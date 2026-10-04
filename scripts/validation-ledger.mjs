@@ -16,7 +16,12 @@ import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { parseHash } from "../packages/core/dist/index.js";
 
-export const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the checks that read the ledger at a made-up tree, so
+// a test can feed them one thing they must refuse and one they must pass
+// (scripts/gate-fixture.mjs). Unset, it is the repository, as it always was.
+export const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 export const LEDGER_PATH = join(ROOT, "docs", "validation", "ledger.json");
 export const GUIDE_PATH = join(ROOT, "docs", "validation", "guide.html");
 export const SHOTS_DIR = join(ROOT, "docs", "validation", "shots");
