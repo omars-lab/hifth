@@ -29,7 +29,19 @@
 }
 
 .menu[data-stacked] .item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   text-align: start;
+}
+
+/* One column of icons, each centred in the same width, so the words after
+   them line up however wide the icon is. */
+.glyph {
+  flex: none;
+  width: 1.5em;
+  text-align: center;
+  color: var(--accent-strong);
 }
 
 .item:hover,

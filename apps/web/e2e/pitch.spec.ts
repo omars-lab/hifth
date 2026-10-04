@@ -548,12 +548,31 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     await press(page);
     await expect(menu(page)).toBeVisible();
     const items = menu(page).getByRole("menuitem");
-    await expect(items.filter({ hasText: /^Commentary/ })).toContainText("Study Quran");
-    await expect(items.filter({ hasText: /^Similar verses in earlier surahs/ })).toHaveCount(1);
-    await expect(items.filter({ hasText: /^Similar verses in later surahs/ })).toHaveCount(1);
-    await expect(items.filter({ hasText: /^Same roots/ })).toHaveCount(1);
-    await expect(items.filter({ hasText: /^Listen/ })).toHaveCount(1);
-    await expect(items.filter({ hasText: /^Surah introduction/ })).toHaveCount(1);
+    const item = (name: RegExp) => menu(page).getByRole("menuitem", { name });
+    await expect(item(/^Commentary/)).toContainText("Study Quran");
+    await expect(item(/^Similar verses in earlier surahs/)).toHaveCount(1);
+    await expect(item(/^Similar verses in later surahs/)).toHaveCount(1);
+    await expect(item(/^Same roots/)).toHaveCount(1);
+    await expect(item(/^Listen/)).toHaveCount(1);
+    await expect(item(/^Surah introduction/)).toHaveCount(1);
+    // Owner, 2026-10-04: every line leads with its icon, the one the app
+    // already uses for the same thing in the verse's tools and its rail.
+    const icon = (name: RegExp) => item(name).locator("[data-glyph]");
+    await expect(icon(/^Commentary/)).toHaveText("✎");
+    await expect(icon(/^Similar verses in earlier surahs/)).toHaveText("◀");
+    await expect(icon(/^Similar verses in later surahs/)).toHaveText("▶");
+    await expect(icon(/^Same roots/)).toHaveText("⬡");
+    await expect(icon(/^Listen/)).toHaveText("▶");
+    await expect(icon(/^Surah introduction/)).toHaveText("ⓘ");
+    // The icons stand in one column, so the words line up after them.
+    const iconLefts = await items.locator("[data-glyph]").evaluateAll((els) =>
+      els.map((el) => Math.round(el.getBoundingClientRect().left)),
+    );
+    expect(new Set(iconLefts).size).toBe(1);
+    const wordLefts = await items.locator("[data-caption]").evaluateAll((els) =>
+      els.map((el) => Math.round(el.getBoundingClientRect().left)),
+    );
+    expect(new Set(wordLefts).size).toBe(1);
     // A short list standing by the number, one line under another — not a row
     // of seven stretched across the window.
     const box = (await menu(page).boundingBox())!;

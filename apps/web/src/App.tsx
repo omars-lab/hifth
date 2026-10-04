@@ -2157,26 +2157,31 @@ export function App(): JSX.Element {
     if (hasCommentary)
       items.push({
         caption: commentarySource ? `${t.vdCommentary} · ${commentarySource.source.label}` : t.vdCommentary,
+        glyph: "✎",
         onPick: () => setCommentaryOpen(true),
       });
     for (const chip of railChips)
       items.push({
         caption: `${t.railDirection[chip.direction]} · ${t.num(chip.count)}`,
+        glyph: chip.glyph,
         onPick: () => setOpenDirection(chip.direction),
       });
     if (rootCount > 0)
       items.push({
         caption: t.vdRoots,
+        glyph: "⬡",
         onPick: () => setRootsOpen(true),
       });
     items.push({
       caption: audio.phaseFor(key) === "playing" ? t.vdPause : t.vdListen,
+      glyph: audio.phaseFor(key) === "playing" ? "⏸" : "▶",
       onPick: () => audio.toggle(key),
     });
     const surah = parseAyahKey(key)?.surah;
     if (surah && INTRO_SURAHS.has(surah))
       items.push({
         caption: t.surahIntro,
+        glyph: "ⓘ",
         onPick: () => openIntro(surah),
       });
     return items;

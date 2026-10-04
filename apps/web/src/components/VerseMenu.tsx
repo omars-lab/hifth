@@ -5,6 +5,8 @@ import styles from "./VerseMenu.module.css";
 export interface VerseMenuItem {
   caption: string;
   onPick: () => void;
+  /** The icon the line leads with: the one the app shows for the same thing elsewhere. */
+  glyph?: string;
 }
 
 interface VerseMenuProps {
@@ -133,7 +135,12 @@ export function VerseMenu({ name, around, items, onClose, stacked = false }: Ver
             item.onPick();
           }}
         >
-          {item.caption}
+          {item.glyph !== undefined && (
+            <span className={styles.glyph} aria-hidden="true" data-glyph="">
+              {item.glyph}
+            </span>
+          )}
+          <span data-caption="">{item.caption}</span>
         </button>
       ))}
     </div>
