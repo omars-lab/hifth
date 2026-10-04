@@ -1367,6 +1367,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     and the three that were cut short are whole. Al-Tawbah, which has no basmala, is checked
     by hand against its page. The pitch tests open three that had been missing or cut short
     and check each one is there in full.
+34. ~~**A surah's introduction sat on top of its first verse's note, not beside its name.**~~
+    Owner, 2026-10-04: the surah's context belongs next to the surah's name, above the
+    basmala, as a badge of its own. **Done the same day:** a small ⓘ is drawn on the page
+    just left of each surah's name, and tapping it (or Enter on it) opens the introduction
+    by itself, with no verse in it. Verse 1's note is now only verse 1's. The first two pages
+    draw no line for the name, so there the badge sits beside the basmala. Tested in
+    the pitch browser tests (Ya-Sin, At-Tawbah, the first two pages, the keyboard) and in
+    unit tests of where the badge goes.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

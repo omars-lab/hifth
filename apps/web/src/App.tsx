@@ -178,7 +178,7 @@ import {
 // pitch's book is one source, a live public service another, and the drawer
 // draws whichever is on without knowing which.
 import { CommentarySheet, CommentaryTrigger } from "./components/CommentarySheet";
-import { entryForAyah, indexEntries, noteFor } from "./tafsir/commentary";
+import { entryForAyah, indexEntries, introNote, noteFor } from "./tafsir/commentary";
 import { LIVE_TAFSIR, LIVE_TAFSIR_ID, registerLiveTafsirProvider } from "./tafsir/quran-foundation";
 
 /**
@@ -187,6 +187,11 @@ import { LIVE_TAFSIR, LIVE_TAFSIR_ID, registerLiveTafsirProvider } from "./tafsi
  * a public build with neither drops the drawer and everything only it reaches.
  */
 const COMMENTARY = PITCH || LIVE_TAFSIR;
+// Every surah's name carries an ⓘ that opens its introduction, in the pitch build.
+const INTRO_SURAHS: ReadonlySet<number> = new Set(
+  PITCH ? Array.from({ length: 114 }, (_, i) => i + 1) : [],
+);
+import { drawIntroBadges } from "./components/intro-badge";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
@@ -769,8 +774,8 @@ export function App(): JSX.Element {
     stopAudio();
   }, [selectedKey, stopAudio]);
   // The note for the current selection, from whichever source is on; in the
-  // pitch build led by the surah's introduction on its opening verse, or on any
-  // verse a link asked to see in context.
+  // pitch build led by the surah's introduction on any verse a link asked to
+  // see in context.
   const commentaryEntry = useMemo(() => {
     if (!COMMENTARY || !commentarySource || !selectedKey) return null;
     const surah = parseAyahKey(selectedKey)?.surah;
@@ -782,6 +787,35 @@ export function App(): JSX.Element {
     return noteFor(entryForAyah(indexEntries(entries), selectedKey), commentarySource.source, selectedKey, intro);
   }, [commentarySource, selectedKey, commentaryBySurah, pitchSurahs, contextFor]);
   const hasCommentary = commentaryEntry !== null;
+
+  // The surah whose introduction is open by itself, from the ⓘ beside its name
+  // (owner, 2026-10-04); it gives way the moment the selection moves.
+  const [introSurah, setIntroSurah] = useState<number | null>(null);
+  const openIntro = useCallback(
+    (surah: number) => {
+      ensurePitch(surah);
+      setIntroSurah(surah);
+    },
+    [ensurePitch],
+  );
+  const introLabel = useCallback((surah: number) => `${t.surahIntro} · ${t.surahName(surah)}`, [t]);
+  // Only the pitch build draws the ⓘ, so the public bundle drops the drawing.
+  const paintIntro = useMemo(
+    () => (PITCH ? (svg: SVGSVGElement) => drawIntroBadges(svg, INTRO_SURAHS, introLabel) : undefined),
+    [introLabel],
+  );
+  const introSheet = useMemo(() => {
+    if (!PITCH || introSurah === null || !commentarySource || !resolver) return null;
+    const p = pitchSurahs.get(introSurah);
+    if (!p || p.intro.length === 0) return null;
+    return introNote(commentarySource.source, formatAyahKey(resolver.edition, introSurah, 1), {
+      title: p.title,
+      paragraphs: p.intro,
+    });
+  }, [introSurah, commentarySource, resolver, pitchSurahs]);
+  useEffect(() => {
+    setIntroSurah(null);
+  }, [selectedKey]);
 
   // Moving the selection closes the commentary — except in the pitch build,
   // where a verse that carries a Study Quran note opens it on the tap itself.
@@ -3084,6 +3118,8 @@ export function App(): JSX.Element {
                   noteLabel={noteLabel}
                   verseDots={verseDots}
                   verseDotLabel={t.verseInNotes}
+                  paintIntro={paintIntro}
+                  onOpenIntro={openIntro}
                   confusionMarks={confusionMarks}
                   confusionMarkLabel={t.jumpsFrom}
                   waslMarksOf={waslMarksOf}
@@ -3160,6 +3196,8 @@ export function App(): JSX.Element {
                 noteLabel={noteLabel}
                 verseDots={verseDots}
                 verseDotLabel={t.verseInNotes}
+                paintIntro={paintIntro}
+                onOpenIntro={openIntro}
                 confusionMarks={confusionMarks}
                 confusionMarkLabel={t.jumpsFrom}
                 waslMarksOf={waslMarksOf}
@@ -3230,19 +3268,21 @@ export function App(): JSX.Element {
                 // back (commentaryOpen stays true underneath). Both used to
                 // stack, squeezing the page on a phone and hiding the list
                 // under the note on a spread.
-                entry={commentaryOpen && !openChip && !rootsOpen ? commentaryEntry : null}
+                entry={
+                  openChip || rootsOpen ? null : (introSheet ?? (commentaryOpen ? commentaryEntry : null))
+                }
                 side={sheetSide}
-                roads={commentaryRoads}
+                roads={introSheet ? [] : commentaryRoads}
                 canHop={canHop}
                 onHop={handleHop}
                 onGo={hopTo}
                 onCover={setCoverTop}
-                onClose={() => setCommentaryOpen(false)}
+                onClose={() => (introSheet ? setIntroSurah(null) : setCommentaryOpen(false))}
                 creditNote={
                   PITCH ? "Shown privately, with the rights-holders, for a collaboration." : undefined
                 }
                 back={
-                  breadcrumbKey
+                  breadcrumbKey && !introSheet
                     ? {
                         label: t.ayahLabel(breadcrumbKey) ?? breadcrumbKey,
                         onBack: () => handleBeadBack(trail.length - 1),

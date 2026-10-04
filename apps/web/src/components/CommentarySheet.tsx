@@ -8,7 +8,7 @@ import {
 } from "@hifth/core";
 import { useT } from "../i18n";
 import { splitCitations } from "../tafsir/citations";
-import { textDir, type CommentaryNote } from "../tafsir/commentary";
+import { isIntroOnly, textDir, type CommentaryNote } from "../tafsir/commentary";
 import styles from "./CommentarySheet.module.css";
 
 /**
@@ -100,8 +100,9 @@ function focusables(root: HTMLElement): HTMLElement[] {
  * Same bottom-sheet contract as HopPopover / RootLens (a real modal dialog:
  * focus in on open, Tab trapped, Escape closes, focus restored), but its body is
  * built for *reading*, not for a list of hops: a comfortable measure, the
- * editors' translation set large, then the commentary prose. On the surah's
- * opening verse it leads with the surah introduction.
+ * editors' translation set large, then the commentary prose. Opened from the ⓘ
+ * beside a surah's name it holds that surah's introduction alone; a link's
+ * `?open=context` leads a verse's note with it.
  *
  * No source's words live in these bytes — only in the note this renders.
  */
@@ -260,9 +261,14 @@ export function CommentarySheet({
   );
 
   if (!entry) return null;
-  const label = t.ayahLabel(entry.ayahKey) ?? entry.ayahKey;
+  const introOnly = isIntroOnly(entry);
+  const opening = parseAyahKey(entry.ayahKey);
+  const label =
+    introOnly && opening
+      ? `${t.surahName(opening.surah)} · ${t.surahIntro}`
+      : (t.ayahLabel(entry.ayahKey) ?? entry.ayahKey);
   // A citation in the prose names only surah:verse; it is in this note's edition.
-  const edition = parseAyahKey(entry.ayahKey)?.edition;
+  const edition = opening?.edition;
   const citedKey = (surah: number, ayah: number): string | null =>
     edition ? formatAyahKey(edition, surah, ayah) : null;
   // The drawer's own words follow the app's language; the source's words follow
@@ -281,7 +287,7 @@ export function CommentarySheet({
         className={styles.sheet}
         role="dialog"
         aria-modal={modal}
-        aria-label={t.commentaryOn(label)}
+        aria-label={introOnly ? label : t.commentaryOn(label)}
         data-side={side ?? undefined}
         data-tall={tall || undefined}
         style={place ? { ...place, right: "auto", bottom: "auto", maxBlockSize: "none" } : undefined}
@@ -304,7 +310,7 @@ export function CommentarySheet({
         )}
         <header className={styles.head}>
           <span className={styles.glyph} aria-hidden="true">
-            ✎
+            {introOnly ? "ⓘ" : "✎"}
           </span>
           <div className={styles.heading}>
             <h2 className={styles.title} {...own}>
@@ -342,6 +348,7 @@ export function CommentarySheet({
             </blockquote>
           )}
 
+          {!introOnly && (
           <section className={styles.commentary} aria-label={t.commentaryTitle} {...own}>
             {entry.paragraphs.map((para, i) => (
               <p key={i} className={styles.para}>
@@ -365,6 +372,7 @@ export function CommentarySheet({
               </p>
             ))}
           </section>
+          )}
 
           {roads.length > 0 && (
             <section className={styles.related} aria-label={t.relatedVerses}>
