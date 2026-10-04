@@ -12,7 +12,11 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { ROOT } from "./code-pointers.mjs";
+import { ROOT as REPO } from "./code-pointers.mjs";
+
+// HIFTH_GATE_ROOT points gate:license-copy at a made-up tree, so a test can
+// feed it one record it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/") : REPO;
 
 export const SOURCES_PATH = join(ROOT, "SOURCES.md");
 export const COLOPHON_PATH = join(ROOT, "apps", "web", "src", "components", "Colophon.tsx");
