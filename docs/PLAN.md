@@ -1339,6 +1339,20 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     **The list stands clear of its arrow, the same day:** opened low on the screen, it stands
     above the whole verse, or below the mark when the verse starts at the top, never on the
     lines that hold the arrow (finding 1). Every step of the design is built.
+32. ~~**A surah's introduction in the pitch ended on the surah's opening verse, and some began
+    partway through.**~~ Found 2026-10-03 walking the pitch as a scholar would: every
+    introduction ended with the basmala in the book's English, the line the print sets under it as the
+    surah's first verse, shown as if it were the introduction's last paragraph; Al-Kahf's
+    began on "Finally," and Ta Ha's was the end of one word. **Fixed the same day** in the
+    script that builds the pitch notes: the opening verse is left off, a broken-off word is
+    dropped, and an introduction that begins partway through starts with "…" the way a printed
+    excerpt does. The words themselves are never changed.
+33. **Most surahs have no introduction in the pitch, because the book's capture does not hold
+    them.** Found with 32: 61 of the 114 surahs have none, Al-Ma'idah's and Ta Ha's were lost
+    whole, and Al-Kahf's is only its last paragraph. The capture only took each surah's
+    introduction from the pages it captured, so where an introduction runs over earlier
+    pages they are missing. The fix is in the capture, not here: capture the first pages of
+    each surah's introduction again, then rebuild the pitch notes.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
