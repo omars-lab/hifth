@@ -63,15 +63,20 @@
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
-  MORPHOLOGY_PATH,
+  MORPHOLOGY_FILE,
   TOTAL_AYAHS,
   longestSharedRun,
   wordsByAyah as readWordsByAyah,
 } from "../packages/etl/scripts/morphology.mjs";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const ADJ = join(ROOT, "apps", "web", "public", "assets", "adj");
 const WORDS = join(ROOT, "apps", "web", "public", "assets", "words");
+const MORPHOLOGY = join(ROOT, MORPHOLOGY_FILE);
 
 /** Share of scored edges with no shared words at all, above which CI fails. */
 const ZERO_OVERLAP_LIMIT = 0.1;
@@ -83,7 +88,7 @@ const fail = (msg) => {
   process.exit(1);
 };
 
-for (const p of [ADJ, MORPHOLOGY_PATH]) if (!existsSync(p)) fail(`missing ${p}`);
+for (const p of [ADJ, MORPHOLOGY]) if (!existsSync(p)) fail(`missing ${p}`);
 
 /* ------------------------------------------------------------------ */
 /* Words per ayah, as a consonant skeleton.                            */
@@ -93,7 +98,7 @@ for (const p of [ADJ, MORPHOLOGY_PATH]) if (!existsSync(p)) fail(`missing ${p}`)
 // reads too. The sampler prints this same score beside each pair it draws for a
 // human to audit, and a reader whose printed number disagreed with the number
 // CI enforces would be the one assumed wrong.
-const wordsByAyah = readWordsByAyah();
+const wordsByAyah = readWordsByAyah(MORPHOLOGY);
 
 if (wordsByAyah.size !== TOTAL_AYAHS) {
   fail(
