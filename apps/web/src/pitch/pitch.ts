@@ -131,9 +131,9 @@ export function mergeShard(
 }
 
 /**
- * The surah's introduction to lead a verse's note with, or null. `withContext`
- * leads with it wherever the verse sits, as a link's `?open=context` asks;
- * otherwise only the opening verse carries it.
+ * The surah's introduction to lead a verse's note with, or null. Only a link's
+ * `?open=context` asks for it; otherwise the introduction lives behind the ⓘ
+ * badge beside the surah's name (owner, 2026-10-04), not on verse 1's note.
  */
 export function introFor(
   surah: PitchSurah | null,
@@ -143,6 +143,6 @@ export function introFor(
   if (!surah || !selectedKey || surah.intro.length === 0) return null;
   const ref = /:(\d+)$/.exec(selectedKey);
   if (!ref) return null;
-  if (!withContext && Number(ref[1]) !== 1) return null;
+  if (!withContext) return null;
   return { title: surah.title, paragraphs: surah.intro };
 }

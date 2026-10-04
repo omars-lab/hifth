@@ -66,6 +66,7 @@ import {
 import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT, type Strings } from "../i18n";
 import type { TurnStyle } from "../turn-style";
+import { drawIntroBadges } from "./intro-badge";
 import styles from "./PageStage.module.css";
 
 interface PageStageProps {
@@ -301,6 +302,14 @@ interface PageStageProps {
   verseDotLabel?: (key: string, count: number) => string;
   /** A dot was pressed: list the verse's notes beside it. */
   onOpenVerseNotes?: (key: string, at: { top: number; bottom: number; x: number }) => void;
+  /**
+   * Surahs whose introduction can be opened from an ⓘ beside the surah's name,
+   * drawn on the page wherever the surah opens (the pitch build). `introLabel`
+   * names it; `onOpenIntro` opens it.
+   */
+  introSurahs?: ReadonlySet<number>;
+  introLabel?: (surah: number) => string;
+  onOpenIntro?: (surah: number) => void;
   /** A jump mark was pressed: list where the reader's memory went from that verse. */
   onOpenJumps?: (key: string, at: { top: number; bottom: number; x: number }) => void;
   /**
@@ -1048,6 +1057,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     verseDots,
     verseDotLabel,
     onOpenVerseNotes,
+    introSurahs,
+    introLabel,
+    onOpenIntro,
     onOpenJumps,
     confusionMarks,
     confusionMarkLabel,
@@ -1156,6 +1168,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const onOpenJumpsRef = useRef(onOpenJumps);
   onOpenJumpsRef.current = onOpenJumps;
   const paintDotsRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
+  const introSurahsRef = useRef(introSurahs);
+  introSurahsRef.current = introSurahs;
+  const introLabelRef = useRef(introLabel);
+  introLabelRef.current = introLabel;
+  const onOpenIntroRef = useRef(onOpenIntro);
+  onOpenIntroRef.current = onOpenIntro;
+  const paintIntroRef = useRef<(svg: SVGSVGElement) => void>(() => {});
   const confusionMarksRef = useRef(confusionMarks);
   confusionMarksRef.current = confusionMarks;
   const confusionMarkLabelRef = useRef(confusionMarkLabel);
@@ -1732,7 +1751,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
       if (
         (e.target as Element | null)?.closest(
-          "[data-note-pin], [data-verse-dot], [data-confusion-mark], [data-wasl-mark], [data-jump-arrow]",
+          "[data-note-pin], [data-verse-dot], [data-confusion-mark], [data-wasl-mark], [data-jump-arrow], [data-intro-badge]",
         )
       )
         return;
@@ -1769,7 +1788,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const open = jump ? onOpenJumpsRef.current : onOpenVerseNotesRef.current;
       open?.(dot.getAttribute("data-verse-key") ?? "", { top: r.top, bottom: r.bottom, x: r.left + r.width / 2 });
     };
+    const introOf = (e: Event) => (e.target as Element | null)?.closest("[data-intro-badge]");
+    const openIntro = (badge: Element) => onOpenIntroRef.current?.(Number(badge.getAttribute("data-surah")));
     svg.addEventListener("click", (e) => {
+      const badge = introOf(e);
+      if (badge) {
+        e.stopPropagation();
+        openIntro(badge);
+        return;
+      }
       const dot = dotOf(e);
       if (dot) {
         e.stopPropagation();
@@ -1783,6 +1810,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     });
     svg.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
+      const badge = introOf(e);
+      if (badge) {
+        e.preventDefault();
+        e.stopPropagation();
+        openIntro(badge);
+        return;
+      }
       const dot = dotOf(e);
       const id = pinOf(e);
       if (!dot && !id) return;
@@ -1869,6 +1903,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       drawNotePins(svg, targetPage, notesRef.current, (n) => noteLabelRef.current?.(n) ?? n.key);
       paintMistakesRef.current(targetPage, svg);
       paintDotsRef.current(targetPage, svg);
+      paintIntroRef.current(svg);
       paintJumpsRef.current(targetPage, svg);
       wireNotes(svg, targetPage, hl);
       return mp;
@@ -2986,6 +3021,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useEffect(() => {
     for (const [p, mp] of pagesRef.current) paintDotsRef.current(p, mp.svg);
   }, [verseDots, status]);
+
+  // The ⓘ beside each surah's name needs only the page itself.
+  paintIntroRef.current = (svg) =>
+    drawIntroBadges(svg, introSurahsRef.current ?? new Set(), (s) => introLabelRef.current?.(s) ?? String(s));
+  useEffect(() => {
+    for (const [, mp] of pagesRef.current) paintIntroRef.current(mp.svg);
+  }, [introSurahs, status]);
 
   // The verse under a point on screen, and the page it is on, for the Jump
   // tool: its layer lies over the page, so the question goes past it.
