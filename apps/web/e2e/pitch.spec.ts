@@ -559,10 +559,14 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     // already uses for the same thing in the verse's tools and its rail.
     const icon = (name: RegExp) => item(name).locator("[data-glyph]");
     await expect(icon(/^Commentary/)).toHaveText("✎");
-    await expect(icon(/^Similar verses in earlier surahs/)).toHaveText("◀");
-    await expect(icon(/^Similar verses in later surahs/)).toHaveText("▶");
+    // Similar verses wear one sign for "looks like", whichever way they lie:
+    // the rail's arrows said where, not what, and the later one was the very
+    // triangle that means listen (owner, 2026-10-04).
+    await expect(icon(/^Similar verses in earlier surahs/)).toHaveText("≈");
+    await expect(icon(/^Similar verses in later surahs/)).toHaveText("≈");
     await expect(icon(/^Same roots/)).toHaveText("⬡");
     await expect(icon(/^Listen/)).toHaveText("▶");
+    await expect(items.locator("[data-glyph]").filter({ hasText: "▶" })).toHaveCount(1);
     await expect(icon(/^Surah introduction/)).toHaveText("ⓘ");
     // The icons stand in one column, so the words line up after them.
     const iconLefts = await items.locator("[data-glyph]").evaluateAll((els) =>
