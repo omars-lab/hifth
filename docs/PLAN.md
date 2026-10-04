@@ -1327,12 +1327,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     copy of the mark sits by the first pause sign after the word you left at, the place you
     would next stop and start again, with a count of the verses gone to from there.
     **The saved arrows:** a faint wavy arrow under the word you left at, with a label for each
-    verse gone to; the other way, arrows only while the list is open or the tool is on, is on
-    trial behind the page address, and both are recorded in
-    [jump-arrows-options.md](design/jump-arrows-options.md) for the owner's call.
+    verse gone to. The owner chose on 2026-10-03 that they stay, faint, and asked for the other
+    way (arrows only while the list is open or the tool is on) to be a setting: it is in the
+    info panel as "Saved jump arrows", kept on the device. Both are recorded in
+    [jump-arrows-options.md](design/jump-arrows-options.md).
     **Dismissed jumps:** Dismiss in a verse's list takes a jump off the page, with Undo, and
     a folded "Dismissed" group under "Your jumps" keeps it, each with Bring back. Nothing is
-    deleted unless you press Delete. **Still open:** the owner's call on the saved arrows.
+    deleted unless you press Delete. **Still open:** the arrow labels are small, and near the
+    left edge of the page they land on the next line's letters, and on a phone the "only when
+    you ask" list can cover the arrow it shows (findings 3, 4 and 1 of the options note).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

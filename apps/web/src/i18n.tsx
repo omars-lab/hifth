@@ -746,6 +746,11 @@ export interface Strings {
   verseGesturesB: string;
   verseGesturesC: string;
   verseGesturesNote: string;
+  /** Settings: how the saved jump arrows show. */
+  jumpArrowsTitle: string;
+  jumpArrowsStays: string;
+  jumpArrowsAsked: string;
+  jumpArrowsNote: string;
   scopeLookTitle: string;
   scopeLookSide: string;
   scopeLookLines: string;
@@ -1372,6 +1377,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     verseGesturesB: m.verseGesturesB,
     verseGesturesC: m.verseGesturesC,
     verseGesturesNote: m.verseGesturesNote,
+    jumpArrowsTitle: m.jumpArrowsTitle,
+    jumpArrowsStays: m.jumpArrowsStays,
+    jumpArrowsAsked: m.jumpArrowsAsked,
+    jumpArrowsNote: m.jumpArrowsNote,
     scopeLookTitle: m.scopeLookTitle,
     scopeLookSide: m.scopeLookSide,
     scopeLookLines: m.scopeLookLines,

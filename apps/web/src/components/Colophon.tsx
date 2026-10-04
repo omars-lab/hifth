@@ -1,10 +1,12 @@
 import { useCallback, useLayoutEffect, useRef } from "react";
+import type { ArrowShowing } from "@hifth/core";
 import { useT } from "../i18n";
 import { LOCALES } from "../lang";
 import { LOCALE_IDS } from "../messages/locales.gen";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
+import { ARROW_SHOWINGS } from "../jump-arrows";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import styles from "./Colophon.module.css";
 
@@ -23,6 +25,9 @@ interface ColophonProps {
   /** What a tap and a hold on a verse do; remembered on this device. */
   verseGestures?: VerseGestures;
   onVerseGestures?: (choice: VerseGestures) => void;
+  /** Whether the saved jump arrows stay on the page; remembered on this device. */
+  arrowShowing?: ArrowShowing;
+  onArrowShowing?: (choice: ArrowShowing) => void;
   /** How a note draws the parts it can be about; remembered on this device. */
   scopeLook?: ScopeLook;
   onScopeLook?: (look: ScopeLook) => void;
@@ -180,6 +185,8 @@ export function Colophon({
   onTurnStyle,
   verseGestures,
   onVerseGestures,
+  arrowShowing,
+  onArrowShowing,
   scopeLook,
   onScopeLook,
   onShowTips,
@@ -362,6 +369,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.verseGesturesNote}</p>
+          </section>
+        )}
+
+        {/* How the saved jump arrows show (docs/design/jump-arrows-options.md):
+            the owner chose staying, and kept the other way as a choice. */}
+        {arrowShowing && onArrowShowing && (
+          <section className={styles.block} aria-labelledby="colophon-jump-arrows">
+            <h3 className={styles.subhead} id="colophon-jump-arrows">
+              {t.jumpArrowsTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-jump-arrows">
+              {ARROW_SHOWINGS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={arrowShowing === choice}
+                  data-jump-arrows={choice}
+                  onClick={() => onArrowShowing(choice)}
+                >
+                  {choice === "stays" ? t.jumpArrowsStays : t.jumpArrowsAsked}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.jumpArrowsNote}</p>
           </section>
         )}
 
