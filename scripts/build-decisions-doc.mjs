@@ -44,6 +44,9 @@ const recordLink = (d) => {
 
 const lookLink = (d) => {
   if (!d.artifact) return "—";
+  // A link with no copy is refused by gate:decisions, which reads this page
+  // too; drawing the row lets the check say why instead of this crashing first.
+  if (!d.page) return `[open](${d.artifact})`;
   return `[open](${d.artifact}) · [in repo](${rel(d.page)})`;
 };
 
