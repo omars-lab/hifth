@@ -323,6 +323,13 @@ for (const skin of SKINS) {
     for (const shot of SHOTS) {
       test(`page ${shot.page} · ${shot.state}`, async ({ page }) => {
         const svg = await open(page, withSkin(shot.link, skin.param), shot.page);
+        // Still is not the same as painted. A jump to a verse as wide as the
+        // screen lands with almost no movement, so the stage is at rest before
+        // the wash is drawn, and a shot taken then had no amber at all (pages 9
+        // and 19, 2026-10-04). Wait for the paint the shot is named for.
+        const group = shot.state === "phrase" ? "phrase" : "selection";
+        await expect(page.locator(`#hifth-overlay [data-hl-group='${group}']`)).not.toHaveCount(0);
+        await settle(svg);
         await expect(svg).toHaveScreenshot(`p${shot.page}-${shot.state}-${skin.id}.png`, {
           mask: chrome(page),
         });

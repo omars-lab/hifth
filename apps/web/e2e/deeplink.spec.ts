@@ -52,25 +52,34 @@ test.describe("Hifth · cold deep links", () => {
 test.describe("Hifth · a verse wider than a phone", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test("a link to it opens with its first words on screen", async ({ page }) => {
-    // 18:10 runs the whole of one line and part of the next, so at the jump's
-    // magnification it is wider than the screen. Centred, its head (the right
-    // edge, the page reading right to left) sat off-screen and the reader met
-    // the verse in its middle. Its outline's right edge is where it starts.
-    await page.goto("/#/hafs-kfqc/18:10");
-    const outline = page.locator('svg[aria-labelledby="page-label-294"]:visible #verse-2150');
-    await expect(outline).toHaveCount(1, { timeout: 20_000 });
-    await expect
-      .poll(
-        async () => {
-          // Only once the jump has magnified it: at the page's resting size it
-          // fits, and a check made then would pass on the bug.
-          const box = await outline.boundingBox();
-          if (!box || box.width <= 390) return "not magnified yet";
-          return box.x + box.width <= 390 ? "head on screen" : "head off screen";
-        },
-        { message: "the magnified verse's first word is inside the screen's right edge" },
-      )
-      .toBe("head on screen");
-  });
+  // At the jump's magnification a full line is wider than a phone, so a verse
+  // running whole lines was cut at both edges: 18:10 met the reader in its
+  // middle, and Ayat al-Kursi lost the ends of every middle line (2026-10-04).
+  // The jump now comes down just enough for the verse to fit across.
+  for (const [key, pg, id] of [
+    ["18:10", 294, 2150],
+    ["2:255", 42, 262],
+  ] as const) {
+    test(`a link to ${key} opens with the whole verse across the screen`, async ({ page }) => {
+      await page.goto(`/#/hafs-kfqc/${key}`);
+      const outline = page.locator(`svg[aria-labelledby="page-label-${pg}"]:visible #verse-${id}`);
+      await expect(outline).toHaveCount(1, { timeout: 20_000 });
+      // Read once the jump has come to rest: two samples apart, the same.
+      let last = "";
+      await expect
+        .poll(
+          async () => {
+            const box = await outline.boundingBox();
+            if (!box) return "no box";
+            const now = [box.x, box.width].map(Math.round).join(",");
+            const settled = now === last;
+            last = now;
+            if (!settled) return "moving";
+            return box.x >= 0 && box.x + box.width <= 390 ? "whole" : `cut: ${now}`;
+          },
+          { intervals: [400], timeout: 15_000, message: "the verse sits inside both edges of the screen" },
+        )
+        .toBe("whole");
+    });
+  }
 });

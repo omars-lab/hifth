@@ -198,6 +198,22 @@ export function frameBboxToView(
 const LEAD_INSET = 16;
 
 /**
+ * The zoom a hop lands at: the one asked for, lowered until the verse's lines
+ * fit across the stage with a margin each side, but never below the whole page.
+ * At the hop zoom a full line is wider than a phone, so a verse running whole
+ * lines — Ayat al-Kursi — lost both ends of every middle line to the screen's
+ * edges, the first-line rule only rescuing its opening words. A short verse
+ * still lands at the full zoom. Only the hop: a reader who zoomed in themselves
+ * keeps their zoom.
+ */
+export function hopZoomFor(bbox: Rect, ctx: FrameContext, z: number = DEFAULT_HOP_ZOOM): number {
+  if (!(z > 1)) return z;
+  const wide = bbox.width * textOf(ctx).s;
+  if (!(wide > 0) || !(ctx.stageWidth > 0)) return z;
+  return Math.max(1, Math.min(z, (ctx.stageWidth - 2 * LEAD_INSET) / wide));
+}
+
+/**
  * Where a bbox (SVG user units) lands in stage-local px under a given view —
  * used to position the HopRail next to the selected ayah (mock `toScreen()`).
  */
