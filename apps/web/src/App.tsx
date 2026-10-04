@@ -2163,7 +2163,10 @@ export function App(): JSX.Element {
     for (const chip of railChips)
       items.push({
         caption: `${t.railDirection[chip.direction]} · ${t.num(chip.count)}`,
-        glyph: chip.glyph,
+        // One sign for "looks like" on every similar-verses line; the words
+        // say which way. The rail's own arrows would put a second ▶ beside
+        // Listen's.
+        glyph: "≈",
         onPick: () => setOpenDirection(chip.direction),
       });
     if (rootCount > 0)
