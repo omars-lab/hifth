@@ -29,15 +29,23 @@
  *
  * Re-run it whenever the source capture changes or the curation below is edited.
  */
+import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { cleanIntro } from "./intro.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "../../../..");
 
 // The Study Quran capture, next door. Absolute on this laptop; never vendored.
-const SRC_DIR = resolve(REPO, "../books/books/study-quran/tafseer-bundle");
+// "Next door" is beside the main checkout: a worktree is a folder or two deeper,
+// and from there the capture used to be missing, so every surah was skipped.
+const CAPTURE = "../books/books/study-quran/tafseer-bundle";
+const MAIN = dirname(
+  resolve(REPO, execFileSync("git", ["rev-parse", "--git-common-dir"], { cwd: REPO, encoding: "utf8" }).trim()),
+);
+const SRC_DIR = [resolve(REPO, CAPTURE), resolve(MAIN, CAPTURE)].find(existsSync) ?? resolve(REPO, CAPTURE);
 const MANIFEST = resolve(REPO, "apps/web/public/assets/manifest.json");
 const OUT_DIR = resolve(REPO, "apps/web/public/assets/private/study-quran");
 
@@ -284,6 +292,10 @@ function readSurah(surah) {
 }
 
 /** Build and write one surah's private pitch payload. Returns a summary line. */
+// The book's translation of the opening verse, which its capture repeats under
+// every surah's introduction (see intro.mjs). Read here, never written down.
+const OPENING = readSurah(1)?.entries.find((e) => parseRef(e.key)?.join(":") === "1:1")?.translation?.text ?? "";
+
 function buildSurah(surah) {
   const src = readSurah(surah);
   if (!src) return { surah, skipped: true };
@@ -317,7 +329,7 @@ function buildSurah(surah) {
     edition: manifest.edition,
     surah,
     title: src.title,
-    intro: (src.intro ?? []).map((i) => i.text).filter(Boolean),
+    intro: cleanIntro((src.intro ?? []).map((i) => i.text).filter(Boolean), OPENING),
     verses,
     shard,
     generated: new Date().toISOString(),
