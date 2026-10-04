@@ -217,6 +217,7 @@ export {
 
 export {
   frameBboxToView,
+  hopZoomFor,
   bboxToScreen,
   clampView,
   clampZoom,
