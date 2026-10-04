@@ -103,7 +103,7 @@ export function textDir(lang: string | undefined): "ltr" | "rtl" | "auto" {
   return RIGHT_TO_LEFT.has(lang.toLowerCase().split("-")[0]!) ? "rtl" : "ltr";
 }
 
-/** A surah's introduction, led into a note on the surah's opening verse. */
+/** A surah's introduction: a note of its own, or led into a verse's when a link asks. */
 export interface CommentaryIntro {
   readonly title: string;
   readonly paragraphs: readonly string[];
@@ -122,6 +122,21 @@ export interface CommentaryNote {
   readonly translation?: string;
   readonly paragraphs: readonly string[];
   readonly intro: CommentaryIntro | null;
+  /** The surah's introduction alone, opened from the ⓘ beside the surah's name. */
+  readonly introOnly?: true;
+}
+
+/** A note holding only a surah's introduction, keyed to its opening verse. */
+export function introNote(
+  source: TafsirSource,
+  openingKey: string,
+  intro: CommentaryIntro,
+): CommentaryNote {
+  return { source, ayahKey: openingKey, paragraphs: [], intro, introOnly: true };
+}
+
+export function isIntroOnly(note: CommentaryNote): boolean {
+  return note.introOnly === true;
 }
 
 /**

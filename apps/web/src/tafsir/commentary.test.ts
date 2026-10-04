@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Resolver, type AssetManifest, type TafsirEntry, type TafsirSource } from "@hifth/core";
-import { commentaryEdges, entryForAyah, indexEntries, noteFor } from "./commentary";
+import { commentaryEdges, entryForAyah, indexEntries, introNote, isIntroOnly, noteFor } from "./commentary";
 
 /** A tiny edition: 2:38 on page 7, 2:53 on page 9; 2:255 is not vendored. */
 const manifest: AssetManifest = {
@@ -117,6 +117,14 @@ describe("tafsir · noteFor (what the one commentary drawer reads)", () => {
   it("leads with a surah's introduction only when one is handed in", () => {
     const intro = { title: "The Cow", paragraphs: ["about the surah"] };
     expect(noteFor(full, source, "quran/hafs-kfqc/2:38", intro)?.intro).toEqual(intro);
+  });
+
+  it("a surah's introduction makes a note of its own, with no verse's words in it", () => {
+    const intro = { title: "The Cow", paragraphs: ["about the surah"] };
+    const note = introNote(source, "quran/hafs-kfqc/2:1", intro);
+    expect(note).toEqual({ source, ayahKey: "quran/hafs-kfqc/2:1", paragraphs: [], intro, introOnly: true });
+    expect(isIntroOnly(note)).toBe(true);
+    expect(isIntroOnly(noteFor(full, source, "quran/hafs-kfqc/2:1", intro)!)).toBe(false);
   });
 
   it("a source that sends only a translation, or only commentary, still makes a note", () => {

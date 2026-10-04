@@ -726,6 +726,40 @@
   stroke-width: 1.4;
 }
 
+/* The ⓘ beside a surah's name: opens the surah's introduction (pitch build).
+   A quiet ring in the accent colour, so it reads as the app's, not the print's. */
+.host :global(svg) :global([data-intro-badge]) {
+  cursor: pointer;
+  outline: none;
+}
+.host :global(svg) :global([data-intro-badge]) :global(circle) {
+  pointer-events: auto;
+}
+.host :global(svg) :global([data-intro-badge]) :global(circle[data-hit]) {
+  fill: transparent;
+  stroke: none;
+}
+.host :global(svg) :global([data-intro-badge]) :global(circle[data-ring]) {
+  fill: var(--paper, #fffdf8);
+  stroke: var(--accent);
+  stroke-width: 0.9;
+}
+.host :global(svg) :global([data-intro-badge]) :global(text) {
+  fill: var(--accent);
+  font: italic 700 7px/1 Georgia, "Times New Roman", serif;
+  pointer-events: none;
+}
+.host :global(svg) :global([data-intro-badge]:hover) :global(circle[data-ring]) {
+  fill: var(--accent);
+}
+.host :global(svg) :global([data-intro-badge]:hover) :global(text) {
+  fill: #fff;
+}
+.host :global(svg) :global([data-intro-badge]:focus-visible) :global(circle[data-ring]) {
+  stroke: var(--focus-ring, #111);
+  stroke-width: 1.4;
+}
+
 /* The mark by a verse the reader jumped away from (confusion-jumps, step 3):
    a short red wavy arrow and the count of verses gone to, grey once beaten.
    The mark at the next pause sign (step 8) is the same disc, smaller. */

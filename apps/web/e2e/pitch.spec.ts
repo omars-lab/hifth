@@ -455,6 +455,65 @@ test.describe("Hifth · links straight into the commentary", () => {
   }
 });
 
+test.describe("Hifth · the ⓘ beside a surah's name opens its introduction", () => {
+  // Owner, 2026-10-04: the surah's context belongs next to its name, above the
+  // basmala, as a badge of its own, not stacked on top of verse 1's note.
+  test("the badge sits on Ya-Sin's title line and opens the introduction by itself", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p440");
+    const badge = pageSvg(page, 440).getByRole("button", { name: /^Surah introduction/ });
+    await expect(badge).toBeVisible({ timeout: 20_000 });
+    // Above the opening verse (36:1 is the 3706th), so on the title line or the basmala's.
+    const opening = (await verse(page, 440, 3706).boundingBox())!;
+    const mark = (await badge.boundingBox())!;
+    expect(mark.y + mark.height).toBeLessThanOrEqual(opening.y);
+    await badge.click();
+    const intro = sheet(page).getByRole("region", { name: "Surah introduction" });
+    await expect(intro).toBeVisible();
+    expect((await intro.locator("p").allTextContents()).join(" ").length).toBeGreaterThan(1000);
+    // Nothing of any verse: no translation, no verse commentary.
+    await expect(sheet(page).locator("blockquote")).toHaveCount(0);
+    await expect(sheet(page).getByRole("region", { name: "Commentary" })).toHaveCount(0);
+  });
+
+  test("the badge answers the keyboard too", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p440");
+    const badge = pageSvg(page, 440).getByRole("button", { name: /^Surah introduction/ });
+    await expect(badge).toBeVisible({ timeout: 20_000 });
+    await badge.focus();
+    await page.keyboard.press("Enter");
+    await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toBeVisible();
+  });
+
+  test("verse 1's own note no longer carries the introduction", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/36:1");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page).getByRole("region", { name: "Commentary" })).toBeVisible();
+    await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toHaveCount(0);
+  });
+
+  test("a surah with no basmala, At-Tawbah, has the badge too", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p187");
+    const badge = pageSvg(page, 187).getByRole("button", { name: /^Surah introduction/ });
+    await expect(badge).toBeVisible({ timeout: 20_000 });
+    const opening = (await verse(page, 187, 1236).boundingBox())!;
+    const mark = (await badge.boundingBox())!;
+    expect(mark.y + mark.height).toBeLessThanOrEqual(opening.y);
+  });
+
+  // The first two pages draw no line for the surah's name, so the badge was
+  // missing from both; it now sits beside the basmala there.
+  for (const [p, surah] of [[1, "Al-Fatihah"], [2, "Al-Baqarah"]] as const) {
+    test(`page ${p} has the badge though its print draws no name line, and it opens ${surah}`, async ({ page }) => {
+      await page.goto(`/#/hafs-kfqc/p${p}`);
+      const badge = pageSvg(page, p).getByRole("button", { name: /^Surah introduction/ });
+      await expect(badge).toBeVisible({ timeout: 20_000 });
+      await badge.click();
+      await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toBeVisible();
+      await expect(sheet(page)).toContainText(surah);
+    });
+  }
+});
+
 test.describe("Hifth · the commentary drawer with the app in Arabic", () => {
   // The drawer was pinned left to right and spoke only English. In Arabic its
   // own words and layout now follow the app, while The Study Quran's English
