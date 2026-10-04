@@ -1,5 +1,5 @@
 import { Suspense, useLayoutEffect, useRef, useState } from "react";
-import type { Edge } from "@hifth/core";
+import { parseAyahKey, type Edge } from "@hifth/core";
 import { useT, type Strings } from "../i18n";
 import type { Lang } from "../lang";
 import { DiffView } from "./DiffView";
@@ -11,6 +11,43 @@ import styles from "./VerseNotes.module.css";
 const WIDTH = 360;
 
 const DAY = 24 * 60 * 60 * 1000;
+
+/** The least room worth opening the list into, above the verse or below the mark. */
+const ROOM = 180;
+
+/**
+ * Where the list stands, top to bottom. Below the mark when the mark is high
+ * on the screen. Otherwise above the whole verse, not only above the mark:
+ * the verse's saved arrow is in the lines over its mark, and a list opened
+ * just above the mark covered the arrow it was opened to show (finding 1 of
+ * docs/design/jump-arrows-options.md). A verse at the top of the screen
+ * leaves no room over it, so the list then opens below the mark after all,
+ * scrolling inside itself; the whole verse is above its mark. Only when
+ * neither side has room does it stand on the verse, by the mark.
+ */
+export function listPlace(
+  anchor: { top: number; bottom: number },
+  verseTop: number | null,
+  screen: number,
+): { top: number; maxBlockSize?: number } | { bottom: number; maxBlockSize?: number } {
+  if (anchor.bottom + 8 < screen * 0.55) return { top: anchor.bottom + 8 };
+  const over = verseTop === null ? anchor.top : Math.min(anchor.top, verseTop);
+  if (over - 8 - 12 >= ROOM) return { bottom: screen - over + 8, maxBlockSize: over - 8 - 12 };
+  const under = screen - anchor.bottom - 8 - 12;
+  if (under >= ROOM) return { top: anchor.bottom + 8, maxBlockSize: under };
+  return { bottom: screen - anchor.top + 8 };
+}
+
+/** The top of a verse on the screen, on the page that holds the point it was tapped at. */
+function verseTopAt(key: string, x: number): number | null {
+  const at = parseAyahKey(key);
+  if (!at) return null;
+  for (const el of document.querySelectorAll(`path.ayahPolygon[surah="${at.surah}"][ayah="${at.ayah}"]`)) {
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && x >= r.left && x <= r.right) return r.top;
+  }
+  return null;
+}
 
 /**
  * When a jump last happened, in the words a person would use: today,
@@ -111,7 +148,7 @@ export function JumpList({
       document.removeEventListener("pointerdown", onDown, true);
     };
   }, [onClose]);
-  const below = anchor.bottom + 8 < window.innerHeight * 0.55;
+  const place = listPlace(anchor, verseTopAt(fromKey, anchor.x), window.innerHeight);
   const wide = window.innerWidth >= WIDTH + 48;
   const left = Math.min(Math.max(anchor.x - WIDTH / 2, 12), window.innerWidth - WIDTH - 12);
   return (
@@ -122,7 +159,7 @@ export function JumpList({
       aria-label={head}
       data-jump-list=""
       style={{
-        ...(below ? { top: anchor.bottom + 8 } : { bottom: window.innerHeight - anchor.top + 8 }),
+        ...place,
         ...(wide ? { left, right: "auto", width: WIDTH, marginInline: 0 } : {}),
       }}
     >
