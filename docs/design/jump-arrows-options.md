@@ -3,7 +3,7 @@
 *Decided 2026-10-03 by the owner: **A**, the arrows stay, faint, and B is kept as a setting ("Saved jump arrows" in the info panel) for a reader who wants a clean page. This is question 4 of [the wavy arrow for the places your memory jumps](confusion-jumps.md#4--does-the-arrow-stay-on-the-page-or-only-show-when-you-ask). This page holds what building both taught us.*
 
 > [!success] Decided
-> **A by default, B as a setting.** Every device starts with the arrows on the page, faint. Picking "Only when you ask" in the info panel switches that device to B, and it is remembered. Findings 3 and 4 below (small labels, labels near the edge) are the next work, because the labels are always visible. Finding 1 (on a phone, B's list covering its own arrow) still matters for anyone who picks B.
+> **A by default, B as a setting.** Every device starts with the arrows on the page, faint. Picking "Only when you ask" in the info panel switches that device to B, and it is remembered. Findings 3 and 4 below (small labels, labels near the edge) were fixed the same day; see *What changed after the choice?* Finding 1 (on a phone, B's list covering its own arrow) still matters for anyone who picks B.
 
 > [!tip] Recommended
 > **A: the arrows stay on the page, faint.** The arrow is the only thing that shows *where* in the verse your memory left it, and on a phone the list that B relies on can open right over the arrow it is meant to reveal. Two things are worth fixing whichever way you choose (below): the labels are small, and near the edge of the page they land on letters.
@@ -70,6 +70,16 @@ No arrows on the page. A verse's arrow shows while its list is open, and every a
 2. **The arrow lives in the narrow gap between two lines**, so its wave crosses the harakat of the line below. Faint, it reads as a pencil mark; at full strength it competes with the signs.
 3. **The labels are small.** At normal size they come out about 6–7 points tall on a phone, and about the same on a computer spread. They were enlarged once during the build. Any larger and they cover more letters.
 4. **Near the left edge of the page the labels have nowhere to go.** The arrow runs leftwards from the word. When the word is close to the edge (2:60 here), the labels drop under the arrow and sit on the next line's letters.
+
+## What changed after the choice?
+
+Findings 3 and 4, fixed on 2026-10-03, because with A the labels are always on the page:
+
+- **Bigger, and bare.** A label is now about 9 points on a phone instead of 6–7. It no longer stands on a filled pill, which hid the harakat beneath it; the letters of the label get a thin edge of paper instead, so they stay readable where they cross a stroke. The labels are nearly full strength, and the wave stays faint.
+- **In the gap.** The arrow and its labels sit in the middle of the white gap between the two lines, not on top of the next line's harakat.
+- **Near the edge, a shorter arrow.** When the word is close to the left edge, the arrow is cut shorter so its labels still fit beside it on the same line. 2:60's "7:160" now ends its own arrow instead of dropping onto the line below. If even a short arrow leaves no room, the labels go behind the arrow's start.
+
+![The labels after the fix, on a phone: 2:58's two labels in the gap under its first line, and 2:60's label at the left edge beside its arrow](jump-arrows-options/labels-after-fix.png)
 
 ## What does each option cost? — side by side
 
