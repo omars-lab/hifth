@@ -787,7 +787,7 @@ export function App(): JSX.Element {
   // where a verse that carries a Study Quran note opens it on the tap itself.
   // The demo's whole point is «tap a verse, read the note»; making that a
   // second click on a footer button buried the moment. A verse with no note
-  // (everything outside al-Fātiḥah, in this build) still just closes it.
+  // still just closes it.
   useEffect(() => {
     setCommentaryOpen(PITCH && hasCommentary);
   }, [selectedKey, hasCommentary]);
