@@ -6,6 +6,7 @@ import {
   DEFAULT_HOP_ZOOM,
   easeInOutCubic,
   frameBboxToView,
+  hopZoomFor,
   lerpView,
   viewFitsAcross,
   type FrameContext,
@@ -62,6 +63,36 @@ describe("frameBboxToView (mock focus() port)", () => {
     expect(withLead).toEqual(frameBboxToView(verse, CTX, 1.55));
   });
 
+});
+
+describe("hopZoomFor: a verse a link opens on is shown whole across", () => {
+  // Ayat al-Kursi on a phone: the hop zoom made every full line wider than the
+  // screen, so both ends of its middle lines were cut off (2026-10-04).
+  const s = 320 / 345;
+  const kursi: Rect = { x: 15, y: 200, width: 315, height: 150 };
+
+  it("comes down from the hop zoom until the verse's lines fit across, with a margin", () => {
+    const z = hopZoomFor(kursi, CTX, DEFAULT_HOP_ZOOM);
+    expect(z).toBeLessThan(DEFAULT_HOP_ZOOM);
+    expect(kursi.width * s * z).toBeLessThanOrEqual(CTX.stageWidth - 32 + 1e-9);
+    const v = frameBboxToView(kursi, CTX, z);
+    const at = bboxToScreen(kursi, v, CTX);
+    expect(at.x).toBeGreaterThanOrEqual(0);
+    expect(at.x + at.width).toBeLessThanOrEqual(CTX.stageWidth);
+  });
+
+  it("keeps the full hop zoom for a short verse", () => {
+    expect(hopZoomFor({ x: 145, y: 265, width: 55, height: 20 }, CTX, DEFAULT_HOP_ZOOM)).toBe(DEFAULT_HOP_ZOOM);
+  });
+
+  it("never goes below the whole page, and never raises a zoom asked to be lower", () => {
+    const narrow = { ...CTX, stageWidth: 300 };
+    expect(hopZoomFor({ x: 0, y: 0, width: 345, height: 40 }, narrow, DEFAULT_HOP_ZOOM)).toBe(1);
+    expect(hopZoomFor({ x: 145, y: 265, width: 55, height: 20 }, CTX, 1)).toBe(1);
+  });
+});
+
+describe("frameBboxToView defaults", () => {
   it("defaults to the hop zoom", () => {
     const v = frameBboxToView({ x: 0, y: 0, width: 10, height: 10 }, CTX);
     expect(v.z).toBe(DEFAULT_HOP_ZOOM);

@@ -2559,6 +2559,18 @@
       "owner": "agent",
       "note": "The pitch showed a surah's introduction on top of its first verse's note. Owner asked on 2026-10-04 for it to sit beside the surah's name, above the basmala, as a badge. Done the same day: an ⓘ just left of the name opens the introduction by itself, and verse 1's note carries only verse 1. On the first two pages, which draw no name line, the badge sits beside the basmala.",
       "closedBy": "apps/web/e2e/pitch.spec.ts"
+    },
+    {
+      "id": "phone-hop-crops-verse",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "35"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On a phone, opening a link to a long verse (Ayat al-Kursi) zoomed in so far that its lines were cut off at both edges of the screen. Fixed on 2026-10-04: a jump zooms in only as far as the verse fits across the screen, never past the whole page; a short verse keeps the full zoom.",
+      "closedBy": "apps/web/e2e/deeplink.spec.ts"
     }
   ]
 }
