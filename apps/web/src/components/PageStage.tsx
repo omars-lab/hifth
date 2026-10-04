@@ -66,7 +66,6 @@ import {
 import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT, type Strings } from "../i18n";
 import type { TurnStyle } from "../turn-style";
-import { drawIntroBadges } from "./intro-badge";
 import styles from "./PageStage.module.css";
 
 interface PageStageProps {
@@ -303,12 +302,11 @@ interface PageStageProps {
   /** A dot was pressed: list the verse's notes beside it. */
   onOpenVerseNotes?: (key: string, at: { top: number; bottom: number; x: number }) => void;
   /**
-   * Surahs whose introduction can be opened from an ⓘ beside the surah's name,
-   * drawn on the page wherever the surah opens (the pitch build). `introLabel`
-   * names it; `onOpenIntro` opens it.
+   * Draws the ⓘ beside each surah's name that opens its introduction (the
+   * pitch build only, so the public bundle never carries the drawing code);
+   * `onOpenIntro` opens the one pressed.
    */
-  introSurahs?: ReadonlySet<number>;
-  introLabel?: (surah: number) => string;
+  paintIntro?: ((svg: SVGSVGElement) => void) | undefined;
   onOpenIntro?: (surah: number) => void;
   /** A jump mark was pressed: list where the reader's memory went from that verse. */
   onOpenJumps?: (key: string, at: { top: number; bottom: number; x: number }) => void;
@@ -1057,8 +1055,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     verseDots,
     verseDotLabel,
     onOpenVerseNotes,
-    introSurahs,
-    introLabel,
+    paintIntro,
     onOpenIntro,
     onOpenJumps,
     confusionMarks,
@@ -1168,13 +1165,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const onOpenJumpsRef = useRef(onOpenJumps);
   onOpenJumpsRef.current = onOpenJumps;
   const paintDotsRef = useRef<(page: number, svg: SVGSVGElement) => void>(() => {});
-  const introSurahsRef = useRef(introSurahs);
-  introSurahsRef.current = introSurahs;
-  const introLabelRef = useRef(introLabel);
-  introLabelRef.current = introLabel;
   const onOpenIntroRef = useRef(onOpenIntro);
   onOpenIntroRef.current = onOpenIntro;
-  const paintIntroRef = useRef<(svg: SVGSVGElement) => void>(() => {});
+  const paintIntroRef = useRef(paintIntro);
+  paintIntroRef.current = paintIntro;
   const confusionMarksRef = useRef(confusionMarks);
   confusionMarksRef.current = confusionMarks;
   const confusionMarkLabelRef = useRef(confusionMarkLabel);
@@ -1903,7 +1897,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       drawNotePins(svg, targetPage, notesRef.current, (n) => noteLabelRef.current?.(n) ?? n.key);
       paintMistakesRef.current(targetPage, svg);
       paintDotsRef.current(targetPage, svg);
-      paintIntroRef.current(svg);
+      paintIntroRef.current?.(svg);
       paintJumpsRef.current(targetPage, svg);
       wireNotes(svg, targetPage, hl);
       return mp;
@@ -3023,11 +3017,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   }, [verseDots, status]);
 
   // The ⓘ beside each surah's name needs only the page itself.
-  paintIntroRef.current = (svg) =>
-    drawIntroBadges(svg, introSurahsRef.current ?? new Set(), (s) => introLabelRef.current?.(s) ?? String(s));
   useEffect(() => {
-    for (const [, mp] of pagesRef.current) paintIntroRef.current(mp.svg);
-  }, [introSurahs, status]);
+    if (paintIntro) for (const [, mp] of pagesRef.current) paintIntro(mp.svg);
+  }, [paintIntro, status]);
 
   // The verse under a point on screen, and the page it is on, for the Jump
   // tool: its layer lies over the page, so the question goes past it.

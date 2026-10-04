@@ -191,6 +191,7 @@ const COMMENTARY = PITCH || LIVE_TAFSIR;
 const INTRO_SURAHS: ReadonlySet<number> = new Set(
   PITCH ? Array.from({ length: 114 }, (_, i) => i + 1) : [],
 );
+import { drawIntroBadges } from "./components/intro-badge";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
@@ -798,6 +799,11 @@ export function App(): JSX.Element {
     [ensurePitch],
   );
   const introLabel = useCallback((surah: number) => `${t.surahIntro} · ${t.surahName(surah)}`, [t]);
+  // Only the pitch build draws the ⓘ, so the public bundle drops the drawing.
+  const paintIntro = useMemo(
+    () => (PITCH ? (svg: SVGSVGElement) => drawIntroBadges(svg, INTRO_SURAHS, introLabel) : undefined),
+    [introLabel],
+  );
   const introSheet = useMemo(() => {
     if (!PITCH || introSurah === null || !commentarySource || !resolver) return null;
     const p = pitchSurahs.get(introSurah);
@@ -3112,8 +3118,7 @@ export function App(): JSX.Element {
                   noteLabel={noteLabel}
                   verseDots={verseDots}
                   verseDotLabel={t.verseInNotes}
-                  introSurahs={INTRO_SURAHS}
-                  introLabel={introLabel}
+                  paintIntro={paintIntro}
                   onOpenIntro={openIntro}
                   confusionMarks={confusionMarks}
                   confusionMarkLabel={t.jumpsFrom}
@@ -3191,8 +3196,7 @@ export function App(): JSX.Element {
                 noteLabel={noteLabel}
                 verseDots={verseDots}
                 verseDotLabel={t.verseInNotes}
-                introSurahs={INTRO_SURAHS}
-                introLabel={introLabel}
+                paintIntro={paintIntro}
                 onOpenIntro={openIntro}
                 confusionMarks={confusionMarks}
                 confusionMarkLabel={t.jumpsFrom}
