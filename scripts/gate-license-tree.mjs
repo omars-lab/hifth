@@ -79,12 +79,17 @@
  * licence nobody classified. Restored. Also checked the empty-channel case: with
  * `workbox-build` absent the service-worker seed is empty and `idb` correctly
  * leaves the ship set, so the gate reports only the bundle — the PWA being
- * removed must not leave a phantom worker under review.
+ * removed must not leave a phantom worker under review. Since 2026-10-03 both
+ * breaks are held by a test that goes red: gate-license-tree.test.mjs.
  */
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const STORE = join(ROOT, "node_modules", ".pnpm");
 
 /**

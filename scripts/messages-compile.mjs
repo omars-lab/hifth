@@ -30,7 +30,12 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "@messageformat/parser";
 
-export const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points gate:i18n (and the build it compares against) at a
+// made-up tree, so a test can feed it catalogs it must refuse and ones it must
+// pass (scripts/gate-fixture.mjs). Unset, it is the repository, as always.
+export const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 export const MESSAGES_DIR = join(ROOT, "apps", "web", "src", "messages");
 
 /**
