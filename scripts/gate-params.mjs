@@ -34,6 +34,7 @@
  * Run: `pnpm gate:params` (also in `pnpm gates`, `make ci` and CI).
  */
 import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { exampleProblems, searchSettingProblems, table, unbacktick } from "./lib/link-catalog.mjs";
 import { parseHash, serializeState } from "../packages/core/dist/index.js";
 
@@ -43,8 +44,15 @@ const FIELD_CSS = "apps/web/src/styles/field.css";
 const TOKENS = "apps/web/src/styles/tokens.css";
 const DOC = "docs/query-params.md";
 
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs). The link
+// reader the examples run through stays the real built core either way.
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
+
 const problems = [];
-const read = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
+const read = (p) => readFileSync(join(ROOT, p), "utf8");
 
 const router = read(ROUTER);
 const fieldTs = read(FIELD_TS);
@@ -140,7 +148,7 @@ problems.push(...exampleProblems(doc, { parseHash, serializeState }).map((p) => 
 
 const WEB_SRC = "apps/web/src";
 const sources = {};
-for (const f of readdirSync(new URL(`../${WEB_SRC}`, import.meta.url), { recursive: true })) {
+for (const f of readdirSync(join(ROOT, WEB_SRC), { recursive: true })) {
   if (/\.(ts|tsx)$/.test(f) && !/\.test\./.test(f)) sources[`${WEB_SRC}/${f}`] = read(`${WEB_SRC}/${f}`);
 }
 problems.push(...searchSettingProblems(doc, sources).map((p) => `${DOC} — ${p}`));
