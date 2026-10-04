@@ -37,10 +37,14 @@
  * the Mac, and the linux set the GitHub e2e job used to check is retired. The
  * lever left is fewer or smaller shots.
  */
-import { readdirSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const SHOTS = join(ROOT, "apps", "web", "e2e", "__screenshots__");
 
 /** Bytes. Generous against today's ~3.5 MB; see the docblock for what it buys. */
@@ -50,7 +54,10 @@ const byPlatform = new Map();
 let total = 0;
 let count = 0;
 
-for (const platform of readdirSync(SHOTS, { withFileTypes: true }).filter((d) => d.isDirectory())) {
+// A missing folder is the same failure as an empty one, said plainly rather than
+// as a crash from deep inside the file system.
+const platforms = existsSync(SHOTS) ? readdirSync(SHOTS, { withFileTypes: true }) : [];
+for (const platform of platforms.filter((d) => d.isDirectory())) {
   const dir = join(SHOTS, platform.name);
   const files = readdirSync(dir).filter((f) => f.endsWith(".png"));
   const bytes = files.reduce((sum, f) => sum + statSync(join(dir, f)).size, 0);
