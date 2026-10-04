@@ -47,6 +47,40 @@ export function CommentaryTrigger({
   );
 }
 
+/** The least width the note is read in, beside a spread — the stylesheet's card. */
+const LEAST_WIDTH = 460;
+/** How far the note stands off the fold, so the spine still shows. */
+const OFF_FOLD = 4;
+/** How far it stands in from the window's edges. */
+const MARGIN = 12;
+
+/**
+ * Where the note lies on a spread, in window px: over the whole facing page,
+ * from the fold to the page's outer edge and from its top to its foot, like a
+ * page of commentary laid on the book. A fixed card in from the window's edge
+ * hid most of the facing page and left a strip of it showing, its words cut off
+ * at the card. A page narrower than the note can be read in is overhung past
+ * its outer edge rather than squeezed; a book magnified past the window is
+ * covered as far as the window goes.
+ */
+export function overLeaf(
+  book: { left: number; right: number; top: number; bottom: number },
+  side: LeafSide,
+  screen: { width: number; height: number },
+): { left: number; width: number; top: number; height: number } {
+  const fold = (book.left + book.right) / 2;
+  const top = Math.max(book.top, MARGIN);
+  const height = Math.min(book.bottom, screen.height - MARGIN) - top;
+  if (side === "right") {
+    const left = fold + OFF_FOLD;
+    const width = Math.min(Math.max(LEAST_WIDTH, book.right - left), screen.width - MARGIN - left);
+    return { left, width, top, height };
+  }
+  const right = fold - OFF_FOLD;
+  const width = Math.min(Math.max(LEAST_WIDTH, right - book.left), right - MARGIN);
+  return { left: right - width, width, top, height };
+}
+
 /** How much of a phone's height the note opens at — `38vh` in the stylesheet. */
 const SHORT_SHARE = 0.38;
 
@@ -155,6 +189,31 @@ export function CommentarySheet({
   }, [open, beside, verseKey, onCover]);
   useEffect(() => () => onCover?.(null), [onCover]);
 
+  // Beside a spread, lie over the facing page, and follow the book as it is
+  // magnified or the window is resized. A book closed to one magnified leaf has
+  // no facing page, so the card keeps the stylesheet's corner.
+  const [place, setPlace] = useState<ReturnType<typeof overLeaf> | null>(null);
+  useLayoutEffect(() => {
+    const book = document.querySelector<HTMLElement>('[data-testid="page-book"]');
+    if (!open || side === null || !book || book.dataset.solo) {
+      setPlace(null);
+      return;
+    }
+    const measure = () =>
+      setPlace(overLeaf(book.getBoundingClientRect(), side, { width: innerWidth, height: innerHeight }));
+    measure();
+    const seen = new ResizeObserver(measure);
+    seen.observe(book);
+    window.addEventListener("resize", measure);
+    // A magnified book is scrolled, which moves it without resizing it.
+    window.addEventListener("scroll", measure, true);
+    return () => {
+      seen.disconnect();
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure, true);
+    };
+  }, [open, side]);
+
   useEffect(() => {
     if (!open) return;
     const opener = document.activeElement as HTMLElement | null;
@@ -225,6 +284,7 @@ export function CommentarySheet({
         aria-label={t.commentaryOn(label)}
         data-side={side ?? undefined}
         data-tall={tall || undefined}
+        style={place ? { ...place, right: "auto", bottom: "auto", maxBlockSize: "none" } : undefined}
         tabIndex={-1}
         onKeyDown={onKeyDown}
         onScroll={(e) => {
