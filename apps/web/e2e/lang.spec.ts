@@ -129,6 +129,28 @@ test.describe("Hifth · language", () => {
   // the saved choice: a reader who opens a link a teacher sent in Arabic must
   // not find their own app in Arabic tomorrow. Owner, 2026-09-28: links that
   // enter the app in a certain mode.
+  test("every choice in the info panel fits inside its button, in both languages", async ({ page }) => {
+    // Six ways to pick what a note is about shared one row on a phone, and
+    // "Sideways" and "Pyramid" ran out past their buttons' edges.
+    for (const lang of ["en", "ar"]) {
+      await page.goto(`/?lang=${lang}#/hafs-kfqc/p9`);
+      await page.getByRole("button", { name: /^(About Hifth|عن حِفظ) · / }).tap();
+      const sheet = page.getByRole("dialog", { name: /About Hifth|عن حِفظ/ });
+      await expect(sheet.getByRole("radio").first()).toBeVisible();
+      const spills = await sheet.getByRole("radio").evaluateAll((els) =>
+        els.flatMap((el) => {
+          const box = el.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const ink = range.getBoundingClientRect();
+          return ink.left < box.left - 0.5 || ink.right > box.right + 0.5 ? [el.textContent ?? ""] : [];
+        }),
+      );
+      expect(spills, `${lang}: choices whose words run past their button`).toEqual([]);
+      await page.keyboard.press("Escape");
+    }
+  });
+
   test("?lang= sets the chrome for this visit only, and keeps the saved choice", async ({ page }) => {
     await page.addInitScript((k) => {
       if (!sessionStorage.getItem("seeded")) {
