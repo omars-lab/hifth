@@ -162,12 +162,16 @@ test.describe("Hifth · the Jump tool on the computer", () => {
     const a = await ayahTarget(page, verse(65)); // 2:58
     const b = await ayahTarget(page, verse(68)); // 2:61
     await jumpTool(page);
+    // The arrow under the finger is its own drawing; once let go it is gone,
+    // and the jump's saved arrow, faint, takes its place on the page.
+    const drawing = page.locator("svg[data-jump-arrow]");
     await drag(page, a, b, false);
-    await expect(page.locator("[data-jump-arrow]")).toBeVisible();
+    await expect(drawing).toBeVisible();
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-dragging.png` });
     await page.mouse.up();
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-marked.png` });
-    await expect(page.locator("[data-jump-arrow]")).toHaveCount(0);
+    await expect(drawing).toHaveCount(0);
+    await expect(pageSvg(page, 9).locator('[data-jump-arrow="2:58"]')).toBeVisible();
     await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
     await expect(undoBar(page)).toContainText("Jump from 2:58 to 2:61 marked");
     await undoBar(page).getByRole("button", { name: "Undo" }).click();
@@ -443,6 +447,39 @@ test.describe("Hifth · the saved arrows on the page", () => {
     await page.reload();
     await expect(mark(page, "2:58")).toBeVisible();
     await expect(arrows(page)).toHaveCount(0);
+  });
+
+  test("on request, a list opened low on the screen stands clear of the arrow it shows", async ({ page }) => {
+    // Finding 1 of the options note: the list opens upwards when its mark is
+    // low on the screen, and the arrow sits in the verse above the mark, so
+    // the list covered the very arrow it had been opened to show.
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await seed(page, JUMPS);
+    await page.evaluate((k) => localStorage.setItem(k, "asked"), JUMP_ARROWS_KEY);
+    await page.reload();
+    await expect(mark(page, "2:58")).toBeVisible();
+    // Bring the mark down into the lower part of the screen, where the list
+    // has to open upwards.
+    await page.evaluate(() => scrollTo(0, 0));
+    const at = (await mark(page, "2:58").boundingBox())!;
+    const height = page.viewportSize()!.height;
+    test.skip(at.y + at.height + 8 < height * 0.55, "the mark sits high on this screen, so the list opens below it");
+    await mark(page, "2:58").click();
+    const list = page.getByRole("dialog", { name: "Jumps from 2:58" });
+    await expect(list).toBeVisible();
+    await expect(arrow(page, "2:58")).toBeVisible();
+    const card = (await list.boundingBox())!;
+    const line = (await arrow(page, "2:58").boundingBox())!;
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-arrows-asked-clear-${test.info().project.name}.png` });
+    const apart =
+      card.y + card.height <= line.y ||
+      card.y >= line.y + line.height ||
+      card.x + card.width <= line.x ||
+      card.x >= line.x + line.width;
+    expect(apart, "the list and the arrow do not overlap").toBe(true);
+    // Still reachable whole: it starts on the screen.
+    expect(card.y).toBeGreaterThanOrEqual(0);
   });
 
   test("on request: no arrows until the Jump tool is on, or a verse's list is open", async ({ page, isMobile }) => {
