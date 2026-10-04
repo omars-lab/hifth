@@ -14,6 +14,11 @@ interface VerseMenuProps {
   around: DOMRect;
   items: readonly VerseMenuItem[];
   onClose: () => void;
+  /**
+   * One line under another, for a longer menu: a verse number's choices are
+   * seven lines, and a row of seven ran across the whole window.
+   */
+  stacked?: boolean;
 }
 
 const GAP = 8;
@@ -51,7 +56,7 @@ export function placeMenu(
  * offer, beside the verse rather than over it. Escape, a tap anywhere else, or
  * a pick closes it.
  */
-export function VerseMenu({ name, around, items, onClose }: VerseMenuProps): JSX.Element {
+export function VerseMenu({ name, around, items, onClose, stacked = false }: VerseMenuProps): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
 
@@ -64,10 +69,21 @@ export function VerseMenu({ name, around, items, onClose }: VerseMenuProps): JSX
         height: window.innerHeight,
       }),
     );
-  }, [around]);
+    // Placed again when lines arrive: a taller menu must still clear the verse.
+  }, [around, items.length]);
+
+  // Focus waits for the menu to be placed: until then it is hidden, and a
+  // browser will not focus a hidden button, so the keyboard was left on nothing.
+  // It follows the first line too: a menu opened from a verse's number fills in
+  // as the verse's note and look-alikes arrive, and the keyboard should start
+  // on the line at the top, not on whichever was first a moment before.
+  const placed = at !== null;
+  const first = items[0]?.caption;
+  useEffect(() => {
+    if (placed) ref.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus({ preventScroll: true });
+  }, [placed, first]);
 
   useEffect(() => {
-    ref.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.preventDefault();
@@ -104,6 +120,7 @@ export function VerseMenu({ name, around, items, onClose }: VerseMenuProps): JSX
       style={at ? { left: at.left, top: at.top } : { visibility: "hidden" }}
       onKeyDown={onKeyDown}
       data-verse-menu=""
+      data-stacked={stacked ? "" : undefined}
     >
       {items.map((item) => (
         <button

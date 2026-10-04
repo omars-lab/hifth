@@ -153,6 +153,21 @@ interface Grab {
 const GRAB_SLOP_PX = 4;
 
 /**
+ * A click on the edge that never became a turn reaches whatever button is
+ * beneath it. The strip is widest at the foot, which is where a page's last
+ * line ends, and a verse whose number sits at the end of that line could not
+ * be pressed at all with the strip over it.
+ */
+function pressBeneath(rail: HTMLElement, x: number, y: number): void {
+  const was = rail.style.pointerEvents;
+  rail.style.pointerEvents = "none";
+  const under = document.elementFromPoint(x, y);
+  rail.style.pointerEvents = was;
+  const button = under?.closest('button, a[href], [role="button"]');
+  button?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, clientX: x, clientY: y }));
+}
+
+/**
  * The outer edges of an open mus'haf, made grabbable.
  *
  * ## Why the edges, and why here
@@ -413,7 +428,11 @@ export function EdgeGrabRails({
         setHeld(null);
         if (!g) return;
         e.currentTarget.releasePointerCapture(e.pointerId);
-        if (!g.begun) return; // a click on the edge, not a turn
+        if (!g.begun) {
+          // A click on the edge, not a turn: hand it to a mark beneath it.
+          pressBeneath(e.currentTarget, e.clientX, e.clientY);
+          return;
+        }
         const dx = e.clientX - g.startX;
         // Signed pixels-per-millisecond over the last move, for the flick rule.
         // Zero when the finger paused before lifting, which is the same as a

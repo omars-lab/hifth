@@ -303,12 +303,19 @@ interface PageStageProps {
   /** A dot was pressed: list the verse's notes beside it. */
   onOpenVerseNotes?: (key: string, at: { top: number; bottom: number; x: number }) => void;
   /**
-   * Draws the ⓘ beside each surah's name that opens its introduction (the
-   * pitch build only, so the public bundle never carries the drawing code);
+   * Makes each surah's name a button that opens its introduction (the pitch
+   * build only, so the public bundle never carries the drawing code);
    * `onOpenIntro` opens the one pressed.
    */
   paintIntro?: ((svg: SVGSVGElement) => void) | undefined;
   onOpenIntro?: (surah: number) => void;
+  /**
+   * Makes each verse's number a button (the pitch build only, for the same
+   * reason); it needs the page's words to find the numbers.
+   * `onOpenVerseMenu` opens the menu of what to read on the verse pressed.
+   */
+  paintVerses?: ((svg: SVGSVGElement, words: WordIndex | null) => void) | undefined;
+  onOpenVerseMenu?: (key: string, around: DOMRect) => void;
   /** A jump mark was pressed: list where the reader's memory went from that verse. */
   onOpenJumps?: (key: string, at: { top: number; bottom: number; x: number }) => void;
   /**
@@ -1058,6 +1065,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onOpenVerseNotes,
     paintIntro,
     onOpenIntro,
+    paintVerses,
+    onOpenVerseMenu,
     onOpenJumps,
     confusionMarks,
     confusionMarkLabel,
@@ -1170,6 +1179,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onOpenIntroRef.current = onOpenIntro;
   const paintIntroRef = useRef(paintIntro);
   paintIntroRef.current = paintIntro;
+  const paintVersesRef = useRef(paintVerses);
+  paintVersesRef.current = paintVerses;
+  const onOpenVerseMenuRef = useRef(onOpenVerseMenu);
+  onOpenVerseMenuRef.current = onOpenVerseMenu;
   const confusionMarksRef = useRef(confusionMarks);
   confusionMarksRef.current = confusionMarks;
   const confusionMarkLabelRef = useRef(confusionMarkLabel);
@@ -1746,7 +1759,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP_PX) return;
       if (
         (e.target as Element | null)?.closest(
-          "[data-note-pin], [data-verse-dot], [data-confusion-mark], [data-wasl-mark], [data-jump-arrow], [data-intro-badge]",
+          "[data-note-pin], [data-verse-dot], [data-confusion-mark], [data-wasl-mark], [data-jump-arrow], [data-intro-badge], [data-verse-number]",
         )
       )
         return;
@@ -1785,6 +1798,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     };
     const introOf = (e: Event) => (e.target as Element | null)?.closest("[data-intro-badge]");
     const openIntro = (badge: Element) => onOpenIntroRef.current?.(Number(badge.getAttribute("data-surah")));
+    // A verse's number opens the menu of what to read on it, beside the number.
+    // The note dot and jump mark sit on its shoulders and are asked first.
+    const numberOf = (e: Event) => (e.target as Element | null)?.closest("[data-verse-number]");
+    const openMenu = (n: Element) =>
+      onOpenVerseMenuRef.current?.(n.getAttribute("data-verse-key") ?? "", n.getBoundingClientRect());
     svg.addEventListener("click", (e) => {
       const badge = introOf(e);
       if (badge) {
@@ -1796,6 +1814,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (dot) {
         e.stopPropagation();
         openDot(dot);
+        return;
+      }
+      const n = numberOf(e);
+      if (n) {
+        e.stopPropagation();
+        openMenu(n);
         return;
       }
       const id = pinOf(e);
@@ -1813,11 +1837,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         return;
       }
       const dot = dotOf(e);
+      const n = numberOf(e);
       const id = pinOf(e);
-      if (!dot && !id) return;
+      if (!dot && !n && !id) return;
       e.preventDefault();
       e.stopPropagation();
       if (dot) openDot(dot);
+      else if (n) openMenu(n);
       else if (id) onOpenNoteRef.current?.(id);
     });
   }, []);
@@ -1899,6 +1925,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       paintMistakesRef.current(targetPage, svg);
       paintDotsRef.current(targetPage, svg);
       paintIntroRef.current?.(svg);
+      const verses = paintVersesRef.current;
+      if (verses) void ensureWords(resolver.edition, targetPage).then((idx) => verses(svg, idx));
       paintJumpsRef.current(targetPage, svg);
       wireNotes(svg, targetPage, hl);
       return mp;
@@ -3018,10 +3046,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     for (const [p, mp] of pagesRef.current) paintDotsRef.current(p, mp.svg);
   }, [verseDots, status]);
 
-  // The ⓘ beside each surah's name needs only the page itself.
+  // The button over each surah's name needs only the page itself.
   useEffect(() => {
     if (paintIntro) for (const [, mp] of pagesRef.current) paintIntro(mp.svg);
   }, [paintIntro, status]);
+  // The verse numbers again on every change of selection, for the wash on the
+  // selected one; the words are fetched once a page, so this is cheap.
+  useEffect(() => {
+    if (!paintVerses) return;
+    for (const [p, mp] of pagesRef.current) void ensureWords(resolver.edition, p).then((idx) => paintVerses(mp.svg, idx));
+  }, [paintVerses, status, resolver]);
 
   // The verse under a point on screen, and the page it is on, for the Jump
   // tool: its layer lies over the page, so the question goes past it.

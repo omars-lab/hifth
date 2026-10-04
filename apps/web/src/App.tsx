@@ -99,6 +99,7 @@ import {
   openingAfter,
   type TajweedShard,
   type TajweedVocabulary,
+  type WordIndex,
 } from "@hifth/core";
 import {
   loadManifest,
@@ -192,6 +193,7 @@ const INTRO_SURAHS: ReadonlySet<number> = new Set(
   PITCH ? Array.from({ length: 114 }, (_, i) => i + 1) : [],
 );
 import { drawIntroBadges } from "./components/intro-badge";
+import { drawVerseNumbers } from "./components/verse-numbers";
 import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
@@ -788,7 +790,7 @@ export function App(): JSX.Element {
   }, [commentarySource, selectedKey, commentaryBySurah, pitchSurahs, contextFor]);
   const hasCommentary = commentaryEntry !== null;
 
-  // The surah whose introduction is open by itself, from the ⓘ beside its name
+  // The surah whose introduction is open by itself, from a press on its name
   // (owner, 2026-10-04); it gives way the moment the selection moves.
   const [introSurah, setIntroSurah] = useState<number | null>(null);
   const openIntro = useCallback(
@@ -799,7 +801,7 @@ export function App(): JSX.Element {
     [ensurePitch],
   );
   const introLabel = useCallback((surah: number) => `${t.surahIntro} · ${t.surahName(surah)}`, [t]);
-  // Only the pitch build draws the ⓘ, so the public bundle drops the drawing.
+  // Only the pitch build makes the names buttons, so the public bundle drops the drawing.
   const paintIntro = useMemo(
     () => (PITCH ? (svg: SVGSVGElement) => drawIntroBadges(svg, INTRO_SURAHS, introLabel) : undefined),
     [introLabel],
@@ -817,13 +819,37 @@ export function App(): JSX.Element {
     setIntroSurah(null);
   }, [selectedKey]);
 
+  // Each verse's number is a button that opens a menu of what to read on the
+  // verse (pitch build; owner, 2026-10-04): its note, its similar verses, the
+  // words from the same roots, its recitation, the surah's introduction. The
+  // selected verse's number is washed. Pressing a number selects its verse,
+  // and the note waits to be picked from the menu rather than opening behind it.
+  // It is the same small menu a hold on a verse opens, with other lines.
+  const [verseMenuAt, setVerseMenuAt] = useState<{ key: string; around: DOMRect } | null>(null);
+  const closeNumberMenu = useCallback(() => setVerseMenuAt(null), []);
+  const pickedFromNumberRef = useRef<string | null>(null);
+  const verseMenuLabel = useCallback((key: string) => t.verseMenu(key), [t]);
+  const paintVerses = useMemo(
+    () =>
+      PITCH && resolver
+        ? (svg: SVGSVGElement, words: WordIndex | null) =>
+            drawVerseNumbers(svg, resolver.edition, words, selectedKey, verseMenuLabel)
+        : undefined,
+    [resolver, selectedKey, verseMenuLabel],
+  );
+  useEffect(() => {
+    if (verseMenuAt && verseMenuAt.key !== selectedKey) setVerseMenuAt(null);
+  }, [selectedKey, verseMenuAt]);
+
   // Moving the selection closes the commentary — except in the pitch build,
   // where a verse that carries a Study Quran note opens it on the tap itself.
   // The demo's whole point is «tap a verse, read the note»; making that a
   // second click on a footer button buried the moment. A verse with no note
   // still just closes it.
   useEffect(() => {
-    setCommentaryOpen(PITCH && hasCommentary);
+    const fromNumber = pickedFromNumberRef.current === selectedKey;
+    if (!fromNumber) pickedFromNumberRef.current = null;
+    setCommentaryOpen(PITCH && hasCommentary && !fromNumber);
   }, [selectedKey, hasCommentary]);
 
   useEffect(() => {
@@ -2112,6 +2138,50 @@ export function App(): JSX.Element {
     [announce, dropWithTool, resolver, t],
   );
 
+  // A press on a verse's number: select the verse (unless it already is) and
+  // open the menu beside the number. Only where a tap on a verse selects it.
+  const openVerseMenu = useCallback(
+    (key: string, around: DOMRect) => {
+      if (toolRef.current !== "select" && toolRef.current !== "highlight") return;
+      pickedFromNumberRef.current = key;
+      if (selectedKeyRef.current !== key) handleSelect(key);
+      else setCommentaryOpen(false);
+      setVerseMenuAt({ key, around });
+    },
+    [handleSelect],
+  );
+  const verseMenuItems = useMemo((): VerseMenuItem[] => {
+    if (!PITCH || !verseMenuAt || verseMenuAt.key !== selectedKey) return [];
+    const key = verseMenuAt.key;
+    const items: VerseMenuItem[] = [];
+    if (hasCommentary)
+      items.push({
+        caption: commentarySource ? `${t.vdCommentary} · ${commentarySource.source.label}` : t.vdCommentary,
+        onPick: () => setCommentaryOpen(true),
+      });
+    for (const chip of railChips)
+      items.push({
+        caption: `${t.railDirection[chip.direction]} · ${t.num(chip.count)}`,
+        onPick: () => setOpenDirection(chip.direction),
+      });
+    if (rootCount > 0)
+      items.push({
+        caption: t.vdRoots,
+        onPick: () => setRootsOpen(true),
+      });
+    items.push({
+      caption: audio.phaseFor(key) === "playing" ? t.vdPause : t.vdListen,
+      onPick: () => audio.toggle(key),
+    });
+    const surah = parseAyahKey(key)?.surah;
+    if (surah && INTRO_SURAHS.has(surah))
+      items.push({
+        caption: t.surahIntro,
+        onPick: () => openIntro(surah),
+      });
+    return items;
+  }, [verseMenuAt, selectedKey, hasCommentary, commentarySource, railChips, rootCount, audio, openIntro, t]);
+
   // A marquee released over ayahs (Loop 5). The passage replaces the selection —
   // one open hop list at a time — and the stage keeps the amber marks while L3
   // holds the keys the merged hop list is built from.
@@ -3120,6 +3190,8 @@ export function App(): JSX.Element {
                   verseDotLabel={t.verseInNotes}
                   paintIntro={paintIntro}
                   onOpenIntro={openIntro}
+                  paintVerses={paintVerses}
+                  onOpenVerseMenu={openVerseMenu}
                   confusionMarks={confusionMarks}
                   confusionMarkLabel={t.jumpsFrom}
                   waslMarksOf={waslMarksOf}
@@ -3198,6 +3270,8 @@ export function App(): JSX.Element {
                 verseDotLabel={t.verseInNotes}
                 paintIntro={paintIntro}
                 onOpenIntro={openIntro}
+                paintVerses={paintVerses}
+                onOpenVerseMenu={openVerseMenu}
                 confusionMarks={confusionMarks}
                 confusionMarkLabel={t.jumpsFrom}
                 waslMarksOf={waslMarksOf}
@@ -3269,7 +3343,9 @@ export function App(): JSX.Element {
                 // stack, squeezing the page on a phone and hiding the list
                 // under the note on a spread.
                 entry={
-                  openChip || rootsOpen ? null : (introSheet ?? (commentaryOpen ? commentaryEntry : null))
+                  openChip || rootsOpen || verseMenuAt
+                    ? null
+                    : (introSheet ?? (commentaryOpen ? commentaryEntry : null))
                 }
                 side={sheetSide}
                 roads={introSheet ? [] : commentaryRoads}
@@ -3613,6 +3689,16 @@ export function App(): JSX.Element {
         pageContext={pageContext}
         fisheye={fisheye}
       />
+
+      {PITCH && verseMenuAt && verseMenuItems.length > 0 && (
+        <VerseMenu
+          name={t.verseMenu(verseMenuAt.key)}
+          around={verseMenuAt.around}
+          items={verseMenuItems}
+          onClose={closeNumberMenu}
+          stacked
+        />
+      )}
 
       {verseNotesAt && verseNotes.length > 0 && (
         <Suspense fallback={null}>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { badgeSpot, titleBand, titleLeftEdge } from "./intro-badge";
+import { introSpot, titleBand, titleLeftEdge } from "./intro-badge";
 
 describe("intro badge · where a surah's name sits", () => {
   it("two lines above the opening verse, over the basmala", () => {
@@ -35,25 +35,34 @@ describe("intro badge · where the name's ink ends on the left", () => {
   });
 });
 
-describe("intro badge · where the badge goes", () => {
-  it("left of the name, a little above the middle of its line", () => {
-    const name = (x: number, y: number) => y > 128 && y < 150 && x >= 150 && x <= 196;
-    const spot = badgeSpot(name, 191.5, 36, 35.75, 172.5);
-    expect(spot?.cx).toBe(140);
-    expect(spot?.cy).toBeGreaterThan(120);
-    expect(spot?.cy).toBeLessThan(138);
+describe("intro badge · what is drawn to press", () => {
+  it("a wash over the whole name, centred, a little margin each side, inside its line", () => {
+    // Ink from 150 to 195 about a middle at 172.5: the name is centred, so its
+    // right end mirrors its left.
+    const name = (x: number, y: number) => y > 128 && y < 150 && x >= 150 && x <= 195;
+    const spot = introSpot(name, 191.5, 36, 35.75, 172.5);
+    expect(spot?.kind).toBe("name");
+    if (spot?.kind !== "name") return;
+    expect(spot.x).toBe(144);
+    expect(spot.x + spot.width).toBe(201);
+    expect(spot.y).toBeGreaterThan(120);
+    expect(spot.y + spot.height).toBeLessThan(155.75);
+    expect(spot.y).toBeLessThan(129);
+    expect(spot.y + spot.height).toBeGreaterThan(149);
   });
 
   it("beside the basmala when the page draws no name line, as on the first two pages", () => {
     // Only the line just above verse 1 is inked, from 60 to 180.
     const basmala = (x: number, y: number) => y > 160 && y < 185 && x >= 60 && x <= 180;
-    const spot = badgeSpot(basmala, 191.5, 2, 35.75, 172.5);
-    expect(spot?.cx).toBe(50);
-    expect(spot?.cy).toBeGreaterThan(155.75);
-    expect(spot?.cy).toBeLessThan(191.5);
+    const spot = introSpot(basmala, 191.5, 2, 35.75, 172.5);
+    expect(spot?.kind).toBe("beside");
+    if (spot?.kind !== "beside") return;
+    expect(spot.cx).toBe(50);
+    expect(spot.cy).toBeGreaterThan(155.75);
+    expect(spot.cy).toBeLessThan(191.5);
   });
 
   it("nowhere when neither line holds ink", () => {
-    expect(badgeSpot(() => false, 191.5, 36, 35.75, 172.5)).toBeNull();
+    expect(introSpot(() => false, 191.5, 36, 35.75, 172.5)).toBeNull();
   });
 });
