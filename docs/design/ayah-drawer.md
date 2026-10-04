@@ -211,6 +211,15 @@ and cheap to change — which is the argument for deciding it by hand on the liv
 prose. C was chosen first and reversed to D once both were felt on the real spread; "never cover
 the verse" won.
 
+**Refined (2026-10-03): the panel lies over the whole facing leaf.** The first build of D was a
+card of a fixed width set in from the screen's edge. Walking the pitch as a scholar would showed
+what that cost: it hid most of the facing page but left a strip of it showing between the card and
+the fold, a column of half-lines cut off mid-word. A reader's eye goes straight to the broken words.
+Now the panel starts at the fold and covers the facing leaf edge to edge and top to bottom, so the
+page you are not reading is put away cleanly instead of torn. On a page magnified past the window
+it fills the screen's half on that side. A test opens it on al-Fatiha (panel on the left leaf) and
+on Ayat al-Kursi (panel on the right leaf) and checks it meets the fold and the book's edges.
+
 ### What the drawer holds, in all options
 
 One panel, top to bottom: the **verse's label** as its title (this replaces the separate pill);

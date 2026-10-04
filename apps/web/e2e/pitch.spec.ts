@@ -132,6 +132,33 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(await sideOf(page, sheet(page))).toBe("right");
   });
 
+  for (const [where, hash, side] of [
+    ["al-Fātiḥah, on the right leaf", "#/hafs-kfqc/1:2", "left"],
+    ["Āyat al-Kursī, on the left leaf", "#/hafs-kfqc/2:255", "right"],
+  ] as const) {
+    test(`the note lies over the whole facing page, with no strip of cut-off words beside it: ${where}`, async ({
+      page,
+    }) => {
+      // The card stood a fixed width in from the window's edge, so it hid most
+      // of the facing page and left a strip of it showing, the words cut off
+      // mid-line at the card's edge. Over the whole page, from the fold to the
+      // outer edge, it reads as a page of commentary laid on the book.
+      await page.goto(`/${hash}`);
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      expect(await sheet(page).getAttribute("data-side")).toBe(side);
+      await settle(sheet(page));
+      const open = (await book(page).boundingBox())!;
+      const card = (await sheet(page).boundingBox())!;
+      const fold = open.x + open.width / 2;
+      const [inner, outer] = side === "right" ? [card.x, card.x + card.width] : [card.x + card.width, card.x];
+      expect(Math.abs(inner - fold), "the card starts at the fold").toBeLessThanOrEqual(8);
+      if (side === "right") expect(outer, "and reaches the page's outer edge").toBeGreaterThanOrEqual(open.x + open.width);
+      else expect(outer, "and reaches the page's outer edge").toBeLessThanOrEqual(open.x);
+      expect(card.y, "from the page's top").toBeLessThanOrEqual(open.y + 1);
+      expect(card.y + card.height, "to its foot").toBeGreaterThanOrEqual(open.y + open.height - 1);
+    });
+  }
+
   test("the verse stays bright beside its note, and a tap on the next verse turns the note to it", async ({
     page,
   }) => {
