@@ -30,6 +30,13 @@ const want = etlScriptsHash();
 const have = docHash();
 const rel = relative(ROOT, DOC_PATH);
 
+// A census of no scripts matches a page built from no scripts, and would print
+// a tick for it. That is a folder somebody emptied, not a census that is current.
+if (payload().total === 0) {
+  console.error(`✗ packages/etl/scripts holds no scripts at all — there is nothing here to count, so nothing was.`);
+  process.exit(1);
+}
+
 if (have === null) {
   console.error(`✗ ${rel} is missing or has no hash stamp. Run \`make etl-scripts-doc\`.`);
   process.exit(1);
