@@ -39,8 +39,16 @@ const MAKEFILE = [
 
 const hook = (t) => `#!/bin/sh\n# Everything this hook does lives in the Makefile.\nmake -s ${t}\n`;
 
-const files = ({ scripts = SCRIPTS, makefile = MAKEFILE, hooks = {}, workflow } = {}) => {
+/** Each check's own test, beside it. */
+const TESTS = {
+  "scripts/gate-a.test.mjs": "",
+  "scripts/gate-b.test.mjs": "",
+  "scripts/gate-i18n.test.mjs": "",
+};
+
+const files = ({ scripts = SCRIPTS, makefile = MAKEFILE, hooks = {}, workflow, tests = TESTS } = {}) => {
   const tree = {
+    ...tests,
     "package.json": JSON.stringify({ scripts }),
     Makefile: makefile,
     ".githooks/pre-commit": hook("pre-commit"),
@@ -93,6 +101,11 @@ test("gate:gates refuses a check a hook reaches only through a comment", () => {
   const scripts = { ...SCRIPTS, "gate:c": "node c", gates: "pnpm gates:fast && pnpm gate:b && pnpm gate:c" };
   const makefile = MAKEFILE.replace("\t@pnpm gate:b", "\t@pnpm gate:b\n\t@# gate:c would go here, one day");
   refuses(files({ scripts, makefile }), /gate:c is declared in package\.json but not invoked by `make pre-commit` or `make pre-push`/);
+});
+
+test("gate:gates refuses a check with no test beside it, and names the test it wants", () => {
+  const { "scripts/gate-b.test.mjs": _b, ...rest } = TESTS;
+  refuses(files({ tests: rest }), /gate:b has no test: scripts\/gate-b\.test\.mjs is missing/);
 });
 
 test("gate:gates refuses a Makefile naming a check that does not exist", () => {

@@ -64,6 +64,15 @@ test("gate:ci-artifacts refuses a workflow that uploads nothing at all", () => {
   refuses(files(workflow()), /no upload-artifact steps found; CI keeps no evidence at all/);
 });
 
+test("gate:ci-artifacts refuses a tree with no workflows folder, plainly", () => {
+  // It used to crash reading the missing folder: a refusal, but one that
+  // said nothing about why.
+  const r = run({ "apps/web/package.json": BUILDS });
+  assert.equal(r.status, 1, r.out);
+  assert.match(r.out, /no upload-artifact steps found/);
+  assert.doesNotMatch(r.out, /ENOENT|at .*\.mjs:\d+/);
+});
+
 test("gate:ci-artifacts refuses an upload of a path nothing claims to write", () => {
   refuses(files(workflow(PAGES.replace("apps/web/dist", "apps/web/playwright-report"))), /deploy\.yml › Upload the site: uploads "apps\/web\/playwright-report", which no producer/);
 });
