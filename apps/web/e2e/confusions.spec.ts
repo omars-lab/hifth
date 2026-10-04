@@ -366,6 +366,57 @@ test.describe("Hifth · the saved arrows on the page", () => {
     await expect(page.getByRole("dialog", { name: "Jumps from 2:58" })).toBeVisible();
   });
 
+  test("the labels can be read, stay beside their arrow even at the page's edge, and hide no letters", async ({
+    page,
+  }) => {
+    // Findings 3 and 4 of the options note: at 6–7 points the labels were
+    // hard to read, and 2:60's word sits near the left edge, where its label
+    // had no room and dropped onto the next line's letters. Each label also
+    // stood on a solid pill, which hid the harakat under it.
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await seed(page, JUMPS);
+    await page.reload();
+    await expect(arrows(page)).toHaveCount(3);
+    const labels = await arrows(page).evaluateAll((els) =>
+      els.flatMap((el) => {
+        const line = (el.querySelector("[data-line]") as SVGGraphicsElement).getBBox();
+        const lineY = line.y + line.height / 2;
+        return [...el.querySelectorAll<SVGGElement>("[data-end]")].map((end) => {
+          const text = end.querySelector("text")!;
+          const b = text.getBBox();
+          const m = end.getCTM()!;
+          const scale = text.getScreenCTM()!.a;
+          return {
+            verse: el.getAttribute("data-jump-arrow"),
+            text: text.textContent,
+            onScreen: parseFloat(getComputedStyle(text).fontSize) * scale,
+            left: b.x + m.e,
+            right: b.x + b.width + m.e,
+            fromLine: b.y + b.height / 2 + m.f - lineY,
+            solid: [...end.querySelectorAll("rect")].some((r) => {
+              const fill = getComputedStyle(r).fill;
+              return fill !== "none" && !/rgba\(.*,\s*0\)|transparent/.test(fill);
+            }),
+          };
+        });
+      }),
+    );
+    expect(labels.length).toBe(4);
+    for (const l of labels) {
+      const what = `${l.verse} → ${l.text}`;
+      expect(l.onScreen, `${what}: big enough to read`).toBeGreaterThanOrEqual(8.5);
+      expect(l.left, `${what}: starts on the page`).toBeGreaterThanOrEqual(0);
+      expect(l.right, `${what}: ends on the page`).toBeLessThanOrEqual(345);
+      expect(Math.abs(l.fromLine), `${what}: beside its arrow, not under it`).toBeLessThan(4);
+      expect(l.solid, `${what}: no solid box over the letters`).toBe(false);
+    }
+    if (SHOTS) {
+      await arrow(page, "2:60").scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${SHOTS}/jump-labels-${test.info().project.name}.png` });
+    }
+  });
+
   test("the setting is in the info panel, stays when nobody chose, and takes effect at once", async ({ page, isMobile }) => {
     await page.goto("/#/hafs-kfqc/p9");
     await expect(pageSvg(page, 9)).toBeVisible();
