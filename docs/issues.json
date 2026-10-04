@@ -2533,7 +2533,7 @@
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Every surah introduction in the pitch ended with the surah's opening verse, and a few began partway through or were one broken-off word. The script that builds the pitch notes now leaves the opening verse off, drops a broken-off word, and starts a cut-off introduction with an ellipsis. Also held by apps/web/e2e/pitch.spec.ts (Al-Kahf's introduction). Found 2026-10-03.",
+      "note": "Every surah introduction in the pitch ended with the surah's opening verse, and a few began partway through or were one broken-off word. The script that builds the pitch notes now leaves the opening verse off, drops a broken-off word, and starts a cut-off introduction with an ellipsis. Also held by apps/web/e2e/pitch.spec.ts (introductions end on their own words). Found 2026-10-03.",
       "closedBy": "packages/etl/tools/pitch/intro.test.mjs"
     },
     {
@@ -2542,10 +2542,11 @@
         "file": "docs/PLAN.md",
         "item": "33"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "61 of 114 surahs have no introduction in the pitch, two lost theirs whole and Al-Kahf's is only its last paragraph, because the book's capture missed the earlier pages of those introductions. Recapture them, then rebuild the pitch notes. Found 2026-10-03. Owner chose on 2026-10-04 to capture them again from the reading app, not read them off the page pictures (59 are there, but about 3% of words come out wrong)."
+      "note": "61 of 114 surahs had no introduction in the pitch, two lost theirs whole and Al-Kahf's was only its last paragraph, because the book's capture missed the earlier pages of those introductions. Found 2026-10-03. Owner chose on 2026-10-04 to capture them again from the reading app, not read them off the page pictures. Fixed the same day: the reading app, narrowed to one page at a time, gave each surah's first page whole, and all 114 now have their introduction.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     }
   ]
 }
