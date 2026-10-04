@@ -1336,8 +1336,9 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     deleted unless you press Delete. **Labels fixed the same day:** about 9 points on a phone,
     bare letters with a paper edge instead of a filled pill, in the gap between the lines, and
     near the left edge the arrow is cut shorter so its labels stay beside it (findings 3 and 4).
-    **Still open:** on a phone the "only when you ask" list can cover the arrow it shows
-    (finding 1 of the options note).
+    **The list stands clear of its arrow, the same day:** opened low on the screen, it stands
+    above the whole verse, or below the mark when the verse starts at the top, never on the
+    lines that hold the arrow (finding 1). Every step of the design is built.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

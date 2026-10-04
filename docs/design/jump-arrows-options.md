@@ -3,7 +3,7 @@
 *Decided 2026-10-03 by the owner: **A**, the arrows stay, faint, and B is kept as a setting ("Saved jump arrows" in the info panel) for a reader who wants a clean page. This is question 4 of [the wavy arrow for the places your memory jumps](confusion-jumps.md#4--does-the-arrow-stay-on-the-page-or-only-show-when-you-ask). This page holds what building both taught us.*
 
 > [!success] Decided
-> **A by default, B as a setting.** Every device starts with the arrows on the page, faint. Picking "Only when you ask" in the info panel switches that device to B, and it is remembered. Findings 3 and 4 below (small labels, labels near the edge) were fixed the same day; see *What changed after the choice?* Finding 1 (on a phone, B's list covering its own arrow) still matters for anyone who picks B.
+> **A by default, B as a setting.** Every device starts with the arrows on the page, faint. Picking "Only when you ask" in the info panel switches that device to B, and it is remembered. Findings 3 and 4 below (small labels, labels near the edge) and finding 1 (on a phone, B's list covering its own arrow) were all fixed the same day; see *What changed after the choice?*
 
 > [!tip] Recommended
 > **A: the arrows stay on the page, faint.** The arrow is the only thing that shows *where* in the verse your memory left it, and on a phone the list that B relies on can open right over the arrow it is meant to reveal. Two things are worth fixing whichever way you choose (below): the labels are small, and near the edge of the page they land on letters.
@@ -73,11 +73,15 @@ No arrows on the page. A verse's arrow shows while its list is open, and every a
 
 ## What changed after the choice?
 
-Findings 3 and 4, fixed on 2026-10-03, because with A the labels are always on the page:
+Findings 3 and 4, fixed on 2026-10-03, because with A the labels are always on the page, and finding 1, so that B works on a phone too:
 
 - **Bigger, and bare.** A label is now about 9 points on a phone instead of 6–7. It no longer stands on a filled pill, which hid the harakat beneath it; the letters of the label get a thin edge of paper instead, so they stay readable where they cross a stroke. The labels are nearly full strength, and the wave stays faint.
 - **In the gap.** The arrow and its labels sit in the middle of the white gap between the two lines, not on top of the next line's harakat.
 - **Near the edge, a shorter arrow.** When the word is close to the left edge, the arrow is cut shorter so its labels still fit beside it on the same line. 2:60's "7:160" now ends its own arrow instead of dropping onto the line below. If even a short arrow leaves no room, the labels go behind the arrow's start.
+
+- **The list stands clear of its arrow.** When a verse's mark is low on the screen, the list now opens above the whole verse, not just above the mark. When the verse starts at the top of the screen and there is no room over it, the list opens below the mark instead and scrolls inside itself. Either way the lines that hold the arrow stay in sight.
+
+![On a phone, with the list only when you ask: the list for 2:58 opens above the verse, and the arrow with its 2:35 and 7:161 ×3 labels shows below it](jump-arrows-options/list-clear-of-arrow.png)
 
 ![The labels after the fix, on a phone: 2:58's two labels in the gap under its first line, and 2:60's label at the left edge beside its arrow](jump-arrows-options/labels-after-fix.png)
 
