@@ -726,8 +726,54 @@
   stroke-width: 1.4;
 }
 
-/* The ⓘ beside a surah's name: opens the surah's introduction (pitch build).
-   A quiet ring in the accent colour, so it reads as the app's, not the print's. */
+/* A surah's name: opens the surah's introduction (pitch build). A soft wash in
+   the accent colour over the name says it can be pressed, and deepens under a
+   pointer or a press. The first two pages, which draw no name, keep an ⓘ: a
+   quiet ring in the accent colour, so it reads as the app's, not the print's. */
+.host :global(svg) :global([data-intro-badge]) :global(rect[data-wash]) {
+  fill: var(--accent);
+  fill-opacity: 0.1;
+  pointer-events: auto;
+  transition: fill-opacity 120ms ease;
+}
+.host :global(svg) :global([data-intro-badge]:hover) :global(rect[data-wash]) {
+  fill-opacity: 0.2;
+}
+.host :global(svg) :global([data-intro-badge]:active) :global(rect[data-wash]) {
+  fill-opacity: 0.3;
+}
+.host :global(svg) :global([data-intro-badge]:focus-visible) :global(rect[data-wash]) {
+  stroke: var(--focus-ring, #111);
+  stroke-width: 1.4;
+}
+
+/* The verse numbers, made into buttons (pitch build): a ring that shows only
+   under a pointer or a press, and a wash on the selected verse's number. */
+.host :global(svg) :global([data-verse-number]) {
+  cursor: pointer;
+  outline: none;
+}
+.host :global(svg) :global([data-verse-number]) :global(circle) {
+  fill: var(--accent);
+  fill-opacity: 0;
+  stroke: none;
+  pointer-events: auto;
+  transition: fill-opacity 120ms ease;
+}
+.host :global(svg) :global([data-verse-number][data-selected]) :global(circle) {
+  fill-opacity: 0.16;
+}
+.host :global(svg) :global([data-verse-number]:hover) :global(circle) {
+  fill-opacity: 0.22;
+}
+.host :global(svg) :global([data-verse-number]:active) :global(circle) {
+  fill-opacity: 0.32;
+}
+.host :global(svg) :global([data-verse-number]:focus-visible) :global(circle) {
+  stroke: var(--focus-ring, #111);
+  stroke-width: 1.4;
+}
+
 .host :global(svg) :global([data-intro-badge]) {
   cursor: pointer;
   outline: none;

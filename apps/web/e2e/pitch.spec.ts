@@ -455,18 +455,24 @@ test.describe("Hifth · links straight into the commentary", () => {
   }
 });
 
-test.describe("Hifth · the ⓘ beside a surah's name opens its introduction", () => {
+test.describe("Hifth · a surah's name opens its introduction", () => {
   // Owner, 2026-10-04: the surah's context belongs next to its name, above the
-  // basmala, as a badge of its own, not stacked on top of verse 1's note.
-  test("the badge sits on Ya-Sin's title line and opens the introduction by itself", async ({ page }) => {
+  // basmala, not stacked on top of verse 1's note; and the name itself is the
+  // button, washed so it looks pressable, rather than a small ⓘ beside it.
+  test("Ya-Sin's name is the button, and it opens the introduction by itself", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p440");
-    const badge = pageSvg(page, 440).getByRole("button", { name: /^Surah introduction/ });
-    await expect(badge).toBeVisible({ timeout: 20_000 });
-    // Above the opening verse (36:1 is the 3706th), so on the title line or the basmala's.
+    const name = pageSvg(page, 440).getByRole("button", { name: /^Surah introduction/ });
+    await expect(name).toBeVisible({ timeout: 20_000 });
+    // The whole name, centred on the page, above the opening verse (36:1 is the 3706th).
+    const leaf = (await pageSvg(page, 440).boundingBox())!;
     const opening = (await verse(page, 440, 3706).boundingBox())!;
-    const mark = (await badge.boundingBox())!;
-    expect(mark.y + mark.height).toBeLessThanOrEqual(opening.y);
-    await badge.click();
+    const box = (await name.boundingBox())!;
+    expect(box.width).toBeGreaterThan(40);
+    expect(Math.abs(box.x + box.width / 2 - (leaf.x + leaf.width / 2))).toBeLessThan(6);
+    expect(box.y + box.height).toBeLessThanOrEqual(opening.y);
+    // No ⓘ drawn on top of it.
+    await expect(name.locator("text")).toHaveCount(0);
+    await name.click();
     const intro = sheet(page).getByRole("region", { name: "Surah introduction" });
     await expect(intro).toBeVisible();
     expect((await intro.locator("p").allTextContents()).join(" ").length).toBeGreaterThan(1000);
@@ -475,11 +481,11 @@ test.describe("Hifth · the ⓘ beside a surah's name opens its introduction", (
     await expect(sheet(page).getByRole("region", { name: "Commentary" })).toHaveCount(0);
   });
 
-  test("the badge answers the keyboard too", async ({ page }) => {
+  test("the name answers the keyboard too", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p440");
-    const badge = pageSvg(page, 440).getByRole("button", { name: /^Surah introduction/ });
-    await expect(badge).toBeVisible({ timeout: 20_000 });
-    await badge.focus();
+    const name = pageSvg(page, 440).getByRole("button", { name: /^Surah introduction/ });
+    await expect(name).toBeVisible({ timeout: 20_000 });
+    await name.focus();
     await page.keyboard.press("Enter");
     await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toBeVisible();
   });
@@ -491,19 +497,20 @@ test.describe("Hifth · the ⓘ beside a surah's name opens its introduction", (
     await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toHaveCount(0);
   });
 
-  test("a surah with no basmala, At-Tawbah, has the badge too", async ({ page }) => {
+  test("a surah with no basmala, At-Tawbah, has its name as the button too", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p187");
-    const badge = pageSvg(page, 187).getByRole("button", { name: /^Surah introduction/ });
-    await expect(badge).toBeVisible({ timeout: 20_000 });
+    const name = pageSvg(page, 187).getByRole("button", { name: /^Surah introduction/ });
+    await expect(name).toBeVisible({ timeout: 20_000 });
     const opening = (await verse(page, 187, 1236).boundingBox())!;
-    const mark = (await badge.boundingBox())!;
-    expect(mark.y + mark.height).toBeLessThanOrEqual(opening.y);
+    const box = (await name.boundingBox())!;
+    expect(box.width).toBeGreaterThan(40);
+    expect(box.y + box.height).toBeLessThanOrEqual(opening.y);
   });
 
-  // The first two pages draw no line for the surah's name, so the badge was
-  // missing from both; it now sits beside the basmala there.
+  // The first two pages draw no line for the surah's name, so there the
+  // introduction keeps a small ⓘ beside the basmala.
   for (const [p, surah] of [[1, "Al-Fatihah"], [2, "Al-Baqarah"]] as const) {
-    test(`page ${p} has the badge though its print draws no name line, and it opens ${surah}`, async ({ page }) => {
+    test(`page ${p} has the ⓘ though its print draws no name line, and it opens ${surah}`, async ({ page }) => {
       await page.goto(`/#/hafs-kfqc/p${p}`);
       const badge = pageSvg(page, p).getByRole("button", { name: /^Surah introduction/ });
       await expect(badge).toBeVisible({ timeout: 20_000 });
@@ -512,6 +519,100 @@ test.describe("Hifth · the ⓘ beside a surah's name opens its introduction", (
       await expect(sheet(page)).toContainText(surah);
     });
   }
+});
+
+test.describe("Hifth · a verse's number opens a menu of what to read on it", () => {
+  // Owner, 2026-10-04: a tap on the verse's number picks what to read about
+  // it (its note, similar verses, words from the same roots, its recitation,
+  // the surah's introduction); a tap on its words still opens the note at once.
+  const KEY = "quran/hafs-kfqc/36:12";
+  const number = (page: Page) => pageSvg(page, 440).locator(`[data-verse-number][data-verse-key="${KEY}"]`);
+  const menu = (page: Page) => page.getByRole("menu", { name: /36:12/ });
+  // Pressed where a mouse would press it, not by reaching into the page: 36:12
+  // ends the bottom line of a left-hand page, under the corner a reader grabs
+  // to turn it, and a click there has to reach the number all the same.
+  const press = async (page: Page) => {
+    const b = (await number(page).boundingBox())!;
+    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+  };
+
+  test("the number lists what there is, and the note waits to be picked", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p440");
+    await expect(number(page)).toBeVisible({ timeout: 20_000 });
+    await expect(number(page)).toHaveAccessibleName(/36:12/);
+    // On the verse's last line, in the gap left of its last word.
+    const ring = (await number(page).boundingBox())!;
+    const v = (await verse(page, 440, 3717).boundingBox())!;
+    expect(ring.y + ring.height / 2).toBeGreaterThan(v.y);
+    expect(ring.y + ring.height / 2).toBeLessThan(v.y + v.height);
+    await press(page);
+    await expect(menu(page)).toBeVisible();
+    const items = menu(page).getByRole("menuitem");
+    await expect(items.filter({ hasText: /^Commentary/ })).toContainText("Study Quran");
+    await expect(items.filter({ hasText: /^Similar verses in earlier surahs/ })).toHaveCount(1);
+    await expect(items.filter({ hasText: /^Similar verses in later surahs/ })).toHaveCount(1);
+    await expect(items.filter({ hasText: /^Same roots/ })).toHaveCount(1);
+    await expect(items.filter({ hasText: /^Listen/ })).toHaveCount(1);
+    await expect(items.filter({ hasText: /^Surah introduction/ })).toHaveCount(1);
+    // A short list standing by the number, one line under another — not a row
+    // of seven stretched across the window.
+    const box = (await menu(page).boundingBox())!;
+    expect(box.width).toBeLessThan(420);
+    const lefts = await items.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().left)));
+    expect(new Set(lefts).size).toBe(1);
+    expect(Math.abs(box.x + box.width / 2 - (ring.x + ring.width / 2))).toBeLessThan(box.width / 2 + 1);
+    // The menu is the choice, so the note is not opened behind it.
+    await expect(sheet(page).getByRole("region", { name: "Commentary" })).toHaveCount(0);
+    // And the verse is now the selected one, its number washed.
+    await expect(pageSvg(page, 440).locator("[data-verse-number][data-selected]")).toHaveAttribute("data-verse-key", KEY);
+  });
+
+  test("picking the note opens it, and the menu goes", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p440");
+    await expect(number(page)).toBeVisible({ timeout: 20_000 });
+    await press(page);
+    await menu(page).getByRole("menuitem", { name: /^Commentary/ }).click();
+    await expect(menu(page)).toHaveCount(0);
+    await expect(sheet(page).getByRole("region", { name: "Commentary" })).toBeVisible();
+  });
+
+  test("picking similar verses opens that list, not the note", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p440");
+    await expect(number(page)).toBeVisible({ timeout: 20_000 });
+    await press(page);
+    await menu(page).getByRole("menuitem", { name: /^Similar verses in later surahs/ }).click();
+    await expect(page.getByRole("dialog", { name: /later/i })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Commentary" })).toHaveCount(0);
+  });
+
+  test("picking the introduction opens it", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p440");
+    await expect(number(page)).toBeVisible({ timeout: 20_000 });
+    await press(page);
+    await menu(page).getByRole("menuitem", { name: /^Surah introduction/ }).click();
+    await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toBeVisible();
+  });
+
+  test("the keyboard opens it, and Escape closes it", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p440");
+    await expect(number(page)).toBeVisible({ timeout: 20_000 });
+    await number(page).focus();
+    await page.keyboard.press("Enter");
+    await expect(menu(page)).toBeVisible();
+    await expect(menu(page).getByRole("menuitem").first()).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(menu(page).getByRole("menuitem").nth(1)).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(menu(page)).toHaveCount(0);
+  });
+
+  test("a tap on the verse's words still opens its note straight away", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p440");
+    await expect(number(page)).toBeVisible({ timeout: 20_000 });
+    await verse(page, 440, 3717).click();
+    await expect(sheet(page).getByRole("region", { name: "Commentary" })).toBeVisible();
+    await expect(menu(page)).toHaveCount(0);
+  });
 });
 
 test.describe("Hifth · the commentary drawer with the app in Arabic", () => {

@@ -1,8 +1,10 @@
 import { rectsOf } from "@hifth/core";
 
 /**
- * The ⓘ beside a surah's name, on the page itself, that opens the surah's
- * introduction (pitch build; owner, 2026-10-04). The print draws the whole page
+ * A surah's name, made into the button that opens the surah's introduction
+ * (pitch build; owner, 2026-10-04): a soft wash over the name says it can be
+ * pressed. It began as an ⓘ beside the name, and the owner asked for the name
+ * itself to be the thing pressed. The print draws the whole page
  * as one shape, so the name cannot be picked out by itself: its line is worked
  * out from where verse 1 starts, and where its ink ends is found by asking,
  * point by point along that line, whether the page's shapes are inked there.
@@ -46,26 +48,38 @@ export function titleLeftEdge(
   return last;
 }
 
+/** What is drawn to press: a wash over the name, or an ⓘ beside the basmala. */
+export type IntroSpot =
+  | { kind: "name"; x: number; y: number; width: number; height: number }
+  | { kind: "beside"; cx: number; cy: number };
+
 /**
- * Where the badge's centre goes: just left of the name, a little above the
- * middle of its line (the name sits high in it). The first two pages draw no
- * name line, so when that line is empty the badge goes beside the line below
- * it instead, the basmala. Null when neither line has ink near the middle.
+ * Where the button goes. Over the name: it is centred on the page, so where
+ * its ink ends on the right mirrors where it ends on the left, and the wash
+ * runs a little past both, inside its line. The first two pages draw no name
+ * line, so there an ⓘ goes just left of the line below, the basmala, a little
+ * above its middle. Null when neither line has ink near the middle.
  */
-export function badgeSpot(
+export function introSpot(
   inked: (x: number, y: number) => boolean,
   firstTop: number,
   surah: number,
   pitch: number,
   centreX: number,
-): { cx: number; cy: number } | null {
+): IntroSpot | null {
   const name = titleBand(firstTop, surah, pitch);
-  const below = { top: name.bottom, bottom: name.bottom + pitch };
-  for (const band of name.bottom - name.top > pitch / 2 ? [name, below] : [below]) {
-    const edge = titleLeftEdge(inked, band, centreX);
-    if (edge !== null) return { cx: Math.max(8, edge - 10), cy: band.top + (band.bottom - band.top) * 0.44 };
+  const h = name.bottom - name.top;
+  if (h > pitch / 2) {
+    const edge = titleLeftEdge(inked, name, centreX);
+    if (edge !== null) {
+      const x = edge - 6;
+      return { kind: "name", x, y: name.top + h * 0.12, width: 2 * (centreX - x), height: h * 0.76 };
+    }
   }
-  return null;
+  const below = { top: name.bottom, bottom: name.bottom + pitch };
+  const edge = titleLeftEdge(inked, below, centreX);
+  if (edge === null) return null;
+  return { kind: "beside", cx: Math.max(8, edge - 10), cy: below.top + pitch * 0.44 };
 }
 
 /** From the page's own units to a shape's, through every transform in between. */
@@ -78,7 +92,7 @@ function toLocal(el: SVGGraphicsElement, root: SVGSVGElement): DOMMatrix {
   return m.inverse();
 }
 
-/** Draw the ⓘ for each surah that opens on this page and has an introduction. */
+/** Make the name of each surah that opens on this page, and has an introduction, a button. */
 export function drawIntroBadges(
   svg: SVGSVGElement,
   surahs: ReadonlySet<number>,
@@ -107,16 +121,25 @@ export function drawIntroBadges(
   for (const { surah, first } of opening) {
     if (!first) continue;
     const pitch = vh === 550 ? LINE_PITCH : first.height;
-    const spot = badgeSpot(inked, first.y, surah, pitch, vw / 2);
+    const spot = introSpot(inked, first.y, surah, pitch, vw / 2);
     if (!spot) continue;
-    const { cx, cy } = spot;
     const badge = document.createElementNS(SVG_NS, "g");
     badge.setAttribute("data-intro-badge", "");
     badge.setAttribute("data-surah", String(surah));
     badge.setAttribute("role", "button");
     badge.setAttribute("tabindex", "0");
     badge.setAttribute("aria-label", labelOf(surah));
-    badge.setAttribute("transform", `translate(${cx} ${cy})`);
+    if (spot.kind === "name") {
+      const wash = document.createElementNS(SVG_NS, "rect");
+      wash.setAttribute("data-wash", "");
+      for (const [k, v] of [["x", spot.x], ["y", spot.y], ["width", spot.width], ["height", spot.height]] as const)
+        wash.setAttribute(k, String(Math.round(v * 10) / 10));
+      wash.setAttribute("rx", String(Math.round(spot.height * 5) / 10));
+      badge.append(wash);
+      g.append(badge);
+      continue;
+    }
+    badge.setAttribute("transform", `translate(${spot.cx} ${spot.cy})`);
     // The finger's target, larger than the mark it finds.
     const hit = document.createElementNS(SVG_NS, "circle");
     hit.setAttribute("data-hit", "");

@@ -381,6 +381,7 @@
   "noteAboutNow": "This note is now about {scope}",
   "noteUntitled": "A note with no words yet",
   "verseInNotes": "{keyText} is in {n, plural, one{{nText} note} other{{nText} notes}}",
+  "verseMenu": "What to read on {keyText}",
   "jumpsFrom": "From {keyText} you have jumped to {n, plural, =0{a verse not named yet} one{{nText} other verse} other{{nText} other verses}}",
   "jumpsAtWasl": "At the pause sign in {keyText} you have jumped to {n, plural, =0{a verse not named yet} one{{nText} other verse} other{{nText} other verses}}",
   "jumpArrowLabel": "Where you went from here in {keyText}",
