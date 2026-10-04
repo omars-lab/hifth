@@ -1333,9 +1333,11 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     [jump-arrows-options.md](design/jump-arrows-options.md).
     **Dismissed jumps:** Dismiss in a verse's list takes a jump off the page, with Undo, and
     a folded "Dismissed" group under "Your jumps" keeps it, each with Bring back. Nothing is
-    deleted unless you press Delete. **Still open:** the arrow labels are small, and near the
-    left edge of the page they land on the next line's letters, and on a phone the "only when
-    you ask" list can cover the arrow it shows (findings 3, 4 and 1 of the options note).
+    deleted unless you press Delete. **Labels fixed the same day:** about 9 points on a phone,
+    bare letters with a paper edge instead of a filled pill, in the gap between the lines, and
+    near the left edge the arrow is cut shorter so its labels stay beside it (findings 3 and 4).
+    **Still open:** on a phone the "only when you ask" list can cover the arrow it shows
+    (finding 1 of the options note).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
