@@ -20,6 +20,7 @@ import {
   formatAyahKey,
   formatWordKey,
   frameBboxToView,
+  hopZoomFor,
   isMarkShard,
   isMistake,
   isViewportIntent,
@@ -2615,10 +2616,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         const bbox = mp.hl.bboxOf(loc.elementIds);
         const fit = measureFit();
         if (bbox && fit) {
+          const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(mp.svg), text: textBoxOf(mp.host, mp.svg) };
           const target = frameBboxToView(
             bbox,
-            { ...fit, viewBoxWidth: viewBoxWidthOf(mp.svg), text: textBoxOf(mp.host, mp.svg) },
-            clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM),
+            ctx,
+            hopZoomFor(bbox, ctx, clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM)),
             firstLineOf(mp.svg, loc.elementIds),
           );
           await tweenTo(target);

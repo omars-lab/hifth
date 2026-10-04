@@ -1375,6 +1375,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     draw no line for the name, so there the badge sits beside the basmala. Tested in
     the pitch browser tests (Ya-Sin, At-Tawbah, the first two pages, the keyboard) and in
     unit tests of where the badge goes.
+35. ~~**On a phone, a link to a long verse opened it with its lines cut off at both edges.**~~
+    Found on 2026-10-04 walking the pitch as a scholar would: a link to Ayat al-Kursi
+    zoomed in so far that every full line ran past both sides of the screen, and only the
+    verse's first words were kept in view. **Fixed the same day:** a jump now zooms in only as
+    far as the verse still fits across the screen with a small margin each side, and never
+    out past the whole page. A short verse still lands at the full zoom, and a reader who
+    zoomed in themselves keeps their zoom. Tested in the phone browser tests (links to 18:10
+    and 2:255 must show the verse whole across) and unit tests of the zoom; the ten saved
+    pictures of a verse after a jump were taken again, with the owner's OK.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
