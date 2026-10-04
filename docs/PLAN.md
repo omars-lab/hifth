@@ -1347,8 +1347,8 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     script that builds the pitch notes: the opening verse is left off, a broken-off word is
     dropped, and an introduction that begins partway through starts with "…" the way a printed
     excerpt does. The words themselves are never changed.
-33. **Most surahs have no introduction in the pitch, because the book's capture does not hold
-    them.** Found with 32: 61 of the 114 surahs have none, Al-Ma'idah's and Ta Ha's were lost
+33. ~~**Most surahs have no introduction in the pitch, because the book's capture does not hold
+    them.**~~ Found with 32: 61 of the 114 surahs have none, Al-Ma'idah's and Ta Ha's were lost
     whole, and Al-Kahf's is only its last paragraph. The capture only took each surah's
     introduction from the pages it captured, so where an introduction runs over earlier
     pages they are missing. The fix is in the capture, not here: capture the first pages of
@@ -1360,6 +1360,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     split at line ends. **Owner's call (2026-10-04): capture them again from the reading app**,
     so an introduction is as exact as the verse notes beside it, rather than fill them from
     the pictures.
+    **Fixed the same day.** The reading app only gives the text of the left page of an open
+    pair, and these surahs all begin on the right one. With its window narrowed to one page at
+    a time, the app gives that page's text whole, accents included. All 65 were read again that
+    way, in the book's own project, so every one of the 114 surahs now has its introduction,
+    and the three that were cut short are whole. Al-Tawbah, which has no basmala, is checked
+    by hand against its page. The pitch tests open three that had been missing or cut short
+    and check each one is there in full.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
