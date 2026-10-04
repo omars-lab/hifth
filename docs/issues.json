@@ -2547,6 +2547,18 @@
       "owner": "agent",
       "note": "61 of 114 surahs had no introduction in the pitch, two lost theirs whole and Al-Kahf's was only its last paragraph, because the book's capture missed the earlier pages of those introductions. Found 2026-10-03. Owner chose on 2026-10-04 to capture them again from the reading app, not read them off the page pictures. Fixed the same day: the reading app, narrowed to one page at a time, gave each surah's first page whole, and all 114 now have their introduction.",
       "closedBy": "apps/web/e2e/pitch.spec.ts"
+    },
+    {
+      "id": "pitch-intro-badge",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "34"
+      },
+      "status": "fixed",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The pitch showed a surah's introduction on top of its first verse's note. Owner asked on 2026-10-04 for it to sit beside the surah's name, above the basmala, as a badge. Done the same day: an ⓘ just left of the name opens the introduction by itself, and verse 1's note carries only verse 1. On the first two pages, which draw no name line, the badge sits beside the basmala.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     }
   ]
 }

@@ -37,8 +37,10 @@ describe("pitch · the book's notes as one more commentary source", () => {
 });
 
 describe("pitch · introFor", () => {
-  it("the surah's context leads only the opening verse's note", () => {
-    expect(introFor(surah, "quran/hafs-kfqc/2:1")).toEqual({ title: "Title", paragraphs: surah.intro });
+  it("no verse's note leads with the surah's context unasked, not even the opening verse's", () => {
+    // Owner, 2026-10-04: the introduction belongs beside the surah's name, behind
+    // its own ⓘ badge, not stacked on top of verse 1's note.
+    expect(introFor(surah, "quran/hafs-kfqc/2:1")).toBeNull();
     expect(introFor(surah, "quran/hafs-kfqc/2:255")).toBeNull();
   });
 
@@ -49,6 +51,6 @@ describe("pitch · introFor", () => {
   it("nothing without a surah, a selection, or a surah that has an introduction", () => {
     expect(introFor(null, "quran/hafs-kfqc/2:1", true)).toBeNull();
     expect(introFor(surah, null, true)).toBeNull();
-    expect(introFor({ ...surah, intro: [] }, "quran/hafs-kfqc/2:1")).toBeNull();
+    expect(introFor({ ...surah, intro: [] }, "quran/hafs-kfqc/2:1", true)).toBeNull();
   });
 });
