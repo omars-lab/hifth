@@ -73,7 +73,8 @@
  * middle one is the one that matters; the other two are cheap. Check 4 was broken
  * the same way when it was added: an empty directory under assets/ — "ships and
  * nothing declares it" — and the declaration for the word geometry removed from
- * LICENSES.md — "never mentions assets/words, which ships". Both restored.
+ * LICENSES.md — "never mentions assets/words, which ships". Both restored. Since 2026-10-03
+ * every one of these breaks has a test that goes red: gate-notices.test.mjs.
  *
  * WHAT IT DOES NOT SEE, said out loud rather than discovered later. The trace
  * follows *relative* imports inside packages/etl and reads string literals; it
@@ -87,7 +88,11 @@
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join, dirname, resolve, basename } from "node:path";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const ETL = join(ROOT, "packages", "etl");
 const DATA = join(ETL, "data");
 const ASSETS = join(ROOT, "apps", "web", "public", "assets");
@@ -227,7 +232,10 @@ function moduleGraph(entry) {
     if (seen.has(file) || !existsSync(file)) continue;
     seen.add(file);
     const text = readFileSync(file, "utf8");
-    for (const m of text.matchAll(/\bfrom\s+["'](\.[^"']+)["']/g)) {
+    // `import "./x.mjs"` too, not only `… from "./x.mjs"`: a helper pulled in
+    // for what it does when loaded reads its files just the same, and the
+    // trace walked straight past one until its test caught it.
+    for (const m of text.matchAll(/\b(?:from|import)\s+["'](\.[^"']+)["']/g)) {
       queue.push(resolve(dirname(file), m[1]));
     }
   }
