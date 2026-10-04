@@ -1353,6 +1353,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     introduction from the pages it captured, so where an introduction runs over earlier
     pages they are missing. The fix is in the capture, not here: capture the first pages of
     each surah's introduction again, then rebuild the pitch notes.
+    Looked closer the next day: the clean text read from the reading app missed them, but the
+    page pictures taken at the same time hold 59 of them. Reading words off a picture got
+    about 92% of them exactly as printed (97% after fixing them from the book's own
+    spellings); the rest were accents read wrongly, a commentator's initials misread and words
+    split at line ends. **Owner's call (2026-10-04): capture them again from the reading app**,
+    so an introduction is as exact as the verse notes beside it, rather than fill them from
+    the pictures.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
