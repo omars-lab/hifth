@@ -112,6 +112,12 @@ if (scope && checked === 0) {
   process.exit(0); // nothing staged is on the map; say nothing
 }
 
+// A map that names no code at all has checked nothing, and would print OK for
+// it. That is a map somebody emptied, not one that is up to date.
+if (!scope && checked === 0) {
+  problems.push("docs/map.json names no code at all — there is nothing here to check, so nothing was.");
+}
+
 if (problems.length > 0) {
   console.error("gate:map — FAIL:");
   for (const p of problems) console.error("  -", p);

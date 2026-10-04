@@ -43,7 +43,12 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points this check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs). Unset,
+// it is the repository, as it always was.
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const WORKFLOWS = join(ROOT, ".github", "workflows");
 const HOOKS = join(ROOT, ".githooks");
 const HOOK_TARGETS = ["pre-commit", "pre-push"];
