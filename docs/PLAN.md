@@ -1384,6 +1384,24 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     zoomed in themselves keeps their zoom. Tested in the phone browser tests (links to 18:10
     and 2:255 must show the verse whole across) and unit tests of the zoom; the ten saved
     pictures of a verse after a jump were taken again, with the owner's OK.
+36. ~~**The surah's name and each verse's number should be what you press, not a separate ⓘ.**~~
+    Owner, 2026-10-04: the surah's name should feel like something you can press, and
+    pressing it should give the surah's introduction; a verse should have the same, opening a
+    choice of what to read on it. **Done the same day, in the pitch build:** the ⓘ is gone
+    where a page draws the surah's name; the name itself carries a soft green wash and is the
+    button (the first two pages, which draw no name line, keep the ⓘ by the basmala). Each
+    verse's number is a button too: pressing it selects the verse, washes its number, and
+    opens a short list beside it — the Study Quran note, similar verses in this surah, in
+    earlier and in later surahs (with counts), words from the same roots, listen, and the
+    surah's introduction. Pressing the verse's words still opens the note at once. Two faults
+    found on the way and fixed: on a two-page spread the strip you grab to turn the page
+    covered the number at the end of the bottom line, so it could not be pressed (a click on
+    the strip that is not a drag now reaches what is under it); and the small menu lost the
+    keyboard, because it tried to focus its first line while still hidden. **Not yet:** a
+    line for a classical tafsir, which waits on the open choice of which tafsir edition to
+    carry. Tested in the pitch browser tests (the name at Ya-Sin and At-Tawbah, every line
+    of the menu, each pick, the keyboard, the bottom-corner number pressed with the mouse)
+    and unit tests of where the wash and each number's ring go.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

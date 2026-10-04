@@ -23,6 +23,15 @@
   cursor: pointer;
 }
 
+.menu[data-stacked] {
+  flex-direction: column;
+  gap: 0;
+}
+
+.menu[data-stacked] .item {
+  text-align: start;
+}
+
 .item:hover,
 .item:focus-visible {
   background: var(--hairline);

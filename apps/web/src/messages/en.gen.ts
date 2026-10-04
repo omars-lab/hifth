@@ -459,6 +459,7 @@ const messages: Catalog = {
   verseGesturesNote: "What your finger does on a verse. Tap hides the bars: a tap hides or shows the bars, and a hold opens the verse's menu. Tap opens the full menu: a tap or a hold opens it, and full screen is a button below the page. Hold opens a small menu: a tap opens the menu as before, and a hold opens a small menu beside the verse. With a mouse a click always opens the menu, and F switches full screen.",
   verseGesturesTitle: "Tap and hold on a verse",
   verseInNotes: (d) => d.keyText + " is in " + plural(LC, d.n, { one: d.nText + " note", other: d.nText + " notes" }),
+  verseMenu: (d) => "What to read on " + d.keyText,
   verseMore: (d) => "More for " + d.label,
   verseTools: (d) => "Tools for " + d.label,
   wordHops: (d) => plural(LC, d.n, { "0": "No similar places", one: d.nText + " similar place", other: d.nText + " similar places" }) + plural(LC, d.u, { "0": "", one: ", and " + d.uText + " link that names no words", other: ", and " + d.uText + " links that name no words" }),
