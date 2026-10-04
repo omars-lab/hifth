@@ -144,6 +144,12 @@ if (!scope) {
   const features = mapFeatureIds();
   const scripts = scriptNames();
 
+  // A file that names no use case has proven nothing, and would print OK for
+  // it. That is a file somebody emptied, not one that is up to date.
+  if (useCases.length === 0) {
+    problems.push("docs/use-cases.json names no use case at all — there is nothing here to prove, so nothing was.");
+  }
+
   for (const a of actors) {
     if (!useCases.some((u) => u.actor === a.id)) {
       problems.push(
