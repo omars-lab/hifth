@@ -41,10 +41,14 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-import { wordsByAyah } from "../packages/etl/scripts/morphology.mjs";
+import { MORPHOLOGY_FILE, wordsByAyah } from "../packages/etl/scripts/morphology.mjs";
 import { EXCEPTIONS } from "../packages/etl/scripts/lib/segmentation.mjs";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs).
+const ROOT = process.env.HIFTH_GATE_ROOT
+  ? process.env.HIFTH_GATE_ROOT.replace(/\/?$/, "/")
+  : new URL("..", import.meta.url).pathname;
 const PIN = join(ROOT, "packages/etl/data/pages/word-alignment.pin.json");
 const WORDS = join(ROOT, "apps/web/public/assets/words/hafs-kfqc");
 const ROOTS = join(ROOT, "apps/web/public/assets/roots/hafs-kfqc/ayah");
@@ -73,7 +77,8 @@ for (const [key, why] of Object.entries(pin.exceptions ?? {})) {
 // ---- 2. read the base: every ayah's print indices, marks separated ----------
 /** `"surah:ayah"` → { lexical: [print index…] } */
 const print = new Map();
-for (const file of readdirSync(WORDS).filter((f) => f.endsWith(".json"))) {
+const shards = existsSync(WORDS) ? readdirSync(WORDS).filter((f) => f.endsWith(".json")) : [];
+for (const file of shards) {
   const shard = JSON.parse(readFileSync(join(WORDS, file), "utf8"));
   for (const [key, entry] of Object.entries(shard.words)) {
     const marks = new Set(entry.marks ?? []);
@@ -86,9 +91,12 @@ for (const file of readdirSync(WORDS).filter((f) => f.endsWith(".json"))) {
     print.set(key, lexical);
   }
 }
+// No shards means no ayah to map, and every count below would agree with an
+// empty pin; that is nothing checked, not a pass.
+if (print.size === 0) say(`no word shards carry any ayah under ${WORDS.replace(ROOT, "")}, so there is nothing to map`);
 
 // ---- 3. apply the delta, and check it against QAC --------------------------
-const qac = wordsByAyah();
+const qac = wordsByAyah(join(ROOT, MORPHOLOGY_FILE));
 let checked = 0;
 let joins = 0;
 let splits = 0;

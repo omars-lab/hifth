@@ -30,7 +30,16 @@
  * not held: both are handled by the pen, and their numbers are here so that
  * "how common is a six-line ayah" is an output rather than a guess.
  */
-import { sweep } from "./lib/box-sweep.mjs";
+import { join } from "node:path";
+
+import { PAGES_DIR, sweep } from "./lib/box-sweep.mjs";
+
+// HIFTH_GATE_ROOT points the check at a made-up tree, so a test can feed it one
+// thing it must refuse and one it must pass (scripts/gate-fixture.mjs). Only the
+// pages move: the pen is code under test, so it is always this repo's own build.
+const PAGES = process.env.HIFTH_GATE_ROOT
+  ? join(process.env.HIFTH_GATE_ROOT, "apps", "web", "public", "assets", "pages", "hafs-kfqc")
+  : PAGES_DIR;
 
 const FALLBACK_COUNT = 8;
 const FALLBACK_PAGES = new Set([1, 2]);
@@ -41,7 +50,7 @@ const list = process.argv.includes("--list");
 const failures = [];
 const fail = (msg) => failures.push(msg);
 
-const { census, flagged } = await sweep();
+const { census, flagged } = await sweep(PAGES);
 
 const fallbackPages = [
   ...new Set(flagged.filter((f) => f.rule === "fallback").map((f) => f.page)),
