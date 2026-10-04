@@ -75,7 +75,9 @@ const PRODUCERS = [
 const problems = [];
 let uploads = 0;
 
-for (const name of readdirSync(WORKFLOWS).filter((f) => /\.ya?ml$/.test(f))) {
+// No workflows folder is no uploads, refused below in so many words.
+const workflows = existsSync(WORKFLOWS) ? readdirSync(WORKFLOWS) : [];
+for (const name of workflows.filter((f) => /\.ya?ml$/.test(f))) {
   const file = join(WORKFLOWS, name);
   const text = readFileSync(file, "utf8");
 
