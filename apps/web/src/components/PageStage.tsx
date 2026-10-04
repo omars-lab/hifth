@@ -648,9 +648,16 @@ function drawWaslMarks(
 
 /** How far a saved arrow runs, in the page's units: about a word and a half. */
 const ARROW_RUN = 50;
-/** The labels at its end: the type's size and how tall each chip stands. */
-const CHIP_FONT = 6.2;
-const CHIP_HEIGHT = 8.5;
+/** The shortest it may be cut to, near the page's edge, so its labels fit beside it. */
+const ARROW_RUN_MIN = 18;
+/**
+ * The labels at its end: the type's size (about 9 points on a phone, the
+ * smallest that reads at a glance), how tall each label's tap area stands,
+ * and the space between two labels.
+ */
+const LABEL_FONT = 8.4;
+const LABEL_HEIGHT = 9;
+const LABEL_GAP = 4.5;
 
 /**
  * Draw a page's saved arrows (confusion-jumps, step 10), replacing whatever
@@ -685,9 +692,19 @@ function drawJumpArrows(
     const line = ((outline && rectsOf(outline.getAttribute("d") ?? "")) || []).find(
       (r) => mid >= r.y && mid <= r.y + r.height,
     );
-    const y = (line ? line.y + line.height : box.y + box.height) + 1.2;
+    // In the gap between this line's letters and the next line's harakat,
+    // which sits about a page unit above where the verse's outline ends.
+    const y = line ? line.y + line.height - 1 : box.y + box.height + 1.2;
     const a = { x: box.x + box.width / 2, y };
-    const b = { x: Math.max(a.x - ARROW_RUN, 6), y };
+    // The labels run on past the head in reading order, to the left. Near the
+    // page's edge the arrow is cut shorter so they still fit beside it; when
+    // even the shortest arrow leaves no room, they stand behind its start.
+    const texts = arrow.ends.map((end) => endOf(end.to, end.times));
+    const widths = texts.map((text) => text.length * LABEL_FONT * 0.58 + 2);
+    const room = widths.reduce((sum, w) => sum + w, 0) + LABEL_GAP * (widths.length - 1) + 1.5;
+    const fitted = Math.max(a.x - ARROW_RUN, 2 + room);
+    const behind = a.x - fitted < ARROW_RUN_MIN;
+    const b = { x: behind ? Math.max(a.x - ARROW_RUN, 6) : fitted, y };
     const el = document.createElementNS(SVG_NS, "g");
     el.setAttribute("data-jump-arrow", `${at.surah}:${at.ayah}`);
     el.setAttribute("data-verse-key", arrow.key);
@@ -703,20 +720,19 @@ function drawJumpArrows(
     head.setAttribute("data-head", "");
     head.setAttribute("d", arrowHead(a, b, 3));
     el.append(path, head);
-    // The chips run on past the head, one after another in reading order.
-    let x = b.x - 1.5;
-    const chips: SVGGElement[] = [];
-    for (const end of arrow.ends) {
-      const text = endOf(end.to, end.times);
-      const w = text.length * CHIP_FONT * 0.58 + 4;
+    // Bare type with a thin edge of paper, not a filled pill: a pill hid the
+    // harakat under it, and the edge keeps the label legible where it crosses
+    // a letter. The rectangle behind each one is only the finger's target.
+    let x = behind ? Math.min(a.x + 1.5 + room, 343) : b.x - 1.5;
+    const chips = texts.map((text, i) => {
+      const w = widths[i]!;
       const chip = document.createElementNS(SVG_NS, "g");
       chip.setAttribute("data-end", "");
       const rect = document.createElementNS(SVG_NS, "rect");
       rect.setAttribute("x", (x - w).toFixed(1));
-      rect.setAttribute("y", (y - CHIP_HEIGHT / 2).toFixed(1));
+      rect.setAttribute("y", (y - LABEL_HEIGHT / 2).toFixed(1));
       rect.setAttribute("width", w.toFixed(1));
-      rect.setAttribute("height", String(CHIP_HEIGHT));
-      rect.setAttribute("rx", String(CHIP_HEIGHT / 2));
+      rect.setAttribute("height", String(LABEL_HEIGHT));
       const label = document.createElementNS(SVG_NS, "text");
       label.setAttribute("x", (x - w / 2).toFixed(1));
       label.setAttribute("y", y.toFixed(1));
@@ -725,13 +741,9 @@ function drawJumpArrows(
       label.setAttribute("direction", "ltr");
       label.textContent = text;
       chip.append(rect, label);
-      chips.push(chip);
-      x -= w + 1.5;
-    }
-    // Out of room before the margin: the chips stand under the arrow instead.
-    if (x < 2) {
-      for (const chip of chips) chip.setAttribute("transform", `translate(${(2 - x).toFixed(1)} ${CHIP_HEIGHT + 1})`);
-    }
+      x -= w + LABEL_GAP;
+      return chip;
+    });
     // The finger's target: the arrow's own strip, kept thin so the next
     // line's words stay tappable.
     const hit = document.createElementNS(SVG_NS, "rect");
