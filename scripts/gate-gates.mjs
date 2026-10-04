@@ -170,6 +170,13 @@ for (const gate of owned) {
         "A gate that nothing invokes is a script.",
     );
   }
+  // A check with no test can stop refusing anything and nobody would know.
+  const script = /node\s+(scripts\/gate-[a-z0-9-]+)\.mjs/.exec(pkg.scripts[gate]);
+  if (script && !existsSync(join(ROOT, `${script[1]}.test.mjs`))) {
+    problems.push(
+      `${gate} has no test: ${script[1]}.test.mjs is missing, so if it broke and passed everything nothing would say so.`,
+    );
+  }
 }
 
 const allComposites = new Set(composites.flatMap((c) => [...expand(c)]));

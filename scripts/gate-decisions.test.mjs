@@ -108,17 +108,15 @@ test("gate:decisions refuses a link that is not the page's own address on the si
 });
 
 test("gate:decisions refuses a link with no checked-in copy", () => {
-  // The index renderer cannot draw this row at all, so the page is stamped from
-  // the good register and the copy is dropped from the row afterwards.
-  const drop = (root) => {
-    const rows = [{ ...open(), page: null, builtBy: null }, settled()];
-    writeFileSync(join(root, "docs/decisions.json"), JSON.stringify({ decisions: rows }));
-  };
-  withRegister([open(), settled()], (root) => {
+  // The index page is drawn from this very row, so its renderer must draw a
+  // link with no copy too, rather than crash before the check can say why.
+  // It used to, and the test had to stamp the page from a good register.
+  const row = { ...open(), page: null, builtBy: null };
+  withRegister([row, settled()], (root) => {
     const r = runGate("decisions", root);
     assert.equal(r.status, 1, r.out);
     assert.match(r.out, /artifact with no checked-in page/);
-  }, { after: drop });
+  });
 });
 
 test("gate:decisions refuses a checked-in page nobody could rebuild", () => {

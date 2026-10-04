@@ -376,7 +376,7 @@ used to grade the first. **What would answer it:** a separate instrument produce
 the marks the first is least sure of, and the two either agree or hand us a named list of where they
 do not.
 
-### ⑦ If one of our own checks broke and started passing everything, would anything tell us? · **open**
+### ⑦ If one of our own checks broke and started passing everything, would anything tell us? · **fixed**
 
 The steps above cover the scripts that *grade* the marks. There is a second set: the thirty-odd
 checks that run before every change is saved and pushed — that each published page still has its
@@ -395,6 +395,13 @@ revision record never imported by anything that could send it — each now have 
 them. Each test builds a small made-up tree, points the check at it, and reads the exit code, so
 the check runs exactly as the hooks run it. The other twenty-nine checks are still untested; the
 same shape fits each, and the item stays open until they have it.
+
+**Done (2026-10-03):** all thirty-four checks now have that test, and each test was proved by
+breaking its check on purpose and watching it go red. Writing them found about a dozen real bugs —
+checks that crashed on a missing folder rather than saying what was wrong, checks that let an empty
+list through as if it were fine, one rule that could never fire. And the check that every check is
+wired into the hooks now also refuses a check with no test beside it, so a new one cannot arrive
+untested.
 
 ---
 
