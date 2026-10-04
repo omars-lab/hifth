@@ -114,13 +114,18 @@
    default. Each keeps its own script's font: «العربية» set in the Latin face
    would be the switch telling a reader it does not really speak their
    language. */
+/* A row too full for one line (six ways to pick what a note is about, on a
+   phone) wraps onto a second, rather than pressing its buttons narrower than
+   their longest word. */
 .langRow {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
 .lang {
   flex: 1;
+  min-inline-size: min-content;
   min-block-size: var(--touch-min);
   padding-inline: var(--space-3);
   border: 1px solid var(--hairline);
