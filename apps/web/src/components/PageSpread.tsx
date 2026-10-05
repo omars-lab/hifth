@@ -76,6 +76,16 @@ interface PageSpreadProps {
    * the phone turns pages by swiping the leaf itself.
    */
   edgeRails?: ReactNode;
+  /**
+   * Whatever sits on the desk just outside the live page's outer edge — the
+   * look-alike chips. Given the side it lands on, so it can lean toward the
+   * page: right of the book for a right-hand page, left for a left-hand one.
+   *
+   * On a phone those chips float in the window's corner, which is the page's
+   * corner. Here the window's corner is out on the desk, a long way from the
+   * verse they belong to, so the spread offers them a place beside the paper.
+   */
+  beside?: (side: "left" | "right") => ReactNode;
 }
 
 /**
@@ -159,6 +169,7 @@ export function PageSpread({
   bookRef,
   solo = false,
   edgeRails,
+  beside,
 }: PageSpreadProps): JSX.Element {
   const { t } = useT();
 
@@ -167,6 +178,15 @@ export function PageSpread({
   if (!enabled) return <>{children}</>;
 
   const { right, left } = spreadOf(page, total);
+  const liveSide = page === right ? "right" : "left";
+
+  /* The desk either side of the book, as two boxes of equal share so the book
+     stays centred. Only the one beside the live page holds anything. */
+  const desk = (side: "left" | "right") => (
+    <div className={styles.desk} data-desk={side}>
+      {side === liveSide && beside?.(side)}
+    </div>
+  );
 
   /*
    * What every leaf carries, live or not.
@@ -249,6 +269,7 @@ export function PageSpread({
        The gutter is drawn on the paper, half on each leaf's bound edge, so it
        is never taller than the pages it sits between (PageSpread.module.css). */
     <div className={styles.spread} data-testid="page-spread">
+      {desk("right")}
       <div
         ref={bookRef}
         className={styles.book}
@@ -262,6 +283,7 @@ export function PageSpread({
             over a page the reader is panning would fight the pan. */}
         {!solo && edgeRails}
       </div>
+      {desk("left")}
     </div>
   );
 }

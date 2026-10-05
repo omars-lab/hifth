@@ -26,6 +26,12 @@ interface HopRailProps {
    * new selection can change how many chips there are.
    */
   onBand?: (bottom: number | null) => void;
+  /**
+   * On the desk beside the book (PageSpread's `beside`), the side of the book
+   * the rail is on. It then hugs the page's outer edge instead of the window's
+   * corner, and `crossed` has nothing to do: the card rises over the other leaf.
+   */
+  beside?: "left" | "right" | undefined;
 }
 
 /**
@@ -35,7 +41,7 @@ interface HopRailProps {
  * popover. The rail only exists while an ayah is selected and has hops; a
  * hop-less ayah renders nothing (quiet by default).
  */
-export function HopRail({ chips, openDirection, onOpenChip, crossed = false, onBand }: HopRailProps): JSX.Element | null {
+export function HopRail({ chips, openDirection, onOpenChip, crossed = false, onBand, beside }: HopRailProps): JSX.Element | null {
   const { t } = useT();
   const railRef = useRef<HTMLDivElement>(null);
   const count = chips.length;
@@ -57,6 +63,7 @@ export function HopRail({ chips, openDirection, onOpenChip, crossed = false, onB
       role="group"
       aria-label={t.railGroup}
       data-crossed={crossed || undefined}
+      data-beside={beside}
     >
       {chips.map((chip) => (
         <button
