@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { lum, pixelsAt } from "./ink";
 
 /*
  * The open book is the same size in every browser.
@@ -43,6 +44,57 @@ for (const [w, h] of [
       // And the drawing reaches across it, rather than shrinking to fit a
       // narrower box and leaving the leaf mostly paper.
       expect(l.artW, `page ${l.page} drawing width`).toBeGreaterThan(l.w * 0.95);
+    }
+  });
+}
+
+/*
+ * The crease down the middle of the book stops where the paper stops.
+ *
+ * It used to be drawn on the frame that holds the two leaves, and that frame is
+ * as tall as the desk. A page is shorter than the desk — a little on most
+ * pages, a lot on the two opening pages, which are drawn nearly square — so the
+ * crease ran on past the head and foot of the paper, out across the empty desk,
+ * from the toolbar to the bottom bar (2026-10-04). Read off the screen: the desk
+ * just above and below the paper is the same colour at the seam as it is a
+ * hand's width away from it.
+ */
+for (const p of [2, 44]) {
+  test(`on page ${p} the crease does not run past the paper`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/#/hafs-kfqc/p${p}`);
+    await expect(page.locator(`svg[aria-labelledby="page-label-${p}"]:visible`)).toBeVisible();
+    const geo = await page.evaluate(() => {
+      const book = document.querySelector<HTMLElement>('[data-testid="page-book"]')!.getBoundingClientRect();
+      const papers = [...document.querySelectorAll<HTMLElement>("[data-host-page]")]
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.width > 0);
+      return {
+        seam: book.left + book.width / 2,
+        top: book.top,
+        bottom: book.bottom,
+        paperTop: Math.min(...papers.map((r) => r.top)),
+        paperBottom: Math.max(...papers.map((r) => r.bottom)),
+      };
+    });
+    const mean = (px: { length: number } & Parameters<typeof lum>[0][]) =>
+      px.reduce((a, c) => a + lum(c), 0) / px.length;
+    for (const [from, to, where] of [
+      // A pixel clear of the paper, whose edge is antialiased into the desk.
+      [geo.top, geo.paperTop - 2, "above"],
+      [geo.paperBottom + 2, geo.bottom, "below"],
+    ] as const) {
+      // Rows of bare desk only; a page taller than the book leaves none.
+      if (to - from < 2) continue;
+      const rows = { y: Math.ceil(from), height: Math.floor(to - from) };
+      const atSeam = mean(await pixelsAt(page, { x: Math.round(geo.seam - 14), width: 28, ...rows }));
+      // Beside it is the desk just clear of the band on both sides — near enough
+      // that the desk's own soft shading is the same as at the seam.
+      const aside =
+        (mean(await pixelsAt(page, { x: Math.round(geo.seam - 42), width: 28, ...rows })) +
+          mean(await pixelsAt(page, { x: Math.round(geo.seam + 14), width: 28, ...rows }))) /
+        2;
+      expect(Math.abs(atSeam - aside), `desk ${where} the paper, at the seam vs beside it`).toBeLessThan(1.5);
     }
   });
 }

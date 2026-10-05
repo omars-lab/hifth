@@ -249,6 +249,44 @@
   );
 }
 
+/* The crease of an open book, half of it on each leaf's bound edge. Off unless
+   PageSpread switches it on, because a phone shows one page and a single page
+   has no seam (PageSpread.module.css, "The gutter"). Same band as the book-wide
+   one it replaced — 28 px with a one-pixel core at the seam — cut down the
+   middle: 14 px a side, the outer end clear, the shadow at 84% (42% of the
+   whole), the deep stop at the edge.
+
+   The one-pixel core is not in the band, because the band cannot reach the
+   seam: it is clipped inside the leaf's border. It is a shadow cast one pixel
+   past the border instead, across the seam and onto the facing leaf's border —
+   which also covers the faint light hairline two leaves leave between them
+   when the seam falls between two screen pixels. The leaf's own clip opens over
+   the fold (`--fold-allow`, above), so the shadow is not cut off. */
+.host[data-leaf]::before {
+  content: "";
+  display: var(--spine-crease, none);
+  position: absolute;
+  inset-block: 0;
+  width: 14px;
+  pointer-events: none;
+  z-index: 1;
+  --crease: transparent 0%, var(--gutter-shadow) 84%, var(--gutter-shadow-deep) 100%;
+}
+.host[data-leaf="right"]::before {
+  left: 0;
+  background: linear-gradient(to left, var(--crease));
+}
+.host[data-leaf="left"]::before {
+  right: 0;
+  background: linear-gradient(to right, var(--crease));
+}
+.host[data-leaf="right"] {
+  box-shadow: calc(-1 * var(--spine-core, 0px)) 0 0 0 var(--gutter-core);
+}
+.host[data-leaf="left"] {
+  box-shadow: var(--spine-core, 0px) 0 0 0 var(--gutter-core);
+}
+
 /* Multiple hosts overlap in the layer's single grid cell; only one is visible. */
 .layer > .host {
   grid-area: 1 / 1;
