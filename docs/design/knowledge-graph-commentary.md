@@ -472,3 +472,22 @@ just facts."
    or a live fetch?
 7. The licence grey middle on the cross-reference *selection* — needs a real answer, not an
    engineer's guess.
+
+## Open questions, and what would answer each
+
+### ① Where does the commentary the pitch shows still differ from the printed book? · **open**
+
+The private pitch reads The Study Quran's commentary from a capture of the book, page by page.
+Walking the pitch on 2026-10-05 found that where a paragraph ran over the foot of a printed
+page, the capture kept the part on the first page and then the whole paragraph again on the
+next, so Ayat al-Kursi's note, and 124 others, read the same passage twice. The pitch's
+extractor now joins those paragraphs, and after a re-run 124 of the 125 read once.
+
+Two differences are left. In one note (98:5) a paragraph from somewhere else sits between the
+two copies, so joining them would be a guess. And in places the second copy lost a full stop
+the book has, so one sentence runs straight into the next with no stop between; the join puts
+back the stops it can see, not ones the capture never had.
+
+**What would answer it:** open the printed pages for 98:5 and a few of the run-on sentences
+beside what the pitch shows, and either fix the capture or tell the extractor what the print
+does there. Nothing here reaches the public site; it is only the pitch.

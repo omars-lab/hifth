@@ -2595,6 +2595,17 @@
       "owner": "agent",
       "note": "The small menu beside a verse tried to put the keyboard on its first line while it was still hidden, before it had been placed, so the keyboard was left on nothing. Fixed on 2026-10-04: it waits until it is placed, and follows the first line if lines arrive after it opens.",
       "closedBy": "apps/web/e2e/pitch.spec.ts"
+    },
+    {
+      "id": "pitch-commentary-differs-from-print",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Found walking the desktop pitch: 125 notes repeated a passage where the capture took a paragraph twice across a page break. Fixed in packages/etl/tools/pitch/blocks.mjs (joinPageBreaks), held by blocks.test.mjs; 124 of 125 now read once. Left: 98:5, where a stray paragraph sits between the copies, and sentences whose full stop the capture lost. Next step is a look at the printed pages, not more code."
     }
   ]
 }
