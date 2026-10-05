@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { pageNumber } from "./page-number";
 
 // Loop 0 exit criterion: the installable shell shows page 7 on a phone.
 test.describe("Hifth shell", () => {
@@ -17,7 +18,7 @@ test.describe("Hifth shell", () => {
     ).toBeVisible();
 
     // Page identity shows 7.
-    await expect(page.locator(".numeric", { hasText: "7" }).first()).toBeVisible();
+    await expect(page.locator(".numeric", { hasText: pageNumber(7) }).first()).toBeVisible();
 
     // The mushaf SVG mounts with an accessible role.
     const svg = page.locator("svg[role='group']");

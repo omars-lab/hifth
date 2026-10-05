@@ -3024,7 +3024,7 @@ export function App(): JSX.Element {
           }}
         >
           <span className={styles.pageLabel}>{t.pageWord}</span>
-          <span className={`${styles.pageNum} numeric`}>{page}</span>
+          <span className={`${styles.pageNum} numeric`}>{t.num(page)}</span>
         </button>
         {/* Wayfinding lives in the chrome because it is always available: the
             keyboard has `/`, and a touch device needs something to press. */}

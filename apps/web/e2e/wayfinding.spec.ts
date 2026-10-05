@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { tapAyah } from "./ayah";
 import { contextWithout } from "./inventory";
 import { openTips } from "./tips";
+import { pageNumber } from "./page-number";
 
 /*
  * Loop 6a — wayfinding: getting anywhere, and knowing where you are.
@@ -60,7 +61,7 @@ test.describe("Hifth · wayfinding", () => {
   test("`/` opens the jumper and a jump lands like a link", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']")).toBeVisible();
-    await expect(page.locator(pageNum)).toHaveText("7");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(7));
 
     await page.keyboard.press("/");
     const jumper = page.getByRole("dialog", { name: "اذهب إلى" });
@@ -75,7 +76,7 @@ test.describe("Hifth · wayfinding", () => {
     await page.keyboard.press("Enter");
 
     await expect(jumper).toHaveCount(0);
-    await expect(page.locator(pageNum)).toHaveText("9");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(9));
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٥٨/ }),
     ).toBeVisible();
@@ -107,7 +108,7 @@ test.describe("Hifth · wayfinding", () => {
 
       await expect(jumper).toHaveCount(0);
       // We stay put and say so — no ghost page, no silent nearest-page landing.
-      await expect(page.locator(pageNum)).toHaveText("7");
+      await expect(page.locator(pageNum)).toHaveText(pageNumber(7));
       await expect(page.locator("[aria-live='polite']")).toContainText(
         "الآية المطلوبة غير متوفّرة بعد",
       );
@@ -123,25 +124,25 @@ test.describe("Hifth · wayfinding", () => {
     // RTL: ArrowLeft goes forward, the way the pages turn. Consecutive leaves,
     // which is a thing this row could not say when the inventory was 7, 9, 19.
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("8");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(8));
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("9");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(9));
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator(pageNum)).toHaveText("8");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(8));
 
     // The ends are the *book's* ends now, not the inventory's. 604 is the last
     // leaf of the Madani print and 1 is the first, and a stepper that ran off
     // either would be asking for a page that does not exist in any edition —
     // the clamp that used to be tested against page 19 by accident.
     await page.getByRole("slider").fill("604");
-    await expect(page.locator(pageNum)).toHaveText("604");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(604));
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("604"); // no ghost page 605
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(604)); // no ghost page 605
 
     await page.getByRole("slider").fill("1");
-    await expect(page.locator(pageNum)).toHaveText("1");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(1));
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator(pageNum)).toHaveText("1"); // no ghost page 0
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(1)); // no ghost page 0
   });
 
   test("a turn that steps over a page we do not have says where it landed", async ({ browser }) => {
@@ -162,23 +163,23 @@ test.describe("Hifth · wayfinding", () => {
       const said = page.locator("[aria-live='polite']");
 
       await page.keyboard.press("ArrowLeft");
-      await expect(page.locator(pageNum)).toHaveText("9");
-      await expect(said).toContainText("أقرب صفحة متوفّرة · صفحة 9");
+      await expect(page.locator(pageNum)).toHaveText(pageNumber(9));
+      await expect(said).toContainText("أقرب صفحة متوفّرة · صفحة ٩");
 
       // The far end, where nothing moves at all. "Last available page" on its own
       // would tell a reader their arrow did nothing and leave them to guess where
       // they are, so it names the page too.
       await page.getByRole("slider").fill("604");
-      await expect(page.locator(pageNum)).toHaveText("604");
+      await expect(page.locator(pageNum)).toHaveText(pageNumber(604));
       await page.keyboard.press("ArrowLeft");
-      await expect(said).toContainText("آخر صفحة متوفّرة · صفحة 604");
-      await expect(page.locator(pageNum)).toHaveText("604");
+      await expect(said).toContainText("آخر صفحة متوفّرة · صفحة ٦٠٤");
+      await expect(page.locator(pageNum)).toHaveText(pageNumber(604));
 
       // …and the near end, which is a different sentence for the same reason.
       await page.getByRole("slider").fill("1");
       await page.keyboard.press("ArrowRight");
-      await expect(said).toContainText("أول صفحة متوفّرة · صفحة 1");
-      await expect(page.locator(pageNum)).toHaveText("1");
+      await expect(said).toContainText("أول صفحة متوفّرة · صفحة ١");
+      await expect(page.locator(pageNum)).toHaveText(pageNumber(1));
     } finally {
       await context.close();
     }
@@ -198,14 +199,14 @@ test.describe("Hifth · wayfinding", () => {
     // regression that handed them to the page turn fails on the next line
     // rather than passing by turning the page twice.
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("7");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(7));
 
     // PageDown/PageUp are nobody else's. They name no direction either, so
     // unlike the arrows they need no RTL convention to be read correctly.
     await page.keyboard.press("PageDown");
-    await expect(page.locator(pageNum)).toHaveText("8");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(8));
     await page.keyboard.press("PageUp");
-    await expect(page.locator(pageNum)).toHaveText("7");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(7));
 
     // The other exit. Escape blurs the ayah, and the proof it worked is that
     // the *arrow* turns the page on the very next press — rule 6, reached
@@ -213,7 +214,7 @@ test.describe("Hifth · wayfinding", () => {
     await page.locator("#verse-55").focus();
     await page.keyboard.press("Escape");
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("8");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(8));
   });
 
   test("an open sheet keeps the page keys, and Escape closes it rather than blurring", async ({
@@ -231,12 +232,12 @@ test.describe("Hifth · wayfinding", () => {
     await expect(jumper).toBeVisible();
 
     await page.keyboard.press("PageDown");
-    await expect(page.locator(pageNum)).toHaveText("7");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(7));
     await expect(jumper).toBeVisible();
 
     await page.keyboard.press("Escape");
     await expect(jumper).toHaveCount(0);
-    await expect(page.locator(pageNum)).toHaveText("7");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(7));
   });
 
   test("an ayah with focus keeps the arrows; `/` still opens the jumper", async ({ page }) => {
@@ -247,7 +248,7 @@ test.describe("Hifth · wayfinding", () => {
     // map must not steal them — precedence, not a race.
     await page.locator("#verse-55").focus();
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("7");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(7));
 
     // …but the jumper is reachable from anywhere, which is the point of `/`.
     await page.keyboard.press("/");
@@ -261,7 +262,7 @@ test.describe("Hifth · wayfinding", () => {
     await expect(page.locator("svg[role='group']")).toBeVisible();
 
     // `exact`, because a role name match is a substring match by default and the
-    // page chip beside this button is now «صفحة 7 · ما فتحتَه من المصحف» — which
+    // page chip beside this button is now «صفحة ٧ · ما فتحتَه من المصحف» — which
     // contains this whole name. Two controls in one row can share a word.
     await page.getByRole("button", { name: "المصحف", exact: true }).tap();
     const sheet = page.getByRole("dialog", { name: "المصحف", exact: true });

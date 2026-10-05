@@ -2,6 +2,7 @@ import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { tapAyah } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { openTips } from "./tips";
+import { pageNumber } from "./page-number";
 
 /*
  * Loop 6a, the ungated half of the exit criterion (PLAN §Loop 6a):
@@ -98,7 +99,7 @@ test.describe("Hifth · offline", () => {
       // navigation fallback would also render *a* shell.
       await expect(page.locator("svg[role='group']").first()).toBeVisible();
       await expect(page.locator("#verse-54:visible")).toHaveCount(1);
-      await expect(page.locator("header .numeric")).toHaveText("7");
+      await expect(page.locator("header .numeric")).toHaveText(pageNumber(7));
 
       // …and the app is still an instrument offline, not a picture: tapping an
       // ayah surfaces its rail, which means the adjacency shard came out of the
@@ -132,7 +133,7 @@ test.describe("Hifth · offline", () => {
         .getByRole("dialog")
         .getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ })
         .tap();
-      await expect(page.locator("header .numeric")).toHaveText("19");
+      await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
       await expect(
         page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
       ).toBeVisible();
@@ -219,7 +220,7 @@ test.describe("Hifth · eviction", () => {
       await page.reload();
       await expect(page.locator("svg[role='group']").first()).toBeVisible();
       await expect(page.locator("#verse-54:visible")).toHaveCount(1);
-      await expect(page.locator("header .numeric")).toHaveText("7");
+      await expect(page.locator("header .numeric")).toHaveText(pageNumber(7));
     } finally {
       await context.setOffline(false);
     }
@@ -496,7 +497,7 @@ test.describe("Hifth · a pinned juz", () => {
       });
 
       await expect(page.locator("svg[aria-labelledby='page-label-15']")).toBeVisible();
-      await expect(page.locator("header .numeric")).toHaveText("15");
+      await expect(page.locator("header .numeric")).toHaveText(pageNumber(15));
       // And it is still an instrument, not a picture. Selecting works, and the
       // juz's adjacency came down with its paper — asserted on the cache rather
       // than by looking for a rail, because whether *this* ayah has edges is a

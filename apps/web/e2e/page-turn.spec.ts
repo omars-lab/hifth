@@ -3,6 +3,7 @@ import { foldBetween } from "@hifth/core";
 import { tapAyah, ayahTarget } from "./ayah";
 import { watchFolds, foldWords } from "./fold";
 import { contextWithout } from "./inventory";
+import { pageNumber } from "./page-number";
 
 /*
  * The fold — what a page turn draws, and everything it must not.
@@ -74,7 +75,7 @@ async function open(page: Page): Promise<void> {
   await watchFolds(page);
   await page.goto("/");
   await expect(page.locator("svg[role='group']").first()).toBeVisible();
-  await expect(page.locator(NUM)).toHaveText("7");
+  await expect(page.locator(NUM)).toHaveText(pageNumber(7));
 }
 
 test.describe("Hifth · the fold", () => {
@@ -95,7 +96,7 @@ test.describe("Hifth · the fold", () => {
       // Get to `from` without turning — the slider is a jump, so it neither
       // draws a band nor pollutes what the next turn's band says.
       await page.getByRole("slider").fill(String(from));
-      await expect(page.locator(NUM)).toHaveText(String(from));
+      await expect(page.locator(NUM)).toHaveText(pageNumber(from));
 
       const before = (await foldWords(page)).length;
       await page.getByRole("button", { name: to > from ? NEXT : PREV }).tap();
@@ -104,7 +105,7 @@ test.describe("Hifth · the fold", () => {
       const band = page.locator("[data-fold]");
       await expect(band).toHaveAttribute("data-fold", foldBetween(from, to, TOTAL));
 
-      await expect(page.locator(NUM)).toHaveText(String(to));
+      await expect(page.locator(NUM)).toHaveText(pageNumber(to));
       // One band per turn, not one per frame or one per re-render.
       expect((await foldWords(page)).length - before).toBe(1);
     }
@@ -122,9 +123,9 @@ test.describe("Hifth · the fold", () => {
     // failed to vendor, or a manifest that lost a column — and it says it in the
     // one place a reader would notice, the paper between two pages.
     await page.getByRole("button", { name: NEXT }).tap();
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
     await page.getByRole("button", { name: NEXT }).tap();
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
 
     const seen = await foldWords(page);
     expect(seen).toEqual(["crease", "gap"]);
@@ -143,7 +144,7 @@ test.describe("Hifth · the fold", () => {
     try {
       await open(page);
       await page.getByRole("button", { name: NEXT }).tap();
-      await expect(page.locator(NUM)).toHaveText("9");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(9));
       expect(await foldWords(page)).toEqual(["hole"]);
     } finally {
       await context.close();
@@ -166,7 +167,7 @@ test.describe("Hifth · the fold", () => {
       .getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ })
       .tap();
 
-    await expect(page.locator(NUM)).toHaveText("19");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(19));
     expect(await foldWords(page)).toEqual([]);
   });
 
@@ -229,7 +230,7 @@ test.describe("Hifth · the fold", () => {
     });
 
     await page.getByRole("button", { name: NEXT }).tap();
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
 
     // Stop and read in one call. Frames sampled after the turn landed are of a
     // page that has stopped moving, so they can only strengthen the check below
@@ -285,7 +286,7 @@ test.describe("Hifth · the fold", () => {
     // Mid-flight: exactly one band in the document, whatever else is happening.
     expect(await page.locator("[data-fold]").count()).toBeLessThanOrEqual(1);
 
-    await expect(page.locator(NUM)).toHaveText("10");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(10));
     await expect(page.locator("[data-fold]")).toHaveCount(0);
 
     // …and exactly one page is painted. The cross-fade writes inline opacity on
@@ -318,7 +319,7 @@ test.describe("Hifth · the fold", () => {
     try {
       await open(page);
       await page.getByRole("button", { name: NEXT }).tap();
-      await expect(page.locator(NUM)).toHaveText("8");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(8));
       expect(await foldWords(page)).toEqual([]);
     } finally {
       await context.close();
@@ -349,14 +350,14 @@ test.describe("Hifth · the fold", () => {
       // The band retreats the way it came, the number does not move, and the app
       // says which page failed — page 8, not the page still on screen.
       await expect(page.getByRole("alert")).toContainText("٨");
-      await expect(page.locator(NUM)).toHaveText("7");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(7));
       await expect(page.locator("[data-fold]")).toHaveCount(0);
       await expect(page.locator("svg[aria-labelledby='page-label-7']")).toBeVisible();
 
       // Unblocked, the same press lands. The failure was a state, not a latch.
       await page.unroute("**/assets/pages/**/8.svg");
       await page.getByRole("button", { name: NEXT }).tap();
-      await expect(page.locator(NUM)).toHaveText("8");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(8));
     } finally {
       await context.close();
     }
@@ -383,7 +384,7 @@ test.describe("Hifth · the fold", () => {
     await page.mouse.up();
 
     expect(await foldWords(page)).toEqual([]);
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
   test("a sideways flick turns the page, and the band tracks the finger", async ({ page }) => {
@@ -410,7 +411,7 @@ test.describe("Hifth · the fold", () => {
     await expect(page.locator("[data-turn]")).toHaveAttribute("data-turn", "tracking");
 
     await page.mouse.up();
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
     // One band for the whole gesture — the tracked band is *handed over* to the
     // crossing rather than replaced by a second one (§3.4). One word, too: the
     // handover must not re-derive the pair, or a band that began as a crease
@@ -422,7 +423,7 @@ test.describe("Hifth · the fold", () => {
   test("a leftward flick turns back", async ({ page }) => {
     await open(page);
     await page.getByRole("button", { name: NEXT }).tap();
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
 
     const box = await stageBox(page);
     const y = box.y + box.height / 2;
@@ -433,7 +434,7 @@ test.describe("Hifth · the fold", () => {
     }
     await page.mouse.up();
 
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
   test("a short drag springs back and turns nothing", async ({ page }) => {
@@ -459,7 +460,7 @@ test.describe("Hifth · the fold", () => {
     // The band was inserted — the reader saw their drag — and then removed.
     expect(await foldWords(page)).toEqual(["crease"]);
     await expect(page.locator("[data-fold]")).toHaveCount(0);
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
   test("a vertical drag pans and draws no band", async ({ page }) => {
@@ -480,6 +481,6 @@ test.describe("Hifth · the fold", () => {
     await page.mouse.up();
 
     expect(await foldWords(page)).toEqual([]);
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 });

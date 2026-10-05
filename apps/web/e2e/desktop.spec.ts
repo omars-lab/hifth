@@ -3,6 +3,7 @@ import { watchFolds, foldsSeen } from "./fold";
 import { contextWithout } from "./inventory";
 import { ayahTarget } from "./ayah";
 import { lum, pixelsAt } from "./ink";
+import { pageNumber, readPageNumber } from "./page-number";
 
 /*
  * The desktop spread — an open mus'haf, and honest about the half it does not
@@ -304,7 +305,7 @@ test.describe("Hifth · the desktop spread", () => {
       // same sentence the page bar carries, from the same string. 603 of 604 is
       // the fixture's arithmetic, and asserting it is what proves the fixture
       // reached the app rather than being quietly bypassed.
-      await expect(absent).toContainText("صفحة 8 ليست في هذه النسخة");
+      await expect(absent).toContainText("صفحة ٨ ليست في هذه النسخة");
       await expect(absent).toContainText("المتوفّر ٦٠٣ من ٦٠٤ صفحة");
 
       // The claim that it is not blank paper, made against the pixels rather
@@ -383,7 +384,7 @@ test.describe("Hifth · the desktop spread", () => {
     const before = await boxOf(pageSvg(page, 7));
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     await expect(spread(page)).toBeVisible();
 
     const after = await restingBox(page, 10);
@@ -394,7 +395,7 @@ test.describe("Hifth · the desktop spread", () => {
     expect(after.width, "the leaf changed size on a page turn").toBeCloseTo(before.width, 0);
 
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
   test("a turn moves your place: the URL follows the page, and the highlight lets go", async ({
@@ -413,7 +414,7 @@ test.describe("Hifth · the desktop spread", () => {
     await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/2:48");
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
 
     // The leaf landed, so the place let go: no bead, and the address is the page.
     await expect(page.getByRole("button", { name: /الآية الحالية/ })).toHaveCount(0);
@@ -433,7 +434,7 @@ test.describe("Hifth · the desktop spread", () => {
     await expect(pageSvg(page, 8)).toBeVisible();
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     await expect(page.locator("[data-fold]")).toHaveCount(0);
 
     // A band at rest sits one width *outside* the book at each end of its
@@ -503,7 +504,7 @@ test.describe("Hifth · the desktop spread", () => {
     // the book after it: the reader has just watched the leaf go over by hand,
     // and a second sweep would play the same turn twice. The lifted leaf is
     // gone once the new opening is down.
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     expect(await foldsSeen(page), "a band played the turn again after the peel").toEqual([]);
     await expect(page.getByTestId("edge-peel")).toHaveCount(0);
   });
@@ -537,7 +538,7 @@ test.describe("Hifth · the desktop spread", () => {
     // And releasing short commits nothing: the corner falls back, still on 8,
     // and no band ever drawn.
     await expect(page.getByTestId("edge-peel")).toHaveCount(0);
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
     expect(await foldsSeen(page), "a short grab still turned the page").toEqual([]);
   });
 
@@ -560,7 +561,7 @@ test.describe("Hifth · the desktop spread", () => {
 
     // Still on 8, and no band was ever inserted — the drag through the text was
     // not a turn at all.
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
     expect(await foldsSeen(page), "a mid-page drag turned the page").toEqual([]);
   });
 });
@@ -851,21 +852,21 @@ test.describe("Hifth · the wheel", () => {
     // the vertical axis is the one bound here.
     // With the book open a turn is a whole opening, 7 → 9.
     await page.mouse.wheel(0, 120);
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
 
     // A pause, then the other way. The pause is the gesture boundary — 100 ms of
     // quiet is what tells a mouse's second notch from a trackpad's next frame,
     // and there is no other signal in a wheel event that could.
     await page.waitForTimeout(200);
     await page.mouse.wheel(0, -120);
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
 
     // Drift is not a gesture. A hand resting on a trackpad emits a few pixels;
     // a page that turned on them would turn while nobody was asking.
     await page.waitForTimeout(200);
     await page.mouse.wheel(0, 10);
     await page.waitForTimeout(300);
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
   test("a flick and its momentum tail turn exactly one page", async ({ page }) => {
@@ -899,10 +900,10 @@ test.describe("Hifth · the wheel", () => {
       }
     });
 
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     // …and it stays there. A tail that spent a second turn would land on 11.
     await page.waitForTimeout(400);
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
   });
 
   test("ctrl+wheel does nothing at all — it is somebody else's pinch", async ({ page }) => {
@@ -929,7 +930,7 @@ test.describe("Hifth · the wheel", () => {
     // the modifier check and four notches turn four pages.
     await page.waitForTimeout(300);
     expect(await scaleOf(page, 7), "ctrl+wheel still zooms").toBeCloseTo(1, 2);
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
   test("shift+wheel jumps a juz, and says which one", async ({ page }) => {
@@ -940,7 +941,7 @@ test.describe("Hifth · the wheel", () => {
     // from a partial build, and "back" from the middle of a juz, which lands on
     // that juz's own opening the way a media player's ⏮ does.
     await overTheLeaf(page);
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
 
     // Down is forward here for the same reason it is forward unmodified: down
     // is down in both directions of script.
@@ -949,15 +950,15 @@ test.describe("Hifth · the wheel", () => {
     await page.keyboard.up("Shift");
 
     // Juz 2 opens on 22 — not 8, which is what a plain wheel would have done.
-    await expect(page.locator(NUM)).toHaveText("22");
-    await expect(page.locator("[aria-live='polite']")).toHaveText("الجزء ٢ · صفحة 22");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(22));
+    await expect(page.locator("[aria-live='polite']")).toHaveText("الجزء ٢ · صفحة ٢٢");
 
     // And back, over the boundary rather than to the top of the leaf we are on.
     await page.waitForTimeout(200);
     await page.keyboard.down("Shift");
     await page.mouse.wheel(0, -120);
     await page.keyboard.up("Shift");
-    await expect(page.locator(NUM)).toHaveText("1");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(1));
   });
 
   test("the juz axis and the page axis do not spend each other's travel", async ({ page }) => {
@@ -974,7 +975,7 @@ test.describe("Hifth · the wheel", () => {
     await page.waitForTimeout(300);
 
     // Neither threshold reached, so nothing moved at all.
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 });
 
@@ -1273,7 +1274,7 @@ test.describe("Hifth · one page or two, and how big", () => {
 
     // Turn to the next page. The magnification comes with the reader.
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
     await expect.poll(
       () => scaleOf(page, 8),
       "the turn reset the zoom instead of carrying it",
@@ -1282,7 +1283,7 @@ test.describe("Hifth · one page or two, and how big", () => {
 
     // And it keeps carrying, turn after turn — this is reading, not one lucky hop.
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     await expect.poll(() => scaleOf(page, 9)).toBeCloseTo(2, 2);
 
     // Now a hop — the jumper, to an ayah on another page. This is not reading on;
@@ -1296,7 +1297,7 @@ test.describe("Hifth · one page or two, and how big", () => {
     await page.keyboard.press("Enter");
     await expect(jumper).toHaveCount(0);
 
-    const landedPage = Number(await page.locator(NUM).textContent());
+    const landedPage = readPageNumber(await page.locator(NUM).textContent());
     await expect.poll(
       () => scaleOf(page, landedPage),
       "the hop carried the turn's magnification instead of reframing its target",
@@ -1417,7 +1418,7 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
       // 2:49 opens page 8 — the left-hand leaf of the same opening.
       await page.goto("/#/hafs-kfqc/2:49");
       await expect(pageSvg(page, 8)).toBeVisible({ timeout: 20_000 });
-      await expect(page.locator(NUM)).toHaveText("8");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(8));
       await chip(page).click();
       await expect(sheet(page)).toBeVisible();
       expect(
@@ -1437,7 +1438,7 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
       expect(await sideOf(page, sheet(page)), "a passage on the right leaf").toBe("left");
 
       await page.goto("/#/hafs-kfqc/2:52-2:53");
-      await expect(page.locator(NUM)).toHaveText("8");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(8));
       await expect(sheet(page)).toBeVisible();
       expect(await sideOf(page, sheet(page)), "a passage on the left leaf").toBe("right");
     });

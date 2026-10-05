@@ -66,9 +66,9 @@
  * message compiler *refuses* ICU's `#` and `{n, number}` so a second one cannot
  * appear. Messages that count therefore take two arguments: `{n}`, the number, to
  * choose the plural form with, and `{nText}`, the digits already rendered, to
- * print. A bare `{page}` is a raw number and comes out in Latin digits — the
- * deliberate exception, because a page number is read off the corner of the
- * printed mus'haf in both languages.
+ * print. A `{page}` is passed already rendered too, so a page number follows
+ * the chrome like every other figure: ٧ in Arabic, as the printed page's own
+ * foot has it, and 7 in English.
  *
  * ## What is deliberately NOT here
  *
@@ -176,11 +176,11 @@ export interface Strings {
   tagline: string;
   pageWord: string;
   /**
-   * "صفحة 7" / "Page 7" — the stage's accessible name and the page-turn
-   * announcement. Latin digits in *both* languages, and deliberately so: the
-   * page number is the one figure a reader reads off the printed mus'haf's
-   * corner and types into the jumper, and the chrome's own `.numeric` treatment
-   * has always shown it that way. The aria snapshots record «صفحة 7».
+   * "صفحة ٧" / "Page 7" — the stage's accessible name and the page-turn
+   * announcement. In the chrome's own digits, like the foot of the printed
+   * Madani page, which says ٧; this was Latin in both languages until the owner
+   * chose otherwise on 2026-10-05. The jumper reads either spelling back, so a
+   * reader who types 7 still lands. The aria snapshots record «صفحة ٧».
    */
   pageN(page: number): string;
   goTo: string;
@@ -195,9 +195,9 @@ export interface Strings {
   /** Accessible name of the range input inside it. */
   pageChoose: string;
   /**
-   * "صفحة 7 من 604" / "Page 7 of 604" — the slider's readout, and the one place
-   * the app says how long the book is. Latin digits on both numbers, following
-   * `pageN`: they are page numbers, read off the corner of the printed page.
+   * "صفحة ٧ من ٦٠٤" / "Page 7 of 604" — the slider's readout, and the one place
+   * the app says how long the book is. Both numbers in the chrome's digits,
+   * following `pageN`.
    */
   pageOfTotal(page: number, total: number): string;
   prevPage: string;
@@ -523,8 +523,8 @@ export interface Strings {
    *
    * A sentence rather than two strings joined in the component, because the two
    * halves are not in the same order in every language and a `${a} · ${b}` is a
-   * word order decided in TypeScript. Latin page digits, following `pageN` — it
-   * is the figure printed on the corner of the leaf the reader is about to see.
+   * word order decided in TypeScript. The page number in the chrome's digits,
+   * following `pageN`, as printed on the leaf the reader is about to see.
    */
   mapWentTo(label: string, page: number): string;
 
@@ -563,13 +563,13 @@ export interface Strings {
    */
   facingPage: string;
   /**
-   * "صفحة 8 ليست في هذه النسخة" / "Page 8 is not in this build".
+   * "صفحة ٨ ليست في هذه النسخة" / "Page 8 is not in this build".
    *
    * Until Loop 4b only pages 7, 9 and 19 were vendored and they are not
    * adjacent, so every spread had one of these. All 604 now ship, so no spread
    * in `hafs-kfqc` reaches it; the string stays for the next edition, which will
-   * arrive incomplete the way this one did. Latin digits, following `pageN` and
-   * `pageOfTotal`: it is a page number, read off the corner of a printed page.
+   * arrive incomplete the way this one did. The chrome's digits, following
+   * `pageN` and `pageOfTotal`.
    * Said in the document rather than through `LiveAnnouncer` — see PageSpread.
    */
   facingAbsent(page: number): string;
@@ -872,8 +872,8 @@ function localDay(at: number): string {
  *     printed; the compiler rejects the `#` that would print it.
  *   - `nText` / `countText` … — `digits(n, lang)`, the thing that appears on
  *     screen and in the aria-label. One numeral authority, `format.ts`.
- *   - a bare number like `page` — printed as-is, i.e. Latin digits in every
- *     language. Only page numbers do this, and deliberately (see `pageN`).
+ *   - `page` — also `digits(page, lang)`, rendered before it is passed (see
+ *     `pageN`). No message prints a raw number.
  */
 export function buildStrings(lang: Lang, m: Catalog): Strings {
   const locale = LOCALES[lang];
@@ -917,7 +917,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     wordmark: m.wordmark,
     tagline: m.tagline,
     pageWord: m.pageWord,
-    pageN: (page) => m.pageN({ page }),
+    pageN: (page) => m.pageN({ page: n(page) }),
     goTo: m.goTo,
     goToLong: m.goToLong,
     mushaf: m.mushaf,
@@ -926,7 +926,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
 
     pageBar: m.pageBar,
     pageChoose: m.pageChoose,
-    pageOfTotal: (page, total) => m.pageOfTotal({ page, total }),
+    pageOfTotal: (page, total) => m.pageOfTotal({ page: n(page), total: n(total) }),
     // Not swapped for a left-to-right chrome. "Previous" and "next" here mean
     // earlier and later in the mus'haf, and the mus'haf runs right to left in
     // every UI language — the bar is scripture furniture, so its edges keep the
@@ -935,9 +935,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     nextPage: m.nextPage,
     pagesVendored: (have, total) => m.pagesVendored({ haveText: n(have), totalText: n(total) }),
 
-    firstPage: (page) => m.firstPage({ page }),
-    lastPage: (page) => m.lastPage({ page }),
-    nearestPageN: (page) => m.nearestPageN({ page }),
+    firstPage: (page) => m.firstPage({ page: n(page) }),
+    lastPage: (page) => m.lastPage({ page: n(page) }),
+    nearestPageN: (page) => m.nearestPageN({ page: n(page) }),
     // Full speed is spelled `other`: ICU requires one, and a fifth case that
     // repeats it could drift from it.
     scrubSpeed: (speed) => m.scrubSpeed({ speed: speed === "full" ? "other" : speed }),
@@ -947,12 +947,12 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     highlighted: (span) => m.highlighted({ span }),
     wordHops: (matches, unjudged) =>
       m.wordHops({ n: matches, nText: n(matches), u: unjudged, uText: n(unjudged) }),
-    hoppedTo: (label, page) => m.hoppedTo({ label, page }),
-    backTo: (label, page) => m.backTo({ label, page }),
+    hoppedTo: (label, page) => m.hoppedTo({ label, page: n(page) }),
+    backTo: (label, page) => m.backTo({ label, page: n(page) }),
     arrivedVia: via,
-    arrivedPage: (origin, page) => m.arrivedPage({ via: via(origin), page }),
-    arrivedRange: (origin, ref, page) => m.arrivedRange({ via: via(origin), ref, page }),
-    arrivedAyah: (origin, label, page) => m.arrivedAyah({ via: via(origin), label, page }),
+    arrivedPage: (origin, page) => m.arrivedPage({ via: via(origin), page: n(page) }),
+    arrivedRange: (origin, ref, page) => m.arrivedRange({ via: via(origin), ref, page: n(page) }),
+    arrivedAyah: (origin, label, page) => m.arrivedAyah({ via: via(origin), label, page: n(page) }),
     rangeUnavailable: m.rangeUnavailable,
     ayahUnavailable: m.ayahUnavailable,
     noConcordance: m.noConcordance,
@@ -1164,7 +1164,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
 
     mapTitle: m.mapTitle,
     mapCaveat: m.mapCaveat,
-    mapOpen: (page) => m.mapOpen({ page }),
+    mapOpen: (page) => m.mapOpen({ page: n(page) }),
     mapScopeGroup: m.mapScopeGroup,
     scopePage: m.scopePage,
     scopeHizb: m.scopeHizb,
@@ -1211,7 +1211,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         when: days <= 0 ? "today" : days === 1 ? "yesterday" : "other",
         daysText: n(days),
       }),
-    mapWentTo: (label, page) => m.mapWentTo({ label, page }),
+    mapWentTo: (label, page) => m.mapWentTo({ label, page: n(page) }),
 
     packsHead: m.packsHead,
     packsHint: m.packsHint,
@@ -1234,7 +1234,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     packAbsent: (ayahs) => m.packAbsent({ n: ayahs, nText: n(ayahs) }),
 
     facingPage: m.facingPage,
-    facingAbsent: (page) => m.facingAbsent({ page }),
+    facingAbsent: (page) => m.facingAbsent({ page: n(page) }),
     keyPages: m.keyPages,
     keyJump: m.keyJump,
     spreadSectionTitle: m.spreadSectionTitle,
@@ -1247,7 +1247,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     zoomOut: m.zoomOut,
     zoomLevel: (percent) => m.zoomLevel({ pctText: n(percent) }),
     arrivedZoom: (percent) => m.arrivedZoom({ pctText: n(percent) }),
-    arrivedJuz: (juz, page) => m.arrivedJuz({ juzText: n(juz), page }),
+    arrivedJuz: (juz, page) => m.arrivedJuz({ juzText: n(juz), page: n(page) }),
     juzEdge: (juz) => m.juzEdge({ juzText: n(juz) }),
 
     bmDrop: m.bmDrop,
@@ -1274,13 +1274,13 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     bmDropped: (name) => m.bmDropped({ name }),
     bmLifted: (name) => m.bmLifted({ name }),
     bmRenamed: (name) => m.bmRenamed({ name }),
-    bmMoved: (name, page) => m.bmMoved({ name, page }),
+    bmMoved: (name, page) => m.bmMoved({ name, page: n(page) }),
     bmNotSaved: m.bmNotSaved,
     bmHead: m.bmHead,
     bmCount: (count) => m.bmCount({ n: count, nText: n(count) }),
     bmGroup: (surah, count) =>
       m.bmGroup({ surah: fmtSurahName(surah, lang), nText: n(count) }),
-    bmOpen: (name, page) => m.bmOpen({ name, page }),
+    bmOpen: (name, page) => m.bmOpen({ name, page: n(page) }),
     bmClear: m.bmClear,
     bmClearSurahAria: (surah) => m.bmClearSurahAria({ surah: fmtSurahName(surah, lang) }),
     bmClearAll: m.bmClearAll,
@@ -1461,8 +1461,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     jumpShelfEmpty: m.jumpShelfEmpty,
     jumpPair: (from, to) => m.jumpPair({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
     jumpPairUnsure: (from) => m.jumpPairUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
-    cropTitle: (page) => m.cropTitle({ page }),
-    cropCaption: (page) => m.cropCaption({ page }),
+    cropTitle: (page) => m.cropTitle({ page: n(page) }),
+    cropCaption: (page) => m.cropCaption({ page: n(page) }),
     cropShare: m.cropShare,
     cropSave: m.cropSave,
     cropClose: m.cropClose,

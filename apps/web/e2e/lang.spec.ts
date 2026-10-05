@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { LANG_STORAGE_KEY } from "../src/lang";
+import { pageNumber } from "./page-number";
 
 /*
  * The chrome speaks English, and the mus'haf still reads right to left.
@@ -92,11 +93,11 @@ test.describe("Hifth · language", () => {
     // backwards. The digits are Latin here and Arabic-Indic there, which is why
     // this is a second assertion rather than a locale parameter on the first.
     const pageNum = "header .numeric";
-    await expect(page.locator(pageNum)).toHaveText("7");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(7));
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(pageNum)).toHaveText("8");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(8));
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator(pageNum)).toHaveText("7");
+    await expect(page.locator(pageNum)).toHaveText(pageNumber(7));
   });
 
   test("the switch is in the colophon, and the choice survives a reload", async ({ page }) => {
@@ -172,6 +173,18 @@ test.describe("Hifth · language", () => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  });
+
+  test("in Arabic the page number at the top is in Arabic digits, like the page's own", async ({ page }) => {
+    // The chip read «صفحة 7» while the page's own foot, the count under the
+    // page bar and every other number in the chrome read ٧: it printed the
+    // number as it was, without the one formatter every other number uses.
+    await page.goto("/?lang=ar#/hafs-kfqc/p7");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    const chip = page.getByRole("button", { name: /^صفحة ٧ · / });
+    await expect(chip).toBeVisible();
+    await expect(chip).toContainText("٧");
+    await expect(chip).not.toContainText("7");
   });
 
   test("an unknown ?lang= is ignored, and the device's language stands", async ({ page }) => {

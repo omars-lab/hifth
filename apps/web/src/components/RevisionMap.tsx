@@ -677,15 +677,14 @@ export function RevisionMap({
                           ? t.mapCellSeen(label(id), days)
                           : t.mapCellNever(label(id)),
                 };
-                // The division's own number, drawn in the cell. A page number is
-                // Latin in both languages — it is read off the corner of the
-                // printed page, the same rule `pageN` follows — while a hizb or
-                // juz number takes the language's digits. `aria-hidden`: the
+                // The division's own number, drawn in the cell, in the chrome's
+                // own digits whatever the scope — the same rule `pageN` follows,
+                // because the printed page's foot says ٧ too. `aria-hidden`: the
                 // cell's `aria-label` already says the number in a full sentence,
                 // so the glyph is for the eye only and must not be read twice.
                 const num = (
                   <span className={styles.num} aria-hidden="true">
-                    {scope === "page" ? String(id) : t.num(id)}
+                    {t.num(id)}
                   </span>
                 );
                 // No paper behind it, so nothing to press — and no button, which
