@@ -182,8 +182,19 @@ export function CommentarySheet({
     }
     // The short height is worked out, not read off the box: the box may still be
     // easing down from the previous verse's grown note.
-    const report = () =>
+    const report = () => {
+      // A card in the corner beside one page covers nothing on it: claiming
+      // the window's foot anyway slid the page up under the toolbar.
+      const paper = [...document.querySelectorAll('[data-live="true"] [data-host-page]')]
+        .map((host) => host.getBoundingClientRect())
+        .find((box) => box.width > 0);
+      const card = sheet.getBoundingClientRect();
+      if (paper && (card.left >= paper.right || card.right <= paper.left)) {
+        onCover(null);
+        return;
+      }
       onCover(window.innerHeight - Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE));
+    };
     report();
     window.addEventListener("resize", report);
     return () => window.removeEventListener("resize", report);
