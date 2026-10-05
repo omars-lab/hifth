@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { RailGlyph } from "./RailGlyph";
 import styles from "./VerseMenu.module.css";
 
 /** One line of the small menu: its words, and what it does. */
@@ -137,7 +138,7 @@ export function VerseMenu({ name, around, items, onClose, stacked = false }: Ver
         >
           {item.glyph !== undefined && (
             <span className={styles.glyph} aria-hidden="true" data-glyph="">
-              {item.glyph}
+              <RailGlyph glyph={item.glyph} />
             </span>
           )}
           <span data-caption="">{item.caption}</span>

@@ -10,6 +10,7 @@ import { useT } from "../i18n";
 // Loaded the first time a look-alike is opened out (see ./later.tsx).
 import { DiffView } from "./later";
 import styles from "./HopPopover.module.css";
+import { RailGlyph } from "./RailGlyph";
 
 interface HopPopoverProps {
   /** The open chip's bucket, or null when closed. */
@@ -134,7 +135,7 @@ export function HopPopover({
         <div className={styles.grip} aria-hidden="true" />
         <header className={styles.head}>
           <span className={styles.glyph} aria-hidden="true">
-            {chip.glyph}
+            <RailGlyph glyph={chip.glyph} />
           </span>
           <h2 className={styles.title}>{title}</h2>
           <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>

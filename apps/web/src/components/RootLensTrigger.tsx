@@ -30,7 +30,7 @@ interface RootLensTriggerProps {
  * counted the *corpus-wide* root families (1,642 roots). Same glyph, two counts,
  * and a hafiz has every reason to read one as a subset of the other — which
  * neither the data nor the curation can promise. The rail's other three chips
- * are directions of one edge type (↻ same surah, ◀ earlier, ▶ later); ⬡ was a
+ * are directions of one edge type (≈↻ same surah, ≈← earlier, ≈→ later); ⬡ was a
  * *type* wearing a direction's clothes and never belonged there.
  *
  * So: the rail is mutashabihat by direction, full stop, and ⬡ means roots, in

@@ -1,0 +1,12 @@
+.glyph {
+  display: inline-flex;
+  align-items: center;
+  unicode-bidi: isolate;
+}
+
+/* The direction, small and tucked against the sign, so the chip stays about
+   as narrow as it was when it wore only an arrow. */
+.mark {
+  font-size: 0.72em;
+  margin-inline-start: 0.05em;
+}
