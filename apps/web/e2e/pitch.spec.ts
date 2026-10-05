@@ -194,11 +194,34 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     for (const text of texts) expect(text).not.toContain("cross-references from here");
   });
 
+  test("the similar-verse buttons hold only look-alikes; the book's cross-references stay in the note", async ({
+    page,
+  }) => {
+    // 2:48 reads almost word for word like 2:122 and 2:123; the book also
+    // cross-references it to 2:255 and 2:184 by meaning, and to 82:19, which
+    // the app already links with its own line.
+    await page.goto("/#/hafs-kfqc/2:48");
+    await expect(page.getByRole("dialog", { name: /2:48/ })).toBeVisible({ timeout: 20_000 });
+    const roads = sheet(page).getByRole("button", { name: /Hop to/ });
+    await expect(roads.first()).toBeVisible();
+    const names = await roads.evaluateAll((els) => els.map((e) => e.getAttribute("aria-label") ?? ""));
+    expect(names.some((n) => /2:255\b/.test(n)), "the book's cross-reference is in the note").toBe(true);
+    expect(names.filter((n) => /82:19\b/.test(n)), "82:19 is listed once").toHaveLength(1);
+
+    await page.locator('button[data-direction="loop"]').click();
+    const list = page.getByRole("dialog", { name: /this surah/i });
+    await expect(list).toBeVisible();
+    const rows = await list.getByRole("listitem").allInnerTexts();
+    expect(rows.join(" | ")).toMatch(/2:122/);
+    expect(rows.join(" | ")).toMatch(/2:123/);
+    expect(rows.join(" | ")).not.toMatch(/2:255|2:184/);
+  });
+
   test("a note on the right leaves the look-alike chips in sight and in reach", async ({ page }) => {
-    // 2:255 sits on the left leaf, so its note lands on the right — the same
-    // corner the look-alike chips live in. They used to peek out from under it.
-    await page.goto("/#/hafs-kfqc/2:255");
-    await expect(page.getByRole("dialog", { name: /2:255/ })).toBeVisible({ timeout: 20_000 });
+    // 2:49 sits on the left leaf, so its note lands on the right — the same
+    // side the look-alike chips live on. They used to peek out from under it.
+    await page.goto("/#/hafs-kfqc/2:49");
+    await expect(page.getByRole("dialog", { name: /2:49/ })).toBeVisible({ timeout: 20_000 });
     expect(await sheet(page).getAttribute("data-side")).toBe("right");
 
     // Measure the note at rest, not mid-way through its slide in.
@@ -353,9 +376,10 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
   test("a look-alike list takes the note's place, and closing it brings the note back", async ({ page }) => {
     // One drawer for a verse at a time. Tapping a look-alike chip while the note
     // was open used to stack the list's sheet on top of the note's, squeezing
-    // the page to a sliver with two of seven look-alikes in reach.
-    await page.goto("/#/hafs-kfqc/2:255");
-    const note = page.getByRole("dialog", { name: /2:255/ });
+    // the page to a sliver with two of seven look-alikes in reach. 2:49 has
+    // look-alikes in later surahs (7:141, 14:6).
+    await page.goto("/#/hafs-kfqc/2:49");
+    const note = page.getByRole("dialog", { name: /2:49/ });
     await expect(note).toBeVisible({ timeout: 20_000 });
 
     await page.locator('button[data-direction="later"]').click();
@@ -371,7 +395,9 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     // used to put its first line right at the top — under the hop chips that
     // float in the top corner. The reader was shown the verse with its opening
     // words covered by the very buttons that lead away from it (native-shell ⑩).
-    await page.goto("/#/hafs-kfqc/2:255");
+    // 2:54 is a verse of several lines, mid-page, with look-alikes (so it has
+    // chips) and a note that lifts it.
+    await page.goto("/#/hafs-kfqc/2:54");
     await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
     await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
     const rail = page.getByRole("group", { name: "Links from this ayah" });
@@ -550,8 +576,9 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     const items = menu(page).getByRole("menuitem");
     const item = (name: RegExp) => menu(page).getByRole("menuitem", { name });
     await expect(item(/^Commentary/)).toContainText("Study Quran");
-    await expect(item(/^Similar verses in earlier surahs/)).toHaveCount(1);
-    await expect(item(/^Similar verses in later surahs/)).toHaveCount(1);
+    // 36:12 reads like no other verse, so there is no similar-verses line:
+    // the book's cross-references are in its note, not dressed as look-alikes.
+    await expect(item(/^Similar verses/)).toHaveCount(0);
     await expect(item(/^Same roots/)).toHaveCount(1);
     await expect(item(/^Listen/)).toHaveCount(1);
     await expect(item(/^Surah introduction/)).toHaveCount(1);
@@ -559,12 +586,6 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     // already uses for the same thing in the verse's tools and its rail.
     const icon = (name: RegExp) => item(name).locator("[data-glyph]");
     await expect(icon(/^Commentary/)).toHaveText("✎");
-    // Similar verses wear "looks like" with a small mark for which way, the
-    // same as their buttons on the page's edge: a bare arrow said where, not
-    // what, and the later one was the very triangle that means listen (owner,
-    // 2026-10-04).
-    await expect(icon(/^Similar verses in earlier surahs/)).toHaveText("≈←");
-    await expect(icon(/^Similar verses in later surahs/)).toHaveText("≈→");
     await expect(icon(/^Same roots/)).toHaveText("⬡");
     await expect(icon(/^Listen/)).toHaveText("▶");
     await expect(items.locator("[data-glyph]").filter({ hasText: "▶" })).toHaveCount(1);
@@ -600,11 +621,34 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     await expect(sheet(page).getByRole("region", { name: "Commentary" })).toBeVisible();
   });
 
+  // 36:31, two pages on, reads like verses both before and after it in the
+  // mus'haf, so its menu has both similar-verses lines.
+  const LOOKS = "quran/hafs-kfqc/36:31";
+  const openLooksMenu = async (page: Page) => {
+    await page.goto("/#/hafs-kfqc/p442");
+    const n = pageSvg(page, 442).locator(`[data-verse-number][data-verse-key="${LOOKS}"]`);
+    await expect(n).toBeVisible({ timeout: 20_000 });
+    await n.focus();
+    await page.keyboard.press("Enter");
+    const m = page.getByRole("menu", { name: /36:31/ });
+    await expect(m).toBeVisible();
+    return m;
+  };
+
+  test("similar verses each have a line, with the rail's own icon", async ({ page }) => {
+    const m = await openLooksMenu(page);
+    const icon = (name: RegExp) => m.getByRole("menuitem", { name }).locator("[data-glyph]");
+    // Similar verses wear "looks like" with a small mark for which way, the
+    // same as their buttons on the page's edge: a bare arrow said where, not
+    // what, and the later one was the very triangle that means listen (owner,
+    // 2026-10-04).
+    await expect(icon(/^Similar verses in earlier surahs/)).toHaveText("≈←");
+    await expect(icon(/^Similar verses in later surahs/)).toHaveText("≈→");
+  });
+
   test("picking similar verses opens that list, not the note", async ({ page }) => {
-    await page.goto("/#/hafs-kfqc/p440");
-    await expect(number(page)).toBeVisible({ timeout: 20_000 });
-    await press(page);
-    await menu(page).getByRole("menuitem", { name: /^Similar verses in later surahs/ }).click();
+    const m = await openLooksMenu(page);
+    await m.getByRole("menuitem", { name: /^Similar verses in later surahs/ }).click();
     await expect(page.getByRole("dialog", { name: /later/i })).toBeVisible();
     await expect(page.getByRole("region", { name: "Commentary" })).toHaveCount(0);
   });

@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { introFor, makePitchProvider, pitchEntries, STUDY_QURAN, type PitchSurah } from "./pitch";
+import type { AdjacencyShard, Edge } from "@hifth/core";
+import {
+  introFor,
+  makePitchProvider,
+  mergeShard,
+  pitchEntries,
+  STUDY_QURAN,
+  withBookRefs,
+  type PitchSurah,
+} from "./pitch";
 
 // A made-up surah: the shape of the private file, none of its words.
 const surah: PitchSurah = {
@@ -52,5 +61,49 @@ describe("pitch · introFor", () => {
     expect(introFor(null, "quran/hafs-kfqc/2:1", true)).toBeNull();
     expect(introFor(surah, null, true)).toBeNull();
     expect(introFor({ ...surah, intro: [] }, "quran/hafs-kfqc/2:1", true)).toBeNull();
+  });
+});
+
+// Made-up edges: verse numbers only, none of the book's words.
+const k = (ref: string) => `quran/hafs-kfqc/${ref}`;
+const edge = (to: string, extra: Partial<Edge> = {}): Edge => ({
+  type: "mutashabih",
+  to: k(to),
+  page: 1,
+  dir: { dSurah: 0, dPage: 0 },
+  ...extra,
+});
+const bookRef = (to: string): Edge =>
+  edge(to, { type: "related-meaning", src: "study-quran-xref", note: "a line" });
+
+describe("pitch · the book's cross-references stay in the note", () => {
+  const base: AdjacencyShard = {
+    "48": { edges: [edge("2:122"), edge("82:19", { type: "related-meaning", note: "ours" })], ext: [] },
+  };
+  const pitch: AdjacencyShard = {
+    "48": { edges: [bookRef("2:255"), bookRef("82:19")], ext: [] },
+    "1": { edges: [edge("10:10", { type: "related-meaning", src: "study-quran-meaning" })], ext: [] },
+  };
+
+  it("the similar-verse buttons get none of the book's cross-references", () => {
+    // A cross-reference is linked by meaning, not wording; under a button that
+    // says "looks like" it sends a hafiz hunting for a trap that is not there.
+    const merged = mergeShard(base, pitch);
+    expect(merged["48"]!.edges.map((e) => e.to)).toEqual([k("2:122"), k("82:19")]);
+  });
+
+  it("the demo's own hand-picked roads still join them", () => {
+    expect(mergeShard(base, pitch)["1"]!.edges.map((e) => e.to)).toEqual([k("10:10")]);
+  });
+
+  it("the note lists each related verse once, keeping the app's own line over the book's", () => {
+    const merged = mergeShard(base, pitch);
+    const roads = withBookRefs(merged["48"]!.edges, pitch["48"]);
+    expect(roads.map((e) => e.to)).toEqual([k("2:122"), k("82:19"), k("2:255")]);
+    expect(roads.find((e) => e.to === k("82:19"))!.note).toBe("ours");
+  });
+
+  it("a verse the book does not cross-reference keeps just its own roads", () => {
+    expect(withBookRefs([edge("2:122")], undefined).map((e) => e.to)).toEqual([k("2:122")]);
   });
 });
