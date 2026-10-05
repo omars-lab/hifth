@@ -26,6 +26,47 @@ test.describe("Hifth · the hop", () => {
     await expect(chip).not.toContainText("▶");
   });
 
+  // On a phone the page fills the screen's width, so the page's top corner,
+  // where the chips used to float, is where the first line's opening words
+  // are: 2:49 opens page 8, and its first word sat under the chip. The chips
+  // now stand in the strip at the top of the page, between the surah's name
+  // and the juz, which holds no words at all. 6:21 has three chips, the most
+  // any verse has, and sits on a left-hand page, whose paper is not centred
+  // on the screen; English labels are the longer ones.
+  test("on a phone the chips stand in the page's top strip, clear of the first line and both labels", async ({ page }) => {
+    const cases = [["2:49", "#verse-56"], ["6:21", null]] as const;
+    for (const [lang, [key, verse]] of ["ar", "en"].flatMap((l) => cases.map((c) => [l, c] as const))) {
+      await page.goto(`/?lang=${lang}#/hafs-kfqc/${key}`);
+      const rail = page.getByRole("group").filter({ has: page.locator("button[data-direction]") });
+      await expect(rail).toBeVisible();
+      // The running heads are printed once the page has drawn, which can be
+      // a beat after the chips arrive.
+      const boxOf = async (which: string) => {
+        const label = page.locator(`[data-running-head="${which}"]:visible`).first();
+        await expect(label).not.toBeEmpty();
+        return (await label.boundingBox())!;
+      };
+      const surah = await boxOf("surah");
+      const juz = await boxOf("juz");
+      const chips = rail.getByRole("button");
+      expect(await chips.count()).toBeGreaterThan(verse ? 0 : 2);
+      const top = verse ? (await page.locator(verse).boundingBox())!.y : Infinity;
+      for (const chip of await chips.all()) {
+        const box = (await chip.boundingBox())!;
+        expect(box.x, `${lang} ${key}: clear of the surah's name`).toBeGreaterThanOrEqual(surah.x + surah.width);
+        expect(box.x + box.width, `${lang} ${key}: clear of the juz`).toBeLessThanOrEqual(juz.x);
+        expect(box.y + box.height, `${lang} ${key}: above the first line`).toBeLessThanOrEqual(top);
+        // Drawn slim, still a whole thumb's worth to tap: a point 8px above
+        // the pill is the chip's.
+        const hit = await page.evaluate(
+          ([x, y]) => document.elementFromPoint(x!, y!)?.closest("button[data-direction]") !== null,
+          [box.x + box.width / 2, box.y - 8],
+        );
+        expect(hit, `${lang} ${key}: a tap just above the pill still lands`).toBe(true);
+      }
+    }
+  });
+
   test("tap 2:48 → rail → popover → cross-page hop to 2:123 → bead back", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']")).toBeVisible();
