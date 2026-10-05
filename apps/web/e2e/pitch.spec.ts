@@ -260,6 +260,28 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(page.getByRole("dialog", { name: /2:140/ })).toBeVisible();
   });
 
+  test("in English the drawer reads left to right, though it lies on the right-to-left page", async ({ page }) => {
+    // It inherited the mus'haf's direction, so the line under the credit read
+    // ".Shown privately, …" — its full stop in front — and sat against the
+    // right edge, and the close button sat at the left end.
+    await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+    const note = sheet(page);
+    await expect(note).toBeVisible({ timeout: 20_000 });
+    expect(await note.evaluate((el) => getComputedStyle(el).direction)).toBe("ltr");
+
+    const close = (await note.getByRole("button", { name: "Close" }).boundingBox())!;
+    const title = (await note.getByRole("heading", { level: 2 }).boundingBox())!;
+    expect(close.x).toBeGreaterThan(title.x);
+
+    const line = note.locator("footer").getByText("Shown privately", { exact: false });
+    const gap = await line.evaluate((el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return range.getClientRects()[0]!.left - el.getBoundingClientRect().left;
+    });
+    expect(gap).toBeLessThan(2);
+  });
+
   test("a note ends on its words, not on the book's section-break stars", async ({ page }) => {
     // 573 notes closed with the print's "* * *" divider, copied in as text.
     await page.goto("/#/hafs-kfqc/1:1");
