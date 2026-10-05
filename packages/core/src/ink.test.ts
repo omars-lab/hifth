@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  LIFT,
   OVERHANG,
   fitSwipesToText,
   textSpanOf,
@@ -37,20 +38,28 @@ const VERSE_2_249 = "M0 6.3h345v36H0Zm0 36h345v218.4H0Zm233.4 218.4H345v36H233.4
 const VERSE_10_44 = "M0 45h345v35.8H0Zm259.7 35.8H345v35.8h-85.4Z";
 
 describe("swipesFromPath", () => {
-  it("lays one swipe per line, centred in the line box", () => {
+  // Owner, 2026-10-04: the bands sat a touch low on the words. Each is lifted
+  // 2.5% of its line's height above the line's middle.
+  it("lifts each band 2.5% of its line above the line's middle", () => {
+    const [s] = swipesFromPath("M0 0h100v40H0Z")!;
+    expect(s.y).toBeCloseTo(20 - 0.025 * 40, 5);
+    expect(s.width).toBeCloseTo(40 * 0.72, 5);
+  });
+
+  it("lays one swipe per line, at the middle of the line box less the lift", () => {
     const swipes = swipesFromPath(VERSE_45);
     expect(swipes).toHaveLength(2);
 
-    // Line 1: y 8.5 → 46.5, so the centreline is at 27.5 and the band is
+    // Line 1: y 8.5 → 46.5, so the middle is at 27.5 (lifted 2.5% of 38) and the band is
     // 0.72 × 38 = 27.36 thick.
-    expect(swipes![0].y).toBeCloseTo(27.5, 5);
+    expect(swipes![0].y).toBeCloseTo(27.5 - LIFT * 38, 5);
     expect(swipes![0].width).toBeCloseTo(27.36, 5);
 
     // Line 2 is a RELATIVE sub-path (`m79.5 38`), continuing from the previous
     // sub-path's start at (0, 8.5) — so it begins at y 46.5, not y 38. Getting
     // this wrong shifts the second line's ink by 8.5 units, which looks like a
     // rendering nudge rather than a bug, hence an assertion.
-    expect(swipes![1].y).toBeCloseTo(46.5 + 38.2 / 2, 5);
+    expect(swipes![1].y).toBeCloseTo(46.5 + 38.2 / 2 - LIFT * 38.2, 5);
   });
 
   it("insets the caps so ink never crosses into the neighbouring ayah", () => {
@@ -74,7 +83,7 @@ describe("swipesFromPath", () => {
 
   it("handles absolute closing runs and reversed coordinate order", () => {
     const [s] = swipesFromPath("M10 20H60V50H10Z")!;
-    expect(s.y).toBeCloseTo(35, 5);
+    expect(s.y).toBeCloseTo(35 - LIFT * 30, 5);
     expect(s.width).toBeCloseTo(30 * 0.72, 5);
   });
 
@@ -183,7 +192,7 @@ describe("splitting a fused multi-line rectangle", () => {
     const middle = swipes.slice(1, 7);
     const step = 218.4 / 6;
     middle.forEach((s, i) => {
-      expect(s.y).toBeCloseTo(42.3 + (i + 0.5) * step, 5);
+      expect(s.y).toBeCloseTo(42.3 + (i + 0.5 - LIFT) * step, 5);
     });
   });
 
@@ -193,8 +202,8 @@ describe("splitting a fused multi-line rectangle", () => {
     // why the height is a page fact passed in, not one read off the ayah.
     const swipes = swipesFromPath("M0 0h345v72H0Z", LINE)!;
     expect(swipes).toHaveLength(2);
-    expect(swipes[0].y).toBeCloseTo(18, 5);
-    expect(swipes[1].y).toBeCloseTo(54, 5);
+    expect(swipes[0].y).toBeCloseTo(18 - LIFT * 36, 5);
+    expect(swipes[1].y).toBeCloseTo(54 - LIFT * 36, 5);
   });
 
   it("leaves a normal short ayah untouched — 38 against a 36 line is one line", () => {
@@ -250,7 +259,7 @@ describe("joining the swipes of a passage line by line", () => {
     const half = (38.2 * 0.72) / 2;
     expect(shared.x1).toBeCloseTo(0 + half);
     expect(shared.x2).toBeCloseTo(345 - half);
-    expect(shared.y).toBeCloseTo(46.5 + 38.2 / 2);
+    expect(shared.y).toBeCloseTo(46.5 + 38.2 / 2 - LIFT * 38.2);
   });
 
   it("keeps bands on different lines apart, top to bottom, whatever order they came in", () => {
