@@ -282,6 +282,30 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(gap).toBeLessThan(2);
   });
 
+  test("with one page showing, a note in the corner beside it leaves the page where it was", async ({ page }) => {
+    // The note reported itself as covering the foot of the window whenever it
+    // was not on a facing leaf, so the page slid up about 300px under the
+    // toolbar to clear a card that sat well off to its side.
+    await page.goto("/#/hafs-kfqc/p42");
+    await expect(pageSvg(page, 42)).toBeVisible({ timeout: 20_000 });
+    await page.getByRole("radio", { name: "One page" }).click();
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    const paper = page.locator('[data-live="true"] [data-host-page]:visible');
+    await settle(paper);
+    const before = (await paper.boundingBox())!;
+
+    // A tap, not a link: a link frames its verse magnified, which moves the
+    // page for its own reason.
+    await verse(page, 42, 263).click();
+    await expect(sheet(page)).toBeVisible();
+    await settle(sheet(page));
+    const card = (await sheet(page).boundingBox())!;
+    expect(card.x).toBeGreaterThan(before.x + before.width);
+    await settle(paper);
+    const after = (await paper.boundingBox())!;
+    expect(Math.abs(after.y - before.y)).toBeLessThan(2);
+  });
+
   test("a note ends on its words, not on the book's section-break stars", async ({ page }) => {
     // 573 notes closed with the print's "* * *" divider, copied in as text.
     await page.goto("/#/hafs-kfqc/1:1");
