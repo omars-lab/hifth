@@ -306,6 +306,29 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(Math.abs(after.y - before.y)).toBeLessThan(2);
   });
 
+  test("switching to one page with a note open leaves the page where it was", async ({ page }) => {
+    // The note on the facing leaf moves to the corner card when the book closes
+    // to one page. It worked out what it covered at once, while the book was
+    // still two pages wide, and never looked again, so the page stayed slid up
+    // under the toolbar for a card that sat off to its side. 2:28 sits near
+    // the foot of its page, where a note claiming the foot lifts it.
+    await page.goto("/#/hafs-kfqc/2:28");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await settle(sheet(page));
+    await page.getByRole("radio", { name: "One page" }).click();
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    const paper = page.locator('[data-live="true"] [data-host-page]:visible');
+    await settle(sheet(page));
+    await settle(paper);
+    const open = (await paper.boundingBox())!;
+
+    await sheet(page).getByRole("button", { name: "Close" }).click();
+    await expect(sheet(page)).toHaveCount(0);
+    await settle(paper);
+    const closed = (await paper.boundingBox())!;
+    expect(Math.abs(open.y - closed.y)).toBeLessThan(2);
+  });
+
   test("a note ends on its words, not on the book's section-break stars", async ({ page }) => {
     // 573 notes closed with the print's "* * *" divider, copied in as text.
     await page.goto("/#/hafs-kfqc/1:1");
@@ -331,6 +354,18 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(page.getByRole("dialog", { name: /6:153/ })).toBeVisible();
     // And it is a real note, not an empty shell — its commentary is present.
     await expect(sheet(page)).toContainText("The Study Quran");
+  });
+
+  test("a related verse's note starts at its top, not where the last one was scrolled to", async ({ page }) => {
+    // The list of related verses sits at the foot of a note, so reaching it
+    // scrolls the note down. Following one turned the note to the new verse
+    // but left it scrolled down, so the reader landed in the middle of a note
+    // they had not started.
+    await page.goto("/#/hafs-kfqc/2:258");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    await sheet(page).getByRole("button", { name: /Hop to .*2:28/ }).click();
+    await expect(page.getByRole("dialog", { name: /2:28/ })).toBeVisible();
+    await expect.poll(() => sheet(page).evaluate((el) => el.scrollTop)).toBe(0);
   });
 });
 
