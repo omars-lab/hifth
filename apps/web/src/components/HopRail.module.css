@@ -21,6 +21,36 @@
   inset-inline-end: var(--space-3);
 }
 
+/*
+ * On the desk beside the book: pinned to the side nearest the page, so the
+ * chips stand just outside the paper's outer edge, level with its head. Said
+ * physically, because the desk's sides are the book's sides, not the reading
+ * direction's.
+ */
+.rail[data-beside] {
+  inset-inline: auto;
+}
+.rail[data-beside="right"] {
+  left: var(--space-3);
+}
+.rail[data-beside="left"] {
+  right: var(--space-3);
+}
+
+/* No desk to stand in — the pages fill a tall, narrow window — so the chips
+   go back to the page's own top corner, the way a phone has them: anchored to
+   the window's edge and reaching in over the paper. */
+@container desk (max-width: 96px) {
+  .rail[data-beside="right"] {
+    left: auto;
+    right: var(--space-3);
+  }
+  .rail[data-beside="left"] {
+    right: auto;
+    left: var(--space-3);
+  }
+}
+
 .chip {
   pointer-events: auto;
   display: flex;

@@ -2950,6 +2950,24 @@ export function App(): JSX.Element {
   const revisionMounted = useOpenedOnce(revisionOpen);
   const drawerMounted = useOpenedOnce(drawerBookmark !== null);
 
+  /* The look-alike chips. One rail, placed by whoever renders it: the stage's
+     corner on a phone, the desk beside the live page above the breakpoint. */
+  const hopRail = (beside?: "left" | "right") => (
+    <HopRail
+      chips={railChips}
+      openDirection={openDirection}
+      onOpenChip={(chip) =>
+        setOpenDirection((d) => (d === chip.direction ? null : chip.direction))
+      }
+      // The pitch note for a left-leaf verse lands on the right, over the
+      // rail's corner; the chips cross to the left while it is up. Beside the
+      // book there is no corner to share: the note rises over the other leaf.
+      crossed={!beside && COMMENTARY && commentaryOpen && hasCommentary && sheetSide === "right"}
+      onBand={setRailBottom}
+      beside={beside}
+    />
+  );
+
   return (
     // The chrome reads in the UI language's direction — every offset in the
     // stylesheet is a logical property, so the flip is the whole change. What
@@ -3130,6 +3148,9 @@ export function App(): JSX.Element {
                  book with two outer edges to grab; the phone still turns by
                  swiping the leaf itself, so it gets no rails and keeps its
                  gesture. */
+              /* The look-alike chips, on the desk just outside the live page's
+                 outer edge rather than out at the window's corner. */
+              beside={(side) => hopRail(side)}
               edgeRails={
                 desktop ? (
                   <EdgeGrabRails
@@ -3296,17 +3317,10 @@ export function App(): JSX.Element {
                 onCrop={setCrop}
               />
             </PageSpread>
-            <HopRail
-              chips={railChips}
-              openDirection={openDirection}
-              onOpenChip={(chip) =>
-                setOpenDirection((d) => (d === chip.direction ? null : chip.direction))
-              }
-              // The pitch note for a left-leaf verse lands on the right, over
-              // the rail's corner; the chips cross to the left while it is up.
-              crossed={COMMENTARY && commentaryOpen && hasCommentary && sheetSide === "right"}
-              onBand={setRailBottom}
-            />
+            {/* On a phone the chips float in the stage's top corner. Above the
+                breakpoint the spread places them itself, on the desk beside the
+                live page (`beside`, above). */}
+            {!desktop && hopRail()}
             <HopPopover
               chip={openChip}
               fromKey={selectedKey}

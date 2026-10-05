@@ -2075,3 +2075,50 @@ async function tapAyahAt(page: Page, selector: string): Promise<void> {
   const at = await ayahTarget(page, selector);
   await page.mouse.click(at.x, at.y);
 }
+
+test.describe("Hifth · the look-alike chips sit beside their page", () => {
+  /*
+   * The chips that lead to similar verses used to float in the window's top
+   * corner. On a phone that corner is the page's corner; on a wide screen it is
+   * out on the desk, ~270 px from the book, so the buttons for a verse sat a
+   * long way from the verse. They now sit in the desk just outside the outer
+   * edge of the page the verse is on — on the right of the book for a
+   * right-hand page, on the left for a left-hand one.
+   */
+  // Found by what is in it, not by its name: these runs read in either language.
+  const rail = (page: Page): Locator =>
+    page.getByRole("group").filter({ has: page.locator("button[data-direction]") });
+
+  for (const { at, pageNo, side } of [
+    { at: "2:48", pageNo: 7, side: "right" },
+    { at: "2:49", pageNo: 8, side: "left" },
+  ] as const) {
+    test(`a verse on the ${side} page has its chips just outside that page's edge`, async ({ page }) => {
+      await page.goto(`/#/hafs-kfqc/${at}`);
+      await expect(pageSvg(page, pageNo)).toBeVisible({ timeout: 20_000 });
+      await expect(rail(page)).toBeVisible();
+      const open = await boxOf(book(page));
+      const chips = await boxOf(rail(page));
+      const gap = side === "right" ? chips.x - (open.x + open.width) : open.x - (chips.x + chips.width);
+      expect(gap, `the chips ${JSON.stringify(chips)} beside the book ${JSON.stringify(open)}`).toBeGreaterThanOrEqual(4);
+      expect(gap).toBeLessThanOrEqual(32);
+      // Level with the top of the page, not floating off above it.
+      expect(Math.abs(chips.y - open.y)).toBeLessThanOrEqual(32);
+    });
+  }
+
+  test("with no desk either side of the book, the chips stay on the screen", async ({ page }) => {
+    // Tall and narrow: the two pages fill the width, so there is no desk to sit
+    // in. The chips fall back to the page's own top corner, all of them visible.
+    await page.setViewportSize({ width: 1024, height: 1366 });
+    await page.goto("/#/hafs-kfqc/2:49");
+    await expect(pageSvg(page, 8)).toBeVisible({ timeout: 20_000 });
+    await expect(rail(page)).toBeVisible();
+    const chips = await boxOf(rail(page));
+    const open = await boxOf(book(page));
+    expect(chips.x).toBeGreaterThanOrEqual(0);
+    expect(chips.x + chips.width).toBeLessThanOrEqual(1024);
+    expect(chips.x).toBeGreaterThanOrEqual(open.x);
+    expect(chips.x + chips.width).toBeLessThanOrEqual(open.x + open.width);
+  });
+});
