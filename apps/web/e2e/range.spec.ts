@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { tapAyah } from "./ayah";
 import { inkToken } from "./ink";
 import { contextWithout } from "./inventory";
+import { pageNumber } from "./page-number";
 
 // Loop 5, the range half of the exit criterion (PLAN §Loop 5):
 //   highlight 2:47–2:48 → merged, deduped hop list → leap, with the URL in the
@@ -110,7 +111,7 @@ test.describe("Hifth · the highlighted range", () => {
     await page.goto(RANGE_LINK);
     const menu = page.getByRole("dialog");
     await expect(menu).toBeVisible();
-    await expect(page.locator("header .numeric")).toHaveText("7");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(7));
 
     // 2:123 is an edge of BOTH members, so the row names both — and the leap
     // still has to depart from exactly one ayah. It departs from the member
@@ -121,7 +122,7 @@ test.describe("Hifth · the highlighted range", () => {
     await expect(menu.getByText("شفاعة ↔ عدل")).toBeVisible();
     await menu.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ }).tap();
 
-    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
     ).toBeVisible();

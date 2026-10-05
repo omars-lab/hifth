@@ -108,11 +108,11 @@ test.describe("Hifth · the revision map", () => {
     // so it opens on 22 — and this is the assertion that would catch a landing
     // computed from the *print's* division table instead of from the pages this
     // build actually holds.
-    await expect(page.getByRole("button", { name: "صفحة 22 · ما فتحتَه من المصحف" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "صفحة ٢٢ · ما فتحتَه من المصحف" })).toBeVisible();
     // Said out loud, and said as a *hizb*: the reader pressed a division and
     // arrived on a page, and a landing that only named the page would leave them
     // to work out whether it was the right one.
-    await expect(page.locator("[aria-live='polite']")).toHaveText("الحزب ٣ · صفحة 22");
+    await expect(page.locator("[aria-live='polite']")).toHaveText("الحزب ٣ · صفحة ٢٢");
   });
 
   test("a hizb this edition does not carry is not drawn as a neglected one", async ({ browser }) => {

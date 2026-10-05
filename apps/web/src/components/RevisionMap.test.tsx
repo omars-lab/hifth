@@ -204,14 +204,14 @@ describe("RevisionMap", () => {
     expect(grid[11]!.textContent).toBe("١٢"); // two Arabic-Indic digits
   });
 
-  it("numbers page-scope cells in Latin, the way a page number is read off the corner", async () => {
-    // `pageN`'s rule, applied to the cell: a page number is Latin in both
-    // languages because it is read off the printed page's corner, unlike a hizb
-    // or juz number which follows the chrome. Page 7 is the one the fixture holds.
+  it("numbers page-scope cells in the chrome's own digits, like the printed page's corner", async () => {
+    // `pageN`'s rule, applied to the cell: the printed Madani page says ٧ at its
+    // foot, so an Arabic grid says ٧ too, the same as its hizb and juz cells and
+    // the same as the cell's own spoken label. Page 7 is the one the fixture holds.
     draw({ openAt: "page" });
     const grid = await cells();
     expect(grid[6]!.getAttribute("data-state")).toBe("cold");
-    expect(grid[6]!.textContent).toBe("7");
+    expect(grid[6]!.textContent).toBe("٧");
   });
 
   it("counts the inventory, not the book", async () => {
@@ -318,13 +318,13 @@ describe("RevisionMap", () => {
     draw({ onGoToPage: went, onClose: closed });
     const grid = await cells();
     fireEvent.click(grid[0]!);
-    expect(went).toHaveBeenCalledWith(7, "الحزب ١ · صفحة 7");
+    expect(went).toHaveBeenCalledWith(7, "الحزب ١ · صفحة ٧");
     expect(closed).toHaveBeenCalled();
   });
 
   it("says nothing extra at page scope, where the cell and the landing are one fact", async () => {
-    // `goToPage`'s own wording is «صفحة 7», which is already exactly right. A
-    // sentence built here would read «صفحة 7 · صفحة 7».
+    // `goToPage`'s own wording is «صفحة ٧», which is already exactly right. A
+    // sentence built here would read «صفحة ٧ · صفحة ٧».
     const went = vi.fn();
     draw({ onGoToPage: went });
     await cells();
@@ -360,7 +360,7 @@ describe("RevisionMap", () => {
     const stops = pages.filter((cell) => cell.getAttribute("tabindex") === "0");
     expect(stops).toHaveLength(1);
     // Page 7 is where the stage is, and the only page this fixture vendors.
-    expect(stops[0]!.getAttribute("aria-label")).toBe("صفحة 7 · لم يُفتح");
+    expect(stops[0]!.getAttribute("aria-label")).toBe("صفحة ٧ · لم يُفتح");
   });
 
   it("steps the cursor through the book with the arrows, skipping paper we do not have", async () => {
@@ -375,20 +375,20 @@ describe("RevisionMap", () => {
     const stop = () =>
       grid.querySelector<HTMLElement>('[tabindex="0"]')!.getAttribute("aria-label");
 
-    expect(stop()).toBe("صفحة 5 · لم يُفتح");
+    expect(stop()).toBe("صفحة ٥ · لم يُفتح");
     fireEvent.keyDown(grid, { key: "ArrowLeft" });
-    expect(stop()).toBe("صفحة 7 · لم يُفتح");
+    expect(stop()).toBe("صفحة ٧ · لم يُفتح");
     fireEvent.keyDown(grid, { key: "ArrowLeft" });
-    expect(stop()).toBe("صفحة 19 · لم يُفتح");
+    expect(stop()).toBe("صفحة ١٩ · لم يُفتح");
     // The end of the inventory, not the end of the print: there is nowhere
     // further to go, so the cursor stays where it is rather than sliding onto a
     // cell that cannot be pressed.
     fireEvent.keyDown(grid, { key: "ArrowLeft" });
-    expect(stop()).toBe("صفحة 19 · لم يُفتح");
+    expect(stop()).toBe("صفحة ١٩ · لم يُفتح");
     fireEvent.keyDown(grid, { key: "Home" });
-    expect(stop()).toBe("صفحة 5 · لم يُفتح");
+    expect(stop()).toBe("صفحة ٥ · لم يُفتح");
     fireEvent.keyDown(grid, { key: "End" });
-    expect(stop()).toBe("صفحة 19 · لم يُفتح");
+    expect(stop()).toBe("صفحة ١٩ · لم يُفتح");
   });
 
   it("puts the cursor back where the reader is when the scope changes", async () => {
@@ -411,7 +411,7 @@ describe("RevisionMap", () => {
         .getByRole("list", { name: "خريطة المصحف" })
         .querySelector('[tabindex="0"]')!
         .getAttribute("aria-label"),
-    ).toBe("صفحة 19 · لم يُفتح");
+    ).toBe("صفحة ١٩ · لم يُفتح");
   });
 
   /*
@@ -442,13 +442,10 @@ describe("RevisionMap", () => {
     // `absent`. Which means "cold" here is a real assertion and not the absent
     // branch quietly answering for it.
     expect(pages[6]!.getAttribute("data-state")).toBe("cold");
-    // «صفحة 7», not «الصفحة ٧». The mixed numerals in this one grid are on
-    // purpose: a page number is the figure a reader reads off the printed
-    // mus'haf's corner and types back into the jumper, so it stays Latin in
-    // every language — `i18n.test.tsx` asserts exactly that, against a sweep
-    // that would "fix" it. Hizb and juz are not printed anywhere, so they take
-    // the language's own digits.
-    expect(pages[6]!.getAttribute("aria-label")).toBe("صفحة 7 · لم يُفتح");
+    // «صفحة ٧», not «الصفحة ٧»: the page word bare, and the number in the
+    // chrome's own digits like the page's own foot (owner, 2026-10-05). The
+    // jumper reads either spelling back, so nothing typed is lost by it.
+    expect(pages[6]!.getAttribute("aria-label")).toBe("صفحة ٧ · لم يُفتح");
   });
 
   it("does colour this reader's juz with it, because a juz is the same in every print", async () => {

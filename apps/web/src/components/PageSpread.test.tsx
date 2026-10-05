@@ -60,7 +60,7 @@ describe("PageSpread", () => {
     // Page 7 pairs with 8; 7 is the earlier page, so 7 — the live one — is on
     // the right and the hole for 8 is on the left.
     expect(right!).toContainElement(screen.getByTestId("live-stage"));
-    expect(left!.textContent).toContain("صفحة 8 ليست في هذه النسخة");
+    expect(left!.textContent).toContain("صفحة ٨ ليست في هذه النسخة");
   });
 
   it("keeps the live stage on the leaf the reader is actually on", () => {
@@ -85,7 +85,7 @@ describe("PageSpread", () => {
     // is and how much of the mus'haf is here.
     spread({ page: 7 });
     const absent = screen.getByRole("region", { name: "الصفحة المقابلة" });
-    expect(absent.textContent).toContain("صفحة 8 ليست في هذه النسخة");
+    expect(absent.textContent).toContain("صفحة ٨ ليست في هذه النسخة");
     expect(absent.textContent).toContain("المتوفّر ٣ من ٦٠٤ صفحة");
   });
 
@@ -127,7 +127,7 @@ describe("PageSpread", () => {
     const container = spread({ page: 1 });
     const [right, left] = leaves(container);
     expect(right!.querySelector("[data-testid='live-stage']")).not.toBeNull();
-    expect(left!.textContent).toContain("صفحة 2 ليست في هذه النسخة");
+    expect(left!.textContent).toContain("صفحة ٢ ليست في هذه النسخة");
   });
 
   it("leaves the far side blank and unlabelled at the end of an odd-length print", () => {

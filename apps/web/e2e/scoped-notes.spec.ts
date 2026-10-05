@@ -2,6 +2,7 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
 import { readFileSync, writeFileSync } from "node:fs";
 import { ayahTarget } from "./ayah";
 import { SCOPE_LOOK_KEY } from "../src/scope-look";
+import { pageNumber } from "./page-number";
 
 /*
  * Scoped notes, step 2 (docs/design/scoped-notes.md): the first time the app
@@ -616,7 +617,7 @@ test.describe("Hifth · the list of notes, and following one", () => {
     const bar = page.getByRole("group", { name: "Following a note" });
     await expect(bar).toContainText("Juz 1 weak spots");
     await expect(bar).toContainText("1 of 3");
-    await expect(page.locator("header .numeric")).toHaveText("7");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(7));
     await expect(page.getByRole("button", { name: /Current ayah Al-Baqarah · 2:39/ })).toBeVisible();
     await expect(bar.getByRole("button", { name: "Previous verse in this note" })).toBeDisabled();
     // The note's own words are a tap away, and fold back.
@@ -643,22 +644,22 @@ test.describe("Hifth · the list of notes, and following one", () => {
     const next = bar.getByRole("button", { name: "Next verse in this note" });
     await next.click();
     await expect(bar).toContainText("2 of 3");
-    await expect(page.locator("header .numeric")).toHaveText("9");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(9));
     await expect(page.getByRole("button", { name: /Current ayah Al-Baqarah · 2:58/ })).toBeVisible();
 
     await next.click();
     await expect(bar).toContainText("3 of 3");
-    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(next).toBeDisabled();
 
     await bar.getByRole("button", { name: "Previous verse in this note" }).click();
     await expect(bar).toContainText("2 of 3");
-    await expect(page.locator("header .numeric")).toHaveText("9");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(9));
 
     // Leaving: the bar goes, and the reader stays where they are.
     await bar.getByRole("button", { name: "Stop following this note" }).click();
     await expect(bar).toHaveCount(0);
-    await expect(page.locator("header .numeric")).toHaveText("9");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(9));
   });
 
   test("with no notes, the list says how to make one", async ({ page }) => {

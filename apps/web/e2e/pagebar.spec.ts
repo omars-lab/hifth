@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { contextWithout } from "./inventory";
+import { pageNumber } from "./page-number";
 
 /*
  * The page bar — the second way through the book, after the jumper.
@@ -66,7 +67,7 @@ test.describe("Hifth · the page bar", () => {
     // rather than in the aria snapshot because Playwright serialises a slider as
     // its raw `value`, so the tree would go on passing with the attribute gone.
     const slider = page.getByRole("slider");
-    await expect(slider).toHaveAttribute("aria-valuetext", "صفحة 7 من 604");
+    await expect(slider).toHaveAttribute("aria-valuetext", "صفحة ٧ من ٦٠٤");
 
     // And the description is the wiring that carries the vendored count to a
     // listener who will never see the ticks: the id must actually resolve.
@@ -95,11 +96,11 @@ test.describe("Hifth · the page bar", () => {
   });
 
   test("the edge buttons turn the page the way the book does", async ({ page }) => {
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
     await page.getByRole("button", { name: "الصفحة التالية" }).tap();
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
     await page.getByRole("button", { name: "الصفحة السابقة" }).tap();
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
   test("letting go in the gap lands on the nearest page we have, and says so", async ({
@@ -122,7 +123,7 @@ test.describe("Hifth · the page bar", () => {
       await slider.fill("300");
 
       // The stage moved to a page that exists, not to the one that was asked for.
-      await expect(page.locator(NUM)).toHaveText("299");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(299));
       // …and the app said which, because a landing the reader did not ask for is
       // the one thing a partial corpus must never do silently.
       await expect(page.locator("[aria-live='polite']")).toContainText("أقرب صفحة متوفّرة");
@@ -137,14 +138,14 @@ test.describe("Hifth · the page bar", () => {
     // so "أقرب صفحة متوفّرة" was ambient and a bar that announced it
     // unconditionally would have passed every test in this file.
     await page.getByRole("slider").fill("300");
-    await expect(page.locator(NUM)).toHaveText("300");
-    await expect(page.locator("[aria-live='polite']")).toHaveText("صفحة 300");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(300));
+    await expect(page.locator("[aria-live='polite']")).toHaveText("صفحة ٣٠٠");
   });
 
   test("a page we do hold is reached without a word about snapping", async ({ page }) => {
     await page.getByRole("slider").fill("19");
-    await expect(page.locator(NUM)).toHaveText("19");
-    await expect(page.locator("[aria-live='polite']")).toHaveText("صفحة 19");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(19));
+    await expect(page.locator("[aria-live='polite']")).toHaveText("صفحة ١٩");
   });
 
   test("the arrow keys step between the pages that exist, not by one of 604", async ({
@@ -166,15 +167,15 @@ test.describe("Hifth · the page bar", () => {
 
       const slider = page.getByRole("slider");
       await slider.focus();
-      await expect(page.locator(NUM)).toHaveText("7");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(7));
       await page.keyboard.press("ArrowLeft");
-      await expect(page.locator(NUM)).toHaveText("9");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(9));
       await page.keyboard.press("ArrowLeft");
-      await expect(page.locator(NUM)).toHaveText("10");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(10));
       await page.keyboard.press("ArrowRight");
-      await expect(page.locator(NUM)).toHaveText("9");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(9));
       await page.keyboard.press("ArrowRight");
-      await expect(page.locator(NUM)).toHaveText("7");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(7));
     } finally {
       await context.close();
     }
@@ -188,9 +189,9 @@ test.describe("Hifth · the page bar", () => {
     const slider = page.getByRole("slider");
     await slider.focus();
     await page.keyboard.press("End");
-    await expect(page.locator(NUM)).toHaveText("604");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(604));
     await page.keyboard.press("Home");
-    await expect(page.locator(NUM)).toHaveText("1");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(1));
   });
 
   test("the bar is the bottom-most chrome and clears the safe area", async ({ page }) => {
