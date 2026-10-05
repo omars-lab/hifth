@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LONG_PRESS_MS, TAP_SLOP_PX } from "./gestures.js";
 import { FIBRE_FLOOR, FIBRE_ID, Highlighter, MARQUEE_MIN_SIZE, rectsIntersect } from "./highlighter.js";
-import { LIFT, OVERHANG } from "./ink.js";
+import { BAND, LIFT, OVERHANG } from "./ink.js";
 import { Resolver } from "./resolver.js";
 import type { AssetManifest } from "./types.js";
 
@@ -577,9 +577,11 @@ describe("Highlighter marker swipes", () => {
 
     const marks = [...svg.querySelectorAll<SVGElement>("#hifth-overlay .hl-hlt")];
     expect(marks).toHaveLength(3);
-    const shared = marks.find((m) => Number(m.getAttribute("data-y")) > 60 && Number(m.getAttribute("data-y")) < 70)!;
+    // Line 2's band: its middle (46.5 + 38.2 / 2) less the lift.
+    const line2 = 46.5 + 38.2 / 2 - LIFT * 38.2;
+    const shared = marks.find((m) => Math.abs(Number(m.getAttribute("data-y")) - line2) < 1)!;
     const xs = [Number(shared.getAttribute("data-x1")), Number(shared.getAttribute("data-x2"))];
-    const half = (38.2 * 0.72) / 2;
+    const half = (38.2 * BAND) / 2;
     expect(Math.min(...xs)).toBeCloseTo(half);
     expect(Math.max(...xs)).toBeCloseTo(345 - half);
     // The wipe still runs top to bottom, one line after another.
@@ -593,8 +595,8 @@ describe("Highlighter marker swipes", () => {
     // Thickness is per band precisely because line heights differ; a single
     // shape for the whole ayah would have to pick one and be wrong.
     expect(marks.map((m) => m.getAttribute("data-width"))).toEqual([
-      String(38 * 0.72),
-      String(38.2 * 0.72),
+      String(38 * BAND),
+      String(38.2 * BAND),
     ]);
   });
 
@@ -791,10 +793,10 @@ describe("Highlighter.highlightRects", () => {
     expect(marks.every((m) => m.tagName === "g" && m.querySelector("path.hl-band"))).toBe(true);
     expect(marks.every((m) => m.classList.contains("hl-ink"))).toBe(true);
     expect(marks.map((m) => m.getAttribute("data-hl-group"))).toEqual(["word", "word"]);
-    // Band height is the pen's, not the box's — the same 0.72 an ayah gets.
+    // Band height is the pen's, not the box's — the same BAND an ayah gets.
     expect(marks.map((m) => m.getAttribute("data-width"))).toEqual([
-      String(30 * 0.72),
-      String(30 * 0.72),
+      String(30 * BAND),
+      String(30 * BAND),
     ]);
   });
 
@@ -818,7 +820,7 @@ describe("Highlighter.highlightRects", () => {
   it("insets the caps so a band stops inside its own box", () => {
     hl.highlightRects([BANDS[0]!], "sel", "word");
     const m = svg.querySelector<SVGElement>("#hifth-overlay .hl-sel")!;
-    const half = (30 * 0.72) / 2;
+    const half = (30 * BAND) / 2;
     // Written right-to-left, so x1 is the band's right end.
     expect(Number(m.getAttribute("data-x1"))).toBeCloseTo(10 + 200 - half, 6);
     expect(Number(m.getAttribute("data-x2"))).toBeCloseTo(10 + half, 6);
@@ -826,14 +828,14 @@ describe("Highlighter.highlightRects", () => {
   });
 
   it("draws a single word as a dot when it is narrower than the pen", () => {
-    // One short word on its own: 5 units wide against a 21.6-unit band. A real
+    // One short word on its own: 5 units wide against a ~24-unit band. A real
     // pen tapped once leaves a round mark, and that is what this must be — not
     // a zero-length line the renderer drops.
     hl.highlightRects([{ x: 0, y: 0, width: 5, height: 30 }], "sel", "word");
     const m = svg.querySelector<SVGElement>("#hifth-overlay .hl-sel")!;
     expect(Number(m.getAttribute("data-x1"))).toBeCloseTo(2.5, 6);
     expect(Number(m.getAttribute("data-x2"))).toBeCloseTo(2.5, 6);
-    expect(m.getAttribute("data-width")).toBe(String(30 * 0.72));
+    expect(m.getAttribute("data-width")).toBe(String(30 * BAND));
     expect(m.querySelector("path.hl-band")!.getAttribute("d")).toMatch(/^M.*Z$/);
   });
 
