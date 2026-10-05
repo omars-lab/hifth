@@ -115,6 +115,30 @@
   overflow: hidden;
 }
 
+/*
+ * The desk either side of the book. Equal shares of what the book leaves, so
+ * the book stays in the middle exactly as `justify-content` kept it. They hold
+ * the look-alike chips beside the live page; a box of their own rather than a
+ * position worked out from the book's width, because that width is a function
+ * of the window's height and the page's shape, and a second copy of that sum
+ * would drift from the first.
+ *
+ * Named as a container so the chips can tell when there is no desk to sit in —
+ * a tall, narrow window where the pages fill the width — and fall back to the
+ * page's corner (HopRail.module.css).
+ */
+.desk {
+  position: relative;
+  flex: 1 1 0;
+  min-inline-size: 0;
+  container: desk / inline-size;
+  /* Above the book, so that with no desk to stand in the chips still draw over
+     the page they fall back onto; and transparent to the pointer, so the box
+     never catches a drag meant for a magnified page lying under it. */
+  z-index: var(--z-chrome);
+  pointer-events: none;
+}
+
 /* Except while a magnified leaf hangs over the desk (#148): then the book is
    wider than this box on purpose, and the leaves clip themselves at the fold,
    head and foot (PageStage.module.css, `data-spills`). The desk still stops
