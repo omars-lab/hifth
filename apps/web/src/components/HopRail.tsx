@@ -2,9 +2,10 @@ import type { RailChip } from "@hifth/core";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useT } from "../i18n";
 import styles from "./HopRail.module.css";
+import { RailGlyph } from "./RailGlyph";
 
 interface HopRailProps {
-  /** Bucketed chips for the current selection (↻ loop, ◀ earlier, ▶ later, ⬡ root). */
+  /** Bucketed chips for the current selection (≈↻ loop, ≈← earlier, ≈→ later, ⬡ root). */
   chips: readonly RailChip[];
   /** Which chip's popover is open, by direction, or null. */
   openDirection: RailChip["direction"] | null;
@@ -30,7 +31,7 @@ interface HopRailProps {
 /**
  * HopRail — the signature affordance (spec §9, PLAN signature element). A short
  * vertical rail of direction chips beside the selected ayah: each chip is one
- * bucket of hops with its glyph (↻◀▶⬡) and count. Tapping a chip opens its
+ * bucket of hops with its glyph (≈ with a small ↻ ← →, or ⬡) and count. Tapping a chip opens its
  * popover. The rail only exists while an ayah is selected and has hops; a
  * hop-less ayah renders nothing (quiet by default).
  */
@@ -74,7 +75,7 @@ export function HopRail({ chips, openDirection, onOpenChip, crossed = false, onB
           onClick={() => onOpenChip(chip)}
         >
           <span className={styles.glyph} aria-hidden="true">
-            {chip.glyph}
+            <RailGlyph glyph={chip.glyph} />
           </span>
           <span className={`${styles.count} numeric`} aria-hidden="true">
             {t.num(chip.count)}

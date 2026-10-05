@@ -5,6 +5,27 @@ import { contextWithout } from "./inventory";
 //   tap 2:48 → rail → popover → hop to 2:123 cross-page → bead back, one-handed.
 // 2:48 is verse-55 on page 7; 2:123 is verse-130 on page 19. Both are vendored.
 test.describe("Hifth · the hop", () => {
+  // Owner, 2026-10-04: a bare arrow did not read as "similar", and the later
+  // one was the triangle that means listen. A chip now says "looks like" (≈)
+  // and then, smaller, which way — in that order on the mus'haf's side too,
+  // where the page's right-to-left would otherwise put the arrow first.
+  test("a similar-verses chip reads 'looks like', then a small mark for which way", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']")).toBeVisible();
+    await page.locator("#verse-55").tap();
+    const chip = page.getByRole("group", { name: "روابط الآية" }).getByRole("button", { name: /متشابهات في السورة/ });
+    await expect(chip).toBeVisible();
+    const sign = chip.locator("[data-sign]");
+    const mark = chip.locator("[data-mark]");
+    await expect(sign).toHaveText("≈");
+    await expect(mark).toHaveText("↻");
+    const s = (await sign.boundingBox())!;
+    const m = (await mark.boundingBox())!;
+    expect(m.x).toBeGreaterThan(s.x);
+    expect(m.height).toBeLessThan(s.height * 0.85);
+    await expect(chip).not.toContainText("▶");
+  });
+
   test("tap 2:48 → rail → popover → cross-page hop to 2:123 → bead back", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']")).toBeVisible();
@@ -17,7 +38,7 @@ test.describe("Hifth · the hop", () => {
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
     ).toBeVisible();
 
-    // 2. The hop rail appears with at least the same-surah loop chip (↻).
+    // 2. The hop rail appears with at least the same-surah loop chip (≈↻).
     const rail = page.getByRole("group", { name: "روابط الآية" });
     await expect(rail).toBeVisible();
     const loopChip = rail.getByRole("button", { name: /متشابهات في السورة/ });
@@ -63,7 +84,7 @@ test.describe("Hifth · the hop", () => {
 
   test("un-vendored hop targets are surfaced but disabled (no ghost pages)", async ({ browser }) => {
     // 2:120 on page 19 is the ayah whose chips are *entirely* dead ends when the
-    // two pages behind them are absent: ↻ holds only 2:145 (page 22) and ▶ only
+    // two pages behind them are absent: ≈↻ holds only 2:145 (page 22) and ≈→ only
     // 13:37 (page 254). Neither was vendored before Loop 4b, which made this row
     // free; both are vendored now, so the scarcity is arranged (`./inventory`).
     //
@@ -110,7 +131,7 @@ test.describe("Hifth · the hop", () => {
   test("with the whole print vendored, those same chips land", async ({ page }) => {
     // The other side of the row above, and the thing Loop 4b actually bought.
     // Same ayah, same two chips, no fixture: 2:145 and 13:37 are now pages we
-    // have, so the leap is enabled and taking it arrives — page 22 for the ↻
+    // have, so the leap is enabled and taking it arrives — page 22 for the ≈↻
     // chip, which is a cross-page hop of the ordinary kind.
     //
     // Worth its own row rather than an assertion appended to the first, because
@@ -140,7 +161,7 @@ test.describe("Hifth · the hop", () => {
     // belonging to the place the reader was a single tap from going.
     //
     // 2:120 is the case that makes it visible rather than merely arguable. It
-    // sits on page 19, which carries surah 2 and nothing else, and its ▶ chip
+    // sits on page 19, which carries surah 2 and nothing else, and its ≈→ chip
     // holds exactly one edge: 13:37. So surah 13's shard is reachable from this
     // screen in one tap and is on no mounted page at all — under the old rule
     // it could not have been fetched by anything except arriving there.

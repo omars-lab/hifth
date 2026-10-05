@@ -10,7 +10,7 @@ import type { Page } from "@playwright/test";
  * chrome:
  *
  *   - `nonBmp` — "content contains only non-text characters". Every glyph
- *     control (↻ ▶ ⬡ ✕ ⌄ ⌖ ▤) is exactly that. They are not decoration; they
+ *     control (≈ ▶ ⬡ ✕ ⌄ ⌖ ▤) is exactly that. They are not decoration; they
  *     are the affordance, and a reader who cannot see them cannot navigate.
  *   - `shortTextContent` — a hop count is one Arabic-Indic digit, a page number
  *     is two. Short is not the same as unimportant.
