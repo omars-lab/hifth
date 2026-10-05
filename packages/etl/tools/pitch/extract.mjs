@@ -33,6 +33,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { joinPageBreaks } from "./blocks.mjs";
 import { cleanIntro } from "./intro.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -306,11 +307,13 @@ function buildSurah(surah) {
     const ref = parseRef(entry.key);
     if (!ref) continue;
     const [s, a] = ref;
-    const blocks = (entry.commentary ?? [])
-      .flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean))
-      .map((text) => trimSelfLabel(text, a))
-      .map(dropSectionBreak)
-      .filter(Boolean);
+    const blocks = joinPageBreaks(
+      (entry.commentary ?? [])
+        .flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean))
+        .map((text) => trimSelfLabel(text, a))
+        .map(dropSectionBreak)
+        .filter(Boolean),
+    );
     verses[`${s}:${a}`] = {
       ref: `${s}:${a}`,
       key: canon(s, a),
