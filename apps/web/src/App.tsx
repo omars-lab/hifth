@@ -171,6 +171,7 @@ import {
   PITCH,
   loadPitchSurah,
   mergeShard,
+  withBookRefs,
   introFor,
   makePitchProvider,
   type PitchSurah,
@@ -914,17 +915,30 @@ export function App(): JSX.Element {
     [resolver],
   );
 
+  // The roads out of the open note: the edges the rail shows, plus The Study
+  // Quran's own cross-references, which the rail leaves out because they are
+  // linked by meaning, not wording (`withBookRefs`). Handed to the drawer so the
+  // reading and the navigation live on one surface instead of the note covering
+  // a rail.
+  const commentaryRoads = useMemo(() => {
+    if (!PITCH || !adjacency || !commentaryOpen || !selectedKey) return [];
+    const at = parseAyahKey(selectedKey);
+    const book = at ? pitchSurahs.get(at.surah)?.shard[String(at.ayah)] : undefined;
+    return withBookRefs(adjacency.hopsForKey(selectedKey), book);
+  }, [adjacency, commentaryOpen, selectedKey, pitchSurahs]);
+
   // Pages to keep mounted: the current page + the selection's vendored hop
-  // targets, so a hop's tween has both endpoints ready (spec DOM budget).
+  // targets (and the open note's), so a hop's tween has both endpoints ready
+  // (spec DOM budget).
   const mountedPages = useMemo(() => {
     const pages = new Set<number>([page]);
     const hops = adjacency && selectedKey ? adjacency.hopsForKey(selectedKey) : [];
-    for (const edge of [...hops, ...rangeHops]) {
+    for (const edge of [...hops, ...rangeHops, ...commentaryRoads]) {
       const loc = resolver?.resolve(edge.to);
       if (loc) pages.add(loc.page);
     }
     return [...pages];
-  }, [page, adjacency, selectedKey, rangeHops, resolver]);
+  }, [page, adjacency, selectedKey, rangeHops, commentaryRoads, resolver]);
 
   // Prefetch shards for every surah visible on a mounted page, so the rail is
   // ready the moment an ayah is tapped.
@@ -2930,16 +2944,6 @@ export function App(): JSX.Element {
     return null;
   }, [desktop, pageMode, resolver, selectedRange, selectedKey, page, totalPages]);
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
-  // The roads out of the open note: the same merged edges the rail would show
-  // (Study Quran cross-references included), handed to the drawer so the reading
-  // and the navigation live on one surface instead of the note covering a rail.
-  const commentaryRoads = useMemo(
-    () =>
-      PITCH && adjacency && commentaryOpen && selectedKey
-        ? adjacency.hopsForKey(selectedKey)
-        : [],
-    [adjacency, commentaryOpen, selectedKey],
-  );
 
   // The sheets that load on first open are mounted from their first opening on,
   // so their files are not fetched before anyone asks and a sheet that keeps
