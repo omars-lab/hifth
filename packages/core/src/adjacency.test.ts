@@ -59,10 +59,16 @@ describe("bucketEdges (spec §9 rail chips)", () => {
     };
     const chips = bucketEdges(adj);
     expect(chips.map((c) => c.direction)).toEqual(["loop", "earlier", "later", "root"]);
-    expect(chips.map((c) => c.glyph)).toEqual(["↻", "◀", "▶", "⬡"]);
+    // Owner, 2026-10-04: similar verses wear "looks like" (≈) with a small
+    // mark for which way; the old ◀ ▶ read as directions, not similarity.
+    expect(chips.map((c) => c.glyph)).toEqual(["≈↻", "≈←", "≈→", "⬡"]);
     // loop = 1 (same surah), earlier = 1, later = 2, root = 1
     expect(chips.map((c) => c.count)).toEqual([1, 1, 2, 1]);
-    expect(RAIL_GLYPH.loop).toBe("↻");
+    expect(RAIL_GLYPH.loop).toBe("≈↻");
+  });
+
+  it("never wears the play triangle, which means listen", () => {
+    for (const glyph of Object.values(RAIL_GLYPH)) expect(glyph).not.toMatch(/[▶◀▷◁]/);
   });
 
   it("drops empty buckets and excludes reserved-type edges", () => {

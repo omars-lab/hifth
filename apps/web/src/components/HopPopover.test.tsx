@@ -13,7 +13,7 @@ const edge = (surah: number, ayah: number, extra: Partial<Edge> = {}): Edge => (
 
 const chip = (edges: Edge[]): RailChip => ({
   direction: "loop",
-  glyph: "↻",
+  glyph: "≈↻",
   count: edges.length,
   edges,
 });
