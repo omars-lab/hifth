@@ -15,6 +15,7 @@ import {
   tafsirKeyFor,
   type AdjacencyShard,
   type AyahAdjacency,
+  type Edge,
   type TafsirEntry,
   type TafsirProvider,
   type TafsirSource,
@@ -111,10 +112,23 @@ export function makePitchProvider(
   };
 }
 
+/** The mark on an edge that is one of the book's own cross-references. */
+const BOOK_REF = "study-quran-xref";
+const isBookRef = (e: Edge): boolean => e.src === BOOK_REF;
+
+/** `extra` without any verse `kept` already goes to: the first line wins. */
+function unseen(kept: readonly Edge[], extra: readonly Edge[]): Edge[] {
+  const seen = new Set(kept.map((e) => e.to));
+  return extra.filter((e) => !seen.has(e.to) && seen.add(e.to));
+}
+
 /**
- * Merge pitch edges into a base shard, per ayah, without losing either side.
- * The base surah shard is usually empty for al-Fātiḥah, but a general merge
- * keeps this honest for any surah the pitch later covers.
+ * Merge the demo's hand-picked roads into a base shard, per ayah, without
+ * losing either side. The book's cross-references are left out: they are
+ * linked by meaning, and everything this shard feeds (the similar-verse
+ * buttons, the jump arrows, the pages kept ready) promises verses that *read*
+ * alike. Mixed in, they outnumbered the look-alikes about six to one. They
+ * reach the note's related list instead, through {@link withBookRefs}.
  */
 export function mergeShard(
   base: AdjacencyShard | undefined,
@@ -122,12 +136,24 @@ export function mergeShard(
 ): AdjacencyShard {
   const out: Record<string, AyahAdjacency> = { ...(base ?? {}) };
   for (const [ayah, adj] of Object.entries(pitch)) {
+    const own = adj.edges.filter((e) => !isBookRef(e));
     const prior = out[ayah];
-    out[ayah] = prior
-      ? { edges: [...prior.edges, ...adj.edges], ext: [...prior.ext, ...adj.ext] }
-      : adj;
+    if (prior) {
+      out[ayah] = { edges: [...prior.edges, ...unseen(prior.edges, own)], ext: [...prior.ext, ...adj.ext] };
+    } else if (own.length > 0 || adj.ext.length > 0) {
+      out[ayah] = { edges: unseen([], own), ext: adj.ext };
+    }
   }
   return out;
+}
+
+/**
+ * The related verses a note lists: the verse's own roads, then the book's
+ * cross-references from it, each verse once. Where both name a verse, the
+ * app's own line is kept (it says why the two belong together for a hafiz).
+ */
+export function withBookRefs(roads: readonly Edge[], pitch: AyahAdjacency | undefined): Edge[] {
+  return [...roads, ...unseen(roads, (pitch?.edges ?? []).filter(isBookRef))];
 }
 
 /**
