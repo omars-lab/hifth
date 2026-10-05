@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { watchFolds, foldsSeen } from "./fold";
 import { TURN_STYLE_KEY } from "../src/turn-style";
+import { pageNumber } from "./page-number";
 
 /*
  * The turn style — the reader's choice of how a page turn looks (page-turn-curl,
@@ -28,14 +29,14 @@ async function openWith(page: Page, style: string | null): Promise<void> {
   }
   await page.goto("/");
   await expect(page.locator("svg[role='group']").first()).toBeVisible();
-  await expect(page.locator(NUM)).toHaveText("7");
+  await expect(page.locator(NUM)).toHaveText(pageNumber(7));
 }
 
 async function turnTwice(page: Page): Promise<void> {
   await page.getByRole("button", { name: NEXT }).tap();
-  await expect(page.locator(NUM)).toHaveText("8");
+  await expect(page.locator(NUM)).toHaveText(pageNumber(8));
   await page.getByRole("button", { name: NEXT }).tap();
-  await expect(page.locator(NUM)).toHaveText("9");
+  await expect(page.locator(NUM)).toHaveText(pageNumber(9));
   await expect(page.locator("[data-fold]")).toHaveCount(0);
 }
 

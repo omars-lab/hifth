@@ -3,6 +3,7 @@ import { tapAyah } from "./ayah";
 import { gotoLink } from "./links";
 import AxeBuilder from "@axe-core/playwright";
 import { COACH_STORAGE_KEY } from "../src/coach";
+import { pageNumber } from "./page-number";
 
 // Loop 3 exit criterion (PLAN §Loop 3):
 //   cold-opening a teacher link restores the exact view incl. trail; the screen
@@ -22,7 +23,7 @@ test.describe("Hifth · share links (spec §7)", () => {
 
     // Restored: page 19 mounted (header page number), 2:123 selected as the
     // current ayah, and the 2:48 origin is a bead.
-    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
     ).toBeVisible();
@@ -63,7 +64,7 @@ test.describe("Hifth · share links (spec §7)", () => {
       await route.continue();
     });
     await page.goto("/#/hafs-kfqc/2:123?via=2:48");
-    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(
       page.locator('svg[aria-labelledby="page-label-7"] #hifth-overlay .hl-crumb'),
     ).toBeAttached();
@@ -73,7 +74,7 @@ test.describe("Hifth · share links (spec §7)", () => {
     // trail=2:40,2:47 then via=2:48 → three beads, landing on 2:123.
     await page.goto("/#/hafs-kfqc/2:123?trail=2:40,2:47&via=2:48");
     // The active page (19) is up and 2:123 is the current ayah.
-    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
     ).toBeVisible();
@@ -279,7 +280,7 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
   test("the trail beads say where each one leads back to", async ({ page }) => {
     await settled(page);
     await page.goto("/#/hafs-kfqc/2:123?trail=2:40,2:47&via=2:48");
-    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(page.locator("footer")).toMatchAriaSnapshot({ name: "trail.aria.yml" });
   });
 

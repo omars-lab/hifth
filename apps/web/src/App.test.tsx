@@ -132,9 +132,9 @@ describe("App shell", () => {
     }
   });
 
-  it("shows the starting page number (7)", () => {
+  it("shows the starting page number (7), in the chrome's own digits", () => {
     render(<App />);
-    expect(screen.getByText("7")).toBeInTheDocument();
+    expect(screen.getByText("٧")).toBeInTheDocument();
   });
 
   it("mounts the page SVG with an accessible role and overlay group", async () => {

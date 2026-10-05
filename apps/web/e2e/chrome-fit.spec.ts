@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { pageNumber } from "./page-number";
 
 /*
  * The chrome fits the phone — at every width a phone actually has.
@@ -101,7 +102,7 @@ test.describe("Hifth · the chrome fits a phone", () => {
     await expect(page.locator("main svg[aria-labelledby='page-label-604']")).toBeVisible({
       timeout: 20_000,
     });
-    await expect(page.locator("header span.numeric")).toHaveText("604");
+    await expect(page.locator("header span.numeric")).toHaveText(pageNumber(604));
 
     await page.setViewportSize({ width: 320, height: 844 });
     await expect.poll(async () => (await measure(page)).headerClient, { timeout: 5_000 }).toBe(320);

@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { pageNumber } from "./page-number";
 
 // Cold-opening a link is the teacher-shares-a-link path, and it is the one path
 // where two things race to decide what the reader sees: PageStage's initial
@@ -32,7 +33,7 @@ test.describe("Hifth · cold deep links", () => {
         timeout: 20_000,
       });
       await expect(page.locator('svg[aria-labelledby="page-label-7"]:visible')).toHaveCount(0);
-      await expect(headerPage(page)).toHaveText("9");
+      await expect(headerPage(page)).toHaveText(pageNumber(9));
     });
   }
 
@@ -45,7 +46,7 @@ test.describe("Hifth · cold deep links", () => {
       timeout: 20_000,
     });
     await expect(page.locator('svg[aria-labelledby="page-label-7"]:visible')).toHaveCount(0);
-    await expect(headerPage(page)).toHaveText("19");
+    await expect(headerPage(page)).toHaveText(pageNumber(19));
   });
 });
 

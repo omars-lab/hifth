@@ -290,7 +290,7 @@ test.describe("Hifth · word selection", () => {
     // ←/→ are the app's page keys, and a run in hand takes the arrows off them.
     // Read off the slider rather than the stage, because a page that turned and a
     // page that never loaded look identical in the SVG and quite different here.
-    await expect(page.getByRole("slider")).toHaveAttribute("aria-valuetext", "صفحة 7 من 604");
+    await expect(page.getByRole("slider")).toHaveAttribute("aria-valuetext", "صفحة ٧ من ٦٠٤");
 
     // And Escape climbs exactly one rung, as it does for the finger.
     await page.keyboard.press("Escape");
