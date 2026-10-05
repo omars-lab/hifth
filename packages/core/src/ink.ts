@@ -76,6 +76,13 @@ export interface Swipe {
 const BAND = 0.72;
 
 /**
+ * How far above the line's middle the band sits, as a fraction of the line
+ * box. Centred exactly, the ink read a touch low on the words (owner,
+ * 2026-10-04), so every band is lifted 2.5% of its line.
+ */
+export const LIFT = 0.025;
+
+/**
  * One rectangle, in the order the path grammar below produces them — the
  * highlighter's own {@link Rect}, so a parsed polygon and a shard's word band
  * are literally the same type by the time the pen sees them. Width and height
@@ -318,15 +325,14 @@ export function rectsFromOutline(d: string): InkRect[] | null {
   return rects.length ? rects : null;
 }
 
-/** One marker stroke down the centre of one rectangle. */
+/** One marker stroke along one rectangle, lifted {@link LIFT} above its middle. */
 function bandOf({ x, y, width: w, height: h }: InkRect): Swipe {
   const width = h * BAND;
   const half = width / 2;
   const x1 = x + half;
   const x2 = x + w - half;
-  return x2 < x1
-    ? { x1: x + w / 2, x2: x + w / 2, y: y + h / 2, width }
-    : { x1, x2, y: y + h / 2, width };
+  const mid = y + h / 2 - h * LIFT;
+  return x2 < x1 ? { x1: x + w / 2, x2: x + w / 2, y: mid, width } : { x1, x2, y: mid, width };
 }
 
 /**
