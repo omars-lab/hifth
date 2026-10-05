@@ -68,19 +68,24 @@ export interface Swipe {
 }
 
 /**
- * Fraction of the line box the band covers. 0.72 leaves ~14% of the line clear
- * above and below, which is what keeps two stacked swipes reading as two passes
- * of a pen rather than one filled block — the single most box-like thing about
- * filling the rectangles was that adjacent lines touched.
+ * Fraction of the line box the band covers. It was 0.72; tried on a phone a
+ * step at a time with the owner (2026-10-04), it settled at 0.72 × 1.1 × 1.1 ×
+ * 1.05 ≈ 0.915. That still leaves ~8% of a line between two stacked swipes —
+ * what keeps them reading as two passes of a pen rather than one filled block,
+ * the single most box-like thing about filling the rectangles being that
+ * adjacent lines touched.
  */
-const BAND = 0.72;
+export const BAND = 0.72 * 1.1 * 1.1 * 1.05;
 
 /**
  * How far above the line's middle the band sits, as a fraction of the line
- * box. Centred exactly, the ink read a touch low on the words (owner,
- * 2026-10-04), so every band is lifted 2.5% of its line.
+ * box. Centred exactly, the ink read low on the words (owner, 2026-10-04);
+ * stepped up to 15% and back, it settled at 10% of the line. With the thick
+ * band its top reaches ~6% of a line above the line's own top, into the gap
+ * under the line above; the gap between two stacked bands is unchanged by the
+ * lift.
  */
-export const LIFT = 0.025;
+export const LIFT = 0.1;
 
 /**
  * One rectangle, in the order the path grammar below produces them — the

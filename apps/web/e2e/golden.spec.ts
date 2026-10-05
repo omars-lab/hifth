@@ -410,7 +410,9 @@ for (const skin of SKINS) {
           ].map((el) => el.getBoundingClientRect());
           const widest = rects.sort((a, b) => b.width - a.width)[0];
           if (!widest) throw new Error("the selection is not painted");
-          return { x: widest.x, y: widest.y, width: widest.width };
+          // Press on the band's middle, not its top edge: the band is lifted
+          // and thicker than its line, so its top edge sits over the line above.
+          return { x: widest.x, y: widest.y + widest.height / 2, width: widest.width };
         });
         const view = page.viewportSize()!;
         // The band overhangs the window on both sides (the sheet is wider than
