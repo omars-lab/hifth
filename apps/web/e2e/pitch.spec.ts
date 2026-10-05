@@ -368,9 +368,17 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
       .poll(async () => (await sheet(page).boundingBox())!.y, { message: "the note grows" })
       .toBeLessThan(844 * 0.3);
 
-    // The verse's own number was stripped from the front of its note.
-    await expect(sheet(page)).toContainText("This verse is known as");
-    await expect(sheet(page)).not.toContainText("255 This verse is known as");
+    // The verse's own number was stripped from the front of its note. The
+    // note's opening words are read from the private book at run time, never
+    // written here: the repository carries none of its text.
+    const opening = await page.evaluate(async () => {
+      const book = await (await fetch("./assets/private/study-quran/2.json")).json();
+      const first = (book.verses["2:255"].commentary as string[])[0]!;
+      return first.replace(/^\d+\s+/, "").split(/\s+/).slice(0, 4).join(" ");
+    });
+    expect(opening.split(" ")).toHaveLength(4);
+    await expect(sheet(page)).toContainText(opening);
+    await expect(sheet(page)).not.toContainText(`255 ${opening}`);
   });
 
   test("a look-alike list takes the note's place, and closing it brings the note back", async ({ page }) => {
