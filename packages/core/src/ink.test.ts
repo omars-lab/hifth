@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  BAND,
   LIFT,
   OVERHANG,
   fitSwipesToText,
@@ -38,22 +39,23 @@ const VERSE_2_249 = "M0 6.3h345v36H0Zm0 36h345v218.4H0Zm233.4 218.4H345v36H233.4
 const VERSE_10_44 = "M0 45h345v35.8H0Zm259.7 35.8H345v35.8h-85.4Z";
 
 describe("swipesFromPath", () => {
-  // Owner, 2026-10-04: the bands sat a touch low on the words. Each is lifted
-  // 2.5% of its line's height above the line's middle.
-  it("lifts each band 2.5% of its line above the line's middle", () => {
+  // Owner, 2026-10-04: the bands sat low on the words and a little thin. Tried
+  // on a phone a step at a time, they settled at a lift of 10% of the line's
+  // height above its middle, and 0.72 × 1.1 × 1.1 × 1.05 ≈ 0.915 of the line thick.
+  it("lifts each band 10% of its line above the middle, ~0.915 of the line thick", () => {
     const [s] = swipesFromPath("M0 0h100v40H0Z")!;
-    expect(s.y).toBeCloseTo(20 - 0.025 * 40, 5);
-    expect(s.width).toBeCloseTo(40 * 0.72, 5);
+    expect(s.y).toBeCloseTo(20 - 0.1 * 40, 5);
+    expect(s.width).toBeCloseTo(40 * 0.72 * 1.1 * 1.1 * 1.05, 5);
   });
 
   it("lays one swipe per line, at the middle of the line box less the lift", () => {
     const swipes = swipesFromPath(VERSE_45);
     expect(swipes).toHaveLength(2);
 
-    // Line 1: y 8.5 → 46.5, so the middle is at 27.5 (lifted 2.5% of 38) and the band is
-    // 0.72 × 38 = 27.36 thick.
+    // Line 1: y 8.5 → 46.5, so the middle is at 27.5 (lifted LIFT × 38) and the band is
+    // BAND × 38 thick.
     expect(swipes![0].y).toBeCloseTo(27.5 - LIFT * 38, 5);
-    expect(swipes![0].width).toBeCloseTo(27.36, 5);
+    expect(swipes![0].width).toBeCloseTo(38 * BAND, 5);
 
     // Line 2 is a RELATIVE sub-path (`m79.5 38`), continuing from the previous
     // sub-path's start at (0, 8.5) — so it begins at y 46.5, not y 38. Getting
@@ -73,7 +75,7 @@ describe("swipesFromPath", () => {
   });
 
   it("collapses a rect narrower than its band to a centred dot", () => {
-    // 10 wide, 38 tall: the band (27.36) is wider than the rect, so an inset
+    // 10 wide, 38 tall: the band (~30) is wider than the rect, so an inset
     // centreline would run backwards. A pen tapped once leaves a dot.
     const [dot] = swipesFromPath("M100 0h10v38H100Z")!;
     expect(dot.x1).toBeCloseTo(105, 5);
@@ -84,7 +86,7 @@ describe("swipesFromPath", () => {
   it("handles absolute closing runs and reversed coordinate order", () => {
     const [s] = swipesFromPath("M10 20H60V50H10Z")!;
     expect(s.y).toBeCloseTo(35 - LIFT * 30, 5);
-    expect(s.width).toBeCloseTo(30 * 0.72, 5);
+    expect(s.width).toBeCloseTo(30 * BAND, 5);
   });
 
   it("accepts a rectangle whose rounded closing edge misses by a tenth (10:44)", () => {
@@ -256,7 +258,7 @@ describe("joining the swipes of a passage line by line", () => {
     const joined = joinSwipesByLine([...a, ...b]);
     expect(joined).toHaveLength(3);
     const shared = joined[1]!;
-    const half = (38.2 * 0.72) / 2;
+    const half = (38.2 * BAND) / 2;
     expect(shared.x1).toBeCloseTo(0 + half);
     expect(shared.x2).toBeCloseTo(345 - half);
     expect(shared.y).toBeCloseTo(46.5 + 38.2 / 2 - LIFT * 38.2);
@@ -286,7 +288,9 @@ describe("keeping a band to the words on its line", () => {
   it("pulls a full-width band in to just past the words at both ends", () => {
     const [full] = swipesFromRects([{ x: 0, y: 441, width: 345, height: 37 }]);
     const [fit] = fitSwipesToText([full!], text);
-    expect(ends(fit!)).toEqual([text.left - OVERHANG, text.right + OVERHANG]);
+    const [left, right] = ends(fit!);
+    expect(left).toBeCloseTo(text.left - OVERHANG, 9);
+    expect(right).toBeCloseTo(text.right + OVERHANG, 9);
     expect(fit!.y).toBe(full!.y);
     expect(fit!.width).toBe(full!.width);
   });
