@@ -155,7 +155,7 @@ export function CommentarySheet({
   /** A line under the credit about where this is shown (the pitch says it is private). */
   creditNote?: string | undefined;
 }): JSX.Element | null {
-  const { t } = useT();
+  const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -286,6 +286,10 @@ export function CommentarySheet({
         ref={sheetRef}
         className={styles.sheet}
         role="dialog"
+        // The drawer is drawn inside the mus'haf's right-to-left stage, so it
+        // says its own direction or the page's leaks in: in English the credit
+        // read ".Shown privately, …" with its full stop in front.
+        dir={dir}
         aria-modal={modal}
         aria-label={introOnly ? label : t.commentaryOn(label)}
         data-side={side ?? undefined}
