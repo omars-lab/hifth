@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { pageNumber } from "./page-number";
 
 /*
  * The juz detents on the *app* bar — option C, graduated from the decision page
@@ -77,9 +78,9 @@ test.describe("Hifth · the app bar's juz detents (option C)", () => {
     // the thumb bubble names both, shown as a hand-off with the arrow flipped
     // leftward for Arabic. The bubble only exists mid-drag, so dispatch the
     // native `input` the drag fires (React's onChange, the scrub) without the
-    // `change` that release fires and would clear it. Arabic-Indic ٣/٤ are the
-    // juz label; the page number on the line above is Latin, so they cannot be
-    // it.
+    // `change` that release fires and would clear it. ٣/٤ are the juz label; the
+    // page number on the line above is ٦٢, which holds neither digit, so they
+    // cannot be it.
     await scrubTo(page, 62);
     const bubble = page.locator("output");
     await expect(bubble).toBeVisible();
@@ -103,13 +104,13 @@ test.describe("Hifth · the app bar's juz detents (option C)", () => {
     // Start is page 7. Juz 3 opens at 42 and juz 30 at 582 in this edition —
     // the two ends of a tap, so a marker that navigated by its DOM index rather
     // than its juz would land wrong on at least one.
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
 
     await page.locator("[data-testid='juz-detent'][data-juz='3']").click();
-    await expect(page.locator(NUM)).toHaveText("42");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(42));
 
     await page.locator("[data-testid='juz-detent'][data-juz='30']").click();
-    await expect(page.locator(NUM)).toHaveText("582");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(582));
   });
 
   test("the marker under the pointer grows and a far one stays put", async ({ page }) => {

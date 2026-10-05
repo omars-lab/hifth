@@ -1,6 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { TURN_STYLE_KEY } from "../src/turn-style";
 import { foldsSeen, watchFolds } from "./fold";
+import { pageNumber } from "./page-number";
 
 /*
  * The corner that lifts with the hand (#189).
@@ -60,10 +61,10 @@ test.describe("Hifth · lifting a page by its corner", () => {
     // The live pages were not moved to make it: the page drawing has no transform.
     const moved = await pageSvg(page, 8).evaluate((el) => getComputedStyle(el).transform);
     expect(moved).toBe("none");
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
 
     await page.mouse.up();
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     await expect(peel(page)).toHaveCount(0);
     // The reader watched the leaf go over by hand; no band plays it again.
     expect(await foldsSeen(page), "a band played the turn again after the peel").toEqual([]);
@@ -110,7 +111,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
       const tick = () => {
         const landed = document.querySelector('[data-testid="edge-peel"][data-landed]');
         if (landed) w.__frames.push(`landed 10=${pic("edge-peel-under")} 9=${pic("edge-peel-back")}`);
-        else if (w.__frames.length > 0 || document.querySelector("header .numeric")?.textContent === "9")
+        else if (w.__frames.length > 0 || ["9", "٩"].includes(document.querySelector("header .numeric")?.textContent ?? ""))
           w.__frames.push(`live 10=${drawn(10)} 9=${drawn(9)}`);
         if (performance.now() - t0 < 4000) requestAnimationFrame(tick);
       };
@@ -129,7 +130,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
     expect(await box(under), "the page beneath is not where its drawing will be").toEqual(leftDrawing);
 
     await page.mouse.up();
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     await expect(peel(page)).toHaveCount(0);
     await expect(pageSvg(page, 10)).toBeVisible();
     await page.waitForTimeout(300);
@@ -165,7 +166,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
     expect(Math.round(layer.y), "the peel starts above the paper").toBe(Math.round(paper.y));
     expect(Math.round(layer.height), "the peel is not the paper's height").toBe(Math.round(paper.height));
     await page.mouse.up();
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
   });
 
   // Owner, 2026-09-28 (Firefox): with two pages open an arrow had to be pressed
@@ -174,13 +175,13 @@ test.describe("Hifth · lifting a page by its corner", () => {
   test("each arrow press and each corner pull turns a whole opening", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 8)).toBeVisible();
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     await expect(pageSvg(page, 10)).toBeVisible();
     await page.keyboard.press("ArrowRight");
-    await expect(page.locator(NUM)).toHaveText("7");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(7));
     await expect(pageSvg(page, 8)).toBeVisible();
 
     // The corner pulled from the right-hand page's opening lands on the next one too.
@@ -191,7 +192,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
     for (let i = 1; i <= 5; i += 1) await page.mouse.move(rail.x + 6 + i * 40, y + i * 4);
     await expect(peel(page).getByTestId("edge-peel-under")).toHaveAttribute("src", /\/10\.svg$/);
     await page.mouse.up();
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
   });
 
   // Owner, 2026-09-28 (Firefox): "transition into new pages is weird with
@@ -245,7 +246,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
     });
 
     await page.keyboard.press("ArrowLeft");
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     await expect(pageSvg(page, 10)).toBeVisible();
     await page.waitForTimeout(2600);
 
@@ -280,7 +281,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
     for (let i = 4; i >= 0; i -= 1) await page.mouse.move(x - i * 40, y - i * 4);
     await page.mouse.up();
     await expect(peel(page)).toHaveCount(0);
-    await expect(page.locator(NUM)).toHaveText("8");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(8));
   });
 
   // The reader's turn style carries into the peel: the skeleton curl's flap
@@ -307,7 +308,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
       await expect(peel(page).getByTestId("edge-peel-back")).toBeHidden();
       expect(await peel(page).locator("[data-skeleton] i").count() > 0).toBe(lines);
       await page.mouse.up();
-      await expect(page.locator(NUM)).toHaveText("9");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(9));
     });
   }
 
@@ -322,7 +323,7 @@ test.describe("Hifth · lifting a page by its corner", () => {
     for (let i = 1; i <= 8; i += 1) await page.mouse.move(rail.x + 6 + i * 45, y);
     await expect(peel(page)).toHaveCount(0);
     await page.mouse.up();
-    await expect(page.locator(NUM)).toHaveText("9");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
   });
 });
 

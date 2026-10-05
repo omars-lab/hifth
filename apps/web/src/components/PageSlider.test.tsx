@@ -87,7 +87,7 @@ describe("PageSlider", () => {
   it("names the page rather than reading out a bare number", () => {
     // Without `aria-valuetext` a screen reader says "9" — a number with no unit
     // in a bar made of numbers.
-    expect(slider().getAttribute("aria-valuetext")).toBe("صفحة 9 من 604");
+    expect(slider().getAttribute("aria-valuetext")).toBe("صفحة ٩ من ٦٠٤");
   });
 
   it("puts the previous page on the right edge and the next on the left", () => {
@@ -132,14 +132,14 @@ describe("PageSlider", () => {
   it("shows where the drag would land before the reader lets go", () => {
     const input = slider();
     fireEvent.input(input, { target: { value: "300" } });
-    expect(screen.getByText("صفحة 300 من 604")).toBeTruthy();
-    expect(screen.getByText("أقرب صفحة متوفّرة · صفحة 19")).toBeTruthy();
+    expect(screen.getByText("صفحة ٣٠٠ من ٦٠٤")).toBeTruthy();
+    expect(screen.getByText("أقرب صفحة متوفّرة · صفحة ١٩")).toBeTruthy();
   });
 
   it("says nothing about snapping when the page is one we hold", () => {
     const input = slider();
     fireEvent.input(input, { target: { value: "7" } });
-    expect(screen.getByText("صفحة 7 من 604")).toBeTruthy();
+    expect(screen.getByText("صفحة ٧ من ٦٠٤")).toBeTruthy();
     expect(screen.queryByText(/أقرب صفحة/)).toBeNull();
   });
 
@@ -267,7 +267,7 @@ describe("PageSlider", () => {
     // the page number and nothing it would have to guess.
     const input = slider({ pageContext: () => null });
     fireEvent.input(input, { target: { value: "300" } });
-    expect(screen.getByText("صفحة 300 من 604")).toBeTruthy();
+    expect(screen.getByText("صفحة ٣٠٠ من ٦٠٤")).toBeTruthy();
     expect(screen.queryByText(/النساء/)).toBeNull();
   });
 });

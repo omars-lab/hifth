@@ -109,16 +109,36 @@ describe("the bundles", () => {
     expect(EN.chipAria("Similar", 3)).toBe("Similar · 3");
   });
 
-  it("spells the page number in Latin in every language", () => {
-    // The one figure a reader reads off the printed mus'haf's corner and types
-    // back into the jumper. The aria snapshots in e2e/__aria__ record «صفحة 7»,
-    // and this is the assertion that stops a well-meaning sweep from
-    // "fixing" it to «صفحة ٧» and taking the snapshots with it.
-    expect(AR.pageN(7)).toBe("صفحة 7");
+  it("spells the page number in each language's own digits, like the printed page", () => {
+    // The printed mus'haf's own foot reads ٧, and so does every other number in
+    // the Arabic chrome; a bar that said «صفحة 7» over a page that says ٧ read
+    // as two books. The jumper takes either kind of digit, so nothing is lost.
+    // (Owner, 2026-10-05.)
+    expect(AR.pageN(7)).toBe("صفحة ٧");
     expect(EN.pageN(7)).toBe("Page 7");
     for (const id of LOCALE_IDS) {
-      expect(ARABIC_DIGITS.test(stringsFor(id).pageN(7))).toBe(false);
-      expect(ARABIC_DIGITS.test(stringsFor(id).pageOfTotal(7, 604))).toBe(false);
+      const s = stringsFor(id);
+      // Every label that carries a page number, so one left printing the raw
+      // number shows up here rather than on a scholar's screen.
+      const labels = [
+        s.pageN(7),
+        s.pageOfTotal(7, 604),
+        s.firstPage(7),
+        s.lastPage(7),
+        s.nearestPageN(7),
+        s.hoppedTo("x", 7),
+        s.backTo("x", 7),
+        s.mapOpen(7),
+        s.mapWentTo("x", 7),
+        s.facingAbsent(7),
+        s.arrivedJuz(2, 7),
+        s.bmMoved("x", 7),
+        s.bmOpen("x", 7),
+        s.cropTitle(7),
+        s.cropCaption(7),
+      ];
+      for (const label of labels) expect(label).toContain(s.num(7));
+      expect(s.pageOfTotal(7, 604)).toContain(s.num(604));
     }
   });
 

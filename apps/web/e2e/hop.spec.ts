@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { contextWithout } from "./inventory";
+import { pageNumber } from "./page-number";
 
 // Loop 2 exit criterion (PLAN §Loop 2):
 //   tap 2:48 → rail → popover → hop to 2:123 cross-page → bead back, one-handed.
@@ -95,7 +96,7 @@ test.describe("Hifth · the hop", () => {
     // 4. Hop — cross-page to page 19. The page id updates and 2:123 becomes
     //    current (its selection highlight lands on the newly mounted page).
     await hopBtn.tap();
-    await expect(page.locator("header .numeric")).toHaveText("19");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
     ).toBeVisible();
@@ -112,7 +113,7 @@ test.describe("Hifth · the hop", () => {
     await bead.tap();
 
     // Back on page 7 with 2:48 current again — same code path as a forward hop.
-    await expect(page.locator("header .numeric")).toHaveText("7");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(7));
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
     ).toBeVisible();
@@ -188,7 +189,7 @@ test.describe("Hifth · the hop", () => {
     await expect(hop).toBeEnabled();
     await hop.tap();
 
-    await expect(page.locator("header .numeric")).toHaveText("22");
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(22));
     await expect(
       page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٤٥/ }),
     ).toBeVisible();

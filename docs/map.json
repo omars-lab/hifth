@@ -459,7 +459,7 @@
         {
           "file": "apps/web/src/i18n.tsx",
           "symbol": "buildStrings",
-          "note": "The assembler: one function, run for every locale, wiring a compiled catalog to format.ts's formatters and to LOCALES. Written once is the point — the old file said everything twice, so «صفحتان» and \"2 pages\" were two independent chances to bind a rule differently. It also holds the numeral convention: {n} selects a plural form, {nText} is digits(n, lang) and is what prints, and a bare {page} is a raw number, i.e. Latin digits in every language."
+          "note": "The assembler: one function, run for every locale, wiring a compiled catalog to format.ts's formatters and to LOCALES. Written once is the point — the old file said everything twice, so «صفحتان» and \"2 pages\" were two independent chances to bind a rule differently. It also holds the numeral convention: {n} selects a plural form, {nText} is digits(n, lang) and is what prints, and {page} is passed through digits too, so a page number reads ٧ in Arabic like the printed page's foot."
         },
         {
           "file": "apps/web/src/i18n.tsx",
