@@ -39,7 +39,7 @@ const road: Edge = {
   dir: { dSurah: 0, dPage: 0 },
 };
 
-function drawer(entry: CommentaryNote, more: { back?: boolean } = {}) {
+function drawer(entry: CommentaryNote, more: { back?: boolean; side?: "left" | "right" } = {}) {
   render(
     <LangProvider>
       <CommentarySheet
@@ -48,6 +48,7 @@ function drawer(entry: CommentaryNote, more: { back?: boolean } = {}) {
         roads={[road]}
         onHop={() => {}}
         back={more.back ? { label: "2:1", onBack: () => {} } : null}
+        side={more.side ?? null}
       />
     </LangProvider>,
   );
@@ -102,6 +103,13 @@ describe("the commentary drawer in English", () => {
     // its full stop in front, and the header and the cards ran right to left.
     const sheet = drawer(note("en"), { back: true });
     expect(sheet.getAttribute("dir")).toBe("ltr");
+  });
+
+  it("on a facing page it starts at its title, with no bar to drag", () => {
+    // The phone sheet's grab bar was drawn there too, though nothing on a
+    // facing page drags or grows: it promised a handle that did nothing.
+    const sheet = drawer(note("en"), { side: "left" });
+    expect(sheet.firstElementChild?.tagName).toBe("HEADER");
   });
 
   it("keeps its own words in English", () => {
