@@ -863,7 +863,7 @@ export function App(): JSX.Element {
   );
 
   // Loop 6a — the ⬡ merge. The rail's other chips are *directions* of one edge
-  // type (↻ same surah, ◀ earlier, ▶ later); `root` was an edge *type* wearing a
+  // type (≈↻ same surah, ≈← earlier, ≈→ later); `root` was an edge *type* wearing a
   // direction's clothes, and it wore the same glyph as the root lens while
   // promising something narrower. So the rail drops it and the lens adopts it:
   // the curated edges are pinned above the corpus families, marked as
@@ -2163,10 +2163,8 @@ export function App(): JSX.Element {
     for (const chip of railChips)
       items.push({
         caption: `${t.railDirection[chip.direction]} · ${t.num(chip.count)}`,
-        // One sign for "looks like" on every similar-verses line; the words
-        // say which way. The rail's own arrows would put a second ▶ beside
-        // Listen's.
-        glyph: "≈",
+        // The rail's own sign: "looks like" with a small mark for which way.
+        glyph: chip.glyph,
         onPick: () => setOpenDirection(chip.direction),
       });
     if (rootCount > 0)

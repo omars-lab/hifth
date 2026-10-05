@@ -133,11 +133,16 @@ export type AdjacencyShard = Readonly<Record<string, AyahAdjacency>>;
 /** The four rail directions. `loop` = same surah, `root` = shared-root family. */
 export type RailDirection = "loop" | "earlier" | "later" | "root";
 
-/** Direction glyph for a chip (spec §9: `↻ 3` `◀ 1` `▶ 2` `⬡ 12`). */
+/**
+ * The glyph a chip wears. Spec §9 drew similar verses as bare direction
+ * arrows (`↻ 3` `◀ 1` `▶ 2`); the owner (2026-10-04) found an arrow does not
+ * read as "similar", and the later one was the very triangle that means
+ * listen. So each wears "looks like" (≈) with a small mark for which way.
+ */
 export const RAIL_GLYPH: Readonly<Record<RailDirection, string>> = {
-  loop: "↻",
-  earlier: "◀",
-  later: "▶",
+  loop: "≈↻",
+  earlier: "≈←",
+  later: "≈→",
   root: "⬡",
 };
 
