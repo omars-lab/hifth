@@ -171,6 +171,12 @@ export function CommentarySheet({
   const [tall, setTall] = useState(false);
   const verseKey = entry?.ayahKey ?? null;
   useEffect(() => setTall(false), [verseKey]);
+  // Reading starts at the top of each note. A related verse is followed from
+  // the foot of a note, and the same panel turning to the new verse kept the
+  // old one's scroll, so the reader landed mid-way down a note not yet begun.
+  useLayoutEffect(() => {
+    if (sheetRef.current) sheetRef.current.scrollTop = 0;
+  }, [verseKey]);
   const modal = !beside && tall;
 
   useLayoutEffect(() => {
@@ -197,7 +203,17 @@ export function CommentarySheet({
     };
     report();
     window.addEventListener("resize", report);
-    return () => window.removeEventListener("resize", report);
+    // Closing the book to one page moves the note into the corner while the
+    // book is still two pages wide, so look again once the book has narrowed:
+    // a card judged against the old spread kept the page slid up under the
+    // toolbar for nothing.
+    const book = document.querySelector<HTMLElement>('[data-testid="page-book"]');
+    const seen = new ResizeObserver(report);
+    if (book) seen.observe(book);
+    return () => {
+      seen.disconnect();
+      window.removeEventListener("resize", report);
+    };
   }, [open, beside, verseKey, onCover]);
   useEffect(() => () => onCover?.(null), [onCover]);
 
