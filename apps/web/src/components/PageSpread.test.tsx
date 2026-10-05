@@ -196,13 +196,4 @@ describe("PageSpread", () => {
     expect(left!.getAttribute("aria-hidden")).toBeNull();
     expect(container.querySelector("[data-testid='page-book']")!.getAttribute("data-solo")).toBeNull();
   });
-
-  it("hides the gutter from the accessibility tree", () => {
-    // It is a drawn shadow standing in for a binding. There is nothing to say
-    // about it, and a screen reader stopping on the spine of the book is noise.
-    const container = spread();
-    const root = container.querySelector("[data-testid='page-book']")!;
-    const gutter = root.lastElementChild!;
-    expect(gutter.getAttribute("aria-hidden")).toBe("true");
-  });
 });

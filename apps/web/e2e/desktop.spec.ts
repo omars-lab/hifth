@@ -2,6 +2,7 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
 import { watchFolds, foldsSeen } from "./fold";
 import { contextWithout } from "./inventory";
 import { ayahTarget } from "./ayah";
+import { lum, pixelsAt } from "./ink";
 
 /*
  * The desktop spread — an open mus'haf, and honest about the half it does not
@@ -216,21 +217,18 @@ test.describe("Hifth · the desktop spread", () => {
     const open = await boxOf(book(page));
     const live = await boxOf(pageSvg(page, 7));
 
-    // The two leaf boxes and the gutter's centre, read in one pass off the book's
-    // own children. The leaves are what has to be equal — measuring the page
-    // inside one against the well inside the other would compare a box that
-    // gives up 14 px to a border and a fore-edge stack against one that does not.
-    const { leaves, centre } = await book(page).evaluate((el) => {
-      const kids = Array.from(el.children);
-      const g = kids[kids.length - 1]!.getBoundingClientRect();
-      return {
-        leaves: kids.slice(0, 2).map((k) => {
+    // The two leaf boxes, read in one pass off the book's own children. The
+    // leaves are what has to be equal — measuring the page inside one against
+    // the well inside the other would compare a box that gives up 14 px to a
+    // border and a fore-edge stack against one that does not.
+    const leaves = await book(page).evaluate((el) =>
+      Array.from(el.children)
+        .slice(0, 2)
+        .map((k) => {
           const r = k.getBoundingClientRect();
           return { x: r.x, width: r.width };
         }),
-        centre: g.x + g.width / 2,
-      };
-    });
+    );
 
     // Equal, and the seam is where the gutter is drawn. `flex: 1 1 0` floors the
     // *content* box at zero, so the absent leaf's padding was added on top of its
@@ -243,7 +241,12 @@ test.describe("Hifth · the desktop spread", () => {
     );
     // Right leaf first in DOM order, so the seam is where the second one ends.
     const seam = leaves[1]!.x + leaves[1]!.width;
-    expect(centre, "the gutter is not drawn where the leaves meet").toBeCloseTo(seam, 0);
+    // The gutter is drawn on the paper, a half on each leaf, so its darkest
+    // column is read off the screen: one row across the band, a third of the
+    // way down the page.
+    const row = await pixelsAt(page, { x: Math.round(seam) - 20, y: Math.round(live.y + live.height / 3), width: 40, height: 1 });
+    const darkest = row.reduce((best, px, i) => (lum(px) < lum(row[best]!) ? i : best), 0);
+    expect(Math.abs(Math.round(seam) - 20 + darkest - seam), "the gutter is not drawn where the leaves meet").toBeLessThanOrEqual(3);
 
     // The scripture reaches the spine. Not `=== seam`: the page host carries a
     // border, so a page flush against the binding still starts a pixel or two

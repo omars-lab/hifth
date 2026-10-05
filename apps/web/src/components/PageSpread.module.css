@@ -160,40 +160,22 @@
 /*
  * The gutter — the signature, and the only place this layout spends any boldness.
  *
- * Drawn once on the book, not twice on the leaves: a spine belongs to the
- * binding. The gradient falls onto *both* facing edges, which is what makes the
- * pair read as one open book rather than two cards on a shelf. Non-interactive
- * and aria-hidden — it is the shadow of a fold, and there is nothing to say
- * about it.
+ * Drawn on the paper, not on the book: each leaf carries its own half of the
+ * crease along its bound edge (PageStage.module.css, `.host[data-leaf]::before`),
+ * and the two halves meet at the seam into one band that falls onto *both*
+ * facing edges — which is what makes the pair read as one open book rather than
+ * two cards on a shelf. This file only switches it on.
  *
- * `50%` is the seam because the two leaves are the same width. That is now true
- * by construction — they are the same box with the same aspect — where before
- * it was true only of the leaves' flex rule and not of their padding.
+ * It used to be one element on `.book`, and `.book` is as tall as the desk. A
+ * page is shorter than that — by ~10 px at the head and foot of most pages, and
+ * by a third on the two opening pages, which are drawn nearly square — so the
+ * crease ran on past the paper and out across the empty desk, toolbar to bottom
+ * bar (2026-10-04; e2e/spread-fit.spec.ts). Drawn on the paper, it is as tall as
+ * the paper by construction, whatever shape the page turns out to be.
  */
-.gutter {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: calc(50% - 14px);
-  inline-size: 28px;
-  pointer-events: none;
-  /* The core is one pixel wide and it is the whole difference between a fold and
-     a soft band. `calc(50% - 0.5px)` → `calc(50% + 0.5px)` rather than a
-     percentage, so it stays one pixel whatever the band's width becomes.
-     Measured against a reference reader whose crease is 26.7 px with a 1.0 px
-     core at α ≈ 0.70; ours was 28 px with a deepest stop of 0.18, which is a
-     wash (docs/design/page-transition.md §1.4, §2.4). The two shoulders were
-     already within 0.02 alpha of the reference and are left alone. */
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    var(--gutter-shadow) 42%,
-    var(--gutter-shadow-deep) calc(50% - 1px),
-    var(--gutter-core) calc(50% - 0.5px),
-    var(--gutter-core) calc(50% + 0.5px),
-    var(--gutter-shadow-deep) calc(50% + 1px),
-    var(--gutter-shadow) 58%,
-    transparent 100%
-  );
+.spread {
+  --spine-crease: block;
+  --spine-core: 1px;
 }
 
 /*
@@ -257,10 +239,11 @@
 }
 
 /* No spine, because there is no seam: one leaf has no facing edge for the
-   shadow to fall onto, and a crease down the middle of a single page is a
+   shadow to fall onto, and a crease down the side of a single page is a
    picture of a fold that is not there. */
-.book[data-solo="true"] .gutter {
-  display: none;
+.book[data-solo="true"] {
+  --spine-crease: none;
+  --spine-core: 0px;
 }
 
 /*

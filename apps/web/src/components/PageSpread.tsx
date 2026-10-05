@@ -241,14 +241,13 @@ export function PageSpread({
     /* Two boxes, because two different things wanted to be "the spread" and they
        are not the same width. The outer one is the desk: it runs the width of
        the window and draws the field. The inner one is the book — the two
-       leaves and nothing else — and it is what the gutter is drawn on and what
-       the fold's band is given, both of which are claims about the paper rather
-       than about the room it is lying in.
+       leaves and nothing else — and it is what the fold's band is given, which
+       is a claim about the paper rather than about the room it is lying in.
 
        Right leaf first. The RTL flow of `main` puts it on the right; see the
        geometry note above for why that is the only place the side is decided.
-       The gutter is drawn on the book rather than on the leaves — a spine
-       belongs to the binding, not to either page. */
+       The gutter is drawn on the paper, half on each leaf's bound edge, so it
+       is never taller than the pages it sits between (PageSpread.module.css). */
     <div className={styles.spread} data-testid="page-spread">
       <div
         ref={bookRef}
@@ -260,12 +259,8 @@ export function PageSpread({
         {leaf(left, "left")}
         {/* Solo — the book is closed to one magnified leaf — takes the rails
             away: there is no facing page to turn toward, and a fore-edge grab
-            over a page the reader is panning would fight the pan. Before the
-            gutter so the spine stays the book's last child — it is drawn on top
-            of nothing and the rails hug the outer edges, so paint order is free,
-            but the gutter is the book's signature furniture and reads last. */}
+            over a page the reader is panning would fight the pan. */}
         {!solo && edgeRails}
-        <div className={styles.gutter} aria-hidden="true" />
       </div>
     </div>
   );
