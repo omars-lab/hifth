@@ -66,6 +66,14 @@ export async function pixelsOf(page: Page, selector: string, opts: { middle?: nu
     width: Math.min(view.width, b.x + b.width) - x,
     height: Math.min(view.height, b.y + b.height) - y,
   };
+  return pixelsAt(page, clip);
+}
+
+/** The pixels inside a rectangle of the screen, row by row. */
+export async function pixelsAt(
+  page: Page,
+  clip: { x: number; y: number; width: number; height: number },
+): Promise<Rgb[]> {
   const png = await page.screenshot({ clip, animations: "disabled" });
   return page.evaluate(async (b64) => {
     const img = new Image();
