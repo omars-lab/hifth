@@ -60,7 +60,7 @@ describe("the commentary drawer in Arabic", () => {
   it("says its own words in Arabic, and does not force them left to right", () => {
     const sheet = drawer(note("en", { intro: { title: "Intro", paragraphs: ["p"] } }), { back: true });
     expect(sheet.getAttribute("aria-label")).not.toMatch(/Commentary on/);
-    expect(sheet.hasAttribute("dir")).toBe(false);
+    expect(sheet.getAttribute("dir")).toBe("rtl");
     for (const english of ["Show all of the note", "Surah introduction", "Commentary", "Related verses"]) {
       expect(screen.queryByLabelText(english), english).toBeNull();
     }
@@ -94,6 +94,14 @@ describe("the commentary drawer in English", () => {
     const para = screen.getByText("a paragraph").closest("[dir]");
     expect(para?.getAttribute("dir")).toBe("auto");
     expect(para?.hasAttribute("lang")).toBe(false);
+  });
+
+  it("lays its own words out left to right, though it sits on a right-to-left page", () => {
+    // The drawer is drawn inside the mus'haf's right-to-left stage, so without
+    // its own direction the credit's last line read ".Shown privately, …" with
+    // its full stop in front, and the header and the cards ran right to left.
+    const sheet = drawer(note("en"), { back: true });
+    expect(sheet.getAttribute("dir")).toBe("ltr");
   });
 
   it("keeps its own words in English", () => {
