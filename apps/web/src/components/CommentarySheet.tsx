@@ -312,9 +312,8 @@ export function CommentarySheet({
           if (!beside && !tall && e.currentTarget.scrollTop > 0) setTall(true);
         }}
       >
-        {beside ? (
-          <div className={styles.grip} aria-hidden="true" />
-        ) : (
+        {/* Beside a page nothing drags or grows, so it has no handle. */}
+        {beside ? null : (
           <button
             type="button"
             className={styles.grip}
