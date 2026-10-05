@@ -391,6 +391,41 @@ test.describe("Hifth · the way back from a note on a phone", () => {
     await expect(sheet(page).getByRole("button", { name: /^Back to/ })).toHaveCount(0);
   });
 
+  test("the way back has a space between its arrow and its words", async ({ page }) => {
+    // The space after the arrow was a trailing space inside the button's own
+    // row, which the row drops, so the arrow sat glued to the first word.
+    await page.goto("/#/hafs-kfqc/1:6");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).getByRole("button", { name: /Hop to .*6:153/ }).click();
+    const back = sheet(page).getByRole("button", { name: /^Back to .*1:6/ });
+    await expect(back).toBeVisible();
+    const gap = await back.evaluate((el) => {
+      const arrow = el.querySelector("[aria-hidden]")!.getBoundingClientRect();
+      const words = document.createRange();
+      words.selectNodeContents(el.lastChild!);
+      return words.getClientRects()[0]!.left - arrow.right;
+    });
+    expect(gap).toBeGreaterThanOrEqual(3);
+  });
+
+  test("in Arabic the way back's arrow bends the way the line reads, clear of its words", async ({ page }) => {
+    // The arrow was one glyph for both languages, so in Arabic it pointed
+    // away from the start of the line it sat at, and was glued to it there too.
+    await page.goto("/?lang=ar#/hafs-kfqc/1:6");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).getByRole("button", { name: /^انتقل إلى .*(6:153|٦:١٥٣)/ }).click();
+    const back = sheet(page).getByRole("button", { name: /^ارجع إلى / });
+    await expect(back).toBeVisible();
+    await expect(back.locator("[aria-hidden]")).toHaveText("↪");
+    const gap = await back.evaluate((el) => {
+      const arrow = el.querySelector("[aria-hidden]")!.getBoundingClientRect();
+      const words = document.createRange();
+      words.selectNodeContents(el.lastChild!);
+      return arrow.left - words.getClientRects()[0]!.right;
+    });
+    expect(gap).toBeGreaterThanOrEqual(3);
+  });
+
   test("a note opened by a link wears no focus box", async ({ page }) => {
     // Nobody pressed a key, so there is no keyboard user to show where focus
     // went; a ring round the close button only reads as a stray box on the demo.
