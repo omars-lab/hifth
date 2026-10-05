@@ -140,6 +140,7 @@ button.grip {
 .back {
   display: inline-flex;
   align-items: center;
+  gap: 0.35em;
   padding: 0;
   min-block-size: var(--touch-min);
   border: 0;

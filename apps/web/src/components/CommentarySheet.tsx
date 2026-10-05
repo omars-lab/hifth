@@ -355,7 +355,9 @@ export function CommentarySheet({
 
         {back && (
           <button type="button" className={styles.back} onClick={back.onBack}>
-            <span aria-hidden="true">↩ </span>
+            {/* The hook bends back toward where the line starts, so it turns
+                with the reading direction; the row's gap is the space after it. */}
+            <span aria-hidden="true">{dir === "rtl" ? "↪" : "↩"}</span>
             {t.beadBack(back.label)}
           </button>
         )}
