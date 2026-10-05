@@ -98,6 +98,48 @@
   font-weight: 600;
 }
 
+/*
+ * On a phone the page fills the screen's width, so its top corner is where
+ * the first line's opening words are, and a chip there sat on them. The one
+ * place on the page with no words is the strip at its top, between the
+ * surah's name and the juz: the chips stand there instead, in a row and drawn
+ * slim enough to fit it (three at most ever occur, and three fit, English
+ * labels included). Centred, there is no corner for a card to cover, so
+ * crossing has nothing to do.
+ *
+ * Centred on the paper, not the screen: the page's stacked edges take their
+ * room on the left, so the paper's middle is 13px right of the screen's on
+ * every phone page, and on a left-hand page those 13px were the difference
+ * between clearing the surah's name and covering its last letters.
+ */
+@media (max-width: 600px) {
+  .rail:not([data-beside]) {
+    inset-block-start: 14px;
+    left: 26px;
+    right: 0;
+    margin-inline: auto;
+    inline-size: max-content;
+    flex-direction: row;
+    gap: 2px;
+  }
+  .rail:not([data-beside]) .chip {
+    position: relative;
+    min-block-size: 28px;
+    padding-inline: 6px;
+  }
+  .rail:not([data-beside]) .glyph {
+    font-size: var(--text-md);
+  }
+  /* Still a whole thumb's worth to tap: the reach grows up, over the desk
+     above the page, rather than down onto the first line. */
+  .rail:not([data-beside]) .chip::after {
+    content: "";
+    position: absolute;
+    inset-block: calc(28px - var(--touch-min)) -2px;
+    inset-inline: 0;
+  }
+}
+
 /* The root chip reads as a distinct family — hexagon glyph, subtler weight. */
 .chip[data-direction="root"] {
   border-style: dashed;
