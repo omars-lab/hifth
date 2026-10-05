@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LONG_PRESS_MS, TAP_SLOP_PX } from "./gestures.js";
 import { FIBRE_FLOOR, FIBRE_ID, Highlighter, MARQUEE_MIN_SIZE, rectsIntersect } from "./highlighter.js";
-import { OVERHANG } from "./ink.js";
+import { LIFT, OVERHANG } from "./ink.js";
 import { Resolver } from "./resolver.js";
 import type { AssetManifest } from "./types.js";
 
@@ -822,7 +822,7 @@ describe("Highlighter.highlightRects", () => {
     // Written right-to-left, so x1 is the band's right end.
     expect(Number(m.getAttribute("data-x1"))).toBeCloseTo(10 + 200 - half, 6);
     expect(Number(m.getAttribute("data-x2"))).toBeCloseTo(10 + half, 6);
-    expect(Number(m.getAttribute("data-y"))).toBeCloseTo(115, 6);
+    expect(Number(m.getAttribute("data-y"))).toBeCloseTo(115 - LIFT * 30, 6);
   });
 
   it("draws a single word as a dot when it is narrower than the pen", () => {
