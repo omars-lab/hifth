@@ -70,6 +70,12 @@ import type { TurnStyle } from "../turn-style";
 import styles from "./PageStage.module.css";
 import { printedNumbersOf } from "./verse-numbers";
 
+/** Where a verse's number is on screen, and the whole verse on its page. */
+export interface VerseSpot {
+  around: DOMRect;
+  clear?: DOMRect | undefined;
+}
+
 interface PageStageProps {
   resolver: Resolver;
   /** The page currently shown. */
@@ -314,10 +320,11 @@ interface PageStageProps {
    * Makes each verse's number a button (the pitch build only, for the same
    * reason); it needs the page's words to find the numbers.
    * `onOpenVerseMenu` opens the menu of what to read on the verse pressed,
-   * given where its number is and where the whole verse is on this page.
+   * given a way to ask where its number and the whole verse are on screen —
+   * asked again while the page moves under the menu.
    */
   paintVerses?: ((svg: SVGSVGElement, words: WordIndex | null) => void) | undefined;
-  onOpenVerseMenu?: (key: string, around: DOMRect, verse?: DOMRect) => void;
+  onOpenVerseMenu?: (key: string, locate: () => VerseSpot | null) => void;
   /** A jump mark was pressed: list where the reader's memory went from that verse. */
   onOpenJumps?: (key: string, at: { top: number; bottom: number; x: number }) => void;
   /**
@@ -1819,9 +1826,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const bottom = Math.max(...parts.map((r) => r.bottom));
       return new DOMRect(left, top, right - left, bottom - top);
     };
+    // Looked up by its key each time: the numbers are drawn again when the
+    // selection moves, so the one pressed may not be the one there now.
     const openMenu = (n: Element) => {
       const key = n.getAttribute("data-verse-key") ?? "";
-      onOpenVerseMenuRef.current?.(key, n.getBoundingClientRect(), verseBox(key));
+      const locate = (): VerseSpot | null => {
+        const now = svg.querySelector(`[data-verse-number][data-verse-key="${key}"]`);
+        const around = now?.getBoundingClientRect();
+        if (!around || around.width === 0) return null;
+        return { around, clear: verseBox(key) };
+      };
+      onOpenVerseMenuRef.current?.(key, locate);
     };
     svg.addEventListener("click", (e) => {
       const badge = introOf(e);

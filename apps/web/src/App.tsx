@@ -118,7 +118,15 @@ import { useHashRouter } from "./useHashRouter";
 import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
-import { PageStage, pageSpan, type Corner, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
+import {
+  PageStage,
+  pageSpan,
+  type Corner,
+  type PageStageHandle,
+  type PageTool,
+  type VerseSpot,
+  type WordRect,
+} from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
 import { PenHomeBottom, PenHomeFloat, PenHomeSide, useSideRoom } from "./components/PenHomes";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
@@ -828,7 +836,9 @@ export function App(): JSX.Element {
   // selected verse's number is washed. Pressing a number selects its verse,
   // and the note waits to be picked from the menu rather than opening behind it.
   // It is the same small menu a hold on a verse opens, with other lines.
-  const [verseMenuAt, setVerseMenuAt] = useState<{ key: string; around: DOMRect; verse?: DOMRect | undefined } | null>(null);
+  const [verseMenuAt, setVerseMenuAt] = useState<({ key: string; locate: () => VerseSpot | null } & VerseSpot) | null>(
+    null,
+  );
   const closeNumberMenu = useCallback(() => setVerseMenuAt(null), []);
   const pickedFromNumberRef = useRef<string | null>(null);
   const verseMenuLabel = useCallback((key: string) => t.verseMenu(key), [t]);
@@ -2169,12 +2179,14 @@ export function App(): JSX.Element {
   // A press on a verse's number: select the verse (unless it already is) and
   // open the menu beside the number. Only where a tap on a verse selects it.
   const openVerseMenu = useCallback(
-    (key: string, around: DOMRect, verse?: DOMRect) => {
+    (key: string, locate: () => VerseSpot | null) => {
       if (toolRef.current !== "select" && toolRef.current !== "highlight") return;
+      const spot = locate();
+      if (!spot) return;
       pickedFromNumberRef.current = key;
       if (selectedKeyRef.current !== key) handleSelect(key);
       else setCommentaryOpen(false);
-      setVerseMenuAt({ key, around, verse });
+      setVerseMenuAt({ key, locate, ...spot });
     },
     [handleSelect],
   );
@@ -3742,7 +3754,8 @@ export function App(): JSX.Element {
         <VerseMenu
           name={t.verseMenu(verseMenuAt.key)}
           around={verseMenuAt.around}
-          clear={verseMenuAt.verse}
+          clear={verseMenuAt.clear}
+          follow={verseMenuAt.locate}
           items={verseMenuItems}
           onClose={closeNumberMenu}
           stacked

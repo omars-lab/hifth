@@ -575,6 +575,28 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     }
   });
 
+  test("with the note open, a verse's number opens its menu clear of the verse", async ({ page }) => {
+    // Pressing the number closes the note, so the page drops back down from
+    // where it had been lifted to sit above the note. The menu was placed
+    // before the drop and stayed where the page had been: on the verse.
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const number = pageSvg(page, 42).locator('[data-verse-number][data-verse-key="quran/hafs-kfqc/2:255"]');
+    await settle(number);
+    const at = (await number.boundingBox())!;
+    await page.mouse.click(at.x + at.width / 2, at.y + at.height / 2);
+    const menu = page.getByRole("menu", { name: /2:255/ });
+    await expect(menu).toBeVisible();
+    await settle(verse(page, 42, 262));
+    await settle(menu);
+    const menuBox = (await menu.boundingBox())!;
+    const verseBox = (await verse(page, 42, 262).boundingBox())!;
+    expect(overlaps(menuBox, verseBox), `menu ${JSON.stringify(menuBox)} verse ${JSON.stringify(verseBox)}`).toBe(
+      false,
+    );
+  });
+
   test("tapping a verse opens a full-width bottom sheet with no side", async ({ page }) => {
     // Deep-linking a verse selects it, which opens the note the same way a tap
     // does (the pitch build opens on selection). 2:255 is Āyat al-Kursī.
