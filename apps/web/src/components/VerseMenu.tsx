@@ -21,6 +21,13 @@ interface VerseMenuProps {
    * lines. The menu clears this instead, and stays centred on `around`.
    */
   clear?: DOMRect | undefined;
+  /**
+   * Where the verse is now, asked again each frame until it stops moving: the
+   * press that opens the menu can also move the page (closing a phone's note
+   * lets the lifted page drop back), and a menu placed where the verse was
+   * would be left standing on it.
+   */
+  follow?: (() => { around: Box; clear?: Box | undefined } | null) | undefined;
   items: readonly VerseMenuItem[];
   onClose: () => void;
   /**
@@ -33,7 +40,7 @@ interface VerseMenuProps {
 const GAP = 8;
 const EDGE = 8;
 
-type Box = { left: number; right: number; top: number; bottom: number };
+export type Box = { left: number; right: number; top: number; bottom: number };
 
 /**
  * Where the menu goes: above the verse when it fits there, below when it fits
@@ -76,7 +83,7 @@ export function placeMenu(
  * offer, beside the verse rather than over it. Escape, a tap anywhere else, or
  * a pick closes it.
  */
-export function VerseMenu({ name, around, clear, items, onClose, stacked = false }: VerseMenuProps): JSX.Element {
+export function VerseMenu({ name, around, clear, follow, items, onClose, stacked = false }: VerseMenuProps): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
 
@@ -91,6 +98,37 @@ export function VerseMenu({ name, around, clear, items, onClose, stacked = false
     );
     // Placed again when lines arrive: a taller menu must still clear the verse.
   }, [around, clear, items.length]);
+
+  // Kept beside the verse while the page settles, then left alone.
+  useEffect(() => {
+    if (!follow) return;
+    const start = performance.now();
+    let frame = 0;
+    let last = "";
+    let still = 0;
+    const step = () => {
+      const el = ref.current;
+      const now = follow();
+      if (el && now) {
+        const b = [now.around, now.clear ?? now.around];
+        const seen = b.map((r) => `${Math.round(r.left)},${Math.round(r.top)},${Math.round(r.right)},${Math.round(r.bottom)}`).join(";");
+        if (seen === last) still += 1;
+        else {
+          still = 0;
+          last = seen;
+          setAt(
+            placeMenu(now.around, { width: el.offsetWidth, height: el.offsetHeight }, {
+              width: window.innerWidth,
+              height: window.innerHeight,
+            }, now.clear),
+          );
+        }
+      }
+      if (still < 20 && performance.now() - start < 2000) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [follow, items.length]);
 
   // Focus waits for the menu to be placed: until then it is hidden, and a
   // browser will not focus a hidden button, so the keyboard was left on nothing.
