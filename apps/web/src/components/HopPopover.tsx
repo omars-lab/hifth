@@ -129,7 +129,7 @@ export function HopPopover({
       <div
         ref={sheetRef}
         className={styles.sheet}
-        style={leafStyle(place)}
+        style={leafStyle(place, "content")}
         role="dialog"
         aria-modal={!live}
         aria-label={t.hopSheetAria(title, chip.count)}

@@ -987,6 +987,43 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     });
   }
 
+  test("a short list stands only as tall as what it holds", async ({ page }) => {
+    // Laid over the facing page, a list was stretched to the page's full
+    // height whatever it held: 36:31's one later look-alike sat at the top of
+    // a card as tall as the book, empty below it.
+    const m = await openLooksMenu(page);
+    await m.getByRole("menuitem", { name: /^Similar verses in later surahs/ }).click();
+    const list = page.getByRole("dialog", { name: /later/i });
+    await expect(list).toBeVisible();
+    await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const open = (await book(page).boundingBox())!;
+    expect((await list.boundingBox())!.height).toBeLessThan(open.height / 2);
+  });
+
+  test("a highlighted passage's menu stands only as tall as what it holds", async ({ page }) => {
+    // The same for the menu of a passage marked by a press, a hold and a drag.
+    // 36:14 to 36:16 on page 441 is a passage with no links yet, so its menu
+    // is a line and two buttons.
+    await page.goto("/#/hafs-kfqc/p442");
+    const from = verse(page, 441, 3719);
+    await expect(from).toBeVisible({ timeout: 20_000 });
+    await settle(from);
+    const a = (await from.boundingBox())!;
+    const b = (await verse(page, 441, 3721).boundingBox())!;
+    await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 12 });
+    await page.mouse.up();
+    const menu = page.getByRole("dialog", { name: /36:14/ });
+    await expect(menu).toBeVisible();
+    await menu.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const open = (await book(page).boundingBox())!;
+    const box = (await menu.boundingBox())!;
+    expect(box.y, "its top is the book's top").toBeGreaterThanOrEqual(open.y - 1);
+    expect(box.height).toBeLessThan(open.height / 2);
+  });
+
   test("picking the introduction opens it", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p440");
     await expect(number(page)).toBeVisible({ timeout: 20_000 });
