@@ -161,6 +161,7 @@
   "commentaryOn": "Commentary on {label}",
   "commentaryBy": "{source} commentary",
   "tapForNote": "Tap a verse to read its {source} note",
+  "clickForNote": "Click a verse to read its {source} note",
   "noteShowAll": "Show all of the note",
   "noteShowLess": "Show less of the note",
   "surahIntro": "Surah introduction",

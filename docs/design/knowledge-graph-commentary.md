@@ -694,3 +694,11 @@ covered the foot of the verse's last line. Found on 2026-10-06 with Fatir 35:44.
 **Fixed, 2026-10-06:** once the buttons move, the page is placed again, with the verse above the
 list. A test reads upright, turns sideways, drags the page a little lower, opens each list, and
 checks every line of the verse is above it.
+
+### ⑰ At a desk, does the first screen tell a visitor to tap? · **fixed**
+
+The one line a first visit reads, under the page, said to tap a verse to read its note — on a
+computer too, where the visitor holds a mouse. Found on 2026-10-06 on the desktop spread.
+
+**Fixed, 2026-10-06:** with a mouse it says click, in English and in Arabic; on a phone or an iPad
+it still says tap. Tests check the desktop wording in both languages, and the phone's.
