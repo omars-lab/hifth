@@ -184,6 +184,8 @@ import {
   withBookRefs,
   introFor,
   makePitchProvider,
+  loadPitchKey,
+  type Commentator,
   type PitchSurah,
 } from "./pitch/pitch";
 // The one commentary drawer and its sources (decision `tafsir-provider`): the
@@ -281,6 +283,11 @@ export function App(): JSX.Element {
   const [pitchSurahs, setPitchSurahs] = useState<ReadonlyMap<number, PitchSurah>>(
     new Map(),
   );
+  // The book's key to its commentators' initials, so a note can say who they are.
+  const [pitchKey, setPitchKey] = useState<ReadonlyMap<string, Commentator>>(() => new Map());
+  useEffect(() => {
+    if (PITCH) void loadPitchKey().then(setPitchKey);
+  }, []);
   // Whether the commentary sheet is showing for the current selection.
   const [commentaryOpen, setCommentaryOpen] = useState(false);
   // The commentary source the drawer reads, registered once. A held or loaded
@@ -3455,6 +3462,7 @@ export function App(): JSX.Element {
                 onTall={setNoteTall}
                 onClose={() => (introSheet ? setIntroSurah(null) : setCommentaryOpen(false))}
                 creditNote={PITCH ? t.pitchCredit : undefined}
+                sigla={pitchKey}
                 back={
                   breadcrumbKey && !introSheet
                     ? {

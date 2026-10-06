@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import {
   formatAyahKey,
   orderForHifz,
@@ -7,7 +7,9 @@ import {
   type LeafSide,
 } from "@hifth/core";
 import { useT } from "../i18n";
-import { splitCitations } from "../tafsir/citations";
+import type { Commentator } from "../pitch/pitch";
+import { splitCitations, type Citation } from "../tafsir/citations";
+import { splitSigla, type Siglum } from "../tafsir/sigla";
 import { isIntroOnly, textDir, type CommentaryNote } from "../tafsir/commentary";
 import styles from "./CommentarySheet.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
@@ -53,6 +55,8 @@ export function CommentaryTrigger({
 /** How much of a phone's height the note opens at — `38vh` in the stylesheet. */
 const SHORT_SHARE = 0.38;
 
+const NO_KEY: ReadonlyMap<string, Commentator> = new Map();
+
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
 function focusables(root: HTMLElement): HTMLElement[] {
   const sel =
@@ -87,6 +91,7 @@ export function CommentarySheet({
   onTall,
   back = null,
   creditNote,
+  sigla = NO_KEY,
 }: {
   entry: CommentaryNote | null;
   onClose: () => void;
@@ -130,9 +135,20 @@ export function CommentarySheet({
   back?: { label: string; onBack: () => void } | null;
   /** A line under the credit about where this is shown (the pitch says it is private). */
   creditNote?: string | undefined;
+  /**
+   * The source's key to the initials its notes cite commentators by. Each
+   * initial in a bracket that the key has becomes a button saying who it is:
+   * the book prints its key once, at the front, where a reader in the app
+   * never is. Empty, and the initials stay plain text.
+   */
+  sigla?: ReadonlyMap<string, Commentator>;
 }): JSX.Element | null {
   const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const cardId = useId();
+  // The one line of the key that is open, and which initials in the prose opened it.
+  const [keyOpen, setKeyOpen] = useState<{ at: string; sig: string } | null>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
   const open = entry !== null;
@@ -147,6 +163,38 @@ export function CommentarySheet({
   const [tall, setTall] = useState(false);
   const verseKey = entry?.ayahKey ?? null;
   useEffect(() => setTall(false), [verseKey]);
+  useEffect(() => setKeyOpen(null), [verseKey]);
+
+  // The card stands under the initials it explains, inside the note's edges,
+  // and above them when there is no room left below in the visible note. It is
+  // placed before it is painted, so it never shows anywhere else first.
+  useLayoutEffect(() => {
+    const sheet = sheetRef.current;
+    const card = cardRef.current;
+    const at = keyOpen && sheet?.querySelector<HTMLElement>(`[data-siglum="${keyOpen.at}"]`);
+    if (!sheet || !card || !at) return;
+    const box = sheet.getBoundingClientRect();
+    const word = at.getBoundingClientRect();
+    const gap = 6;
+    const below = word.bottom + gap + card.offsetHeight <= box.bottom;
+    const above = word.top - gap - card.offsetHeight >= box.top;
+    const top = !below && above ? word.top - gap - card.offsetHeight : word.bottom + gap;
+    card.style.top = `${top - box.top - sheet.clientTop + sheet.scrollTop}px`;
+    const left = word.left - box.left - sheet.clientLeft;
+    card.style.left = `${Math.max(gap, Math.min(left, sheet.clientWidth - card.offsetWidth - gap))}px`;
+  }, [keyOpen]);
+
+  // A press anywhere but the card, or another initial, puts the card away.
+  useEffect(() => {
+    if (!keyOpen) return;
+    const away = (e: PointerEvent) => {
+      const el = e.target as Element | null;
+      if (el?.closest(`.${styles.keyCard}, [data-siglum]`)) return;
+      setKeyOpen(null);
+    };
+    document.addEventListener("pointerdown", away, true);
+    return () => document.removeEventListener("pointerdown", away, true);
+  }, [keyOpen]);
   // Reading starts at the top of each note. A related verse is followed from
   // the foot of a note, and the same panel turning to the new verse kept the
   // old one's scroll, so the reader landed mid-way down a note not yet begun.
@@ -225,6 +273,12 @@ export function CommentarySheet({
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (e.key === "Escape") {
         e.stopPropagation();
+        // An open line of the key goes first, and the note stays.
+        if (keyOpen) {
+          sheetRef.current?.querySelector<HTMLElement>(`[data-siglum="${keyOpen.at}"]`)?.focus();
+          setKeyOpen(null);
+          return;
+        }
         onClose();
         return;
       }
@@ -244,7 +298,7 @@ export function CommentarySheet({
         first.focus();
       }
     },
-    [onClose, modal],
+    [onClose, modal, keyOpen],
   );
 
   if (!entry) return null;
@@ -349,8 +403,28 @@ export function CommentarySheet({
           <section className={styles.commentary} aria-label={t.commentaryTitle} {...own}>
             {entry.paragraphs.map((para, i) => (
               <p key={i} className={styles.para}>
-                {splitCitations(para).map((part, j) => {
+                {splitSigla(para, sigla)
+                  .flatMap((part): (string | Citation | Siglum)[] =>
+                    typeof part === "string" ? splitCitations(part) : [part],
+                  )
+                  .map((part, j) => {
                   if (typeof part === "string") return part;
+                  if ("sig" in part) {
+                    const at = `${i}-${j}`;
+                    return (
+                      <button
+                        key={j}
+                        type="button"
+                        className={styles.siglum}
+                        data-siglum={at}
+                        aria-expanded={keyOpen?.at === at}
+                        aria-controls={cardId}
+                        onClick={() => setKeyOpen((o) => (o?.at === at ? null : { at, sig: part.sig }))}
+                      >
+                        {part.text}
+                      </button>
+                    );
+                  }
                   const key = citedKey(part.surah, part.ayah);
                   if (!key) return part.text;
                   return (
@@ -420,7 +494,33 @@ export function CommentarySheet({
           </span>
           {creditNote && <span className={styles.creditNote}>{creditNote}</span>}
         </footer>
+
+        {keyOpen && sigla.has(keyOpen.sig) && (
+          <KeyCard ref={cardRef} id={cardId} sig={keyOpen.sig} who={sigla.get(keyOpen.sig)!} own={own} />
+        )}
       </div>
     </>
   );
 }
+
+/** One line of the source's key, under the initials that opened it. */
+const KeyCard = forwardRef<
+  HTMLDivElement,
+  { id: string; sig: string; who: Commentator; own: { dir: "ltr" | "rtl" | "auto"; lang?: string } }
+>(function KeyCard({ id, sig, who, own }, ref) {
+  const { t } = useT();
+  return (
+    <div ref={ref} id={id} className={styles.keyCard} role="note" aria-label={t.keyFrom}>
+      <p className={styles.keyFrom}>{t.keyFrom}</p>
+      <p className={styles.keyWho} {...own}>
+        <b>{sig}</b> {who.who}
+      </p>
+      <p className={styles.keyWork} {...own}>
+        <cite>{who.work}</cite>
+      </p>
+      {who.also && (
+        <p className={styles.keyAlso}>{t.keyAlso(who.also)}</p>
+      )}
+    </div>
+  );
+});

@@ -1153,6 +1153,62 @@ test.describe("Hifth · links straight into the commentary", () => {
   }
 });
 
+test.describe("Hifth · who the initials in a note stand for", () => {
+  // The book cites its commentators by initials in brackets, and says who they
+  // are only in a key at the front of the volume. A reader in the app has no
+  // front of the volume, so each initial opens its line of the key. The test
+  // names no commentator: the key is the book's, and stays out of the code.
+  test("tapping an initial says whose commentary it is, and closing it keeps the note", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/18:10?open=commentary");
+    await expect(page.getByRole("dialog", { name: /18:10/ })).toBeVisible({ timeout: 20_000 });
+    const notes = sheet(page).getByRole("region", { name: "Commentary" });
+    const initials = notes.locator("button[data-siglum]");
+    expect(await initials.count(), "the note's bracketed initials are buttons").toBeGreaterThan(5);
+
+    const first = initials.first();
+    const short = (await first.textContent())!.trim();
+    expect(short.length).toBeLessThanOrEqual(3);
+    await expect(first).toHaveAttribute("aria-expanded", "false");
+    await first.click();
+    await expect(first).toHaveAttribute("aria-expanded", "true");
+    const card = page.locator(`#${await first.getAttribute("aria-controls")}`);
+    await expect(card).toBeVisible();
+    // A name, when they died, and the work the book draws on: far more than the initials.
+    const said = (await card.textContent())!;
+    expect(said).toContain(short);
+    expect(said).toMatch(/\bd\. (ca\. )?\d/);
+    expect(said.length).toBeGreaterThan(short.length + 30);
+    // The card stays on the note's own surface.
+    const [c, s] = [await card.boundingBox(), await sheet(page).boundingBox()];
+    expect(c!.x).toBeGreaterThanOrEqual(s!.x);
+    expect(c!.x + c!.width).toBeLessThanOrEqual(s!.x + s!.width + 0.5);
+
+    // Escape puts the card away, and only the card.
+    await page.keyboard.press("Escape");
+    await expect(card).toBeHidden();
+    await expect(first).toHaveAttribute("aria-expanded", "false");
+    await expect(sheet(page)).toBeVisible();
+
+    // A second initial opens its own card, and only one is open at a time.
+    await first.click();
+    const second = initials.nth(1);
+    await second.click();
+    await expect(first).toHaveAttribute("aria-expanded", "false");
+    await expect(second).toHaveAttribute("aria-expanded", "true");
+  });
+
+  test("every initial that opens the key is one short entry of it, not a word of the prose", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/18:10?open=commentary");
+    await expect(page.getByRole("dialog", { name: /18:10/ })).toBeVisible({ timeout: 20_000 });
+    const notes = sheet(page).getByRole("region", { name: "Commentary" });
+    await expect(notes.locator("button[data-siglum]").first()).toBeVisible();
+    // Every button stands for one entry of the key: short, a capital first.
+    for (const t of await notes.locator("button[data-siglum]").allTextContents()) {
+      expect(t.trim()).toMatch(/^\p{Lu}[\p{L}]{0,2}$/u);
+    }
+  });
+});
+
 test.describe("Hifth · a surah's name opens its introduction", () => {
   // Owner, 2026-10-04: the surah's context belongs next to its name, above the
   // basmala, not stacked on top of verse 1's note; and the name itself is the

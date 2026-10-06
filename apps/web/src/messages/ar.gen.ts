@@ -175,6 +175,8 @@ const messages: Catalog = {
   juzEdge: (d) => "لا جزء في هذا الاتجاه، الجزء " + d.juzText,
   juzGroup: "الأجزاء",
   juzN: (d) => "الجزء " + d.juzText,
+  keyAlso: (d) => "ويُعرف أيضًا باسم " + d.name,
+  keyFrom: "من مفتاح الكتاب لأسماء مفسّريه",
   keyJump: "انتقال",
   keyPages: "تصفّح",
   langSectionNote: "تتغيّر لغة الأزرار والقوائم فقط؛ المصحف ونصّ الآيات عربيّ دائمًا.",
