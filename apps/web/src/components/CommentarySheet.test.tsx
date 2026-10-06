@@ -109,7 +109,8 @@ describe("the commentary drawer in English", () => {
     // The phone sheet's grab bar was drawn there too, though nothing on a
     // facing page drags or grows: it promised a handle that did nothing.
     const sheet = drawer(note("en"), { side: "left" });
-    expect(sheet.firstElementChild?.tagName).toBe("HEADER");
+    // The title row is held at the top in its own band; nothing comes before it there.
+    expect(sheet.firstElementChild?.firstElementChild?.tagName).toBe("HEADER");
   });
 
   it("keeps its own words in English", () => {
