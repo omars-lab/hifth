@@ -1401,6 +1401,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const wordPendingRef = useRef(new Map<string, Promise<WordIndex | null>>());
   const tweenRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  /** Says the glide under way is over, whether it got there or was cut short. */
+  const tweenDoneRef = useRef<(() => void) | null>(null);
   /*
    * The stage and the page inside it, last time anyone asked.
    *
@@ -1525,6 +1527,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       tweenRef.current = null;
       startTimeRef.current = null;
     }
+    // A glide cut short still ends. Left waiting, whatever was to follow it
+    // never ran: a link's verse was lit only once the page got there, so a
+    // phone turned mid-glide (which glides again, to fit the new screen)
+    // left the verse unlit for good.
+    const done = tweenDoneRef.current;
+    tweenDoneRef.current = null;
+    done?.();
   }, []);
 
   /**
@@ -1612,6 +1621,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         return Promise.resolve();
       }
       return new Promise((resolve) => {
+        tweenDoneRef.current = resolve;
         const step = (now: number) => {
           if (startTimeRef.current === null) startTimeRef.current = now;
           const t = Math.min(1, (now - startTimeRef.current) / duration);
@@ -1624,6 +1634,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
             applyTransform();
             tweenRef.current = null;
             startTimeRef.current = null;
+            tweenDoneRef.current = null;
             resolve();
           }
         };
@@ -2096,6 +2107,19 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     lift();
     return () => cancelAnimationFrame(liftRaf.current);
   }, [coverTop, lift]);
+  // The chips move when a list opens: from their column at the stage's side
+  // onto the list's top row. The page was placed while they still stood in
+  // the column, kept below where it ended, and a phone held sideways has too
+  // little room above the list for that — the list covered the verse's last
+  // line. So once they have moved, place the page again.
+  const railSeen = useRef(railBottom);
+  useEffect(() => {
+    if (railSeen.current === railBottom) return;
+    railSeen.current = railBottom;
+    if (coverTopRef.current === null) return;
+    lift();
+    return () => cancelAnimationFrame(liftRaf.current);
+  }, [railBottom, lift]);
 
   /**
    * The one settle step every road onto a page ends with.

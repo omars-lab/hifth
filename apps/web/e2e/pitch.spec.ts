@@ -1038,6 +1038,71 @@ test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
     expect(boxes.length).toBeGreaterThan(1);
     for (const bottom of boxes) expect(bottom, "a line of the verse is under the note").toBeLessThanOrEqual(top);
   });
+
+  test("turning a phone sideways the moment a link opens a verse still lights the verse", async ({ page }) => {
+    // The page glides to the verse a link names and lights it once it gets
+    // there. Turned before it got there, the glide was cut short to fit the
+    // new screen, and a glide cut short never said it was done: the verse
+    // was never lit.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect.poll(() => page.locator("#hifth-overlay .hl-sel").count(), { timeout: 5_000 }).toBeGreaterThan(0);
+  });
+
+  test.describe("read upright first", () => {
+    // Started upright, as a phone is, and turned; a page that starts sideways
+    // and is set upright before it loads does not get there the same way.
+    test.use({ viewport: { width: 390, height: 844 } });
+    test.beforeEach(async ({ context }) => {
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    });
+
+    for (const open of ["roots", "look-alikes"] as const) {
+      test(`turned sideways, a list opened on a verse keeps every line of the verse above it: ${open}`, async ({
+        page,
+      }) => {
+        // Read upright, then turned sideways, the roots and look-alike lists
+        // opened where the verse's tools had been and the page was not moved:
+        // the list covered the foot of the verse's last line: the page was
+        // placed below the chips' column at the side, and when the list opened
+        // the chips moved onto its top row without the page being placed again.
+        await page.goto("/#/hafs-kfqc/35:44");
+        await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+        await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        await settle(page.locator("#hifth-overlay .hl-sel").first());
+        await page.setViewportSize({ width: 844, height: 390 });
+        await sheet(page).getByRole("button", { name: "Close" }).click();
+        const tools = page.getByRole("region", { name: "Tools for Fatir · 35:44" });
+        await expect(tools).toBeVisible();
+        await tools.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        // The chips have left the note's top row for their column at the side.
+        const rail = page.getByRole("group", { name: "Links from this ayah" });
+        await expect(rail).not.toHaveAttribute("data-seated");
+        await settle(rail);
+        // The reader drags the page down a little, so the verse sits lower
+        // than the chips' column ends.
+        const lines = page.locator("#hifth-overlay .hl-sel");
+        const at = (await lines.first().boundingBox())!;
+        await page.mouse.move(at.x + at.width / 2, at.y);
+        await page.mouse.down();
+        await page.mouse.move(at.x + at.width / 2, at.y + 40, { steps: 8 });
+        await page.mouse.up();
+        await settle(lines.first());
+        if (open === "roots") await tools.getByRole("button", { name: /^Roots/ }).click();
+        else await page.getByRole("button", { name: /^Similar verses in later surahs/ }).click();
+        const list = page.getByRole("dialog");
+        await expect(list).toHaveCount(1);
+        await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        await settle(lines.first());
+        const top = (await list.boundingBox())!.y;
+        const boxes = await lines.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().bottom));
+        expect(boxes.length).toBeGreaterThan(1);
+        for (const bottom of boxes) expect(bottom, "a line of the verse is under the list").toBeLessThanOrEqual(top);
+      });
+    }
+  });
 });
 
 test.describe("Hifth · links straight into the commentary", () => {
