@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Rect } from "./highlighter.js";
-import { WordIndex, isWordShard, verseNumberSpot, type WordShard } from "./words.js";
+import { WordIndex, isWordShard, printedVerseNumbers, verseNumberSpot, type WordShard } from "./words.js";
 
 /**
  * The real thing, lifted verbatim from
@@ -313,5 +313,75 @@ describe("verseNumberSpot — where the dot for a verse in a note goes", () => {
     expect(verseNumberSpot(full, [{ x: 2, y: 160, width: 50, height: 25 }])).toBeNull();
     expect(verseNumberSpot([], words)).toBeNull();
     expect(verseNumberSpot(lines, [])).toBeNull();
+  });
+
+  // Page 7's 2:41: three lines, the last running from 171.6, its last word at
+  // 195. A word near the end of the middle line is tall enough to reach into
+  // the last line's band; counted as on it, it put the gap left of where the
+  // outline stops, and the verse got no dot and no number button.
+  const lines241 = [
+    { x: 0, y: 155.9, width: 144.7, height: 36.5 },
+    { x: 0, y: 192.4, width: 345, height: 36 },
+    { x: 171.6, y: 228.4, width: 173.4, height: 36 },
+  ];
+  const words241 = [
+    { x: 129.9, y: 197.4, width: 50.5, height: 33.7 },
+    { x: 308, y: 232, width: 24.3, height: 18.3 },
+    { x: 276.2, y: 229.8, width: 29.9, height: 27.3 },
+    { x: 195, y: 228.4, width: 44.9, height: 27.5 },
+  ];
+
+  it("counts a word on the last line only when its middle is on it", () => {
+    const at = verseNumberSpot(lines241, words241)!;
+    expect(at.x).toBeGreaterThan(171.6);
+    expect(at.x).toBeLessThan(195);
+  });
+
+  it("goes on the number the page drawing marks, beside it towards the last word", () => {
+    // 2:41's number is marked at (183.4, 246.5): the dot sits on its shoulder.
+    const at = verseNumberSpot(lines241, words241, "upper", { x: 183.4, y: 246.5 })!;
+    expect(at.x).toBeGreaterThan(183.4);
+    expect(at.x).toBeLessThan(195);
+    expect(at.y).toBeGreaterThan(228.4);
+    expect(at.y).toBeLessThan(228.4 + 18);
+  });
+
+  it("finds the number where the outlines split it down the middle", () => {
+    // Page 50's 3:1, the first line under the surah's opening: its outline
+    // stops at 306.5, through the middle of its number, leaving 9 units of a
+    // number about 20 wide. The drawing marks the number at 306.6.
+    const lines = [{ x: 306.5, y: 86.5, width: 33.5, height: 31.8 }];
+    const words = [{ x: 315.7, y: 85.9, width: 20.5, height: 24.3 }];
+    expect(verseNumberSpot(lines, words)).toBeNull();
+    const at = verseNumberSpot(lines, words, "upper", { x: 306.6, y: 100.6 })!;
+    expect(at.x).toBeGreaterThan(306.6);
+    expect(at.x).toBeLessThan(315.7);
+  });
+});
+
+describe("printedVerseNumbers — which printed number is which verse's", () => {
+  // Page 50's first numbers: 3:1 and 3:2 share a line, 3:3 is on the next.
+  const points = [
+    { x: 36.5, y: 136.2 },
+    { x: 126.6, y: 100.7 },
+    { x: 306.6, y: 100.6 },
+  ];
+
+  it("reads them as the page is read: line by line, right to left", () => {
+    const at = printedVerseNumbers(["3:1", "3:2", "3:3"], points);
+    expect(at.get("3:1")).toEqual({ x: 306.6, y: 100.6 });
+    expect(at.get("3:2")).toEqual({ x: 126.6, y: 100.7 });
+    expect(at.get("3:3")).toEqual({ x: 36.5, y: 136.2 });
+  });
+
+  it("leaves the page's last verse without one when it runs on to the next page", () => {
+    const at = printedVerseNumbers(["3:1", "3:2", "3:3", "3:4"], points);
+    expect(at.size).toBe(3);
+    expect(at.has("3:4")).toBe(false);
+  });
+
+  it("claims nothing when the count is one it cannot explain", () => {
+    expect(printedVerseNumbers(["3:1"], points).size).toBe(0);
+    expect(printedVerseNumbers(["3:1", "3:2", "3:3", "3:4", "3:5"], points).size).toBe(0);
   });
 });
