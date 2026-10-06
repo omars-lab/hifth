@@ -5,6 +5,7 @@ import { useT } from "../i18n";
 import { DiffView } from "./later";
 import { ShareSheet } from "./ShareSheet";
 import styles from "./HighlightMenu.module.css";
+import { leafStyle, useOverLeaf } from "./over-leaf";
 
 interface HighlightMenuProps {
   /** The highlighted range's ayah keys in reading order, or null when nothing is highlighted. */
@@ -76,6 +77,7 @@ export function HighlightMenu({
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const open = rangeKeys !== null && rangeKeys.length > 0;
+  const place = useOverLeaf(open, side);
 
   // Capture the trigger and move focus into the menu on open; restore on close.
   useEffect(() => {
@@ -131,6 +133,7 @@ export function HighlightMenu({
       <div
         ref={sheetRef}
         className={styles.sheet}
+        style={leafStyle(place)}
         role="dialog"
         aria-modal={!beside}
         aria-label={t.rangeAria(title, hops.length)}

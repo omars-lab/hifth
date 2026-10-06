@@ -10,6 +10,7 @@ import { useT } from "../i18n";
 // Loaded the first time a look-alike is opened out (see ./later.tsx).
 import { DiffView } from "./later";
 import styles from "./HopPopover.module.css";
+import { leafStyle, useOverLeaf } from "./over-leaf";
 import { RailGlyph } from "./RailGlyph";
 
 interface HopPopoverProps {
@@ -62,6 +63,7 @@ export function HopPopover({
   // On a spread the card stands on the facing leaf, beside the verse, so the
   // page stays clear and live: no dimming, no trapped Tab — as the note does.
   const beside = side !== null;
+  const place = useOverLeaf(chip !== null, side);
   const sheetRef = useRef<HTMLDivElement>(null);
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -120,6 +122,7 @@ export function HopPopover({
       <div
         ref={sheetRef}
         className={styles.sheet}
+        style={leafStyle(place)}
         role="dialog"
         aria-modal={!beside}
         aria-label={t.hopSheetAria(title, chip.count)}
