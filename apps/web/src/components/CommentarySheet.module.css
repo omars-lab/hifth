@@ -65,6 +65,17 @@
   max-block-size: 38vh; /* SHORT_SHARE in CommentarySheet.tsx */
 }
 
+/* Pinned to the sheet's top edge over the scrolling note. The sheet's own
+   padding is pulled under it, so text does not show above it as it passes. */
+.top {
+  position: sticky;
+  inset-block-start: calc(-1 * var(--space-3));
+  z-index: 1;
+  margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-4)) 0;
+  padding: var(--space-3) var(--space-4) 0;
+  background: var(--paper-raised);
+}
+
 .grip {
   inline-size: 40px;
   block-size: 4px;
