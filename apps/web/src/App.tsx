@@ -3668,7 +3668,9 @@ export function App(): JSX.Element {
 
       {/* The verse's tools, in one drawer over the bar and the slider (selection
           = D). It steps aside while a sheet it opened is up, and comes back when
-          that sheet closes; its × or Escape puts it away until the next verse. */}
+          that sheet closes; its × or Escape puts it away until the next verse.
+          The number's menu is one of those: it lists the same things, so the
+          two never show at once. */}
       <VerseDrawer
         label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
         open={
@@ -3678,7 +3680,8 @@ export function App(): JSX.Element {
           (tool === "select" || tool === "highlight") &&
           !rootsOpen &&
           !commentaryOpen &&
-          openDirection === null
+          openDirection === null &&
+          verseMenuAt === null
         }
         onClose={putDrawerAway}
       >

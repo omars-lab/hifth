@@ -574,3 +574,31 @@ note does not cover.
 from the note, next to the verse they belong to. With no note open they stay where they were. A
 test on a laptop-sized window and an iPad-sized one opens a verse on the right-hand page and
 checks that the note does not cover the first chip, and that the chip is on the right.
+
+### ⑦ Does pressing a verse's number open two lists of the same tools? · **fixed**
+
+A press on a verse's number opens a small menu beside it: the commentary, the look-alike
+verses, the same roots, listening, the surah's introduction. The same press also chose the
+verse, and a chosen verse brings up its row of tools under the page, which offers most of the
+same things. So one press put two lists of the same choices on screen at once, and the lower
+one sat over the page bar. Found walking the pitch on 2026-10-06, on a laptop and on an iPad on
+its side.
+
+**What would answer it:** one list at a time. While the number's menu is up, the row under the
+page waits.
+
+**Fixed, 2026-10-06:** the row of tools under the page stays away while the number's menu is
+open, and comes back the moment the menu closes. A test presses a number, checks that only the
+menu shows, closes it with Escape, and checks that the row is back.
+
+### ⑧ Should the "later surahs" arrow point left, the way the book runs? · **open**
+
+The look-alike signs use an arrow to say where the other verse is: "≈←" for an earlier surah
+and "≈→" for a later one. But the book, and the page bar under it, run right to left: page 1 is
+at the right, and later pages lie to the left. So the arrow for "later" points the opposite way
+from where a reader's eye would go to find a later page. The owner looked over these signs on
+2026-10-04 and kept them; this asks only about the direction, which was not raised then.
+
+**What would answer it:** the owner choosing, from the two arrows drawn on a real page, whether
+"later" points left (with the book) or right (as now, the way most English readers expect
+"next").
