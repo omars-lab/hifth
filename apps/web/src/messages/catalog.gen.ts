@@ -404,6 +404,7 @@ export interface Catalog {
   readonly tagline: string;
   readonly tajweed: string;
   readonly tajweedCredit: string;
+  readonly tapForNote: (d: { readonly source: string | number }) => string;
   readonly tapHint: string;
   readonly tipsNote: string;
   readonly tipsSectionTitle: string;

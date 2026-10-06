@@ -410,6 +410,7 @@ const messages: Catalog = {
   tagline: "مِلاحة للحُفّاظ",
   tajweed: "تجويد",
   tajweedCredit: "أحكام التجويد مأخوذة من quran-tajweed (Collin Fair)، رخصة CC BY 4.0.",
+  tapForNote: (d) => "المس آيةً لتقرأ تعليق " + d.source + " عليها",
   tapHint: "المس آية على الصفحة لتحديدها",
   tipsNote: "ثلاث بطاقات قصيرة عن التنقّل في المصحف. لم تعد تظهر من تلقاء نفسها.",
   tipsSectionTitle: "البداية",
