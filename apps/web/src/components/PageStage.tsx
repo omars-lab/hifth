@@ -313,10 +313,11 @@ interface PageStageProps {
   /**
    * Makes each verse's number a button (the pitch build only, for the same
    * reason); it needs the page's words to find the numbers.
-   * `onOpenVerseMenu` opens the menu of what to read on the verse pressed.
+   * `onOpenVerseMenu` opens the menu of what to read on the verse pressed,
+   * given where its number is and where the whole verse is on this page.
    */
   paintVerses?: ((svg: SVGSVGElement, words: WordIndex | null) => void) | undefined;
-  onOpenVerseMenu?: (key: string, around: DOMRect) => void;
+  onOpenVerseMenu?: (key: string, around: DOMRect, verse?: DOMRect) => void;
   /** A jump mark was pressed: list where the reader's memory went from that verse. */
   onOpenJumps?: (key: string, at: { top: number; bottom: number; x: number }) => void;
   /**
@@ -1804,8 +1805,24 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // A verse's number opens the menu of what to read on it, beside the number.
     // The note dot and jump mark sit on its shoulders and are asked first.
     const numberOf = (e: Event) => (e.target as Element | null)?.closest("[data-verse-number]");
-    const openMenu = (n: Element) =>
-      onOpenVerseMenuRef.current?.(n.getAttribute("data-verse-key") ?? "", n.getBoundingClientRect());
+    // The verse's own shapes on this page, so the menu can stand clear of all
+    // of it: the number is at the verse's end, under its last words only.
+    const verseBox = (key: string): DOMRect | undefined => {
+      const [s, a] = (key.split("/").pop() ?? "").split(":");
+      const parts = [...svg.querySelectorAll(`.ayahPolygon[surah="${s}"][ayah="${a}"]`)].map((p) =>
+        p.getBoundingClientRect(),
+      );
+      if (parts.length === 0) return undefined;
+      const left = Math.min(...parts.map((r) => r.left));
+      const top = Math.min(...parts.map((r) => r.top));
+      const right = Math.max(...parts.map((r) => r.right));
+      const bottom = Math.max(...parts.map((r) => r.bottom));
+      return new DOMRect(left, top, right - left, bottom - top);
+    };
+    const openMenu = (n: Element) => {
+      const key = n.getAttribute("data-verse-key") ?? "";
+      onOpenVerseMenuRef.current?.(key, n.getBoundingClientRect(), verseBox(key));
+    };
     svg.addEventListener("click", (e) => {
       const badge = introOf(e);
       if (badge) {

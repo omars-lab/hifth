@@ -17,6 +17,22 @@ describe("placeMenu", () => {
     expect(at.top).toBeGreaterThanOrEqual(80);
   });
 
+  // A verse's number sits at the verse's end: the menu clears the whole verse,
+  // and stays over the number left to right.
+  it("clears the whole verse when told where it is, not only its number", () => {
+    const number = { left: 100, right: 120, top: 400, bottom: 420 };
+    const at = placeMenu(number, menu, view, { left: 20, right: 380, top: 300, bottom: 420 });
+    expect(at.top + menu.height).toBeLessThanOrEqual(300);
+    expect(at.left).toBe(8);
+  });
+
+  it("stands by the number when the verse is too tall to clear", () => {
+    const number = { left: 100, right: 120, top: 400, bottom: 420 };
+    const at = placeMenu(number, menu, view, { left: 20, right: 380, top: 30, bottom: 780 });
+    expect(at.top + menu.height).toBeLessThanOrEqual(400);
+    expect(at.top).toBeGreaterThan(300);
+  });
+
   it("stays inside the window left to right", () => {
     const at = placeMenu({ left: 360, right: 395, top: 300, bottom: 320 }, menu, view);
     expect(at.left + menu.width).toBeLessThanOrEqual(view.width);
