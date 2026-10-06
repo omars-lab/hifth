@@ -1516,6 +1516,26 @@ test.describe("Hifth · the verse's tools on a phone", () => {
       expect(last).toBeLessThanOrEqual(390);
     }
   });
+
+  test("the tools' icons sit in one row, however many lines their words take", async ({ page }) => {
+    // Each tool's icon and word were centred up and down in its cell, so a
+    // word that wrapped to two lines ("Same roots") pushed its icon above the
+    // icons beside it.
+    for (const lang of ["en", "ar"]) {
+      await page.goto(`/?lang=${lang}#/hafs-kfqc/18:10`);
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await page.keyboard.press("Escape");
+      const tools = page.getByRole("region", { name: lang === "ar" ? /^أدوات الكهف/ : "Tools for Al-Kahf · 18:10" });
+      await expect(tools).toBeVisible({ timeout: 20_000 });
+      await tools.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => undefined))));
+      const icons = await tools.locator(":scope > div > :is(button, a), :scope > div > div button").evaluateAll((els) =>
+        els.map((el) => ({ name: el.getAttribute("aria-label") ?? el.textContent ?? "", top: el.firstElementChild!.getBoundingClientRect().top })),
+      );
+      expect(icons.length).toBeGreaterThan(3);
+      const first = icons[0]!.top;
+      for (const i of icons) expect(Math.abs(i.top - first), `${lang}: "${i.name}" icon is out of line`).toBeLessThanOrEqual(1);
+    }
+  });
 });
 
 test.describe("Hifth · the commentary drawer with the app in Arabic", () => {
