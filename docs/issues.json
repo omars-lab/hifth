@@ -2656,6 +2656,18 @@
       "note": "Found walking the pitch on an upright 13-inch iPad (2026-10-06): at desktop size dragToTurn was off and the edge-grab rails are only drawn for two pages, so one page could only turn from the page bar's arrows. Fixed the same day: dragToTurn is also on for one page when TOUCH_QUERY (useMediaQuery.ts) matches (ipad e2e: 'the large iPad upright turns its one page with a swipe')."
     },
     {
+      "id": "chips-under-facing-note",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑥"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on a laptop and a sideways iPad (2026-10-06): PageSpread drew the look-alike chips (HopRail) beside the live leaf, so a verse on the right page opened its note on the left desk on top of them. Fixed the same day: App passes besideSide from sheetSide, so the chips stand on the side the note does not cover (pitch e2e: 'a note opened from the facing page leaves its look-alike chips in sight')."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",

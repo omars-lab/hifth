@@ -557,3 +557,20 @@ on a phone, while a laptop's mouse keeps the edge-grab rule.
 turns the page. Two pages on an iPad still turn by their edges, and a laptop is unchanged. A test
 on an iPad-sized window in the iPad's own browser engine swipes page 8 and checks page 9 comes
 up.
+
+### ⑥ With two pages open, does a verse's note hide its look-alike chips? · **fixed**
+
+With two pages open, a verse's note opens on the facing page so the verse itself stays in
+sight. The chips that lead to the verse's look-alikes were always drawn beside the page that
+turns next, whichever page the verse was on. So for a verse on the right-hand page, the note
+opened on the left and sat right on top of the chips, which also stand on the left. The note is
+wider than a page and reaches out over the table, so the chips were fully covered. Found walking
+the pitch on 2026-10-06, on a laptop and on an iPad on its side.
+
+**What would answer it:** the chips standing beside the chosen verse's own page, on the side its
+note does not cover.
+
+**Fixed, 2026-10-06:** while a note is open beside two pages, the chips stand on the far side
+from the note, next to the verse they belong to. With no note open they stay where they were. A
+test on a laptop-sized window and an iPad-sized one opens a verse on the right-hand page and
+checks that the note does not cover the first chip, and that the chip is on the right.
