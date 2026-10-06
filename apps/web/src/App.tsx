@@ -221,6 +221,12 @@ import styles from "./App.module.css";
 const START_PAGE = PITCH ? 1 : 7;
 
 /** `quran/…/2:47` → its spec-§7 ref, or null if it is not a bare ayah key. */
+/** Whichever sheet over the foot of a phone reaches highest, or null when none does. */
+function highestTop(...tops: readonly (number | null)[]): number | null {
+  const open = tops.filter((top): top is number => top !== null);
+  return open.length === 0 ? null : Math.min(...open);
+}
+
 function refOf(key: string): AyahRef | null {
   const parsed = parseAyahKey(key);
   return parsed ? { surah: parsed.surah, ayah: parsed.ayah } : null;
@@ -298,6 +304,9 @@ export function App(): JSX.Element {
   // Where the open share tray starts on a phone; the page lifts the verse above
   // whichever of the two reaches higher.
   const [shareTop, setShareTop] = useState<number | null>(null);
+  // Where an open roots or similar-verses list starts on a phone: it takes the
+  // note's place, so the page lifts the verse above it the same way.
+  const [listTop, setListTop] = useState<number | null>(null);
   // Where the hop chips floating over the page's top corner end, so the lift
   // above a phone note stops the verse's first line beneath them.
   const [railBottom, setRailBottom] = useState<number | null>(null);
@@ -3282,7 +3291,7 @@ export function App(): JSX.Element {
             >
               <PageStage
                 ref={stageRef}
-                coverTop={coverTop === null ? shareTop : shareTop === null ? coverTop : Math.min(coverTop, shareTop)}
+                coverTop={highestTop(coverTop, shareTop, listTop)}
                 railBottom={railBottom}
                 resolver={resolver}
                 page={page}
@@ -3366,6 +3375,7 @@ export function App(): JSX.Element {
               canHop={canHop}
               onHop={handleHop}
               onClose={() => setOpenDirection(null)}
+              onCover={setListTop}
             />
             <HighlightMenu
               rangeKeys={selectedRange}
@@ -3390,6 +3400,7 @@ export function App(): JSX.Element {
                   onHop={handleRootHop}
                   onHopEdge={handleHop}
                   onClose={() => setRootsOpen(false)}
+                  onCover={setListTop}
                 />
               </Suspense>
             )}
