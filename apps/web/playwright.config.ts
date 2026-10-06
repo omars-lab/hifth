@@ -229,7 +229,7 @@ export default defineConfig({
           // docs page the build stages beside the app.
           // `pen-colours` is the highlighter's colours, picked from the tools
           // bar; it runs on the phones too, from their own bar.
-          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|link-builder|pen-colours|verse-gestures|page-library|confusions)\.spec\.ts/,
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|link-builder|pen-colours|pen-homes|verse-gestures|page-library|confusions)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -252,12 +252,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|ipad|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|sign-tools|lazy-tools|pitch|drive-video|drive-touch)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|sign-tools|lazy-tools|pitch|drive-video|drive-touch)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|ipad|shots|desktop|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|sign-tools|lazy-tools|pitch|drive-video|drive-touch)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|sign-tools|lazy-tools|pitch|drive-video|drive-touch)\.spec\.ts/,
         },
         {
           // The iPad, the same WebKit the native shell hosts (native/). One

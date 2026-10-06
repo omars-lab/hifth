@@ -120,6 +120,7 @@ import { linksFor } from "./share-links";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
 import { PageStage, pageSpan, type Corner, type PageStageHandle, type PageTool, type WordRect } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
+import { PenHomeBottom, PenHomeFloat, PenHomeSide, useSideRoom } from "./components/PenHomes";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 import { rememberArrowShowing, savedArrowShowing } from "./jump-arrows";
 // Opened by few readers and never before the page is up: loaded on first open.
@@ -200,6 +201,7 @@ import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
+import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
 import { applyPen, rememberPen, savedPen, type Pen } from "./pen";
 import styles from "./App.module.css";
@@ -1017,6 +1019,18 @@ export function App(): JSX.Element {
     rememberScopeLook(look);
     setScopeLook(look);
   }, []);
+  // Where the page tools sit on the wide layout (docs/design/notes-style-toolbar.md,
+  // ①; every home a setting since 2026-10-05, today's strip by default). Down
+  // the side only where the margin holds it, else the bottom row's button.
+  const [penHome, setPenHome] = useState<PenHome>(() => savedPenHome());
+  const choosePenHome = useCallback((home: PenHome) => {
+    rememberPenHome(home);
+    setPenHome(home);
+  }, []);
+  const sideRoom = useSideRoom(desktop && penHome === "side");
+  // While the margin is still unmeasured nothing is drawn, so the rail never
+  // flashes over a book too wide for it.
+  const penAt: PenHome | null = penHome !== "side" ? penHome : sideRoom === null ? null : sideRoom ? "side" : "bottom";
   // Full screen: every bar hidden, the page alone (the same note, all options).
   const [full, setFull] = useState(false);
   // The verse a hold opened the small menu on (option C), and where it is.
@@ -3111,7 +3125,9 @@ export function App(): JSX.Element {
           argue with the page. */}
       {/* Its own row above the book, not floated over it: floated, it sat on
           the page's first line. */}
-      {resolver && desktop && <PageToolbar tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+      {resolver && desktop && penAt === "strip" && <PageToolbar tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+      {resolver && desktop && penAt === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+      {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
       <main
         className={styles.main}
@@ -3463,6 +3479,8 @@ export function App(): JSX.Element {
             onArrowShowing={chooseArrowShowing}
             scopeLook={scopeLook}
             onScopeLook={chooseScopeLook}
+            penHome={desktop ? penHome : undefined}
+            onPenHome={desktop ? choosePenHome : undefined}
             onShowTips={() => {
               setColophonOpen(false);
               setCoachUp(true);
@@ -3555,6 +3573,7 @@ export function App(): JSX.Element {
         />
       )}
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
+        {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
         {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
         <TrailBeads

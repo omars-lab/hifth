@@ -156,7 +156,7 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen }: PageToolbarPro
   };
 
   return (
-    <div className={styles.bar} role="toolbar" aria-label={t.toolbarLabel} data-tool={tool}>
+    <div className={styles.bar} role="toolbar" aria-label={t.toolbarLabel} data-tool={tool} data-pen-home="strip">
       <div className={styles.tools} role="radiogroup" aria-label={t.toolbarLabel} onKeyDown={onKeyDown}>
         {TOOLS.map(({ tool: x, letter }, i) => (
           <button

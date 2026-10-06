@@ -189,6 +189,33 @@ margin in landscape) is worth trying beside it. What would answer it: both built
 pieces and tried by hand on a real iPad, in a real revision session, for reach and for whether
 the one extra tap to start marking feels like a cost or a relief.
 
+**Built, all of them, as a setting (owner, 2026-10-05: "can we implement all and have settings
+option?").** Settings now has "Where the page tools sit", with four answers: above the page
+(today's strip, still the default), floating (A), a Mark up button (B) and down the side (C). It
+shows on a computer and on an iPad held sideways; an upright iPad and a phone already have their
+own bottom-row tray. What is still open is which one becomes the default, and that waits on
+trying them by hand.
+
+What building them taught, that the drawings did not:
+
+| home | what it is like | what it costs |
+| --- | --- | --- |
+| A · floating | Drag it by its handle and it lands on the nearest edge, lying flat on the top or bottom, standing up on a side. On the left or right it sits in the empty margin and covers nothing. Where you left it is remembered. | Its starting place, the bottom edge, sits over the page slider. On a side it is the best of the four; at the bottom it is the worst. |
+| B · Mark up button | The page is for reading until you press the button; then the tools take the bottom row, with the pens and what the tool does beside them, until Done. | The button first sat on top of the "tap a verse" line, then made the row taller and the page 18 pixels shorter; it now takes its own place and reaches into the row's padding instead. One extra press before every marking session. |
+| C · down the side | The tools stand in the margin beside the book, one reach from the hand holding the iPad, covering no line. | With the highlighter's pens under them the rail grew down over the bottom row, so the pens now stand in a second column beside it. Where the margin is too narrow (a tall window, or the single page) it falls back to B by itself. A page zoomed in can slide under it. |
+
+Each one, at an iPad held sideways (1180 by 820):
+
+| A on the bottom edge | A dragged to the left edge |
+| --- | --- |
+| ![The floating tools along the bottom edge, over the page slider](notes-style-toolbar/built-a-bottom-edge.png) | ![The floating tools standing in the left margin](notes-style-toolbar/built-a-left-edge.png) |
+
+| B closed | B open, highlighter on |
+| --- | --- |
+| ![A Mark up button at the end of the bottom row](notes-style-toolbar/built-b-closed.png) | ![The tools filling the bottom row, with the four pens](notes-style-toolbar/built-b-open.png) |
+
+![C: the tools down the right margin, the pens in a second column](notes-style-toolbar/built-c-side.png)
+
 ### ② Should Note, Harakat and Word become one pen with three ways to aim it? · **open**
 
 It takes three buttons off the bar, the way Notes keeps its two erasers behind one pen. What
