@@ -2644,6 +2644,18 @@
       "note": "Found walking the pitch on an upright iPad (2026-10-06): it opened on two small pages. Fixed the same day: App starts pageMode from UPRIGHT_QUERY (useMediaQuery.ts) and follows the screen's shape until the reader picks one or two (pitch e2e: 'an iPad held upright opens on one page', 'turning the iPad does not undo it')."
     },
     {
+      "id": "large-ipad-one-page-no-swipe",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑤"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/ipad.spec.ts",
+      "note": "Found walking the pitch on an upright 13-inch iPad (2026-10-06): at desktop size dragToTurn was off and the edge-grab rails are only drawn for two pages, so one page could only turn from the page bar's arrows. Fixed the same day: dragToTurn is also on for one page when TOUCH_QUERY (useMediaQuery.ts) matches (ipad e2e: 'the large iPad upright turns its one page with a swipe')."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",

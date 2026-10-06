@@ -540,3 +540,20 @@ on two when it is wider, and follows the screen when it turns, until the reader 
 themselves; from then on their pick stays. Two tests turn an iPad-sized window: one checks it
 opens on one page upright and on two sideways, the other that a reader's pick of two survives
 turning it there and back.
+
+### ⑤ On a large iPad showing one page, can a finger turn it? · **fixed**
+
+A large iPad is wide enough to get the laptop's layout, and there a page turns by grabbing its
+outer edge, not by a swipe across it, so a drag through the text is free to select or move the
+page. But the edges to grab are only drawn when two pages are open. With one page showing there
+was nothing to grab and the swipe was switched off, so the only way to turn was the small arrows
+at the ends of the page bar. Found walking the pitch on 2026-10-06, right after item ④ made one
+page the way an upright iPad opens.
+
+**What would answer it:** a swipe across the one page turning it on a touch screen, as it does
+on a phone, while a laptop's mouse keeps the edge-grab rule.
+
+**Fixed, 2026-10-06:** with one page open on a screen whose main pointer is a finger, a swipe
+turns the page. Two pages on an iPad still turn by their edges, and a laptop is unchanged. A test
+on an iPad-sized window in the iPad's own browser engine swipes page 8 and checks page 9 comes
+up.
