@@ -1221,6 +1221,15 @@ test.describe("Hifth · a verse named without its surah is a link too", () => {
     await expect(page.getByRole("dialog", { name: /18:25/ })).toBeVisible();
   });
 
+  test("a note naming its own verse draws it as text, not a link that goes nowhere", async ({ page }) => {
+    // 18:13's note points to its own verse and to the next one.
+    await page.goto("/#/hafs-kfqc/18:13?open=commentary");
+    await expect(page.getByRole("dialog", { name: /18:13/ })).toBeVisible({ timeout: 20_000 });
+    const notes = sheet(page).getByRole("region", { name: "Commentary" });
+    await expect(notes.getByRole("button", { name: /18:14\b/ }).first()).toBeVisible();
+    await expect(notes.getByRole("button", { name: /18:13\b/ })).toHaveCount(0);
+  });
+
   test("the surah introduction's initials open the key, and its verses are links", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p293");
     const name = pageSvg(page, 293).getByRole("button", { name: /^Surah introduction/ });

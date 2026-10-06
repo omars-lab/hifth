@@ -349,8 +349,9 @@ export function CommentarySheet({
   // A paragraph of the source's prose, with the verses it cites as links and the
   // initials its key explains as buttons, in the introduction as in the note.
   // A "v. 5" is a verse of this note's surah. `at` names the paragraph, so each
-  // initial's button is told apart from the same initials elsewhere.
-  const prose = (para: string, at: string): ReactNode[] =>
+  // initial's button is told apart from the same initials elsewhere. A note that
+  // names its own verse (`self`) draws it as words: the reader is already there.
+  const prose = (para: string, at: string, self?: string): ReactNode[] =>
     together(splitSigla(para, sigla)
       .flatMap((part): (string | Citation | Siglum)[] =>
         typeof part === "string" ? splitCitations(part, opening?.surah) : [part],
@@ -374,7 +375,7 @@ export function CommentarySheet({
           );
         }
         const key = citedKey(part.surah, part.ayah);
-        if (!key) return part.text;
+        if (!key || key === self) return part.text;
         return (
           <button
             key={j}
@@ -479,7 +480,7 @@ export function CommentarySheet({
           <section className={styles.commentary} aria-label={t.commentaryTitle} {...own}>
             {entry.paragraphs.map((para, i) => (
               <p key={i} className={styles.para}>
-                {prose(para, `${i}`)}
+                {prose(para, `${i}`, entry.ayahKey)}
               </p>
             ))}
           </section>
