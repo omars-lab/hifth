@@ -117,7 +117,7 @@ import { JumpPicker, type JumpChoice } from "./components/JumpPicker";
 import { useHashRouter } from "./useHashRouter";
 import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
-import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
+import { DESKTOP_QUERY, UPRIGHT_QUERY, useMediaQuery } from "./useMediaQuery";
 import { useRoomForCards } from "./components/over-leaf";
 import {
   PageStage,
@@ -404,7 +404,13 @@ export function App(): JSX.Element {
    * fit" and re-opened the book at a different size than it closed at. A state
    * with no gesture behind it cannot drift from a gesture.
    */
-  const [pageMode, setPageMode] = useState<"one" | "two">("two");
+  // Until the reader picks, the screen's shape picks: one page on a screen
+  // taller than it is wide (an iPad held upright), two on one wider than tall.
+  // Upright, two pages were each half the screen wide with empty space above
+  // and below them.
+  const upright = useMediaQuery(UPRIGHT_QUERY);
+  const [pageMode, setPageMode] = useState<"one" | "two">(() => (upright ? "one" : "two"));
+  const pageModePickedRef = useRef(false);
   /*
    * What the paper is magnified to, for the chrome's readout.
    *
@@ -555,6 +561,7 @@ export function App(): JSX.Element {
    */
   const handlePageMode = useCallback(
     (mode: "one" | "two") => {
+      pageModePickedRef.current = true;
       setPageMode(mode);
       // The mirror moves now, not at the next render: a link that closes the
       // book (`?view=one`) lands its verse in the same step, and that landing
@@ -578,6 +585,15 @@ export function App(): JSX.Element {
   useEffect(() => {
     stage.setZoom(1);
   }, [desktop, stage]);
+  // Turning the screen turns the book with it, until the reader has picked.
+  useEffect(() => {
+    if (pageModePickedRef.current) return;
+    const mode = upright ? "one" : "two";
+    setPageMode(mode);
+    bookOpenRef.current = desktop && mode === "two";
+    // Opened as the control opens it: both pages at fit, or they disagree.
+    if (mode === "two") stage.setZoom(1);
+  }, [upright, desktop, stage]);
   const { t, dir } = useT();
   const { message, announce } = useAnnouncer();
 
