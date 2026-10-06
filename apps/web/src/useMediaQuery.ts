@@ -51,6 +51,9 @@ export const DESKTOP_QUERY = "(min-width: 1024px) and (min-height: 775px)";
 /** A screen taller than it is wide, as an iPad held upright: one page reads larger than two. */
 export const UPRIGHT_QUERY = "(orientation: portrait)";
 
+/** A screen whose main pointer is a finger, as an iPad's is: a swipe is how it turns a page. */
+export const TOUCH_QUERY = "(pointer: coarse)";
+
 /**
  * Subscribe to a CSS media query from JavaScript.
  *

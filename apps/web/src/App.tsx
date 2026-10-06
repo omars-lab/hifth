@@ -117,7 +117,7 @@ import { JumpPicker, type JumpChoice } from "./components/JumpPicker";
 import { useHashRouter } from "./useHashRouter";
 import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
-import { DESKTOP_QUERY, UPRIGHT_QUERY, useMediaQuery } from "./useMediaQuery";
+import { DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, useMediaQuery } from "./useMediaQuery";
 import { useRoomForCards } from "./components/over-leaf";
 import {
   PageStage,
@@ -409,6 +409,7 @@ export function App(): JSX.Element {
   // Upright, two pages were each half the screen wide with empty space above
   // and below them.
   const upright = useMediaQuery(UPRIGHT_QUERY);
+  const touchScreen = useMediaQuery(TOUCH_QUERY);
   const [pageMode, setPageMode] = useState<"one" | "two">(() => (upright ? "one" : "two"));
   const pageModePickedRef = useRef(false);
   /*
@@ -3351,8 +3352,10 @@ export function App(): JSX.Element {
                    a swipe across its middle: the edge rails drive the fold, and
                    the stage's own swipe-to-turn is off so a drag through the
                    text is free to pan and select. The phone keeps the swipe —
-                   it has no rails and no edge to spare. */
-                dragToTurn={!desktop}
+                   it has no rails and no edge to spare — and so does one page
+                   on a touch screen, such as a large iPad held upright: one
+                   page has no rails either, and a finger expects to swipe. */
+                dragToTurn={!desktop || (pageMode === "one" && touchScreen)}
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}
