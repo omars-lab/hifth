@@ -302,6 +302,7 @@ export interface Catalog {
   readonly penYellow: string;
   readonly phoneTools: (d: { readonly name: string | number }) => string;
   readonly phoneToolsClose: string;
+  readonly pitchCredit: string;
   readonly playAyah: (d: { readonly label: string | number }) => string;
   readonly playToPick: string;
   readonly playingRun: (d: { readonly from: string | number; readonly to: string | number }) => string;

@@ -3378,9 +3378,7 @@ export function App(): JSX.Element {
                 onGo={hopTo}
                 onCover={setCoverTop}
                 onClose={() => (introSheet ? setIntroSurah(null) : setCommentaryOpen(false))}
-                creditNote={
-                  PITCH ? "Shown privately, with the rights-holders, for a collaboration." : undefined
-                }
+                creditNote={PITCH ? t.pitchCredit : undefined}
                 back={
                   breadcrumbKey && !introSheet
                     ? {

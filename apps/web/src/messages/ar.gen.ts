@@ -308,6 +308,7 @@ const messages: Catalog = {
   penYellow: "أصفر",
   phoneTools: (d) => "أدوات الصفحة، أداة " + d.name + " مفعّلة",
   phoneToolsClose: "أغلق الأدوات",
+  pitchCredit: "يُعرَض بصفة خاصة على أصحاب الحقوق، بقصد التعاون.",
   playAyah: (d) => "تشغيل " + d.label,
   playToPick: "انقر الآية التي تقف عندها",
   playingRun: (d) => "تلاوة " + d.from + " إلى " + d.to,

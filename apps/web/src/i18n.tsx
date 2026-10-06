@@ -413,6 +413,8 @@ export interface Strings {
 
   /* ---- commentary (tafsir) sheet ------------------------------------------ */
   commentaryTitle: string;
+  /** Under a note's credit in the private pitch build: where this is shown. */
+  pitchCredit: string;
   /** aria label for the ✎ trigger. */
   /** "{source} · {licence}" — a note is never anonymous. */
   /** "Ayah 30" / "Ayahs 30–39" — the span a note attaches to. */
@@ -1112,6 +1114,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     rootsUnavailable: m.rootsUnavailable,
     rootsCredit: m.rootsCredit,
     commentaryTitle: m.commentaryTitle,
+    pitchCredit: m.pitchCredit,
     tafsirImportTitle: m.tafsirImportTitle,
     tafsirImportBody: m.tafsirImportBody,
     tafsirImportButton: m.tafsirImportButton,

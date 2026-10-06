@@ -844,4 +844,31 @@ test.describe("Hifth · the commentary drawer with the app in Arabic", () => {
     expect(gap).toBeLessThan(2);
     await page.screenshot({ path: test.info().outputPath("drawer-ar.png") });
   });
+
+  test("the foot of the note credits the book in English from the left, and says where it is shown in Arabic", async ({
+    page,
+  }) => {
+    // The line about where this is shown was typed in English straight into
+    // the app, so in Arabic it came out right to left with its full stop in
+    // front, and the book's credit wrapped onto a ragged right edge.
+    await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+    const foot = sheet(page).locator("footer");
+    await expect(foot).toBeVisible({ timeout: 20_000 });
+
+    const book = foot.locator('[lang="en"]');
+    await expect(book).toHaveCount(1);
+    expect(await book.evaluate((el) => getComputedStyle(el).direction)).toBe("ltr");
+    // A line of its own, starting at the foot's left edge like the prose above it.
+    const gap = await book.evaluate((el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return range.getClientRects()[0]!.left - el.parentElement!.getBoundingClientRect().left;
+    });
+    expect(gap).toBeLessThan(2);
+
+    // Ours: the app's own words, so Arabic, with no English left in it.
+    const shown = (await foot.innerText()).replace(await book.innerText(), "").trim();
+    expect(shown).toMatch(/[\u0600-\u06FF]/);
+    expect(shown).not.toMatch(/[A-Za-z]/);
+  });
 });
