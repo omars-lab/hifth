@@ -807,6 +807,37 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
   });
 });
 
+test.describe("Hifth · the verse's tools on a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+  test("every word under a tool is shown whole, in both languages", async ({ page }) => {
+    // The pitch build puts six tools in one row on a phone, and the words under
+    // them were cut short with an ellipsis: "Commentary" and "Same roots", and
+    // in Arabic «الجذور نفسها» and «شارك المسار».
+    for (const lang of ["en", "ar"]) {
+      // Come from 2:30, so the share tool offers the trail: its longest name.
+      await page.goto(`/?lang=${lang}#/hafs-kfqc/2:44?via=2:30`);
+      // The link opens the book's note; the tools come back when it closes.
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await page.keyboard.press("Escape");
+      const tools = page.getByRole("region", { name: lang === "ar" ? "أدوات البقرة، ٢:٤٤" : "Tools for Al-Baqarah · 2:44" });
+      await expect(tools).toBeVisible({ timeout: 20_000 });
+      await tools.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => undefined))));
+      const cut = await tools
+        .locator("span")
+        .evaluateAll((els) => els.filter((el) => el.scrollWidth > el.clientWidth + 0.5).map((el) => el.textContent ?? ""));
+      expect(cut, `${lang}: words cut short under a tool`).toEqual([]);
+      // Wider cells must still leave the whole row on the screen.
+      const row = (await tools.boundingBox())!;
+      const last = await tools.locator(":scope > div > :is(button, a, div)").evaluateAll((els) =>
+        Math.max(...els.map((el) => el.getBoundingClientRect().right)),
+      );
+      expect(row.x).toBeGreaterThanOrEqual(0);
+      expect(last).toBeLessThanOrEqual(390);
+    }
+  });
+});
+
 test.describe("Hifth · the commentary drawer with the app in Arabic", () => {
   // The drawer was pinned left to right and spoke only English. In Arabic its
   // own words and layout now follow the app, while The Study Quran's English
