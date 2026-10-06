@@ -507,3 +507,20 @@ with a long list (2:255's roots) and a short one (36:31's later look-alike), and
 page, and the page moves up so the verse sits above them, as it does under the note. Tried on
 2:255's roots and 36:31's look-alikes on a phone, and a test opens each list from the verse's
 number and checks its first line stays in sight above it.
+
+### ③ With one page open on a laptop or an iPad, can the reader still reach the page bar while a note is open? · **fixed**
+
+With two pages open the note lies over the facing page. With one page open it is a card in the
+corner, and that card stood a fixed gap off the bottom of the window, so it ran down over the
+full-screen button, the verse's chip and the page bar. A reader could not move to another page
+without closing the note first. Found walking the pitch on 2026-10-06, on a laptop and on an iPad
+held upright, with Ya-Sin 36:12 open.
+
+**What would answer it:** the card ending above the bars at both sizes, still tall enough to
+read, and the verse it is about still in sight.
+
+**Fixed, 2026-10-06:** the app measures the room the page has and every card in the corner (the
+note, the roots list, the similar-verses list, a marked passage's menu) stands inside it. The
+note also measures what it covers from its own new foot, so the page still lifts the verse clear
+of it. A test opens 36:12 on one page at both sizes and checks the card ends above the bars and
+covers none of the verse.

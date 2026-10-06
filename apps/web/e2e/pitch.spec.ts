@@ -318,6 +318,38 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(Math.abs(after.y - before.y)).toBeLessThan(2);
   });
 
+  for (const screen of [
+    { name: "a laptop", width: 1440, height: 900 },
+    { name: "an iPad held upright", width: 1024, height: 1366 },
+  ]) {
+    test(`with one page showing on ${screen.name}, the note ends above the page bar`, async ({ browser }) => {
+      // The corner card stood a fixed gap off the window's foot, so with one
+      // page open it ran down over the full-screen button, the verse's chip and
+      // the page bar: the reader could not move to another page without
+      // closing the note first.
+      const context = await browser.newContext({ viewport: { width: screen.width, height: screen.height } });
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+      const page = await context.newPage();
+      await page.goto("/#/hafs-kfqc/36:12?view=one");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+      await settle(sheet(page));
+      const card = (await sheet(page).boundingBox())!;
+      const full = (await page.getByRole("button", { name: "Full screen" }).boundingBox())!;
+      const bar = (await page.getByRole("navigation", { name: "Page bar" }).boundingBox())!;
+      expect(card.y + card.height).toBeLessThanOrEqual(full.y);
+      expect(card.y + card.height).toBeLessThanOrEqual(bar.y);
+      // And it is still a card worth reading, not squeezed to a strip.
+      expect(card.height).toBeGreaterThan(screen.height / 4);
+      // Standing higher, it must still leave the verse it is about in sight.
+      await settle(page.locator('[data-live="true"] [data-host-page]:visible'));
+      const lines = await litLineBoxes(page);
+      expect(lines.length).toBeGreaterThan(0);
+      for (const line of lines) expect(overlaps(line, card)).toBe(false);
+      await context.close();
+    });
+  }
+
   test("switching to one page with a note open leaves the page where it was", async ({ page }) => {
     // The note on the facing leaf moves to the corner card when the book closes
     // to one page. It worked out what it covered at once, while the book was

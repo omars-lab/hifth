@@ -118,6 +118,7 @@ import { useHashRouter } from "./useHashRouter";
 import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
 import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
+import { useRoomForCards } from "./components/over-leaf";
 import {
   PageStage,
   pageSpan,
@@ -356,6 +357,9 @@ export function App(): JSX.Element {
   const [coachUp, setCoachUp] = useState(false);
 
   const stageRef = useRef<PageStageHandle>(null);
+  // The page's room, which the cards stand inside rather than over the bars.
+  const roomRef = useRef<HTMLElement>(null);
+  useRoomForCards(roomRef);
   /*
    * The facing leaf's handle — held for one reason only: magnification. When two
    * pages are open the reader magnifies the whole opening, so the stepper drives
@@ -3157,6 +3161,7 @@ export function App(): JSX.Element {
       {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
       <main
+        ref={roomRef}
         className={styles.main}
         dir="rtl"
         /* The bookmark tool's tap on a page's margin, where there is no ayah to

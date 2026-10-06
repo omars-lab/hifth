@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useState, type CSSProperties, type RefObject } from "react";
 import type { LeafSide } from "@hifth/core";
 
 /** The least width the note is read in, beside a spread — the stylesheet's card. */
@@ -68,6 +68,37 @@ export function useOverLeaf(open: boolean, side: LeafSide | null): Place | null 
     };
   }, [open, side]);
   return place;
+}
+
+/**
+ * Tell every card how much of the window the page has: how far its foot stands
+ * above the window's foot, and how tall it is. With one page open the cards
+ * stand in a corner, and a corner a fixed gap off the window's foot ran down
+ * over the full-screen button, the verse's chip and the page bar, so the
+ * reader could not move on without closing the note. The stylesheets read the
+ * two measures (--room-foot, --room-block) to stand in the page's room.
+ */
+export function useRoomForCards(room: RefObject<HTMLElement | null>): void {
+  useLayoutEffect(() => {
+    const area = room.current;
+    if (!area) return;
+    const root = document.documentElement.style;
+    const measure = () => {
+      const box = area.getBoundingClientRect();
+      root.setProperty("--room-foot", `${Math.max(0, innerHeight - box.bottom)}px`);
+      root.setProperty("--room-block", `${box.height}px`);
+    };
+    measure();
+    const seen = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    seen?.observe(area);
+    window.addEventListener("resize", measure);
+    return () => {
+      seen?.disconnect();
+      window.removeEventListener("resize", measure);
+      root.removeProperty("--room-foot");
+      root.removeProperty("--room-block");
+    };
+  }, [room]);
 }
 
 /** The card's style for a place: the stylesheet's corner when there is none. */
