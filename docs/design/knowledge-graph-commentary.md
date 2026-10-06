@@ -672,3 +672,25 @@ half. Found on 2026-10-06 with Fatir 35:44.
 exactly to its top. A wider screen keeps them as a card in the middle, with the bar's ends clear
 beside it. A test on four phone sizes checks every button of the bar is either wholly under the
 tools or wholly clear of them.
+
+### ⑮ Turning a phone the moment a link opens a verse, is the verse still marked? · **fixed**
+
+A link that opens a verse slides the page to it, and marks the verse once the page gets there.
+Turning the phone during that slide starts a new one, to fit the new screen, and the first slide
+was cut off without ever saying it had ended — so the verse was never marked at all. Found on
+2026-10-06 with Fatir 35:44, and it came in with the fix for ⑬.
+
+**Fixed, 2026-10-06:** a slide cut short still says it is over, so whatever was waiting on it
+runs. A test opens a verse from a link upright, turns the phone straight away, and checks the
+verse is marked.
+
+### ⑯ On a phone held sideways, does a list opened on a verse cover its last line? · **fixed**
+
+Sideways, the verse's link buttons stand in a column at the screen's side, and the page keeps the
+verse below where that column ends. Opening the roots or look-alike list moves those buttons onto
+the list's top row, but the page stayed where the column had put it — low enough that the list
+covered the foot of the verse's last line. Found on 2026-10-06 with Fatir 35:44.
+
+**Fixed, 2026-10-06:** once the buttons move, the page is placed again, with the verse above the
+list. A test reads upright, turns sideways, drags the page a little lower, opens each list, and
+checks every line of the verse is above it.
