@@ -69,6 +69,28 @@ test.describe("Hifth · on an iPad", () => {
     expect(new URL(page.url()).hash).toBe("#/hafs-kfqc/2:255");
   });
 
+  // The large iPad is wide enough for the desktop layout, where a page turns
+  // by its edge rather than by a swipe across it. With one page showing there
+  // is no edge to take, so a finger has to be able to swipe it over, as it
+  // does on a phone. Found walking the pitch upright (2026-10-06): the swipe
+  // did nothing and only the page bar's small arrows turned the page.
+  test("the large iPad upright turns its one page with a swipe", async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 1366 });
+    await page.goto("/#/hafs-kfqc/p8");
+    await shown(page, 8);
+    await expect(leaf(page, 7)).toHaveCount(0);
+
+    const box = (await leaf(page, 8).boundingBox())!;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width * 0.3, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i += 1) await page.mouse.move(box.x + box.width * (0.3 + i * 0.05), y);
+    await page.mouse.up();
+
+    await shown(page, 9);
+    await expect(leaf(page, 8)).toHaveCount(0);
+  });
+
   test("a finger on a verse selects it, on either leaf of the spread", async ({ page }) => {
     await page.setViewportSize(LANDSCAPE);
     await page.goto("/#/hafs-kfqc/p8");

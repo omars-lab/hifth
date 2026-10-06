@@ -117,7 +117,8 @@ import { JumpPicker, type JumpChoice } from "./components/JumpPicker";
 import { useHashRouter } from "./useHashRouter";
 import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
-import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
+import { DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, useMediaQuery } from "./useMediaQuery";
+import { useRoomForCards } from "./components/over-leaf";
 import {
   PageStage,
   pageSpan,
@@ -356,6 +357,9 @@ export function App(): JSX.Element {
   const [coachUp, setCoachUp] = useState(false);
 
   const stageRef = useRef<PageStageHandle>(null);
+  // The page's room, which the cards stand inside rather than over the bars.
+  const roomRef = useRef<HTMLElement>(null);
+  useRoomForCards(roomRef);
   /*
    * The facing leaf's handle — held for one reason only: magnification. When two
    * pages are open the reader magnifies the whole opening, so the stepper drives
@@ -400,7 +404,14 @@ export function App(): JSX.Element {
    * fit" and re-opened the book at a different size than it closed at. A state
    * with no gesture behind it cannot drift from a gesture.
    */
-  const [pageMode, setPageMode] = useState<"one" | "two">("two");
+  // Until the reader picks, the screen's shape picks: one page on a screen
+  // taller than it is wide (an iPad held upright), two on one wider than tall.
+  // Upright, two pages were each half the screen wide with empty space above
+  // and below them.
+  const upright = useMediaQuery(UPRIGHT_QUERY);
+  const touchScreen = useMediaQuery(TOUCH_QUERY);
+  const [pageMode, setPageMode] = useState<"one" | "two">(() => (upright ? "one" : "two"));
+  const pageModePickedRef = useRef(false);
   /*
    * What the paper is magnified to, for the chrome's readout.
    *
@@ -551,6 +562,7 @@ export function App(): JSX.Element {
    */
   const handlePageMode = useCallback(
     (mode: "one" | "two") => {
+      pageModePickedRef.current = true;
       setPageMode(mode);
       // The mirror moves now, not at the next render: a link that closes the
       // book (`?view=one`) lands its verse in the same step, and that landing
@@ -574,6 +586,15 @@ export function App(): JSX.Element {
   useEffect(() => {
     stage.setZoom(1);
   }, [desktop, stage]);
+  // Turning the screen turns the book with it, until the reader has picked.
+  useEffect(() => {
+    if (pageModePickedRef.current) return;
+    const mode = upright ? "one" : "two";
+    setPageMode(mode);
+    bookOpenRef.current = desktop && mode === "two";
+    // Opened as the control opens it: both pages at fit, or they disagree.
+    if (mode === "two") stage.setZoom(1);
+  }, [upright, desktop, stage]);
   const { t, dir } = useT();
   const { message, announce } = useAnnouncer();
 
@@ -3157,6 +3178,7 @@ export function App(): JSX.Element {
       {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
       <main
+        ref={roomRef}
         className={styles.main}
         dir="rtl"
         /* The bookmark tool's tap on a page's margin, where there is no ayah to
@@ -3330,8 +3352,10 @@ export function App(): JSX.Element {
                    a swipe across its middle: the edge rails drive the fold, and
                    the stage's own swipe-to-turn is off so a drag through the
                    text is free to pan and select. The phone keeps the swipe —
-                   it has no rails and no edge to spare. */
-                dragToTurn={!desktop}
+                   it has no rails and no edge to spare — and so does one page
+                   on a touch screen, such as a large iPad held upright: one
+                   page has no rails either, and a finger expects to swipe. */
+                dragToTurn={!desktop || (pageMode === "one" && touchScreen)}
                 /* Only the live stage turns pages, and only on a desktop
                    spread does the fold belong to something wider than it. */
                 foldTarget={desktop ? bookRef : null}

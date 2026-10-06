@@ -168,7 +168,10 @@ export function CommentarySheet({
         onCover(null);
         return;
       }
-      onCover(window.innerHeight - Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE));
+      // Measured up from the card's own foot: a corner card stands above the
+      // bars, and measuring from the window's foot left the verse under it.
+      const foot = window.innerHeight - (parseFloat(getComputedStyle(sheet).bottom) || 0);
+      onCover(foot - Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE));
     };
     report();
     window.addEventListener("resize", report);

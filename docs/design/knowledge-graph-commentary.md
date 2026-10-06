@@ -507,3 +507,53 @@ with a long list (2:255's roots) and a short one (36:31's later look-alike), and
 page, and the page moves up so the verse sits above them, as it does under the note. Tried on
 2:255's roots and 36:31's look-alikes on a phone, and a test opens each list from the verse's
 number and checks its first line stays in sight above it.
+
+### ③ With one page open on a laptop or an iPad, can the reader still reach the page bar while a note is open? · **fixed**
+
+With two pages open the note lies over the facing page. With one page open it is a card in the
+corner, and that card stood a fixed gap off the bottom of the window, so it ran down over the
+full-screen button, the verse's chip and the page bar. A reader could not move to another page
+without closing the note first. Found walking the pitch on 2026-10-06, on a laptop and on an iPad
+held upright, with Ya-Sin 36:12 open.
+
+**What would answer it:** the card ending above the bars at both sizes, still tall enough to
+read, and the verse it is about still in sight.
+
+**Fixed, 2026-10-06:** the app measures the room the page has and every card in the corner (the
+note, the roots list, the similar-verses list, a marked passage's menu) stands inside it. The
+note also measures what it covers from its own new foot, so the page still lifts the verse clear
+of it. A test opens 36:12 on one page at both sizes and checks the card ends above the bars and
+covers none of the verse.
+
+### ④ Does an iPad held upright open on one page the reader can read? · **fixed**
+
+An iPad held upright is tall and narrow, but the app opened it on two pages side by side, each
+small enough that the verse lines were hard to read and the note had to squeeze in beneath
+them. A reader had to find the One/Two switch before the page was usable. Found walking the
+pitch on 2026-10-06.
+
+**What would answer it:** an upright iPad opening on one page, turning the iPad on its side
+opening the book to two, and a reader's own pick of one or two staying put when they turn it.
+
+**Fixed, 2026-10-06:** the app opens on one page when the screen is taller than it is wide and
+on two when it is wider, and follows the screen when it turns, until the reader picks one or two
+themselves; from then on their pick stays. Two tests turn an iPad-sized window: one checks it
+opens on one page upright and on two sideways, the other that a reader's pick of two survives
+turning it there and back.
+
+### ⑤ On a large iPad showing one page, can a finger turn it? · **fixed**
+
+A large iPad is wide enough to get the laptop's layout, and there a page turns by grabbing its
+outer edge, not by a swipe across it, so a drag through the text is free to select or move the
+page. But the edges to grab are only drawn when two pages are open. With one page showing there
+was nothing to grab and the swipe was switched off, so the only way to turn was the small arrows
+at the ends of the page bar. Found walking the pitch on 2026-10-06, right after item ④ made one
+page the way an upright iPad opens.
+
+**What would answer it:** a swipe across the one page turning it on a touch screen, as it does
+on a phone, while a laptop's mouse keeps the edge-grab rule.
+
+**Fixed, 2026-10-06:** with one page open on a screen whose main pointer is a finger, a swipe
+turns the page. Two pages on an iPad still turn by their edges, and a laptop is unchanged. A test
+on an iPad-sized window in the iPad's own browser engine swipes page 8 and checks page 9 comes
+up.
