@@ -35,6 +35,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinPageBreaks } from "./blocks.mjs";
 import { cleanIntro } from "./intro.mjs";
+import { readKey } from "./key.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "../../../..");
@@ -49,6 +50,10 @@ const MAIN = dirname(
 const SRC_DIR = [resolve(REPO, CAPTURE), resolve(MAIN, CAPTURE)].find(existsSync) ?? resolve(REPO, CAPTURE);
 const MANIFEST = resolve(REPO, "apps/web/public/assets/manifest.json");
 const OUT_DIR = resolve(REPO, "apps/web/public/assets/private/study-quran");
+// The key to the commentators' initials, typed by hand from the front of the
+// volume into the capture's folder (see key.mjs). Optional: without it the
+// notes still show, their initials just stay plain.
+const KEY_SRC = resolve(SRC_DIR, "../raw/commentator-key.hand.json");
 
 // How many road edges a single verse may carry when they come from the source's
 // own cross-references. A few dozen refs on one ayah would bury the hop list; a
@@ -369,6 +374,27 @@ for (const surah of surahs) {
   totalVerses += r.verses;
   totalCommentary += r.withCommentary;
   totalEdges += r.edges;
+}
+
+if (existsSync(KEY_SRC)) {
+  const raw = JSON.parse(readFileSync(KEY_SRC, "utf8"));
+  const key = readKey(raw);
+  writeFileSync(
+    resolve(OUT_DIR, "key.json"),
+    JSON.stringify(
+      {
+        source: raw.source,
+        license: "private",
+        key,
+        note: "PRIVATE pitch data. Held copy (The Study Quran, HarperOne 2015). Never commit or deploy.",
+      },
+      null,
+      2,
+    ),
+  );
+  console.log(`wrote the key to ${Object.keys(key).length} commentators' initials`);
+} else {
+  console.log(`  no key to the commentators' initials at ${KEY_SRC}: their initials stay plain`);
 }
 
 console.log(`wrote ${wrote} surah file(s) to ${OUT_DIR}`);

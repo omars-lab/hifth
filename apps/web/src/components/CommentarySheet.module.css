@@ -441,3 +441,64 @@ button.grip {
     animation: none;
   }
 }
+
+/* A commentator's initials in a bracket: they open the book's key on a tap. A
+   dotted line, not the citations' solid one, because they explain rather than
+   go anywhere. */
+.siglum {
+  display: inline;
+  min-block-size: 0;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+  cursor: help;
+}
+.siglum[aria-expanded="true"] {
+  color: var(--accent-strong);
+  text-decoration-style: solid;
+}
+.siglum:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* The line of the key, under the initials. Placed by the note, in its own
+   scrolling box, so it moves with the words it explains. */
+.keyCard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  inline-size: min(22rem, calc(100% - 12px));
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-2);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+.keyCard p {
+  margin: 0;
+}
+.keyFrom,
+.keyAlso {
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+}
+.keyFrom {
+  margin-block-end: var(--space-1) !important;
+}
+.keyWork cite {
+  font-style: italic;
+}

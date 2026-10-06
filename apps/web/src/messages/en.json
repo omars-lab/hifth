@@ -168,6 +168,8 @@
   "relatedVerses": "Related verses",
   "relatedLede": "Where {source} connects this verse. Tap one to go there.",
   "goToVerse": "Go to {label}",
+  "keyFrom": "From the book's key to its commentators",
+  "keyAlso": "Also known as {name}",
   "tafsirImportTitle": "Commentary edition",
   "tafsirImportBody": "A commentary you own can be side-loaded from a folder of files. It is stored only in this browser, never uploaded, and can be removed at any time.",
   "tafsirImportButton": "Choose folder…",

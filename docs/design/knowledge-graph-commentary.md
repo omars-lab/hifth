@@ -713,3 +713,21 @@ the rest once the row grew taller. Found on 2026-10-06 on an upright phone.
 **Fixed, 2026-10-06:** each tool starts at the top of its cell, and the share button fills its
 cell's height like the others, so every icon sits on one line whatever its word does. A test
 checks it in English and in Arabic.
+
+### ⑲ Can a reader tell whose commentary a note is citing? · **fixed**
+
+The book cites the commentators it draws on by initials in brackets after each claim, and says
+who they are only in a key of about forty names at the front of the volume. A reader in the app
+never sees the front of the volume, so the initials were letters nobody could read: the note
+showed *that* the book had sources, and not *which* ones. A scholar would ask at once.
+
+**Fixed, 2026-10-06:** each initial in a bracket that the key has is now a quiet, dotted button.
+A tap (or a click) opens a small card under it with the commentator's name, when they died, and
+the work the book draws on, with a line saying it comes from the book's own key. A press anywhere
+else or Escape puts it away and leaves the note open. Initials the key does not have, and capital
+letters in the prose, stay plain text.
+
+The key itself is the book's, so it is held like the rest of it: it was typed by hand from the
+pictures of the captured pages, because the machine-read text garbled its accents, and it lives
+beside the capture and in the private pitch data, never in this repository. The tests name no
+commentator.

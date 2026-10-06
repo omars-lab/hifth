@@ -98,6 +98,31 @@ export function pitchEntries(surah: PitchSurah): TafsirEntry[] {
   });
 }
 
+/** One line of the book's key: who a commentator's initials stand for. */
+export interface Commentator {
+  /** The name, with when they died. */
+  readonly who: string;
+  /** The work of theirs the book draws on. */
+  readonly work: string;
+  /** Another name the work goes by. */
+  readonly also?: string;
+}
+
+let key: Promise<ReadonlyMap<string, Commentator>> | null = null;
+
+/**
+ * The book's key to the initials its notes cite commentators by, or an empty
+ * one if there is none / not pitch — the initials then stay plain text.
+ */
+export function loadPitchKey(): Promise<ReadonlyMap<string, Commentator>> {
+  if (!PITCH) return Promise.resolve(new Map());
+  key ??= fetch(`${BASE}assets/private/study-quran/key.json`)
+    .then((res) => (res.ok ? (res.json() as Promise<{ key: Record<string, Commentator> }>) : { key: {} }))
+    .then((k) => new Map<string, Commentator>(Object.entries(k.key ?? {})))
+    .catch(() => new Map<string, Commentator>());
+  return key;
+}
+
 /** The book as a commentary source; `load` is the file loader, swapped in tests. */
 export function makePitchProvider(
   load: (surah: number) => Promise<PitchSurah | null> = loadPitchSurah,
