@@ -3101,9 +3101,13 @@ export function App(): JSX.Element {
           third of it, on exactly the visit where a reader is deciding what
           this app is. So they take turns, and the teaching goes first: one
           asks for a tap now, the other warns about eviction that may never
-          come. */}
+          come.
+
+          Always held in the pitch build: it is shown to visitors in a room,
+          who are judging the page, and storage that may be cleared next week is
+          nothing they need to hear about. */}
       <OfflineNotice
-        hold={coachUp}
+        hold={coachUp || PITCH}
         onShowPacks={() => {
           setRevisionAt("juz");
           setRevisionOpen(true);

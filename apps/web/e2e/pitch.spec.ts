@@ -491,6 +491,26 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
   // does not try to take a side it has no room for.
   test.use({ viewport: { width: 390, height: 844 } });
 
+  test("an iPhone's first screen opens on the page, not on an install notice", async ({ browser }) => {
+    // Safari on an iPhone was told to install the app before anything else: a
+    // strip a fifth of the screen tall, about storage a demo never needs, on
+    // the screen a visitor first judges the demo by. The iPhone browser id is
+    // what makes the app take the visitor for an iPhone.
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+    });
+    // The first-visit tips are put away, as they are after the first visit:
+    // while they are up the notice waits its turn anyway.
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/");
+    await expect(page.getByText("Tap a verse to read its Study Quran note")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Install Hifth so it stays with you offline")).toHaveCount(0);
+    await context.close();
+  });
+
   test("the first screen's hint does not leave one word alone on its second line", async ({ page }) => {
     // At a phone's width the line wrapped after "Study Quran", leaving "note"
     // by itself under it — the first thing a visitor reads looked unfinished.
