@@ -893,6 +893,25 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     await expect(menu(page)).toHaveCount(0);
   });
 
+  test("the menu stands clear of the whole verse, not over its first lines", async ({ page }) => {
+    // 2:285 runs over three lines of page 49 and its number ends the last one,
+    // so a menu placed just above the number stood on the verse's own words.
+    await page.goto("/#/hafs-kfqc/p49");
+    const n = pageSvg(page, 49).locator(`[data-verse-number][data-verse-key="quran/hafs-kfqc/2:285"]`);
+    await expect(n).toBeVisible({ timeout: 20_000 });
+    await settle(n);
+    const b = (await n.boundingBox())!;
+    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    const m = page.getByRole("menu", { name: /2:285/ });
+    await expect(m).toBeVisible();
+    await settle(m);
+    const box = (await m.boundingBox())!;
+    const v = (await verse(page, 49, 292).boundingBox())!;
+    expect(overlaps(box, v), "the menu covers 2:285's own lines").toBe(false);
+    // Still beside its number, not thrown across the page.
+    expect(Math.abs(box.x + box.width / 2 - (b.x + b.width / 2))).toBeLessThan(box.width / 2 + 1);
+  });
+
   test("a tap on the verse's words still opens its note straight away", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p440");
     await expect(number(page)).toBeVisible({ timeout: 20_000 });
