@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 // Loop 6a exit criterion (PLAN §Loop 6a): "instant plain⇄tajweed toggle with
@@ -24,6 +24,28 @@ const SIGNATURE = `(() => {
 
 const toggle = "header button[aria-pressed]";
 
+/**
+ * The page's fingerprint once it has stopped changing. Opening on a verse marks
+ * it with the highlighter a moment after the page shows, and the marks are fitted
+ * to the letters again once those are laid out; a fingerprint taken before that
+ * differs from every later one for reasons that have nothing to do with the skin
+ * (2 runs in 300 on a busy machine). So wait for the marks, then for two reads in
+ * a row to agree.
+ */
+async function settledSignature(page: Page): Promise<string> {
+  await expect(page.locator("#hifth-overlay .hl-sel path.hl-band")).toHaveCount(2);
+  let last: string | null = null;
+  await expect
+    .poll(async () => {
+      const now = (await page.evaluate(SIGNATURE)) as string | null;
+      const same = now !== null && now === last;
+      last = now;
+      return same;
+    }, { intervals: [250] })
+    .toBe(true);
+  return last!;
+}
+
 test.describe("Hifth · tajweed skin (spec §8)", () => {
   test("the beta badge is visible before the skin is ever switched on", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/2:38");
@@ -36,7 +58,7 @@ test.describe("Hifth · tajweed skin (spec §8)", () => {
     await page.goto("/#/hafs-kfqc/2:38");
     await expect(page.locator("main svg[role='group']").first()).toBeVisible();
 
-    const plain = await page.evaluate(SIGNATURE);
+    const plain = await settledSignature(page);
     expect(plain).toBeTruthy();
 
     await page.locator(toggle).click();
