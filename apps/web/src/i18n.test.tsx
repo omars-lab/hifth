@@ -347,6 +347,38 @@ describe("a note that cannot be narrowed names what is in the way", () => {
   });
 });
 
+describe("counting links", () => {
+  // «البقرة، ٠ روابط» read as "zero links" in the plural that only fits three
+  // to ten, and English said "1 links" (seen on the phone, 2026-10-05). Arabic
+  // counts with a different noun for none, one, two, a few, many and a hundred.
+  const COUNTS = [0, 1, 2, 3, 11, 100];
+
+  it("names the links in the right Arabic form for each count", () => {
+    expect(COUNTS.map((n) => AR.railSummary("البقرة", n))).toEqual([
+      "البقرة، لا روابط",
+      "البقرة، رابط واحد",
+      "البقرة، رابطان",
+      "البقرة، ٣ روابط",
+      "البقرة، ١١ رابطًا",
+      "البقرة، ١٠٠ رابط",
+    ]);
+    expect(AR.rangeAria("البقرة ٢:٤٠", 3)).toBe("مقطع محدَّد، البقرة ٢:٤٠، ٣ روابط");
+    expect(AR.rangeAria("البقرة ٢:٤٠", 1)).toBe("مقطع محدَّد، البقرة ٢:٤٠، رابط واحد");
+  });
+
+  it("says one link, not one links, in English", () => {
+    expect(COUNTS.map((n) => EN.railSummary("Al-Baqarah", n))).toEqual([
+      "Al-Baqarah · 0 links",
+      "Al-Baqarah · 1 link",
+      "Al-Baqarah · 2 links",
+      "Al-Baqarah · 3 links",
+      "Al-Baqarah · 11 links",
+      "Al-Baqarah · 100 links",
+    ]);
+    expect(EN.rangeAria("Al-Baqarah 2:40", 1)).toBe("Highlighted passage · Al-Baqarah 2:40 · 1 link");
+  });
+});
+
 describe("separators", () => {
   it("never separates with the middle dot in Arabic, because it reads as a zero", () => {
     // «الأعراف · ٧:٢٠٥»: the dot and the ٠ inside ٢٠٥ are the same small mark,

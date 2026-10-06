@@ -962,7 +962,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     rangeUnavailable: m.rangeUnavailable,
     ayahUnavailable: m.ayahUnavailable,
     noConcordance: m.noConcordance,
-    railSummary: (surah, links) => m.railSummary({ surah, linksText: n(links) }),
+    railSummary: (surah, links) => m.railSummary({ surah, n: links, linksText: n(links) }),
 
     ayahAria: (label) => m.ayahAria({ label }),
     stageLoading: m.stageLoading,
@@ -1004,7 +1004,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     audioUnavailable: m.audioUnavailable,
     qulVerse: (label) => m.qulVerse({ label }),
 
-    rangeAria: (title, links) => m.rangeAria({ title, links }),
+    rangeAria: (title, links) => m.rangeAria({ title, n: links, linksText: n(links) }),
     rangeEmpty: m.rangeEmpty,
     rangeFrom: (refs) => m.rangeFrom({ refs }),
     refJoin: m.refJoin,
