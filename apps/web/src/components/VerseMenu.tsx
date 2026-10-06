@@ -15,6 +15,12 @@ interface VerseMenuProps {
   name: string;
   /** Where the held verse is on screen; the menu stands above or below it, never over it. */
   around: DOMRect;
+  /**
+   * The whole verse, when `around` is only a part of it: a verse's number
+   * sits at its end, so a menu above the number stood on the verse's earlier
+   * lines. The menu clears this instead, and stays centred on `around`.
+   */
+  clear?: DOMRect | undefined;
   items: readonly VerseMenuItem[];
   onClose: () => void;
   /**
@@ -27,16 +33,29 @@ interface VerseMenuProps {
 const GAP = 8;
 const EDGE = 8;
 
+type Box = { left: number; right: number; top: number; bottom: number };
+
 /**
  * Where the menu goes: above the verse when it fits there, below when it fits
  * there, and otherwise on whichever side has more room. Kept inside the window
- * left to right. Exported for its unit test.
+ * left to right. Given the whole verse as `clear`, it stands above or below
+ * all of it, and beside `around` only when the verse is too tall to clear.
+ * Exported for its unit test.
  */
 export function placeMenu(
-  around: { left: number; right: number; top: number; bottom: number },
+  around: Box,
   menu: { width: number; height: number },
   view: { width: number; height: number },
+  clear?: Box,
 ): { left: number; top: number } {
+  const centre = (around.left + around.right) / 2 - menu.width / 2;
+  const left = Math.min(Math.max(EDGE, centre), view.width - EDGE - menu.width);
+  if (clear) {
+    const above = clear.top - GAP - menu.height;
+    const below = clear.bottom + GAP;
+    if (above >= EDGE) return { left, top: above };
+    if (below + menu.height <= view.height - EDGE) return { left, top: below };
+  }
   const above = around.top - GAP - menu.height;
   const below = around.bottom + GAP;
   const fitsAbove = above >= EDGE;
@@ -48,8 +67,6 @@ export function placeMenu(
       : around.top > view.height - around.bottom
         ? Math.max(EDGE, above)
         : Math.min(below, view.height - EDGE - menu.height);
-  const centre = (around.left + around.right) / 2 - menu.width / 2;
-  const left = Math.min(Math.max(EDGE, centre), view.width - EDGE - menu.width);
   return { left, top };
 }
 
@@ -59,7 +76,7 @@ export function placeMenu(
  * offer, beside the verse rather than over it. Escape, a tap anywhere else, or
  * a pick closes it.
  */
-export function VerseMenu({ name, around, items, onClose, stacked = false }: VerseMenuProps): JSX.Element {
+export function VerseMenu({ name, around, clear, items, onClose, stacked = false }: VerseMenuProps): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
 
@@ -70,10 +87,10 @@ export function VerseMenu({ name, around, items, onClose, stacked = false }: Ver
       placeMenu(around, { width: el.offsetWidth, height: el.offsetHeight }, {
         width: window.innerWidth,
         height: window.innerHeight,
-      }),
+      }, clear),
     );
     // Placed again when lines arrive: a taller menu must still clear the verse.
-  }, [around, items.length]);
+  }, [around, clear, items.length]);
 
   // Focus waits for the menu to be placed: until then it is hidden, and a
   // browser will not focus a hidden button, so the keyboard was left on nothing.

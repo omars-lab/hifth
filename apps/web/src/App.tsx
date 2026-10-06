@@ -828,7 +828,7 @@ export function App(): JSX.Element {
   // selected verse's number is washed. Pressing a number selects its verse,
   // and the note waits to be picked from the menu rather than opening behind it.
   // It is the same small menu a hold on a verse opens, with other lines.
-  const [verseMenuAt, setVerseMenuAt] = useState<{ key: string; around: DOMRect } | null>(null);
+  const [verseMenuAt, setVerseMenuAt] = useState<{ key: string; around: DOMRect; verse?: DOMRect | undefined } | null>(null);
   const closeNumberMenu = useCallback(() => setVerseMenuAt(null), []);
   const pickedFromNumberRef = useRef<string | null>(null);
   const verseMenuLabel = useCallback((key: string) => t.verseMenu(key), [t]);
@@ -2169,12 +2169,12 @@ export function App(): JSX.Element {
   // A press on a verse's number: select the verse (unless it already is) and
   // open the menu beside the number. Only where a tap on a verse selects it.
   const openVerseMenu = useCallback(
-    (key: string, around: DOMRect) => {
+    (key: string, around: DOMRect, verse?: DOMRect) => {
       if (toolRef.current !== "select" && toolRef.current !== "highlight") return;
       pickedFromNumberRef.current = key;
       if (selectedKeyRef.current !== key) handleSelect(key);
       else setCommentaryOpen(false);
-      setVerseMenuAt({ key, around });
+      setVerseMenuAt({ key, around, verse });
     },
     [handleSelect],
   );
@@ -3742,6 +3742,7 @@ export function App(): JSX.Element {
         <VerseMenu
           name={t.verseMenu(verseMenuAt.key)}
           around={verseMenuAt.around}
+          clear={verseMenuAt.verse}
           items={verseMenuItems}
           onClose={closeNumberMenu}
           stacked
