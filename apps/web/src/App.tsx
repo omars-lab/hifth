@@ -3648,9 +3648,11 @@ export function App(): JSX.Element {
                 // is all a first visit is told (the tips open only from
                 // settings), so it says so, in the app's language. Only the
                 // book's name is pitch copy; dropped from the public build
-                // with PITCH.
+                // with PITCH. A mouse is told to click, a finger to tap.
                 PITCH
-                ? t.tapForNote("Study Quran")
+                ? touchScreen
+                  ? t.tapForNote("Study Quran")
+                  : t.clickForNote("Study Quran")
                 : undefined
           }
         />

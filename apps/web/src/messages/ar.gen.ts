@@ -65,6 +65,7 @@ const messages: Catalog = {
   bmUnfolded: (d) => "فُردت الزاوية: " + plural(LC, d.count, { zero: "لم تُرفع أي علامة", one: "رُفعت علامة واحدة", two: "رُفعت علامتان", few: "رُفعت " + d.countText + " علامات", many: "رُفعت " + d.countText + " علامة", other: "رُفعت " + d.countText + " علامة" }),
   chipAria: (d) => d.direction + "، " + d.countText,
   clearSelection: "إلغاء التحديد",
+  clickForNote: (d) => "انقر آيةً لتقرأ تعليق " + d.source + " عليها",
   close: "إغلاق",
   coachDone: "تمّ",
   coachDoneAria: "تمّ، إخفاء الشرح",

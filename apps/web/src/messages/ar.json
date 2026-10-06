@@ -161,6 +161,7 @@
   "commentaryOn": "تفسير {label}",
   "commentaryBy": "تفسير {source}",
   "tapForNote": "المس آيةً لتقرأ تعليق {source} عليها",
+  "clickForNote": "انقر آيةً لتقرأ تعليق {source} عليها",
   "noteShowAll": "اعرض التفسير كله",
   "noteShowLess": "اعرض أقل من التفسير",
   "surahIntro": "مقدمة السورة",
