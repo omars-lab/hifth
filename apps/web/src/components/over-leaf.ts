@@ -71,6 +71,10 @@ export function useOverLeaf(open: boolean, side: LeafSide | null): Place | null 
 }
 
 /** The card's style for a place: the stylesheet's corner when there is none. */
-export function leafStyle(place: Place | null): CSSProperties | undefined {
-  return place ? { ...place, right: "auto", bottom: "auto", maxBlockSize: "none" } : undefined;
+export function leafStyle(place: Place | null, fit: "page" | "content" = "page"): CSSProperties | undefined {
+  if (!place) return undefined;
+  // A list is only as tall as what it holds, up to the page: one look-alike
+  // stretched to the book's height sat at the top of an empty card.
+  if (fit === "content") return { ...place, height: "auto", maxBlockSize: place.height, right: "auto", bottom: "auto" };
+  return { ...place, right: "auto", bottom: "auto", maxBlockSize: "none" };
 }
