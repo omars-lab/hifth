@@ -159,6 +159,18 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     });
   }
 
+  test("the arrow keys still turn the page while a note sits beside it", async ({ page }) => {
+    // The note card beside the spread leaves the page usable — no veil, verses
+    // still tap — but the keyboard took any open panel for one that owns the
+    // keys, so the arrows did nothing until the note was closed.
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page)).toHaveAttribute("aria-modal", "false");
+    await expect(pageSvg(page, 42)).toBeVisible();
+    await page.keyboard.press("ArrowLeft");
+    await expect(pageSvg(page, 42), "the next opening replaced page 42").toHaveCount(0);
+  });
+
   test("the verse stays bright beside its note, and a tap on the next verse turns the note to it", async ({
     page,
   }) => {
