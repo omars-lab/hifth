@@ -660,3 +660,15 @@ first line. Found on 2026-10-06 with Fatir 35:44.
 **Fixed, 2026-10-06:** when the screen changes size with a note up, the page slides its verse up
 above the note again, the same way it does when the note first comes up. A test opens the note
 upright, turns the phone, and checks every line of the verse is above the note.
+
+### ⑭ On a phone, do the verse's tools leave scraps of the bar showing? · **fixed**
+
+A verse's tools rise over the bar under the page and its slider. On every phone they stopped a
+few pixels short of the bar's top, so a thin strip of its buttons showed above them; held
+sideways they were narrower than the screen, and their edge cut the selected verse's button in
+half. Found on 2026-10-06 with Fatir 35:44.
+
+**Fixed, 2026-10-06:** on a phone the tools cover the bar whole, upright and sideways, reaching
+exactly to its top. A wider screen keeps them as a card in the middle, with the bar's ends clear
+beside it. A test on four phone sizes checks every button of the bar is either wholly under the
+tools or wholly clear of them.

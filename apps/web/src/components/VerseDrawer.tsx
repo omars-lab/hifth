@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { useT } from "../i18n";
 import styles from "./VerseDrawer.module.css";
 
@@ -32,6 +32,25 @@ export function VerseDrawer({
 }): JSX.Element | null {
   const { t } = useT();
   const shown = open && label !== null;
+  const ref = useRef<HTMLElement>(null);
+
+  // On a phone the drawer covers the bar under the page whole, and needs to
+  // know where that bar starts to do it: cut to its own height, it stopped a
+  // few pixels short and a sliver of the bar's buttons showed above it.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const bar = document.querySelector<HTMLElement>("footer[data-keep-clear]");
+    if (!shown || !el || !bar) return;
+    const fit = () => el.style.setProperty("--reach", `${window.innerHeight - bar.getBoundingClientRect().top}px`);
+    fit();
+    window.addEventListener("resize", fit);
+    const seen = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(fit);
+    seen?.observe(bar);
+    return () => {
+      seen?.disconnect();
+      window.removeEventListener("resize", fit);
+    };
+  }, [shown]);
 
   useEffect(() => {
     if (!shown) return;
@@ -47,7 +66,7 @@ export function VerseDrawer({
 
   if (!shown) return null;
   return (
-    <section className={styles.drawer} aria-label={t.verseTools(label)}>
+    <section ref={ref} className={styles.drawer} aria-label={t.verseTools(label)}>
       <header className={styles.head}>
         <span className={styles.title}>{label}</span>
         <button type="button" className={styles.close} aria-label={t.close} onClick={onClose}>
