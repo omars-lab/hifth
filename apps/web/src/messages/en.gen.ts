@@ -308,6 +308,7 @@ const messages: Catalog = {
   penYellow: "Yellow",
   phoneTools: (d) => "Page tools · " + d.name + " is on",
   phoneToolsClose: "Close the tools",
+  pitchCredit: "Shown privately, with the rights-holders, for a collaboration.",
   playAyah: (d) => "Play " + d.label,
   playToPick: "Tap the verse to stop at",
   playingRun: (d) => "Playing " + d.from + " to " + d.to,
