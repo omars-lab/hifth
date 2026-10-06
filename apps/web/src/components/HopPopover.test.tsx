@@ -62,4 +62,28 @@ describe("HopPopover", () => {
     // Ships a URL, not bytes: no Arabic scripture in the href.
     expect(link.getAttribute("href")).not.toMatch(/[؀-ۿ]/);
   });
+
+  // Some look-alikes match in more than one place, so no particular words are
+  // named and there is nothing to lay side by side. Their row offered to open
+  // anyway, its arrow turned, and nothing came: it read as broken.
+  it("a row opens to a comparison only when the pair names the words they share", () => {
+    render(
+      <HopPopover
+        chip={chip([
+          edge(2, 3, { span: { from: [1, 4] }, toSpan: { from: [2, 5] } }),
+          edge(2, 4),
+        ])}
+        fromKey="quran/hafs-kfqc/2:2"
+        canHop={() => true}
+        onHop={noop}
+        onClose={noop}
+      />,
+    );
+    const [withWords, without] = screen
+      .getAllByRole("listitem")
+      .map((li) => li.querySelector("button")!);
+    expect(withWords).toHaveAttribute("aria-expanded", "false");
+    expect(without).not.toHaveAttribute("aria-expanded");
+    expect(without!.textContent).not.toContain("⌄");
+  });
 });
