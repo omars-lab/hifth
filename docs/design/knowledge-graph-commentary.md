@@ -640,3 +640,23 @@ never touch its title or its close button. When the note is grown to fill the sc
 back under it. Four tests on a phone: no button on any line of the page with the note up, none
 drawn over the grown note, none on a list's title or close button at rest or scrolled, and none
 on the share tray's title in Arabic.
+
+### ⑫ On a phone held sideways, do the look-alike buttons cover the note's close button? · **fixed**
+
+Held sideways, a phone is wider than the width at which the buttons lie flat in a row, so on the
+note's top row they stood in a column of full-size buttons, and they came down onto the note's
+close button. Found on 2026-10-06 with Fatir 35:44.
+
+**Fixed, 2026-10-06:** on a sheet's top row the buttons always lie in one slim row, whatever the
+width of the screen. A test holds the phone sideways and checks both buttons share one row, above
+the close button and clear of it.
+
+### ⑬ Turning a phone sideways with a note open, does the note cover its verse? · **fixed**
+
+Upright, the note slides the page up so its verse shows above it. Turned sideways, the screen is
+far shorter, and the page settled back to where it rests: the note covered all but the verse's
+first line. Found on 2026-10-06 with Fatir 35:44.
+
+**Fixed, 2026-10-06:** when the screen changes size with a note up, the page slides its verse up
+above the note again, the same way it does when the note first comes up. A test opens the note
+upright, turns the phone, and checks every line of the verse is above the note.
