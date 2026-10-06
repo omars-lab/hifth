@@ -84,6 +84,7 @@ export function CommentarySheet({
   onHop,
   onGo,
   onCover,
+  onTall,
   back = null,
   creditNote,
 }: {
@@ -114,6 +115,12 @@ export function CommentarySheet({
    * covered then anyway, and moving it would only be motion nobody sees.
    */
   onCover?: (top: number | null) => void;
+  /**
+   * Whether the phone note is grown to its full height, a modal over the whole
+   * page. The look-alike chips ride the short note's top row, and a grown note
+   * is all the reader is looking at, so they step back under it.
+   */
+  onTall?: (tall: boolean) => void;
   /**
    * The verse the reader came from, when they arrived by following a road — the
    * last bead on the trail. On a phone the note covers the trail bar, so without
@@ -147,6 +154,9 @@ export function CommentarySheet({
     if (sheetRef.current) sheetRef.current.scrollTop = 0;
   }, [verseKey]);
   const modal = !beside && tall;
+  const grown = open && modal;
+  useEffect(() => onTall?.(grown), [grown, onTall]);
+  useEffect(() => () => onTall?.(false), [onTall]);
 
   useLayoutEffect(() => {
     if (!onCover) return;

@@ -311,6 +311,9 @@ export function App(): JSX.Element {
   // Where the hop chips floating over the page's top corner end, so the lift
   // above a phone note stops the verse's first line beneath them.
   const [railBottom, setRailBottom] = useState<number | null>(null);
+  // Whether the phone note is grown over the whole page; the chips sit on the
+  // short note's top row, and step back under a grown one.
+  const [noteTall, setNoteTall] = useState(false);
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // The drag-highlighted passage: its ayah keys in reading order (spec §3's
@@ -3027,6 +3030,7 @@ export function App(): JSX.Element {
       crossed={!beside && COMMENTARY && commentaryOpen && hasCommentary && sheetSide === "right"}
       onBand={setRailBottom}
       beside={beside}
+      seat={beside || noteTall ? null : highestTop(coverTop, shareTop, listTop)}
     />
   );
 
@@ -3448,6 +3452,7 @@ export function App(): JSX.Element {
                 onHop={handleHop}
                 onGo={hopTo}
                 onCover={setCoverTop}
+                onTall={setNoteTall}
                 onClose={() => (introSheet ? setIntroSurah(null) : setCommentaryOpen(false))}
                 creditNote={PITCH ? t.pitchCredit : undefined}
                 back={

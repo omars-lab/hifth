@@ -387,3 +387,13 @@
     max-block-size: 38vh;
   }
 }
+
+/* On a phone the look-alike chips ride this sheet's top row while it is up
+   (HopRail's `seat`): the title starts below them, at rest and pinned alike,
+   so they never stand on its close button. Only when there are chips: a
+   verse with none keeps the short row. */
+@media (max-width: 899.98px) {
+  :root:has([data-seated]) .head {
+    padding-block-start: calc(var(--space-3) + 36px);
+  }
+}
