@@ -375,8 +375,12 @@ button.grip {
   line-height: 1.5;
 }
 
+.creditSource,
 .creditNote {
   display: block;
+}
+
+.creditNote {
   margin-block-start: var(--space-1);
 }
 
