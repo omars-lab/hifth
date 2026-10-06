@@ -354,27 +354,96 @@ export class WordIndex {
   }
 }
 
+/** Where a printed verse number's centre is, in the page's own units. */
+export interface NumberPoint {
+  readonly x: number;
+  readonly y: number;
+}
+
+/**
+ * Which printed number is which verse's. The page drawing marks the centre of
+ * every verse number it prints, one per verse that ends on the page (6 236 in
+ * the book, as many as there are verses), but not whose number it is. Read in
+ * the order the page is read, line by line from the top and right to left
+ * along a line, they are the numbers of `verses` in order, `verses` being the
+ * page's verse outlines as the drawing lists them. Only the page's last verse
+ * can lack one: it runs on to the next page and its number is printed there.
+ * Any other count means the drawing is not one this rule knows, and nothing is
+ * claimed.
+ */
+export function printedVerseNumbers(
+  verses: readonly string[],
+  points: readonly NumberPoint[],
+): Map<string, NumberPoint> {
+  const found = new Map<string, NumberPoint>();
+  if (points.length !== verses.length && points.length !== verses.length - 1) return found;
+  // Lines are about 36 units apart and a line's numbers sit level, so a step
+  // down of more than a quarter line starts the next line.
+  const byHeight = [...points].sort((a, b) => a.y - b.y);
+  const lines: NumberPoint[][] = [];
+  for (const p of byHeight) {
+    const line = lines.at(-1);
+    if (line && p.y - (line[0] as NumberPoint).y < 9) line.push(p);
+    else lines.push([p]);
+  }
+  const read = lines.flatMap((line) => line.sort((a, b) => b.x - a.x));
+  read.forEach((p, i) => found.set(verses[i] as string, p));
+  return found;
+}
+
 /**
  * Where the dot for a verse in a note goes: on the upper shoulder of the
- * verse's number. The print sets the number at the left end of the verse's
- * last line, in the gap between its last word and where its outline stops,
- * so that gap is the number. `lines` is the verse's outline on this page, one
- * box per line; `words` its word boxes here. Null when the gap is too narrow
- * to hold a number: the verse runs on to the next page, and its number is
- * there. A jump's mark goes on the `lower` shoulder, under the note dot
- * (confusion-jumps, question 1).
+ * verse's number. A jump's mark goes on the `lower` shoulder, under the note
+ * dot (confusion-jumps, question 1). `lines` is the verse's outline on this
+ * page, one box per line; `words` its word boxes here; `printed` the centre of
+ * its number as the page drawing marks it. Null when the number is not on this
+ * page: the verse runs on to the next.
  */
 export function verseNumberSpot(
   lines: readonly Rect[],
   words: readonly Rect[],
   shoulder: "upper" | "lower" = "upper",
+  printed?: NumberPoint | null,
 ): { x: number; y: number } | null {
+  const at = verseNumberGap(lines, words, printed);
+  if (!at) return null;
+  const { line, gap } = at;
+  return { x: line.x + gap * 0.8, y: line.y + line.height * (shoulder === "upper" ? 0.2 : 0.8) };
+}
+
+/**
+ * The room the printed number fills: the line it is on, starting where the
+ * number does, and how wide the number's room is up to the verse's last word
+ * on that line. Shared by the note dots and the number buttons.
+ *
+ * With the drawing's mark (`printed`) the room is centred on the number, as
+ * wide on its far side as on the side facing the word. Without it, the room is
+ * guessed as the gap between the verse's last word and where its outline
+ * stops, which is how the dots were placed before the marks were read: right
+ * to within a point for most verses, but off by up to 17 for some, and no room
+ * at all where the outlines split a number down its middle (the lines under a
+ * surah's opening) or where a tall word on the line above reaches down into the
+ * last line (page 7's 2:41). A word belongs to a line when its middle is
+ * inside it. Null when there is no room for a number.
+ */
+export function verseNumberGap(
+  lines: readonly Rect[],
+  words: readonly Rect[],
+  printed?: NumberPoint | null,
+): { line: Rect; gap: number } | null {
   if (lines.length === 0 || words.length === 0) return null;
-  const last = lines.reduce((a, b) => (b.y > a.y ? b : a));
-  const onLast = words.filter((w) => w.y < last.y + last.height && w.y + w.height > last.y);
-  if (onLast.length === 0) return null;
-  const wordsLeft = Math.min(...onLast.map((w) => w.x));
-  const gap = wordsLeft - last.x;
-  if (gap < last.height * 0.4) return null;
-  return { x: last.x + gap * 0.8, y: last.y + last.height * (shoulder === "upper" ? 0.2 : 0.8) };
+  const inside = (line: Rect, y: number) => y >= line.y && y <= line.y + line.height;
+  const line = printed
+    ? lines.find((l) => inside(l, printed.y))
+    : lines.reduce((a, b) => (b.y > a.y ? b : a));
+  if (!line) return null;
+  const on = words.filter((w) => inside(line, w.y + w.height / 2) && (!printed || w.x > printed.x));
+  if (on.length === 0) return null;
+  const left = Math.min(...on.map((w) => w.x));
+  if (printed) {
+    const half = Math.min(left - printed.x, line.height / 2);
+    return { line: { ...line, x: printed.x - half, width: line.x + line.width - printed.x + half }, gap: half * 2 };
+  }
+  const gap = left - line.x;
+  return gap < line.height * 0.4 ? null : { line, gap };
 }
