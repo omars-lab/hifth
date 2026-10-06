@@ -2763,6 +2763,30 @@
       "note": "Found walking the pitch on phones (2026-10-06): VerseDrawer was cut to its own height (4-15px short of the trail's top) and capped at 40rem, so bar buttons peeked above it upright and the current-ayah pill was halved by its edge sideways. Fixed the same day: under (max-width:40rem),(max-height:31rem) the drawer is full width with min-block-size set to the trail's measured reach."
     },
     {
+      "id": "turned-phone-loses-linked-verse-mark",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑮"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on a phone turned right after a link opened 35:44 (2026-10-06), a regression from the ⑬ fix: the resize re-lift called cancelTween, which stopped the frame loop but never resolved the glide's promise, so navigateTo never reached the selection highlight. Fixed the same day: tweenTo keeps its resolver and cancelTween calls it."
+    },
+    {
+      "id": "sideways-list-covers-verse",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑯"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on a phone held sideways (2026-10-06): lift() keeps the verse below the unseated chip column (railBottom), and opening RootLens or HopPopover seats the chips without lifting again, so the stale band left the verse's last line under the list. Fixed the same day: PageStage lifts again when railBottom changes while a cover is up."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",
