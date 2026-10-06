@@ -2865,6 +2865,18 @@
       "severity": "question",
       "owner": "user",
       "note": "The pencil study (2026-10-05): a web page never hears double-tap or squeeze; the native wrapper does, and can pass them to the page. Waits on the native app (docs/design/native-shell plan) and on marking-pens-home-on-ipad."
+    },
+    {
+      "id": "intro-and-same-surah-verses-unlinked",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑳"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Same-surah verse mentions (v. N, vv. N–M) were never links, and the surah introduction drew plain text with no initials or citations. Fixed 2026-10-06: splitCitations takes the note's surah; CommentarySheet draws the introduction with the note's paragraph code and keeps a link's touching punctuation on its line."
     }
   ]
 }
