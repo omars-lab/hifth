@@ -2799,6 +2799,18 @@
       "note": "Found walking the pitch on the desktop spread (2026-10-06): the pitch's trail hint was always tapForNote. Fixed the same day: App picks clickForNote unless TOUCH_QUERY (pointer: coarse) matches; the phone describe in the pitch spec now runs with hasTouch."
     },
     {
+      "id": "phone-tool-icons-out-of-line",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑱"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the upright phone (2026-10-06): .tools cells used align-content:center, so the two-line roots caption lifted its icon ~7px; the share wrap (align-items:center from ShareSheet) then dropped its pill ~5px. Fixed the same day: align-content:start on the cells and align-items:stretch on the share wrap in VerseDrawer.module.css."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",
