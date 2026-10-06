@@ -731,3 +731,19 @@ The key itself is the book's, so it is held like the rest of it: it was typed by
 pictures of the captured pages, because the machine-read text garbled its accents, and it lives
 beside the capture and in the private pitch data, never in this repository. The tests name no
 commentator.
+
+### ⑳ Can a reader follow the verses a surah's introduction, or a note, points to? · **fixed**
+
+The book names a verse of the surah it is in without the surah, as "v. 25" or "vv. 9–26", about
+four thousand times across the introductions and the notes. Only a full citation, with its surah,
+was a link, so the outline at the head of a surah (where each story begins and ends) could not be
+followed, and a note pointing a few verses on was plain text. The introduction also drew its
+prose bare: its commentators' initials did not open the key, though the same initials in a note
+did.
+
+**Fixed, 2026-10-06:** a "v." or "vv." is a link to that verse of the note's own surah, and goes
+on through a list the same way a full citation does. The introduction is drawn the way a note is,
+so its initials open the key and its citations are links. A link now also keeps the bracket or
+comma touching it on its line, as a word would: on a phone the line used to break between "("
+and the link, leaving the bracket alone at the end of the line above.
+

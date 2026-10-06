@@ -1209,6 +1209,68 @@ test.describe("Hifth · who the initials in a note stand for", () => {
   });
 });
 
+test.describe("Hifth · a verse named without its surah is a link too", () => {
+  // The book names a verse of the surah it is in as "v. 25" or "vv. 9–26",
+  // without the surah. Those are as much its roads as a full citation, and are
+  // written thousands of times; they were plain text.
+  test("a v. in a verse's note goes to that verse of the same surah", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/18:11?open=commentary");
+    await expect(page.getByRole("dialog", { name: /18:11/ })).toBeVisible({ timeout: 20_000 });
+    const notes = sheet(page).getByRole("region", { name: "Commentary" });
+    await notes.getByRole("button", { name: /18:25\b/ }).first().click();
+    await expect(page.getByRole("dialog", { name: /18:25/ })).toBeVisible();
+  });
+
+  test("the surah introduction's initials open the key, and its verses are links", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p293");
+    const name = pageSvg(page, 293).getByRole("button", { name: /^Surah introduction/ });
+    await expect(name).toBeVisible({ timeout: 20_000 });
+    await name.click();
+    const intro = sheet(page).getByRole("region", { name: "Surah introduction" });
+    await expect(intro).toBeVisible();
+
+    const initial = intro.locator("button[data-siglum]").first();
+    await initial.click();
+    await expect(initial).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(`#${await initial.getAttribute("aria-controls")}`)).toContainText(/\bd\. /);
+    await page.keyboard.press("Escape");
+
+    // Its outline names the cave's story by its verses; that is a road to the first of them.
+    await intro.getByRole("button", { name: /18:9\b/ }).first().click();
+    await expect(page.getByRole("dialog", { name: /18:9\b/ })).toBeVisible();
+  });
+
+  test.describe("on a phone", () => {
+    test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+    test("a bracket never sits alone at a line's end, cut off from the link it opens", async ({ page }) => {
+      // A button is one box in the line, so the line could break between "("
+      // and the link, leaving the bracket stranded at the end of the line above.
+      await page.goto("/#/hafs-kfqc/p293");
+      const name = pageSvg(page, 293).getByRole("button", { name: /^Surah introduction/ });
+      await expect(name).toBeVisible({ timeout: 20_000 });
+      await name.click();
+      const intro = sheet(page).getByRole("region", { name: "Surah introduction" });
+      await expect(intro.locator("button").first()).toBeVisible();
+      const stranded = await intro.evaluate((root) => {
+        const out: string[] = [];
+        for (const b of root.querySelectorAll("button")) {
+          const before = b.previousSibling;
+          if (!(before instanceof Text) || !/[([]$/.test(before.data)) continue;
+          const r = document.createRange();
+          r.setStart(before, before.data.length - 1);
+          r.setEnd(before, before.data.length);
+          const bracket = r.getClientRects()[0]!;
+          const link = b.getClientRects()[0]!;
+          if (Math.abs(bracket.top - link.top) > 2) out.push(b.textContent ?? "");
+        }
+        return out;
+      });
+      expect(stranded, "links whose opening bracket was left on the line above").toEqual([]);
+    });
+  });
+});
+
 test.describe("Hifth · a surah's name opens its introduction", () => {
   // Owner, 2026-10-04: the surah's context belongs next to its name, above the
   // basmala, not stacked on top of verse 1's note; and the name itself is the

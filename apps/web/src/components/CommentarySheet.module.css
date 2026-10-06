@@ -262,6 +262,11 @@ button.grip {
   cursor: default;
 }
 
+/* A link or an initial and the punctuation touching it: one word to the line. */
+.together {
+  white-space: nowrap;
+}
+
 .para:last-child {
   margin-block-end: 0;
 }

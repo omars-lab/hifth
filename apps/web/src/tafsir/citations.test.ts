@@ -49,6 +49,47 @@ describe("verse citations in the commentary prose", () => {
     expect(splitCitations(text).map((p) => (typeof p === "string" ? p : p.text)).join("")).toBe(text);
   });
 
+  // The book names a verse of the surah it is in as "v. 5" or "vv. 9–26",
+  // without the surah, so these need to know which surah the prose is about.
+  describe("a verse of the same surah, named without it", () => {
+    const here = (text: string, surah: number) =>
+      splitCitations(text, surah).flatMap((part) => (typeof part === "string" ? [] : [part]));
+
+    it("links v. and vv. to that verse of the surah the prose is in", () => {
+      expect(here("as at v. 5, and the story (vv. 9–26) and v. 3b", 18)).toEqual([
+        { text: "v. 5", surah: 18, ayah: 5 },
+        { text: "vv. 9–26", surah: 18, ayah: 9 },
+        { text: "v. 3b", surah: 18, ayah: 3 },
+      ]);
+    });
+
+    it("carries a list on, as it does after a full citation", () => {
+      expect(here("see vv. 9, 13, and 60–82; later", 18)).toEqual([
+        { text: "vv. 9", surah: 18, ayah: 9 },
+        { text: "13", surah: 18, ayah: 13 },
+        { text: "60–82", surah: 18, ayah: 60 },
+      ]);
+    });
+
+    it("leaves a number beyond the surah, and v. with no surah to go on, as text", () => {
+      // Al-Fātiḥah has seven verses.
+      expect(here("see v. 9", 1)).toEqual([]);
+      expect(cited("see v. 9")).toEqual([]);
+    });
+
+    it("still reads a full citation as its own surah", () => {
+      expect(here("v. 2, unlike 2:255", 18)).toEqual([
+        { text: "v. 2", surah: 18, ayah: 2 },
+        { text: "2:255", surah: 2, ayah: 255 },
+      ]);
+    });
+
+    it("keeps every word, in order", () => {
+      const text = "the tale (vv. 60–82) and v. 109, 110; then";
+      expect(splitCitations(text, 18).map((p) => (typeof p === "string" ? p : p.text)).join("")).toBe(text);
+    });
+  });
+
   it("returns the text whole when nothing is cited", () => {
     expect(splitCitations("no verses here")).toEqual(["no verses here"]);
   });
