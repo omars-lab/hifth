@@ -2787,6 +2787,18 @@
       "note": "Found walking the pitch on a phone held sideways (2026-10-06): lift() keeps the verse below the unseated chip column (railBottom), and opening RootLens or HopPopover seats the chips without lifting again, so the stale band left the verse's last line under the list. Fixed the same day: PageStage lifts again when railBottom changes while a cover is up."
     },
     {
+      "id": "desktop-hint-says-tap",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑰"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on the desktop spread (2026-10-06): the pitch's trail hint was always tapForNote. Fixed the same day: App picks clickForNote unless TOUCH_QUERY (pointer: coarse) matches; the phone describe in the pitch spec now runs with hasTouch."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",

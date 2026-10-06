@@ -287,6 +287,8 @@ export interface Strings {
   commentaryBy(source: string): string;
   /** The first screen's hint when a tap opens a source's note. */
   tapForNote(source: string): string;
+  /** The same, said to a mouse: a desk has no finger to tap with. */
+  clickForNote(source: string): string;
   noteShowAll: string;
   noteShowLess: string;
   surahIntro: string;
@@ -998,6 +1000,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     commentaryOn: (label) => m.commentaryOn({ label }),
     commentaryBy: (source) => m.commentaryBy({ source }),
     tapForNote: (source) => m.tapForNote({ source }),
+    clickForNote: (source) => m.clickForNote({ source }),
     noteShowAll: m.noteShowAll,
     noteShowLess: m.noteShowLess,
     surahIntro: m.surahIntro,

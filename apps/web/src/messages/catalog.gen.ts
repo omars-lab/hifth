@@ -59,6 +59,7 @@ export interface Catalog {
   readonly bmUnfolded: (d: { readonly count: number; readonly countText: string | number }) => string;
   readonly chipAria: (d: { readonly direction: string | number; readonly countText: string | number }) => string;
   readonly clearSelection: string;
+  readonly clickForNote: (d: { readonly source: string | number }) => string;
   readonly close: string;
   readonly coachDone: string;
   readonly coachDoneAria: string;

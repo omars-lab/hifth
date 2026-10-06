@@ -65,6 +65,7 @@ const messages: Catalog = {
   bmUnfolded: (d) => "Corner unfolded: " + plural(LC, d.count, { one: d.countText + " bookmark", other: d.countText + " bookmarks" }) + " lifted",
   chipAria: (d) => d.direction + " · " + d.countText,
   clearSelection: "Clear highlight",
+  clickForNote: (d) => "Click a verse to read its " + d.source + " note",
   close: "Close",
   coachDone: "Done",
   coachDoneAria: "Done · hide the tips",

@@ -90,12 +90,14 @@ const overlaps = (a: Box, b: Box): boolean =>
 test.use({ locale: "en-US", viewport: { width: 1440, height: 900 } });
 
 test.describe("Hifth · the pitch build's Study Quran commentary", () => {
-  test("the first screen says a tap opens The Study Quran's note", async ({ page }) => {
+  test("the first screen says a click opens The Study Quran's note", async ({ page }) => {
     // The tips open only from settings, so this one line is the whole of what
     // a first visit is told. The public build's hint says only "select it",
-    // which leaves a visitor to the demo not knowing the notes exist.
+    // which leaves a visitor to the demo not knowing the notes exist. With a
+    // mouse it says click: it said tap to a visitor at a desk.
     await page.goto("/");
-    await expect(page.getByText("Tap a verse to read its Study Quran note")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Click a verse to read its Study Quran note")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Tap a verse to read its Study Quran note")).toHaveCount(0);
   });
 
   test("tapping an al-Fātiḥah verse opens its note on the facing leaf", async ({ page }) => {
@@ -601,7 +603,7 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
   // the other half of the "no drawer on tap" report: the desktop tests above
   // check the side placement; this one checks the phone path opens at all and
   // does not try to take a side it has no room for.
-  test.use({ viewport: { width: 390, height: 844 } });
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
   test("an iPhone's first screen opens on the page, not on an install notice", async ({ browser }) => {
     // Safari on an iPhone was told to install the app before anything else: a
@@ -610,6 +612,7 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     // what makes the app take the visitor for an iPhone.
     const context = await browser.newContext({
       viewport: { width: 390, height: 844 },
+      hasTouch: true,
       userAgent:
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
     });
@@ -1528,8 +1531,9 @@ test.describe("Hifth · the commentary drawer with the app in Arabic", () => {
     // It was one English sentence written straight into the screen, so an
     // Arabic visitor's whole first-visit guidance was in the wrong language.
     await page.goto("/");
-    await expect(page.getByText("المس آيةً لتقرأ تعليق Study Quran عليها")).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText("Tap a verse to read its Study Quran note")).toHaveCount(0);
+    // With a mouse, as here, it says click; a finger is told to touch.
+    await expect(page.getByText("انقر آيةً لتقرأ تعليق Study Quran عليها")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Click a verse to read its Study Quran note")).toHaveCount(0);
   });
 
   test("the drawer is laid out right to left and speaks Arabic; the book's English still reads left to right", async ({
