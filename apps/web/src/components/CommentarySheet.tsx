@@ -328,30 +328,35 @@ export function CommentarySheet({
           if (!beside && !tall && e.currentTarget.scrollTop > 0) setTall(true);
         }}
       >
-        {/* Beside a page nothing drags or grows, so it has no handle. */}
-        {beside ? null : (
-          <button
-            type="button"
-            className={styles.grip}
-            aria-label={tall ? t.noteShowLess : t.noteShowAll}
-            aria-expanded={tall}
-            onClick={() => setTall((v) => !v)}
-          />
-        )}
-        <header className={styles.head}>
-          <span className={styles.glyph} aria-hidden="true">
-            {introOnly ? "ⓘ" : "✎"}
-          </span>
-          <div className={styles.heading}>
-            <h2 className={styles.title} {...own}>
-              {entry.source.label}
-            </h2>
-            <span className={styles.ref}>{label}</span>
-          </div>
-          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
-            ✕
-          </button>
-        </header>
+        {/* The handle and the title row stay at the top while the note
+            scrolls under them: deep in a long note the reader still sees
+            which verse it is on, and can close it or shrink it. */}
+        <div className={styles.top}>
+          {/* Beside a page nothing drags or grows, so it has no handle. */}
+          {beside ? null : (
+            <button
+              type="button"
+              className={styles.grip}
+              aria-label={tall ? t.noteShowLess : t.noteShowAll}
+              aria-expanded={tall}
+              onClick={() => setTall((v) => !v)}
+            />
+          )}
+          <header className={styles.head}>
+            <span className={styles.glyph} aria-hidden="true">
+              {introOnly ? "ⓘ" : "✎"}
+            </span>
+            <div className={styles.heading}>
+              <h2 className={styles.title} {...own}>
+                {entry.source.label}
+              </h2>
+              <span className={styles.ref}>{label}</span>
+            </div>
+            <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
+              ✕
+            </button>
+          </header>
+        </div>
 
         {back && (
           <button type="button" className={styles.back} onClick={back.onBack}>

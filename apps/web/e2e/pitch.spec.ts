@@ -546,6 +546,35 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     }
   });
 
+  test("deep in a long note, its title and close button stay at the top", async ({ page }) => {
+    // The whole sheet scrolled as one, so the handle, the book's name with the
+    // verse, and the close button went up with the first lines of the note.
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    await sheet(page).evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+    await expect(sheet(page)).toHaveAttribute("data-tall", "true");
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    await page.waitForTimeout(400);
+    await sheet(page).evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+    expect(await sheet(page).evaluate((el) => el.scrollTop), "the note scrolled").toBeGreaterThan(500);
+    const box = (await sheet(page).boundingBox())!;
+    for (const [what, target] of [
+      ["the close button", sheet(page).getByRole("button", { name: "Close" })],
+      ["the verse's name", sheet(page).getByText("2:255").first()],
+      ["the handle", sheet(page).getByRole("button", { name: /^Show less/ })],
+    ] as const) {
+      const at = (await target.boundingBox())!;
+      expect(at.y, `${what} is still inside the sheet`).toBeGreaterThanOrEqual(box.y - 1);
+      // And on top, not under the note's text: it is what a tap there reaches.
+      const hit = await page.evaluate(
+        ([x, y]) => document.elementFromPoint(x!, y!)?.closest("header, button") !== null,
+        [at.x + at.width / 2, at.y + at.height / 2],
+      );
+      expect(hit, `${what} is not covered by the note's text`).toBe(true);
+    }
+  });
+
   test("tapping a verse opens a full-width bottom sheet with no side", async ({ page }) => {
     // Deep-linking a verse selects it, which opens the note the same way a tap
     // does (the pitch build opens on selection). 2:255 is Āyat al-Kursī.
