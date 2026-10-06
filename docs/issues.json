@@ -2901,6 +2901,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "On an upright iPad a surah's introduction opened over half of the surah's name and its opening verses, because the page only slid up for a selected verse. Fixed 2026-10-06: PageStage brings the open introduction's name into sight above the card, as it does a verse above its note."
+    },
+    {
+      "id": "own-verse-breaks-across-lines",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉓"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Once a note's own verse was drawn as words (item ㉑), the line could break between \"v.\" and its number, as 18:60's note did on a sideways iPad. Fixed 2026-10-06: CommentarySheet keeps the mention and its brackets in one unbreakable piece, like the links beside it."
     }
   ]
 }

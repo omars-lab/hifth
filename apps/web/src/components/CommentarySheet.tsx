@@ -375,7 +375,10 @@ export function CommentarySheet({
           );
         }
         const key = citedKey(part.surah, part.ayah);
-        if (!key || key === self) return part.text;
+        if (!key) return part.text;
+        // The note's own verse is words, not a link, but still one piece: a
+        // line must not break between "v." and its number.
+        if (key === self) return <span key={j} className={styles.together}>{part.text}</span>;
         return (
           <button
             key={j}

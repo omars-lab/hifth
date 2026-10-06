@@ -768,3 +768,13 @@ verses: the reader lost sight of the very thing the note is about.
 opens, the page slides up so the name and the lines under it sit above the card. On a phone,
 where the card is shorter, nothing changes.
 
+### ㉓ Can a note's mention of its own verse split across two lines? · **fixed**
+
+Once a note's own verse was drawn as words (item ㉑), it lost what the links around it have: a
+link is one piece in the line, but plain words can break anywhere there is a space. On a sideways
+iPad, 18:60's note broke its own verse between "v." and the number, with the number and the
+closing bracket starting the next line.
+
+**Fixed, 2026-10-06:** the mention is kept in one piece, brackets included, the same way the
+links beside it are.
+
