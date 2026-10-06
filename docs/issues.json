@@ -2620,6 +2620,18 @@
       "note": "Found walking the phone pitch (2026-10-06): the roots and similar-verses sheets open at 70vh behind a scrim and cover the verse; the note opens short and lifts the page instead. Desktop was fixed the same day (the lists now lie over the facing page, over-leaf.ts). Fixed the same day: short-band.ts gives both lists the note's short phone height, drops the veil, and reports their top so the page lifts the verse (pitch e2e: 'a list picked from the number keeps its verse in sight')."
     },
     {
+      "id": "one-page-note-covers-page-bar",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "③"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on a laptop and an upright iPad (2026-10-06): with one page open the corner card stood a fixed gap off the window's foot and covered the full-screen button, the verse chip and the page bar. Fixed the same day: useRoomForCards (over-leaf.ts) shares the page area's foot and height as CSS measures, the four corner cards stand inside them, and the note's cover report measures from its own foot (pitch e2e: 'the note ends above the page bar')."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",
