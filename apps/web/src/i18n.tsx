@@ -295,6 +295,10 @@ export interface Strings {
   relatedVerses: string;
   relatedLede(source: string): string;
   goToVerse(label: string): string;
+  /** Over the line of the book's key that says who a commentator's initials stand for. */
+  keyFrom: string;
+  /** Another name the book gives a commentator's work. */
+  keyAlso(name: string): string;
   twin: string;
   pageUnavailable: string;
   /** The outbound-link label on a hop row whose page we do not carry. */
@@ -1007,6 +1011,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     relatedVerses: m.relatedVerses,
     relatedLede: (source) => m.relatedLede({ source }),
     goToVerse: (label) => m.goToVerse({ label }),
+    keyFrom: m.keyFrom,
+    keyAlso: (name) => m.keyAlso({ name }),
     twin: m.twin,
     pageUnavailable: m.pageUnavailable,
     openOnQul: m.openOnQul,

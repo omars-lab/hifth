@@ -2811,6 +2811,18 @@
       "note": "Found walking the upright phone (2026-10-06): .tools cells used align-content:center, so the two-line roots caption lifted its icon ~7px; the share wrap (align-items:center from ShareSheet) then dropped its pill ~5px. Fixed the same day: align-content:start on the cells and align-items:stretch on the share wrap in VerseDrawer.module.css."
     },
     {
+      "id": "note-initials-unexplained",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑲"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Pitch notes cite commentators by bracketed initials the app never explained. Fixed 2026-10-06: splitSigla finds key initials inside brackets; CommentarySheet makes each a button opening a card; the hand-typed key (held, outside the repo) reaches the private pitch data through key.mjs in the pitch extract script."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",
