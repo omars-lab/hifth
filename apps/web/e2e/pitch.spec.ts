@@ -597,6 +597,47 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     );
   });
 
+  for (const pick of [
+    { key: "2:255", page: 42, item: /^Same roots/ },
+    { key: "36:31", page: 442, item: /^Similar verses in later surahs/ },
+  ]) {
+    test(`a list picked from the number keeps its verse in sight, as the note does: ${pick.item.source}`, async ({
+      page,
+    }) => {
+      // The note opens short and the page moves up to show the verse above it.
+      // The roots and similar-verses lists rose over most of the screen behind
+      // a dimmed page instead, and the verse they are about was under them.
+      await page.goto(`/#/hafs-kfqc/${pick.key}`);
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const number = pageSvg(page, pick.page).locator(
+        `[data-verse-number][data-verse-key="quran/hafs-kfqc/${pick.key}"]`,
+      );
+      await settle(number);
+      const at = (await number.boundingBox())!;
+      await page.mouse.click(at.x + at.width / 2, at.y + at.height / 2);
+      const menu = page.getByRole("menu", { name: new RegExp(pick.key) });
+      await settle(menu);
+      await menu.getByRole("menuitem", { name: pick.item }).click();
+      const list = page.getByRole("dialog");
+      await expect(list).toHaveCount(1);
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const lit = page.locator("#hifth-overlay .hl-sel").first();
+      await settle(lit);
+      const box = (await list.boundingBox())!;
+      expect(box.y, "the list opens on the lower part of the screen").toBeGreaterThan(844 * 0.5);
+      const lines = await litLineBoxes(page);
+      const first = lines[0]!;
+      expect(first.y, "the verse's first line is on the screen").toBeGreaterThanOrEqual(0);
+      expect(first.y + first.height, "the verse's first line is above the list").toBeLessThanOrEqual(box.y);
+      const onTop = await page.evaluate(
+        ([x, y]) => document.elementFromPoint(x!, y!)?.closest("svg") !== null,
+        [first.x + first.width / 2, first.y + first.height / 2],
+      );
+      expect(onTop, "the verse, not a veil, is under its first line").toBe(true);
+    });
+  }
+
   test("tapping a verse opens a full-width bottom sheet with no side", async ({ page }) => {
     // Deep-linking a verse selects it, which opens the note the same way a tap
     // does (the pitch build opens on selection). 2:255 is Āyat al-Kursī.

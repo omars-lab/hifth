@@ -3,6 +3,7 @@ import type { Edge, LeafSide, RootFamily, RootHop } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./RootLens.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
+import { useShortBand } from "./short-band";
 
 // The ⬡ button has its own file so it can stay in the start-up script while
 // the lens loads on first open. Re-exported here for existing importers.
@@ -32,6 +33,8 @@ interface RootLensProps {
    * the ayah is *not* on, so the card never covers the ayah (desktop.md §5).
    */
   side?: LeafSide | null;
+  /** On a phone, where the list starts, so the page can lift the verse above it; null when it covers nothing. */
+  onCover?: (top: number | null) => void;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -73,12 +76,16 @@ export function RootLens({
   onHopEdge,
   onClose,
   side = null,
+  onCover,
 }: RootLensProps): JSX.Element | null {
   const { t, dir } = useT();
   // Beside the verse on a spread: no dimming, no trapped Tab (see HopPopover).
   const beside = side !== null;
   const place = useOverLeaf(families !== null, side);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const band = useShortBand(families !== null, beside, sheetRef, onCover);
+  // Under the page on a phone, or beside it on a spread: the page stays live.
+  const live = beside || band;
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -111,7 +118,7 @@ export function RootLens({
         onClose();
         return;
       }
-      if (e.key !== "Tab" || beside) return;
+      if (e.key !== "Tab" || live) return;
       const sheet = sheetRef.current;
       if (!sheet) return;
       const items = focusables(sheet);
@@ -127,7 +134,7 @@ export function RootLens({
         first.focus();
       }
     },
-    [onClose, beside],
+    [onClose, live],
   );
 
   if (!families) return null;
@@ -166,13 +173,13 @@ export function RootLens({
 
   return (
     <>
-      {!beside && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
+      {!live && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
       <div
         ref={sheetRef}
         className={styles.sheet}
         style={leafStyle(place)}
         role="dialog"
-        aria-modal={!beside}
+        aria-modal={!live}
         aria-label={t.rootsAria(families.length)}
         dir={dir}
         data-side={side ?? undefined}

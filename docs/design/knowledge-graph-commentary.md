@@ -492,7 +492,7 @@ back the stops it can see, not ones the capture never had.
 beside what the pitch shows, and either fix the capture or tell the extractor what the print
 does there. Nothing here reaches the public site; it is only the pitch.
 
-### ② On a phone, can the roots and similar-verses lists keep their verse in sight, as the note does? · **open**
+### ② On a phone, can the roots and similar-verses lists keep their verse in sight, as the note does? · **fixed**
 
 On a phone the note opens on the lower part of the screen and lifts the page, so the verse it is
 about stays in sight above it. The roots list and the similar-verses list do not: they rise over
@@ -502,3 +502,8 @@ leaving only the page's first three lines showing.
 
 **What would answer it:** the same short opening and lifted page the note has, tried on a phone
 with a long list (2:255's roots) and a short one (36:31's later look-alike), and looked at.
+
+**Fixed, 2026-10-06:** both lists now open on the lower part of the screen with no veil over the
+page, and the page moves up so the verse sits above them, as it does under the note. Tried on
+2:255's roots and 36:31's look-alikes on a phone, and a test opens each list from the verse's
+number and checks its first line stays in sight above it.
