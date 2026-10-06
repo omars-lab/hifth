@@ -175,6 +175,8 @@ const messages: Catalog = {
   juzEdge: (d) => "No juz that way · juz " + d.juzText,
   juzGroup: "The thirty juz",
   juzN: (d) => "Juz " + d.juzText,
+  keyAlso: (d) => "Also known as " + d.name,
+  keyFrom: "From the book's key to its commentators",
   keyJump: "Go to",
   keyPages: "Pages",
   langSectionNote: "This changes the buttons and menus only. The mus'haf and the verse text are always Arabic.",

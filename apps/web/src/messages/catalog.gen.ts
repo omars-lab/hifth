@@ -169,6 +169,8 @@ export interface Catalog {
   readonly juzEdge: (d: { readonly juzText: string | number }) => string;
   readonly juzGroup: string;
   readonly juzN: (d: { readonly juzText: string | number }) => string;
+  readonly keyAlso: (d: { readonly name: string | number }) => string;
+  readonly keyFrom: string;
   readonly keyJump: string;
   readonly keyPages: string;
   readonly langSectionNote: string;
