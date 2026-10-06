@@ -994,6 +994,52 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
   });
 });
 
+test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
+  test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+
+  test("on a phone held sideways, the look-alike chips lie in a row on the note's top row, clear of its close button", async ({ page }) => {
+    // Held sideways the phone is wider than the width the chips lie flat at
+    // on a page at rest, so on the note's top row they stood in a column of
+    // full-size buttons, and the second one came down onto the note's close
+    // button.
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const rail = page.getByRole("group", { name: "Links from this ayah" });
+    await expect(rail).toBeVisible();
+    const chips = await rail.getByRole("button").all();
+    expect(chips.length).toBe(2);
+    const close = (await sheet(page).getByRole("button", { name: "Close" }).boundingBox())!;
+    const top = (await sheet(page).boundingBox())!.y;
+    const boxes = await Promise.all(chips.map(async (c) => (await c.boundingBox())!));
+    for (const box of boxes) {
+      expect(overlaps(box, close), `the chip ${JSON.stringify(box)} is on the close button ${JSON.stringify(close)}`).toBe(false);
+      expect(box.y).toBeGreaterThanOrEqual(top);
+      expect(box.y + box.height, "the chip stays above the note's title row").toBeLessThanOrEqual(close.y);
+    }
+    expect(Math.abs(boxes[0]!.y - boxes[1]!.y), "the two chips share one row").toBeLessThan(2);
+  });
+
+  test("turning a phone sideways with a note open lifts the verse above the note again", async ({ page }) => {
+    // Upright, the note lifts its verse clear. Turned sideways, the note is
+    // shorter but the screen is much shorter still, and the page settled back
+    // to where it rests: the note covered all but the verse's first line.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    await settle(page.locator("#hifth-overlay .hl-sel").first());
+    await page.setViewportSize({ width: 844, height: 390 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const lines = page.locator("#hifth-overlay .hl-sel");
+    await settle(lines.first());
+    const top = (await sheet(page).boundingBox())!.y;
+    const boxes = await lines.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().bottom));
+    expect(boxes.length).toBeGreaterThan(1);
+    for (const bottom of boxes) expect(bottom, "a line of the verse is under the note").toBeLessThanOrEqual(top);
+  });
+});
+
 test.describe("Hifth · links straight into the commentary", () => {
   // Owner, 2026-09-29: another app should be able to open the note of a verse,
   // or a surah's context, from a link — the same link the native shell's

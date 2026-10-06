@@ -146,6 +146,10 @@
  * on the sheet's own top row, beside its handle and above its title. Drawn over
  * the sheet, and the thumb's reach split evenly across the row, since the row
  * is all theirs and the page above it is not.
+ *
+ * Always one slim row, whatever the width: a phone held sideways is wider than
+ * the width the chips lie flat at on a page at rest, and there they stood in a
+ * column of full-size buttons that came down onto the sheet's close button.
  */
 .rail[data-seated]:not([data-beside]) {
   position: fixed;
@@ -153,10 +157,24 @@
   left: auto;
   right: var(--space-4);
   margin-inline: 0;
+  inline-size: max-content;
+  flex-direction: row;
+  gap: 2px;
   z-index: calc(var(--z-sheet) + 1);
 }
+.rail[data-seated]:not([data-beside]) .chip {
+  position: relative;
+  min-block-size: 28px;
+  padding-inline: 6px;
+}
+.rail[data-seated]:not([data-beside]) .glyph {
+  font-size: var(--text-md);
+}
 .rail[data-seated]:not([data-beside]) .chip::after {
+  content: "";
+  position: absolute;
   inset-block: -10px;
+  inset-inline: 0;
 }
 
 /* The root chip reads as a distinct family — hexagon glyph, subtler weight. */
