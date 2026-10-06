@@ -1496,6 +1496,36 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     await expect(tools).toBeVisible();
   });
 
+  // The same rule for the menu a long press on the verse itself opens. On a
+  // phone the note is a card over the foot of the screen, and both together
+  // left the page a strip between them (found walking the pitch, 2026-10-06).
+  test.describe("on a phone", () => {
+    test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    test("a long press on a verse opens its menu alone, and the note comes back after", async ({ page }) => {
+      await page.goto("/#/hafs-kfqc/p300");
+      const held = verse(page, 300, 2198); // 18:58
+      await expect(held).toBeVisible({ timeout: 20_000 });
+      const at = (await held.boundingBox())!;
+      await page.mouse.move(at.x + at.width / 2, at.y + at.height / 2);
+      await page.mouse.down();
+      await page.waitForTimeout(700);
+      await page.mouse.up();
+      const small = page.getByRole("menu", { name: /^More for .*18:58/ });
+      await expect(small).toBeVisible();
+      // The note rises a beat after the press, so one look straight away would
+      // pass by being early: it must stay down for as long as the menu is up.
+      const note = sheet(page).getByRole("region", { name: "Commentary" });
+      for (let i = 0; i < 6; i++) {
+        await page.waitForTimeout(250);
+        expect(await note.count(), "no note under the menu").toBe(0);
+      }
+      await expect(small).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(small).toHaveCount(0);
+      await expect(page.getByRole("dialog", { name: /18:58/ })).toBeVisible();
+    });
+  });
+
   test("picking the note opens it, and the menu goes", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p440");
     await expect(number(page)).toBeVisible({ timeout: 20_000 });
