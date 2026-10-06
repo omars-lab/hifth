@@ -62,9 +62,14 @@ export interface Locale {
    *  names are proper nouns, so this is a choice about the reader's script, not
    *  a translation task. */
   readonly surahNames: "arabic" | "romanised";
-  /** Arabic-Indic digits, or Latin. See `digits()` in format.ts — and note that
-   *  page numbers are Latin in *every* locale, deliberately. */
+  /** Arabic-Indic digits, or Latin. See `digits()` in format.ts. Page numbers
+   *  follow it too, like the foot of the printed page. */
   readonly digits: "arabic" | "latin";
+  /** What goes between two parts of a label, spaces included: «البقرة، ٢:٤١».
+   *  Arabic takes its own comma, because the middle dot is the same small mark
+   *  as its zero «٠» and «البقرة · ٢:٤١» can read as a stray digit; English
+   *  keeps the dot, which no Latin digit resembles. */
+  readonly sep: string;
   /** A tajweed rule has one name written two ways: «إدغام» and "idgham". Both
    *  ship in both languages and only the order changes — which spelling this
    *  language puts first is a property of the language, not a string. */
@@ -84,6 +89,7 @@ export const LOCALES: Readonly<Record<Lang, Locale>> = {
     dir: "rtl",
     surahNames: "arabic",
     digits: "arabic",
+    sep: "، ",
     rulePrimary: "arabic",
   },
   en: {
@@ -92,6 +98,7 @@ export const LOCALES: Readonly<Record<Lang, Locale>> = {
     dir: "ltr",
     surahNames: "romanised",
     digits: "latin",
+    sep: " · ",
     rulePrimary: "latin",
   },
 };

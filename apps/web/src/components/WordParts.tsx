@@ -277,7 +277,7 @@ export function WordParts({
       {mode === "note" && (
         <div className={styles.hint}>
           {t.wordPartsHint}
-          {gathering && <span className={styles.hintMany}> · {t.wordPartsHintMany}</span>}
+          {gathering && <span className={styles.hintMany}>{t.sep}{t.wordPartsHintMany}</span>}
         </div>
       )}
       <div className={styles.row}>

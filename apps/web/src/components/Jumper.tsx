@@ -42,7 +42,7 @@ function targetHint(target: JumpTarget, t: Strings): string {
   const juz = t.juzN(juzOf(target.surah, target.ayah));
   if (target.kind === "juz") return t.jumpStartsAt(t.ayahAt(target.surah, target.ayah));
   if (target.kind === "ayah") return juz;
-  return `${t.surahN(target.surah)} · ${juz}`;
+  return `${t.surahN(target.surah)}${t.sep}${juz}`;
 }
 
 /** A stable DOM id per row, for `aria-activedescendant`. */

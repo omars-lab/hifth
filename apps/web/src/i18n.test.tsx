@@ -4,6 +4,7 @@ import { Colophon } from "./components/Colophon";
 import { LangProvider, stringsFor, useT } from "./i18n";
 import { LANG_STORAGE_KEY, LOCALES, detectLang, dirOf } from "./lang";
 import { LOCALE_IDS } from "./messages/locales.gen";
+import arCatalog from "./messages/ar.json";
 
 /** Arabic and English by name. Both are loaded by the unit tests' setup file. */
 const AR = stringsFor("ar");
@@ -104,8 +105,8 @@ describe("the bundles", () => {
     // The half that is easy to forget, and the half a screen reader gets wrong
     // when it is missed: the hop rail once said «٣» to the eye and "three" to a
     // screen reader. These two are aria-labels, nothing else.
-    expect(AR.chipAria("متشابهات", 3)).toBe("متشابهات · ٣");
-    expect(AR.rootsAria(12)).toBe("الجذور · ١٢");
+    expect(AR.chipAria("متشابهات", 3)).toBe("متشابهات، ٣");
+    expect(AR.rootsAria(12)).toBe("الجذور، ١٢");
     expect(EN.chipAria("Similar", 3)).toBe("Similar · 3");
   });
 
@@ -163,7 +164,7 @@ describe("the bundles", () => {
     // call site pairs it with `?? key`, so the null does not crash; it prints
     // the raw string, which in the Arabic UI is Latin digits sitting inside an
     // Arabic row and looks enough like a label to survive review.
-    expect(AR.ayahAt(2, 58)).toBe("البقرة · ٢:٥٨");
+    expect(AR.ayahAt(2, 58)).toBe("البقرة، ٢:٥٨");
     expect(EN.ayahAt(2, 58)).toBe("Al-Baqarah · 2:58");
     expect(AR.ayahLabel("2:58")).toBeNull();
   });
@@ -343,5 +344,19 @@ describe("a note that cannot be narrowed names what is in the way", () => {
     expect(AR.noteOutside("البقرة ٥٠", 2, "صفحة ٧")).toMatch(/^آيتان ليستا في صفحة ٧، أولاهما البقرة ٥٠\./);
     expect(AR.noteOutside("البقرة ٥٠", 3, "صفحة ٧")).toMatch(/^٣ آيات ليست/);
     expect(AR.noteOutside("البقرة ٥٠", 11, "صفحة ٧")).toMatch(/^١١ آية ليست/);
+  });
+});
+
+describe("separators", () => {
+  it("never separates with the middle dot in Arabic, because it reads as a zero", () => {
+    // «الأعراف · ٧:٢٠٥»: the dot and the ٠ inside ٢٠٥ are the same small mark,
+    // so the separator could read as a digit (seen at full size, 2026-10-05).
+    // Arabic separates with its own comma «،», which no digit resembles.
+    const dotted = Object.entries(arCatalog as Record<string, string>)
+      .filter(([, text]) => text.includes("·"))
+      .map(([key]) => key);
+    expect(dotted).toEqual([]);
+    expect(stringsFor("ar").sep).toBe("، ");
+    expect(stringsFor("en").sep).toBe(" · ");
   });
 });

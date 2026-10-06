@@ -59,7 +59,7 @@ const CURATED: Edge[] = [
     to: "quran/hafs-kfqc/3:7",
     page: 50,
     root: "ذ ك ر",
-    note: "جذر مشترك · محقّق",
+    note: "جذر مشترك، محقّق",
     dir: { dSurah: 1, dPage: 43, sameJuz: false },
   },
   {
@@ -119,11 +119,11 @@ describe("RootLens", () => {
         onClose={noop}
       />,
     );
-    fireEvent.click(screen.getByLabelText(/انتقل إلى البقرة · ٢:٤٧/));
+    fireEvent.click(screen.getByLabelText(/انتقل إلى البقرة، ٢:٤٧/));
     expect(onHop).toHaveBeenCalledWith(expect.objectContaining({ key: "quran/hafs-kfqc/2:47" }));
 
     fireEvent.click(screen.getByRole("button", { expanded: false }));
-    expect(screen.getByLabelText(/انتقل إلى إبراهيم · ١٤:٥/)).toBeDisabled();
+    expect(screen.getByLabelText(/انتقل إلى إبراهيم، ١٤:٥/)).toBeDisabled();
     expect(screen.getByText(/غير متوفّرة بعد/)).toBeInTheDocument();
   });
 
@@ -168,13 +168,13 @@ describe("RootLens", () => {
     expect(screen.getByText("محقّقة يدويًا")).toBeInTheDocument();
     // Curated first: a hand-verified pair outranks a corpus match.
     const rows = screen.getAllByLabelText(/انتقل إلى/);
-    expect(rows[0]).toHaveAccessibleName(/آل عمران · ٣:٧/);
+    expect(rows[0]).toHaveAccessibleName(/آل عمران، ٣:٧/);
     fireEvent.click(rows[0]!);
     expect(onHopEdge).toHaveBeenCalledWith(
       expect.objectContaining({ to: "quran/hafs-kfqc/3:7" }),
     );
     // And an un-vendored curated target is surfaced, disabled — same rule.
-    expect(screen.getByLabelText(/انتقل إلى الأعراف · ٧:١٤٠/)).toBeDisabled();
+    expect(screen.getByLabelText(/انتقل إلى الأعراف، ٧:١٤٠/)).toBeDisabled();
   });
 
   it("is not empty when the corpus knows no roots but a curated edge exists", () => {
@@ -204,7 +204,7 @@ describe("RootLensTrigger", () => {
   it("shows the root count in Arabic-Indic digits and reports its state", () => {
     const onToggle = vi.fn();
     render(<RootLensTrigger count={5} open onToggle={onToggle} />);
-    const button = screen.getByRole("button", { name: "الجذور · ٥" });
+    const button = screen.getByRole("button", { name: "الجذور، ٥" });
     expect(button).toHaveAttribute("aria-expanded", "true");
     fireEvent.click(button);
     expect(onToggle).toHaveBeenCalled();
@@ -214,11 +214,11 @@ describe("RootLensTrigger", () => {
     // ⬡ is now the app's only ⬡ (Loop 6a): one glyph, one place, and a label
     // that keeps the two numbers distinguishable instead of conflating them.
     render(<RootLensTrigger count={5} curated={2} open={false} onToggle={noop} />);
-    expect(screen.getByRole("button", { name: "الجذور · ٥ · ٢ مختارة" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "الجذور، ٥، ٢ مختارة" })).toBeInTheDocument();
 
     // A hand-verified pair on an ayah the corpus has no roots for must still
     // be reachable, so the trigger appears at count 0.
     render(<RootLensTrigger count={0} curated={1} open={false} onToggle={noop} />);
-    expect(screen.getByRole("button", { name: "الجذور · ٠ · ١ مختارة" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "الجذور، ٠، ١ مختارة" })).toBeInTheDocument();
   });
 });

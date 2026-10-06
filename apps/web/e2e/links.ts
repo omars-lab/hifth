@@ -14,7 +14,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 export const LINKS = {
   "verse-2-48": {
     path: "#/hafs-kfqc/2:48",
-    shows: (p: Page) => p.getByRole("region", { name: /البقرة · ٢:٤٨/ }),
+    shows: (p: Page) => p.getByRole("region", { name: /البقرة، ٢:٤٨/ }),
   },
   "verse-2-48-lookalikes": {
     path: "#/hafs-kfqc/2:48?open=lookalikes",

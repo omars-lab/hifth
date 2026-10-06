@@ -410,7 +410,7 @@ test.describe("Hifth · the desktop spread", () => {
     await page.goto("/#/hafs-kfqc/2:48");
     await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
     // The place is held: the current-ayah bead is up and the URL is the ayah.
-    await expect(page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٤٨/ })).toBeVisible();
     await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/2:48");
 
     await page.keyboard.press("ArrowLeft");
@@ -951,7 +951,7 @@ test.describe("Hifth · the wheel", () => {
 
     // Juz 2 opens on 22 — not 8, which is what a plain wheel would have done.
     await expect(page.locator(NUM)).toHaveText(pageNumber(22));
-    await expect(page.locator("[aria-live='polite']")).toHaveText("الجزء ٢ · صفحة ٢٢");
+    await expect(page.locator("[aria-live='polite']")).toHaveText("الجزء ٢، صفحة ٢٢");
 
     // And back, over the boundary rather than to the top of the leaf we are on.
     await page.waitForTimeout(200);
@@ -1515,7 +1515,7 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
       );
     const opens: Array<[string, () => Promise<void>]> = [
       ["the look-alike list", () => chip(page).click()],
-      ["the roots", () => page.getByRole("button", { name: /الجذور · / }).click()],
+      ["the roots", () => page.getByRole("button", { name: /الجذور، / }).click()],
     ];
     for (const [name, open] of opens) {
       await open();
