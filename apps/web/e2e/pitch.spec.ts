@@ -132,6 +132,39 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(await sideOf(page, sheet(page))).toBe("right");
   });
 
+  for (const screen of [
+    { name: "a laptop", width: 1440, height: 900 },
+    { name: "an iPad on its side", width: 1366, height: 1024 },
+  ]) {
+    test(`a note opened from the facing page leaves its look-alike chips in sight on ${screen.name}`, async ({
+      browser,
+    }) => {
+      // The chips stood beside the page the reader was on, not beside the
+      // verse they are about. Tapping a verse on the facing page laid its note
+      // over the page the chips stood beside, and the card, a little wider than
+      // the page, reached over them: on the iPad the chip was half hidden.
+      const context = await browser.newContext({ viewport: { width: screen.width, height: screen.height } });
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+      const page = await context.newPage();
+      await page.goto("/#/hafs-kfqc/p440");
+      await expect(pageSvg(page, 439)).toBeVisible({ timeout: 20_000 });
+      // 35:40 is the 3700th verse, on page 439, the right-hand page; it has a
+      // look-alike, so a chip comes up for it.
+      await verse(page, 439, 3700).click();
+      await expect(sheet(page)).toBeVisible();
+      expect(await sheet(page).getAttribute("data-side")).toBe("left");
+      const chip = page.getByRole("group", { name: "Links from this ayah" }).getByRole("button").first();
+      await expect(chip).toBeVisible();
+      await settle(sheet(page));
+      await settle(chip);
+      const card = (await sheet(page).boundingBox())!;
+      const pill = (await chip.boundingBox())!;
+      expect(overlaps(card, pill), "the note covers the look-alike chip").toBe(false);
+      expect(await sideOf(page, chip), "the chip stands by its verse's page").toBe("right");
+      await context.close();
+    });
+  }
+
   for (const [where, hash, side] of [
     ["al-Fātiḥah, on the right leaf", "#/hafs-kfqc/1:2", "left"],
     ["Āyat al-Kursī, on the left leaf", "#/hafs-kfqc/2:255", "right"],
