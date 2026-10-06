@@ -59,7 +59,9 @@
   gap: var(--space-1);
 }
 
-/* The triggers bring their own footer styling; here each becomes one cell. */
+/* The triggers bring their own footer styling; here each becomes one cell.
+   A cell is never narrower than its longest word: with six tools on a phone,
+   equal cells cut "Commentary" and «الجذور نفسها» short. */
 .tools :is(button, a) {
   display: flex;
   flex: 1 1 0;
@@ -68,7 +70,7 @@
   justify-content: center;
   align-content: center;
   gap: 2px 4px;
-  min-inline-size: 0;
+  min-inline-size: min-content;
   max-inline-size: 5.5rem;
   min-block-size: 3.25rem;
   padding: var(--space-1);
@@ -97,7 +99,7 @@
   display: flex;
   flex: 1 1 0;
   justify-content: center;
-  min-inline-size: 0;
+  min-inline-size: min-content;
   max-inline-size: 5.5rem;
   position: relative;
 }
@@ -112,9 +114,8 @@
 .tools > div button > span:last-child {
   font-size: var(--text-xs);
   color: var(--ink-soft);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.2;
+  text-wrap: balance;
   flex-basis: 100%;
   text-align: center;
 }
