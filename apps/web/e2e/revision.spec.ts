@@ -66,7 +66,7 @@ test.describe("Hifth · the revision map", () => {
     // is the distinction the whole component is built around, and asserting it
     // first is what makes the assertion after the tap mean something.
     let sheet = await openMap(page);
-    await expect(hizb(sheet, /^الحزب ١ · لم يُفتح$/)).toHaveCount(1);
+    await expect(hizb(sheet, /^الحزب ١، لم يُفتح$/)).toHaveCount(1);
     await page.keyboard.press("Escape");
     await expect(sheet).toBeHidden();
 
@@ -79,12 +79,12 @@ test.describe("Hifth · the revision map", () => {
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
 
     sheet = await openMap(page);
-    await expect(hizb(sheet, /^الحزب ١ · فُتح اليوم$/)).toHaveCount(1);
+    await expect(hizb(sheet, /^الحزب ١، فُتح اليوم$/)).toHaveCount(1);
     // Hizb 3 is paper we now have and the reader has not opened — «لم يُفتح».
     // That is the *cold* reading, and until Loop 4b this line said «غير متوفّر»
     // instead. Both words have to exist and they have to be different words;
     // this row holds one end of that and the row below holds the other.
-    await expect(hizb(sheet, /^الحزب ٣ · لم يُفتح$/)).toHaveCount(1);
+    await expect(hizb(sheet, /^الحزب ٣، لم يُفتح$/)).toHaveCount(1);
     // Counted in the unit on screen — the page bar's «المتوفّر ٦٠٤ من ٦٠٤ صفحة»
     // one division coarser.
     await expect(sheet.getByText("المتوفّر ٦٠ من ٦٠ حزب")).toBeVisible();
@@ -100,7 +100,7 @@ test.describe("Hifth · the revision map", () => {
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
 
     const sheet = await openMap(page);
-    await hizb(sheet, /^الحزب ٣ · لم يُفتح$/).tap();
+    await hizb(sheet, /^الحزب ٣، لم يُفتح$/).tap();
 
     // The sheet gets out of the way: the reader asked to be somewhere else.
     await expect(sheet).toBeHidden();
@@ -108,11 +108,11 @@ test.describe("Hifth · the revision map", () => {
     // so it opens on 22 — and this is the assertion that would catch a landing
     // computed from the *print's* division table instead of from the pages this
     // build actually holds.
-    await expect(page.getByRole("button", { name: "صفحة ٢٢ · ما فتحتَه من المصحف" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "صفحة ٢٢، ما فتحتَه من المصحف" })).toBeVisible();
     // Said out loud, and said as a *hizb*: the reader pressed a division and
     // arrived on a page, and a landing that only named the page would leave them
     // to work out whether it was the right one.
-    await expect(page.locator("[aria-live='polite']")).toHaveText("الحزب ٣ · صفحة ٢٢");
+    await expect(page.locator("[aria-live='polite']")).toHaveText("الحزب ٣، صفحة ٢٢");
   });
 
   test("a hizb this edition does not carry is not drawn as a neglected one", async ({ browser }) => {
@@ -131,15 +131,15 @@ test.describe("Hifth · the revision map", () => {
       await expect(page.locator("svg[role='group']").first()).toBeVisible();
 
       const sheet = await openMap(page);
-      await expect(absentHizb(sheet, /^الحزب ٣ · غير متوفّر في هذه النسخة$/)).toHaveCount(1);
+      await expect(absentHizb(sheet, /^الحزب ٣، غير متوفّر في هذه النسخة$/)).toHaveCount(1);
       // And it is not a control. A button over a division we have no paper for
       // would be the app offering a page it cannot show — the same false claim
       // as drawing it cold, made in the cursor instead of in the fill.
-      await expect(hizb(sheet, /^الحزب ٣ · غير متوفّر في هذه النسخة$/)).toHaveCount(0);
+      await expect(hizb(sheet, /^الحزب ٣، غير متوفّر في هذه النسخة$/)).toHaveCount(0);
       // Its neighbours are untouched and read as cold, which is what makes the
       // line above a distinction rather than a global relabelling.
-      await expect(hizb(sheet, /^الحزب ٢ · لم يُفتح$/)).toHaveCount(1);
-      await expect(hizb(sheet, /^الحزب ٤ · لم يُفتح$/)).toHaveCount(1);
+      await expect(hizb(sheet, /^الحزب ٢، لم يُفتح$/)).toHaveCount(1);
+      await expect(hizb(sheet, /^الحزب ٤، لم يُفتح$/)).toHaveCount(1);
       await expect(sheet.getByText("المتوفّر ٥٩ من ٦٠ حزب")).toBeVisible();
     } finally {
       await context.close();
@@ -161,7 +161,7 @@ test.describe("Hifth · the revision map", () => {
     await recorded(page);
 
     let sheet = await openMap(page);
-    await expect(hizb(sheet, /^الحزب ١ · فُتح اليوم$/)).toHaveCount(1);
+    await expect(hizb(sheet, /^الحزب ١، فُتح اليوم$/)).toHaveCount(1);
     await page.keyboard.press("Escape");
 
     // Take the record the way an ITP sweep does. Only IndexedDB: the caches are
@@ -174,7 +174,7 @@ test.describe("Hifth · the revision map", () => {
     sheet = await openMap(page);
     // The history is gone — that part is not preventable, and the app does not
     // pretend otherwise.
-    await expect(hizb(sheet, /^الحزب ١ · لم يُفتح$/)).toHaveCount(1);
+    await expect(hizb(sheet, /^الحزب ١، لم يُفتح$/)).toHaveCount(1);
     // But the sheet is dated. This is the line that stops an empty map from
     // reading as an accusation: `since` is stamped when the store is *opened*,
     // so a record wiped this morning is visibly one morning old rather than a

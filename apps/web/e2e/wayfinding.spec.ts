@@ -40,7 +40,7 @@ test.describe("Hifth · wayfinding", () => {
     // tappable while it is still on screen.
     await tapAyah(page, "#verse-55");
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٤٨/ }),
     ).toBeVisible();
 
     await strip.getByText("التالي").tap();
@@ -78,7 +78,7 @@ test.describe("Hifth · wayfinding", () => {
     await expect(jumper).toHaveCount(0);
     await expect(page.locator(pageNum)).toHaveText(pageNumber(9));
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٥٨/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٥٨/ }),
     ).toBeVisible();
     // The URL carries the new place — the jump went through the §7 state, not
     // around it.
@@ -164,7 +164,7 @@ test.describe("Hifth · wayfinding", () => {
 
       await page.keyboard.press("ArrowLeft");
       await expect(page.locator(pageNum)).toHaveText(pageNumber(9));
-      await expect(said).toContainText("أقرب صفحة متوفّرة · صفحة ٩");
+      await expect(said).toContainText("أقرب صفحة متوفّرة، صفحة ٩");
 
       // The far end, where nothing moves at all. "Last available page" on its own
       // would tell a reader their arrow did nothing and leave them to guess where
@@ -172,13 +172,13 @@ test.describe("Hifth · wayfinding", () => {
       await page.getByRole("slider").fill("604");
       await expect(page.locator(pageNum)).toHaveText(pageNumber(604));
       await page.keyboard.press("ArrowLeft");
-      await expect(said).toContainText("آخر صفحة متوفّرة · صفحة ٦٠٤");
+      await expect(said).toContainText("آخر صفحة متوفّرة، صفحة ٦٠٤");
       await expect(page.locator(pageNum)).toHaveText(pageNumber(604));
 
       // …and the near end, which is a different sentence for the same reason.
       await page.getByRole("slider").fill("1");
       await page.keyboard.press("ArrowRight");
-      await expect(said).toContainText("أول صفحة متوفّرة · صفحة ١");
+      await expect(said).toContainText("أول صفحة متوفّرة، صفحة ١");
       await expect(page.locator(pageNum)).toHaveText(pageNumber(1));
     } finally {
       await context.close();
@@ -262,7 +262,7 @@ test.describe("Hifth · wayfinding", () => {
     await expect(page.locator("svg[role='group']")).toBeVisible();
 
     // `exact`, because a role name match is a substring match by default and the
-    // page chip beside this button is now «صفحة ٧ · ما فتحتَه من المصحف» — which
+    // page chip beside this button is now «صفحة ٧، ما فتحتَه من المصحف» — which
     // contains this whole name. Two controls in one row can share a word.
     await page.getByRole("button", { name: "المصحف", exact: true }).tap();
     const sheet = page.getByRole("dialog", { name: "المصحف", exact: true });

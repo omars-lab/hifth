@@ -96,7 +96,7 @@ describe("PackShelf", () => {
     // The register is the claim; the list is the picture of it. Both, because
     // either alone has been wrong in this module's history.
     await waitFor(async () => expect(await listPacks()).toHaveLength(1));
-    await screen.findByText(/^الجزء ١ · /);
+    await screen.findByText(/^الجزء ١، /);
     expect(screen.queryByRole("button", { name: "احفظ الجزء ١ هنا" })).toBeNull();
   });
 
@@ -106,7 +106,7 @@ describe("PackShelf", () => {
     // Manifest + two pages + one shard, a kilobyte each: 0.0 MB, rounded. The
     // assertion is on the *shape* — a number and a unit — because the fixture's
     // bytes are arbitrary and the real thing is a few MB.
-    await screen.findByText(/^الجزء ١ · [٠-٩]+(٫[٠-٩])? م\.ب$/);
+    await screen.findByText(/^الجزء ١، [٠-٩]+(٫[٠-٩])? م\.ب$/);
   });
 
   it("a swept pack is named as incomplete, not left looking kept", async () => {
@@ -128,7 +128,7 @@ describe("PackShelf", () => {
     await pinPack(EDITION, 1, ["/a", "/b"], 0);
     sweep();
     render(<PackShelf edition={EDITION} pages={PAGES} page={22} />);
-    await screen.findByText("الجزء ١ · لم يعد في هذا الجهاز");
+    await screen.findByText("الجزء ١، لم يعد في هذا الجهاز");
     expect(document.querySelector("[data-health]")).toHaveAttribute("data-health", "gone");
   });
 

@@ -801,7 +801,7 @@ export function App(): JSX.Element {
     },
     [ensurePitch],
   );
-  const introLabel = useCallback((surah: number) => `${t.surahIntro} · ${t.surahName(surah)}`, [t]);
+  const introLabel = useCallback((surah: number) => `${t.surahIntro}${t.sep}${t.surahName(surah)}`, [t]);
   // Only the pitch build makes the names buttons, so the public bundle drops the drawing.
   const paintIntro = useMemo(
     () => (PITCH ? (svg: SVGSVGElement) => drawIntroBadges(svg, INTRO_SURAHS, introLabel) : undefined),
@@ -1367,7 +1367,7 @@ export function App(): JSX.Element {
     (n: ScopedNote) => ({
       id: n.id,
       title: noteTitle(n) || t.noteUntitled,
-      about: `${scopeName(n.scope)} · ${t.noteVerses(n.verses.length)}`,
+      about: `${scopeName(n.scope)}${t.sep}${t.noteVerses(n.verses.length)}`,
     }),
     [t, scopeName],
   );
@@ -1716,7 +1716,7 @@ export function App(): JSX.Element {
         ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
         ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
       ];
-      commitBookmarks(merged, parts.length > 0 ? parts.join(" · ") : t.bmLoaded(0));
+      commitBookmarks(merged, parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0));
     },
     [announce, bookmarks, commitBookmarks, loadNotesFile, loadConfusionsFile, t],
   );
@@ -2170,13 +2170,13 @@ export function App(): JSX.Element {
     const items: VerseMenuItem[] = [];
     if (hasCommentary)
       items.push({
-        caption: commentarySource ? `${t.vdCommentary} · ${commentarySource.source.label}` : t.vdCommentary,
+        caption: commentarySource ? `${t.vdCommentary}${t.sep}${commentarySource.source.label}` : t.vdCommentary,
         glyph: "✎",
         onPick: () => setCommentaryOpen(true),
       });
     for (const chip of railChips)
       items.push({
-        caption: `${t.railDirection[chip.direction]} · ${t.num(chip.count)}`,
+        caption: `${t.railDirection[chip.direction]}${t.sep}${t.num(chip.count)}`,
         // The rail's own sign: "looks like" with a small mark for which way.
         glyph: chip.glyph,
         onPick: () => setOpenDirection(chip.direction),
@@ -2467,7 +2467,7 @@ export function App(): JSX.Element {
       const last = run[run.length - 1]!;
       const lastName = t.ayahLabel(last) ?? last;
       const sameSurah = parseAyahKey(first)?.surah === parseAyahKey(last)?.surah;
-      announce(t.playingRun(t.ayahLabel(first) ?? first, sameSurah ? lastName.split(" · ").pop()! : lastName));
+      announce(t.playingRun(t.ayahLabel(first) ?? first, sameSurah ? (t.ayahRef(last) ?? lastName) : lastName));
     },
     [announce, audio, t],
   );

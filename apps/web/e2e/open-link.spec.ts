@@ -42,7 +42,7 @@ test.describe("Hifth · a link that opens a panel", () => {
 
   test("?open=roots opens the verse's roots", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/2:48?open=roots");
-    await expect(page.getByRole("dialog", { name: /^الجذور · / })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("dialog", { name: /^الجذور، / })).toBeVisible({ timeout: 20_000 });
   });
 
   test("a verse sheet on a link with no verse opens nothing", async ({ page }) => {

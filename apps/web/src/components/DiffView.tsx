@@ -249,7 +249,7 @@ export function DiffView({ edge, fromKey }: DiffViewProps): JSX.Element | null {
     <div className={styles.diff}>
       <div className={styles.side}>
         <span className={styles.who}>
-          {fromLabel} · {t.hereTag}
+          {fromLabel}{t.sep}{t.hereTag}
         </span>
         <PrintedAyah side={diff.from} loaded={sides.from} marks={tints?.a ?? NO_RECTS} />
       </div>

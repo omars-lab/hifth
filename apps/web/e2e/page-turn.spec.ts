@@ -164,7 +164,7 @@ test.describe("Hifth · the fold", () => {
     await rail.getByRole("button", { name: /متشابهات في السورة/ }).tap();
     await page
       .getByRole("dialog")
-      .getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ })
+      .getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٣/ })
       .tap();
 
     await expect(page.locator(NUM)).toHaveText(pageNumber(19));
