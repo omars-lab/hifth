@@ -2833,7 +2833,9 @@ export function App(): JSX.Element {
         // Any open sheet owns the keyboard while it is up — it is modal, and its
         // own Escape/Tab handling is the contract. Asking the DOM instead of
         // OR-ing this loop's flags keeps that true for sheets other loops add.
-        inDialog: document.querySelector('[role="dialog"]') !== null,
+        // A panel that says it is not modal — the note card beside the spread,
+        // which leaves the page in use — does not: the arrows still turn.
+        inDialog: document.querySelector('[role="dialog"]:not([aria-modal="false"])') !== null,
         // The polygons live inside the page <svg>; Loop 3 gives them the arrows.
         onAyah: el?.closest?.("svg") != null,
       });
