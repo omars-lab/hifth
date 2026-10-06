@@ -747,3 +747,13 @@ so its initials open the key and its citations are links. A link now also keeps 
 comma touching it on its line, as a word would: on a phone the line used to break between "("
 and the link, leaving the bracket alone at the end of the line above.
 
+### ㉑ Should a note's mention of its own verse be a link? · **fixed**
+
+A note often names the verse it is about: the note on 18:13 points to verse 13. Once "v." became
+a link, that one went nowhere: tapping it opened the note the reader was already reading. It looked
+like a way onward and was not one.
+
+**Fixed, 2026-10-06:** in a note, its own verse is drawn as words, like the text around it. Every
+other verse it names stays a link. The surah's introduction is not changed: there, the opening
+verse is somewhere new to go.
+

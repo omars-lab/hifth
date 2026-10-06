@@ -2877,6 +2877,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Same-surah verse mentions (v. N, vv. N–M) were never links, and the surah introduction drew plain text with no initials or citations. Fixed 2026-10-06: splitCitations takes the note's surah; CommentarySheet draws the introduction with the note's paragraph code and keeps a link's touching punctuation on its line."
+    },
+    {
+      "id": "note-links-to-its-own-verse",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉑"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "A note naming its own verse (v. 13 in the note on 18:13) drew it as a link back to the same note. Fixed 2026-10-06: CommentarySheet draws a citation of the note's own verse as text; the introduction is unchanged."
     }
   ]
 }
