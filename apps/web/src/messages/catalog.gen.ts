@@ -313,8 +313,8 @@ export interface Catalog {
   readonly "railDirection.loop": string;
   readonly "railDirection.root": string;
   readonly railGroup: string;
-  readonly railSummary: (d: { readonly surah: string | number; readonly linksText: string | number }) => string;
-  readonly rangeAria: (d: { readonly title: string | number; readonly links: string | number }) => string;
+  readonly railSummary: (d: { readonly surah: string | number; readonly n: number; readonly linksText: string | number }) => string;
+  readonly rangeAria: (d: { readonly title: string | number; readonly n: number; readonly linksText: string | number }) => string;
   readonly rangeEmpty: string;
   readonly rangeFrom: (d: { readonly refs: string | number }) => string;
   readonly rangeUnavailable: string;
