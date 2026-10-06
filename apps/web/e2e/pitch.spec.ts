@@ -491,6 +491,29 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
   // does not try to take a side it has no room for.
   test.use({ viewport: { width: 390, height: 844 } });
 
+  test("the first screen's hint does not leave one word alone on its second line", async ({ page }) => {
+    // At a phone's width the line wrapped after "Study Quran", leaving "note"
+    // by itself under it — the first thing a visitor reads looked unfinished.
+    await page.goto("/");
+    const hint = page.getByText("Tap a verse to read its Study Quran note");
+    await expect(hint).toBeVisible({ timeout: 20_000 });
+    const widths = await hint.evaluate((el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const rows = new Map<number, number>();
+      for (const r of range.getClientRects()) {
+        const top = Math.round(r.top);
+        rows.set(top, (rows.get(top) ?? 0) + r.width);
+      }
+      return [...rows.values()];
+    });
+    if (widths.length > 1) {
+      expect(Math.min(...widths), `line widths ${widths.map(Math.round).join(", ")}`).toBeGreaterThan(
+        Math.max(...widths) * 0.5,
+      );
+    }
+  });
+
   test("tapping a verse opens a full-width bottom sheet with no side", async ({ page }) => {
     // Deep-linking a verse selects it, which opens the note the same way a tap
     // does (the pitch build opens on selection). 2:255 is Āyat al-Kursī.
