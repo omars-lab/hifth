@@ -923,6 +923,29 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     await expect(page.getByRole("region", { name: "Commentary" })).toHaveCount(0);
   });
 
+  for (const [line, dialog] of [
+    [/^Similar verses in later surahs/, /later/i],
+    [/^Same roots/, /^Roots/],
+  ] as const) {
+    test(`what is picked from the menu lies over the facing page: ${line.source}`, async ({ page }) => {
+      // The note lies over the facing page, fitted to the book. The roots and
+      // similar-verses lists kept the older card in the window's corner, so on
+      // a spread they ran past the book's foot and over the page slider.
+      const m = await openLooksMenu(page);
+      await m.getByRole("menuitem", { name: line }).click();
+      const list = page.getByRole("dialog", { name: dialog });
+      await expect(list).toBeVisible();
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const open = (await book(page).boundingBox())!;
+      const box = (await list.boundingBox())!;
+      expect(box.y, "its top is the book's top").toBeGreaterThanOrEqual(open.y - 1);
+      expect(box.y + box.height, "its foot is the book's foot").toBeLessThanOrEqual(open.y + open.height + 1);
+      // On the page across the fold from the verse, not over it.
+      const n = pageSvg(page, 442).locator(`[data-verse-number][data-verse-key="${LOOKS}"]`);
+      expect(await sideOf(page, list)).not.toBe(await sideOf(page, n));
+    });
+  }
+
   test("picking the introduction opens it", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p440");
     await expect(number(page)).toBeVisible({ timeout: 20_000 });
