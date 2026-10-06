@@ -7,6 +7,7 @@ import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { ARROW_SHOWINGS } from "../jump-arrows";
+import { PEN_HOMES, type PenHome } from "../pen-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import styles from "./Colophon.module.css";
 
@@ -31,6 +32,9 @@ interface ColophonProps {
   /** How a note draws the parts it can be about; remembered on this device. */
   scopeLook?: ScopeLook;
   onScopeLook?: (look: ScopeLook) => void;
+  /** Where the page tools sit on a computer or an iPad held sideways; remembered on this device. */
+  penHome?: PenHome | undefined;
+  onPenHome?: ((home: PenHome) => void) | undefined;
   /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
   onShowTips?: () => void;
 }
@@ -176,6 +180,13 @@ const SCOPE_LOOK_NAME: Record<ScopeLook, (t: ReturnType<typeof useT>["t"]) => st
   trail: (t) => t.scopeLookTrail,
 };
 
+const PEN_HOME_NAME: Record<PenHome, (t: ReturnType<typeof useT>["t"]) => string> = {
+  strip: (t) => t.penHomeStrip,
+  float: (t) => t.penHomeFloat,
+  bottom: (t) => t.penHomeBottom,
+  side: (t) => t.penHomeSide,
+};
+
 export function Colophon({
   open,
   onClose,
@@ -189,6 +200,8 @@ export function Colophon({
   onArrowShowing,
   scopeLook,
   onScopeLook,
+  penHome,
+  onPenHome,
   onShowTips,
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
@@ -421,6 +434,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.scopeLookNote}</p>
+          </section>
+        )}
+        {/* Where the page tools sit (docs/design/notes-style-toolbar.md, ①): all
+            three homes the study drew, kept while they are tried (owner,
+            2026-10-05). Only on the layout that has the tools bar. */}
+        {penHome && onPenHome && (
+          <section className={styles.block} aria-labelledby="colophon-pen-home">
+            <h3 className={styles.subhead} id="colophon-pen-home">
+              {t.penHomeTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-pen-home">
+              {PEN_HOMES.map((home) => (
+                <button
+                  key={home}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={penHome === home}
+                  data-pen-home-choice={home}
+                  onClick={() => onPenHome(home)}
+                >
+                  {PEN_HOME_NAME[home](t)}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.penHomeNote}</p>
           </section>
         )}
 
