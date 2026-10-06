@@ -20,6 +20,19 @@
   animation: rise var(--dur-fast) ease-out;
 }
 
+/*
+ * On a phone it covers the bar and the slider whole, upright or held sideways:
+ * a sliver of the bar's buttons above it, or one cut in half by its side, reads
+ * as broken. A wider screen keeps the card in the middle, the bar's ends clear
+ * beside it.
+ */
+@media (max-width: 40rem), (max-height: 31rem) {
+  .drawer {
+    max-inline-size: none;
+    min-block-size: var(--reach, auto);
+  }
+}
+
 @keyframes rise {
   from {
     transform: translateY(100%);

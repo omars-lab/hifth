@@ -1385,6 +1385,43 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
 test.describe("Hifth · the verse's tools on a phone", () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
+  test("the tools cover the bar beneath them whole, or leave each of its buttons clear, upright and sideways", async ({ page }) => {
+    // The tools rise over the bar under the page and its slider. On every
+    // phone they stopped a few pixels short of the bar's top, so a sliver of
+    // its buttons showed above them; held sideways they are narrower than the
+    // screen, and their edge cut the selected verse's button in half.
+    for (const size of [
+      { width: 390, height: 844 },
+      { width: 430, height: 932 },
+      { width: 844, height: 390 },
+      { width: 667, height: 375 },
+    ]) {
+      await page.setViewportSize(size);
+      // A blank page between, so each size is a fresh load and opens the note.
+      await page.goto("about:blank");
+      await page.goto("/#/hafs-kfqc/35:44");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await page.keyboard.press("Escape");
+      const tools = page.getByRole("region", { name: "Tools for Fatir · 35:44" });
+      await expect(tools).toBeVisible({ timeout: 20_000 });
+      await tools.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished.catch(() => undefined))));
+      const drawer = (await tools.boundingBox())!;
+      const buttons = await page.locator("footer button").evaluateAll((els) =>
+        els.map((el) => {
+          const r = el.getBoundingClientRect();
+          return { name: el.getAttribute("aria-label") ?? el.textContent ?? "", x: r.x, y: r.y, width: r.width, height: r.height };
+        }),
+      );
+      expect(buttons.length).toBeGreaterThan(1);
+      for (const b of buttons) {
+        const w = Math.max(0, Math.min(b.x + b.width, drawer.x + drawer.width) - Math.max(b.x, drawer.x));
+        const h = Math.max(0, Math.min(b.y + b.height, drawer.y + drawer.height) - Math.max(b.y, drawer.y));
+        const share = (w * h) / (b.width * b.height);
+        expect(share === 0 || share > 0.999, `${size.width}x${size.height}: "${b.name}" is ${Math.round(share * 100)}% under the tools`).toBe(true);
+      }
+    }
+  });
+
   test("every word under a tool is shown whole, in both languages", async ({ page }) => {
     // The pitch build puts six tools in one row on a phone, and the words under
     // them were cut short with an ellipsis: "Commentary" and "Same roots", and
