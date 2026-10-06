@@ -1230,6 +1230,39 @@ test.describe("Hifth · a verse named without its surah is a link too", () => {
     await expect(notes.getByRole("button", { name: /18:13\b/ })).toHaveCount(0);
   });
 
+  test.describe("on a sideways iPad", () => {
+    test.use({ viewport: { width: 1366, height: 1024 }, hasTouch: true, isMobile: true });
+    test("a note's own verse stays on one line, brackets and all", async ({ page }) => {
+      // Drawn as words, the citation could break between "v." and its number,
+      // as 18:60's note did at this width (found walking the pitch, 2026-10-06).
+      await page.goto("/#/hafs-kfqc/18:60?open=commentary");
+      await expect(page.getByRole("dialog", { name: /18:60/ })).toBeVisible({ timeout: 20_000 });
+      const notes = sheet(page).getByRole("region", { name: "Commentary" });
+      await expect(notes.locator("p").first()).toBeVisible();
+      const lines = await notes.evaluate((root) => {
+        const nodes: Text[] = [];
+        const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+        for (let n = walk.nextNode(); n; n = walk.nextNode()) nodes.push(n as Text);
+        const all = nodes.map((n) => n.data).join("");
+        const at = (i: number): [Text, number] => {
+          for (const n of nodes) { if (i <= n.data.length) return [n, i]; i -= n.data.length; }
+          const end = nodes[nodes.length - 1]!;
+          return [end, end.data.length];
+        };
+        const out: number[] = [];
+        for (const m of all.matchAll(/\(v\. 60\)/g)) {
+          const r = document.createRange();
+          r.setStart(...at(m.index!));
+          r.setEnd(...at(m.index! + m[0].length));
+          out.push(new Set([...r.getClientRects()].filter((b) => b.width > 0).map((b) => Math.round(b.bottom))).size);
+        }
+        return out;
+      });
+      expect(lines.length).toBeGreaterThan(0);
+      expect(lines.every((n) => n === 1), `lines per mention: ${lines}`).toBe(true);
+    });
+  });
+
   test("the surah introduction's initials open the key, and its verses are links", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p293");
     const name = pageSvg(page, 293).getByRole("button", { name: /^Surah introduction/ });
