@@ -758,6 +758,15 @@ export interface Strings {
   jumpArrowsStays: string;
   jumpArrowsAsked: string;
   jumpArrowsNote: string;
+  penMarkUp: string;
+  penDone: string;
+  penGrip: string;
+  penHomeTitle: string;
+  penHomeStrip: string;
+  penHomeFloat: string;
+  penHomeBottom: string;
+  penHomeSide: string;
+  penHomeNote: string;
   scopeLookTitle: string;
   scopeLookSide: string;
   scopeLookLines: string;
@@ -1391,6 +1400,15 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     jumpArrowsStays: m.jumpArrowsStays,
     jumpArrowsAsked: m.jumpArrowsAsked,
     jumpArrowsNote: m.jumpArrowsNote,
+    penMarkUp: m.penMarkUp,
+    penDone: m.penDone,
+    penGrip: m.penGrip,
+    penHomeTitle: m.penHomeTitle,
+    penHomeStrip: m.penHomeStrip,
+    penHomeFloat: m.penHomeFloat,
+    penHomeBottom: m.penHomeBottom,
+    penHomeSide: m.penHomeSide,
+    penHomeNote: m.penHomeNote,
     scopeLookTitle: m.scopeLookTitle,
     scopeLookSide: m.scopeLookSide,
     scopeLookLines: m.scopeLookLines,
