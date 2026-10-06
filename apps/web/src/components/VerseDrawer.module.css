@@ -74,14 +74,16 @@
 
 /* The triggers bring their own footer styling; here each becomes one cell.
    A cell is never narrower than its longest word: with six tools on a phone,
-   equal cells cut "Commentary" and «الجذور نفسها» short. */
+   equal cells cut "Commentary" and «الجذور نفسها» short. Content starts at
+   the top, so a word that wraps to two lines does not lift its icon above
+   the icons beside it. */
 .tools :is(button, a) {
   display: flex;
   flex: 1 1 0;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  align-content: center;
+  align-content: start;
   gap: 2px 4px;
   min-inline-size: min-content;
   max-inline-size: 5.5rem;
@@ -107,10 +109,12 @@
   outline-offset: 1px;
 }
 
-/* The share button is a pill wrapped in a div, with a word already in it. */
+/* The share button is a pill wrapped in a div, with a word already in it.
+   The div stretches it to the row's height, as the other cells are. */
 .tools > div {
   display: flex;
   flex: 1 1 0;
+  align-items: stretch;
   justify-content: center;
   min-inline-size: min-content;
   max-inline-size: 5.5rem;

@@ -702,3 +702,14 @@ computer too, where the visitor holds a mouse. Found on 2026-10-06 on the deskto
 
 **Fixed, 2026-10-06:** with a mouse it says click, in English and in Arabic; on a phone or an iPad
 it still says tap. Tests check the desktop wording in both languages, and the phone's.
+
+### ⑱ On a phone, do the verse's tools line up? · **fixed**
+
+The row of tools under the page — listen, commentary, same roots, share, bookmark, the verse on
+QUL — showed the same-roots icon higher than its neighbours, because its word wraps to two lines
+and each tool was centred up and down in its cell. The share icon then sat a little lower than
+the rest once the row grew taller. Found on 2026-10-06 on an upright phone.
+
+**Fixed, 2026-10-06:** each tool starts at the top of its cell, and the share button fills its
+cell's height like the others, so every icon sits on one line whatever its word does. A test
+checks it in English and in Arabic.
