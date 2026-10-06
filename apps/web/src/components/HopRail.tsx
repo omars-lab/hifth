@@ -1,5 +1,5 @@
 import type { RailChip } from "@hifth/core";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { type CSSProperties, useEffect, useLayoutEffect, useRef } from "react";
 import { useT } from "../i18n";
 import styles from "./HopRail.module.css";
 import { RailGlyph } from "./RailGlyph";
@@ -32,6 +32,14 @@ interface HopRailProps {
    * corner, and `crossed` has nothing to do: the card rises over the other leaf.
    */
   beside?: "left" | "right" | undefined;
+  /**
+   * On a phone, where a note, list or share tray over the page's foot starts,
+   * in window px, or null when none is up. That sheet slides the page up, and
+   * the strip the chips stand in at rest goes with it, out of sight; left
+   * behind, the chips sat on an earlier verse's words. So while it is up they
+   * ride the sheet's own top row instead, beside its handle.
+   */
+  seat?: number | null;
 }
 
 /**
@@ -41,15 +49,25 @@ interface HopRailProps {
  * popover. The rail only exists while an ayah is selected and has hops; a
  * hop-less ayah renders nothing (quiet by default).
  */
-export function HopRail({ chips, openDirection, onOpenChip, crossed = false, onBand, beside }: HopRailProps): JSX.Element | null {
+export function HopRail({
+  chips,
+  openDirection,
+  onOpenChip,
+  crossed = false,
+  onBand,
+  beside,
+  seat = null,
+}: HopRailProps): JSX.Element | null {
   const { t } = useT();
   const railRef = useRef<HTMLDivElement>(null);
   const count = chips.length;
+  const seated = seat !== null && !beside;
   useLayoutEffect(() => {
     if (!onBand) return;
     const rail = railRef.current;
-    onBand(count === 0 || !rail ? null : rail.getBoundingClientRect().bottom);
-  }, [count, crossed, onBand]);
+    // Down on a sheet, the chips leave the top of the screen to the page.
+    onBand(count === 0 || !rail || seated ? null : rail.getBoundingClientRect().bottom);
+  }, [count, crossed, onBand, seated]);
   useEffect(() => () => onBand?.(null), [onBand]);
   if (count === 0) return null;
   return (
@@ -64,6 +82,8 @@ export function HopRail({ chips, openDirection, onOpenChip, crossed = false, onB
       aria-label={t.railGroup}
       data-crossed={crossed || undefined}
       data-beside={beside}
+      data-seated={seated || undefined}
+      style={seated ? ({ "--seat": `${seat}px` } as CSSProperties) : undefined}
     >
       {chips.map((chip) => (
         <button

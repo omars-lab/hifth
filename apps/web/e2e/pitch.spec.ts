@@ -876,6 +876,103 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     expect(lines[0]!.y + lines[0]!.height).toBeLessThanOrEqual((await sheet(page).boundingBox())!.y);
   });
 
+  test("with a note up, the look-alike chips sit on the note's top row, off every line of the page", async ({ page }) => {
+    // The note slides the page up so its verse shows above it, and the chips
+    // stayed where they stand on a page at rest: in the strip above its first
+    // line. That strip had slid up out of sight, so the chips sat on the words
+    // of an earlier verse instead. 35:44 closes page 439 and has look-alikes
+    // both ways, so the slide is long and there are two chips.
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const rail = page.getByRole("group", { name: "Links from this ayah" });
+    await expect(rail).toBeVisible();
+    await settle(page.locator("#hifth-overlay .hl-sel").first());
+    const verses = await pageSvg(page, 439)
+      .locator("[id^='verse-']")
+      .evaluateAll((els) =>
+        els.map((el) => {
+          const r = el.getBoundingClientRect();
+          return { x: r.x, y: r.y, width: r.width, height: r.height };
+        }),
+      );
+    expect(verses.length).toBeGreaterThan(3);
+    const chips = rail.getByRole("button");
+    expect(await chips.count()).toBe(2);
+    const onTop = (box: Box) =>
+      page.evaluate(
+        ([x, y]) => document.elementFromPoint(x!, y!)?.closest("[data-direction]") !== null,
+        [box.x + box.width / 2, box.y + box.height / 2],
+      );
+    for (const chip of await chips.all()) {
+      const box = (await chip.boundingBox())!;
+      const covered = verses.filter((v) => overlaps(v, box));
+      expect(covered, `the chip ${JSON.stringify(box)} sits on ${JSON.stringify(covered)}`).toEqual([]);
+      expect(await onTop(box), "the chip is drawn over everything, so a tap reaches it").toBe(true);
+    }
+    // Grown to the whole note, the note is all the reader is looking at: the
+    // chips do not float over its words.
+    await sheet(page).getByRole("button", { name: "Show all of the note" }).click();
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    for (const chip of await chips.all()) {
+      const box = await chip.boundingBox();
+      if (box) expect(await onTop(box), "a chip floats over the grown note").toBe(false);
+    }
+  });
+
+  test("on a look-alike list, the chips sit above its title and close button, at rest and scrolled", async ({ page }) => {
+    // The list takes the note's place and the chips ride its top row the same
+    // way, but the list's row was only as tall as its handle, so the chips
+    // stood on its close button.
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    const rail = page.getByRole("group", { name: "Links from this ayah" });
+    await rail.getByRole("button", { name: /^Similar verses in later surahs/ }).click();
+    const list = page.getByRole("dialog");
+    await expect(list).toHaveAttribute("aria-label", /later surahs/);
+    await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const clear = async (when: string) => {
+      const close = (await list.getByRole("button", { name: "Close" }).boundingBox())!;
+      const title = (await list.locator("header").getByRole("heading").first().boundingBox())!;
+      for (const chip of await rail.getByRole("button").all()) {
+        const box = (await chip.boundingBox())!;
+        expect(overlaps(box, close), `${when}: a chip is on the close button`).toBe(false);
+        expect(overlaps(box, title), `${when}: a chip is on the title`).toBe(false);
+      }
+    };
+    await clear("at rest");
+    // Open the first row's comparison so the list is long enough to scroll.
+    await list.locator("[aria-expanded=false]").first().click();
+    await expect
+      .poll(() => list.evaluate((el) => el.scrollHeight - el.clientHeight), { timeout: 10_000 })
+      .toBeGreaterThan(100);
+    await list.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+    await clear("scrolled");
+  });
+
+  test("on the share tray in Arabic, the chips sit above its title", async ({ page }) => {
+    // The share tray slides the page up like the note, so the chips ride its
+    // top edge too; in Arabic its title starts on the right, where the chips
+    // stand, and they were drawn on top of it.
+    await page.goto("/?lang=ar#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).getByRole("button", { name: "إغلاق" }).first().click();
+    await expect(sheet(page)).toHaveCount(0);
+    await page.getByRole("button", { name: "شارك", exact: false }).first().click();
+    const tray = page.getByRole("dialog");
+    await expect(tray).toBeVisible();
+    await tray.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const rail = page.getByRole("group").filter({ has: page.locator("button[data-direction]") });
+    const chips = await rail.getByRole("button").all();
+    expect(chips.length).toBe(2);
+    const title = (await tray.locator("[class*=sheetTitle]").boundingBox())!;
+    for (const chip of chips) {
+      const box = (await chip.boundingBox())!;
+      expect(overlaps(box, title), `the chip ${JSON.stringify(box)} is on the title ${JSON.stringify(title)}`).toBe(false);
+      expect(box.y, "the chip is on the tray, not over the page").toBeGreaterThanOrEqual((await tray.boundingBox())!.y);
+    }
+  });
+
   test("a verse low on the page moves up clear of the note, every line of it", async ({ page }) => {
     // 6:157 closes page 149, so its note would open right over it. The page
     // moves up so the whole verse sits in the part of the screen still showing.

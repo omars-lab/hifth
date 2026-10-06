@@ -144,7 +144,14 @@ export function ShareSheet({
     const report = () => onCover(window.matchMedia(WIDE).matches ? null : sheet.getBoundingClientRect().top);
     report();
     window.addEventListener("resize", report);
-    return () => window.removeEventListener("resize", report);
+    // The tray grows a row for the look-alike chips once they come down onto
+    // it, and its top moves up with it: say so, or the chips sit a row low.
+    const seen = new ResizeObserver(report);
+    seen.observe(sheet);
+    return () => {
+      seen.disconnect();
+      window.removeEventListener("resize", report);
+    };
   }, [open, onCover]);
   useEffect(() => () => onCover?.(null), [onCover]);
 

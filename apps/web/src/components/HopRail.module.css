@@ -140,6 +140,25 @@
   }
 }
 
+/*
+ * A sheet is up over a phone page's foot (HopRail's `seat`): the page has slid
+ * up under it, the strip above the page's first line with it, so the chips sit
+ * on the sheet's own top row, beside its handle and above its title. Drawn over
+ * the sheet, and the thumb's reach split evenly across the row, since the row
+ * is all theirs and the page above it is not.
+ */
+.rail[data-seated]:not([data-beside]) {
+  position: fixed;
+  inset-block-start: calc(var(--seat) + 10px);
+  left: auto;
+  right: var(--space-4);
+  margin-inline: 0;
+  z-index: calc(var(--z-sheet) + 1);
+}
+.rail[data-seated]:not([data-beside]) .chip::after {
+  inset-block: -10px;
+}
+
 /* The root chip reads as a distinct family — hexagon glyph, subtler weight. */
 .chip[data-direction="root"] {
   border-style: dashed;
