@@ -111,6 +111,12 @@ interface PageStageProps {
   label: string;
   /** The currently selected ayah key (controlled by L3), or null. */
   selectedKey: string | null;
+  /**
+   * The surah whose introduction is open, or null. Its name is what that note
+   * is about, so a note over the foot of the stage moves the name into sight
+   * above it, as it does the selected verse for a verse's note.
+   */
+  introSurah?: number | null;
   /** The origin ayah to mark with the breadcrumb group (persists across hops). */
   breadcrumbKey: string | null;
   /**
@@ -447,6 +453,13 @@ function bareAyah(key: string): string {
  */
 /** Air between the lowest hop chip and the first line a lift puts beneath it, in CSS px. */
 const RAIL_CLEARANCE = 8;
+
+/** A surah name button's box in the page's own units: its wash, or its ⓘ where it stands. */
+function nameBoxOf(badge: SVGGElement) {
+  const b = badge.getBBox();
+  const at = badge.transform.baseVal.consolidate()?.matrix;
+  return { x: b.x + (at?.e ?? 0), y: b.y + (at?.f ?? 0), width: b.width, height: b.height };
+}
 
 function firstLineOf(svg: SVGSVGElement, ids: readonly string[]) {
   const el = ids.length ? svg.querySelector<SVGPathElement>(`[id="${ids[0]}"]`) : null;
@@ -1049,6 +1062,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     pageBudget = MOUNTED_PAGE_CAP,
     label,
     selectedKey,
+    introSurah = null,
     breadcrumbKey,
     rangeKeys = null,
     onSelect,
@@ -1149,6 +1163,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onSelectWordsRef.current = onSelectWords;
   const selectedKeyRef = useRef(selectedKey);
   selectedKeyRef.current = selectedKey;
+  const introSurahRef = useRef(introSurah);
+  introSurahRef.current = introSurah;
   const labelForRef = useRef(labelFor);
   /** The words the running heads are printed in; a change of language reprints them. */
   const tRef = useRef(t);
@@ -2071,9 +2087,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const cur = pagesRef.current.get(currentPageRef.current);
       if (!fit || !cur) return;
       let target = clampView(view.current, fit);
-      const key = selectedKeyRef.current;
+      // An open introduction is about its surah's name, not the selected verse.
+      const name = introSurahRef.current === null
+        ? null
+        : cur.svg.querySelector<SVGGElement>(`[data-intro-badge][data-surah="${introSurahRef.current}"]`);
+      const key = name ? null : selectedKeyRef.current;
       const ids = key ? cur.hl.resolve(key)?.elementIds : undefined;
-      const bbox = ids?.length ? cur.hl.bboxOf(ids) : null;
+      const bbox = name ? nameBoxOf(name) : ids?.length ? cur.hl.bboxOf(ids) : null;
       if (bbox) {
         const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg), text: textBoxOf(cur.host, cur.svg) };
         const shown = fit.stageHeight - (fit.coverBottom ?? 0);
@@ -2100,6 +2120,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     bring();
   }, [measureFit, tweenTo]);
   liftRef.current = lift;
+  // A verse's note turning into the introduction leaves the note's top where it
+  // was, so the name is brought up when the introduction opens, too.
+  useEffect(() => {
+    if (introSurah !== null && coverTopRef.current !== null) lift();
+  }, [introSurah, lift]);
   const coverSeen = useRef(coverTop);
   useEffect(() => {
     if (coverSeen.current === coverTop) return;

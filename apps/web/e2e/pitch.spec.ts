@@ -1281,6 +1281,42 @@ test.describe("Hifth · a verse named without its surah is a link too", () => {
 });
 
 test.describe("Hifth · a surah's name opens its introduction", () => {
+  // The page slides a verse up above its note so the reader still sees what the
+  // note is about. An introduction is about the surah's name, and nothing slid:
+  // on an upright iPad the card stood over half of Al-Kahf's name and its
+  // opening verses (found walking the pitch, 2026-10-06).
+  for (const [device, viewport] of [
+    ["an upright iPad", { width: 1024, height: 1366 }],
+    ["a phone", { width: 390, height: 844 }],
+  ] as const) {
+    test.describe(`on ${device}`, () => {
+      test.use({ viewport, hasTouch: true, isMobile: true });
+      test("the name stays in sight above the introduction", async ({ page }) => {
+        await page.goto("/#/hafs-kfqc/p293");
+        const name = pageSvg(page, 293).getByRole("button", { name: /^Surah introduction/ });
+        await expect(name).toBeVisible({ timeout: 20_000 });
+        await name.tap();
+        const card = sheet(page);
+        await expect(card.getByRole("region", { name: "Surah introduction" })).toBeVisible();
+        const head = (await page.locator("header").first().boundingBox())!;
+        // Read once the card and the page have both stopped moving: the card
+        // rises into place, and a reading taken on its way up passes for nothing.
+        let last = "";
+        await expect
+          .poll(async () => {
+            const now = JSON.stringify([await name.boundingBox(), await card.boundingBox()]);
+            const still = now === last;
+            last = now;
+            return still;
+          }, { intervals: [300] })
+          .toBe(true);
+        const box = (await name.boundingBox())!;
+        expect(box.y).toBeGreaterThanOrEqual(head.y + head.height);
+        expect(box.y + box.height).toBeLessThanOrEqual((await card.boundingBox())!.y);
+      });
+    });
+  }
+
   // Owner, 2026-10-04: the surah's context belongs next to its name, above the
   // basmala, not stacked on top of verse 1's note; and the name itself is the
   // button, washed so it looks pressable, rather than a small ⓘ beside it.
