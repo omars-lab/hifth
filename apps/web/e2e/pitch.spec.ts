@@ -1023,6 +1023,22 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     await expect(pageSvg(page, 440).locator("[data-verse-number][data-selected]")).toHaveAttribute("data-verse-key", KEY);
   });
 
+  // One panel for a verse at a time: the number's menu and the verse's tools
+  // under the page both answer "what can I do with this verse?", and showing
+  // both put two lists of the same things on screen, the lower one over the
+  // page bar. The tools wait while the menu is up and come back when it goes.
+  test("while the number's menu is up, the verse's tools wait, and come back when it closes", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p440");
+    await expect(number(page)).toBeVisible({ timeout: 20_000 });
+    await press(page);
+    await expect(menu(page)).toBeVisible();
+    const tools = page.getByRole("region", { name: /^Tools for .*36:12/ });
+    await expect(tools, "the verse's tools show under the number's menu").toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(menu(page)).toHaveCount(0);
+    await expect(tools).toBeVisible();
+  });
+
   test("picking the note opens it, and the menu goes", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p440");
     await expect(number(page)).toBeVisible({ timeout: 20_000 });
