@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import {
   formatAyahKey,
   orderForHifz,
@@ -79,6 +79,40 @@ function focusables(root: HTMLElement): HTMLElement[] {
  *
  * No source's words live in these bytes — only in the note this renders.
  */
+/**
+ * Keep the punctuation that touches a link or an initial on its line, as it
+ * would stay with a word: a button is one box in the line, so the line could
+ * otherwise break between "(" and the verse it opens, stranding the bracket.
+ */
+function together(parts: ReactNode[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  for (let j = 0; j < parts.length; j++) {
+    const part = parts[j];
+    if (typeof part === "string") {
+      out.push(part);
+      continue;
+    }
+    const prev = out[out.length - 1];
+    const lead = typeof prev === "string" ? /\S*$/.exec(prev)![0] : "";
+    if (lead) out[out.length - 1] = (prev as string).slice(0, -lead.length);
+    const next = parts[j + 1];
+    const trail = typeof next === "string" ? /^\S*/.exec(next)![0] : "";
+    if (trail) parts[j + 1] = (next as string).slice(trail.length);
+    out.push(
+      lead || trail ? (
+        <span key={`w${j}`} className={styles.together}>
+          {lead}
+          {part}
+          {trail}
+        </span>
+      ) : (
+        part
+      ),
+    );
+  }
+  return out;
+}
+
 export function CommentarySheet({
   entry,
   onClose,
@@ -312,6 +346,48 @@ export function CommentarySheet({
   const edition = opening?.edition;
   const citedKey = (surah: number, ayah: number): string | null =>
     edition ? formatAyahKey(edition, surah, ayah) : null;
+  // A paragraph of the source's prose, with the verses it cites as links and the
+  // initials its key explains as buttons, in the introduction as in the note.
+  // A "v. 5" is a verse of this note's surah. `at` names the paragraph, so each
+  // initial's button is told apart from the same initials elsewhere.
+  const prose = (para: string, at: string): ReactNode[] =>
+    together(splitSigla(para, sigla)
+      .flatMap((part): (string | Citation | Siglum)[] =>
+        typeof part === "string" ? splitCitations(part, opening?.surah) : [part],
+      )
+      .map((part, j) => {
+        if (typeof part === "string") return part;
+        if ("sig" in part) {
+          const here = `${at}-${j}`;
+          return (
+            <button
+              key={j}
+              type="button"
+              className={styles.siglum}
+              data-siglum={here}
+              aria-expanded={keyOpen?.at === here}
+              aria-controls={cardId}
+              onClick={() => setKeyOpen((o) => (o?.at === here ? null : { at: here, sig: part.sig }))}
+            >
+              {part.text}
+            </button>
+          );
+        }
+        const key = citedKey(part.surah, part.ayah);
+        if (!key) return part.text;
+        return (
+          <button
+            key={j}
+            type="button"
+            className={styles.cite}
+            disabled={!onGo || !(canHop?.(key) ?? true)}
+            aria-label={t.goToVerse(t.ayahLabel(key) ?? part.text)}
+            onClick={() => onGo?.(key)}
+          >
+            {part.text}
+          </button>
+        );
+      }));
   // The drawer's own words follow the app's language; the source's words follow
   // the source's, so an Arabic tafsir reads right to left in an English app and
   // The Study Quran reads left to right in an Arabic one.
@@ -387,7 +463,7 @@ export function CommentarySheet({
               <h3 className={styles.introTitle}>{entry.intro.title}</h3>
               {entry.intro.paragraphs.map((para, i) => (
                 <p key={i} className={styles.introPara}>
-                  {para}
+                  {prose(para, `intro-${i}`)}
                 </p>
               ))}
             </section>
@@ -403,43 +479,7 @@ export function CommentarySheet({
           <section className={styles.commentary} aria-label={t.commentaryTitle} {...own}>
             {entry.paragraphs.map((para, i) => (
               <p key={i} className={styles.para}>
-                {splitSigla(para, sigla)
-                  .flatMap((part): (string | Citation | Siglum)[] =>
-                    typeof part === "string" ? splitCitations(part) : [part],
-                  )
-                  .map((part, j) => {
-                  if (typeof part === "string") return part;
-                  if ("sig" in part) {
-                    const at = `${i}-${j}`;
-                    return (
-                      <button
-                        key={j}
-                        type="button"
-                        className={styles.siglum}
-                        data-siglum={at}
-                        aria-expanded={keyOpen?.at === at}
-                        aria-controls={cardId}
-                        onClick={() => setKeyOpen((o) => (o?.at === at ? null : { at, sig: part.sig }))}
-                      >
-                        {part.text}
-                      </button>
-                    );
-                  }
-                  const key = citedKey(part.surah, part.ayah);
-                  if (!key) return part.text;
-                  return (
-                    <button
-                      key={j}
-                      type="button"
-                      className={styles.cite}
-                      disabled={!onGo || !(canHop?.(key) ?? true)}
-                      aria-label={t.goToVerse(t.ayahLabel(key) ?? part.text)}
-                      onClick={() => onGo?.(key)}
-                    >
-                      {part.text}
-                    </button>
-                  );
-                })}
+                {prose(para, `${i}`)}
               </p>
             ))}
           </section>
