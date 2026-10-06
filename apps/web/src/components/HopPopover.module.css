@@ -27,6 +27,8 @@
 }
 
 .grip {
+  position: relative;
+  z-index: 2;
   inline-size: 40px;
   block-size: 4px;
   margin: 0 auto var(--space-2);
@@ -34,12 +36,22 @@
   background: var(--hairline);
 }
 
+/* Pinned to the sheet's top edge over the scrolling rows, as the note's top
+   row is, so the title and the close button stay in reach of a long list. It
+   reaches up over the sheet's top padding, where the handle sits, so rows do
+   not show above it as they pass; the handle is drawn over it until it goes. */
 .head {
+  position: sticky;
+  inset-block-start: calc(-1 * var(--space-3));
+  z-index: 1;
+  margin-block-start: calc(-1 * var(--space-3));
+  padding-block-start: var(--space-3);
   display: flex;
   align-items: center;
   gap: var(--space-2);
   padding-block-end: var(--space-2);
   border-block-end: 1px solid var(--hairline);
+  background: var(--paper-raised);
 }
 
 .glyph {
@@ -105,6 +117,11 @@
   font: inherit;
   color: inherit;
   cursor: pointer;
+}
+
+/* A row with nothing to open out is only a label beside its hop button. */
+.rowText:not([aria-expanded]) {
+  cursor: default;
 }
 
 .rowText:focus-visible {

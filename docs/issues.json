@@ -2691,6 +2691,30 @@
       "note": "RAIL_GLYPH in packages/core/src/adjacency.ts gives later = ≈→ and earlier = ≈←, while the book and the page bar run right to left. Not flipped by the agent: the owner reviewed the signs on 2026-10-04, so the direction is theirs to choose."
     },
     {
+      "id": "list-sheet-title-scrolls-away",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑨"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on a phone (2026-10-06): HopPopover and RootLens scroll as one, so .head (title + close) left the sheet. Fixed the same day: .head is sticky over the sheet's top padding in both, the grip drawn above it (pitch e2e: 'scrolled down a list picked from the number, its title and close button stay at the top')."
+    },
+    {
+      "id": "lookalike-row-opens-to-nothing",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑩"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/src/components/HopPopover.test.tsx",
+      "note": "Found walking the pitch on a phone (2026-10-06) with 36:31 -> 38:3: an edge with no span/toSpan has no wordDiff, so DiffView renders null, but the row still toggled aria-expanded and turned its caret. Fixed the same day: HopPopover offers the toggle and caret only when wordDiff(edge, fromKey) is not null."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",

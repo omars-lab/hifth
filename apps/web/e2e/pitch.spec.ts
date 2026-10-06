@@ -738,6 +738,56 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     });
   }
 
+  for (const pick of [
+    { key: "2:255", page: 42, item: /^Same roots/ },
+    // 35:40's look-alike in a later surah, 46:4, names the words they share, so
+    // its row opens to the two verses side by side and the list grows to scroll.
+    { key: "35:40", page: 439, item: /^Similar verses in later surahs/ },
+  ]) {
+    test(`scrolled down a list picked from the number, its title and close button stay at the top: ${pick.item.source}`, async ({
+      page,
+    }) => {
+      // The list scrolled as one, so its title and its close button went up and
+      // out of the sheet with the first rows, as the note's once did.
+      await page.goto(`/#/hafs-kfqc/${pick.key}`);
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const number = pageSvg(page, pick.page).locator(
+        `[data-verse-number][data-verse-key="quran/hafs-kfqc/${pick.key}"]`,
+      );
+      await settle(number);
+      const at = (await number.boundingBox())!;
+      await page.mouse.click(at.x + at.width / 2, at.y + at.height / 2);
+      const menu = page.getByRole("menu", { name: new RegExp(pick.key) });
+      await settle(menu);
+      await menu.getByRole("menuitem", { name: pick.item }).click();
+      const list = page.getByRole("dialog");
+      await expect(list).toHaveCount(1);
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      // Open the first row's comparison, so even a one-row list is long enough to scroll.
+      const caret = list.locator("[aria-expanded=false]").first();
+      if ((await caret.count()) > 0) await caret.click();
+      await expect
+        .poll(() => list.evaluate((el) => el.scrollHeight - el.clientHeight), { timeout: 10_000 })
+        .toBeGreaterThan(150);
+      await list.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+      expect(await list.evaluate((el) => el.scrollTop), "the list scrolled").toBeGreaterThan(100);
+      const box = (await list.boundingBox())!;
+      for (const [what, target] of [
+        ["the close button", list.getByRole("button", { name: "Close" })],
+        ["the title", list.getByRole("heading").first()],
+      ] as const) {
+        const spot = (await target.boundingBox())!;
+        expect(spot.y, `${what} is still inside the sheet`).toBeGreaterThanOrEqual(box.y - 1);
+        const hit = await page.evaluate(
+          ([x, y]) => document.elementFromPoint(x!, y!)?.closest("header") !== null,
+          [spot.x + spot.width / 2, spot.y + spot.height / 2],
+        );
+        expect(hit, `${what} is not covered by the rows`).toBe(true);
+      }
+    });
+  }
+
   test("tapping a verse opens a full-width bottom sheet with no side", async ({ page }) => {
     // Deep-linking a verse selects it, which opens the note the same way a tap
     // does (the pitch build opens on selection). 2:255 is Āyat al-Kursī.

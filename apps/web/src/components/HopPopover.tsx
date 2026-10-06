@@ -2,6 +2,7 @@ import { Suspense, useCallback, useLayoutEffect, useRef, useState } from "react"
 import {
   orderForHifz,
   qulVerseUrlFromKey,
+  wordDiff,
   type Edge,
   type LeafSide,
   type RailChip,
@@ -162,7 +163,10 @@ export function HopPopover({
             // outside library rather than dead-ending (the qul-reliance
             // decision's "link back to it" half). Ships a URL, not bytes.
             const qulUrl = enabled ? null : qulVerseUrlFromKey(edge.to);
-            const isOpen = expanded === edge.to;
+            // A pair that matches in more than one place names no words, so
+            // there is nothing to lay side by side: its row does not offer to open.
+            const comparable = fromKey !== null && wordDiff(edge, fromKey) !== null;
+            const isOpen = comparable && expanded === edge.to;
             const diffId = `diff-${edge.to.replace(/[^\w-]/g, "-")}`;
             return (
               <li key={edge.to} className={styles.row}>
@@ -170,17 +174,19 @@ export function HopPopover({
                   <button
                     type="button"
                     className={styles.rowText}
-                    aria-expanded={isOpen}
-                    aria-controls={fromKey ? diffId : undefined}
-                    onClick={() => setExpanded((k) => (k === edge.to ? null : edge.to))}
+                    aria-expanded={comparable ? isOpen : undefined}
+                    aria-controls={comparable ? diffId : undefined}
+                    onClick={comparable ? () => setExpanded((k) => (k === edge.to ? null : edge.to)) : undefined}
                   >
                     <span className={styles.rowLabel}>
                       {label}
                       {edge.twin && <span className={styles.badge}>{t.twin}</span>}
                       {edge.root && <span className={styles.root}>{edge.root}</span>}
-                      <span className={styles.caret} data-open={isOpen || undefined} aria-hidden="true">
-                        ⌄
-                      </span>
+                      {comparable && (
+                        <span className={styles.caret} data-open={isOpen || undefined} aria-hidden="true">
+                          ⌄
+                        </span>
+                      )}
                     </span>
                     {edge.note && <span className={styles.note}>{edge.note}</span>}
                     {!enabled && (
@@ -210,7 +216,7 @@ export function HopPopover({
                     </button>
                   )}
                 </div>
-                {isOpen && fromKey && (
+                {isOpen && fromKey !== null && (
                   <div id={diffId}>
                     <Suspense fallback={null}>
                       <DiffView edge={edge} fromKey={fromKey} />
