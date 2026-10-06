@@ -3220,6 +3220,8 @@ export function App(): JSX.Element {
               /* The look-alike chips, on the desk just outside the live page's
                  outer edge rather than out at the window's corner. */
               beside={(side) => hopRail(side)}
+              // By the chosen verse's page, the side its note does not cover.
+              besideSide={sheetSide === "left" ? "right" : sheetSide === "right" ? "left" : undefined}
               edgeRails={
                 desktop ? (
                   <EdgeGrabRails

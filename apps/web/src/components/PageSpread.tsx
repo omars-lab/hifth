@@ -86,6 +86,12 @@ interface PageSpreadProps {
    * verse they belong to, so the spread offers them a place beside the paper.
    */
   beside?: (side: "left" | "right") => ReactNode;
+  /**
+   * The page the chips belong beside, when it is not the live one: a verse
+   * picked on the facing page. Its note is laid over the live page, so chips
+   * left there would sit under the note's edge.
+   */
+  besideSide?: "left" | "right" | undefined;
 }
 
 /**
@@ -170,6 +176,7 @@ export function PageSpread({
   solo = false,
   edgeRails,
   beside,
+  besideSide,
 }: PageSpreadProps): JSX.Element {
   const { t } = useT();
 
@@ -181,10 +188,11 @@ export function PageSpread({
   const liveSide = page === right ? "right" : "left";
 
   /* The desk either side of the book, as two boxes of equal share so the book
-     stays centred. Only the one beside the live page holds anything. */
+     stays centred. Only the one beside the chosen verse's page holds anything,
+     which is the live page unless the verse was picked on the facing one. */
   const desk = (side: "left" | "right") => (
     <div className={styles.desk} data-desk={side}>
-      {side === liveSide && beside?.(side)}
+      {side === (besideSide ?? liveSide) && beside?.(side)}
     </div>
   );
 
