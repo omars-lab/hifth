@@ -3338,6 +3338,7 @@ export function App(): JSX.Element {
                 pageBudget={desktop ? spreadBudget().reading : MOUNTED_PAGE_CAP}
                 label={t.pageN(page)}
                 selectedKey={selectedKey}
+                introSurah={introSheet ? introSurah : null}
                 breadcrumbKey={breadcrumbKey}
                 rangeKeys={selectedRange}
                 onSelect={handleVerse}

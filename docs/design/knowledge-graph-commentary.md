@@ -757,3 +757,14 @@ like a way onward and was not one.
 other verse it names stays a link. The surah's introduction is not changed: there, the opening
 verse is somewhere new to go.
 
+### ㉒ When a surah's introduction opens, can the reader still see the surah's name? · **fixed**
+
+When a reader opens a verse's note, the page slides up so the verse stays in sight above the
+note. An introduction opened from the surah's name did not do that. On an upright iPad, where the
+note card covers the lower part of the page, it covered half of Al-Kahf's name and its first
+verses: the reader lost sight of the very thing the note is about.
+
+**Fixed, 2026-10-06:** the surah's name is treated like the selected verse. When its introduction
+opens, the page slides up so the name and the lines under it sit above the card. On a phone,
+where the card is shorter, nothing changes.
+
