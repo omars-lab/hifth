@@ -399,9 +399,10 @@ button.grip {
   .sheet {
     inset-inline-start: auto;
     inset-inline-end: var(--space-5);
-    inset-block-end: var(--space-5);
+    /* Inside the page's room, above the bars under it (useRoomForCards). */
+    inset-block-end: calc(var(--room-foot, 0px) + var(--space-5));
     inline-size: 460px;
-    max-block-size: 80vh;
+    max-block-size: min(80vh, calc(var(--room-block, 100vh) - 2 * var(--space-5)));
     border-radius: var(--radius-lg);
   }
 
