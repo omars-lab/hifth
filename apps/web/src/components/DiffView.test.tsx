@@ -177,7 +177,7 @@ describe("DiffView (spec §3 — why these two are confusable)", () => {
       container.querySelectorAll(`.${styles.who as string}`),
       (el) => el.textContent,
     );
-    expect(labels[0]).toMatch(/٢:٤٨ · هنا/);
+    expect(labels[0]).toMatch(/٢:٤٨، هنا/);
     expect(labels[1]).toMatch(/٢:١٢٣/);
     expect(labels[1]).not.toMatch(/هنا/);
   });

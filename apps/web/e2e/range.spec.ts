@@ -40,14 +40,14 @@ test.describe("Hifth · the highlighted range", () => {
     // The menu is a modal dialog titled with the range in Arabic-Indic digits.
     const menu = page.getByRole("dialog");
     await expect(menu).toBeVisible();
-    await expect(menu.getByRole("heading")).toHaveText("البقرة · ٢:٤٧–٢:٤٨");
+    await expect(menu.getByRole("heading")).toHaveText("البقرة، ٢:٤٧–٢:٤٨");
 
     // Merged: rows from BOTH members of the range, each naming its source.
     // 2:47 → 2:40 / 2:122 / 2:123 (+ shared roots); 2:48 → 2:122 / 2:123 / 82:19.
     await expect(menu.getByText("من ٢:٤٧").first()).toBeVisible();
     await expect(menu.getByText("من ٢:٤٨").first()).toBeVisible();
-    await expect(menu.getByRole("button", { name: /انتقل إلى البقرة · ٢:٤٠/ }).first()).toBeVisible();
-    await expect(menu.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ })).toBeVisible();
+    await expect(menu.getByRole("button", { name: /انتقل إلى البقرة، ٢:٤٠/ }).first()).toBeVisible();
+    await expect(menu.getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٣/ })).toBeVisible();
 
     // Hifz order holds across the merge: the same-page hop (2:40) comes first.
     const first = menu.getByRole("button", { name: /انتقل إلى/ }).first();
@@ -96,7 +96,7 @@ test.describe("Hifth · the highlighted range", () => {
       const menu = page.getByRole("dialog");
       await expect(menu).toBeVisible();
 
-      await expect(menu.getByRole("button", { name: /انتقل إلى الانفطار · ٨٢:١٩/ })).toBeDisabled();
+      await expect(menu.getByRole("button", { name: /انتقل إلى الانفطار، ٨٢:١٩/ })).toBeDisabled();
       await expect(menu.getByText(/هذه الصفحة غير متوفّرة بعد/).first()).toBeVisible();
       // …while the shared-root row anchored to a word (2:122#w3) blames the right
       // thing, and blames it in a build where the page reason is also on screen:
@@ -118,15 +118,15 @@ test.describe("Hifth · the highlighted range", () => {
     // whose edge survived the merge (mergeRangeEdges rule 2): 2:47's carries a
     // bare `ctx` flag, 2:48's the curated «شفاعة ↔ عدل», and a note outranks any
     // amount of derived flagging. So the row reads as 2:48's and leaps from it.
-    await expect(menu.getByRole("button", { name: "البقرة · ٢:١٢٣ من ٢:٤٧، ٢:٤٨" })).toBeVisible();
+    await expect(menu.getByRole("button", { name: "البقرة، ٢:١٢٣ من ٢:٤٧، ٢:٤٨" })).toBeVisible();
     await expect(menu.getByText("شفاعة ↔ عدل")).toBeVisible();
-    await menu.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ }).tap();
+    await menu.getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٣/ }).tap();
 
     await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:١٢٣/ }),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: /ارجع إلى البقرة · ٢:٤٨/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /ارجع إلى البقرة، ٢:٤٨/ })).toBeVisible();
     // The highlight is gone with the leap: one hop list at a time.
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });

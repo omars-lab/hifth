@@ -80,8 +80,8 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
   it("titles the range in Arabic-Indic digits and lists its merged hops", () => {
     renderMenu();
     const dialog = screen.getByRole("dialog");
-    expect(within(dialog).getByRole("heading")).toHaveTextContent("البقرة · ٢:٤٧–٢:٤٨");
-    expect(within(dialog).getByText(/البقرة · ٢:١٢٢/)).toBeInTheDocument();
+    expect(within(dialog).getByRole("heading")).toHaveTextContent("البقرة، ٢:٤٧–٢:٤٨");
+    expect(within(dialog).getByText(/البقرة، ٢:١٢٢/)).toBeInTheDocument();
     // each row names the range member that contributed it (the merge, visible)
     expect(within(dialog).getByText("من ٢:٤٧")).toBeInTheDocument();
     expect(within(dialog).getByText("من ٢:٤٨")).toBeInTheDocument();
@@ -89,8 +89,8 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
 
   it("enables vendored leaps and disables un-vendored ones with an honest note", () => {
     renderMenu();
-    expect(screen.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٢/ })).toBeEnabled();
-    expect(screen.getByRole("button", { name: /انتقل إلى إبراهيم · ١٤:٥/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٢/ })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /انتقل إلى إبراهيم، ١٤:٥/ })).toBeDisabled();
     expect(screen.getByText(/غير متوفّرة بعد/)).toBeInTheDocument();
   });
 
@@ -127,7 +127,7 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
 
   it("hops with the merged edge (the caller reads its `from` for the trail)", () => {
     const { props } = renderMenu();
-    fireEvent.click(screen.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٢/ }));
+    fireEvent.click(screen.getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٢/ }));
     expect(props.onHop).toHaveBeenCalledWith(HOPS[0]);
   });
 

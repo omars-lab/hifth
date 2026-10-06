@@ -52,7 +52,7 @@ test.describe("Hifth shell", () => {
     // The selection chip appears with the surah name + ayah ref, and the
     // highlighter drew the mark into the additive overlay.
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٣٨/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٣٨/ }),
     ).toBeVisible();
     // One marker band per line the ayah occupies — 2:38 runs across two on
     // page 7. Not asserted as a bare count: `toHaveCount(1)` passed here for

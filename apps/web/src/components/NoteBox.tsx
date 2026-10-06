@@ -168,7 +168,7 @@ export function NoteBox({
       <div className={styles.head}>
         {about ? (
           <>
-            {about.count === 1 ? <>{label} · </> : null}
+            {about.count === 1 ? <>{label}{t.sep}</> : null}
             <button
               type="button"
               ref={aboutRef}
@@ -182,7 +182,7 @@ export function NoteBox({
             >
               {about.short ?? about.name}
             </button>
-            {about.count > 1 ? <> · {t.noteVerses(about.count)}</> : null}
+            {about.count > 1 ? <>{t.sep}{t.noteVerses(about.count)}</> : null}
           </>
         ) : (
           (head ?? label)

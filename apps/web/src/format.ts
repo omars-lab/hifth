@@ -219,7 +219,8 @@ export function tenths(n: number, lang: Lang): string {
 }
 
 /**
- * Human label for a surah/ayah pair: "البقرة · ٢:٤١" / "Al-Baqarah · 2:41".
+ * Human label for a surah/ayah pair: "البقرة، ٢:٤١" / "Al-Baqarah · 2:41", the
+ * two halves joined by the language's own separator (`LOCALES[lang].sep`).
  *
  * The coordinate form, for callers that already hold the numbers — the jumper's
  * result rows, which are built from a parsed query and never see a key. It is
@@ -231,11 +232,11 @@ export function tenths(n: number, lang: Lang): string {
 export function ayahLabelAt(surah: number, ayah: number, lang: Lang): string {
   const name = surahName(surah, lang);
   const ref = `${digits(surah, lang)}:${digits(ayah, lang)}`;
-  return name ? `${name} · ${ref}` : ref;
+  return name ? `${name}${LOCALES[lang].sep}${ref}` : ref;
 }
 
 /**
- * Human label for an ayah key: "البقرة · ٢:٤١" / "Al-Baqarah · 2:41". Returns
+ * Human label for an ayah key: "البقرة، ٢:٤١" / "Al-Baqarah · 2:41". Returns
  * null if the key is not a bare ayah key.
  */
 export function ayahLabel(key: string, lang: Lang): string | null {
@@ -252,7 +253,7 @@ export function ayahRef(key: string, lang: Lang): string | null {
 }
 
 /**
- * Human label for a highlighted range, e.g. "البقرة · ٢:٤٧–٢:٤٨" (spec §9's menu
+ * Human label for a highlighted range, e.g. "البقرة، ٢:٤٧–٢:٤٨" (spec §9's menu
  * title). A one-ayah range reads as a plain ayah label. Returns null if either
  * endpoint is not a bare ayah key.
  */
@@ -263,5 +264,5 @@ export function rangeLabel(fromKey: string, toKey: string, lang: Lang): string |
   if (!from || !to) return null;
   const name = surahName(from.surah, lang);
   const span = `${ayahRef(fromKey, lang)}–${ayahRef(toKey, lang)}`;
-  return name ? `${name} · ${span}` : span;
+  return name ? `${name}${LOCALES[lang].sep}${span}` : span;
 }

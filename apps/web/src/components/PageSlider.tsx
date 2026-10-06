@@ -866,7 +866,7 @@ export function PageSlider({
               <span className="numeric">{t.pageOfTotal(scrub, total)}</span>
               {context !== null && (
                 <span className={styles.context}>
-                  {juzLabel} · {t.surahName(context.surah)}
+                  {juzLabel}{t.sep}{t.surahName(context.surah)}
                 </span>
               )}
               <span className={styles.speed} data-testid="scrub-speed">
@@ -892,7 +892,7 @@ export function PageSlider({
                 — off the vendored inventory the line is left off rather than guessed. */}
             {context !== null && (
               <span className={styles.context}>
-                {juzLabel} · {t.surahName(context.surah)}
+                {juzLabel}{t.sep}{t.surahName(context.surah)}
               </span>
             )}
             {/* Said before you let go, not only after. The drag is the moment

@@ -104,7 +104,7 @@ describe("App shell", () => {
   });
 
   it("renders an English wordmark when the chrome is English", () => {
-    // The wordmark follows the UI language. It was pinned to «حفظ · مِلاحة
+    // The wordmark follows the UI language. It was pinned to «حفظ، مِلاحة
     // للحُفّاظ» in both languages; this reverses that, because the wordmark is
     // chrome and only the mus'haf and the verse text stay Arabic. This is the
     // regression that runs on every push — the English path's home is the phone
@@ -170,11 +170,38 @@ describe("App shell", () => {
     // Footer now shows the surah name + ayah ref in Arabic-Indic digits, and
     // the verse drawer rises under the same name.
     await waitFor(() => {
-      expect(within(screen.getByRole("contentinfo")).getByText(/البقرة · ٢:٤١/)).toBeInTheDocument();
+      expect(within(screen.getByRole("contentinfo")).getByText(/البقرة، ٢:٤١/)).toBeInTheDocument();
     });
-    expect(screen.getByRole("region", { name: /البقرة · ٢:٤١/ })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /البقرة، ٢:٤١/ })).toBeInTheDocument();
     // And the highlighter drew a selection clone into the overlay.
     expect(container.querySelector("#hifth-overlay .hl-sel")).not.toBeNull();
+  });
+
+  it("never puts a middle dot beside Arabic, on screen or in a spoken label", async () => {
+    // The dot «·» is the same small mark as the Arabic zero «٠», so «البقرة · ٢:٤١»
+    // can read as a stray digit. The strings test covers the catalog; this one
+    // covers what the app glues together itself, with a verse open so the
+    // footer, the drawer and the rail all have something to say.
+    const { container } = render(<App />);
+    const poly = await waitFor(() => {
+      const p = container.querySelector<SVGElement>("#verse-1");
+      expect(p).not.toBeNull();
+      return p!;
+    });
+    act(() => {
+      poly.dispatchEvent(new Event("pointerup", { bubbles: true }));
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("region", { name: /البقرة، ٢:٤١/ })).toBeInTheDocument();
+    });
+    const besideArabic = /[\u0600-\u06FF]\s*·|·\s*[\u0600-\u06FF]/;
+    const said = [...document.querySelectorAll("*")].flatMap((el) =>
+      ["aria-label", "title", "placeholder", "aria-description"]
+        .map((name) => el.getAttribute(name))
+        .filter((value): value is string => value !== null),
+    );
+    const shown = (document.body.textContent ?? "").split(/\n/);
+    expect([...said, ...shown].filter((text) => besideArabic.test(text))).toEqual([]);
   });
 
   it("surfaces a hop rail chip for a selected ayah that has edges", async () => {
@@ -269,7 +296,7 @@ describe("the revision record — which taps become a look", () => {
     // The hop landed — asserted on the live region, which says it once, rather
     // than on the page text, where the trail bead says it too.
     await waitFor(() => {
-      expect(screen.getByRole("status")).toHaveTextContent(/انتقلت إلى البقرة · ٢:٤٧/);
+      expect(screen.getByRole("status")).toHaveTextContent(/انتقلت إلى البقرة، ٢:٤٧/);
     });
     // …and the record still holds only the ayah the reader chose.
     const { events } = await readRecord();
