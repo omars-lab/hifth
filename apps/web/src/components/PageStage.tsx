@@ -68,6 +68,7 @@ import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT, type Strings } from "../i18n";
 import type { TurnStyle } from "../turn-style";
 import styles from "./PageStage.module.css";
+import { printedNumbersOf } from "./verse-numbers";
 
 interface PageStageProps {
   resolver: Resolver;
@@ -516,13 +517,14 @@ function drawVerseDots(
   if (dots.size === 0 || !words) return;
   const g = document.createElementNS(SVG_NS, "g");
   g.setAttribute("data-verse-dots", "");
+  const printed = printedNumbersOf(svg);
   for (const [key, count] of dots) {
     const at = parseAyahKey(key);
     const outline = at && svg.querySelector(`path.ayahPolygon[surah="${at.surah}"][ayah="${at.ayah}"]`);
     const lines = outline ? rectsOf(outline.getAttribute("d") ?? "") : null;
     const span = words.span(key);
     if (!at || !lines || !span) continue;
-    const spot = verseNumberSpot(lines, words.boxesFor(key, span.from, span.to));
+    const spot = verseNumberSpot(lines, words.boxesFor(key, span.from, span.to), "upper", printed.get(`${at.surah}:${at.ayah}`));
     if (!spot) continue;
     const dot = document.createElementNS(SVG_NS, "g");
     dot.setAttribute("data-verse-dot", `${at.surah}:${at.ayah}`);
@@ -567,13 +569,14 @@ function drawConfusionMarks(
   if (marks.size === 0 || !words) return;
   const g = document.createElementNS(SVG_NS, "g");
   g.setAttribute("data-confusion-marks", "");
+  const printed = printedNumbersOf(svg);
   for (const [key, m] of marks) {
     const at = parseAyahKey(key);
     const outline = at && svg.querySelector(`path.ayahPolygon[surah="${at.surah}"][ayah="${at.ayah}"]`);
     const lines = outline ? rectsOf(outline.getAttribute("d") ?? "") : null;
     const span = words.span(key);
     if (!at || !lines || !span) continue;
-    const spot = verseNumberSpot(lines, words.boxesFor(key, span.from, span.to), "lower");
+    const spot = verseNumberSpot(lines, words.boxesFor(key, span.from, span.to), "lower", printed.get(`${at.surah}:${at.ayah}`));
     if (!spot) continue;
     const mark = document.createElementNS(SVG_NS, "g");
     mark.setAttribute("data-confusion-mark", `${at.surah}:${at.ayah}`);
