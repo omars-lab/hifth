@@ -1327,6 +1327,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   coverTopRef.current = coverTop;
   const railBottomRef = useRef(railBottom);
   railBottomRef.current = railBottom;
+  /** The lift above a phone note (below), for the resize observer declared before it. */
+  const liftRef = useRef<() => void>(() => {});
   /*
    * The step an edge grab latched, held between the grab going down and coming
    * up (see the edge verbs on the handle): begin latches which way the grabbed
@@ -1506,7 +1508,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     const layer = layerRef.current;
     if (!layer || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(() => {
-      if (measureFit()) applyTransform();
+      if (!measureFit()) return;
+      applyTransform();
+      // A note is still up over the foot of a stage that has changed size —
+      // the phone turned sideways — so its verse is brought up into what
+      // still shows, the same as when the note arrived.
+      if (coverTopRef.current !== null) liftRef.current();
     });
     ro.observe(layer);
     return () => ro.disconnect();
@@ -2041,14 +2048,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * leave it never arriving, and it may have been the thing that selected the
    * verse to begin with.
    */
-  const coverSeen = useRef(coverTop);
-  useEffect(() => {
-    if (coverSeen.current === coverTop) return;
-    coverSeen.current = coverTop;
-    let raf = 0;
+  const liftRaf = useRef(0);
+  const lift = useCallback(() => {
+    cancelAnimationFrame(liftRaf.current);
     const bring = () => {
       if (tweenRef.current !== null) {
-        raf = requestAnimationFrame(bring);
+        liftRaf.current = requestAnimationFrame(bring);
         return;
       }
       const fit = measureFit();
@@ -2082,8 +2087,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       void tweenTo(target);
     };
     bring();
-    return () => cancelAnimationFrame(raf);
-  }, [coverTop, measureFit, tweenTo]);
+  }, [measureFit, tweenTo]);
+  liftRef.current = lift;
+  const coverSeen = useRef(coverTop);
+  useEffect(() => {
+    if (coverSeen.current === coverTop) return;
+    coverSeen.current = coverTop;
+    lift();
+    return () => cancelAnimationFrame(liftRaf.current);
+  }, [coverTop, lift]);
 
   /**
    * The one settle step every road onto a page ends with.
