@@ -602,3 +602,27 @@ from where a reader's eye would go to find a later page. The owner looked over t
 **What would answer it:** the owner choosing, from the two arrows drawn on a real page, whether
 "later" points left (with the book) or right (as now, the way most English readers expect
 "next").
+
+### ⑨ Deep in a list of roots or look-alikes, can the reader still close it? · **fixed**
+
+On a phone the roots list and the look-alike list rise from the bottom of the screen. Scrolling
+down either one carried its title and its close button up and out of sight with the first rows,
+so the reader had to scroll all the way back to put it away. The note had the same fault and was
+fixed on its own; these two lists are built the same way and were missed. Found walking the
+pitch on a phone on 2026-10-06.
+
+**Fixed, 2026-10-06:** both lists keep their title and close button pinned to the top edge, over
+the rows as they pass. A test scrolls each list to its end and checks that the close button and
+the title are still inside the list and on top of the rows.
+
+### ⑩ Does every look-alike row that offers to open have something to show? · **fixed**
+
+A look-alike row can open out to show the two verses side by side, with the words they share
+washed green. Some pairs match in more than one place, so no particular words are named and
+there is nothing to show; 452 of the 2,996 pairs are like this. Their rows offered to open
+anyway: the arrow turned, and nothing came, which reads as broken. Found on 2026-10-06 with
+Ya-Sin 36:31 and its look-alike in Sad.
+
+**Fixed, 2026-10-06:** a row offers to open only when its pair names the words they share. The
+others keep their label and their button to go there. A unit test draws one row of each kind and
+checks that only the first can open.
