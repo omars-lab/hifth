@@ -99,4 +99,6 @@
 .hint {
   color: var(--ink-faint);
   font-size: var(--text-sm);
+  /* Two even lines on a phone, never one word left alone under the rest. */
+  text-wrap: balance;
 }
