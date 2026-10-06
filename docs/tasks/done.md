@@ -997,3 +997,52 @@ before the refactor. Every open item in it is now written in full in `docs/backl
 confusion-map questions were already indexed, the Preact swap became `docs/performance.md` ⑱, and
 the library command-line tool became PLAN.md follow-up 22. The file was removed so there is one
 backlog, not two.
+
+## #52–#90 — Archived 2026-10-06: walking the pitch on phone, desktop and iPad, fault by fault
+
+**Done:** 2026-10-05 to 2026-10-06, shipped through PRs #257 to #288. Each fault left a test
+behind (mostly in the pitch end-to-end tests); the reasoning lives in those PRs, in the
+commentary design note's numbered items, and in the issues list.
+
+- #52 — Stop notes repeating a passage across the book's page break
+- #53 — Start a followed related verse's note at the top
+- #54 — Don't lift the page when switching to one page with a note open
+- #55 — Back arrow: space after it, and point the reading way in Arabic
+- #56 — Arabic page numbers in Arabic digits (owner chose, 2026-10-05)
+- #57 — Highlight a verse opened from a link
+- #58 — Arabic: the dot between surah and verse number looked like a zero
+- #59 — Arabic note foot: credit lines in the right direction
+- #60 — Phone verse bar: Arabic words under the tools were cut off
+- #61 — Verse-number button missing on some verses (2:41 on page 7)
+- #62 — Arabic: page slider read its value in Western digits
+- #63 — Arabic: trail summary said «٠ روابط» (zero links)
+- #64 — Build the three pen-bar homes (floating, bottom row, side) with a setting
+- #65 — Arabic: the pitch's first-screen hint was in English
+- #66 — Phone: the first-screen hint left one word alone on its second line
+- #67 — Pitch: hold back the install banner on iPhone and iPad
+- #68 — Desktop: arrow keys didn't turn the page while a note was open
+- #69 — Desktop: the verse-number menu covered its own verse
+- #70 — Phone: the note's top row scrolled away with a long note
+- #71 — Phone: number menu landed on the verse after the page dropped back
+- #72 — Desktop: roots and similar-verses panels spilled over the page slider
+- #73 — Phone: roots and similar-verses lists hid their verse
+- #74 — One page open: keep the note card above the page slider
+- #75 — Upright iPad: open on one page, not two small ones
+- #76 — Large iPad, one page: a finger swipe turns the page
+- #77 — Spread: look-alike chips hid under a note opened from the facing page
+- #78 — Sideways iPad: walk the pitch for the next fault
+- #79 — One list of a verse's tools at a time (number menu vs. row under the page)
+- #80 — Phone: roots and similar-verses sheets lost their title and close button when scrolled
+- #81 — Phone: look-alike chips covered a line of scripture while a note lifted the page
+- #82 — Phone held sideways: look-alike chips sat on the note's close button
+- #83 — Phone held sideways: the note covered most of its own verse
+- #84 — Phone held sideways: the verse tools drawer half-covered the reading bar's buttons
+- #85 — Phone held sideways: roots and similar-verses lists covered the verse's last line
+- #86 — Phone turned right after a link opened a verse: verse never marked
+- #87 — Desktop: first-screen hint said "Tap a verse" with a mouse
+- #88 — Line up the verse tools' icons on an upright phone
+- #89 — Pitch: say who a commentator's initials stand for in a note
+- #90 — Surah introduction and "v. N" mentions: initials and verse links like the note's
+
+The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
+spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.

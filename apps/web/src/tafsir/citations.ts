@@ -8,8 +8,9 @@ export interface Citation {
   readonly ayah: number;
 }
 
-// surah:ayah, then an optional range end, then an optional note letter.
-const CITE = /\b(\d{1,3}):(\d{1,3})(?:[–-]\d{1,3})?[a-z]?\b/g;
+// surah:ayah, then an optional range end, then an optional note letter; or a
+// verse of the surah the prose is in, which the book writes "v. 5" or "vv. 9–26".
+const CITE = /\b(\d{1,3}):(\d{1,3})(?:[–-]\d{1,3})?[a-z]?\b|\bvv?\.\s*(\d{1,3})(?:[–-]\d{1,3})?[a-z]?\b/g;
 
 // A bare verse number continuing a list — "2:42, 140, and 146" — which the book
 // writes without repeating the surah. It must end where a list item ends (a
@@ -25,14 +26,17 @@ const isVerse = (surah: number, ayah: number): boolean => {
 /**
  * Split a paragraph of The Study Quran's prose into plain text and the verses
  * it cites, in order, so each citation can be drawn as a link. A number that
- * is not a real verse stays text.
+ * is not a real verse stays text. `here` is the surah the prose is about, which
+ * a "v. 5" means; without it, those stay text.
  */
-export function splitCitations(text: string): (string | Citation)[] {
+export function splitCitations(text: string, here?: number): (string | Citation)[] {
   const parts: (string | Citation)[] = [];
   let last = 0;
   for (const m of text.matchAll(CITE)) {
-    const surah = Number(m[1]);
-    const ayah = Number(m[2]);
+    const same = m[3] !== undefined;
+    if (same && here === undefined) continue;
+    const surah = same ? here! : Number(m[1]);
+    const ayah = Number(same ? m[3] : m[2]);
     if (!isVerse(surah, ayah)) continue;
     if (m.index > last) parts.push(text.slice(last, m.index));
     parts.push({ text: m[0], surah, ayah });
