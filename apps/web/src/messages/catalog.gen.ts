@@ -296,8 +296,17 @@ export interface Catalog {
   readonly pagesVendored: (d: { readonly haveText: string | number; readonly totalText: string | number }) => string;
   readonly pauseAyah: (d: { readonly label: string | number }) => string;
   readonly penBlue: string;
+  readonly penDone: string;
   readonly penGreen: string;
+  readonly penGrip: string;
+  readonly penHomeBottom: string;
+  readonly penHomeFloat: string;
+  readonly penHomeNote: string;
+  readonly penHomeSide: string;
+  readonly penHomeStrip: string;
+  readonly penHomeTitle: string;
   readonly penLabel: string;
+  readonly penMarkUp: string;
   readonly penPink: string;
   readonly penYellow: string;
   readonly phoneTools: (d: { readonly name: string | number }) => string;

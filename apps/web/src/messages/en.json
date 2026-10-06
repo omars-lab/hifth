@@ -463,5 +463,14 @@
   "penGreen": "Green",
   "penBlue": "Blue",
   "penYellow": "Yellow",
-  "penPink": "Pink"
+  "penPink": "Pink",
+  "penMarkUp": "Mark up",
+  "penDone": "Done",
+  "penGrip": "Move the tools: drag to any edge",
+  "penHomeTitle": "Where the page tools sit",
+  "penHomeStrip": "Above the page",
+  "penHomeFloat": "Floating",
+  "penHomeBottom": "Mark up button",
+  "penHomeSide": "Down the side",
+  "penHomeNote": "On a computer, or an iPad held sideways. Above the page: a row of tools over the book, as before. Floating: drag it by its handle to any edge of the window. Mark up button: the tools wait behind one button in the bottom row, and the page is for reading until you open them. Down the side: the tools stand in the empty margin beside the book, and go to the bottom row where there is no margin."
 }
