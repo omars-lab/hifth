@@ -367,6 +367,46 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(page.getByRole("dialog", { name: /2:28/ })).toBeVisible();
     await expect.poll(() => sheet(page).evaluate((el) => el.scrollTop)).toBe(0);
   });
+
+  for (const [where, pageNo, key] of [
+    // A tall word from the line above made 2:41 look as if it had no room left
+    // for its number, so it got no button at all.
+    ["2:41, under a tall word from the line above", 7, "2:41"],
+    // Under a surah's opening the verse outlines split the number down its middle.
+    ["3:1, whose number the outlines split in two", 50, "3:1"],
+  ] as const) {
+    test(`every printed verse number has its button, on the number: ${where}`, async ({ page }) => {
+      await page.goto(`/#/hafs-kfqc/p${pageNo}`);
+      const svg = pageSvg(page, pageNo);
+      const mark = svg.locator(`[data-verse-number][data-verse-key="quran/hafs-kfqc/${key}"]`);
+      await expect(mark).toHaveCount(1, { timeout: 20_000 });
+      // The printed number nearest the button, in the page's own units, must
+      // hold the button's centre on screen.
+      const onNumber = await mark.evaluate((el) => {
+        const svgEl = (el as SVGGraphicsElement).ownerSVGElement!;
+        const m = /translate\(([-\d.]+)[ ,]+([-\d.]+)\)/.exec(el.getAttribute("transform") ?? "");
+        if (!m) return "no position";
+        const [cx, cy] = [Number(m[1]), Number(m[2])];
+        let best: Element | null = null;
+        let bestD = Infinity;
+        for (const g of svgEl.querySelectorAll("g")) {
+          const x = g.getAttribute("ayah:x");
+          const y = g.getAttribute("ayah:y");
+          if (x === null || y === null) continue;
+          const d = Math.hypot(Number(x) - cx, Number(y) - cy);
+          if (d < bestD) [best, bestD] = [g, d];
+        }
+        if (!best) return "no printed numbers";
+        const printed = best.getBoundingClientRect();
+        const button = el.getBoundingClientRect();
+        const [bx, by] = [button.x + button.width / 2, button.y + button.height / 2];
+        return bx >= printed.left && bx <= printed.right && by >= printed.top && by <= printed.bottom
+          ? "on"
+          : `off by ${bestD.toFixed(1)} units`;
+      });
+      expect(onNumber).toBe("on");
+    });
+  }
 });
 
 test.describe("Hifth · the way back from a note on a phone", () => {

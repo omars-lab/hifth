@@ -150,9 +150,12 @@ export { rectsOf } from "./ink.js";
 export {
   WordIndex,
   isWordShard,
+  printedVerseNumbers,
+  verseNumberGap,
   verseNumberSpot,
   type WireBox,
   type WireAyahWords,
+  type NumberPoint,
   type WordShard,
   type WordSpanRange,
 } from "./words.js";
