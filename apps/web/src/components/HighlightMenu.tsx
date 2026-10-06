@@ -133,7 +133,7 @@ export function HighlightMenu({
       <div
         ref={sheetRef}
         className={styles.sheet}
-        style={leafStyle(place)}
+        style={leafStyle(place, "content")}
         role="dialog"
         aria-modal={!beside}
         aria-label={t.rangeAria(title, hops.length)}

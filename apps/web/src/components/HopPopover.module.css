@@ -277,3 +277,11 @@
     animation: none;
   }
 }
+
+/* On a phone the list opens short, like the note, so the verse it is about
+   stays in sight above it (the page moves up to make room). */
+@media (max-width: 899.98px) {
+  .sheet {
+    max-block-size: 38vh;
+  }
+}
