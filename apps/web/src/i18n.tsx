@@ -285,6 +285,8 @@ export interface Strings {
   hopTo(label: string): string;
   commentaryOn(label: string): string;
   commentaryBy(source: string): string;
+  /** The first screen's hint when a tap opens a source's note. */
+  tapForNote(source: string): string;
   noteShowAll: string;
   noteShowLess: string;
   surahIntro: string;
@@ -995,6 +997,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     hopTo: (label) => m.hopTo({ label }),
     commentaryOn: (label) => m.commentaryOn({ label }),
     commentaryBy: (source) => m.commentaryBy({ source }),
+    tapForNote: (source) => m.tapForNote({ source }),
     noteShowAll: m.noteShowAll,
     noteShowLess: m.noteShowLess,
     surahIntro: m.surahIntro,

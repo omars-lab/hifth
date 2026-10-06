@@ -3586,10 +3586,11 @@ export function App(): JSX.Element {
               ? toolHint(t, tool, true)
               : // The pitch build's tap opens a Study Quran note, and this line
                 // is all a first visit is told (the tips open only from
-                // settings), so it says so. English, like the pitch's other
-                // copy; dropped from the public build with PITCH.
+                // settings), so it says so, in the app's language. Only the
+                // book's name is pitch copy; dropped from the public build
+                // with PITCH.
                 PITCH
-                ? "Tap a verse to read its Study Quran note"
+                ? t.tapForNote("Study Quran")
                 : undefined
           }
         />
