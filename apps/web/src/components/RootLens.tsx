@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import type { Edge, LeafSide, RootFamily, RootHop } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./RootLens.module.css";
+import { leafStyle, useOverLeaf } from "./over-leaf";
 
 // The ⬡ button has its own file so it can stay in the start-up script while
 // the lens loads on first open. Re-exported here for existing importers.
@@ -76,6 +77,7 @@ export function RootLens({
   const { t, dir } = useT();
   // Beside the verse on a spread: no dimming, no trapped Tab (see HopPopover).
   const beside = side !== null;
+  const place = useOverLeaf(families !== null, side);
   const sheetRef = useRef<HTMLDivElement>(null);
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -168,6 +170,7 @@ export function RootLens({
       <div
         ref={sheetRef}
         className={styles.sheet}
+        style={leafStyle(place)}
         role="dialog"
         aria-modal={!beside}
         aria-label={t.rootsAria(families.length)}
