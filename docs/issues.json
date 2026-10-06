@@ -2751,6 +2751,18 @@
       "note": "Found walking the pitch on a phone turned sideways with 35:44's note up (2026-10-06): the stage's resize observer only re-clamped the view, so the page fell back to rest under the shorter note. Fixed the same day: the cover lift is one callback, run by the cover effect and by the resize observer whenever a cover is up."
     },
     {
+      "id": "verse-tools-leave-bar-scraps",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑭"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on phones (2026-10-06): VerseDrawer was cut to its own height (4-15px short of the trail's top) and capped at 40rem, so bar buttons peeked above it upright and the current-ayah pill was halved by its edge sideways. Fixed the same day: under (max-width:40rem),(max-height:31rem) the drawer is full width with min-block-size set to the trail's measured reach."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",
