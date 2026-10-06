@@ -48,6 +48,9 @@ import { useEffect, useState } from "react";
  */
 export const DESKTOP_QUERY = "(min-width: 1024px) and (min-height: 775px)";
 
+/** A screen taller than it is wide, as an iPad held upright: one page reads larger than two. */
+export const UPRIGHT_QUERY = "(orientation: portrait)";
+
 /**
  * Subscribe to a CSS media query from JavaScript.
  *

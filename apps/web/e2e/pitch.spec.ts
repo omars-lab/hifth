@@ -350,6 +350,41 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     });
   }
 
+  test("an iPad held upright opens on one page, and turned on its side opens the book", async ({ browser }) => {
+    // Upright, two pages side by side were each half the screen wide, with
+    // empty space above and below: the mus'haf read small on the very screen
+    // it is shown on. One page upright and two on its side is what a reader
+    // of a printed mus'haf on an iPad expects.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/p440");
+    await expect(pageSvg(page, 440)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await expect(page.getByRole("radio", { name: "One page" })).toBeChecked();
+
+    await page.setViewportSize({ width: 1366, height: 1024 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBeNull();
+    await expect(page.getByRole("radio", { name: "Two pages" })).toBeChecked();
+    await context.close();
+  });
+
+  test("once the reader picks two pages upright, turning the iPad does not undo it", async ({ browser }) => {
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/p440");
+    await expect.poll(() => book(page).getAttribute("data-solo"), { timeout: 20_000 }).toBe("true");
+    await page.getByRole("radio", { name: "Two pages" }).click();
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBeNull();
+
+    await page.setViewportSize({ width: 1366, height: 1024 });
+    await page.setViewportSize({ width: 1024, height: 1366 });
+    await page.waitForTimeout(300);
+    expect(await book(page).getAttribute("data-solo")).toBeNull();
+    await context.close();
+  });
+
   test("switching to one page with a note open leaves the page where it was", async ({ page }) => {
     // The note on the facing leaf moves to the corner card when the book closes
     // to one page. It worked out what it covered at once, while the book was
