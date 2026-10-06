@@ -129,10 +129,10 @@ describe("TajweedLegend", () => {
 
   it("spells out the selected ayah's rules as text chips", () => {
     open({
-      selection: { label: "البقرة · ٢:٣٨", marks: lens().marksForKey("quran/hafs-kfqc/2:38") },
+      selection: { label: "البقرة، ٢:٣٨", marks: lens().marksForKey("quran/hafs-kfqc/2:38") },
     });
     const section = screen.getByLabelText("أحكام الآية المحددة");
-    expect(section.textContent).toContain("البقرة · ٢:٣٨");
+    expect(section.textContent).toContain("البقرة، ٢:٣٨");
     expect(section.textContent).toContain("مدّ لازم");
   });
 

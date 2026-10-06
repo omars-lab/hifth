@@ -25,10 +25,10 @@ test.describe("Hifth · share links (spec §7)", () => {
     // current ayah, and the 2:48 origin is a bead.
     await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:١٢٣/ }),
     ).toBeVisible();
     // The via origin (2:48) is on the trail — tap-to-rewind is available.
-    await expect(page.getByRole("button", { name: /ارجع إلى البقرة · ٢:٤٨/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /ارجع إلى البقرة، ٢:٤٨/ })).toBeVisible();
     // And it is *outlined on its own page* — the third noun in this test's name
     // and the one thing it did not check. The bead above is not evidence of it:
     // the bead comes from the trail, the outline comes from `PageStage`, and the
@@ -76,11 +76,11 @@ test.describe("Hifth · share links (spec §7)", () => {
     // The active page (19) is up and 2:123 is the current ayah.
     await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:١٢٣/ }),
     ).toBeVisible();
     // The two earlier origins plus the via origin are all beads.
     for (const ref of ["٢:٤٠", "٢:٤٧", "٢:٤٨"]) {
-      await expect(page.getByRole("button", { name: new RegExp(`ارجع إلى البقرة · ${ref}`) })).toBeVisible();
+      await expect(page.getByRole("button", { name: new RegExp(`ارجع إلى البقرة، ${ref}`) })).toBeVisible();
     }
   });
 
@@ -88,7 +88,7 @@ test.describe("Hifth · share links (spec §7)", () => {
     await page.goto("/");
     await tapAyah(page, "#verse-55");
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٤٨/ }),
     ).toBeVisible();
     // The URL now encodes the selection (spec §7 canonical form).
     await expect.poll(() => new URL(page.url()).hash).toBe("#/hafs-kfqc/2:48");
@@ -105,11 +105,11 @@ test.describe("Hifth · diff view (spec §3)", () => {
 
     // The 2:123 row's expander (the labelled text button, not the hop button)
     // opens the comparison. The row's own label carries the hand-written note.
-    const expander = sheet.getByRole("button", { name: /البقرة · ٢:١٢٣ شفاعة/ });
+    const expander = sheet.getByRole("button", { name: /البقرة، ٢:١٢٣ شفاعة/ });
     await expander.tap();
 
     // Both ayahs are named, and the one the reader is standing on says so.
-    await expect(sheet.getByText(/٢:٤٨ · هنا/)).toBeVisible();
+    await expect(sheet.getByText(/٢:٤٨، هنا/)).toBeVisible();
     await expect(sheet.getByText(/٢:١٢٣$/).first()).toBeVisible();
 
     // Each side is a crop of the printed page — real artwork, not a
@@ -138,7 +138,7 @@ test.describe("Hifth · keyboard a11y", () => {
     await ayah.focus();
     await page.keyboard.press("Enter");
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٤٨/ }),
     ).toBeVisible();
 
     // The rail chip is reachable and openable; the dialog takes focus.
@@ -183,7 +183,7 @@ test.describe("Hifth · keyboard a11y", () => {
  * *tree* — which controls exist, in what order, under what names — and a tree
  * is a thing a machine can hold onto. So it holds onto it here, and the human
  * check keeps only the three steps an ear can do and a runner cannot: whether
- * «الآية البقرة · ٢:٤٨» is a phrase a person would say, whether focus can
+ * «الآية البقرة، ٢:٤٨» is a phrase a person would say, whether focus can
  * escape out of the back of a sheet, and whether the whole tour survives with
  * the screen off.
  *
@@ -239,7 +239,7 @@ test.describe("Hifth · aria snapshots (the tour the ledger describes)", () => {
 
   // What makes `judge-the-phrasing` a question about phrasing rather than about
   // existence: the page is a labelled group and every ayah under it is a button
-  // named «الآية <السورة> · <المرجع>» (enhancePolygons, packages/core). The
+  // named «الآية <السورة>، <المرجع>» (enhancePolygons, packages/core). The
   // runbook step points here by name; it used to point here by position, and
   // that pointer had been wrong since the runbook was condensed.
   test("the mushaf page is a labelled group of ayah buttons", async ({ page }) => {

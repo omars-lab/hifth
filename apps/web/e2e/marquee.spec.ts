@@ -142,7 +142,7 @@ test.describe("Hifth · drag-to-highlight", () => {
     await openApp(page);
     await tapAyah(page, "#verse-55");
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٤٨/ }),
     ).toBeVisible();
   });
 });

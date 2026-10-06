@@ -122,7 +122,7 @@ test.describe("Hifth · offline", () => {
     await page.goto("/#/hafs-kfqc/2:48");
     await awaitController(page);
     await page.reload();
-    await expect(page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٤٨/ })).toBeVisible();
     await awaitCached(page, "/assets/pages/hafs-kfqc/19.svg");
 
     await context.setOffline(true);
@@ -131,11 +131,11 @@ test.describe("Hifth · offline", () => {
       await rail.getByRole("button", { name: /متشابهات في السورة/ }).tap();
       await page
         .getByRole("dialog")
-        .getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ })
+        .getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٣/ })
         .tap();
       await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
       await expect(
-        page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
+        page.getByRole("button", { name: /الآية الحالية البقرة، ٢:١٢٣/ }),
       ).toBeVisible();
     } finally {
       await context.setOffline(false);

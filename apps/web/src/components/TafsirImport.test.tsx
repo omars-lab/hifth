@@ -52,7 +52,7 @@ describe("TafsirImport", () => {
 
     await waitFor(() => expect(onImported).toHaveBeenCalledWith("study-quran"));
     expect(getTafsirProvider("study-quran")?.has(1)).toBe(true);
-    // Arabic-default UI: "… مُحمَّل · ١ سورة، ١ مدخلًا"
+    // Arabic-default UI: "… مُحمَّل، ١ سورة، ١ مدخلًا"
     expect(await screen.findByText(/مُحمَّل/)).toBeInTheDocument();
   });
 

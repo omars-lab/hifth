@@ -137,11 +137,11 @@ describe("RevisionMap", () => {
 
     const hizb1 = grid[0]!;
     expect(hizb1.getAttribute("data-state")).toBe("cold");
-    expect(hizb1.getAttribute("aria-label")).toBe("الحزب ١ · لم يُفتح");
+    expect(hizb1.getAttribute("aria-label")).toBe("الحزب ١، لم يُفتح");
 
     const hizb2 = grid[1]!;
     expect(hizb2.getAttribute("data-state")).toBe("absent");
-    expect(hizb2.getAttribute("aria-label")).toBe("الحزب ٢ · غير متوفّر في هذه النسخة");
+    expect(hizb2.getAttribute("aria-label")).toBe("الحزب ٢، غير متوفّر في هذه النسخة");
   });
 
   it("keys absent on a trimmed build, and drops the row when nothing is absent", async () => {
@@ -249,7 +249,7 @@ describe("RevisionMap", () => {
     // Two days back — the second band, not the first, and the count is in the
     // label because the ramp is not available to a screen reader.
     expect(grid[0]!.getAttribute("data-warmth")).toBe("3");
-    expect(grid[0]!.getAttribute("aria-label")).toBe("الحزب ١ · فُتح قبل ٢ يومًا");
+    expect(grid[0]!.getAttribute("aria-label")).toBe("الحزب ١، فُتح قبل ٢ يومًا");
   });
 
   it("scopes the colouring to a calendar month, and cools what falls outside it", async () => {
@@ -318,13 +318,13 @@ describe("RevisionMap", () => {
     draw({ onGoToPage: went, onClose: closed });
     const grid = await cells();
     fireEvent.click(grid[0]!);
-    expect(went).toHaveBeenCalledWith(7, "الحزب ١ · صفحة ٧");
+    expect(went).toHaveBeenCalledWith(7, "الحزب ١، صفحة ٧");
     expect(closed).toHaveBeenCalled();
   });
 
   it("says nothing extra at page scope, where the cell and the landing are one fact", async () => {
     // `goToPage`'s own wording is «صفحة ٧», which is already exactly right. A
-    // sentence built here would read «صفحة ٧ · صفحة ٧».
+    // sentence built here would read «صفحة ٧، صفحة ٧».
     const went = vi.fn();
     draw({ onGoToPage: went });
     await cells();
@@ -360,7 +360,7 @@ describe("RevisionMap", () => {
     const stops = pages.filter((cell) => cell.getAttribute("tabindex") === "0");
     expect(stops).toHaveLength(1);
     // Page 7 is where the stage is, and the only page this fixture vendors.
-    expect(stops[0]!.getAttribute("aria-label")).toBe("صفحة ٧ · لم يُفتح");
+    expect(stops[0]!.getAttribute("aria-label")).toBe("صفحة ٧، لم يُفتح");
   });
 
   it("steps the cursor through the book with the arrows, skipping paper we do not have", async () => {
@@ -375,20 +375,20 @@ describe("RevisionMap", () => {
     const stop = () =>
       grid.querySelector<HTMLElement>('[tabindex="0"]')!.getAttribute("aria-label");
 
-    expect(stop()).toBe("صفحة ٥ · لم يُفتح");
+    expect(stop()).toBe("صفحة ٥، لم يُفتح");
     fireEvent.keyDown(grid, { key: "ArrowLeft" });
-    expect(stop()).toBe("صفحة ٧ · لم يُفتح");
+    expect(stop()).toBe("صفحة ٧، لم يُفتح");
     fireEvent.keyDown(grid, { key: "ArrowLeft" });
-    expect(stop()).toBe("صفحة ١٩ · لم يُفتح");
+    expect(stop()).toBe("صفحة ١٩، لم يُفتح");
     // The end of the inventory, not the end of the print: there is nowhere
     // further to go, so the cursor stays where it is rather than sliding onto a
     // cell that cannot be pressed.
     fireEvent.keyDown(grid, { key: "ArrowLeft" });
-    expect(stop()).toBe("صفحة ١٩ · لم يُفتح");
+    expect(stop()).toBe("صفحة ١٩، لم يُفتح");
     fireEvent.keyDown(grid, { key: "Home" });
-    expect(stop()).toBe("صفحة ٥ · لم يُفتح");
+    expect(stop()).toBe("صفحة ٥، لم يُفتح");
     fireEvent.keyDown(grid, { key: "End" });
-    expect(stop()).toBe("صفحة ١٩ · لم يُفتح");
+    expect(stop()).toBe("صفحة ١٩، لم يُفتح");
   });
 
   it("puts the cursor back where the reader is when the scope changes", async () => {
@@ -400,7 +400,7 @@ describe("RevisionMap", () => {
     const grid = screen.getByRole("list", { name: "خريطة المصحف" });
     fireEvent.keyDown(grid, { key: "Home" });
     expect(grid.querySelector('[tabindex="0"]')!.getAttribute("aria-label")).toBe(
-      "الحزب ١ · لم يُفتح",
+      "الحزب ١، لم يُفتح",
     );
     fireEvent.click(screen.getByRole("radio", { name: "صفحة" }));
     await cells();
@@ -411,7 +411,7 @@ describe("RevisionMap", () => {
         .getByRole("list", { name: "خريطة المصحف" })
         .querySelector('[tabindex="0"]')!
         .getAttribute("aria-label"),
-    ).toBe("صفحة ١٩ · لم يُفتح");
+    ).toBe("صفحة ١٩، لم يُفتح");
   });
 
   /*
@@ -445,7 +445,7 @@ describe("RevisionMap", () => {
     // «صفحة ٧», not «الصفحة ٧»: the page word bare, and the number in the
     // chrome's own digits like the page's own foot (owner, 2026-10-05). The
     // jumper reads either spelling back, so nothing typed is lost by it.
-    expect(pages[6]!.getAttribute("aria-label")).toBe("صفحة ٧ · لم يُفتح");
+    expect(pages[6]!.getAttribute("aria-label")).toBe("صفحة ٧، لم يُفتح");
   });
 
   it("does colour this reader's juz with it, because a juz is the same in every print", async () => {
@@ -458,7 +458,7 @@ describe("RevisionMap", () => {
     await waitFor(() => {
       expect(grid[0]!.getAttribute("data-state")).toBe("seen");
     });
-    expect(grid[0]!.getAttribute("aria-label")).toBe("الحزب ١ · فُتح قبل ٢ يومًا");
+    expect(grid[0]!.getAttribute("aria-label")).toBe("الحزب ١، فُتح قبل ٢ يومًا");
   });
   it("keeps the pin shelf to juz scope, where a pack is the unit on screen", async () => {
     draw();

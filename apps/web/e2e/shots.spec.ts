@@ -177,7 +177,7 @@ test.describe("@app · the screens a runbook step describes", () => {
   test("a selected ayah, its rail, and a hop popover", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/2:48");
     await stageReady(page);
-    await expect(page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٤٨/ })).toBeVisible();
     // The ink has to have landed, or this photographs an unselected page.
     await expect(page.locator("#hifth-overlay .hl-sel")).not.toHaveCount(0);
     await screen(page, "ayah-selected");

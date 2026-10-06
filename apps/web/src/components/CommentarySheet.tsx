@@ -292,7 +292,7 @@ export function CommentarySheet({
   const opening = parseAyahKey(entry.ayahKey);
   const label =
     introOnly && opening
-      ? `${t.surahName(opening.surah)} · ${t.surahIntro}`
+      ? `${t.surahName(opening.surah)}${t.sep}${t.surahIntro}`
       : (t.ayahLabel(entry.ayahKey) ?? entry.ayahKey);
   // A citation in the prose names only surah:verse; it is in this note's edition.
   const edition = opening?.edition;

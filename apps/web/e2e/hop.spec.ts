@@ -77,7 +77,7 @@ test.describe("Hifth · the hop", () => {
     await expect(ayah).toHaveCount(1);
     await ayah.tap();
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٤٨/ }),
     ).toBeVisible();
 
     // 2. The hop rail appears with at least the same-surah loop chip (≈↻).
@@ -90,7 +90,7 @@ test.describe("Hifth · the hop", () => {
     await loopChip.tap();
     const sheet = page.getByRole("dialog");
     await expect(sheet).toBeVisible();
-    const hopBtn = sheet.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٢٣/ });
+    const hopBtn = sheet.getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٣/ });
     await expect(hopBtn).toBeEnabled();
 
     // 4. Hop — cross-page to page 19. The page id updates and 2:123 becomes
@@ -98,27 +98,27 @@ test.describe("Hifth · the hop", () => {
     await hopBtn.tap();
     await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٣/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:١٢٣/ }),
     ).toBeVisible();
     // the origin 2:48 kept its breadcrumb (still on the mounted page 7).
     await expect(page.locator("#hifth-overlay .hl-crumb")).not.toHaveCount(0);
     // Arriving by a hop leaves the verse's tool drawer down: on a phone it rises
     // over the bar the way back lives in, and hid the bead below (main was red
     // on iPhone from the drawer's first day until this).
-    await expect(page.getByRole("region", { name: /البقرة · ٢:١٢٣/ })).toHaveCount(0);
+    await expect(page.getByRole("region", { name: /البقرة، ٢:١٢٣/ })).toHaveCount(0);
 
     // 5. A trail bead for the origin (2:48) is threaded; tap it to rewind.
-    const bead = page.getByRole("button", { name: /ارجع إلى البقرة · ٢:٤٨/ });
+    const bead = page.getByRole("button", { name: /ارجع إلى البقرة، ٢:٤٨/ });
     await expect(bead).toBeVisible();
     await bead.tap();
 
     // Back on page 7 with 2:48 current again — same code path as a forward hop.
     await expect(page.locator("header .numeric")).toHaveText(pageNumber(7));
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:٤٨/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:٤٨/ }),
     ).toBeVisible();
     // Coming back is a hop too, so the drawer stays down; a tap still raises it.
-    const tools = page.getByRole("region", { name: /البقرة · ٢:٤٨/ });
+    const tools = page.getByRole("region", { name: /البقرة، ٢:٤٨/ });
     await expect(tools).toHaveCount(0);
     await ayah.tap();
     await expect(tools).toBeVisible();
@@ -141,7 +141,7 @@ test.describe("Hifth · the hop", () => {
       // <svg> is first in the DOM, warm or visible.
       await expect(page.locator('svg[aria-labelledby="page-label-19"]')).toBeVisible();
       await expect(
-        page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٢٠/ }),
+        page.getByRole("button", { name: /الآية الحالية البقرة، ٢:١٢٠/ }),
       ).toBeVisible();
 
       const rail = page.getByRole("group", { name: "روابط الآية" });
@@ -185,13 +185,13 @@ test.describe("Hifth · the hop", () => {
     const rail = page.getByRole("group", { name: "روابط الآية" });
     await rail.getByRole("button", { name: /متشابهات في السورة/ }).tap();
     const sheet = page.getByRole("dialog");
-    const hop = sheet.getByRole("button", { name: /انتقل إلى البقرة · ٢:١٤٥/ });
+    const hop = sheet.getByRole("button", { name: /انتقل إلى البقرة، ٢:١٤٥/ });
     await expect(hop).toBeEnabled();
     await hop.tap();
 
     await expect(page.locator("header .numeric")).toHaveText(pageNumber(22));
     await expect(
-      page.getByRole("button", { name: /الآية الحالية البقرة · ٢:١٤٥/ }),
+      page.getByRole("button", { name: /الآية الحالية البقرة، ٢:١٤٥/ }),
     ).toBeVisible();
   });
 

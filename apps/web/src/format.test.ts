@@ -1,5 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { longDay, longMonth } from "./format";
+import { ayahLabel, ayahLabelAt, longDay, longMonth, rangeLabel } from "./format";
+
+describe("verse labels", () => {
+  // In Arabic the middle dot «·» is the same small mark as the zero «٠», so
+  // «الأعراف · ٧:٢٠٥» could read as a stray zero beside the number (seen at
+  // full size, 2026-10-05). Arabic separates with its own comma, which no digit
+  // resembles; English keeps the dot, which no Latin digit resembles.
+  it("separates the surah name from the verse with the Arabic comma in Arabic", () => {
+    expect(ayahLabelAt(7, 205, "ar")).toBe("الأعراف، ٧:٢٠٥");
+    expect(ayahLabel("quran/hafs-kfqc/2:41", "ar")).toBe("البقرة، ٢:٤١");
+    expect(rangeLabel("quran/hafs-kfqc/2:47", "quran/hafs-kfqc/2:48", "ar")).toBe("البقرة، ٢:٤٧–٢:٤٨");
+  });
+
+  it("keeps the middle dot in English", () => {
+    expect(ayahLabel("quran/hafs-kfqc/2:41", "en")).toBe("Al-Baqarah · 2:41");
+  });
+});
 
 // `longDay` turns the day-stamp the record is opened with into the line the map
 // shows — «Active since …». It parses the stamp by hand rather than through

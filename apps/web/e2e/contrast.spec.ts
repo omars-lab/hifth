@@ -122,8 +122,8 @@ const SURFACES: readonly Surface[] = [
       // also waits out the two page loads the panel does on expand, so the
       // measurement below runs against the finished surface rather than a
       // half-drawn one.
-      await sheet.getByRole("button", { name: /البقرة · ٢:١٢٣ شفاعة/ }).tap();
-      await expect(sheet.getByText(/٢:٤٨ · هنا/)).toBeVisible();
+      await sheet.getByRole("button", { name: /البقرة، ٢:١٢٣ شفاعة/ }).tap();
+      await expect(sheet.getByText(/٢:٤٨، هنا/)).toBeVisible();
     },
   },
   {
@@ -140,7 +140,7 @@ const SURFACES: readonly Surface[] = [
       await settled(page);
       await page.goto("/");
       await selectAyah(page);
-      await page.getByRole("button", { name: /الجذور · / }).tap();
+      await page.getByRole("button", { name: /الجذور، / }).tap();
       await expect(page.getByRole("dialog", { name: /الجذور/ })).toBeVisible();
     },
   },
@@ -190,7 +190,7 @@ const SURFACES: readonly Surface[] = [
     open: async (page) => {
       await settled(page);
       await page.goto("/#/hafs-kfqc/2:123?trail=2:40,2:47&via=2:48");
-      await expect(page.getByRole("button", { name: /ارجع إلى البقرة · ٢:٤٨/ })).toBeVisible();
+      await expect(page.getByRole("button", { name: /ارجع إلى البقرة، ٢:٤٨/ })).toBeVisible();
     },
   },
   {

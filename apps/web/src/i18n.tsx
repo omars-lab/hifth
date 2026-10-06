@@ -123,16 +123,19 @@ export interface Strings {
   /* ---- formatters (bound to this language; components never pass `lang`) -- */
   /** A number in this language's digits. */
   num(n: number): string;
+  /** The language's separator between two parts of a label, spaces included:
+   *  "، " in Arabic, " · " in English. See `sep` in lang.ts. */
+  sep: string;
   /** The surah name table, for the jumper's matcher. */
   names: readonly string[];
   surahName(surah: number): string;
-  /** "البقرة · ٢:٤١" / "Al-Baqarah · 2:41". */
+  /** "البقرة، ٢:٤١" / "Al-Baqarah · 2:41". */
   ayahLabel(key: string): string | null;
   /** The same label from the coordinates, for callers with no canonical key. */
   ayahAt(surah: number, ayah: number): string;
   /** "٢:٤٧" / "2:47". */
   ayahRef(key: string): string | null;
-  /** "البقرة · ٢:٤٧–٢:٤٨" / "Al-Baqarah · 2:47–2:48". */
+  /** "البقرة، ٢:٤٧–٢:٤٨" / "Al-Baqarah · 2:47–2:48". */
   rangeLabel(fromKey: string, toKey: string): string | null;
 
   /* ---- the language control itself ---------------------------------------- */
@@ -887,6 +890,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
 
   return {
     num: n,
+    sep: LOCALES[lang].sep,
     names: surahNames(lang),
     surahName: (s) => fmtSurahName(s, lang),
     ayahLabel: (k) => fmtAyahLabel(k, lang),

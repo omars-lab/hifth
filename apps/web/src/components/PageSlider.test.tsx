@@ -133,7 +133,7 @@ describe("PageSlider", () => {
     const input = slider();
     fireEvent.input(input, { target: { value: "300" } });
     expect(screen.getByText("صفحة ٣٠٠ من ٦٠٤")).toBeTruthy();
-    expect(screen.getByText("أقرب صفحة متوفّرة · صفحة ١٩")).toBeTruthy();
+    expect(screen.getByText("أقرب صفحة متوفّرة، صفحة ١٩")).toBeTruthy();
   });
 
   it("says nothing about snapping when the page is one we hold", () => {
