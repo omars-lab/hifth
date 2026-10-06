@@ -2608,6 +2608,17 @@
       "note": "Found walking the desktop pitch: 125 notes repeated a passage where the capture took a paragraph twice across a page break. Fixed in packages/etl/tools/pitch/blocks.mjs (joinPageBreaks), held by blocks.test.mjs; 124 of 125 now read once. Left: 98:5, where a stray paragraph sits between the copies, and sentences whose full stop the capture lost. Next step is a look at the printed pages, not more code."
     },
     {
+      "id": "phone-lists-hide-their-verse",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Found walking the phone pitch (2026-10-06): the roots and similar-verses sheets open at 70vh behind a scrim and cover the verse; the note opens short and lifts the page instead. Desktop was fixed the same day (the lists now lie over the facing page, over-leaf.ts)."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",
