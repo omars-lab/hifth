@@ -90,6 +90,15 @@
   }
 }
 
+/* On a phone the look-alike chips ride the tray's top edge while it is up
+   (HopRail's `seat`), so its title starts a row lower: in Arabic the title
+   starts on the right, where the chips stand. Only when there are chips. */
+@media (max-width: 39.99rem) {
+  :root:has([data-seated]) .sheet {
+    padding-block-start: calc(var(--space-3) + 36px);
+  }
+}
+
 .sheetHead {
   display: flex;
   align-items: center;

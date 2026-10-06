@@ -626,3 +626,17 @@ Ya-Sin 36:31 and its look-alike in Sad.
 **Fixed, 2026-10-06:** a row offers to open only when its pair names the words they share. The
 others keep their label and their button to go there. A unit test draws one row of each kind and
 checks that only the first can open.
+
+### ⑪ With a note up on a phone, do the look-alike buttons cover any words? · **fixed**
+
+On a phone the look-alike buttons stand in the empty strip at the top of the page, above its
+first line. Opening a note slides the page up so the verse shows above the note, and that strip
+slid up out of sight with it, but the buttons stayed where they were: on top of the words of an
+earlier verse. Found on 2026-10-06 with Fatir 35:44, where they sat on a line of 35:40.
+
+**Fixed, 2026-10-06:** while a note, a list of look-alikes or roots, or the share tray is up, the
+buttons move down onto its top row, beside its handle, and that row is made tall enough that they
+never touch its title or its close button. When the note is grown to fill the screen, they step
+back under it. Four tests on a phone: no button on any line of the page with the note up, none
+drawn over the grown note, none on a list's title or close button at rest or scrolled, and none
+on the share tray's title in Arabic.

@@ -2715,6 +2715,18 @@
       "note": "Found walking the pitch on a phone (2026-10-06) with 36:31 -> 38:3: an edge with no span/toSpan has no wordDiff, so DiffView renders null, but the row still toggled aria-expanded and turned its caret. Fixed the same day: HopPopover offers the toggle and caret only when wordDiff(edge, fromKey) is not null."
     },
     {
+      "id": "lookalike-chips-cover-lifted-page",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑪"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on a phone (2026-10-06) with 35:44: the note lifts the page, the head strip the centred chips stand in goes off-screen, and the chips sat on 35:40's words. Fixed the same day: HopRail takes a seat (the highest phone sheet top) and rides that sheet's top row, fixed and above it; the note, lists and share tray grow that row via :has([data-seated]); a grown note drops the seat."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",
