@@ -2727,6 +2727,30 @@
       "note": "Found walking the pitch on a phone (2026-10-06) with 35:44: the note lifts the page, the head strip the centred chips stand in goes off-screen, and the chips sat on 35:40's words. Fixed the same day: HopRail takes a seat (the highest phone sheet top) and rides that sheet's top row, fixed and above it; the note, lists and share tray grow that row via :has([data-seated]); a grown note drops the seat."
     },
     {
+      "id": "lookalike-chips-sideways-cover-close",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑫"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on a phone held sideways (844x390, 2026-10-06) with 35:44: above the 600px row breakpoint the seated rail kept its column of 44px chips and the second covered the note's Close. Fixed the same day: the seated rule itself lays the chips in a slim row at any width."
+    },
+    {
+      "id": "note-covers-verse-after-turn",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "⑬"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on a phone turned sideways with 35:44's note up (2026-10-06): the stage's resize observer only re-clamped the view, so the page fell back to rest under the shorter note. Fixed the same day: the cover lift is one callback, run by the cover effect and by the resize observer whenever a cover is up."
+    },
+    {
       "id": "marking-pens-home-on-ipad",
       "source": {
         "file": "docs/design/notes-style-toolbar.md",
