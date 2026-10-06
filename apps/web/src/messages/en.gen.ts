@@ -410,6 +410,7 @@ const messages: Catalog = {
   tagline: "Navigation for huffaz",
   tajweed: "Tajweed",
   tajweedCredit: "Tajweed rules from quran-tajweed (Collin Fair), licensed CC BY 4.0.",
+  tapForNote: (d) => "Tap a verse to read its " + d.source + " note",
   tapHint: "Tap an ayah on the page to select it",
   tipsNote: "Three short cards on how to move around the mus'haf. They no longer open by themselves.",
   tipsSectionTitle: "Getting started",

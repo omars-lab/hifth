@@ -887,6 +887,14 @@ test.describe("Hifth · the commentary drawer with the app in Arabic", () => {
     await page.addInitScript(() => localStorage.setItem("hifth.lang.v1", "ar"));
   });
 
+  test("the first screen's hint is in Arabic, naming the book", async ({ page }) => {
+    // It was one English sentence written straight into the screen, so an
+    // Arabic visitor's whole first-visit guidance was in the wrong language.
+    await page.goto("/");
+    await expect(page.getByText("المس آيةً لتقرأ تعليق Study Quran عليها")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Tap a verse to read its Study Quran note")).toHaveCount(0);
+  });
+
   test("the drawer is laid out right to left and speaks Arabic; the book's English still reads left to right", async ({
     page,
   }) => {
