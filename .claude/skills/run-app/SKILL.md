@@ -1,6 +1,6 @@
 ---
 name: run-app
-description: Launch the actual Hifth app and open it in a browser — the real navigation instrument, not a picture of it. Use when asked to run, start, open, or screenshot "the app", "Hifth", or "the desktop/mobile UI", or to confirm a change works in the running app. For a GIF or video, use record-demo. The project's answer to the built-in `run` skill.
+description: Launch the actual Hifth app and open it in a browser — the real navigation instrument, not a picture of it. Use when asked to run, start, open, or screenshot "the app", "Hifth", or "the desktop/mobile UI", or to confirm a change works in the running app. For a GIF or video, use record-demo; to walk every device and build down a checklist, use walk-app. The project's answer to the built-in `run` skill.
 ---
 
 # Running Hifth
@@ -79,7 +79,8 @@ make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # pitch server, deskto
 - `MOUSE=1` drives a desktop with a real pointer (hover styles, the page-edge grab);
   `drag=x,y>x,y` in `ACT` presses, glides and lets go — a page turn by its edge.
 
-For a GIF or video of a run — something that moves — use the `record-demo` skill.
+For a GIF or video of a run — something that moves — use the `record-demo` skill. To walk the
+whole app in every device and build, down a checklist that grows with each fault, use `walk-app`.
 
 This is the mechanism behind this skill's promise to "screenshot the app". It is
 **not a test** — it asserts nothing on its own and holds no baselines. The `testing`
