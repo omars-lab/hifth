@@ -4,6 +4,8 @@ export interface Siglum {
   readonly text: string;
   /** The key's spelling, with its accents composed. */
   readonly sig: string;
+  /** Which bracket of the text it is in; initials sharing one share this. */
+  readonly bracket: number;
 }
 
 // A bracket with no bracket inside it, then each piece of it between commas and semicolons.
@@ -28,7 +30,7 @@ export function splitSigla(text: string, known: { has(sig: string): boolean }): 
       if (!word || !known.has(sig)) continue;
       const at = start + p.index + lead;
       if (at > last) parts.push(text.slice(last, at));
-      parts.push({ text: word, sig });
+      parts.push({ text: word, sig, bracket: b.index });
       last = at + word.length;
     }
   }

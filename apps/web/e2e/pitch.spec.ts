@@ -1197,6 +1197,81 @@ test.describe("Hifth · who the initials in a note stand for", () => {
     await expect(second).toHaveAttribute("aria-expanded", "true");
   });
 
+  test.describe("on a phone", () => {
+    test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+    // Initials in a bracket are a letter or two each, a comma apart: far
+    // narrower than a fingertip, so a tap meant for one lands on its neighbour
+    // or between them (found walking the pitch, 2026-10-07). A bracket names
+    // commentators who agree, so a tap anywhere on it shows all of them.
+    test("a tap on any initial in a bracket, or between two, shows the whole bracket", async ({ page }) => {
+      await page.goto("/#/hafs-kfqc/18:60?open=commentary");
+      await expect(page.getByRole("dialog", { name: /18:60/ })).toBeVisible({ timeout: 20_000 });
+      const notes = sheet(page).getByRole("region", { name: "Commentary" });
+      await expect(notes.locator("button[data-siglum]").first()).toBeVisible();
+      // The first bracket that names three or more.
+      const group = await notes.evaluate((root) => {
+        const count = new Map<string, number>();
+        for (const b of root.querySelectorAll<HTMLElement>("[data-siglum-group]")) {
+          const g = b.dataset.siglumGroup!;
+          count.set(g, (count.get(g) ?? 0) + 1);
+        }
+        return [...count].find(([, n]) => n >= 3)?.[0] ?? null;
+      });
+      expect(group, "18:60's note has a bracket of three or more initials").not.toBeNull();
+      const members = notes.locator(`[data-siglum-group="${group}"]`);
+      const names = (await members.allTextContents()).map((t) => t.trim());
+
+      const second = members.nth(1);
+      await second.scrollIntoViewIfNeeded();
+      await second.tap();
+      const card = page.locator(`#${await second.getAttribute("aria-controls")}`);
+      await expect(card).toBeVisible();
+      const entries = card.locator("[data-key-entry]");
+      await expect(entries).toHaveCount(names.length);
+      expect((await entries.locator("b").allTextContents()).map((t) => t.trim())).toEqual(names);
+      // The one tapped is marked among them.
+      await expect(card.locator("[data-key-entry][aria-current='true'] b")).toHaveText(names[1]!);
+
+      // A fingertip landing on the comma between two, or a little above or
+      // below the line, is still on an initial. Asked of the page itself, not
+      // of a tap, so the browser's own nudging of near-miss taps cannot pass it.
+      await page.keyboard.press("Escape");
+      await expect(card).toBeHidden();
+      const [a, b] = [await members.nth(0).boundingBox(), await members.nth(1).boundingBox()];
+      const mid = a!.y + a!.height / 2;
+      const spots = [
+        [(a!.x + a!.width + b!.x) / 2, mid],
+        [a!.x + a!.width / 2, a!.y - 6],
+        [a!.x + a!.width / 2, a!.y + a!.height + 6],
+      ];
+      const hits = await page.evaluate(
+        (xy) => xy.map(([x, y]) => !!document.elementFromPoint(x!, y!)?.closest("[data-siglum]")),
+        spots,
+      );
+      expect(hits, "comma, above, below").toEqual([true, true, true]);
+    });
+
+    test.describe("in Arabic", () => {
+      test.use({ locale: "ar" });
+      test("the tapped initial is marked on the side its entry starts from", async ({ page }) => {
+        // The app reads right to left, the key's entries left to right; the
+        // mark stood on the right, away from the names it points at.
+        await page.addInitScript(() => localStorage.setItem("hifth.lang.v1", "ar"));
+        await page.goto("/#/hafs-kfqc/18:60?open=commentary");
+        const second = page.locator("[data-siglum-group]").nth(1);
+        await expect(second).toBeVisible({ timeout: 20_000 });
+        await second.scrollIntoViewIfNeeded();
+        await second.tap();
+        const marked = page.locator("[data-key-entry][aria-current='true']");
+        await expect(marked).toBeVisible();
+        const [entry, name] = [await marked.boundingBox(), await marked.locator("b").boundingBox()];
+        const left = await marked.evaluate((el) => parseFloat(getComputedStyle(el).borderLeftWidth));
+        expect(left, "the mark is on the left, where the names start").toBeGreaterThan(0);
+        expect(name!.x - entry!.x).toBeLessThan(24);
+      });
+    });
+  });
+
   test("every initial that opens the key is one short entry of it, not a word of the prose", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/18:10?open=commentary");
     await expect(page.getByRole("dialog", { name: /18:10/ })).toBeVisible({ timeout: 20_000 });
