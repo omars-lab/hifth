@@ -498,15 +498,21 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
 - **Pieces that are not the note.** The page's margin column of verse references became
   paragraphs, or was glued to the front of one (4 verses); single stray letters became paragraphs
   (7 verses); and 98:5 carried a piece of 98:4's note and a cut-short copy of its own. All dropped.
+- **Verses the capture lost.** Where the book prints a note before or inside its verse, the
+  capture took the note as the verse (85:12, 87:1, 88:11 to 88:14, and 4:107, whose verse ran on
+  into the note shared by 4:105 to 4:107). Three more verses were cut at the foot of a page
+  (3:119, 3:167, 46:11). These ten verses were read again off the page pictures into a private
+  file kept beside the capture; each note now sits under its verse, and 4:105 and 4:106 have the
+  shared note too.
 
-**What is still different:** three verses whose translation stops part way (3:119, 3:167,
-46:11), and six where the note sits inside the translation and the note itself is empty (85:12,
-87:1, 88:11 to 88:14). A run-on whose second sentence starts with an unusual word could also
-remain, since the search for them looked for the common sentence openings. Nothing here reaches
-the public site; it is only the pitch.
+**What is still different:** 281 note paragraphs end with no full stop. Some only lost the stop
+(87:1's note has one on the page); some stop part way through a sentence, which a reader would
+notice. A run-on whose second sentence starts with an unusual word could also remain, since the
+search for them looked for the common sentence openings. Nothing here reaches the public site; it
+is only the pitch.
 
-**What would answer it:** move those six notes out of the translation, put back the three
-translations from the printed page, and close this.
+**What would answer it:** sort the paragraphs that end with no full stop into kinds, read a
+sample of each off the page pictures, and fix each kind once.
 
 ### ② On a phone, can the roots and similar-verses lists keep their verse in sight, as the note does? · **fixed**
 
