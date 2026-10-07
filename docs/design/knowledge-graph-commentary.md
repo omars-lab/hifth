@@ -483,14 +483,36 @@ page, the capture kept the part on the first page and then the whole paragraph a
 next, so Ayat al-Kursi's note, and 124 others, read the same passage twice. The pitch's
 extractor now joins those paragraphs, and after a re-run 124 of the 125 read once.
 
-Two differences are left. In one note (98:5) a paragraph from somewhere else sits between the
-two copies, so joining them would be a guess. And in places the second copy lost a full stop
-the book has, so one sentence runs straight into the next with no stop between; the join puts
-back the stops it can see, not ones the capture never had.
+**Second pass, 2026-10-07:**
 
-**What would answer it:** open the printed pages for 98:5 and a few of the run-on sentences
-beside what the pitch shows, and either fix the capture or tell the extractor what the print
-does there. Nothing here reaches the public site; it is only the pitch.
+- **Sentences run together.** Where a paragraph started at the top of a printed column, the
+  capture lost both the new paragraph and the full stop before it. 30 such places were read off
+  the page images and are now put back. The list of places is kept with the extractor, and the
+  extractor refuses to run if one of them stops matching.
+- **Stray letters from the transliteration.** The small raised letters of a few Arabic words were
+  set down as words of their own at the start of a sentence (3 verses). They are dropped.
+- **The verse printed again as the note's first lines.** The book prints each verse in bold above
+  its note, and in 47 notes the capture took that in as the note's opening, sometimes with the
+  next verses too. It is dropped, so the verse shows once, above its note. A note that quotes only
+  part of its verse is left as it is.
+- **Pieces that are not the note.** The page's margin column of verse references became
+  paragraphs, or was glued to the front of one (4 verses); single stray letters became paragraphs
+  (7 verses); and 98:5 carried a piece of 98:4's note and a cut-short copy of its own. All dropped.
+- **Verses the capture lost.** Where the book prints a note before or inside its verse, the
+  capture took the note as the verse (85:12, 87:1, 88:11 to 88:14, and 4:107, whose verse ran on
+  into the note shared by 4:105 to 4:107). Three more verses were cut at the foot of a page
+  (3:119, 3:167, 46:11). These ten verses were read again off the page pictures into a private
+  file kept beside the capture; each note now sits under its verse, and 4:105 and 4:106 have the
+  shared note too.
+
+**What is still different:** 281 note paragraphs end with no full stop. Some only lost the stop
+(87:1's note has one on the page); some stop part way through a sentence, which a reader would
+notice. A run-on whose second sentence starts with an unusual word could also remain, since the
+search for them looked for the common sentence openings. Nothing here reaches the public site; it
+is only the pitch.
+
+**What would answer it:** sort the paragraphs that end with no full stop into kinds, read a
+sample of each off the page pictures, and fix each kind once.
 
 ### ② On a phone, can the roots and similar-verses lists keep their verse in sight, as the note does? · **fixed**
 
@@ -803,3 +825,24 @@ which is also how the book means it read: these commentators together. The one t
 with a bar on the side its entry starts from, the left even in the Arabic app, since the entries
 are in English. Each initial also takes taps over the comma beside it and a little above and below
 its line, without moving a word of the prose.
+
+### ㉖ With two pages open and a note beside them, can the reader turn the page by its edge? · **open**
+
+On a computer or an iPad on its side, the book turns when the reader grabs a page's outer edge and drags it. A note opens
+on the facing page, so its verse stays in sight, and the note is wider than that page: it covers
+the page's outer edge too. For a verse on the right-hand page, the note sits on the left one,
+and the left edge is the one that turns forward. Grabbing it there selects the note's words
+instead of turning. Found walking the pitch on 2026-10-07, on a laptop and on an iPad on its side.
+
+The arrow keys and the arrows under the page still turn it, and a turn closes the note, since its
+verse has left the page. So nothing is lost, only the turn a reader reaches for first.
+
+**What would answer it:** one of these, each tried with a hand on it before it is chosen.
+
+- **Leave it.** Keys and the arrows under the page are the way to turn with a note open.
+  Costs nothing; the edge just does not answer while the note covers it.
+- **A narrower note that stops short of the edge.** The edge stays free. The note's lines get
+  short, about 300 points on a laptop, which reads worse than the card does now.
+- **Close the note on a press at its outer margin, and start the turn.** The edge keeps working
+  in the same place. A press on the note's margin doing two things at once may surprise.
+
