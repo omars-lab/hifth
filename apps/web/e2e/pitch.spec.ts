@@ -377,10 +377,15 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
       // And it is still a card worth reading, not squeezed to a strip.
       expect(card.height).toBeGreaterThan(screen.height / 4);
       // Standing higher, it must still leave the verse it is about in sight.
-      await settle(page.locator('[data-live="true"] [data-host-page]:visible'));
-      const lines = await litLineBoxes(page);
-      expect(lines.length).toBeGreaterThan(0);
-      for (const line of lines) expect(overlaps(line, card)).toBe(false);
+      // The page can hold still a moment before it rises clear of the card, so
+      // a single reading once it stops can catch it not yet risen: wait for
+      // what the reader ends up seeing.
+      await expect
+        .poll(async () => {
+          const lines = await litLineBoxes(page);
+          return lines.length > 0 && lines.every((line) => !overlaps(line, card));
+        }, { timeout: 5_000 })
+        .toBe(true);
       await context.close();
     });
   }
@@ -1453,6 +1458,32 @@ test.describe("Hifth · a surah's name opens its introduction", () => {
         expect(Math.abs(card.x + card.width - (open.x + open.width / 2)), "the card starts at the fold").toBeLessThanOrEqual(8);
         const [own, facing] = [(await pageSvg(page, 293).boundingBox())!, (await pageSvg(page, 294).boundingBox())!];
         expect(Math.abs(own.y - facing.y), "page 293 is not lifted out of line").toBeLessThanOrEqual(1);
+      });
+
+      test("opened from a verse's number far from the surah's start, it still lies over the facing page", async ({
+        page,
+      }) => {
+        // The introduction was placed by the surah's first verse. Opened from
+        // 2:255's number on page 42, that verse is pages away, so the card had
+        // no side: it floated in the corner past the book's edge, with a drag
+        // bar nothing could drag (found walking the iPad on its side, 2026-10-07).
+        await page.goto("/#/hafs-kfqc/2:255");
+        await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+        await settle(sheet(page));
+        const number = pageSvg(page, 42).locator('[data-verse-number][data-verse-key="quran/hafs-kfqc/2:255"]');
+        await settle(number);
+        const at = (await number.boundingBox())!;
+        await (touch ? page.touchscreen.tap(at.x + at.width / 2, at.y + at.height / 2) : page.mouse.click(at.x + at.width / 2, at.y + at.height / 2));
+        const menu = page.getByRole("menu", { name: /2:255/ });
+        await expect(menu).toBeVisible();
+        await menu.getByRole("menuitem", { name: /^Surah introduction/ }).click();
+        await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toBeVisible();
+        expect(await sheet(page).getAttribute("data-side"), "over page 41, across the fold").toBe("right");
+        await settle(sheet(page));
+        const open = (await book(page).boundingBox())!;
+        const card = (await sheet(page).boundingBox())!;
+        expect(Math.abs(card.x - (open.x + open.width / 2)), "the card starts at the fold").toBeLessThanOrEqual(8);
+        await expect(sheet(page).locator('[class*="grip"]')).toHaveCount(0);
       });
     });
   }

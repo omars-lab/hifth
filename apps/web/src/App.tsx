@@ -3001,20 +3001,21 @@ export function App(): JSX.Element {
    * from. A surah's introduction, opened from its name with no verse picked, is
    * anchored by the surah's first verse, on the page its name heads; with no
    * anchor it came up from the foot like a phone's card and lifted its page out
-   * of line with the facing one.
+   * of line with the facing one. Opened from a verse's number pages past the
+   * surah's start, the first verse is not on the spread, so the picked verse
+   * places it instead; with neither, it floated past the book's edge.
    */
   const sheetSide = useMemo<"left" | "right" | null>(() => {
     if (!desktop || pageMode !== "two" || !resolver) return null;
-    const anchor = introSheet
-      ? formatAyahKey(resolver.edition, introSurah!, 1)
-      : (selectedRange?.[0] ?? selectedKey);
-    if (!anchor) return null;
-    const loc = resolver.resolve(anchor);
-    if (!loc) return null;
     const { right, left } = spreadOf(page, totalPages);
-    if (loc.page === right) return "left";
-    if (loc.page === left) return "right";
-    return null;
+    const sideOf = (anchor: string | null | undefined) => {
+      const loc = anchor ? resolver.resolve(anchor) : null;
+      if (loc?.page === right) return "left";
+      if (loc?.page === left) return "right";
+      return null;
+    };
+    const picked = selectedRange?.[0] ?? selectedKey;
+    return introSheet ? (sideOf(formatAyahKey(resolver.edition, introSurah!, 1)) ?? sideOf(picked)) : sideOf(picked);
   }, [desktop, pageMode, resolver, introSheet, introSurah, selectedRange, selectedKey, page, totalPages]);
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
 
