@@ -1043,6 +1043,19 @@ commentary design note's numbered items, and in the issues list.
 - #88 — Line up the verse tools' icons on an upright phone
 - #89 — Pitch: say who a commentator's initials stand for in a note
 - #90 — Surah introduction and "v. N" mentions: initials and verse links like the note's
+- #91 — Steady the flaky Android tajweed-toggle geometry test
+- #92 — iPad: keep the surah name in sight when its introduction opens
+- #93 — Keep a note's own verse ("v. 60") on one line
+- #94 — Phone: keep the note card down while a long press's menu is up
+- #95 — Phone: make the book's initials in a note easy to hit with a finger
+- #96 — Pitch notes: put back full stops where a sentence ran into the next
+- #97 — Pitch notes: stop opening with their verse's own words and number
+- #98 — Pitch: move notes that landed in the translation back to the note
+- #99 — Pitch: restore translations the capture cut short
+- #100 — Pitch notes: drop margin references, lone letters and repeated pieces
+- #101 — Pitch notes: rejoin paragraphs cut mid-sentence, put back lost closing stops (#300; 23 left to read by hand, in the commentary item ①)
+- #103 — Spread: drop the drag bar from cards that lie beside a page (#299)
+- #102 — Sideways iPad: walk a note, the number menu and an introduction (found the introduction floating off the book, item ㉚)
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
