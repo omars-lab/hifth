@@ -51,6 +51,10 @@
  *
  * Other flags: --browser firefox (the owner's browser; default chromium),
  * --mouse (a desktop with a real pointer, no touch — hover styles apply),
+ * --device <name> (the way a reader holds it, by name: desktop, laptop, ipad,
+ * ipad-side, ipad-big-side, phone, phone-side — the window size, and a finger
+ * or a mouse; an explicit --viewport or --mouse still wins), --seen-coach (the
+ * first-run hint already dismissed, as for a returning reader),
  * --clip x,y,w,h (shoot only that part of the viewport, for a close look).
  *
  * Showing a finger in a moving picture: --marks loads the record-demo skill's
@@ -117,7 +121,23 @@ const url = base + "/" + (hash.startsWith("#") ? hash : hash ? "#" + hash : "");
 const out = args.out
   ? resolve(String(args.out))
   : fileURLToPath(new URL("../../test-results/drive/shot.png", import.meta.url));
-const [vw, vh] = String(args.viewport ?? "390x844")
+// The ways a reader holds the app, by name, so a walk on "an iPad on its side"
+// is the same window every time. The walk-app skill's checklist uses these words.
+const DEVICES = {
+  desktop: { viewport: "1440x900", mouse: true },
+  laptop: { viewport: "1280x800", mouse: true },
+  ipad: { viewport: "1024x1366" },
+  "ipad-side": { viewport: "1180x820" },
+  "ipad-big-side": { viewport: "1366x1024" },
+  phone: { viewport: "390x844" },
+  "phone-side": { viewport: "844x390" },
+};
+const device = args.device ? DEVICES[String(args.device)] : {};
+if (!device) {
+  console.error(`[drive] unknown device "${args.device}"; known: ${Object.keys(DEVICES).join(", ")}`);
+  process.exit(2);
+}
+const [vw, vh] = String(args.viewport ?? device.viewport ?? "390x844")
   .split("x")
   .map((n) => Number(n));
 const dsf = Number(args.dsf ?? 2);
@@ -127,7 +147,8 @@ const timeout = Number(args.timeout ?? 20000);
 const locale = args.locale ? String(args.locale) : undefined;
 const expectSel = args.expect ? String(args.expect) : undefined;
 const engine = args.browser === "firefox" ? firefox : chromium;
-const mouse = Boolean(args.mouse);
+const mouse = Boolean(args.mouse ?? device.mouse);
+const seenCoach = Boolean(args["seen-coach"]);
 const clip = args.clip
   ? (([x, y, width, height]) => ({ x, y, width, height }))(String(args.clip).split(",").map(Number))
   : undefined;
@@ -354,7 +375,7 @@ async function installMarks(page, why) {
 async function main() {
   mkdirSync(dirname(out), { recursive: true });
   const videoDir = video ? mkdtempSync(join(tmpdir(), "drive-video-")) : undefined;
-  log("launch", `base=${base} viewport=${vw}x${vh} dsf=${dsf}`);
+  log("launch", `base=${base} device=${args.device ?? "-"} viewport=${vw}x${vh} dsf=${dsf} mouse=${mouse}`);
   const browser = await engine.launch();
   const context = await browser.newContext({
     viewport: { width: vw, height: vh },
@@ -363,6 +384,8 @@ async function main() {
     locale,
     ...(videoDir ? { recordVideo: { dir: videoDir, size: { width: vw, height: vh } } } : {}),
   });
+  // The same key the app's first-run hint keeps (src/coach.ts).
+  if (seenCoach) await context.addInitScript(() => globalThis.localStorage.setItem("hifth.coach.v1", "1"));
   const page = await context.newPage();
 
   // Surface page crashes and failed requests — a blank screenshot otherwise

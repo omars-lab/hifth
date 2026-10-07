@@ -149,6 +149,9 @@ report: ## Open the last e2e run's report — traces, image diffs, the failing s
 #   make drive HASH='#/hafs-kfqc/1:1' ACT='clickrole=button|commentary; settle=400' \
 #     EXPECT='div[role="dialog"]' OUT=fatiha-commentary.png LOCALE=en-US
 #   make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # the pitch server, desktop spread
+#   make drive HASH='#/hafs-kfqc/2:255' DEVICE=ipad-side SEEN_COACH=1 BROWSER=firefox
+#     # a reader's hand by name (desktop, laptop, ipad, ipad-side, ipad-big-side,
+#     # phone, phone-side), the first-run hint already seen — the walk-app skill
 #   make drive HASH='#/hafs-kfqc/p8' VIEWPORT=1280x800 MOUSE=1 \
 #     ACT='settle=400; press=ArrowLeft; settle=800' VIDEO=test-results/drive/turn.gif
 #     # a moving picture: .gif (needs ffmpeg) or .webm — the record-demo skill
@@ -161,6 +164,8 @@ report: ## Open the last e2e run's report — traces, image diffs, the failing s
 # apps/web; the run prints the path to open. --expect makes a silently-wrong
 # flow exit non-zero instead of handing back a screenshot of the wrong screen.
 DRIVE_OUT ?= $(or $(OUT),test-results/drive/shot.png)
+# A path given whole stays whole; a relative one is under apps/web.
+drive_path = $(if $(filter /%,$(1)),$(1),apps/web/$(1))
 .PHONY: drive
 drive: node-ok ## Open the running app at a deep link, do a few steps, save a PNG to look at
 	$(WEB) exec node e2e/tools/drive.mjs --out '$(DRIVE_OUT)' \
@@ -170,13 +175,16 @@ drive: node-ok ## Open the running app at a deep link, do a few steps, save a PN
 	  $(if $(EXPECT),--expect '$(EXPECT)',) \
 	  $(if $(LOCALE),--locale '$(LOCALE)',) \
 	  $(if $(VIEWPORT),--viewport '$(VIEWPORT)',) \
+	  $(if $(DEVICE),--device '$(DEVICE)',) \
+	  $(if $(SEEN_COACH),--seen-coach,) \
+	  $(if $(BROWSER),--browser '$(BROWSER)',) \
 	  $(if $(FULL),--full,) \
 	  $(if $(MOUSE),--mouse,) \
 	  $(if $(VIDEO),--video '$(VIDEO)',) \
 	  $(if $(MARKS),--marks,) \
 	  $(if $(MARK_HOLD),--mark-hold '$(MARK_HOLD)',) \
 	  $(if $(FRAMES),--frames '$(FRAMES)',)
-	@echo "  → open apps/web/$(or $(VIDEO),$(if $(FRAMES),$(FRAMES)/frames.txt,),$(DRIVE_OUT))"
+	@echo "  → open $(call drive_path,$(or $(VIDEO),$(if $(FRAMES),$(FRAMES)/frames.txt,),$(DRIVE_OUT)))"
 
 .PHONY: core
 core: node-ok ## Build @hifth/core only (needed before typecheck/test — the Loop 0 lesson)
