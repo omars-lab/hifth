@@ -902,3 +902,15 @@ already dropped it. The same was true of the menu for a highlighted passage. Fou
 pitch on an iPad on its side, 2026-10-07.
 
 **Fixed, 2026-10-07:** all three draw the bar only as a phone card, never beside a page.
+
+### ㉚ Opened from a verse deep in a surah, does the introduction lie over the facing page like the note? · **fixed**
+
+On a spread, a verse's note lies over the facing page, and so does a surah's introduction opened
+from the surah's name. Opened from the menu on a verse's number pages into the surah (Ayat
+al-Kursi, on page 42), the introduction instead floated in the bottom corner, hanging past the
+book's edge, with a drag bar nothing could drag. It was placed by the surah's first verse, which
+was pages away, so it had no page to lie beside. Found walking the pitch on an iPad on its side,
+2026-10-07.
+
+**Fixed, 2026-10-07:** the introduction lies beside the surah's first verse when that verse is
+open, and beside the verse it was opened from otherwise, the same place that verse's note takes.
