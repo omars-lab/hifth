@@ -45,6 +45,7 @@ import { dropMarginRefs } from "./strays.mjs";
 import { readKey } from "./key.mjs";
 import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
+import { endPrint } from "./ends.mjs";
 import { wordsOf } from "./splits.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -337,6 +338,10 @@ const WORDS = wordsOf(
 const JOINS = JSON.parse(readFileSync(resolve(HERE, "print-joins.json"), "utf8")).joins;
 const usedJoins = new Set();
 const LIST_SPLITS = process.argv.includes("--splits");
+// Notes whose closing stop the capture lost, read off the printed page (see ends.mjs).
+const ENDS = JSON.parse(readFileSync(resolve(HERE, "print-ends.json"), "utf8")).ends;
+const usedEnds = new Set();
+const LIST_ENDS = process.argv.includes("--ends");
 
 function buildSurah(surah) {
   const src = readSurah(surah);
@@ -369,9 +374,10 @@ function buildSurah(surah) {
         .map(dropRaisedEndings)
         .filter(Boolean),
     );
-    const done = finishNote(`${s}:${a}`, joined, previous, { marks: MARKS, joins: JOINS, words: WORDS });
+    const done = finishNote(`${s}:${a}`, joined, previous, { marks: MARKS, joins: JOINS, words: WORDS, ends: ENDS });
     for (const i of done.usedMarks) usedMarks.add(i);
     for (const i of done.usedJoins) usedJoins.add(i);
+    for (const i of done.usedEnds) usedEnds.add(i);
     const blocks = done.blocks;
     if (LIST_SPLITS)
       for (let i = 1; i < blocks.length; i++)
@@ -379,6 +385,8 @@ function buildSurah(surah) {
           const prev = blocks[i - 1].trimEnd();
           console.log(`${s}:${a} ${seamPrint(`${prev} ${blocks[i]}`, prev.length)} …${prev.slice(-30)} | ${blocks[i].slice(0, 30)}…`);
         }
+    if (LIST_ENDS && blocks.length && !/[.!?…:;)\]"'”’»]\s*$/u.test(blocks.at(-1)))
+      console.log(`${s}:${a} ${endPrint(blocks.at(-1))}`);
     if (LIST_SEAMS)
       for (const block of blocks)
         for (const { at } of seams(block))
@@ -458,7 +466,14 @@ if (staleJoins.length) {
   console.error("  read those pages again and list each join's new fingerprint (--splits).");
   process.exit(1);
 }
-if (LIST_SEAMS || LIST_SPLITS) process.exit(0);
+const staleEnds = ENDS.filter((m, i) => surahs.includes(Number(m.verse.split(":")[0])) && !usedEnds.has(i));
+if (staleEnds.length) {
+  console.error(`print-ends.json names ${staleEnds.length} note ending(s) the capture no longer has:`);
+  for (const m of staleEnds) console.error(`  ${m.verse} ${m.print} (page image ${m.page})`);
+  console.error("  read those pages again and list each ending's new fingerprint (--ends).");
+  process.exit(1);
+}
+if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS) process.exit(0);
 
 if (existsSync(KEY_SRC)) {
   const raw = JSON.parse(readFileSync(KEY_SRC, "utf8"));

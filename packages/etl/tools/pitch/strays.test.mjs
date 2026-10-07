@@ -23,6 +23,22 @@ describe("dropMarginRefs", () => {
     expect(dropMarginRefs("an")).toBe("");
   });
 
+  it("drops the margin's references and stray letters left after a paragraph's last sentence", () => {
+    expect(dropMarginRefs("The lamp was lit (Q). un un")).toBe("The lamp was lit (Q).");
+    expect(dropMarginRefs("They said, “The lamp.” u")).toBe("They said, “The lamp.”");
+    expect(dropMarginRefs("On the lamp, see 5:3c. in in 5:3c")).toBe("On the lamp, see 5:3c.");
+    expect(dropMarginRefs("The lamp was lit. an 4 4:93c 5:34")).toBe("The lamp was lit.");
+    expect(dropMarginRefs("The lamp was lit. 4:138 2:65 7:163–66 2:65c")).toBe("The lamp was lit.");
+    expect(dropMarginRefs("Did they light the lamp? an 138")).toBe("Did they light the lamp?");
+  });
+
+  it("leaves a paragraph's own last words after its last full stop", () => {
+    expect(dropMarginRefs("Did they light the lamp? in v. 155")).toBe("Did they light the lamp? in v. 155");
+    expect(dropMarginRefs("The lamp was lit. Cf. v. 108")).toBe("The lamp was lit. Cf. v. 108");
+    expect(dropMarginRefs("The lamp was lit. See 2:41")).toBe("The lamp was lit. See 2:41");
+    expect(dropMarginRefs("The lamp was lit as in 2:41")).toBe("The lamp was lit as in 2:41");
+  });
+
   it("leaves a paragraph that cites references or opens with its own label", () => {
     expect(dropMarginRefs("2:41 and 3:6 speak of the lamp")).toBe("2:41 and 3:6 speak of the lamp");
     expect(dropMarginRefs("See 2:41 and 3:6 on the lamp.")).toBe("See 2:41 and 3:6 on the lamp.");
