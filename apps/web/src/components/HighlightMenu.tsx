@@ -142,7 +142,8 @@ export function HighlightMenu({
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
-        <div className={styles.grip} aria-hidden="true" />
+        {/* Beside a page nothing drags, so it has no handle — as the note. */}
+        {side ? null : <div className={styles.grip} aria-hidden="true" />}
         <header className={styles.head}>
           <span className={styles.glyph} aria-hidden="true">
             ▬
