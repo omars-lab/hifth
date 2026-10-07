@@ -39,7 +39,9 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinPageBreaks } from "./blocks.mjs";
 import { dropRaisedEndings, restoreBreaks, seamPrint, seams } from "./breaks.mjs";
+import { dropVerseHeading } from "./heading.mjs";
 import { cleanIntro } from "./intro.mjs";
+import { dropMarginRefs, dropStrayBlocks } from "./strays.mjs";
 import { readKey } from "./key.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -319,6 +321,7 @@ function buildSurah(surah) {
 
   // Per-verse held content: the editors' translation + the commentary prose.
   const verses = {};
+  let previous = [];
   for (const entry of src.entries) {
     const ref = parseRef(entry.key);
     if (!ref) continue;
@@ -326,9 +329,10 @@ function buildSurah(surah) {
     const joined = joinPageBreaks(
       (entry.commentary ?? [])
         .flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean))
-        .map((text) => trimSelfLabel(text, a))
+        .map((text) => trimSelfLabel(dropVerseHeading(text, a, (n) => translationOf(s, n)), a))
         .map(dropSectionBreak)
         .map(dropRaisedEndings)
+        .map(dropMarginRefs)
         .filter(Boolean),
     );
     const { blocks, used } = restoreBreaks(`${s}:${a}`, joined, MARKS);
@@ -341,8 +345,9 @@ function buildSurah(surah) {
       ref: `${s}:${a}`,
       key: canon(s, a),
       translation: entry.translation?.text ?? "",
-      commentary: blocks,
+      commentary: dropStrayBlocks(blocks, previous),
     };
+    previous = blocks;
   }
 
   // Al-Fātiḥah keeps its hand-written roads; every other surah takes the
