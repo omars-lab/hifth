@@ -26,6 +26,10 @@
  *
  *   node packages/etl/tools/pitch/extract.mjs            # all 114 surahs
  *   node packages/etl/tools/pitch/extract.mjs 1 2 36     # just these surahs
+ *   node packages/etl/tools/pitch/extract.mjs --seams 17 # list where sentences may run
+ *                                                        # together, with each spot's
+ *                                                        # fingerprint for print-breaks.json;
+ *                                                        # prints to the terminal, writes nothing
  *
  * Re-run it whenever the source capture changes or the curation below is edited.
  */
@@ -34,6 +38,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinPageBreaks } from "./blocks.mjs";
+import { dropRaisedEndings, restoreBreaks, seamPrint, seams } from "./breaks.mjs";
 import { cleanIntro } from "./intro.mjs";
 import { readKey } from "./key.mjs";
 
@@ -302,6 +307,12 @@ function readSurah(surah) {
 // every surah's introduction (see intro.mjs). Read here, never written down.
 const OPENING = readSurah(1)?.entries.find((e) => parseRef(e.key)?.join(":") === "1:1")?.translation?.text ?? "";
 
+// The full stops and new paragraphs the print has and the capture lost, each
+// read off the printed page (see breaks.mjs).
+const MARKS = JSON.parse(readFileSync(resolve(HERE, "print-breaks.json"), "utf8")).marks;
+const usedMarks = new Set();
+const LIST_SEAMS = process.argv.includes("--seams");
+
 function buildSurah(surah) {
   const src = readSurah(surah);
   if (!src) return { surah, skipped: true };
@@ -312,13 +323,20 @@ function buildSurah(surah) {
     const ref = parseRef(entry.key);
     if (!ref) continue;
     const [s, a] = ref;
-    const blocks = joinPageBreaks(
+    const joined = joinPageBreaks(
       (entry.commentary ?? [])
         .flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean))
         .map((text) => trimSelfLabel(text, a))
         .map(dropSectionBreak)
+        .map(dropRaisedEndings)
         .filter(Boolean),
     );
+    const { blocks, used } = restoreBreaks(`${s}:${a}`, joined, MARKS);
+    for (const i of used) usedMarks.add(i);
+    if (LIST_SEAMS)
+      for (const block of blocks)
+        for (const { at } of seams(block))
+          console.log(`${s}:${a} ${seamPrint(block, at)} …${block.slice(Math.max(0, at - 30), at + 30)}…`);
     verses[`${s}:${a}`] = {
       ref: `${s}:${a}`,
       key: canon(s, a),
@@ -344,6 +362,7 @@ function buildSurah(surah) {
     note: "PRIVATE pitch data. Held copy (The Study Quran, HarperOne 2015). Never commit or deploy.",
   };
 
+  if (LIST_SEAMS) return { surah, listed: true };
   const outPath = resolve(OUT_DIR, `${surah}.json`);
   writeFileSync(outPath, JSON.stringify(out, null, 2));
   const edgeCount = Object.values(shard).reduce((n, adj) => n + adj.edges.length, 0);
@@ -365,6 +384,7 @@ let totalCommentary = 0;
 let totalEdges = 0;
 for (const surah of surahs) {
   const r = buildSurah(surah);
+  if (r.listed) continue;
   if (r.skipped) {
     skipped++;
     console.warn(`  surah ${surah}: no source file, skipped`);
@@ -375,6 +395,16 @@ for (const surah of surahs) {
   totalCommentary += r.withCommentary;
   totalEdges += r.edges;
 }
+
+// A listed spot that matched nothing means the capture moved under the list.
+const stale = MARKS.filter((m, i) => surahs.includes(Number(m.verse.split(":")[0])) && !usedMarks.has(i));
+if (stale.length) {
+  console.error(`print-breaks.json names ${stale.length} spot(s) the capture no longer has:`);
+  for (const m of stale) console.error(`  ${m.verse} ${m.print} (page image ${m.page})`);
+  console.error("  read those pages again and list each spot's new fingerprint (--seams).");
+  process.exit(1);
+}
+if (LIST_SEAMS) process.exit(0);
 
 if (existsSync(KEY_SRC)) {
   const raw = JSON.parse(readFileSync(KEY_SRC, "utf8"));
