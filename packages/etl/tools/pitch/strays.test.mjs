@@ -13,6 +13,11 @@ describe("dropMarginRefs", () => {
     expect(dropMarginRefs("2:55 The lamp confirms")).toBe("The lamp confirms");
   });
 
+  it("drops a reference from the page foot printed in front of a paragraph's own label", () => {
+    expect(dropMarginRefs("29:1 185 The lamp confirms")).toBe("185 The lamp confirms");
+    expect(dropMarginRefs("2:14 95–7 The lamp confirms")).toBe("95–7 The lamp confirms");
+  });
+
   it("drops a lone stray letter", () => {
     expect(dropMarginRefs("a")).toBe("");
     expect(dropMarginRefs("an")).toBe("");
