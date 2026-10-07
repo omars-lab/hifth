@@ -2948,6 +2948,18 @@
       "severity": "defect",
       "owner": "agent",
       "note": "With two pages open (a computer, or an iPad on its side) a note opens over the facing page and covers that page's outer edge, so grabbing the edge to turn selects note text instead. Keys and the arrows under the page still turn, and a turn closes the note. Options in the design note: leave it, a narrower note, or a press on the note's outer margin that closes it and turns."
+    },
+    {
+      "id": "intro-on-spread-opens-as-phone-card",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉗"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on an iPad on its side and a laptop (2026-10-07): the side a card lies on was chosen from the selected verse, and pressing a surah's name selects none, so the introduction came up as a bottom card over its own page and lifted that page alone, out of line with the facing one. Fixed in App.tsx (sheetSide anchors an open introduction on its surah's first verse). Pitch e2e: 'the introduction lies over the facing page, and the two pages stay level', on a desktop spread and an iPad on its side."
     }
   ]
 }

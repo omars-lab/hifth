@@ -856,3 +856,15 @@ verse has left the page. So nothing is lost, only the turn a reader reaches for 
 - **Close the note on a press at its outer margin, and start the turn.** The edge keeps working
   in the same place. A press on the note's margin doing two things at once may surprise.
 
+### ㉗ With two pages open, where does a surah's introduction open? · **fixed**
+
+A verse's note lies over the facing page, so the verse stays in sight. A surah's introduction,
+opened by pressing the surah's name, came up from the foot of the screen instead, the way a
+phone's card does, over the page the name is on. It also lifted that page by itself, so its top
+slid under the toolbar and it no longer lined up with the page beside it. Found walking the pitch
+on 2026-10-07, on an iPad on its side and on a laptop: the app chooses the facing page from the
+verse the reader picked, and pressing a name picks no verse.
+
+**Fixed, 2026-10-07:** an open introduction counts as being about its surah's first verse, which
+is on the page the name heads. It now lies over the facing page like a note, and both pages stay
+level with the name in full view.
