@@ -2984,6 +2984,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Found walking the pitch on an iPad on its side (2026-10-07): picking the surah introduction from a verse number's menu left the verse's tools drawer up under it, over the page slider; the drawer's open rule listed the note but not the introduction. Fixed in App.tsx (the drawer stays shut while an introduction is open). Pitch e2e: 'picking the introduction opens it' now checks the tools step aside and come back on close."
+    },
+    {
+      "id": "intro-from-deep-verse-floats",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉚"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on an iPad on its side (2026-10-07): the surah introduction opened from 2:255's number menu floated in the corner past the book's edge with a drag bar, because it was placed by the surah's first verse, pages away. Fixed in App.tsx (sheetSide falls back to the picked verse). Pitch e2e: 'opened from a verse's number far from the surah's start' on a desktop spread and an iPad on its side."
     }
   ]
 }
