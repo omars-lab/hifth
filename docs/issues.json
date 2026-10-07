@@ -2605,7 +2605,7 @@
       "status": "open",
       "severity": "defect",
       "owner": "agent",
-      "note": "Found walking the desktop pitch: 125 notes repeated a passage where the capture took a paragraph twice across a page break. Fixed in packages/etl/tools/pitch/blocks.mjs (joinPageBreaks), held by blocks.test.mjs; 124 of 125 now read once. Left: 98:5, where a stray paragraph sits between the copies, and sentences whose full stop the capture lost. Next step is a look at the printed pages, not more code."
+      "note": "Found walking the desktop pitch: 125 notes repeated a passage where the capture took a paragraph twice across a page break; joined in packages/etl/tools/pitch/blocks.mjs. Second pass 2026-10-07: 30 lost paragraph breaks put back from the page images (breaks.mjs, print-breaks.json), leaked raised letters dropped (breaks.mjs), the verse heading dropped from 47 notes (heading.mjs), margin references, stray letters and 98:5's repeated pieces dropped (strays.mjs), each held by its own test. Ten verses the capture lost (notes taken as the verse: 85:12, 87:1, 88:11-14, 4:107; cut at a page foot: 3:119, 3:167, 46:11) read again into a private file beside the capture and settled by translation.mjs. Left: 281 note paragraphs end with no full stop, some part way through a sentence."
     },
     {
       "id": "phone-lists-hide-their-verse",
@@ -2937,6 +2937,17 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "On a phone the commentators' initials in a note were a letter or two wide and a comma apart, so a finger opened the neighbour's line of the key or nothing. Fixed 2026-10-07: CommentarySheet opens the key for every initial in the bracket, the tapped one marked on the side its entry starts from, and each initial's tap area reaches over the comma and above and below the line without moving a word."
+    },
+    {
+      "id": "note-covers-turn-edge",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉖"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "With two pages open (a computer, or an iPad on its side) a note opens over the facing page and covers that page's outer edge, so grabbing the edge to turn selects note text instead. Keys and the arrows under the page still turn, and a turn closes the note. Options in the design note: leave it, a narrower note, or a press on the note's outer margin that closes it and turns."
     }
   ]
 }

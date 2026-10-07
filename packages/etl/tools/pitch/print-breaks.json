@@ -1,0 +1,213 @@
+{
+  "about": "Places the printed Study Quran starts a new paragraph where its capture ran two paragraphs together and lost the stop between them, each read off the printed page (see breaks.mjs). print: a fingerprint of the words around the spot, never the words. stop: the mark put back, a full stop unless given, empty where the capture kept it. page: the captured page image the spot was read on.",
+  "marks": [
+    {
+      "verse": "2:97",
+      "print": "3ccdf2e0c6c3",
+      "kind": "break",
+      "page": "chapter-2_p24"
+    },
+    {
+      "verse": "2:124",
+      "print": "05e270951e19",
+      "kind": "break",
+      "page": "chapter-2_p30"
+    },
+    {
+      "verse": "2:143",
+      "print": "0e1c439e989e",
+      "kind": "break",
+      "page": "chapter-2_p33"
+    },
+    {
+      "verse": "2:255",
+      "print": "2259885be00c",
+      "kind": "break",
+      "page": "chapter-2_p57"
+    },
+    {
+      "verse": "2:272",
+      "print": "86c01e6b2488",
+      "kind": "break",
+      "page": "chapter-2_p60"
+    },
+    {
+      "verse": "4:113",
+      "print": "31dbcc239160",
+      "kind": "break",
+      "page": "chapter-4_p30"
+    },
+    {
+      "verse": "4:136",
+      "print": "4da23fa6771d",
+      "kind": "break",
+      "page": "chapter-4_p35"
+    },
+    {
+      "verse": "4:158",
+      "print": "80f17aacf4bb",
+      "kind": "break",
+      "stop": "",
+      "page": "chapter-4_p40"
+    },
+    {
+      "verse": "5:2",
+      "print": "517a0b2aa0c7",
+      "kind": "break",
+      "page": "chapter-5_p05"
+    },
+    {
+      "verse": "5:3",
+      "print": "742b6c033b34",
+      "kind": "break",
+      "page": "chapter-5_p06"
+    },
+    {
+      "verse": "5:6",
+      "print": "6bf173efb934",
+      "kind": "break",
+      "page": "chapter-5_p07"
+    },
+    {
+      "verse": "5:35",
+      "print": "e76bf20d18c1",
+      "kind": "break",
+      "page": "chapter-5_p15"
+    },
+    {
+      "verse": "5:58",
+      "print": "bee346dd7598",
+      "kind": "break",
+      "stop": "",
+      "page": "chapter-5_p21"
+    },
+    {
+      "verse": "6:12",
+      "print": "d34458c3c79c",
+      "kind": "break",
+      "page": "chapter-6_p06"
+    },
+    {
+      "verse": "6:13",
+      "print": "d34458c3c79c",
+      "kind": "break",
+      "page": "chapter-6_p06"
+    },
+    {
+      "verse": "6:52",
+      "print": "a0977802d38a",
+      "kind": "break",
+      "page": "chapter-6_p13"
+    },
+    {
+      "verse": "7:38",
+      "print": "cb1da65b2a26",
+      "kind": "break",
+      "page": "chapter-7_p12"
+    },
+    {
+      "verse": "7:39",
+      "print": "cb1da65b2a26",
+      "kind": "break",
+      "page": "chapter-7_p12"
+    },
+    {
+      "verse": "7:43",
+      "print": "c6080ff81ef2",
+      "kind": "break",
+      "page": "chapter-7_p13"
+    },
+    {
+      "verse": "7:157",
+      "print": "c2a337fcbc42",
+      "kind": "break",
+      "page": "chapter-7_p32"
+    },
+    {
+      "verse": "7:169",
+      "print": "31c6a1ee2d91",
+      "kind": "break",
+      "page": "chapter-7_p35"
+    },
+    {
+      "verse": "7:172",
+      "print": "945160370209",
+      "kind": "break",
+      "page": "chapter-7_p36"
+    },
+    {
+      "verse": "9:12",
+      "print": "ae9feeaba97e",
+      "kind": "break",
+      "page": "chapter-9_p06"
+    },
+    {
+      "verse": "9:103",
+      "print": "99818cd290b7",
+      "kind": "break",
+      "page": "chapter-9_p19"
+    },
+    {
+      "verse": "15:39",
+      "print": "614ecf435654",
+      "kind": "break",
+      "stop": "?",
+      "page": "chapter-15_p05"
+    },
+    {
+      "verse": "15:40",
+      "print": "614ecf435654",
+      "kind": "break",
+      "stop": "?",
+      "page": "chapter-15_p05"
+    },
+    {
+      "verse": "17:23",
+      "print": "bea1e56725bc",
+      "kind": "break",
+      "page": "chapter-17_p06"
+    },
+    {
+      "verse": "22:52",
+      "print": "5e8347495c97",
+      "kind": "break",
+      "page": "chapter-22_p09"
+    },
+    {
+      "verse": "24:35",
+      "print": "0c60d7178175",
+      "kind": "break",
+      "page": "chapter-24_p09"
+    },
+    {
+      "verse": "37:102",
+      "print": "0e960648e47e",
+      "kind": "break",
+      "page": "chapter-37_p08"
+    },
+    {
+      "verse": "40:28",
+      "print": "e4c73e38f4e0",
+      "kind": "break",
+      "page": "chapter-40_p06"
+    },
+    {
+      "verse": "41:31",
+      "print": "8b291e89f4e0",
+      "kind": "break",
+      "page": "chapter-41_p05"
+    },
+    {
+      "verse": "45:28",
+      "print": "598fae60e8a7",
+      "kind": "break",
+      "page": "chapter-45_p05"
+    },
+    {
+      "verse": "45:29",
+      "print": "598fae60e8a7",
+      "kind": "break",
+      "page": "chapter-45_p05"
+    }
+  ]
+}

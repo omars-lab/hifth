@@ -26,6 +26,10 @@
  *
  *   node packages/etl/tools/pitch/extract.mjs            # all 114 surahs
  *   node packages/etl/tools/pitch/extract.mjs 1 2 36     # just these surahs
+ *   node packages/etl/tools/pitch/extract.mjs --seams 17 # list where sentences may run
+ *                                                        # together, with each spot's
+ *                                                        # fingerprint for print-breaks.json;
+ *                                                        # prints to the terminal, writes nothing
  *
  * Re-run it whenever the source capture changes or the curation below is edited.
  */
@@ -34,8 +38,12 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinPageBreaks } from "./blocks.mjs";
+import { dropRaisedEndings, restoreBreaks, seamPrint, seams } from "./breaks.mjs";
+import { dropVerseHeading } from "./heading.mjs";
 import { cleanIntro } from "./intro.mjs";
+import { dropMarginRefs, dropStrayBlocks } from "./strays.mjs";
 import { readKey } from "./key.mjs";
+import { noteRange, settleTranslation } from "./translation.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "../../../..");
@@ -54,6 +62,9 @@ const OUT_DIR = resolve(REPO, "apps/web/public/assets/private/study-quran");
 // volume into the capture's folder (see key.mjs). Optional: without it the
 // notes still show, their initials just stay plain.
 const KEY_SRC = resolve(SRC_DIR, "../raw/commentator-key.hand.json");
+// Verses the capture lost, read again off the page pictures (see translation.mjs).
+const FIXES_SRC = resolve(SRC_DIR, "../raw/translation-fixes.hand.json");
+const FIXES = existsSync(FIXES_SRC) ? JSON.parse(readFileSync(FIXES_SRC, "utf8")).verses : {};
 
 // How many road edges a single verse may carry when they come from the source's
 // own cross-references. A few dozen refs on one ayah would bury the hop list; a
@@ -279,11 +290,16 @@ function translationOf(surah, ayah) {
     const bySurah = new Map();
     for (const entry of readSurah(surah)?.entries ?? []) {
       const ref = parseRef(entry.key);
-      if (ref && ref[0] === surah) bySurah.set(ref[1], entry.translation?.text ?? "");
+      if (ref && ref[0] === surah) bySurah.set(ref[1], settled(ref, entry).translation);
     }
     translations.set(surah, bySurah);
   }
   return translations.get(surah).get(ayah) ?? "";
+}
+
+/** One verse's translation and any note the capture filed in its place. */
+function settled([s, a], entry) {
+  return settleTranslation(entry.translation?.text ?? "", FIXES[`${s}:${a}`]?.translation);
 }
 
 /** Read one captured surah file (zero-padded, three digits). */
@@ -302,29 +318,56 @@ function readSurah(surah) {
 // every surah's introduction (see intro.mjs). Read here, never written down.
 const OPENING = readSurah(1)?.entries.find((e) => parseRef(e.key)?.join(":") === "1:1")?.translation?.text ?? "";
 
+// The full stops and new paragraphs the print has and the capture lost, each
+// read off the printed page (see breaks.mjs).
+const MARKS = JSON.parse(readFileSync(resolve(HERE, "print-breaks.json"), "utf8")).marks;
+const usedMarks = new Set();
+const LIST_SEAMS = process.argv.includes("--seams");
+
 function buildSurah(surah) {
   const src = readSurah(surah);
   if (!src) return { surah, skipped: true };
 
   // Per-verse held content: the editors' translation + the commentary prose.
   const verses = {};
+  // A note the capture filed as a verse goes back under it, and a range note
+  // ("105–7 …") also goes under the other verses it covers.
+  const moved = new Map();
+  for (const entry of src.entries) {
+    const ref = parseRef(entry.key);
+    const { note } = ref ? settled(ref, entry) : { note: "" };
+    if (!note) continue;
+    const [from, to] = noteRange(note) ?? [ref[1], ref[1]];
+    for (let a = from; a <= to; a++) moved.set(a, [...(moved.get(a) ?? []), note]);
+  }
+  let previous = [];
   for (const entry of src.entries) {
     const ref = parseRef(entry.key);
     if (!ref) continue;
     const [s, a] = ref;
-    const blocks = joinPageBreaks(
-      (entry.commentary ?? [])
-        .flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean))
-        .map((text) => trimSelfLabel(text, a))
+    const captured = (entry.commentary ?? []).flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean));
+    const own = moved.get(a) ?? [];
+    const joined = joinPageBreaks(
+      [...own, ...captured.filter((b) => !own.includes(b))]
+        .map((text) => trimSelfLabel(dropVerseHeading(text, a, (n) => translationOf(s, n)), a))
         .map(dropSectionBreak)
+        .map(dropRaisedEndings)
+        .map(dropMarginRefs)
         .filter(Boolean),
     );
+    const { blocks, used } = restoreBreaks(`${s}:${a}`, joined, MARKS);
+    for (const i of used) usedMarks.add(i);
+    if (LIST_SEAMS)
+      for (const block of blocks)
+        for (const { at } of seams(block))
+          console.log(`${s}:${a} ${seamPrint(block, at)} …${block.slice(Math.max(0, at - 30), at + 30)}…`);
     verses[`${s}:${a}`] = {
       ref: `${s}:${a}`,
       key: canon(s, a),
-      translation: entry.translation?.text ?? "",
-      commentary: blocks,
+      translation: settled(ref, entry).translation,
+      commentary: dropStrayBlocks(blocks, previous),
     };
+    previous = blocks;
   }
 
   // Al-Fātiḥah keeps its hand-written roads; every other surah takes the
@@ -344,6 +387,7 @@ function buildSurah(surah) {
     note: "PRIVATE pitch data. Held copy (The Study Quran, HarperOne 2015). Never commit or deploy.",
   };
 
+  if (LIST_SEAMS) return { surah, listed: true };
   const outPath = resolve(OUT_DIR, `${surah}.json`);
   writeFileSync(outPath, JSON.stringify(out, null, 2));
   const edgeCount = Object.values(shard).reduce((n, adj) => n + adj.edges.length, 0);
@@ -365,6 +409,7 @@ let totalCommentary = 0;
 let totalEdges = 0;
 for (const surah of surahs) {
   const r = buildSurah(surah);
+  if (r.listed) continue;
   if (r.skipped) {
     skipped++;
     console.warn(`  surah ${surah}: no source file, skipped`);
@@ -375,6 +420,16 @@ for (const surah of surahs) {
   totalCommentary += r.withCommentary;
   totalEdges += r.edges;
 }
+
+// A listed spot that matched nothing means the capture moved under the list.
+const stale = MARKS.filter((m, i) => surahs.includes(Number(m.verse.split(":")[0])) && !usedMarks.has(i));
+if (stale.length) {
+  console.error(`print-breaks.json names ${stale.length} spot(s) the capture no longer has:`);
+  for (const m of stale) console.error(`  ${m.verse} ${m.print} (page image ${m.page})`);
+  console.error("  read those pages again and list each spot's new fingerprint (--seams).");
+  process.exit(1);
+}
+if (LIST_SEAMS) process.exit(0);
 
 if (existsSync(KEY_SRC)) {
   const raw = JSON.parse(readFileSync(KEY_SRC, "utf8"));
