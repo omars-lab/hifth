@@ -38,12 +38,14 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinPageBreaks } from "./blocks.mjs";
-import { dropRaisedEndings, restoreBreaks, seamPrint, seams } from "./breaks.mjs";
+import { dropRaisedEndings, seamPrint, seams } from "./breaks.mjs";
 import { dropVerseHeading } from "./heading.mjs";
 import { cleanIntro } from "./intro.mjs";
-import { dropMarginRefs, dropStrayBlocks } from "./strays.mjs";
+import { dropMarginRefs } from "./strays.mjs";
 import { readKey } from "./key.mjs";
 import { noteRange, settleTranslation } from "./translation.mjs";
+import { finishNote } from "./finish.mjs";
+import { wordsOf } from "./splits.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "../../../..");
@@ -324,6 +326,18 @@ const MARKS = JSON.parse(readFileSync(resolve(HERE, "print-breaks.json"), "utf8"
 const usedMarks = new Set();
 const LIST_SEAMS = process.argv.includes("--seams");
 
+// Sentences a column or page break split into two paragraphs (see splits.mjs):
+// every word the book uses, to tell a cut word from two, and the joins only the
+// printed page could settle.
+const WORDS = wordsOf(
+  Array.from({ length: 114 }, (_, i) => readSurah(i + 1)?.entries ?? []).flatMap((entries) =>
+    entries.flatMap((e) => (e.commentary ?? []).flatMap((c) => (c.blocks ?? []).map((b) => b.text ?? ""))),
+  ),
+);
+const JOINS = JSON.parse(readFileSync(resolve(HERE, "print-joins.json"), "utf8")).joins;
+const usedJoins = new Set();
+const LIST_SPLITS = process.argv.includes("--splits");
+
 function buildSurah(surah) {
   const src = readSurah(surah);
   if (!src) return { surah, skipped: true };
@@ -349,14 +363,22 @@ function buildSurah(surah) {
     const own = moved.get(a) ?? [];
     const joined = joinPageBreaks(
       [...own, ...captured.filter((b) => !own.includes(b))]
+        .map(dropMarginRefs)
         .map((text) => trimSelfLabel(dropVerseHeading(text, a, (n) => translationOf(s, n)), a))
         .map(dropSectionBreak)
         .map(dropRaisedEndings)
-        .map(dropMarginRefs)
         .filter(Boolean),
     );
-    const { blocks, used } = restoreBreaks(`${s}:${a}`, joined, MARKS);
-    for (const i of used) usedMarks.add(i);
+    const done = finishNote(`${s}:${a}`, joined, previous, { marks: MARKS, joins: JOINS, words: WORDS });
+    for (const i of done.usedMarks) usedMarks.add(i);
+    for (const i of done.usedJoins) usedJoins.add(i);
+    const blocks = done.blocks;
+    if (LIST_SPLITS)
+      for (let i = 1; i < blocks.length; i++)
+        if (!/[.!?;:”"’)\]]\s*$/u.test(blocks[i - 1])) {
+          const prev = blocks[i - 1].trimEnd();
+          console.log(`${s}:${a} ${seamPrint(`${prev} ${blocks[i]}`, prev.length)} …${prev.slice(-30)} | ${blocks[i].slice(0, 30)}…`);
+        }
     if (LIST_SEAMS)
       for (const block of blocks)
         for (const { at } of seams(block))
@@ -365,9 +387,9 @@ function buildSurah(surah) {
       ref: `${s}:${a}`,
       key: canon(s, a),
       translation: settled(ref, entry).translation,
-      commentary: dropStrayBlocks(blocks, previous),
+      commentary: blocks,
     };
-    previous = blocks;
+    previous = done.handOn;
   }
 
   // Al-Fātiḥah keeps its hand-written roads; every other surah takes the
@@ -387,7 +409,7 @@ function buildSurah(surah) {
     note: "PRIVATE pitch data. Held copy (The Study Quran, HarperOne 2015). Never commit or deploy.",
   };
 
-  if (LIST_SEAMS) return { surah, listed: true };
+  if (LIST_SEAMS || LIST_SPLITS) return { surah, listed: true };
   const outPath = resolve(OUT_DIR, `${surah}.json`);
   writeFileSync(outPath, JSON.stringify(out, null, 2));
   const edgeCount = Object.values(shard).reduce((n, adj) => n + adj.edges.length, 0);
@@ -429,7 +451,14 @@ if (stale.length) {
   console.error("  read those pages again and list each spot's new fingerprint (--seams).");
   process.exit(1);
 }
-if (LIST_SEAMS) process.exit(0);
+const staleJoins = JOINS.filter((m, i) => surahs.includes(Number(m.verse.split(":")[0])) && !usedJoins.has(i));
+if (staleJoins.length) {
+  console.error(`print-joins.json names ${staleJoins.length} join(s) the capture no longer has:`);
+  for (const m of staleJoins) console.error(`  ${m.verse} ${m.print} (page image ${m.page})`);
+  console.error("  read those pages again and list each join's new fingerprint (--splits).");
+  process.exit(1);
+}
+if (LIST_SEAMS || LIST_SPLITS) process.exit(0);
 
 if (existsSync(KEY_SRC)) {
   const raw = JSON.parse(readFileSync(KEY_SRC, "utf8"));
