@@ -514,15 +514,27 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
   were read off the page pictures; that list is kept with the extractor, and it refuses to run if
   one of them stops matching. None of the 83 is left.
 
-**What is still different:** 198 notes end their last paragraph with no full stop. Most only
-lost the stop at the very end (about 97 were checked against a second reading of the pages and
-have one in print); the rest are notes the capture cut short, which a second reading of the
-pages is now filling in. A run-on whose second sentence starts with an unusual word could also
-remain, since the search for them looked for the common sentence openings. Nothing here reaches
-the public site; it is only the pitch.
+**Third pass, 2026-10-07:**
 
-**What would answer it:** once the second reading of the pages has filled in the cut-short notes,
-put back the lost final stops the pages show, and read the rest off the page pictures.
+- **Notes the capture cut short.** A second reading of the book's pages filled in notes the first
+  capture had cut short or missed, so verses with no note at all fell from 258 to 44.
+- **Margin references left after the last sentence.** The margin's verse references and stray
+  letters were also glued to the *end* of a paragraph, after its last full stop. They are
+  dropped; a paragraph's own last words ("in v. 155", "See 2:41") stay.
+- **The last full stop lost.** 111 notes ended with no full stop where the printed page has one
+  — checked against the page pictures, and only where the page shows the next note's number,
+  the end of the surah or the section mark right after it. That list is kept with the extractor
+  (it holds no words of the note), and the extractor refuses to run if one of them stops matching.
+
+**What is still different:** 23 notes end their last paragraph with no full stop, out of 5,000.
+They were left out on purpose because the pages did not settle them: 9 look cut short (the page
+carries on past where the note stops, as at 3:77, 6:161 and 49:15), 4 are unclear on the page,
+and 10 could not be found on any page reading. A run-on whose second sentence starts with an
+unusual word could also remain, since the search for them looked for the common sentence
+openings. Nothing here reaches the public site; it is only the pitch.
+
+**What would answer it:** read the 23 off the page pictures by hand, and put back what is
+missing.
 
 ### ② On a phone, can the roots and similar-verses lists keep their verse in sight, as the note does? · **fixed**
 
