@@ -1429,6 +1429,34 @@ test.describe("Hifth · a surah's name opens its introduction", () => {
     });
   }
 
+  for (const [device, viewport, touch] of [
+    ["a desktop spread", { width: 1440, height: 900 }, false],
+    ["an iPad on its side", { width: 1180, height: 820 }, true],
+  ] as const) {
+    test.describe(`on ${device}`, () => {
+      test.use({ viewport, hasTouch: touch, isMobile: touch });
+      test("the introduction lies over the facing page, and the two pages stay level", async ({ page }) => {
+        // A verse's note lies over the facing page. The introduction, opened from
+        // the name, has no verse picked, so it came up from the foot like a
+        // phone's card over its own page and lifted that page alone, its top
+        // under the toolbar and out of line with the page beside it (found
+        // walking the pitch, 2026-10-07).
+        await page.goto("/#/hafs-kfqc/p293");
+        const name = pageSvg(page, 293).getByRole("button", { name: /^Surah introduction/ });
+        await expect(name).toBeVisible({ timeout: 20_000 });
+        await (touch ? name.tap() : name.click());
+        await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toBeVisible();
+        expect(await sheet(page).getAttribute("data-side"), "over page 294, across the fold").toBe("left");
+        await settle(sheet(page));
+        const open = (await book(page).boundingBox())!;
+        const card = (await sheet(page).boundingBox())!;
+        expect(Math.abs(card.x + card.width - (open.x + open.width / 2)), "the card starts at the fold").toBeLessThanOrEqual(8);
+        const [own, facing] = [(await pageSvg(page, 293).boundingBox())!, (await pageSvg(page, 294).boundingBox())!];
+        expect(Math.abs(own.y - facing.y), "page 293 is not lifted out of line").toBeLessThanOrEqual(1);
+      });
+    });
+  }
+
   // Owner, 2026-10-04: the surah's context belongs next to its name, above the
   // basmala, not stacked on top of verse 1's note; and the name itself is the
   // button, washed so it looks pressable, rather than a small ⓘ beside it.

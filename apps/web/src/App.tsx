@@ -2998,11 +2998,16 @@ export function App(): JSX.Element {
    * leaf, there is no second leaf, and `null` lets the sheet keep its
    * chrome-direction default (a phone's bottom sheet, or a single leaf's corner
    * card). A range is anchored by its first ayah — the ayah the reader started
-   * from.
+   * from. A surah's introduction, opened from its name with no verse picked, is
+   * anchored by the surah's first verse, on the page its name heads; with no
+   * anchor it came up from the foot like a phone's card and lifted its page out
+   * of line with the facing one.
    */
   const sheetSide = useMemo<"left" | "right" | null>(() => {
     if (!desktop || pageMode !== "two" || !resolver) return null;
-    const anchor = selectedRange?.[0] ?? selectedKey;
+    const anchor = introSheet
+      ? formatAyahKey(resolver.edition, introSurah!, 1)
+      : (selectedRange?.[0] ?? selectedKey);
     if (!anchor) return null;
     const loc = resolver.resolve(anchor);
     if (!loc) return null;
@@ -3010,7 +3015,7 @@ export function App(): JSX.Element {
     if (loc.page === right) return "left";
     if (loc.page === left) return "right";
     return null;
-  }, [desktop, pageMode, resolver, selectedRange, selectedKey, page, totalPages]);
+  }, [desktop, pageMode, resolver, introSheet, introSurah, selectedRange, selectedKey, page, totalPages]);
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
 
   // The sheets that load on first open are mounted from their first opening on,
