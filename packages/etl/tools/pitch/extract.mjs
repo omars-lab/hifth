@@ -43,6 +43,7 @@ import { dropVerseHeading } from "./heading.mjs";
 import { cleanIntro } from "./intro.mjs";
 import { dropMarginRefs, dropStrayBlocks } from "./strays.mjs";
 import { readKey } from "./key.mjs";
+import { noteRange, settleTranslation } from "./translation.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "../../../..");
@@ -61,6 +62,9 @@ const OUT_DIR = resolve(REPO, "apps/web/public/assets/private/study-quran");
 // volume into the capture's folder (see key.mjs). Optional: without it the
 // notes still show, their initials just stay plain.
 const KEY_SRC = resolve(SRC_DIR, "../raw/commentator-key.hand.json");
+// Verses the capture lost, read again off the page pictures (see translation.mjs).
+const FIXES_SRC = resolve(SRC_DIR, "../raw/translation-fixes.hand.json");
+const FIXES = existsSync(FIXES_SRC) ? JSON.parse(readFileSync(FIXES_SRC, "utf8")).verses : {};
 
 // How many road edges a single verse may carry when they come from the source's
 // own cross-references. A few dozen refs on one ayah would bury the hop list; a
@@ -286,11 +290,16 @@ function translationOf(surah, ayah) {
     const bySurah = new Map();
     for (const entry of readSurah(surah)?.entries ?? []) {
       const ref = parseRef(entry.key);
-      if (ref && ref[0] === surah) bySurah.set(ref[1], entry.translation?.text ?? "");
+      if (ref && ref[0] === surah) bySurah.set(ref[1], settled(ref, entry).translation);
     }
     translations.set(surah, bySurah);
   }
   return translations.get(surah).get(ayah) ?? "";
+}
+
+/** One verse's translation and any note the capture filed in its place. */
+function settled([s, a], entry) {
+  return settleTranslation(entry.translation?.text ?? "", FIXES[`${s}:${a}`]?.translation);
 }
 
 /** Read one captured surah file (zero-padded, three digits). */
@@ -321,14 +330,25 @@ function buildSurah(surah) {
 
   // Per-verse held content: the editors' translation + the commentary prose.
   const verses = {};
+  // A note the capture filed as a verse goes back under it, and a range note
+  // ("105–7 …") also goes under the other verses it covers.
+  const moved = new Map();
+  for (const entry of src.entries) {
+    const ref = parseRef(entry.key);
+    const { note } = ref ? settled(ref, entry) : { note: "" };
+    if (!note) continue;
+    const [from, to] = noteRange(note) ?? [ref[1], ref[1]];
+    for (let a = from; a <= to; a++) moved.set(a, [...(moved.get(a) ?? []), note]);
+  }
   let previous = [];
   for (const entry of src.entries) {
     const ref = parseRef(entry.key);
     if (!ref) continue;
     const [s, a] = ref;
+    const captured = (entry.commentary ?? []).flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean));
+    const own = moved.get(a) ?? [];
     const joined = joinPageBreaks(
-      (entry.commentary ?? [])
-        .flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean))
+      [...own, ...captured.filter((b) => !own.includes(b))]
         .map((text) => trimSelfLabel(dropVerseHeading(text, a, (n) => translationOf(s, n)), a))
         .map(dropSectionBreak)
         .map(dropRaisedEndings)
@@ -344,7 +364,7 @@ function buildSurah(surah) {
     verses[`${s}:${a}`] = {
       ref: `${s}:${a}`,
       key: canon(s, a),
-      translation: entry.translation?.text ?? "",
+      translation: settled(ref, entry).translation,
       commentary: dropStrayBlocks(blocks, previous),
     };
     previous = blocks;
