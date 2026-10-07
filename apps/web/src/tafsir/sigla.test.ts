@@ -27,6 +27,14 @@ describe("a commentator's initials in the commentary prose", () => {
     expect(found("(Ṭz)")).toEqual(["Ṭz"]);
   });
 
+  it("tells which initials share a bracket, so a tap on one can name them all", () => {
+    const brackets = splitSigla("Some say so (Xy, Ṭz); others not (Q).", KNOWN).flatMap((part) =>
+      typeof part === "string" ? [] : [part.bracket],
+    );
+    expect(brackets[0]).toBe(brackets[1]);
+    expect(brackets[2]).not.toBe(brackets[0]);
+  });
+
   it("is the prose untouched when there is no key", () => {
     expect(splitSigla("(Xy, Q)", new Set())).toEqual(["(Xy, Q)"]);
   });

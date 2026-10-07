@@ -451,6 +451,7 @@ button.grip {
    dotted line, not the citations' solid one, because they explain rather than
    go anywhere. */
 .siglum {
+  position: relative;
   display: inline;
   min-block-size: 0;
   min-inline-size: 0;
@@ -465,6 +466,13 @@ button.grip {
   text-decoration: underline dotted;
   text-underline-offset: 0.2em;
   cursor: help;
+}
+/* A finger is wider than an initial: each one's tap area reaches over the
+   comma to its neighbour and above and below the line, without moving a word. */
+.siglum::after {
+  content: "";
+  position: absolute;
+  inset: -0.5em -0.35em;
 }
 .siglum[aria-expanded="true"] {
   color: var(--accent-strong);
@@ -503,6 +511,15 @@ button.grip {
 }
 .keyFrom {
   margin-block-end: var(--space-1) !important;
+}
+.keyEntry + .keyEntry {
+  margin-block-start: var(--space-2);
+}
+/* The initial that was tapped, among the others of its bracket. */
+.keyEntry[aria-current="true"] {
+  margin-inline-start: calc(-1 * var(--space-2));
+  padding-inline-start: calc(var(--space-2) - 3px);
+  border-inline-start: 3px solid var(--accent);
 }
 .keyWork cite {
   font-style: italic;

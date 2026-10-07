@@ -181,8 +181,9 @@ export function CommentarySheet({
   const sheetRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const cardId = useId();
-  // The one line of the key that is open, and which initials in the prose opened it.
-  const [keyOpen, setKeyOpen] = useState<{ at: string; sig: string } | null>(null);
+  // The lines of the key that are open: every initial in the bracket that was
+  // tapped, which one of them was tapped (`sig`), and its button (`at`).
+  const [keyOpen, setKeyOpen] = useState<{ at: string; sig: string; sigs: readonly string[] } | null>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
   const open = entry !== null;
@@ -351,8 +352,15 @@ export function CommentarySheet({
   // A "v. 5" is a verse of this note's surah. `at` names the paragraph, so each
   // initial's button is told apart from the same initials elsewhere. A note that
   // names its own verse (`self`) draws it as words: the reader is already there.
-  const prose = (para: string, at: string, self?: string): ReactNode[] =>
-    together(splitSigla(para, sigla)
+  // A bracket names commentators who agree, so any initial in it opens the key
+  // for all of them: on a phone, a finger cannot tell a letter from the next.
+  const prose = (para: string, at: string, self?: string): ReactNode[] => {
+    const split = splitSigla(para, sigla);
+    const bracket = new Map<number, string[]>();
+    for (const part of split) {
+      if (typeof part !== "string") bracket.set(part.bracket, [...(bracket.get(part.bracket) ?? []), part.sig]);
+    }
+    return together(split
       .flatMap((part): (string | Citation | Siglum)[] =>
         typeof part === "string" ? splitCitations(part, opening?.surah) : [part],
       )
@@ -360,15 +368,17 @@ export function CommentarySheet({
         if (typeof part === "string") return part;
         if ("sig" in part) {
           const here = `${at}-${j}`;
+          const sigs = bracket.get(part.bracket)!;
           return (
             <button
               key={j}
               type="button"
               className={styles.siglum}
               data-siglum={here}
+              data-siglum-group={`${at}-${part.bracket}`}
               aria-expanded={keyOpen?.at === here}
               aria-controls={cardId}
-              onClick={() => setKeyOpen((o) => (o?.at === here ? null : { at: here, sig: part.sig }))}
+              onClick={() => setKeyOpen((o) => (o?.at === here ? null : { at: here, sig: part.sig, sigs }))}
             >
               {part.text}
             </button>
@@ -392,6 +402,7 @@ export function CommentarySheet({
           </button>
         );
       }));
+  };
   // The drawer's own words follow the app's language; the source's words follow
   // the source's, so an Arabic tafsir reads right to left in an English app and
   // The Study Quran reads left to right in an Arabic one.
@@ -540,31 +551,53 @@ export function CommentarySheet({
         </footer>
 
         {keyOpen && sigla.has(keyOpen.sig) && (
-          <KeyCard ref={cardRef} id={cardId} sig={keyOpen.sig} who={sigla.get(keyOpen.sig)!} own={own} />
+          <KeyCard
+            ref={cardRef}
+            id={cardId}
+            tapped={keyOpen.sig}
+            entries={keyOpen.sigs.flatMap((sig) => (sigla.has(sig) ? [[sig, sigla.get(sig)!] as const] : []))}
+            own={own}
+          />
         )}
       </div>
     </>
   );
 }
 
-/** One line of the source's key, under the initials that opened it. */
+/** The source's key for one bracket of initials, under the one that was tapped. */
 const KeyCard = forwardRef<
   HTMLDivElement,
-  { id: string; sig: string; who: Commentator; own: { dir: "ltr" | "rtl" | "auto"; lang?: string } }
->(function KeyCard({ id, sig, who, own }, ref) {
-  const { t } = useT();
+  {
+    id: string;
+    tapped: string;
+    entries: readonly (readonly [string, Commentator])[];
+    own: { dir: "ltr" | "rtl" | "auto"; lang?: string };
+  }
+>(function KeyCard({ id, tapped, entries, own }, ref) {
+  const { t, dir } = useT();
+  const many = entries.length > 1;
   return (
     <div ref={ref} id={id} className={styles.keyCard} role="note" aria-label={t.keyFrom}>
       <p className={styles.keyFrom}>{t.keyFrom}</p>
-      <p className={styles.keyWho} {...own}>
-        <b>{sig}</b> {who.who}
-      </p>
-      <p className={styles.keyWork} {...own}>
-        <cite>{who.work}</cite>
-      </p>
-      {who.also && (
-        <p className={styles.keyAlso}>{t.keyAlso(who.also)}</p>
-      )}
+      {entries.map(([sig, who]) => (
+        <div
+          key={sig}
+          className={styles.keyEntry}
+          data-key-entry=""
+          // The entry runs the source's way, so the mark of the tapped one
+          // stands where its name starts; the app's own words keep the app's.
+          dir={own.dir}
+          {...(many && sig === tapped ? { "aria-current": "true" as const } : {})}
+        >
+          <p className={styles.keyWho} {...own}>
+            <b>{sig}</b> {who.who}
+          </p>
+          <p className={styles.keyWork} {...own}>
+            <cite>{who.work}</cite>
+          </p>
+          {who.also && <p className={styles.keyAlso} dir={dir}>{t.keyAlso(who.also)}</p>}
+        </div>
+      ))}
     </div>
   );
 });

@@ -791,3 +791,15 @@ and comes back when it closes. **Fixed, 2026-10-06:** the press-and-hold menu fo
 rule on a phone and an upright iPad. On a computer or a sideways iPad, where the note stands
 beside the pages and covers nothing, both still show together.
 
+### ㉕ On a phone, can a reader tap the initials that name the book's commentators? · **fixed**
+
+The book cites its commentators by initials in brackets, often several together, such as four
+initials for four commentators who agree. Each opens its line of the book's key. On a phone each
+initial was a letter or two wide, a comma from the next, far narrower than a fingertip, so a tap
+meant for one opened its neighbour, or landed on the comma and did nothing.
+
+**Fixed, 2026-10-07:** a tap on any initial in a bracket now shows the key for the whole bracket,
+which is also how the book means it read: these commentators together. The one tapped is marked
+with a bar on the side its entry starts from, the left even in the Arabic app, since the entries
+are in English. Each initial also takes taps over the comma beside it and a little above and below
+its line, without moving a word of the prose.
