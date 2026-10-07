@@ -1056,6 +1056,9 @@ commentary design note's numbered items, and in the issues list.
 - #101 — Pitch notes: rejoin paragraphs cut mid-sentence, put back lost closing stops (#300; 23 left to read by hand, in the commentary item ①)
 - #103 — Spread: drop the drag bar from cards that lie beside a page (#299)
 - #102 — Sideways iPad: walk a note, the number menu and an introduction (found the introduction floating off the book, item ㉚)
+- #104 — A walk-app skill: every flavour of the app, the walk loop, and where faults go
+- #105 — Its checklist, seeded from every fault the walks have found (items ①–㉚)
+- #106 — `make drive` takes a reader's hand by name (DEVICE=ipad-side…), SEEN_COACH=1 and BROWSER=
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
