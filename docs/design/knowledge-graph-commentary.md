@@ -880,3 +880,13 @@ introduction.
 
 **Fixed, 2026-10-07:** an open introduction puts the tools aside the way a note does, and they
 come back when it closes.
+
+### ㉙ Beside a page, do the similar-verses and roots lists still show a drag bar? · **fixed**
+
+On a phone these lists rise from the foot of the screen as a card with a short grey bar at its
+top, the sign that a card can be pulled. On a spread they lie over the facing page instead, where
+nothing about them drags or grows, yet they still drew the bar. The note in the same place had
+already dropped it. The same was true of the menu for a highlighted passage. Found walking the
+pitch on an iPad on its side, 2026-10-07.
+
+**Fixed, 2026-10-07:** all three draw the bar only as a phone card, never beside a page.
