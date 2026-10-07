@@ -3702,6 +3702,7 @@ export function App(): JSX.Element {
           (tool === "select" || tool === "highlight") &&
           !rootsOpen &&
           !commentaryOpen &&
+          !introSheet &&
           openDirection === null &&
           verseMenuAt === null
         }

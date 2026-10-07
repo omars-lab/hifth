@@ -1740,6 +1740,13 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     await press(page);
     await menu(page).getByRole("menuitem", { name: /^Surah introduction/ }).click();
     await expect(sheet(page).getByRole("region", { name: "Surah introduction" })).toBeVisible();
+    // The verse's tools step aside for it, as they do for the verse's note:
+    // walking an iPad on its side (2026-10-07), the tools rose over the page
+    // bar under the introduction, two panels about one verse at once.
+    const tools = page.getByRole("region", { name: /^Tools for Ya-Sin/ });
+    await expect(tools).toHaveCount(0);
+    await sheet(page).getByRole("button", { name: /^Close/ }).click();
+    await expect(tools).toBeVisible();
   });
 
   test("the keyboard opens it, and Escape closes it", async ({ page }) => {

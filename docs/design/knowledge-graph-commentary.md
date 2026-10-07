@@ -868,3 +868,15 @@ verse the reader picked, and pressing a name picks no verse.
 **Fixed, 2026-10-07:** an open introduction counts as being about its surah's first verse, which
 is on the page the name heads. It now lies over the facing page like a note, and both pages stay
 level with the name in full view.
+
+### ㉘ When a surah's introduction is open, do the verse's tools stay up as well? · **fixed**
+
+Picking "Surah introduction" from a verse number's menu opened the introduction, and the verse's
+row of tools (listen, note, share, bookmark) rose along the foot of the screen at the same time,
+over the page slider. Two panels about one verse at once, and the slider out of reach. Opening the
+verse's own note from the same menu already put the tools aside. Found walking the pitch on an
+iPad on its side, 2026-10-07: the rule that puts the tools aside listed the note but not the
+introduction.
+
+**Fixed, 2026-10-07:** an open introduction puts the tools aside the way a note does, and they
+come back when it closes.
