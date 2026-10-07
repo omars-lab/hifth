@@ -2960,6 +2960,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Found walking the pitch on an iPad on its side and a laptop (2026-10-07): the side a card lies on was chosen from the selected verse, and pressing a surah's name selects none, so the introduction came up as a bottom card over its own page and lifted that page alone, out of line with the facing one. Fixed in App.tsx (sheetSide anchors an open introduction on its surah's first verse). Pitch e2e: 'the introduction lies over the facing page, and the two pages stay level', on a desktop spread and an iPad on its side."
+    },
+    {
+      "id": "intro-leaves-verse-tools-up",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉘"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on an iPad on its side (2026-10-07): picking the surah introduction from a verse number's menu left the verse's tools drawer up under it, over the page slider; the drawer's open rule listed the note but not the introduction. Fixed in App.tsx (the drawer stays shut while an introduction is open). Pitch e2e: 'picking the introduction opens it' now checks the tools step aside and come back on close."
     }
   ]
 }
