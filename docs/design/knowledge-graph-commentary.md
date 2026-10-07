@@ -778,3 +778,16 @@ closing bracket starting the next line.
 **Fixed, 2026-10-06:** the mention is kept in one piece, brackets included, the same way the
 links beside it are.
 
+### ㉔ On a phone, what shows when a reader presses and holds a verse? · **fixed**
+
+A press and hold on a verse opens a small menu of things to do with it: play from it, mark it,
+write a note, copy, jump. In the demo it also opened the book's note for that verse, at the same
+moment. On a phone, where the note is a card over the bottom of the screen, the two stacked: the
+menu over the page, the note under it, and the page squeezed into a strip between them. The note
+rising also slid the page up, so the menu no longer sat by the verse it was about.
+
+The menu on the verse's number already had a rule for this: the note waits while the menu is up,
+and comes back when it closes. **Fixed, 2026-10-06:** the press-and-hold menu follows the same
+rule on a phone and an upright iPad. On a computer or a sideways iPad, where the note stands
+beside the pages and covers nothing, both still show together.
+

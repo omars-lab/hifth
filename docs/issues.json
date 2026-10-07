@@ -2913,6 +2913,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Once a note's own verse was drawn as words (item ㉑), the line could break between \"v.\" and its number, as 18:60's note did on a sideways iPad. Fixed 2026-10-06: CommentarySheet keeps the mention and its brackets in one unbreakable piece, like the links beside it."
+    },
+    {
+      "id": "long-press-menu-and-note-stack-on-phone",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉔"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "On a phone, a long press on a verse opened its menu and the book's note at once, leaving the page a strip between them, and the note's rise slid the verse away from the menu. Fixed 2026-10-06: App keeps the note card down while that menu is up wherever the note is a card over the page's foot, as it already did for the verse-number menu; the desktop, where they sit side by side, is unchanged."
     }
   ]
 }
