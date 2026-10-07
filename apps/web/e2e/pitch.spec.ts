@@ -1363,6 +1363,9 @@ test.describe("Hifth · a verse named without its surah is a link too", () => {
     test("a bracket never sits alone at a line's end, cut off from the link it opens", async ({ page }) => {
       // A button is one box in the line, so the line could break between "("
       // and the link, leaving the bracket stranded at the end of the line above.
+      // The link's box is taller than the text (a finger-sized target), so its top
+      // sits a couple of pixels above the bracket's even on one line; the bracket
+      // is left behind only when its middle falls outside the link's box.
       await page.goto("/#/hafs-kfqc/p293");
       const name = pageSvg(page, 293).getByRole("button", { name: /^Surah introduction/ });
       await expect(name).toBeVisible({ timeout: 20_000 });
@@ -1379,7 +1382,8 @@ test.describe("Hifth · a verse named without its surah is a link too", () => {
           r.setEnd(before, before.data.length);
           const bracket = r.getClientRects()[0]!;
           const link = b.getClientRects()[0]!;
-          if (Math.abs(bracket.top - link.top) > 2) out.push(b.textContent ?? "");
+          const middle = (bracket.top + bracket.bottom) / 2;
+          if (middle < link.top || middle > link.bottom) out.push(b.textContent ?? "");
         }
         return out;
       });
