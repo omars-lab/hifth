@@ -2605,7 +2605,7 @@
       "status": "open",
       "severity": "defect",
       "owner": "agent",
-      "note": "Found walking the desktop pitch: 125 notes repeated a passage where the capture took a paragraph twice across a page break. Fixed in packages/etl/tools/pitch/blocks.mjs (joinPageBreaks), held by blocks.test.mjs; 124 of 125 now read once. Left: 98:5, where a stray paragraph sits between the copies, and sentences whose full stop the capture lost. Next step is a look at the printed pages, not more code."
+      "note": "Found walking the desktop pitch: 125 notes repeated a passage where the capture took a paragraph twice across a page break; joined in packages/etl/tools/pitch/blocks.mjs. Second pass 2026-10-07: 30 lost paragraph breaks put back from the page images (breaks.mjs, print-breaks.json), leaked raised letters dropped (breaks.mjs), the verse heading dropped from 47 notes (heading.mjs), margin references, stray letters and 98:5's repeated pieces dropped (strays.mjs), each held by its own test. Left: 3 translations cut short (3:119, 3:167, 46:11) and 6 notes sitting inside the translation (85:12, 87:1, 88:11-14)."
     },
     {
       "id": "phone-lists-hide-their-verse",
