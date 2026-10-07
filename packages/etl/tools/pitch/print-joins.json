@@ -1,0 +1,113 @@
+{
+  "about": "Places a column or page break split one of The Study Quran's sentences into two paragraphs where text alone cannot tell (see splits.mjs), each read off the printed page. print: a fingerprint of the words either side, never the words. fill: letters the break lost, put back. space: false where the break cut one word. page: the captured page image the join was read on.",
+  "joins": [
+    {
+      "verse": "1:4",
+      "print": "272f4f2f3e6f",
+      "page": "chapter-1_p01"
+    },
+    {
+      "verse": "2:62",
+      "print": "c70bc3fea59f",
+      "page": "chapter-2_p17"
+    },
+    {
+      "verse": "5:64",
+      "print": "2970d2bf6755",
+      "page": "chapter-5_p22"
+    },
+    {
+      "verse": "18:65",
+      "print": "3556ec611585",
+      "page": "chapter-18_p13"
+    },
+    {
+      "verse": "24:2",
+      "print": "899f5c7595ac",
+      "page": "chapter-24_p02"
+    },
+    {
+      "verse": "50:40",
+      "print": "64c0493f2a25",
+      "page": "chapter-50_p06"
+    },
+    {
+      "verse": "55:1",
+      "print": "719127b014ce",
+      "page": "chapter-55_p00"
+    },
+    {
+      "verse": "19:32",
+      "print": "c2b22124288f",
+      "fill": ".",
+      "apart": true,
+      "page": "chapter-19_p06"
+    },
+    {
+      "verse": "19:33",
+      "print": "21cc7b072b1c",
+      "fill": ".",
+      "apart": true,
+      "page": "chapter-19_p06"
+    },
+    {
+      "verse": "45:18",
+      "print": "d560e65cbaa0",
+      "fill": "e",
+      "skip": 5,
+      "page": "chapter-45_p03"
+    },
+    {
+      "verse": "4:135",
+      "print": "285b0aced21f",
+      "cut": 27,
+      "page": "chapter-4_p34"
+    },
+    {
+      "verse": "6:142",
+      "print": "de68e8f6adb0",
+      "cut": 4,
+      "page": "chapter-6_p30"
+    },
+    {
+      "verse": "50:15",
+      "print": "bcbc5d917b8c",
+      "cut": 3,
+      "page": "chapter-50_p03"
+    },
+    {
+      "verse": "14:22",
+      "print": "f5fd37bb1daa",
+      "fill": "h",
+      "page": "chapter-14_p03"
+    },
+    {
+      "verse": "2:116",
+      "print": "6b960489fd06",
+      "fill": "r",
+      "space": false,
+      "page": "chapter-2_p28"
+    },
+    {
+      "verse": "2:229",
+      "print": "a3b4d2137893",
+      "fill": "i",
+      "space": false,
+      "page": "chapter-2_p51"
+    },
+    {
+      "verse": "42:45",
+      "print": "4f9d987b9a80",
+      "fill": "e",
+      "space": false,
+      "page": "chapter-42_p07"
+    },
+    {
+      "verse": "6:37",
+      "print": "42509b5b8bd9",
+      "fill": "n",
+      "space": false,
+      "page": "chapter-6_p09"
+    }
+  ]
+}

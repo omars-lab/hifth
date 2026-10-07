@@ -504,15 +504,25 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
   (3:119, 3:167, 46:11). These ten verses were read again off the page pictures into a private
   file kept beside the capture; each note now sits under its verse, and 4:105 and 4:106 have the
   shared note too.
+- **Paragraphs cut in two.** Where a sentence ran over the foot of a column or a page, the
+  capture started a new paragraph part way through it, sometimes in the middle of a word
+  (a word like "merchants" left as "mer" and "chants"), and sometimes dropped the last letter before the break or added the
+  page's margin numbers. 83 paragraphs inside notes stopped part way through a sentence. A
+  paragraph that does not end its sentence and is followed by one that starts in lower case is now
+  joined to it, without a space when the two halves only make a word together. The 18 places
+  that needed more than that (a lost letter, a leftover number, a full stop that belonged there)
+  were read off the page pictures; that list is kept with the extractor, and it refuses to run if
+  one of them stops matching. None of the 83 is left.
 
-**What is still different:** 281 note paragraphs end with no full stop. Some only lost the stop
-(87:1's note has one on the page); some stop part way through a sentence, which a reader would
-notice. A run-on whose second sentence starts with an unusual word could also remain, since the
-search for them looked for the common sentence openings. Nothing here reaches the public site; it
-is only the pitch.
+**What is still different:** 198 notes end their last paragraph with no full stop. Most only
+lost the stop at the very end (about 97 were checked against a second reading of the pages and
+have one in print); the rest are notes the capture cut short, which a second reading of the
+pages is now filling in. A run-on whose second sentence starts with an unusual word could also
+remain, since the search for them looked for the common sentence openings. Nothing here reaches
+the public site; it is only the pitch.
 
-**What would answer it:** sort the paragraphs that end with no full stop into kinds, read a
-sample of each off the page pictures, and fix each kind once.
+**What would answer it:** once the second reading of the pages has filled in the cut-short notes,
+put back the lost final stops the pages show, and read the rest off the page pictures.
 
 ### ② On a phone, can the roots and similar-verses lists keep their verse in sight, as the note does? · **fixed**
 
