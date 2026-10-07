@@ -1694,6 +1694,10 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
       // On the page across the fold from the verse, not over it.
       const n = pageSvg(page, 442).locator(`[data-verse-number][data-verse-key="${LOOKS}"]`);
       expect(await sideOf(page, list)).not.toBe(await sideOf(page, n));
+      // Beside a page it neither drags nor grows, so it shows no drag bar, as
+      // the note there shows none. Walking an iPad on its side (2026-10-07),
+      // these lists still wore the phone card's bar over their title.
+      await expect(list.locator('[class*="grip"]')).toHaveCount(0);
     });
   }
 
@@ -1732,6 +1736,8 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     const box = (await menu.boundingBox())!;
     expect(box.y, "its top is the book's top").toBeGreaterThanOrEqual(open.y - 1);
     expect(box.height).toBeLessThan(open.height / 2);
+    // And, beside a page, no drag bar: nothing about it drags there.
+    await expect(menu.locator('[class*="grip"]')).toHaveCount(0);
   });
 
   test("picking the introduction opens it", async ({ page }) => {

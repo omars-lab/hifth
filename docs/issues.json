@@ -2962,6 +2962,18 @@
       "note": "Found walking the pitch on an iPad on its side and a laptop (2026-10-07): the side a card lies on was chosen from the selected verse, and pressing a surah's name selects none, so the introduction came up as a bottom card over its own page and lifted that page alone, out of line with the facing one. Fixed in App.tsx (sheetSide anchors an open introduction on its surah's first verse). Pitch e2e: 'the introduction lies over the facing page, and the two pages stay level', on a desktop spread and an iPad on its side."
     },
     {
+      "id": "spread-cards-show-drag-bar",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉙"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch on an iPad on its side (2026-10-07): the similar-verses list, the roots list and a highlighted passage's menu kept the phone card's drag bar when they lay over the facing page, where nothing drags; the note there already had none. Fixed in HopPopover, RootLens and HighlightMenu (no bar when the card has a side). Pitch e2e: the facing-page tests for both lists and the passage menu's height test now check for no bar."
+    },
+    {
       "id": "intro-leaves-verse-tools-up",
       "source": {
         "file": "docs/design/knowledge-graph-commentary.md",
