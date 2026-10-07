@@ -3448,9 +3448,10 @@ export function App(): JSX.Element {
                 // lens takes the note's place, and closing it brings the note
                 // back (commentaryOpen stays true underneath). Both used to
                 // stack, squeezing the page on a phone and hiding the list
-                // under the note on a spread.
+                // under the note on a spread. A long press's menu waits the
+                // same way where the note is a card over the page's foot.
                 entry={
-                  openChip || rootsOpen || verseMenuAt
+                  openChip || rootsOpen || verseMenuAt || (verseMenu && !sheetSide)
                     ? null
                     : (introSheet ?? (commentaryOpen ? commentaryEntry : null))
                 }
