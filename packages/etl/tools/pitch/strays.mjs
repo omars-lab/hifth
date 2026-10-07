@@ -1,13 +1,14 @@
 /**
  * Pieces the book capture took in as note paragraphs that are not part of the
  * note: the page's margin column of verse references ("2:61 87 91 3:21 …"),
- * sometimes glued to the front of the paragraph beside it; a lone letter left
+ * sometimes glued to the front of the paragraph beside it or of its verse label; a lone letter left
  * over from a raised ending; and, where a page was read twice, a cut-short
  * copy of a paragraph or a piece of the previous verse's note.
  */
 const REF = "\\d+:\\d+(?:[–-]\\d+)?";
 const ONLY_REFS = new RegExp(`^${REF}(?:\\s+(?:${REF}|\\d+))*\\s*$`);
-const LEADING_REFS = new RegExp(`^(?:${REF}\\s+)+(?=\\p{Lu})`, "u");
+// …up to the capital the paragraph opens on, or up to its own verse label.
+const LEADING_REFS = new RegExp(`^(?:${REF}\\s+)+(?=(?:\\d+(?:[–-]\\d+)?\\s+)?\\p{Lu})`, "u");
 const LONE_LETTERS = /^\p{L}{1,2}$/u;
 
 /** One captured block with the margin's references and lone letters taken out. */
