@@ -2925,6 +2925,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "On a phone, a long press on a verse opened its menu and the book's note at once, leaving the page a strip between them, and the note's rise slid the verse away from the menu. Fixed 2026-10-06: App keeps the note card down while that menu is up wherever the note is a card over the page's foot, as it already did for the verse-number menu; the desktop, where they sit side by side, is unchanged."
+    },
+    {
+      "id": "initials-too-small-to-tap",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉕"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "On a phone the commentators' initials in a note were a letter or two wide and a comma apart, so a finger opened the neighbour's line of the key or nothing. Fixed 2026-10-07: CommentarySheet opens the key for every initial in the bracket, the tapped one marked on the side its entry starts from, and each initial's tap area reaches over the comma and above and below the line without moving a word."
     }
   ]
 }
