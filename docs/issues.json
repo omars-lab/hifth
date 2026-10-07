@@ -2937,6 +2937,17 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "On a phone the commentators' initials in a note were a letter or two wide and a comma apart, so a finger opened the neighbour's line of the key or nothing. Fixed 2026-10-07: CommentarySheet opens the key for every initial in the bracket, the tapped one marked on the side its entry starts from, and each initial's tap area reaches over the comma and above and below the line without moving a word."
+    },
+    {
+      "id": "note-covers-turn-edge",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉖"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "With two pages open (a computer, or an iPad on its side) a note opens over the facing page and covers that page's outer edge, so grabbing the edge to turn selects note text instead. Keys and the arrows under the page still turn, and a turn closes the note. Options in the design note: leave it, a narrower note, or a press on the note's outer margin that closes it and turns."
     }
   ]
 }

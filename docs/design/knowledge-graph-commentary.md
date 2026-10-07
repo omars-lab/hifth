@@ -803,3 +803,24 @@ which is also how the book means it read: these commentators together. The one t
 with a bar on the side its entry starts from, the left even in the Arabic app, since the entries
 are in English. Each initial also takes taps over the comma beside it and a little above and below
 its line, without moving a word of the prose.
+
+### ㉖ With two pages open and a note beside them, can the reader turn the page by its edge? · **open**
+
+On a computer or an iPad on its side, the book turns when the reader grabs a page's outer edge and drags it. A note opens
+on the facing page, so its verse stays in sight, and the note is wider than that page: it covers
+the page's outer edge too. For a verse on the right-hand page, the note sits on the left one,
+and the left edge is the one that turns forward. Grabbing it there selects the note's words
+instead of turning. Found walking the pitch on 2026-10-07, on a laptop and on an iPad on its side.
+
+The arrow keys and the arrows under the page still turn it, and a turn closes the note, since its
+verse has left the page. So nothing is lost, only the turn a reader reaches for first.
+
+**What would answer it:** one of these, each tried with a hand on it before it is chosen.
+
+- **Leave it.** Keys and the arrows under the page are the way to turn with a note open.
+  Costs nothing; the edge just does not answer while the note covers it.
+- **A narrower note that stops short of the edge.** The edge stays free. The note's lines get
+  short, about 300 points on a laptop, which reads worse than the card does now.
+- **Close the note on a press at its outer margin, and start the turn.** The edge keeps working
+  in the same place. A press on the note's margin doing two things at once may surprise.
+
