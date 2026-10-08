@@ -146,6 +146,37 @@ test.describe("Hifth · tajweed skin (spec §8)", () => {
     await context.close();
   });
 
+  // Found walking the pitch in the Mac app, 2026-10-08: on a laptop-sized
+  // window the key is taller than its card, so the last rule is cut at the
+  // edge and the source's credit, a licence condition, sits out of sight with
+  // nothing to say there is more. While there is more below, the card shows
+  // it; once the reader reaches the end, the cue goes.
+  test("a key taller than its card says there is more, until the end is reached", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/#/hafs-kfqc/p45");
+    await page.getByLabel("مفتاح ألوان التجويد").click();
+    const legend = page.getByRole("dialog", { name: "مفتاح ألوان التجويد" });
+    await expect(legend).toBeVisible();
+    const overflows = await legend.evaluate((el) => el.scrollHeight > el.clientHeight + 1);
+    expect(overflows).toBe(true);
+    await expect(legend).toHaveAttribute("data-more", "below");
+    await legend.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+    await expect(legend).not.toHaveAttribute("data-more", "below");
+    await expect(legend.locator("a[href]").last()).toBeInViewport();
+  });
+
+  test("a key that fits its card shows no cue", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1400 });
+    await page.goto("/#/hafs-kfqc/p45");
+    await page.getByLabel("مفتاح ألوان التجويد").click();
+    const legend = page.getByRole("dialog", { name: "مفتاح ألوان التجويد" });
+    await expect(legend).toBeVisible();
+    await expect(legend.getByText(/آية في صفحة/).first()).toBeVisible({ timeout: 10_000 });
+    await expect(legend).not.toHaveAttribute("data-more", "below");
+  });
+
   test("no axe violations with the skin on and the legend open", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/2:38");
     await page.locator(toggle).click();

@@ -3130,6 +3130,18 @@
       "note": "Found walking the pitch in the iPad app (2026-10-08), on the public build too: the tajweed key, opened with the colours off, said 'None on this page' for every rule, because the rules were only fetched once the colours went on. Opening the key now fetches the page's rules without turning the colours on, and each count stays blank until they arrive. Tests: 'the key counts the page's rules even with the colours off' and 'the key does not say a rule is missing while it is still counting' (both failed first; skin tests 16/16 after)."
     },
     {
+      "id": "tajweed-key-hidden-credit",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉑"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/skin.spec.ts",
+      "note": "Found walking the pitch in the Mac app (2026-10-08), the same in a laptop-sized browser: the tajweed key is taller than its card, so its last rule was cut at the edge and the rules' source credit, a licence condition, sat out of sight with nothing saying the card scrolls. The card's foot now fades while there is more below and the fade goes at the end. Tests: 'a key taller than its card says there is more, until the end is reached' (failed first) and 'a key that fits its card shows no cue'."
+    },
+    {
       "id": "reader-words-plumbing",
       "source": {
         "file": "docs/design/native-shell.md",
@@ -3159,14 +3171,14 @@
         "file": "docs/design/native-shell.md",
         "item": "⑲"
       },
-      "status": "open",
+      "status": "confirmed",
       "severity": "defect",
       "owner": "user",
       "blockedBy": [
         "the owner deleting the 134 merged branches on GitHub",
         "a GitHub Support purge of the old commits"
       ],
-      "note": "The two 2:255 app pictures were taken of the pitch build with the note open, so they showed The Study Quran's translation and commentary in a public repository since 2026-09-29, where text checks cannot see it. Done: both out of the tree, the comparison refuses the pitch build (scripts/native-golden-public.test.mjs), the four public-build pictures are the new record, and on 2026-10-08 main's history was rewritten without the two old picture versions. Left, all the owner's: delete the 134 merged branches on GitHub that still carry the old history (the permission check refused the agent), ask GitHub Support to purge the old commits the pull requests still hold, move the unpushed native-shell branch onto the new main, and decide whether the comparison runs before every push."
+      "note": "The two 2:255 app pictures were taken of the pitch build with the note open, so they showed The Study Quran's translation and commentary in a public repository since 2026-09-29, where text checks cannot see it. Done: both out of the tree, the comparison refuses the pitch build (scripts/native-golden-public.test.mjs), the four public-build pictures are the new record, and on 2026-10-08 main's history was rewritten without the two old picture versions. A sweep of every picture and text change since the pitch began found nothing else to purge. Left, all the owner's, and first on their list because the two pictures can still be opened today: delete the 134 merged branches on GitHub that still carry the old history (the permission check refused the agent), ask GitHub Support to purge the old commits the pull requests still hold, move the unpushed native-shell branch onto the new main, and decide whether the comparison runs before every push."
     },
     {
       "id": "shell-public-copy-kept-private",

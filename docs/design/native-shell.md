@@ -487,7 +487,7 @@ picture fail its own check rather than crash. The picture is now taken of the pa
 Two checks on every Mac picture, both seen failing first: the picture job refuses a page that says
 it is hidden, and refuses a picture whose size is not the page's size.
 
-### ⑲ The iPad and iPhone app pictures are compared with an out-of-date record, and two of them show The Study Quran's words · **open**
+### ⑲ The iPad and iPhone app pictures are compared with an out-of-date record, and two of them show The Study Quran's words · **confirmed**
 
 Found on 2026-10-08 while checking that ⑱ changed nothing on the iPad. The saved pictures the app
 is compared against were taken before three fixes: the two pages drawn stamp-sized on an upright
@@ -516,6 +516,14 @@ pictures saved under the same names stay. Main went from `f94a8f1` to `bac4da8`;
 2026-09-29 has a new id, earlier ones kept theirs, and the files at the tip are byte-for-byte what
 they were, so nothing new was pushed that the checks had not already passed.
 
+**Nothing else needed purging (checked 2026-10-08).** Before naming anything to GitHub, every
+picture version that has left the tree since the pitch build began was looked at by eye: 140
+versions, every third frame of each moving picture. Only the two known pictures show held text.
+Every commit message and every change to a text file in the same span was also compared, run of
+seven words by run of seven words, against the private translation and commentary: nothing
+matched beyond a stock phrase in a note of our own. So the request to GitHub names two pictures
+and no more, and should not need a second one.
+
 **Still to do, all the owner's:**
 
 - **Delete the old branches on GitHub.** 134 merged branches still carry the old history, so the
@@ -542,3 +550,16 @@ pitch's private folder stayed behind. The check after the copy refused the resul
 held went anywhere, but the switch did not work. The public copy now deletes skipped folders too.
 Tests drive the copy alone, without a web build: switching leaves no private folder, and a public
 build that somehow carries one is copied without it (both failed first).
+
+### ㉑ The tajweed key hid its last rule and the source's credit, with nothing to say there was more · **fixed**
+
+Found walking the pitch in the Mac app on 2026-10-08, and the same in a laptop-sized browser
+window: the key is taller than its card there, so the last rule was cut off at the card's edge and
+the credit to the rules' source, which its licence asks us to show, sat out of sight. Nothing said
+the card scrolled; the cut line looked like the end.
+
+**The fix:** while there is more below, the card's foot fades into the paper, so the last line
+visibly runs on; once the reader scrolls to the end, the fade goes. Tests: two in the tajweed
+browser tests, one on a laptop-sized window that expects the cue and then, scrolled to the end,
+no cue and the credit's link in view (failed first), and one on a tall window where the key fits
+and no cue shows.
