@@ -135,7 +135,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the way in, and no empty strip along the bottom. · `make app-shot TARGET=mac` (refuses a page that
   says it is hidden, and a picture not the page's size) · issue: `mac-app-shot-frozen`
 - [ ] Before trusting `make app-golden` on the iPad and iPhone, check its saved pictures are not
-  older than the last change to the page's look. · issue: `shell-goldens-stale`
+  older than the last change to the page's look, and that none shows The Study Quran's words: they
+  are committed to a public repository. It runs on the public build only (`make app-web
+  FLAVOUR=public`). · issue: `shell-goldens-stale`
+- [ ] Switch the app from the pitch build to the public one: it works, and no private folder is
+  left in the app. · `make app-web FLAVOUR=public` · issue: `shell-public-copy-kept-private` · test:
+  `node --test scripts/native-golden-public.test.mjs`
 - [ ] Pinch a page in the iPad app to look closer, ending with a finger on a verse: the page grows,
   and no verse is selected and no menu opens. Same with the note tool picked: no note is pinned.
   · iPad simulator · issue: `ipad-pinch-selects-verse` · test:

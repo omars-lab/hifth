@@ -91,10 +91,22 @@ ifeq ($(FLAVOUR),pitch)
 	  echo ""; echo "  No private pitch data at apps/web/public/assets/private/study-quran/"; \
 	  echo "  Build it first (node packages/etl/tools/pitch/extract.mjs) or use FLAVOUR=public"; echo ""; exit 1; }
 	VITE_PITCH=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
-	rsync -a --delete apps/web/dist-native/ $(WEB_BUNDLE)/
 else
 	$(WEB) exec vite build --outDir dist-native --emptyOutDir
-	rsync -a --delete --exclude 'assets/private' apps/web/dist-native/ $(WEB_BUNDLE)/
+endif
+	@$(MAKE) --no-print-directory app-web-copy FLAVOUR=$(FLAVOUR)
+
+.PHONY: app-web-copy
+# The copy alone, so a test can drive it without a web build. A folder the copy
+# skips is also one it never deletes, so the public copy deletes skipped
+# folders too: switching from the pitch build must not keep its private folder.
+DIST ?= apps/web/dist-native
+app-web-copy:
+	@mkdir -p $(WEB_BUNDLE)
+ifeq ($(FLAVOUR),pitch)
+	rsync -a --delete $(DIST)/ $(WEB_BUNDLE)/
+else
+	rsync -a --delete --delete-excluded --exclude 'assets/private' $(DIST)/ $(WEB_BUNDLE)/
 	@test ! -e $(WEB_BUNDLE)/assets/private || { echo "held data reached the public shell bundle"; exit 1; }
 endif
 	@echo "$(FLAVOUR)" > $(WEB_BUNDLE)/.hifth-web-flavour
@@ -214,9 +226,17 @@ app-golden-update: app-golden-shots ## Accept the current shell screenshots as t
 	cp $(SHOTS)/current/*.png $(SHOTS)/baseline/
 	@echo "  baseline updated: $$(ls $(SHOTS)/baseline | wc -l | tr -d ' ') screenshots"
 
-.PHONY: app-golden-shots
+.PHONY: app-golden-public app-golden-shots
+# The baseline is committed to a public repository, so it is taken of the public
+# build: a pitch picture of a verse with its note open carries The Study Quran's
+# words in its pixels, where no text check can see them (native-shell.md ⑲).
+app-golden-public:
+	@test "$$(cat $(WEB_BUNDLE)/.hifth-web-flavour 2>/dev/null)" = public || { \
+	  echo ""; echo "  The app's comparison pictures are committed to a public repository, so they"; \
+	  echo "  are taken of the public build, never the pitch. Run: make app-web FLAVOUR=public"; echo ""; exit 1; }
+
 # Shots are halved (the simulator draws at 2x) so a baseline is a few hundred KB, not 2 MB.
-app-golden-shots:
+app-golden-shots: app-golden-public
 	@rm -rf $(SHOTS)/current && mkdir -p $(SHOTS)/current
 	@for r in $(GOLDEN_ROUTES); do \
 	  name=$$(printf '%s' "$$r" | sed 's#^/##; s#[/:?=]#_#g'); \
