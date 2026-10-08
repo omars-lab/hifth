@@ -16,6 +16,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `upright-ipad-opens-two-small-pages`
 - [ ] A deep link to a verse lands on its page with the verse marked; turn the phone the moment it
   opens and the mark is still there. · phone, phone-side · issue: `turned-phone-loses-linked-verse-mark`
+- [ ] Open at page 1 and turn to page 3: the paper stays the same size and shape; the opening text sits
+  in the middle, not on a squat card. · desktop, phone · issue: `opening-pages-squat`
 
 ## Turning pages
 

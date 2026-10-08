@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { ayahTarget } from "./ayah";
 import { lum, pixelsAt } from "./ink";
 
 /*
@@ -98,3 +99,57 @@ for (const p of [2, 44]) {
     }
   });
 }
+
+/*
+ * The book's first two leaves are the same size as every other leaf.
+ *
+ * The print draws the opening pages' text as a small square block, and the app
+ * used to cut the paper to that square: the open book began as two squat cards
+ * with the scripture half again as large as on the pages after it, and the paper
+ * jumped in size at the first turn (2026-10-08, walking the pitch as a first
+ * visitor). Now the paper is the page's shape and the block sits in its middle,
+ * still spanning the page's width so the opening text stays large (the owner's
+ * pick over shrinking it to every other page's size of type).
+ */
+const paperOf = (page: Page, p: number) =>
+  page.evaluate((p) => {
+    const host = [...document.querySelectorAll<HTMLElement>(`[data-host-page="${p}"]`)].find(
+      (el) => el.getBoundingClientRect().width > 0,
+    )!;
+    const svg = host.querySelector<SVGSVGElement>("svg")!;
+    const paper = host.getBoundingClientRect();
+    const art = svg.getBoundingClientRect();
+    return {
+      w: paper.width,
+      h: paper.height,
+      // how much of the paper's width the drawing spans
+      across: art.width / paper.width,
+      // where the drawing's middle sits on the paper, as a share of the paper
+      artMidX: (art.left + art.width / 2 - paper.left) / paper.width,
+      artMidY: (art.top + art.height / 2 - paper.top) / paper.height,
+    };
+  }, p);
+
+test("the opening pages are the size of every other page, their text across the full width", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/#/hafs-kfqc/p3");
+  await expect(page.locator('svg[aria-labelledby="page-label-3"]:visible')).toBeVisible();
+  const usual = await paperOf(page, 3);
+
+  await page.goto("/#/hafs-kfqc/p1");
+  await expect(page.locator('svg[aria-labelledby="page-label-1"]:visible')).toBeVisible();
+  await expect(page.locator('svg[aria-labelledby="page-label-2"]:visible')).toBeVisible();
+  for (const p of [1, 2]) {
+    const opening = await paperOf(page, p);
+    expect(Math.abs(opening.w - usual.w), `page ${p} paper width`).toBeLessThan(2);
+    expect(Math.abs(opening.h - usual.h), `page ${p} paper height`).toBeLessThan(2);
+    expect(Math.abs(opening.across - usual.across), `page ${p} text across the page`).toBeLessThan(0.02);
+    expect(Math.abs(opening.artMidY - 0.5), `page ${p} text in the middle, top to bottom`).toBeLessThan(0.03);
+    expect(Math.abs(opening.artMidX - 0.5), `page ${p} text in the middle, side to side`).toBeLessThan(0.04);
+  }
+
+  // And a click on a verse there still picks that verse.
+  const { x, y } = await ayahTarget(page, 'svg[aria-labelledby="page-label-1"]:visible #verse-5');
+  await page.mouse.click(x, y);
+  await expect(page).toHaveURL(/1:5/);
+});
