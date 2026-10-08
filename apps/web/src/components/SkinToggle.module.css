@@ -284,6 +284,21 @@
   font-size: var(--text-sm);
 }
 
+/* More below: the card's foot fades into the paper while there is still
+   something under it, and the fade goes once the reader reaches the end.
+   It sticks to the card's real edge, below the bottom padding, or the line
+   in that padding reads as the last one. */
+.sheet[data-more="below"]::after {
+  content: "";
+  position: sticky;
+  inset-block-end: calc(-1 * (var(--space-5) + env(safe-area-inset-bottom)));
+  display: block;
+  block-size: 56px;
+  margin-block-start: -56px;
+  background: linear-gradient(to bottom, transparent, var(--paper-raised));
+  pointer-events: none;
+}
+
 .credit {
   margin-block-start: var(--space-4);
   color: var(--ink-soft);

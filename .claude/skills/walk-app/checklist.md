@@ -97,6 +97,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] The tajweed key, opened with the colours off (the ⓘ, or `?open=key`), counts the rules on the
   page (page 45 has madd on 5 ayahs), and never says "none" while still loading. · every flavour ·
   issue: `tajweed-key-none-when-off`
+- [ ] On a laptop-sized window (and in the Mac app) open the tajweed key: if it is taller than its
+  card, its foot fades to say there is more, and scrolling to the end shows the source's credit
+  with the fade gone. · desktop, the Mac app · issue: `tajweed-key-hidden-credit`
 - [ ] Read every sentence a panel shows as a hafiz would: no word for how the app is built
   ("build", "table", "ids", "pack"…), and nothing that says "phone" on an iPad or a Mac. Inside
   the iPad app, the juz map has no keep-offline shelf. · every flavour · issue:

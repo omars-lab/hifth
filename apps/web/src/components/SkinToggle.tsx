@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   TAJWEED_RULES,
   type SkinId,
@@ -104,6 +104,24 @@ export function TajweedLegend({
   const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
+  // Whether the card holds more than it shows. On a laptop-sized window the
+  // key is taller than its card, and the last thing in it is the source's
+  // credit, a licence condition; without a cue nothing says it is there.
+  const [moreBelow, setMoreBelow] = useState(false);
+  const measure = useCallback(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    setMoreBelow(sheet.scrollTop + sheet.clientHeight < sheet.scrollHeight - 2);
+  }, []);
+
+  // The counts and the selection arrive after the card opens, and a window
+  // can change size under it, so measure again whenever any of them does.
+  useLayoutEffect(() => {
+    if (!open) return;
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [open, counts, selection, credit, measure]);
 
   // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
   useLayoutEffect(() => {
@@ -156,6 +174,8 @@ export function TajweedLegend({
         dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
+        onScroll={measure}
+        data-more={moreBelow ? "below" : undefined}
       >
         <div className={styles.grip} aria-hidden="true" />
         <header className={styles.head}>

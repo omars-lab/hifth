@@ -3130,6 +3130,18 @@
       "note": "Found walking the pitch in the iPad app (2026-10-08), on the public build too: the tajweed key, opened with the colours off, said 'None on this page' for every rule, because the rules were only fetched once the colours went on. Opening the key now fetches the page's rules without turning the colours on, and each count stays blank until they arrive. Tests: 'the key counts the page's rules even with the colours off' and 'the key does not say a rule is missing while it is still counting' (both failed first; skin tests 16/16 after)."
     },
     {
+      "id": "tajweed-key-hidden-credit",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉑"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/skin.spec.ts",
+      "note": "Found walking the pitch in the Mac app (2026-10-08), the same in a laptop-sized browser: the tajweed key is taller than its card, so its last rule was cut at the edge and the rules' source credit, a licence condition, sat out of sight with nothing saying the card scrolls. The card's foot now fades while there is more below and the fade goes at the end. Tests: 'a key taller than its card says there is more, until the end is reached' (failed first) and 'a key that fits its card shows no cue'."
+    },
+    {
       "id": "reader-words-plumbing",
       "source": {
         "file": "docs/design/native-shell.md",
