@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 
 /*
  * The web app on an iPad-sized WebKit — the same engine the native shell hosts.
@@ -102,4 +102,66 @@ test.describe("Hifth · on an iPad", () => {
     await expect(page.locator("#hifth-overlay .hl-sel.hl-ink")).not.toHaveCount(0);
     expect(new URL(page.url()).hash).toBe("#/hafs-kfqc/2:38");
   });
+
+  // Found walking the pitch in the iPad app (2026-10-08): a pinch that ended
+  // on a verse selected it and opened its hold menu, because the second
+  // finger's lift was read as a tap of its own. Two fingers are a pinch, and
+  // nothing in a pinch selects a verse or pins a note, however long they rest.
+  test("two fingers resting on a verse and lifting select nothing", async ({ page }) => {
+    await page.setViewportSize(LANDSCAPE);
+    await page.goto("/#/hafs-kfqc/p8");
+    await shown(page, 7);
+    await pinchOn(page, leaf(page, 7).locator("#verse-45"));
+    await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(0);
+    expect(new URL(page.url()).hash).toBe("#/hafs-kfqc/p8");
+  });
+
+  test("two fingers on a verse with the note tool picked pin no note", async ({ page }) => {
+    await page.setViewportSize(LANDSCAPE);
+    await page.goto("/#/hafs-kfqc/p8");
+    await shown(page, 7);
+    await page.keyboard.press("KeyN");
+    // The page says which tool is in hand; this project reads in Arabic, so
+    // the bar's own names are not English here.
+    await expect(page.locator('[data-tool="note"][data-page="7"]')).toHaveCount(1);
+    await pinchOn(page, leaf(page, 7).locator("#verse-45"));
+    await expect(page.locator("[data-note-pin]:visible")).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  });
 });
+
+/**
+ * Two fingers come down on the element, a little apart, rest past the hold
+ * time, and lift, the second one first and where it landed. Built from
+ * pointer events by hand: Playwright's touch tap is one finger only.
+ */
+async function pinchOn(page: Page, target: Locator): Promise<void> {
+  const box = await target.boundingBox();
+  expect(box).not.toBeNull();
+  const at = { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 };
+  const finger = (type: string, id: number, primary: boolean) =>
+    page.evaluate(
+      ({ type, id, primary, x, y }) => {
+        document.elementFromPoint(x, y)?.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            pointerId: id,
+            pointerType: "touch",
+            isPrimary: primary,
+            clientX: x,
+            clientY: y,
+            button: 0,
+            buttons: type === "pointerup" ? 0 : 1,
+          }),
+        );
+      },
+      { type, id, primary, x: at.x + (primary ? -12 : 12), y: at.y },
+    );
+  await finger("pointerdown", 1, true);
+  await finger("pointerdown", 2, false);
+  await page.waitForTimeout(500);
+  await finger("pointerup", 2, false);
+  await finger("pointerup", 1, true);
+  await page.waitForTimeout(300);
+}

@@ -3058,6 +3058,18 @@
       "closedBy": "native/Makefile.native"
     },
     {
+      "id": "ipad-pinch-selects-verse",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑫"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Walking the pitch in the iPad app (2026-10-08): pinching page 45 jumped to a verse lower down, selected it and opened its long-press menu. The second finger of the pinch rested and lifted where it landed, so its lift was read as a hold on the verse under it; the note tool would have pinned a note the same way. Fixed 2026-10-08: once a second finger joins a stroke, nothing in it is a tap or a hold. Tests in the tap-reading unit tests, the iPad browser tests, and the simulator smoke test.",
+      "closedBy": "packages/core/src/highlighter.ts"
+    },
+    {
       "id": "number-menu-keyboard-pulled-back",
       "source": {
         "file": "docs/design/knowledge-graph-commentary.md",

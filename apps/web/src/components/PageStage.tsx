@@ -1780,15 +1780,22 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * The note tool's two listeners on one page. A tap under the note tool asks
    * for a pin (a tap, not a drag: the same slop the highlighter uses), and a
    * pin under any tool opens its note. Pins are not verses, so the
-   * highlighter's own tap finds no verse on them and selects nothing.
+   * highlighter's own tap finds no verse on them and selects nothing. A second
+   * finger makes the stroke a pinch, and nothing in a pinch is a tap.
    */
   const wireNotes = useCallback((svg: SVGSVGElement, targetPage: number, hl: Highlighter) => {
     let press: { x: number; y: number } | null = null;
+    let manyFingers = false;
     svg.addEventListener("pointerdown", (e) => {
+      if (e.isPrimary === false) {
+        manyFingers = true;
+        return;
+      }
+      manyFingers = false;
       press = { x: e.clientX, y: e.clientY };
     });
     svg.addEventListener("pointerup", (e) => {
-      const from = press;
+      const from = manyFingers ? null : press;
       press = null;
       const using = toolRef.current;
       if (
