@@ -1063,3 +1063,4 @@ commentary design note's numbered items, and in the issues list.
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
+- #109 — One page on a laptop: a link straight to a verse sometimes left the note over that verse; fixed (design item ㉛).
