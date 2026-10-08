@@ -3104,6 +3104,18 @@
       "owner": "agent",
       "closedBy": "apps/web/src/components/VerseMenu.keys.test.tsx",
       "note": "Found running the pitch suite in WebKit (2026-10-08): the verse-number menu fills in as its lines arrive. A line was keyed by its words, so the top line gaining the book's name became a new button and focus dropped to the page for a moment; and every change of the top line pulled the keyboard back to it, even after the reader pressed Down. Lines now carry a fixed id, and the menu stops following the top line once the reader has walked it. Tests: VerseMenu.keys.test.tsx (both failed first); the pitch test 'the keyboard opens it, and Escape closes it' waits for the menu to fill, 16/16 in WebKit."
+    },
+    {
+      "id": "pitch-link-lookalikes-opens-note",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑮"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch in the iPad app (2026-10-08): a link asking for 2:48's look-alikes opened its note. The link waited for either the look-alike file or the private file, and the private one could land first, so the list opened empty and the note took its place. The app now records when each file has come back (empty counts) and waits for both. Test: the pitch test '?open=lookalikes opens the look-alike list even when the note's file arrives first' (failed first; 3/3 after); the public link tests 57/57."
     }
   ]
 }

@@ -769,13 +769,19 @@ export function App(): JSX.Element {
   // Fetch a surah's shard at most once per session; a null result (missing
   // file) still counts as requested so we don't hammer a broken deploy.
   const requestedShards = useRef(new Set<number>());
+  // The surahs whose shard request has come back, empty or not: what a link's
+  // `?open=lookalikes` waits for, since a surah with no look-alikes (1) never
+  // lands in `shards` at all.
+  const [settledShards, setSettledShards] = useState<ReadonlySet<number>>(new Set());
   const ensureShard = useCallback(
     (surah: number) => {
       if (!manifest || requestedShards.current.has(surah)) return;
       requestedShards.current.add(surah);
-      void loadShard(manifest.edition, surah).then((shard) => {
-        if (shard) setShards((m) => new Map(m).set(surah, shard));
-      });
+      void loadShard(manifest.edition, surah)
+        .then((shard) => {
+          if (shard) setShards((m) => new Map(m).set(surah, shard));
+        })
+        .finally(() => setSettledShards((s) => new Set(s).add(surah)));
     },
     [manifest],
   );
@@ -784,12 +790,15 @@ export function App(): JSX.Element {
   // shape as `ensureShard`, but for the private held payload. A no-op (and fully
   // dead code) in every public build.
   const requestedPitch = useRef(new Set<number>());
+  const [settledPitch, setSettledPitch] = useState<ReadonlySet<number>>(new Set());
   const ensurePitch = useCallback((surah: number) => {
     if (!PITCH || requestedPitch.current.has(surah)) return;
     requestedPitch.current.add(surah);
-    void loadPitchSurah(surah).then((p) => {
-      if (p) setPitchSurahs((m) => new Map(m).set(surah, p));
-    });
+    void loadPitchSurah(surah)
+      .then((p) => {
+        if (p) setPitchSurahs((m) => new Map(m).set(surah, p));
+      })
+      .finally(() => setSettledPitch((s) => new Set(s).add(surah)));
   }, []);
 
   // A surah's notes from the commentary source, asked for at most once.
@@ -1001,19 +1010,22 @@ export function App(): JSX.Element {
     if (!pendingSheet || !selectedKey) return;
     if (selectedKey !== pendingSheet.key) return setPendingSheet(null);
     // Both lookups exist before the verse's surah has loaded, so "ready" is
-    // that surah's own file having arrived. One that never arrives leaves the
-    // request waiting, harmlessly, until the reader moves.
+    // that surah's own files having come back. One that never comes back
+    // leaves the request waiting, harmlessly, until the reader moves.
     const surah = parseAyahKey(selectedKey)?.surah ?? 0;
     if (pendingSheet.panel === "roots") {
       if (!rootAyahShards.has(surah)) return;
       setRootsOpen(true);
     } else {
-      if (!shards.has(surah) && !(PITCH && pitchSurahs.has(surah))) return;
+      // Both files, not either: in the pitch build the private one (which
+      // also carries the note) can land first, and opening then found no
+      // look-alikes yet, so the note opened in the list's place.
+      if (!settledShards.has(surah) || (PITCH && !settledPitch.has(surah))) return;
       const first = railChips[0];
       if (first) setOpenDirection(first.direction);
     }
     setPendingSheet(null);
-  }, [pendingSheet, selectedKey, rootAyahShards, shards, pitchSurahs, railChips]);
+  }, [pendingSheet, selectedKey, rootAyahShards, settledShards, settledPitch, railChips]);
   const curatedRoots = useMemo(
     () => chips.find((c) => c.direction === "root")?.edges ?? [],
     [chips],
