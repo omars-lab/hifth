@@ -25,6 +25,30 @@ Two consequences to hold onto:
 If a task does not move the pitch forward, it is not urgent right now. When in doubt, build
 the thing that will make a scholar lean in.
 
+## How we work, in one line each
+
+The sections below give the reasons at length; these are the habits, short enough to hold in
+your head.
+
+- **Build it more than one way, and let the reader switch.** When a feature could work in a few
+  ways, build the main ones. The best becomes the default, and the others stay as a setting in
+  the info panel, not deleted. (Owner, 2026-10-08.)
+- **Nothing is too small to fix.** A fault you notice gets fixed now, with its test, not waved
+  off.
+- **Look at the real thing.** Open the app on the device it is for (and in Firefox, the owner's
+  browser) before calling a change done. A picture settles what reading the code only guesses.
+- **Every fault found makes the walk checklist longer**, so the next walk looks for it on
+  purpose (the walk-app skill).
+- **Write it down where it lives, the same turn.** A choice goes in the decision index, open
+  work in the backlog. Nothing lives only in a chat.
+- **Do not hand checks to the owner.** What only a person can check is parked on the
+  manual-testing list, and each answer becomes a test.
+- **No warning the reader cannot act on.** It goes to the backlog, not onto the screen.
+- **The book's text never leaves the private build.** Not in a commit, a PR, a test or a doc;
+  tests use made-up text.
+- **Checks run on this laptop, before the push.** Hosted CI runs are scarce; only what cannot
+  run here goes there.
+
 ## Decisions are explained in plain language, or they are not explained
 
 This is the tenet. Everything below is how it is enforced.
@@ -68,7 +92,8 @@ never opened this repository.** Concretely:
   is built as an interchangeable component — one per option, behind a shared interface,
   `OptionA` through `OptionN` — and mounted **live** on the decision page, so the reader
   chooses by doing it rather than by imagining it. The component that wins graduates into the
-  app and the losers are deleted, so nothing was throwaway that the choice did not need. An
+  app as the default, and the others stay as a setting the reader can switch to, so nothing
+  built for the choice was thrown away. An
   option whose difference is purely structural or policy — which of two labels a page carries —
   may still be drawn. The test is whether a reader could be *wrong* about the option from a
   picture and *right* about it from a hand on it; where that is true, drawing it is not enough.
