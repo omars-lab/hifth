@@ -1275,6 +1275,28 @@ test.describe("Hifth · links straight into the commentary", () => {
     await expect.poll(() => page.evaluate(() => location.hash)).toBe("#/hafs-kfqc/2:255");
   });
 
+  test("?open=lookalikes opens the look-alike list even when the note's file arrives first", async ({ browser }) => {
+    // The link waited for the verse's surah to load, and in this build it
+    // counted the note's own file as that: when the note's file came first,
+    // the list was looked for before there was one, and the link opened the
+    // note instead (found walking the pitch in the iPad app, 2026-10-08).
+    // Holding the look-alikes back makes it lose that race every time.
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, serviceWorkers: "block" });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    await context.route("**/assets/adj/**/2.json", async (route) => {
+      await new Promise((done) => setTimeout(done, 1_500));
+      await route.continue();
+    });
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/2:48?open=lookalikes");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    const list = page.getByRole("dialog");
+    await expect(list).toHaveCount(1, { timeout: 20_000 });
+    await expect(list).not.toContainText("Study Quran", { timeout: 8_000 });
+    await expect(list).toContainText("2:123");
+    await context.close();
+  });
+
   // Every introduction ended on the opening verse's translation, which the
   // print sets under it as the surah's first line. Then 61 surahs had none at
   // all and Al-Kahf's began on "Finally,": the book's capture never read a

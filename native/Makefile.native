@@ -10,6 +10,7 @@
 #   make app-open ROUTE=/hafs-kfqc/2:255   turn the running app to a route
 #   make app-callback-check an x-callback request through macOS, answer received by a second process
 #   make app-test           route/bundle unit tests + the XCUITest smoke
+#   make app-walk ROUTES='/hafs-kfqc/2:255?open=commentary …' [SIDEWAYS=1]   a picture per route, to look at
 #   make app-golden         the real app's screenshots against native/shots/baseline/
 #   make app-device-install build for a plugged-in iPad, install and launch (DEVICE=…)
 # ---------------------------------------------------------------------------
@@ -48,6 +49,10 @@ TARGET       ?= ipad
 EVAL         ?=
 # app-test: one XCUITest instead of the whole run, e.g. ONLY=SmokeTests/testOpensAtAVerse
 ONLY         ?=
+# app-walk: the routes to open, space-separated, and whether to hold it sideways.
+ROUTES       ?= $(ROUTE)
+SIDEWAYS     ?=
+WALK_OUT     ?= $(SHOTS)/walk
 DELAY_MS     ?= 2000
 APPEARANCE   ?= light
 # `/hafs-kfqc/p45?field=dark` → `ipad-hafs-kfqc_p45_field-dark.png`
@@ -67,7 +72,7 @@ DEVICE       ?=
 SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(patsubst /%,%,$(ROUTE))))))$(if $(filter-out light,$(APPEARANCE)),-$(APPEARANCE),).png
 
 .PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
-        app-run-ipad app-shot app-probe app-open app-test app-test-mac-ui app-unit-test app-logs app-clean \
+        app-run-ipad app-shot app-probe app-open app-test app-walk app-test-mac-ui app-unit-test app-logs app-clean \
         app-golden app-golden-update app-device-install app-archive app-testflight
 
 app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
@@ -183,6 +188,15 @@ app-test: $(if $(ONLY),app-generate,app-unit-test) ## Unit tests plus the XCUITe
 	set -o pipefail; $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
 	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-smoke.xcresult \
 	  $(if $(ONLY),-only-testing:HifthUITests-iOS/$(ONLY)) test | $(XCPRETTY)
+
+app-walk: app-generate ## Open each of ROUTES in the iPad app (SIDEWAYS=1 to turn it) and save a picture of each to native/shots/walk/
+	@rm -rf $(SHOTS)/ipad-walk.xcresult $(WALK_OUT)
+	set -o pipefail; TEST_RUNNER_WALK_ROUTES='$(ROUTES)' TEST_RUNNER_WALK_SIDEWAYS='$(SIDEWAYS)' \
+	  $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
+	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-walk.xcresult \
+	  -only-testing:HifthUITests-iOS/WalkTests test | $(XCPRETTY)
+	xcrun xcresulttool export attachments --path $(SHOTS)/ipad-walk.xcresult --output-path $(WALK_OUT) > /dev/null
+	@node $(NATIVE)/scripts/name-attachments.mjs $(WALK_OUT)
 
 app-test-mac-ui: app-generate ## The XCUITest smoke on the Mac (needs Accessibility permission for your terminal — see docs/design/native-shell.md)
 	@rm -rf $(SHOTS)/mac-smoke.xcresult
