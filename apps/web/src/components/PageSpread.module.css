@@ -64,6 +64,10 @@
   background: var(--field-wash);
   --stage-field: none;
 
+  /* Measured, so a leaf can take its width straight from the desk's height
+     (see `.leaf`). */
+  container: spread / size;
+
   /*
    * The two knobs a stage reads, both set to "fill the leaf you are given".
    *
@@ -161,7 +165,7 @@
  * estimate that clips the mus'haf is not an estimate worth keeping, and there is
  * nothing to estimate: the browser knows this box's height.
  *
- * `max-inline-size: 50%` is the other regime. In a window that is tall and
+ * The `50cqi` cap is the other regime. In a window that is tall and
  * narrow the aspect would ask for more width than half the book, so the leaf is
  * clamped and stops being page-shaped. That direction is safe — the page inside
  * takes the *width* and derives its height, so a clamped leaf holds a page
@@ -174,9 +178,15 @@
   block-size: 100%;
   /* The text's 345 × 550, plus the two printed bands — the running head and
      the page number, 6.5% of the page's width each (PageStage.module.css):
-     550 + 2 × 0.065 × 345 = 594.85. Change one, change the other. */
-  aspect-ratio: 345 / 594.85;
-  max-inline-size: 50%;
+     550 + 2 × 0.065 × 345 = 594.85. Change one, change the other.
+
+     Said as a width worked out from the desk's measured height, not as an
+     `aspect-ratio` on this box. The browsers derive the same width from the
+     ratio, but the iPad's own WebKit did not: inside the app, held sideways,
+     each leaf came out 14 px wide and the open book was a sliver in the middle
+     of an empty desk (2026-10-08; native SmokeTests, landscape). Half the
+     desk's width is the cap for a tall, narrow window, as before. */
+  inline-size: min(100cqb * 345 / 594.85, 50cqi);
   min-inline-size: 0;
   display: flex;
 }
@@ -249,8 +259,7 @@
 
 .book[data-solo="true"] > .leaf {
   flex: 1 1 auto;
-  aspect-ratio: auto;
-  max-inline-size: none;
+  inline-size: auto;
 }
 
 /* Gone from the eye and, via `aria-hidden` in the component, from the reading

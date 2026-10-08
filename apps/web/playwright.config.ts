@@ -137,7 +137,9 @@ export default defineConfig({
           name: "pitch",
           testMatch: /pitch\.spec\.ts/,
           use: {
-            browserName: "chromium",
+            // HIFTH_PITCH_BROWSER=webkit runs the same tests in the engine the
+            // iPad and Mac apps are built on, for a fault only the app shows.
+            browserName: process.env.HIFTH_PITCH_BROWSER === "webkit" ? "webkit" : "chromium",
             viewport: { width: 1440, height: 900 },
           },
         },

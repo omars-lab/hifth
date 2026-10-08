@@ -3032,6 +3032,41 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Found walking the pitch in the iPad app (2026-10-08): upright, one page fills the width, yet the note and the roots and look-alike lists opened as a 460px corner card beside an empty block. The four sheets now span the page when the screen is upright and no spread side is set; the note's lines keep their 60ch reading width. Test: e2e/pitch.spec.ts 'an iPad held upright lays the note and its lists across the page'."
+    },
+    {
+      "id": "ipad-app-sideways-spread-tiny",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉞"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "native/HifthUITests/SmokeTests.swift",
+      "note": "Found walking the pitch in the iPad app (2026-10-08): held sideways, the two pages drew as a strip about 28 points wide in the middle of the desk, in the app only; every Playwright browser drew them full height. Each page took its width from an aspect ratio on its own height, which the iPad's WebKit inside the app resolved to 14 points. Pages now take their width from the desk's measured height (container units), capped at half its width. Test: SmokeTests testLandscapeOpensTheBookFullSize (make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize), which failed at 0% before the change; e2e/pitch.spec.ts 'turning an iPad on its side with a note open still shows the note's page' guards the browser side."
+    },
+    {
+      "id": "mac-app-shot-empty",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑪"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Walking the apps (2026-10-08): make app-shot TARGET=mac wrote a 0-byte picture and make app-probe on the Mac saw a 0x0 window, while the iPad simulator gave a full picture and the real size. The Mac app started straight from the command line seems to load the page before its window has a size, or with no window on screen. Closes when a Mac picture of page 45 is not empty, checked by a script."
+    },
+    {
+      "id": "number-menu-keyboard-pulled-back",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉟"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/src/components/VerseMenu.keys.test.tsx",
+      "note": "Found running the pitch suite in WebKit (2026-10-08): the verse-number menu fills in as its lines arrive. A line was keyed by its words, so the top line gaining the book's name became a new button and focus dropped to the page for a moment; and every change of the top line pulled the keyboard back to it, even after the reader pressed Down. Lines now carry a fixed id, and the menu stops following the top line once the reader has walked it. Tests: VerseMenu.keys.test.tsx (both failed first); the pitch test 'the keyboard opens it, and Escape closes it' waits for the menu to fill, 16/16 in WebKit."
     }
   ]
 }

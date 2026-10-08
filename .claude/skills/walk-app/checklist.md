@@ -47,6 +47,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   issues: `phone-tool-icons-out-of-line`, `verse-tools-leave-bar-scraps`
 - [ ] Press a verse's number: one list of tools, not two. · any · issue:
   `number-menu-and-toolbar-together`
+- [ ] Open a verse's number menu with the keyboard and press Down at once, while its lines are
+  still arriving: the keyboard stays on the line you moved to, and never drops off the menu. ·
+  desktop, and the pitch suite with `HIFTH_PITCH_BROWSER=webkit` · issue:
+  `number-menu-keyboard-pulled-back` · test: VerseMenu.keys.test.tsx
 - [ ] Press and hold a verse: one menu, not a menu with a note stacked on it. · phone · issue:
   `long-press-menu-and-note-stack-on-phone`
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
@@ -105,3 +109,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 
 - [ ] Open the app at a verse and at a page; turn, zoom, open a note. · `make app-run-mac`,
   `make app-run-ipad` · Same as the browser. · see the native-shell skill
+- [ ] Walk the pitch **in the iPad app**, not only in the browser: the iPad's own WebKit lays out
+  differently from Playwright's. Rebuild the bundle (`make app-web FLAVOUR=pitch`), launch at a
+  verse, turn the simulator, screenshot, and measure from inside the page with
+  `make app-probe TARGET=ipad EVAL=…`. · the native-shell skill, "Walking the app in the simulator"
+- [ ] Hold the iPad app sideways: two pages fill the height between the bars, not a sliver in the
+  middle of the desk. · iPad simulator, landscape · issue: `ipad-app-sideways-spread-tiny` · test:
+  `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize`

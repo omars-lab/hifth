@@ -20,9 +20,11 @@ by hand: `make app-generate` rewrites it.
 | run in the iPad simulator | `make app-run-ipad ROUTE=/hafs-kfqc/p45` |
 | turn a running app to a route | `make app-open ROUTE=/hafs-kfqc/2:255 TARGET=ipad` (or `TARGET=mac`) |
 | screenshot the page | `make app-shot ROUTE='/hafs-kfqc/p45?field=dark' TARGET=ipad` → `native/shots/` |
-| what the page can see inside the shell | `make app-probe` |
+| what the page can see inside the shell | `make app-probe` (Mac) · `make app-probe TARGET=ipad ROUTE=… EVAL='js'` |
+| walk the app held sideways, by eye | see "Walking the app in the simulator" below |
 | tests, fast | `make app-unit-test` (route, bundle paths, bridge; Mac, seconds) |
 | tests, full | `make app-test` (unit tests + the iPad simulator smoke) |
+| one simulator test | `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize` |
 | Mac smoke | `make app-test-mac-ui` (needs Accessibility permission, see below) |
 | console output | `make app-logs` · `make app-run-mac-stdout` |
 | start over | `make app-clean` |
@@ -117,6 +119,52 @@ page can see (origin, secure context, `caches`, service worker, `navigator.share
 storage, the native marker, viewport, touch points, user agent) and exits. Run it first when
 something works in Safari and not in the shell.
 
+## Walking the app in the simulator
+
+The browsers Playwright drives are not the iPad's own WebKit. A layout can be right in every
+Playwright project and wrong in the app: held sideways, the app once drew the two pages
+28 points wide in the middle of an empty desk, while Playwright's WebKit at the same size drew
+them full height (2026-10-08). So a walk of the pitch on an iPad is done **in the app**, in
+this order:
+
+```mermaid
+flowchart LR
+  A["make app-web FLAVOUR=pitch"] --> B["launch at a verse"]
+  B --> C["turn it, look"]
+  C --> D["measure from inside"]
+  D --> E["a failing simulator test"]
+  E --> F["fix, make app-web, test passes"]
+```
+
+1. **Rebuild the bundle** after any web change: `make app-web FLAVOUR=pitch`. The app runs the
+   copy in `native/WebBundle/`, not the dev server.
+2. **Launch at a verse.** `make app-run-ipad ROUTE=/hafs-kfqc/35:44`, or by hand:
+   `xcrun simctl terminate <udid> com.bytesofpurpose.hifth`, then
+   `SIMCTL_CHILD_HIFTH_ROUTE=/hafs-kfqc/35:44 xcrun simctl launch <udid> com.bytesofpurpose.hifth`.
+3. **Turn it and look.** In a test, `XCUIDevice.shared.orientation = .landscapeLeft` turns the
+   simulator without touching anything else. By hand, Cmd+→ in the Simulator window:
+   `osascript -e 'tell application "Simulator" to activate' -e 'delay 0.5' -e 'tell application "System Events" to key code 124 using command down'`
+   — this pulls the Simulator to the front, so check `osascript -e 'tell application "System Events" to get name of first process whose frontmost is true'`
+   says `Simulator` before you trust it; if the owner is working in another window the key
+   lands there. Then `xcrun simctl io <udid> screenshot out.png`: the file is always in the
+   device's upright frame, so a sideways screen comes out turned; `sips -r 270 out.png` (or
+   `-r 90`, depending on which way it was turned) stands it up. Shrink before reading:
+   `sips -Z 1200 out.png`.
+4. **Measure from inside the page.** `make app-probe TARGET=ipad ROUTE=/hafs-kfqc/p45 EVAL='JSON.stringify(document.querySelector("[data-testid=page-book]")?.getBoundingClientRect())' DELAY_MS=3000`
+   launches the app, waits, runs the expression in the page and prints it with the usual probe
+   fields (viewport, screen, orientation). Keep longer expressions in a file and pass
+   `EVAL="$(cat probe.js)"`. This is what found the 14-point leaves: a number, where a picture
+   only said "small".
+5. **Pin it with a simulator test** in `native/HifthUITests/SmokeTests.swift`, watched failing
+   first: `make app-test ONLY=SmokeTests/<name>`. For anything drawn sideways, measure the web
+   view's own picture (`app.webViews.firstMatch.screenshot()`), redrawn upright with
+   `UIGraphicsImageRenderer`: the whole-screen capture of a turned simulator comes back as a
+   portrait frame with the picture shifted and a black band, and a pixel check on it passes or
+   fails for the wrong reason. Attach that upright picture, not `app.screenshot()`, so the
+   result bundle shows what was measured.
+6. Add the fault to the walk-app checklist (`.claude/skills/walk-app/checklist.md`) under
+   "The Mac and iPad apps", with its issue id and the test.
+
 ## A plugged-in iPad
 
 ```
@@ -206,7 +254,9 @@ edition goes in `Route.editions` and the contract's `Edition` schema (`x-edition
 | "no simulator named …" | name not in `simctl list devices available` | pass `IPAD='<exact name>'`; boot with `xcrun simctl bootstatus <udid> -b` |
 | new route ignored on `simctl launch` | app already running; launch ignores env | `xcrun simctl terminate <udid> com.bytesofpurpose.hifth` first |
 | "open in Hifth?" alert in the simulator | `simctl openurl` | expected once per install; use the env var in scripts |
-| clang module errors from Homebrew paths | stale `CPATH` | the Makefile does `unexport CPATH`; if you call `xcodebuild` yourself, `unset CPATH` |
+| clang module errors from Homebrew paths | stale `CPATH` | the Makefile does `unexport CPATH`; if you call `xcodebuild` yourself, `unset CPATH` — or use `make app-test ONLY=…` instead of `xcodebuild -only-testing` |
+| `-only-testing:HifthUITests/…` runs nothing | the iPad UI test target is `HifthUITests-iOS` | `make app-test ONLY=SmokeTests/<name>` adds the right prefix |
+| right in Playwright, wrong in the app | the iPad's own WebKit is not Playwright's | walk it in the simulator (above); `HIFTH_PITCH_BROWSER=webkit` runs the pitch e2e in Playwright's WebKit, which is closer but still not the app |
 | build works, app dark but desk still light | `APPEARANCE` only colours chrome | use `ROUTE='…?field=dark'` |
 
 NOTICE: Reworked from rshankras/claude-code-apple-skills — `ios/run-simulator`,

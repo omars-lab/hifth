@@ -35,6 +35,12 @@ IPAD         ?= iPad Pro 13-inch (M5)
 IPAD_UDID     = $(shell $(NATIVE)/scripts/simulator-udid.sh "$(IPAD)")
 ROUTE        ?= /hafs-kfqc/2:255
 TARGET       ?= ipad
+# app-probe: one more JavaScript question for the page, asked DELAY_MS after it
+# says it is ready (double quotes inside it; the Makefile wraps it in single).
+EVAL         ?=
+# app-test: one XCUITest instead of the whole run, e.g. ONLY=SmokeTests/testOpensAtAVerse
+ONLY         ?=
+DELAY_MS     ?= 2000
 APPEARANCE   ?= light
 # `/hafs-kfqc/p45?field=dark` → `ipad-hafs-kfqc_p45_field-dark.png`
 # Where `app-shot` writes; `app-golden` points it at native/shots/current/.
@@ -128,8 +134,21 @@ else
 endif
 	@echo "  ✓ $(SHOT_OUT)"
 
-app-probe: app-build-mac ## Print what the page can see inside the Mac shell (secure context, caches, share…)
-	HIFTH_PROBE=1 HIFTH_ROUTE=$(ROUTE) $(MAC_APP)/Contents/MacOS/Hifth | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
+app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression'] [DELAY_MS=…]
+ifeq ($(TARGET),ipad)
+	$(MAKE) app-build-ipad
+	xcrun simctl bootstatus $(IPAD_UDID) -b
+	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
+	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
+	SIMCTL_CHILD_HIFTH_PROBE=1 SIMCTL_CHILD_HIFTH_ROUTE='$(ROUTE)' SIMCTL_CHILD_HIFTH_PROBE_EVAL='$(EVAL)' \
+	  SIMCTL_CHILD_HIFTH_PROBE_DELAY_MS=$(DELAY_MS) \
+	  xcrun simctl launch --console-pty --terminate-running-process $(IPAD_UDID) $(BUNDLE_ID) \
+	  | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
+else
+	$(MAKE) app-build-mac
+	HIFTH_PROBE=1 HIFTH_ROUTE='$(ROUTE)' HIFTH_PROBE_EVAL='$(EVAL)' HIFTH_PROBE_DELAY_MS=$(DELAY_MS) \
+	  $(MAC_APP)/Contents/MacOS/Hifth | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
+endif
 
 app-open: ## Turn the running app to ROUTE (TARGET=ipad|mac)
 ifeq ($(TARGET),mac)
@@ -141,10 +160,11 @@ endif
 app-unit-test: app-generate ## Route, bundle-path and bridge unit tests (Mac, seconds)
 	set -o pipefail; $(XCB) -scheme Hifth-macOS -destination 'platform=macOS' -only-testing:HifthTests test | $(XCPRETTY)
 
-app-test: app-unit-test ## Unit tests plus the XCUITest smoke on the iPad simulator
+app-test: $(if $(ONLY),app-generate,app-unit-test) ## Unit tests plus the XCUITest smoke on the iPad simulator [ONLY=SmokeTests/testName]
 	@rm -rf $(SHOTS)/ipad-smoke.xcresult
 	set -o pipefail; $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
-	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-smoke.xcresult test | $(XCPRETTY)
+	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-smoke.xcresult \
+	  $(if $(ONLY),-only-testing:HifthUITests-iOS/$(ONLY)) test | $(XCPRETTY)
 
 app-test-mac-ui: app-generate ## The XCUITest smoke on the Mac (needs Accessibility permission for your terminal — see docs/design/native-shell.md)
 	@rm -rf $(SHOTS)/mac-smoke.xcresult
