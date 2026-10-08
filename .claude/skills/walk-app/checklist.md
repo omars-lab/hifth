@@ -119,3 +119,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] The Mac app's own picture of a page is the page, not an empty file: two pages, full size.
   · `make app-shot TARGET=mac ROUTE=/hafs-kfqc/p45` (fails on an empty picture) · issue:
   `mac-app-shot-empty`
+- [ ] Pinch a page in the iPad app to look closer, ending with a finger on a verse: the page grows,
+  and no verse is selected and no menu opens. Same with the note tool picked: no note is pinned.
+  · iPad simulator · issue: `ipad-pinch-selects-verse` · test:
+  `make app-test ONLY=SmokeTests/testPinchSelectsNothing`

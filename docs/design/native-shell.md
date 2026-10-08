@@ -371,3 +371,19 @@ picture, probe and console jobs were affected. They now start it through the lau
 background so it does not take the keyboard from whatever you are in. The picture job now also
 fails on an empty file or a picture with no pixels. Before, it printed a tick for the empty
 file, which is why this went unnoticed.
+
+### ⑫ On the iPad, a pinch that ends on a verse selects it and opens its menu · **fixed**
+
+Seen walking the pitch in the iPad app on 2026-10-08: pinching page 45 to look closer jumped the
+reader to a verse further down the page, selected it and opened the menu a long press opens. A
+pinch is two fingers, and the page was counting each finger's lift on its own: the second
+finger came down, rested a moment while the first one moved, and lifted where it landed, so
+the page read it as a long press on whatever verse was under it. The note tool had the same gap
+and would have dropped a note there.
+
+**What it was, and the fix:** the browser marks the first finger of a touch as the main one and
+any finger that joins it as not. Both places that listen for a tap now treat a stroke as a pinch
+from the moment a second finger joins it, and nothing in a pinch is a tap or a hold, whichever
+finger lifts last. The next one-finger tap counts again. Tests: three in the page's own
+tap-reading code, two in the iPad browser tests (a verse is not selected, a note is not pinned),
+and one in the app on the simulator that pinches page 45 and checks the reader is still there.

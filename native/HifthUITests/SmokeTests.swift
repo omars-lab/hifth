@@ -59,6 +59,33 @@ final class SmokeTests: XCTestCase {
     }
 
     #if os(iOS)
+    /// A finger turns the page inside the app, not only in the browser: the
+    /// mus'haf reads to the left, so drawing the page to the right brings the
+    /// next one, and drawing it back returns.
+    func testSwipeTurnsThePage() {
+        let app = launch(route: "/hafs-kfqc/p45")
+        waitForRoute("#/hafs-kfqc/p45", in: app)
+        sleep(2)
+        app.webViews.firstMatch.swipeRight()
+        waitForRoute("#/hafs-kfqc/p46", in: app)
+        app.webViews.firstMatch.swipeLeft()
+        waitForRoute("#/hafs-kfqc/p45", in: app)
+    }
+
+    /// A pinch only magnifies: it selects no verse and opens no menu. A pinch
+    /// that ended on a verse once selected it, because the second finger's lift
+    /// counted as a tap, so the page jumped to that verse and its hold menu
+    /// opened (found walking the pitch, 2026-10-08).
+    func testPinchSelectsNothing() {
+        let app = launch(route: "/hafs-kfqc/p45")
+        waitForRoute("#/hafs-kfqc/p45", in: app)
+        sleep(2)
+        app.webViews.firstMatch.pinch(withScale: 2.5, velocity: 2)
+        sleep(2)
+        attach(app, named: "page-45-after-pinch")
+        XCTAssertEqual(app.staticTexts["hifth.route"].label, "#/hafs-kfqc/p45")
+    }
+
     /// Sideways, the two pages fill the height between the bars. They once
     /// drew as a sliver 28 points wide in the middle of an empty desk, in the
     /// app only: the iPad's own WebKit could not size a page from its height
