@@ -509,11 +509,30 @@ taken of the public build, are ready to become the new record.
 the four public-build pictures are now the record, each looked at by eye first: no note open, no
 translation, only the page and its bar.
 
-**Still to do:** the two old pictures are still in the repository's history. The owner chose to
-rewrite that history to remove them (2026-10-08), knowing every later commit changes for anyone
-holding a copy and GitHub may keep serving the old commits by direct link until its support purges
-them. Whether the comparison should also run before every push (a few more minutes, and a fresh yes
-whenever the page's look changes) is still the owner's call.
+**History rewritten (2026-10-08).** The owner chose to remove the two old pictures from the
+repository's history, knowing every later commit changes for anyone holding a copy. Only those two
+picture versions were stripped, by their content, not by their file names, so the new public-build
+pictures saved under the same names stay. Main went from `f94a8f1` to `bac4da8`; every commit since
+2026-09-29 has a new id, earlier ones kept theirs, and the files at the tip are byte-for-byte what
+they were, so nothing new was pushed that the checks had not already passed.
+
+**Still to do, all the owner's:**
+
+- **Delete the old branches on GitHub.** 134 merged branches still carry the old history, so the
+  two pictures can still be reached through them. Every one is merged into main, so nothing is lost
+  by deleting them. The permission check refused to let the agent delete them, so it waits on the
+  owner.
+- **Ask GitHub Support to purge the old commits.** Every pull request keeps a read-only copy of its
+  commits that only GitHub can remove, so the two pictures stay reachable by a direct link until
+  Support purges them. Name the repository and the two picture versions:
+  `8b7c1d134d364ff18ec5aca04f58e4f17321b173` (iPad) and
+  `5f251330bd9a6690b9010ccbecd4288efbd303c7` (iPhone).
+- **Move the older app branch onto the new main.** The native-shell branch in the second checkout
+  (never pushed, last touched 2026-09-30) still sits on the old history. Whoever picks it up runs
+  `git rebase --onto bac4da8 f94a8f1 native-shell`, after first bringing in anything on old main it
+  lacks.
+- **Decide whether the comparison runs before every push.** It adds a few minutes, and a fresh yes
+  whenever the page's look changes.
 
 ### ⑳ Switching the app to the public build kept the pitch's private folder · **fixed**
 
