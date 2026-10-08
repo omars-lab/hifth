@@ -445,6 +445,32 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     });
   }
 
+  test("with one page showing, a note that opens before its page arrives still leaves its verse in sight", async ({ browser }) => {
+    // The page slid up out from under the note only when the note arrived, and
+    // the note can arrive first: then there was no page to slide yet, and once
+    // the page came nothing slid it. A cold link to 36:12 lost that race about
+    // one time in four; holding the page back makes it lose every time.
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, serviceWorkers: "block" });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    await context.route("**/assets/pages/**/440.svg", async (route) => {
+      await new Promise((done) => setTimeout(done, 1_500));
+      await route.continue();
+    });
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/36:12?view=one");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await settle(sheet(page));
+    const card = (await sheet(page).boundingBox())!;
+    await expect
+      .poll(async () => {
+        const lines = await litLineBoxes(page);
+        return lines.length > 0 && lines.every((line) => !overlaps(line, card));
+      }, { timeout: 8_000 })
+      .toBe(true);
+    await context.close();
+  });
+
   test("an iPad held upright opens on one page, and turned on its side opens the book", async ({ browser }) => {
     // Upright, two pages side by side were each half the screen wide, with
     // empty space above and below: the mus'haf read small on the very screen

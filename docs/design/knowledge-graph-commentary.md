@@ -931,3 +931,23 @@ was pages away, so it had no page to lie beside. Found walking the pitch on an i
 
 **Fixed, 2026-10-07:** the introduction lies beside the surah's first verse when that verse is
 open, and beside the verse it was opened from otherwise, the same place that verse's note takes.
+
+### ㉛ With one page open on a laptop, does a link straight to a verse leave that verse in sight beside its note? · **fixed**
+
+About one time in four, opening a link to Ya-Sin 36:12 with one page showing left the corner note
+sitting on the verse it was about: the right-hand ends of both of the verse's lines were under the
+card, and the page never slid up out from under it. The check written for ③ kept catching it and
+passing on a retry, which is how it showed up, on 2026-10-08.
+
+**Why it happened:** two things, each depending on what loaded first. The note judges whether it
+covers the page by comparing its own box with the page's. A link first shows its page at the
+whole-page size, clear of the corner, so the note said it covered nothing; the page then zoomed in
+to frame the verse and ran under the card, and nothing judged again. And when the note did count
+as covering, it asked the page to slide up the moment it opened, which is often before the page
+has loaded: that ask found no page and was dropped.
+
+**Fixed, 2026-10-08:** the note judges again whenever the page moves or zooms, not only when the
+window changes size, and a page that arrives by a link or a jump while a note is up slides clear
+of it once it is there. A new test holds the page back so the note always opens first; it failed
+every time before the fix and passed 24 times running after it, as did ③'s test.
+

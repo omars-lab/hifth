@@ -36,6 +36,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 
 - [ ] With one page open and a note up, the page bar is still in reach. · laptop, ipad · issue:
   `one-page-note-covers-page-bar`
+- [ ] With one page open, a link straight to a verse leaves it in sight beside its note — open it
+  a few times, it was one in four. · laptop · issue: `one-page-link-note-covers-verse`
 - [ ] The bar grows under the finger and settles on a page, both ways up. · phone, ipad-side ·
   tests: pagebar, pagebar-detents, pagebar-fisheye specs
 
