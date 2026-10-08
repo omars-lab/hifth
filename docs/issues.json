@@ -3140,6 +3140,32 @@
       "owner": "agent",
       "closedBy": "apps/web/src/messages/plain-words.test.ts",
       "note": "Found walking the pitch in the iPad app (2026-10-08): the tajweed key, the editions list and the juz map used our own words (salient, vendored, letter ids, concordance table, in this build, data pack), the offline shelf said 'this phone' on an iPad, and inside the app it offered to keep pages the app already carries. Reworded in English and Arabic; the shelf is hidden in the app. Tests: a check over every reader-facing line in both languages for plumbing words and 'this phone', and a shelf test inside the app (all failed first)."
+    },
+    {
+      "id": "mac-app-shot-frozen",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑱"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "native/Hifth/Web/ShellModel.swift",
+      "note": "Walking the pitch in the Mac app (2026-10-08): every picture showed the page mid-animation (note half slid in, chip unfilled, verse uncoloured), because the picture job opens the app behind other windows and the web view then calls the page hidden and stops its movement; each picture also had a blank strip the height of the title bar. Fixed in the test build only: the web view keeps drawing for the picture and probe jobs, and the picture is the page's own area. Checks on every Mac picture, both seen failing first: refuse a hidden page, refuse a picture not the page's size."
+    },
+    {
+      "id": "shell-goldens-stale",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑲"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "the owner's yes on the four side-by-side pictures"
+      ],
+      "note": "The iPad and iPhone app pictures are compared with a record taken before three fixes (stamp-sized pages upright, the note as a bottom sheet, the phone page fitting its width), so all four fail, every difference an improvement. Nothing runs the comparison on its own. Waiting on a yes to save the new pictures, and on whether it should run before every push."
     }
   ]
 }

@@ -131,6 +131,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] The Mac app's own picture of a page is the page, not an empty file: two pages, full size.
   · `make app-shot TARGET=mac ROUTE=/hafs-kfqc/p45` (fails on an empty picture) · issue:
   `mac-app-shot-empty`
+- [ ] The Mac app's pictures show the page settled: chips filled, the verse coloured, the note all
+  the way in, and no empty strip along the bottom. · `make app-shot TARGET=mac` (refuses a page that
+  says it is hidden, and a picture not the page's size) · issue: `mac-app-shot-frozen`
+- [ ] Before trusting `make app-golden` on the iPad and iPhone, check its saved pictures are not
+  older than the last change to the page's look. · issue: `shell-goldens-stale`
 - [ ] Pinch a page in the iPad app to look closer, ending with a finger on a verse: the page grows,
   and no verse is selected and no menu opens. Same with the note tool picked: no note is pinned.
   · iPad simulator · issue: `ipad-pinch-selects-verse` · test:
