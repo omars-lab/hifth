@@ -63,7 +63,7 @@ export async function readBookmarks(): Promise<Bookmark[]> {
 
 /**
  * Replace the whole set. Resolves true when it landed, false when it did not,
- * so the page can say "not saved on this phone" rather than pretend.
+ * so the page can say "not saved on this device" rather than pretend.
  */
 export async function writeBookmarks(set: readonly Bookmark[]): Promise<boolean> {
   if (!bookmarkStoreSupported()) return false;

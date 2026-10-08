@@ -255,7 +255,7 @@ export async function pinPack(
  *
  * Re-planning from the manifest would also work and would be *newer*. This
  * restores what the reader was promised instead, which is the narrower and more
- * honest thing: the offer on screen says "juz 30 is no longer on this phone",
+ * honest thing: the offer on screen says "juz 30 is no longer on this device",
  * and the file list that answers it should be the one that went missing. It
  * also means the offer works when the manifest itself is what got swept.
  *

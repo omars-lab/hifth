@@ -53,9 +53,9 @@ describe("EditionPicker", () => {
     expect(pickable).toHaveLength(0);
   });
 
-  it("says there is no concordance table rather than implying the numbers match", () => {
+  it("says the editions are not matched yet rather than implying the numbers match", () => {
     open();
-    expect(screen.getAllByText("لا جدول مقابلة بعد").length).toBe(EDITIONS.length - 1);
+    expect(screen.getAllByText("لم تُطابَق آيةً بآية بعد").length).toBe(EDITIONS.length - 1);
   });
 
   it("shows the counterpart ayah when a table exists", () => {
