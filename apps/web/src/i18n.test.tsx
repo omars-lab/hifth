@@ -4,6 +4,7 @@ import { Colophon } from "./components/Colophon";
 import { LangProvider, stringsFor, useT } from "./i18n";
 import { LANG_STORAGE_KEY, LOCALES, detectLang, dirOf } from "./lang";
 import { LOCALE_IDS } from "./messages/locales.gen";
+import { SCOPE_LOOKS } from "./scope-look";
 import arCatalog from "./messages/ar.json";
 
 /** Arabic and English by name. Both are loaded by the unit tests' setup file. */
@@ -306,6 +307,42 @@ describe("what the English UI must not translate", () => {
     const group = document.querySelector('[role="radiogroup"][aria-labelledby="colophon-lang"]') as HTMLElement;
     const offered = within(group).getAllByRole("radio").map((el) => el.getAttribute("lang"));
     expect(offered).toEqual([...LOCALE_IDS]);
+  });
+
+  it.each([...LOCALE_IDS])("names each group of choices in settings apart from the others, in %s", (lang) => {
+    // A name that holds another whole is two groups to anything finding one by
+    // name: "Turning the page" inside "Turning the page with a card open" sent
+    // a check for the first to both. Every group is shown here, so a new one
+    // is held to it without this test changing.
+    localStorage.setItem(LANG_STORAGE_KEY, lang);
+    render(
+      <LangProvider>
+        <Colophon
+          open
+          onClose={() => {}}
+          fisheye
+          onToggleFisheye={() => {}}
+          turnStyle="seam"
+          onTurnStyle={() => {}}
+          verseGestures="a"
+          onVerseGestures={() => {}}
+          arrowShowing="stays"
+          onArrowShowing={() => {}}
+          scopeLook={SCOPE_LOOKS[0]!}
+          onScopeLook={() => {}}
+          penHome="strip"
+          onPenHome={() => {}}
+        />
+      </LangProvider>,
+    );
+    const names = screen.getAllByRole("radiogroup").map((el) => {
+      const id = el.getAttribute("aria-labelledby");
+      return (id ? document.getElementById(id)?.textContent : el.getAttribute("aria-label"))?.trim() ?? "";
+    });
+    expect(names.length).toBeGreaterThan(5);
+    const clashes = names.flatMap((a, i) => names.filter((b, j) => i !== j && b.includes(a)).map((b) => `${a} ⊂ ${b}`));
+    expect(clashes).toEqual([]);
+    localStorage.removeItem(LANG_STORAGE_KEY);
   });
 
   it("names each option after itself, in the language doing the offering", () => {
