@@ -94,6 +94,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `lookalike-chips-sideways-cover-close`, `chips-under-facing-note`
 - [ ] A link that asks for a verse's look-alikes (`?open=lookalikes`, try 2:48) opens the list, not
   the note, even on a slow load. · desktop, the iPad app · issue: `pitch-link-lookalikes-opens-note`
+- [ ] The tajweed key, opened with the colours off (the ⓘ, or `?open=key`), counts the rules on the
+  page (page 45 has madd on 5 ayahs), and never says "none" while still loading. · every flavour ·
+  issue: `tajweed-key-none-when-off`
   · test: the pitch test "opens the look-alike list even when the note's file arrives first"
 
 ## Pens, bookmarks, the interface language

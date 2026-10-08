@@ -111,6 +111,41 @@ test.describe("Hifth · tajweed skin (spec §8)", () => {
     await expect(legend).toBeHidden();
   });
 
+  // Found walking the pitch in the iPad app, 2026-10-08: the key, opened with
+  // the colours still off, said "none on this page" for every rule, because
+  // the rules are only fetched once the colours go on. A page of al-Baqarah
+  // has madd on it; a key that says otherwise is wrong, not empty.
+  test("the key counts the page's rules even with the colours off", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/2:38");
+    await expect(page.locator(toggle)).toHaveAttribute("aria-pressed", "false");
+    await page.getByLabel("مفتاح ألوان التجويد").click();
+    const legend = page.getByRole("dialog", { name: "مفتاح ألوان التجويد" });
+    await expect(legend).toBeVisible();
+    await expect(legend.getByText(/آية في صفحة/).first()).toBeVisible({ timeout: 10_000 });
+    // Opening the key does not switch the colours on behind the reader's back.
+    await expect(page.locator(toggle)).toHaveAttribute("aria-pressed", "false");
+  });
+
+  // While the rules are still on their way the key has nothing to say yet;
+  // "none on this page" in that moment is a wrong answer, not a pending one.
+  test("the key does not say a rule is missing while it is still counting", async ({ browser }) => {
+    // Own the context: the service worker answers the fetch itself, where
+    // `page.route` cannot slow it.
+    const context = await browser.newContext({ serviceWorkers: "block" });
+    const page = await context.newPage();
+    await page.route("**/assets/skins/**/tajweed/2.json", async (route) => {
+      await new Promise((r) => setTimeout(r, 1500));
+      await route.continue();
+    });
+    await page.goto("/#/hafs-kfqc/2:38");
+    await page.getByLabel("مفتاح ألوان التجويد").click();
+    const legend = page.getByRole("dialog", { name: "مفتاح ألوان التجويد" });
+    await expect(legend).toBeVisible();
+    await expect(legend.getByText("لا شيء في هذه الصفحة")).toHaveCount(0);
+    await expect(legend.getByText(/آية في صفحة/).first()).toBeVisible({ timeout: 10_000 });
+    await context.close();
+  });
+
   test("no axe violations with the skin on and the legend open", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/2:38");
     await page.locator(toggle).click();
