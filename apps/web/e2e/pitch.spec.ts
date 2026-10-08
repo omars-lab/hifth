@@ -445,6 +445,39 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     });
   }
 
+  test("an iPad held upright lays the note and its lists across the page, not in a corner beside nothing", async ({
+    browser,
+  }) => {
+    // Upright, the one page fills the screen's width, so there is nothing for
+    // a card to sit beside: the note stood in the bottom right corner, a
+    // narrow card, with an empty brown block to its left (found walking the
+    // pitch in the iPad app, 2026-10-08). Across the page, it reads as the
+    // page's own note; its lines stay a comfortable length all the same.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/35:44?view=one");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await settle(sheet(page));
+    const across = async (what: string) => {
+      const card = (await sheet(page).boundingBox())!;
+      expect(card.x, `${what} starts at the page's near edge`).toBeLessThan(40);
+      expect(card.x + card.width, `${what} reaches the page's far edge`).toBeGreaterThan(1024 - 40);
+    };
+    await across("the note");
+    const para = (await sheet(page).locator("p").first().boundingBox())!;
+    expect(para.width, "a line of the note stays a comfortable length").toBeLessThan(760);
+    await sheet(page).getByRole("button", { name: "Close" }).click();
+    const tools = page.getByRole("region", { name: "Tools for Fatir · 35:44" });
+    await expect(tools).toBeVisible();
+    await tools.getByRole("button", { name: /^Roots/ }).click();
+    await expect(sheet(page)).toHaveCount(1);
+    await settle(sheet(page));
+    await across("the roots list");
+    await context.close();
+  });
+
   test("with one page showing, a note that opens before its page arrives still leaves its verse in sight", async ({ browser }) => {
     // The page slid up out from under the note only when the note arrived, and
     // the note can arrive first: then there was no page to slide yet, and once

@@ -271,6 +271,16 @@
   }
 }
 
+/* Upright, one page fills the screen's width and there is nothing for a card
+   to sit beside: a corner card left an empty block next to it. It lies across
+   the page instead; a spread keeps its card over the facing page. */
+@media (min-width: 900px) and (orientation: portrait) {
+  .sheet:not([data-side]) {
+    inset-inline: var(--space-5);
+    inline-size: auto;
+  }
+}
+
 @keyframes rise {
   from {
     transform: translateY(100%);
