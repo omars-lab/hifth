@@ -3116,6 +3116,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Found walking the pitch in the iPad app (2026-10-08): a link asking for 2:48's look-alikes opened its note. The link waited for either the look-alike file or the private file, and the private one could land first, so the list opened empty and the note took its place. The app now records when each file has come back (empty counts) and waits for both. Test: the pitch test '?open=lookalikes opens the look-alike list even when the note's file arrives first' (failed first; 3/3 after); the public link tests 57/57."
+    },
+    {
+      "id": "tajweed-key-none-when-off",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑯"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/skin.spec.ts",
+      "note": "Found walking the pitch in the iPad app (2026-10-08), on the public build too: the tajweed key, opened with the colours off, said 'None on this page' for every rule, because the rules were only fetched once the colours went on. Opening the key now fetches the page's rules without turning the colours on, and each count stays blank until they arrive. Tests: 'the key counts the page's rules even with the colours off' and 'the key does not say a rule is missing while it is still counting' (both failed first; skin tests 16/16 after)."
     }
   ]
 }

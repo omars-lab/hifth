@@ -1187,6 +1187,9 @@ export function App(): JSX.Element {
     new Map(),
   );
   const requestedTajweed = useRef(new Set<number>());
+  // Surahs whose shard has come back, empty or not: until every surah on the
+  // page has, the key is still counting and must not say a rule is absent.
+  const [settledTajweed, setSettledTajweed] = useState<ReadonlySet<number>>(new Set());
   // The vocabulary the shards are written in. Separate state from the shards
   // because it is fetched once and they are fetched per surah — and because the
   // colour settings surface needs it whether or not any shard has landed: it
@@ -1203,45 +1206,52 @@ export function App(): JSX.Element {
     return lens;
   }, [manifest, tajweedShards, tajweedVocabulary]);
 
-  // Fetched the moment the skin goes on, ahead of any shard: a shard whose rule
-  // ids nothing can interpret paints nothing, so this is the round trip that
-  // actually gates the first colour. Once, per session, ~500 bytes.
+  // Fetched the moment the skin goes on — or the key opens, since the key
+  // counts the page's rules with the colours off too — ahead of any shard: a
+  // shard whose rule ids nothing can interpret paints nothing, so this is the
+  // round trip that actually gates the first colour. Once, per session, ~500 bytes.
   useEffect(() => {
-    if (!manifest || skin !== "tajweed" || tajweedVocabulary) return;
+    if (!manifest || (skin !== "tajweed" && !legendOpen) || tajweedVocabulary) return;
     void loadTajweedVocabulary(manifest.edition).then((v) => {
       if (v) setTajweedVocabulary(v);
     });
-  }, [manifest, skin, tajweedVocabulary]);
+  }, [manifest, skin, legendOpen, tajweedVocabulary]);
 
-  // Fetched only once the skin is actually on, and only for surahs on screen —
-  // all 114 shards are ~240KB gzipped, and a reader who never opens the skin
-  // should not pay a byte of it.
+  // Fetched only once the skin is actually on or its key is open, and only for
+  // surahs on screen — all 114 shards are ~240KB gzipped, and a reader who
+  // never opens either should not pay a byte of it.
   useEffect(() => {
-    if (!manifest || skin !== "tajweed") return;
+    if (!manifest || (skin !== "tajweed" && !legendOpen)) return;
     for (const p of manifest.pages) {
       if (!mountedPages.includes(p.page)) continue;
       for (const poly of p.polygons) {
         const surah = poly.surah;
         if (requestedTajweed.current.has(surah)) continue;
         requestedTajweed.current.add(surah);
-        void loadTajweedShard(manifest.edition, surah).then((shard) => {
-          if (shard) setTajweedShards((m) => new Map(m).set(surah, shard));
-        });
+        void loadTajweedShard(manifest.edition, surah)
+          .then((shard) => {
+            if (shard) setTajweedShards((m) => new Map(m).set(surah, shard));
+          })
+          .finally(() => setSettledTajweed((s) => new Set(s).add(surah)));
       }
     }
-  }, [manifest, mountedPages, skin]);
+  }, [manifest, mountedPages, skin, legendOpen]);
 
   // Every ayah key on the page in view, so the legend can say what is actually
   // in front of the reader rather than reciting seven colours in the abstract.
+  // Null while any surah on the page is still on its way: not yet counted.
   const tajweedCounts = useMemo(() => {
-    if (!tajweed) return new Map();
+    if (!tajweed) return null;
     const keys: string[] = [];
     for (const p of manifest?.pages ?? []) {
       if (p.page !== page) continue;
-      for (const poly of p.polygons) keys.push(poly.key);
+      for (const poly of p.polygons) {
+        if (!settledTajweed.has(poly.surah)) return null;
+        keys.push(poly.key);
+      }
     }
     return tajweed.countsForKeys(keys);
-  }, [tajweed, manifest, page]);
+  }, [tajweed, manifest, page, settledTajweed]);
 
   // The selected ayah's rules, spelled out as text — the channel that works
   // with no colour vision at all.
