@@ -203,6 +203,12 @@ export class Highlighter {
   private pressT = 0;
   /** Whether the current press has been spent — see {@link consumePress}. */
   private pressSpent = false;
+  /**
+   * Whether a second finger came down during this stroke. Two fingers are a
+   * pinch, and no release in it is a tap, whichever finger lifts last. Reset by
+   * the next first finger down, which the browser marks as the primary one.
+   */
+  private manyFingers = false;
   /** The applied skin, and L3's rule lookup for it (spec §8; see `setSkin`). */
   private currentSkin: SkinId = "plain";
   private skinLookup: TajweedLookup | null = null;
@@ -247,6 +253,13 @@ export class Highlighter {
     // a drag and selects nothing — and, for the strokes travel cannot see, it
     // can be told *in advance* ({@link consumePress}).
     this.onPolygonPointerDown = (e: PointerEvent) => {
+      // A second finger joining the first: the stroke is a pinch from here on,
+      // and the first finger's press stays the one `pressedKey` answers for.
+      if (e.isPrimary === false) {
+        this.manyFingers = true;
+        return;
+      }
+      this.manyFingers = false;
       this.pressAt =
         typeof e.clientX === "number" && typeof e.clientY === "number"
           ? { x: e.clientX, y: e.clientY }
@@ -265,7 +278,7 @@ export class Highlighter {
       const spent = this.pressSpent;
       this.pressAt = null;
       this.pressSpent = false;
-      if (spent) return;
+      if (spent || this.manyFingers) return;
       if (press && typeof e.clientX === "number" && typeof e.clientY === "number") {
         if (Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_SLOP_PX) return;
       }

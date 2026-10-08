@@ -475,6 +475,62 @@ describe("Highlighter · a drag release is not a tap (Loop 5)", () => {
     expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah", "tap");
   });
 
+  /*
+   * Two fingers on the page are a pinch, never a tap. Walking the iPad app
+   * (2026-10-08), a pinch that zoomed the page also picked the verse under the
+   * second finger and opened its long-press menu: the second finger's press
+   * overwrote the first's, the first finger's release then cleared it, and the
+   * second release, with nothing left to measure against, read as a still hold.
+   */
+  function finger(el: Element, type: string, x: number, y: number, id: number, primary: boolean): void {
+    const e = new MouseEvent(type, { clientX: x, clientY: y, bubbles: true });
+    Object.defineProperty(e, "pointerId", { value: id });
+    Object.defineProperty(e, "isPrimary", { value: primary });
+    el.dispatchEvent(e);
+  }
+
+  it("does not select when a pinch ends on a verse", () => {
+    vi.useFakeTimers();
+    try {
+      const cb = vi.fn();
+      hl.onSelect(cb);
+      const poly = svg.querySelector("#verse-2")!;
+      finger(poly, "pointerdown", 100, 100, 1, true);
+      finger(poly, "pointerdown", 200, 200, 2, false);
+      vi.advanceTimersByTime(LONG_PRESS_MS + 200);
+      finger(poly, "pointerup", 60, 60, 1, true);
+      finger(poly, "pointerup", 240, 240, 2, false);
+      expect(cb).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not select when two fingers rest on the page and lift where they landed", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    const poly = svg.querySelector("#verse-2")!;
+    finger(poly, "pointerdown", 100, 100, 1, true);
+    finger(poly, "pointerdown", 200, 200, 2, false);
+    finger(poly, "pointerup", 200, 200, 2, false);
+    finger(poly, "pointerup", 100, 100, 1, true);
+    expect(cb).not.toHaveBeenCalled();
+  });
+
+  it("takes the next one-finger tap after a pinch as a tap", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    const poly = svg.querySelector("#verse-2")!;
+    finger(poly, "pointerdown", 100, 100, 1, true);
+    finger(poly, "pointerdown", 200, 200, 2, false);
+    finger(poly, "pointerup", 60, 60, 1, true);
+    finger(poly, "pointerup", 240, 240, 2, false);
+    finger(poly, "pointerdown", 100, 100, 3, true);
+    finger(poly, "pointerup", 100, 100, 3, true);
+    expect(cb).toHaveBeenCalledTimes(1);
+    expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah", "tap");
+  });
+
   it("leaves pressedKey standing, because it answers a different question", () => {
     const poly = svg.querySelector("#verse-2")!;
     press(poly, "pointerdown", 100, 100);
