@@ -576,7 +576,7 @@ export interface Strings {
    */
   facingPage: string;
   /**
-   * "صفحة ٨ ليست في هذه النسخة" / "Page 8 is not in this build".
+   * "صفحة ٨ ليست في هذه النسخة" / "Page 8 is not available yet".
    *
    * Until Loop 4b only pages 7, 9 and 19 were vendored and they are not
    * adjacent, so every spread had one of these. All 604 now ship, so no spread

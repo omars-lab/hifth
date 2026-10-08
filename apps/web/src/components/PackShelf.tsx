@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { juzOfPage, planPack, type EditionId, type PageMeta } from "@hifth/core";
 import { useT } from "../i18n";
 import { packUrls } from "../assets";
+import { isNative } from "../native-bridge";
 import {
   packStatuses,
   packsSupported,
@@ -13,7 +14,8 @@ import {
 import styles from "./PackShelf.module.css";
 
 /**
- * What is kept on this phone — the pin control, and the shelf it lives on.
+ * What is kept on this device — the pin control, and the shelf it lives on.
+ * Not shown inside the iPad and Mac app, which carries every page already.
  *
  * ## Why it is inside the revision map, at juz scope
  *
@@ -76,7 +78,7 @@ function megabytes(bytes: number): number {
   return bytes / 1_000_000;
 }
 
-export function PackShelf({ edition, pages, page }: PackShelfProps): JSX.Element {
+export function PackShelf({ edition, pages, page }: PackShelfProps): JSX.Element | null {
   const { t } = useT();
   // `undefined` while the register is being read: "still opening" is not the
   // same answer as "nothing is kept here", and only the second is worth a line.
@@ -130,6 +132,7 @@ export function PackShelf({ edition, pages, page }: PackShelfProps): JSX.Element
   const kept = statuses ?? [];
   const alreadyHere = kept.some((s) => s.juz === here);
 
+  if (isNative()) return null;
   return (
     <section className={styles.shelf} aria-labelledby="packs-head">
       <h3 className={styles.head} id="packs-head">
