@@ -60,8 +60,8 @@ export function SkinToggle({ skin, onChange, onOpenLegend }: SkinToggleProps): J
 interface TajweedLegendProps {
   /** Null when closed (same convention as HopPopover's `chip`). */
   open: boolean;
-  /** Rule → how many ayahs on the current page carry it. */
-  counts: ReadonlyMap<TajweedRuleId, number>;
+  /** Rule → how many ayahs on the current page carry it; null while still counting. */
+  counts: ReadonlyMap<TajweedRuleId, number> | null;
   /** The page the counts describe. */
   page: number;
   /** The selected ayah's rules, spelled out in text — the non-visual channel. */
@@ -177,7 +177,7 @@ export function TajweedLegend({
 
         <ul className={styles.list}>
           {TAJWEED_RULES.map((rule) => {
-            const n = counts.get(rule.id) ?? 0;
+            const n = counts ? (counts.get(rule.id) ?? 0) : null;
             return (
               <li key={rule.id} className={styles.row} data-empty={n === 0 || undefined}>
                 <span className={styles.swatch} aria-hidden="true">
@@ -209,7 +209,7 @@ export function TajweedLegend({
                   </span>
                 </span>
                 <span className={styles.count}>
-                  {n === 0 ? t.legendNoneOnPage : t.legendCountOnPage(n, page)}
+                  {n === null ? null : n === 0 ? t.legendNoneOnPage : t.legendCountOnPage(n, page)}
                 </span>
               </li>
             );

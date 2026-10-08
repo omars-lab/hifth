@@ -434,3 +434,17 @@ the 57 public link tests unchanged; and the walk camera's own picture of 2:48 in
 **The walk camera:** `make app-walk ROUTES='…' [SIDEWAYS=1]` opens each route in the iPad app,
 upright or turned, and keeps one picture per route in `native/shots/walk/`, named after the
 route. It is how this was found: ten links photographed in one run, not ten launches by hand.
+
+### ⑯ The tajweed key says no rule is on the page while the colours are off · **fixed**
+
+Seen walking the pitch in the iPad app on 2026-10-08: the ⓘ beside the Tajweed button, or a link
+that opens the key, listed every rule as "None on this page" on page 45, which is full of madd and
+ghunnah. The browser and the public site did the same. The key counts the rules on the page in
+view, but the rules themselves were only fetched once the colours went on, so with the colours off
+it was counting nothing and reporting that as an answer.
+
+**The fix:** opening the key now fetches the page's rules too, without switching the colours on,
+and while they are still on their way each rule's count is left blank rather than saying "none".
+Tests: two in the tajweed browser tests, one that opens the key with the colours off and expects
+a count, one that holds the rules back a second and a half and expects no "none" in the meantime
+(both failed first); and the walk camera's picture of page 45 with the key open in the app.
