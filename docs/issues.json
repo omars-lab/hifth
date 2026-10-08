@@ -3051,10 +3051,11 @@
         "file": "docs/design/native-shell.md",
         "item": "⑪"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Walking the apps (2026-10-08): make app-shot TARGET=mac wrote a 0-byte picture and make app-probe on the Mac saw a 0x0 window, while the iPad simulator gave a full picture and the real size. The Mac app started straight from the command line seems to load the page before its window has a size, or with no window on screen. Closes when a Mac picture of page 45 is not empty, checked by a script."
+      "note": "Walking the apps (2026-10-08): make app-shot TARGET=mac wrote a 0-byte picture and make app-probe on the Mac saw a 0x0 window, while the iPad simulator gave a full picture and the real size. The Mac app started straight from the command line seems to load the page before its window has a size, or with no window on screen. Closes when a Mac picture of page 45 is not empty, checked by a script. Fixed 2026-10-08: the app had no window at all when its binary was run directly; the Mac jobs now start it through macOS's launcher, and the picture job fails on an empty or pixel-less file.",
+      "closedBy": "native/Makefile.native"
     },
     {
       "id": "number-menu-keyboard-pulled-back",

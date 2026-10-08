@@ -1066,6 +1066,7 @@ commentary design note's numbered items, and in the issues list.
 - #112 — Walked the pitch inside the iPad app: upright, the note and the lists stood in a corner beside an empty block; they now lie across the page (design item ㉝).
 - #113 — The iPad app held sideways drew the two pages as a thin strip in the middle of the desk; they now fill the height (design item ㉞). The simulator walk is written into the native-shell skill.
 - The verse-number menu, opened from the keyboard while its lines were still arriving, could drop the keyboard or pull it back to the top; it now stays where the reader moved (design item ㉟). Found running the pitch tests in Safari's engine.
+- The Mac app's own picture of a page came out empty: started by our scripts it had no window at all. The scripts now start it the way a reader does, and the picture job fails on an empty picture (native-shell.md ⑪).
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
