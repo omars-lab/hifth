@@ -487,7 +487,7 @@ picture fail its own check rather than crash. The picture is now taken of the pa
 Two checks on every Mac picture, both seen failing first: the picture job refuses a page that says
 it is hidden, and refuses a picture whose size is not the page's size.
 
-### ⑲ The iPad and iPhone app pictures are compared with an out-of-date record, and two of them show The Study Quran's words · **open**
+### ⑲ The iPad and iPhone app pictures are compared with an out-of-date record, and two of them show The Study Quran's words · **confirmed**
 
 Found on 2026-10-08 while checking that ⑱ changed nothing on the iPad. The saved pictures the app
 is compared against were taken before three fixes: the two pages drawn stamp-sized on an upright
@@ -515,6 +515,14 @@ picture versions were stripped, by their content, not by their file names, so th
 pictures saved under the same names stay. Main went from `f94a8f1` to `bac4da8`; every commit since
 2026-09-29 has a new id, earlier ones kept theirs, and the files at the tip are byte-for-byte what
 they were, so nothing new was pushed that the checks had not already passed.
+
+**Nothing else needed purging (checked 2026-10-08).** Before naming anything to GitHub, every
+picture version that has left the tree since the pitch build began was looked at by eye: 140
+versions, every third frame of each moving picture. Only the two known pictures show held text.
+Every commit message and every change to a text file in the same span was also compared, run of
+seven words by run of seven words, against the private translation and commentary: nothing
+matched beyond a stock phrase in a note of our own. So the request to GitHub names two pictures
+and no more, and should not need a second one.
 
 **Still to do, all the owner's:**
 
