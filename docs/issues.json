@@ -3161,12 +3161,9 @@
       },
       "status": "open",
       "severity": "defect",
-      "owner": "user",
-      "blockedBy": [
-        "the owner's yes on the side-by-side pictures",
-        "the owner's call on rewriting history"
-      ],
-      "note": "The iPad and iPhone app pictures are compared with a record taken before three fixes, so all four fail, every difference an improvement; and the two 2:255 pictures were taken of the pitch build with the note open, so they showed The Study Quran's translation and commentary in a public repository since 2026-09-29, where text checks cannot see it. Done: both out of the tree, and the comparison refuses the pitch build (scripts/native-golden-public.test.mjs). Waiting on the owner's yes to save the public-build pictures, on whether to rewrite history to remove the two old ones, and on whether the comparison runs before every push."
+      "owner": "agent",
+      "blockedBy": [],
+      "note": "The two 2:255 app pictures were taken of the pitch build with the note open, so they showed The Study Quran's translation and commentary in a public repository since 2026-09-29, where text checks cannot see it. Done: both out of the tree, the comparison refuses the pitch build (scripts/native-golden-public.test.mjs), and on the owner's yes (2026-10-08) the four public-build pictures are the new record. Left: the owner chose to rewrite history to remove the two old pictures; whether the comparison runs before every push is still the owner's call."
     },
     {
       "id": "shell-public-copy-kept-private",
