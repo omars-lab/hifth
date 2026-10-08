@@ -15,6 +15,11 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hook-native-nudge.mjs\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hook-advisor-nudge.mjs\"",
+            "timeout": 5
           }
         ]
       }
