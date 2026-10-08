@@ -505,11 +505,15 @@ check could have seen it: the checks for held text read text, and these are pixe
 the app holds the public build, which has no held text to photograph; and the same four routes,
 taken of the public build, are ready to become the new record.
 
-**What would answer it:** the owner looks at the side-by-side pictures and says yes, then they are
-saved as the new record. Separately, the two pictures are still in the repository's history; only
-rewriting that history removes them, which changes every later commit for anyone holding a copy.
-That, and whether the comparison should also run before every push (a few more minutes, and a
-fresh yes whenever the page's look changes), are the owner's calls.
+**New record saved (2026-10-08).** The owner looked at the side-by-side pictures and said yes, so
+the four public-build pictures are now the record, each looked at by eye first: no note open, no
+translation, only the page and its bar.
+
+**Still to do:** the two old pictures are still in the repository's history. The owner chose to
+rewrite that history to remove them (2026-10-08), knowing every later commit changes for anyone
+holding a copy and GitHub may keep serving the old commits by direct link until its support purges
+them. Whether the comparison should also run before every push (a few more minutes, and a fresh yes
+whenever the page's look changes) is still the owner's call.
 
 ### ⑳ Switching the app to the public build kept the pitch's private folder · **fixed**
 
