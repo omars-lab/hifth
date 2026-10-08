@@ -2174,6 +2174,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * back to the whole page. The relocations — cold open, deep link, hop — leave
    * it false and reset, because they are moves *to* a page, not reading *across*
    * one.
+   *
+   * A relocation under a note that is already up brings the verse clear of it
+   * once the page is there. The note's own arrival does that too, but a cold
+   * link opens the note before its page has loaded: that lift found no page and
+   * gave up, and with one page on a laptop the corner note sat on its own
+   * verse about one open in four. Waiting a frame lets a hop start its framing
+   * first, and the lift waits out any motion already under way.
    */
   const arrive = useCallback(
     (next: number, carry = false): void => {
@@ -2182,6 +2189,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       setCurrentPage(next);
       if (carry) reclampCurrent();
       else centerCurrent();
+      if (!carry && coverTopRef.current !== null) {
+        cancelAnimationFrame(liftRaf.current);
+        liftRaf.current = requestAnimationFrame(() => liftRef.current());
+      }
     },
     [cancelTween, centerCurrent, reclampCurrent, setCurrentPage],
   );
