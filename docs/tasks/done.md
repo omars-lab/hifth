@@ -1073,6 +1073,7 @@ commentary design note's numbered items, and in the issues list.
 - A link asking for a verse's look-alikes opened its note instead when the private file came back first; it now waits for both files (native-shell.md ⑮). New: `make app-walk` photographs many routes in the iPad app in one run.
 - The tajweed key said "None on this page" for every rule while the colours were off; opening it now fetches the page's rules, and it shows no count until they arrive (native-shell.md ⑯).
 - The tajweed key, the editions list and the juz map explained themselves in our own build words, and the offline shelf said "this phone" on an iPad and offered to keep pages inside the app that already has them; all plain now, the shelf hidden in the app, and a check refuses those words coming back (native-shell.md ⑰).
+- Walked the pitch in the iPad app upright and sideways (nothing new) and in the Mac app: the Mac app's own pictures froze mid-animation and carried a blank strip; both fixed in the test build, and the picture job now refuses either (native-shell.md ⑱). The iPad and iPhone comparison pictures are out of date and wait on the owner (⑲).
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
