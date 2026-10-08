@@ -346,7 +346,7 @@ covered: a request sent to the simulator with `simctl openurl` stops at an "Open
 alert (the same trap that keeps the smoke test on the launch variable), and the plain link is
 already covered there by the XCUITest smoke.
 
-### ⑪ On the Mac, the app's own picture of the page comes out empty · **open**
+### ⑪ On the Mac, the app's own picture of the page comes out empty · **fixed**
 
 Seen walking the pitch in the apps on 2026-10-08: asked for a picture of page 45 on the Mac,
 the app wrote an empty file, and asked what it could see, the page reported a window of zero by
@@ -360,3 +360,14 @@ picture, which is how a walk checks the Mac without a person looking.
 size and whether it is on screen at the moment the page says it is ready. If the window has no
 size yet, wait for it before taking the picture; if there is no window, the command-line start
 needs one. A Mac picture of page 45 that is not empty, checked by a script, closes it.
+
+**What it was (2026-10-08):** there was no window at all. Asked which windows the running app
+had, macOS listed none, and the page still said zero by zero four seconds after it was ready. A
+SwiftUI Mac app only opens its first window when macOS's launcher tells it the app was opened;
+a program started by running the file inside the app never gets that message, so it runs with
+nothing on screen. Started through the launcher (`open`), the same build opens at 1280 by 860
+and photographs the two pages properly. A reader always starts it that way, so only our own
+picture, probe and console jobs were affected. They now start it through the launcher, in the
+background so it does not take the keyboard from whatever you are in. The picture job now also
+fails on an empty file or a picture with no pixels. Before, it printed a tick for the empty
+file, which is why this went unnoticed.
