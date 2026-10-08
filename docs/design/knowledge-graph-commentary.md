@@ -979,3 +979,33 @@ page under it, edge to edge, and the note's lines keep the same comfortable read
 Two pages side by side keep their card over the facing page. A browser test at the iPad's upright
 size checks the note and the roots list each reach both edges of the page while a line of the note
 stays short; it failed before the change (the note started 540 pixels in).
+
+### ㉞ In the iPad app held sideways, do the two pages fill the screen, or shrink to a strip? · **fixed**
+
+Same walk, iPad turned on its side: the app opened on two pages drawn as a strip about 28 points wide
+in the middle of an empty brown desk, a little taller than a thumbnail and no wider than a pencil.
+The same page in the browsers we test with, at the same size, held sideways, showed both pages full
+height. Measured from inside the app, each page was 14 points wide: the iPad's own browser engine,
+inside the app, could not work out a page's width from its height the way the page asked it to.
+
+**Fixed, 2026-10-08:** each page now takes its width straight from the desk's measured height (and
+never more than half the desk's width), which every engine reads the same way. Held sideways, the
+app shows both pages filling the height between the bars. A test on the iPad simulator turns the
+iPad, opens page 45, and checks the pages cover more than 40% of the screen's width across the
+middle; it failed before the change ("the two pages cover 0%"). A browser test turns an iPad from
+upright to sideways with a note open and checks the note's page is still there at full size. The
+walk of the app in the simulator is now written into the native-shell skill, step by step.
+
+### ㉟ Open a verse's number menu from the keyboard and press Down straight away: where does the keyboard land? · **fixed**
+
+Found running the pitch tests in Safari's engine, the one the iPad and Mac apps use, on 2026-10-08.
+The menu fills in a line at a time as the verse's note, look-alikes and roots arrive. Two things went
+wrong when a key was pressed while it was still filling. The top line's words change when the book's
+name arrives, and the menu treated new words as a new line: the button under the keyboard was thrown
+away and the keyboard fell off the menu for a moment, so a key pressed then did nothing. And each time
+the top line changed, the menu put the keyboard back on it, even after the reader had moved down.
+
+**Fixed, 2026-10-08:** each line keeps a fixed name while the menu is open, so new words do not make a
+new button, and once the reader has moved through the menu, a line arriving leaves them where they are.
+Unit tests check both (each failed before its change); the browser test that found it now waits for the
+menu to fill before pressing keys, and passed sixteen runs in a row in Safari's engine.

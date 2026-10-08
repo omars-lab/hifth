@@ -2236,12 +2236,14 @@ export function App(): JSX.Element {
     const items: VerseMenuItem[] = [];
     if (hasCommentary)
       items.push({
+        id: "note",
         caption: commentarySource ? `${t.vdCommentary}${t.sep}${commentarySource.source.label}` : t.vdCommentary,
         glyph: "✎",
         onPick: () => setCommentaryOpen(true),
       });
     for (const chip of railChips)
       items.push({
+        id: `looks-${chip.direction}`,
         caption: `${t.railDirection[chip.direction]}${t.sep}${t.num(chip.count)}`,
         // The rail's own sign: "looks like" with a small mark for which way.
         glyph: chip.glyph,
@@ -2249,11 +2251,13 @@ export function App(): JSX.Element {
       });
     if (rootCount > 0)
       items.push({
+        id: "roots",
         caption: t.vdRoots,
         glyph: "⬡",
         onPick: () => setRootsOpen(true),
       });
     items.push({
+      id: "listen",
       caption: audio.phaseFor(key) === "playing" ? t.vdPause : t.vdListen,
       glyph: audio.phaseFor(key) === "playing" ? "⏸" : "▶",
       onPick: () => audio.toggle(key),
@@ -2261,6 +2265,7 @@ export function App(): JSX.Element {
     const surah = parseAyahKey(key)?.surah;
     if (surah && INTRO_SURAHS.has(surah))
       items.push({
+        id: "intro",
         caption: t.surahIntro,
         glyph: "ⓘ",
         onPick: () => openIntro(surah),

@@ -4,6 +4,12 @@ import styles from "./VerseMenu.module.css";
 
 /** One line of the small menu: its words, and what it does. */
 export interface VerseMenuItem {
+  /**
+   * Names the line for as long as the menu is open, when its words can change
+   * while it is (the note's line gains the book's name, Listen becomes Pause).
+   * Without it the words name the line, and new words make a new button.
+   */
+  id?: string;
   caption: string;
   onPick: () => void;
   /** The icon the line leads with: the one the app shows for the same thing elsewhere. */
@@ -134,11 +140,15 @@ export function VerseMenu({ name, around, clear, follow, items, onClose, stacked
   // browser will not focus a hidden button, so the keyboard was left on nothing.
   // It follows the first line too: a menu opened from a verse's number fills in
   // as the verse's note and look-alikes arrive, and the keyboard should start
-  // on the line at the top, not on whichever was first a moment before.
+  // on the line at the top, not on whichever was first a moment before. Once
+  // the reader has walked the menu, a line arriving leaves them where they are:
+  // in Safari's engine the book's name reached the top line just after a press
+  // of Down, and the keyboard was pulled back to line one.
   const placed = at !== null;
   const first = items[0]?.caption;
+  const walked = useRef(false);
   useEffect(() => {
-    if (placed) ref.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus({ preventScroll: true });
+    if (placed && !walked.current) ref.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus({ preventScroll: true });
   }, [placed, first]);
 
   useEffect(() => {
@@ -166,6 +176,7 @@ export function VerseMenu({ name, around, clear, follow, items, onClose, stacked
     const step = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? -1 : 0;
     if (!step) return;
     e.preventDefault();
+    walked.current = true;
     all[(i + step + all.length) % all.length]?.focus();
   };
 
@@ -182,7 +193,7 @@ export function VerseMenu({ name, around, clear, follow, items, onClose, stacked
     >
       {items.map((item) => (
         <button
-          key={item.caption}
+          key={item.id ?? item.caption}
           type="button"
           role="menuitem"
           className={styles.item}

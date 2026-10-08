@@ -237,9 +237,22 @@ final class ShellModel {
     /// With `HIFTH_PROBE=1`, ask the page what it can see of its own world
     /// (secure context, caches, share, storage, the marker) and print it as
     /// one JSON line, then quit. The day-one questions from the design review.
+    /// `HIFTH_PROBE_EVAL` adds one more question, a JavaScript expression whose
+    /// value lands under `eval`: how a fault that only the app shows gets
+    /// measured from inside it (make app-probe EVAL=…).
     private func probeIfAsked() {
-        guard ProcessInfo.processInfo.environment["HIFTH_PROBE"] == "1" else { return }
-        webView.callAsyncJavaScript(Self.probeScript, arguments: [:], in: nil, in: .page) { result in
+        let environment = ProcessInfo.processInfo.environment
+        guard environment["HIFTH_PROBE"] == "1" else { return }
+        let delayMs = Int(environment["HIFTH_PROBE_DELAY_MS"] ?? "") ?? 0
+        let extra = environment["HIFTH_PROBE_EVAL"] ?? ""
+        Task {
+            try? await Task.sleep(for: .milliseconds(delayMs))
+            probe(extra)
+        }
+    }
+
+    private func probe(_ extra: String) {
+        webView.callAsyncJavaScript(Self.probeScript, arguments: ["extra": extra], in: nil, in: .page) { result in
             switch result {
             case .success(let value):
                 print("probe \(value)")
@@ -267,6 +280,7 @@ final class ShellModel {
       viewport: [innerWidth, innerHeight, devicePixelRatio],
       touch: navigator.maxTouchPoints,
       ua: navigator.userAgent,
+      eval: extra ? (() => { try { return (0, eval)(extra); } catch (e) { return String(e); } })() : undefined,
     };
     return JSON.stringify(out);
     """

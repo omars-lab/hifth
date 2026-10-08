@@ -59,12 +59,54 @@ final class SmokeTests: XCTestCase {
     }
 
     #if os(iOS)
-    func testLandscapeStillShowsTheRoute() {
+    /// Sideways, the two pages fill the height between the bars. They once
+    /// drew as a sliver 28 points wide in the middle of an empty desk, in the
+    /// app only: the iPad's own WebKit could not size a page from its height
+    /// the way the browsers do (found walking the pitch, 2026-10-08).
+    func testLandscapeOpensTheBookFullSize() {
         XCUIDevice.shared.orientation = .landscapeLeft
         defer { XCUIDevice.shared.orientation = .portrait }
         let app = launch(route: "/hafs-kfqc/p45")
         waitForRoute("#/hafs-kfqc/p45", in: app)
-        attach(app, named: "page-45-landscape")
+        sleep(3)
+        // The web view alone, drawn upright: a whole-screen capture of a turned
+        // simulator comes back as a portrait frame with the picture shifted.
+        let shot = app.webViews.firstMatch.screenshot().image
+        let upright = UIGraphicsImageRenderer(size: shot.size).image { _ in shot.draw(at: .zero) }
+        let picture = XCTAttachment(image: upright)
+        picture.name = "page-45-landscape"
+        picture.lifetime = .keepAlways
+        add(picture)
+        let book = Self.bookShareAcrossTheMiddle(of: upright)
+        XCTAssertGreaterThan(book, 0.4, "the two pages cover \(Int(book * 100))% of the screen's width")
+    }
+
+    /// The share of the screen's middle row that is not desk. The desk is a
+    /// warm tan, red well above blue; the page's paper and its ink are not.
+    private static func bookShareAcrossTheMiddle(of image: UIImage) -> Double {
+        guard let cg = image.cgImage else { return 0 }
+        let width = cg.width, height = cg.height
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let drawn = pixels.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(
+                data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8,
+                bytesPerRow: width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else { return false }
+            context.draw(cg, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
+        guard drawn else { return 0 }
+        let row = height / 2
+        var desk = 0, counted = 0
+        for x in 0..<width {
+            let i = (row * width + x) * 4
+            let red = Int(pixels[i]), green = Int(pixels[i + 1]), blue = Int(pixels[i + 2])
+            if red + green + blue < 30 { continue }  // no picture here at all
+            counted += 1
+            if (140...225).contains(red), red - blue > 40 { desk += 1 }
+        }
+        return counted == 0 ? 0 : 1 - Double(desk) / Double(counted)
     }
     #endif
 }
