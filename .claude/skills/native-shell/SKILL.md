@@ -196,9 +196,15 @@ send to TestFlight. Do not guess a team id; ask the owner.
 ## The shell goldens
 
 ```
+make app-web FLAVOUR=public   # the comparison is taken of the public build only; it refuses the pitch
 make app-golden            # screenshot each route on the iPad simulator (and one on an iPhone), diff against native/shots/baseline/
 make app-golden-update     # after the owner has seen the diff: accept the current shots
 ```
+
+The saved pictures are committed to a public repository, so they are taken of the public build:
+a pitch picture of a verse with its note open carries The Study Quran's words in its pixels,
+where no text check can see them. `app-golden` refuses to run on the pitch build. Rebuild the
+pitch (`make app-web`) afterwards if you are walking the pitch.
 
 Routes come from `GOLDEN_ROUTES` (iPad) and `GOLDEN_IPHONE_ROUTES` (iPhone, `IPHONE=` names
 the simulator) in `native/Makefile.native`. A failing route leaves a diff

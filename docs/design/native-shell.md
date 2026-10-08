@@ -487,7 +487,7 @@ picture fail its own check rather than crash. The picture is now taken of the pa
 Two checks on every Mac picture, both seen failing first: the picture job refuses a page that says
 it is hidden, and refuses a picture whose size is not the page's size.
 
-### ⑲ The iPad and iPhone app pictures are compared with an out-of-date record · **open**
+### ⑲ The iPad and iPhone app pictures are compared with an out-of-date record, and two of them show The Study Quran's words · **open**
 
 Found on 2026-10-08 while checking that ⑱ changed nothing on the iPad. The saved pictures the app
 is compared against were taken before three fixes: the two pages drawn stamp-sized on an upright
@@ -496,6 +496,26 @@ comparison now fails on all four pictures, every difference an improvement. Noth
 comparison on its own (it needs the simulators, and it takes minutes), which is how it fell behind
 unnoticed.
 
-**What would answer it:** the owner looks at the four side-by-side pictures and says yes, then
-they are saved as the new record. Whether the comparison should also run before every push, at the
-cost of a few more minutes and a fresh yes whenever the page's look changes, is the owner's call.
+Looking at them side by side showed something worse. The two pictures of verse 2:255 were taken
+of the pitch build with the verse's note open, so they carry The Study Quran's translation and
+commentary, readably, in a repository anyone can open. They have been there since 2026-09-29. No
+check could have seen it: the checks for held text read text, and these are pixels.
+
+**Done so far:** the two pictures are out of the tree; the comparison now refuses to run unless
+the app holds the public build, which has no held text to photograph; and the same four routes,
+taken of the public build, are ready to become the new record.
+
+**What would answer it:** the owner looks at the side-by-side pictures and says yes, then they are
+saved as the new record. Separately, the two pictures are still in the repository's history; only
+rewriting that history removes them, which changes every later commit for anyone holding a copy.
+That, and whether the comparison should also run before every push (a few more minutes, and a
+fresh yes whenever the page's look changes), are the owner's calls.
+
+### ⑳ Switching the app to the public build kept the pitch's private folder · **fixed**
+
+Found the same day, switching the app to the public build to retake those pictures. The copy into
+the app skips the private folder, and a folder the copy skips is also one it never deletes, so the
+pitch's private folder stayed behind. The check after the copy refused the result, so nothing
+held went anywhere, but the switch did not work. The public copy now deletes skipped folders too.
+Tests drive the copy alone, without a web build: switching leaves no private folder, and a public
+build that somehow carries one is copied without it (both failed first).
