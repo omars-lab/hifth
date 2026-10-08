@@ -65,6 +65,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `note-links-to-its-own-verse`, `own-verse-breaks-across-lines`
 - [ ] Beside two pages, a card lies over the facing page and shows no drag bar. · desktop,
   ipad-side · issue: `spread-cards-show-drag-bar`
+- [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
+  an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 
 ## The surah introduction (pitch)
 

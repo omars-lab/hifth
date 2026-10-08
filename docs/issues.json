@@ -3020,6 +3020,18 @@
       "owner": "agent",
       "closedBy": "apps/web/src/components/Colophon.test.tsx",
       "note": "Found walking the phone in Arabic (2026-10-08): settings offered the card-edge choice (item 26), which only means something with two pages facing; and drew a second line just under the title's own. Card-edge now shown only where two pages can face each other (App passes spread={desktop}); the first section under the title draws no line. Tests: Colophon.test.tsx (not offered without two pages) and e2e/colophon.spec.ts (one line under the title)."
+    },
+    {
+      "id": "upright-ipad-note-in-corner",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉝"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found walking the pitch in the iPad app (2026-10-08): upright, one page fills the width, yet the note and the roots and look-alike lists opened as a 460px corner card beside an empty block. The four sheets now span the page when the screen is upright and no spread side is set; the note's lines keep their 60ch reading width. Test: e2e/pitch.spec.ts 'an iPad held upright lays the note and its lists across the page'."
     }
   ]
 }

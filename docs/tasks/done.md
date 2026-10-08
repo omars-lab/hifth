@@ -1062,6 +1062,8 @@ commentary design note's numbered items, and in the issues list.
 - #108 — Spread: build item ㉖'s ways of turning with a card open as a setting ("stops short", "grab through"; today's way the default)
 - #109 — One page on a laptop: a link straight to a verse sometimes left the note over that verse; fixed (design item ㉛).
 - #110 — Walked the pitch in Firefox, in Arabic, on an iPad held sideways and on a phone; the settings sheet offered a two-page choice on a phone and drew a double line under its title; both fixed (design item ㉜).
+- #111 — Walked the pitch on a phone held sideways (English and Arabic) and in Arabic at a desk (note, introduction, verse-number menu); no faults.
+- #112 — Walked the pitch inside the iPad app: upright, the note and the lists stood in a corner beside an empty block; they now lie across the page (design item ㉝).
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
