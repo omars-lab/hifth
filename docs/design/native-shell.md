@@ -415,3 +415,22 @@ how far the two fingers spread, from the fold, as the + button does. Tests: the 
 unit tests, one for a tap on one page while the other finger is on the facing page, one in the
 iPad browser tests that pinches across the fold and checks nothing is selected and the pages
 grew, and one in the app on the simulator that does the same.
+
+### ⑮ A link that asks for a verse's look-alikes opens its note instead · **fixed**
+
+Seen walking the pitch in the iPad app on 2026-10-08, with a picture of each link taken by the
+new walk camera: a link to 2:48 that asked for its look-alike list opened the Study Quran note,
+though 2:48 has two look-alikes in its surah. The browser did the same once the timing lined up.
+The app waited for "the surah's file" before opening the list, and counted either of two files
+as that: the look-alike file, or the private file that also carries the notes. When the private
+file came first, the list was opened with nothing in it yet, and the note took its place.
+
+**The fix:** the app now notes when each file has come back, empty or not, and opens the list
+only once both have. A surah with no look-alikes at all (Al-Fātiḥah) still counts as come back,
+so its link opens the verse as before. Tests: one in the pitch browser tests that holds the
+look-alike file back a second and a half and checks the list opens, not the note (failed first);
+the 57 public link tests unchanged; and the walk camera's own picture of 2:48 in the app.
+
+**The walk camera:** `make app-walk ROUTES='…' [SIDEWAYS=1]` opens each route in the iPad app,
+upright or turned, and keeps one picture per route in `native/shots/walk/`, named after the
+route. It is how this was found: ten links photographed in one run, not ten launches by hand.

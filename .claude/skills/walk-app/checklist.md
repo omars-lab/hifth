@@ -92,6 +92,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] The look-alike buttons cover no words, no close button, and are not hidden by a note. ·
   phone, phone-side, desktop · issues: `lookalike-chips-cover-lifted-page`,
   `lookalike-chips-sideways-cover-close`, `chips-under-facing-note`
+- [ ] A link that asks for a verse's look-alikes (`?open=lookalikes`, try 2:48) opens the list, not
+  the note, even on a slow load. · desktop, the iPad app · issue: `pitch-link-lookalikes-opens-note`
+  · test: the pitch test "opens the look-alike list even when the note's file arrives first"
 
 ## Pens, bookmarks, the interface language
 
@@ -112,7 +115,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Walk the pitch **in the iPad app**, not only in the browser: the iPad's own WebKit lays out
   differently from Playwright's. Rebuild the bundle (`make app-web FLAVOUR=pitch`), launch at a
   verse, turn the simulator, screenshot, and measure from inside the page with
-  `make app-probe TARGET=ipad EVAL=…`. · the native-shell skill, "Walking the app in the simulator"
+  `make app-probe TARGET=ipad EVAL=…`. For many links at once, `make app-walk ROUTES='…'`
+  (add `SIDEWAYS=1` to turn it) keeps one picture per link. · the native-shell skill, "Walking
+  the app in the simulator"
 - [ ] Hold the iPad app sideways: two pages fill the height between the bars, not a sliver in the
   middle of the desk. · iPad simulator, landscape · issue: `ipad-app-sideways-spread-tiny` · test:
   `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize`
