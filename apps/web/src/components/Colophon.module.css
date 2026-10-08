@@ -95,6 +95,13 @@
   border-block-start: 1px solid var(--hairline);
 }
 
+/* The title row already rules itself off; a second rule a few pixels under it
+   read as an empty band. */
+.head + .block {
+  margin-block-start: var(--space-2);
+  border-block-start: none;
+}
+
 .subhead {
   margin: 0 0 var(--space-2);
   font-size: var(--text-sm);

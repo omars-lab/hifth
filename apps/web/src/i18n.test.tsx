@@ -332,6 +332,7 @@ describe("what the English UI must not translate", () => {
           onScopeLook={() => {}}
           penHome="strip"
           onPenHome={() => {}}
+          spread
         />
       </LangProvider>,
     );

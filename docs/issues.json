@@ -3008,6 +3008,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Found as a flaky pitch check (2026-10-08, about 6 in 24 on main): a cold link to 36:12 with one page on a laptop left the corner note over the verse. The note judged 'covers nothing' against the page at whole-page size and never again after the zoom; and its slide-up ask ran before the page loaded. Fixed in CommentarySheet.tsx (judge again when the page moves) and PageStage.tsx (a page arriving under a note slides clear). Pitch e2e: 'a note that opens before its page arrives still leaves its verse in sight'."
+    },
+    {
+      "id": "phone-settings-spread-choice-and-double-line",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㉜"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/src/components/Colophon.test.tsx",
+      "note": "Found walking the phone in Arabic (2026-10-08): settings offered the card-edge choice (item 26), which only means something with two pages facing; and drew a second line just under the title's own. Card-edge now shown only where two pages can face each other (App passes spread={desktop}); the first section under the title draws no line. Tests: Colophon.test.tsx (not offered without two pages) and e2e/colophon.spec.ts (one line under the title)."
     }
   ]
 }

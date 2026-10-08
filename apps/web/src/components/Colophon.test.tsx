@@ -102,7 +102,7 @@ describe("Colophon", () => {
 describe("what a card does at the page's edge, in settings", () => {
   it("offers the three ways, today's checked, and keeps the one picked", () => {
     localStorage.removeItem(CARD_EDGE_KEY);
-    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} spread />);
     const way = (c: string) => container.querySelector(`[data-card-edge="${c}"]`)!;
     expect(way("covers")).toHaveAttribute("aria-checked", "true");
     expect(way("clear")).toHaveAttribute("aria-checked", "false");
@@ -112,6 +112,12 @@ describe("what a card does at the page's edge, in settings", () => {
     expect(way("covers")).toHaveAttribute("aria-checked", "false");
     expect(localStorage.getItem(CARD_EDGE_KEY)).toBe("turns");
     localStorage.removeItem(CARD_EDGE_KEY);
+  });
+
+  it("is not offered on a screen too narrow for two pages, where there is no facing page to cover", () => {
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    expect(container.querySelector("[data-card-edge]")).toBeNull();
+    expect(container.querySelector("#colophon-card-edge")).toBeNull();
   });
 });
 

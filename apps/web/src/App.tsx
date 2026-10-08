@@ -3566,6 +3566,7 @@ export function App(): JSX.Element {
             onScopeLook={chooseScopeLook}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
+            spread={desktop}
             onShowTips={() => {
               setColophonOpen(false);
               setCoachUp(true);
