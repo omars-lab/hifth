@@ -101,9 +101,14 @@ Dark: `APPEARANCE=dark` only colours native chrome. The desk colour is the web a
   Develop menu.
 - `make app-run-mac` registers the build with Launch Services (`lsregister -f`) before
   opening, so `open "hifth:///hafs-kfqc/2:255"` lands on this copy, not an older one.
-- For deterministic scripting run the binary directly with the env var:
-  `HIFTH_ROUTE=/hafs-kfqc/p45 native/build/Build/Products/Debug/Hifth.app/Contents/MacOS/Hifth`
-  (that is what `make app-run-mac-stdout`, `app-shot TARGET=mac` and `app-probe` do).
+- **Never run the binary inside the app directly** (`…/Hifth.app/Contents/MacOS/Hifth`): started
+  that way a SwiftUI app runs with no window at all, so the page is 0×0 and hidden and its
+  picture is an empty file (native-shell.md ⑪). Start it through macOS's launcher with the
+  settings passed as `--env`, the way `app-shot TARGET=mac`, `app-probe` and
+  `app-run-mac-stdout` do:
+  `open -n -g -F -W --stdout native/build/mac-stdout.log --env HIFTH_ROUTE=/hafs-kfqc/p45 native/build/Build/Products/Debug/Hifth.app`
+  (`-g` keeps it behind your windows, so the page reports itself hidden, but it is drawn at
+  full size and its picture is right).
 - Trackpad pinch reaches the web app as gesture events; that only works because
   `allowsMagnification` stays off (see the `web-shell-bridge` skill).
 

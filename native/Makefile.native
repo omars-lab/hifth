@@ -27,6 +27,14 @@ XCB          := xcodebuild -project $(XCPROJ) -derivedDataPath $(DERIVED)
 XCPRETTY     := $(shell command -v xcbeautify >/dev/null 2>&1 && echo "xcbeautify" || echo "cat")
 MAC_APP      := $(DERIVED)/Build/Products/Debug/Hifth.app
 IPAD_APP     := $(DERIVED)/Build/Products/Debug-iphonesimulator/Hifth.app
+# The Mac app is started through macOS's launcher, never by running the binary
+# inside it: started that way it runs with no window at all, so the page is
+# 0×0 and hidden and its picture comes out empty (native-shell.md ⑪). A new
+# copy (-n), in the background so it does not take the keyboard from whatever
+# you are in (-g), with no windows restored from last time (-F), waiting until
+# it quits (-W); what it prints lands in MAC_LOG. Add `--env NAME=value`.
+MAC_LOG      := $(DERIVED)/mac-stdout.log
+MAC_OPEN     := open -n -g -F -W --stdout $(abspath $(MAC_LOG)) --stderr $(abspath $(MAC_LOG))
 # Which web build goes in: `pitch` (private, with the held commentary) or
 # `public` (what the site ships).
 FLAVOUR      ?= pitch
@@ -103,8 +111,10 @@ app-run-mac: app-build-mac ## Build and open the Mac app (ROUTE=… to open at a
 app-callback-check: app-build-mac ## Send one x-callback-url request through macOS to the app and check a second process gets the answer (opens one browser tab)
 	$(NATIVE)/scripts/callback-check.sh $(MAC_APP) $(BUNDLE_ID)
 
-app-run-mac-stdout: app-build-mac ## Run the Mac binary in the foreground so its console output shows here
-	HIFTH_ROUTE=$(ROUTE) HIFTH_APPEARANCE=$(APPEARANCE) $(MAC_APP)/Contents/MacOS/Hifth
+app-run-mac-stdout: app-build-mac ## Run the Mac app until you quit it, then print its console output here (live: make app-logs)
+	@: > $(MAC_LOG)
+	$(MAC_OPEN) --env HIFTH_ROUTE=$(ROUTE) --env HIFTH_APPEARANCE=$(APPEARANCE) $(MAC_APP)
+	@cat $(MAC_LOG)
 
 app-run-ipad: app-build-ipad ## Boot the simulator, install and launch at ROUTE
 	@test -n "$(IPAD_UDID)" || { echo "no simulator named '$(IPAD)'; see xcrun simctl list devices"; exit 1; }
@@ -118,8 +128,10 @@ app-shot: ## Screenshot the app at ROUTE on TARGET=ipad|mac (APPEARANCE=light|da
 	@mkdir -p $(SHOTS)
 ifeq ($(TARGET),mac)
 	$(MAKE) app-build-mac
-	HIFTH_ROUTE=$(ROUTE) HIFTH_APPEARANCE=$(APPEARANCE) HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) \
-	  $(MAC_APP)/Contents/MacOS/Hifth
+	@rm -f $(SHOT_OUT); : > $(MAC_LOG)
+	$(MAC_OPEN) --env HIFTH_ROUTE=$(ROUTE) --env HIFTH_APPEARANCE=$(APPEARANCE) \
+	  --env HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) $(MAC_APP)
+	@cat $(MAC_LOG)
 else
 	$(MAKE) app-build-ipad
 	xcrun simctl bootstatus $(IPAD_UDID) -b
@@ -132,6 +144,10 @@ else
 	@for i in $$(seq 1 60); do test -s $(SHOT_OUT) && break; sleep 0.5; done
 	@test -s $(SHOT_OUT) || { echo "no screenshot after 30 s"; exit 1; }
 endif
+	@# An empty file, or a picture with no pixels, is a failure, not a shot:
+	@# the Mac app once wrote 0 bytes here for weeks and this line said ✓.
+	@test -s $(SHOT_OUT) || { echo "  ✗ $(SHOT_OUT) is empty"; exit 1; }
+	@sips -g pixelWidth $(SHOT_OUT) | awk '/pixelWidth/ { exit !($$2 > 0) }' || { echo "  ✗ $(SHOT_OUT) has no pixels"; exit 1; }
 	@echo "  ✓ $(SHOT_OUT)"
 
 app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression'] [DELAY_MS=…]
@@ -146,8 +162,10 @@ ifeq ($(TARGET),ipad)
 	  | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
 else
 	$(MAKE) app-build-mac
-	HIFTH_PROBE=1 HIFTH_ROUTE='$(ROUTE)' HIFTH_PROBE_EVAL='$(EVAL)' HIFTH_PROBE_DELAY_MS=$(DELAY_MS) \
-	  $(MAC_APP)/Contents/MacOS/Hifth | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
+	@: > $(MAC_LOG)
+	$(MAC_OPEN) --env HIFTH_PROBE=1 --env HIFTH_ROUTE='$(ROUTE)' --env HIFTH_PROBE_EVAL='$(EVAL)' \
+	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) $(MAC_APP)
+	@grep '^probe' $(MAC_LOG) | sed 's/^probe //' | python3 -m json.tool
 endif
 
 app-open: ## Turn the running app to ROUTE (TARGET=ipad|mac)
