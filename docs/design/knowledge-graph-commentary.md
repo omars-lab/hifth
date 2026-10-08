@@ -951,3 +951,18 @@ window changes size, and a page that arrives by a link or a jump while a note is
 of it once it is there. A new test holds the page back so the note always opens first; it failed
 every time before the fix and passed 24 times running after it, as did ③'s test.
 
+
+### ㉜ On a phone, does the settings sheet ask only what a phone can use, and draw cleanly? · **fixed**
+
+Walking the app in Arabic on a phone on 2026-10-08 turned up two things in the settings sheet. The
+choice from ㉖ — what an open card does at the facing page's outer edge — was offered on a phone,
+where only one page ever shows and there is no facing page for a card to cover; its own description
+starts "with two pages open". And the sheet opened with an empty band between two lines under its
+title, in every language and on every screen: the title row draws a line under itself, and the
+first section drew another above itself a few pixels lower.
+
+**Fixed, 2026-10-08:** the card-edge choice is offered only where two pages can face each other (a
+computer, or an iPad held sideways), the same rule the pens' placement already follows; and the
+first section under the title no longer draws a line of its own. A unit test checks the choice is
+absent without two pages, and a phone browser test checks there is one line under the title, not
+two; both failed before the change.
