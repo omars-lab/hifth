@@ -28,6 +28,7 @@
  * recognise falls back to a filled clone.
  */
 
+import { fingersOnGlass } from "./fingers.js";
 import { LONG_PRESS_MS, TAP_SLOP_PX } from "./gestures.js";
 import {
   fitSwipesToText,
@@ -209,6 +210,8 @@ export class Highlighter {
    * the next first finger down, which the browser marks as the primary one.
    */
   private manyFingers = false;
+  /** Stops this page counting the fingers on the whole glass (`fingers.ts`). */
+  private unwatchGlass: (() => void) | null = null;
   /** The applied skin, and L3's rule lookup for it (spec §8; see `setSkin`). */
   private currentSkin: SkinId = "plain";
   private skinLookup: TajweedLookup | null = null;
@@ -272,13 +275,17 @@ export class Highlighter {
       this.pressKey = this.keyForEventTarget(e.target);
     };
     svg.addEventListener("pointerdown", this.onPolygonPointerDown);
+    const glass = svg.ownerDocument?.defaultView;
+    this.unwatchGlass = glass ? fingersOnGlass.watch(glass) : null;
 
     this.onPolygonPointerUp = (e: PointerEvent) => {
       const press = this.pressAt;
       const spent = this.pressSpent;
       this.pressAt = null;
       this.pressSpent = false;
-      if (spent || this.manyFingers) return;
+      // The other finger of a pinch can be on the facing page of the open book,
+      // where this page never hears it; the count of the whole glass does.
+      if (spent || this.manyFingers || fingersOnGlass.crowded) return;
       if (press && typeof e.clientX === "number" && typeof e.clientY === "number") {
         if (Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_SLOP_PX) return;
       }
@@ -830,6 +837,8 @@ export class Highlighter {
     this.svg.removeEventListener("pointerdown", this.onPolygonPointerDown);
     this.svg.removeEventListener("pointerup", this.onPolygonPointerUp);
     this.svg.removeEventListener("keydown", this.onPolygonKeyDown);
+    this.unwatchGlass?.();
+    this.unwatchGlass = null;
     for (const group of this.drawn.keys()) this.clear(group as GroupId);
     this.layoutWatch?.disconnect();
     this.layoutWatch = null;

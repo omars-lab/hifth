@@ -95,7 +95,7 @@ test.describe("Hifth · on an iPad", () => {
     await page.setViewportSize(LANDSCAPE);
     await page.goto("/#/hafs-kfqc/p8");
     await shown(page, 7);
-    // Page 7 is the left-hand leaf of the 7|8 opening; verse-45 is 2:38.
+    // Page 7 is the right-hand leaf of the 7|8 opening; verse-45 is 2:38.
     const poly = leaf(page, 7).locator("#verse-45");
     await expect(poly).toHaveCount(1);
     await poly.tap();
@@ -128,7 +128,76 @@ test.describe("Hifth · on an iPad", () => {
     await expect(page.locator("[data-note-pin]:visible")).toHaveCount(0);
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
+
+  // Found in the iPad app held sideways (2026-10-08): each page of the open
+  // book is its own surface, so a pinch across the fold reached each page as a
+  // lone finger dragging, which means "select a run of verses". A run across
+  // both pages lit up, the passage panel opened, and nothing grew.
+  test("a pinch across the fold magnifies the open book and selects nothing", async ({ page }) => {
+    await page.setViewportSize(LANDSCAPE);
+    await page.goto("/#/hafs-kfqc/p8");
+    await shown(page, 7);
+    await shown(page, 8);
+    const before = (await leaf(page, 7).boundingBox())!.width;
+    // The zoom readout, in this project's Arabic digits.
+    await expect(page.getByText("١٠٠٪")).toHaveCount(1);
+    await pinchAcrossTheFold(page, leaf(page, 7), leaf(page, 8));
+    await expect(page.getByText("١٠٠٪")).toHaveCount(0);
+    await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(0);
+    expect(new URL(page.url()).hash).toBe("#/hafs-kfqc/p8");
+    await expect.poll(async () => (await leaf(page, 7).boundingBox())!.width).toBeGreaterThan(before * 1.3);
+  });
 });
+
+/**
+ * One finger on each page of the open book, near the fold, drawn apart and
+ * lifted: the pinch a reader makes to magnify the opening.
+ */
+async function pinchAcrossTheFold(page: Page, one: Locator, other: Locator): Promise<void> {
+  // The mus'haf opens right to left, so which page is on the left is read off
+  // the screen rather than assumed from the page numbers.
+  const a1 = (await one.boundingBox())!;
+  const b1 = (await other.boundingBox())!;
+  const [l, r] = a1.x < b1.x ? [a1, b1] : [b1, a1];
+  const y = l.y + l.height / 2;
+  const a = l.x + l.width - 60;
+  const b = r.x + 60;
+  const finger = (type: string, id: number, x: number, from: number) =>
+    page.evaluate(
+      ({ type, id, x, y, from }) => {
+        const held = (window as unknown as { __held?: Record<number, Element | null> }).__held ?? {};
+        (window as unknown as { __held?: Record<number, Element | null> }).__held = held;
+        if (type === "pointerdown") held[id] = document.elementFromPoint(from, y);
+        held[id]?.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            pointerId: id,
+            pointerType: "touch",
+            isPrimary: id === 1,
+            clientX: x,
+            clientY: y,
+            button: 0,
+            buttons: type === "pointerup" ? 0 : 1,
+          }),
+        );
+      },
+      { type, id, x, y, from },
+    );
+  await finger("pointerdown", 1, a, a);
+  await finger("pointerdown", 2, b, b);
+  // Fingers settle before they spread, as a hand does; a still finger that
+  // then moves is the stroke that used to sweep verses.
+  await page.waitForTimeout(400);
+  for (let step = 1; step <= 10; step += 1) {
+    await finger("pointermove", 1, a - step * 15, a);
+    await finger("pointermove", 2, b + step * 15, b);
+    await page.waitForTimeout(30);
+  }
+  await finger("pointerup", 2, b + 150, b);
+  await finger("pointerup", 1, a - 150, a);
+  await page.waitForTimeout(400);
+}
 
 /**
  * Two fingers come down on the element, a little apart, rest past the hold
