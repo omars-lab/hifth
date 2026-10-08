@@ -966,3 +966,16 @@ computer, or an iPad held sideways), the same rule the pens' placement already f
 first section under the title no longer draws a line of its own. A unit test checks the choice is
 absent without two pages, and a phone browser test checks there is one line under the title, not
 two; both failed before the change.
+
+### ㉝ On an iPad held upright, does the note read as the page's own, or stand in a corner beside nothing? · **fixed**
+
+Walking the pitch inside the iPad app on 2026-10-08: held upright, the iPad shows one page that fills
+the screen's width. The note, and the lists of roots and look-alikes, still opened as the narrow card
+made for sitting beside a page, in the bottom right corner, with an empty brown block to its left.
+There was nothing for it to sit beside, so it looked misplaced rather than placed.
+
+**Fixed, 2026-10-08:** with one page on a screen held upright, the note and the lists lie across the
+page under it, edge to edge, and the note's lines keep the same comfortable reading length as before.
+Two pages side by side keep their card over the facing page. A browser test at the iPad's upright
+size checks the note and the roots list each reach both edges of the page while a line of the note
+stays short; it failed before the change (the note started 540 pixels in).
