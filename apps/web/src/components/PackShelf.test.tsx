@@ -87,6 +87,20 @@ beforeEach(async () => {
 });
 
 describe("PackShelf", () => {
+  // Inside the iPad and Mac app every page is already on the device, so an
+  // offer to keep a juz for offline reading is a promise about nothing. Found
+  // walking the pitch in the iPad app, 2026-10-08.
+  it("is not offered inside the app, where every page is already kept", () => {
+    const w = window as Window & { __HIFTH_NATIVE__?: unknown };
+    w.__HIFTH_NATIVE__ = { platform: "ios", publicBase: "https://example.test/" };
+    try {
+      const { container } = render(<PackShelf edition={EDITION} pages={PAGES} page={1} />);
+      expect(container).toBeEmptyDOMElement();
+    } finally {
+      delete w.__HIFTH_NATIVE__;
+    }
+  });
+
   it("offers the juz the reader is standing in, and keeps it", async () => {
     render(<PackShelf edition={EDITION} pages={PAGES} page={1} />);
 

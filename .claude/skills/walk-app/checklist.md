@@ -97,6 +97,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] The tajweed key, opened with the colours off (the ⓘ, or `?open=key`), counts the rules on the
   page (page 45 has madd on 5 ayahs), and never says "none" while still loading. · every flavour ·
   issue: `tajweed-key-none-when-off`
+- [ ] Read every sentence a panel shows as a hafiz would: no word for how the app is built
+  ("build", "table", "ids", "pack"…), and nothing that says "phone" on an iPad or a Mac. Inside
+  the iPad app, the juz map has no keep-offline shelf. · every flavour · issue:
+  `reader-words-plumbing`
   · test: the pitch test "opens the look-alike list even when the note's file arrives first"
 
 ## Pens, bookmarks, the interface language
