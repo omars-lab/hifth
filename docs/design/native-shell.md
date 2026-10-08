@@ -465,3 +465,37 @@ finds the same ayah, not just the same number", "available"), in English and Ara
 became "this device"; and the keep-offline shelf is not shown inside the app. Tests: a check over
 every line a reader sees, in both languages, that fails on any of our plumbing words or on "this
 phone"; and one that the shelf is absent inside the app (all failed first).
+
+### ⑱ The Mac app's own pictures froze mid-animation and carried a blank band · **fixed**
+
+Seen walking the pitch in the Mac app on 2026-10-08. Every picture the app took of itself showed
+the page caught halfway: a note half slid in, the look-alike chip still white instead of filled,
+no verse coloured. Waiting longer before the picture changed nothing. Asked from inside the page,
+it said it was hidden and its fades had not moved past their first frame. The picture job opens
+the app behind the windows already on screen, so it does not take the keyboard from whatever the
+owner is in, and behind other windows macOS's web view decides nobody can see the page and stops
+drawing its movement. A reader with the window in front never sees this; only our pictures did.
+
+Each picture also had an empty strip along the bottom, about the height of the title bar. The web
+view runs on up under the title bar, so it is taller than the page it shows, and the picture took
+the whole view.
+
+**The fix:** only for the picture and probe jobs, and only in a test build, the web view is told
+to keep drawing while behind other windows. Apple gives no public switch for this; the private
+one is asked for by name and skipped if it is missing, so a future macOS without it makes the
+picture fail its own check rather than crash. The picture is now taken of the page's own area.
+Two checks on every Mac picture, both seen failing first: the picture job refuses a page that says
+it is hidden, and refuses a picture whose size is not the page's size.
+
+### ⑲ The iPad and iPhone app pictures are compared with an out-of-date record · **open**
+
+Found on 2026-10-08 while checking that ⑱ changed nothing on the iPad. The saved pictures the app
+is compared against were taken before three fixes: the two pages drawn stamp-sized on an upright
+iPad, the note opening as a sheet from the bottom, and the phone page fitting its width. So the
+comparison now fails on all four pictures, every difference an improvement. Nothing runs the
+comparison on its own (it needs the simulators, and it takes minutes), which is how it fell behind
+unnoticed.
+
+**What would answer it:** the owner looks at the four side-by-side pictures and says yes, then
+they are saved as the new record. Whether the comparison should also run before every push, at the
+cost of a few more minutes and a fresh yes whenever the page's look changes, is the owner's call.

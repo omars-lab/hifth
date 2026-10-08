@@ -94,6 +94,7 @@ final class ShellModel {
         // zoom. Off, it forwards the pinch as gesture events the web app's own
         // stage already binds.
         webView.allowsMagnification = false
+        keepDrawingWhileBehindIfAsked()
         #else
         webView.scrollView.bounces = false
         webView.scrollView.isScrollEnabled = false
@@ -280,6 +281,7 @@ final class ShellModel {
       viewport: [innerWidth, innerHeight, devicePixelRatio],
       touch: navigator.maxTouchPoints,
       ua: navigator.userAgent,
+      visibility: document.visibilityState,
       eval: extra ? (() => { try { return (0, eval)(extra); } catch (e) { return String(e); } })() : undefined,
     };
     return JSON.stringify(out);
@@ -297,7 +299,21 @@ final class ShellModel {
         let delayMs = Int(environment["HIFTH_SNAPSHOT_DELAY_MS"] ?? "") ?? 1500
         Task {
             try? await Task.sleep(for: .milliseconds(delayMs))
-            let png = await Self.snapshotPNG(of: webView)
+            // A page the system thinks nobody can see stops its fades at the
+            // first frame, so its picture shows notes half slid in and chips
+            // still blank. Refuse to keep a picture like that.
+            let page = await Self.pageState(of: webView)
+            guard page.visibility == "visible" else {
+                print("snapshot refused: the page is \(page.visibility), so a picture of it would be frozen mid-animation")
+                exit(1)
+            }
+            let (png, size) = await Self.snapshotPNG(of: webView, page: page.size)
+            // The picture is of the page the reader sees, no more: a picture
+            // taller than the page shows a blank band the app never draws.
+            guard size == page.size else {
+                print("snapshot refused: the picture is \(Int(size.width))x\(Int(size.height)) but the page is \(Int(page.size.width))x\(Int(page.size.height))")
+                exit(1)
+            }
             do {
                 try png.write(to: URL(fileURLWithPath: path))
                 print("snapshot written \(path)")
@@ -309,17 +325,56 @@ final class ShellModel {
         }
     }
 
-    private static func snapshotPNG(of webView: WKWebView) async -> Data {
+    #if os(macOS)
+    /// `make app-shot` and `make app-probe` open the Mac app behind the windows
+    /// already on screen, so the owner keeps their place. Behind other windows
+    /// WebKit calls the page hidden and stops its fades at the first frame, and
+    /// the picture shows notes half slid in. Only for those two jobs, and only
+    /// in a debug build, the web view is told to keep drawing anyway. WebKit
+    /// has no public switch for this; the private one is asked for by name and
+    /// skipped if it is not there, so a WebKit without it fails the picture's
+    /// own visibility check instead of crashing.
+    private func keepDrawingWhileBehindIfAsked() {
+        #if DEBUG
+        let environment = ProcessInfo.processInfo.environment
+        let photographing = !(environment["HIFTH_SNAPSHOT_PATH"] ?? "").isEmpty || environment["HIFTH_PROBE"] == "1"
+        let selector = NSSelectorFromString("_setWindowOcclusionDetectionEnabled:")
+        guard photographing, webView.responds(to: selector) else { return }
+        typealias Setter = @convention(c) (AnyObject, Selector, Bool) -> Void
+        let set = unsafeBitCast(webView.method(for: selector), to: Setter.self)
+        set(webView, selector, false)
+        #endif
+    }
+    #endif
+
+    private static func pageState(of webView: WKWebView) async -> (visibility: String, size: CGSize) {
         await withCheckedContinuation { continuation in
-            webView.takeSnapshot(with: nil) { image, _ in
+            webView.callAsyncJavaScript("return [document.visibilityState, innerWidth, innerHeight]", arguments: [:], in: nil, in: .page) { result in
+                let values = (try? result.get()) as? [Any] ?? []
+                let visibility = values.first as? String ?? "unknown"
+                let width = (values.count > 1 ? values[1] as? NSNumber : nil)?.doubleValue ?? 0
+                let height = (values.count > 2 ? values[2] as? NSNumber : nil)?.doubleValue ?? 0
+                continuation.resume(returning: (visibility, CGSize(width: width, height: height)))
+            }
+        }
+    }
+
+    /// The PNG, and its size in points, to check against the page's own.
+    /// On the Mac the web view runs on under the title bar, so the view is
+    /// taller than the page; only the page's own area is photographed.
+    private static func snapshotPNG(of webView: WKWebView, page: CGSize) async -> (Data, CGSize) {
+        let configuration = WKSnapshotConfiguration()
+        configuration.rect = CGRect(origin: .zero, size: page)
+        return await withCheckedContinuation { continuation in
+            webView.takeSnapshot(with: configuration) { image, _ in
                 #if os(iOS)
-                continuation.resume(returning: image?.pngData() ?? Data())
+                continuation.resume(returning: (image?.pngData() ?? Data(), image?.size ?? .zero))
                 #else
                 let png = image
                     .flatMap { $0.tiffRepresentation }
                     .flatMap { NSBitmapImageRep(data: $0) }
                     .flatMap { $0.representation(using: .png, properties: [:]) }
-                continuation.resume(returning: png ?? Data())
+                continuation.resume(returning: (png ?? Data(), image?.size ?? .zero))
                 #endif
             }
         }
