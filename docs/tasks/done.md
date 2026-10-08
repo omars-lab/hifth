@@ -1059,6 +1059,7 @@ commentary design note's numbered items, and in the issues list.
 - #104 — A walk-app skill: every flavour of the app, the walk loop, and where faults go
 - #105 — Its checklist, seeded from every fault the walks have found (items ①–㉚)
 - #106 — `make drive` takes a reader's hand by name (DEVICE=ipad-side…), SEEN_COACH=1 and BROWSER=
+- #108 — Spread: build item ㉖'s ways of turning with a card open as a setting ("stops short", "grab through"; today's way the default)
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.

@@ -134,6 +134,7 @@ export function HighlightMenu({
         ref={sheetRef}
         className={styles.sheet}
         style={leafStyle(place, "content")}
+        data-over-leaf={place ? "" : undefined}
         role="dialog"
         aria-modal={!beside}
         aria-label={t.rangeAria(title, hops.length)}

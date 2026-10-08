@@ -3248,6 +3248,15 @@ export function App(): JSX.Element {
                     turnStyle={turnStyle}
                     opening={page}
                     playRef={playTurnRef}
+                    // A turn begun on a card over the edge puts every card over
+                    // the facing page away (settings: grab the edge through it).
+                    onGrabThrough={() => {
+                      setOpenDirection(null);
+                      setSelectedRange(null);
+                      setRootsOpen(false);
+                      if (introSheet) setIntroSurah(null);
+                      else setCommentaryOpen(false);
+                    }}
                   />
                 ) : undefined
               }
