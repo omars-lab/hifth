@@ -448,3 +448,20 @@ and while they are still on their way each rule's count is left blank rather tha
 Tests: two in the tajweed browser tests, one that opens the key with the colours off and expects
 a count, one that holds the rules back a second and a half and expects no "none" in the meantime
 (both failed first); and the walk camera's picture of page 45 with the key open in the app.
+
+### ⑰ The app explains itself in our own words, and calls an iPad a phone · **fixed**
+
+Seen in the same walk, 2026-10-08. The tajweed key said the layer marks each ayah by its "most
+salient rule" because the pages "vendored so far carry no letter ids"; the editions list said
+moving between editions "goes through a concordance table, never through shared numbering"; the
+map said "30 of 30 juz in this build". Those are our words for how the app is put together, and a
+hafiz should not need them to read a sentence. The shelf for keeping a juz offline was headed
+"Kept on this phone" on an iPad, and inside the iPad and Mac app it offered to keep pages that the
+app already carries.
+
+**The fix:** each of those lines now says the plain thing ("its main rule", "the pages we have so
+far do not say where each letter sits", "editions number some ayahs differently, so switching
+finds the same ayah, not just the same number", "available"), in English and Arabic; "this phone"
+became "this device"; and the keep-offline shelf is not shown inside the app. Tests: a check over
+every line a reader sees, in both languages, that fails on any of our plumbing words or on "this
+phone"; and one that the shelf is absent inside the app (all failed first).
