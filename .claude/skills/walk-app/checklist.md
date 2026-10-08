@@ -95,6 +95,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `BROWSER=firefox` · test: edge-peel spec
 - [ ] Switch the interface to Arabic: everything mirrors, nothing is cut off. · phone, desktop ·
   tests: lang, chrome-fit specs
+- [ ] Open settings and scroll to the end: one line under the title, and no choice that this screen
+  cannot use (nothing about two facing pages on a phone). · phone, desktop · issue:
+  `phone-settings-spread-choice-and-double-line`
 
 ## The Mac and iPad apps
 

@@ -58,6 +58,25 @@ test.describe("Hifth · colophon (GPL §6)", () => {
     }
   });
 
+  test("draws one line under its title, not two with a gap between", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /عن حِفظ/ }).tap();
+    const sheet = page.getByRole("dialog", { name: "عن حِفظ" });
+    await expect(sheet).toBeVisible();
+    // The title row rules itself off; the first section under it must not
+    // draw a second rule of its own a few pixels lower.
+    const lines = await sheet.evaluate((d) => {
+      const head = d.querySelector("header")!;
+      const first = head.nextElementSibling as HTMLElement;
+      return {
+        under: parseFloat(getComputedStyle(head).borderBottomWidth),
+        over: parseFloat(getComputedStyle(first).borderTopWidth),
+      };
+    });
+    expect(lines.under).toBeGreaterThan(0);
+    expect(lines.over).toBe(0);
+  });
+
   test("Escape closes it and focus returns to the wordmark", async ({ page }) => {
     await page.goto("/");
     const wordmark = page.getByRole("button", { name: /عن حِفظ/ });
