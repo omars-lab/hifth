@@ -345,3 +345,18 @@ opens a browser tab per leg, so it is its own target, not part of pre-push. The 
 covered: a request sent to the simulator with `simctl openurl` stops at an "Open in Hifth?"
 alert (the same trap that keeps the smoke test on the launch variable), and the plain link is
 already covered there by the XCUITest smoke.
+
+### ⑪ On the Mac, the app's own picture of the page comes out empty · **open**
+
+Seen walking the pitch in the apps on 2026-10-08: asked for a picture of page 45 on the Mac,
+the app wrote an empty file, and asked what it could see, the page reported a window of zero by
+zero. The same requests on the iPad simulator give a full picture and the real screen size. So
+the Mac app, started straight from the command line the way the picture and probe jobs start
+it, seems to load the page before its window has any size, or without putting a window on
+screen at all. The app itself, opened normally, shows the page; this is about the automatic
+picture, which is how a walk checks the Mac without a person looking.
+
+**What would answer it:** run the Mac picture job and the probe again, and print the window's
+size and whether it is on screen at the moment the page says it is ready. If the window has no
+size yet, wait for it before taking the picture; if there is no window, the command-line start
+needs one. A Mac picture of page 45 that is not empty, checked by a script, closes it.

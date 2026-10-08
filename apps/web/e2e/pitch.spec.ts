@@ -523,6 +523,32 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("turning an iPad on its side with a note open still shows the note's page", async ({ browser }) => {
+    // Found walking the pitch in the iPad app (2026-10-08): with a note open
+    // upright, turning the iPad on its side opened the book on two pages but
+    // drew neither of them, only the brown desk behind the note.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await settle(sheet(page));
+
+    await page.setViewportSize({ width: 1366, height: 1024 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBeNull();
+    await expect(pageSvg(page, 439)).toBeVisible();
+    await expect
+      .poll(async () => {
+        const box = await pageSvg(page, 439).boundingBox();
+        if (!box) return "no page";
+        const inView = box.x < 1366 && box.x + box.width > 0 && box.y < 1024 && box.y + box.height > 0;
+        return inView && box.width > 300 ? "in sight" : `at ${Math.round(box.x)},${Math.round(box.y)} ${Math.round(box.width)} wide`;
+      })
+      .toBe("in sight");
+    await context.close();
+  });
+
   test("once the reader picks two pages upright, turning the iPad does not undo it", async ({ browser }) => {
     const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
     await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
@@ -1907,6 +1933,10 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     await page.keyboard.press("Enter");
     await expect(menu(page)).toBeVisible();
     await expect(menu(page).getByRole("menuitem").first()).toBeFocused();
+    // The menu fills in as the verse's lists arrive. Wait for the last of them:
+    // in Safari's engine the roots line sometimes came in just after Down, and
+    // the line the keyboard had moved to was rightly kept but was now third.
+    await expect(menu(page).getByRole("menuitem", { name: /Same roots/ })).toBeVisible();
     await page.keyboard.press("ArrowDown");
     await expect(menu(page).getByRole("menuitem").nth(1)).toBeFocused();
     await page.keyboard.press("Escape");
