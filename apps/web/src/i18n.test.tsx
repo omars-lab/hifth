@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { afterEach, describe, expect, it } from "vitest";
 import { Colophon } from "./components/Colophon";
 import { LangProvider, stringsFor, useT } from "./i18n";
@@ -301,7 +301,10 @@ describe("what the English UI must not translate", () => {
         <Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />
       </LangProvider>,
     );
-    const offered = screen.getAllByRole("radio").map((el) => el.getAttribute("lang"));
+    // Only the language group: settings carry other choices (how a turn looks,
+    // what a card does at the edge), and those buttons are not languages.
+    const group = document.querySelector('[role="radiogroup"][aria-labelledby="colophon-lang"]') as HTMLElement;
+    const offered = within(group).getAllByRole("radio").map((el) => el.getAttribute("lang"));
     expect(offered).toEqual([...LOCALE_IDS]);
   });
 

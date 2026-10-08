@@ -194,6 +194,61 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     });
   }
 
+  // ㉖: the note covered the page's outer edge, the strip a hand grabs to turn
+  // the page, so on a spread only the arrows and keys turned it with a note
+  // open. Two ways round it are built as a setting, today's way the default.
+  const withEdge = async (page: Page, choice: string): Promise<void> => {
+    await page.addInitScript((c) => localStorage.setItem("hifth.cards.edge.v1", c), choice);
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    expect(await sheet(page).getAttribute("data-side")).toBe("right");
+    await settle(sheet(page));
+  };
+  /** A point low on the right page's outer edge, where the grab strip is widest. */
+  const edgeFoot = async (page: Page): Promise<{ x: number; y: number }> => {
+    const rail = (await page.getByTestId("edge-grab-right").boundingBox())!;
+    return { x: rail.x + rail.width - 8, y: rail.y + rail.height - 24 };
+  };
+  const onTop = (page: Page, at: { x: number; y: number }): Promise<string | null> =>
+    page.evaluate(
+      ({ x, y }) => {
+        const el = document.elementFromPoint(x, y);
+        return el?.closest('[role="dialog"]') ? "card" : (el?.closest("[data-testid]")?.getAttribute("data-testid") ?? null);
+      },
+      at,
+    );
+
+  test("kept free, the note stops short of the page's outer edge, so the edge can be grabbed", async ({ page }) => {
+    await withEdge(page, "clear");
+    const card = (await sheet(page).boundingBox())!;
+    const rail = (await page.getByTestId("edge-grab-right").boundingBox())!;
+    expect(card.x + card.width, "the card ends before the grab strip").toBeLessThanOrEqual(rail.x + 1);
+    expect(await onTop(page, await edgeFoot(page)), "the edge, not the card, is under the hand").toBe("edge-grab-right");
+  });
+
+  test("by default the note still covers the edge, and a drag there does not turn", async ({ page }) => {
+    await withEdge(page, "covers");
+    const at = await edgeFoot(page);
+    expect(await onTop(page, at)).toBe("card");
+    await page.mouse.move(at.x, at.y);
+    await page.mouse.down();
+    await page.mouse.move(at.x - 200, at.y, { steps: 8 });
+    await page.mouse.up();
+    await expect(pageSvg(page, 42), "still on page 42").toBeVisible();
+  });
+
+  test("set to grab through, a drag at the edge closes the note and turns the page", async ({ page }) => {
+    await withEdge(page, "turns");
+    const at = await edgeFoot(page);
+    expect(await onTop(page, at), "the card is still drawn over the edge").toBe("card");
+    await page.mouse.move(at.x, at.y);
+    await page.mouse.down();
+    await page.mouse.move(at.x - 400, at.y, { steps: 12 });
+    await page.mouse.up();
+    await expect(sheet(page), "the note closed for the turn").toHaveCount(0);
+    await expect(pageSvg(page, 42), "the opening turned").toHaveCount(0);
+  });
+
   test("the arrow keys still turn the page while a note sits beside it", async ({ page }) => {
     // The note card beside the spread leaves the page usable — no veil, verses
     // still tap — but the keyboard took any open panel for one that owns the

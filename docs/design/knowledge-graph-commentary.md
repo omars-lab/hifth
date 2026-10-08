@@ -868,6 +868,23 @@ verse has left the page. So nothing is lost, only the turn a reader reaches for 
 - **Close the note on a press at its outer margin, and start the turn.** The edge keeps working
   in the same place. A press on the note's margin doing two things at once may surprise.
 
+**Built, 2026-10-08, as a setting to try — still open.** Settings now has "Turning with a card
+open", with all three ways in it. Leaving it as it is stays the default until one is chosen. It
+covers every card that lies over the facing page (the note, the roots, the similar verses and a
+highlight's menu), so they all behave the same. What having a hand on each showed:
+
+- **Card stops short of the edge.** The edge is free and turns as usual. But a strip of the
+  facing page shows beside the card, its words cut off at the card's edge — the very thing laying
+  the note over the whole page fixed. On a laptop the note's lines come to about 300 points.
+- **Grab the edge through the card.** The note keeps its full width, and a drag that starts on
+  the page's edge, through the note, closes the note and turns the page. A still press there does
+  nothing, and the note's own buttons, links and scrollbar stay the note's even where they sit
+  over the edge. A hand cursor over that strip of the note says the edge is there. The catch: the
+  page edge cannot be seen under the note, so the reader has to know it is there.
+
+To choose, open settings on a two-page spread, try each with a note open, then record the choice
+here and make it the default; the others stay as settings.
+
 ### ㉗ With two pages open, where does a surah's introduction open? · **fixed**
 
 A verse's note lies over the facing page, so the verse stays in sight. A surah's introduction,
