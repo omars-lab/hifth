@@ -3160,12 +3160,25 @@
         "item": "⑲"
       },
       "status": "open",
-      "severity": "risk",
+      "severity": "defect",
       "owner": "user",
       "blockedBy": [
-        "the owner's yes on the four side-by-side pictures"
+        "the owner's yes on the side-by-side pictures",
+        "the owner's call on rewriting history"
       ],
-      "note": "The iPad and iPhone app pictures are compared with a record taken before three fixes (stamp-sized pages upright, the note as a bottom sheet, the phone page fitting its width), so all four fail, every difference an improvement. Nothing runs the comparison on its own. Waiting on a yes to save the new pictures, and on whether it should run before every push."
+      "note": "The iPad and iPhone app pictures are compared with a record taken before three fixes, so all four fail, every difference an improvement; and the two 2:255 pictures were taken of the pitch build with the note open, so they showed The Study Quran's translation and commentary in a public repository since 2026-09-29, where text checks cannot see it. Done: both out of the tree, and the comparison refuses the pitch build (scripts/native-golden-public.test.mjs). Waiting on the owner's yes to save the public-build pictures, on whether to rewrite history to remove the two old ones, and on whether the comparison runs before every push."
+    },
+    {
+      "id": "shell-public-copy-kept-private",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑳"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "scripts/native-golden-public.test.mjs",
+      "note": "Switching the app from the pitch build to the public one (2026-10-08) kept the pitch's private folder, because a folder the copy skips is one it never deletes; the check after the copy refused it, so nothing leaked, but the switch failed. The public copy now deletes skipped folders. Tests drive the copy alone (both failed first)."
     }
   ]
 }
