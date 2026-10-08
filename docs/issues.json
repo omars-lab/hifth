@@ -3070,6 +3070,30 @@
       "closedBy": "packages/core/src/highlighter.ts"
     },
     {
+      "id": "ipad-pinch-readout-stuck",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑬"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Walking the pitch in the iPad app (2026-10-08): after a pinch made page 45 several times larger the zoom readout still said 100%, and + then dropped the page to 125%; with the book open the other page stayed at its old size. Only the buttons told the readout anything. Fixed 2026-10-08: when the fingers lift the page reports its level, the readout and the facing page take it. Test: the simulator smoke test that pinches page 45.",
+      "closedBy": "apps/web/src/App.tsx"
+    },
+    {
+      "id": "ipad-spread-pinch-selects-range",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "⑭"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Walking the pitch in the iPad app held sideways (2026-10-08): a pinch across the fold selected a run of verses on both pages, opened the passage panel and magnified nothing, because each page heard only its own finger and read it as a sweep. Fixed 2026-10-08: a counter of every finger on the screen lets each page stand aside once a second finger is down anywhere, and the app grows the open book from the fold by how far the fingers spread. Tests: the counter's unit tests, a tap test across two pages, the iPad browser test and the simulator smoke test.",
+      "closedBy": "packages/core/src/fingers.ts"
+    },
+    {
       "id": "number-menu-keyboard-pulled-back",
       "source": {
         "file": "docs/design/knowledge-graph-commentary.md",

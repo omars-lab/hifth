@@ -96,6 +96,9 @@ import {
   type RootIndexShard,
   type SkinId,
   spreadOf,
+  spreadScale,
+  fingersOnGlass,
+  type Finger,
   openingAfter,
   type TajweedShard,
   type TajweedVocabulary,
@@ -556,8 +559,70 @@ export function App(): JSX.Element {
         facingStageRef.current?.setZoom(z);
         setZoom(applied);
       },
+      // A pinch has already moved the leaf under the fingers; the other leaf of
+      // an open book follows it to the same level, and the readout says what
+      // the live leaf landed at, as it does after a press.
+      pinched: (z: number, onFacing: boolean) => {
+        (onFacing ? stageRef : facingStageRef).current?.setZoom(z);
+        setZoom(stageRef.current?.zoomNow() ?? z);
+      },
     };
   }, []);
+  const pinchedLive = useCallback((z: number) => stage.pinched(z, false), [stage]);
+  const pinchedFacing = useCallback((z: number) => stage.pinched(z, true), [stage]);
+  /*
+   * A pinch across the fold of the open book. Each page is its own surface and
+   * hears only the finger on it, so neither page can see the pinch; this looks
+   * at the whole glass instead, and when the two fingers sit on different pages
+   * it grows the opening by how far they spread, from the fold, the same way the
+   * stepper does. A pinch with both fingers on one page is that page's own, and
+   * the page passes its level on when the fingers lift (`pinched`).
+   */
+  const bookOpen = desktop && pageMode === "two";
+  useEffect(() => {
+    if (!bookOpen) return;
+    const unwatch = fingersOnGlass.watch(window);
+    const pageUnder = (t: EventTarget | null) => (t instanceof Element ? t.closest("[data-tool][data-page]") : null);
+    let pinch: { ids: [number, number]; from: [Finger, Finger]; z: number } | null = null;
+    let frame = 0;
+    const onDown = () => {
+      const fingers = [...fingersOnGlass.down.entries()];
+      pinch = null;
+      if (fingers.length !== 2) return;
+      const [[ia, a], [ib, b]] = fingers as [[number, Finger], [number, Finger]];
+      const pa = pageUnder(a.target);
+      const pb = pageUnder(b.target);
+      if (!pa || !pb || pa === pb) return;
+      pinch = { ids: [ia, ib], from: [{ ...a }, { ...b }], z: stageRef.current?.zoomNow() ?? 1 };
+    };
+    const onMove = () => {
+      if (!pinch || frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        if (!pinch) return;
+        const a = fingersOnGlass.down.get(pinch.ids[0]);
+        const b = fingersOnGlass.down.get(pinch.ids[1]);
+        if (a && b) stage.setZoom(pinch.z * spreadScale(pinch.from, [a, b]));
+      });
+    };
+    const onUp = () => {
+      if (fingersOnGlass.down.size < 2) pinch = null;
+    };
+    // Capture, after the count's own listeners, so the count is current here.
+    const opts = { capture: true, passive: true } as const;
+    window.addEventListener("pointerdown", onDown, opts);
+    window.addEventListener("pointermove", onMove, opts);
+    window.addEventListener("pointerup", onUp, opts);
+    window.addEventListener("pointercancel", onUp, opts);
+    return () => {
+      window.removeEventListener("pointerdown", onDown, opts);
+      window.removeEventListener("pointermove", onMove, opts);
+      window.removeEventListener("pointerup", onUp, opts);
+      window.removeEventListener("pointercancel", onUp, opts);
+      cancelAnimationFrame(frame);
+      unwatch();
+    };
+  }, [bookOpen, stage]);
   /*
    * Open or close the book — and start the opening at fit.
    *
@@ -3303,6 +3368,7 @@ export function App(): JSX.Element {
                      is as often printed on this leaf as on the other one. */
                   onSelectWords={handleSelectWords}
                   onTurn={stepPage}
+                  onPinchZoom={pinchedFacing}
                   /* Both leaves, for the same reason `onTurn` is on both: a
                      wheel over the facing page that did nothing would read as a
                      dead half of the book. */
@@ -3371,6 +3437,7 @@ export function App(): JSX.Element {
                    much the book as this one, and a wheel over it that did
                    nothing would read as a dead half of the page. */
                 onTurn={stepPage}
+                onPinchZoom={pinchedLive}
                 onJuzTurn={stepJuz}
                 /* And the drag needs to know where it *would* land before it
                    lands, so the fold under the finger is drawn for the pair the

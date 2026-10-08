@@ -27,6 +27,7 @@ import {
   isWordShard,
   leafSideOf,
   lerpView,
+  fingersOnGlass,
   marqueeRect,
   nearestSignOnPage,
   nextIntent,
@@ -176,6 +177,13 @@ interface PageStageProps {
    * second caller is exactly the moment that difference starts to cost.
    */
   onTurn?: (step: 1 | -1) => void;
+  /**
+   * What a two-finger pinch left the paper at, once the fingers lift. The
+   * stepper's own presses come back through the handle's `setZoom`; a pinch
+   * starts here, on the glass, so without this the readout kept describing
+   * the level before it and the facing leaf stayed behind.
+   */
+  onPinchZoom?: (z: number) => void;
   /**
    * Which page a turn in this direction would land on, or `null` for none.
    *
@@ -1071,6 +1079,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     labelFor,
     onSelectionRect,
     onTurn,
+    onPinchZoom,
     turnTargetOf,
     dragToTurn = true,
     onJuzTurn,
@@ -1177,6 +1186,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onSelectionRectRef.current = onSelectionRect;
   const onTurnRef = useRef(onTurn);
   onTurnRef.current = onTurn;
+  const onPinchZoomRef = useRef(onPinchZoom);
+  onPinchZoomRef.current = onPinchZoom;
   const turnTargetOfRef = useRef(turnTargetOf);
   turnTargetOfRef.current = turnTargetOf;
   const dragToTurnRef = useRef(dragToTurn);
@@ -1795,7 +1806,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       press = { x: e.clientX, y: e.clientY };
     });
     svg.addEventListener("pointerup", (e) => {
-      const from = manyFingers ? null : press;
+      const from = manyFingers || fingersOnGlass.crowded ? null : press;
       press = null;
       const using = toolRef.current;
       if (
@@ -3485,7 +3496,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         last,
         tap,
       }) => {
-        if (pinching) {
+        // A pinch on this page is `pinching`. A pinch across the fold of the
+        // open book puts its other finger on the facing page, where this page
+        // never hears it, so this page asks the whole glass. Either way the
+        // stroke is not this page's to sweep, pan or turn; `onDragEnd` puts
+        // back anything it had already started.
+        if (pinching || fingersOnGlass.crowded) {
           cancel();
           return memo;
         }
@@ -3655,7 +3671,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         zoomAbout(clampZoom(base.z * ms, MIN_ZOOM, MAX_ZOOM), ox, oy, base);
         return base;
       },
-      onPinchEnd: emitSelectionRect,
+      onPinchEnd: () => {
+        emitSelectionRect();
+        onPinchZoomRef.current?.(view.current.z);
+      },
     },
     {
       target: stageRef,

@@ -531,6 +531,23 @@ describe("Highlighter · a drag release is not a tap (Loop 5)", () => {
     expect(cb).toHaveBeenCalledWith("quran/hafs-kfqc/2:42", "ayah", "tap");
   });
 
+  // The open book is two pages side by side, each its own surface. A pinch
+  // across the fold puts one finger on each, and the page holding the first
+  // finger saw only that finger, so its lift read as a tap (iPad app held
+  // sideways, 2026-10-08).
+  it("does not select when the pinch's other finger is on the facing page", () => {
+    const cb = vi.fn();
+    hl.onSelect(cb);
+    const facing = makeSvg();
+    new Highlighter(facing, resolver, 8);
+    const poly = svg.querySelector("#verse-2")!;
+    finger(poly, "pointerdown", 100, 100, 1, true);
+    finger(facing, "pointerdown", 300, 100, 2, false);
+    finger(facing, "pointerup", 300, 100, 2, false);
+    finger(poly, "pointerup", 100, 100, 1, true);
+    expect(cb).not.toHaveBeenCalled();
+  });
+
   it("leaves pressedKey standing, because it answers a different question", () => {
     const poly = svg.querySelector("#verse-2")!;
     press(poly, "pointerdown", 100, 100);

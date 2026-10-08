@@ -86,6 +86,47 @@ final class SmokeTests: XCTestCase {
         XCTAssertEqual(app.staticTexts["hifth.route"].label, "#/hafs-kfqc/p45")
     }
 
+    /// The zoom readout says what a pinch landed at. It once stayed at 100%
+    /// while the page sat many times larger, because only the − and + buttons
+    /// told it anything; a press of + then dropped the page to 125% (found
+    /// walking the pitch, 2026-10-08).
+    func testPinchMovesTheZoomReadout() {
+        let app = launch(route: "/hafs-kfqc/p45")
+        waitForRoute("#/hafs-kfqc/p45", in: app)
+        sleep(2)
+        let atFit = app.webViews.staticTexts["100%"]
+        XCTAssertTrue(atFit.exists, "the readout starts at 100%")
+        app.webViews.firstMatch.pinch(withScale: 2.5, velocity: 2)
+        sleep(2)
+        attach(app, named: "page-45-readout-after-pinch")
+        XCTAssertFalse(atFit.exists, "the readout still says 100% after a pinch")
+    }
+
+    /// Sideways, a pinch across the two pages magnifies them; it selects no
+    /// verses. Each page is its own surface, so one finger landed on each and
+    /// each page read its finger as a one-finger drag: a run of verses across
+    /// both pages was selected and the passage panel opened, and nothing
+    /// magnified (found walking the pitch, 2026-10-08).
+    func testPinchOnTheOpenBookSelectsNothing() {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let app = launch(route: "/hafs-kfqc/p45")
+        waitForRoute("#/hafs-kfqc/p45", in: app)
+        sleep(3)
+        let web = app.webViews.firstMatch
+        let atFit = web.staticTexts["100%"]
+        XCTAssertTrue(atFit.exists, "the readout starts at 100%")
+        web.pinch(withScale: 1.6, velocity: 1)
+        sleep(2)
+        let shot = web.screenshot().image
+        let upright = XCTAttachment(image: UIGraphicsImageRenderer(size: shot.size).image { _ in shot.draw(at: .zero) })
+        upright.name = "page-45-landscape-after-pinch"
+        upright.lifetime = .keepAlways
+        add(upright)
+        XCTAssertEqual(app.staticTexts["hifth.route"].label, "#/hafs-kfqc/p45", "the pinch selected verses")
+        XCTAssertFalse(atFit.exists, "the readout still says 100% after a pinch")
+    }
+
     /// Sideways, the two pages fill the height between the bars. They once
     /// drew as a sliver 28 points wide in the middle of an empty desk, in the
     /// app only: the iPad's own WebKit could not size a page from its height
