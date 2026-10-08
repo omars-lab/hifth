@@ -116,3 +116,6 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Hold the iPad app sideways: two pages fill the height between the bars, not a sliver in the
   middle of the desk. · iPad simulator, landscape · issue: `ipad-app-sideways-spread-tiny` · test:
   `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize`
+- [ ] The Mac app's own picture of a page is the page, not an empty file: two pages, full size.
+  · `make app-shot TARGET=mac ROUTE=/hafs-kfqc/p45` (fails on an empty picture) · issue:
+  `mac-app-shot-empty`
