@@ -766,6 +766,12 @@ export interface Strings {
   jumpArrowsStays: string;
   jumpArrowsAsked: string;
   jumpArrowsNote: string;
+  /** What a card over the facing page does at its outer edge (card-edge.ts). */
+  cardEdgeTitle: string;
+  cardEdgeCovers: string;
+  cardEdgeClear: string;
+  cardEdgeTurns: string;
+  cardEdgeNote: string;
   penMarkUp: string;
   penDone: string;
   penGrip: string;
@@ -1412,6 +1418,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     jumpArrowsStays: m.jumpArrowsStays,
     jumpArrowsAsked: m.jumpArrowsAsked,
     jumpArrowsNote: m.jumpArrowsNote,
+    cardEdgeTitle: m.cardEdgeTitle,
+    cardEdgeCovers: m.cardEdgeCovers,
+    cardEdgeClear: m.cardEdgeClear,
+    cardEdgeTurns: m.cardEdgeTurns,
+    cardEdgeNote: m.cardEdgeNote,
     penMarkUp: m.penMarkUp,
     penDone: m.penDone,
     penGrip: m.penGrip,

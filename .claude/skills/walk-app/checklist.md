@@ -28,7 +28,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Jump to a juz or surah: the page arrives centred, with no flash of the wrong page. · any ·
   test: hop spec
 - [ ] With two pages open and a note beside them, the page still turns by its edge. · desktop ·
-  **open** — issue: `note-covers-turn-edge`
+  **open** — issue: `note-covers-turn-edge`. Walk all three ways in settings ("Turning with a card
+  open"): the default turns by arrows and keys only; "stops short" leaves the edge bare; "grab
+  through" closes the note and turns. test: pitch spec, "grab through"
 
 ## The page bar
 

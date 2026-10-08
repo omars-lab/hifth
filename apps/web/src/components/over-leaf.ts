@@ -1,5 +1,6 @@
 import { useLayoutEffect, useState, type CSSProperties, type RefObject } from "react";
 import type { LeafSide } from "@hifth/core";
+import { useCardEdge, type CardEdge } from "../card-edge";
 
 /** The least width the note is read in, beside a spread — the stylesheet's card. */
 const LEAST_WIDTH = 460;
@@ -7,6 +8,11 @@ const LEAST_WIDTH = 460;
 const OFF_FOLD = 4;
 /** How far it stands in from the window's edges. */
 const MARGIN = 12;
+/**
+ * The outer strip a card leaves uncovered when the reader keeps the edge free:
+ * the grab strip's widest reach (3.5rem in EdgeGrabRails.module.css).
+ */
+export const EDGE_FREE = 56;
 
 /**
  * Where a card lies on a spread, in window px: over the whole facing page,
@@ -16,21 +22,32 @@ const MARGIN = 12;
  * at the card. A page narrower than the note can be read in is overhung past
  * its outer edge rather than squeezed; a book magnified past the window is
  * covered as far as the window goes.
+ *
+ * With the edge kept free (`clear`, see card-edge.ts) the card stops short of
+ * the outer edge by the grab strip's width instead, however narrow that leaves
+ * it, so the page can still be turned by hand with the card open.
  */
 export function overLeaf(
   book: { left: number; right: number; top: number; bottom: number },
   side: LeafSide,
   screen: { width: number; height: number },
+  edge: CardEdge = "covers",
 ): { left: number; width: number; top: number; height: number } {
   const fold = (book.left + book.right) / 2;
   const top = Math.max(book.top, MARGIN);
   const height = Math.min(book.bottom, screen.height - MARGIN) - top;
+  const free = edge === "clear";
   if (side === "right") {
     const left = fold + OFF_FOLD;
+    if (free) return { left, width: Math.min(book.right - EDGE_FREE, screen.width - MARGIN) - left, top, height };
     const width = Math.min(Math.max(LEAST_WIDTH, book.right - left), screen.width - MARGIN - left);
     return { left, width, top, height };
   }
   const right = fold - OFF_FOLD;
+  if (free) {
+    const left = Math.max(book.left + EDGE_FREE, MARGIN);
+    return { left, width: right - left, top, height };
+  }
   const width = Math.min(Math.max(LEAST_WIDTH, right - book.left), right - MARGIN);
   return { left: right - width, width, top, height };
 }
@@ -47,6 +64,7 @@ type Place = ReturnType<typeof overLeaf>;
  */
 export function useOverLeaf(open: boolean, side: LeafSide | null): Place | null {
   const [place, setPlace] = useState<Place | null>(null);
+  const edge = useCardEdge();
   useLayoutEffect(() => {
     const book = document.querySelector<HTMLElement>('[data-testid="page-book"]');
     if (!open || side === null || !book || book.dataset.solo) {
@@ -54,7 +72,7 @@ export function useOverLeaf(open: boolean, side: LeafSide | null): Place | null 
       return;
     }
     const measure = () =>
-      setPlace(overLeaf(book.getBoundingClientRect(), side, { width: innerWidth, height: innerHeight }));
+      setPlace(overLeaf(book.getBoundingClientRect(), side, { width: innerWidth, height: innerHeight }, edge));
     measure();
     const seen = new ResizeObserver(measure);
     seen.observe(book);
@@ -66,7 +84,7 @@ export function useOverLeaf(open: boolean, side: LeafSide | null): Place | null 
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
     };
-  }, [open, side]);
+  }, [open, side, edge]);
   return place;
 }
 

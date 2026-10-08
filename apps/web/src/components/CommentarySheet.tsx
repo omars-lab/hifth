@@ -427,6 +427,7 @@ export function CommentarySheet({
         data-side={side ?? undefined}
         data-tall={tall || undefined}
         style={leafStyle(place)}
+        data-over-leaf={place ? "" : undefined}
         tabIndex={-1}
         onKeyDown={onKeyDown}
         onScroll={(e) => {

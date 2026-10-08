@@ -178,6 +178,7 @@ export function RootLens({
         ref={sheetRef}
         className={styles.sheet}
         style={leafStyle(place, "content")}
+        data-over-leaf={place ? "" : undefined}
         role="dialog"
         aria-modal={!live}
         aria-label={t.rootsAria(families.length)}

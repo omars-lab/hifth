@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/preact";
 import { describe, expect, it, vi } from "vitest";
 import { Colophon } from "./Colophon";
 import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
+import { CARD_EDGE_KEY } from "../card-edge";
 
 /*
  * The colophon is the app's licence compliance, so these tests assert
@@ -95,6 +96,22 @@ describe("Colophon", () => {
     render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} onShowTips={onShowTips} />);
     fireEvent.click(screen.getByRole("button", { name: "عرض الإرشادات" }));
     expect(onShowTips).toHaveBeenCalledOnce();
+  });
+});
+
+describe("what a card does at the page's edge, in settings", () => {
+  it("offers the three ways, today's checked, and keeps the one picked", () => {
+    localStorage.removeItem(CARD_EDGE_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-card-edge="${c}"]`)!;
+    expect(way("covers")).toHaveAttribute("aria-checked", "true");
+    expect(way("clear")).toHaveAttribute("aria-checked", "false");
+    expect(way("turns")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("turns"));
+    expect(way("turns")).toHaveAttribute("aria-checked", "true");
+    expect(way("covers")).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem(CARD_EDGE_KEY)).toBe("turns");
+    localStorage.removeItem(CARD_EDGE_KEY);
   });
 });
 
