@@ -321,6 +321,10 @@ export {
   type PointerSample,
 } from "./gestures.js";
 
+// Every finger on the glass, for the open book: a pinch across the fold reaches
+// each page as one lone finger, and only the whole window can see it is a pinch.
+export { FingerCount, fingersOnGlass, spreadScale, type Finger } from "./fingers.js";
+
 // word-C — the fifth verdict on the same ladder. The hold that paints a marquee
 // means *words* when it began inside the ayah already selected, so this is not a
 // new gesture the reader has to learn; it is the one they already know, read

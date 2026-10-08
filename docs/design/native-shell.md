@@ -387,3 +387,31 @@ from the moment a second finger joins it, and nothing in a pinch is a tap or a h
 finger lifts last. The next one-finger tap counts again. Tests: three in the page's own
 tap-reading code, two in the iPad browser tests (a verse is not selected, a note is not pinned),
 and one in the app on the simulator that pinches page 45 and checks the reader is still there.
+
+### ⑬ On the iPad, the zoom readout stays at 100% after a pinch · **fixed**
+
+Seen walking the pitch in the iPad app on 2026-10-08: after a pinch had made page 45 several
+times larger, the readout between − and + still said 100%, and pressing + then dropped the page
+to 125%. Only the two buttons ever told the readout anything; a pinch moved the paper and said
+nothing. With the book open, the other page stayed behind at its old size too.
+
+**The fix:** when the fingers lift, the page says what level the pinch left it at. The readout
+takes that level, the other page of an open book moves to it, and the next + or − starts from
+there. Test: one in the app on the simulator that pinches page 45 and checks the readout no
+longer says 100%.
+
+### ⑭ On the iPad held sideways, a pinch selects a run of verses instead of magnifying · **fixed**
+
+Seen the same day, with the book open: pinching across the fold selected verses on both pages,
+opened the panel for that passage, and magnified nothing. Each page of the open book is its own
+surface and hears only the finger that lands on it. A pinch across the fold puts one finger on
+each page, so each page heard one finger resting and then moving, which is how a reader sweeps
+a run of verses.
+
+**The fix:** one small counter listens to the whole screen and knows how many fingers are down.
+Each page asks it before treating a finger as a tap, a sweep, a pan or a turn, and stands aside
+once a second finger is down anywhere. The app, which sees both pages, grows the open book by
+how far the two fingers spread, from the fold, as the + button does. Tests: the counter's own
+unit tests, one for a tap on one page while the other finger is on the facing page, one in the
+iPad browser tests that pinches across the fold and checks nothing is selected and the pages
+grew, and one in the app on the simulator that does the same.

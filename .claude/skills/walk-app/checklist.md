@@ -123,3 +123,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   and no verse is selected and no menu opens. Same with the note tool picked: no note is pinned.
   · iPad simulator · issue: `ipad-pinch-selects-verse` · test:
   `make app-test ONLY=SmokeTests/testPinchSelectsNothing`
+- [ ] After that pinch, the zoom readout says the new size, not 100%, and + goes up from there.
+  · iPad simulator · issue: `ipad-pinch-readout-stuck` · test:
+  `make app-test ONLY=SmokeTests/testPinchMovesTheZoomReadout`
+- [ ] Hold the iPad sideways and pinch across the fold, one finger on each page: both pages grow
+  together from the fold, and no verses are selected and no panel opens. · iPad simulator and
+  the `ipad` browser tests · issue: `ipad-spread-pinch-selects-range` · test:
+  `make app-test ONLY=SmokeTests/testPinchOnTheOpenBookSelectsNothing`

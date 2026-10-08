@@ -1068,6 +1068,8 @@ commentary design note's numbered items, and in the issues list.
 - The verse-number menu, opened from the keyboard while its lines were still arriving, could drop the keyboard or pull it back to the top; it now stays where the reader moved (design item ㉟). Found running the pitch tests in Safari's engine.
 - The Mac app's own picture of a page came out empty: started by our scripts it had no window at all. The scripts now start it the way a reader does, and the picture job fails on an empty picture (native-shell.md ⑪).
 - In the iPad app, a pinch that ended on a verse selected it and opened its menu: the second finger's lift counted as a hold. A second finger now makes the whole stroke a pinch, for selecting and for the note tool alike (native-shell.md ⑫).
+- In the iPad app, the zoom readout stayed at 100% after a pinch, and + then shrank the page; a pinch now tells the readout and the other page where it left off (native-shell.md ⑬).
+- In the iPad app held sideways, a pinch across the fold selected a run of verses on both pages and magnified nothing; it now grows the open book from the fold and selects nothing (native-shell.md ⑭).
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
