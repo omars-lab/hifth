@@ -38,6 +38,9 @@ interface ColophonProps {
   onPenHome?: ((home: PenHome) => void) | undefined;
   /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
   onShowTips?: () => void;
+  /** Whether this screen can show two pages side by side. What a card does at the
+      facing page's edge only means something then, so a phone is not asked. */
+  spread?: boolean;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -204,6 +207,7 @@ export function Colophon({
   penHome,
   onPenHome,
   onShowTips,
+  spread = false,
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
   const cardEdge = useCardEdge();
@@ -415,7 +419,9 @@ export function Colophon({
 
         {/* What a card over the facing page does at the page's outer edge
             (docs/design/knowledge-graph-commentary.md, item 26): still open, so
-            every way is built and today's is the default. */}
+            every way is built and today's is the default. Only where two pages
+            can face each other: on a phone there is no facing page to cover. */}
+        {spread && (
         <section className={styles.block} aria-labelledby="colophon-card-edge">
           <h3 className={styles.subhead} id="colophon-card-edge">
             {t.cardEdgeTitle}
@@ -437,6 +443,7 @@ export function Colophon({
           </div>
           <p className={styles.note}>{t.cardEdgeNote}</p>
         </section>
+        )}
 
         {/* How a note draws the parts it can be about (docs/design/scoped-notes.md,
             step 7): every look kept while they are tried, so a radio group too. */}
