@@ -57,6 +57,11 @@ export interface Catalog {
   readonly bmUndo: string;
   readonly bmUnfold: (d: { readonly count: number; readonly countText: string | number }) => string;
   readonly bmUnfolded: (d: { readonly count: number; readonly countText: string | number }) => string;
+  readonly cardEdgeClear: string;
+  readonly cardEdgeCovers: string;
+  readonly cardEdgeNote: string;
+  readonly cardEdgeTitle: string;
+  readonly cardEdgeTurns: string;
   readonly chipAria: (d: { readonly direction: string | number; readonly countText: string | number }) => string;
   readonly clearSelection: string;
   readonly clickForNote: (d: { readonly source: string | number }) => string;

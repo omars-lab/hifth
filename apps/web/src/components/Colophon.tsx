@@ -7,6 +7,7 @@ import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { ARROW_SHOWINGS } from "../jump-arrows";
+import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import styles from "./Colophon.module.css";
@@ -205,6 +206,7 @@ export function Colophon({
   onShowTips,
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
+  const cardEdge = useCardEdge();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -410,6 +412,31 @@ export function Colophon({
             <p className={styles.note}>{t.jumpArrowsNote}</p>
           </section>
         )}
+
+        {/* What a card over the facing page does at the page's outer edge
+            (docs/design/knowledge-graph-commentary.md, item 26): still open, so
+            every way is built and today's is the default. */}
+        <section className={styles.block} aria-labelledby="colophon-card-edge">
+          <h3 className={styles.subhead} id="colophon-card-edge">
+            {t.cardEdgeTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-card-edge">
+            {CARD_EDGES.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={cardEdge === choice}
+                data-card-edge={choice}
+                onClick={() => rememberCardEdge(choice)}
+              >
+                {choice === "covers" ? t.cardEdgeCovers : choice === "clear" ? t.cardEdgeClear : t.cardEdgeTurns}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.cardEdgeNote}</p>
+        </section>
 
         {/* How a note draws the parts it can be about (docs/design/scoped-notes.md,
             step 7): every look kept while they are tried, so a radio group too. */}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type MutableRefObject } from "react";
 import { cornerOf, landedCorner, peelShape, type PeelSide, type Pt } from "../peel";
 import type { TurnStyle } from "../turn-style";
+import { useCardEdge } from "../card-edge";
 import styles from "./EdgeGrabRails.module.css";
 
 /**
@@ -143,6 +144,8 @@ interface Grab {
   lastX: number;
   lastT: number;
   begun: boolean;
+  /** Pressed through a card lying over the edge: the card closes once it turns. */
+  through: boolean;
 }
 
 /**
@@ -165,6 +168,29 @@ function pressBeneath(rail: HTMLElement, x: number, y: number): void {
   rail.style.pointerEvents = was;
   const button = under?.closest('button, a[href], [role="button"]');
   button?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, clientX: x, clientY: y }));
+}
+
+/**
+ * The rail under a press on a card laid over the facing page, or null when the
+ * press is the card's own: on one of its buttons or links, or on its scrollbar.
+ * Read through the card, so the rail's pinched shape still decides what is edge.
+ */
+function railThrough(e: PointerEvent, rails: Element): HTMLElement | null {
+  const target = e.target instanceof Element ? e.target : null;
+  const card = target?.closest<HTMLElement>("[data-over-leaf]");
+  if (!target || !card) return null;
+  if (target.closest('button, a[href], input, select, textarea, summary, [role="button"], [role="radio"], [role="tab"]')) {
+    return null;
+  }
+  for (let el: HTMLElement | null = target as HTMLElement; el && card.contains(el); el = el.parentElement) {
+    const box = el.getBoundingClientRect();
+    if (el.scrollHeight > el.clientHeight && e.clientX > box.left + el.clientLeft + el.clientWidth) return null;
+    if (el.scrollHeight > el.clientHeight && e.clientX < box.left + el.clientLeft) return null;
+  }
+  const rail = document
+    .elementsFromPoint(e.clientX, e.clientY)
+    .find((el) => el.parentElement === rails && el.getAttribute("data-testid")?.startsWith("edge-grab-"));
+  return rail instanceof HTMLElement ? rail : null;
 }
 
 /**
@@ -204,6 +230,7 @@ export function EdgeGrabRails({
   turnStyle,
   opening,
   playRef,
+  onGrabThrough,
 }: {
   driver?: EdgeTurnDriver;
   /**
@@ -232,6 +259,12 @@ export function EdgeGrabRails({
    * show, less motion asked for — and the caller turns the old way.
    */
   playRef?: MutableRefObject<((step: 1 | -1) => boolean) | null>;
+  /**
+   * Close the cards lying over the facing page. Called when the reader has
+   * asked to grab the edge through a card (card-edge.ts, `turns`) and a drag
+   * that began on the card over the edge becomes a turn.
+   */
+  onGrabThrough?: () => void;
 }): JSX.Element | null {
   // Which side, if any, is being held right now — only to swap the cursor to a
   // closed hand. The drag's numbers live in the ref beside it.
@@ -284,6 +317,64 @@ export function EdgeGrabRails({
   }, [lifted?.landed]);
   useEffect(() => () => cancelAnimationFrame(anim.current), []);
   const railsEl = useRef<HTMLDivElement | null>(null);
+  const edge = useCardEdge();
+
+  /** Take hold of an edge: the drag is this rail's from here to the release. */
+  const takeHold = (
+    rail: HTMLElement,
+    e: { pointerId: number; clientX: number; clientY: number; timeStamp: number },
+    through: boolean,
+  ): void => {
+    const side = rail.dataset.side === "left" ? "left" : "right";
+    rail.setPointerCapture(e.pointerId);
+    grab.current = {
+      // The left edge pulls forward into the book, the right edge back.
+      step: side === "left" ? 1 : -1,
+      startX: e.clientX,
+      startY: e.clientY,
+      lastX: e.clientX,
+      lastT: e.timeStamp,
+      begun: false,
+      through,
+    };
+    setHeld(side);
+  };
+
+  // Grab the edge through a card lying over it, when the reader asked for that:
+  // the press is caught before the card sees it and handed to the rail beneath,
+  // and a hand shows over that strip of the card so the edge reads as one.
+  const through = edge === "turns" && !!driver && !aside;
+  useEffect(() => {
+    const rails = railsEl.current?.parentElement;
+    if (!through || !rails) return;
+    let hinted: HTMLElement | null = null;
+    const hint = (card: HTMLElement | null): void => {
+      if (hinted === card) return;
+      if (hinted) hinted.style.cursor = "";
+      hinted = card;
+      if (card) card.style.cursor = "grab";
+    };
+    const down = (e: PointerEvent): void => {
+      if (e.button !== 0 || grab.current) return;
+      const rail = railThrough(e, rails);
+      if (!rail) return;
+      e.preventDefault();
+      e.stopPropagation();
+      hint(null);
+      takeHold(rail, e, true);
+    };
+    const move = (e: PointerEvent): void => {
+      if (e.buttons !== 0 || grab.current) return;
+      hint(railThrough(e, rails) && e.target instanceof Element ? e.target.closest<HTMLElement>("[data-over-leaf]") : null);
+    };
+    document.addEventListener("pointerdown", down, true);
+    document.addEventListener("pointermove", move, true);
+    return () => {
+      hint(null);
+      document.removeEventListener("pointerdown", down, true);
+      document.removeEventListener("pointermove", move, true);
+    };
+  }, [through]);
 
   const reduced = (): boolean =>
     typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -355,7 +446,7 @@ export function EdgeGrabRails({
     anim.current = requestAnimationFrame(frame);
   };
 
-  const rail = (side: "left" | "right", step: 1 | -1): JSX.Element => (
+  const rail = (side: "left" | "right"): JSX.Element => (
     <div
       key={side}
       className={styles.rail}
@@ -368,16 +459,7 @@ export function EdgeGrabRails({
         // Left button only, and take the pointer so the whole drag arrives here
         // even when it leaves the strip — a page turn crosses the book.
         if (e.button !== 0) return;
-        e.currentTarget.setPointerCapture(e.pointerId);
-        grab.current = {
-          step,
-          startX: e.clientX,
-          startY: e.clientY,
-          lastX: e.clientX,
-          lastT: e.timeStamp,
-          begun: false,
-        };
-        setHeld(side);
+        takeHold(e.currentTarget, e, false);
       }}
       onPointerMove={(e) => {
         const g = grab.current;
@@ -387,6 +469,8 @@ export function EdgeGrabRails({
         // not a turn, and beginning one would flash a fold on and take it back.
         if (!g.begun && Math.abs(dx) < GRAB_SLOP_PX) return;
         if (!g.begun) {
+          // A turn that began on a card over the edge puts the card away first.
+          if (g.through) onGrabThrough?.();
           driver.begin(g.step);
           g.begun = true;
           // Lift the corner nearest the press, if this edge has pages to show.
@@ -429,6 +513,8 @@ export function EdgeGrabRails({
         if (!g) return;
         e.currentTarget.releasePointerCapture(e.pointerId);
         if (!g.begun) {
+          // A still press on a card over the edge was the card's to ignore.
+          if (g.through) return;
           // A click on the edge, not a turn: hand it to a mark beneath it.
           pressBeneath(e.currentTarget, e.clientX, e.clientY);
           return;
@@ -473,8 +559,8 @@ export function EdgeGrabRails({
   return (
     <>
       <div ref={railsEl} hidden />
-      {rail("left", 1)}
-      {rail("right", -1)}
+      {rail("left")}
+      {rail("right")}
       {lifted && shape && (
         <PeelOverlay held={lifted} pages={lifted.pages} shape={shape} turnStyle={turnStyle ?? "seam"} />
       )}
