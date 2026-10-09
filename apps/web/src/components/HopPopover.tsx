@@ -88,10 +88,14 @@ export function HopPopover({
   // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
   useLayoutEffect(() => {
     if (!open) return;
-    restoreRef.current = (document.activeElement as HTMLElement | null) ?? null;
+    const opener = document.activeElement as HTMLElement | null;
+    restoreRef.current = opener;
     // Focus the first actionable control (or the sheet itself as a fallback).
+    // Opened by a link, nothing was pressed: focus the sheet itself, so a screen
+    // reader still lands in it but no ring appears round a button nobody reached for.
     const sheet = sheetRef.current;
-    if (sheet) (focusables(sheet)[0] ?? sheet).focus();
+    const byLink = !opener || opener === document.body;
+    if (sheet) (byLink ? sheet : focusables(sheet)[0] ?? sheet).focus();
     return () => {
       restoreRef.current?.focus?.();
       setExpanded(null);

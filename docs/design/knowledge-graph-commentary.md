@@ -558,7 +558,10 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
 book's title) show upright in the panel, except in the notes the demo opens: neither the capture
 nor the page readings record the slant. For the demo's verses (2:255, 18:10–13 and 18:60, with the note
 18:60–82 share, and since 2026-10-09 2:48 and the note 15:30–31 share) the slant was read off the page pictures by
-hand, about a hundred and thirty runs, and the panel draws them in italics. Everywhere else stays upright.
+hand, about a hundred and thirty runs, and the panel draws them in italics. Since 2026-10-09 the same
+was done for half the notes a reader reaches in one tap from a demo note (a verse link in it, or a
+look-alike): 42 of the 84 were read, 38 had slanted words, 205 runs. The other 42 are next.
+Everywhere else stays upright.
 One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted
 without reading the slant at all. About 4,000 notes have such a run, but checked against the

@@ -274,4 +274,26 @@ describe("HopPopover", () => {
     expect(screen.getByRole("listitem").querySelector("[data-shared-words]")).toHaveAttribute("aria-hidden", "true");
     localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
   });
+
+  // Opened from a link nothing was pressed, so no ring should appear round the
+  // close button; a reader who pressed a chip still lands on the first control.
+  it("opened by a link, focuses the list itself, not its first button", () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    render(
+      <HopPopover chip={chip([edge(2, 3)])} fromKey="quran/hafs-kfqc/2:2" canHop={() => true} onHop={noop} onClose={noop} />,
+    );
+    expect(document.activeElement).toBe(screen.getByRole("dialog"));
+  });
+
+  it("opened by a press, focuses its first button", () => {
+    const opener = document.createElement("button");
+    document.body.append(opener);
+    opener.focus();
+    render(
+      <HopPopover chip={chip([edge(2, 3)])} fromKey="quran/hafs-kfqc/2:2" canHop={() => true} onHop={noop} onClose={noop} />,
+    );
+    expect(document.activeElement?.tagName).toBe("BUTTON");
+    expect(document.activeElement).not.toBe(opener);
+    opener.remove();
+  });
 });

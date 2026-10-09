@@ -149,6 +149,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `lookalike-passage-row-names-match`
 - [ ] A link that asks for a verse's look-alikes (`?open=lookalikes`, try 2:48) opens the list, not
   the note, even on a slow load. · desktop, the iPad app · issue: `pitch-link-lookalikes-opens-note`
+- [ ] Opened from a link, the look-alike list (and the passage menu) shows no focus ring round its
+  close button, since nothing was pressed; opened by a press on a chip, the first control takes it.
+  · phone on its side, desktop · test: `HopPopover.test.tsx` ("opened by a link")
 - [ ] The tajweed key, opened with the colours off (the ⓘ, or `?open=key`), counts the rules on the
   page (page 45 has madd on 5 ayahs), and never says "none" while still loading. · every flavour ·
   issue: `tajweed-key-none-when-off`

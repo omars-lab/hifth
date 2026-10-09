@@ -11,6 +11,12 @@
   animation: fade var(--dur-fast) ease;
 }
 
+/* Focus rests on the list itself when a link opened it; the list is the
+   dialog, not a control, so it wears no ring (as the passage menu). */
+.sheet:focus {
+  outline: none;
+}
+
 .sheet {
   position: fixed;
   inset-inline: 0;
