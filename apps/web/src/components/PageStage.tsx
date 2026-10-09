@@ -21,6 +21,7 @@ import {
   formatWordKey,
   frameBboxToView,
   hopZoomFor,
+  nearFitRoom,
   nearFitZoom,
   isMarkShard,
   isMistake,
@@ -70,6 +71,7 @@ import {
 } from "@hifth/core";
 import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT, type Strings } from "../i18n";
+import { giveNoteRoom, noteRoom, useLongVerse } from "../long-verse";
 import { useOpeningText, type OpeningText } from "../opening-text";
 import type { TurnStyle } from "../turn-style";
 import styles from "./PageStage.module.css";
@@ -1329,6 +1331,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Read by `applyTransform`, which runs from gestures and tweens, not renders.
   const boundRef = useRef(bound);
   boundRef.current = bound;
+  // How a verse a little too tall for the room above the note is shown whole.
+  const longVerse = useLongVerse();
+  const longVerseRef = useRef(longVerse);
+  longVerseRef.current = longVerse;
   // And the same reason again, for the one mark that is owed to a page the
   // reader is not on. See the breadcrumb effect below for what went wrong.
   const breadcrumbRef = useRef(breadcrumbKey);
@@ -2138,7 +2144,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    */
   const aboveCover = useCallback(
     (bbox: Rect, ctx: FrameContext, fit: StageFit, start: View, lead: Rect | undefined): View => {
-      const shown = fit.stageHeight - (fit.coverBottom ?? 0);
+      let shown = fit.stageHeight - (fit.coverBottom ?? 0);
       // The band the hop chips float in, from the stage's top: a verse moved
       // up to the top of the screen stops beneath it, or its first line is
       // shown with the chips sitting on it (native-shell ⑩).
@@ -2146,13 +2152,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const head =
         railBottomRef.current === null ? 0 : Math.max(0, railBottomRef.current - layerTop + RAIL_CLEARANCE);
       const at = bboxToScreen(bbox, start, ctx);
+      // The reader's other way (item 43): the note opens a little shorter and
+      // the page keeps its zoom. Worked out from the note's full height, the
+      // room it already gave added back, so the run its own shrinking sets
+      // off gives the same answer.
+      const shorter = longVerseRef.current === "shorter" && !boundRef.current;
+      if (shorter) {
+        const full = (fit.coverBottom ?? 0) + noteRoom();
+        const roomy = fit.stageHeight - full;
+        const give = nearFitRoom(at.height, roomy - head - LIFT_SLACK, full) ?? 0;
+        giveNoteRoom(give);
+        shown = roomy + give;
+      } else giveNoteRoom(0);
       if (!(at.y < head || at.y + at.height > shown)) return start;
       let target = frameBboxToView(bbox, ctx, start.z, lead);
       // A verse only a little taller than that is drawn a little smaller
       // and shown whole, rather than lose its last line under the note. Not
       // with the book open: its two pages keep one zoom between them.
       const tall = bboxToScreen(bbox, target, ctx).height;
-      const smaller = boundRef.current ? null : nearFitZoom(tall, shown - head - LIFT_SLACK, target.z);
+      const smaller = boundRef.current || shorter ? null : nearFitZoom(tall, shown - head - LIFT_SLACK, target.z);
       if (smaller !== null) target = frameBboxToView(bbox, ctx, smaller, lead);
       // A verse taller than what shows beneath the chips starts at its
       // first line, just under them; one that fits is kept out from under
@@ -2201,7 +2219,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (bbox) {
         const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg), text: textBoxOf(cur.host, cur.svg) };
         target = aboveCover(bbox, ctx, fit, target, firstLineOf(cur.svg, ids ?? []));
-      }
+      } else giveNoteRoom(0);
       const before = view.current.z;
       void tweenTo(target).then(() => {
         // The readout says the level the page is drawn at, as after a pinch.
@@ -2220,6 +2238,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useEffect(() => {
     if (coverSeen.current === coverTop) return;
     coverSeen.current = coverTop;
+    // A note that has gone gives back the room it gave up for the next one.
+    if (coverTop === null) giveNoteRoom(0);
     lift();
     return () => cancelAnimationFrame(liftRaf.current);
   }, [coverTop, lift]);

@@ -10,6 +10,7 @@ import { ARROW_SHOWINGS } from "../jump-arrows";
 import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PITCH } from "../pitch/pitch";
+import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
@@ -216,6 +217,7 @@ export function Colophon({
   const cardEdge = useCardEdge();
   const openingText = useOpeningText();
   const relatedList = useRelatedList();
+  const longVerse = useLongVerse();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -498,6 +500,34 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.relatedListNote}</p>
+          </section>
+        )}
+
+        {/* How a verse a little taller than the room above its note is shown
+            whole (knowledge-graph-commentary.md, items 42 and 43): the page a
+            little smaller is the default, the note a little shorter kept as a
+            choice. Only the private build has notes. */}
+        {PITCH && (
+          <section className={styles.block} aria-labelledby="colophon-long-verse">
+            <h3 className={styles.subhead} id="colophon-long-verse">
+              {t.longVerseTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-long-verse">
+              {LONG_VERSES.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={longVerse === choice}
+                  data-long-verse={choice}
+                  onClick={() => rememberLongVerse(choice)}
+                >
+                  {choice === "smaller" ? t.longVerseSmaller : t.longVerseShorter}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.longVerseNote}</p>
           </section>
         )}
 

@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { LONG_VERSE_KEY } from "../src/long-verse";
 
 /*
  * The pitch build's held commentary — the one screen no public test can touch.
@@ -1392,6 +1393,47 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     const readout = Number((await page.getByRole("group", { name: "Zoom" }).innerText()).match(/(\d+)%/)![1]);
     expect(readout, "the readout says the smaller level").toBeLessThan(155);
     expect(readout).toBeGreaterThanOrEqual(124);
+  });
+
+  test("set to open the note shorter, the same verse shows whole with the page kept at its zoom", async ({ page }) => {
+    // The other way of making room, kept as a setting: the note opens a
+    // little shorter and the page keeps the level the link asked for. Reached
+    // in one move: the page's zoom never changes once it has arrived.
+    await page.goto("/#/hafs-kfqc/p1");
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    const shorter = page.locator('[data-long-verse="shorter"]');
+    await shorter.click();
+    await expect(shorter).toHaveAttribute("aria-checked", "true");
+    expect(await page.evaluate((key) => localStorage.getItem(key), LONG_VERSE_KEY)).toBe("shorter");
+    await page.keyboard.press("Escape");
+    await page.evaluate(() => {
+      const w = window as unknown as { __zooms: number[] };
+      w.__zooms = [];
+      const look = () => {
+        const z = document.querySelector<HTMLElement>('[data-host-page="42"]')?.style.transform.match(/scale\(([^)]*)\)/)?.[1];
+        if (z) w.__zooms.push(Number(z));
+        requestAnimationFrame(look);
+      };
+      requestAnimationFrame(look);
+    });
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const lines = page.locator("#hifth-overlay .hl-sel");
+    await settle(lines.first());
+    await settle(lines.last());
+    await page.waitForTimeout(600);
+    const box = (await sheet(page).boundingBox())!;
+    const boxes = await litLineBoxes(page);
+    expect(boxes.length).toBeGreaterThan(4);
+    for (const b of boxes) expect(b.y + b.height, "a line of the verse is under the note").toBeLessThanOrEqual(box.y);
+    expect(boxes[0]!.y, "the verse's first line is on the screen").toBeGreaterThanOrEqual(0);
+    const readout = Number((await page.getByRole("group", { name: "Zoom" }).innerText()).match(/(\d+)%/)![1]);
+    expect(readout, "the page keeps the level the link asked for").toBeGreaterThanOrEqual(150);
+    expect(box.height, "the note opened shorter than usual").toBeLessThan(1366 * 0.38 - 4);
+    expect(box.height, "but by no more than a fifth").toBeGreaterThanOrEqual(1366 * 0.38 * 0.8 - 1);
+    const zooms = await page.evaluate(() => (window as unknown as { __zooms: number[] }).__zooms);
+    expect(Math.max(...zooms), "the page never went past where it ends").toBeLessThanOrEqual(zooms.at(-1)! + 0.01);
   });
 
   test("a link to a verse whose note rises with it zooms in once, not in and then back out", async ({ page }) => {

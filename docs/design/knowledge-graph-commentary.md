@@ -1192,7 +1192,7 @@ where it ends; it failed first, at 155% against 141%. A second link followed whi
 still moving lost track of its own move, so it zoomed in and back out again; it now keeps it, and a
 test holds the note back until the second move has begun, so the note always rises during it.
 
-### ㊸ On an iPad held upright, should a reader be able to keep the page's zoom and have the note open shorter instead? · **open**
+### ㊸ On an iPad held upright, should a reader be able to keep the page's zoom and have the note open shorter instead? · **fixed**
 
 Left from ㊷ (2026-10-09). To show 2:255 whole above its note on an upright iPad, the page is now
 drawn a little smaller, about 140% instead of 155%. The other way, opening the note a little shorter
@@ -1206,3 +1206,20 @@ note gives up a line or two of its height instead.
 **What would answer it:** build it as a setting beside today's way, for the upright iPad only (on a
 phone a note shrunk to make room would show a line or two), and walk both on 2:255 to see which
 reads better. Today's way stays the default until then.
+
+**Built (2026-10-09), as a setting in the info panel:** "A verse a little too tall for the room
+above a note", with *Page a little smaller* (today's way, the default) and *Note a little shorter*.
+Set to the second, 2:255 opens at the level its link asked for (155%) and the note opens a few dozen
+pixels shorter, so the whole verse shows above it. The note gives up room only within the same
+limit the smaller page keeps to: no more than a fifth of the verse's height, and no more than a fifth
+of the note's own, so a phone's short note never shrinks to a line or two. A verse too tall for that
+starts at its first line, as before. Not with the book open, whose two pages keep one zoom.
+
+Walked both on an upright iPad: each shows the whole verse with its number, one at the page's
+smaller size and the note at full height, the other at the link's size with the note a little lower.
+Which reads better is the owner's to say; the default is unchanged until they do.
+
+Tests: a core rule test (how much room the note gives, and when it gives none), the setting's own
+test (the default, the choice kept, an unknown value), and a browser test on an upright iPad that
+picks the way in the info panel, opens 2:255, and checks the whole verse is above the note with the
+page never zooming out. All three failed first.

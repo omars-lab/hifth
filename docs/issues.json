@@ -2944,10 +2944,11 @@
         "file": "docs/design/knowledge-graph-commentary.md",
         "item": "㊸"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "The second way of showing a long verse whole above its note on an upright iPad: open the note shorter and keep the page's zoom, instead of drawing the page smaller (㊷, today's way). Owed as a setting by the build-it-more-than-one-way habit; upright iPad only, today's way stays the default."
+      "note": "The second way of showing a long verse whole above its note on an upright iPad: open the note shorter and keep the page's zoom, instead of drawing the page smaller (㊷, today's way). Built 2026-10-09 as an info-panel setting (long-verse.ts); the page works out the room (core nearFitRoom, within a fifth of the verse and of the note) and the note opens that much shorter. Today's way stays the default. Tests: view.test.ts nearFitRoom, long-verse.test.ts, and pitch.spec.ts 'set to open the note shorter, the same verse shows whole with the page kept at its zoom' failed first.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
       "id": "note-covers-turn-edge",
