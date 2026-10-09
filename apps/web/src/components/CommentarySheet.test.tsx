@@ -241,3 +241,31 @@ describe("words the book sets in italics", () => {
     expect(em.closest("[class*=together]")).toBeNull();
   });
 });
+
+// Walking the Arabic iPad app, 2026-10-09 (look-alike rows ③): a look-alike
+// pair's own note read in English in the Arabic app, its arrow an emoji.
+describe("a look-alike's own note in the related verses", () => {
+  const ours: Edge = { ...road, type: "mutashabih", to: "quran/hafs-kfqc/2:9", note: "Alpha ↔ beta", noteAr: "ألف ↔ باء" };
+  const books: Edge = { ...road, note: "see the other verse" };
+
+  it("reads in Arabic in the Arabic app, with the arrow as text", () => {
+    localStorage.setItem(LANG_STORAGE_KEY, "ar");
+    drawer(note("en"), { roads: [ours] });
+    const span = screen.getByText("ألف ↔︎ باء");
+    expect(span.getAttribute("lang")).toBe("ar");
+    expect(span.getAttribute("dir")).toBe("rtl");
+    expect(screen.queryByText(/Alpha/)).toBeNull();
+  });
+
+  it("reads in English in the English app, with the arrow as text", () => {
+    localStorage.setItem(LANG_STORAGE_KEY, "en");
+    drawer(note("en"), { roads: [ours] });
+    expect(screen.getByText("Alpha ↔︎ beta").getAttribute("lang")).toBe("en");
+  });
+
+  it("leaves a note from the book in the book's language", () => {
+    localStorage.setItem(LANG_STORAGE_KEY, "ar");
+    drawer(note("en"), { roads: [books] });
+    expect(screen.getByText("see the other verse").getAttribute("lang")).toBe("en");
+  });
+});
