@@ -5,10 +5,10 @@
  * first, or a cut-short copy can be rejoined to a stray piece of the previous
  * verse's note and neither is recognised any more. Last, put back the closing
  * stop the print has on the note's last sentence (ends.mjs), once that sentence
- * is whole.
+ * is whole, and finish first a note the capture cut short (also ends.mjs).
  */
 import { restoreBreaks } from "./breaks.mjs";
-import { restoreLastStop } from "./ends.mjs";
+import { restoreCutTail, restoreLastStop } from "./ends.mjs";
 import { joinSplits } from "./splits.mjs";
 import { dropStrayBlocks } from "./strays.mjs";
 
@@ -17,15 +17,17 @@ import { dropStrayBlocks } from "./strays.mjs";
  * before this step. Returns the finished paragraphs, the ones to hand on as
  * `previous`, and which hand-read entries matched.
  */
-export function finishNote(verse, blocks, previous, { marks, joins, words, ends = [] }) {
+export function finishNote(verse, blocks, previous, { marks, joins, words, ends = [], tails = [] }) {
   const restored = restoreBreaks(verse, blocks, marks);
   const split = joinSplits(verse, dropStrayBlocks(restored.blocks, previous), words, joins);
-  const closed = restoreLastStop(split.blocks, ends);
+  const whole = restoreCutTail(split.blocks, tails);
+  const closed = restoreLastStop(whole.blocks, ends);
   return {
     blocks: closed.blocks,
     handOn: restored.blocks,
     usedMarks: restored.used,
     usedJoins: split.used,
     usedEnds: closed.used,
+    usedTails: whole.used,
   };
 }

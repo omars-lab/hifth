@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { endPrint, restoreLastStop } from "./ends.mjs";
+import { endPrint, restoreCutTail, restoreLastStop } from "./ends.mjs";
 
 // Made-up notes: the shape of the capture, none of its words.
 const NOTE = "The caravan rested by the well, see 4:12c";
@@ -32,8 +32,41 @@ describe("restoreLastStop", () => {
     expect(restoreLastStop(["The caravan rested."], ends).used.size).toBe(0);
   });
 
+  it("puts back the stop the page prints after a closing bracket", () => {
+    const shut = "The caravan rested by the well (see 4:12c)";
+    const ends = [{ verse: "9:9", print: endPrint(shut) }, { verse: "9:10", print: endPrint("rested [at noon]") }];
+    expect(restoreLastStop([shut], ends).blocks).toEqual([`${shut}.`]);
+    expect(restoreLastStop(["rested [at noon]"], ends).blocks).toEqual(["rested [at noon]."]);
+  });
+
+  it("leaves a bracket whose sentence already stopped inside it", () => {
+    const inside = "(The caravan rested.)";
+    expect(restoreLastStop([inside], [{ verse: "9:9", print: endPrint(inside) }]).used.size).toBe(0);
+  });
+
   it("does not read a page's trailing space as part of the last words", () => {
     const ends = [{ verse: "9:9", print: endPrint(NOTE) }];
     expect(restoreLastStop([`${NOTE} `], ends).blocks).toEqual([`${NOTE}.`]);
+  });
+});
+
+describe("restoreCutTail", () => {
+  const CUT = "The caravan rested by the well and";
+  it("finishes a note the capture cut short with the rest read off the page", () => {
+    const tails = [{ print: endPrint(CUT), tail: " gave thanks at noon.", page: "page_0001" }];
+    expect(restoreCutTail(["First paragraph.", CUT], tails)).toEqual({
+      blocks: ["First paragraph.", `${CUT} gave thanks at noon.`],
+      used: new Set([0]),
+    });
+  });
+
+  it("adds the tail exactly as read, so one that carries on a word or a reference takes no space", () => {
+    const tails = [{ print: endPrint("see 4:12–1"), tail: "4; 5:3)." }];
+    expect(restoreCutTail(["see 4:12–1"], tails).blocks).toEqual(["see 4:12–14; 5:3)."]);
+  });
+
+  it("leaves a note that is not listed", () => {
+    const tails = [{ print: endPrint(CUT), tail: "gave thanks." }];
+    expect(restoreCutTail(["Another note"], tails)).toEqual({ blocks: ["Another note"], used: new Set() });
   });
 });

@@ -1,0 +1,12 @@
+{
+  "about": "Notes the capture set aside with no verse because a stray scrap landed before the note's label, where the printed page shows the note under its verses (see orphans.mjs). print: a fingerprint of the whole set-aside block, never its words. from, to: the verses the note's label names. page: the page image it was read on.",
+  "orphans": [
+    {
+      "surah": 89,
+      "print": "f063a9a760c5",
+      "from": 1,
+      "to": 2,
+      "page": "page_0922"
+    }
+  ]
+}
