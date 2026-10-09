@@ -8,6 +8,7 @@ import {
   frameBboxToView,
   hopZoomFor,
   lerpView,
+  nearFitRoom,
   nearFitZoom,
   viewFitsAcross,
   type FrameContext,
@@ -113,6 +114,25 @@ describe("nearFitZoom: a verse a little taller than the room is shown whole", ()
   it("never draws the page smaller than the whole page", () => {
     expect(nearFitZoom(600, 570, 1)).toBeNull();
     expect(nearFitZoom(600, 570, 1.02)).toBe(1);
+  });
+});
+
+describe("nearFitRoom: the other way, the note opens a little shorter", () => {
+  it("asks the note for just the room the verse is missing", () => {
+    expect(nearFitRoom(600, 570, 500)).toBe(30);
+  });
+
+  it("asks nothing for a verse that fits", () => {
+    expect(nearFitRoom(500, 570, 500)).toBeNull();
+  });
+
+  it("never takes more than a fifth of the note", () => {
+    expect(nearFitRoom(600, 570, 100)).toBeNull();
+    expect(nearFitRoom(600, 570, 150)).toBe(30);
+  });
+
+  it("leaves a long passage to be read from its first line, as the smaller page does", () => {
+    expect(nearFitRoom(1000, 570, 5000)).toBeNull();
   });
 });
 

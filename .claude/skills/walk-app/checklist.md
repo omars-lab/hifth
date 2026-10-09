@@ -186,6 +186,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   level, reached in one move (not zoomed in and then back out). · `make drive DEVICE=ipad
   HASH='#/hafs-kfqc/2:255'` · issue: `long-verse-under-ipad-note` ·
   test: `e2e/pitch.spec.ts`
+- [ ] The same on an upright iPad with the info panel set to "Note a little shorter": the page stays
+  at the level the link asked for, the note opens a little shorter, and the whole verse still shows
+  above it. Set it back after. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/p1' ACT='clickrole=button|About
+  Hifth; click=[data-long-verse="shorter"]; press=Escape; eval=location.hash="#/hafs-kfqc/2:255"'` ·
+  issue: `upright-ipad-shorter-note-way` · test: `e2e/pitch.spec.ts`
 - [ ] Open the tips from settings in the pitch build: the foot line does not repeat the first
   tip, and comes back once the tips are skipped or done. · `make drive DEVICE=phone
   HASH='#/hafs-kfqc/p1?open=tips'` · issue: `tips-repeat-foot-line` · test: `e2e/pitch.spec.ts`

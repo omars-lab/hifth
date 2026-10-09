@@ -232,6 +232,20 @@ export function nearFitZoom(height: number, room: number, z: number): number | n
 }
 
 /**
+ * The other way of showing the same verse whole: the px a note `cover` px tall
+ * gives up so a verse `height` px tall fits in `room`, or null to leave the
+ * note as it is. Kept as a reader's setting beside `nearFitZoom`. Within the
+ * same fifth of the verse that rule allows, and never more than a fifth of the
+ * note, so a phone's short note still shows its first lines.
+ */
+export function nearFitRoom(height: number, room: number, cover: number): number | null {
+  if (!(height > room) || !(room > 0)) return null;
+  const need = Math.ceil(height - room);
+  if (room < height * NEAR_FIT || need > cover - cover * NEAR_FIT) return null;
+  return need;
+}
+
+/**
  * Where a bbox (SVG user units) lands in stage-local px under a given view —
  * used to position the HopRail next to the selected ayah (mock `toScreen()`).
  */

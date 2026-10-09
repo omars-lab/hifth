@@ -193,6 +193,10 @@ export interface Catalog {
   readonly legendTitle: string;
   readonly licenceBody: string;
   readonly licenceHead: string;
+  readonly longVerseNote: string;
+  readonly longVerseShorter: string;
+  readonly longVerseSmaller: string;
+  readonly longVerseTitle: string;
   readonly mapAbsent: string;
   readonly mapActiveIn: (d: { readonly monthText: string | number }) => string;
   readonly mapCaveat: string;

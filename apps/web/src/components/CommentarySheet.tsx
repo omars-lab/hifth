@@ -10,6 +10,7 @@ import {
 } from "@hifth/core";
 import { useT } from "../i18n";
 import type { Commentator } from "../pitch/pitch";
+import { useNoteRoom } from "../long-verse";
 import { useRelatedList } from "../related-list";
 import { splitSigla, type Siglum } from "../tafsir/sigla";
 import { isIntroOnly, textDir, type CommentaryNote } from "../tafsir/commentary";
@@ -282,6 +283,9 @@ export function CommentarySheet({
   useEffect(() => onTall?.(grown), [grown, onTall]);
   useEffect(() => () => onTall?.(false), [onTall]);
 
+  // The room a short note gives up so the verse above it shows whole, when the
+  // reader set the note to open a little shorter (the long-verse setting).
+  const room = useNoteRoom();
   useLayoutEffect(() => {
     if (!onCover) return;
     const sheet = sheetRef.current;
@@ -291,8 +295,8 @@ export function CommentarySheet({
     }
     // The short height is worked out, not read off the box: the box may still be
     // easing down from the previous verse's grown note.
-    return watchCover(sheet, () => Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE), onCover);
-  }, [open, beside, verseKey, onCover]);
+    return watchCover(sheet, () => Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE - room), onCover);
+  }, [open, beside, verseKey, onCover, room]);
   useEffect(() => () => onCover?.(null), [onCover]);
 
   // Beside a spread, lie over the facing page.
@@ -439,7 +443,11 @@ export function CommentarySheet({
         aria-label={introOnly ? label : t.commentaryOn(label)}
         data-side={side ?? undefined}
         data-tall={tall || undefined}
-        style={leafStyle(place)}
+        style={
+          room > 0 && !side && !tall && !place
+            ? { maxBlockSize: `calc(${SHORT_SHARE * 100}vh - ${room}px)` }
+            : leafStyle(place)
+        }
         data-over-leaf={place ? "" : undefined}
         tabIndex={-1}
         onKeyDown={onKeyDown}

@@ -779,6 +779,10 @@ export interface Strings {
   openingTextEven: string;
   openingTextNote: string;
   /** How many related verses a note lists before asking (related-list.ts). */
+  longVerseTitle: string;
+  longVerseSmaller: string;
+  longVerseShorter: string;
+  longVerseNote: string;
   relatedListTitle: string;
   relatedListLine: string;
   relatedListAll: string;
@@ -1439,6 +1443,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     openingTextLarge: m.openingTextLarge,
     openingTextEven: m.openingTextEven,
     openingTextNote: m.openingTextNote,
+    longVerseTitle: m.longVerseTitle,
+    longVerseSmaller: m.longVerseSmaller,
+    longVerseShorter: m.longVerseShorter,
+    longVerseNote: m.longVerseNote,
     relatedListTitle: m.relatedListTitle,
     relatedListLine: m.relatedListLine,
     relatedListAll: m.relatedListAll,

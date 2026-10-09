@@ -1088,8 +1088,43 @@ commentary design note's numbered items, and in the issues list.
 - A wider search for sentences run together in the pitch's notes: 135 spots, 103 run on in the book too, and the 5 that had lost a stop and a new paragraph were put back, along with stray long-vowel marks set down as letters (knowledge-graph-commentary.md ①).
 - Two phone tests that failed now and then under the full run (the look-alike buttons clear of the page's labels; the colour key saying there is more) were made to measure once the page has settled; each failed often when run 60 times in parallel and passes 60 of 60 now.
 
-The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
-spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
+## #48–#50, #114–#140 — Archived 2026-10-09: walking every flavour of the pitch, and the demo verses
+
+**Done:** 2026-10-06 to 2026-10-09, through PRs up to #343. The one-line summaries above (and the
+design items they name) carry the substance; this is the task-number index back to them.
+
+- #48 — Walk the phone pitch end to end
+- #49 — Walk the verse-number menu on desktop and phone
+- #50 — Walk the desktop spread: turning pages with a note open
+- #114 — Walk the pitch inside the Mac app
+- #116 — Opening two pages drawn squat: give them the normal page shape (㊱)
+- #117 — Walk a first visit in Arabic (desktop and phone)
+- #118 — Opening pages: keep the smaller-text way as a setting (㊱)
+- #119 — Re-walk the iPad and Mac apps with the day's fixes
+- #120 — Walk an English first visit with the welcome hints on
+- #121 — Upright iPad: the look-alikes list covered the verse it is about, 2:48 (㊲)
+- #122 — Phone: the tips strip pushed the page's foot out of sight
+- #123 — Tips: the foot hint repeated tip 1 (㊳)
+- #124 — Check every pitch note against its captured source, count differences by kind, fix them (①)
+- #125 — Read the last 29 bracket endings off the page pictures (①)
+- #127 — Italics: measure whether quoted verse words can be set slanted from our own verse text (set aside)
+- #128 — Wider search for sentences run together, checked on the pages (①)
+- #129 — Fix two flaky Android tests: the hop's first line and the tajweed skin to the end
+- #130 — Steady the iPhone look-alike list test that measured a mark with no box
+- #131 — Italics by hand for the demo's verses (2:255, 18:10–13, 18:60)
+- #132 — Walk the demo pages (2:255 and surah 18) as the team would see them, and fix what shows
+- #133 — Related verses: add the bare verse numbers a note cites after a first one (㊵)
+- #134 — Run the pitch tests before every push when the private notes are present
+- #135 — 2:255: say how many more verses the note cites under the eight cards, and open them (㊶)
+- #136 — Related verses: a setting to show all of them at once (the line stays the default)
+- #137 — Walk every flavour against the grown checklist
+- #138 — Upright iPad: the note covered the last line of 2:255 (㊷)
+- #139 — 2:255 on an upright iPad: zoomed in then out; now one move (㊷)
+- #140 — Two links in quick succession: the second also zooms in once (㊷)
+- #141 — Upright iPad: the shorter-note way, built as a setting beside the smaller page (㊸)
+
+Still open in the task list: #51 (fix the faults found, worst first: the walk goes on) and #115
+(the history rewrite's last steps, the owner's).
 - One more phone test that failed once under the full run (a look-alike list opened low on the screen stands clear of its arrow) now waits until the mark it measures has a position on the screen.
 - The italics in the demo's notes (2:255, 18:10–13, 18:60 and the note 18:60–82 share) were read off the page pictures by hand and the panel now draws them; every other note stays upright (docs/issues/italics-from-quoted-verse-words.md).
 - The walk checklist now looks for the demo notes' slanted words, in the browser and in the iPad app; the iPad app was walked at 2:255 and 18:70 and shows them.
