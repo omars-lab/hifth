@@ -462,6 +462,9 @@ test.describe("Hifth · the saved arrows on the page", () => {
     // Bring the mark down into the lower part of the screen, where the list
     // has to open upwards.
     await page.evaluate(() => scrollTo(0, 0));
+    // Under a full run the page can still be redrawing its marks just after
+    // the scroll, when the mark has no box for a moment: measure once it has.
+    await expect.poll(() => mark(page, "2:58").boundingBox()).not.toBeNull();
     const at = (await mark(page, "2:58").boundingBox())!;
     const height = page.viewportSize()!.height;
     test.skip(at.y + at.height + 8 < height * 0.55, "the mark sits high on this screen, so the list opens below it");
