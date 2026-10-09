@@ -1367,6 +1367,34 @@ test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
   });
 });
 
+test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
+  test.use({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+
+  test("a verse a little taller than the room above the note is shown whole, the page drawn a little smaller", async ({ page }) => {
+    // A link to a verse lands zoomed in, and the note rises over the lower part
+    // of the screen. 2:255 runs six lines: at that zoom it was a few dozen
+    // pixels taller than the room left above the note, so its last line, with
+    // the verse's number, sat under the note. The page now zooms out just
+    // enough for the verse to fit, and the zoom readout says the level it is
+    // drawn at, not the one the link asked for.
+    await page.goto("/#/hafs-kfqc/p1");
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const lines = page.locator("#hifth-overlay .hl-sel");
+    await settle(lines.first());
+    await settle(lines.last());
+    const top = (await sheet(page).boundingBox())!.y;
+    const boxes = await litLineBoxes(page);
+    expect(boxes.length).toBeGreaterThan(4);
+    for (const b of boxes) expect(b.y + b.height, "a line of the verse is under the note").toBeLessThanOrEqual(top);
+    expect(boxes[0]!.y, "the verse's first line is on the screen").toBeGreaterThanOrEqual(0);
+    const readout = Number((await page.getByRole("group", { name: "Zoom" }).innerText()).match(/(\d+)%/)![1]);
+    expect(readout, "the readout says the smaller level").toBeLessThan(155);
+    expect(readout).toBeGreaterThanOrEqual(124);
+  });
+});
+
 test.describe("Hifth · links straight into the commentary", () => {
   // Owner, 2026-09-29: another app should be able to open the note of a verse,
   // or a surah's context, from a link — the same link the native shell's

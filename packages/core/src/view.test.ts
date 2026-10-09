@@ -8,6 +8,7 @@ import {
   frameBboxToView,
   hopZoomFor,
   lerpView,
+  nearFitZoom,
   viewFitsAcross,
   type FrameContext,
   type View,
@@ -89,6 +90,29 @@ describe("hopZoomFor: a verse a link opens on is shown whole across", () => {
     const narrow = { ...CTX, stageWidth: 300 };
     expect(hopZoomFor({ x: 0, y: 0, width: 345, height: 40 }, narrow, DEFAULT_HOP_ZOOM)).toBe(1);
     expect(hopZoomFor({ x: 145, y: 265, width: 55, height: 20 }, CTX, 1)).toBe(1);
+  });
+});
+
+describe("nearFitZoom: a verse a little taller than the room is shown whole", () => {
+  // Ayat al-Kursi on an upright iPad: at the hop zoom its six lines were a few
+  // dozen pixels taller than the room above the note (2026-10-09).
+  it("zooms out just enough for a verse that nearly fits", () => {
+    const z = nearFitZoom(600, 570, DEFAULT_HOP_ZOOM);
+    expect(z).not.toBeNull();
+    expect((600 / DEFAULT_HOP_ZOOM) * z!).toBeCloseTo(570, 6);
+  });
+
+  it("leaves the zoom alone for a verse that fits", () => {
+    expect(nearFitZoom(500, 570, DEFAULT_HOP_ZOOM)).toBeNull();
+  });
+
+  it("leaves a long passage at its zoom, to be read from its first line, rather than shrink the page by more than a fifth", () => {
+    expect(nearFitZoom(1000, 570, DEFAULT_HOP_ZOOM)).toBeNull();
+  });
+
+  it("never draws the page smaller than the whole page", () => {
+    expect(nearFitZoom(600, 570, 1)).toBeNull();
+    expect(nearFitZoom(600, 570, 1.02)).toBe(1);
   });
 });
 

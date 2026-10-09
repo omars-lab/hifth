@@ -1154,3 +1154,29 @@ pressed anything, so the keyboard is left where it was. The choice is kept on th
 only in the private build, the one with notes. A panel test with the setting on, and a browser test
 that switches it in the info panel and finds 2:255's whole list and no line, then again after a
 reload, failed first.
+
+### ㊷ On an iPad held upright, does a long verse lose its last line under its note? · **fixed**
+
+Found walking the demo on an upright iPad on 2026-10-09: a link to 2:255 lands zoomed in, and the
+note rises over the lower part of the screen. The verse runs six lines, and at that zoom it was 37
+points taller than the room left above the note, so its last line, with the verse's own number,
+sat under the note. The rule was that a verse taller than the room starts at its first line and the
+reader slides the page for the rest; for a verse that misses by a few lines that is right, but one
+that misses by half a line looked like a mistake, on the verse the demo shows most.
+
+**What it changes for a hafiz:** the verse they opened arrives whole, its number included, without
+touching the page.
+
+**The fix:** when the note arrives and the verse is only a little taller than the room above it, the
+page is drawn just smaller enough to show it whole: here from 155% to about 145%. It never shrinks
+the page by more than a fifth, and never below the whole page; a longer passage still starts at its
+first line, as before. Not with the book open, where the two pages keep one zoom between them. The
+zoom readout follows, so it says the level the page is drawn at. Rule tests on made-up sizes, and a
+browser test on an upright iPad that opens 2:255 and checks every line is above the note and the
+readout is under 155%, failed first.
+
+**The other way, not built:** open the note a little shorter instead, so the page keeps its zoom. Not
+built because the note's opening height is one rule shared with the phone, where a note shrunk to
+make room would show only a line or two, and because the page already comes down from its zoom for
+a verse too wide to show whole across; a verse too tall by a little now gets the same treatment. If a
+reader minds the page changing size under them, that is the way to try.
