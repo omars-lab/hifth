@@ -347,6 +347,7 @@ const messages: Catalog = {
   rangeUnavailable: "المقطع المطلوب غير متوفّر بعد",
   refJoin: "، ",
   relatedLede: (d) => "حيث يربط " + d.source + " هذه الآية بغيرها. اضغط على آية للانتقال إليها.",
+  relatedMore: (d) => plural(LC, d.n, { zero: "لا آيات أخرى", one: "اعرض آية أخرى ذات صلة", two: "اعرض آيتين أخريين ذواتي صلة", few: "اعرض " + d.nText + " آيات أخرى ذات صلة", many: "اعرض " + d.nText + " آية أخرى ذات صلة", other: "اعرض " + d.nText + " آية أخرى ذات صلة" }),
   relatedVerses: "آيات ذات صلة",
   rootsAria: (d) => "الجذور، " + d.countText,
   rootsCredit: "الجذور من",

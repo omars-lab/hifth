@@ -1132,3 +1132,17 @@ the ones the book's list left out are added after it. They only fill places the 
 none of the book's own references is ever pushed out; one that comes straight after a card's last verse
 runs that card on. 1,619 more related verses now show. Tests on made-up notes, and a browser test at
 18:65 that checks every verse the note links has a card while the list has room, failed first.
+
+### ㊶ When a note points to more verses than its eight cards, can the reader reach the rest? · **fixed**
+
+Seen walking the demo's most-shown verse, 2:255: its note points to 25 places, and the related verses
+showed the first eight and stopped, with nothing to say the others existed. A scholar who knows the
+note would read the list as incomplete. Across the book 1,587 verses had references cut off this way;
+the most, 39, at one verse of Al-An'am.
+
+**The fix:** the list still shows eight, so the pages a card might turn to are not all made ready at
+once, and the references past the eighth are kept beside them. Under the eighth card one quiet line
+says how many more there are ("Show 17 more related verses"); pressing it lists them after the
+eighth, puts the keyboard on the first new card, and the line goes. A card that only shows after the
+press still turns to its verse. Tests on made-up references, a panel test in both languages, and a
+browser test at 2:255 that counts the line's number, opens it and turns to the last card, failed first.

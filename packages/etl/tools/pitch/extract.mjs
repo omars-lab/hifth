@@ -78,11 +78,12 @@ const TAILS = HAND.tails ?? [];
 // The words the print sets in italics, read off the pages for the demo verses.
 const ITALICS = HAND.italics ?? [];
 
-// How many road edges a single verse may carry when they come from the source's
-// own cross-references. A few dozen refs on one ayah would bury the hop list; a
+// How many road edges a single verse shows when they come from the source's own
+// cross-references. A few dozen refs on one ayah would bury the hop list; a
 // handful keeps the drawer legible and still shows the graph is real. Verses
 // whose target also has commentary are kept first, so a hop lands somewhere with
-// something to read.
+// something to read. The rest go in `more`, which the note offers under a line
+// saying how many there are.
 const MAX_REF_EDGES = 8;
 
 // Public Qur'an metadata (verse counts per surah) — not held copy. Used to turn
@@ -276,7 +277,7 @@ function refShard(surah, entries, verses) {
     const cited = citedIn(notes, surah).filter(([s, a]) => !(s === surah && a === sourceAyah));
     const all = addCited(roads, cited);
 
-    const edges = all.slice(0, MAX_REF_EDGES).map(({ to, through }) => {
+    const toEdge = ({ to, through }) => {
       const e = edge(
         surah,
         sourceAyah,
@@ -286,8 +287,10 @@ function refShard(surah, entries, verses) {
         "xref",
       );
       return through ? { ...e, through: canon(through[0], through[1]) } : e;
-    });
-    if (edges.length) shard[String(sourceAyah)] = { edges, ext: [] };
+    };
+    const edges = all.slice(0, MAX_REF_EDGES).map(toEdge);
+    const more = all.slice(MAX_REF_EDGES).map(toEdge);
+    if (edges.length) shard[String(sourceAyah)] = more.length ? { edges, ext: [], more } : { edges, ext: [] };
   }
   return shard;
 }

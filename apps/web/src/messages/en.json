@@ -167,6 +167,7 @@
   "surahIntro": "Surah introduction",
   "relatedVerses": "Related verses",
   "relatedLede": "Where {source} connects this verse. Tap one to go there.",
+  "relatedMore": "{n, plural, one{Show {nText} more related verse} other{Show {nText} more related verses}}",
   "goToVerse": "Go to {label}",
   "keyFrom": "From the book's key to its commentators",
   "keyAlso": "Also known as {name}",

@@ -347,6 +347,7 @@ const messages: Catalog = {
   rangeUnavailable: "That passage is not available yet",
   refJoin: ", ",
   relatedLede: (d) => "Where " + d.source + " connects this verse. Tap one to go there.",
+  relatedMore: (d) => plural(LC, d.n, { one: "Show " + d.nText + " more related verse", other: "Show " + d.nText + " more related verses" }),
   relatedVerses: "Related verses",
   rootsAria: (d) => "Roots · " + d.countText,
   rootsCredit: "Roots from",

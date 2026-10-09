@@ -126,6 +126,11 @@ export interface AyahAdjacency {
   readonly edges: readonly Edge[];
   /** Reserved-type edges, shipped from day one, rendered by nobody yet. */
   readonly ext: readonly Edge[];
+  /**
+   * A source's further cross-references past the few `edges` holds, shown only
+   * when asked for, so the pages a hop might need are not all kept ready.
+   */
+  readonly more?: readonly Edge[];
 }
 
 /** One surah shard: ayah-number (as string) → its adjacency. */

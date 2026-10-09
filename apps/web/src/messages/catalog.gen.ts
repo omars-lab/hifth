@@ -341,6 +341,7 @@ export interface Catalog {
   readonly rangeUnavailable: string;
   readonly refJoin: string;
   readonly relatedLede: (d: { readonly source: string | number }) => string;
+  readonly relatedMore: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly relatedVerses: string;
   readonly rootsAria: (d: { readonly countText: string | number }) => string;
   readonly rootsCredit: string;

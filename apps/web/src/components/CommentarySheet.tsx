@@ -138,6 +138,7 @@ export function CommentarySheet({
   onClose,
   side = null,
   roads = [],
+  moreRoads = [],
   canHop,
   onHop,
   onGo,
@@ -158,6 +159,12 @@ export function CommentarySheet({
    * rail behind it. Empty when the verse leads nowhere the app can reach.
    */
   roads?: readonly Edge[];
+  /**
+   * More of the source's cross-references from this verse than the list shows
+   * at first (2:255 has dozens). A line under the list says how many, and
+   * pressing it adds them below.
+   */
+  moreRoads?: readonly Edge[];
   /** Whether a target's page is vendored (unreachable targets are shown, disabled). */
   canHop?: (toKey: string) => boolean;
   /** Jump to a related verse — the same hop the rail uses, so it leaves a trail. */
@@ -205,6 +212,16 @@ export function CommentarySheet({
   // tapped, which one of them was tapped (`sig`), and its button (`at`).
   const [keyOpen, setKeyOpen] = useState<{ at: string; sig: string; sigs: readonly string[] } | null>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
+  // The verse whose further related verses were asked for; another verse's
+  // note starts short again.
+  const [moreFor, setMoreFor] = useState<string | null>(null);
+  const showMore = entry !== null && moreFor === entry.ayahKey;
+  const firstMoreRef = useRef<HTMLButtonElement>(null);
+  // The line that was pressed is gone, so the reader is put on the first card
+  // it added rather than lost to the top of the page.
+  useEffect(() => {
+    if (showMore) firstMoreRef.current?.focus({ preventScroll: true });
+  }, [showMore]);
 
   const open = entry !== null;
   // On a spread the note stands on the facing leaf, beside the verse, not over
@@ -498,7 +515,7 @@ export function CommentarySheet({
               <h3 className={styles.relatedTitle}>{t.relatedVerses}</h3>
               <p className={styles.relatedLede}>{t.relatedLede(entry.source.label)}</p>
               <ul className={styles.roads}>
-                {orderForHifz(roads).map((edge) => {
+                {[...orderForHifz(roads), ...(showMore ? orderForHifz(moreRoads) : [])].map((edge, i) => {
                   const enabled = canHop ? canHop(edge.to) : true;
                   const label =
                     (edge.through ? t.rangeLabel(edge.to, edge.through) : t.ayahLabel(edge.to)) ?? edge.to;
@@ -506,6 +523,7 @@ export function CommentarySheet({
                     <li key={`${edge.type}:${edge.to}`} className={styles.road}>
                       <button
                         type="button"
+                        ref={i === roads.length ? firstMoreRef : undefined}
                         className={styles.roadHop}
                         disabled={!enabled || !onHop}
                         onClick={() => onHop?.(edge)}
@@ -531,6 +549,11 @@ export function CommentarySheet({
                   );
                 })}
               </ul>
+              {moreRoads.length > 0 && !showMore && entry && (
+                <button type="button" className={styles.roadsMore} onClick={() => setMoreFor(entry.ayahKey)}>
+                  {t.relatedMore(moreRoads.length)}
+                </button>
+              )}
             </section>
           )}
         </div>
