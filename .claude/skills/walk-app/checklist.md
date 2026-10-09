@@ -183,7 +183,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `lookalikes-card-covers-verse` · test: `e2e/open-link.spec.ts`
 - [ ] Open a long verse's note on an upright iPad in the pitch build: a verse a little taller than
   the room shows whole above the note, its number included, and the zoom readout says the smaller
-  level. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:255'` · issue: `long-verse-under-ipad-note` ·
+  level, reached in one move (not zoomed in and then back out). · `make drive DEVICE=ipad
+  HASH='#/hafs-kfqc/2:255'` · issue: `long-verse-under-ipad-note` ·
   test: `e2e/pitch.spec.ts`
 - [ ] Open the tips from settings in the pitch build: the foot line does not repeat the first
   tip, and comes back once the tips are skipped or done. · `make drive DEVICE=phone

@@ -62,6 +62,8 @@ import {
   type Resolver,
   type SkinId,
   type StageFit,
+  type FrameContext,
+  type Rect,
   type TajweedLookup,
   type View,
   type WheelTurnState,
@@ -1688,6 +1690,20 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     [applyTransform, cancelTween, hopDurationMs, measureFit],
   );
 
+  /**
+   * Send a glide under way somewhere else, from where it has got to. Whatever
+   * was waiting for the glide to end waits for the new one instead: cut short,
+   * it would go on as though the page had arrived.
+   */
+  const retarget = useCallback(
+    (target: View) => {
+      const done = tweenDoneRef.current;
+      tweenDoneRef.current = null;
+      void tweenTo(target).then(() => done?.());
+    },
+    [tweenTo],
+  );
+
   /** Switch the visible page: toggle host visibility, re-point the transform. */
   const setCurrentPage = useCallback(
     (next: number) => {
@@ -2112,14 +2128,66 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * verse to begin with.
    */
   const liftRaf = useRef(0);
+  /** A hop's glide while it is under way: where it is going, and the verse it frames. */
+  const hopRef = useRef<{ target: View; bbox: Rect; lead: Rect | undefined } | null>(null);
+  /*
+   * Where `start` has to move so the verse in `bbox` shows in the part of the
+   * stage the note leaves, beneath the hop chips; `start` itself when it
+   * already does. Shared by the lift and the hop, so a link followed with the
+   * note already up lands where the lift would have put it, in one move.
+   */
+  const aboveCover = useCallback(
+    (bbox: Rect, ctx: FrameContext, fit: StageFit, start: View, lead: Rect | undefined): View => {
+      const shown = fit.stageHeight - (fit.coverBottom ?? 0);
+      // The band the hop chips float in, from the stage's top: a verse moved
+      // up to the top of the screen stops beneath it, or its first line is
+      // shown with the chips sitting on it (native-shell ⑩).
+      const layerTop = layerRef.current?.getBoundingClientRect().top ?? 0;
+      const head =
+        railBottomRef.current === null ? 0 : Math.max(0, railBottomRef.current - layerTop + RAIL_CLEARANCE);
+      const at = bboxToScreen(bbox, start, ctx);
+      if (!(at.y < head || at.y + at.height > shown)) return start;
+      let target = frameBboxToView(bbox, ctx, start.z, lead);
+      // A verse only a little taller than that is drawn a little smaller
+      // and shown whole, rather than lose its last line under the note. Not
+      // with the book open: its two pages keep one zoom between them.
+      const tall = bboxToScreen(bbox, target, ctx).height;
+      const smaller = boundRef.current ? null : nearFitZoom(tall, shown - head - LIFT_SLACK, target.z);
+      if (smaller !== null) target = frameBboxToView(bbox, ctx, smaller, lead);
+      // A verse taller than what shows beneath the chips starts at its
+      // first line, just under them; one that fits is kept out from under
+      // them too.
+      const framed = bboxToScreen(bbox, target, ctx);
+      if (framed.height > shown - head || framed.y < head) {
+        target = clampView({ ...target, y: target.y - framed.y + head }, fit);
+      }
+      return target;
+    },
+    [],
+  );
   const lift = useCallback(() => {
     cancelAnimationFrame(liftRaf.current);
     const bring = () => {
-      if (tweenRef.current !== null) {
+      const hop = tweenRef.current === null ? null : hopRef.current;
+      if (tweenRef.current !== null && !hop) {
         liftRaf.current = requestAnimationFrame(bring);
         return;
       }
       const fit = measureFit();
+      if (hop && fit) {
+        // A note that rises while a link's glide is under way: send the glide
+        // where the lift would have moved the verse, rather than let it land
+        // zoomed in and then zoom back out — one move, not two. The hop still
+        // waits for the glide, so it lights the verse once the page is there.
+        const cur = pagesRef.current.get(currentPageRef.current);
+        if (!cur) return;
+        const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg), text: textBoxOf(cur.host, cur.svg) };
+        const target = aboveCover(hop.bbox, ctx, fit, clampView(hop.target, fit), hop.lead);
+        if (target.x === hop.target.x && target.y === hop.target.y && target.z === hop.target.z) return;
+        hop.target = target;
+        retarget(target);
+        return;
+      }
       const cur = pagesRef.current.get(currentPageRef.current);
       if (!fit || !cur) return;
       let target = clampView(view.current, fit);
@@ -2132,31 +2200,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const bbox = name ? nameBoxOf(name) : ids?.length ? cur.hl.bboxOf(ids) : null;
       if (bbox) {
         const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg), text: textBoxOf(cur.host, cur.svg) };
-        const shown = fit.stageHeight - (fit.coverBottom ?? 0);
-        // The band the hop chips float in, from the stage's top: a verse moved
-        // up to the top of the screen stops beneath it, or its first line is
-        // shown with the chips sitting on it (native-shell ⑩).
-        const layerTop = layerRef.current?.getBoundingClientRect().top ?? 0;
-        const head =
-          railBottomRef.current === null ? 0 : Math.max(0, railBottomRef.current - layerTop + RAIL_CLEARANCE);
-        const at = bboxToScreen(bbox, target, ctx);
-        if (at.y < head || at.y + at.height > shown) {
-          const lead = firstLineOf(cur.svg, ids ?? []);
-          target = frameBboxToView(bbox, ctx, view.current.z, lead);
-          // A verse only a little taller than that is drawn a little smaller
-          // and shown whole, rather than lose its last line under the note. Not
-          // with the book open: its two pages keep one zoom between them.
-          const tall = bboxToScreen(bbox, target, ctx).height;
-          const smaller = boundRef.current ? null : nearFitZoom(tall, shown - head - LIFT_SLACK, target.z);
-          if (smaller !== null) target = frameBboxToView(bbox, ctx, smaller, lead);
-          // A verse taller than what shows beneath the chips starts at its
-          // first line, just under them; one that fits is kept out from under
-          // them too.
-          const framed = bboxToScreen(bbox, target, ctx);
-          if (framed.height > shown - head || framed.y < head) {
-            target = clampView({ ...target, y: target.y - framed.y + head }, fit);
-          }
-        }
+        target = aboveCover(bbox, ctx, fit, target, firstLineOf(cur.svg, ids ?? []));
       }
       const before = view.current.z;
       void tweenTo(target).then(() => {
@@ -2165,7 +2209,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       });
     };
     bring();
-  }, [measureFit, tweenTo]);
+  }, [aboveCover, measureFit, retarget, tweenTo]);
   liftRef.current = lift;
   // A verse's note turning into the introduction leaves the note's top where it
   // was, so the name is brought up when the introduction opens, too.
@@ -2799,13 +2843,20 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         const fit = measureFit();
         if (bbox && fit) {
           const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(mp.svg), text: textBoxOf(mp.host, mp.svg) };
-          const target = frameBboxToView(
+          const lead = firstLineOf(mp.svg, loc.elementIds);
+          let target = frameBboxToView(
             bbox,
             ctx,
             hopZoomFor(bbox, ctx, clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM)),
-            firstLineOf(mp.svg, loc.elementIds),
+            lead,
           );
+          // With a note already up, land where the lift would move the verse
+          // to, rather than zoom in and then have the lift zoom back out.
+          if (fit.coverBottom) target = aboveCover(bbox, ctx, fit, target, lead);
+          // A note that rises once the glide has begun bends it (the lift, below).
+          hopRef.current = { target, bbox, lead };
           await tweenTo(target);
+          hopRef.current = null;
           if (ticket !== relocateRef.current) return;
         }
         if (opts?.pulse !== false) {

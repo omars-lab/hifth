@@ -1180,3 +1180,12 @@ built because the note's opening height is one rule shared with the phone, where
 make room would show only a line or two, and because the page already comes down from its zoom for
 a verse too wide to show whole across; a verse too tall by a little now gets the same treatment. If a
 reader minds the page changing size under them, that is the way to try.
+
+**Then it moved twice, now once.** Watching the fix move (2026-10-09), a link to 2:255 zoomed the
+page in to 155% and, half a second after it stopped, back out to about 140%: the second move undid
+part of the first and read as a wobble. The page now goes to the smaller level in one move. When
+the note is already up as the link is followed, the link aims there to begin with; when the note
+rises a moment after the page has started moving, the move is turned toward the same place on the
+way, and the verse is lit once the page arrives. A browser test on an upright iPad follows a link
+to 2:255 with the note rising, records the page's zoom on every frame, and checks it never went past
+where it ends; it failed first, at 155% against 141%.
