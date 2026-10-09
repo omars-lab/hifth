@@ -21,7 +21,7 @@ by hand: `make app-generate` rewrites it.
 | turn a running app to a route | `make app-open ROUTE=/hafs-kfqc/2:255 TARGET=ipad` (or `TARGET=mac`) |
 | screenshot the page | `make app-shot ROUTE='/hafs-kfqc/p45?field=dark' TARGET=ipad` → `native/shots/` |
 | what the page can see inside the shell | `make app-probe` (Mac) · `make app-probe TARGET=ipad ROUTE=… EVAL='js'` |
-| a picture of each of many routes, upright or sideways | `make app-walk ROUTES='/hafs-kfqc/2:48?open=lookalikes /hafs-kfqc/p45' SIDEWAYS=1` → `native/shots/walk/` |
+| a picture of each of many routes, upright or sideways | `make app-walk ROUTES='/hafs-kfqc/2:48?open=lookalikes /hafs-kfqc/p45' SIDEWAYS=1` → `native/shots/walk/side/` (upright runs go to `walk/upright/`) |
 | walk the app held sideways, by eye | see "Walking the app in the simulator" below |
 | tests, fast | `make app-unit-test` (route, bundle paths, bridge; Mac, seconds) |
 | tests, full | `make app-test` (unit tests + the iPad simulator smoke) |
@@ -159,8 +159,13 @@ flowchart LR
    For many routes at once, `make app-walk ROUTES='/hafs-kfqc/2:255?open=commentary /hafs-kfqc/p45'`
    (add `SIDEWAYS=1` to turn it) runs `WalkTests` in the simulator: it opens each route, waits
    for the page, and keeps the web view's own picture, upright, as
-   `native/shots/walk/side-1-hafs-kfqc_2-255_open-commentary.png`. It turns the simulator from
-   inside the test, so it never steals the keyboard from whatever window the owner is in.
+   `native/shots/walk/side/side-1-hafs-kfqc_2-255_open-commentary.png`. It turns the simulator
+   from inside the test, so it never steals the keyboard from whatever window the owner is in.
+   **If a sideways walk fails with "asked for sideways, got an upright picture", the simulator is
+   stuck** (its home screen will not turn either): `xcrun simctl shutdown <udid>`, then
+   `xcrun simctl boot <udid>`, and run it again. Before that check existed, a stuck simulator
+   made every sideways picture and both sideways smoke tests pass on an upright iPad
+   (2026-10-08).
    `native/scripts/name-attachments.mjs` gives the pictures those names; Xcode writes them out
    under random ids.
 4. **Measure from inside the page.** `make app-probe TARGET=ipad ROUTE=/hafs-kfqc/p45 EVAL='JSON.stringify(document.querySelector("[data-testid=page-book]")?.getBoundingClientRect())' DELAY_MS=3000`

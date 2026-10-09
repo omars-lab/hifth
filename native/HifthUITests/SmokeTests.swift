@@ -119,6 +119,7 @@ final class SmokeTests: XCTestCase {
         web.pinch(withScale: 1.6, velocity: 1)
         sleep(2)
         let shot = web.screenshot().image
+        XCTAssertGreaterThan(shot.size.width, shot.size.height, "asked for sideways, got an upright picture")
         let upright = XCTAttachment(image: UIGraphicsImageRenderer(size: shot.size).image { _ in shot.draw(at: .zero) })
         upright.name = "page-45-landscape-after-pinch"
         upright.lifetime = .keepAlways
@@ -140,6 +141,9 @@ final class SmokeTests: XCTestCase {
         // The web view alone, drawn upright: a whole-screen capture of a turned
         // simulator comes back as a portrait frame with the picture shifted.
         let shot = app.webViews.firstMatch.screenshot().image
+        // A stuck simulator reports sideways and stays upright, and this test
+        // then passed on a portrait page (2026-10-08): restart the simulator.
+        XCTAssertGreaterThan(shot.size.width, shot.size.height, "asked for sideways, got an upright picture")
         let upright = UIGraphicsImageRenderer(size: shot.size).image { _ in shot.draw(at: .zero) }
         let picture = XCTAttachment(image: upright)
         picture.name = "page-45-landscape"

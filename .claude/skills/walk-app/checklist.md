@@ -159,3 +159,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   together from the fold, and no verses are selected and no panel opens. · iPad simulator and
   the `ipad` browser tests · issue: `ipad-spread-pinch-selects-range` · test:
   `make app-test ONLY=SmokeTests/testPinchOnTheOpenBookSelectsNothing`
+- [ ] Walk the iPad app sideways: every picture is wider than it is tall. If the walk fails with
+  "asked for sideways, got an upright picture", the simulator is stuck; restart it. · iPad
+  simulator · issue: `ipad-sideways-checks-upright` · test: `make app-walk ROUTES='/hafs-kfqc/p1'
+  SIDEWAYS=1`
+- [ ] Open a verse's look-alikes on an upright iPad (and a phone): the whole verse stays in sight
+  above the list. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:48?open=lookalikes'` · issue:
+  `lookalikes-card-covers-verse` · test: `e2e/open-link.spec.ts`

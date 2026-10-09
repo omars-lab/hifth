@@ -1079,6 +1079,8 @@ commentary design note's numbered items, and in the issues list.
 - The tajweed key on a laptop-sized window hid its last rule and the source's credit with no sign it scrolled; its foot now fades while there is more (native-shell.md ㉑).
 - The book opened on two squat pages that jumped taller at the first turn; the opening pages now sit on normal page-shaped paper with their text kept large and centred, the owner's pick of three drawn ways (knowledge-graph-commentary.md ㊱).
 - The opening pages' runner-up, their text at the usual size of type, is kept as an info-panel setting ("The first two pages"), large text the default (knowledge-graph-commentary.md ㊱).
+- The sideways iPad walk and tests passed on a simulator stuck upright; they now check their picture is sideways, and the walk keeps each turn's pictures apart (native-shell.md ㉒).
+- On an upright iPad the look-alikes list covered the verse it is about; the lists now slide the verse clear at every width, as the note does (knowledge-graph-commentary.md ㊲).
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.

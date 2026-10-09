@@ -47,12 +47,14 @@ TARGET       ?= ipad
 # app-probe: one more JavaScript question for the page, asked DELAY_MS after it
 # says it is ready (double quotes inside it; the Makefile wraps it in single).
 EVAL         ?=
-# app-test: one XCUITest instead of the whole run, e.g. ONLY=SmokeTests/testOpensAtAVerse
+# app-test: some XCUITests instead of the whole run, space-separated, e.g. ONLY=SmokeTests/testOpensAtAVerse
 ONLY         ?=
 # app-walk: the routes to open, space-separated, and whether to hold it sideways.
 ROUTES       ?= $(ROUTE)
 SIDEWAYS     ?=
-WALK_OUT     ?= $(SHOTS)/walk
+# Upright and sideways pictures in their own folders, so one run never
+# deletes the other's before anyone has looked at them.
+WALK_OUT     ?= $(SHOTS)/walk/$(if $(SIDEWAYS),side,upright)
 DELAY_MS     ?= 2000
 APPEARANCE   ?= light
 # `/hafs-kfqc/p45?field=dark` → `ipad-hafs-kfqc_p45_field-dark.png`
@@ -199,9 +201,9 @@ app-test: $(if $(ONLY),app-generate,app-unit-test) ## Unit tests plus the XCUITe
 	@rm -rf $(SHOTS)/ipad-smoke.xcresult
 	set -o pipefail; $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
 	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-smoke.xcresult \
-	  $(if $(ONLY),-only-testing:HifthUITests-iOS/$(ONLY)) test | $(XCPRETTY)
+	  $(foreach t,$(ONLY),-only-testing:HifthUITests-iOS/$(t)) test | $(XCPRETTY)
 
-app-walk: app-generate ## Open each of ROUTES in the iPad app (SIDEWAYS=1 to turn it) and save a picture of each to native/shots/walk/
+app-walk: app-generate ## Open each of ROUTES in the iPad app (SIDEWAYS=1 to turn it) and save a picture of each to native/shots/walk/upright or side/
 	@rm -rf $(SHOTS)/ipad-walk.xcresult $(WALK_OUT)
 	set -o pipefail; TEST_RUNNER_WALK_ROUTES='$(ROUTES)' TEST_RUNNER_WALK_SIDEWAYS='$(SIDEWAYS)' \
 	  $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \

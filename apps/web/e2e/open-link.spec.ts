@@ -6,6 +6,21 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
 // params to enter app in certain mode, on certain page … our tests should use
 // this too". The names are the ones in docs/query-params.md.
 
+async function settle(target: Locator): Promise<void> {
+  let last = "";
+  await expect
+    .poll(
+      async () => {
+        const now = JSON.stringify(await target.boundingBox());
+        const stable = now === last;
+        last = now;
+        return stable;
+      },
+      { intervals: [100, 100, 100, 150, 200, 300], timeout: 10_000 },
+    )
+    .toBe(true);
+}
+
 const PANELS: Record<string, (page: Page) => Locator> = {
   jump: (p) => p.getByRole("dialog", { name: "اذهب إلى" }),
   about: (p) => p.getByRole("dialog", { name: "عن حِفظ" }),
@@ -39,6 +54,28 @@ test.describe("Hifth · a link that opens a panel", () => {
     await expect(page.getByRole("dialog", { name: /^متشابهات/ })).toBeVisible({ timeout: 20_000 });
     await expect(page).toHaveURL(/#\/hafs-kfqc\/2:48$/);
   });
+
+  // The look-alike list rose over the foot of the page and the verse it is
+  // about stayed under it, on an iPad held upright and on a phone; a note on
+  // the same screen slid its verse up clear (walking the iPad app, 2026-10-08).
+  for (const [held, size] of [
+    ["an iPad held upright", { width: 1024, height: 1366 }],
+    ["a phone", { width: 390, height: 844 }],
+  ] as const) {
+    test(`?open=lookalikes on ${held} leaves the verse above the list`, async ({ page }) => {
+      await page.setViewportSize(size);
+      await page.goto("/#/hafs-kfqc/2:48?open=lookalikes");
+      const list = page.getByRole("dialog", { name: /^متشابهات/ });
+      await expect(list).toBeVisible({ timeout: 20_000 });
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const lines = page.locator("#hifth-overlay .hl-sel");
+      await settle(lines.first());
+      const top = (await list.boundingBox())!.y;
+      const bottoms = await lines.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().bottom));
+      expect(bottoms.length).toBeGreaterThan(0);
+      for (const bottom of bottoms) expect(bottom, "a line of the verse is under the list").toBeLessThanOrEqual(top);
+    });
+  }
 
   test("?open=roots opens the verse's roots", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/2:48?open=roots");
