@@ -164,7 +164,9 @@ export function HighlightMenu({
             {hops.map((edge) => {
               const enabled = canHop(edge.to);
               const toKey = bareTarget(edge.to);
-              const label = t.ayahLabel(toKey) ?? edge.to;
+              // A look-alike that is a whole passage is named as the passage.
+              const label =
+                (edge.through ? t.rangeLabel(toKey, edge.through) : t.ayahLabel(toKey)) ?? edge.to;
               // A word-anchored target (`…#w3`) does not resolve until the
               // word-granular corpus lands (PLAN Loop 4b) — say *that*, rather
               // than blaming the page, when the page itself is vendored.

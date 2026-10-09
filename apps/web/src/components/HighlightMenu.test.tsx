@@ -167,4 +167,13 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     renderMenu({ hops: [] });
     expect(screen.getByText("لا روابط في هذا المقطع بعد")).toBeInTheDocument();
   });
+
+  // A look-alike that is a whole passage is named as the passage, as it is in
+  // the hop list and the note card.
+  it("names a passage look-alike by its whole range", () => {
+    renderMenu({
+      hops: [edge({ type: "mutashabih", to: k("14:5"), through: k("14:6"), page: 255, sources: [k("2:48")] })],
+    });
+    expect(within(screen.getByRole("dialog")).getByText(/إبراهيم، ١٤:٥–١٤:٦/)).toBeInTheDocument();
+  });
 });

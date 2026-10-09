@@ -355,6 +355,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/68:46",
+        "through": "quran/hafs-kfqc/68:47",
         "page": 566,
         "dir": {
           "dSurah": 16,

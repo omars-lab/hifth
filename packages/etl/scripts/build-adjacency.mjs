@@ -230,10 +230,21 @@ for (const [juzKeyStr, entries] of Object.entries(DATASET)) {
     for (const mut of entry.muts) {
       const toAbs = datasetAbs(first(mut.ayah));
       fromAbsoluteAyah(toAbs); // validity gate on the target
+      // A target that is a passage keeps where it ends, so the row can name the
+      // whole passage: without it, a later verse of the source passage listed
+      // the target's opening verse with no reason it was there.
+      const toMembers = members(mut.ayah);
+      // (One entry lists the same verse twice: that is one verse, not a passage.)
+      const lastAbs = datasetAbs(toMembers[toMembers.length - 1]);
+      const throughAbs = lastAbs > toAbs ? lastAbs : null;
+      if (throughAbs !== null) fromAbsoluteAyah(throughAbs);
       for (const fromAbs of srcMembers) {
         fromAbsoluteAyah(fromAbs); // validity gate on the source
         datasetDirected += 1;
-        addEdge(fromAbs, toAbs, "mutashabih", ctx ? { ctx: true } : {});
+        addEdge(fromAbs, toAbs, "mutashabih", {
+          ...(ctx ? { ctx: true } : {}),
+          ...(throughAbs !== null ? { throughAbs } : {}),
+        });
       }
     }
   }
@@ -288,7 +299,8 @@ for (const [k, meta] of [...edges]) {
   const [f, t, type] = k.split(">");
   const rk = edgeKey(t, f, type);
   if (!edges.has(rk)) {
-    const { w: _w, ...rest } = meta;
+    // A passage's end is on the forward target too; the reverse lands on one verse.
+    const { w: _w, throughAbs: _through, ...rest } = meta;
     edges.set(rk, rest);
     generatedReverses += 1;
   }
@@ -372,6 +384,7 @@ for (const e of flat) {
   const tgt = fromAbsoluteAyah(e.toAbs);
   const sameJuz = juzOf(src.surah, src.ayah) === juzOf(tgt.surah, tgt.ayah);
   const key = formatAyahKey(EDITION, tgt.surah, tgt.ayah);
+  const end = e.throughAbs && !e.twin ? fromAbsoluteAyah(e.throughAbs) : null;
   // Only mutashabih edges: they are the type whose *definition* is shared
   // phrasing. A shared-root edge already names its word through `root`, and a
   // related-meaning edge is thematic — its longest run is one word (measured:
@@ -384,6 +397,8 @@ for (const e of flat) {
   const edge = {
     type: e.type,
     to: e.w ? `${key}#${e.w}` : key,
+    // A twin is word-for-word one verse, so a passage end never rides on one.
+    ...(end ? { through: formatAyahKey(EDITION, end.surah, end.ayah) } : {}),
     page: pageOf(e.toAbs),
     dir: {
       dSurah: tgt.surah - src.surah,

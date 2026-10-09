@@ -4,6 +4,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/79:15",
+        "through": "quran/hafs-kfqc/79:16",
         "page": 583,
         "dir": {
           "dSurah": 59,
@@ -72,6 +73,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/79:15",
+        "through": "quran/hafs-kfqc/79:16",
         "page": 583,
         "dir": {
           "dSurah": 59,
@@ -450,6 +452,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/7:120",
+        "through": "quran/hafs-kfqc/7:122",
         "page": 164,
         "dir": {
           "dSurah": -13,
@@ -501,6 +504,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/26:46",
+        "through": "quran/hafs-kfqc/26:48",
         "page": 369,
         "dir": {
           "dSurah": 6,
