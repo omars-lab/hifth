@@ -125,6 +125,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   In the iPad or Mac app, find the "later surahs" button by its accessible label, not its text (it
   shows only a count). · desktop (Firefox), phone, ipad, ipad-side, iPad app, Mac app · issue:
   `lookalike-compare-below-edge`
+- [ ] Opening the *first* look-alike row, while the list is still at its start, keeps the row's name
+  in sight under the title, not behind it (15:30's later surahs → the passage in surah 38, on a
+  phone, English and Arabic). · phone, ipad, iPad app · issue: `lookalike-opened-row-name-behind-title`
 - [ ] The look-alike buttons cover no words, no close button, and are not hidden by a note. ·
   phone, phone-side, desktop · issues: `lookalike-chips-cover-lifted-page`,
   `lookalike-chips-sideways-cover-close`, `chips-under-facing-note`

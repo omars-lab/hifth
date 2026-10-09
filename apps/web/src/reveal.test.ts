@@ -51,4 +51,25 @@ describe("revealRow", () => {
   it("lines it up with the sheet's edge when the title scrolls away with the rows", () => {
     expect(list(false)).toMatchObject({ top: 200 });
   });
+
+  // The title only pins once the list has scrolled under it. With the list
+  // still at its start, the title sits a little below the sheet's edge, so it
+  // did not count, and the row's name was scrolled up behind it (walking a
+  // phone, 2026-10-09: look-alike rows ②).
+  it("counts a title that will pin once the list moves, not only one already pinned", () => {
+    document.body.innerHTML = `
+      <div id="sheet" style="overflow-y: auto">
+        <header style="position: sticky; top: -12px">Title</header>
+        <ul><li id="row"><div id="compare"></div></li></ul>
+      </div>`;
+    const sheet = document.getElementById("sheet")!;
+    sheet.getBoundingClientRect = at(100, 500);
+    // At rest, 12 down from the sheet's edge; pinned, 12 above it: 88 to 148.
+    document.querySelector("header")!.getBoundingClientRect = at(112, 172);
+    document.getElementById("row")!.getBoundingClientRect = at(300, 900);
+    const scrollBy = vi.fn();
+    sheet.scrollBy = scrollBy;
+    revealRow(document.getElementById("compare")!);
+    expect(scrollBy.mock.calls[0]?.[0]).toMatchObject({ top: 152 });
+  });
 });

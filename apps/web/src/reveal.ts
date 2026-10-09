@@ -44,9 +44,16 @@ function shownEdges(list: Element): { top: number; bottom: number } {
   const edges = list.getBoundingClientRect();
   let top = edges.top;
   for (const child of list.querySelectorAll(":scope > *, :scope > * > *")) {
-    if (getComputedStyle(child).position !== "sticky") continue;
-    const pinned = child.getBoundingClientRect();
-    if (pinned.top <= edges.top + 1 && pinned.bottom > top) top = pinned.bottom;
+    const style = getComputedStyle(child);
+    if (style.position !== "sticky") continue;
+    const box = child.getBoundingClientRect();
+    // Pinned already, or still at rest further down: then it pins where its
+    // own offset says once the list scrolls, which is what the row lines up to.
+    const offset = parseFloat(style.top);
+    const pinned = box.top <= edges.top + 1;
+    if (!pinned && Number.isNaN(offset)) continue;
+    const bottom = pinned ? box.bottom : edges.top + offset + (box.bottom - box.top);
+    if (bottom > top) top = bottom;
   }
   return { top, bottom: edges.bottom };
 }
