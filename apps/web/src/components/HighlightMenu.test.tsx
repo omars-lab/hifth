@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import type { AppState, MergedEdge } from "@hifth/core";
 import { HighlightMenu } from "./HighlightMenu";
+import { PASSAGE_ROWS_KEY } from "../passage-rows";
 
 /**
  * The panel itself is a crop of two mus'haf pages and needs both pages' artwork
@@ -203,5 +204,27 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
       .getAllByRole("listitem")
       .map((li) => li.querySelector("[aria-expanded]") !== null);
     expect(opens).toEqual([true, true, false]);
+  });
+
+  // A passage listed beside a verse inside it (item 47) is laid out the way the
+  // reader chose in the info panel, as in the single-verse list.
+  it("lays out a passage and a verse inside it the way the reader chose", () => {
+    const hops = [
+      edge({ type: "mutashabih", to: k("14:6"), page: 255, sources: [k("2:48")] }),
+      edge({ type: "mutashabih", to: k("14:5"), through: k("14:7"), page: 255, sources: [k("2:47")] }),
+    ];
+    const rows = (way: string) => {
+      localStorage.setItem(PASSAGE_ROWS_KEY, way);
+      const { unmount } = renderMenu({ hops });
+      const seen = screen
+        .getAllByRole("listitem")
+        .map((li) => `${li.textContent?.match(/١٤:[٠-٩]+(–١٤:[٠-٩]+)?/)?.[0]}${li.hasAttribute("data-inside") ? " in" : ""}`);
+      unmount();
+      return seen;
+    };
+    expect(rows("both")).toEqual(["١٤:٦", "١٤:٥–١٤:٧"]);
+    expect(rows("group")).toEqual(["١٤:٥–١٤:٧", "١٤:٦ in"]);
+    expect(rows("drop")).toEqual(["١٤:٦"]);
+    localStorage.removeItem(PASSAGE_ROWS_KEY);
   });
 });

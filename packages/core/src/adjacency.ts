@@ -180,8 +180,10 @@ export interface RailChip {
 
 /** Bucket an ayah's active edges into rail chips, in reading order
  * (loop, earlier, later, root). Empty buckets are dropped; reserved-type
- * edges (`ext`) never appear. */
-export function bucketEdges(adj: AyahAdjacency | undefined): RailChip[] {
+ * edges (`ext`) never appear. `way` is the reader's passage-rows setting:
+ * when a passage row is dropped from the list, it is not counted either, so
+ * the number on the rail is the number of rows the list shows. */
+export function bucketEdges(adj: AyahAdjacency | undefined, way: PassageRows = "both"): RailChip[] {
   const buckets: Record<RailDirection, Edge[]> = {
     loop: [],
     earlier: [],
@@ -195,12 +197,11 @@ export function bucketEdges(adj: AyahAdjacency | undefined): RailChip[] {
   const order: RailDirection[] = ["loop", "earlier", "later", "root"];
   return order
     .filter((d) => buckets[d].length > 0)
-    .map((direction) => ({
-      direction,
-      glyph: RAIL_GLYPH[direction],
-      count: buckets[direction].length,
-      edges: buckets[direction],
-    }));
+    .map((direction) => {
+      // A passage and the verses inside it share a surah, so they share a bucket.
+      const edges = way === "drop" ? arrangePassages(buckets[direction], way).map((r) => r.edge) : buckets[direction];
+      return { direction, glyph: RAIL_GLYPH[direction], count: edges.length, edges };
+    });
 }
 
 /** Which rail bucket an edge falls in. shared-root is its own family; every
@@ -232,6 +233,67 @@ export function orderForHifz<T extends Edge>(edges: readonly T[]): T[] {
         a.i - b.i,
     )
     .map((x) => x.edge);
+}
+
+/**
+ * What a list does with a passage row ("9:20–9:22") when a verse inside that
+ * passage is also listed on its own (knowledge-graph-commentary.md, item 47).
+ * About 40 verses have such a pair, and a hafiz sees two or three rows for what
+ * they hold as one memory. All three ways are built so the owner can choose by
+ * using them:
+ *
+ *   both   every row where the hifz order put it (as before)
+ *   group  the verses inside a passage sit, indented, right under it
+ *   drop   the passage row is left out; its verses keep their own rows
+ */
+export type PassageRows = "both" | "group" | "drop";
+
+/** One row of a look-alike list, and whether it sits inside the passage above it. */
+export interface ArrangedRow<T extends Edge> {
+  readonly edge: T;
+  readonly inside: boolean;
+}
+
+/** `"quran/hafs-kfqc/2:48#w3"` → `[2, 48]`, or null for a key that names no verse. */
+function verseOf(key: string): readonly [number, number] | null {
+  const m = /(\d+):(\d+)(?:#.*)?$/.exec(key);
+  return m ? [Number(m[1]), Number(m[2])] : null;
+}
+
+/** True when `inner` is a single verse of the same kind falling within `passage`. */
+function liesInside(inner: Edge, passage: Edge): boolean {
+  if (inner === passage || inner.through || !passage.through || inner.type !== passage.type) return false;
+  const v = verseOf(inner.to);
+  const lo = verseOf(passage.to);
+  const hi = verseOf(passage.through);
+  return !!v && !!lo && !!hi && v[0] === lo[0] && v[0] === hi[0] && v[1] >= lo[1] && v[1] <= hi[1];
+}
+
+/**
+ * Arrange an already-ordered list for {@link PassageRows}. A verse is claimed by
+ * the first passage that covers it; a passage nothing else covers is kept in
+ * every way.
+ */
+export function arrangePassages<T extends Edge>(edges: readonly T[], way: PassageRows): ArrangedRow<T>[] {
+  const flat = edges.map((edge) => ({ edge, inside: false }));
+  if (way === "both") return flat;
+  const claimed = new Map<T, T[]>();
+  const taken = new Set<T>();
+  for (const passage of edges) {
+    if (!passage.through) continue;
+    const inner = edges.filter((e) => !taken.has(e) && liesInside(e, passage));
+    if (inner.length === 0) continue;
+    claimed.set(passage, inner);
+    for (const e of inner) taken.add(e);
+  }
+  if (way === "drop") return flat.filter((r) => !claimed.has(r.edge));
+  const rows: ArrangedRow<T>[] = [];
+  for (const edge of edges) {
+    if (taken.has(edge)) continue;
+    rows.push({ edge, inside: false });
+    for (const e of claimed.get(edge) ?? []) rows.push({ edge: e, inside: true });
+  }
+  return rows;
 }
 
 function hifzRank(edge: Edge): number {
@@ -471,8 +533,8 @@ export class Adjacency {
   }
 
   /** Rail chips for an ayah key (empty if uncovered). */
-  chipsForKey(key: string): RailChip[] {
-    return bucketEdges(this.forKey(key));
+  chipsForKey(key: string, way: PassageRows = "both"): RailChip[] {
+    return bucketEdges(this.forKey(key), way);
   }
 
   /** All active edges for a key, hifz-ordered (empty if uncovered). */

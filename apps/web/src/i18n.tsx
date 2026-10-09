@@ -793,6 +793,11 @@ export interface Strings {
   lookalikeCompareEvery: string;
   lookalikeComparePlain: string;
   lookalikeCompareNote: string;
+  passageRowsTitle: string;
+  passageRowsBoth: string;
+  passageRowsGroup: string;
+  passageRowsDrop: string;
+  passageRowsNote: string;
   relatedListTitle: string;
   relatedListLine: string;
   relatedListAll: string;
@@ -1464,6 +1469,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     lookalikeCompareEvery: m.lookalikeCompareEvery,
     lookalikeComparePlain: m.lookalikeComparePlain,
     lookalikeCompareNote: m.lookalikeCompareNote,
+    passageRowsTitle: m.passageRowsTitle,
+    passageRowsBoth: m.passageRowsBoth,
+    passageRowsGroup: m.passageRowsGroup,
+    passageRowsDrop: m.passageRowsDrop,
+    passageRowsNote: m.passageRowsNote,
     relatedListTitle: m.relatedListTitle,
     relatedListLine: m.relatedListLine,
     relatedListAll: m.relatedListAll,

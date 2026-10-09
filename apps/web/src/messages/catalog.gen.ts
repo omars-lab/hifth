@@ -317,6 +317,11 @@ export interface Catalog {
   readonly pagebarFisheyeNote: string;
   readonly pagebarSectionTitle: string;
   readonly pagesVendored: (d: { readonly haveText: string | number; readonly totalText: string | number }) => string;
+  readonly passageRowsBoth: string;
+  readonly passageRowsDrop: string;
+  readonly passageRowsGroup: string;
+  readonly passageRowsNote: string;
+  readonly passageRowsTitle: string;
   readonly pauseAyah: (d: { readonly label: string | number }) => string;
   readonly penBlue: string;
   readonly penDone: string;

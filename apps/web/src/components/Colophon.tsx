@@ -12,6 +12,7 @@ import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-t
 import { PITCH } from "../pitch/pitch";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
 import { LOOKALIKE_COMPARES, rememberLookalikeCompare, useLookalikeCompare } from "../lookalike-compare";
+import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-rows";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
@@ -220,6 +221,7 @@ export function Colophon({
   const relatedList = useRelatedList();
   const longVerse = useLongVerse();
   const lookalikeCompare = useLookalikeCompare();
+  const passageRows = usePassageRows();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -557,6 +559,35 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.lookalikeCompareNote}</p>
+        </section>
+
+        {/* What a look-alike list does with a passage row when a verse inside
+            it is listed too (knowledge-graph-commentary.md, item 47): all three
+            ways built, both rows kept as the default until the owner picks. */}
+        <section className={styles.block} aria-labelledby="colophon-passage-rows">
+          <h3 className={styles.subhead} id="colophon-passage-rows">
+            {t.passageRowsTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-passage-rows">
+            {PASSAGE_ROWS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={passageRows === choice}
+                data-passage-rows={choice}
+                onClick={() => rememberPassageRows(choice)}
+              >
+                {choice === "both"
+                  ? t.passageRowsBoth
+                  : choice === "group"
+                    ? t.passageRowsGroup
+                    : t.passageRowsDrop}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.passageRowsNote}</p>
         </section>
 
         {/* How a note draws the parts it can be about (docs/design/scoped-notes.md,

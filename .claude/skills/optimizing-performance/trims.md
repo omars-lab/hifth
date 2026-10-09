@@ -22,7 +22,8 @@ cap shows. Every row left is either the first page's own code or "none worth the
 candidates if the room runs short: split `PageStage.tsx` (14.9 KB) so the zoom and edge-turn code
 loads after first paint, or move `EdgeGrabRails` (3 KB, desktop only) out of the phone's start-up.
 Later the same day the long-verse setting brought it to 162.0 KB (+1.4 KB); still well inside that
-room, so still nothing taken.
+room, so still nothing taken. The passage-rows setting (item 47) brought it to 164.3 KB (+1.0 KB),
+10.7 KB under the cap; checked again and still inside the ~50 KB the sweep found, so nothing taken.
 
 When a trim lands, set its status to **done**, with the date, the PR and the bytes saved, and
 update the sizes from a fresh `make perf-report`.

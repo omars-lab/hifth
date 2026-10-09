@@ -5,6 +5,7 @@ import {
   buildShards,
   EDGE_TYPES,
   isActiveEdgeType,
+  arrangePassages,
   mergeRangeEdges,
   orderForHifz,
   RAIL_GLYPH,
@@ -108,6 +109,59 @@ describe("orderForHifz (spec §6: same page → same juz → earlier → later)"
     const ordered = orderForHifz(input);
     expect(ordered).toEqual([a, b]); // same rank + same |dPage| → shard order kept
     expect(input).toEqual([a, b]); // input untouched
+  });
+});
+
+describe("arrangePassages (knowledge-graph-commentary.md, item 47)", () => {
+  // Made-up refs: a passage 9:20–9:22 listed beside two verses inside it, one
+  // verse outside it, and an edge of another kind that happens to fall inside.
+  const passage = edge({ type: "mutashabih", to: k("9:20"), through: k("9:22"), page: 50 });
+  const inner21 = edge({ type: "mutashabih", to: k("9:21"), page: 50 });
+  const inner22 = edge({ type: "mutashabih", to: k("9:22#w3"), page: 50 });
+  const outside = edge({ type: "mutashabih", to: k("9:30"), page: 51 });
+  const otherKind = edge({ type: "related-meaning", to: k("9:21"), page: 50 });
+  const list = [inner21, outside, passage, otherKind, inner22];
+  const shape = (rows: ReturnType<typeof arrangePassages>) =>
+    rows.map((r) => `${r.edge.to.slice(r.edge.to.lastIndexOf("/") + 1)}${r.edge.through ? "+" : ""}${r.inside ? " (in)" : ""}`);
+
+  it("leaves the list as it is by default", () => {
+    expect(shape(arrangePassages(list, "both"))).toEqual(["9:21", "9:30", "9:20+", "9:21", "9:22#w3"]);
+  });
+
+  it("groups the verses inside a passage under it, in their own order", () => {
+    expect(shape(arrangePassages(list, "group"))).toEqual([
+      "9:30",
+      "9:20+",
+      "9:21 (in)",
+      "9:22#w3 (in)",
+      "9:21",
+    ]);
+  });
+
+  it("drops a passage row when a verse inside it has a row of its own", () => {
+    expect(shape(arrangePassages(list, "drop"))).toEqual(["9:21", "9:30", "9:21", "9:22#w3"]);
+  });
+
+  it("keeps a passage row nothing else covers, in every way", () => {
+    const alone = [outside, passage];
+    for (const way of ["both", "group", "drop"] as const) {
+      expect(shape(arrangePassages(alone, way))).toEqual(["9:30", "9:20+"]);
+    }
+  });
+
+  it("does not reach into another surah with the same verse numbers", () => {
+    const elsewhere = edge({ type: "mutashabih", to: k("8:21"), page: 40 });
+    expect(shape(arrangePassages([passage, elsewhere], "drop"))).toEqual(["9:20+", "8:21"]);
+  });
+
+  it("counts on the rail only the rows the list will show", () => {
+    // A rail number that says 3 above a list of 2 was seen on the iPad.
+    const adj: AyahAdjacency = { edges: list, ext: [] };
+    expect(bucketEdges(adj)[0].count).toBe(5);
+    expect(bucketEdges(adj, "group")[0].count).toBe(5);
+    const dropped = bucketEdges(adj, "drop")[0];
+    expect(dropped.count).toBe(4);
+    expect(dropped.edges).not.toContain(passage);
   });
 });
 

@@ -199,6 +199,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Open a verse's look-alikes on an upright iPad (and a phone): the whole verse stays in sight
   above the list. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:48?open=lookalikes'` · issue:
   `lookalikes-card-covers-verse` · test: `e2e/open-link.spec.ts`
+- [ ] Open 7:106's look-alikes under each of the info panel's three ways for a passage and a verse
+  inside it: "Show both rows" lists both, "Verse under its passage" indents the verse beneath its
+  passage, "Verse only" leaves the passage out. In every way the number on the rail button is the
+  number of rows in the list. Set it back to both after. · `make drive DEVICE=ipad
+  HASH='#/hafs-kfqc/7:106' ACT='eval=(localStorage.setItem("hifth.passage-rows.v1","drop"),location.reload());
+  settle=1500; eval=(location.hash="#/hafs-kfqc/7:106?open=lookalikes")'` · issue: `lookalike-passage-and-verse-overlap`
+  · test: `packages/core/src/adjacency.test.ts`
 - [ ] Open a long verse's note on an upright iPad in the pitch build: a verse a little taller than
   the room shows whole above the note, its number included, and the zoom readout says the smaller
   level, reached in one move (not zoomed in and then back out). · `make drive DEVICE=ipad
