@@ -229,7 +229,29 @@
           "dSurah": 3,
           "dPage": 87
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              13,
+              15
+            ],
+            [
+              18,
+              20
+            ]
+          ],
+          "to": [
+            [
+              10,
+              12
+            ],
+            [
+              15,
+              17
+            ]
+          ]
+        }
       },
       {
         "type": "mutashabih",
@@ -239,7 +261,29 @@
           "dSurah": 7,
           "dPage": 159
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              13,
+              15
+            ],
+            [
+              18,
+              20
+            ]
+          ],
+          "to": [
+            [
+              16,
+              18
+            ],
+            [
+              21,
+              23
+            ]
+          ]
+        }
       },
       {
         "type": "mutashabih",
@@ -249,7 +293,29 @@
           "dSurah": 27,
           "dPage": 353
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              13,
+              15
+            ],
+            [
+              18,
+              20
+            ]
+          ],
+          "to": [
+            [
+              2,
+              4
+            ],
+            [
+              7,
+              9
+            ]
+          ]
+        }
       }
     ],
     "ext": []
@@ -1786,7 +1852,29 @@
           "dSurah": 2,
           "dPage": 54
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              17,
+              18
+            ],
+            [
+              23,
+              24
+            ]
+          ],
+          "to": [
+            [
+              21,
+              22
+            ],
+            [
+              27,
+              28
+            ]
+          ]
+        }
       }
     ],
     "ext": []
@@ -1824,6 +1912,32 @@
           "dPage": 209
         },
         "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              19,
+              21
+            ],
+            [
+              23,
+              26
+            ]
+          ],
+          "to": [
+            [
+              4,
+              5
+            ],
+            [
+              11,
+              13
+            ],
+            [
+              15,
+              18
+            ]
+          ]
+        },
         "ctx": true
       },
       {

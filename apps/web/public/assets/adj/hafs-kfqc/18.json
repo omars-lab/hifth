@@ -860,7 +860,29 @@
           "dPage": 0,
           "sameJuz": true
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              10,
+              11
+            ],
+            [
+              13,
+              14
+            ]
+          ],
+          "to": [
+            [
+              38,
+              39
+            ],
+            [
+              41,
+              42
+            ]
+          ]
+        }
       }
     ],
     "ext": []
@@ -876,7 +898,29 @@
           "dPage": 0,
           "sameJuz": true
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              38,
+              39
+            ],
+            [
+              41,
+              42
+            ]
+          ],
+          "to": [
+            [
+              10,
+              11
+            ],
+            [
+              13,
+              14
+            ]
+          ]
+        }
       }
     ],
     "ext": []

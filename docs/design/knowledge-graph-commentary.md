@@ -1283,9 +1283,24 @@ than once" or "Alike, but not word for word". The outside list's mark that the n
 verses apart, which we carried but never showed, is said too: "The next verse tells them apart". A data test
 (every look-alike row carries a reason, the same from both ends) and a test on each list failed first.
 
-### ㊾ Can a reader open one of those rows and compare the two verses? · **open**
+### ㊾ Can a reader open one of those rows and compare the two verses? · **fixed**
 
-The rows ㊽ explains still do not open. Two ways to build: show both verses side by side with nothing washed
-(cheap, works for all 393); or, for the 151 with repeated stretches, wash everything outside all the
-stretches they share (closer to the marked comparison, a bigger change). Build both, make the better one the
-default and keep the other as a setting.
+The rows ㊽ explains now open, the same as a row with one marked stretch. Both ways were built:
+
+- **Mark every shared stretch** (the default). For the 151 rows whose shared words repeat, the build now
+  records every run of two words or more the pair shares, on both sides. Opening the row washes each of them
+  green and what lies between them ochre, as the single-stretch comparison does.
+- **Side by side, unmarked** (a setting in the info panel). Both verses as printed, nothing washed.
+
+Rows alike only loosely (242) have no shared run to mark, so they open unmarked either way. A row with a
+single shared stretch keeps its one mark either way. The small vowel-mark tint is left off when there is more
+than one stretch, since which word goes with which is a guess.
+
+**Why marking is the default.** Opened on 10:15 against 19:73, the marked way shows the two openings agree
+except for one word in the middle, which the mus'haf spells differently in the two places (a full alif in one,
+a small one in the other). Unmarked, the two openings look the same at a glance and that one word goes
+unnoticed, and a spelling difference like that is what a hafiz needs to catch.
+
+Tests: the build test checks every repeated row carries its stretches and that a pair and its reverse agree;
+the comparison view's tests check both ways and the loose case; both lists' tests check these rows open; the
+info panel's test checks the setting. All failed first.

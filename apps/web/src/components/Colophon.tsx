@@ -11,6 +11,7 @@ import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PITCH } from "../pitch/pitch";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
+import { LOOKALIKE_COMPARES, rememberLookalikeCompare, useLookalikeCompare } from "../lookalike-compare";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
@@ -218,6 +219,7 @@ export function Colophon({
   const openingText = useOpeningText();
   const relatedList = useRelatedList();
   const longVerse = useLongVerse();
+  const lookalikeCompare = useLookalikeCompare();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -530,6 +532,32 @@ export function Colophon({
             <p className={styles.note}>{t.longVerseNote}</p>
           </section>
         )}
+
+        {/* How a look-alike whose shared words come more than once is compared
+            (knowledge-graph-commentary.md, item 49): every shared stretch
+            marked is the default, the two side by side unmarked kept as a
+            choice. */}
+        <section className={styles.block} aria-labelledby="colophon-lookalike-compare">
+          <h3 className={styles.subhead} id="colophon-lookalike-compare">
+            {t.lookalikeCompareTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-lookalike-compare">
+            {LOOKALIKE_COMPARES.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={lookalikeCompare === choice}
+                data-lookalike-compare={choice}
+                onClick={() => rememberLookalikeCompare(choice)}
+              >
+                {choice === "every" ? t.lookalikeCompareEvery : t.lookalikeComparePlain}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.lookalikeCompareNote}</p>
+        </section>
 
         {/* How a note draws the parts it can be about (docs/design/scoped-notes.md,
             step 7): every look kept while they are tried, so a radio group too. */}

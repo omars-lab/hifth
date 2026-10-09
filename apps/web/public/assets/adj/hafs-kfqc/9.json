@@ -315,7 +315,41 @@
           "dPage": 3,
           "sameJuz": true
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              3,
+              4
+            ],
+            [
+              13,
+              14
+            ],
+            [
+              17,
+              18
+            ]
+          ],
+          "to": [
+            [
+              8,
+              9
+            ],
+            [
+              26,
+              27
+            ],
+            [
+              32,
+              33
+            ],
+            [
+              37,
+              38
+            ]
+          ]
+        }
       },
       {
         "type": "mutashabih",
@@ -508,7 +542,29 @@
           "dSurah": 2,
           "dPage": 35
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              8,
+              11
+            ],
+            [
+              17,
+              19
+            ]
+          ],
+          "to": [
+            [
+              13,
+              16
+            ],
+            [
+              22,
+              24
+            ]
+          ]
+        }
       }
     ],
     "ext": []
@@ -524,7 +580,41 @@
           "dPage": -3,
           "sameJuz": true
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              8,
+              9
+            ],
+            [
+              26,
+              27
+            ],
+            [
+              32,
+              33
+            ],
+            [
+              37,
+              38
+            ]
+          ],
+          "to": [
+            [
+              3,
+              4
+            ],
+            [
+              13,
+              14
+            ],
+            [
+              17,
+              18
+            ]
+          ]
+        }
       },
       {
         "type": "mutashabih",

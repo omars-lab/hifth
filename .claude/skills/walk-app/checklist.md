@@ -116,6 +116,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   passage named as a range (try 2:48 — "2:122–2:123"), or a line saying how they are alike (try
   10:15's later surahs — 19:73, 39:13). No bare verse name. · any · issue:
   `lookalike-passage-row-unnamed`, `lookalike-row-no-reason`
+- [ ] A look-alike row whose words repeat opens a comparison with every shared stretch marked (try
+  10:15 → 19:73: the opening green, the one word spelled differently ochre); with the info panel's
+  "side by side, unmarked" it opens plain. A loosely alike row opens plain. · desktop, phone · issue:
+  `lookalike-row-no-compare`
 - [ ] The look-alike buttons cover no words, no close button, and are not hidden by a note. ·
   phone, phone-side, desktop · issues: `lookalike-chips-cover-lifted-page`,
   `lookalike-chips-sideways-cover-close`, `chips-under-facing-note`

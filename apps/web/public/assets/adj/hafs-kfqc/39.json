@@ -590,6 +590,28 @@
           "dPage": -184
         },
         "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              9,
+              10
+            ],
+            [
+              12,
+              13
+            ]
+          ],
+          "to": [
+            [
+              14,
+              15
+            ],
+            [
+              17,
+              18
+            ]
+          ]
+        },
         "ctx": true
       },
       {
@@ -601,6 +623,28 @@
           "dPage": -184
         },
         "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              9,
+              10
+            ],
+            [
+              12,
+              13
+            ]
+          ],
+          "to": [
+            [
+              17,
+              18
+            ],
+            [
+              20,
+              21
+            ]
+          ]
+        },
         "ctx": true
       },
       {
@@ -998,6 +1042,24 @@
           "sameJuz": true
         },
         "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              4,
+              6
+            ]
+          ],
+          "to": [
+            [
+              2,
+              4
+            ],
+            [
+              12,
+              14
+            ]
+          ]
+        },
         "ctx": true
       },
       {
@@ -1125,7 +1187,25 @@
           "dPage": 0,
           "sameJuz": true
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              2,
+              4
+            ],
+            [
+              12,
+              14
+            ]
+          ],
+          "to": [
+            [
+              4,
+              6
+            ]
+          ]
+        }
       },
       {
         "type": "mutashabih",
@@ -1135,7 +1215,25 @@
           "dSurah": 6,
           "dPage": 38
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              2,
+              3
+            ],
+            [
+              12,
+              13
+            ]
+          ],
+          "to": [
+            [
+              4,
+              5
+            ]
+          ]
+        }
       }
     ],
     "ext": []
@@ -1620,7 +1718,37 @@
           "dPage": 0,
           "sameJuz": true
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              1,
+              3
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              13,
+              17
+            ]
+          ],
+          "to": [
+            [
+              1,
+              3
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              15,
+              19
+            ]
+          ]
+        }
       }
     ],
     "ext": []
@@ -1686,7 +1814,37 @@
           "dPage": 0,
           "sameJuz": true
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              1,
+              3
+            ],
+            [
+              8,
+              12
+            ],
+            [
+              15,
+              19
+            ]
+          ],
+          "to": [
+            [
+              1,
+              3
+            ],
+            [
+              7,
+              11
+            ],
+            [
+              13,
+              17
+            ]
+          ]
+        }
       }
     ],
     "ext": []

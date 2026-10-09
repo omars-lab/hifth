@@ -30,7 +30,25 @@
           "dSurah": -63,
           "dPage": -521
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              20,
+              28
+            ]
+          ],
+          "to": [
+            [
+              18,
+              21
+            ],
+            [
+              23,
+              27
+            ]
+          ]
+        }
       }
     ],
     "ext": []

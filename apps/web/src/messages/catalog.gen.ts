@@ -197,6 +197,10 @@ export interface Catalog {
   readonly longVerseShorter: string;
   readonly longVerseSmaller: string;
   readonly longVerseTitle: string;
+  readonly lookalikeCompareEvery: string;
+  readonly lookalikeCompareNote: string;
+  readonly lookalikeComparePlain: string;
+  readonly lookalikeCompareTitle: string;
   readonly mapAbsent: string;
   readonly mapActiveIn: (d: { readonly monthText: string | number }) => string;
   readonly mapCaveat: string;

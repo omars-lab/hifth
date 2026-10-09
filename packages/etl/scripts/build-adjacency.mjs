@@ -44,7 +44,7 @@ import {
   juzOf,
   TOTAL_AYAHS,
 } from "@hifth/core";
-import { sharedRuns } from "./lib/shared-runs.mjs";
+import { sharedRuns, sharedStretches } from "./lib/shared-runs.mjs";
 import { openPrintWords } from "./lib/print-words.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -374,6 +374,29 @@ function matchOf(srcKey, tgtKey, words = printWords) {
   return len >= 2 ? "repeat" : "loose";
 }
 
+/**
+ * For a "repeat" pair: every stretch of two words or more the two share, on
+ * each side, as print ranges — so a comparison can mark all of them rather
+ * than guess at one. Consecutive positions are merged into one range.
+ * `sharedStretches(b, a)` mirrors `sharedStretches(a, b)`, so a reverse row
+ * carries this row's ranges with `from` and `to` swapped.
+ */
+function stretchesOf(srcKey, tgtKey, words = printWords) {
+  const a = words.get(srcKey);
+  const b = words.get(tgtKey);
+  const { a: inA, b: inB } = sharedStretches(a.map((w) => w.id), b.map((w) => w.id));
+  const ranges = (positions, ws) => {
+    const out = [];
+    for (const p of positions) {
+      const last = out[out.length - 1];
+      if (last && last.end === p - 1) last.end = p;
+      else out.push({ start: p, end: p });
+    }
+    return out.map(({ start, end }) => [ws[start - 1].first, ws[end - 1].last]);
+  };
+  return { from: ranges(inA, a), to: ranges(inB, b) };
+}
+
 /* ------------------------------------------------------------------ */
 /* Pass 3 — spec-shape shards with real dir annotations.               */
 /* ------------------------------------------------------------------ */
@@ -430,6 +453,9 @@ for (const e of flat) {
     },
     ...(spans ? { span: { from: spans.from }, toSpan: { from: spans.to } } : {}),
     ...(match ? { match } : {}),
+    ...(match === "repeat"
+      ? { stretches: stretchesOf(`${src.surah}:${src.ayah}`, `${tgt.surah}:${tgt.ayah}`) }
+      : {}),
     ...(e.root ? { root: e.root } : {}),
     ...(e.twin ? { twin: true } : {}),
     ...(e.ctx ? { ctx: true } : {}),

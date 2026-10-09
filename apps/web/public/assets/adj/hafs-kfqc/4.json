@@ -282,7 +282,29 @@
           "dSurah": 1,
           "dPage": 28
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              1,
+              5
+            ]
+          ],
+          "to": [
+            [
+              10,
+              11
+            ],
+            [
+              22,
+              23
+            ],
+            [
+              33,
+              34
+            ]
+          ]
+        }
       }
     ],
     "ext": []

@@ -190,4 +190,18 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     expect(repeat!.textContent).toContain("تتكرر");
     expect(repeat!.textContent).toContain("الآية التالية");
   });
+
+  it("lets a look-alike with a reason open a comparison even with no marked words", () => {
+    renderMenu({
+      hops: [
+        edge({ type: "mutashabih", to: k("3:5"), match: "loose", sources: [k("2:47")] }),
+        edge({ type: "mutashabih", to: k("3:6"), match: "repeat", sources: [k("2:48")] }),
+        edge({ type: "mutashabih", to: k("3:7"), sources: [k("2:48")] }),
+      ],
+    });
+    const opens = within(screen.getByRole("dialog"))
+      .getAllByRole("listitem")
+      .map((li) => li.querySelector("[aria-expanded]") !== null);
+    expect(opens).toEqual([true, true, false]);
+  });
 });

@@ -506,7 +506,29 @@
           "dSurah": -9,
           "dPage": -100
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              1,
+              4
+            ],
+            [
+              6,
+              8
+            ]
+          ],
+          "to": [
+            [
+              1,
+              4
+            ],
+            [
+              6,
+              8
+            ]
+          ]
+        }
       },
       {
         "type": "mutashabih",

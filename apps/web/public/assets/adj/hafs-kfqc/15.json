@@ -933,7 +933,29 @@
           "dSurah": -4,
           "dPage": -35
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              2,
+              5
+            ],
+            [
+              7,
+              9
+            ]
+          ],
+          "to": [
+            [
+              5,
+              8
+            ],
+            [
+              10,
+              12
+            ]
+          ]
+        }
       }
     ],
     "ext": []

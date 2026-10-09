@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Colophon } from "./Colophon";
 import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 import { CARD_EDGE_KEY } from "../card-edge";
+import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 
 /*
  * The colophon is the app's licence compliance, so these tests assert
@@ -118,6 +119,21 @@ describe("what a card does at the page's edge, in settings", () => {
     const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
     expect(container.querySelector("[data-card-edge]")).toBeNull();
     expect(container.querySelector("#colophon-card-edge")).toBeNull();
+  });
+});
+
+describe("how two look-alikes that share words in several places are compared, in settings", () => {
+  it("offers both ways, every stretch marked checked, and keeps the one picked", () => {
+    localStorage.removeItem(LOOKALIKE_COMPARE_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-lookalike-compare="${c}"]`)!;
+    expect(way("every")).toHaveAttribute("aria-checked", "true");
+    expect(way("plain")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("plain"));
+    expect(way("plain")).toHaveAttribute("aria-checked", "true");
+    expect(way("every")).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem(LOOKALIKE_COMPARE_KEY)).toBe("plain");
+    localStorage.removeItem(LOOKALIKE_COMPARE_KEY);
   });
 });
 

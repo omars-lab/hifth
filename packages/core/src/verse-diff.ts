@@ -37,15 +37,30 @@ function bareKey(key: string): string {
   return hash === -1 ? tail : tail.slice(0, hash);
 }
 
-/** One side of the comparison: an ayah, the page it is printed on, and the run it shares. */
+/** An inclusive run of print word indices. */
+export type WordRange = readonly [number, number];
+
+/** One side of the comparison: an ayah, the page it is printed on, and what it shares. */
 export interface DiffSide {
   /** Bare `"2:48"`, ready for {@link WordIndex}. */
   readonly key: string;
   /** The page whose word shard and artwork this side is drawn from. */
   readonly page: number;
-  /** Inclusive print word indices the two ayahs have in common. */
-  readonly shared: readonly [number, number];
+  /**
+   * The runs of print word indices the two ayahs have in common. One for a pair
+   * with a span; several when every shared stretch is marked; none when the two
+   * are shown side by side with nothing marked.
+   */
+  readonly shared: readonly WordRange[];
 }
+
+/**
+ * How a look-alike with no single shared stretch is compared:
+ *   plain  both verses as printed, nothing marked
+ *   every  every stretch of two words or more they share is marked, where the
+ *          row carries them (only the "repeat" rows do)
+ */
+export type CompareWay = "plain" | "every";
 
 /** The two sides of a look-alike comparison. */
 export interface WordDiff {
@@ -56,26 +71,33 @@ export interface WordDiff {
 /**
  * The comparison an edge describes, or `null` when it describes none.
  *
- * `null` is the common case and not a failure: `build-adjacency.mjs` emits a
- * span only where the shared run occurs in exactly one place on *both* sides,
- * because naming one of several occurrences would be a guess. 2,544 of 2,996
- * look-alike edges carry one; the rest make no claim about where they match, and
- * a caller shows its plain note instead — the same fallback the twelve-ayah
- * table left in place for every pair it did not cover.
+ * `build-adjacency.mjs` emits a span only where the shared run occurs in exactly
+ * one place on *both* sides, because naming one of several occurrences would be
+ * a guess. An edge without one still opens when it says why it is listed
+ * (`match`): a "repeat" edge with every shared stretch marked or nothing marked,
+ * as the reader set it; a "loose" edge always unmarked. `null` is left for an
+ * edge that gives neither, and the caller shows its plain note instead.
  *
  * The source page is read off `dir.dPage`, which is the target's page minus the
  * source's, rather than passed in. The edge is self-describing that way, and the
  * arithmetic cannot drift out of step with the page the edge actually names.
  */
-export function wordDiff(edge: Edge, fromKey: string): WordDiff | null {
-  if (!edge.span || !edge.toSpan) return null;
-  const from = edge.span.from;
-  const to = edge.toSpan.from;
-  if (from[1] < from[0] || to[1] < to[0]) return null;
-  return {
-    from: { key: bareKey(fromKey), page: edge.page - edge.dir.dPage, shared: from },
-    to: { key: bareKey(edge.to), page: edge.page, shared: to },
-  };
+export function wordDiff(edge: Edge, fromKey: string, way: CompareWay = "plain"): WordDiff | null {
+  const side = (fromShared: readonly WordRange[], toShared: readonly WordRange[]): WordDiff => ({
+    from: { key: bareKey(fromKey), page: edge.page - edge.dir.dPage, shared: fromShared },
+    to: { key: bareKey(edge.to), page: edge.page, shared: toShared },
+  });
+  if (edge.span && edge.toSpan) {
+    const from = edge.span.from;
+    const to = edge.toSpan.from;
+    if (from[1] < from[0] || to[1] < to[0]) return null;
+    return side([from], [to]);
+  }
+  // No one stretch to mark, but the row says why it is listed (2026-10-09):
+  // the two can still be laid side by side.
+  if (!edge.match) return null;
+  if (way === "every" && edge.stretches) return side(edge.stretches.from, edge.stretches.to);
+  return side([], []);
 }
 
 /**
@@ -93,10 +115,19 @@ export function wordDiff(edge: Edge, fromKey: string): WordDiff | null {
  */
 export function divergentRuns(
   present: WordSpanRange,
-  shared: readonly [number, number],
-): Array<readonly [number, number]> {
-  const runs: Array<readonly [number, number]> = [];
-  if (shared[0] > present.from) runs.push([present.from, Math.min(shared[0] - 1, present.to)]);
-  if (shared[1] < present.to) runs.push([Math.max(shared[1] + 1, present.from), present.to]);
+  shared: readonly WordRange[],
+): WordRange[] {
+  const runs: WordRange[] = [];
+  // Walk the stretches in order; whatever lies between them, and before the
+  // first and after the last, is what differs.
+  let next = present.from;
+  for (const [lo, hi] of [...shared].sort((a, b) => a[0] - b[0])) {
+    if (lo > next) {
+      const to = Math.min(lo - 1, present.to);
+      if (to >= next) runs.push([next, to]);
+    }
+    next = Math.max(next, hi + 1);
+  }
+  if (next <= present.to) runs.push([next, present.to]);
   return runs;
 }

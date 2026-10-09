@@ -118,6 +118,14 @@ export interface Edge {
    * once; "loose" — alike, but nothing longer than a word in common.
    */
   readonly match?: "loose" | "repeat";
+  /**
+   * On a "repeat" row: every stretch of two words or more the pair shares, in
+   * print word indices on each side, so a comparison can mark them all.
+   */
+  readonly stretches?: {
+    readonly from: readonly (readonly [number, number])[];
+    readonly to: readonly (readonly [number, number])[];
+  };
   /** Identical wording — popover labels it "identical; context differs". */
   readonly twin?: boolean;
   /** Show the following ayah's opening in the popover (hifz disambiguator). */

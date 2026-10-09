@@ -196,7 +196,25 @@
           "dPage": 11,
           "sameJuz": true
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              3,
+              6
+            ]
+          ],
+          "to": [
+            [
+              1,
+              2
+            ],
+            [
+              4,
+              5
+            ]
+          ]
+        }
       }
     ],
     "ext": []
@@ -400,6 +418,28 @@
           "dPage": -26
         },
         "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              1,
+              4
+            ],
+            [
+              6,
+              8
+            ]
+          ],
+          "to": [
+            [
+              1,
+              4
+            ],
+            [
+              6,
+              8
+            ]
+          ]
+        },
         "ctx": true
       },
       {

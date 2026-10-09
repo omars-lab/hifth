@@ -124,4 +124,22 @@ describe("HopPopover", () => {
     expect(repeat).toMatch(/next verse|الآية التالية/);
     expect(plain).not.toMatch(/word for word|كلمةً بكلمة|more than once|تتكرر/);
   });
+
+  // Those rows can still be opened to lay the two verses side by side; a row
+  // that gives no reason at all has nothing to open.
+  it("a look-alike with a reason opens a comparison even with no marked words", () => {
+    render(
+      <HopPopover
+        chip={chip([edge(2, 3, { match: "loose" }), edge(2, 4, { match: "repeat" }), edge(2, 5)])}
+        fromKey="quran/hafs-kfqc/2:2"
+        canHop={() => true}
+        onHop={noop}
+        onClose={noop}
+      />,
+    );
+    const opens = screen
+      .getAllByRole("listitem")
+      .map((li) => li.querySelector("[aria-expanded]") !== null);
+    expect(opens).toEqual([true, true, false]);
+  });
 });

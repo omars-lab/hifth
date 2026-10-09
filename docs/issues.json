@@ -3364,10 +3364,11 @@
         "file": "docs/design/knowledge-graph-commentary.md",
         "item": "㊾"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "The 393 rows ㊽ explains still cannot open a comparison. Build both ways: both verses side by side, nothing washed (all 393); and, for the 151 'repeat' rows, wash outside every shared stretch. Better one is the default, the other an info-panel setting."
+      "note": "The 393 rows ㊽ explains could not open a comparison. Now they open: the 151 'repeat' rows carry every shared stretch (edge `stretches`) and wash them all by default; 'side by side, unmarked' is an info-panel setting; loose rows open unmarked. Tests: scripts/adjacency-reasons.test.mjs, DiffView.test.tsx, HopPopover.test.tsx, HighlightMenu.test.tsx, Colophon.test.tsx, all failed first.",
+      "closedBy": "apps/web/src/components/DiffView.test.tsx"
     }
   ]
 }

@@ -157,7 +157,29 @@
           "dSurah": 26,
           "dPage": 124
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              5,
+              8
+            ],
+            [
+              10,
+              14
+            ]
+          ],
+          "to": [
+            [
+              6,
+              9
+            ],
+            [
+              33,
+              37
+            ]
+          ]
+        }
       }
     ],
     "ext": []
@@ -358,7 +380,29 @@
           "dSurah": 15,
           "dPage": 90
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              12,
+              13
+            ],
+            [
+              17,
+              18
+            ]
+          ],
+          "to": [
+            [
+              1,
+              2
+            ],
+            [
+              6,
+              7
+            ]
+          ]
+        }
       }
     ],
     "ext": []

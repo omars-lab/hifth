@@ -789,6 +789,10 @@ export interface Strings {
   longVerseSmaller: string;
   longVerseShorter: string;
   longVerseNote: string;
+  lookalikeCompareTitle: string;
+  lookalikeCompareEvery: string;
+  lookalikeComparePlain: string;
+  lookalikeCompareNote: string;
   relatedListTitle: string;
   relatedListLine: string;
   relatedListAll: string;
@@ -1456,6 +1460,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     longVerseSmaller: m.longVerseSmaller,
     longVerseShorter: m.longVerseShorter,
     longVerseNote: m.longVerseNote,
+    lookalikeCompareTitle: m.lookalikeCompareTitle,
+    lookalikeCompareEvery: m.lookalikeCompareEvery,
+    lookalikeComparePlain: m.lookalikeComparePlain,
+    lookalikeCompareNote: m.lookalikeCompareNote,
     relatedListTitle: m.relatedListTitle,
     relatedListLine: m.relatedListLine,
     relatedListAll: m.relatedListAll,

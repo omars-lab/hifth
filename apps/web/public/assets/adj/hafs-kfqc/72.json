@@ -62,7 +62,25 @@
           "dSurah": -51,
           "dPage": -242
         },
-        "match": "repeat"
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              3,
+              6
+            ]
+          ],
+          "to": [
+            [
+              10,
+              11
+            ],
+            [
+              14,
+              15
+            ]
+          ]
+        }
       }
     ],
     "ext": []

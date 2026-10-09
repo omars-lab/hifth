@@ -61,3 +61,37 @@ test("the reason is the same read from either verse", () => {
     assert.equal(back, match, `${pair}: the two directions disagree`);
   }
 });
+
+// A "repeat" row can be opened with every shared stretch marked, so it carries
+// them: on both sides, in order, never overlapping, and the same pair read
+// from the other verse carries the same stretches the other way round.
+test("a row whose shared words repeat carries every stretch, on both sides", () => {
+  const seen = new Map();
+  let rows = 0;
+  for (const { from, edge } of edges()) {
+    const where = `${from} → ${bare(edge.to)}`;
+    if (edge.match !== "repeat") {
+      assert.ok(!edge.stretches, `${where}: carries stretches without repeating`);
+      continue;
+    }
+    rows++;
+    const s = edge.stretches;
+    assert.ok(s?.from?.length && s?.to?.length, `${where}: no stretches to mark`);
+    for (const side of [s.from, s.to]) {
+      let last = 0;
+      for (const [lo, hi] of side) {
+        assert.ok(lo >= 1 && hi >= lo, `${where}: a stretch runs backwards`);
+        assert.ok(lo > last, `${where}: stretches out of order or overlapping`);
+        last = hi;
+      }
+    }
+    seen.set(`${from}>${bare(edge.to)}`, s);
+  }
+  assert.ok(rows > 100, `only ${rows} repeat rows`);
+  for (const [pair, s] of seen) {
+    const [a, b] = pair.split(">");
+    const back = seen.get(`${b}>${a}`);
+    if (!back) continue;
+    assert.deepEqual(back.from, s.to, `${pair}: the two directions mark different words`);
+  }
+});
