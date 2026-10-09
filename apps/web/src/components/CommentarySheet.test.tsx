@@ -39,13 +39,16 @@ const road: Edge = {
   dir: { dSurah: 0, dPage: 0 },
 };
 
-function drawer(entry: CommentaryNote, more: { back?: boolean; side?: "left" | "right" } = {}) {
+function drawer(
+  entry: CommentaryNote,
+  more: { back?: boolean; side?: "left" | "right"; roads?: Edge[] } = {},
+) {
   render(
     <LangProvider>
       <CommentarySheet
         entry={entry}
         onClose={() => {}}
-        roads={[road]}
+        roads={more.roads ?? [road]}
         onHop={() => {}}
         back={more.back ? { label: "2:1", onBack: () => {} } : null}
         side={more.side ?? null}
@@ -144,6 +147,19 @@ describe("where the note lies on a spread", () => {
     const big = { left: -200, right: 1640, top: -100, bottom: 1300 };
     expect(overLeaf(big, "right", screen)).toEqual({ left: 724, width: 704, top: 12, height: 876 });
     expect(overLeaf(big, "left", screen)).toEqual({ left: 12, width: 704, top: 12, height: 876 });
+  });
+});
+
+describe("a range the note cites, in the related verses", () => {
+  beforeEach(() => localStorage.setItem(LANG_STORAGE_KEY, "en"));
+
+  // A note citing "vv. 30–34" used to give one card per verse, and the list's few
+  // places filled before the note's other references were reached.
+  it("is one card that names the whole range, and hops to its first verse", () => {
+    const range: Edge = { ...road, to: "quran/hafs-kfqc/2:30", through: "quran/hafs-kfqc/2:34" };
+    drawer(note("en"), { roads: [range, road] });
+    expect(screen.getByRole("button", { name: /2:30–2:34/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /2:5\b/ })).toBeTruthy();
   });
 });
 

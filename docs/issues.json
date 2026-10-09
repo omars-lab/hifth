@@ -3239,6 +3239,29 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Walking an English first visit (2026-10-08): with the tips opened from settings, the pitch build's foot line ('read its note') repeated the first tip. The line is quiet while the tips are up (App.tsx, coachUp). Test: pitch.spec.ts 'while the tips are up, the foot line does not repeat the first one' failed first."
+    },
+    {
+      "id": "related-verses-ranges-crowd-out",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊴"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Walking the demo's 18:60 (2026-10-08): a run of verses a note cites as one arrived as every verse in it, each its own related-verse card, so one run filled the eight places and pushed out the note's other references (1,149 verses lost 3,523 references). Runs now fold into one card naming the whole run (pitch extractor, runs.mjs). Tests: runs.test.mjs, CommentarySheet.test.tsx 'a range the note cites', pitch.spec.ts 'a range the note cites is one related verse' all failed first."
+    },
+    {
+      "id": "related-verses-drop-bare-numbers",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊵"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Walking 18:13 (2026-10-08): a note citing several verses of one surah by bare number after the first keeps only the first of each surah in its related verses; the note's text links them all. Fix in the pitch extractor, reading the bare numbers back into the list."
     }
   ]
 }

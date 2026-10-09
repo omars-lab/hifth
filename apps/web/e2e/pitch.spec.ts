@@ -637,6 +637,24 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(sheet(page)).toContainText("The Study Quran");
   });
 
+  test("a range the note cites is one related verse, so the note's other references still fit", async ({ page }) => {
+    // 18:60's note cites long runs of its own surah and places in other surahs.
+    // Each run came through as one card per verse, so the list filled with one
+    // run's verses and the other surahs never showed. Checked by shape, so the
+    // test names none of the book's references.
+    await page.goto("/#/hafs-kfqc/18:60");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    const hops = sheet(page).getByRole("button", { name: /^Hop to / });
+    await expect(hops.first()).toBeVisible();
+    const names = await hops.evaluateAll((els) => els.map((e) => e.getAttribute("aria-label") ?? ""));
+    const refs = names.map((t) => [...t.matchAll(/(\d+):(\d+)/g)].map((m) => ({ surah: Number(m[1]), ayah: Number(m[2]) })));
+    expect(refs.some((r) => r.length === 2), "a run shows as one card naming its ends").toBe(true);
+    const firsts = refs.flatMap((r) => r.slice(0, 1));
+    expect(new Set(firsts.map((f) => f.surah)).size, "references outside surah 18 fit").toBeGreaterThan(1);
+    const nextTo = firsts.some((f) => firsts.some((g) => g.surah === f.surah && g.ayah === f.ayah + 1));
+    expect(nextTo, "no two cards for verses side by side").toBe(false);
+  });
+
   test("a related verse's note starts at its top, not where the last one was scrolled to", async ({ page }) => {
     // The list of related verses sits at the foot of a note, so reaching it
     // scrolls the note down. Following one turned the note to the new verse
