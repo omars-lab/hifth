@@ -256,6 +256,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/27:83",
+        "through": "quran/hafs-kfqc/27:84",
         "page": 384,
         "dir": {
           "dSurah": 0,
@@ -277,6 +278,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/41:19",
+        "through": "quran/hafs-kfqc/41:20",
         "page": 478,
         "dir": {
           "dSurah": 14,
@@ -303,6 +305,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/27:83",
+        "through": "quran/hafs-kfqc/27:84",
         "page": 384,
         "dir": {
           "dSurah": 0,
@@ -312,6 +315,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/41:19",
+        "through": "quran/hafs-kfqc/41:20",
         "page": 478,
         "dir": {
           "dSurah": 14,

@@ -3322,6 +3322,29 @@
       "owner": "agent",
       "note": "Walking the notes on the iPad and a laptop (2026-10-09): a note longer than its card was cut through the letters of its last line with nothing to say it went on. The card now fades its foot while there is more below and drops the fade at the end, as the tajweed key does (CommentarySheet data-more, a sticky gradient at the card's real edge; the card and its parts are watched as they grow). Tests: pitch.spec.ts 'a note longer than its card fades at its foot' and 'on a phone the short note fades too' failed first.",
       "closedBy": "apps/web/e2e/pitch.spec.ts"
+    },
+    {
+      "id": "lookalike-passage-row-unnamed",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊻"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Walking the look-alikes in the iPad app (2026-10-09): 2:48 listed 2:122 with no difference line and nothing to compare. The outside list pairs whole passages and the build kept only the other passage's first verse (102 links). The build now keeps where the passage ends (edge `through`, never on a twin; one entry listing a verse twice stays one verse), and the hop list and highlight menu name the range as the note card already did. Tests: scripts/adjacency-passages.test.mjs, plus a range-label test in HopPopover.test.tsx and HighlightMenu.test.tsx, all failed first.",
+      "closedBy": "scripts/adjacency-passages.test.mjs"
+    },
+    {
+      "id": "lookalike-passage-and-verse-overlap",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊼"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "A verse can list a passage match and, separately, one verse inside that passage with its own hand-written note (2:48: 2:122–2:123 and 2:123). Both are true; a hafiz sees two rows for one memory. Keep both, fold one into the other, or hide the passage row — look at more such pairs before choosing."
     }
   ]
 }

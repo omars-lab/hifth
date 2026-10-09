@@ -86,4 +86,21 @@ describe("HopPopover", () => {
     expect(without).not.toHaveAttribute("aria-expanded");
     expect(without!.textContent).not.toContain("⌄");
   });
+
+  // The outside look-alike list pairs whole passages: two verses here with two
+  // verses there. Every verse of the first passage links to the start of the
+  // second, so a row named only by that first verse gave no reason it was
+  // listed — no note, nothing to compare. It names the whole passage.
+  it("a look-alike that is a whole passage is named as the passage", () => {
+    render(
+      <HopPopover
+        chip={chip([edge(2, 3, { through: "quran/hafs-kfqc/2:5" })])}
+        fromKey="quran/hafs-kfqc/2:2"
+        canHop={() => true}
+        onHop={noop}
+        onClose={noop}
+      />,
+    );
+    expect(screen.getByRole("listitem").textContent).toMatch(/2:3–2:5|٢:٣–٢:٥/);
+  });
 });

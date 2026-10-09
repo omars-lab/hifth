@@ -578,6 +578,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/2:122",
+        "through": "quran/hafs-kfqc/2:123",
         "page": 19,
         "dir": {
           "dSurah": 0,
@@ -1450,6 +1451,7 @@
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/2:47",
+        "through": "quran/hafs-kfqc/2:48",
         "page": 7,
         "dir": {
           "dSurah": 0,

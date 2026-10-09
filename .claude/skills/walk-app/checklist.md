@@ -112,6 +112,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Scroll deep into a list: you can still close it. · any · issue: `list-sheet-title-scrolls-away`
 - [ ] Every look-alike row that offers to open has something to show. · any · issue:
   `lookalike-row-opens-to-nothing`
+- [ ] Every look-alike row says why it is there: a difference line, a comparison to open, or a
+  passage named as a range (try 2:48 — "2:122–2:123"). No bare verse name. · any · issue:
+  `lookalike-passage-row-unnamed`
 - [ ] The look-alike buttons cover no words, no close button, and are not hidden by a note. ·
   phone, phone-side, desktop · issues: `lookalike-chips-cover-lifted-page`,
   `lookalike-chips-sideways-cover-close`, `chips-under-facing-note`

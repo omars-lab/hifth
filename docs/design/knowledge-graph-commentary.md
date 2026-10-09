@@ -1251,3 +1251,22 @@ the tajweed key's list already does; once the reader scrolls to the end, the fad
 on the card's real edge, so the line it softens is the one actually cut. On a phone the card first
 opens short and grows as it is pulled up; the fade is there in both. Two browser tests, one on a laptop
 and one on a phone that pulls the card up first, failed first.
+
+### ㊻ When a verse's look-alike is a whole passage, does its row say so? · **fixed**
+
+Seen walking the look-alikes on the iPad (2026-10-09): at 2:48 the list named 2:122 with nothing under it — no
+difference line and nothing to compare — so a reader had no idea why it was there. The outside look-alike
+list pairs whole passages: 2:47–48 with 2:122–123. Every verse of the first passage links to the start of
+the second, and our build kept the start but threw away where the passage ends. 102 links were like this.
+
+**The fix:** the build keeps where the passage ends, and the row names the whole passage ("2:122–2:123"),
+in the look-alike list and the highlight menu, the way the note card already named a range of verses. A
+word-for-word twin stays one verse. A data test on the shipped links and a test on each list failed first.
+
+### ㊼ When a verse lists both a passage and one verse inside it, is that one look-alike or two? · **open**
+
+After ㊻, 2:48's list shows "2:122–2:123" (the passage match) and, under it, "2:123" (a hand-written
+note: the same two words in the other order, and different verbs). Both are true, and the second says
+more, but a hafiz sees two rows for one memory. Options: keep both (today); fold the verse row into the
+passage row, keeping its note; or hide the passage row when a verse inside it already has its own. Not
+decided; it waits for a look at a few more such pairs.

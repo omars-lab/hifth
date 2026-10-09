@@ -159,7 +159,9 @@ export function HopPopover({
         <ul className={styles.list}>
           {edges.map((edge) => {
             const enabled = canHop(edge.to);
-            const label = t.ayahLabel(edge.to) ?? edge.to;
+            // A look-alike that is a whole passage is named as the passage.
+            const label =
+              (edge.through ? t.rangeLabel(edge.to, edge.through) : t.ayahLabel(edge.to)) ?? edge.to;
             // When we do not carry the target's page, the leap is honestly
             // disabled — but the verse still exists, so we link out to it on the
             // outside library rather than dead-ending (the qul-reliance
