@@ -29,3 +29,14 @@ Nothing: the words stay upright. A panel that slants the wrong words a quarter o
 reads worse than one that slants none, and tuning the rule against a sample risks fitting the
 sample. Putting italics back needs a way to read the slant off the page pictures themselves,
 which is listed in the commentary design page as what would answer it.
+
+## What came next: the demo's notes, by hand
+
+The notes the demo opens are few, so their italics were read off the page pictures by eye
+instead: the two notes on 2:255, the notes on 18:10–13, and on 18:60 both its own note and the
+one it shares with the verses up to 18:82. That is 75 hand-read rows, each a few words of
+context with the slanted run marked, kept in the private books repository beside the other
+hand-read fixes, never in this one. The extractor finds each row's one place in the verse's
+notes and refuses a row that finds none or two, so a row that goes stale after a new capture
+fails the run rather than slanting the wrong words. A note the book files under several verses
+carries its italics to all of them. Every other note stays upright.

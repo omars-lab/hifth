@@ -80,13 +80,19 @@ function focusables(root: HTMLElement): HTMLElement[] {
  *
  * No source's words live in these bytes — only in the note this renders.
  */
+// The private-use pair the extractor wraps around a run the book sets in
+// italics; the extractor has the same pair.
+const SLANT = /([\uE000\uE001])/;
+
 /**
  * Keep the punctuation that touches a link or an initial on its line, as it
  * would stay with a word: a button is one box in the line, so the line could
  * otherwise break between "(" and the verse it opens, stranding the bracket.
+ * Then draw the words the book sets in italics, which may run up to a link.
  */
 function together(parts: ReactNode[]): ReactNode[] {
-  const out: ReactNode[] = [];
+  type Glued = { lead: string; part: ReactNode; trail: string; key: string };
+  const out: (string | Glued)[] = [];
   for (let j = 0; j < parts.length; j++) {
     const part = parts[j];
     if (typeof part === "string") {
@@ -99,19 +105,31 @@ function together(parts: ReactNode[]): ReactNode[] {
     const next = parts[j + 1];
     const trail = typeof next === "string" ? /^\S*/.exec(next)![0] : "";
     if (trail) parts[j + 1] = (next as string).slice(trail.length);
-    out.push(
-      lead || trail ? (
-        <span key={`w${j}`} className={styles.together}>
-          {lead}
-          {part}
-          {trail}
-        </span>
-      ) : (
-        part
-      ),
-    );
+    out.push({ lead, part, trail, key: `w${j}` });
   }
-  return out;
+  // A run opens in one piece of text and closes in the same or a later one.
+  let open = false;
+  let n = 0;
+  const words = (text: string): ReactNode[] =>
+    text.split(SLANT).flatMap((piece): ReactNode[] => {
+      if (piece === "\uE000" || piece === "\uE001") {
+        open = piece === "\uE000";
+        return [];
+      }
+      if (!piece) return [];
+      return [open ? <em key={`i${n++}`}>{piece}</em> : piece];
+    });
+  return out.flatMap((item): ReactNode[] => {
+    if (typeof item === "string") return words(item);
+    if (!item.lead && !item.trail) return [item.part];
+    return [
+      <span key={item.key} className={styles.together}>
+        {words(item.lead)}
+        {item.part}
+        {words(item.trail)}
+      </span>,
+    ];
+  });
 }
 
 export function CommentarySheet({
