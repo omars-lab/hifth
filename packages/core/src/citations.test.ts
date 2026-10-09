@@ -44,6 +44,26 @@ describe("verse citations in the commentary prose", () => {
     expect(cited("see 2:42. In 140 years")).toEqual([{ text: "2:42", surah: 2, ayah: 42 }]);
   });
 
+  it("carries a list on before a colon, a bracket, or 'of this surah'", () => {
+    const head = { text: "2:10", surah: 2, ayah: 10 };
+    const twenty = { text: "20", surah: 2, ayah: 20 };
+    expect(cited("as 2:10, 20 of this surah")).toEqual([head, twenty]);
+    expect(cited("as 2:10, 20: the same")).toEqual([head, twenty]);
+    expect(cited("as 2:10, 20 (and later)")).toEqual([head, twenty]);
+  });
+
+  it("still leaves a number that starts the next thing as text", () => {
+    const head = { text: "2:10", surah: 2, ayah: 10 };
+    // A semicolon parts surahs, so a bare number after one may be a slip for
+    // another surah: leave it, rather than link the wrong verse.
+    expect(cited("see 2:10; 20; 30.")).toEqual([head]);
+    // A book of another scripture, and a count.
+    expect(cited("see 2:10; 1 Kings")).toEqual([head]);
+    expect(cited("see 2:10, 40 days")).toEqual([head]);
+    // A full citation written with a space after its colon.
+    expect(cited("see 2:10, 23: 24")).toEqual([head]);
+  });
+
   it("keeps every word of a list, in order", () => {
     const text = "see 2:42, 140, and 146; then";
     expect(splitCitations(text).map((p) => (typeof p === "string" ? p : p.text)).join("")).toBe(text);

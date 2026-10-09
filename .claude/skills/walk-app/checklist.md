@@ -81,6 +81,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Verses a note points to are links; a mention of the note's own verse is not, and does not
   break across two lines. · any · issues: `intro-and-same-surah-verses-unlinked`,
   `note-links-to-its-own-verse`, `own-verse-breaks-across-lines`
+- [ ] In a note, a bare verse number that carries a list on after a comma is a link, also when a colon,
+  a bracket or "of this surah" follows it; one after a semicolon stays plain text, as the book puts
+  a semicolon between surahs · laptop · test: `packages/core/src/citations.test.ts`
 - [ ] At the foot of 18:60's note, the related verses show each cited run as one card
   (in the shape "9:4–9:7") beside the note's references to other surahs, not eight cards of one run. ·
   any · issue: `related-verses-ranges-crowd-out`

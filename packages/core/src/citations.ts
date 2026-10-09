@@ -13,10 +13,14 @@ export interface Citation {
 const CITE = /\b(\d{1,3}):(\d{1,3})(?:[–-]\d{1,3})?[a-z]?\b|\bvv?\.\s*(\d{1,3})(?:[–-]\d{1,3})?[a-z]?\b/g;
 
 // A bare verse number continuing a list — "2:42, 140, and 146" — which the book
-// writes without repeating the surah. It must end where a list item ends (a
-// comma, a semicolon, a stop, a bracket, "and", or the end), so "1:5, 40 days"
-// leaves the 40 alone.
-const FOLLOW = /,\s*(?:and\s+)?(\d{1,3})(?:[–-]\d{1,3})?[a-z]?(?=[,;.)\]]|\s+and\b|$)/y;
+// writes without repeating the surah, after a comma. It must end where a list
+// item ends (a comma, a semicolon, a stop, a bracket, a colon that starts no
+// verse, "and", "of this surah", or the end), so "1:5, 40 days" leaves the 40
+// alone and "23: 24" stays one citation. Not after a semicolon: the book puts
+// one between surahs, and a bare number there is as often a slip for another
+// surah as a verse of the same one, and a wrong link is worse than none.
+const FOLLOW =
+  /,\s*(?:and\s+)?(\d{1,3})(?:[–-]\d{1,3})?[a-z]?(?=[,;.)\]]|:(?!\s*\d)|\s+(?:and|of\s+this)\b|\s+\(|$)/y;
 
 const isVerse = (surah: number, ayah: number): boolean => {
   const count = AYAH_COUNTS[surah - 1];
