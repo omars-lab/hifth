@@ -1077,6 +1077,7 @@ commentary design note's numbered items, and in the issues list.
 - Two of the app's comparison pictures showed The Study Quran's words in a public repository; they are out of the tree, the comparison now refuses the pitch build, and switching the app to the public build no longer keeps the pitch's private folder (native-shell.md ⑲, ⑳). Rewriting history to remove the old pictures is the owner's call.
 - The app's comparison pictures were retaken of the public build on the owner's yes, and main's history was rewritten without the two old pictures (native-shell.md ⑲); deleting the old branches and the GitHub purge are the owner's.
 - The tajweed key on a laptop-sized window hid its last rule and the source's credit with no sign it scrolled; its foot now fades while there is more (native-shell.md ㉑).
+- The book opened on two squat pages that jumped taller at the first turn; the opening pages now sit on normal page-shaped paper with their text kept large and centred, the owner's pick of three drawn ways (knowledge-graph-commentary.md ㊱).
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.

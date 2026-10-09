@@ -1009,3 +1009,23 @@ the top line changed, the menu put the keyboard back on it, even after the reade
 new button, and once the reader has moved through the menu, a line arriving leaves them where they are.
 Unit tests check both (each failed before its change); the browser test that found it now waits for the
 menu to fill before pressing keys, and passed sixteen runs in a row in Safari's engine.
+
+### ㊱ Does the book open on pages the same size as the rest, or does it jump at the first turn? · **fixed**
+
+Found walking the pitch as a first visitor, 2026-10-08. The print draws its first two pages, Al-Fatihah
+and the opening of Al-Baqarah, as a small square block of text with no page around it, and the app cut
+the paper to that square. So the book opened on two squat cards, and at the first turn it jumped taller
+to the page shape every other page has. The first thing a visitor does was the first thing that looked
+wrong.
+
+Three ways were drawn side by side on the real spread: leave it; page-shaped paper with the opening text
+shrunk to the size of type every other page uses; and page-shaped paper with the opening text kept as
+large as it was, centred top to bottom. The owner picked the third: a printed copy gives its opening
+pages room, and the shrunk text looked lost on a large empty page.
+
+**Fixed, 2026-10-08:** the two opening pages now sit on paper the size and shape of every other page,
+the text across the page's full width and centred top to bottom, and a tap on a verse there still picks
+that verse. A browser test opens page 3, then page 1, and checks both opening pages match page 3's paper
+and are centred; it failed before the change (page 1's paper was 217 pixels short). The saved picture of
+page 1 was retaken on the owner's pick. A frame like the print's ornament, to fill the space above and
+below, is not built.

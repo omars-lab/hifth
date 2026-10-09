@@ -3191,6 +3191,18 @@
       "owner": "agent",
       "closedBy": "scripts/native-golden-public.test.mjs",
       "note": "Switching the app from the pitch build to the public one (2026-10-08) kept the pitch's private folder, because a folder the copy skips is one it never deletes; the check after the copy refused it, so nothing leaked, but the switch failed. The public copy now deletes skipped folders. Tests drive the copy alone (both failed first)."
+    },
+    {
+      "id": "opening-pages-squat",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊱"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/spread-fit.spec.ts",
+      "note": "Found walking the pitch as a first visitor (2026-10-08): pages 1 and 2 are drawn as the text block alone, 235 units square, against 345 by 550 for every other page, and the paper took its height from the drawing, so the book opened on two squat cards and jumped taller at the first turn. Three ways were drawn on the real spread; the owner picked page-shaped paper with the opening text kept full width and centred top to bottom. PageStage now adds top and bottom margins to a drawing squatter than the page, and reads them back where it maps the page to the screen. Test: spread-fit.spec.ts 'the opening pages are the size of every other page', which failed before the change (page 1 paper 217 px short); the page-1 saved picture was retaken on the owner's pick."
     }
   ]
 }

@@ -1976,6 +1976,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       svgEl.setAttribute("role", "group");
       svgEl.setAttribute("aria-labelledby", `page-label-${targetPage}`);
       svgEl.classList.add(styles.svg ?? "");
+      fitDrawingToPage(svgEl as unknown as SVGSVGElement);
       printRunningHeads(host, svgEl, targetPage, resolver, tRef.current);
       layer.appendChild(host);
 
@@ -4244,11 +4245,40 @@ function textBoxOf(host: HTMLElement, svg: SVGSVGElement): { x: number; y: numbe
   const padRight = parseFloat(cs.paddingRight) || 0;
   const padTop = parseFloat(cs.paddingTop) || 0;
   const head = svg.previousElementSibling as HTMLElement | null;
+  // A drawing smaller than the page sits inside margins (`fitDrawingToPage`).
+  const art = getComputedStyle(svg);
+  const width = host.clientWidth - padLeft - padRight;
   return {
-    x: host.clientLeft + padLeft,
-    y: host.clientTop + padTop + (head?.offsetHeight ?? 0),
-    width: host.clientWidth - padLeft - padRight,
+    x: host.clientLeft + padLeft + (parseFloat(art.marginLeft) || 0),
+    y: host.clientTop + padTop + (head?.offsetHeight ?? 0) + (parseFloat(art.marginTop) || 0),
+    width: parseFloat(art.width) || width,
   };
+}
+
+/** The print's page, in the drawing's own units: 345 wide, 550 tall. */
+const PAGE_W = 345;
+const PAGE_H = 550;
+
+/**
+ * Lay a drawing squatter than the page in the middle of a page-shaped sheet.
+ *
+ * The two opening pages are drawn as the text block alone, 235 units square,
+ * and the paper used to be cut to it: the book opened on two squat cards and
+ * the paper jumped in size at the first turn. Now the drawing keeps the full
+ * width — so the opening text stays large, the way a printed copy gives those
+ * pages room (the owner's pick, 2026-10-08) — and the rest of the page's
+ * height is split above and below it. Margins in percent are a share of the
+ * paper's width, top and bottom too, which is why the height is worked out in
+ * a 345-wide page's units. Every other page is already page-shaped and
+ * untouched. `textBoxOf` reads the top margin back, so a verse is placed where
+ * it is drawn.
+ */
+function fitDrawingToPage(svg: SVGSVGElement): void {
+  const vb = svg.viewBox?.baseVal;
+  if (!vb || !(vb.width > 0)) return;
+  const tall = (PAGE_W * vb.height) / vb.width; // its height, drawn 345 wide
+  if (tall >= PAGE_H) return;
+  svg.style.marginBlock = `${((PAGE_H - tall) / 2 / PAGE_W) * 100}%`;
 }
 
 /** Read a page's viewBox width (defaults to the Madani 345). */
