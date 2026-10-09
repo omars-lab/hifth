@@ -3381,6 +3381,18 @@
       "owner": "agent",
       "note": "Opening a row near the foot of a look-alike list drew its comparison below the list's edge (Firefox; phones too). The list now moves to show the row whole, or its name just under the pinned title when it is too tall. Tests: apps/web/src/reveal.test.ts, DiffView.test.tsx, e2e/lookalike-compare-view.spec.ts (Firefox, iPhone, Android), all failed first.",
       "closedBy": "apps/web/e2e/lookalike-compare-view.spec.ts"
+    },
+    {
+      "id": "lookalike-passage-row-reason",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "①"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Passage rows were measured against the passage's first verse, so 54 of 101 said nothing useful and could not open. Each is now measured against the verse inside the passage it matches best, and every row gives a reason.",
+      "closedBy": "apps/web/e2e/lookalike-compare-view.spec.ts"
     }
   ]
 }

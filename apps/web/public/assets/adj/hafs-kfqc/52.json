@@ -358,10 +358,26 @@
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/68:46",
         "through": "quran/hafs-kfqc/68:47",
+        "like": {
+          "to": "quran/hafs-kfqc/68:47",
+          "page": 566
+        },
         "page": 566,
         "dir": {
           "dSurah": 16,
           "dPage": 41
+        },
+        "span": {
+          "from": [
+            1,
+            5
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            5
+          ]
         },
         "ctx": true
       },

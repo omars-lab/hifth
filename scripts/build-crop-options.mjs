@@ -113,7 +113,8 @@ function sweep() {
         pairs++;
         const sides = [
           { key: `${surah}:${ayah}`, page: e.page - (e.dir?.dPage ?? 0) },
-          { key: e.to.split("/").pop(), page: e.page },
+          // A passage row compares against the verse inside it that matches.
+          { key: (e.like?.to ?? e.to).split("/").pop(), page: e.like?.page ?? e.page },
         ];
         for (const s of sides) {
           const idx = indexOf(s.page);

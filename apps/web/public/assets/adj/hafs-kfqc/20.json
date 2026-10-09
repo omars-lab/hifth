@@ -74,10 +74,26 @@
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/79:15",
         "through": "quran/hafs-kfqc/79:16",
+        "like": {
+          "to": "quran/hafs-kfqc/79:16",
+          "page": 583
+        },
         "page": 583,
         "dir": {
           "dSurah": 59,
           "dPage": 271
+        },
+        "span": {
+          "from": [
+            1,
+            1
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            1
+          ]
         }
       }
     ],
@@ -456,6 +472,10 @@
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/7:120",
         "through": "quran/hafs-kfqc/7:122",
+        "like": {
+          "to": "quran/hafs-kfqc/7:121",
+          "page": 165
+        },
         "page": 164,
         "dir": {
           "dSurah": -13,
@@ -463,13 +483,13 @@
         },
         "span": {
           "from": [
-            2,
-            2
+            4,
+            6
           ]
         },
         "toSpan": {
           "from": [
-            3,
+            1,
             3
           ]
         }
@@ -509,6 +529,10 @@
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/26:46",
         "through": "quran/hafs-kfqc/26:48",
+        "like": {
+          "to": "quran/hafs-kfqc/26:47",
+          "page": 369
+        },
         "page": 369,
         "dir": {
           "dSurah": 6,
@@ -516,14 +540,14 @@
         },
         "span": {
           "from": [
-            1,
-            2
+            4,
+            6
           ]
         },
         "toSpan": {
           "from": [
             1,
-            2
+            3
           ]
         }
       },

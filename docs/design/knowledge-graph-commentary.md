@@ -1348,3 +1348,5 @@ worked out by hand. The list moves smoothly unless the reader has asked for less
 Tests: the scroll rule's unit tests (fits, too tall, above the edge, under a pinned title), the comparison
 view's test that the list moves once and only once it has drawn, and a browser test on Firefox and both phones
 that opens 10:15's last later-surahs row and checks what shows. All failed first.
+
+Look-alike rows continue in [their own page](lookalike-rows.md), from ①: this section has used every number it has.

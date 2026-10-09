@@ -63,7 +63,9 @@ function shippedEdges() {
     for (const [ayah, node] of Object.entries(shard)) {
       for (const edge of node.edges) {
         if (edge.type !== "mutashabih") continue;
-        const to = edge.to.slice(edge.to.lastIndexOf("/") + 1);
+        // A passage row's span is measured against the verse inside it that matches.
+        const key = edge.like?.to ?? edge.to;
+        const to = key.slice(key.lastIndexOf("/") + 1);
         out.push([`${file.slice(0, -5)}:${ayah}`, to, edge]);
       }
     }
@@ -97,8 +99,10 @@ describe("the shipped spans, against the corpus", () => {
       else lost.push(`${from} → ${to}: corpus ${JSON.stringify(want)}, shipped ${JSON.stringify(got)}`);
     }
     expect(lost).toEqual([]);
-    // Measured when the switch was made: 3,708 one-way spans.
-    expect(held).toBe(3708);
+    // Measured when the switch was made: 3,708 one-way spans; 34 more once
+    // passage rows were measured against the verse inside them that matches
+    // (2026-10-09, look-alike rows ①).
+    expect(held).toBe(3742);
   });
 
   it("finds the same whole-verse twins the corpus does", () => {

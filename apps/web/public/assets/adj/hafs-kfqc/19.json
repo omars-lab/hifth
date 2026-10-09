@@ -92,6 +92,7 @@
           "dPage": 1,
           "sameJuz": true
         },
+        "match": "loose",
         "ctx": true
       }
     ],
@@ -103,12 +104,17 @@
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/19:32",
         "through": "quran/hafs-kfqc/19:33",
+        "like": {
+          "to": "quran/hafs-kfqc/19:33",
+          "page": 307
+        },
         "page": 307,
         "dir": {
           "dSurah": 0,
           "dPage": 1,
           "sameJuz": true
         },
+        "match": "loose",
         "ctx": true
       }
     ],

@@ -85,7 +85,8 @@ export interface WordDiff {
 export function wordDiff(edge: Edge, fromKey: string, way: CompareWay = "plain"): WordDiff | null {
   const side = (fromShared: readonly WordRange[], toShared: readonly WordRange[]): WordDiff => ({
     from: { key: bareKey(fromKey), page: edge.page - edge.dir.dPage, shared: fromShared },
-    to: { key: bareKey(edge.to), page: edge.page, shared: toShared },
+    // A passage row was measured against the verse inside it that this one matches.
+    to: { key: bareKey(edge.like?.to ?? edge.to), page: edge.like?.page ?? edge.page, shared: toShared },
   });
   if (edge.span && edge.toSpan) {
     const from = edge.span.from;

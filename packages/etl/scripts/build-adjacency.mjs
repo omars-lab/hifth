@@ -397,6 +397,30 @@ function stretchesOf(srcKey, tgtKey, words = printWords) {
   return { from: ranges(inA, a), to: ranges(inB, b) };
 }
 
+/**
+ * Which verse of a passage a look-alike row is about. The outside list pairs a
+ * verse with a whole passage and points at its first verse, but the words this
+ * verse shares are often in a later one: 15:30 matches its passage's second
+ * verse and shares nothing with the first (2026-10-09, lookalike-rows ①). So
+ * the verse sharing the longest run of words is the one the reason line and the
+ * comparison are measured against. A tie, or nothing shared with any of them,
+ * keeps the first: there is no one answer to name.
+ */
+function likeOf(srcKey, surah, first, last, words = printWords) {
+  const a = words.get(srcKey);
+  if (!a?.length) return first;
+  let best = 0;
+  let at = [];
+  for (let ayah = first; ayah <= last; ayah++) {
+    const b = words.get(`${surah}:${ayah}`);
+    if (!b?.length) continue;
+    const { len } = sharedRuns(a.map((w) => w.id), b.map((w) => w.id));
+    if (len > best) [best, at] = [len, [ayah]];
+    else if (len === best && len > 0) at.push(ayah);
+  }
+  return at.length === 1 ? at[0] : first;
+}
+
 /* ------------------------------------------------------------------ */
 /* Pass 3 — spec-shape shards with real dir annotations.               */
 /* ------------------------------------------------------------------ */
@@ -426,25 +450,27 @@ for (const e of flat) {
   const sameJuz = juzOf(src.surah, src.ayah) === juzOf(tgt.surah, tgt.ayah);
   const key = formatAyahKey(EDITION, tgt.surah, tgt.ayah);
   const end = e.throughAbs && !e.twin ? fromAbsoluteAyah(e.throughAbs) : null;
+  const srcKey = `${src.surah}:${src.ayah}`;
+  // A passage row is measured against the verse inside it that this one matches.
+  const likeAyah = end ? likeOf(srcKey, tgt.surah, tgt.ayah, end.ayah) : tgt.ayah;
+  const likeAbs = likeAyah === tgt.ayah ? null : toAbsoluteAyah(tgt.surah, likeAyah);
+  const tgtKey = `${tgt.surah}:${likeAyah}`;
   // Only mutashabih edges: they are the type whose *definition* is shared
   // phrasing. A shared-root edge already names its word through `root`, and a
   // related-meaning edge is thematic — its longest run is one word (measured:
   // mean 1.00 over the two shipped), and one word in common is not a phrase.
-  const spans =
-    e.type === "mutashabih"
-      ? spansOf(`${src.surah}:${src.ayah}`, `${tgt.surah}:${tgt.ayah}`)
-      : null;
+  const spans = e.type === "mutashabih" ? spansOf(srcKey, tgtKey) : null;
   if (spans) spanned += 1;
-  // A row with nothing else to show says why no words are marked.
+  // A row with nothing else to show says why no words are marked. Naming a
+  // passage is not a reason on its own (lookalike-rows ①).
   const match =
-    e.type === "mutashabih" && !spans && !end && !e.twin && !e.note
-      ? matchOf(`${src.surah}:${src.ayah}`, `${tgt.surah}:${tgt.ayah}`)
-      : null;
+    e.type === "mutashabih" && !spans && !e.twin && !e.note ? matchOf(srcKey, tgtKey) : null;
   const edge = {
     type: e.type,
     to: e.w ? `${key}#${e.w}` : key,
     // A twin is word-for-word one verse, so a passage end never rides on one.
     ...(end ? { through: formatAyahKey(EDITION, end.surah, end.ayah) } : {}),
+    ...(likeAbs ? { like: { to: formatAyahKey(EDITION, tgt.surah, likeAyah), page: pageOf(likeAbs) } } : {}),
     page: pageOf(e.toAbs),
     dir: {
       dSurah: tgt.surah - src.surah,
@@ -454,7 +480,7 @@ for (const e of flat) {
     ...(spans ? { span: { from: spans.from }, toSpan: { from: spans.to } } : {}),
     ...(match ? { match } : {}),
     ...(match === "repeat"
-      ? { stretches: stretchesOf(`${src.surah}:${src.ayah}`, `${tgt.surah}:${tgt.ayah}`) }
+      ? { stretches: stretchesOf(srcKey, tgtKey) }
       : {}),
     ...(e.root ? { root: e.root } : {}),
     ...(e.twin ? { twin: true } : {}),

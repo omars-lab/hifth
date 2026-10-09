@@ -765,10 +765,26 @@
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/38:12",
         "through": "quran/hafs-kfqc/38:13",
+        "like": {
+          "to": "quran/hafs-kfqc/38:13",
+          "page": 453
+        },
         "page": 453,
         "dir": {
           "dSurah": 16,
           "dPage": 116
+        },
+        "span": {
+          "from": [
+            4,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            3,
+            5
+          ]
         },
         "ctx": true
       },
@@ -776,10 +792,26 @@
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/50:12",
         "through": "quran/hafs-kfqc/50:13",
+        "like": {
+          "to": "quran/hafs-kfqc/50:13",
+          "page": 518
+        },
         "page": 518,
         "dir": {
           "dSurah": 28,
           "dPage": 181
+        },
+        "span": {
+          "from": [
+            6,
+            6
+          ]
+        },
+        "toSpan": {
+          "from": [
+            7,
+            7
+          ]
         },
         "ctx": true
       }

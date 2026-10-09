@@ -1,10 +1,14 @@
 /**
  * Every look-alike row says why it is there. A row can name the words the two
- * verses share (a single matching stretch), carry a hand-written note, name a
- * whole passage, or be a word-for-word twin. About four hundred did none of
- * these, because the two verses share no stretch of words in one place only:
- * either nothing word for word, or a stretch that comes more than once. Those
- * now say which, so the list never shows a bare verse name (2026-10-09).
+ * verses share (a single matching stretch), carry a hand-written note, or be a
+ * word-for-word twin. About four hundred did none of these, because the two
+ * verses share no stretch of words in one place only: either nothing word for
+ * word, or a stretch that comes more than once. Those now say which, so the
+ * list never shows a bare verse name (2026-10-09).
+ *
+ * A row naming a whole passage is held to the same rule, measured against the
+ * verse inside the passage that matches this one best (`like`), which is often
+ * not the passage's first.
  *
  * Reads the committed look-alike data, by verse numbers only.
  *
@@ -14,9 +18,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { sharedRuns } from "../packages/etl/scripts/lib/shared-runs.mjs";
+import { openPrintWords } from "../packages/etl/scripts/lib/print-words.mjs";
 
 const ADJ = fileURLToPath(new URL("../apps/web/public/assets/adj/hafs-kfqc", import.meta.url));
 const bare = (key) => key.replace(/^quran\/[^/]+\//, "").replace(/#.*$/, "");
+// The verse a row was measured against: for a passage row, the one inside it it matches.
+const against = (edge) => bare(edge.like?.to ?? edge.to);
 
 function* edges() {
   for (const file of readdirSync(ADJ).filter((f) => /^\d+\.json$/.test(f))) {
@@ -32,10 +40,40 @@ test("every look-alike row carries a reason it is there", () => {
   const bareRows = [];
   for (const { from, edge } of edges()) {
     if (edge.type !== "mutashabih") continue;
-    if (edge.span || edge.note || edge.through || edge.twin || edge.match) continue;
-    bareRows.push(`${from} → ${bare(edge.to)}`);
+    // Naming a passage is not a reason: 47 passage rows said nothing else (lookalike-rows ①).
+    if (edge.span || edge.note || edge.twin || edge.match) continue;
+    bareRows.push(`${from} → ${bare(edge.to)}${edge.through ? `–${bare(edge.through)}` : ""}`);
   }
   assert.deepEqual(bareRows.slice(0, 5), [], `${bareRows.length} rows give no reason`);
+});
+
+// A passage row is measured against the verse inside the passage that shares the
+// longest run of words with this one. It names that verse (`like`) when it is
+// not the passage's first; a tie, or nothing shared with any of them, keeps the
+// first. Measured on the same print words the build reads.
+test("a passage row is measured against the verse inside it that matches best", () => {
+  const words = openPrintWords();
+  const ids = (key) => words.get(key).map((w) => w.id);
+  const wrong = [];
+  let named = 0;
+  for (const { from, edge } of edges()) {
+    if (edge.type !== "mutashabih" || !edge.through || edge.twin) continue;
+    const [s, first] = bare(edge.to).split(":").map(Number);
+    const last = Number(bare(edge.through).split(":")[1]);
+    const runs = [];
+    for (let a = first; a <= last; a++) runs.push({ key: `${s}:${a}`, len: sharedRuns(ids(from), ids(`${s}:${a}`)).len });
+    const best = Math.max(...runs.map((r) => r.len));
+    const top = runs.filter((r) => r.len === best);
+    const want = best > 0 && top.length === 1 && top[0].key !== bare(edge.to) ? top[0].key : undefined;
+    const got = edge.like ? bare(edge.like.to) : undefined;
+    if (got !== want) wrong.push(`${from} → ${bare(edge.to)}–${bare(edge.through)}: names ${got}, matches ${want}`);
+    if (edge.like) {
+      named++;
+      assert.ok(Number.isInteger(edge.like.page), `${from}: no page for the verse it is measured against`);
+    }
+  }
+  assert.deepEqual(wrong.slice(0, 5), [], `${wrong.length} passage rows measured against the wrong verse`);
+  assert.ok(named > 30, `only ${named} passage rows name the verse they match`);
 });
 
 test("a row's reason is one of the two kinds, and never sits beside a matching stretch", () => {
@@ -52,7 +90,7 @@ test("a row's reason is one of the two kinds, and never sits beside a matching s
 test("the reason is the same read from either verse", () => {
   const seen = new Map();
   for (const { from, edge } of edges()) {
-    if (edge.type === "mutashabih") seen.set(`${from}>${bare(edge.to)}`, edge.match ?? null);
+    if (edge.type === "mutashabih") seen.set(`${from}>${against(edge)}`, edge.match ?? null);
   }
   for (const [pair, match] of seen) {
     const [a, b] = pair.split(">");
@@ -85,7 +123,7 @@ test("a row whose shared words repeat carries every stretch, on both sides", () 
         last = hi;
       }
     }
-    seen.set(`${from}>${bare(edge.to)}`, s);
+    seen.set(`${from}>${against(edge)}`, s);
   }
   assert.ok(rows > 100, `only ${rows} repeat rows`);
   for (const [pair, s] of seen) {

@@ -185,7 +185,8 @@ for (const edition of readdirSync(ADJ, { withFileTypes: true })) {
     for (const [ayah, node] of Object.entries(shard)) {
       const from = `${surah}:${ayah}`;
       for (const edge of node.edges ?? []) {
-        const to = bareKey(edge.to);
+        // A passage row is measured against the verse inside it this one matches.
+        const to = bareKey(edge.like?.to ?? edge.to);
         const run = longestSharedRun(wordsByAyah.get(from), wordsByAyah.get(to));
         let stat = byType.get(edge.type);
         if (!stat) byType.set(edge.type, (stat = { n: 0, zero: 0, total: 0 }));
