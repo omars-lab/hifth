@@ -550,10 +550,19 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
 sentence starts with an unusual word could also remain, since the search for them looked for
 the common sentence openings. Words the book sets in italics (a term being defined, a
 book's title) show upright in the panel: neither the capture nor the page readings record
-the slant, so putting them back would need a new way to read the page pictures. Nothing here reaches the public site; it is only the pitch.
+the slant. One shortcut was tried and set aside: the book often sets in italics a note's
+quotation of its own verse, so a run of the verse's words inside its note could be slanted
+without reading the slant at all. About 4,000 notes have such a run, but checked against the
+page pictures, a sample of 25 was right only about three times in four; the misses were
+quotations the book sets upright in quotation marks, runs that reach past the slanted words,
+and plain phrases that happen to repeat the verse. Terms and titles, the other italics, cannot
+be found from the words at all. A panel that slants the wrong words a quarter of the time reads
+worse than one that slants none, so the words stay upright. Nothing here reaches the public
+site; it is only the pitch.
 
-**What would answer it:** a way to read the slant off the page pictures, and a wider search for
-run-on sentences. Why the bracket endings had to be read off the pictures rather than the page
+**What would answer it:** a way to read the slant off the page pictures themselves, and a wider
+search for run-on sentences. The shortcut is written up in
+[the italics note](../issues/italics-from-quoted-verse-words.md). Why the bracket endings had to be read off the pictures rather than the page
 readings is written up in [the bracket endings note](../issues/bracket-endings-read-from-the-pictures.md).
 
 ### ② On a phone, can the roots and similar-verses lists keep their verse in sight, as the note does? · **fixed**
