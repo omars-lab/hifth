@@ -28,6 +28,22 @@ test("an upright walk empties only the upright pictures", () => {
   assert.doesNotMatch(out, /rm -rf \S*shots\/walk(\s|$)/m);
 });
 
+// The simulator sometimes stops turning: asked to go sideways it says it has
+// and stays upright, and the walk refuses every picture. A restart cures it,
+// and it was needed two days running (2026-10-08, 2026-10-09), so a sideways
+// walk restarts the simulator before it starts; an upright one has no need.
+test("a sideways walk restarts the simulator before it opens the app", () => {
+  const out = plan(true);
+  const restart = out.search(/simctl shutdown \S+/);
+  const boot = out.search(/simctl boot \S+/);
+  const run = out.search(/WalkTests test/);
+  assert.ok(restart >= 0 && boot > restart && run > boot, out);
+});
+
+test("an upright walk does not restart the simulator", () => {
+  assert.doesNotMatch(plan(false), /simctl shutdown/);
+});
+
 // Two tests by name in one run used to hand xcodebuild a bare name it read as
 // a build action, and the run stopped before testing anything (2026-10-08).
 test("ONLY can name more than one test", () => {

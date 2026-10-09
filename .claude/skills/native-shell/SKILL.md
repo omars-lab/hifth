@@ -161,18 +161,22 @@ flowchart LR
    for the page, and keeps the web view's own picture, upright, as
    `native/shots/walk/side/side-1-hafs-kfqc_2-255_open-commentary.png`. It turns the simulator
    from inside the test, so it never steals the keyboard from whatever window the owner is in.
-   **If a sideways walk fails with "asked for sideways, got an upright picture", the simulator is
-   stuck** (its home screen will not turn either): `xcrun simctl shutdown <udid>`, then
-   `xcrun simctl boot <udid>`, and run it again. Before that check existed, a stuck simulator
-   made every sideways picture and both sideways smoke tests pass on an upright iPad
-   (2026-10-08).
+   **The simulator sometimes gets stuck upright** (its home screen will not turn either), so a
+   sideways walk restarts it before it starts, about 20 seconds. The sideways smoke tests in
+   `make app-test` do not; if one fails with "asked for sideways, got an upright picture",
+   `xcrun simctl shutdown <udid>`, then `xcrun simctl boot <udid>`, and run it again. Before that
+   check existed, a stuck simulator made every sideways picture and both sideways smoke tests pass
+   on an upright iPad (2026-10-08).
    `native/scripts/name-attachments.mjs` gives the pictures those names; Xcode writes them out
    under random ids.
 4. **Measure from inside the page.** `make app-probe TARGET=ipad ROUTE=/hafs-kfqc/p45 EVAL='JSON.stringify(document.querySelector("[data-testid=page-book]")?.getBoundingClientRect())' DELAY_MS=3000`
    launches the app, waits, runs the expression in the page and prints it with the usual probe
    fields (viewport, screen, orientation). Keep longer expressions in a file and pass
    `EVAL="$(cat probe.js)"`. This is what found the 14-point leaves: a number, where a picture
-   only said "small".
+   only said "small". To press something and read what changed, answer with a promise that
+   waits for the redraw; the probe waits for it:
+   `EVAL='new Promise(done => { document.querySelector("button").click(); setTimeout(() => done(document.title), 600); })'`.
+   Use double quotes inside: the Makefile wraps `EVAL` in single ones.
 5. **Pin it with a simulator test** in `native/HifthUITests/SmokeTests.swift`, watched failing
    first: `make app-test ONLY=SmokeTests/<name>`. For anything drawn sideways, measure the web
    view's own picture (`app.webViews.firstMatch.screenshot()`), redrawn upright with

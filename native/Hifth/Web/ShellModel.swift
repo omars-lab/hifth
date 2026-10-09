@@ -240,7 +240,8 @@ final class ShellModel {
     /// one JSON line, then quit. The day-one questions from the design review.
     /// `HIFTH_PROBE_EVAL` adds one more question, a JavaScript expression whose
     /// value lands under `eval`: how a fault that only the app shows gets
-    /// measured from inside it (make app-probe EVAL=…).
+    /// measured from inside it (make app-probe EVAL=…). A question that has to
+    /// wait, say for a redraw after a tap, answers with a promise; it is awaited.
     private func probeIfAsked() {
         let environment = ProcessInfo.processInfo.environment
         guard environment["HIFTH_PROBE"] == "1" else { return }
@@ -265,7 +266,7 @@ final class ShellModel {
         }
     }
 
-    private static let probeScript = """
+    static let probeScript = """
     const out = {
       href: location.href,
       origin: location.origin,
@@ -282,7 +283,7 @@ final class ShellModel {
       touch: navigator.maxTouchPoints,
       ua: navigator.userAgent,
       visibility: document.visibilityState,
-      eval: extra ? (() => { try { return (0, eval)(extra); } catch (e) { return String(e); } })() : undefined,
+      eval: extra ? await (async () => { try { return await (0, eval)(extra); } catch (e) { return String(e); } })() : undefined,
     };
     return JSON.stringify(out);
     """
