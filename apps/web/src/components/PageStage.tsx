@@ -2854,9 +2854,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           // to, rather than zoom in and then have the lift zoom back out.
           if (fit.coverBottom) target = aboveCover(bbox, ctx, fit, target, lead);
           // A note that rises once the glide has begun bends it (the lift, below).
-          hopRef.current = { target, bbox, lead };
+          // Cleared only if still ours: this glide cut short by a newer hop's
+          // resumes here after that hop has put its own glide there.
+          const mine = { target, bbox, lead };
+          hopRef.current = mine;
+          // No zoom report from here: App reads the level back once this
+          // returns, and a bent glide is still awaited here (`retarget`).
           await tweenTo(target);
-          hopRef.current = null;
+          if (hopRef.current === mine) hopRef.current = null;
           if (ticket !== relocateRef.current) return;
         }
         if (opts?.pulse !== false) {

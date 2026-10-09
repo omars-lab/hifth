@@ -1404,15 +1404,14 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
     await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
     await page.goto("/#/hafs-kfqc/p1");
-    await page.waitForTimeout(800);
+    await expect(sheet(page)).toHaveCount(0);
     await page.evaluate(() => {
       const w = window as unknown as { __zooms: number[] };
       w.__zooms = [];
+      // 2:255's page; the page beneath it keeps whatever zoom it was left at.
       const look = () => {
-        for (const host of document.querySelectorAll<HTMLElement>("[data-host-page]")) {
-          const z = host.style.transform.match(/scale\(([^)]*)\)/)?.[1];
-          if (host.style.display !== "none" && z) w.__zooms.push(Number(z));
-        }
+        const z = document.querySelector<HTMLElement>('[data-host-page="42"]')?.style.transform.match(/scale\(([^)]*)\)/)?.[1];
+        if (z) w.__zooms.push(Number(z));
         requestAnimationFrame(look);
       };
       requestAnimationFrame(look);
@@ -1427,6 +1426,59 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     const last = zooms.at(-1)!;
     expect(last, "the page ends zoomed in").toBeGreaterThan(1.2);
     expect(Math.max(...zooms), "the page never went past where it ends").toBeLessThanOrEqual(last + 0.01);
+  });
+
+  test("a second link followed while the first is still moving also zooms in once", async ({ browser }) => {
+    // The first link's move, cut short by the second, forgot the second was
+    // under way, so a note rising during the second move no longer turned it:
+    // it zoomed in and then back out. The note's file is held back until the
+    // second move has begun, so the note always rises during it.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true, serviceWorkers: "block" });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    let release!: () => void;
+    const held = new Promise<void>((done) => (release = done));
+    await context.route("**/assets/private/study-quran/2.json", async (route) => {
+      await held;
+      await route.continue();
+    });
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/p42");
+    await expect(pageSvg(page, 42)).toBeVisible({ timeout: 20_000 });
+    await page.evaluate(
+      () =>
+        new Promise<void>((done) => {
+          const w = window as unknown as { __zooms: number[] };
+          w.__zooms = [];
+          // The two verses' page; the page beneath it keeps whatever zoom it was left at.
+          const zoom = () =>
+            Number(document.querySelector<HTMLElement>('[data-host-page="42"]')?.style.transform.match(/scale\(([^)]*)\)/)?.[1] ?? 1);
+          let second = false;
+          const look = () => {
+            const z = zoom();
+            if (second) w.__zooms.push(z);
+            else if (z > 1.02) {
+              // The first move is under way: follow the second link now.
+              second = true;
+              location.hash = "#/hafs-kfqc/2:255";
+              done();
+            }
+            requestAnimationFrame(look);
+          };
+          location.hash = "#/hafs-kfqc/2:254";
+          requestAnimationFrame(look);
+        }),
+    );
+    release();
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    const lines = page.locator("#hifth-overlay .hl-sel");
+    await settle(lines.first());
+    await settle(lines.last());
+    await page.waitForTimeout(600);
+    const zooms = await page.evaluate(() => (window as unknown as { __zooms: number[] }).__zooms);
+    const last = zooms.at(-1)!;
+    expect(last, "the page ends zoomed in").toBeGreaterThan(1.2);
+    expect(Math.max(...zooms), "the page never went past where it ends").toBeLessThanOrEqual(last + 0.01);
+    await context.close();
   });
 });
 
