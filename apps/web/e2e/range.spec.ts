@@ -116,10 +116,11 @@ test.describe("Hifth · the highlighted range", () => {
     // 2:123 is an edge of BOTH members, so the row names both — and the leap
     // still has to depart from exactly one ayah. It departs from the member
     // whose edge survived the merge (mergeRangeEdges rule 2): 2:47's carries a
-    // bare `ctx` flag, 2:48's the curated «شفاعة ↔ عدل», and a note outranks any
-    // amount of derived flagging. So the row reads as 2:48's and leaps from it.
+    // bare `ctx` flag, 2:48's a hand-written note (in Arabic here, the app's
+    // language), and a note outranks any amount of derived flagging. So the
+    // row reads as 2:48's and leaps from it.
     await expect(menu.getByRole("button", { name: "البقرة، ٢:١٢٣ من ٢:٤٧، ٢:٤٨" })).toBeVisible();
-    await expect(menu.getByText("شفاعة ↔ عدل")).toBeVisible();
+    await expect(menu.getByText("تبادلت «شفاعة» و«عدل» موضعيهما، واختلف الفعلان")).toBeVisible();
     await menu.getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٣/ }).tap();
 
     await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
