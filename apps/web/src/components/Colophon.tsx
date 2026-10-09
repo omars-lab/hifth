@@ -9,6 +9,8 @@ import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { ARROW_SHOWINGS } from "../jump-arrows";
 import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
+import { PITCH } from "../pitch/pitch";
+import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import styles from "./Colophon.module.css";
@@ -213,6 +215,7 @@ export function Colophon({
   const { t, dir, lang, setLang } = useT();
   const cardEdge = useCardEdge();
   const openingText = useOpeningText();
+  const relatedList = useRelatedList();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -470,6 +473,33 @@ export function Colophon({
           </div>
           <p className={styles.note}>{t.openingTextNote}</p>
         </section>
+
+        {/* How many related verses a note lists before the reader asks
+            (knowledge-graph-commentary.md, item 41): the line is the default,
+            the whole list kept as a choice. Only the private build has notes. */}
+        {PITCH && (
+          <section className={styles.block} aria-labelledby="colophon-related-list">
+            <h3 className={styles.subhead} id="colophon-related-list">
+              {t.relatedListTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-related-list">
+              {RELATED_LISTS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={relatedList === choice}
+                  data-related-list={choice}
+                  onClick={() => rememberRelatedList(choice)}
+                >
+                  {choice === "line" ? t.relatedListLine : t.relatedListAll}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.relatedListNote}</p>
+          </section>
+        )}
 
         {/* How a note draws the parts it can be about (docs/design/scoped-notes.md,
             step 7): every look kept while they are tried, so a radio group too. */}

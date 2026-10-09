@@ -700,6 +700,35 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(page.getByRole("dialog", { name: new RegExp(`${target}\\b`) })).toBeVisible();
   });
 
+  test("set in the info panel, a note lists every related verse at once, and keeps it so", async ({ page }) => {
+    // The line under the first few is the default; the other way is kept as a
+    // setting. Counted, so the test names none of the book's references.
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    const cards = sheet(page).getByRole("button", { name: /^Hop to / });
+    const line = sheet(page).getByRole("button", { name: /^Show \d+ more related verses?$/ });
+    const total = (await cards.count()) + Number((await line.innerText()).match(/\d+/)?.[0]);
+
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    const all = page.locator('[data-related-list="all"]');
+    await all.click();
+    await expect(all).toHaveAttribute("aria-checked", "true");
+    await page.keyboard.press("Escape");
+
+    for (const visit of ["after choosing", "after a reload"]) {
+      if (visit === "after a reload") await page.reload();
+      else {
+        // Away and back, so the verse's note opens afresh in the same visit.
+        await page.goto("/#/hafs-kfqc/p1");
+        await page.goto("/#/hafs-kfqc/2:255");
+      }
+      await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+      await expect(cards, visit).toHaveCount(total);
+      await expect(line, visit).toHaveCount(0);
+    }
+  });
+
   test("a related verse's note starts at its top, not where the last one was scrolled to", async ({ page }) => {
     // The list of related verses sits at the foot of a note, so reaching it
     // scrolls the note down. Following one turned the note to the new verse

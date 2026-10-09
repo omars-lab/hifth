@@ -10,6 +10,7 @@ import {
 } from "@hifth/core";
 import { useT } from "../i18n";
 import type { Commentator } from "../pitch/pitch";
+import { useRelatedList } from "../related-list";
 import { splitSigla, type Siglum } from "../tafsir/sigla";
 import { isIntroOnly, textDir, type CommentaryNote } from "../tafsir/commentary";
 import styles from "./CommentarySheet.module.css";
@@ -213,15 +214,18 @@ export function CommentarySheet({
   const [keyOpen, setKeyOpen] = useState<{ at: string; sig: string; sigs: readonly string[] } | null>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
   // The verse whose further related verses were asked for; another verse's
-  // note starts short again.
+  // note starts short again, unless the reader set every note to list them all.
+  const relatedList = useRelatedList();
   const [moreFor, setMoreFor] = useState<string | null>(null);
-  const showMore = entry !== null && moreFor === entry.ayahKey;
+  const pressedMore = entry !== null && moreFor === entry.ayahKey;
+  const showMore = entry !== null && (relatedList === "all" || pressedMore);
   const firstMoreRef = useRef<HTMLButtonElement>(null);
   // The line that was pressed is gone, so the reader is put on the first card
-  // it added rather than lost to the top of the page.
+  // it added rather than lost to the top of the page. A list that was whole
+  // from the start had no line pressed, so nobody is moved.
   useEffect(() => {
-    if (showMore) firstMoreRef.current?.focus({ preventScroll: true });
-  }, [showMore]);
+    if (pressedMore) firstMoreRef.current?.focus({ preventScroll: true });
+  }, [pressedMore]);
 
   const open = entry !== null;
   // On a spread the note stands on the facing leaf, beside the verse, not over

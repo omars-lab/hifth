@@ -778,6 +778,11 @@ export interface Strings {
   openingTextLarge: string;
   openingTextEven: string;
   openingTextNote: string;
+  /** How many related verses a note lists before asking (related-list.ts). */
+  relatedListTitle: string;
+  relatedListLine: string;
+  relatedListAll: string;
+  relatedListNote: string;
   penMarkUp: string;
   penDone: string;
   penGrip: string;
@@ -1434,6 +1439,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     openingTextLarge: m.openingTextLarge,
     openingTextEven: m.openingTextEven,
     openingTextNote: m.openingTextNote,
+    relatedListTitle: m.relatedListTitle,
+    relatedListLine: m.relatedListLine,
+    relatedListAll: m.relatedListAll,
+    relatedListNote: m.relatedListNote,
     penMarkUp: m.penMarkUp,
     penDone: m.penDone,
     penGrip: m.penGrip,

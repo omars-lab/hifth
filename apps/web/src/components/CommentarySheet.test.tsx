@@ -5,6 +5,7 @@ import { LANG_STORAGE_KEY } from "../lang";
 import { LangProvider } from "../i18n";
 import type { CommentaryNote } from "../tafsir/commentary";
 import { CommentarySheet, overLeaf } from "./CommentarySheet";
+import { RELATED_LIST_KEY } from "../related-list";
 
 /*
  * The one commentary drawer, in both of the app's languages and with sources in
@@ -199,6 +200,16 @@ describe("more related verses than the list shows", () => {
     const before = buttons().length;
     if (line) fireEvent.click(line);
     expect(buttons().length).toBe(before - 1 + 4);
+  });
+
+  it("lists them all at once, with no line, for a reader who set it so", () => {
+    localStorage.setItem(RELATED_LIST_KEY, "all");
+    drawer(note("en"), { roads: shown, moreRoads: extra });
+    expect(cards()).toHaveLength(12);
+    expect(screen.queryByRole("button", { name: /4 more/ })).toBeNull();
+    // Nothing was pressed, so the reader's place is left where it was.
+    expect(document.activeElement).not.toBe(cards()[8]);
+    localStorage.removeItem(RELATED_LIST_KEY);
   });
 });
 
