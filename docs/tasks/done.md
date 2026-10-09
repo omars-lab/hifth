@@ -1138,3 +1138,5 @@ Still open in the task list: #51 (fix the faults found, worst first: the walk go
 - The 2:255 fix zoomed the page in and then back out (two moves); a link now reaches the smaller level in one move, bending on the way when the note rises after the page has started moving (design note ㊷).
 - A second link followed while the first was still moving zoomed in and back out again; it now keeps its own move, and the one-move test waits for the note to close rather than a fixed time (design note ㊷).
 - A note longer than its card was cut through its last line with nothing to say it went on; its foot now fades while there is more below and the fade goes at the end, as the tajweed key's does (design note ㊺).
+- A desktop test (a dot's list on a two-page spread) failed once under the full run: it read a position the moment after "visible" and got none. The tests now share one position read that waits for a place on screen, replacing three copies that read once; a test shows the old read failing on an element placed late and the new one waiting for it.
+- The size page now records the start-up code at 162.0 KB after the long-verse setting, still nothing to trim.

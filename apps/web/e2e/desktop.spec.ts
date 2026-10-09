@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { boxOf } from "./box";
 import { watchFolds, foldsSeen } from "./fold";
 import { contextWithout } from "./inventory";
 import { ayahTarget } from "./ayah";
@@ -61,13 +62,6 @@ const pageSvg = (page: Page, pageNo: number): Locator =>
 
 /** The header's page number. The one place the app says where the reader is. */
 const NUM = "header .numeric";
-
-/** A bounding box that is definitely there. */
-async function boxOf(target: Locator) {
-  const box = await target.boundingBox();
-  expect(box, "element has no box").not.toBeNull();
-  return box!;
-}
 
 /**
  * The box of a page, once exactly one copy of it is on screen.
