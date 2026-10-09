@@ -6,14 +6,14 @@
     "Keys have vite's content hash stripped; see `stable` in gate-budget.mjs.",
     "Regenerate with `make budget-update` — and look at the diff before committing."
   ],
-  "totalGz": 164420,
+  "totalGz": 165880,
   "chunks": {
-    "assets/ar.gen.js": 10684,
-    "assets/en.gen.js": 8748,
-    "assets/index.js": 115343,
-    "assets/rarely-used.js": 18472,
+    "assets/ar.gen.js": 11059,
+    "assets/en.gen.js": 9039,
+    "assets/index.js": 116008,
+    "assets/rarely-used.js": 18608,
     "assets/workbox-window.prod.es5.js": 2390,
-    "sw.js": 1206,
+    "sw.js": 1199,
     "workbox.js": 7577
   }
 }
