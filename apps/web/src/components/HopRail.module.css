@@ -177,6 +177,11 @@
   inset-inline: 0;
 }
 
+/* Behind a phone note grown over the page (HopRail's `away`). */
+.rail[data-away] {
+  visibility: hidden;
+}
+
 /* The root chip reads as a distinct family — hexagon glyph, subtler weight. */
 .chip[data-direction="root"] {
   border-style: dashed;

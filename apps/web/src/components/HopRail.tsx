@@ -40,6 +40,12 @@ interface HopRailProps {
    * ride the sheet's own top row instead, beside its handle.
    */
   seat?: number | null;
+  /**
+   * A phone note grown over the page: the page behind it is dimmed and takes
+   * no taps, and the strip the chips stand in at rest is off on an earlier
+   * verse's words, so they step out of sight until the note is short again.
+   */
+  away?: boolean;
 }
 
 /**
@@ -57,6 +63,7 @@ export function HopRail({
   onBand,
   beside,
   seat = null,
+  away = false,
 }: HopRailProps): JSX.Element | null {
   const { t } = useT();
   const railRef = useRef<HTMLDivElement>(null);
@@ -66,8 +73,8 @@ export function HopRail({
     if (!onBand) return;
     const rail = railRef.current;
     // Down on a sheet, the chips leave the top of the screen to the page.
-    onBand(count === 0 || !rail || seated ? null : rail.getBoundingClientRect().bottom);
-  }, [count, crossed, onBand, seated]);
+    onBand(count === 0 || !rail || seated || away ? null : rail.getBoundingClientRect().bottom);
+  }, [count, crossed, onBand, seated, away]);
   useEffect(() => () => onBand?.(null), [onBand]);
   if (count === 0) return null;
   return (
@@ -83,6 +90,7 @@ export function HopRail({
       data-crossed={crossed || undefined}
       data-beside={beside}
       data-seated={seated || undefined}
+      data-away={away || undefined}
       style={seated ? ({ "--seat": `${seat}px` } as CSSProperties) : undefined}
     >
       {chips.map((chip) => (
