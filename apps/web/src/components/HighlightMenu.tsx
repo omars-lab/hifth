@@ -128,6 +128,9 @@ export function HighlightMenu({
   const first = rangeKeys[0]!;
   const last = rangeKeys[rangeKeys.length - 1]!;
   const title = t.rangeLabel(first, last) ?? `${first}–${last}`;
+  // A passage listed beside a verse inside it is laid out as the reader chose
+  // (item 47), and the spoken count is the rows that layout shows.
+  const rows = arrangePassages(hops, passageRows);
 
   return (
     <>
@@ -139,7 +142,7 @@ export function HighlightMenu({
         data-over-leaf={place ? "" : undefined}
         role="dialog"
         aria-modal={!beside}
-        aria-label={t.rangeAria(title, hops.length)}
+        aria-label={t.rangeAria(title, rows.length)}
         dir={dir}
         data-side={side ?? undefined}
         tabIndex={-1}
@@ -159,12 +162,11 @@ export function HighlightMenu({
           </button>
         </header>
 
-        {hops.length === 0 ? (
+        {rows.length === 0 ? (
           <p className={styles.empty}>{t.rangeEmpty}</p>
         ) : (
           <ul className={styles.list}>
-            {/* A passage listed beside a verse inside it is laid out as the reader chose (item 47). */}
-            {arrangePassages(hops, passageRows).map(({ edge, inside }) => {
+            {rows.map(({ edge, inside }) => {
               const enabled = canHop(edge.to);
               const toKey = bareTarget(edge.to);
               // A look-alike that is a whole passage is named as the passage.
