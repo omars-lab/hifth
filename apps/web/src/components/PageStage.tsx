@@ -67,6 +67,7 @@ import {
 } from "@hifth/core";
 import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT, type Strings } from "../i18n";
+import { useOpeningText, type OpeningText } from "../opening-text";
 import type { TurnStyle } from "../turn-style";
 import styles from "./PageStage.module.css";
 import { printedNumbersOf } from "./verse-numbers";
@@ -1307,6 +1308,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Read by mountPage, which runs async and must not close over a stale skin.
   const skinRef = useRef(skin);
   skinRef.current = skin;
+  // How the two opening pages fill their paper: read at mount, and every page
+  // already drawn is laid out again when the reader changes it in settings.
+  const openingText = useOpeningText();
+  const openingTextRef = useRef(openingText);
+  openingTextRef.current = openingText;
   const tajweedRef = useRef(tajweedLookup);
   tajweedRef.current = tajweedLookup;
   // Same reason: mountPage decides a leaf's free edge after an await.
@@ -1547,6 +1553,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     ro.observe(layer);
     return () => ro.disconnect();
   }, [measureFit, applyTransform]);
+
+  useEffect(() => {
+    for (const mp of pagesRef.current.values()) fitDrawingToPage(mp.svg, openingText);
+    if (measureFit()) applyTransform();
+  }, [openingText, measureFit, applyTransform]);
 
   const cancelTween = useCallback(() => {
     if (tweenRef.current !== null) {
@@ -1976,7 +1987,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       svgEl.setAttribute("role", "group");
       svgEl.setAttribute("aria-labelledby", `page-label-${targetPage}`);
       svgEl.classList.add(styles.svg ?? "");
-      fitDrawingToPage(svgEl as unknown as SVGSVGElement);
+      fitDrawingToPage(svgEl as unknown as SVGSVGElement, openingTextRef.current);
       printRunningHeads(host, svgEl, targetPage, resolver, tRef.current);
       layer.appendChild(host);
 
@@ -4273,12 +4284,18 @@ const PAGE_H = 550;
  * untouched. `textBoxOf` reads the top margin back, so a verse is placed where
  * it is drawn.
  */
-function fitDrawingToPage(svg: SVGSVGElement): void {
+function fitDrawingToPage(svg: SVGSVGElement, choice: OpeningText): void {
   const vb = svg.viewBox?.baseVal;
   if (!vb || !(vb.width > 0)) return;
   const tall = (PAGE_W * vb.height) / vb.width; // its height, drawn 345 wide
   if (tall >= PAGE_H) return;
-  svg.style.marginBlock = `${((PAGE_H - tall) / 2 / PAGE_W) * 100}%`;
+  // The other way, kept as a setting: the drawing at the size of type every
+  // other page uses — its own units against a 345-wide page — in the middle.
+  const even = choice === "even" && vb.width < PAGE_W;
+  const pct = (units: number) => `${(units / PAGE_W) * 100}%`;
+  svg.style.width = even ? pct(vb.width) : "";
+  svg.style.marginInline = even ? pct((PAGE_W - vb.width) / 2) : "";
+  svg.style.marginBlock = even ? pct((PAGE_H - vb.height) / 2) : pct((PAGE_H - tall) / 2);
 }
 
 /** Read a page's viewBox width (defaults to the Madani 345). */

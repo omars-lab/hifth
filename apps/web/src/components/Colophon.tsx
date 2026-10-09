@@ -8,6 +8,7 @@ import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { ARROW_SHOWINGS } from "../jump-arrows";
 import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
+import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import styles from "./Colophon.module.css";
@@ -211,6 +212,7 @@ export function Colophon({
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
   const cardEdge = useCardEdge();
+  const openingText = useOpeningText();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -444,6 +446,30 @@ export function Colophon({
           <p className={styles.note}>{t.cardEdgeNote}</p>
         </section>
         )}
+
+        {/* How the two opening pages fill their paper (knowledge-graph-commentary.md,
+            item 36): the owner's pick is the default, the other kept as a choice. */}
+        <section className={styles.block} aria-labelledby="colophon-opening-text">
+          <h3 className={styles.subhead} id="colophon-opening-text">
+            {t.openingTextTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-opening-text">
+            {OPENING_TEXTS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={openingText === choice}
+                data-opening-text={choice}
+                onClick={() => rememberOpeningText(choice)}
+              >
+                {choice === "large" ? t.openingTextLarge : t.openingTextEven}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.openingTextNote}</p>
+        </section>
 
         {/* How a note draws the parts it can be about (docs/design/scoped-notes.md,
             step 7): every look kept while they are tried, so a radio group too. */}

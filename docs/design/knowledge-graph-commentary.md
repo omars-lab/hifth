@@ -1029,3 +1029,9 @@ that verse. A browser test opens page 3, then page 1, and checks both opening pa
 and are centred; it failed before the change (page 1's paper was 217 pixels short). The saved picture of
 page 1 was retaken on the owner's pick. A frame like the print's ornament, to fill the space above and
 below, is not built.
+
+**The other way kept, 2026-10-08:** the runner-up, the opening text at the size of type every other page
+uses, is a setting in the info panel ("The first two pages": large text, the default, or usual size), so
+a reader who wants the opening to match the rest can have it. A browser test switches it in the panel,
+checks the opening text then matches page 3's size of type and stays centred, that the choice survives a
+reload, and that a click on a verse there still picks that verse; it failed before the setting existed.

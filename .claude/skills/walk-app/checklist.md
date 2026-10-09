@@ -18,6 +18,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   opens and the mark is still there. · phone, phone-side · issue: `turned-phone-loses-linked-verse-mark`
 - [ ] Open at page 1 and turn to page 3: the paper stays the same size and shape; the opening text sits
   in the middle, not on a squat card. · desktop, phone · issue: `opening-pages-squat`
+- [ ] In the info panel, set "The first two pages" to usual size: pages 1 and 2 redraw at once with
+  their text the size of page 3's, still centred, and a tap on a verse there still opens it. · desktop, phone
 
 ## Turning pages
 

@@ -772,6 +772,10 @@ export interface Strings {
   cardEdgeClear: string;
   cardEdgeTurns: string;
   cardEdgeNote: string;
+  openingTextTitle: string;
+  openingTextLarge: string;
+  openingTextEven: string;
+  openingTextNote: string;
   penMarkUp: string;
   penDone: string;
   penGrip: string;
@@ -1423,6 +1427,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     cardEdgeClear: m.cardEdgeClear,
     cardEdgeTurns: m.cardEdgeTurns,
     cardEdgeNote: m.cardEdgeNote,
+    openingTextTitle: m.openingTextTitle,
+    openingTextLarge: m.openingTextLarge,
+    openingTextEven: m.openingTextEven,
+    openingTextNote: m.openingTextNote,
     penMarkUp: m.penMarkUp,
     penDone: m.penDone,
     penGrip: m.penGrip,
