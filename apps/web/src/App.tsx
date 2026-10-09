@@ -3769,7 +3769,9 @@ export function App(): JSX.Element {
                 // settings), so it says so, in the app's language. Only the
                 // book's name is pitch copy; dropped from the public build
                 // with PITCH. A mouse is told to click, a finger to tap.
-                PITCH
+                // Quiet while the tips are up: the first one teaches the same
+                // tap, and the screen said it twice.
+                PITCH && !coachUp
                 ? touchScreen
                   ? t.tapForNote("Study Quran")
                   : t.clickForNote("Study Quran")

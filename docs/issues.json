@@ -3227,6 +3227,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/open-link.spec.ts",
       "note": "Re-walking the iPad app (2026-10-08): on an upright iPad (wider than 900) the look-alikes and roots lists are a card at the page's foot and did not report their reach, so a link to 2:48?open=lookalikes left the verse under the list. The lists now report at every width through the note's own rule (watchCover in short-band.ts, shared with the note). Test: open-link.spec.ts '?open=lookalikes on an iPad held upright leaves the verse above the list' failed first (92 px under)."
+    },
+    {
+      "id": "tips-repeat-foot-line",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊳"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Walking an English first visit (2026-10-08): with the tips opened from settings, the pitch build's foot line ('read its note') repeated the first tip. The line is quiet while the tips are up (App.tsx, coachUp). Test: pitch.spec.ts 'while the tips are up, the foot line does not repeat the first one' failed first."
     }
   ]
 }
