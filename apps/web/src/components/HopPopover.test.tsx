@@ -226,6 +226,38 @@ describe("HopPopover", () => {
     localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
   });
 
+  // Rows carry different captions (the verse that matches best, the next verse
+  // telling them apart, how they differ); the picture sat between some of them
+  // and after others, so the eye had to hunt for it row by row. It comes after
+  // every caption, on every row. Made-up refs.
+  it("puts the picture after every caption on the row", () => {
+    localStorage.setItem(LOOKALIKE_PREVIEW_KEY, "picture");
+    render(
+      <HopPopover
+        chip={chip([
+          edge(2, 3, {
+            through: "quran/hafs-kfqc/2:5",
+            like: { to: "quran/hafs-kfqc/2:4", page: 7 },
+            ctx: true,
+            span: { from: [1, 4] },
+            toSpan: { from: [2, 5] },
+          }),
+        ])}
+        fromKey="quran/hafs-kfqc/2:2"
+        canHop={() => true}
+        onHop={noop}
+        onClose={noop}
+      />,
+    );
+    const row = screen.getByRole("listitem");
+    const picture = row.querySelector("[data-shared-words]")!;
+    const after = [...row.querySelectorAll("span")].filter(
+      (s) => picture.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING && !picture.contains(s),
+    );
+    expect(after.map((s) => s.textContent).join("")).not.toMatch(/next verse|الآية التالية/);
+    localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
+  });
+
   // The picture is for the eye; a screen reader already hears the row's name,
   // and the comparison it opens says the rest.
   it("keeps the picture out of what a screen reader hears", () => {

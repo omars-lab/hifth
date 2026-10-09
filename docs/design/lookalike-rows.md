@@ -192,6 +192,11 @@ What looking at it taught us, on a phone and an iPad in both languages and in Fi
 - **It makes the doubled rows of ㊼ plain.** Where a passage is listed beside a verse inside it, both
   rows now carry the very same picture, one above the other (15:30's 38:72–38:75 and 38:73; 2:48's
   2:122–2:123 and 2:123). That is for ㊼, the owner's pick; nothing here changes it.
+- **The picture first sat between captions on some rows and after them on others** (under *most alike*
+  but above *the next verse tells them apart*), so the eye hunted for it row by row. It now comes after
+  every caption, on every row; a unit test in each list checks the order and failed first.
+- **Walked in the real apps, 2026-10-09:** the iPad app upright and on its side, and the Mac app in
+  English, at both demo verses. The strip starts under the name and stops where the verses part in each.
 - **Cost:** a row with a picture is about one line taller, and the list now loads the page pictures of
   the verses it names when it opens, not only when a row is opened. For a reader who finds that too
   much, *As a count* keeps the list short and *Not shown* puts it back as it was.

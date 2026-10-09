@@ -282,4 +282,26 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     expect(screen.getAllByRole("listitem")[0]!.textContent).toMatch(/١٣ كلمة/);
     localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
   });
+
+  // Same place on every row: after every caption, never between two of them.
+  it("puts the picture after every caption on the row", () => {
+    localStorage.setItem(LOOKALIKE_PREVIEW_KEY, "picture");
+    renderMenu({
+      hops: [
+        edge({
+          type: "mutashabih",
+          to: k("14:6"),
+          ctx: true,
+          span: { from: [1, 4] },
+          toSpan: { from: [2, 5] },
+          sources: [RANGE[0]!],
+        }),
+      ],
+    });
+    const row = screen.getAllByRole("listitem")[0]!;
+    const picture = row.querySelector("[data-shared-words]")!;
+    const caption = within(row).getByText(/الآية التالية/);
+    expect(caption.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
+  });
 });

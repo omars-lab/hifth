@@ -1309,7 +1309,8 @@ passage row now names the verse inside it that is most alike. In those 22, that 
 row beneath it ("most alike: 2:123" right above the 2:123 row at 2:48; "most alike: 38:73" above the 38:73 row
 at 15:30), so under *Both* the repetition is now plain on the closed list, not only after opening.
 Since [look-alike rows ⑥](lookalike-rows.md) the closed rows also carry a picture of the shared words, and
-in those cases the two rows carry the very same picture, one above the other. Nothing is decided by
+in those cases the two rows carry the very same picture, one above the other, on both demo verses and in the
+iPad app as much as the browser (walked 2026-10-09, upright and on its side). Nothing is decided by
 that; it only makes what *Both* costs easier to see.
 
 The default stays "both" and the question stays open: the owner picks.

@@ -224,7 +224,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   · test: `packages/core/src/adjacency.test.ts`
 - [ ] Open 15:30's and 2:48's look-alikes in English and in Arabic: each row that shares one stretch shows
   the other verse's shared words cut from the page, under the row's name, starting at the same edge as the
-  name, and the picture stops where the two verses part. Opening the row replaces the picture with the
+  name, and the picture stops where the two verses part. It comes after every caption on its row, never
+  between two of them. Opening the row replaces the picture with the
   comparison. Try the info panel's "As a count" and "Not shown" too, then set it back. · `make drive
   DEVICE=phone LOCALE=en HASH='#/hafs-kfqc/15:30?open=lookalikes'` · issue: `lookalike-row-shared-words-unseen`
   · test: `e2e/lookalike-compare-view.spec.ts`
