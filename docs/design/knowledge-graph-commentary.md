@@ -816,7 +816,7 @@ commentator.
 
 ### ⑳ Can a reader follow the verses a surah's introduction, or a note, points to? · **fixed**
 
-The book names a verse of the surah it is in without the surah, as "v. 25" or "vv. 9–26", about
+The book names a verse of the surah it is in without the surah, as "v. 25" or "vv. 4–7", about
 four thousand times across the introductions and the notes. Only a full citation, with its surah,
 was a link, so the outline at the head of a surah (where each story begins and ends) could not be
 followed, and a note pointing a few verses on was plain text. The introduction also drew its
@@ -1103,3 +1103,25 @@ The same walk also saw the phone page keep its size under the tips, so its foot 
 bar. That is the phone's page rule working as meant (the page is sized from the screen's height and
 a taller page can be dragged), no verse is covered, and the strip is gone after three taps; not
 changed.
+
+### ㊴ When a note cites a whole run of verses, do its other references still show? · **fixed**
+
+Found walking the demo's 18:60 on 2026-10-08: the note there cites eight separate places, two of
+them long runs of verses, and the related verses under it showed only two. The captured book lists a
+cited run ("vv. 4–7") as every verse in it, one after another, and each became its own card; the
+list keeps eight, so one run filled all eight and pushed out every other place the note names. Across
+the book, 1,149 verses lost 3,523 references this way.
+
+**The fix:** verses that follow each other in the same surah, in the order the note gives them, now
+fold into one card that names the whole run ("9:4–9:7") and opens on its first verse. 18:60 now
+shows its runs as one card each and its references to other surahs beside them. A run never folds
+across a surah's end or backwards. Unit tests on made-up lists, a panel test for the run's label and
+a browser test on 18:60 all failed first.
+
+### ㊵ When a note cites several verses of one surah in a row, are they all among its related verses? · **open**
+
+Seen on the same walk, at 18:13: where a note cites several verses of one surah by bare number after
+the first (in the shape "9:4, 7, 12"), the captured list keeps only the first of each surah. The note's own text
+links every one of them; the related verses list under it does not. The fix belongs where the list is
+made: read the bare numbers that follow a cited verse back into the list, as the note's links already
+do.

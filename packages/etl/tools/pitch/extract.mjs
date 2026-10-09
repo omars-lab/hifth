@@ -46,6 +46,7 @@ import { readKey } from "./key.mjs";
 import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
 import { slantSurah } from "./italics.mjs";
+import { foldRuns } from "./runs.mjs";
 import { endPrint, endsClosed } from "./ends.mjs";
 import { orphanPrint, rescueOrphans } from "./orphans.mjs";
 import { wordsOf } from "./splits.mjs";
@@ -262,19 +263,24 @@ function refShard(surah, entries) {
         return true;
       });
 
-    // Verses whose target also has commentary rank first.
-    picked.sort((a, b) => Number(b.r.commentary) - Number(a.r.commentary));
+    // A range the note cites ("vv. 4–7") is one road, not one per verse, or it
+    // fills the list and pushes out the note's other references (runs.mjs).
+    const roads = foldRuns(picked.map(({ r, to }) => ({ to, commentary: Boolean(r.commentary) })));
 
-    const edges = picked.slice(0, MAX_REF_EDGES).map(({ to }) =>
-      edge(
+    // Verses whose target also has commentary rank first.
+    roads.sort((a, b) => Number(b.commentary) - Number(a.commentary));
+
+    const edges = roads.slice(0, MAX_REF_EDGES).map(({ to, through }) => {
+      const e = edge(
         surah,
         sourceAyah,
         to[0],
         to[1],
         snippet(translationOf(to[0], to[1])) ?? "A verse the Study Quran cross-references from here.",
         "xref",
-      ),
-    );
+      );
+      return through ? { ...e, through: canon(through[0], through[1]) } : e;
+    });
     if (edges.length) shard[String(sourceAyah)] = { edges, ext: [] };
   }
   return shard;

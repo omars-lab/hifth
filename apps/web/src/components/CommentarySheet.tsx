@@ -499,7 +499,8 @@ export function CommentarySheet({
               <ul className={styles.roads}>
                 {orderForHifz(roads).map((edge) => {
                   const enabled = canHop ? canHop(edge.to) : true;
-                  const label = t.ayahLabel(edge.to) ?? edge.to;
+                  const label =
+                    (edge.through ? t.rangeLabel(edge.to, edge.through) : t.ayahLabel(edge.to)) ?? edge.to;
                   return (
                     <li key={`${edge.type}:${edge.to}`} className={styles.road}>
                       <button

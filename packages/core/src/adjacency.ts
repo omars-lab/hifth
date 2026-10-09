@@ -101,6 +101,11 @@ export interface Edge {
   readonly type: EdgeTypeId;
   /** Canonical target key, e.g. "quran/hafs-kfqc/2:123" (may carry #wN). */
   readonly to: string;
+  /**
+   * The last verse when the source cites a whole range ("vv. 9–26") as one
+   * reference; the hop still lands on `to`, the range's first verse.
+   */
+  readonly through?: string;
   /** Mushaf page of the target (denormalized for rail counts + prefetch). */
   readonly page: number;
   readonly dir: EdgeDir;

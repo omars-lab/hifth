@@ -77,6 +77,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Verses a note points to are links; a mention of the note's own verse is not, and does not
   break across two lines. · any · issues: `intro-and-same-surah-verses-unlinked`,
   `note-links-to-its-own-verse`, `own-verse-breaks-across-lines`
+- [ ] At the foot of 18:60's note, the related verses show each cited run as one card
+  (in the shape "9:4–9:7") beside the note's references to other surahs, not eight cards of one run. ·
+  any · issue: `related-verses-ranges-crowd-out`
 - [ ] Beside two pages, a card lies over the facing page and shows no drag bar. · desktop,
   ipad-side · issue: `spread-cards-show-drag-bar`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
