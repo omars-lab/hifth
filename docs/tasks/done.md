@@ -1084,6 +1084,7 @@ commentary design note's numbered items, and in the issues list.
 - With the tips open, the foot line repeated the first tip; it now waits until the tips are put away (knowledge-graph-commentary.md ㊳). The Mac app re-walk found nothing new.
 - The pitch's notes were checked against the printed pages once more: the stops still missing were read by hand, the stop after a closing bracket put back on 97 notes, two notes cut short were finished, and a note the capture had set aside now shows under both its verses (knowledge-graph-commentary.md ①).
 - The last 29 notes ending on a bracket were read off the page pictures by eye: 25 had their stop put back, 4 have none in the book and stay as printed, and the italics were checked (the capture does not record them) (knowledge-graph-commentary.md ①).
+- Italics in the pitch's notes: slanting a note's quotation of its own verse was tried against the page pictures and was right only about three times in four, so the words stay upright until the slant can be read off the pictures (docs/issues/italics-from-quoted-verse-words.md).
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
