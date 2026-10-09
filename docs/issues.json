@@ -2951,6 +2951,17 @@
       "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
+      "id": "sideways-phone-long-verse-under-note",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊹"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "On a phone held sideways, a seven-line verse (2:255) with its note open shows about four lines; the rest is under the note until the page is dragged. Too tall for either way of making room within a fifth (㊷ smaller page, ㊸ shorter note), so it starts at its first line by design. Upright, and for short verses sideways (⑬), the whole verse shows. Low priority: the demo is for an iPad."
+    },
+    {
       "id": "note-covers-turn-edge",
       "source": {
         "file": "docs/design/knowledge-graph-commentary.md",

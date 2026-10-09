@@ -1223,3 +1223,19 @@ Tests: a core rule test (how much room the note gives, and when it gives none), 
 test (the default, the choice kept, an unknown value), and a browser test on an upright iPad that
 picks the way in the info panel, opens 2:255, and checks the whole verse is above the note with the
 page never zooming out. All three failed first.
+
+### ㊹ On a phone held sideways, can a long verse be shown whole beside its open note? · **open**
+
+Found walking 2:255 on a phone on its side (2026-10-09). The screen is short that way, and the note
+leaves room for about four of the verse's seven lines. Neither way of making room (㊷, ㊸) can do
+it within its limit of a fifth, so the page starts the verse at its first line and the rest sits
+under the note until the reader drags the page. A short verse, such as 35:44 in ⑬, still shows
+whole. Upright, the same phone shows all of 2:255 above the note.
+
+**What it changes for a hafiz:** reading a long verse's note with the phone on its side, they see
+the verse's opening lines and have to drag the page to check its end.
+
+**What would answer it:** build the ways that could carry it and walk them on 2:255 sideways. For
+example, the page drawn smaller past the usual limit only when held sideways, or the note opening
+as just its title row until it is pulled up. Today's way stays until then. It is low on the list,
+since the demo is meant for an iPad.
