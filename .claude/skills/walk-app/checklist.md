@@ -121,8 +121,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   "side by side, unmarked" it opens plain. A loosely alike row opens plain. · desktop, phone · issue:
   `lookalike-row-no-compare`
 - [ ] Opening the last look-alike rows shows what opened: the whole row if it fits, else its name
-  just under the list's title (try 10:15's later surahs → 39:13 on desktop Firefox, 46:7 on a phone). ·
-  desktop (Firefox), phone · issue: `lookalike-compare-below-edge`
+  just under the list's title (try 10:15's later surahs → 39:13 on desktop Firefox, 46:7 on a phone).
+  In the iPad or Mac app, find the "later surahs" button by its accessible label, not its text (it
+  shows only a count). · desktop (Firefox), phone, ipad, ipad-side, iPad app, Mac app · issue:
+  `lookalike-compare-below-edge`
 - [ ] The look-alike buttons cover no words, no close button, and are not hidden by a note. ·
   phone, phone-side, desktop · issues: `lookalike-chips-cover-lifted-page`,
   `lookalike-chips-sideways-cover-close`, `chips-under-facing-note`
