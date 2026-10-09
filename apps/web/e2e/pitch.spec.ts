@@ -1559,6 +1559,31 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     expect(Math.max(...zooms), "the page never went past where it ends").toBeLessThanOrEqual(last + 0.01);
     await context.close();
   });
+
+  test.describe("in Arabic", () => {
+    test.use({ locale: "ar" });
+    test("the note mirrors and stays whole, held upright and on its side", async ({ page }) => {
+      // Walked in the iPad's shape with the app in Arabic (2026-10-09): the
+      // note's close button moves to the left of its title, and the card stays
+      // inside the window and off its verse, whichever way the iPad is held.
+      await page.addInitScript(() => localStorage.setItem("hifth.lang.v1", "ar"));
+      await page.goto("/#/hafs-kfqc/18:60?open=commentary");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      for (const size of [{ width: 1024, height: 1366 }, { width: 1366, height: 1024 }]) {
+        await page.setViewportSize(size);
+        await settle(sheet(page));
+        const card = (await sheet(page).boundingBox())!;
+        const close = (await sheet(page).getByRole("button", { name: /^(إغلاق|Close)$/ }).first().boundingBox())!;
+        const title = (await sheet(page).getByText("The Study Quran").first().boundingBox())!;
+        expect(close.x + close.width, `${size.width} wide: close sits left of the title`).toBeLessThan(title.x);
+        expect(card.x, `${size.width} wide: the card's left edge is on the screen`).toBeGreaterThanOrEqual(0);
+        expect(card.x + card.width, `${size.width} wide: its right edge too`).toBeLessThanOrEqual(size.width);
+        const lines = page.locator("#hifth-overlay .hl-sel");
+        await settle(lines.last());
+        for (const b of await litLineBoxes(page)) expect(overlaps(b, card), "the note covers its verse").toBe(false);
+      }
+    });
+  });
 });
 
 test.describe("Hifth · links straight into the commentary", () => {

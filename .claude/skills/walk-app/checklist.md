@@ -138,8 +138,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   pen-colours specs
 - [ ] Bookmark a page: the ribbon and folded corner look right, in Firefox too. · desktop with
   `BROWSER=firefox` · test: edge-peel spec
-- [ ] Switch the interface to Arabic: everything mirrors, nothing is cut off. · phone, desktop ·
-  tests: lang, chrome-fit specs
+- [ ] Switch the interface to Arabic: everything mirrors, nothing is cut off; on an iPad, upright
+  and on its side, open a note too: its close button is on the left and the card stays whole. ·
+  phone, desktop, ipad, ipad-side · tests: lang, chrome-fit specs, pitch "the note mirrors"
 - [ ] Open settings and scroll to the end: one line under the title, and no choice that this screen
   cannot use (nothing about two facing pages on a phone). · phone, desktop · issue:
   `phone-settings-spread-choice-and-double-line`
