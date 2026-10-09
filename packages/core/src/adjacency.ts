@@ -102,7 +102,7 @@ export interface Edge {
   /** Canonical target key, e.g. "quran/hafs-kfqc/2:123" (may carry #wN). */
   readonly to: string;
   /**
-   * The last verse when the source cites a whole range ("vv. 9–26") as one
+   * The last verse when the source cites a whole range ("vv. 4–7") as one
    * reference; the hop still lands on `to`, the range's first verse.
    */
   readonly through?: string;
