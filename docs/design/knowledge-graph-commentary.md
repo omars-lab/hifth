@@ -542,13 +542,18 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
   with the blocks it could not place, because a stray reference sat in front of its verse
   number, so both verses showed nothing. It is put back from a list that holds a fingerprint of
   the block, never its words.
+- **Sentences run together, searched wider.** The first search looked for the common sentence
+  openings. A wider one looked for any word that usually opens a sentence in these notes but
+  sat mid-sentence: 135 spots. The page readings show the book itself runs 103 of them on, nearly
+  all a verse quoted straight into the sentence. The rest were looked at, on the page pictures
+  where the readings could not say: four had lost a full stop and a new paragraph, and are on the
+  list; one of them also had the long-vowel marks of the line above set down as stray letters,
+  which are now dropped wherever two or more such lone vowels open a sentence.
 - **Verses with no note.** The 42 verses still without a note were each looked for on the pages.
   The book has none for them: where it prints a run of verses together, the note carries only
   the last verse's number.
 
-**What is still different:** A run-on whose second
-sentence starts with an unusual word could also remain, since the search for them looked for
-the common sentence openings. Words the book sets in italics (a term being defined, a
+**What is still different:** Words the book sets in italics (a term being defined, a
 book's title) show upright in the panel: neither the capture nor the page readings record
 the slant. One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted
@@ -560,8 +565,7 @@ be found from the words at all. A panel that slants the wrong words a quarter of
 worse than one that slants none, so the words stay upright. Nothing here reaches the public
 site; it is only the pitch.
 
-**What would answer it:** a way to read the slant off the page pictures themselves, and a wider
-search for run-on sentences. The shortcut is written up in
+**What would answer it:** a way to read the slant off the page pictures themselves. The shortcut is written up in
 [the italics note](../issues/italics-from-quoted-verse-words.md). Why the bracket endings had to be read off the pictures rather than the page
 readings is written up in [the bracket endings note](../issues/bracket-endings-read-from-the-pictures.md).
 

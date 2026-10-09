@@ -62,6 +62,18 @@ describe("vowel endings the print raises above a word", () => {
     expect(dropRaisedEndings("Great is the Maker!). u u Great is the Maker!")).toBe("Great is the Maker!). Great is the Maker!");
   });
 
+  it("drops the long-vowel marks of the line above, set down as two or more lone vowels", () => {
+    expect(dropRaisedEndings("as when one walks the road; Tr). a u About this road the elder said.")).toBe(
+      "as when one walks the road; Tr). About this road the elder said.",
+    );
+    expect(dropRaisedEndings("The well was dry. i a u Then they left.")).toBe("The well was dry. Then they left.");
+  });
+
+  it("keeps a lone article after a stop, as in an abbreviation", () => {
+    const note = "Some travellers, e.g. a Bedouin, knew the well. See 4:2. I said so.";
+    expect(dropRaisedEndings(note)).toBe(note);
+  });
+
   it("leaves ordinary words alone", () => {
     const note = "It is called “water” in English, and (an old word) an Arab would know. In Egypt it is (ṣalāh) in Islam.";
     expect(dropRaisedEndings(note)).toBe(note);
