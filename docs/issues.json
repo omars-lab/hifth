@@ -3238,7 +3238,7 @@
       "severity": "defect",
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
-      "note": "Walking the demo on an upright iPad (2026-10-09): a link to 2:255 landed zoomed in and the note covered the verse's last line and its number (37 px under). A verse only a little taller than the room above a note is now drawn a little smaller (never by more than a fifth, never below the whole page, not with the book open) and the zoom readout follows. Tests: view.test.ts nearFitZoom; pitch.spec.ts 'a verse a little taller than the room above the note is shown whole' failed first."
+      "note": "Walking the demo on an upright iPad (2026-10-09): a link to 2:255 landed zoomed in and the note covered the verse's last line and its number (37 px under). A verse only a little taller than the room above a note is now drawn a little smaller (never by more than a fifth, never below the whole page, not with the book open) and the zoom readout follows. Tests: view.test.ts nearFitZoom; pitch.spec.ts 'a verse a little taller than the room above the note is shown whole' failed first. Then the page moved twice (zoomed in to 155%, then back out to about 140%); it now moves once, the link aiming at the smaller level, or bending toward it when the note rises mid-move. Test: pitch.spec.ts 'a link to a verse whose note rises with it zooms in once' failed first."
     },
     {
       "id": "tips-repeat-foot-line",

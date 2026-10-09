@@ -1393,6 +1393,41 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     expect(readout, "the readout says the smaller level").toBeLessThan(155);
     expect(readout).toBeGreaterThanOrEqual(124);
   });
+
+  test("a link to a verse whose note rises with it zooms in once, not in and then back out", async ({ page }) => {
+    // The link zoomed the page to its usual level, and only once it had
+    // stopped did the page zoom back out so the verse fit above the note: two
+    // moves, the second undoing part of the first. The note rises a moment
+    // after the page starts moving, so the move now turns toward the smaller
+    // level on the way and lands there once.
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    await page.goto("/#/hafs-kfqc/p1");
+    await page.waitForTimeout(800);
+    await page.evaluate(() => {
+      const w = window as unknown as { __zooms: number[] };
+      w.__zooms = [];
+      const look = () => {
+        for (const host of document.querySelectorAll<HTMLElement>("[data-host-page]")) {
+          const z = host.style.transform.match(/scale\(([^)]*)\)/)?.[1];
+          if (host.style.display !== "none" && z) w.__zooms.push(Number(z));
+        }
+        requestAnimationFrame(look);
+      };
+      requestAnimationFrame(look);
+    });
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toBeVisible();
+    const lines = page.locator("#hifth-overlay .hl-sel");
+    await settle(lines.first());
+    await settle(lines.last());
+    await page.waitForTimeout(600);
+    const zooms = await page.evaluate(() => (window as unknown as { __zooms: number[] }).__zooms);
+    const last = zooms.at(-1)!;
+    expect(last, "the page ends zoomed in").toBeGreaterThan(1.2);
+    expect(Math.max(...zooms), "the page never went past where it ends").toBeLessThanOrEqual(last + 0.01);
+  });
 });
 
 test.describe("Hifth · links straight into the commentary", () => {
