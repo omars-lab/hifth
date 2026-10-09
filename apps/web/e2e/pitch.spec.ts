@@ -646,11 +646,13 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
 
   test("the demo's notes set the book's italics, and nothing shows of the marks that carry them", async ({ page }) => {
     // The slanted words are read off the page pictures by hand for the demo's
-    // verses; 2:255 and the shared note on 18:60–82 carry dozens of them.
-    for (const verse of ["2:255", "18:70"]) {
+    // verses; 2:255 and the shared note on 18:60–82 carry dozens of them. The
+    // 2:48 note and the one 15:30 shares with 15:31 were left upright at first,
+    // so every demo verse is checked; 15:31 shows a shared note keeps its slant.
+    for (const [verse, least] of [["2:255", 5], ["18:70", 5], ["2:48", 15], ["15:31", 3]] as const) {
       await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
       await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
-      expect(await sheet(page).locator("em").count()).toBeGreaterThan(5);
+      expect(await sheet(page).locator("em").count(), verse).toBeGreaterThan(least);
       expect(await sheet(page).textContent()).not.toMatch(/[\uE000\uE001]/);
     }
   });

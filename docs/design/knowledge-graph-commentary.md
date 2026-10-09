@@ -557,8 +557,8 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
 **What is still different:** Words the book sets in italics (a term being defined, a
 book's title) show upright in the panel, except in the notes the demo opens: neither the capture
 nor the page readings record the slant. For the demo's verses (2:255, 18:10–13 and 18:60, with the note
-18:60–82 share) the slant was read off the page pictures by
-hand, about a hundred runs, and the panel draws them in italics. Everywhere else stays upright.
+18:60–82 share, and since 2026-10-09 2:48 and the note 15:30–31 share) the slant was read off the page pictures by
+hand, about a hundred and thirty runs, and the panel draws them in italics. Everywhere else stays upright.
 One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted
 without reading the slant at all. About 4,000 notes have such a run, but checked against the
