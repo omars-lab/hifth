@@ -205,6 +205,11 @@ app-test: $(if $(ONLY),app-generate,app-unit-test) ## Unit tests plus the XCUITe
 
 app-walk: app-generate ## Open each of ROUTES in the iPad app (SIDEWAYS=1 to turn it) and save a picture of each to native/shots/walk/upright or side/
 	@rm -rf $(SHOTS)/ipad-walk.xcresult $(WALK_OUT)
+	@# The simulator sometimes stops turning (it says sideways and stays
+	@# upright); a restart cures it, so a sideways walk starts from one.
+	$(if $(SIDEWAYS),-xcrun simctl shutdown $(IPAD_UDID))
+	$(if $(SIDEWAYS),xcrun simctl boot $(IPAD_UDID))
+	$(if $(SIDEWAYS),xcrun simctl bootstatus $(IPAD_UDID) -b > /dev/null)
 	set -o pipefail; TEST_RUNNER_WALK_ROUTES='$(ROUTES)' TEST_RUNNER_WALK_SIDEWAYS='$(SIDEWAYS)' \
 	  $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
 	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-walk.xcresult \

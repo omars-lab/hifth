@@ -581,3 +581,11 @@ pass. The walk also kept one folder for both turns, so a sideways run deleted th
 before anyone had looked at them; each turn now has its own folder. And naming two tests in one
 run stopped before testing anything; it now takes several. A small test checks both plans
 (failed first).
+
+It came back the next day (2026-10-09), and again only a restart cured it, so a sideways walk now
+restarts the simulator before it starts, about 20 seconds, and a test of the walk's plan checks it
+does (failed first). The same walk found the probe could not wait: a question that presses
+something and then counts what changed got `{}` back, because the answer comes a moment after the
+press. The probe now waits for an answer that comes later; three tests run its question in a real
+web view (the waiting one and a failing one failed first). With both, the iPad app at 2:255 shows
+the line under its eight related verses, and pressing it lists all 25.
