@@ -3448,10 +3448,10 @@
         "file": "docs/design/lookalike-rows.md",
         "item": "⑥"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "A row whose shared words sit in one place shows only a verse name until opened, so finding the row a hafiz confuses means opening each. Options: leave it, a small picture of the shared words under the name, or a count of shared words. Related to ㊼."
+      "note": "A row whose shared words sit in one place showed only a verse name until opened. Built three ways as an info-panel choice: the other verse's shared words cut from its page under the row's name (the default, because it shows where the two part), a count of shared words, or nothing. Unit and browser tests cover each way and the strip's starting edge in both languages."
     }
   ]
 }

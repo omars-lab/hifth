@@ -1,7 +1,7 @@
 import { afterEach, describe, it, expect, vi } from "vitest";
 import { render, waitFor } from "@testing-library/preact";
 import type { Edge, MarkShard, WordShard } from "@hifth/core";
-import { DiffView } from "./DiffView";
+import { DiffView, SharedWords } from "./DiffView";
 import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 import styles from "./DiffView.module.css";
 
@@ -298,5 +298,35 @@ describe("DiffView for a look-alike with no single shared stretch", () => {
       expect(washes(svg, styles.wShare as string)).toHaveLength(0);
       expect(washes(svg, styles.wDiff as string)).toHaveLength(0);
     }
+  });
+});
+
+/**
+ * The closed row's picture of the shared words (lookalike-rows ⑥): a page whose
+ * made-up verse 9:9 runs ten words over two lines, five a line, so a run from
+ * word 4 to word 7 sits on both lines.
+ */
+describe("SharedWords, the picture of the shared words on a closed row", () => {
+  const twoLines = Array.from({ length: 10 }, (_, i) =>
+    i < 5 ? ([10 * (i + 1), 20, 8, 10] as const) : ([10 * (i - 4), 40, 8, 10] as const),
+  );
+  const RUN = { key: "9:9", page: 7, from: 4, to: 7, words: 4 };
+
+  it("cuts one piece a printed line, so the words read in a row, not a block", async () => {
+    SHARDS[7] = { page: 7, words: { ...SHARDS[7]!.words, "9:9": { from: 1, boxes: twoLines } } };
+    const { container } = render(<SharedWords run={RUN} edition="hafs-kfqc" />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [first, second] = Array.from(container.querySelectorAll("svg"));
+    // Words 4–5 on the first line (x 40–58), words 6–7 on the second (x 10–28),
+    // each cut to its own words with a letter's room around it.
+    expect(first!.getAttribute("viewBox")).toBe("38 18 22 14");
+    expect(second!.getAttribute("viewBox")).toBe("8 38 22 14");
+    for (const svg of [first!, second!]) expect(svg).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("draws nothing when the page does not carry the verse", async () => {
+    const { container } = render(<SharedWords run={{ ...RUN, key: "9:10" }} edition="hafs-kfqc" />);
+    await new Promise((r) => setTimeout(r, 20));
+    expect(container.querySelector("svg")).toBeNull();
   });
 });

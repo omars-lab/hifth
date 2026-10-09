@@ -5,6 +5,7 @@ import { useT } from "../i18n";
 import { usePassageRows } from "../passage-rows";
 // Loaded the first time a look-alike is opened out (see ./later.tsx).
 import { DiffView } from "./later";
+import { SharedPreview } from "./SharedPreview";
 import { ShareSheet } from "./ShareSheet";
 import styles from "./HighlightMenu.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
@@ -230,6 +231,8 @@ export function HighlightMenu({
                       {edge.through && edge.like && (
                         <span className={styles.note}>{t.likeVerse(t.ayahRef(edge.like.to) ?? edge.like.to)}</span>
                       )}
+                      {/* The words the two share, before the row is opened. */}
+                      <SharedPreview edge={edge} open={isOpen} className={styles.note} />
                       {/* With no words to mark, the row still says why it is listed. */}
                       {edge.match && (
                         <span className={styles.note}>

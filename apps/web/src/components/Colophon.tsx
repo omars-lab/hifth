@@ -13,6 +13,7 @@ import { PITCH } from "../pitch/pitch";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
 import { LOOKALIKE_COMPARES, rememberLookalikeCompare, useLookalikeCompare } from "../lookalike-compare";
 import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-rows";
+import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
@@ -222,6 +223,7 @@ export function Colophon({
   const longVerse = useLongVerse();
   const lookalikeCompare = useLookalikeCompare();
   const passageRows = usePassageRows();
+  const lookalikePreview = useLookalikePreview();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -588,6 +590,35 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.passageRowsNote}</p>
+        </section>
+
+        {/* What a closed look-alike row shows of the words the pair shares
+            (docs/design/lookalike-rows.md, item 6): every way built, the picture
+            the default. */}
+        <section className={styles.block} aria-labelledby="colophon-lookalike-preview">
+          <h3 className={styles.subhead} id="colophon-lookalike-preview">
+            {t.lookalikePreviewTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-lookalike-preview">
+            {LOOKALIKE_PREVIEWS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={lookalikePreview === choice}
+                data-lookalike-preview={choice}
+                onClick={() => rememberLookalikePreview(choice)}
+              >
+                {choice === "picture"
+                  ? t.lookalikePreviewPicture
+                  : choice === "count"
+                    ? t.lookalikePreviewCount
+                    : t.lookalikePreviewNone}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.lookalikePreviewNote}</p>
         </section>
 
         {/* How a note draws the parts it can be about (docs/design/scoped-notes.md,

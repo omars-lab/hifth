@@ -222,6 +222,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   HASH='#/hafs-kfqc/7:106' ACT='eval=(localStorage.setItem("hifth.passage-rows.v1","drop"),location.reload());
   settle=1500; eval=(location.hash="#/hafs-kfqc/7:106?open=lookalikes"); settle=1500'` · issue: `lookalike-passage-and-verse-overlap`
   · test: `packages/core/src/adjacency.test.ts`
+- [ ] Open 15:30's and 2:48's look-alikes in English and in Arabic: each row that shares one stretch shows
+  the other verse's shared words cut from the page, under the row's name, starting at the same edge as the
+  name, and the picture stops where the two verses part. Opening the row replaces the picture with the
+  comparison. Try the info panel's "As a count" and "Not shown" too, then set it back. · `make drive
+  DEVICE=phone LOCALE=en HASH='#/hafs-kfqc/15:30?open=lookalikes'` · issue: `lookalike-row-shared-words-unseen`
+  · test: `e2e/lookalike-compare-view.spec.ts`
 - [ ] Open a long verse's note on an upright iPad in the pitch build: a verse a little taller than
   the room shows whole above the note, its number included, and the zoom readout says the smaller
   level, reached in one move (not zoomed in and then back out). · `make drive DEVICE=ipad

@@ -16,8 +16,8 @@
 - **Reason line** — the short line under a row's name that says how the two are alike:
   "the words they share come more than once", "alike, but not word for word", "the next verse
   tells them apart", or, on a passage row, which verse inside it is most alike. A row whose
-  shared words sit in one place on both sides has no line; opening it marks them (⑥ asks
-  whether it should say them before it is opened).
+  shared words sit in one place on both sides shows those words under its name, cut from the
+  page (⑥); opening it marks them in both verses.
 - **Comparison** — what opens under a row: both verses as printed, the shared words washed
   green and the differences ochre.
 
@@ -147,7 +147,7 @@ first verse. A row matched best by its first verse needs no line, since its name
 Tests: a unit test on each list (the look-alike list and the highlighted-passage menu), both failed first,
 and the browser test that opens 15:30's passage row now checks the closed row names 38:73 first.
 
-### ⑥ Before a reader opens a look-alike row, can they see which words the two verses share? · **open**
+### ⑥ Before a reader opens a look-alike row, can they see which words the two verses share? · **answered**
 
 **What it changes for a hafiz:** a row like 10:15's 8:31, or 15:30's 38:73, shows only a verse name and an
 arrow to open it. The shared words, which are exactly the stretch a hafiz slides on, appear only after a
@@ -157,7 +157,7 @@ What the app does today: a row whose shared words sit in one place on both sides
 name; the other kinds of row each say why they are listed (㊽). Opening a row draws both verses with the
 shared words washed green (㊾).
 
-Options already visible, none built yet:
+Options seen before building:
 
 - **Leave it** (today): the row is short, and the comparison is one tap away.
 - **A small picture of the shared words** under the row's name, cut from the printed page the way the
@@ -167,3 +167,31 @@ Options already visible, none built yet:
 
 Not settled here: how many rows a verse should list at all (㊼, the owner's pick). A picture under each row
 makes a long list longer, so the two are related.
+
+**Built all three, 2026-10-09; the picture is the default.** The info panel has a new choice, "The words a
+look-alike shares, before it is opened", with *Cut from the page* (the default), *As a count* and *Not
+shown*. A row that shares one stretch of words shows the **other** verse's shared words under its name,
+cut from its printed page: one piece for each printed line, set side by side in reading order, about as
+tall as a line of the row's own text, washed the same green the comparison uses. The reader already
+knows their own verse; what they need is the other one. For a passage row, the words come from the verse
+inside the passage that matches best (⑤). Rows alike only loosely, or whose words come more than once,
+keep their own line and get no picture, since there is no one stretch to show. The picture steps aside
+while the row is open, because the comparison under it shows the same words larger. A screen reader
+does not hear it: the row's name and the comparison already say what it shows.
+
+What looking at it taught us, on a phone and an iPad in both languages and in Firefox:
+
+- **The picture ends where the two verses part.** At 2:48 the pictured words of 2:123 stop at the last
+  shared word, the point where the next words differ. So the closed row shows not only *which* words
+  are shared but *where the slip happens*, which is the thing a hafiz needs and which a count can never
+  say. That is why the picture is the default.
+- **In the English layout the strip first sat at the far end of the row**, away from the name it belongs
+  to, because a right-to-left strip that runs the full width starts at the right. It is now only as wide
+  as its pieces, so it starts where the name starts in either language. A browser test checks the edge
+  in both languages; it failed first.
+- **It makes the doubled rows of ㊼ plain.** Where a passage is listed beside a verse inside it, both
+  rows now carry the very same picture, one above the other (15:30's 38:72–38:75 and 38:73; 2:48's
+  2:122–2:123 and 2:123). That is for ㊼, the owner's pick; nothing here changes it.
+- **Cost:** a row with a picture is about one line taller, and the list now loads the page pictures of
+  the verses it names when it opens, not only when a row is opened. For a reader who finds that too
+  much, *As a count* keeps the list short and *Not shown* puts it back as it was.

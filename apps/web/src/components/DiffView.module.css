@@ -104,3 +104,39 @@
   stroke-width: 0.6;
   vector-effect: non-scaling-stroke;
 }
+
+/*
+ * A closed row's picture of the shared words (lookalike-rows ⑥): one piece a
+ * printed line, side by side in reading order and wrapping when the row is
+ * narrow. Each piece is about a line of the row's own text tall — the ink at
+ * the size of the words around it, not a thumbnail to squint at.
+ *
+ * The pieces run right to left because the words do, but the strip itself is
+ * only as wide as they are, so it starts where the row's name starts: in an
+ * English list a full-width right-to-left strip sat at the far end, away from
+ * the name it belongs to.
+ */
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-1);
+  direction: rtl;
+  margin-block-start: 2px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.pieceHost {
+  display: block;
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.piece {
+  display: block;
+  height: 1.75rem;
+  width: auto;
+  max-width: 100%;
+  background: var(--mushaf-paper, #fdfbf5);
+}

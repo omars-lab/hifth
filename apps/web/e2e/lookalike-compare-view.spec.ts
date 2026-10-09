@@ -30,7 +30,8 @@ test.describe("Hifth · a look-alike comparison", () => {
     await expect(list).toBeVisible({ timeout: 20_000 });
     await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
     await list.locator("[aria-expanded=false]").last().click();
-    const crops = list.locator("svg");
+    // The comparison's crops, not the pictures closed rows show of their shared words.
+    const crops = list.locator("[id^='diff-'] svg");
     await expect(crops).toHaveCount(2, { timeout: 10_000 });
     const row = crops.last().locator("xpath=ancestor::li[1]");
     await settle(row);
@@ -68,7 +69,7 @@ test.describe("Hifth · a look-alike comparison", () => {
     const open = row.locator("[aria-expanded]");
     await expect(open, "the passage row offers to open").toHaveCount(1);
     await open.click();
-    await expect(row.locator("svg")).toHaveCount(2, { timeout: 10_000 });
+    await expect(row.locator("[id^='diff-'] svg")).toHaveCount(2, { timeout: 10_000 });
     await expect(row, "the comparison stands on the verse that matches").toContainText("38:73");
     // The row is taller than a phone's list, so it lines up its name under the
     // title. The title only pins once the list moves, and the name was scrolled
@@ -80,4 +81,36 @@ test.describe("Hifth · a look-alike comparison", () => {
       title.y + title.height - 1,
     );
   });
+
+  // A row whose two verses share one stretch showed nothing of it until opened
+  // (lookalike-rows ⑥). Closed, it now shows those words cut from the page,
+  // and the strip starts on the same side as the row's name: in English it sat
+  // at the far end, away from the name it belongs to.
+  for (const lang of ["en", "ar"] as const) {
+    test(`a closed row shows the shared words from the page, starting where its name starts (${lang})`, async ({ page }) => {
+      await page.addInitScript((l) => localStorage.setItem("hifth.lang.v1", l), lang);
+      await page.goto("/#/hafs-kfqc/15:30?open=lookalikes");
+      const list = page.getByRole("dialog").first();
+      await expect(list).toBeVisible({ timeout: 20_000 });
+      const row = list.getByRole("listitem").first();
+      const pieces = row.locator("[data-shared-words] svg");
+      await expect(pieces.first()).toBeVisible({ timeout: 10_000 });
+      await settle(row);
+      // The name's line runs the row's width and its words start at its start
+      // edge; the pieces, wherever they wrap, must reach that same edge.
+      const name = (await row.locator("button > span").first().boundingBox())!;
+      const boxes = await pieces.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON() as DOMRect));
+      if (lang === "en") {
+        const left = Math.min(...boxes.map((b) => b.left));
+        expect(Math.abs(left - name.x), "the pictures start at the name's left edge").toBeLessThanOrEqual(2);
+      } else {
+        const right = Math.max(...boxes.map((b) => b.right));
+        expect(Math.abs(right - (name.x + name.width)), "the pictures start at the name's right edge").toBeLessThanOrEqual(2);
+      }
+      // Opening the row lets the comparison show the same words larger.
+      await row.locator("[aria-expanded]").click();
+      await expect(row.locator("[id^='diff-'] svg")).toHaveCount(2, { timeout: 10_000 });
+      await expect(row.locator("[data-shared-words]")).toHaveCount(0);
+    });
+  }
 });

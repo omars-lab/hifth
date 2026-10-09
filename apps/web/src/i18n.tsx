@@ -296,6 +296,8 @@ export interface Strings {
   relatedLede(source: string): string;
   /** The line under a short related list that shows the rest, with how many. */
   relatedMore(count: number): string;
+  /** A closed look-alike row's count of the words the pair shares. */
+  sharesWords(count: number): string;
   goToVerse(label: string): string;
   /** Over the line of the book's key that says who a commentator's initials stand for. */
   keyFrom: string;
@@ -800,6 +802,11 @@ export interface Strings {
   passageRowsGroup: string;
   passageRowsDrop: string;
   passageRowsNote: string;
+  lookalikePreviewTitle: string;
+  lookalikePreviewPicture: string;
+  lookalikePreviewCount: string;
+  lookalikePreviewNone: string;
+  lookalikePreviewNote: string;
   relatedListTitle: string;
   relatedListLine: string;
   relatedListAll: string;
@@ -1049,6 +1056,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     relatedVerses: m.relatedVerses,
     relatedLede: (source) => m.relatedLede({ source }),
     relatedMore: (count) => m.relatedMore({ n: count, nText: n(count) }),
+    sharesWords: (count) => m.sharesWords({ n: count, nText: n(count) }),
     goToVerse: (label) => m.goToVerse({ label }),
     keyFrom: m.keyFrom,
     keyAlso: (name) => m.keyAlso({ name }),
@@ -1477,6 +1485,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     passageRowsGroup: m.passageRowsGroup,
     passageRowsDrop: m.passageRowsDrop,
     passageRowsNote: m.passageRowsNote,
+    lookalikePreviewTitle: m.lookalikePreviewTitle,
+    lookalikePreviewPicture: m.lookalikePreviewPicture,
+    lookalikePreviewCount: m.lookalikePreviewCount,
+    lookalikePreviewNone: m.lookalikePreviewNone,
+    lookalikePreviewNote: m.lookalikePreviewNote,
     relatedListTitle: m.relatedListTitle,
     relatedListLine: m.relatedListLine,
     relatedListAll: m.relatedListAll,
