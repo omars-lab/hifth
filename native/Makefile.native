@@ -6,11 +6,11 @@
 #   make app-web FLAVOUR=public   copy the public build (refuses held data)
 #   make app-run-mac        build and open the Mac app
 #   make app-run-ipad       build, install and launch on the iPad simulator
-#   make app-shot ROUTE=/hafs-kfqc/p45 TARGET=ipad|mac [APPEARANCE=dark]
+#   make app-shot ROUTE=/hafs-kfqc/p45 TARGET=ipad|mac [APPEARANCE=dark] [LOCALE=ar|en]
 #   make app-open ROUTE=/hafs-kfqc/2:255   turn the running app to a route
 #   make app-callback-check an x-callback request through macOS, answer received by a second process
 #   make app-test           route/bundle unit tests + the XCUITest smoke
-#   make app-walk ROUTES='/hafs-kfqc/2:255?open=commentary …' [SIDEWAYS=1]   a picture per route, to look at
+#   make app-walk ROUTES='/hafs-kfqc/2:255?open=commentary …' [SIDEWAYS=1] [LOCALE=ar|en]   a picture per route, to look at
 #   make app-golden         the real app's screenshots against native/shots/baseline/
 #   make app-device-install build for a plugged-in iPad, install and launch (DEVICE=…)
 # ---------------------------------------------------------------------------
@@ -57,6 +57,13 @@ SIDEWAYS     ?=
 WALK_OUT     ?= $(SHOTS)/walk/$(if $(SIDEWAYS),side,upright)
 DELAY_MS     ?= 2000
 APPEARANCE   ?= light
+# The device language to launch in (ar, en); empty keeps the device's own.
+# The app starts in it only until the reader picks a language with its own
+# button, as any reader's choice outranks the device: the iPad simulator has
+# Arabic picked (2026-10-09), so LOCALE=en there still shows Arabic.
+LOCALE       ?=
+LOCALE_ARGS   = $(if $(LOCALE),-AppleLanguages '($(LOCALE))')
+MAC_ARGS      = $(if $(LOCALE),--args $(LOCALE_ARGS))
 # `/hafs-kfqc/p45?field=dark` → `ipad-hafs-kfqc_p45_field-dark.png`
 # Where `app-shot` writes; `app-golden` points it at native/shots/current/.
 SHOT_OUT     ?= $(SHOTS)/$(SHOT_NAME)
@@ -71,7 +78,7 @@ GOLDEN_IPHONE_ROUTES ?= /hafs-kfqc/2:255
 TEAM         ?= $(shell security find-identity -v -p codesigning 2>/dev/null | sed -n 's/.*Apple Development: .*(\([A-Z0-9]\{10\}\)).*/\1/p' | head -1)
 # The plugged-in iPad, by the name `xcrun devicectl list devices` prints.
 DEVICE       ?=
-SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(patsubst /%,%,$(ROUTE))))))$(if $(filter-out light,$(APPEARANCE)),-$(APPEARANCE),).png
+SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(patsubst /%,%,$(ROUTE))))))$(if $(filter-out light,$(APPEARANCE)),-$(APPEARANCE),)$(if $(LOCALE),-$(LOCALE)).png
 
 .PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
         app-run-ipad app-shot app-probe app-open app-test app-walk app-test-mac-ui app-unit-test app-logs app-clean \
@@ -132,7 +139,7 @@ app-callback-check: app-build-mac ## Send one x-callback-url request through mac
 
 app-run-mac-stdout: app-build-mac ## Run the Mac app until you quit it, then print its console output here (live: make app-logs)
 	@: > $(MAC_LOG)
-	$(MAC_OPEN) --env HIFTH_ROUTE=$(ROUTE) --env HIFTH_APPEARANCE=$(APPEARANCE) $(MAC_APP)
+	$(MAC_OPEN) --env HIFTH_ROUTE=$(ROUTE) --env HIFTH_APPEARANCE=$(APPEARANCE) $(MAC_APP) $(MAC_ARGS)
 	@cat $(MAC_LOG)
 
 app-run-ipad: app-build-ipad ## Boot the simulator, install and launch at ROUTE
@@ -141,7 +148,7 @@ app-run-ipad: app-build-ipad ## Boot the simulator, install and launch at ROUTE
 	open -a Simulator
 	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
-	SIMCTL_CHILD_HIFTH_ROUTE=$(ROUTE) SIMCTL_CHILD_HIFTH_APPEARANCE=$(APPEARANCE) xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID)
+	SIMCTL_CHILD_HIFTH_ROUTE=$(ROUTE) SIMCTL_CHILD_HIFTH_APPEARANCE=$(APPEARANCE) xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS)
 
 app-shot: ## Screenshot the app at ROUTE on TARGET=ipad|mac (APPEARANCE=light|dark) into native/shots/
 	@mkdir -p $(SHOTS)
@@ -149,7 +156,7 @@ ifeq ($(TARGET),mac)
 	$(MAKE) app-build-mac
 	@rm -f $(SHOT_OUT); : > $(MAC_LOG)
 	$(MAC_OPEN) --env HIFTH_ROUTE=$(ROUTE) --env HIFTH_APPEARANCE=$(APPEARANCE) \
-	  --env HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) $(MAC_APP)
+	  --env HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) $(MAC_APP) $(MAC_ARGS)
 	@cat $(MAC_LOG)
 else
 	$(MAKE) app-build-ipad
@@ -159,7 +166,7 @@ else
 	@rm -f $(SHOT_OUT)
 	SIMCTL_CHILD_HIFTH_ROUTE=$(ROUTE) SIMCTL_CHILD_HIFTH_APPEARANCE=$(APPEARANCE) \
 	  SIMCTL_CHILD_HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) \
-	  xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID)
+	  xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS)
 	@for i in $$(seq 1 60); do test -s $(SHOT_OUT) && break; sleep 0.5; done
 	@test -s $(SHOT_OUT) || { echo "no screenshot after 30 s"; exit 1; }
 endif
@@ -177,13 +184,13 @@ ifeq ($(TARGET),ipad)
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
 	SIMCTL_CHILD_HIFTH_PROBE=1 SIMCTL_CHILD_HIFTH_ROUTE='$(ROUTE)' SIMCTL_CHILD_HIFTH_PROBE_EVAL='$(EVAL)' \
 	  SIMCTL_CHILD_HIFTH_PROBE_DELAY_MS=$(DELAY_MS) \
-	  xcrun simctl launch --console-pty --terminate-running-process $(IPAD_UDID) $(BUNDLE_ID) \
+	  xcrun simctl launch --console-pty --terminate-running-process $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS) \
 	  | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
 else
 	$(MAKE) app-build-mac
 	@: > $(MAC_LOG)
 	$(MAC_OPEN) --env HIFTH_PROBE=1 --env HIFTH_ROUTE='$(ROUTE)' --env HIFTH_PROBE_EVAL='$(EVAL)' \
-	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) $(MAC_APP)
+	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) $(MAC_APP) $(MAC_ARGS)
 	@grep '^probe' $(MAC_LOG) | sed 's/^probe //' | python3 -m json.tool
 endif
 
@@ -210,7 +217,7 @@ app-walk: app-generate ## Open each of ROUTES in the iPad app (SIDEWAYS=1 to tur
 	$(if $(SIDEWAYS),-xcrun simctl shutdown $(IPAD_UDID))
 	$(if $(SIDEWAYS),xcrun simctl boot $(IPAD_UDID))
 	$(if $(SIDEWAYS),xcrun simctl bootstatus $(IPAD_UDID) -b > /dev/null)
-	set -o pipefail; TEST_RUNNER_WALK_ROUTES='$(ROUTES)' TEST_RUNNER_WALK_SIDEWAYS='$(SIDEWAYS)' \
+	set -o pipefail; TEST_RUNNER_WALK_ROUTES='$(ROUTES)' TEST_RUNNER_WALK_SIDEWAYS='$(SIDEWAYS)' TEST_RUNNER_WALK_LOCALE='$(LOCALE)' \
 	  $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
 	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-walk.xcresult \
 	  -only-testing:HifthUITests-iOS/WalkTests test | $(XCPRETTY)

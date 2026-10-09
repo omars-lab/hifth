@@ -81,6 +81,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Verses a note points to are links; a mention of the note's own verse is not, and does not
   break across two lines. · any · issues: `intro-and-same-surah-verses-unlinked`,
   `note-links-to-its-own-verse`, `own-verse-breaks-across-lines`
+- [ ] In a note, a bare verse number that carries a list on after a comma is a link, also when a colon,
+  a bracket or "of this surah" follows it; one after a semicolon stays plain text, as the book puts
+  a semicolon between surahs · laptop · test: `packages/core/src/citations.test.ts`
 - [ ] At the foot of 18:60's note, the related verses show each cited run as one card
   (in the shape "9:4–9:7") beside the note's references to other surahs, not eight cards of one run. ·
   any · issue: `related-verses-ranges-crowd-out`
@@ -184,6 +187,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Hold the iPad app sideways: two pages fill the height between the bars, not a sliver in the
   middle of the desk. · iPad simulator, landscape · issue: `ipad-app-sideways-spread-tiny` · test:
   `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize`
+- [ ] Walk the Mac app in Arabic too, not only the iPad: the look-alike list and a note open,
+  mirrored, nothing cut off. · `make app-shot TARGET=mac LOCALE=ar ROUTE=…` (the app keeps a
+  language picked with its own button over the one it is launched in) · test:
+  `scripts/native-make-locale.test.mjs`
 - [ ] The Mac app's own picture of a page is the page, not an empty file: two pages, full size.
   · `make app-shot TARGET=mac ROUTE=/hafs-kfqc/p45` (fails on an empty picture) · issue:
   `mac-app-shot-empty`

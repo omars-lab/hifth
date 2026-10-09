@@ -11,11 +11,14 @@ final class WalkTests: XCTestCase {
         try XCTSkipIf(routes.isEmpty, "no WALK_ROUTES: run it with make app-walk ROUTES=…")
         let sideways = env["WALK_SIDEWAYS"] == "1"
         let settle = UInt32(env["WALK_SETTLE"] ?? "") ?? 3
+        // The interface language to walk in; empty keeps the simulator's own.
+        let locale = env["WALK_LOCALE"] ?? ""
+        let language = locale.isEmpty ? [] : ["-AppleLanguages", "(\(locale))"]
         if sideways { XCUIDevice.shared.orientation = .landscapeLeft }
         defer { XCUIDevice.shared.orientation = .portrait }
         for (index, route) in routes.enumerated() {
             let app = XCUIApplication()
-            app.launchArguments = ["--route=\(route)"]
+            app.launchArguments = ["--route=\(route)"] + language
             app.launch()
             // The mirror shows the hash the page settled on, which may be
             // fuller than the route asked for; any hash at all means it is up.
