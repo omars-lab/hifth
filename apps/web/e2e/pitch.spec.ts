@@ -677,6 +677,29 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(linked.filter((v) => !covered(v)), "linked verses with no card").toEqual([]);
   });
 
+  test("a verse the book connects to more places than the list shows says how many more, and shows them", async ({ page }) => {
+    // 2:255's note is tied to dozens of verses and the list shows its first
+    // few. A line under them counts the rest; pressing it adds them, and each
+    // one goes where it says, though its page was not kept ready. Checked by
+    // count, so the test names none of the book's references.
+    await page.goto("/#/hafs-kfqc/2:255");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    const cards = sheet(page).getByRole("button", { name: /^Hop to / });
+    const before = await cards.count();
+    const line = sheet(page).getByRole("button", { name: /^Show \d+ more related verses?$/ });
+    const more = Number((await line.innerText()).match(/\d+/)?.[0]);
+    expect(more, "the line counts the rest").toBeGreaterThan(0);
+    await line.click();
+    await expect(cards).toHaveCount(before + more);
+    await expect(line).toHaveCount(0);
+    await expect(cards.nth(before), "the reader is put on the first card added").toBeFocused();
+    const last = cards.last();
+    const target = (await last.getAttribute("aria-label"))?.match(/(\d+):(\d+)/)?.[0] ?? "";
+    expect(target).not.toBe("");
+    await last.click();
+    await expect(page.getByRole("dialog", { name: new RegExp(`${target}\\b`) })).toBeVisible();
+  });
+
   test("a related verse's note starts at its top, not where the last one was scrolled to", async ({ page }) => {
     // The list of related verses sits at the foot of a note, so reaching it
     // scrolls the note down. Following one turned the note to the new verse

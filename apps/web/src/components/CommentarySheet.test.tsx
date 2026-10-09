@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/preact";
+import { fireEvent, render, screen } from "@testing-library/preact";
 import type { Edge, TafsirSource } from "@hifth/core";
 import { LANG_STORAGE_KEY } from "../lang";
 import { LangProvider } from "../i18n";
@@ -41,7 +41,7 @@ const road: Edge = {
 
 function drawer(
   entry: CommentaryNote,
-  more: { back?: boolean; side?: "left" | "right"; roads?: Edge[] } = {},
+  more: { back?: boolean; side?: "left" | "right"; roads?: Edge[]; moreRoads?: Edge[] } = {},
 ) {
   render(
     <LangProvider>
@@ -49,6 +49,7 @@ function drawer(
         entry={entry}
         onClose={() => {}}
         roads={more.roads ?? [road]}
+        moreRoads={more.moreRoads ?? []}
         onHop={() => {}}
         back={more.back ? { label: "2:1", onBack: () => {} } : null}
         side={more.side ?? null}
@@ -160,6 +161,44 @@ describe("a range the note cites, in the related verses", () => {
     drawer(note("en"), { roads: [range, road] });
     expect(screen.getByRole("button", { name: /2:30–2:34/ })).toBeTruthy();
     expect(screen.getByRole("button", { name: /2:5\b/ })).toBeTruthy();
+  });
+});
+
+describe("more related verses than the list shows", () => {
+  beforeEach(() => localStorage.setItem(LANG_STORAGE_KEY, "en"));
+
+  // Made-up targets: eight shown, four more the book also lists from this verse.
+  const to = (a: number): Edge => ({ ...road, to: `quran/hafs-kfqc/3:${a}` });
+  const shown = [1, 2, 3, 4, 5, 6, 7, 8].map(to);
+  const extra = [20, 21, 40, 60].map(to);
+  const cards = () => screen.queryAllByRole("button", { name: /^Hop to/ });
+
+  it("ends the list on a line saying how many more there are, which shows them", () => {
+    drawer(note("en"), { roads: shown, moreRoads: extra });
+    expect(cards()).toHaveLength(8);
+    const line = screen.getByRole("button", { name: /4 more/ });
+    fireEvent.click(line);
+    expect(cards()).toHaveLength(12);
+    expect(screen.getByRole("button", { name: /3:60\b/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /4 more/ })).toBeNull();
+  });
+
+  it("has no such line when the list shows everything", () => {
+    drawer(note("en"), { roads: shown });
+    expect(cards()).toHaveLength(8);
+    expect(screen.queryByRole("button", { name: /more/ })).toBeNull();
+  });
+
+  it("says it in Arabic in the Arabic app", () => {
+    localStorage.setItem(LANG_STORAGE_KEY, "ar");
+    const sheet = drawer(note("en"), { roads: shown, moreRoads: extra });
+    const buttons = () => [...sheet.querySelectorAll("button")];
+    const line = buttons().at(-1);
+    expect(line?.textContent).toMatch(/[4٤]/);
+    expect(line?.textContent).not.toMatch(/more/);
+    const before = buttons().length;
+    if (line) fireEvent.click(line);
+    expect(buttons().length).toBe(before - 1 + 4);
   });
 });
 

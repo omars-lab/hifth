@@ -184,6 +184,7 @@ import {
   PITCH,
   loadPitchSurah,
   mergeShard,
+  moreBookRefs,
   withBookRefs,
   introFor,
   makePitchProvider,
@@ -1055,6 +1056,15 @@ export function App(): JSX.Element {
     const book = at ? pitchSurahs.get(at.surah)?.shard[String(at.ayah)] : undefined;
     return withBookRefs(adjacency.hopsForKey(selectedKey), book);
   }, [adjacency, commentaryOpen, selectedKey, pitchSurahs]);
+  // The book's further references from the open note, past the few it shows,
+  // offered under a line that says how many. Left out of the pages kept ready
+  // below: a hop to one finds its page when it is pressed.
+  const commentaryMore = useMemo(() => {
+    if (!PITCH || !commentaryOpen || !selectedKey) return [];
+    const at = parseAyahKey(selectedKey);
+    const book = at ? pitchSurahs.get(at.surah)?.shard[String(at.ayah)] : undefined;
+    return moreBookRefs(commentaryRoads, book);
+  }, [commentaryOpen, selectedKey, pitchSurahs, commentaryRoads]);
 
   // Pages to keep mounted: the current page + the selection's vendored hop
   // targets (and the open note's), so a hop's tween has both endpoints ready
@@ -3566,6 +3576,7 @@ export function App(): JSX.Element {
                 }
                 side={sheetSide}
                 roads={introSheet ? [] : commentaryRoads}
+                moreRoads={introSheet ? [] : commentaryMore}
                 canHop={canHop}
                 onHop={handleHop}
                 onGo={hopTo}

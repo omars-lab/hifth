@@ -182,6 +182,14 @@ export function withBookRefs(roads: readonly Edge[], pitch: AyahAdjacency | unde
 }
 
 /**
+ * The book's further cross-references from a verse, past the few its list
+ * shows: offered under the list, each verse once and none the list already has.
+ */
+export function moreBookRefs(shown: readonly Edge[], pitch: AyahAdjacency | undefined): Edge[] {
+  return unseen(shown, pitch?.more ?? []);
+}
+
+/**
  * The surah's introduction to lead a verse's note with, or null. Only a link's
  * `?open=context` asks for it; otherwise the introduction lives behind the ⓘ
  * badge beside the surah's name (owner, 2026-10-04), not on verse 1's note.

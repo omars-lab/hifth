@@ -6,6 +6,7 @@ import {
   mergeShard,
   pitchEntries,
   STUDY_QURAN,
+  moreBookRefs,
   withBookRefs,
   type PitchSurah,
 } from "./pitch";
@@ -105,5 +106,12 @@ describe("pitch · the book's cross-references stay in the note", () => {
 
   it("a verse the book does not cross-reference keeps just its own roads", () => {
     expect(withBookRefs([edge("2:122")], undefined).map((e) => e.to)).toEqual([k("2:122")]);
+  });
+
+  it("the book's further references offered under the list leave out any verse the list already has", () => {
+    const shown = [edge("2:122"), edge("82:19")];
+    const book = { edges: [], ext: [], more: [edge("82:19"), edge("9:4"), edge("9:4"), edge("40:2")] };
+    expect(moreBookRefs(shown, book).map((e) => e.to)).toEqual([k("9:4"), k("40:2")]);
+    expect(moreBookRefs(shown, undefined)).toEqual([]);
   });
 });

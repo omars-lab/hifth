@@ -294,6 +294,8 @@ export interface Strings {
   surahIntro: string;
   relatedVerses: string;
   relatedLede(source: string): string;
+  /** The line under a short related list that shows the rest, with how many. */
+  relatedMore(count: number): string;
   goToVerse(label: string): string;
   /** Over the line of the book's key that says who a commentator's initials stand for. */
   keyFrom: string;
@@ -1020,6 +1022,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     surahIntro: m.surahIntro,
     relatedVerses: m.relatedVerses,
     relatedLede: (source) => m.relatedLede({ source }),
+    relatedMore: (count) => m.relatedMore({ n: count, nText: n(count) }),
     goToVerse: (label) => m.goToVerse({ label }),
     keyFrom: m.keyFrom,
     keyAlso: (name) => m.keyAlso({ name }),
