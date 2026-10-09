@@ -58,18 +58,20 @@ describe("revealRow", () => {
   // phone, 2026-10-09: look-alike rows ②).
   it("counts a title that will pin once the list moves, not only one already pinned", () => {
     document.body.innerHTML = `
-      <div id="sheet" style="overflow-y: auto">
+      <div id="sheet" style="overflow-y: auto; padding-top: 12px">
         <header style="position: sticky; top: -12px">Title</header>
         <ul><li id="row"><div id="compare"></div></li></ul>
       </div>`;
     const sheet = document.getElementById("sheet")!;
     sheet.getBoundingClientRect = at(100, 500);
-    // At rest, 12 down from the sheet's edge; pinned, 12 above it: 88 to 148.
+    // At rest, 12 down from the sheet's edge. A browser pins it inside the
+    // sheet's padding, so 12 up from there is the sheet's edge: 100 to 160.
+    // Measured on a phone: the pinned title's top is the sheet's top.
     document.querySelector("header")!.getBoundingClientRect = at(112, 172);
     document.getElementById("row")!.getBoundingClientRect = at(300, 900);
     const scrollBy = vi.fn();
     sheet.scrollBy = scrollBy;
     revealRow(document.getElementById("compare")!);
-    expect(scrollBy.mock.calls[0]?.[0]).toMatchObject({ top: 152 });
+    expect(scrollBy.mock.calls[0]?.[0]).toMatchObject({ top: 140 });
   });
 });

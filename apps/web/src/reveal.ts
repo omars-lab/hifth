@@ -43,6 +43,11 @@ function scrollerOf(el: Element): Element | null {
 function shownEdges(list: Element): { top: number; bottom: number } {
   const edges = list.getBoundingClientRect();
   let top = edges.top;
+  // A browser pins a title inside the list's border and padding, not at its
+  // outer edge (measured on a phone: the sheet's padding cancels the title's
+  // own pull upwards, so it pins flush with the sheet's top).
+  const own = getComputedStyle(list);
+  const inner = edges.top + (parseFloat(own.borderTopWidth) || 0) + (parseFloat(own.paddingTop) || 0);
   for (const child of list.querySelectorAll(":scope > *, :scope > * > *")) {
     const style = getComputedStyle(child);
     if (style.position !== "sticky") continue;
@@ -52,7 +57,7 @@ function shownEdges(list: Element): { top: number; bottom: number } {
     const offset = parseFloat(style.top);
     const pinned = box.top <= edges.top + 1;
     if (!pinned && Number.isNaN(offset)) continue;
-    const bottom = pinned ? box.bottom : edges.top + offset + (box.bottom - box.top);
+    const bottom = pinned ? box.bottom : inner + offset + (box.bottom - box.top);
     if (bottom > top) top = bottom;
   }
   return { top, bottom: edges.bottom };
