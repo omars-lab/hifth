@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/preact";
 import type { Edge, RailChip } from "@hifth/core";
 import { HopPopover } from "./HopPopover";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
+import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
 
 const edge = (surah: number, ayah: number, extra: Partial<Edge> = {}): Edge => ({
   type: "mutashabih",
@@ -194,5 +195,51 @@ describe("HopPopover", () => {
     expect(rows("group")).toEqual(["2:3–2:5", "2:4 in", "2:9"]);
     expect(rows("drop")).toEqual(["2:4", "2:9"]);
     localStorage.removeItem(PASSAGE_ROWS_KEY);
+  });
+
+  // A row whose two verses share one stretch had nothing under its name: the
+  // shared words, the very stretch a hafiz slides on, showed only once it was
+  // opened (lookalike-rows ⑥). The closed row now shows them, as a picture cut
+  // from the page or as a count, as the reader set it. Made-up refs.
+  it("shows the shared words on a closed row the way the reader chose", () => {
+    const rows = (way: string) => {
+      localStorage.setItem(LOOKALIKE_PREVIEW_KEY, way);
+      const { unmount } = render(
+        <HopPopover
+          chip={chip([edge(2, 3, { span: { from: [1, 4] }, toSpan: { from: [2, 5] } }), edge(2, 4, { match: "loose" })])}
+          fromKey="quran/hafs-kfqc/2:2"
+          canHop={() => true}
+          onHop={noop}
+          onClose={noop}
+        />,
+      );
+      const seen = screen.getAllByRole("listitem").map((li) => ({
+        picture: li.querySelector("[data-shared-words]") !== null,
+        count: /4 words|٤ كلمات/.test(li.textContent ?? ""),
+      }));
+      unmount();
+      return seen;
+    };
+    expect(rows("picture")).toEqual([{ picture: true, count: false }, { picture: false, count: false }]);
+    expect(rows("count")).toEqual([{ picture: false, count: true }, { picture: false, count: false }]);
+    expect(rows("none")).toEqual([{ picture: false, count: false }, { picture: false, count: false }]);
+    localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
+  });
+
+  // The picture is for the eye; a screen reader already hears the row's name,
+  // and the comparison it opens says the rest.
+  it("keeps the picture out of what a screen reader hears", () => {
+    localStorage.setItem(LOOKALIKE_PREVIEW_KEY, "picture");
+    render(
+      <HopPopover
+        chip={chip([edge(2, 3, { span: { from: [1, 4] }, toSpan: { from: [2, 5] } })])}
+        fromKey="quran/hafs-kfqc/2:2"
+        canHop={() => true}
+        onHop={noop}
+        onClose={noop}
+      />,
+    );
+    expect(screen.getByRole("listitem").querySelector("[data-shared-words]")).toHaveAttribute("aria-hidden", "true");
+    localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
   });
 });

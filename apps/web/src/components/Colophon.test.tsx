@@ -5,6 +5,7 @@ import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 import { CARD_EDGE_KEY } from "../card-edge";
 import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
+import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
 
 /*
  * The colophon is the app's licence compliance, so these tests assert
@@ -151,6 +152,22 @@ describe("what a look-alike list does with a passage and a verse inside it, in s
     expect(way("both")).toHaveAttribute("aria-checked", "false");
     expect(localStorage.getItem(PASSAGE_ROWS_KEY)).toBe("group");
     localStorage.removeItem(PASSAGE_ROWS_KEY);
+  });
+});
+
+describe("what a closed look-alike row shows of the shared words, in settings", () => {
+  it("offers the picture, the count and nothing, the picture checked, and keeps the one picked", () => {
+    localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-lookalike-preview="${c}"]`)!;
+    expect(way("picture")).toHaveAttribute("aria-checked", "true");
+    expect(way("count")).toHaveAttribute("aria-checked", "false");
+    expect(way("none")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("count"));
+    expect(way("count")).toHaveAttribute("aria-checked", "true");
+    expect(way("picture")).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem(LOOKALIKE_PREVIEW_KEY)).toBe("count");
+    localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
   });
 });
 

@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/pre
 import type { AppState, MergedEdge } from "@hifth/core";
 import { HighlightMenu } from "./HighlightMenu";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
+import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
 
 /**
  * The panel itself is a crop of two mus'haf pages and needs both pages' artwork
@@ -13,6 +14,7 @@ import { PASSAGE_ROWS_KEY } from "../passage-rows";
 // The menu reaches the panel through the load-on-first-open wrapper.
 vi.mock("./later", () => ({
   DiffView: ({ fromKey }: { fromKey: string }) => <div data-here={fromKey} />,
+  SharedWords: ({ run }: { run: { key: string } }) => <div data-run={run.key} />,
 }));
 
 const ED = "hafs-kfqc";
@@ -261,5 +263,23 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     expect(spoken("both")).toMatch(/رابطان/);
     expect(spoken("drop")).toMatch(/رابط واحد/);
     localStorage.removeItem(PASSAGE_ROWS_KEY);
+  });
+
+  // The highlighted-passage menu shows the shared words on a closed row the
+  // same way the look-alike list does (lookalike-rows ⑥), and steps the
+  // picture aside while the comparison is open.
+  it("shows the shared words on a closed row, as the reader set it", () => {
+    localStorage.setItem(LOOKALIKE_PREVIEW_KEY, "picture");
+    const { unmount } = renderMenu();
+    const [paired, plain] = screen.getAllByRole("listitem");
+    expect(paired!.querySelector("[data-shared-words] [data-run='2:122']")).not.toBeNull();
+    expect(plain!.querySelector("[data-shared-words]")).toBeNull();
+    fireEvent.click(within(paired!).getAllByRole("button")[0]!);
+    expect(paired!.querySelector("[data-shared-words]")).toBeNull();
+    unmount();
+    localStorage.setItem(LOOKALIKE_PREVIEW_KEY, "count");
+    renderMenu();
+    expect(screen.getAllByRole("listitem")[0]!.textContent).toMatch(/١٣ كلمة/);
+    localStorage.removeItem(LOOKALIKE_PREVIEW_KEY);
   });
 });

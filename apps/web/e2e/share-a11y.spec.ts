@@ -115,7 +115,8 @@ test.describe("Hifth · diff view (spec §3)", () => {
     // Each side is a crop of the printed page — real artwork, not a
     // transcription — carrying at least one wash over the words it does not
     // share. The washes are the only rounded rectangles drawn into a page root.
-    const crops = sheet.locator("svg[aria-hidden='true'][focusable='false']");
+    // The comparison's own, not the pictures closed rows show of their shared words.
+    const crops = sheet.locator("[id^='diff-'] svg[aria-hidden='true'][focusable='false']");
     await expect(crops).toHaveCount(2);
     await expect(crops.first().locator("> rect[rx='1']").first()).toBeVisible();
     await expect(crops.last().locator("> rect[rx='1']").first()).toBeVisible();

@@ -38,6 +38,7 @@ export const CropSheet = later(() => tools().then((m) => m.CropSheet));
 export const WordPartsHost = later(() => tools().then((m) => m.WordPartsHost));
 export const BookmarkDrawer = later(() => tools().then((m) => m.BookmarkDrawer));
 export const DiffView = later(() => tools().then((m) => m.DiffView));
+export const SharedWords = later(() => tools().then((m) => m.SharedWords));
 
 /**
  * True from the first time `open` is true, and from then on.

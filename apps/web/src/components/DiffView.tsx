@@ -15,6 +15,7 @@ import {
 } from "@hifth/core";
 import { loadMarkShard, loadPageSvg, loadWordShard } from "../assets";
 import { useT } from "../i18n";
+import type { SharedRun } from "../lookalike-preview";
 import { useLookalikeCompare } from "../lookalike-compare";
 import { revealRow } from "../reveal";
 import styles from "./DiffView.module.css";
@@ -77,6 +78,53 @@ function appendBand(svg: SVGSVGElement, r: Rect, cls: string): void {
 }
 
 /**
+ * Cut one piece out of a page: hand the browser the page's markup as authored,
+ * crop it to `box` (plus a letter's room), veil everything outside `keep`, and
+ * lay the washes over the ink. Both the comparison and a closed row's picture
+ * of the shared words cut this way, so they cannot drift apart.
+ *
+ * The page's own markup is mounted once and then cropped by overriding the
+ * `viewBox` — word boxes and page artwork are authored in the same user units,
+ * so a band rectangle is a crop rectangle with no conversion in between.
+ */
+function drawCrop(
+  el: HTMLElement,
+  markup: string,
+  box: Rect,
+  keep: readonly Rect[],
+  washes: readonly (readonly [readonly Rect[], string])[],
+  cls: string = styles.page as string,
+): SVGSVGElement | null {
+  // Same idiom as the stage: PageStage.tsx does `host.innerHTML = markup`,
+  // then takes hold of the root it produced.
+  el.innerHTML = markup;
+  const svg = el.firstElementChild as SVGSVGElement | null;
+  if (!svg) return null;
+  const outer = { x: box.x - PAD, y: box.y - PAD, width: box.width + PAD * 2, height: box.height + PAD * 2 };
+  svg.setAttribute("viewBox", `${outer.x} ${outer.y} ${outer.width} ${outer.height}`);
+  svg.removeAttribute("width");
+  svg.removeAttribute("height");
+  svg.setAttribute("class", cls);
+  // The artwork is decoration here — the label beside the crop is what names
+  // the ayah, and a screen reader should not walk 20 KB of path data.
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+  // The scrim: the padded crop rectangle, then each kept line (grown a hair so a
+  // descender is not clipped) as an even-odd hole. What is left painted is
+  // exactly the margin and the neighbours' ink.
+  const holes = keep
+    .map((b) => rectPath({ x: b.x - 1, y: b.y - 1, width: b.width + 2, height: b.height + 2 }))
+    .join("");
+  const scrim = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  scrim.setAttribute("d", rectPath(outer) + holes);
+  scrim.setAttribute("fill-rule", "evenodd");
+  scrim.setAttribute("class", styles.scrim as string);
+  svg.appendChild(scrim);
+  for (const [rects, wash] of washes) for (const r of rects) appendBand(svg, r, wash);
+  return svg;
+}
+
+/**
  * One side of the comparison: the ayah as the mus'haf prints it, veiled down to
  * its own lines and washed to show where it agrees with its partner and where
  * it does not.
@@ -92,11 +140,8 @@ function appendBand(svg: SVGSVGElement, r: Rect, cls: string): void {
  *    option C) — worked out once for both sides by the parent, since a mark is
  *    unmatched only *against* its partner, and handed down here as boxes.
  *
- * The page's own markup is mounted once and then cropped by overriding the
- * `viewBox` — word boxes and page artwork are authored in the same user units
- * (page 1 is `0 0 235 235`, and its words run x 11.6–227.5, y 19.5–211.7), so a
- * band rectangle is a crop rectangle with no conversion in between. Nothing is
- * redrawn or re-parsed when the washes change; only the overlays move.
+ * Page 1 is `0 0 235 235`, and its words run x 11.6–227.5, y 19.5–211.7, so the
+ * crop is a few page units each way of the ayah's own lines (see drawCrop).
  */
 function PrintedAyah({
   side,
@@ -136,45 +181,13 @@ function PrintedAyah({
   useEffect(() => {
     const el = host.current;
     if (!el || !box) return;
-    // Same idiom as the stage: hand the browser the page's markup as authored
-    // (PageStage.tsx does `host.innerHTML = markup`), then take hold of the
-    // root it produced. Re-cropping is an attribute write, not a re-parse.
-    el.innerHTML = loaded.markup;
-    const svg = el.firstElementChild as SVGSVGElement | null;
-    if (!svg) return;
-    svg.setAttribute(
-      "viewBox",
-      `${box.x - PAD} ${box.y - PAD} ${box.width + PAD * 2} ${box.height + PAD * 2}`,
-    );
-    svg.removeAttribute("width");
-    svg.removeAttribute("height");
-    svg.setAttribute("class", styles.page as string);
-    // The artwork is decoration here — the label above the crop is what names
-    // the ayah, and a screen reader should not walk 20 KB of path data.
-    svg.setAttribute("aria-hidden", "true");
-    svg.setAttribute("focusable", "false");
-    // The scrim: the padded crop rectangle, then each of the ayah's own lines
-    // (grown a hair so a descender is not clipped) as an even-odd hole. What is
-    // left painted is exactly the margin and the neighbours' ink.
-    const outer = {
-      x: box.x - PAD,
-      y: box.y - PAD,
-      width: box.width + PAD * 2,
-      height: box.height + PAD * 2,
-    };
-    const holes = lines
-      .map((b) => rectPath({ x: b.x - 1, y: b.y - 1, width: b.width + 2, height: b.height + 2 }))
-      .join("");
-    const scrim = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    scrim.setAttribute("d", rectPath(outer) + holes);
-    scrim.setAttribute("fill-rule", "evenodd");
-    scrim.setAttribute("class", styles.scrim as string);
-    svg.appendChild(scrim);
-    // Then the two washes, over the ink, sharing the page's coordinate space —
-    // and the mark tints last, so they sit on top of whichever wash they fall in.
-    for (const r of shared) appendBand(svg, r, styles.wShare as string);
-    for (const r of diff) appendBand(svg, r, styles.wDiff as string);
-    for (const r of marks) appendBand(svg, r, styles.wMark as string);
+    drawCrop(el, loaded.markup, box, lines, [
+      // The two washes, over the ink, and the mark tints last, so they sit on
+      // top of whichever wash they fall in.
+      [shared, styles.wShare as string],
+      [diff, styles.wDiff as string],
+      [marks, styles.wMark as string],
+    ]);
   }, [loaded, box, shared, diff, lines, marks]);
 
   if (!box) return null;
@@ -298,4 +311,58 @@ function markSide(side: DiffSide, loaded: Loaded): MarkSide | null {
 function editionOf(key: string): string {
   const parts = key.split("/");
   return parts.length >= 2 ? (parts[1] as string) : "hafs-kfqc";
+}
+
+/**
+ * The shared words of a closed look-alike row, cut from the page they are
+ * printed on (lookalike-rows ⑥): one piece a printed line, laid side by side in
+ * reading order, so a run that wraps reads as one phrase and not as a block.
+ * Washed green like the comparison's shared stretch, so opening the row shows
+ * the same words in the same colour.
+ *
+ * It is for the eye only — the row's own name is what a screen reader hears —
+ * and it draws nothing when the page is not to hand or does not carry the verse.
+ */
+export function SharedWords({ run, edition }: { run: SharedRun; edition: string }): JSX.Element | null {
+  const [loaded, setLoaded] = useState<{ markup: string; lines: readonly Rect[] } | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    void Promise.all([loadPageSvg(edition, run.page).catch(() => null), loadWordShard(edition, run.page)]).then(
+      ([markup, shard]) => {
+        if (!live) return;
+        if (!markup || !shard || !isWordShard(shard)) return setLoaded(null);
+        const index = new WordIndex(shard);
+        const present = index.span(run.key);
+        // A run can begin on the leaf before; only what this page prints is cut.
+        const from = present ? Math.max(run.from, present.from) : 0;
+        const to = present ? Math.min(run.to, present.to) : -1;
+        setLoaded(from <= to ? { markup, lines: index.bandsFor(run.key, from, to) } : null);
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [edition, run.page, run.key, run.from, run.to]);
+
+  if (!loaded || loaded.lines.length === 0) return null;
+  return (
+    <span className={styles.strip}>
+      {loaded.lines.map((line, i) => (
+        <SharedPiece key={i} markup={loaded.markup} line={line} />
+      ))}
+    </span>
+  );
+}
+
+function SharedPiece({ markup, line }: { markup: string; line: Rect }): JSX.Element {
+  const host = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = host.current;
+    if (!el) return;
+    const svg = drawCrop(el, markup, line, [line], [[[line], styles.wShare as string]], styles.piece as string);
+    // A piece is as tall as a line of the row's note and as wide as its words make it.
+    svg?.style.setProperty("aspect-ratio", `${line.width + PAD * 2} / ${line.height + PAD * 2}`);
+  }, [markup, line]);
+  return <span ref={host} className={styles.pieceHost} />;
 }

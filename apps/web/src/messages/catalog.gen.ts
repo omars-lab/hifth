@@ -202,6 +202,11 @@ export interface Catalog {
   readonly lookalikeCompareNote: string;
   readonly lookalikeComparePlain: string;
   readonly lookalikeCompareTitle: string;
+  readonly lookalikePreviewCount: string;
+  readonly lookalikePreviewNone: string;
+  readonly lookalikePreviewNote: string;
+  readonly lookalikePreviewPicture: string;
+  readonly lookalikePreviewTitle: string;
   readonly mapAbsent: string;
   readonly mapActiveIn: (d: { readonly monthText: string | number }) => string;
   readonly mapCaveat: string;
@@ -411,6 +416,7 @@ export interface Catalog {
   readonly shareTextTrail: string;
   readonly shareTitle: string;
   readonly shared: string;
+  readonly sharesWords: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly showBars: string;
   readonly skinGroup: string;
   readonly sourceLink: string;

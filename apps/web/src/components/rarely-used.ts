@@ -20,4 +20,4 @@ export { JumpShelf } from "./JumpShelf";
 export { CropSheet } from "./CropSheet";
 export { WordPartsHost } from "./WordPartsHost";
 export { BookmarkDrawer } from "./BookmarkDrawer";
-export { DiffView } from "./DiffView";
+export { DiffView, SharedWords } from "./DiffView";
