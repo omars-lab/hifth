@@ -1090,3 +1090,4 @@ commentary design note's numbered items, and in the issues list.
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
+- One more phone test that failed once under the full run (a look-alike list opened low on the screen stands clear of its arrow) now waits until the mark it measures has a position on the screen.
