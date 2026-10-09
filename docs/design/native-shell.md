@@ -563,3 +563,21 @@ visibly runs on; once the reader scrolls to the end, the fade goes. Tests: two i
 browser tests, one on a laptop-sized window that expects the cue and then, scrolled to the end,
 no cue and the credit's link in view (failed first), and one on a tall window where the key fits
 and no cue shows.
+
+### ㉒ The sideways walk and tests passed on an iPad that never turned · **fixed**
+
+Found re-walking the iPad app on 2026-10-08. Every picture the sideways walk took was upright, and
+the two tests that turn the iPad sideways still passed. The simulator was stuck: asked to turn, it
+said it had, and nothing on the screen moved, not even its own home screen. A sideways test whose
+checks also hold upright cannot tell the difference, so both passed on a portrait page. When the
+simulator got stuck is not known; the sideways-pages fix (㉞ in the commentary record) was seen
+failing on a turned iPad before it was fixed.
+
+**The fix:** the walk and both sideways tests now check their own picture is wider than it is
+tall, and fail with "asked for sideways, got an upright picture". Restarting the simulator cured
+it; the native-shell skill says so. With the check on, the sideways walk shows the two pages full
+size, page 1's text large and centred, and the note opening beside its verse; both sideways tests
+pass. The walk also kept one folder for both turns, so a sideways run deleted the upright pictures
+before anyone had looked at them; each turn now has its own folder. And naming two tests in one
+run stopped before testing anything; it now takes several. A small test checks both plans
+(failed first).

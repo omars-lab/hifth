@@ -1035,3 +1035,18 @@ uses, is a setting in the info panel ("The first two pages": large text, the def
 a reader who wants the opening to match the rest can have it. A browser test switches it in the panel,
 checks the opening text then matches page 3's size of type and stays centred, that the choice survives a
 reload, and that a click on a verse there still picks that verse; it failed before the setting existed.
+
+### ㊲ On an iPad held upright, does the look-alikes list leave its verse in sight? · **fixed**
+
+Found re-walking the iPad app on 2026-10-08, and the same in a browser at that size: a link to 2:48
+with its look-alikes open magnified the page onto the verse and then put the list over it; only the
+top of the verse's highlight peeked out above the list. The note on the same screen slid its verse
+clear. The lists only said how high they reached on screens under 900 points wide, where they are a
+band across the foot; an upright iPad is wider, so there the list is a card at the page's foot,
+said nothing, and the page never moved.
+
+**The fix:** the lists say where they start at every width, measured from the card's own foot, by
+the same rule the note already used (now one shared piece both use). A card standing beside the
+page, as on the two-page laptop view, still covers nothing and moves nothing. A browser test opens
+the link on an upright iPad and on a phone and checks every line of the verse is above the list;
+the iPad one failed first (the verse's last line 92 points under the list).

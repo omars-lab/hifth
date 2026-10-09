@@ -26,6 +26,11 @@ final class WalkTests: XCTestCase {
             // The web view alone, drawn upright: a whole-screen capture of a
             // turned simulator comes back as a portrait frame, shifted.
             let shot = app.webViews.firstMatch.screenshot().image
+            // A sideways walk that took upright pictures checked nothing, and
+            // looked as if it had (2026-10-08: every "side-" picture was upright).
+            if sideways {
+                XCTAssertGreaterThan(shot.size.width, shot.size.height, "\(route): asked for sideways, got an upright picture")
+            }
             let picture = XCTAttachment(image: UIGraphicsImageRenderer(size: shot.size).image { _ in shot.draw(at: .zero) })
             // `/hafs-kfqc/2:255?open=commentary` → `side-1-hafs-kfqc_2-255_open-commentary`,
             // the same spelling `make app-shot` gives its files.

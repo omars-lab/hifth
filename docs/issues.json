@@ -3203,6 +3203,30 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/spread-fit.spec.ts",
       "note": "Found walking the pitch as a first visitor (2026-10-08): pages 1 and 2 are drawn as the text block alone, 235 units square, against 345 by 550 for every other page, and the paper took its height from the drawing, so the book opened on two squat cards and jumped taller at the first turn. Three ways were drawn on the real spread; the owner picked page-shaped paper with the opening text kept full width and centred top to bottom. PageStage now adds top and bottom margins to a drawing squatter than the page, and reads them back where it maps the page to the screen. Test: spread-fit.spec.ts 'the opening pages are the size of every other page', which failed before the change (page 1 paper 217 px short); the page-1 saved picture was retaken on the owner's pick."
+    },
+    {
+      "id": "ipad-sideways-checks-upright",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉒"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "native/HifthUITests/WalkTests.swift",
+      "note": "Re-walking the iPad app (2026-10-08): the sideways walk's pictures were upright and both sideways smoke tests passed, because the simulator was stuck and never turned. The walk and testLandscapeOpensTheBookFullSize / testPinchOnTheOpenBookSelectsNothing now assert the picture is wider than tall (the walk's check failed first, 1032 not greater than 1376); restarting the simulator cured it. Also: app-walk keeps upright and sideways pictures in separate folders, and ONLY takes several tests (scripts/native-make-plan.test.mjs, failed first)."
+    },
+    {
+      "id": "lookalikes-card-covers-verse",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊲"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/open-link.spec.ts",
+      "note": "Re-walking the iPad app (2026-10-08): on an upright iPad (wider than 900) the look-alikes and roots lists are a card at the page's foot and did not report their reach, so a link to 2:48?open=lookalikes left the verse under the list. The lists now report at every width through the note's own rule (watchCover in short-band.ts, shared with the note). Test: open-link.spec.ts '?open=lookalikes on an iPad held upright leaves the verse above the list' failed first (92 px under)."
     }
   ]
 }

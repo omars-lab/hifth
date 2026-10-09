@@ -13,6 +13,7 @@ import { splitSigla, type Siglum } from "../tafsir/sigla";
 import { isIntroOnly, textDir, type CommentaryNote } from "../tafsir/commentary";
 import styles from "./CommentarySheet.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
+import { watchCover } from "./short-band";
 
 export { overLeaf } from "./over-leaf";
 
@@ -250,52 +251,7 @@ export function CommentarySheet({
     }
     // The short height is worked out, not read off the box: the box may still be
     // easing down from the previous verse's grown note.
-    const report = () => {
-      // A card in the corner beside one page covers nothing on it: claiming
-      // the window's foot anyway slid the page up under the toolbar.
-      const paper = [...document.querySelectorAll('[data-live="true"] [data-host-page]')]
-        .map((host) => host.getBoundingClientRect())
-        .find((box) => box.width > 0);
-      const card = sheet.getBoundingClientRect();
-      if (paper && (card.left >= paper.right || card.right <= paper.left)) {
-        onCover(null);
-        return;
-      }
-      // Measured up from the card's own foot: a corner card stands above the
-      // bars, and measuring from the window's foot left the verse under it.
-      const foot = window.innerHeight - (parseFloat(getComputedStyle(sheet).bottom) || 0);
-      onCover(foot - Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE));
-    };
-    report();
-    window.addEventListener("resize", report);
-    // Closing the book to one page moves the note into the corner while the
-    // book is still two pages wide, so look again once the book has narrowed:
-    // a card judged against the old spread kept the page slid up under the
-    // toolbar for nothing.
-    const book = document.querySelector<HTMLElement>('[data-testid="page-book"]');
-    const seen = new ResizeObserver(report);
-    if (book) seen.observe(book);
-    // And again whenever the page moves or zooms: whether the corner card lies
-    // beside the page or over it depends on how wide the page is drawn. A cold
-    // link shows its page at the whole-page size, clear of the card, then
-    // zooms in to frame the verse and runs under it, and judged only at the
-    // first size the note claimed to cover nothing while it sat on its verse.
-    // Once a frame at most, since a zoom moves the page every frame.
-    let frame = 0;
-    const moved = new MutationObserver(() => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        report();
-      });
-    });
-    if (book) moved.observe(book, { subtree: true, attributes: true, attributeFilter: ["style"] });
-    return () => {
-      seen.disconnect();
-      moved.disconnect();
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", report);
-    };
+    return watchCover(sheet, () => Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE), onCover);
   }, [open, beside, verseKey, onCover]);
   useEffect(() => () => onCover?.(null), [onCover]);
 
