@@ -1092,3 +1092,4 @@ The four walking tasks (#48–#51: the phone end to end, the verse-number menu, 
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
 - One more phone test that failed once under the full run (a look-alike list opened low on the screen stands clear of its arrow) now waits until the mark it measures has a position on the screen.
 - The italics in the demo's notes (2:255, 18:10–13, 18:60 and the note 18:60–82 share) were read off the page pictures by hand and the panel now draws them; every other note stays upright (docs/issues/italics-from-quoted-verse-words.md).
+- The walk checklist now looks for the demo notes' slanted words, in the browser and in the iPad app; the iPad app was walked at 2:255 and 18:70 and shows them.
