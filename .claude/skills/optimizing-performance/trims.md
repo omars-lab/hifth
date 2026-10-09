@@ -14,6 +14,14 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Checked again 2026-10-09, nothing taken.** 160.6 KB in all against the 175 KB cap; the main
+script is 112.6 KB, of which our page stage, app shell and shared logic are ~93 KB and the gesture
+library and Preact the rest. Start-up was 2254 ms, and the sweep met the 2.5 s promise with +50 KB
+more code and found +25 KB cost no time at all, so the real room is near 50 KB, not the 14 KB the
+cap shows. Every row left is either the first page's own code or "none worth the risk". Next
+candidates if the room runs short: split `PageStage.tsx` (14.9 KB) so the zoom and edge-turn code
+loads after first paint, or move `EdgeGrabRails` (3 KB, desktop only) out of the phone's start-up.
+
 When a trim lands, set its status to **done**, with the date, the PR and the bytes saved, and
 update the sizes from a fresh `make perf-report`.
 
