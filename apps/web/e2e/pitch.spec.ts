@@ -100,6 +100,17 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(page.getByText("Tap a verse to read its Study Quran note")).toHaveCount(0);
   });
 
+  test("while the tips are up, the foot line does not repeat the first one", async ({ page }) => {
+    // The first tip teaches the same tap the foot line does, so with both up
+    // the screen said it twice. One teacher at a time: the line comes back
+    // when the tips are put away.
+    await page.goto("/#/hafs-kfqc/p1?open=tips");
+    await expect(page.getByText("Tap an ayah", { exact: true })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Click a verse to read its Study Quran note")).toHaveCount(0);
+    await page.getByRole("button", { name: "Skip" }).click();
+    await expect(page.getByText("Click a verse to read its Study Quran note")).toBeVisible();
+  });
+
   test("tapping an al-Fātiḥah verse opens its note on the facing leaf", async ({ page }) => {
     // The page-1 spread, nothing selected — the demo's opening screen.
     await page.goto("/#/hafs-kfqc/p1");

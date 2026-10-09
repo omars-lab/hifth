@@ -1050,3 +1050,18 @@ the same rule the note already used (now one shared piece both use). A card stan
 page, as on the two-page laptop view, still covers nothing and moves nothing. A browser test opens
 the link on an upright iPad and on a phone and checks every line of the verse is above the list;
 the iPad one failed first (the verse's last line 92 points under the list).
+
+### ㊳ With the tips open, does the screen say the same thing twice? · **fixed**
+
+Found walking an English first visit on 2026-10-08, on a phone, a laptop and an iPad: with the
+three tips opened from settings, the first tip teaches tapping a verse to read its note, and the
+line at the foot of the screen said the same thing at the same time.
+
+**The fix:** the foot line stays quiet while the tips are up and comes back when they are put away,
+the same turn-taking the storage notice already follows with the tips. A browser test opens the
+tips, checks the line is gone, skips them and checks it is back; it failed first.
+
+The same walk also saw the phone page keep its size under the tips, so its foot slides below the
+bar. That is the phone's page rule working as meant (the page is sized from the screen's height and
+a taller page can be dragged), no verse is covered, and the strip is gone after three taps; not
+changed.

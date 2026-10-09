@@ -166,3 +166,6 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Open a verse's look-alikes on an upright iPad (and a phone): the whole verse stays in sight
   above the list. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:48?open=lookalikes'` · issue:
   `lookalikes-card-covers-verse` · test: `e2e/open-link.spec.ts`
+- [ ] Open the tips from settings in the pitch build: the foot line does not repeat the first
+  tip, and comes back once the tips are skipped or done. · `make drive DEVICE=phone
+  HASH='#/hafs-kfqc/p1?open=tips'` · issue: `tips-repeat-foot-line` · test: `e2e/pitch.spec.ts`
