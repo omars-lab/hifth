@@ -124,6 +124,8 @@ const paperOf = (page: Page, p: number) =>
       h: paper.height,
       // how much of the paper's width the drawing spans
       across: art.width / paper.width,
+      // screen pixels per unit of the drawing: the size of the type
+      scale: art.width / svg.viewBox.baseVal.width,
       // where the drawing's middle sits on the paper, as a share of the paper
       artMidX: (art.left + art.width / 2 - paper.left) / paper.width,
       artMidY: (art.top + art.height / 2 - paper.top) / paper.height,
@@ -152,4 +154,44 @@ test("the opening pages are the size of every other page, their text across the 
   const { x, y } = await ayahTarget(page, 'svg[aria-labelledby="page-label-1"]:visible #verse-5');
   await page.mouse.click(x, y);
   await expect(page).toHaveURL(/1:5/);
+});
+
+// The other way stays as a setting (the owner keeps runner-up options): the
+// opening text at the size of type every other page uses, in the middle of the
+// same page-shaped paper. Switched in the info panel, with the book open.
+test.describe("in English", () => {
+  test.use({ locale: "en-US" });
+
+  test("chosen in settings, the opening text is the size of every other page's", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/#/hafs-kfqc/p3");
+    await expect(page.locator('svg[aria-labelledby="page-label-3"]:visible')).toBeVisible();
+    const usual = await paperOf(page, 3);
+
+    await page.goto("/#/hafs-kfqc/p1");
+    await expect(page.locator('svg[aria-labelledby="page-label-1"]:visible')).toBeVisible();
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    await page.locator('[data-opening-text="even"]').click();
+    await expect(page.locator('[data-opening-text="even"]')).toHaveAttribute("aria-checked", "true");
+    await page.keyboard.press("Escape");
+
+    for (const p of [1, 2]) {
+      const opening = await paperOf(page, p);
+      expect(Math.abs(opening.h - usual.h), `page ${p} paper height`).toBeLessThan(2);
+      expect(Math.abs(opening.scale / usual.scale - 1), `page ${p} size of type`).toBeLessThan(0.02);
+      expect(Math.abs(opening.artMidY - 0.5), `page ${p} text in the middle, top to bottom`).toBeLessThan(0.03);
+      expect(Math.abs(opening.artMidX - 0.5), `page ${p} text in the middle, side to side`).toBeLessThan(0.04);
+    }
+
+    // Kept on this device: a fresh load opens the same way.
+    await page.reload();
+    await expect(page.locator('svg[aria-labelledby="page-label-1"]:visible')).toBeVisible();
+    const again = await paperOf(page, 1);
+    expect(Math.abs(again.scale / usual.scale - 1), "after a reload").toBeLessThan(0.02);
+
+    // And a click on a verse there still picks that verse.
+    const { x, y } = await ayahTarget(page, 'svg[aria-labelledby="page-label-1"]:visible #verse-5');
+    await page.mouse.click(x, y);
+    await expect(page).toHaveURL(/1:5/);
+  });
 });

@@ -277,6 +277,10 @@ export interface Catalog {
   readonly "notices.pack-gone.title": string;
   readonly openOnQul: string;
   readonly openOnQulAria: (d: { readonly label: string | number }) => string;
+  readonly openingTextEven: string;
+  readonly openingTextLarge: string;
+  readonly openingTextNote: string;
+  readonly openingTextTitle: string;
   readonly packAbsent: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly packGone: (d: { readonly juzText: string | number }) => string;
   readonly packKeep: (d: { readonly juzText: string | number }) => string;
