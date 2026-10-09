@@ -1285,11 +1285,17 @@ today's list), "Verse under its passage" (the verse rows indented beneath their 
 down their side), and "Verse only" (the passage row left out). Looked at on the iPad at 7:106 and 15:30:
 
 - *Both* is honest but repeats itself, worst at 7:106.
-- *Verse under its passage* reads well: one memory, one block, and nothing is lost.
-- *Verse only* can throw away the best row. At 7:106 the passage row is the only one that marks
-  shared words; the two verse rows left are both "alike, but not word for word". Building it also
-  found that the number on the rail button still counted the dropped row (3 above a list of 2); the
-  button now counts only the rows the list shows, with a test.
+- *Verse under its passage* keeps everything in one block. At 7:106 it reads well. At 15:30 the
+  passage row on top is the one that cannot be opened, so the block is headed by a dead row with the
+  live one tucked beneath it.
+- *Verse only* cuts both ways. At 7:106 it throws away the best row: the passage row is the only one
+  that marks shared words, and the two verse rows left are both "alike, but not word for word". At
+  15:30 it throws away exactly the right row: what is left is the one word-for-word twin, and nothing
+  dead. Which happens depends on whether the passage row can be opened; 15 of the 41 cannot.
+
+Building it also found that the number on the rail button still counted the dropped row (3 above a
+list of 2), and the passage menu told a screen reader the same wrong number. Both now count only the
+rows the list shows, each with a test.
 
 The default stays "both" and the question stays open: the owner picks.
 

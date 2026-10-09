@@ -227,4 +227,21 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     expect(rows("drop")).toEqual(["١٤:٦"]);
     localStorage.removeItem(PASSAGE_ROWS_KEY);
   });
+
+  it("tells a screen reader the number of rows it will find, not the rows left out", () => {
+    const hops = [
+      edge({ type: "mutashabih", to: k("14:6"), sources: [RANGE[0]!] }),
+      edge({ type: "mutashabih", to: k("14:5"), through: k("14:7"), sources: [RANGE[0]!] }),
+    ];
+    const spoken = (way: string) => {
+      localStorage.setItem(PASSAGE_ROWS_KEY, way);
+      const { unmount } = renderMenu({ hops });
+      const label = screen.getByRole("dialog").getAttribute("aria-label");
+      unmount();
+      return label;
+    };
+    expect(spoken("both")).toMatch(/رابطان/);
+    expect(spoken("drop")).toMatch(/رابط واحد/);
+    localStorage.removeItem(PASSAGE_ROWS_KEY);
+  });
 });
