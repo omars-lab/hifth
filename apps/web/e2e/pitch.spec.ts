@@ -655,6 +655,28 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(nextTo, "no two cards for verses side by side").toBe(false);
   });
 
+  test("while the related verses have room, every verse the note links is among them", async ({ page }) => {
+    // The captured list keeps only the first of several verses a note cites
+    // from one surah by bare number, though the note links them all; 18:65's
+    // list had room and still left one out. Checked by shape, so the test names
+    // none of the book's references.
+    await page.goto("/#/hafs-kfqc/18:65");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    const labels = async (name: RegExp) =>
+      (await sheet(page).getByRole("button", { name }).evaluateAll((els) => els.map((e) => e.getAttribute("aria-label") ?? "")))
+        .map((t) => [...t.matchAll(/(\d+):(\d+)/g)].map((m) => ({ surah: Number(m[1]), ayah: Number(m[2]) })));
+    const cards = await labels(/^Hop to /);
+    const linked = (await labels(/^Go to /)).flatMap((r) => r.slice(0, 1));
+    expect(cards.length, "the list has room").toBeLessThan(8);
+    expect(linked.length, "the note links verses").toBeGreaterThan(0);
+    const covered = (v: { surah: number; ayah: number }) =>
+      cards.some((r) => {
+        const [from, to] = [r.at(0), r.at(-1)];
+        return !!from && !!to && from.surah === v.surah && from.ayah <= v.ayah && v.ayah <= to.ayah;
+      });
+    expect(linked.filter((v) => !covered(v)), "linked verses with no card").toEqual([]);
+  });
+
   test("a related verse's note starts at its top, not where the last one was scrolled to", async ({ page }) => {
     // The list of related verses sits at the foot of a note, so reaching it
     // scrolls the note down. Following one turned the note to the new verse

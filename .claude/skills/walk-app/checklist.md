@@ -80,6 +80,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] At the foot of 18:60's note, the related verses show each cited run as one card
   (in the shape "9:4–9:7") beside the note's references to other surahs, not eight cards of one run. ·
   any · issue: `related-verses-ranges-crowd-out`
+- [ ] Where a note's related verses have fewer than eight cards (try 18:65 and 18:22), every verse
+  the note links is among them. · any · issue: `related-verses-drop-bare-numbers`
 - [ ] Beside two pages, a card lies over the facing page and shows no drag bar. · desktop,
   ipad-side · issue: `spread-cards-show-drag-bar`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside

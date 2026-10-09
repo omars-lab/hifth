@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { splitCitations } from "./citations";
+import { splitCitations } from "./citations.js";
 
 const cited = (text: string) =>
   splitCitations(text).flatMap((part) => (typeof part === "string" ? [] : [part]));

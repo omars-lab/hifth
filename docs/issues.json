@@ -3258,10 +3258,11 @@
         "file": "docs/design/knowledge-graph-commentary.md",
         "item": "㊵"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Walking 18:13 (2026-10-08): a note citing several verses of one surah by bare number after the first keeps only the first of each surah in its related verses; the note's text links them all. Fix in the pitch extractor, reading the bare numbers back into the list."
+      "note": "Walking 18:13 (2026-10-08): a note citing several verses of one surah by bare number after the first kept only the first of each surah in its related verses; the note's text links them all (about 2,000 verses; 18:65 had room and left one out, 18:22 showed none). The pitch extractor now reads the note's citations with the panel's own rule (moved to core) and adds the missing ones after the book's list, filling empty places only (runs.mjs addCited). Tests: runs.test.mjs citedIn/addCited and pitch.spec.ts 'while the related verses have room, every verse the note links is among them' failed first.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     }
   ]
 }
