@@ -65,7 +65,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Open a verse's note: it never covers its own verse, also after turning the phone. · phone,
   phone-side · issue: `note-covers-verse-after-turn`
 - [ ] Read a note to the end: it ends above the page bar, and reads like the printed book. · any ·
-  **open** — issue: `pitch-commentary-differs-from-print` (italic words show upright)
+  **open** — issue: `pitch-commentary-differs-from-print` (outside the demo notes, italic words
+  still show upright)
+- [ ] In the demo notes (2:255, 18:10–14, and the long note 18:60–82 shares), the words the book
+  slants are slanted: a transliterated word, a quoted verse phrase. No stray box or mark shows
+  where a slant starts or ends, and a slanted run next to a cited verse keeps the verse a link.
+  · laptop, and the iPad app after `make app-web` · test: `e2e/pitch.spec.ts` ("the demo's notes
+  set the book's italics")
 - [ ] The commentators' initials can be tapped and say whose comment it is. · phone · issues:
   `note-initials-unexplained`, `initials-too-small-to-tap`
 - [ ] Verses a note points to are links; a mention of the note's own verse is not, and does not
