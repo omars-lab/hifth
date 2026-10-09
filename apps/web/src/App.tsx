@@ -219,6 +219,7 @@ import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from ".
 import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
 import { applyPen, rememberPen, savedPen, type Pen } from "./pen";
+import { usePassageRows } from "./passage-rows";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -985,9 +986,12 @@ export function App(): JSX.Element {
   }, [selectedKey, contextFor]);
 
   // Rail chips for the current selection (empty when nothing selected / no hops).
+  // The reader's passage-rows way (item 47) goes in too, so a chip never
+  // counts a row its list leaves out.
+  const passageRows = usePassageRows();
   const chips = useMemo(
-    () => (adjacency && selectedKey ? adjacency.chipsForKey(selectedKey) : []),
-    [adjacency, selectedKey],
+    () => (adjacency && selectedKey ? adjacency.chipsForKey(selectedKey, passageRows) : []),
+    [adjacency, selectedKey, passageRows],
   );
 
   // Loop 6a — the ⬡ merge. The rail's other chips are *directions* of one edge

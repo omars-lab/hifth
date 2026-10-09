@@ -1,6 +1,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { wordDiff, type AppState, type LeafSide, type MergedEdge } from "@hifth/core";
+import { arrangePassages, wordDiff, type AppState, type LeafSide, type MergedEdge } from "@hifth/core";
 import { useT } from "../i18n";
+import { usePassageRows } from "../passage-rows";
 // Loaded the first time a look-alike is opened out (see ./later.tsx).
 import { DiffView } from "./later";
 import { ShareSheet } from "./ShareSheet";
@@ -69,6 +70,7 @@ export function HighlightMenu({
   side = null,
 }: HighlightMenuProps): JSX.Element | null {
   const { t, dir } = useT();
+  const passageRows = usePassageRows();
   // Beside the passage on a spread: no dimming, no trapped Tab (see HopPopover).
   const beside = side !== null;
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -161,7 +163,8 @@ export function HighlightMenu({
           <p className={styles.empty}>{t.rangeEmpty}</p>
         ) : (
           <ul className={styles.list}>
-            {hops.map((edge) => {
+            {/* A passage listed beside a verse inside it is laid out as the reader chose (item 47). */}
+            {arrangePassages(hops, passageRows).map(({ edge, inside }) => {
               const enabled = canHop(edge.to);
               const toKey = bareTarget(edge.to);
               // A look-alike that is a whole passage is named as the passage.
@@ -183,7 +186,7 @@ export function HighlightMenu({
               const diffId = `range-diff-${edge.to.replace(/[^\w-]/g, "-")}`;
               const fromRefs = edge.sources.map((k) => t.ayahRef(k) ?? k).join(t.refJoin);
               return (
-                <li key={`${edge.type} ${edge.to}`} className={styles.row}>
+                <li key={`${edge.type} ${edge.to}`} className={styles.row} data-inside={inside || undefined}>
                   <div className={styles.rowMain}>
                     <button
                       type="button"

@@ -1269,7 +1269,29 @@ After ㊻, 2:48's list shows "2:122–2:123" (the passage match) and, under it, 
 note: the same two words in the other order, and different verbs). Both are true, and the second says
 more, but a hafiz sees two rows for one memory. Options: keep both (today); fold the verse row into the
 passage row, keeping its note; or hide the passage row when a verse inside it already has its own. Not
-decided; it waits for a look at a few more such pairs.
+decided.
+
+**What a count of every such pair showed (2026-10-09).** 101 rows name a passage. 41 of them, on 40
+verses, sit beside a row for a verse inside that passage. Of those 41 passage rows, 22 mark shared
+words, 3 carry only "the next verse tells them apart", 1 carries both, and 15 carry nothing at all: the
+row names the passage and cannot be opened (15:30 is one). The verse rows inside them say more: 26 mark
+shared words, 21 say "alike, but not word for word", 2 carry a hand-written note. Some passages have two
+verses inside them listed (7:106, 7:120, 20:70, 26:31, 26:46), so 7:106 shows three rows for one memory.
+The pairs come in mirrored clusters, the same shape seen from both ends: the story of Moses and the
+magicians (surah 7 against surah 26) and the refusal of Iblis (surah 15 against surah 38).
+
+**All three ways are now built** and are a setting in the info panel: "Show both rows" (the default,
+today's list), "Verse under its passage" (the verse rows indented beneath their passage, with a line
+down their side), and "Verse only" (the passage row left out). Looked at on the iPad at 7:106 and 15:30:
+
+- *Both* is honest but repeats itself, worst at 7:106.
+- *Verse under its passage* reads well: one memory, one block, and nothing is lost.
+- *Verse only* can throw away the best row. At 7:106 the passage row is the only one that marks
+  shared words; the two verse rows left are both "alike, but not word for word". Building it also
+  found that the number on the rail button still counted the dropped row (3 above a list of 2); the
+  button now counts only the rows the list shows, with a test.
+
+The default stays "both" and the question stays open: the owner picks.
 
 ### ㊽ When two look-alikes share no one stretch of words, does the row still say why? · **fixed**
 

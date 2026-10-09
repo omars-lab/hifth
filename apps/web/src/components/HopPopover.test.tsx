@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import type { Edge, RailChip } from "@hifth/core";
 import { HopPopover } from "./HopPopover";
+import { PASSAGE_ROWS_KEY } from "../passage-rows";
 
 const edge = (surah: number, ayah: number, extra: Partial<Edge> = {}): Edge => ({
   type: "mutashabih",
@@ -19,6 +20,9 @@ const chip = (edges: Edge[]): RailChip => ({
 });
 
 const noop = () => {};
+
+/** Arabic-Indic digits to the Latin ones, so a label reads the same in either locale. */
+const latin = (s: string) => s.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660));
 
 describe("HopPopover", () => {
   it("renders nothing when no chip is open", () => {
@@ -141,5 +145,32 @@ describe("HopPopover", () => {
       .getAllByRole("listitem")
       .map((li) => li.querySelector("[aria-expanded]") !== null);
     expect(opens).toEqual([true, true, false]);
+  });
+
+  // A passage listed beside a verse inside it (item 47): the reader picks, in
+  // the info panel, whether both rows show, the verse sits under the passage,
+  // or the passage row is left out. Made-up refs.
+  it("lays out a passage and a verse inside it the way the reader chose", () => {
+    const rows = (way: string) => {
+      localStorage.setItem(PASSAGE_ROWS_KEY, way);
+      const { unmount } = render(
+        <HopPopover
+          chip={chip([edge(2, 4), edge(2, 3, { through: "quran/hafs-kfqc/2:5" }), edge(2, 9)])}
+          fromKey="quran/hafs-kfqc/2:2"
+          canHop={() => true}
+          onHop={noop}
+          onClose={noop}
+        />,
+      );
+      const seen = screen
+        .getAllByRole("listitem")
+        .map((li) => `${latin(li.textContent ?? "").match(/2:\d+(–2:\d+)?/)?.[0]}${li.hasAttribute("data-inside") ? " in" : ""}`);
+      unmount();
+      return seen;
+    };
+    expect(rows("both")).toEqual(["2:4", "2:3–2:5", "2:9"]);
+    expect(rows("group")).toEqual(["2:3–2:5", "2:4 in", "2:9"]);
+    expect(rows("drop")).toEqual(["2:4", "2:9"]);
+    localStorage.removeItem(PASSAGE_ROWS_KEY);
   });
 });

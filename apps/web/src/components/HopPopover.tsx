@@ -1,5 +1,6 @@
 import { Suspense, useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
+  arrangePassages,
   orderForHifz,
   qulVerseUrlFromKey,
   wordDiff,
@@ -8,6 +9,7 @@ import {
   type RailChip,
 } from "@hifth/core";
 import { useT } from "../i18n";
+import { usePassageRows } from "../passage-rows";
 // Loaded the first time a look-alike is opened out (see ./later.tsx).
 import { DiffView } from "./later";
 import styles from "./HopPopover.module.css";
@@ -65,6 +67,7 @@ export function HopPopover({
   onCover,
 }: HopPopoverProps): JSX.Element | null {
   const { t, dir } = useT();
+  const passageRows = usePassageRows();
   // On a spread the card stands on the facing leaf, beside the verse, so the
   // page stays clear and live: no dimming, no trapped Tab — as the note does.
   const beside = side !== null;
@@ -121,7 +124,8 @@ export function HopPopover({
   );
 
   if (!chip) return null;
-  const edges = orderForHifz(chip.edges);
+  // A passage listed beside a verse inside it is laid out as the reader chose (item 47).
+  const rows = arrangePassages(orderForHifz(chip.edges), passageRows);
   const title = t.hopTitle[chip.direction];
 
   return (
@@ -157,7 +161,7 @@ export function HopPopover({
         </header>
 
         <ul className={styles.list}>
-          {edges.map((edge) => {
+          {rows.map(({ edge, inside }) => {
             const enabled = canHop(edge.to);
             // A look-alike that is a whole passage is named as the passage.
             const label =
@@ -173,7 +177,7 @@ export function HopPopover({
             const isOpen = comparable && expanded === edge.to;
             const diffId = `diff-${edge.to.replace(/[^\w-]/g, "-")}`;
             return (
-              <li key={edge.to} className={styles.row}>
+              <li key={edge.to} className={styles.row} data-inside={inside || undefined}>
                 <div className={styles.rowMain}>
                   <button
                     type="button"

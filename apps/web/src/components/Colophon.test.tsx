@@ -4,6 +4,7 @@ import { Colophon } from "./Colophon";
 import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 import { CARD_EDGE_KEY } from "../card-edge";
 import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
+import { PASSAGE_ROWS_KEY } from "../passage-rows";
 
 /*
  * The colophon is the app's licence compliance, so these tests assert
@@ -134,6 +135,22 @@ describe("how two look-alikes that share words in several places are compared, i
     expect(way("every")).toHaveAttribute("aria-checked", "false");
     expect(localStorage.getItem(LOOKALIKE_COMPARE_KEY)).toBe("plain");
     localStorage.removeItem(LOOKALIKE_COMPARE_KEY);
+  });
+});
+
+describe("what a look-alike list does with a passage and a verse inside it, in settings", () => {
+  it("offers all three ways, both rows checked, and keeps the one picked", () => {
+    localStorage.removeItem(PASSAGE_ROWS_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-passage-rows="${c}"]`)!;
+    expect(way("both")).toHaveAttribute("aria-checked", "true");
+    expect(way("group")).toHaveAttribute("aria-checked", "false");
+    expect(way("drop")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("group"));
+    expect(way("group")).toHaveAttribute("aria-checked", "true");
+    expect(way("both")).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem(PASSAGE_ROWS_KEY)).toBe("group");
+    localStorage.removeItem(PASSAGE_ROWS_KEY);
   });
 });
 
