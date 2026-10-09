@@ -172,6 +172,11 @@ export {
   hizbOf,
 } from "./quran-meta.js";
 
+// The verses The Study Quran's prose cites ("5:15–16", "2:42, 140", "v. 5"),
+// read the same way by the reader's panel, which draws them as links, and by
+// the pitch extractor, which lists them among a note's related verses.
+export { splitCitations, type Citation } from "./citations.js";
+
 // The "links back to it" half of the qul-reliance decision — a per-verse
 // reference page on the outside library, built from the verse's absolute
 // ordinal and nothing downloaded. Ships a URL, not bytes.

@@ -1,4 +1,4 @@
-import { AYAH_COUNTS } from "@hifth/core";
+import { AYAH_COUNTS } from "./quran-meta.js";
 
 /** A verse the commentary cites, as written ("5:15–16", "1:6c") and where it goes. */
 export interface Citation {

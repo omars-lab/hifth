@@ -46,7 +46,7 @@ import { readKey } from "./key.mjs";
 import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
 import { slantSurah } from "./italics.mjs";
-import { foldRuns } from "./runs.mjs";
+import { addCited, citedIn, foldRuns } from "./runs.mjs";
 import { endPrint, endsClosed } from "./ends.mjs";
 import { orphanPrint, rescueOrphans } from "./orphans.mjs";
 import { wordsOf } from "./splits.mjs";
@@ -235,13 +235,13 @@ function curatedShard(surah) {
 /**
  * The source's own cross-references, as a shard. Each `refs` entry is a verse
  * the Study Quran points to from this one; we keep the ones that also carry
- * commentary first (so a hop leads somewhere with something to read), cap the
- * count, and label each with the opening words of the target verse's own
+ * commentary first (so a hop leads somewhere with something to read), add the
+ * verses the note cites that the list left out, cap the count, and label each with the opening words of the target verse's own
  * translation, so a card says what is there. That is a quote of the held
  * translation, which is why this output stays in the private, gitignored pitch
  * data and never ships; a target with no translation keeps a plain line.
  */
-function refShard(surah, entries) {
+function refShard(surah, entries, verses) {
   const shard = {};
   for (const entry of entries) {
     const from = parseRef(entry.key);
@@ -270,7 +270,13 @@ function refShard(surah, entries) {
     // Verses whose target also has commentary rank first.
     roads.sort((a, b) => Number(b.commentary) - Number(a.commentary));
 
-    const edges = roads.slice(0, MAX_REF_EDGES).map(({ to, through }) => {
+    // Then the verses the note cites that the list left out ("9:4, 7, 12" keeps
+    // only 9:4), after the book's own, so they fill places and push none out.
+    const notes = verses[`${surah}:${sourceAyah}`]?.commentary ?? [];
+    const cited = citedIn(notes, surah).filter(([s, a]) => !(s === surah && a === sourceAyah));
+    const all = addCited(roads, cited);
+
+    const edges = all.slice(0, MAX_REF_EDGES).map(({ to, through }) => {
       const e = edge(
         surah,
         sourceAyah,
@@ -436,7 +442,7 @@ function buildSurah(surah) {
 
   // Al-Fātiḥah keeps its hand-written roads; every other surah takes the
   // source's own cross-references.
-  const shard = surah === 1 ? curatedShard(1) : refShard(surah, src.entries);
+  const shard = surah === 1 ? curatedShard(1) : refShard(surah, src.entries, verses);
 
   const out = {
     source: src.source,

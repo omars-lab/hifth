@@ -3,12 +3,13 @@ import {
   formatAyahKey,
   orderForHifz,
   parseAyahKey,
+  splitCitations,
+  type Citation,
   type Edge,
   type LeafSide,
 } from "@hifth/core";
 import { useT } from "../i18n";
 import type { Commentator } from "../pitch/pitch";
-import { splitCitations, type Citation } from "../tafsir/citations";
 import { splitSigla, type Siglum } from "../tafsir/sigla";
 import { isIntroOnly, textDir, type CommentaryNote } from "../tafsir/commentary";
 import styles from "./CommentarySheet.module.css";

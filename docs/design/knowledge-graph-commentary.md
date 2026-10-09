@@ -1118,10 +1118,17 @@ shows its runs as one card each and its references to other surahs beside them. 
 across a surah's end or backwards. Unit tests on made-up lists, a panel test for the run's label and
 a browser test on 18:60 all failed first.
 
-### ㊵ When a note cites several verses of one surah in a row, are they all among its related verses? · **open**
+### ㊵ When a note cites several verses of one surah in a row, are they all among its related verses? · **fixed**
 
 Seen on the same walk, at 18:13: where a note cites several verses of one surah by bare number after
 the first (in the shape "9:4, 7, 12"), the captured list keeps only the first of each surah. The note's own text
-links every one of them; the related verses list under it does not. The fix belongs where the list is
-made: read the bare numbers that follow a cited verse back into the list, as the note's links already
-do.
+links every one of them; the related verses list under it does not. Across the book about 2,000
+verses' notes cite verses their list leaves out; on the demo pages 18:65 had room and still left one
+out, and 18:22 showed no related verses at all though its note cites one.
+
+**The fix:** the verses a note cites are read back from the note by the same rule that draws them as
+links (that rule now lives in the shared core, so the panel and the list read citations one way), and
+the ones the book's list left out are added after it. They only fill places the list left empty, so
+none of the book's own references is ever pushed out; one that comes straight after a card's last verse
+runs that card on. 1,619 more related verses now show. Tests on made-up notes, and a browser test at
+18:65 that checks every verse the note links has a card while the list has room, failed first.
