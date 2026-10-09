@@ -159,8 +159,9 @@ test.describe("Hifth · tajweed skin (spec §8)", () => {
     await page.getByLabel("مفتاح ألوان التجويد").click();
     const legend = page.getByRole("dialog", { name: "مفتاح ألوان التجويد" });
     await expect(legend).toBeVisible();
-    const overflows = await legend.evaluate((el) => el.scrollHeight > el.clientHeight + 1);
-    expect(overflows).toBe(true);
+    // The key's rows fill in once the page's colours are counted, which under
+    // load is a beat after the card opens: measure once it has filled.
+    await expect.poll(() => legend.evaluate((el) => el.scrollHeight > el.clientHeight + 1)).toBe(true);
     await expect(legend).toHaveAttribute("data-more", "below");
     await legend.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
     await expect(legend).not.toHaveAttribute("data-more", "below");

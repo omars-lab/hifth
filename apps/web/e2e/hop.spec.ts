@@ -41,30 +41,37 @@ test.describe("Hifth · the hop", () => {
       const rail = page.getByRole("group").filter({ has: page.locator("button[data-direction]") });
       await expect(rail).toBeVisible();
       // The running heads are printed once the page has drawn, which can be
-      // a beat after the chips arrive.
-      const boxOf = async (which: string) => {
-        const label = page.locator(`[data-running-head="${which}"]:visible`).first();
-        await expect(label).not.toBeEmpty();
-        return (await label.boundingBox())!;
-      };
-      const surah = await boxOf("surah");
-      const juz = await boxOf("juz");
-      const chips = rail.getByRole("button");
-      expect(await chips.count()).toBeGreaterThan(verse ? 0 : 2);
-      const top = verse ? (await page.locator(verse).boundingBox())!.y : Infinity;
-      for (const chip of await chips.all()) {
-        const box = (await chip.boundingBox())!;
-        expect(box.x, `${lang} ${key}: clear of the surah's name`).toBeGreaterThanOrEqual(surah.x + surah.width);
-        expect(box.x + box.width, `${lang} ${key}: clear of the juz`).toBeLessThanOrEqual(juz.x);
-        expect(box.y + box.height, `${lang} ${key}: above the first line`).toBeLessThanOrEqual(top);
-        // Drawn slim, still a whole thumb's worth to tap: a point 8px above
-        // the pill is the chip's.
-        const hit = await page.evaluate(
-          ([x, y]) => document.elementFromPoint(x!, y!)?.closest("button[data-direction]") !== null,
-          [box.x + box.width / 2, box.y - 8],
-        );
-        expect(hit, `${lang} ${key}: a tap just above the pill still lands`).toBe(true);
-      }
+      // a beat after the chips arrive, and under load the page can still be
+      // redrawing as it is measured: the whole measurement is taken again
+      // until the page has settled.
+      await expect(async () => {
+        const boxOf = async (which: string) => {
+          const label = page.locator(`[data-running-head="${which}"]:visible`).first();
+          await expect(label).not.toBeEmpty();
+          const box = await label.boundingBox();
+          expect(box, `${lang} ${key}: the ${which} label is drawn`).not.toBeNull();
+          return box!;
+        };
+        const surah = await boxOf("surah");
+        const juz = await boxOf("juz");
+        const chips = rail.getByRole("button");
+        expect(await chips.count()).toBeGreaterThan(verse ? 0 : 2);
+        const top = verse ? (await page.locator(verse).boundingBox())!.y : Infinity;
+        for (const chip of await chips.all()) {
+          const box = await chip.boundingBox();
+          expect(box, `${lang} ${key}: the chip is drawn`).not.toBeNull();
+          expect(box!.x, `${lang} ${key}: clear of the surah's name`).toBeGreaterThanOrEqual(surah.x + surah.width);
+          expect(box!.x + box!.width, `${lang} ${key}: clear of the juz`).toBeLessThanOrEqual(juz.x);
+          expect(box!.y + box!.height, `${lang} ${key}: above the first line`).toBeLessThanOrEqual(top);
+          // Drawn slim, still a whole thumb's worth to tap: a point 8px above
+          // the pill is the chip's.
+          const hit = await page.evaluate(
+            ([x, y]) => document.elementFromPoint(x!, y!)?.closest("button[data-direction]") !== null,
+            [box!.x + box!.width / 2, box!.y - 8],
+          );
+          expect(hit, `${lang} ${key}: a tap just above the pill still lands`).toBe(true);
+        }
+      }).toPass();
     }
   });
 
