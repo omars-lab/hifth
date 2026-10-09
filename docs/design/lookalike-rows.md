@@ -79,3 +79,9 @@ Opening 15:30's first row on a phone puts its name just under the title, in Engl
 
 Tests: a unit test of the rule with a title that has not pinned yet, and the browser test that opens
 15:30's passage row now checks its name sits under the title on both phones and desktop Firefox.
+
+**Corrected the same day:** the first fix still left the row's top 12 pixels behind the title; only the
+row's own top margin kept its name clear. A browser pins the title inside the list's padding, which the
+rule had not counted. It does now, and the row starts exactly under the title. The browser test now checks
+the row's top, not only its name, and it caught the 12 pixels on the Android phone. On the iPhone the
+title was already pinned when the row opened, so the first rule never went wrong there.

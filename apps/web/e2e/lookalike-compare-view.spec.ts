@@ -72,8 +72,8 @@ test.describe("Hifth · a look-alike comparison", () => {
     // up behind it (lookalike-rows ②).
     await settle(row);
     const title = (await list.locator("header").first().boundingBox())!;
-    const name = (await open.boundingBox())!;
-    expect(name.y, "the opened row's name is under the title, not behind it").toBeGreaterThanOrEqual(
+    const top = (await row.boundingBox())!;
+    expect(top.y, "the opened row starts under the title, not behind it").toBeGreaterThanOrEqual(
       title.y + title.height - 1,
     );
   });
