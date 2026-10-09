@@ -50,6 +50,21 @@ I go wrong and how to follow the reciter. A rough build, with a way to pick the 
 - **Where it runs:** in the browser on the iPad. The one iPad risk found is that Safari may lower
   the sound quality while the microphone is open; the rough build checks this first, on the real
   iPad and in Firefox.
+- **Recordings already named by maqam:** a starting list was found, all from search summaries and
+  none heard. Surah 1 appears in Hijaz and in Saba from the same reciter, and a course claims Rast
+  for it. The best source, a teacher's blog with the same verses in several maqamat, can no longer be
+  reached, so the next step is to write to its author. No verse timings were found anywhere.
+- **Do we need yt-dlp?** Not for the rough build. QUL's per-verse files and word timings need no
+  cutting. ffmpeg comes in for long recordings. YouTube's terms forbid downloading even for private
+  study, so yt-dlp is a last resort, used only with the recording owner's written yes, and asking
+  them for the file comes first.
+- **A public guide to the sources:** one page, rebuilt from a hand-edited catalog. It has a card per
+  source with its licence, and a bar on each recording's timeline for each cut, marked with the maqam
+  and who named it. Links and timings only, never audio.
+- **Growing the catalog:** one skill with five scripts. A check refuses any row with no source, no
+  licence note or no labeller. A person names every maqam. Audio goes only into the private store,
+  and only when the licence or the owner allows it. It is one more held-copy source, with its
+  licence check inside it.
 - **What it is not settling:** whether this belongs in the demo for The Study Quran team, which
   reciters, or anything about grading a recitation.
 
@@ -157,8 +172,8 @@ project already drew for outside data (see "What have we already decided" below)
 >   reciters will often differ more in their home note than in their maqam. To *hear* the maqamat
 >   differ on one passage, mujawwad recordings, or one teacher reciting the same verses in several
 >   maqamat on purpose, are what make the comparison come alive. One maqam teacher (ReciteinTune)
->   is said to have published exactly that for one surah; that page would not open from here, so it
->   is unverified.
+>   is said to have published exactly that, for two passages; that page can no longer be reached, so
+>   it is unverified (see "Which real recordings already have a verse recited in a named maqam?").
 > - **The cleanest route for the private demo** is QUL recordings with word timings, held privately,
 >   with the owner (or a teacher he trusts) tagging the maqam by ear. If a recording is ever to be
 >   shown more widely, alquran.cloud's terms are the clearest found, and asking the reciter or
@@ -347,6 +362,234 @@ gave it, so that it can later test any guess the app makes.
 **Recommendation:** the private store for the rough build, with a teacher's purpose-made recordings
 as the thing to seek if this goes further.
 
+---
+
+## Which real recordings already have a verse recited in a named maqam?
+
+The owner asked for a starting list: real recordings of particular verses, each in a maqam that
+somebody has named, ideally the same verses in two or three maqamat. This is what the search found.
+It is a list of **links and names, never audio**.
+
+**Three things to know before reading the table:**
+
+- **Nothing here was heard, and no verse timing was seen.** Every row came from a search engine's
+  summary of a page. No source gave a verse's start and end time inside a recording, so every
+  row's timing is "to be marked by ear".
+- **The best source has gone dark.** Almost every row comes from one maqam teacher's blog,
+  ReciteinTune, which lists short clips by maqam. Its address now lands on its web host's
+  "this site is not set up yet" page, and the Internet Archive's lookup found no copy of the post that has
+  the same verses in several maqamat. The rows are leads to follow up, for example by writing to
+  the teacher, who also sells maqam courses.
+- **Most listings name a surah, not verses.** Which verses each clip covers was not visible.
+
+| Passage | Reciter | Maqam | Who says it is that maqam | Where | Start to end | Opened? |
+| --- | --- | --- | --- | --- | --- | --- |
+| 2:21–22 | The ReciteinTune teacher, three takes | Bayati, Ajam, Nahawand | The teacher, on the post | [post 87](https://reciteintune.com/?p=87) | Not seen; to be marked by ear | Snippet; the site no longer serves it |
+| Opening of surah 73 | The ReciteinTune teacher, five takes | Bayati, Hijaz, Saba, Sikah, Nahawand | The teacher, on the post | [post 87](https://reciteintune.com/?p=87) | Not seen | Snippet; the site no longer serves it |
+| Surah 1 | Umar al-Qazabri | Hijaz | ReciteinTune's Hijaz post | [post 84](https://reciteintune.com/?p=84) | Not seen | Snippet |
+| Surah 1 | Umar al-Qazabri | Saba | ReciteinTune's Saba post | [post 105](https://reciteintune.com/?p=105) | Not seen | Snippet |
+| Surah 1 | Muhammad Ayyub | Saba | ReciteinTune's Saba post | [post 105](https://reciteintune.com/?p=105) | Not seen | Snippet |
+| Surah 1 | Not named (a lesson) | Rast | ReciteinTune's Rast course page, which also says ash-Shuraim and al-Juhany recite in Rast | [course page](https://reciteintune.teachable.com/p/maqam-rast-masterclass) | Behind payment | Snippet |
+| Surah 93 | Mishary al-Afasy | Hijaz | ReciteinTune's Hijaz post | [post 84](https://reciteintune.com/?p=84) | Not seen | Snippet |
+| Surah 92 | Hani ar-Rifa'i | Hijaz | ReciteinTune's Hijaz post | [post 84](https://reciteintune.com/?p=84) | Not seen | Snippet |
+| Surah 36 | Abdul Basit Abdus-Samad | Hijaz | ReciteinTune's Hijaz post | [post 84](https://reciteintune.com/?p=84) | Not seen | Snippet |
+| End of surah 89; surah 49 | Muhammad Siddiq al-Minshawi | Hijaz | ReciteinTune's Hijaz post | [post 84](https://reciteintune.com/?p=84) | Not seen | Snippet |
+| Surah 59 | Muhammad Ayyub; al-Minshawi | Saba | ReciteinTune's Saba post | [post 105](https://reciteintune.com/?p=105) | Not seen | Snippet |
+| Surah 6 | Umar al-Qazabri | Saba | ReciteinTune's Saba post | [post 105](https://reciteintune.com/?p=105) | Not seen | Snippet |
+| Surah 23 | Mishary al-Afasy | Saba | ReciteinTune's Saba post | [post 105](https://reciteintune.com/?p=105) | Not seen | Snippet |
+| Surah 55 | Khalid al-Qahtani | Saba | ReciteinTune's Saba post | [post 105](https://reciteintune.com/?p=105) | Not seen | Snippet |
+| Opening of surah 21 | Not named in the snippet | Nahawand | ReciteinTune's Nahawand and Bayati post | [post 77](https://reciteintune.com/?p=77) | Not seen | Snippet |
+| Surahs 82 and 102 | Not named in the snippet | Bayati | ReciteinTune's Nahawand and Bayati post | [post 77](https://reciteintune.com/?p=77) | Not seen | Snippet |
+| Selected passages, not named | Fares Abbad | Bayati | The video's own title | [equran.me listing](https://equran.me/showvideo-101.html) (a YouTube video) | Not seen | Snippet; the page refused the fetch |
+
+**What stands out:** surah 1 is the rough build's own passage, and it turns up in **Hijaz and in
+Saba from the same reciter**, Umar al-Qazabri, with Rast claimed for it by a course. That is the
+same verses in two or three maqamat, the thing the owner asked for. Surah 93, the rough build's
+second choice, has al-Afasy in Hijaz.
+
+> [!example]- Sources that sounded right but are not rows
+> - **A 2025 voice-science abstract** ([Voice Foundation](https://voicefoundation.org/view/2025-abstracts/entry/3031/),
+>   opened) measured Abdul Basit's pitch lines across ten surahs and found them moving through Bayati,
+>   Sikah, Saba and Rast. It does not say which surahs, so it cannot give a row.
+> - **A Persian study** (snippet) found reciters favour Bayati, Saba, Hijaz, Rast and Sikah for one
+>   surah about the Day of Judgment; no reciter or timing was visible.
+> - **A Qasid lesson on Bayati** (opened, through a video-summary site) teaches the maqam without
+>   Qur'an examples.
+> - **Udemy maqam courses** (snippets) promise "examples from Quran" for all eight maqamat, behind payment.
+
+**Recommendation:** start the collection with the surah 1 rows. Write to the ReciteinTune teacher for
+the clips with the same verses in several maqamat, since that page is the best match found and it
+can no longer be reached. Give each row a maqam label of our own, from a person who listened,
+before anything uses it.
+
+## Do we need to download and cut recordings ourselves, and are we allowed to?
+
+There are three places a recording can come from. Each needs different tools and comes with
+different terms. Both download tools are already on the laptop: yt-dlp, which fetches a video's
+sound from YouTube, and ffmpeg, which cuts a file between two times. Neither was run for this note.
+
+| | **Per-verse files from the Qur'an audio collections** (recommended) | **Long recordings on the Internet Archive** | **YouTube videos** |
+| --- | --- | --- | --- |
+| **Where** | QUL, everyayah, alquran.cloud: one file per verse; QUL and quranicaudio also have whole surahs | Uploaded tapes, concerts, whole-mushaf sets | Lessons, concerts, the teachers' own clips |
+| **What it buys** | No cutting at all for a single verse. For a passage, QUL's word timings say exactly where each verse starts and ends. The most reciters and the cleanest sound | Mujawwad and concert recordings the collections lack, for example a long recitation in several maqamat | The only place found for the teaching clips, where one voice recites the same verses in several maqamat |
+| **What it costs** | Mostly murattal, so the maqamat barely differ (see above). No maqam labels | Someone marks each verse's start and end by ear, and ffmpeg cuts it. Uploads vary in quality and in who uploaded them | Someone marks each verse by ear. yt-dlp to fetch, ffmpeg to cut, and yt-dlp breaks whenever YouTube changes |
+| **What the terms allow** | Per collection, as in the sources table above. alquran.cloud allows free non-commercial sharing; QUL and everyayah state no licence; quranicaudio says personal use only (snippet) | The Archive's own terms page would not open from here, twice. An upload's rights belong to whoever owns the recording, and the uploader may not be that person | YouTube's terms (opened) allow you to "view or listen to Content for your personal, non-commercial use", but forbid you to "access, reproduce, download" it except "as expressly authorized by the Service", and forbid "automated means" without YouTube's written permission. yt-dlp is both of those |
+| **Implications** | The rough build needs no new tool. The cut points come from data, not from someone's ear | It needs ffmpeg only. Each row needs its owner checked, one at a time | Private study does not change YouTube's terms: they allow viewing for personal use, not keeping a copy. The recording also belongs to the reciter or publisher, whoever uploaded it. Whether a country's private-copy or research exception would cover it was **not looked up** |
+
+**When is yt-dlp warranted?** Only when three things are all true. First, the recording exists
+nowhere else. Second, it matters for the demo, which in practice means the clips with the same
+verses in several maqamat. Third, its owner has said yes in writing. Even then, the better first
+ask is for the owner to send the file. A channel owner can usually download their own upload from
+YouTube's own tools (not checked here), and a file they send needs no yt-dlp and breaks none of
+YouTube's terms. If they say "take it from my channel", the catalog row records that permission,
+and only then does the fetch step accept a YouTube link.
+
+**Recommendation:** the rough build uses QUL's per-verse and per-surah files with word timings: no
+cutting by ear and no new tool. ffmpeg comes in for the first Internet Archive or teacher's
+recording. yt-dlp is the last resort, used only with the owner's written yes, and asking them for
+the file comes first.
+
+## How would a reader see every source and the exact piece taken from it?
+
+The owner asked for a guide that shows each source and the cut taken from it for each verse. It is
+one page on the public site, beside the other design pages, and it carries **links and timings,
+never audio**. Anyone can open it and check where each piece came from and who named its maqam.
+Only the owner's private build can play the pieces.
+
+**What the page shows:**
+
+- **One card per source:** what it is, who runs it, the licence in its own words (or "none stated"),
+  whether that licence was actually read or only seen in a search, and a link.
+- **One block per passage,** grouped by verse. Under it, each recording's timeline is drawn as a
+  thin grey line, the length of the whole recording. **The cut is a coloured bar on that line**,
+  from the verse's start to its end, and beside the bar sit the maqam and two names: who the
+  source says it is, and who in this project listened and agreed. A source's claim and our own
+  label are kept apart, because the first is a lead and the second is a check.
+- **A "listen at the source" link** on each bar opens the source's own page at that moment, where
+  the source allows it, so the person checking hears the original and not our copy.
+- **The same verses in several maqamat sit next to each other**, so the guide shows at a glance
+  which passages are ready to compare and which have only one maqam so far.
+
+A sketch of one passage block. The times are made up; no real timing was found.
+
+```
+Surah 1, verses 1 to 7
+
+QUL · reciter A (murattal) · licence: none stated, read                 0:00 ────────────────────── 0:52
+  whole file is the passage   ██████████████████████████████  Hijaz   source: names none · ours: owner, 2026-10-xx
+
+ReciteinTune · Umar al-Qazabri · licence: none stated, snippet only     0:00 ────────────────────── 3:10
+  1:1–1:7   0:12 – 0:58       ░░░██████████░░░░░░░░░░░░░░░░░░  Hijaz   source: the teacher · ours: owner, 2026-10-xx
+
+ReciteinTune · Umar al-Qazabri · licence: none stated, snippet only     0:00 ────────────────────── 2:40
+  1:1–1:7   0:05 – 0:49       ░██████████░░░░░░░░░░░░░░░░░░░░  Saba    source: the teacher · ours: owner, 2026-10-xx
+```
+
+**How it is rebuilt.** The page is generated from one hand-edited list, the catalog, in the same
+way the decisions page is generated from the decision index. Nobody edits the page itself.
+
+```mermaid
+flowchart LR
+  A["Catalog: one row per cut<br/>source link, licence note,<br/>verses, start and end,<br/>maqam, who labelled it"] --> B{"Check: every row has<br/>a source, a licence note<br/>and a labeller?"}
+  B -- no --> X["Refused, with the row named"]
+  B -- yes --> C["Guide page rebuilt:<br/>source cards and<br/>timeline bars"]
+  C --> D["Served on the public site<br/>with the other design pages"]
+  A -. "private build only" .-> E["Fetch and cut into the<br/>owner's private store"]
+```
+
+The catalog lives in the repository's docs folder as a JSON list, like the other registers. Each row
+carries the source link, a licence note, the verse range, the start and end in milliseconds, the
+maqam, what the source claims, who labelled it and when, and whether the licence was read or only
+seen in a search. A command (`make maqam-recordings`, proposed) rebuilds the page from it, and the
+pre-commit check fails if the page is stale, as it does for the decisions page.
+
+**Recommendation:** one generated page, with source cards and a timeline bar for each cut, rebuilt
+from the catalog. It stays public because it holds nothing but links, timings and names.
+
+## How do we add a new recording to the collection without breaking the rules?
+
+The owner asked for skills to grow the collection. One skill is enough. Its steps are:
+
+```mermaid
+flowchart TD
+  F["Find a recording of a passage<br/>in a maqam somebody names"] --> S["Write down its source<br/>and its licence, in the source's words"]
+  S --> T["Mark where the verse starts and ends:<br/>from word timings if the source has them,<br/>by ear if not"]
+  T --> L["A person listens and<br/>names the maqam"]
+  L --> G{"Catalog check passes?"}
+  G -- no --> S
+  G -- yes --> P{"Allowed to hold a copy?<br/>(licence note says so,<br/>or the owner said yes)"}
+  P -- no --> K["Row stays a link only;<br/>listen at the source"]
+  P -- yes --> C["Fetch and cut into<br/>the private store"]
+  C --> R["Rebuild the guide page"]
+  K --> R
+```
+
+The **maqam label is a person's call**, never a script's, because the research found no reliable
+automatic maqam detection (see "Can the app tell which maqam a reciter used?"). It joins the
+project's existing list of things only a person can check: each label is one entry there, with who
+gave it and when, and a second listener can confirm or dispute it.
+
+> [!example]- The skill, its dispatch line and its scripts
+> **Name:** `grow-maqam-catalog`, in `.claude/skills/grow-maqam-catalog/`.
+>
+> **Frontmatter description (the dispatch line):**
+>
+> ```
+> description: Add a recording to the maqam recordings catalog, or check and rebuild it. Use when
+>   asked to find audio of a verse in a named maqam, to add or correct a catalog row, to mark a
+>   verse's start and end in a recording, to record who labelled a maqam, to fetch and cut a
+>   recording into the private store, or when deciding whether yt-dlp or ffmpeg is needed. Holds
+>   the rules that keep audio out of the repository: every row needs a source, a licence note and
+>   a person who labelled the maqam; YouTube is fetched only with the owner's written permission.
+> ```
+>
+> **Scripts, when to use each** (all in the skill's own scripts folder):
+>
+> | Script | What it does | When to reach for it | Command |
+> | --- | --- | --- | --- |
+> | `check-catalog.mjs` | The check. Refuses a row with no source link, no licence note, or no labeller; a start not before its end; a verse range that does not exist; any Arabic script in a text field (no Qur'an text in the repository); and any audio file under the docs folder | Before every commit; it joins the fast pre-commit checks | `pnpm gate:maqam-catalog` (proposed) |
+> | `cut-points-from-word-timings.mjs` | Reads QUL's word timings from the gitignored cache and prints the start and end in milliseconds for a verse range, to paste into a row | Any row from a source with word timings, so nobody marks it by ear | `node .claude/skills/grow-maqam-catalog/scripts/cut-points-from-word-timings.mjs --reciter <id> --verses 1:1-1:7` |
+> | `fetch-and-cut.mjs` | Downloads a row's file into the private store and cuts it with ffmpeg between its start and end. Refuses a row the check refuses, a row whose licence note does not allow holding a copy, and a YouTube link without a recorded permission. It is the only script that calls yt-dlp. It records each file's fingerprint in the private store, not in the catalog | When a row should be playable in the private build | `node .claude/skills/grow-maqam-catalog/scripts/fetch-and-cut.mjs --id <row>` |
+> | `audition.mjs` | Plays a held cut with a second of lead-in and lead-out, so a person can confirm the start and end by ear, and the maqam | After marking by ear, and when labelling | `node .claude/skills/grow-maqam-catalog/scripts/audition.mjs --id <row>` |
+> | `render-guide.mjs` | Rebuilds the public guide page from the catalog | After any catalog change; the check fails if the page is stale | `make maqam-recordings` (proposed) |
+>
+> **One catalog row, as it would look** (an example, not a real row):
+>
+> ```json
+> {
+>   "id": "qazabri-1-1-7-saba",
+>   "verses": "1:1-1:7",
+>   "reciter": "Umar al-Qazabri",
+>   "source": { "name": "ReciteinTune", "url": "https://reciteintune.com/?p=105", "opened": false },
+>   "licence": { "note": "none stated", "read": false, "hold_copy": "no" },
+>   "start_ms": null, "end_ms": null, "marked_by": null,
+>   "maqam": "Saba",
+>   "source_claims": "Saba",
+>   "labelled_by": "owner", "labelled_on": "2026-10-xx",
+>   "permission": null
+> }
+> ```
+>
+> A recording nobody here has listened to yet is a lead, and leads live in this note's starter
+> table, not in the catalog. A row enters the catalog only once a person has listened and put their
+> name on it; the check refuses it before then. Even when it passes, the fetch step still refuses this
+> example: its licence note does not allow a copy and no permission is recorded, so it stays a link,
+> heard at the source. The catalog is hand-edited, like every other register here.
+> Once it exists, it gets a row in the project's table of registers.
+
+**How it fits "every source of Qur'an data is a plugin".** A recordings source is a **held-copy
+plugin**: it holds outside bytes, in this case audio, in the owner's private store, off the
+repository and off the shipped app, and it ships nothing. It enters the same way the other sources
+do: one named plugin behind the shared interface, picked up by the runner and not wired in by hand.
+Its licence check sits inside it. The catalog's licence note decides whether a copy may be held at
+all, and the fetch step refuses otherwise, so the runner never routes around it. The public catalog
+and guide are its outward face, and they carry no audio, only links and timings, much as the
+measuring plugins publish agreement figures and never the outside text.
+
+**Recommendation:** one skill with five scripts in its own folder, a hand-edited catalog checked
+before every commit, and the maqam label left to a person. Audio is fetched only when the licence
+or the owner allows it.
+
 ## What else could be considered, and why isn't it here?
 
 - **Checking the words themselves** (missed or wrong words). That is memorisation checking, which
@@ -422,6 +665,13 @@ rewritten from what it taught**, and only then does a decision get written up.
 - Whether women's and children's voices work as well (one research note says most online recitations are by
   adult men, which limits models trained on them; search snippet only).
 - Word-level memorisation checking.
+- Whether training deliberately in the maqamat is fitting at all. Some scholars object to trained
+  melody in recitation, as distinct from a natural, unforced beautiful voice; others treat the
+  maqamat as permitted and widely used, but not required
+  ([one discussion](https://library.amauacademy.com/qa/what-is-the-ruling-on-reciting-the-quran-with-maqamat/),
+  search snippet only). This note takes no position. It is worth knowing before showing the
+  feature to scholars, and it argues for presenting the maqam as an aid to listening rather than
+  a standard to meet.
 
 ---
 
@@ -466,13 +716,25 @@ installed and tried; everything about them is from their own pages.
 > - WebKit microphone-quality bug — <https://bugs.webkit.org/show_bug.cgi?id=311451>
 > - Arabic maqam (Wikipedia) — <https://en.wikipedia.org/wiki/Arabic_maqam>
 > - Maqam World, Bayati — <https://www.maqamworld.com/en/maqam/bayati.php> (opened, but the text gave no interval detail)
+> - YouTube terms of service — <https://www.youtube.com/static?template=terms> (the permissions and restrictions section)
+> - Voice Foundation 2025 abstract on Abdul Basit's pitch lines — <https://voicefoundation.org/view/2025-abstracts/entry/3031/> (names no surahs)
+> - Quran Lab per-verse audio manifest — <https://huggingface.co/datasets/quranlab/quran-audio> (one file per verse; licence line "mixed-per-row-reference-and-cc-by-timing")
+> - Qasid lesson on Bayati, through a video-summary site — <https://videohighlight.com/v/07Tb1qxjepw> (no Qur'an examples)
 >
 > **Search snippet only, or would not open**
 > - Shahriar and Tariq, maqam classification of Qur'an recitations, "Maqam-478" — repository page refused the fetch
 > - Rababaah, eight-maqam classification — repository page refused the fetch
 > - Khodabandeh, Sharif University thesis on six maqam families — certificate error
 > - Gedik and Bozkurt (2010) and the 2013 reproduction — <https://compmusic.upf.edu/ar/node/164>, snippet
-> - ReciteinTune maqam posts — certificate error
+> - ReciteinTune maqam posts 77, 84, 87 and 105 — certificate error, then the host's default page; every starter-list row from them is a search summary
+> - ReciteinTune Rast course page — <https://reciteintune.teachable.com/p/maqam-rast-masterclass>, snippet; the course itself is paid
+> - equran.me, Fares Abbad in Bayati — <https://equran.me/showvideo-101.html>, refused the fetch
+> - Internet Archive terms of use — <https://archive.org/about/terms.php>, would not open (twice; only the site title came back)
+> - YouTube search results for maqam recitations — returned no content
+> - Persian study on maqam choice for a Day-of-Judgment surah — snippet
+> - Udemy maqam courses with Qur'an examples — snippets
+> - Discussion of the ruling on reciting with maqamat — <https://library.amauacademy.com/qa/what-is-the-ruling-on-reciting-the-quran-with-maqamat/>, snippet
+> - Whether a channel owner can download their own upload from YouTube's own tools — not checked
 > - librosa's pYIN page — not found at the addresses tried
 > - ml5's browser version of CREPE and its download size — snippet
 > - quranicaudio.com About page — snippet
