@@ -69,8 +69,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Read a note to the end: it ends above the page bar, and reads like the printed book. · any ·
   **open** — issue: `pitch-commentary-differs-from-print` (outside the demo notes, italic words
   still show upright)
-- [ ] In the demo notes (2:255, 18:10–14, and the long note 18:60–82 shares), the words the book
-  slants are slanted: a transliterated word, a quoted verse phrase. No stray box or mark shows
+- [ ] In every demo note (2:255, 2:48, 15:30–31, 18:10–14, and the long note 18:60–82 shares), the
+  words the book slants are slanted — open each demo verse, not only the first few: a transliterated word, a quoted verse phrase. No stray box or mark shows
   where a slant starts or ends, and a slanted run next to a cited verse keeps the verse a link.
   · laptop, and the iPad app after `make app-web` · test: `e2e/pitch.spec.ts` ("the demo's notes
   set the book's italics")

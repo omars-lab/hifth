@@ -40,3 +40,8 @@ hand-read fixes, never in this one. The extractor finds each row's one place in 
 notes and refuses a row that finds none or two, so a row that goes stale after a new capture
 fails the run rather than slanting the wrong words. A note the book files under several verses
 carries its italics to all of them. Every other note stays upright.
+
+Walking the iPad app on 2026-10-09 showed that list had missed two demo verses: the note on 2:48
+and the one 15:30 shares with 15:31 still showed their slanted words upright. They were read off
+the page pictures the same way, 22 more rows, and the pitch test now opens every demo verse
+rather than two, so a demo verse left out of the list fails it.
