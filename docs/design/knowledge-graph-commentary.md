@@ -1304,6 +1304,11 @@ longer headed by a row that cannot open. But in 22 of the 41, the passage row no
 same comparison as the verse row beside it (15:30 and 23:7 both show this), so *Both* repeats itself
 more than it did, and *Verse only* now loses nothing in those 22.
 
+**Seen on the iPad app in Arabic, the same day** ([look-alike rows ⑤](lookalike-rows.md)): a closed
+passage row now names the verse inside it that is most alike. In those 22, that names the very verse on the
+row beneath it ("most alike: 2:123" right above the 2:123 row at 2:48; "most alike: 38:73" above the 38:73 row
+at 15:30), so under *Both* the repetition is now plain on the closed list, not only after opening.
+
 The default stays "both" and the question stays open: the owner picks.
 
 ### ㊽ When two look-alikes share no one stretch of words, does the row still say why? · **fixed**
