@@ -106,4 +106,6 @@ always asks for its plain form.
 Tests: a unit test of how a note is picked and its arrow written, a test that every note in the
 look-alike data has an Arabic version with no English letters in it (it failed first, 14 notes), and a
 browser test on both phones that opens 2:48's look-alikes in Arabic and finds no English in any row (it
-failed first on the old list).
+failed first on the old list). The note panel's list of related verses has its own unit test: our note
+reads in the app's language with a plain arrow, and a note from the book keeps the book's language (it
+failed first on the old panel, which showed the English note in the Arabic app).
