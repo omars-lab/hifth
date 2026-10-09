@@ -1142,3 +1142,4 @@ Still open in the task list: #51 (fix the faults found, worst first: the walk go
 - The size page now records the start-up code at 162.0 KB after the long-verse setting, still nothing to trim.
 - At 2:48 the look-alike list named a verse with no reason under it: the outside list pairs whole passages and the build kept only the other passage's first verse. The build now keeps where the passage ends, and the lists name the range (design note ㊻); whether a passage row and a verse row inside it should both show is open (㊼).
 - Walked the note sequences in the real iPad app: a verse link, the way back, and closing, with the foot fade at every step; the look-alike list at 2:48 led to the fix above.
+- Walked the Arabic interface on an iPad, upright and on its side, with a note open: it mirrors and nothing is cut off. A pitch test now holds it (it fails in English, where the close button sits on the right), and the walk checklist covers the iPad.
