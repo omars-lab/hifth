@@ -534,8 +534,10 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
   extractor adds back; two end exactly as the page does.
 - **The stop after a closing bracket.** Where a note ends on a bracketed source or reference,
   the book usually sets the full stop after the bracket, and the capture lost it there too. The
-  page readings show it for 97 of them, and those are on the same list; a note whose sentence
-  stopped inside the bracket is left alone.
+  page readings show it for 97 of them, and those are on the same list. The page readings could
+  not settle 29 more, so each was found on its page picture by its verse and read by eye: 25 show
+  the stop and joined the list, and 4 have none in the book and stay as printed. A note whose
+  sentence stopped inside the bracket is left alone.
 - **A note set aside.** The capture filed one note, shared by the first two verses of a surah,
   with the blocks it could not place, because a stray reference sat in front of its verse
   number, so both verses showed nothing. It is put back from a list that holds a fingerprint of
@@ -544,17 +546,15 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
   The book has none for them: where it prints a run of verses together, the note carries only
   the last verse's number.
 
-**What is still different:** 24 notes end on a bracket with no stop after it and the page
-readings do not settle them: 20 were not found in any reading, three read differently in
-different readings, and one's last words appear twice in the book. (The extractor's list of
-unfinished endings shows more lines than that, because a note shared by several verses is listed
-under each of them.) A run-on whose second
+**What is still different:** A run-on whose second
 sentence starts with an unusual word could also remain, since the search for them looked for
 the common sentence openings. Words the book sets in italics (a term being defined, a
 book's title) show upright in the panel: neither the capture nor the page readings record
 the slant, so putting them back would need a new way to read the page pictures. Nothing here reaches the public site; it is only the pitch.
 
-**What would answer it:** read the 24 off the page pictures by hand.
+**What would answer it:** a way to read the slant off the page pictures, and a wider search for
+run-on sentences. Why the bracket endings had to be read off the pictures rather than the page
+readings is written up in [the bracket endings note](../issues/bracket-endings-read-from-the-pictures.md).
 
 ### ② On a phone, can the roots and similar-verses lists keep their verse in sight, as the note does? · **fixed**
 

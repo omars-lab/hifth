@@ -65,7 +65,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Open a verse's note: it never covers its own verse, also after turning the phone. · phone,
   phone-side · issue: `note-covers-verse-after-turn`
 - [ ] Read a note to the end: it ends above the page bar, and reads like the printed book. · any ·
-  **open** — issue: `pitch-commentary-differs-from-print` (24 notes ending on a bracket still to read)
+  **open** — issue: `pitch-commentary-differs-from-print` (italic words show upright)
 - [ ] The commentators' initials can be tapped and say whose comment it is. · phone · issues:
   `note-initials-unexplained`, `initials-too-small-to-tap`
 - [ ] Verses a note points to are links; a mention of the note's own verse is not, and does not

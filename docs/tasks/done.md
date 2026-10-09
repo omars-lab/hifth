@@ -1082,7 +1082,8 @@ commentary design note's numbered items, and in the issues list.
 - The sideways iPad walk and tests passed on a simulator stuck upright; they now check their picture is sideways, and the walk keeps each turn's pictures apart (native-shell.md ㉒).
 - On an upright iPad the look-alikes list covered the verse it is about; the lists now slide the verse clear at every width, as the note does (knowledge-graph-commentary.md ㊲).
 - With the tips open, the foot line repeated the first tip; it now waits until the tips are put away (knowledge-graph-commentary.md ㊳). The Mac app re-walk found nothing new.
-- The pitch's notes were checked against the printed pages once more: the stops still missing were read by hand, the stop after a closing bracket put back on 97 notes, two notes cut short were finished, and a note the capture had set aside now shows under both its verses; 24 bracket endings are left to read (knowledge-graph-commentary.md ①).
+- The pitch's notes were checked against the printed pages once more: the stops still missing were read by hand, the stop after a closing bracket put back on 97 notes, two notes cut short were finished, and a note the capture had set aside now shows under both its verses (knowledge-graph-commentary.md ①).
+- The last 29 notes ending on a bracket were read off the page pictures by eye: 25 had their stop put back, 4 have none in the book and stay as printed, and the italics were checked (the capture does not record them) (knowledge-graph-commentary.md ①).
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
