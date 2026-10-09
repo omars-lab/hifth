@@ -184,6 +184,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Hold the iPad app sideways: two pages fill the height between the bars, not a sliver in the
   middle of the desk. · iPad simulator, landscape · issue: `ipad-app-sideways-spread-tiny` · test:
   `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize`
+- [ ] Walk the Mac app in Arabic too, not only the iPad: the look-alike list and a note open,
+  mirrored, nothing cut off. · `make app-shot TARGET=mac LOCALE=ar ROUTE=…` (the app keeps a
+  language picked with its own button over the one it is launched in) · test:
+  `scripts/native-make-locale.test.mjs`
 - [ ] The Mac app's own picture of a page is the page, not an empty file: two pages, full size.
   · `make app-shot TARGET=mac ROUTE=/hafs-kfqc/p45` (fails on an empty picture) · issue:
   `mac-app-shot-empty`
