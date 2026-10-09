@@ -1239,3 +1239,15 @@ the verse's opening lines and have to drag the page to check its end.
 example, the page drawn smaller past the usual limit only when held sideways, or the note opening
 as just its title row until it is pulled up. Today's way stays until then. It is low on the list,
 since the demo is meant for an iPad.
+
+### ㊺ When a note runs past the bottom of its card, can the reader tell there is more? · **fixed**
+
+Seen walking the notes on the iPad and on a laptop (2026-10-09): a note is nearly always longer than
+its card, and the card cut its last line through the letters with nothing to say the note went on.
+A reader could take a sentence that stops halfway for the end of the note.
+
+**The fix:** while the note goes on below the card's edge, its last line fades into the paper, the way
+the tajweed key's list already does; once the reader scrolls to the end, the fade goes. The fade sits
+on the card's real edge, so the line it softens is the one actually cut. On a phone the card first
+opens short and grows as it is pulled up; the fade is there in both. Two browser tests, one on a laptop
+and one on a phone that pulls the card up first, failed first.

@@ -283,6 +283,27 @@ export function CommentarySheet({
   useEffect(() => onTall?.(grown), [grown, onTall]);
   useEffect(() => () => onTall?.(false), [onTall]);
 
+  // Whether the note goes on below the card's edge. A note is nearly always
+  // longer than its card, which cut the last line through its letters with
+  // nothing to say there is more; the foot fades while there is, as the
+  // tajweed key's does. The card's height eases as it grows and the related
+  // verses fill in late, so the card and what is in it are watched.
+  const [moreBelow, setMoreBelow] = useState(false);
+  const measureMore = useCallback(() => {
+    const sheet = sheetRef.current;
+    if (sheet) setMoreBelow(sheet.scrollTop + sheet.clientHeight < sheet.scrollHeight - 2);
+  }, []);
+  useLayoutEffect(() => {
+    const sheet = sheetRef.current;
+    if (!open || !sheet) return;
+    measureMore();
+    if (typeof ResizeObserver === "undefined") return;
+    const watch = new ResizeObserver(measureMore);
+    watch.observe(sheet);
+    for (const part of sheet.children) watch.observe(part);
+    return () => watch.disconnect();
+  }, [open, verseKey, measureMore]);
+
   // The room a short note gives up so the verse above it shows whole, when the
   // reader set the note to open a little shorter (the long-verse setting).
   const room = useNoteRoom();
@@ -443,6 +464,7 @@ export function CommentarySheet({
         aria-label={introOnly ? label : t.commentaryOn(label)}
         data-side={side ?? undefined}
         data-tall={tall || undefined}
+        data-more={moreBelow ? "below" : undefined}
         style={
           room > 0 && !side && !tall && !place
             ? { maxBlockSize: `calc(${SHORT_SHARE * 100}vh - ${room}px)` }
@@ -453,6 +475,7 @@ export function CommentarySheet({
         onKeyDown={onKeyDown}
         onScroll={(e) => {
           if (!beside && !tall && e.currentTarget.scrollTop > 0) setTall(true);
+          measureMore();
         }}
       >
         {/* The handle and the title row stay at the top while the note
