@@ -546,9 +546,13 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
 
 **What is still different:** 24 notes end on a bracket with no stop after it and the page
 readings do not settle them: 20 were not found in any reading, three read differently in
-different readings, and one's last words appear twice in the book. A run-on whose second
+different readings, and one's last words appear twice in the book. (The extractor's list of
+unfinished endings shows more lines than that, because a note shared by several verses is listed
+under each of them.) A run-on whose second
 sentence starts with an unusual word could also remain, since the search for them looked for
-the common sentence openings. Nothing here reaches the public site; it is only the pitch.
+the common sentence openings. Words the book sets in italics (a term being defined, a
+book's title) show upright in the panel: neither the capture nor the page readings record
+the slant, so putting them back would need a new way to read the page pictures. Nothing here reaches the public site; it is only the pitch.
 
 **What would answer it:** read the 24 off the page pictures by hand.
 
