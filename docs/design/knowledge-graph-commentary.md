@@ -1297,6 +1297,13 @@ Building it also found that the number on the rail button still counted the drop
 list of 2), and the passage menu told a screen reader the same wrong number. Both now count only the
 rows the list shows, each with a test.
 
+**What changed on 2026-10-09** ([look-alike rows ①](lookalike-rows.md)): a passage row is now
+compared with the verse inside it that matches best, so none of the 41 is a dead row any more. At
+15:30 the passage row opens onto 38:73 and says how they are alike, so *Verse under its passage* is no
+longer headed by a row that cannot open. But in 22 of the 41, the passage row now opens exactly the
+same comparison as the verse row beside it (15:30 and 23:7 both show this), so *Both* repeats itself
+more than it did, and *Verse only* now loses nothing in those 22.
+
 The default stays "both" and the question stays open: the owner picks.
 
 ### ㊽ When two look-alikes share no one stretch of words, does the row still say why? · **fixed**
