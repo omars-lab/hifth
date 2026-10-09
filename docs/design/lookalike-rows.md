@@ -14,8 +14,10 @@
 - **Passage row** — a look-alike row that names a run of verses ("38:71–38:85") rather than one
   verse, because the outside list it comes from pairs whole passages.
 - **Reason line** — the short line under a row's name that says how the two are alike:
-  the words they share, "the words they share come more than once", "alike, but not word for
-  word", or "the next verse tells them apart".
+  "the words they share come more than once", "alike, but not word for word", "the next verse
+  tells them apart", or, on a passage row, which verse inside it is most alike. A row whose
+  shared words sit in one place on both sides has no line; opening it marks them (⑥ asks
+  whether it should say them before it is opened).
 - **Comparison** — what opens under a row: both verses as printed, the shared words washed
   green and the differences ochre.
 
@@ -128,3 +130,40 @@ page, nothing changes.
 
 Tests: the browser test that opens a note on a phone and checks the buttons sit on its top edge now also
 grows the note and checks no button is left on the page. It failed first, on the old app.
+
+### ⑤ Before a passage row is opened, does it say which verse inside the passage is the alike one? · **fixed**
+
+**What it changes for a hafiz:** 15:30's later-surahs list names the passage 38:72 to 38:75. ①'s fix measured
+the row against 38:73, the verse inside it that shares 15:30's words, but only said so once the row was
+opened. Closed, the row named four verses and gave no hint which one to look at.
+
+Why: ①'s record said the row names that verse, and its browser test checked for it only after opening the
+row, so the closed row was never looked at.
+
+**Fixed, 2026-10-09:** a passage row whose best match is not its first verse now carries a line under its
+name, "Most alike: 38:73" (in Arabic, the same with Arabic numerals). The jump still lands on the passage's
+first verse. A row matched best by its first verse needs no line, since its name already starts there.
+
+Tests: a unit test on each list (the look-alike list and the highlighted-passage menu), both failed first,
+and the browser test that opens 15:30's passage row now checks the closed row names 38:73 first.
+
+### ⑥ Before a reader opens a look-alike row, can they see which words the two verses share? · **open**
+
+**What it changes for a hafiz:** a row like 10:15's 8:31, or 15:30's 38:73, shows only a verse name and an
+arrow to open it. The shared words, which are exactly the stretch a hafiz slides on, appear only after a
+tap. Scanning a list of five rows to find the one they actually confuse means opening each.
+
+What the app does today: a row whose shared words sit in one place on both sides has no line under its
+name; the other kinds of row each say why they are listed (㊽). Opening a row draws both verses with the
+shared words washed green (㊾).
+
+Options already visible, none built yet:
+
+- **Leave it** (today): the row is short, and the comparison is one tap away.
+- **A small picture of the shared words** under the row's name, cut from the printed page the way the
+  comparison already cuts it. The reader sees the very stretch, in the mus'haf's own hand, without opening.
+- **The count of shared words** ("shares 4 words"), which says how strong the likeness is but not which
+  words.
+
+Not settled here: how many rows a verse should list at all (㊼, the owner's pick). A picture under each row
+makes a long list longer, so the two are related.

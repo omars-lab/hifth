@@ -67,6 +67,7 @@
   "hopTo": "Hop to {label}",
   "twin": "twin",
   "matchLoose": "Alike, but not word for word",
+  "likeVerse": "Most alike: {ref}",
   "matchRepeat": "The words they share come more than once",
   "nextTellsApart": "The next verse tells them apart",
   "pageUnavailable": "This page is not available yet",

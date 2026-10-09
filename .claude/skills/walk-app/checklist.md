@@ -141,6 +141,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   inside it that matches (try 15:30's later surahs: the passage in surah 38 opens onto 38:73, not
   its first verse; 23:7 opens onto 70:31). · desktop (Firefox), phone, the iPad app · issue:
   `lookalike-passage-row-reason`
+- [ ] Closed, a passage row says which verse inside it is most alike (15:30's later surahs: the passage
+  38:72 to 38:75 says 38:73), in English and Arabic. · phone, desktop (Firefox), the iPad app · issue:
+  `lookalike-passage-row-names-match`
 - [ ] A link that asks for a verse's look-alikes (`?open=lookalikes`, try 2:48) opens the list, not
   the note, even on a slow load. · desktop, the iPad app · issue: `pitch-link-lookalikes-opens-note`
 - [ ] The tajweed key, opened with the colours off (the ⓘ, or `?open=key`), counts the rules on the

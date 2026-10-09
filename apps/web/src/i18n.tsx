@@ -304,6 +304,8 @@ export interface Strings {
   twin: string;
   /** A look-alike row with no marked words: alike, but not word for word. */
   matchLoose: string;
+  /** A passage look-alike's line naming the verse inside it that matches best. */
+  likeVerse(ref: string): string;
   /** A look-alike row with no marked words: the shared stretch comes more than once. */
   matchRepeat: string;
   /** The outside list marks this pair as told apart by the verse after. */
@@ -1052,6 +1054,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     keyAlso: (name) => m.keyAlso({ name }),
     twin: m.twin,
     matchLoose: m.matchLoose,
+    likeVerse: (ref) => m.likeVerse({ ref }),
     matchRepeat: m.matchRepeat,
     nextTellsApart: m.nextTellsApart,
     pageUnavailable: m.pageUnavailable,

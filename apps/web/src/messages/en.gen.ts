@@ -199,6 +199,7 @@ const messages: Catalog = {
   legendTitle: "Tajweed key",
   licenceBody: "Free software under the GNU GPL, version 3 or later: you may study it, change it and pass it on. This is the source of this exact build, not a branch that may move:",
   licenceHead: "Licence and source",
+  likeVerse: (d) => "Most alike: " + d.ref,
   longVerseNote: "On a screen held upright, a verse can come out a few lines taller than the room the note leaves above it. Page a little smaller: the page is drawn a little smaller so the whole verse shows, and the note keeps its height. Note a little shorter: the note opens a little shorter, and the page stays at the size the link opened it.",
   longVerseShorter: "Note a little shorter",
   longVerseSmaller: "Page a little smaller",
