@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { boxOf, type Box } from "./box";
 
 /*
  * The stage always holds page, never blank paper.
@@ -128,12 +129,6 @@ const hostOf = (svg: Locator): Locator => svg.locator("xpath=..");
 const layerOf = (svg: Locator): Locator => svg.locator("xpath=ancestor::*[@aria-busy][1]");
 const stageOf = (svg: Locator): Locator => layerOf(svg).locator("xpath=..");
 
-interface Box {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
 
 /** A point, in whichever frame the function taking it names. */
 interface Point {
@@ -146,13 +141,6 @@ interface Pads {
   right: number;
   top: number;
   bottom: number;
-}
-
-/** A bounding box that is definitely there. */
-async function boxOf(target: Locator): Promise<Box> {
-  const box = await target.boundingBox();
-  expect(box, "element has no box").not.toBeNull();
-  return box!;
 }
 
 /** An element's own padding, read back rather than assumed. */

@@ -1,4 +1,5 @@
-import { test, expect, type Locator } from "@playwright/test";
+import { test, expect } from "@playwright/test";
+import { boxOf } from "./box";
 
 /*
  * The running heads: the page says where it is, the way a printed mus'haf does.
@@ -14,14 +15,6 @@ import { test, expect, type Locator } from "@playwright/test";
  * the leaf"), and, end to end, the share tray's row that holds a verse's last
  * line clear of the tray to the pixel (`share-sheet.spec.ts`).
  */
-
-type Box = { x: number; y: number; width: number; height: number };
-
-async function boxOf(l: Locator): Promise<Box> {
-  const b = await l.boundingBox();
-  expect(b, "element has no box").not.toBeNull();
-  return b!;
-}
 
 test.describe("Hifth · the page says where it is", () => {
   test.beforeEach(async ({ page }) => {

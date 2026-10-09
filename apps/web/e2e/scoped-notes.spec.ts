@@ -1,6 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { readFileSync, writeFileSync } from "node:fs";
 import { ayahTarget } from "./ayah";
+import { boxOf } from "./box";
 import { SCOPE_LOOK_KEY } from "../src/scope-look";
 import { pageNumber } from "./page-number";
 
@@ -803,19 +804,18 @@ test.describe("Hifth · a dot by the verse number for a verse in a note", () => 
     const dot = pageSvg(page, 8).locator('[data-verse-dot="2:51"]');
     // Measured only once each is there: the list's code arrives on first open,
     // and a box read before then is nothing (it failed 1 push in many).
-    await expect(dot).toBeVisible();
-    const at = await dot.boundingBox();
+    // A box read the moment after "visible" still came back empty once in the
+    // full run (2026-10-09), so each read waits for its box.
+    const at = await boxOf(dot);
     await dot.click();
     const list = page.getByRole("dialog", { name: "2:51 is in 1 note" });
-    await expect(list).toBeVisible();
-    const card = await list.boundingBox();
-    expect(at && card).toBeTruthy();
-    const dotX = at!.x + at!.width / 2;
-    expect(card!.x).toBeLessThanOrEqual(dotX);
-    expect(card!.x + card!.width).toBeGreaterThanOrEqual(dotX);
+    const card = await boxOf(list);
+    const dotX = at.x + at.width / 2;
+    expect(card.x).toBeLessThanOrEqual(dotX);
+    expect(card.x + card.width).toBeGreaterThanOrEqual(dotX);
     // And it stays on the page the dot is on: it does not reach past the fold.
-    const fold = (await pageSvg(page, 8).boundingBox())!;
-    expect(card!.x + card!.width).toBeLessThanOrEqual(fold.x + fold.width + 24);
+    const fold = await boxOf(pageSvg(page, 8));
+    expect(card.x + card.width).toBeLessThanOrEqual(fold.x + fold.width + 24);
   });
 });
 
