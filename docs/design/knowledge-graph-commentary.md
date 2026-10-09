@@ -1191,3 +1191,18 @@ to 2:255 with the note rising, records the page's zoom on every frame, and check
 where it ends; it failed first, at 155% against 141%. A second link followed while the first was
 still moving lost track of its own move, so it zoomed in and back out again; it now keeps it, and a
 test holds the note back until the second move has begun, so the note always rises during it.
+
+### ㊸ On an iPad held upright, should a reader be able to keep the page's zoom and have the note open shorter instead? · **open**
+
+Left from ㊷ (2026-10-09). To show 2:255 whole above its note on an upright iPad, the page is now
+drawn a little smaller, about 140% instead of 155%. The other way, opening the note a little shorter
+so the page keeps its size, was written down and not built. The project builds a feature more than
+one way when it could go a few ways, keeps the best as the default and the others as a setting, so a
+reader who minds the page changing size under them can choose.
+
+**What it changes for a hafiz:** the verse they opened stays at the size they read it at, and the
+note gives up a line or two of its height instead.
+
+**What would answer it:** build it as a setting beside today's way, for the upright iPad only (on a
+phone a note shrunk to make room would show a line or two), and walk both on 2:255 to see which
+reads better. Today's way stays the default until then.

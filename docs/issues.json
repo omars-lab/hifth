@@ -2939,6 +2939,17 @@
       "note": "On a phone the commentators' initials in a note were a letter or two wide and a comma apart, so a finger opened the neighbour's line of the key or nothing. Fixed 2026-10-07: CommentarySheet opens the key for every initial in the bracket, the tapped one marked on the side its entry starts from, and each initial's tap area reaches over the comma and above and below the line without moving a word."
     },
     {
+      "id": "upright-ipad-shorter-note-way",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊸"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The second way of showing a long verse whole above its note on an upright iPad: open the note shorter and keep the page's zoom, instead of drawing the page smaller (㊷, today's way). Owed as a setting by the build-it-more-than-one-way habit; upright iPad only, today's way stays the default."
+    },
+    {
       "id": "note-covers-turn-edge",
       "source": {
         "file": "docs/design/knowledge-graph-commentary.md",
