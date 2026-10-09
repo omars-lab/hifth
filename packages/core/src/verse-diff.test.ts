@@ -43,6 +43,20 @@ describe("wordDiff", () => {
     expect(wordDiff(noToSpan, "2:48")).toBeNull();
   });
 
+  // A passage row's words were measured against the verse inside the passage
+  // that this one matches, so that is the verse the comparison stands on.
+  it("compares a passage row against the verse inside it that matches", () => {
+    const passage: Edge = {
+      ...EDGE,
+      to: "quran/hafs-kfqc/38:72",
+      through: "quran/hafs-kfqc/38:75",
+      like: { to: "quran/hafs-kfqc/38:74", page: 457 },
+      page: 456,
+    };
+    expect(wordDiff(passage, "15:31")?.to).toEqual({ key: "38:74", page: 457, shared: [[1, 13]] });
+    expect(wordDiff(passage, "15:31")?.from.page).toBe(456 - 12);
+  });
+
   it("declines an inverted range rather than painting it backwards", () => {
     expect(wordDiff({ ...EDGE, span: { from: [9, 4] } }, "2:48")).toBeNull();
   });

@@ -51,4 +51,21 @@ test.describe("Hifth · a look-alike comparison", () => {
       expect(Math.abs(box.y - port.top), "a row too tall to show whole starts just under the title").toBeLessThanOrEqual(1);
     }
   });
+
+  // A look-alike row naming a whole passage was measured against the passage's
+  // first verse, though the verse that matches is often a later one: 15:30's
+  // passage row in surah 38 said nothing and would not open (lookalike-rows ①).
+  test("a passage row opens onto the verse inside it that matches", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("hifth.lang.v1", "en"));
+    await page.goto("/#/hafs-kfqc/15:30?open=lookalikes");
+    // 15:30 has look-alikes only in later surahs, so the link opens that list itself.
+    const list = page.getByRole("dialog", { name: /later surahs/ });
+    await expect(list).toBeVisible({ timeout: 20_000 });
+    const row = list.getByRole("listitem").filter({ hasText: /38:72.38:75/ });
+    const open = row.locator("[aria-expanded]");
+    await expect(open, "the passage row offers to open").toHaveCount(1);
+    await open.click();
+    await expect(row.locator("svg")).toHaveCount(2, { timeout: 10_000 });
+    await expect(row, "the comparison stands on the verse that matches").toContainText("38:73");
+  });
 });

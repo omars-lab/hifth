@@ -339,20 +339,52 @@
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/27:83",
         "through": "quran/hafs-kfqc/27:84",
+        "like": {
+          "to": "quran/hafs-kfqc/27:84",
+          "page": 384
+        },
         "page": 384,
         "dir": {
           "dSurah": 0,
           "dPage": 6
+        },
+        "span": {
+          "from": [
+            1,
+            2
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            2
+          ]
         }
       },
       {
         "type": "mutashabih",
         "to": "quran/hafs-kfqc/41:19",
         "through": "quran/hafs-kfqc/41:20",
+        "like": {
+          "to": "quran/hafs-kfqc/41:20",
+          "page": 478
+        },
         "page": 478,
         "dir": {
           "dSurah": 14,
           "dPage": 100
+        },
+        "span": {
+          "from": [
+            1,
+            2
+          ]
+        },
+        "toSpan": {
+          "from": [
+            1,
+            2
+          ]
         }
       }
     ],

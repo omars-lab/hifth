@@ -106,6 +106,12 @@ export interface Edge {
    * reference; the hop still lands on `to`, the range's first verse.
    */
   readonly through?: string;
+  /**
+   * On a passage row: the verse inside the passage this one matches, and its
+   * page, when that is not the first verse. The reason line and the comparison
+   * are measured against it; the hop still lands on `to`.
+   */
+  readonly like?: { readonly to: string; readonly page: number };
   /** Mushaf page of the target (denormalized for rail counts + prefetch). */
   readonly page: number;
   readonly dir: EdgeDir;
