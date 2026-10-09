@@ -1188,4 +1188,6 @@ the note is already up as the link is followed, the link aims there to begin wit
 rises a moment after the page has started moving, the move is turned toward the same place on the
 way, and the verse is lit once the page arrives. A browser test on an upright iPad follows a link
 to 2:255 with the note rising, records the page's zoom on every frame, and checks it never went past
-where it ends; it failed first, at 155% against 141%.
+where it ends; it failed first, at 155% against 141%. A second link followed while the first was
+still moving lost track of its own move, so it zoomed in and back out again; it now keeps it, and a
+test holds the note back until the second move has begun, so the note always rises during it.
