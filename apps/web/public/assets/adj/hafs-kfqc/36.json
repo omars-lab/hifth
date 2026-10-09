@@ -195,7 +195,8 @@
           "dSurah": 2,
           "dPage": 11,
           "sameJuz": true
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -398,6 +399,7 @@
           "dSurah": -4,
           "dPage": -26
         },
+        "match": "repeat",
         "ctx": true
       },
       {
@@ -692,7 +694,8 @@
         "dir": {
           "dSurah": 28,
           "dPage": 111
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []

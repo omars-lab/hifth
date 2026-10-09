@@ -29,7 +29,8 @@
         "dir": {
           "dSurah": 25,
           "dPage": 375
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -38,7 +39,8 @@
         "dir": {
           "dSurah": 29,
           "dPage": 409
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []
@@ -546,6 +548,7 @@
           "dPage": 12,
           "sameJuz": true
         },
+        "match": "loose",
         "ctx": true
       },
       {
@@ -767,7 +770,8 @@
         "dir": {
           "dSurah": 5,
           "dPage": 162
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -1333,7 +1337,8 @@
         "dir": {
           "dSurah": 0,
           "dPage": 3
-        }
+        },
+        "match": "repeat"
       },
       {
         "type": "mutashabih",
@@ -1419,6 +1424,7 @@
           "dPage": -12,
           "sameJuz": true
         },
+        "match": "loose",
         "ctx": true
       },
       {
@@ -1495,7 +1501,8 @@
         "dir": {
           "dSurah": 20,
           "dPage": 316
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -1712,7 +1719,8 @@
         "dir": {
           "dSurah": 0,
           "dPage": -3
-        }
+        },
+        "match": "repeat"
       },
       {
         "type": "mutashabih",
@@ -2627,7 +2635,8 @@
         "dir": {
           "dSurah": 22,
           "dPage": 320
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -2721,7 +2730,8 @@
         "dir": {
           "dSurah": 6,
           "dPage": 152
-        }
+        },
+        "match": "repeat"
       },
       {
         "type": "mutashabih",
@@ -2751,7 +2761,8 @@
         "dir": {
           "dSurah": 6,
           "dPage": 152
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -2924,7 +2935,8 @@
         "dir": {
           "dSurah": 63,
           "dPage": 521
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -3254,7 +3266,8 @@
         "dir": {
           "dSurah": 7,
           "dPage": 147
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -3263,7 +3276,8 @@
         "dir": {
           "dSurah": 12,
           "dPage": 213
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -3325,7 +3339,8 @@
         "dir": {
           "dSurah": 46,
           "dPage": 465
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -3334,7 +3349,8 @@
         "dir": {
           "dSurah": 64,
           "dPage": 515
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []
@@ -3464,6 +3480,7 @@
           "dSurah": 14,
           "dPage": 233
         },
+        "match": "repeat",
         "ctx": true
       },
       {

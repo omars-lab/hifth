@@ -171,7 +171,8 @@
         "dir": {
           "dSurah": 25,
           "dPage": 205
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []
@@ -185,7 +186,8 @@
         "dir": {
           "dSurah": -12,
           "dPage": -213
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []

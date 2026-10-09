@@ -35,7 +35,8 @@
         "dir": {
           "dSurah": -46,
           "dPage": -465
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -44,7 +45,8 @@
         "dir": {
           "dSurah": -40,
           "dPage": -331
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -185,6 +187,7 @@
           "dSurah": -15,
           "dPage": -90
         },
+        "match": "repeat",
         "ctx": true
       },
       {

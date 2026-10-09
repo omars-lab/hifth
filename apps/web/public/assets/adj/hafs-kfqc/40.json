@@ -1211,7 +1211,8 @@
         "dir": {
           "dSurah": -10,
           "dPage": -67
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []

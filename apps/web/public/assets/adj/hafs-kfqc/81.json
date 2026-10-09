@@ -30,7 +30,8 @@
         "dir": {
           "dSurah": -12,
           "dPage": -18
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []

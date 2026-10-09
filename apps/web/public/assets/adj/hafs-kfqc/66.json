@@ -8,7 +8,8 @@
         "dir": {
           "dSurah": -64,
           "dPage": -515
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",

@@ -451,6 +451,7 @@
           "dSurah": -36,
           "dPage": -327
         },
+        "match": "repeat",
         "ctx": true
       }
     ],

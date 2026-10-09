@@ -275,7 +275,8 @@
         "dir": {
           "dSurah": -16,
           "dPage": -104
-        }
+        },
+        "match": "repeat"
       },
       {
         "type": "mutashabih",
@@ -721,6 +722,7 @@
           "dSurah": -6,
           "dPage": -38
         },
+        "match": "repeat",
         "ctx": true
       }
     ],

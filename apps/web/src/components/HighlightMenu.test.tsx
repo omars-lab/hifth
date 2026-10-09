@@ -176,4 +176,18 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     });
     expect(within(screen.getByRole("dialog")).getByText(/إبراهيم، ١٤:٥–١٤:٦/)).toBeInTheDocument();
   });
+
+  // A pair with no one stretch of words to mark still says why it is listed.
+  it("says why a look-alike with no marked words is there", () => {
+    renderMenu({
+      hops: [
+        edge({ type: "mutashabih", to: k("3:5"), match: "loose", sources: [k("2:47")] }),
+        edge({ type: "mutashabih", to: k("3:6"), match: "repeat", ctx: true, sources: [k("2:48")] }),
+      ],
+    });
+    const [loose, repeat] = within(screen.getByRole("dialog")).getAllByRole("listitem");
+    expect(loose!.textContent).toContain("لا كلمةً بكلمة");
+    expect(repeat!.textContent).toContain("تتكرر");
+    expect(repeat!.textContent).toContain("الآية التالية");
+  });
 });

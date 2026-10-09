@@ -29,7 +29,8 @@
         "dir": {
           "dSurah": -63,
           "dPage": -521
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []

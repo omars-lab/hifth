@@ -84,7 +84,8 @@
         "dir": {
           "dSurah": 11,
           "dPage": 113
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []
@@ -624,7 +625,8 @@
         "dir": {
           "dSurah": -8,
           "dPage": -112
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -930,7 +932,8 @@
         "dir": {
           "dSurah": -4,
           "dPage": -35
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []

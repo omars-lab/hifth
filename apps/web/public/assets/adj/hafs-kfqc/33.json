@@ -156,7 +156,8 @@
         "dir": {
           "dSurah": 26,
           "dPage": 124
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -298,7 +299,8 @@
           "dSurah": 0,
           "dPage": 1,
           "sameJuz": true
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []
@@ -355,7 +357,8 @@
         "dir": {
           "dSurah": 15,
           "dPage": 90
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -450,7 +453,8 @@
           "dSurah": 0,
           "dPage": -1,
           "sameJuz": true
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []

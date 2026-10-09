@@ -8,7 +8,8 @@
         "dir": {
           "dSurah": -6,
           "dPage": -8
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []

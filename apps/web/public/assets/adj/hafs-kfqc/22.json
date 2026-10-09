@@ -439,7 +439,8 @@
         "dir": {
           "dSurah": -20,
           "dPage": -316
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -621,7 +622,8 @@
         "dir": {
           "dSurah": 7,
           "dPage": 61
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -798,7 +800,8 @@
           "dSurah": 0,
           "dPage": 1,
           "sameJuz": true
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []
@@ -813,7 +816,8 @@
           "dSurah": 0,
           "dPage": -1,
           "sameJuz": true
-        }
+        },
+        "match": "repeat"
       }
     ],
     "ext": []

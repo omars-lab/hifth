@@ -108,7 +108,8 @@
         "dir": {
           "dSurah": -47,
           "dPage": -227
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",

@@ -103,4 +103,25 @@ describe("HopPopover", () => {
     );
     expect(screen.getByRole("listitem").textContent).toMatch(/2:3–2:5|٢:٣–٢:٥/);
   });
+
+  // About four hundred pairs share no stretch of words in one place only, so
+  // nothing can be marked or compared; the row says which, rather than showing
+  // a bare verse name. The outside list's "the next verse tells them apart"
+  // mark is said too.
+  it("a look-alike with no marked words says why it is there", () => {
+    render(
+      <HopPopover
+        chip={chip([edge(2, 3, { match: "loose" }), edge(2, 4, { match: "repeat", ctx: true }), edge(2, 5)])}
+        fromKey="quran/hafs-kfqc/2:2"
+        canHop={() => true}
+        onHop={noop}
+        onClose={noop}
+      />,
+    );
+    const [loose, repeat, plain] = screen.getAllByRole("listitem").map((li) => li.textContent);
+    expect(loose).toMatch(/not word for word|لا كلمةً بكلمة/);
+    expect(repeat).toMatch(/more than once|تتكرر/);
+    expect(repeat).toMatch(/next verse|الآية التالية/);
+    expect(plain).not.toMatch(/word for word|كلمةً بكلمة|more than once|تتكرر/);
+  });
 });
