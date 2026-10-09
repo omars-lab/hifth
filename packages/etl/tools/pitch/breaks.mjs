@@ -16,6 +16,9 @@
  * The print also sets some Arabic case endings small and raised above a word
  * ("Allāhu" with its "u" lifted). The capture set those down as stray letters at
  * the start of the next sentence ("…God). u an Hayya…"), so they are dropped.
+ * The long-vowel marks over a transliterated word on the line above come down
+ * the same way, as two or more lone vowels ("…Tr). a u About…"); one lone
+ * "a" is left, since it can be a real article after an abbreviation.
  */
 import { createHash } from "node:crypto";
 
@@ -31,11 +34,12 @@ export function seams(text) {
 
 /**
  * Drop raised endings the capture set down as stray letters: a run of lone
- * "u", "an" or "un" at the start of a paragraph or of a sentence, before a
- * capital. No English sentence opens with a lowercase word.
+ * "u", "an" or "un", or of two or more lone vowels, at the start of a paragraph
+ * or of a sentence, before a capital. No English sentence opens with a
+ * lowercase word.
  */
 export function dropRaisedEndings(text) {
-  return text.replace(/(^|[.!?][)”]? )(?:(?:u|an|un) )+(?=\p{Lu})/gu, "$1");
+  return text.replace(/(^|[.!?][)”]? )(?:(?:(?:u|an|un) )+|(?:[aiu] ){2,})(?=\p{Lu})/gu, "$1");
 }
 
 /** The fingerprint of the seam at `at` (the index of its space). */

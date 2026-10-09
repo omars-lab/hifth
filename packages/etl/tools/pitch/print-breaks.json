@@ -2,6 +2,19 @@
   "about": "Places the printed Study Quran starts a new paragraph where its capture ran two paragraphs together and lost the stop between them, each read off the printed page (see breaks.mjs). print: a fingerprint of the words around the spot, never the words. stop: the mark put back, a full stop unless given, empty where the capture kept it. page: the captured page image the spot was read on.",
   "marks": [
     {
+      "verse": "2:62",
+      "print": "0aa3f5dacdf6",
+      "kind": "break",
+      "stop": "",
+      "page": "page_0043"
+    },
+    {
+      "verse": "2:62",
+      "print": "3a4b035c2a76",
+      "kind": "break",
+      "page": "page_0044"
+    },
+    {
       "verse": "2:97",
       "print": "3ccdf2e0c6c3",
       "kind": "break",
@@ -118,6 +131,12 @@
       "page": "chapter-7_p13"
     },
     {
+      "verse": "7:56",
+      "print": "2b09e14d3ced",
+      "kind": "break",
+      "page": "page_0256"
+    },
+    {
       "verse": "7:157",
       "print": "c2a337fcbc42",
       "kind": "break",
@@ -140,6 +159,12 @@
       "print": "ae9feeaba97e",
       "kind": "break",
       "page": "chapter-9_p06"
+    },
+    {
+      "verse": "9:29",
+      "print": "11a605dba80e",
+      "kind": "break",
+      "page": "page_0303"
     },
     {
       "verse": "9:103",
@@ -172,6 +197,12 @@
       "print": "5e8347495c97",
       "kind": "break",
       "page": "chapter-22_p09"
+    },
+    {
+      "verse": "24:2",
+      "print": "2f1e3c8e7033",
+      "kind": "break",
+      "page": "page_0519"
     },
     {
       "verse": "24:35",
