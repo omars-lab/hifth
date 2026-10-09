@@ -3405,6 +3405,18 @@
       "owner": "agent",
       "note": "On a phone, opening a tall look-alike row near the top of the list scrolled its name up behind the list's title, because the title only pins once the list moves. The scroll now counts the title by where it will pin.",
       "closedBy": "apps/web/e2e/lookalike-compare-view.spec.ts"
+    },
+    {
+      "id": "lookalike-note-english-in-arabic",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "③"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "In the Arabic app a look-alike pair's hand-written note read in English (2:48 with 2:123), and its two-way arrow drew as an emoji on an iPad. Every note now has an Arabic version, shown when the app is in Arabic, and the arrow asks for its plain form. Tests: apps/web/src/edge-note.test.ts and e2e/hop.spec.ts, both failed first.",
+      "closedBy": "apps/web/e2e/hop.spec.ts"
     }
   ]
 }

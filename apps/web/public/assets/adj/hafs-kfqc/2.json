@@ -410,7 +410,8 @@
           ]
         },
         "ctx": true,
-        "note": "Same opening — continuation differs"
+        "note": "Same opening — continuation differs",
+        "noteAr": "البداية واحدة، وما بعدها مختلف"
       },
       {
         "type": "mutashabih",
@@ -434,7 +435,8 @@
           ]
         },
         "ctx": true,
-        "note": "Same opening — continuation differs"
+        "note": "Same opening — continuation differs",
+        "noteAr": "البداية واحدة، وما بعدها مختلف"
       },
       {
         "type": "shared-root",
@@ -483,7 +485,8 @@
             7
           ]
         },
-        "note": "2:153 prefixes يا أيها الذين آمنوا"
+        "note": "2:153 prefixes يا أيها الذين آمنوا",
+        "noteAr": "٢:١٥٣ تبدأ بـ«يا أيها الذين آمنوا»"
       }
     ],
     "ext": []
@@ -512,7 +515,8 @@
           ]
         },
         "ctx": true,
-        "note": "Same opening — continuation differs"
+        "note": "Same opening — continuation differs",
+        "noteAr": "البداية واحدة، وما بعدها مختلف"
       },
       {
         "type": "mutashabih",
@@ -537,7 +541,8 @@
         },
         "twin": true,
         "ctx": true,
-        "note": "Identical twins — surrounding ayahs differ"
+        "note": "Identical twins — surrounding ayahs differ",
+        "noteAr": "متطابقتان، والآيات حولهما مختلفة"
       },
       {
         "type": "mutashabih",
@@ -627,7 +632,8 @@
             13
           ]
         },
-        "note": "شفاعة ↔ عدل order swapped; verbs differ"
+        "note": "شفاعة ↔ عدل order swapped; verbs differ",
+        "noteAr": "تبادلت «شفاعة» و«عدل» موضعيهما، واختلف الفعلان"
       },
       {
         "type": "related-meaning",
@@ -637,7 +643,8 @@
           "dSurah": 80,
           "dPage": 580
         },
-        "note": "Same theme — no soul avails another"
+        "note": "Same theme — no soul avails another",
+        "noteAr": "المعنى واحد: لا تنفع نفسٌ غيرها"
       }
     ],
     "ext": []
@@ -772,7 +779,8 @@
           "dSurah": 5,
           "dPage": 162
         },
-        "note": "قولوا حطة ↔ ادخلوا الباب سجدا order swapped"
+        "note": "قولوا حطة ↔ ادخلوا الباب سجدا order swapped",
+        "noteAr": "تقديم وتأخير بين «قولوا حطة» و«ادخلوا الباب سجدا»"
       }
     ],
     "ext": []
@@ -840,7 +848,8 @@
             30
           ]
         },
-        "note": "فانفجرت ↔ فانبجست"
+        "note": "فانفجرت ↔ فانبجست",
+        "noteAr": "فانفجرت ↔ فانبجست"
       }
     ],
     "ext": []
@@ -1452,7 +1461,8 @@
           ]
         },
         "ctx": true,
-        "note": "Same opening — continuation differs"
+        "note": "Same opening — continuation differs",
+        "noteAr": "البداية واحدة، وما بعدها مختلف"
       },
       {
         "type": "mutashabih",
@@ -1477,7 +1487,8 @@
         },
         "twin": true,
         "ctx": true,
-        "note": "Identical twins — surrounding ayahs differ"
+        "note": "Identical twins — surrounding ayahs differ",
+        "noteAr": "متطابقتان، والآيات حولهما مختلفة"
       },
       {
         "type": "mutashabih",
@@ -1567,7 +1578,8 @@
             13
           ]
         },
-        "note": "شفاعة ↔ عدل order swapped; verbs differ"
+        "note": "شفاعة ↔ عدل order swapped; verbs differ",
+        "noteAr": "تبادلت «شفاعة» و«عدل» موضعيهما، واختلف الفعلان"
       }
     ],
     "ext": []
@@ -2014,7 +2026,8 @@
             5
           ]
         },
-        "note": "2:153 prefixes يا أيها الذين آمنوا"
+        "note": "2:153 prefixes يا أيها الذين آمنوا",
+        "noteAr": "٢:١٥٣ تبدأ بـ«يا أيها الذين آمنوا»"
       }
     ],
     "ext": []

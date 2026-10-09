@@ -128,6 +128,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Opening the *first* look-alike row, while the list is still at its start, keeps the row's name
   in sight under the title, not behind it (15:30's later surahs → the passage in surah 38, on a
   phone, English and Arabic). · phone, ipad, iPad app · issue: `lookalike-opened-row-name-behind-title`
+- [ ] In Arabic, a look-alike pair's own note reads in Arabic and its two-way arrow is plain text, not
+  a blue emoji tile (open 2:48's look-alikes; the row for 2:123). · phone, ipad, the iPad app (Arabic) ·
+  issue: `lookalike-note-english-in-arabic`
 - [ ] The look-alike buttons cover no words, no close button, and are not hidden by a note. ·
   phone, phone-side, desktop · issues: `lookalike-chips-cover-lifted-page`,
   `lookalike-chips-sideways-cover-close`, `chips-under-facing-note`

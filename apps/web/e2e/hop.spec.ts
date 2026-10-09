@@ -75,6 +75,24 @@ test.describe("Hifth · the hop", () => {
     }
   });
 
+  // Walking the Arabic iPad app, 2026-10-09 (look-alike rows ③): the note on
+  // 2:48's pair read in English, and its two-way arrow drew as a blue emoji.
+  test("in the Arabic app a pair's note reads in Arabic, its arrow as plain text", async ({ page }) => {
+    await page.goto("/?lang=ar");
+    await expect(page.locator("svg[role='group']")).toBeVisible();
+    await page.locator("#verse-55").tap();
+    await page.getByRole("group", { name: "روابط الآية" }).getByRole("button", { name: /متشابهات في السورة/ }).tap();
+    const sheet = page.getByRole("dialog");
+    await expect(sheet.getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٣/ })).toBeVisible();
+    // Read each row whole, so the check does not lean on how a note is marked up.
+    const rows = await sheet.locator("li").allTextContents();
+    expect(rows.length, "the list has rows").toBeGreaterThan(0);
+    for (const row of rows) {
+      expect(row, "no English left in the row").not.toMatch(/[A-Za-z]/);
+      expect(row, "any arrow is asked for as text").not.toMatch(/↔(?!︎)/);
+    }
+  });
+
   test("tap 2:48 → rail → popover → cross-page hop to 2:123 → bead back", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']")).toBeVisible();

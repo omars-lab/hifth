@@ -136,8 +136,10 @@ export interface Edge {
   readonly twin?: boolean;
   /** Show the following ayah's opening in the popover (hifz disambiguator). */
   readonly ctx?: boolean;
-  /** Human note for the popover. */
+  /** Human note for the popover, in English with the pair's Arabic words in it. */
   readonly note?: string;
+  /** The same note in Arabic, shown when the app is in Arabic. */
+  readonly noteAr?: string;
   readonly src?: string;
 }
 
@@ -589,6 +591,7 @@ export interface CuratedEdge {
   readonly twin?: 0 | 1;
   readonly ctx?: 0 | 1;
   readonly note?: string;
+  readonly noteAr?: string;
   /** Word anchor on the target in mock form, e.g. "w3". */
   readonly w?: string;
 }
@@ -640,6 +643,7 @@ export function buildShards(
         ...(e.twin ? { twin: true } : {}),
         ...(e.ctx ? { ctx: true } : {}),
         ...(e.note ? { note: e.note } : {}),
+        ...(e.noteAr ? { noteAr: e.noteAr } : {}),
       };
     });
 

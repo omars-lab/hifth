@@ -117,35 +117,35 @@ const TWINS = (() => {
  */
 const CURATED = {
   "2:40": [
-    { type: "mutashabih", to: "2:47", note: "Same opening — continuation differs", ctx: true },
-    { type: "mutashabih", to: "2:122", note: "Same opening — continuation differs", ctx: true },
+    { type: "mutashabih", to: "2:47", note: "Same opening — continuation differs", noteAr: "البداية واحدة، وما بعدها مختلف", ctx: true },
+    { type: "mutashabih", to: "2:122", note: "Same opening — continuation differs", noteAr: "البداية واحدة، وما بعدها مختلف", ctx: true },
     { type: "root", root: "ذ ك ر", to: "2:47", w: "w3" },
   ],
   "2:45": [
-    { type: "mutashabih", to: "2:153", note: "2:153 prefixes يا أيها الذين آمنوا" },
+    { type: "mutashabih", to: "2:153", note: "2:153 prefixes يا أيها الذين آمنوا", noteAr: "٢:١٥٣ تبدأ بـ«يا أيها الذين آمنوا»" },
   ],
   "2:47": [
-    { type: "mutashabih", to: "2:122", twin: true, note: "Identical twins — surrounding ayahs differ" },
-    { type: "mutashabih", to: "2:40", note: "Same opening — continuation differs", ctx: true },
+    { type: "mutashabih", to: "2:122", twin: true, note: "Identical twins — surrounding ayahs differ", noteAr: "متطابقتان، والآيات حولهما مختلفة" },
+    { type: "mutashabih", to: "2:40", note: "Same opening — continuation differs", noteAr: "البداية واحدة، وما بعدها مختلف", ctx: true },
     { type: "root", root: "ذ ك ر", to: "2:122", w: "w3" },
   ],
   "2:48": [
-    { type: "mutashabih", to: "2:123", note: "شفاعة ↔ عدل order swapped; verbs differ" },
-    { type: "related", to: "82:19", note: "Same theme — no soul avails another" },
+    { type: "mutashabih", to: "2:123", note: "شفاعة ↔ عدل order swapped; verbs differ", noteAr: "تبادلت «شفاعة» و«عدل» موضعيهما، واختلف الفعلان" },
+    { type: "related", to: "82:19", note: "Same theme — no soul avails another", noteAr: "المعنى واحد: لا تنفع نفسٌ غيرها" },
   ],
   "2:58": [
-    { type: "mutashabih", to: "7:161", note: "قولوا حطة ↔ ادخلوا الباب سجدا order swapped" },
+    { type: "mutashabih", to: "7:161", note: "قولوا حطة ↔ ادخلوا الباب سجدا order swapped", noteAr: "تقديم وتأخير بين «قولوا حطة» و«ادخلوا الباب سجدا»" },
   ],
   "2:60": [
-    { type: "mutashabih", to: "7:160", note: "فانفجرت ↔ فانبجست" },
+    { type: "mutashabih", to: "7:160", note: "فانفجرت ↔ فانبجست", noteAr: "فانفجرت ↔ فانبجست" },
   ],
   "2:122": [
-    { type: "mutashabih", to: "2:47", twin: true, note: "Identical twins — surrounding ayahs differ" },
-    { type: "mutashabih", to: "2:40", note: "Same opening — continuation differs", ctx: true },
+    { type: "mutashabih", to: "2:47", twin: true, note: "Identical twins — surrounding ayahs differ", noteAr: "متطابقتان، والآيات حولهما مختلفة" },
+    { type: "mutashabih", to: "2:40", note: "Same opening — continuation differs", noteAr: "البداية واحدة، وما بعدها مختلف", ctx: true },
     { type: "root", root: "ذ ك ر", to: "2:40", w: "w3" },
   ],
   "2:123": [
-    { type: "mutashabih", to: "2:48", note: "شفاعة ↔ عدل order swapped; verbs differ" },
+    { type: "mutashabih", to: "2:48", note: "شفاعة ↔ عدل order swapped; verbs differ", noteAr: "تبادلت «شفاعة» و«عدل» موضعيهما، واختلف الفعلان" },
   ],
 };
 
@@ -265,6 +265,7 @@ for (const [ref, list] of Object.entries(CURATED)) {
         ...(e.twin ? { twin: true } : {}),
         ...(e.ctx ? { ctx: true } : {}),
         ...(e.note ? { note: e.note } : {}),
+        ...(e.noteAr ? { noteAr: e.noteAr } : {}),
         ...(e.w ? { w: e.w } : {}),
       },
       { curated: true },
@@ -486,6 +487,7 @@ for (const e of flat) {
     ...(e.twin ? { twin: true } : {}),
     ...(e.ctx ? { ctx: true } : {}),
     ...(e.note ? { note: e.note } : {}),
+    ...(e.noteAr ? { noteAr: e.noteAr } : {}),
   };
   const shard = shards.get(src.surah);
   (shard[String(src.ayah)] ??= []).push(edge);
