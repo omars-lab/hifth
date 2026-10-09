@@ -606,6 +606,17 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(sheet(page)).not.toContainText("* * *");
   });
 
+  test("the demo's notes set the book's italics, and nothing shows of the marks that carry them", async ({ page }) => {
+    // The slanted words are read off the page pictures by hand for the demo's
+    // verses; 2:255 and the shared note on 18:60–82 carry dozens of them.
+    for (const verse of ["2:255", "18:70"]) {
+      await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
+      await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+      expect(await sheet(page).locator("em").count()).toBeGreaterThan(5);
+      expect(await sheet(page).textContent()).not.toMatch(/[\uE000\uE001]/);
+    }
+  });
+
   test("a related verse in the note hops there and opens its own note", async ({ page }) => {
     // 1:6 — the straight-path verse — carries The Study Quran's own
     // cross-references, folded into the note as a "Related verses" list. This is

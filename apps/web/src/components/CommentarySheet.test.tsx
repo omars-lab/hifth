@@ -146,3 +146,32 @@ describe("where the note lies on a spread", () => {
     expect(overLeaf(big, "left", screen)).toEqual({ left: 12, width: 704, top: 12, height: 876 });
   });
 });
+
+describe("words the book sets in italics", () => {
+  beforeEach(() => localStorage.setItem(LANG_STORAGE_KEY, "en"));
+
+  // The extractor wraps each slanted run in a pair of private-use marks.
+  const slant = (s: string) => `${s}`;
+
+  it("draws a marked run in italics, and the marks themselves not at all", () => {
+    const body = drawer(note(undefined, { paragraphs: [`The word ${slant("qarya")} means a town.`] }));
+    const em = body.querySelectorAll("em");
+    expect([...em].map((e) => e.textContent)).toEqual(["qarya"]);
+    expect(body.textContent).toContain("The word qarya means a town.");
+    expect(body.textContent).not.toMatch(/[]/);
+  });
+
+  it("keeps a run that touches a cited verse in italics, and the verse a link", () => {
+    const body = drawer(note(undefined, { paragraphs: [`As in ${slant("the well")} (3:7).`] }));
+    expect([...body.querySelectorAll("em")].map((e) => e.textContent)).toEqual(["the well"]);
+    expect(screen.getByRole("button", { name: /3:7/ })).toBeTruthy();
+    expect(body.textContent).toContain("As in the well (3:7).");
+  });
+
+  it("lets a long slanted run wrap like any other words", () => {
+    const body = drawer(note(undefined, { paragraphs: [`See ${slant("the long road past the old mill")}, then go on.`] }));
+    const em = body.querySelector("em")!;
+    expect(em.textContent).toBe("the long road past the old mill");
+    expect(em.closest("[class*=together]")).toBeNull();
+  });
+});

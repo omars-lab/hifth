@@ -555,8 +555,11 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
   the last verse's number.
 
 **What is still different:** Words the book sets in italics (a term being defined, a
-book's title) show upright in the panel: neither the capture nor the page readings record
-the slant. One shortcut was tried and set aside: the book often sets in italics a note's
+book's title) show upright in the panel, except in the notes the demo opens: neither the capture
+nor the page readings record the slant. For the demo's verses (2:255, 18:10–13 and 18:60, with the note
+18:60–82 share) the slant was read off the page pictures by
+hand, about a hundred runs, and the panel draws them in italics. Everywhere else stays upright.
+One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted
 without reading the slant at all. About 4,000 notes have such a run, but checked against the
 page pictures, a sample of 25 was right only about three times in four; the misses were
@@ -566,7 +569,8 @@ be found from the words at all. A panel that slants the wrong words a quarter of
 worse than one that slants none, so the words stay upright. Nothing here reaches the public
 site; it is only the pitch.
 
-**What would answer it:** a way to read the slant off the page pictures themselves. The shortcut is written up in
+**What would answer it:** a way to read the slant off the page pictures themselves, for the
+notes beyond the demo's. The shortcut is written up in
 [the italics note](../issues/italics-from-quoted-verse-words.md). Why the bracket endings had to be read off the pictures rather than the page
 readings is written up in [the bracket endings note](../issues/bracket-endings-read-from-the-pictures.md).
 

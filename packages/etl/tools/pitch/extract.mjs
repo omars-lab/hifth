@@ -45,6 +45,7 @@ import { dropMarginRefs } from "./strays.mjs";
 import { readKey } from "./key.mjs";
 import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
+import { slantSurah } from "./italics.mjs";
 import { endPrint, endsClosed } from "./ends.mjs";
 import { orphanPrint, rescueOrphans } from "./orphans.mjs";
 import { wordsOf } from "./splits.mjs";
@@ -71,7 +72,10 @@ const FIXES_SRC = resolve(SRC_DIR, "../raw/translation-fixes.hand.json");
 const FIXES = existsSync(FIXES_SRC) ? JSON.parse(readFileSync(FIXES_SRC, "utf8")).verses : {};
 // The rest of notes the capture cut short, read off the page pictures (see ends.mjs).
 const TAILS_SRC = resolve(SRC_DIR, "../raw/note-fixes.hand.json");
-const TAILS = existsSync(TAILS_SRC) ? JSON.parse(readFileSync(TAILS_SRC, "utf8")).tails : [];
+const HAND = existsSync(TAILS_SRC) ? JSON.parse(readFileSync(TAILS_SRC, "utf8")) : {};
+const TAILS = HAND.tails ?? [];
+// The words the print sets in italics, read off the pages for the demo verses.
+const ITALICS = HAND.italics ?? [];
 
 // How many road edges a single verse may carry when they come from the source's
 // own cross-references. A few dozen refs on one ayah would bury the hop list; a
@@ -347,6 +351,7 @@ const ENDS = JSON.parse(readFileSync(resolve(HERE, "print-ends.json"), "utf8")).
 const usedEnds = new Set();
 const LIST_ENDS = process.argv.includes("--ends");
 const usedTails = new Set();
+const usedItalics = new Set();
 // Notes the capture set aside with no verse, read off the printed page (see orphans.mjs).
 const ORPHANS = JSON.parse(readFileSync(resolve(HERE, "print-orphans.json"), "utf8")).orphans;
 const usedOrphans = new Set();
@@ -421,6 +426,7 @@ function buildSurah(surah) {
     };
     previous = done.handOn;
   }
+  for (const i of slantSurah(surah, verses, ITALICS)) usedItalics.add(i);
 
   // Al-Fātiḥah keeps its hand-written roads; every other surah takes the
   // source's own cross-references.
@@ -507,6 +513,12 @@ if (staleTails.length) {
   console.error(`${TAILS_SRC} names ${staleTails.length} cut-short note(s) the capture no longer has:`);
   for (const m of staleTails) console.error(`  ${m.verse} ${m.print} (page image ${m.page})`);
   console.error("  read those pages again and list each note's new fingerprint (--ends).");
+  process.exit(1);
+}
+const staleItalics = ITALICS.filter((m, i) => surahs.includes(Number(m.verse.split(":")[0])) && !usedItalics.has(i));
+if (staleItalics.length) {
+  console.error(`${TAILS_SRC} names ${staleItalics.length} slanted run(s) for verses the capture no longer has:`);
+  for (const m of staleItalics) console.error(`  ${m.verse} (page image ${m.page})`);
   process.exit(1);
 }
 if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS || LIST_ORPHANS) process.exit(0);
