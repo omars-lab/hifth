@@ -213,6 +213,24 @@ export function hopZoomFor(bbox: Rect, ctx: FrameContext, z: number = DEFAULT_HO
   return Math.max(1, Math.min(z, (ctx.stageWidth - 2 * LEAD_INSET) / wide));
 }
 
+/** The most a page is drawn smaller so a verse shows whole: a fifth. */
+const NEAR_FIT = 0.8;
+
+/**
+ * The zoom at which a verse `height` px tall at zoom `z` just fills `room`, or
+ * null to keep `z`. A verse that is only a little taller than the room above a
+ * note is shown whole, the page drawn a little smaller: Ayat al-Kursi on an
+ * upright iPad lost its last line, with the verse's number, under the note. One
+ * that would need the page shrunk by more than a fifth, or below the whole page,
+ * keeps its zoom and is read from its first line, as before.
+ */
+export function nearFitZoom(height: number, room: number, z: number): number | null {
+  if (!(height > room) || !(room > 0)) return null;
+  const fitted = (z * room) / height;
+  if (fitted < z * NEAR_FIT || z <= 1) return null;
+  return Math.max(1, fitted);
+}
+
 /**
  * Where a bbox (SVG user units) lands in stage-local px under a given view —
  * used to position the HopRail next to the selected ayah (mock `toScreen()`).

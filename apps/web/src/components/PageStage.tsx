@@ -21,6 +21,7 @@ import {
   formatWordKey,
   frameBboxToView,
   hopZoomFor,
+  nearFitZoom,
   isMarkShard,
   isMistake,
   isViewportIntent,
@@ -179,7 +180,9 @@ interface PageStageProps {
    */
   onTurn?: (step: 1 | -1) => void;
   /**
-   * What a two-finger pinch left the paper at, once the fingers lift. The
+   * What a two-finger pinch left the paper at, once the fingers lift — or a
+   * note's arrival, when it drew the page a little smaller to show its verse
+   * whole. The
    * stepper's own presses come back through the handle's `setZoom`; a pinch
    * starts here, on the glass, so without this the readout kept describing
    * the level before it and the facing leaf stayed behind.
@@ -462,6 +465,9 @@ function bareAyah(key: string): string {
  */
 /** Air between the lowest hop chip and the first line a lift puts beneath it, in CSS px. */
 const RAIL_CLEARANCE = 8;
+
+/** Room kept free below a verse drawn smaller to fit above a note: its wash runs a little past its letters. */
+const LIFT_SLACK = 12;
 
 /** A surah name button's box in the page's own units: its wash, or its ⓘ where it stands. */
 function nameBoxOf(badge: SVGGElement) {
@@ -2135,7 +2141,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           railBottomRef.current === null ? 0 : Math.max(0, railBottomRef.current - layerTop + RAIL_CLEARANCE);
         const at = bboxToScreen(bbox, target, ctx);
         if (at.y < head || at.y + at.height > shown) {
-          target = frameBboxToView(bbox, ctx, view.current.z, firstLineOf(cur.svg, ids ?? []));
+          const lead = firstLineOf(cur.svg, ids ?? []);
+          target = frameBboxToView(bbox, ctx, view.current.z, lead);
+          // A verse only a little taller than that is drawn a little smaller
+          // and shown whole, rather than lose its last line under the note. Not
+          // with the book open: its two pages keep one zoom between them.
+          const tall = bboxToScreen(bbox, target, ctx).height;
+          const smaller = boundRef.current ? null : nearFitZoom(tall, shown - head - LIFT_SLACK, target.z);
+          if (smaller !== null) target = frameBboxToView(bbox, ctx, smaller, lead);
           // A verse taller than what shows beneath the chips starts at its
           // first line, just under them; one that fits is kept out from under
           // them too.
@@ -2145,7 +2158,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           }
         }
       }
-      void tweenTo(target);
+      const before = view.current.z;
+      void tweenTo(target).then(() => {
+        // The readout says the level the page is drawn at, as after a pinch.
+        if (view.current.z !== before) onPinchZoomRef.current?.(view.current.z);
+      });
     };
     bring();
   }, [measureFit, tweenTo]);

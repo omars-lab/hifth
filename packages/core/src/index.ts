@@ -226,6 +226,7 @@ export {
 export {
   frameBboxToView,
   hopZoomFor,
+  nearFitZoom,
   bboxToScreen,
   clampView,
   clampZoom,
