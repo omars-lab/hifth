@@ -9760,7 +9760,8 @@
           "dSurah": -3,
           "dPage": -10,
           "sameJuz": true
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []

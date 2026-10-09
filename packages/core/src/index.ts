@@ -240,7 +240,14 @@ export {
   type StageFit,
 } from "./view.js";
 
-export { wordDiff, divergentRuns, type DiffSide, type WordDiff } from "./verse-diff.js";
+export {
+  wordDiff,
+  divergentRuns,
+  type CompareWay,
+  type DiffSide,
+  type WordDiff,
+  type WordRange,
+} from "./verse-diff.js";
 
 export {
   unmatchedMarks,

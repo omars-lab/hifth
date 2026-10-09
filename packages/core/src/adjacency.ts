@@ -112,6 +112,20 @@ export interface Edge {
   readonly root?: string;
   readonly span?: WordSpan;
   readonly toSpan?: WordSpan;
+  /**
+   * Why a look-alike has no `span`, so its row can still say why it is listed:
+   * "repeat" — they share two words or more, but that stretch comes more than
+   * once; "loose" — alike, but nothing longer than a word in common.
+   */
+  readonly match?: "loose" | "repeat";
+  /**
+   * On a "repeat" row: every stretch of two words or more the pair shares, in
+   * print word indices on each side, so a comparison can mark them all.
+   */
+  readonly stretches?: {
+    readonly from: readonly (readonly [number, number])[];
+    readonly to: readonly (readonly [number, number])[];
+  };
   /** Identical wording — popover labels it "identical; context differs". */
   readonly twin?: boolean;
   /** Show the following ayah's opening in the popover (hifz disambiguator). */

@@ -16,8 +16,8 @@ describe("wordDiff", () => {
   it("reads both sides' shared run off the edge", () => {
     const d = wordDiff(EDGE, "quran/hafs-kfqc/2:48");
     expect(d).toEqual({
-      from: { key: "2:48", page: 7, shared: [1, 13] },
-      to: { key: "2:123", page: 19, shared: [1, 13] },
+      from: { key: "2:48", page: 7, shared: [[1, 13]] },
+      to: { key: "2:123", page: 19, shared: [[1, 13]] },
     });
   });
 
@@ -51,25 +51,73 @@ describe("wordDiff", () => {
 describe("divergentRuns", () => {
   it("names the tail when the two ayahs share their opening", () => {
     // 2:48 is 23 words on its page and shares its first 13 — so 14..23 differ.
-    expect(divergentRuns({ from: 1, to: 23 }, [1, 13])).toEqual([[14, 23]]);
-    expect(divergentRuns({ from: 1, to: 22 }, [1, 13])).toEqual([[14, 22]]);
+    expect(divergentRuns({ from: 1, to: 23 }, [[1, 13]])).toEqual([[14, 23]]);
+    expect(divergentRuns({ from: 1, to: 22 }, [[1, 13]])).toEqual([[14, 22]]);
   });
 
   it("names both ends when the shared run is in the middle", () => {
-    expect(divergentRuns({ from: 1, to: 20 }, [5, 15])).toEqual([
+    expect(divergentRuns({ from: 1, to: 20 }, [[5, 15]])).toEqual([
       [1, 4],
       [16, 20],
     ]);
   });
 
   it("names nothing when the whole of what is here is shared", () => {
-    expect(divergentRuns({ from: 1, to: 13 }, [1, 13])).toEqual([]);
+    expect(divergentRuns({ from: 1, to: 13 }, [[1, 13]])).toEqual([]);
   });
 
   it("clamps to what this page holds, for an ayah that runs onto the next", () => {
     // The shared run is recorded over the whole ayah; only 1..8 is printed here.
-    expect(divergentRuns({ from: 1, to: 8 }, [1, 13])).toEqual([]);
+    expect(divergentRuns({ from: 1, to: 8 }, [[1, 13]])).toEqual([]);
     // And where the ayah *starts* on this page part-way through its numbering.
-    expect(divergentRuns({ from: 9, to: 20 }, [1, 13])).toEqual([[14, 20]]);
+    expect(divergentRuns({ from: 9, to: 20 }, [[1, 13]])).toEqual([[14, 20]]);
+  });
+});
+
+describe("divergentRuns over several shared stretches", () => {
+  it("names every gap between them, and the ends", () => {
+    expect(divergentRuns({ from: 1, to: 20 }, [[3, 5], [9, 12]])).toEqual([
+      [1, 2],
+      [6, 8],
+      [13, 20],
+    ]);
+  });
+
+  it("takes the stretches in any order, and touching ones leave no gap", () => {
+    expect(divergentRuns({ from: 1, to: 10 }, [[6, 10], [1, 5]])).toEqual([]);
+  });
+});
+
+// About 390 look-alikes share no one stretch of words in one place on both
+// sides, so they name no span — but they say why they are listed (`match`),
+// and the reader can still lay the two verses side by side.
+describe("wordDiff for a look-alike with no single stretch", () => {
+  const { span: _s, toSpan: _t, ...BARE } = EDGE;
+  const REPEAT: Edge = {
+    ...BARE,
+    match: "repeat",
+    stretches: { from: [[2, 3], [8, 9]], to: [[4, 5]] },
+  };
+
+  it("shows both verses with nothing marked, by default", () => {
+    expect(wordDiff({ ...BARE, match: "loose" }, "2:48")).toEqual({
+      from: { key: "2:48", page: 7, shared: [] },
+      to: { key: "2:123", page: 19, shared: [] },
+    });
+    expect(wordDiff(REPEAT, "2:48")?.from.shared).toEqual([]);
+  });
+
+  it("marks every stretch the two share when asked to", () => {
+    const d = wordDiff(REPEAT, "2:48", "every");
+    expect(d?.from.shared).toEqual([[2, 3], [8, 9]]);
+    expect(d?.to.shared).toEqual([[4, 5]]);
+  });
+
+  it("falls back to nothing marked when a row has no stretches to mark", () => {
+    expect(wordDiff({ ...BARE, match: "loose" }, "2:48", "every")?.from.shared).toEqual([]);
+  });
+
+  it("still declines a row that gives no reason at all", () => {
+    expect(wordDiff(BARE, "2:48", "every")).toBeNull();
   });
 });

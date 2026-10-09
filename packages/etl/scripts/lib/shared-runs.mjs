@@ -48,6 +48,39 @@ export function sharedRuns(a, b) {
 }
 
 /**
+ * Every word, on each side, that sits inside *some* run of at least `min`
+ * words the two ayahs share in order — not only the longest run. For a pair
+ * whose longest run comes more than once, this is everything a comparison can
+ * honestly mark: no one place is picked, all of them are shown.
+ *
+ * Same table as {@link sharedRuns}: a cell holds the length of the run ending
+ * there, so a run of length L ending at (i, j) covers a[i-L+1..i] and
+ * b[j-L+1..j]. Returns **1-based** positions, sorted, on each side.
+ */
+export function sharedStretches(a, b, min = 2) {
+  const inA = new Set();
+  const inB = new Set();
+  if (a?.length && b?.length) {
+    let prev = new Uint16Array(b.length + 1);
+    for (let i = 1; i <= a.length; i++) {
+      const row = new Uint16Array(b.length + 1);
+      for (let j = 1; j <= b.length; j++) {
+        if (a[i - 1] !== b[j - 1]) continue;
+        const len = (row[j] = prev[j - 1] + 1);
+        if (len < min) continue;
+        for (let k = 0; k < len; k++) {
+          inA.add(i - k);
+          inB.add(j - k);
+        }
+      }
+      prev = row;
+    }
+  }
+  const sorted = (s) => [...s].sort((x, y) => x - y);
+  return { a: sorted(inA), b: sorted(inB) };
+}
+
+/**
  * How long the longest shared run is, ignoring where it falls. `gate:edges` and
  * `sample-edges.mjs` ask only this; it is {@link sharedRuns} so the number a
  * reader sees beside a sampled pair and the number CI enforces cannot diverge.

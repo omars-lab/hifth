@@ -193,6 +193,13 @@ export function HopPopover({
                       )}
                     </span>
                     {edge.note && <span className={styles.note}>{edge.note}</span>}
+                    {/* With no words to mark, the row still says why it is listed. */}
+                    {edge.match && (
+                      <span className={styles.note}>
+                        {edge.match === "repeat" ? t.matchRepeat : t.matchLoose}
+                      </span>
+                    )}
+                    {edge.ctx && <span className={styles.note}>{t.nextTellsApart}</span>}
                     {!enabled && (
                       <span className={styles.unavailable}>{t.pageUnavailable}</span>
                     )}

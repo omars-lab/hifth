@@ -219,6 +219,13 @@ export function HighlightMenu({
                           {edge.note}
                         </span>
                       )}
+                      {/* With no words to mark, the row still says why it is listed. */}
+                      {edge.match && (
+                        <span className={styles.note}>
+                          {edge.match === "repeat" ? t.matchRepeat : t.matchLoose}
+                        </span>
+                      )}
+                      {edge.ctx && <span className={styles.note}>{t.nextTellsApart}</span>}
                       {blocker && <span className={styles.unavailable}>{blocker}</span>}
                     </button>
                     <button

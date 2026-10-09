@@ -693,7 +693,8 @@
           "dSurah": 0,
           "dPage": 0,
           "sameJuz": true
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -771,7 +772,8 @@
         "dir": {
           "dSurah": 0,
           "dPage": -1
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -857,6 +859,29 @@
           "dSurah": 0,
           "dPage": 0,
           "sameJuz": true
+        },
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              10,
+              11
+            ],
+            [
+              13,
+              14
+            ]
+          ],
+          "to": [
+            [
+              38,
+              39
+            ],
+            [
+              41,
+              42
+            ]
+          ]
         }
       }
     ],
@@ -872,6 +897,29 @@
           "dSurah": 0,
           "dPage": 0,
           "sameJuz": true
+        },
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              38,
+              39
+            ],
+            [
+              41,
+              42
+            ]
+          ],
+          "to": [
+            [
+              10,
+              11
+            ],
+            [
+              13,
+              14
+            ]
+          ]
         }
       }
     ],

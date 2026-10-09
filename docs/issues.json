@@ -3345,6 +3345,30 @@
       "severity": "question",
       "owner": "agent",
       "note": "A verse can list a passage match and, separately, one verse inside that passage with its own hand-written note (2:48: 2:122–2:123 and 2:123). Both are true; a hafiz sees two rows for one memory. Keep both, fold one into the other, or hide the passage row — look at more such pairs before choosing."
+    },
+    {
+      "id": "lookalike-row-no-reason",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊽"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "After the passage fix, 393 look-alike rows still showed a bare verse name: their shared words do not sit in one place on both sides, so nothing is marked. The build now records which kind each is (edge `match`: 'repeat' when a run of two or more shared words appears more than once, 151 rows; 'loose' otherwise, 242 rows) and both lists say it; the outside list's next-verse mark (`ctx`) is said too. Tests: scripts/adjacency-reasons.test.mjs, plus a reason test in HopPopover.test.tsx and HighlightMenu.test.tsx, all failed first.",
+      "closedBy": "scripts/adjacency-reasons.test.mjs"
+    },
+    {
+      "id": "lookalike-row-no-compare",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊾"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "The 393 rows ㊽ explains could not open a comparison. Now they open: the 151 'repeat' rows carry every shared stretch (edge `stretches`) and wash them all by default; 'side by side, unmarked' is an info-panel setting; loose rows open unmarked. Tests: scripts/adjacency-reasons.test.mjs, DiffView.test.tsx, HopPopover.test.tsx, HighlightMenu.test.tsx, Colophon.test.tsx, all failed first.",
+      "closedBy": "apps/web/src/components/DiffView.test.tsx"
     }
   ]
 }

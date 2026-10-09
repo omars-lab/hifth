@@ -197,6 +197,10 @@ export interface Catalog {
   readonly longVerseShorter: string;
   readonly longVerseSmaller: string;
   readonly longVerseTitle: string;
+  readonly lookalikeCompareEvery: string;
+  readonly lookalikeCompareNote: string;
+  readonly lookalikeComparePlain: string;
+  readonly lookalikeCompareTitle: string;
   readonly mapAbsent: string;
   readonly mapActiveIn: (d: { readonly monthText: string | number }) => string;
   readonly mapCaveat: string;
@@ -221,6 +225,8 @@ export interface Catalog {
   readonly mapSlips: string;
   readonly mapTitle: string;
   readonly mapWentTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
+  readonly matchLoose: string;
+  readonly matchRepeat: string;
   readonly mistakeClear: string;
   readonly mistakeCleared: string;
   readonly mistakeMarked: (d: { readonly label: string | number }) => string;
@@ -233,6 +239,7 @@ export interface Catalog {
   readonly mushaf: string;
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
   readonly nextPage: string;
+  readonly nextTellsApart: string;
   readonly noConcordance: string;
   readonly noteAboutAsk: string;
   readonly noteAboutChange: (d: { readonly scope: string | number }) => string;

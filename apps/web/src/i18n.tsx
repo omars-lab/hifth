@@ -302,6 +302,12 @@ export interface Strings {
   /** Another name the book gives a commentator's work. */
   keyAlso(name: string): string;
   twin: string;
+  /** A look-alike row with no marked words: alike, but not word for word. */
+  matchLoose: string;
+  /** A look-alike row with no marked words: the shared stretch comes more than once. */
+  matchRepeat: string;
+  /** The outside list marks this pair as told apart by the verse after. */
+  nextTellsApart: string;
   pageUnavailable: string;
   /** The outbound-link label on a hop row whose page we do not carry. */
   openOnQul: string;
@@ -783,6 +789,10 @@ export interface Strings {
   longVerseSmaller: string;
   longVerseShorter: string;
   longVerseNote: string;
+  lookalikeCompareTitle: string;
+  lookalikeCompareEvery: string;
+  lookalikeComparePlain: string;
+  lookalikeCompareNote: string;
   relatedListTitle: string;
   relatedListLine: string;
   relatedListAll: string;
@@ -1036,6 +1046,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     keyFrom: m.keyFrom,
     keyAlso: (name) => m.keyAlso({ name }),
     twin: m.twin,
+    matchLoose: m.matchLoose,
+    matchRepeat: m.matchRepeat,
+    nextTellsApart: m.nextTellsApart,
     pageUnavailable: m.pageUnavailable,
     openOnQul: m.openOnQul,
     openOnQulAria: (label) => m.openOnQulAria({ label }),
@@ -1447,6 +1460,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     longVerseSmaller: m.longVerseSmaller,
     longVerseShorter: m.longVerseShorter,
     longVerseNote: m.longVerseNote,
+    lookalikeCompareTitle: m.lookalikeCompareTitle,
+    lookalikeCompareEvery: m.lookalikeCompareEvery,
+    lookalikeComparePlain: m.lookalikeComparePlain,
+    lookalikeCompareNote: m.lookalikeCompareNote,
     relatedListTitle: m.relatedListTitle,
     relatedListLine: m.relatedListLine,
     relatedListAll: m.relatedListAll,

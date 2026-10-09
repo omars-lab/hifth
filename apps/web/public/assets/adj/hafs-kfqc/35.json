@@ -50,7 +50,8 @@
         "dir": {
           "dSurah": -6,
           "dPage": -37
-        }
+        },
+        "match": "loose"
       },
       {
         "type": "mutashabih",
@@ -207,6 +208,37 @@
         "dir": {
           "dSurah": -19,
           "dPage": -168
+        },
+        "match": "repeat",
+        "stretches": {
+          "from": [
+            [
+              19,
+              20
+            ],
+            [
+              23,
+              28
+            ],
+            [
+              32,
+              36
+            ]
+          ],
+          "to": [
+            [
+              8,
+              9
+            ],
+            [
+              13,
+              18
+            ],
+            [
+              23,
+              27
+            ]
+          ]
         },
         "ctx": true
       }

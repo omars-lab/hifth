@@ -1270,3 +1270,37 @@ note: the same two words in the other order, and different verbs). Both are true
 more, but a hafiz sees two rows for one memory. Options: keep both (today); fold the verse row into the
 passage row, keeping its note; or hide the passage row when a verse inside it already has its own. Not
 decided; it waits for a look at a few more such pairs.
+
+### ㊽ When two look-alikes share no one stretch of words, does the row still say why? · **fixed**
+
+After ㊻, 393 look-alike rows still had nothing under the verse name: no difference line, no passage, nothing
+to open. Their shared words do not sit in one place on both sides, so nothing could be marked. They are two
+kinds. In 151 the words they share run on for two or more words but appear more than once in a verse; in 242
+they are alike in sense and shape but no two words run on together.
+
+**The fix:** the build records which kind each row is, and the row says it: "The words they share come more
+than once" or "Alike, but not word for word". The outside list's mark that the next verse is what tells two
+verses apart, which we carried but never showed, is said too: "The next verse tells them apart". A data test
+(every look-alike row carries a reason, the same from both ends) and a test on each list failed first.
+
+### ㊾ Can a reader open one of those rows and compare the two verses? · **fixed**
+
+The rows ㊽ explains now open, the same as a row with one marked stretch. Both ways were built:
+
+- **Mark every shared stretch** (the default). For the 151 rows whose shared words repeat, the build now
+  records every run of two words or more the pair shares, on both sides. Opening the row washes each of them
+  green and what lies between them ochre, as the single-stretch comparison does.
+- **Side by side, unmarked** (a setting in the info panel). Both verses as printed, nothing washed.
+
+Rows alike only loosely (242) have no shared run to mark, so they open unmarked either way. A row with a
+single shared stretch keeps its one mark either way. The small vowel-mark tint is left off when there is more
+than one stretch, since which word goes with which is a guess.
+
+**Why marking is the default.** Opened on 10:15 against 19:73, the marked way shows the two openings agree
+except for one word in the middle, which the mus'haf spells differently in the two places (a full alif in one,
+a small one in the other). Unmarked, the two openings look the same at a glance and that one word goes
+unnoticed, and a spelling difference like that is what a hafiz needs to catch.
+
+Tests: the build test checks every repeated row carries its stretches and that a pair and its reverse agree;
+the comparison view's tests check both ways and the loose case; both lists' tests check these rows open; the
+info panel's test checks the setting. All failed first.

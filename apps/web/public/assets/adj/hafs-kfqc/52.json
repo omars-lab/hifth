@@ -32,6 +32,7 @@
           "dPage": 10,
           "sameJuz": true
         },
+        "match": "loose",
         "ctx": true
       }
     ],
@@ -211,7 +212,8 @@
           "dSurah": 4,
           "dPage": 11,
           "sameJuz": true
-        }
+        },
+        "match": "loose"
       }
     ],
     "ext": []

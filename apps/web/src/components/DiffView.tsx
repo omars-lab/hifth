@@ -11,9 +11,11 @@ import {
   type MarkSide,
   type Rect,
   type WireMark,
+  type WordRange,
 } from "@hifth/core";
 import { loadMarkShard, loadPageSvg, loadWordShard } from "../assets";
 import { useT } from "../i18n";
+import { useLookalikeCompare } from "../lookalike-compare";
 import styles from "./DiffView.module.css";
 
 interface DiffViewProps {
@@ -112,22 +114,23 @@ function PrintedAyah({
   const lines = present ? loaded.index.bandsFor(side.key, present.from, present.to) : [];
   const box = union(lines);
 
-  // The shared opening, clamped to what this page actually carries (a run can
-  // begin on the leaf before), and the divergent tails at either end.
-  const [sFrom, sTo] = side.shared;
-  const shared =
-    present && Math.max(sFrom, present.from) <= Math.min(sTo, present.to)
-      ? loaded.index.bandsFor(
-          side.key,
-          Math.max(sFrom, present.from),
-          Math.min(sTo, present.to),
+  // Each shared stretch, clamped to what this page actually carries (a run can
+  // begin on the leaf before), and whatever lies between and around them. A
+  // side with nothing shared is shown plain: no stretch to mark means nothing
+  // is called different either.
+  const shared = present
+    ? side.shared.flatMap(([sFrom, sTo]) => {
+        const from = Math.max(sFrom, present.from);
+        const to = Math.min(sTo, present.to);
+        return from <= to ? loaded.index.bandsFor(side.key, from, to) : [];
+      })
+    : [];
+  const diff =
+    present && side.shared.length > 0
+      ? divergentRuns(present, side.shared).flatMap(([from, to]) =>
+          loaded.index.bandsFor(side.key, from, to),
         )
       : [];
-  const diff = present
-    ? divergentRuns(present, side.shared).flatMap(([from, to]) =>
-        loaded.index.bandsFor(side.key, from, to),
-      )
-    : [];
 
   useEffect(() => {
     const el = host.current;
@@ -188,14 +191,19 @@ function PrintedAyah({
  * carries the matching run on both sides in the print's own word numbering, and
  * the leftover at either end is what differs.
  *
- * Renders nothing when the edge names no words (452 of 2,996 look-alike edges
- * match in more than one place, so they name none), or when either page's
- * artwork or geometry is not to hand — the row keeps its plain note, exactly as
- * it did for every pair the old twelve-ayah table did not cover.
+ * A pair whose shared words come in more than one place has no single span;
+ * it opens with every shared stretch marked, or plain side by side, as the
+ * reader set it (knowledge-graph-commentary.md, item 49). A pair alike only
+ * loosely opens plain.
+ *
+ * Renders nothing when the edge neither names words nor says why it is listed,
+ * or when either page's artwork or geometry is not to hand — the row keeps its
+ * plain note.
  */
 export function DiffView({ edge, fromKey }: DiffViewProps): JSX.Element | null {
   const { t } = useT();
-  const diff = useMemo(() => wordDiff(edge, fromKey), [edge, fromKey]);
+  const way = useLookalikeCompare();
+  const diff = useMemo(() => wordDiff(edge, fromKey, way), [edge, fromKey, way]);
   const edition = useMemo(() => editionOf(edge.to), [edge.to]);
   const [sides, setSides] = useState<{ from: Loaded; to: Loaded } | null>(null);
 
@@ -231,7 +239,9 @@ export function DiffView({ edge, fromKey }: DiffViewProps): JSX.Element | null {
   // because it takes both sides at once: a mark is unmatched only against the
   // word it is paired with over there.
   const tints = useMemo(() => {
-    if (!diff || !sides) return null;
+    // A tint pairs a word with the same word over there, which needs one shared
+    // stretch on each side; with several, which goes with which is a guess.
+    if (!diff || !sides || diff.from.shared.length !== 1 || diff.to.shared.length !== 1) return null;
     const a = markSide(diff.from, sides.from);
     const b = markSide(diff.to, sides.to);
     return a && b ? unmatchedMarks(a, b) : null;
@@ -270,7 +280,7 @@ function markSide(side: DiffSide, loaded: Loaded): MarkSide | null {
   return {
     marks: loaded.marks,
     present,
-    shared: side.shared,
+    shared: side.shared[0] as WordRange,
     isPause: (i) => loaded.index.isMark(side.key, i),
   };
 }

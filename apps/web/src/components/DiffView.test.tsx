@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import { render, waitFor } from "@testing-library/preact";
 import type { Edge, MarkShard, WordShard } from "@hifth/core";
 import { DiffView } from "./DiffView";
+import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 import styles from "./DiffView.module.css";
 
 /**
@@ -191,8 +192,8 @@ describe("DiffView (spec §3 — why these two are confusable)", () => {
     }
   });
 
-  it("renders nothing when the edge matches in more than one place and names none", () => {
-    // 452 of 2,996 look-alike edges are this shape. The row keeps its plain note.
+  it("renders nothing when the edge names no words and gives no reason it is listed", () => {
+    // A bare row with neither a stretch nor a reason has nothing to compare.
     const { span: _span, ...noSpan } = EDGE;
     const { container } = render(<DiffView edge={noSpan} fromKey={FROM} />);
     expect(container).toBeEmptyDOMElement();
@@ -204,5 +205,66 @@ describe("DiffView (spec §3 — why these two are confusable)", () => {
     );
     // Give the load a turn to settle, then confirm it stayed empty.
     await waitFor(() => expect(container).toBeEmptyDOMElement());
+  });
+});
+
+/**
+ * A look-alike whose shared words come in more than one place: no single span,
+ * but the row says they repeat and carries every stretch of two words or more.
+ * Made-up stretches: words 1–4 and 9–10 on this side, 2–5 and 12–13 over there.
+ */
+const REPEAT: Edge = {
+  type: "mutashabih",
+  to: "quran/hafs-kfqc/2:123",
+  page: 19,
+  dir: { dSurah: 0, dPage: 12, sameJuz: true },
+  match: "repeat",
+  stretches: { from: [[1, 4], [9, 10]], to: [[2, 5], [12, 13]] },
+};
+
+describe("DiffView for a look-alike with no single shared stretch", () => {
+  afterEach(() => localStorage.clear());
+
+  it("marks every shared stretch green and what lies between them ochre, by default", async () => {
+    const { container } = render(<DiffView edge={REPEAT} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    const [fromSvg, toSvg] = Array.from(container.querySelectorAll("svg"));
+
+    const shareA = washes(fromSvg as SVGSVGElement, styles.wShare as string).map(xSpan);
+    expect(shareA).toEqual([[10, 48], [90, 108]]);
+    const diffA = washes(fromSvg as SVGSVGElement, styles.wDiff as string).map(xSpan);
+    expect(diffA).toEqual([[50, 88], [110, 238]]);
+
+    const shareB = washes(toSvg as SVGSVGElement, styles.wShare as string).map(xSpan);
+    expect(shareB).toEqual([[20, 58], [120, 138]]);
+  });
+
+  it("leaves the vowel marks untinted when there is more than one stretch to pair them in", async () => {
+    const { container } = render(<DiffView edge={REPEAT} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    for (const svg of Array.from(container.querySelectorAll("svg"))) {
+      expect(washes(svg, styles.wMark as string)).toHaveLength(0);
+    }
+  });
+
+  it("shows both verses plain, nothing washed, when the reader chose that", async () => {
+    localStorage.setItem(LOOKALIKE_COMPARE_KEY, "plain");
+    const { container } = render(<DiffView edge={REPEAT} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    for (const svg of Array.from(container.querySelectorAll("svg"))) {
+      expect(washes(svg, styles.wShare as string)).toHaveLength(0);
+      expect(washes(svg, styles.wDiff as string)).toHaveLength(0);
+      expect(washes(svg, styles.wMark as string)).toHaveLength(0);
+    }
+  });
+
+  it("shows a loosely alike pair plain, whatever the reader chose", async () => {
+    const { stretches: _s, ...loose } = REPEAT;
+    const { container } = render(<DiffView edge={{ ...loose, match: "loose" }} fromKey={FROM} />);
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    for (const svg of Array.from(container.querySelectorAll("svg"))) {
+      expect(washes(svg, styles.wShare as string)).toHaveLength(0);
+      expect(washes(svg, styles.wDiff as string)).toHaveLength(0);
+    }
   });
 });
