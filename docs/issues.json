@@ -3310,6 +3310,18 @@
       "owner": "agent",
       "note": "Walking 2:255 (2026-10-09): the related verses stopped at the first eight of the 25 places its note points to, with nothing to say more existed (1,587 verses cut off; the most, 39). The pitch extractor keeps references past the eighth in a separate 'more' field the app does not make ready; the panel ends the eight on a line counting them ('Show N more related verses') that lists them and focuses the first. Tests: pitch.test.ts moreBookRefs, CommentarySheet.test.tsx 'more related verses than the list shows' (English and Arabic) and pitch.spec.ts 'says how many more, and shows them' failed first.",
       "closedBy": "apps/web/e2e/pitch.spec.ts"
+    },
+    {
+      "id": "note-card-no-more-below-cue",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊺"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Walking the notes on the iPad and a laptop (2026-10-09): a note longer than its card was cut through the letters of its last line with nothing to say it went on. The card now fades its foot while there is more below and drops the fade at the end, as the tajweed key does (CommentarySheet data-more, a sticky gradient at the card's real edge; the card and its parts are watched as they grow). Tests: pitch.spec.ts 'a note longer than its card fades at its foot' and 'on a phone the short note fades too' failed first.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     }
   ]
 }

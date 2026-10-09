@@ -396,6 +396,43 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(gap).toBeLessThan(2);
   });
 
+  // A note is longer than its card, and the card cut its last line through the
+  // middle of the letters with nothing to say the note goes on (found walking
+  // the pitch, 2026-10-09). The tajweed key fades at its foot for the same
+  // reason; the note now does too, and the fade goes once the end is reached.
+  test("a note longer than its card fades at its foot, until the end is reached", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+    const note = sheet(page);
+    await expect(note).toBeVisible({ timeout: 20_000 });
+    await expect(note).toHaveAttribute("data-more", "below");
+    await note.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+    await expect(note).not.toHaveAttribute("data-more", "below");
+    await expect(note.locator("footer")).toBeInViewport();
+  });
+
+  test("on a phone the short note fades too, and still does once it has grown", async ({ browser }) => {
+    // Scrolling the short note grows it to the full height, which moves its
+    // foot: the fade has to follow the card's new size, not the one it opened at.
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+    const note = sheet(page);
+    await expect(note).toBeVisible({ timeout: 20_000 });
+    await expect(note).toHaveAttribute("data-more", "below");
+    await note.evaluate((el) => el.scrollTo({ top: 40 }));
+    await expect(note).toHaveAttribute("data-tall", "true");
+    await settle(note);
+    await expect(note).toHaveAttribute("data-more", "below");
+    await expect
+      .poll(async () => {
+        await note.evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+        return note.getAttribute("data-more");
+      })
+      .toBeNull();
+    await context.close();
+  });
+
   test("with one page showing, a note in the corner beside it leaves the page where it was", async ({ page }) => {
     // The note reported itself as covering the foot of the window whenever it
     // was not on a facing leaf, so the page slid up about 300px under the

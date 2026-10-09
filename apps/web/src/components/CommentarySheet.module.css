@@ -65,6 +65,21 @@
   max-block-size: 38vh; /* SHORT_SHARE in CommentarySheet.tsx */
 }
 
+/* More below: the note's foot fades into the paper while it goes on past the
+   card's edge, and the fade goes at the end (the tajweed key's cue). It
+   sticks to the card's real edge, below the bottom padding, or the line in
+   that padding reads as the last one. */
+.sheet[data-more="below"]::after {
+  content: "";
+  position: sticky;
+  inset-block-end: calc(-1 * (var(--space-5) + env(safe-area-inset-bottom)));
+  display: block;
+  block-size: 56px;
+  margin-block-start: -56px;
+  background: linear-gradient(to bottom, transparent, var(--paper-raised));
+  pointer-events: none;
+}
+
 /* Pinned to the sheet's top edge over the scrolling note. The sheet's own
    padding is pulled under it, so text does not show above it as it passes. */
 .top {
