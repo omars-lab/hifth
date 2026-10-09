@@ -16,6 +16,7 @@ import {
 import { loadMarkShard, loadPageSvg, loadWordShard } from "../assets";
 import { useT } from "../i18n";
 import { useLookalikeCompare } from "../lookalike-compare";
+import { revealRow } from "../reveal";
 import styles from "./DiffView.module.css";
 
 interface DiffViewProps {
@@ -235,6 +236,14 @@ export function DiffView({ edge, fromKey }: DiffViewProps): JSX.Element | null {
     };
   }, [diff, edition]);
 
+  // A row near the foot of a list opens its comparison below the list's edge,
+  // where nothing says it is there. Once both sides have drawn, the list moves
+  // to show the row (see reveal.ts for how far).
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (sides && box.current) revealRow(box.current);
+  }, [sides]);
+
   // The marks neither side can claim the other carries — worked out here, once,
   // because it takes both sides at once: a mark is unmatched only against the
   // word it is paired with over there.
@@ -256,7 +265,7 @@ export function DiffView({ edge, fromKey }: DiffViewProps): JSX.Element | null {
   const toLabel = named(diff.to.key);
 
   return (
-    <div className={styles.diff}>
+    <div ref={box} className={styles.diff}>
       <div className={styles.side}>
         <span className={styles.who}>
           {fromLabel}{t.sep}{t.hereTag}

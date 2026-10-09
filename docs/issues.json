@@ -3369,6 +3369,18 @@
       "owner": "agent",
       "note": "The 393 rows ㊽ explains could not open a comparison. Now they open: the 151 'repeat' rows carry every shared stretch (edge `stretches`) and wash them all by default; 'side by side, unmarked' is an info-panel setting; loose rows open unmarked. Tests: scripts/adjacency-reasons.test.mjs, DiffView.test.tsx, HopPopover.test.tsx, HighlightMenu.test.tsx, Colophon.test.tsx, all failed first.",
       "closedBy": "apps/web/src/components/DiffView.test.tsx"
+    },
+    {
+      "id": "lookalike-compare-below-edge",
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "㊿"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Opening a row near the foot of a look-alike list drew its comparison below the list's edge (Firefox; phones too). The list now moves to show the row whole, or its name just under the pinned title when it is too tall. Tests: apps/web/src/reveal.test.ts, DiffView.test.tsx, e2e/lookalike-compare-view.spec.ts (Firefox, iPhone, Android), all failed first.",
+      "closedBy": "apps/web/e2e/lookalike-compare-view.spec.ts"
     }
   ]
 }
