@@ -85,3 +85,25 @@ row's own top margin kept its name clear. A browser pins the title inside the li
 rule had not counted. It does now, and the row starts exactly under the title. The browser test now checks
 the row's top, not only its name, and it caught the 12 pixels on the Android phone. On the iPhone the
 title was already pinned when the row opened, so the first rule never went wrong there.
+
+### ③ In the Arabic app, does a look-alike pair's own note read in Arabic? · **fixed**
+
+**What it changes for a hafiz:** a reader using the app in Arabic opened 2:48's look-alikes and found the
+note on its pair with 2:123, the one line that says what was swapped, written in English with the two
+Arabic words dropped into it. On an iPad its two-way arrow drew as a blue emoji tile in the middle of
+the sentence.
+
+Why: the twelve hand-written notes on look-alike pairs were only ever written in English, with the
+pair's Arabic words inside them, and the app showed them as they were in either language. An old
+comment said they were written in Arabic and never translated, so nobody had looked. Apple's fonts draw
+the two-way arrow as an emoji unless the text asks for its plain form.
+
+**Fixed, 2026-10-09:** every note now has an Arabic version beside the English one, and the app shows
+the one in the reader's language, in the list, in the highlighted-passage menu and in the note panel's
+list of look-alikes. A note taken from the book itself still keeps the book's language. The arrow now
+always asks for its plain form.
+
+Tests: a unit test of how a note is picked and its arrow written, a test that every note in the
+look-alike data has an Arabic version with no English letters in it (it failed first, 14 notes), and a
+browser test on both phones that opens 2:48's look-alikes in Arabic and finds no English in any row (it
+failed first on the old list).

@@ -1,5 +1,6 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { arrangePassages, wordDiff, type AppState, type LeafSide, type MergedEdge } from "@hifth/core";
+import { edgeNote } from "../edge-note";
 import { useT } from "../i18n";
 import { usePassageRows } from "../passage-rows";
 // Loaded the first time a look-alike is opened out (see ./later.tsx).
@@ -69,7 +70,7 @@ export function HighlightMenu({
   onClose,
   side = null,
 }: HighlightMenuProps): JSX.Element | null {
-  const { t, dir } = useT();
+  const { t, dir, lang } = useT();
   const passageRows = usePassageRows();
   // Beside the passage on a spread: no dimming, no trapped Tab (see HopPopover).
   const beside = side !== null;
@@ -186,6 +187,7 @@ export function HighlightMenu({
               const diffable = wordDiff(edge, fromKey) !== null;
               const isOpen = expanded === edge.to;
               const diffId = `range-diff-${edge.to.replace(/[^\w-]/g, "-")}`;
+              const note = edgeNote(edge, lang);
               const fromRefs = edge.sources.map((k) => t.ayahRef(k) ?? k).join(t.refJoin);
               return (
                 <li key={`${edge.type} ${edge.to}`} className={styles.row} data-inside={inside || undefined}>
@@ -217,11 +219,10 @@ export function HighlightMenu({
                         )}
                       </span>
                       <span className={styles.from}>{t.rangeFrom(fromRefs)}</span>
-                      {/* A curated note is corpus evidence in the annotator's
-                          own Arabic, not chrome — see RootLens for the rule. */}
-                      {edge.note && (
-                        <span className={styles.note} lang="ar" dir="rtl">
-                          {edge.note}
+                      {/* A hand-written note, in the reader's language. */}
+                      {note && (
+                        <span className={styles.note} lang={note.lang} dir={note.dir}>
+                          {note.text}
                         </span>
                       )}
                       {/* With no words to mark, the row still says why it is listed. */}

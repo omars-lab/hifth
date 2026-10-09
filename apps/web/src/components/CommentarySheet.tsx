@@ -8,6 +8,7 @@ import {
   type Edge,
   type LeafSide,
 } from "@hifth/core";
+import { edgeNote } from "../edge-note";
 import { useT } from "../i18n";
 import type { Commentator } from "../pitch/pitch";
 import { useNoteRoom } from "../long-verse";
@@ -206,7 +207,7 @@ export function CommentarySheet({
    */
   sigla?: ReadonlyMap<string, Commentator>;
 }): JSX.Element | null {
-  const { t, dir } = useT();
+  const { t, dir, lang } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const cardId = useId();
@@ -554,6 +555,7 @@ export function CommentarySheet({
                   const enabled = canHop ? canHop(edge.to) : true;
                   const label =
                     (edge.through ? t.rangeLabel(edge.to, edge.through) : t.ayahLabel(edge.to)) ?? edge.to;
+                  const ours = edge.noteAr ? edgeNote(edge, lang) : null;
                   return (
                     <li key={`${edge.type}:${edge.to}`} className={styles.road}>
                       <button
@@ -568,10 +570,18 @@ export function CommentarySheet({
                           {label}
                           {edge.twin && <span className={styles.badge}>{t.twin}</span>}
                         </span>
-                        {edge.note && (
-                          <span className={styles.roadNote} {...own}>
-                            {edge.note}
+                        {/* Our own hand-written note follows the app; a note
+                            from the book stays in the book's language. */}
+                        {ours ? (
+                          <span className={styles.roadNote} lang={ours.lang} dir={ours.dir}>
+                            {ours.text}
                           </span>
+                        ) : (
+                          edge.note && (
+                            <span className={styles.roadNote} {...own}>
+                              {edge.note}
+                            </span>
+                          )
                         )}
                         {!enabled && (
                           <span className={styles.roadUnavailable}>{t.pageUnavailable}</span>

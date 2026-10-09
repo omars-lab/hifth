@@ -105,7 +105,7 @@ test.describe("Hifth · diff view (spec §3)", () => {
 
     // The 2:123 row's expander (the labelled text button, not the hop button)
     // opens the comparison. The row's own label carries the hand-written note.
-    const expander = sheet.getByRole("button", { name: /البقرة، ٢:١٢٣ شفاعة/ });
+    const expander = sheet.getByRole("button", { name: /البقرة، ٢:١٢٣ تبادلت/ });
     await expander.tap();
 
     // Both ayahs are named, and the one the reader is standing on says so.

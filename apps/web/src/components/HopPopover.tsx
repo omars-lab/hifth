@@ -8,6 +8,7 @@ import {
   type LeafSide,
   type RailChip,
 } from "@hifth/core";
+import { edgeNote } from "../edge-note";
 import { useT } from "../i18n";
 import { usePassageRows } from "../passage-rows";
 // Loaded the first time a look-alike is opened out (see ./later.tsx).
@@ -66,7 +67,7 @@ export function HopPopover({
   side = null,
   onCover,
 }: HopPopoverProps): JSX.Element | null {
-  const { t, dir } = useT();
+  const { t, dir, lang } = useT();
   const passageRows = usePassageRows();
   // On a spread the card stands on the facing leaf, beside the verse, so the
   // page stays clear and live: no dimming, no trapped Tab — as the note does.
@@ -175,6 +176,7 @@ export function HopPopover({
             // there is nothing to lay side by side: its row does not offer to open.
             const comparable = fromKey !== null && wordDiff(edge, fromKey) !== null;
             const isOpen = comparable && expanded === edge.to;
+            const note = edgeNote(edge, lang);
             const diffId = `diff-${edge.to.replace(/[^\w-]/g, "-")}`;
             return (
               <li key={edge.to} className={styles.row} data-inside={inside || undefined}>
@@ -196,7 +198,11 @@ export function HopPopover({
                         </span>
                       )}
                     </span>
-                    {edge.note && <span className={styles.note}>{edge.note}</span>}
+                    {note && (
+                      <span className={styles.note} lang={note.lang} dir={note.dir}>
+                        {note.text}
+                      </span>
+                    )}
                     {/* With no words to mark, the row still says why it is listed. */}
                     {edge.match && (
                       <span className={styles.note}>

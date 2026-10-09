@@ -122,7 +122,7 @@ const SURFACES: readonly Surface[] = [
       // also waits out the two page loads the panel does on expand, so the
       // measurement below runs against the finished surface rather than a
       // half-drawn one.
-      await sheet.getByRole("button", { name: /البقرة، ٢:١٢٣ شفاعة/ }).tap();
+      await sheet.getByRole("button", { name: /البقرة، ٢:١٢٣ تبادلت/ }).tap();
       await expect(sheet.getByText(/٢:٤٨، هنا/)).toBeVisible();
     },
   },
