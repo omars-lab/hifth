@@ -84,6 +84,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the note links is among them. · any · issue: `related-verses-drop-bare-numbers`
 - [ ] At 2:255, the eight related cards end on a line that says how many more the note points to;
   pressing it lists them after the eighth and the line goes. · any · issue: `related-verses-cut-at-eight`
+- [ ] With "All at once" set in the info panel, 2:255 lists every related verse with no line, and
+  still does after a reload. · any · issue: `related-verses-cut-at-eight`
 - [ ] Beside two pages, a card lies over the facing page and shows no drag bar. · desktop,
   ipad-side · issue: `spread-cards-show-drag-bar`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside

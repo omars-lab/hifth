@@ -1146,3 +1146,11 @@ says how many more there are ("Show 17 more related verses"); pressing it lists 
 eighth, puts the keyboard on the first new card, and the line goes. A card that only shows after the
 press still turns to its verse. Tests on made-up references, a panel test in both languages, and a
 browser test at 2:255 that counts the line's number, opens it and turns to the last card, failed first.
+
+**The other way, kept as a setting (2026-10-09):** a reader who would rather see every related verse
+from the start can say so in the info panel, under "Related verses under a note": *The first eight*
+(the line above, the default) or *All at once* (the whole list, no line). With the whole list nobody
+pressed anything, so the keyboard is left where it was. The choice is kept on the device and shown
+only in the private build, the one with notes. A panel test with the setting on, and a browser test
+that switches it in the info panel and finds 2:255's whole list and no line, then again after a
+reload, failed first.
