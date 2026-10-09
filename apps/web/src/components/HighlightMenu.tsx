@@ -231,8 +231,6 @@ export function HighlightMenu({
                       {edge.through && edge.like && (
                         <span className={styles.note}>{t.likeVerse(t.ayahRef(edge.like.to) ?? edge.like.to)}</span>
                       )}
-                      {/* The words the two share, before the row is opened. */}
-                      <SharedPreview edge={edge} open={isOpen} className={styles.note} />
                       {/* With no words to mark, the row still says why it is listed. */}
                       {edge.match && (
                         <span className={styles.note}>
@@ -240,6 +238,9 @@ export function HighlightMenu({
                         </span>
                       )}
                       {edge.ctx && <span className={styles.note}>{t.nextTellsApart}</span>}
+                      {/* The words the two share, before the row is opened: after every
+                          caption, so it sits in the same place on every row. */}
+                      <SharedPreview edge={edge} open={isOpen} className={styles.note} />
                       {blocker && <span className={styles.unavailable}>{blocker}</span>}
                     </button>
                     <button

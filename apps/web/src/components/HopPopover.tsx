@@ -209,8 +209,6 @@ export function HopPopover({
                     {edge.through && edge.like && (
                       <span className={styles.note}>{t.likeVerse(t.ayahRef(edge.like.to) ?? edge.like.to)}</span>
                     )}
-                    {/* The words the two share, before the row is opened. */}
-                    <SharedPreview edge={edge} open={isOpen} className={styles.note} />
                     {/* With no words to mark, the row still says why it is listed. */}
                     {edge.match && (
                       <span className={styles.note}>
@@ -218,6 +216,9 @@ export function HopPopover({
                       </span>
                     )}
                     {edge.ctx && <span className={styles.note}>{t.nextTellsApart}</span>}
+                    {/* The words the two share, before the row is opened: after every
+                        caption, so it sits in the same place on every row. */}
+                    <SharedPreview edge={edge} open={isOpen} className={styles.note} />
                     {!enabled && (
                       <span className={styles.unavailable}>{t.pageUnavailable}</span>
                     )}
