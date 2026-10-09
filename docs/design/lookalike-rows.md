@@ -109,3 +109,22 @@ browser test on both phones that opens 2:48's look-alikes in Arabic and finds no
 failed first on the old list). The note panel's list of related verses has its own unit test: our note
 reads in the app's language with a plain arrow, and a note from the book keeps the book's language (it
 failed first on the old panel, which showed the English note in the Arabic app).
+
+### ④ When a phone note is opened out to its full length, are the look-alike buttons left on the page behind it? · **fixed**
+
+**What it changes for a hafiz:** on a phone, with 2:48's note open, the buttons for its look-alikes sit
+on the note's top edge. Tapping "Show all of the note" made them drop back to their usual place above
+the page's first line, which is an earlier verse's words. There they sat, greyed under the dimming,
+over words the reader was not looking at, and a tap on them did nothing because the dimming takes taps.
+
+Why: ⑪ in [the commentary design](knowledge-graph-commentary.md) moved the buttons onto the note's top
+edge while a note is up, and took them off it again when the note grows to cover the page, so they would
+not float over the note's own words. Nothing said where they should go instead, so they went back to
+where they stand with no note open.
+
+**Fixed, 2026-10-09:** while the note is grown over the page, the buttons are out of sight. Tapping
+"Show less" brings them back on the note's top edge. On a wider screen, where the note sits beside the
+page, nothing changes.
+
+Tests: the browser test that opens a note on a phone and checks the buttons sit on its top edge now also
+grows the note and checks no button is left on the page. It failed first, on the old app.

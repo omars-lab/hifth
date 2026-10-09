@@ -3417,6 +3417,18 @@
       "owner": "agent",
       "note": "In the Arabic app a look-alike pair's hand-written note read in English (2:48 with 2:123), and its two-way arrow drew as an emoji on an iPad. Every note now has an Arabic version, shown when the app is in Arabic, and the arrow asks for its plain form. Tests: apps/web/src/edge-note.test.ts and e2e/hop.spec.ts, both failed first.",
       "closedBy": "apps/web/e2e/hop.spec.ts"
+    },
+    {
+      "id": "lookalike-chips-left-behind-grown-note",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "④"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On a phone, opening a note out to its full length (2:48) dropped the look-alike buttons back above the page's first line, greyed under the dimming on an earlier verse's words and untappable. They are now out of sight while the note is grown, and back on its top edge after Show less. The pitch browser test failed first.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     }
   ]
 }

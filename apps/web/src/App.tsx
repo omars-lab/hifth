@@ -3150,6 +3150,7 @@ export function App(): JSX.Element {
       onBand={setRailBottom}
       beside={beside}
       seat={beside || noteTall ? null : highestTop(coverTop, shareTop, listTop)}
+      away={!beside && noteTall}
     />
   );
 

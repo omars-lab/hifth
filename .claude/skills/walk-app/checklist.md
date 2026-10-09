@@ -131,6 +131,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] In Arabic, a look-alike pair's own note reads in Arabic and its two-way arrow is plain text, not
   a blue emoji tile (open 2:48's look-alikes; the row for 2:123). · phone, ipad, the iPad app (Arabic) ·
   issue: `lookalike-note-english-in-arabic`
+- [ ] With a note open on a phone, "Show all of the note" leaves no look-alike button greyed on the page
+  behind it, and "Show less" puts them back on the note's top edge (2:48 in the pitch build). · phone ·
+  issue: `lookalike-chips-left-behind-grown-note`
 - [ ] The look-alike buttons cover no words, no close button, and are not hidden by a note. ·
   phone, phone-side, desktop · issues: `lookalike-chips-cover-lifted-page`,
   `lookalike-chips-sideways-cover-close`, `chips-under-facing-note`

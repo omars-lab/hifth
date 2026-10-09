@@ -1211,12 +1211,15 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
       expect(await onTop(box), "the chip is drawn over everything, so a tap reaches it").toBe(true);
     }
     // Grown to the whole note, the note is all the reader is looking at: the
-    // chips do not float over its words.
+    // chips do not float over its words. Nor are they left behind on the page:
+    // dropped back to the strip above its first line, they sat greyed under the
+    // dimming on an earlier verse's words, the fault above in a fainter ink
+    // (walking 2:48 on a phone, 2026-10-09). The dimming takes taps, so out of
+    // sight is all they can be.
     await sheet(page).getByRole("button", { name: "Show all of the note" }).click();
     await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
     for (const chip of await chips.all()) {
-      const box = await chip.boundingBox();
-      if (box) expect(await onTop(box), "a chip floats over the grown note").toBe(false);
+      await expect(chip, "a chip is left on the page behind the grown note").toBeHidden();
     }
   });
 
