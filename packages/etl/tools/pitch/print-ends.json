@@ -162,9 +162,19 @@
       "page": "page_0182"
     },
     {
+      "verse": "5:32",
+      "print": "3222cce68e68",
+      "page": "page_0183"
+    },
+    {
       "verse": "5:87",
       "print": "c4f2f4c13004",
       "page": "page_0197"
+    },
+    {
+      "verse": "5:105",
+      "print": "32e1ed753415",
+      "page": "page_0201"
     },
     {
       "verse": "6:8",
@@ -172,9 +182,19 @@
       "page": "page_0210"
     },
     {
+      "verse": "6:26",
+      "print": "ad6d04b84d3a",
+      "page": "page_0213"
+    },
+    {
       "verse": "6:54",
       "print": "62b1712fd080",
       "page": "page_0218"
+    },
+    {
+      "verse": "6:61",
+      "print": "25ebeaa626d3",
+      "page": "page_0220"
     },
     {
       "verse": "6:92",
@@ -185,6 +205,11 @@
       "verse": "6:114",
       "print": "4f30bb904bae",
       "page": "page_0230"
+    },
+    {
+      "verse": "6:158",
+      "print": "ceb2414074a4",
+      "page": "page_0239"
     },
     {
       "verse": "6:161",
@@ -287,6 +312,11 @@
       "page": "page_0305"
     },
     {
+      "verse": "9:46",
+      "print": "f101bb9a3498",
+      "page": "page_0306"
+    },
+    {
       "verse": "9:69",
       "print": "c377b687a8b8",
       "page": "page_0309"
@@ -302,6 +332,11 @@
       "page": "page_0316"
     },
     {
+      "verse": "9:118",
+      "print": "d11d25ab8eb8",
+      "page": "page_0316"
+    },
+    {
       "verse": "9:128",
       "print": "920b3d67698a",
       "page": "page_0318"
@@ -310,6 +345,11 @@
       "verse": "10:21",
       "print": "f07df386c80b",
       "page": "page_0324"
+    },
+    {
+      "verse": "10:71",
+      "print": "dd6abfe4e690",
+      "page": "page_0329"
     },
     {
       "verse": "11:82",
@@ -334,6 +374,11 @@
     {
       "verse": "12:41",
       "print": "84bd7c88c210",
+      "page": "page_0357"
+    },
+    {
+      "verse": "12:44",
+      "print": "fb6cc9025660",
       "page": "page_0357"
     },
     {
@@ -372,6 +417,11 @@
       "page": "page_0376"
     },
     {
+      "verse": "14:26",
+      "print": "30357f2f53de",
+      "page": "page_0376"
+    },
+    {
       "verse": "14:31",
       "print": "23e810055017",
       "page": "page_0377"
@@ -390,6 +440,11 @@
       "verse": "15:67",
       "print": "79224d78a72e",
       "page": "page_0386"
+    },
+    {
+      "verse": "16:15",
+      "print": "0204eca56cf7",
+      "page": "page_0393"
     },
     {
       "verse": "16:22",
@@ -577,6 +632,11 @@
       "page": "page_0481"
     },
     {
+      "verse": "21:68",
+      "print": "3f6626019ccc",
+      "page": "page_0487"
+    },
+    {
       "verse": "22:53",
       "print": "4ebe5af801eb",
       "page": "page_0502"
@@ -607,6 +667,11 @@
       "page": "page_0533"
     },
     {
+      "verse": "25:32",
+      "print": "c3f5501072b2",
+      "page": "page_0535"
+    },
+    {
       "verse": "25:46",
       "print": "09d59ff5cac6",
       "page": "page_0536"
@@ -630,6 +695,11 @@
       "verse": "26:214",
       "print": "552abcd6e236",
       "page": "page_0556"
+    },
+    {
+      "verse": "27:10",
+      "print": "81da59010623",
+      "page": "page_0560"
     },
     {
       "verse": "27:61",
@@ -692,6 +762,11 @@
       "page": "page_0617"
     },
     {
+      "verse": "33:59",
+      "print": "9619ff99a798",
+      "page": "page_0625"
+    },
+    {
       "verse": "33:69",
       "print": "4d3501272b5e",
       "page": "page_0626"
@@ -710,6 +785,11 @@
       "verse": "34:20",
       "print": "8ed87f63b5c4",
       "page": "page_0631"
+    },
+    {
+      "verse": "34:35",
+      "print": "ab5fe6713a14",
+      "page": "page_0633"
     },
     {
       "verse": "34:45",
@@ -787,6 +867,11 @@
       "page": "page_0650"
     },
     {
+      "verse": "36:65",
+      "print": "b67fda3aab24",
+      "page": "page_0652"
+    },
+    {
       "verse": "37:77",
       "print": "f59a8c105c60",
       "page": "page_0661"
@@ -795,6 +880,11 @@
       "verse": "38:26",
       "print": "582e13785180",
       "page": "page_0672"
+    },
+    {
+      "verse": "38:55",
+      "print": "f9fc4efcf770",
+      "page": "page_0675"
     },
     {
       "verse": "39:10",
@@ -887,6 +977,16 @@
       "page": "page_0717"
     },
     {
+      "verse": "42:27",
+      "print": "880f8466f9b4",
+      "page": "page_0718"
+    },
+    {
+      "verse": "44:3",
+      "print": "01e09541b9fe",
+      "page": "page_0733"
+    },
+    {
       "verse": "45:13",
       "print": "073e191f8b01",
       "page": "page_0741"
@@ -900,6 +1000,11 @@
       "verse": "45:24",
       "print": "c4f856f75862",
       "page": "page_0743"
+    },
+    {
+      "verse": "46:24",
+      "print": "43ab8bd8017a",
+      "page": "page_0749"
     },
     {
       "verse": "47:7",
@@ -972,6 +1077,11 @@
       "page": "page_0806"
     },
     {
+      "verse": "56:20",
+      "print": "46add56947e8",
+      "page": "page_0806"
+    },
+    {
       "verse": "56:60",
       "print": "27bd8bca0257",
       "page": "page_0809"
@@ -1035,6 +1145,21 @@
       "verse": "70:32",
       "print": "7676e03468cd",
       "page": "page_0863"
+    },
+    {
+      "verse": "74:4",
+      "print": "26de15c5fac9",
+      "page": "page_0876"
+    },
+    {
+      "verse": "74:52",
+      "print": "68102a3c71bb",
+      "page": "page_0879"
+    },
+    {
+      "verse": "75:5",
+      "print": "1f57c4062886",
+      "page": "page_0881"
     },
     {
       "verse": "75:13",
