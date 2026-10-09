@@ -81,7 +81,7 @@ export interface SharedRun {
  * own verse; for a passage, the verse inside it that matches best.
  */
 export function sharedRun(edge: Edge): SharedRun | null {
-  if (!edge.span || !edge.toSpan) return null;
+  if (edge.match || !edge.span || !edge.toSpan) return null;
   const [from, to] = edge.toSpan.from;
   if (to < from || edge.span.from[1] < edge.span.from[0]) return null;
   const key = (edge.like?.to ?? edge.to).split("/").pop() as string;

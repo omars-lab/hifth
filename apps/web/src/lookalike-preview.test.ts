@@ -41,6 +41,11 @@ describe("the shared words a closed look-alike row can show", () => {
     expect(sharedRun(edge())).toBeNull();
     expect(sharedRun(edge({ match: "repeat" }))).toBeNull();
     expect(sharedRun(edge({ match: "loose" }))).toBeNull();
+    // A pair alike loosely or more than once says so in its own line; a
+    // picture of words under it would contradict that, even if a span came.
+    const spans = { span: { from: [2, 6] as [number, number] }, toSpan: { from: [3, 7] as [number, number] } };
+    expect(sharedRun(edge({ match: "loose", ...spans }))).toBeNull();
+    expect(sharedRun(edge({ match: "repeat", ...spans }))).toBeNull();
     // A run that ends before it starts is a bad row, not one word.
     expect(sharedRun(edge({ span: { from: [4, 2] }, toSpan: { from: [4, 2] } }))).toBeNull();
   });
