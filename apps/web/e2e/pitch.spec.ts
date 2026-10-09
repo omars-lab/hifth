@@ -1221,6 +1221,17 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     for (const chip of await chips.all()) {
       await expect(chip, "a chip is left on the page behind the grown note").toBeHidden();
     }
+    // Short again, the chips come back on the note's top row, not stuck out
+    // of sight for the rest of the visit.
+    await sheet(page).getByRole("button", { name: "Show less" }).click();
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const top = (await sheet(page).boundingBox())!.y;
+    for (const chip of await chips.all()) {
+      await expect(chip, "a chip stays hidden after the note is short again").toBeVisible();
+      const box = (await chip.boundingBox())!;
+      expect(box.y, "the chip is back on the note's top row").toBeGreaterThanOrEqual(top);
+      expect(await onTop(box), "the chip is drawn over everything, so a tap reaches it").toBe(true);
+    }
   });
 
   test("on a look-alike list, the chips sit above its title and close button, at rest and scrolled", async ({ page }) => {

@@ -108,6 +108,28 @@ describe("HopPopover", () => {
     expect(screen.getByRole("listitem").textContent).toMatch(/2:3–2:5|٢:٣–٢:٥/);
   });
 
+  // A passage row is measured against the verse inside it that matches best,
+  // and the closed row says which, so a reader knows where to look before
+  // opening it (lookalike-rows ⑤).
+  it("a passage row names the verse inside it that matches best", () => {
+    render(
+      <HopPopover
+        chip={chip([
+          edge(2, 3, { through: "quran/hafs-kfqc/2:5", like: { to: "quran/hafs-kfqc/2:4", page: 7 } }),
+          edge(2, 9, { through: "quran/hafs-kfqc/2:11" }),
+        ])}
+        fromKey="quran/hafs-kfqc/2:2"
+        canHop={() => true}
+        onHop={noop}
+        onClose={noop}
+      />,
+    );
+    const [named, first] = screen.getAllByRole("listitem");
+    expect(latin(named!.textContent!)).toMatch(/2:4/);
+    // Matched best by its first verse, the row already says where to look.
+    expect(latin(first!.textContent!)).not.toMatch(/2:9[^–]/);
+  });
+
   // About four hundred pairs share no stretch of words in one place only, so
   // nothing can be marked or compared; the row says which, rather than showing
   // a bare verse name. The outside list's "the next verse tells them apart"

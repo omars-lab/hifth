@@ -3429,6 +3429,29 @@
       "owner": "agent",
       "note": "On a phone, opening a note out to its full length (2:48) dropped the look-alike buttons back above the page's first line, greyed under the dimming on an earlier verse's words and untappable. They are now out of sight while the note is grown, and back on its top edge after Show less. The pitch browser test failed first.",
       "closedBy": "apps/web/e2e/pitch.spec.ts"
+    },
+    {
+      "id": "lookalike-passage-row-names-match",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑤"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "A closed passage row (15:30's 38:72 to 38:75) gave no hint which verse inside it is the alike one, though the row was measured against it. It now says \"Most alike: 38:73\". Unit tests on both lists failed first; the browser test checks the closed row.",
+      "closedBy": "apps/web/e2e/lookalike-compare-view.spec.ts"
+    },
+    {
+      "id": "lookalike-row-shared-words-unseen",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "A row whose shared words sit in one place shows only a verse name until opened, so finding the row a hafiz confuses means opening each. Options: leave it, a small picture of the shared words under the name, or a count of shared words. Related to ㊼."
     }
   ]
 }

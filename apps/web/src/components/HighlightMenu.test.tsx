@@ -178,6 +178,24 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     expect(within(screen.getByRole("dialog")).getByText(/إبراهيم، ١٤:٥–١٤:٦/)).toBeInTheDocument();
   });
 
+  // …and says which verse inside it matches best, as the hop list does
+  // (lookalike-rows ⑤).
+  it("names the verse inside a passage look-alike that matches best", () => {
+    renderMenu({
+      hops: [
+        edge({
+          type: "mutashabih",
+          to: k("14:5"),
+          through: k("14:7"),
+          like: { to: k("14:6"), page: 255 },
+          page: 255,
+          sources: [k("2:48")],
+        }),
+      ],
+    });
+    expect(within(screen.getByRole("dialog")).getByRole("listitem").textContent).toContain("١٤:٦");
+  });
+
   // A pair with no one stretch of words to mark still says why it is listed.
   it("says why a look-alike with no marked words is there", () => {
     renderMenu({

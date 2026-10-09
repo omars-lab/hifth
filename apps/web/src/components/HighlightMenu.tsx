@@ -225,6 +225,11 @@ export function HighlightMenu({
                           {note.text}
                         </span>
                       )}
+                      {/* A passage is measured against the verse inside it that matches best;
+                          the closed row says which, so the reader knows where to look. */}
+                      {edge.through && edge.like && (
+                        <span className={styles.note}>{t.likeVerse(t.ayahRef(edge.like.to) ?? edge.like.to)}</span>
+                      )}
                       {/* With no words to mark, the row still says why it is listed. */}
                       {edge.match && (
                         <span className={styles.note}>

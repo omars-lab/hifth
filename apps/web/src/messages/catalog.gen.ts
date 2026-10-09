@@ -193,6 +193,7 @@ export interface Catalog {
   readonly legendTitle: string;
   readonly licenceBody: string;
   readonly licenceHead: string;
+  readonly likeVerse: (d: { readonly ref: string | number }) => string;
   readonly longVerseNote: string;
   readonly longVerseShorter: string;
   readonly longVerseSmaller: string;

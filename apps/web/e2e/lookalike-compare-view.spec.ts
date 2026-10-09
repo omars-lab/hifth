@@ -62,6 +62,9 @@ test.describe("Hifth · a look-alike comparison", () => {
     const list = page.getByRole("dialog", { name: /later surahs/ });
     await expect(list).toBeVisible({ timeout: 20_000 });
     const row = list.getByRole("listitem").filter({ hasText: /38:72.38:75/ });
+    // Closed, the row already says which verse inside the passage it matches
+    // (lookalike-rows ⑤): the passage is 38:72 to 38:75, so 38:73 is that line.
+    await expect(row, "the closed row names the verse it matches").toContainText("38:73");
     const open = row.locator("[aria-expanded]");
     await expect(open, "the passage row offers to open").toHaveCount(1);
     await open.click();
