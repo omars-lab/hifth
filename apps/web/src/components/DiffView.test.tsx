@@ -199,6 +199,38 @@ describe("DiffView (spec §3 — why these two are confusable)", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  // A row near the foot of a list opens below the list's edge. Once the
+  // comparison has drawn, the list moves so the row shows whole — or, too tall
+  // for that, so its top does.
+  it("moves the list to show the opened row once the comparison has drawn, and only then", async () => {
+    const at = (top: number, bottom: number) => () => ({ top, bottom }) as DOMRect;
+    const { container, rerender } = render(
+      <ul style={{ overflowY: "auto" }} data-testid="list">
+        <li>
+          <DiffView edge={EDGE} fromKey={FROM} />
+        </li>
+      </ul>,
+    );
+    const list = container.querySelector("ul")!;
+    const row = container.querySelector("li")!;
+    list.getBoundingClientRect = at(100, 500);
+    row.getBoundingClientRect = at(300, 620);
+    const scrollBy = vi.fn();
+    list.scrollBy = scrollBy;
+    expect(scrollBy).not.toHaveBeenCalled();
+    await waitFor(() => expect(container.querySelectorAll("svg")).toHaveLength(2));
+    expect(scrollBy).toHaveBeenCalledTimes(1);
+    expect(scrollBy.mock.calls[0]?.[0]).toMatchObject({ top: 120 });
+    rerender(
+      <ul style={{ overflowY: "auto" }} data-testid="list">
+        <li>
+          <DiffView edge={EDGE} fromKey={FROM} />
+        </li>
+      </ul>,
+    );
+    expect(scrollBy).toHaveBeenCalledTimes(1);
+  });
+
   it("renders nothing when a side's page has no geometry to hand", async () => {
     const { container } = render(
       <DiffView edge={{ ...EDGE, page: 400, dir: { dSurah: 0, dPage: 12 } }} fromKey={FROM} />,

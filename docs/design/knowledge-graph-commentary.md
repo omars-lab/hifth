@@ -1304,3 +1304,19 @@ unnoticed, and a spelling difference like that is what a hafiz needs to catch.
 Tests: the build test checks every repeated row carries its stretches and that a pair and its reverse agree;
 the comparison view's tests check both ways and the loose case; both lists' tests check these rows open; the
 info panel's test checks the setting. All failed first.
+
+### ㊿ When a row near the foot of a look-alike list is opened, does the reader see what opened? · **fixed**
+
+It did not. In Firefox on a desktop, opening the last rows of 10:15's later-surahs list drew the comparison
+below the list's edge, and nothing on screen said it was there. Chrome happened to move the list on its own,
+which is why it went unnoticed.
+
+The list now moves once the comparison has drawn. If the opened row fits, it moves just far enough to show the
+row whole. If it is taller than the list (usual on a phone), the row's name lines up just under the list's
+title, with the comparison below it. The browser's own "scroll into view" was tried first: on a phone it left
+the row showing neither its name nor its end, and it ignored the title pinned over the rows, so the distance is
+worked out by hand. The list moves smoothly unless the reader has asked for less motion.
+
+Tests: the scroll rule's unit tests (fits, too tall, above the edge, under a pinned title), the comparison
+view's test that the list moves once and only once it has drawn, and a browser test on Firefox and both phones
+that opens 10:15's last later-surahs row and checks what shows. All failed first.

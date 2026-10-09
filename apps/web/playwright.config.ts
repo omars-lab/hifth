@@ -244,8 +244,10 @@ export default defineConfig({
           // pages shrunk inside it or not drawn at all (2026-09-28). One small
           // file, so the whole desktop suite does not have to pass twice. Plus
           // `lazy-tools`: a sheet fetched on first open must open in Firefox too.
+          // And `lookalike-compare-view`: nothing else moves a look-alike list in
+          // Firefox, so an opened comparison has to bring itself into view.
           name: "desktop-firefox",
-          testMatch: /(spread-fit|edge-peel|lazy-tools)\.spec\.ts/,
+          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },
