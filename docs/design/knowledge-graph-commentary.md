@@ -526,15 +526,31 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
   the end of the surah or the section mark right after it. That list is kept with the extractor
   (it holds no words of the note), and the extractor refuses to run if one of them stops matching.
 
-**What is still different:** 23 notes end their last paragraph with no full stop, out of 5,000.
-They were left out on purpose because the pages did not settle them: 9 look cut short (the page
-carries on past where the note stops, as at 3:77, 6:161 and 49:15), 4 are unclear on the page,
-and 10 could not be found on any page reading. A run-on whose second sentence starts with an
-unusual word could also remain, since the search for them looked for the common sentence
-openings. Nothing here reaches the public site; it is only the pitch.
+**Fourth pass, 2026-10-08:**
 
-**What would answer it:** read the 23 off the page pictures by hand, and put back what is
-missing.
+- **The 23 read by hand.** Read off the page pictures: 19 had only lost their stop (one of them a
+  question mark) and are on the list; two were really cut short, and the rest of each was read
+  off the page into a private file beside the capture, never into this repository, which the
+  extractor adds back; two end exactly as the page does.
+- **The stop after a closing bracket.** Where a note ends on a bracketed source or reference,
+  the book usually sets the full stop after the bracket, and the capture lost it there too. The
+  page readings show it for 97 of them, and those are on the same list; a note whose sentence
+  stopped inside the bracket is left alone.
+- **A note set aside.** The capture filed one note, shared by the first two verses of a surah,
+  with the blocks it could not place, because a stray reference sat in front of its verse
+  number, so both verses showed nothing. It is put back from a list that holds a fingerprint of
+  the block, never its words.
+- **Verses with no note.** The 42 verses still without a note were each looked for on the pages.
+  The book has none for them: where it prints a run of verses together, the note carries only
+  the last verse's number.
+
+**What is still different:** 24 notes end on a bracket with no stop after it and the page
+readings do not settle them: 20 were not found in any reading, three read differently in
+different readings, and one's last words appear twice in the book. A run-on whose second
+sentence starts with an unusual word could also remain, since the search for them looked for
+the common sentence openings. Nothing here reaches the public site; it is only the pitch.
+
+**What would answer it:** read the 24 off the page pictures by hand.
 
 ### ② On a phone, can the roots and similar-verses lists keep their verse in sight, as the note does? · **fixed**
 

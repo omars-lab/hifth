@@ -27,6 +27,15 @@ describe("a verse's note, finished", () => {
     expect(done.usedEnds).toEqual(new Set([0]));
   });
 
+  it("finishes a cut-short note before looking for its closing stop", () => {
+    const cut = "They rested by the well until";
+    const tails = [{ print: endPrint(cut), tail: " noon." }];
+    const ends = [{ verse: "9:9", print: endPrint("They rested by the well until noon.") }];
+    const done = finishNote("9:9", [cut], [], { ...lists, ends, tails });
+    expect(done.blocks).toEqual(["They rested by the well until noon."]);
+    expect(done.usedTails).toEqual(new Set([0]));
+  });
+
   it("still rejoins a sentence split across a column", () => {
     expect(finishNote("9:9", ["They rested by the", "well until noon."], [], lists).blocks).toEqual([
       "They rested by the well until noon.",

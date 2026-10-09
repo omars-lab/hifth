@@ -45,7 +45,8 @@ import { dropMarginRefs } from "./strays.mjs";
 import { readKey } from "./key.mjs";
 import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
-import { endPrint } from "./ends.mjs";
+import { endPrint, endsClosed } from "./ends.mjs";
+import { orphanPrint, rescueOrphans } from "./orphans.mjs";
 import { wordsOf } from "./splits.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -68,6 +69,9 @@ const KEY_SRC = resolve(SRC_DIR, "../raw/commentator-key.hand.json");
 // Verses the capture lost, read again off the page pictures (see translation.mjs).
 const FIXES_SRC = resolve(SRC_DIR, "../raw/translation-fixes.hand.json");
 const FIXES = existsSync(FIXES_SRC) ? JSON.parse(readFileSync(FIXES_SRC, "utf8")).verses : {};
+// The rest of notes the capture cut short, read off the page pictures (see ends.mjs).
+const TAILS_SRC = resolve(SRC_DIR, "../raw/note-fixes.hand.json");
+const TAILS = existsSync(TAILS_SRC) ? JSON.parse(readFileSync(TAILS_SRC, "utf8")).tails : [];
 
 // How many road edges a single verse may carry when they come from the source's
 // own cross-references. A few dozen refs on one ayah would bury the hop list; a
@@ -342,6 +346,11 @@ const LIST_SPLITS = process.argv.includes("--splits");
 const ENDS = JSON.parse(readFileSync(resolve(HERE, "print-ends.json"), "utf8")).ends;
 const usedEnds = new Set();
 const LIST_ENDS = process.argv.includes("--ends");
+const usedTails = new Set();
+// Notes the capture set aside with no verse, read off the printed page (see orphans.mjs).
+const ORPHANS = JSON.parse(readFileSync(resolve(HERE, "print-orphans.json"), "utf8")).orphans;
+const usedOrphans = new Set();
+const LIST_ORPHANS = process.argv.includes("--orphans");
 
 function buildSurah(surah) {
   const src = readSurah(surah);
@@ -359,13 +368,19 @@ function buildSurah(surah) {
     const [from, to] = noteRange(note) ?? [ref[1], ref[1]];
     for (let a = from; a <= to; a++) moved.set(a, [...(moved.get(a) ?? []), note]);
   }
+  const rescued = rescueOrphans(surah, src.orphans ?? [], ORPHANS);
+  for (const i of rescued.used) usedOrphans.add(i);
+  if (LIST_ORPHANS)
+    for (const o of src.orphans ?? [])
+      if (!/^verse_dup/.test(o.reason ?? ""))
+        console.log(`${surah} ${orphanPrint(o.text ?? "")} ${o.reason} page ${o.page} ${(o.text ?? "").length} chars`);
   let previous = [];
   for (const entry of src.entries) {
     const ref = parseRef(entry.key);
     if (!ref) continue;
     const [s, a] = ref;
     const captured = (entry.commentary ?? []).flatMap((c) => (c.blocks ?? []).map((b) => b.text).filter(Boolean));
-    const own = moved.get(a) ?? [];
+    const own = [...(rescued.notes.get(a) ?? []), ...(moved.get(a) ?? [])];
     const joined = joinPageBreaks(
       [...own, ...captured.filter((b) => !own.includes(b))]
         .map(dropMarginRefs)
@@ -374,10 +389,17 @@ function buildSurah(surah) {
         .map(dropRaisedEndings)
         .filter(Boolean),
     );
-    const done = finishNote(`${s}:${a}`, joined, previous, { marks: MARKS, joins: JOINS, words: WORDS, ends: ENDS });
+    const done = finishNote(`${s}:${a}`, joined, previous, {
+      marks: MARKS,
+      joins: JOINS,
+      words: WORDS,
+      ends: ENDS,
+      tails: TAILS,
+    });
     for (const i of done.usedMarks) usedMarks.add(i);
     for (const i of done.usedJoins) usedJoins.add(i);
     for (const i of done.usedEnds) usedEnds.add(i);
+    for (const i of done.usedTails) usedTails.add(i);
     const blocks = done.blocks;
     if (LIST_SPLITS)
       for (let i = 1; i < blocks.length; i++)
@@ -385,7 +407,7 @@ function buildSurah(surah) {
           const prev = blocks[i - 1].trimEnd();
           console.log(`${s}:${a} ${seamPrint(`${prev} ${blocks[i]}`, prev.length)} …${prev.slice(-30)} | ${blocks[i].slice(0, 30)}…`);
         }
-    if (LIST_ENDS && blocks.length && !/[.!?…:;)\]"'”’»]\s*$/u.test(blocks.at(-1)))
+    if (LIST_ENDS && blocks.length && !endsClosed(blocks.at(-1)))
       console.log(`${s}:${a} ${endPrint(blocks.at(-1))}`);
     if (LIST_SEAMS)
       for (const block of blocks)
@@ -417,7 +439,7 @@ function buildSurah(surah) {
     note: "PRIVATE pitch data. Held copy (The Study Quran, HarperOne 2015). Never commit or deploy.",
   };
 
-  if (LIST_SEAMS || LIST_SPLITS) return { surah, listed: true };
+  if (LIST_SEAMS || LIST_SPLITS || LIST_ORPHANS) return { surah, listed: true };
   const outPath = resolve(OUT_DIR, `${surah}.json`);
   writeFileSync(outPath, JSON.stringify(out, null, 2));
   const edgeCount = Object.values(shard).reduce((n, adj) => n + adj.edges.length, 0);
@@ -473,7 +495,21 @@ if (staleEnds.length) {
   console.error("  read those pages again and list each ending's new fingerprint (--ends).");
   process.exit(1);
 }
-if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS) process.exit(0);
+const staleOrphans = ORPHANS.filter((m, i) => surahs.includes(m.surah) && !usedOrphans.has(i));
+if (staleOrphans.length) {
+  console.error(`print-orphans.json names ${staleOrphans.length} set-aside note(s) the capture no longer has:`);
+  for (const m of staleOrphans) console.error(`  ${m.surah} ${m.print} (page image ${m.page})`);
+  console.error("  read those pages again and list each note's new fingerprint (--orphans).");
+  process.exit(1);
+}
+const staleTails = TAILS.filter((m, i) => surahs.includes(Number(m.verse.split(":")[0])) && !usedTails.has(i));
+if (staleTails.length) {
+  console.error(`${TAILS_SRC} names ${staleTails.length} cut-short note(s) the capture no longer has:`);
+  for (const m of staleTails) console.error(`  ${m.verse} ${m.print} (page image ${m.page})`);
+  console.error("  read those pages again and list each note's new fingerprint (--ends).");
+  process.exit(1);
+}
+if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS || LIST_ORPHANS) process.exit(0);
 
 if (existsSync(KEY_SRC)) {
   const raw = JSON.parse(readFileSync(KEY_SRC, "utf8"));
