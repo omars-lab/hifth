@@ -1086,6 +1086,7 @@ commentary design note's numbered items, and in the issues list.
 - The last 29 notes ending on a bracket were read off the page pictures by eye: 25 had their stop put back, 4 have none in the book and stay as printed, and the italics were checked (the capture does not record them) (knowledge-graph-commentary.md ①).
 - Italics in the pitch's notes: slanting a note's quotation of its own verse was tried against the page pictures and was right only about three times in four, so the words stay upright until the slant can be read off the pictures (docs/issues/italics-from-quoted-verse-words.md).
 - A wider search for sentences run together in the pitch's notes: 135 spots, 103 run on in the book too, and the 5 that had lost a stop and a new paragraph were put back, along with stray long-vowel marks set down as letters (knowledge-graph-commentary.md ①).
+- Two phone tests that failed now and then under the full run (the look-alike buttons clear of the page's labels; the colour key saying there is more) were made to measure once the page has settled; each failed often when run 60 times in parallel and passes 60 of 60 now.
 
 The four walking tasks (#48–#51: the phone end to end, the verse-number menu, the desktop
 spread with a note open, and fixing what they find) stay open in the task list: the walk goes on.
