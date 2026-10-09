@@ -545,8 +545,9 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
 - **Sentences run together, searched wider.** The first search looked for the common sentence
   openings. A wider one looked for any word that usually opens a sentence in these notes but
   sat mid-sentence: 135 spots. The page readings show the book itself runs 103 of them on, nearly
-  all a verse quoted straight into the sentence. The rest were looked at, on the page pictures
-  where the readings could not say: four had lost a full stop and a new paragraph, and are on the
+  all a verse quoted straight into the sentence; the 15 of those that sit at the end of a printed
+  line, where the readings drop stops, follow a word no sentence ends on, or were read by eye. The rest were looked at, on the page pictures
+  where the readings could not say: five had lost a full stop and a new paragraph, and are on the
   list; one of them also had the long-vowel marks of the line above set down as stray letters,
   which are now dropped wherever two or more such lone vowels open a sentence.
 - **Verses with no note.** The 42 verses still without a note were each looked for on the pages.

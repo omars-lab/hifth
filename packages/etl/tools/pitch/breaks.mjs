@@ -17,7 +17,7 @@
  * ("Allāhu" with its "u" lifted). The capture set those down as stray letters at
  * the start of the next sentence ("…God). u an Hayya…"), so they are dropped.
  * The long-vowel marks over a transliterated word on the line above come down
- * the same way, as two or more lone vowels ("…Th). a u Concerning…"); one lone
+ * the same way, as two or more lone vowels ("…Tr). a u About…"); one lone
  * "a" is left, since it can be a real article after an abbreviation.
  */
 import { createHash } from "node:crypto";
