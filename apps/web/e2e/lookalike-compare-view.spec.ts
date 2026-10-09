@@ -67,5 +67,14 @@ test.describe("Hifth · a look-alike comparison", () => {
     await open.click();
     await expect(row.locator("svg")).toHaveCount(2, { timeout: 10_000 });
     await expect(row, "the comparison stands on the verse that matches").toContainText("38:73");
+    // The row is taller than a phone's list, so it lines up its name under the
+    // title. The title only pins once the list moves, and the name was scrolled
+    // up behind it (lookalike-rows ②).
+    await settle(row);
+    const title = (await list.locator("header").first().boundingBox())!;
+    const name = (await open.boundingBox())!;
+    expect(name.y, "the opened row's name is under the title, not behind it").toBeGreaterThanOrEqual(
+      title.y + title.height - 1,
+    );
   });
 });

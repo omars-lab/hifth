@@ -3393,6 +3393,18 @@
       "owner": "agent",
       "note": "Passage rows were measured against the passage's first verse, so 54 of 101 said nothing useful and could not open. Each is now measured against the verse inside the passage it matches best, and every row gives a reason.",
       "closedBy": "apps/web/e2e/lookalike-compare-view.spec.ts"
+    },
+    {
+      "id": "lookalike-opened-row-name-behind-title",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "②"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On a phone, opening a tall look-alike row near the top of the list scrolled its name up behind the list's title, because the title only pins once the list moves. The scroll now counts the title by where it will pin.",
+      "closedBy": "apps/web/e2e/lookalike-compare-view.spec.ts"
     }
   ]
 }

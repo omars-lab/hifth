@@ -60,3 +60,22 @@ browser test opens 15:30's passage row and finds the matching verse in the compa
 
 Not settled here: comparing a whole passage against a whole passage, rather than one verse
 against the one it matches.
+
+### ② When a tall row opens near the top of a phone's list, can the reader see its name? · **fixed**
+
+**What it changes for a hafiz:** on a phone, opening 15:30's first look-alike row (the passage in surah
+38) moved the list so the comparison sat right under the list's title, and the row's own name, which
+says where the other verse is, was scrolled up behind the title. They saw two verses with no word of
+where the second one lives.
+
+Why: ㊿'s rule lines a row too tall to show whole up under the list's title. On a phone the title is
+pinned inside the scrolling sheet, but it only pins once the list has moved. With the list still at its
+start the title sits a little lower, so the rule did not count it, lined the row up with the sheet's
+edge, and the title then pinned over the row's name. ㊿'s own test opened the last row, by which time
+the list had already moved and the title was pinned, so it never saw this.
+
+**Fixed, 2026-10-09:** the rule now counts a title by where it will pin, not only where it is now.
+Opening 15:30's first row on a phone puts its name just under the title, in English and in Arabic.
+
+Tests: a unit test of the rule with a title that has not pinned yet, and the browser test that opens
+15:30's passage row now checks its name sits under the title on both phones and desktop Firefox.
