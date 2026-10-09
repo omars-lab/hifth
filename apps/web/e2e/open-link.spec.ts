@@ -55,6 +55,16 @@ test.describe("Hifth · a link that opens a panel", () => {
     await expect(page).toHaveURL(/#\/hafs-kfqc\/2:48$/);
   });
 
+  // Nothing was pressed, so nothing wears a focus ring: not the close button
+  // (walking a phone held sideways, 2026-10-09), and not the list itself.
+  test("?open=lookalikes draws no focus ring", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/2:48?open=lookalikes");
+    const list = page.getByRole("dialog", { name: /^متشابهات/ });
+    await expect(list).toBeVisible({ timeout: 20_000 });
+    await expect(list).toBeFocused();
+    await expect(list).toHaveCSS("outline-style", "none");
+  });
+
   // The look-alike list rose over the foot of the page and the verse it is
   // about stayed under it, on an iPad held upright and on a phone; a note on
   // the same screen slid its verse up clear (walking the iPad app, 2026-10-08).
