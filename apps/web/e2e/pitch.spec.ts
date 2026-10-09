@@ -1514,7 +1514,7 @@ test.describe("Hifth · who the initials in a note stand for", () => {
 });
 
 test.describe("Hifth · a verse named without its surah is a link too", () => {
-  // The book names a verse of the surah it is in as "v. 25" or "vv. 9–26",
+  // The book names a verse of the surah it is in as "v. 5" or "vv. 4–7",
   // without the surah. Those are as much its roads as a full citation, and are
   // written thousands of times; they were plain text.
   test("a v. in a verse's note goes to that verse of the same surah", async ({ page }) => {

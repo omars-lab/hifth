@@ -19,6 +19,8 @@ PNPM  := pnpm
 # bare `undefined` where the error should be. The last lines of a failing test
 # run are the ones you read. Exit codes propagate identically.
 WEB   := $(PNPM) -C apps/web
+# The private pitch notes, gitignored; the pitch suite needs them (pitch-e2e).
+PITCH_DATA ?= apps/web/public/assets/private/study-quran/1.json
 CORE  := $(PNPM) -C packages/core
 ETL   := $(PNPM) -C packages/etl
 
@@ -111,9 +113,9 @@ pitch-e2e: core ## Playwright check of the PRIVATE pitch commentary (local only 
 	@# gitignored file (build it with the extractor below), so CI could not run
 	@# this even if it wanted to. HIFTH_PITCH=1 swaps the whole Playwright run for
 	@# a single project that builds and serves the pitch bundle on its own port.
-	@test -f apps/web/public/assets/private/study-quran/1.json || { \
+	@test -f $(PITCH_DATA) || { \
 	  echo ""; \
-	  echo "  No private pitch data — apps/web/public/assets/private/study-quran/1.json"; \
+	  echo "  No private pitch data — $(PITCH_DATA)"; \
 	  echo "  Build it first:  node packages/etl/tools/pitch/extract.mjs"; \
 	  echo ""; \
 	  exit 1; \
@@ -357,6 +359,10 @@ pre-push: secrets-history checks-fast ## Everything checked before each push —
 	@# needs a one-time `pnpm -C apps/web exec playwright install webkit`, and
 	@# it is the project that caught a jump bug the Android one missed.
 	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=ipad --project=golden --project=ipad-golden
+	@# The pitch suite, where most faults a walk of the demo finds keep their
+	@# test (about a minute). It needs the gitignored notes, so on a machine
+	@# without them it is skipped with a line saying so, not failed.
+	$(if $(wildcard $(PITCH_DATA)),$(MAKE) pitch-e2e,@echo "  pitch suite skipped: no private pitch data at $(PITCH_DATA)")
 
 .PHONY: site
 site: build ## Build the public site and check it the way the deploy does (the deploy job runs this)

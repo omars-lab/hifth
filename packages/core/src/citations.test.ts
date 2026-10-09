@@ -49,25 +49,25 @@ describe("verse citations in the commentary prose", () => {
     expect(splitCitations(text).map((p) => (typeof p === "string" ? p : p.text)).join("")).toBe(text);
   });
 
-  // The book names a verse of the surah it is in as "v. 5" or "vv. 9–26",
+  // The book names a verse of the surah it is in as "v. 5" or "vv. 4–7",
   // without the surah, so these need to know which surah the prose is about.
   describe("a verse of the same surah, named without it", () => {
     const here = (text: string, surah: number) =>
       splitCitations(text, surah).flatMap((part) => (typeof part === "string" ? [] : [part]));
 
     it("links v. and vv. to that verse of the surah the prose is in", () => {
-      expect(here("as at v. 5, and the story (vv. 9–26) and v. 3b", 18)).toEqual([
-        { text: "v. 5", surah: 18, ayah: 5 },
-        { text: "vv. 9–26", surah: 18, ayah: 9 },
-        { text: "v. 3b", surah: 18, ayah: 3 },
+      expect(here("as at v. 6, and the story (vv. 4–7) and v. 2b", 44)).toEqual([
+        { text: "v. 6", surah: 44, ayah: 6 },
+        { text: "vv. 4–7", surah: 44, ayah: 4 },
+        { text: "v. 2b", surah: 44, ayah: 2 },
       ]);
     });
 
     it("carries a list on, as it does after a full citation", () => {
-      expect(here("see vv. 9, 13, and 60–82; later", 18)).toEqual([
-        { text: "vv. 9", surah: 18, ayah: 9 },
-        { text: "13", surah: 18, ayah: 13 },
-        { text: "60–82", surah: 18, ayah: 60 },
+      expect(here("see vv. 11, 14, and 30–35; later", 44)).toEqual([
+        { text: "vv. 11", surah: 44, ayah: 11 },
+        { text: "14", surah: 44, ayah: 14 },
+        { text: "30–35", surah: 44, ayah: 30 },
       ]);
     });
 
@@ -78,15 +78,15 @@ describe("verse citations in the commentary prose", () => {
     });
 
     it("still reads a full citation as its own surah", () => {
-      expect(here("v. 2, unlike 2:255", 18)).toEqual([
-        { text: "v. 2", surah: 18, ayah: 2 },
-        { text: "2:255", surah: 2, ayah: 255 },
+      expect(here("v. 3, unlike 9:4", 44)).toEqual([
+        { text: "v. 3", surah: 44, ayah: 3 },
+        { text: "9:4", surah: 9, ayah: 4 },
       ]);
     });
 
     it("keeps every word, in order", () => {
-      const text = "the tale (vv. 60–82) and v. 109, 110; then";
-      expect(splitCitations(text, 18).map((p) => (typeof p === "string" ? p : p.text)).join("")).toBe(text);
+      const text = "the tale (vv. 30–35) and v. 50, 51; then";
+      expect(splitCitations(text, 44).map((p) => (typeof p === "string" ? p : p.text)).join("")).toBe(text);
     });
   });
 
