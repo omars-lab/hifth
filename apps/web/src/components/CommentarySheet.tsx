@@ -18,6 +18,7 @@ import { isIntroOnly, textDir, type CommentaryNote } from "../tafsir/commentary"
 import styles from "./CommentarySheet.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
 import { watchCover } from "./short-band";
+import { LookalikeReason } from "./SharedPreview";
 
 export { overLeaf } from "./over-leaf";
 
@@ -576,11 +577,16 @@ export function CommentarySheet({
                           <span className={styles.roadNote} lang={ours.lang} dir={ours.dir}>
                             {ours.text}
                           </span>
+                        ) : edge.note ? (
+                          <span className={styles.roadNote} {...own}>
+                            {edge.note}
+                          </span>
                         ) : (
-                          edge.note && (
-                            <span className={styles.roadNote} {...own}>
-                              {edge.note}
-                            </span>
+                          // The app's own look-alikes come with no line from
+                          // the book; they say why they are listed the way the
+                          // look-alike lists do (lookalike-rows ⑦).
+                          edge.type === "mutashabih" && (
+                            <LookalikeReason edge={edge} open={false} className={styles.roadNote} />
                           )
                         )}
                         {!enabled && (

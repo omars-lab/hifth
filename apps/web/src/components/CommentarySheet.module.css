@@ -407,6 +407,13 @@ button.grip {
   font-style: italic;
 }
 
+/* An app look-alike's shared-words picture stacks under its captions, in
+   the text column; with no column of its own it took the arrow's place. */
+.roadHop > [data-shared-words] {
+  grid-column: 1;
+  justify-self: start;
+}
+
 .roadArrow {
   grid-column: 2;
   grid-row: 1 / span 2;

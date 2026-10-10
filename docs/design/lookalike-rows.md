@@ -200,3 +200,39 @@ What looking at it taught us, on a phone and an iPad in both languages and in Fi
 - **Cost:** a row with a picture is about one line taller, and the list now loads the page pictures of
   the verses it names when it opens, not only when a row is opened. For a reader who finds that too
   much, *As a count* keeps the list short and *Not shown* puts it back as it was.
+
+### ⑦ In a book note's list of related verses, does every row say something under its name? · **fixed**
+
+**What it changes for a hafiz:** a demo note's list mixes the book's own references, each with the opening
+words of the verse it points to, and the app's own look-alikes for the same verse. The look-alike rows came
+with nothing under their name: three rows across the two demo notes (2:48's passage 2:122 to 2:123 and the
+verse 2:123 inside it, and 15:30's verse 38:73) showed a bare verse name. Those are the rows a hafiz most
+needs explained, since they are listed for a slip, not for a meaning.
+
+Why it was missed: the look-alike lists (the corner card and the highlighted-passage menu) each draw their
+rows' reasons themselves, and the note's list was written for the book's rows, which always carry a line.
+Found on the walk in Arabic on a phone, 2026-10-10.
+
+**Fixed, 2026-10-10:** the note's list now gives an app look-alike row the same reasons the look-alike lists
+give it, drawn by the one shared piece all three lists now use: "Most alike: …" for a passage, the loose or
+repeated line, "The next verse tells them apart", and the shared words under them as ⑥ set them (cut from
+the page by default, a count, or nothing, as the reader chose in the info panel).
+
+Considered, not built: putting the book's opening words of the look-alike verse under its name, the way the
+book's own rows read. It would make every row look alike, but it says what the verse says, not why it is
+listed; and the reason is what a hafiz is checking.
+
+What looking at it taught us:
+
+- **The picture first took the arrow's place.** In English on a laptop the shared words sat beside "The
+  next verse tells them apart" and pushed the arrow up beside the name, because the note's rows lay out in
+  two columns and the picture had no column of its own. It now sits under the captions, and the arrow stays
+  at the row's end. Checked by picture in English on a laptop and in Arabic on a phone.
+- **It makes ㊼'s doubled rows plainer here too.** 2:48's note lists the passage 2:122 to 2:123 and the verse
+  2:123 inside it, both now with the same picture, and 15:30's note lists the passage 38:72 to 38:75 beside
+  the book's own 38:74. How many rows a verse lists is ㊼, the owner's pick; nothing here changes it.
+
+Tests: unit tests on the note's list (a passage row says which verse is most alike and how many words it
+shares; a loose row says it is alike but not word for word; a book row keeps only its own line), which
+failed first; and a browser test that opens both demo notes and checks every row has a line under its name
+and that each picture sits under its captions, clear of the arrow. Both halves failed first.
