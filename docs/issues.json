@@ -3659,10 +3659,23 @@
         "file": "docs/PLAN.md",
         "item": "43"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "On a 744 by 1133 window the look-alike buttons at rest stand over the first letters of the page's first two lines. The large iPad's fix sends them into the bars; the mini's page is narrower and keeps them on the paper."
+      "closedBy": "apps/web/e2e/ipad.spec.ts",
+      "note": "On a 744 by 1133 window the look-alike buttons at rest stood over the first letters of the page's first two lines. Wider than a phone and narrower than a laptop, they now go into the verse's drawer head while it is up and the bottom bar once it is put away. iPad mini test in both languages, which failed first with a button on the paper."
+    },
+    {
+      "id": "verse-drawer-cuts-bar-buttons-ipad-mini-upright",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "44"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/ipad.spec.ts",
+      "note": "On an iPad mini held upright the verse's drawer stood as a middle card over the bottom bar and half covered the buttons either side of it. Below 900 pixels wide it now covers the whole bar, as on a phone. Same iPad mini test, which failed first with the page's tools button half under the drawer."
     },
     {
       "id": "lookalike-chip-over-modal-phone",

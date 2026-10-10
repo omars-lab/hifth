@@ -277,3 +277,68 @@ async function pinchOn(page: Page, target: Locator): Promise<void> {
   await finger("pointerup", 1, true);
   await page.waitForTimeout(300);
 }
+
+// The iPad mini held upright is narrower than a laptop, so it never had the
+// large iPad's rule, and a link lands with the page magnified to the window's
+// width: the look-alike buttons stood in the page's top corner, on the first
+// letters of its top two lines (plan item 43). And the verse's drawer, kept in
+// the middle with the bar's ends meant to show beside it, cut into all three of
+// the bar's buttons, the room beside it too narrow for them (plan item 44).
+// With the drawer up the buttons ride its head; put away, they go to the bar.
+for (const [lang, group, close] of [
+  ["en", "Links from this ayah", "Close"],
+  ["ar", "روابط الآية", "إغلاق"],
+] as const) {
+  test.describe(`Hifth · on an iPad mini held upright (${lang})`, () => {
+    test.use({ viewport: { width: 744, height: 1133 } });
+
+    const box = async (l: Locator) => (await l.boundingBox())!;
+    const meets = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
+      a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+    const inside = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
+      a.x >= b.x - 0.5 && a.x + a.width <= b.x + b.width + 0.5 && a.y >= b.y - 0.5 && a.y + a.height <= b.y + b.height + 0.5;
+
+    async function chipsOffThePage(page: Page, within: Locator): Promise<void> {
+      const rail = page.getByRole("group", { name: group });
+      await expect(rail).toBeVisible();
+      const stage = await box(page.locator("main"));
+      const paper = await box(leaf(page, 7));
+      const x = Math.max(stage.x, paper.x);
+      const y = Math.max(stage.y, paper.y);
+      const shownPaper = {
+        x,
+        y,
+        width: Math.min(stage.x + stage.width, paper.x + paper.width) - x,
+        height: Math.min(stage.y + stage.height, paper.y + paper.height) - y,
+      };
+      const home = await box(within);
+      const chips = await rail.locator("button[data-direction]").all();
+      expect(chips.length).toBeGreaterThan(0);
+      for (const chip of chips) {
+        const c = await box(chip);
+        expect(meets(c, shownPaper), `a button at ${JSON.stringify(c)} on the page shown at ${JSON.stringify(shownPaper)}`).toBe(false);
+        expect(inside(c, home), `a button at ${JSON.stringify(c)} outside its home at ${JSON.stringify(home)}`).toBe(true);
+      }
+    }
+
+    test("the look-alike buttons stay off the page, on the drawer and then the bar, and the drawer cuts no button in the bar", async ({ page }) => {
+      await page.goto(`/?lang=${lang}#/hafs-kfqc/2:48`);
+      await shown(page, 7);
+      const drawer = page.locator("section").filter({ has: page.locator("header") }).filter({ has: page.getByRole("button", { name: close }) }).last();
+      await expect(drawer).toBeVisible();
+      await page.waitForTimeout(600);
+      await chipsOffThePage(page, drawer);
+      // Each button in the bar is either wholly under the drawer or wholly
+      // clear of it: one cut by the drawer's edge reads as broken.
+      const d = await box(drawer);
+      for (const b of await page.locator("footer[data-keep-clear]").locator("button, a").all()) {
+        const r = await b.boundingBox();
+        if (!r || r.width === 0) continue;
+        expect(!meets(r, d) || inside(r, d), `a bar button at ${JSON.stringify(r)} cut by the drawer at ${JSON.stringify(d)}`).toBe(true);
+      }
+      await drawer.getByRole("button", { name: close }).click();
+      await expect(drawer).toBeHidden();
+      await chipsOffThePage(page, page.locator("footer[data-keep-clear]"));
+    });
+  });
+}

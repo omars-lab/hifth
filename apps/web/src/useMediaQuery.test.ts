@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/preact";
-import { DESKTOP_QUERY, useMediaQuery } from "./useMediaQuery";
+import { DESKTOP_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
 
 /**
  * A controllable `matchMedia`. jsdom does not implement one, which is itself the
@@ -61,6 +61,17 @@ describe("DESKTOP_QUERY", () => {
     // because vitest rewrites `import.meta.url` to an http URL.
     const css = readFileSync(resolve(process.cwd(), "src/components/DesktopChrome.module.css"), "utf8");
     expect(css).toContain(`@media ${DESKTOP_QUERY}`);
+  });
+});
+
+describe("PHONE_QUERY", () => {
+  it("is the same width the look-alike buttons' stylesheet turns into a row at", () => {
+    // Below this width the buttons lie in a row above the page's first line, and
+    // the app keeps them there instead of moving them into the bottom bar or the
+    // verse's drawer. If the two drift apart, a width between them puts the
+    // buttons in neither place, or in both. Read off disk for the reason above.
+    const css = readFileSync(resolve(process.cwd(), "src/components/HopRail.module.css"), "utf8");
+    expect(css).toContain(`@media ${PHONE_QUERY}`);
   });
 });
 

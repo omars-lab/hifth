@@ -120,7 +120,7 @@ import { JumpPicker, type JumpChoice } from "./components/JumpPicker";
 import { useHashRouter } from "./useHashRouter";
 import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
-import { DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, useMediaQuery } from "./useMediaQuery";
+import { DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
 import { useRoomForCards } from "./components/over-leaf";
 import { spanOfAll, type CardSpan } from "./components/short-band";
 import {
@@ -441,6 +441,7 @@ export function App(): JSX.Element {
   // Upright, two pages were each half the screen wide with empty space above
   // and below them.
   const upright = useMediaQuery(UPRIGHT_QUERY);
+  const phone = useMediaQuery(PHONE_QUERY);
   const touchScreen = useMediaQuery(TOUCH_QUERY);
   const [pageMode, setPageMode] = useState<"one" | "two">(() => (upright ? "one" : "two"));
   const pageModePickedRef = useRef(false);
@@ -3233,8 +3234,34 @@ export function App(): JSX.Element {
   // and covers that (⑩). The share card opens over either, in the same corner
   // (⑫), so the page clears whichever reaches further in.
   const sideCard = desktop && pageMode === "one" && !upright ? cornerSpan : shareCorner;
-  const railAt: "bar" | "tools" | null =
-    !desktop || roomBeside ? null : railHome === "tools" && penAt === "strip" ? "tools" : "bar";
+  // The verse's drawer, while it is up (its own rule, below).
+  const drawerUp =
+    selectedKey !== null &&
+    !drawerAway &&
+    !full &&
+    (tool === "select" || tool === "highlight") &&
+    !rootsOpen &&
+    !commentaryOpen &&
+    !introSheet &&
+    openDirection === null &&
+    verseMenuAt === null;
+  // Narrower than a laptop but wider than a phone (an iPad mini upright), a
+  // page magnified to the window's width leaves no room either side either,
+  // and the chips stood in its top corner on the first letters of its top two
+  // lines (plan item 43). Unless a sheet or card is carrying them, they go to
+  // the drawer's head while it is up, the tool row there, and to the bar once
+  // it is put away; the drawer covers the bar while it is up.
+  const railAt: "bar" | "tools" | null = desktop
+    ? roomBeside
+      ? null
+      : railHome === "tools" && penAt === "strip"
+        ? "tools"
+        : "bar"
+    : phone || roomBeside || noteTall || shareCorner !== null || highestTop(coverTop, shareTop, listTop) !== null
+      ? null
+      : drawerUp
+        ? "tools"
+        : "bar";
 
   return (
     // The chrome reads in the UI language's direction — every offset in the
@@ -3634,7 +3661,7 @@ export function App(): JSX.Element {
             {/* On a phone the chips float in the stage's top corner. Above the
                 breakpoint the spread places them itself, on the desk beside the
                 live page (`beside`, above). */}
-            {!desktop && hopRail()}
+            {!desktop && railAt === null && hopRail()}
             <HopPopover
               chip={openChip}
               fromKey={selectedKey}
@@ -3931,18 +3958,9 @@ export function App(): JSX.Element {
           two never show at once. */}
       <VerseDrawer
         label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
-        open={
-          selectedKey !== null &&
-          !drawerAway &&
-          !full &&
-          (tool === "select" || tool === "highlight") &&
-          !rootsOpen &&
-          !commentaryOpen &&
-          !introSheet &&
-          openDirection === null &&
-          verseMenuAt === null
-        }
+        open={drawerUp}
         onClose={putDrawerAway}
+        end={!desktop && railAt === "tools" ? hopRail(undefined, "tools") : undefined}
       >
         <PlayTrigger
           selectedKey={selectedKey}

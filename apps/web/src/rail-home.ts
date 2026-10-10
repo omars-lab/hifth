@@ -13,6 +13,10 @@
  *   tools  the end of the tool row above the page, falling back to the bottom
  *          row when the tools live somewhere else.
  *
+ * Wider than a phone and narrower than a laptop (an iPad mini held upright),
+ * the verse's drawer is the tool row: while it is up the buttons stand at the
+ * end of its head, and once it is put away they go to the bottom row.
+ *
  * Its own module, free of React and CSS, as `pen-home.ts` is.
  */
 
