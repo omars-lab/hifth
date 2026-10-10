@@ -1524,6 +1524,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     name written along it stays as a setting in the info panel. It still covers the small juz
     label in the head margin, which the page bar repeats. A phone test on a page bound on each
     side checks the ribbon ends above the writing; it failed first on both.
+50. ~~**On a phone, the open tools hid the card a highlight opens.**~~
+    Found on 2026-10-10 walking the live site on a phone: with the tools open, highlighting a
+    passage slid its card up behind the tool row, which cut the card's title in half and hid
+    what lay under it. The tools were drawn on the layer kept for passing messages, above
+    every card. **Fixed the same day:** the tools now sit above the rest of the app's frame and
+    below every card. A phone test highlights with the tools open and checks the card is on top
+    wherever the two meet; it failed first on both phones.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

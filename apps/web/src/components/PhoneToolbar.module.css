@@ -85,6 +85,10 @@
 
 /* B · the fan: the tools stood up above the button, with their names, over
    the page only while it is open. */
+/* Both the fan and the tray are the app's frame: above the rest of it, below
+   every card that opens over the page. They once sat on the layer kept for
+   passing messages, and a highlight's card slid up behind the tray, which hid
+   its title (2026-10-10, walking a phone). */
 .case {
   position: relative;
 }
@@ -93,7 +97,7 @@
   position: absolute;
   inset-block-end: calc(100% + var(--space-2));
   inset-inline-start: 0;
-  z-index: 30;
+  z-index: calc(var(--z-sheet) - 1);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -129,7 +133,7 @@
   position: absolute;
   inset-inline: 0;
   inset-block-end: 0;
-  z-index: 30;
+  z-index: calc(var(--z-sheet) - 1);
   display: flex;
   flex-direction: column;
   gap: 2px;

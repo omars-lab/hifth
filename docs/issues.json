@@ -3732,6 +3732,18 @@
       "note": "Found walking the live site on a laptop (2026-10-10): magnified to 125% on an open book, a turn grew the page being read but left the page beside it at its normal size. The facing page is built afresh for each opening, and its first-load centring reset the zoom the turn had just mirrored. The page stage now takes the level to open at, and the facing page asks the live page for it. Test turns forward twice and back once, watched failing first."
     },
     {
+      "id": "highlight-card-under-tools-phone",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "50"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/phone-toolbar.spec.ts",
+      "note": "Found walking the live site on a phone (2026-10-10): with the tools open, a highlight's card slid up behind the tool row, which hid its title. The tools were on the layer kept for passing messages; they now sit below every card. Test on both phones, watched failing first."
+    },
+    {
       "id": "ribbon-covers-first-words",
       "source": {
         "file": "docs/PLAN.md",
