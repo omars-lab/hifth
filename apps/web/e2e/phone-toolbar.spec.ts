@@ -1,5 +1,6 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
+import { midSign } from "./signs";
 
 /*
  * The page tools on a phone, step 5 of docs/design/page-toolbar-plan.md: three
@@ -91,6 +92,55 @@ test.describe("Hifth · the page tools on a phone", () => {
     expect(card.y + card.height).toBeLessThanOrEqual(tray.y);
     await box.getByRole("button", { name: "Done" }).click();
     await expect(box).toHaveCount(0);
+  });
+
+  test("a highlight's card opens over the open tools, not under them", async ({ page }) => {
+    // The tray was drawn on the layer kept for passing messages, above every
+    // card that opens over the page: a highlight's card slid up behind it, and
+    // the tray hid the card's title and the top of its list (2026-10-10,
+    // walking the live site on a phone).
+    await page.goto("/#/hafs-kfqc/p7");
+    await bar(page, "c").getByRole("button", { name: /^Page tools · Select is on$/ }).click();
+    await radio(page, "Highlight").click();
+    const from = await ayahTarget(page, "#verse-46");
+    const to = await ayahTarget(page, "#verse-47");
+    await page.mouse.move(from.x, from.y);
+    await page.mouse.down();
+    await page.mouse.move(to.x, to.y, { steps: 8 });
+    await page.mouse.up();
+    const card = page.getByRole("dialog", { name: /^Highlighted passage · / });
+    await expect(card).toBeVisible();
+    await card.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((x) => x.finished)));
+    const tray = (await page.getByRole("toolbar", { name: "Page tools" }).boundingBox())!;
+    const box = (await card.boundingBox())!;
+    // Wherever the two overlap, it is the card a finger lands on.
+    const top = Math.max(tray.y, box.y);
+    const bottom = Math.min(tray.y + tray.height, box.y + box.height);
+    expect(bottom, "the card reaches down over the tray").toBeGreaterThan(top);
+    for (const y of [top + 4, (top + bottom) / 2, bottom - 4])
+      for (const x of [box.x + 24, box.x + box.width / 2, box.x + box.width - 24])
+        expect(
+          await page.evaluate(([px, py]) => !!document.elementFromPoint(px!, py!)?.closest('[role="dialog"]'), [x, y]),
+          `at ${Math.round(x)},${Math.round(y)} the card is on top`,
+        ).toBe(true);
+  });
+
+  test("the harakat tool's magnifier goes once the finger lifts, and the sign keeps its note", async ({ page }) => {
+    // A tap rang the sign and opened its note, and the magnifier stayed on over
+    // the lines above it while the note was written: it was put up again a
+    // moment after the finger had already gone (2026-10-10, the live site).
+    // The iPhone's install notice is put away first, as a reader does once: it
+    // pushes the page down and the middle of it under the tools.
+    await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
+    await page.goto("/#/hafs-kfqc/p7");
+    await bar(page, "c").getByRole("button", { name: /^Page tools · Select is on$/ }).click();
+    await radio(page, "Harakat").click();
+    const at = await midSign(page);
+    await page.touchscreen.tap(at.x, at.y);
+    await expect(page.getByRole("dialog", { name: /^Your note on / })).toBeVisible();
+    await expect(page.locator("[data-note-pin]:visible")).toHaveCount(1);
+    await page.waitForTimeout(500);
+    await expect(page.locator("[data-sign-loupe]")).toHaveCount(0);
   });
 
   test("every tool, and the highlighter's pens, fit across the phone without pushing the page sideways", async ({
