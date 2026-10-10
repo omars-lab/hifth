@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode, type Ref } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode, type Ref } from "react";
 import { spreadOf } from "@hifth/core";
 import { useT } from "../i18n";
 import { deskHoldsRail } from "../rail-home";
@@ -316,8 +316,12 @@ export function PageSpread({
         {leaf(left, "left")}
         {/* Solo — the book is closed to one magnified leaf — takes the rails
             away: there is no facing page to turn toward, and a fore-edge grab
-            over a page the reader is panning would fight the pan. */}
-        {!solo && edgeRails}
+            over a page the reader is panning would fight the pan. Named, as
+            the box after it is: the leaves trade places on every turn, and
+            with one more child after them the rails were built afresh as the
+            turn landed, dropping the corner the reader had lifted
+            (docs/issues/edge-rails-rebuilt-on-turn.md). */}
+        {!solo && <Fragment key="rails">{edgeRails}</Fragment>}
         {/* Closed to one page, the book runs the window's width and the desks
             are empty boxes; the room beside the page is inside the book, as
             wide as the stage says the page leaves (`--page-slack`, written
@@ -325,7 +329,7 @@ export function PageSpread({
             to pick a verse on, so the chips stand beside the live one —
             on its other side while a tall list stands on theirs. */}
         {solo && beside && (
-          <div className={styles.slack} data-slack={besideSide ?? liveSide}>
+          <div key="slack" className={styles.slack} data-slack={besideSide ?? liveSide}>
             {beside(besideSide ?? liveSide)}
           </div>
         )}
