@@ -3719,6 +3719,7 @@ export function App(): JSX.Element {
         page={page}
         selection={tajweedSelection}
         onSide={setKeySide}
+        side={sheetSide}
         credit={{
           text: t.tajweedCredit,
           href: "https://github.com/cpfair/quran-tajweed",

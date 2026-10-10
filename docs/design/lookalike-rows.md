@@ -423,3 +423,19 @@ English (the key on the right, the page to its left, the whole row of tools in s
 left-hand page that the key stands above the tool row, covers none of the page, and that the page
 comes back once it closes, which failed first (the key's foot 36 pixels below the top of the tool
 row, then, with that fixed, 111 and 91 pixels of the page covered).
+
+### ⑭ On a laptop with two pages, does the tajweed key cover the page it explains? · **fixed**
+
+**What it changes for a hafiz:** the same as ⑬, on the open book. With two pages the key kept the
+window's corner, so whenever the verse stood on that side the key lay over the very page whose colours
+it counts. In Arabic that is the left page, 2:49 at the top of page 8; in English the right. Found
+after ⑬, 2026-10-10, asking what the key does on a spread.
+
+**Fixed, 2026-10-10:** the key now lies over the facing page, the one the verse is not on, as the
+roots list, the note and the share card do on a spread. It still dims the book behind it and closes
+with a tap outside.
+
+Checked by picture on a laptop, 1280 wide, two pages, in the pitch, in Arabic: 2:49 with the key
+open lies over the right page and page 8 stands whole beside it. Tests: a laptop browser test for
+2:48 and 2:49 that the key covers none of the verse's page, which failed first for 2:49 (the key
+over 103 pixels of page 8 across).
