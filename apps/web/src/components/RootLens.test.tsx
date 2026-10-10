@@ -98,6 +98,63 @@ describe("RootLens", () => {
     expect(screen.getByText("نفس الصفحة")).toBeInTheDocument();
   });
 
+  // A full run of the checks (2026-10-10): each root's list arrives on its own,
+  // nearest page first is not the order they land in, and the open group kept
+  // jumping to whichever was nearest so far, so the row under a reader's thumb
+  // vanished. The list opens one group, once, when it has them all; after that
+  // only the reader changes it.
+  describe("the open group while the list is still filling", () => {
+    const [NEAR, FAR] = FAMILIES as [RootFamily, RootFamily];
+    const openHeads = () =>
+      screen.queryAllByRole("button", { expanded: true }).map((h) => h.textContent ?? "");
+
+    it("opens nothing by itself until every root has arrived, then the nearest", () => {
+      const { rerender } = render(
+        <RootLens families={[FAR]} loading canHop={always} onHop={noop} onClose={noop} />,
+      );
+      expect(openHeads()).toEqual([]);
+      rerender(<RootLens families={[NEAR, FAR]} canHop={always} onHop={noop} onClose={noop} />);
+      expect(openHeads()).toEqual([expect.stringContaining("ن ع م")]);
+    });
+
+    it("keeps the open group when a nearer one arrives after it", () => {
+      const { rerender } = render(
+        <RootLens families={[FAR]} canHop={always} onHop={noop} onClose={noop} />,
+      );
+      expect(openHeads()).toEqual([expect.stringContaining("ذ ك ر")]);
+      rerender(<RootLens families={[NEAR, FAR]} canHop={always} onHop={noop} onClose={noop} />);
+      expect(openHeads()).toEqual([expect.stringContaining("ذ ك ر")]);
+    });
+
+    it("does not re-open a group the reader shut", () => {
+      const { rerender } = render(
+        <RootLens families={[FAR]} canHop={always} onHop={noop} onClose={noop} />,
+      );
+      fireEvent.click(screen.getByRole("button", { expanded: true }));
+      expect(openHeads()).toEqual([]);
+      rerender(<RootLens families={[NEAR, FAR]} canHop={always} onHop={noop} onClose={noop} />);
+      expect(openHeads()).toEqual([]);
+    });
+
+    it("keeps the group the reader opened while the list was filling", () => {
+      const { rerender } = render(
+        <RootLens families={[FAR]} loading canHop={always} onHop={noop} onClose={noop} />,
+      );
+      fireEvent.click(screen.getByRole("button", { expanded: false }));
+      rerender(<RootLens families={[NEAR, FAR]} canHop={always} onHop={noop} onClose={noop} />);
+      expect(openHeads()).toEqual([expect.stringContaining("ذ ك ر")]);
+    });
+
+    it("opens the nearest again on the next opening", () => {
+      const { rerender } = render(
+        <RootLens families={[FAR]} canHop={always} onHop={noop} onClose={noop} />,
+      );
+      rerender(<RootLens families={null} canHop={always} onHop={noop} onClose={noop} />);
+      rerender(<RootLens families={[NEAR, FAR]} canHop={always} onHop={noop} onClose={noop} />);
+      expect(openHeads()).toEqual([expect.stringContaining("ن ع م")]);
+    });
+  });
+
   it("says page distance the way a hafiz does, in both directions", () => {
     render(<RootLens families={FAMILIES} canHop={always} onHop={noop} onClose={noop} />);
     fireEvent.click(screen.getByRole("button", { expanded: false }));

@@ -143,6 +143,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Sideways, a list never covers the verse's last line. · phone-side · issue:
   `sideways-list-covers-verse`
 - [ ] Scroll deep into a list: you can still close it. · any · issue: `list-sheet-title-scrolls-away`
+- [ ] Open the roots list on a verse with many roots (2:255) on a slow connection: the open group
+  stays the one you see while the rest arrive, and a group you open or shut stays that way. ·
+  any · test: "the open root stays open while the others are still arriving"
 - [ ] Every look-alike row that offers to open has something to show. · any · issue:
   `lookalike-row-opens-to-nothing`
 - [ ] Every look-alike row says why it is there: a difference line, a comparison to open, or a

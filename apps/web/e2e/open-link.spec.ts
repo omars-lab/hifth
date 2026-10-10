@@ -92,6 +92,45 @@ test.describe("Hifth · a link that opens a panel", () => {
     await expect(page.getByRole("dialog", { name: /^الجذور، / })).toBeVisible({ timeout: 20_000 });
   });
 
+  for (const order of ["first asked lands last", "last asked lands last"] as const) {
+    test(`the open root stays open while the others are still arriving: ${order}`, async ({ browser }) => {
+      // A full run of the checks (2026-10-10): the list opens the nearest root
+      // it has so far, and each root's data arrives on its own. A nearer root
+      // landing late shut the open one and opened itself, so the row under a
+      // reader's thumb could vanish as they reached for it.
+      // Own the context: the service worker answers these fetches itself,
+      // where `page.route` cannot slow them.
+      const context = await browser.newContext({ serviceWorkers: "block" });
+      const page = await context.newPage();
+      let asked = 0;
+      let landed = 0;
+      await page.route("**/assets/roots/*/root/*.json", async (route) => {
+        const n = asked++;
+        await new Promise((r) => setTimeout(r, order === "first asked lands last" ? 1600 - n * 300 : 200 + n * 300));
+        await route.continue();
+        landed++;
+      });
+      await page.addInitScript(() => {
+        const seen: string[] = [];
+        (window as unknown as { __openRoots: string[] }).__openRoots = seen;
+        new MutationObserver(() => {
+          const head = document.querySelector('[role="dialog"] [aria-expanded="true"] [lang="ar"]');
+          const root = head?.textContent ?? "";
+          if (root && seen.at(-1) !== root) seen.push(root);
+        }).observe(document, { childList: true, subtree: true, attributes: true });
+      });
+      await page.goto("/#/hafs-kfqc/2:255?open=roots");
+      await expect(page.getByRole("dialog")).toBeVisible({ timeout: 20_000 });
+      await expect.poll(() => asked, { timeout: 10_000 }).toBeGreaterThan(1);
+      await expect.poll(() => landed === asked, { timeout: 10_000 }).toBe(true);
+      await page.waitForTimeout(300);
+      const opened = await page.evaluate(() => (window as unknown as { __openRoots: string[] }).__openRoots);
+      expect(opened.length, "a root was opened for the reader").toBeGreaterThan(0);
+      expect(opened, "the open root never changed by itself").toHaveLength(1);
+      await context.close();
+    });
+  }
+
   test("a verse sheet on a link with no verse opens nothing", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p19?open=lookalikes");
     await expect(page.locator('svg[aria-labelledby="page-label-19"]:visible')).toBeVisible({
