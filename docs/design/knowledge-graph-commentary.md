@@ -576,6 +576,11 @@ slants match. The pitch test opens four of the densest. Two notes had a word the
 (a verse number with a letter for its last digit, so the reference was not a link, and a dot under a
 letter read as another letter); both were read off their page pictures and put right, and the
 reference is a link again. The other 436 notes two taps out are still upright.
+Reading them also showed the capture often gave straight quote marks where the book prints curly
+ones, and a hyphen where it prints a dash between two numbers (about one note in fifty, all
+through the book). One rule now sets them back in every note and every verse's translation, so no
+hand-read fix is spent on them; a quote mark between two letters is left alone, since there it
+is a misread letter. A pitch test checks a demo note shows none, watched failing first.
 Reading them turned up one more difference from the print: where the book slants a closing square
 bracket, the capture sometimes read it as a slash, a round bracket or a letter, so the bracket
 never closed. Three notes had it (14:48, 28:88 and 43:86); each was read off its page picture and

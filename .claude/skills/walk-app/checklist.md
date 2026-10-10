@@ -317,3 +317,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   number with a letter in it, is a word the capture misread; read it off the page picture and add it
   to the hand-read misreads. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/28:88'` · test:
   `e2e/pitch.spec.ts` ("a verse number the capture misread is put back")
+- [ ] A note's quote marks are curly and a range of numbers has a dash, as the book prints them: a
+  straight quote, or a hyphen between two numbers, is the capture's, and the typography rule should
+  have set it. A straight quote between two letters is a misread letter for the hand-read
+  misreads. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/28:88'` · test: `e2e/pitch.spec.ts`
+  ("prints the book's curly quotes")
