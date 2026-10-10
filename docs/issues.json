@@ -3619,6 +3619,52 @@
       "note": "On a 1133 by 744 window (an iPad mini on its side) the share card in the corner covers about 20 pixels of the page's right edge, where the verse's second line begins. The verse is whole top to bottom; the page does not move aside for the card."
     },
     {
+      "id": "share-card-covers-verse-ipad-upright",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "40"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/share-sheet.spec.ts",
+      "note": "On an iPad held upright the share card stood over the foot of the page and the page was not told, so one or two of the verse's lines sat under it. Held upright the page now lifts the verse above the card. Share tests on both iPad sizes in both languages, which failed first."
+    },
+    {
+      "id": "share-card-covers-tool-row-ipad-mini-upright",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "41"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/share-sheet.spec.ts",
+      "note": "On an iPad mini held upright the share card stood at the window's foot over the tool row and page ticks. On a window that narrow but tall it now stands above the bars. Share tests on both languages, which failed first with 26 and 24 buttons covered."
+    },
+    {
+      "id": "share-card-covers-tool-row-sideways-phone",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "42"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On an 844 by 390 window the share card runs nearly the full height, over the tool row and the foot of the top bar. The room between the bars is about 185 pixels, too little to stand the card inside it, so it needs a choice of shape."
+    },
+    {
+      "id": "lookalike-buttons-on-top-lines-ipad-mini-upright",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "43"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On a 744 by 1133 window the look-alike buttons at rest stand over the first letters of the page's first two lines. The large iPad's fix sends them into the bars; the mini's page is narrower and keeps them on the paper."
+    },
+    {
       "id": "lookalike-chip-over-modal-phone",
       "source": {
         "file": "docs/design/lookalike-rows.md",
