@@ -1149,6 +1149,22 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     await context.close();
   });
 
+  test("a link to the book's first verse keeps the opening page's lines on the screen", async ({ page }) => {
+    // The first two pages already draw their text larger than every other
+    // page's, and a link's usual closer look went on top: 2:1, one word,
+    // landed at twice the size of other pages' type with the opening lines
+    // running off the screen (plan item 37).
+    await page.goto("/#/hafs-kfqc/2:1");
+    const svg = pageSvg(page, 2);
+    await expect(svg).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("dialog").first()).toBeVisible();
+    await page.waitForTimeout(1200);
+    const [box, width] = await Promise.all([svg.boundingBox(), page.evaluate(() => innerWidth)]);
+    expect(box, "page 2 is drawn").not.toBeNull();
+    expect(box!.x, "the lines begin on the screen").toBeGreaterThanOrEqual(-1);
+    expect(box!.x + box!.width, "the lines end on the screen").toBeLessThanOrEqual(width + 1);
+  });
+
   for (const open of ["key", "about", "jump", "editions", "shelf", "record"] as const) {
     test(`a panel that dims the page (${open}) stands over the look-alike buttons on the note's edge`, async ({ page }) => {
       // The look-alike buttons ride the top edge of the note on a phone, one

@@ -1402,6 +1402,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     carry. Tested in the pitch browser tests (the name at Ya-Sin and At-Tawbah, every line
     of the menu, each pick, the keyboard, the bottom-corner number pressed with the mouse)
     and unit tests of where the wash and each number's ring go.
+37. ~~**On a phone, a link to the book's first verse blew page 2 up past both edges.**~~
+    Found on 2026-10-10 walking the pitch on a phone: the first two pages already draw their
+    text about one and a half times larger than the rest, so it fills their paper, and a
+    jump's closer look went on top of that. 2:1, one word long, landed at more than twice the
+    size of every other page's type, with the basmala and the opening lines running off the
+    left edge. **Fixed the same day:** on those two pages a jump takes off what the page has
+    already enlarged, so it lands at the same size of type as on any other page, and never
+    out past the whole page; with the setting that keeps the opening text at the usual size
+    nothing changes. Tested in the pitch phone browser tests (a link to 2:1 keeps page 2's
+    lines on the screen, which failed first, 171 pixels off the left edge) and unit tests of
+    the rule.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

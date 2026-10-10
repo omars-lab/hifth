@@ -3584,6 +3584,18 @@
       "note": "On a laptop with two pages the tajweed key kept the corner and covered the verse's page whenever the verse stood on that side. It now lies over the facing page, as the share card does; a laptop browser test for a verse on each page failed first."
     },
     {
+      "id": "phone-hop-opening-page-too-large",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "37"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "On a phone a link to 2:1 put a jump's closer look on top of the first two pages' already larger text, so page 2 landed at more than twice other pages' type with its opening lines off the left edge. A jump there now takes off what the page already enlarged; a pitch phone test failed first, plus unit tests of the rule."
+    },
+    {
       "id": "lookalike-chip-over-modal-phone",
       "source": {
         "file": "docs/design/lookalike-rows.md",

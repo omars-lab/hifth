@@ -7,6 +7,7 @@ import {
   easeInOutCubic,
   frameBboxToView,
   hopZoomFor,
+  hopZoomOnLargeType,
   lerpView,
   nearFitRoom,
   nearFitZoom,
@@ -91,6 +92,24 @@ describe("hopZoomFor: a verse a link opens on is shown whole across", () => {
     const narrow = { ...CTX, stageWidth: 300 };
     expect(hopZoomFor({ x: 0, y: 0, width: 345, height: 40 }, narrow, DEFAULT_HOP_ZOOM)).toBe(1);
     expect(hopZoomFor({ x: 145, y: 265, width: 55, height: 20 }, CTX, 1)).toBe(1);
+  });
+});
+
+describe("hopZoomOnLargeType: a link lands at the same size of type on every page", () => {
+  // The first two pages draw their text larger than the rest, and the hop's
+  // closer look went on top of that: a one-word verse there landed at more
+  // than twice other pages' type (plan item 37).
+  it("takes off what the page has already enlarged", () => {
+    expect(hopZoomOnLargeType(1.5, 1.25)).toBeCloseTo(1.2);
+  });
+
+  it("never goes below the whole page", () => {
+    expect(hopZoomOnLargeType(1.5, 2)).toBe(1);
+  });
+
+  it("leaves a page drawn at the usual size alone", () => {
+    expect(hopZoomOnLargeType(1.5, 1)).toBe(1.5);
+    expect(hopZoomOnLargeType(1.5, 0.75)).toBe(1.5);
   });
 });
 

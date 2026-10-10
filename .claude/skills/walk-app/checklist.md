@@ -20,6 +20,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   in the middle, not on a squat card. · desktop, phone · issue: `opening-pages-squat`
 - [ ] In the info panel, set "The first two pages" to usual size: pages 1 and 2 redraw at once with
   their text the size of page 3's, still centred, and a tap on a verse there still opens it. · desktop, phone
+- [ ] Open a link to 2:1 on a phone: page 2's lines stay on the screen, no larger than a jump makes
+  any other page's type (the basmala whole), in English and in Arabic. · phone, iphone · issue:
+  `phone-hop-opening-page-too-large`
 
 ## Turning pages
 
