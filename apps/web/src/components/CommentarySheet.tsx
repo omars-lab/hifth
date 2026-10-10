@@ -10,6 +10,7 @@ import {
 } from "@hifth/core";
 import { edgeNote } from "../edge-note";
 import { useT } from "../i18n";
+import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import type { Commentator } from "../pitch/pitch";
 import { useNoteRoom } from "../long-verse";
 import { useRelatedList } from "../related-list";
@@ -227,6 +228,7 @@ export function CommentarySheet({
   sigla?: ReadonlyMap<string, Commentator>;
 }): JSX.Element | null {
   const { t, dir, lang } = useT();
+  const touch = useMediaQuery(TOUCH_QUERY);
   const sheetRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const cardId = useId();
@@ -573,7 +575,10 @@ export function CommentarySheet({
           {roads.length > 0 && (
             <section className={styles.related} aria-label={t.relatedVerses}>
               <h3 className={styles.relatedTitle}>{t.relatedVerses}</h3>
-              <p className={styles.relatedLede}>{t.relatedLede(entry.source.label)}</p>
+              {/* A finger is told to tap, a mouse to click. */}
+              <p className={styles.relatedLede}>
+                {touch ? t.relatedLede(entry.source.label) : t.relatedLedeClick(entry.source.label)}
+              </p>
               <ul className={styles.roads}>
                 {[...orderForHifz(roads), ...(showMore ? orderForHifz(moreRoads) : [])].map((edge, i) => {
                   const enabled = canHop ? canHop(edge.to) : true;

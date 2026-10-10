@@ -12,6 +12,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 
 - [ ] Open the app cold, hint not yet seen. · any · The hint says the right thing for the hand:
   "click" at a desk, "tap" on a phone. · issue: `desktop-hint-says-tap`
+- [ ] At a desk, read every line that tells the hand what to do (under the page, each tool's line on
+  the tools bar, the first tips, the empty notes list, the related verses' line): none says tap, in
+  English or Arabic. On an iPad on its side, the same lines say tap, not click. · desktop, laptop,
+  ipad-side · issue: `desk-lines-say-tap`
 - [ ] An upright iPad opens on one page you can read, not two small ones. · ipad · issue:
   `upright-ipad-opens-two-small-pages`
 - [ ] A deep link to a verse lands on its page with the verse marked; turn the phone the moment it

@@ -1,4 +1,5 @@
 import { useT } from "../i18n";
+import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import styles from "./TrailBeads.module.css";
 
 /** One hop origin on the trail: where you were, and its page. */
@@ -16,7 +17,7 @@ interface TrailBeadsProps {
   onBeadBack: (index: number) => void;
   /** Clear the current selection (tap the live bead). */
   onClearCurrent: () => void;
-  /** Said in place of the tap hint while a page tool is on (the phone's tools). */
+  /** Said in place of the tap hint: a tool's own line, or the click wording for a mouse. */
   hint?: string | undefined;
 }
 
@@ -34,6 +35,7 @@ export function TrailBeads({
   hint,
 }: TrailBeadsProps): JSX.Element {
   const { t } = useT();
+  const touch = useMediaQuery(TOUCH_QUERY);
   if (!currentKey) {
     return <span className={styles.hint}>{hint ?? t.tapHint}</span>;
   }
@@ -65,7 +67,7 @@ export function TrailBeads({
         className={`${styles.bead} ${styles.beadCurrent}`}
         onClick={onClearCurrent}
         aria-current="location"
-        aria-label={t.beadCurrent(currentLabel)}
+        aria-label={touch ? t.beadCurrent(currentLabel) : t.beadCurrentClick(currentLabel)}
       >
         <span className={styles.beadDot} aria-hidden="true" />
         <span className={styles.beadLabel}>{currentLabel}</span>

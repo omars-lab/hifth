@@ -21,6 +21,7 @@ export interface Catalog {
   readonly backTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
   readonly beadBack: (d: { readonly label: string | number }) => string;
   readonly beadCurrent: (d: { readonly label: string | number }) => string;
+  readonly beadCurrentClick: (d: { readonly label: string | number }) => string;
   readonly beta: string;
   readonly bmAddAnother: string;
   readonly bmCancel: string;
@@ -65,6 +66,7 @@ export interface Catalog {
   readonly chipAria: (d: { readonly direction: string | number; readonly countText: string | number }) => string;
   readonly clearSelection: string;
   readonly clickForNote: (d: { readonly source: string | number }) => string;
+  readonly clickHint: string;
   readonly close: string;
   readonly coachDone: string;
   readonly coachDoneAria: string;
@@ -74,10 +76,12 @@ export interface Catalog {
   readonly coachSkip: string;
   readonly "coachSteps.1.body": string;
   readonly "coachSteps.1.title": string;
+  readonly "coachSteps.1.titleClick": string;
   readonly "coachSteps.2.body": string;
   readonly "coachSteps.2.title": string;
   readonly "coachSteps.3.body": string;
   readonly "coachSteps.3.title": string;
+  readonly "coachSteps.3.titleClick": string;
   readonly commentaryBy: (d: { readonly source: string | number }) => string;
   readonly commentaryOn: (d: { readonly label: string | number }) => string;
   readonly commentaryTitle: string;
@@ -269,6 +273,7 @@ export interface Catalog {
   readonly noteRestored: string;
   readonly noteSaved: string;
   readonly noteShelfEmpty: string;
+  readonly noteShelfEmptyClick: string;
   readonly noteShelfHead: string;
   readonly noteShowAll: string;
   readonly noteShowLess: string;
@@ -348,6 +353,7 @@ export interface Catalog {
   readonly pitchCredit: string;
   readonly playAyah: (d: { readonly label: string | number }) => string;
   readonly playToPick: string;
+  readonly playToPickClick: string;
   readonly playingRun: (d: { readonly from: string | number; readonly to: string | number }) => string;
   readonly prevPage: string;
   readonly qulVerse: (d: { readonly label: string | number }) => string;
@@ -367,6 +373,7 @@ export interface Catalog {
   readonly rangeUnavailable: string;
   readonly refJoin: string;
   readonly relatedLede: (d: { readonly source: string | number }) => string;
+  readonly relatedLedeClick: (d: { readonly source: string | number }) => string;
   readonly relatedListAll: string;
   readonly relatedListLine: string;
   readonly relatedListNote: string;
@@ -455,6 +462,7 @@ export interface Catalog {
   readonly tipsShow: string;
   readonly toolBookmark: string;
   readonly toolBookmarkHint: string;
+  readonly toolBookmarkHintClick: string;
   readonly toolCrop: string;
   readonly toolCropHint: string;
   readonly toolHighlight: string;
@@ -465,17 +473,21 @@ export interface Catalog {
   readonly toolLockedHintTouch: (d: { readonly name: string | number }) => string;
   readonly toolMistake: string;
   readonly toolMistakeHint: string;
+  readonly toolMistakeHintClick: string;
   readonly toolNote: string;
   readonly toolNoteHint: string;
+  readonly toolNoteHintClick: string;
   readonly toolOn: (d: { readonly name: string | number }) => string;
   readonly toolRead: string;
   readonly toolReadHint: string;
+  readonly toolReadHintClick: string;
   readonly toolSelect: string;
   readonly toolSign: string;
   readonly toolSignHint: string;
   readonly toolSignHintTouch: string;
   readonly toolWord: string;
   readonly toolWordHint: string;
+  readonly toolWordHintClick: string;
   readonly toolbarLabel: string;
   readonly trail: string;
   readonly turnSectionTitle: string;

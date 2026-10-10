@@ -26,7 +26,7 @@ test.describe("Hifth · the mistake tool", () => {
 
     await page.keyboard.press("KeyM");
     await expect(toolBtn(page, "Mistake")).toHaveAttribute("aria-checked", "true");
-    await expect(bar(page)).toContainText("Tap a word to mark a slip");
+    await expect(bar(page)).toContainText("Click a word to mark a slip");
 
     const at = await ayahTarget(page, "#verse-46");
     await page.mouse.click(at.x, at.y);

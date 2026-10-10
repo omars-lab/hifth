@@ -116,6 +116,8 @@ type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt";
 /** One coach card: the glyph belongs to the component, the words to the language. */
 export interface CoachStep {
   readonly title: string;
+  /** The title to a mouse, where the touch one says tap. */
+  readonly titleClick?: string;
   readonly body: string;
 }
 
@@ -294,6 +296,7 @@ export interface Strings {
   surahIntro: string;
   relatedVerses: string;
   relatedLede(source: string): string;
+  relatedLedeClick(source: string): string;
   /** The line under a short related list that shows the rest, with how many. */
   relatedMore(count: number): string;
   /** A closed look-alike row's count of the words the pair shares. */
@@ -342,8 +345,11 @@ export interface Strings {
 
   /* ---- trail beads + share ------------------------------------------------ */
   tapHint: string;
+  /** The same, to a mouse: a desk has no finger on the glass. */
+  clickHint: string;
   beadBack(label: string): string;
   beadCurrent(label: string): string;
+  beadCurrentClick(label: string): string;
   shareTitle: string;
   shareTextTrail: string;
   shareTextRange: string;
@@ -684,8 +690,10 @@ export interface Strings {
   toolLockedHint(name: string): string;
   toolLockedHintTouch(name: string): string;
   toolBookmarkHint: string;
+  toolBookmarkHintClick: string;
   toolNote: string;
   toolNoteHint: string;
+  toolNoteHintClick: string;
   /** A note's pin, named by its verse. */
   notePin(label: string): string;
   /** The box a note is typed in, named by its verse. */
@@ -735,6 +743,7 @@ export interface Strings {
   /** The page map's list of notes, and the bar shown while following one. */
   noteShelfHead: string;
   noteShelfEmpty: string;
+  noteShelfEmptyClick: string;
   noteFollowing: string;
   noteFollowAt(at: number, count: number): string;
   noteFollowPrev: string;
@@ -742,6 +751,7 @@ export interface Strings {
   noteFollowStop: string;
   toolMistake: string;
   toolMistakeHint: string;
+  toolMistakeHintClick: string;
   /** Said when a word is marked, named by its verse. */
   mistakeMarked(label: string): string;
   /** The sign picker, named by its verse. */
@@ -758,6 +768,7 @@ export interface Strings {
   toolSignHint: string;
   toolRead: string;
   toolReadHint: string;
+  toolReadHintClick: string;
   /** The verse drawer (selection-drawer = D): its name, and each tool's caption. */
   verseTools(label: string): string;
   vdListen: string;
@@ -844,6 +855,7 @@ export interface Strings {
   vdJumpAria(label: string): string;
   verseMore(label: string): string;
   playToPick: string;
+  playToPickClick: string;
   playingRun(from: string, to: string): string;
   copiedLink(label: string): string;
   cornerPlay: string;
@@ -858,6 +870,7 @@ export interface Strings {
   fullScreenOff: string;
   toolWord: string;
   toolWordHint: string;
+  toolWordHintClick: string;
   /** The word tool's row of parts, named by its verse. */
   wordParts(label: string): string;
   wordPartsHint: string;
@@ -1059,6 +1072,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     surahIntro: m.surahIntro,
     relatedVerses: m.relatedVerses,
     relatedLede: (source) => m.relatedLede({ source }),
+    relatedLedeClick: (source) => m.relatedLedeClick({ source }),
     relatedMore: (count) => m.relatedMore({ n: count, nText: n(count) }),
     sharesWords: (count) => m.sharesWords({ n: count, nText: n(count) }),
     goToVerse: (label) => m.goToVerse({ label }),
@@ -1087,8 +1101,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     clearSelection: m.clearSelection,
 
     tapHint: m.tapHint,
+    clickHint: m.clickHint,
     beadBack: (label) => m.beadBack({ label }),
     beadCurrent: (label) => m.beadCurrent({ label }),
+    beadCurrentClick: (label) => m.beadCurrentClick({ label }),
     shareTitle: m.shareTitle,
     shareTextTrail: m.shareTextTrail,
     shareTextRange: m.shareTextRange,
@@ -1117,9 +1133,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     // reordered array would silently pair one language's title with another's
     // body. The numbers are the pairing.
     coachSteps: [
-      { title: m["coachSteps.1.title"], body: m["coachSteps.1.body"] },
+      { title: m["coachSteps.1.title"], titleClick: m["coachSteps.1.titleClick"], body: m["coachSteps.1.body"] },
       { title: m["coachSteps.2.title"], body: m["coachSteps.2.body"] },
-      { title: m["coachSteps.3.title"], body: m["coachSteps.3.body"] },
+      { title: m["coachSteps.3.title"], titleClick: m["coachSteps.3.titleClick"], body: m["coachSteps.3.body"] },
     ],
     coachNext: m.coachNext,
     coachDone: m.coachDone,
@@ -1390,8 +1406,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolLockedHint: (name) => m.toolLockedHint({ name }),
     toolLockedHintTouch: (name) => m.toolLockedHintTouch({ name }),
     toolBookmarkHint: m.toolBookmarkHint,
+    toolBookmarkHintClick: m.toolBookmarkHintClick,
     toolNote: m.toolNote,
     toolNoteHint: m.toolNoteHint,
+    toolNoteHintClick: m.toolNoteHintClick,
     notePin: (label) => m.notePin({ label }),
     noteBox: (label) => m.noteBox({ label }),
     noteDone: m.noteDone,
@@ -1429,6 +1447,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteVerseTakenOut: m.noteVerseTakenOut,
     noteShelfHead: m.noteShelfHead,
     noteShelfEmpty: m.noteShelfEmpty,
+    noteShelfEmptyClick: m.noteShelfEmptyClick,
     noteFollowing: m.noteFollowing,
     noteFollowAt: (at, count) => m.noteFollowAt({ atText: n(at), nText: n(count) }),
     noteFollowPrev: m.noteFollowPrev,
@@ -1436,6 +1455,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteFollowStop: m.noteFollowStop,
     toolMistake: m.toolMistake,
     toolMistakeHint: m.toolMistakeHint,
+    toolMistakeHintClick: m.toolMistakeHintClick,
     mistakeMarked: (label) => m.mistakeMarked({ label }),
     mistakePicker: (label) => m.mistakePicker({ label }),
     mistakeWholeWord: m.mistakeWholeWord,
@@ -1449,6 +1469,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolSignHint: m.toolSignHint,
     toolRead: m.toolRead,
     toolReadHint: m.toolReadHint,
+    toolReadHintClick: m.toolReadHintClick,
     verseTools: (label) => m.verseTools({ label }),
     vdListen: m.vdListen,
     vdPause: m.vdPause,
@@ -1531,6 +1552,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     vdJumpAria: (label) => m.vdJumpAria({ label }),
     verseMore: (label) => m.verseMore({ label }),
     playToPick: m.playToPick,
+    playToPickClick: m.playToPickClick,
     playingRun: (from, to) => m.playingRun({ from, to }),
     copiedLink: (label) => m.copiedLink({ label }),
     cornerPlay: m.cornerPlay,
@@ -1544,6 +1566,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     fullScreenOff: m.fullScreenOff,
     toolWord: m.toolWord,
     toolWordHint: m.toolWordHint,
+    toolWordHintClick: m.toolWordHintClick,
     wordParts: (label) => m.wordParts({ label }),
     wordPartsHint: m.wordPartsHint,
     wordPartsHintMany: m.wordPartsHintMany,

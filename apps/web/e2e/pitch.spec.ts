@@ -106,7 +106,8 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     // the screen said it twice. One teacher at a time: the line comes back
     // when the tips are put away.
     await page.goto("/#/hafs-kfqc/p1?open=tips");
-    await expect(page.getByText("Tap an ayah", { exact: true })).toBeVisible({ timeout: 20_000 });
+    // A mouse, as here, is told to click.
+    await expect(page.getByText("Click an ayah", { exact: true })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText("Click a verse to read its Study Quran note")).toHaveCount(0);
     await page.getByRole("button", { name: "Skip" }).click();
     await expect(page.getByText("Click a verse to read its Study Quran note")).toBeVisible();
@@ -697,6 +698,15 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await settle(paper);
     const closed = (await paper.boundingBox())!;
     expect(Math.abs(open.y - closed.y)).toBeLessThan(2);
+  });
+
+  test("the line over a note's related verses tells a mouse to click", async ({ page }) => {
+    // It said "Tap one to go there" to a scholar at a laptop.
+    await page.goto("/#/hafs-kfqc/1:1");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    const finger = await page.evaluate(() => matchMedia("(pointer: coarse)").matches);
+    await expect(sheet(page)).toContainText(finger ? "Tap one to go there." : "Click one to go there.");
+    await expect(sheet(page)).not.toContainText(finger ? "Click one" : "Tap one");
   });
 
   test("a note ends on its words, not on the book's section-break stars", async ({ page }) => {

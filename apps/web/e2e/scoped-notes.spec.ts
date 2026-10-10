@@ -670,7 +670,11 @@ test.describe("Hifth · the list of notes, and following one", () => {
     await page.reload();
     await page.getByRole("button", { name: /what you have opened/ }).click();
     const list = page.getByRole("dialog", { name: "What you have opened" }).getByRole("region", { name: "Your notes" });
-    await expect(list).toContainText("No notes yet. Pick the note tool and tap a word to start one.");
+    // A finger is told to tap, a mouse to click.
+    const finger = await page.evaluate(() => matchMedia("(pointer: coarse)").matches);
+    await expect(list).toContainText(
+      `No notes yet. Pick the note tool and ${finger ? "tap" : "click"} a word to start one.`,
+    );
   });
 });
 

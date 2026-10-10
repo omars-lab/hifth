@@ -33,7 +33,7 @@ test.describe("Hifth · the note tool", () => {
 
     await page.keyboard.press("KeyN");
     await expect(toolBtn(page, "Note")).toHaveAttribute("aria-checked", "true");
-    await expect(bar(page)).toContainText("Tap a word to pin a note");
+    await expect(bar(page)).toContainText("Click a word to pin a note");
     const cursor = await page
       .locator('[data-tool="note"][data-page="7"]')
       .evaluate((el) => getComputedStyle(el).cursor);

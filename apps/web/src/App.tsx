@@ -2731,9 +2731,9 @@ export function App(): JSX.Element {
     (key: string) => {
       playFromRef.current = key;
       setDrawerAway(true);
-      announce(t.playToPick);
+      announce(touchScreen ? t.playToPick : t.playToPickClick);
     },
-    [announce, t],
+    [announce, t, touchScreen],
   );
   const markVerse = useCallback((key: string) => handleSelectRange(key, key, [key]), [handleSelectRange]);
   const noteOnVerse = useCallback(
@@ -3921,7 +3921,7 @@ export function App(): JSX.Element {
           onClearCurrent={handleClearCurrent}
           hint={
             tool === "read" || (!desktop && phoneBar !== "c" && tool !== "select")
-              ? toolHint(t, tool, true)
+              ? toolHint(t, tool, touchScreen)
               : // The pitch build's tap opens a Study Quran note, and this line
                 // is all a first visit is told (the tips open only from
                 // settings), so it says so, in the app's language. Only the
@@ -3933,7 +3933,10 @@ export function App(): JSX.Element {
                 ? touchScreen
                   ? t.tapForNote("Study Quran")
                   : t.clickForNote("Study Quran")
-                : undefined
+                : // The public line was left saying tap to a mouse.
+                  touchScreen
+                  ? undefined
+                  : t.clickHint
           }
         />
         {verseGestures !== "a" && (

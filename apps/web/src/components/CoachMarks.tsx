@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useT, type CoachStep } from "../i18n";
 import { COACH_STORAGE_KEY, coachDismissed, rememberDismissal } from "../coach";
 import { PITCH } from "../pitch/pitch";
+import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import styles from "./CoachMarks.module.css";
 
 // The key and its two accessors live in `../coach` — a module with no React and
@@ -41,6 +42,7 @@ const PITCH_STEP_OVERRIDES: Readonly<Record<number, Partial<CoachStep>>> = {
   },
   2: {
     title: "Tap a related verse",
+    titleClick: "Click a related verse",
     body: "You hop there, its note opens, and a bead on the trail brings you back.",
   },
 };
@@ -79,6 +81,7 @@ interface CoachMarksProps {
  */
 export function CoachMarks({ ready, open, onDismiss }: CoachMarksProps): JSX.Element | null {
   const { t } = useT();
+  const touch = useMediaQuery(TOUCH_QUERY);
   const [step, setStep] = useState(0);
   const stripRef = useRef<HTMLDivElement>(null);
 
@@ -122,6 +125,8 @@ export function CoachMarks({ ready, open, onDismiss }: CoachMarksProps): JSX.Ele
     ? t.coachSteps.map((s, i) => ({ ...s, ...PITCH_STEP_OVERRIDES[i] }))
     : t.coachSteps;
   const current = steps[step]!;
+  // The tap tips, said as a click to a mouse.
+  const title = touch ? current.title : (current.titleClick ?? current.title);
   const last = step === steps.length - 1;
 
   return (
@@ -136,7 +141,7 @@ export function CoachMarks({ ready, open, onDismiss }: CoachMarksProps): JSX.Ele
         {GLYPHS[step]}
       </span>
       <p className={styles.text}>
-        <span className={styles.title}>{current.title}</span>
+        <span className={styles.title}>{title}</span>
         <span className={styles.body}>{current.body}</span>
       </p>
       <span className={styles.count} aria-hidden="true">

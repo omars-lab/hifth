@@ -129,6 +129,19 @@ test.describe("Hifth · on an iPad", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
+  test("on its side, the tools bar tells a finger to tap, not to click", async ({ page }) => {
+    // Held sideways the iPad is wide enough for the desk's tools bar, and the
+    // bar spoke to a mouse: "point at a vowel-sign, click" to a finger.
+    await page.setViewportSize(LANDSCAPE);
+    await page.goto("/#/hafs-kfqc/p8");
+    await shown(page, 7);
+    const bar = page.getByRole("toolbar");
+    await page.keyboard.press("KeyK");
+    await expect(bar).toContainText("اضغط قرب علامة تشكيل لتكتب عليها ملاحظة");
+    await page.keyboard.press("Escape");
+    await expect(page.getByText("المس آية على الصفحة لتحديدها")).toBeVisible();
+  });
+
   // Found in the iPad app held sideways (2026-10-08): each page of the open
   // book is its own surface, so a pinch across the fold reached each page as a
   // lone finger dragging, which means "select a run of verses". A run across

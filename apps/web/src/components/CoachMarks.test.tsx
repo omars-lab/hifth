@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { useState } from "react";
 import { render, screen, fireEvent } from "@testing-library/preact";
 import { CoachMarks } from "./CoachMarks";
@@ -20,8 +20,22 @@ function Harness({ ready = true, onDismiss }: { ready?: boolean; onDismiss?: () 
 
 const region = () => screen.queryByRole("region", { name: "كيف تتنقّل" });
 
+/** A screen whose pointer is a finger, or (false) a mouse. */
+function pointer(finger: boolean): void {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: finger && query === "(pointer: coarse)",
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }));
+}
+
 describe("CoachMarks", () => {
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    localStorage.clear();
+    pointer(true);
+  });
+  afterEach(() => vi.unstubAllGlobals());
 
   it("stays away until the reader asks for it", () => {
     // Since 2026-09-25 the tips open only from the button in settings: a fresh
@@ -34,6 +48,16 @@ describe("CoachMarks", () => {
     render(<Harness />);
     expect(region()).toBeInTheDocument();
     expect(screen.getByText("المس آية")).toBeInTheDocument();
+  });
+
+  it("tells a mouse to click where a finger is told to touch", () => {
+    pointer(false);
+    render(<Harness />);
+    expect(screen.getByText("انقر آية")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("التالي"));
+    fireEvent.click(screen.getByText("التالي"));
+    expect(screen.getByText("انقر رقاقة")).toBeInTheDocument();
+    expect(screen.queryByText("المس رقاقة")).not.toBeInTheDocument();
   });
 
   it("waits until the app is usable", () => {

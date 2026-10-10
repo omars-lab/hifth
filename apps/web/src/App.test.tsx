@@ -147,9 +147,10 @@ describe("App shell", () => {
   });
 
   it("prompts to select an ayah when nothing is selected", async () => {
+    // jsdom has no touch screen, so the line speaks to a mouse.
     render(<App />);
     await waitFor(() => {
-      expect(screen.getByText(/المس آية على الصفحة لتحديدها/)).toBeInTheDocument();
+      expect(screen.getByText(/انقر آية على الصفحة لتحديدها/)).toBeInTheDocument();
     });
   });
 
@@ -272,7 +273,7 @@ describe("the revision record — which taps become a look", () => {
 
     // The selection really did clear — otherwise this asserts nothing.
     await waitFor(() => {
-      expect(screen.getByText(/المس آية على الصفحة لتحديدها/)).toBeInTheDocument();
+      expect(screen.getByText(/انقر آية على الصفحة لتحديدها/)).toBeInTheDocument();
     });
     const { events } = await readRecord();
     expect(events).toHaveLength(1);
