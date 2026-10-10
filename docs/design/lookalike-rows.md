@@ -232,6 +232,11 @@ What looking at it taught us:
   2:123 inside it, both now with the same picture, and 15:30's note lists the passage 38:72 to 38:75 beside
   the book's own 38:74. How many rows a verse lists is ㊼, the owner's pick; nothing here changes it.
 
+- **Walked in the real apps, 2026-10-10:** in the iPad app and the Mac app, in English and in Arabic,
+  both demo notes were measured from inside the page: every row has a line under its name, and every
+  picture sits under its captions, clear of the arrow. The iPad app was also looked at by picture,
+  upright and on its side.
+
 Tests: unit tests on the note's list (a passage row says which verse is most alike and how many words it
 shares; a loose row says it is alike but not word for word; a book row keeps only its own line), which
 failed first; and a browser test that opens both demo notes and checks every row has a line under its name

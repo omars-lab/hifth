@@ -123,7 +123,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 ## The surah introduction (pitch)
 
 - [ ] Open it from the surah's first verse and from a verse far into the surah. · desktop,
-  ipad-side · It lies over the facing page both times. · issues: `intro-on-spread-opens-as-phone-card`,
+  ipad-side, and the iPad app upright and on its side · It lies over the facing page both times. · issues: `intro-on-spread-opens-as-phone-card`,
   `intro-from-deep-verse-floats`
 - [ ] The surah's name stays in sight, and the verse's tools step aside. · any · issues:
   `intro-card-covers-surah-name`, `intro-leaves-verse-tools-up`

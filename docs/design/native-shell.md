@@ -633,3 +633,22 @@ swipe page turn passes in the simulator. On the Mac, in English and in Arabic, e
 note sit over the facing page with the buttons within reach, mirrored correctly in Arabic.
 Nothing new turned up, so no new item. The Mac's own Page-menu test was not run: it presses keys
 on this laptop's keyboard, and the swipe and the browser tests already cover the turn.
+
+### ㉖ Does the whole demo, surah introduction included, look right in the iPad app on today's build? · **answered**
+
+The app's copy of the pitch build was rebuilt on 2026-10-10 with the note's look-alike rows (look-alike
+rows ⑦), and the walks since ㉕ looked at single lists, not the path a scholar is shown from the start.
+No walk of the real app has opened a surah's introduction yet, and that is among the first things shown.
+
+**What closes it:** walk the iPad app upright in Arabic and on its side in English, by picture, over
+the demo path: the introduction from a surah's first verse and from a verse far into it, the notes
+of 2:255, 2:48, 15:30 and 18:60, 2:48's look-alikes, 2:255's roots, and a plain page. Each new fault
+gets its own item, a test, and a walk checklist line.
+
+**Seen, 2026-10-10.** Walked by picture in the iPad app on the rebuilt pitch build, upright in Arabic
+and on its side in English, over the whole path. Upright, each introduction and note lies across the
+foot of the page with the surah's name or the verse in sight above it; on its side, each lies over the
+facing page beside its verse, and a plain spread reads in the right order. The roots list, 2:48's
+look-alikes with their shared-words pictures, and the notes of 2:255, 2:48, 15:30 and 18:60 all read
+as they do in the browser. Nothing new turned up, so no new item. The red strip at 15:30's inner
+edge is the where-you-left-off ribbon, as before.
