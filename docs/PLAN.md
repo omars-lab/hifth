@@ -1470,6 +1470,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     either side of the card can hold those buttons, the drawer covers the whole bar, as it
     does on a phone. Tested in the same iPad mini test (every bar button is either clear of
     the drawer or wholly under it), which failed first, the page's tools button half under it.
+45. ~~**On a laptop, a press of + just after a link landed drew the page smaller.**~~
+    Found on 2026-10-10 chasing a pitch test that failed one run in twenty in Firefox: a link
+    lands the page at 155%, but the zoom readout says 100% until the landing has finished, up
+    to a second later, and the buttons stepped from the readout, so + asked for 125%.
+    **Fixed the same day:** the buttons step from the level the page is drawn at the moment
+    of the press. Tested in the zoom buttons' unit tests (a stale readout under a page at
+    155%: + asks for 200%), which failed first; the pitch test then passed 40 of 40. The
+    write-up is [the zoom press write-up](issues/zoom-press-stepped-from-stale-readout.md).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

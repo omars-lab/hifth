@@ -208,6 +208,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   head, and with it put away (Escape twice) in the bottom bar; the drawer covers the whole bar,
   cutting none of its buttons (2:48, English and Arabic). · `VIEWPORT=744x1133` · issue:
   `verse-drawer-cuts-bar-buttons-ipad-mini-upright`
+- [ ] On a laptop, follow a link and press + the moment the page lands: the page grows, it never
+  shrinks, and the readout ends on the level drawn. · `DEVICE=laptop` · issue:
+  `zoom-press-steps-from-stale-readout`
 - [ ] Closed to one page with the tajweed key open, the key covers none of the page and stands
   above the row of tools; the page comes back once it closes (2:48 `?view=one`, in English and in
   Arabic). · laptop, desktop · issue: `tajweed-key-covers-page-laptop`
