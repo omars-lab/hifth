@@ -1028,7 +1028,9 @@ test.describe("Hifth · one page or two, and how big", () => {
     await modeBtn(page, "one").click();
     await expect.poll(() => soloOf(page)).toBe("true");
     await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
-    const paper = await boxOf(book(page).locator('[data-live="true"] [data-host-page]').first());
+    // The page by its own picture: the first page holder in the open leaf can
+    // be the hidden half of the spread, which has no box at one page.
+    const paper = await boxOf(pageSvg(page, 42));
     const card = await boxOf(list);
     expect(card.x >= paper.x + paper.width || card.x + card.width <= paper.x, "the card is beside the page").toBe(
       true,
