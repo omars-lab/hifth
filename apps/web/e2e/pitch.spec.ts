@@ -677,11 +677,13 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     // 18:65's own note, which the 18:60 note links to, was all upright too.
     // The notes a demo note links to were read the same way (84 of them); a
     // few of the densest stand for the rest, as counted in the private data.
-    // Then the notes two taps out that two or more one-tap notes lead to (68).
+    // Then the notes two taps out that two or more one-tap notes lead to (68),
+    // and then the rest of the notes two taps out.
     const slanted = [["2:255", 5], ["18:70", 5], ["2:48", 15], ["15:31", 3], ["18:65", 15]] as const;
     const oneTapAway = [["7:156", 15], ["2:143", 15], ["18:50", 5], ["7:11", 5]] as const;
     const twoTapsAway = [["2:106", 30], ["54:49", 25], ["6:80", 15], ["13:28", 10]] as const;
-    for (const [verse, least] of [...slanted, ...oneTapAway, ...twoTapsAway]) {
+    const restTwoTapsAway = [["4:171", 25], ["1:3", 25], ["4:24", 30], ["5:54", 20]] as const;
+    for (const [verse, least] of [...slanted, ...oneTapAway, ...twoTapsAway, ...restTwoTapsAway]) {
       await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
       await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
       expect(await sheet(page).locator("em").count(), verse).toBeGreaterThan(least);
