@@ -208,6 +208,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `make app-probe TARGET=ipad EVAL=…`. For many links at once, `make app-walk ROUTES='…'`
   (add `SIDEWAYS=1` to turn it) keeps one picture per link. · the native-shell skill, "Walking
   the app in the simulator"
+- [ ] Walk the iPad app in English as well as Arabic (`LOCALE=en`): the buttons read English even
+  though the simulator has Arabic picked in the app, and Arabic is still picked afterwards. ·
+  iPad simulator · test: `native/HifthTests/RouteTests.swift` ("a language named for this
+  launch, and only one the app has")
 - [ ] Hold the iPad app sideways: two pages fill the height between the bars, not a sliver in the
   middle of the desk. · iPad simulator, landscape · issue: `ipad-app-sideways-spread-tiny` · test:
   `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize`

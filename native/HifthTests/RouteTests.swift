@@ -74,4 +74,27 @@ struct RouteTests {
         #expect(Route.fromArguments(["Hifth", "--route=/hafs-kfqc/p3"]) == "#/hafs-kfqc/p3")
         #expect(Route.fromArguments(["Hifth"]) == nil)
     }
+
+    // The app's own language button outranks the device's language, so a walk
+    // that only set the device's showed Arabic on a simulator with Arabic
+    // picked. A language named for this launch rides in the first address.
+    @Test("a language named for this launch, and only one the app has")
+    func launchLanguage() {
+        #expect(Route.language(["HIFTH_LANG": "en"], arguments: []) == "en")
+        #expect(Route.language([:], arguments: ["Hifth", "--lang=ar"]) == "ar")
+        #expect(Route.language(["HIFTH_LANG": "fr"], arguments: []) == nil)
+        #expect(Route.language(["HIFTH_LANG": "en&x=1"], arguments: []) == nil)
+        #expect(Route.language([:], arguments: ["Hifth"]) == nil)
+    }
+
+    @Test("the first address carries the language before the route")
+    func startAddress() {
+        #expect(Route.startURL(route: "#/hafs-kfqc/2:255", language: "en").absoluteString
+            == "hifth-app://app/index.html?lang=en#/hafs-kfqc/2:255")
+        #expect(Route.startURL(route: "#/hafs-kfqc/p3", language: nil).absoluteString
+            == "hifth-app://app/index.html#/hafs-kfqc/p3")
+        #expect(Route.startURL(route: nil, language: "ar").absoluteString
+            == "hifth-app://app/index.html?lang=ar")
+        #expect(Route.startURL(route: nil, language: nil) == BundleFiles.indexURL)
+    }
 }

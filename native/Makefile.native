@@ -57,12 +57,12 @@ SIDEWAYS     ?=
 WALK_OUT     ?= $(SHOTS)/walk/$(if $(SIDEWAYS),side,upright)
 DELAY_MS     ?= 2000
 APPEARANCE   ?= light
-# The device language to launch in (ar, en); empty keeps the device's own.
-# The app starts in it only until the reader picks a language with its own
-# button, as any reader's choice outranks the device: the iPad simulator has
-# Arabic picked (2026-10-09), so LOCALE=en there still shows Arabic.
+# The language to launch in (ar, en); empty keeps the app's own choice. It
+# sets the device language and also names it for this launch (--lang=), which
+# the app shows over a language the reader picked with its own button, without
+# changing that pick: the iPad simulator has Arabic picked (2026-10-09).
 LOCALE       ?=
-LOCALE_ARGS   = $(if $(LOCALE),-AppleLanguages '($(LOCALE))')
+LOCALE_ARGS   = $(if $(LOCALE),-AppleLanguages '($(LOCALE))' --lang=$(LOCALE))
 MAC_ARGS      = $(if $(LOCALE),--args $(LOCALE_ARGS))
 # `/hafs-kfqc/p45?field=dark` → `ipad-hafs-kfqc_p45_field-dark.png`
 # Where `app-shot` writes; `app-golden` points it at native/shots/current/.
