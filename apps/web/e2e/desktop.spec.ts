@@ -2206,6 +2206,76 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
         .toBeLessThan(2);
     });
 
+    test(`closed to one page, the share card stands clear of a ${side}-hand page`, async ({ page }) => {
+      // The share card opens in the same corner as the roots list, but only
+      // said where its top stood, for a phone: the page did not move aside for
+      // it, and it covered the start of the page's last three lines, the
+      // shared verse's own among them (look-alike rows ⑫).
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/#/hafs-kfqc/${at}?view=one`);
+      const paper = pageSvg(page, pageNo);
+      await expect(paper).toBeVisible({ timeout: 20_000 });
+      // The size the pitch lands at, where the page's edge reaches the card's;
+      // a public link lands a step smaller and just misses it.
+      for (let i = 0; i < 8 && (await boxOf(paper)).width <= 480; i++) {
+        const was = (await boxOf(paper)).width;
+        await page.getByRole("button", { name: /^(تكبير|Zoom in)$/ }).click();
+        await expect.poll(async () => (await boxOf(paper)).width).toBeGreaterThan(was + 1);
+      }
+      expect((await boxOf(paper)).width, "the page at the size a pitch link lands at").toBeGreaterThan(480);
+      await page.getByRole("button", { name: /^(شارك هذه الآية كرابط|Share this ayah as a link)$/ }).click();
+      const card = page.getByRole("dialog");
+      await expect(card).toBeVisible();
+      await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const at2 = await boxOf(card);
+      await expect
+        .poll(async () => {
+          const open = await boxOf(paper);
+          return Math.min(open.x + open.width, at2.x + at2.width) - Math.max(open.x, at2.x);
+        }, { message: "how far the share card stands over the page, across" })
+        .toBeLessThanOrEqual(0);
+    });
+
+  }
+
+  test("on a laptop, the share card stands above the row of tools it opens from", async ({ page }) => {
+    // The share card sat a fixed gap off the window's foot, over the tool row
+    // and the page bar, where every other card stands in the page's room above
+    // them: it hid the row's last tool (look-alike rows ⑫).
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/#/hafs-kfqc/2:48?view=one");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    const share = page.getByRole("button", { name: /^(شارك هذه الآية كرابط|Share this ayah as a link)$/ });
+    await share.click();
+    const card = page.getByRole("dialog");
+    await expect(card).toBeVisible();
+    await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const at = await boxOf(card);
+    const from = await boxOf(share);
+    expect(at.y + at.height, `the card ${JSON.stringify(at)} above the share button ${JSON.stringify(from)}`).toBeLessThanOrEqual(from.y);
+  });
+
+  for (const { at, pageNo } of [
+    { at: "2:48", pageNo: 7 },
+    { at: "2:49", pageNo: 8 },
+  ] as const) {
+    test(`on a spread, the share card lies over the facing page, not the one ${at} is on`, async ({ page }) => {
+      // The share card kept its corner on a spread, where the roots list and
+      // the note lie over the facing page: in the corner it covered the very
+      // verse being shared (look-alike rows ⑫).
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/#/hafs-kfqc/${at}`);
+      const paper = pageSvg(page, pageNo);
+      await expect(paper).toBeVisible({ timeout: 20_000 });
+      await page.getByRole("button", { name: /^(شارك هذه الآية كرابط|Share this ayah as a link)$/ }).click();
+      const card = page.getByRole("dialog");
+      await expect(card).toBeVisible();
+      await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const box = await boxOf(card);
+      const open = await boxOf(paper);
+      const across = Math.min(open.x + open.width, box.x + box.width) - Math.max(open.x, box.x);
+      expect(across, `the card ${JSON.stringify(box)} over the verse's page ${JSON.stringify(open)}`).toBeLessThanOrEqual(0);
+    });
   }
 
   // In both languages: the list stands on the left in Arabic, and on the right

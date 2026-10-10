@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sideCoverOf } from "./short-band";
+import { sideCoverOf, spanOfAll } from "./short-band";
 
 // A laptop window closed to one page: the stage runs 0–1280 across, and the
 // corner card is 460px wide with 24px to spare at the window's edge.
@@ -24,5 +24,20 @@ describe("sideCoverOf", () => {
 
   it("never covers less than nothing, for a card clear of the stage", () => {
     expect(sideCoverOf({ left: 1300, right: 1500 }, STAGE)).toEqual({ coverRight: 0 });
+  });
+});
+
+describe("spanOfAll", () => {
+  it("spans every card that is up, so the page clears the widest reach of them", () => {
+    // A note from 796 and the share card over it from 848: the note reaches further.
+    expect(spanOfAll([{ left: 796, right: 1256 }, { left: 848, right: 1264 }])).toEqual({ left: 796, right: 1264 });
+  });
+
+  it("is the one card when only one is up", () => {
+    expect(spanOfAll([null, { left: 24, right: 484 }, null])).toEqual({ left: 24, right: 484 });
+  });
+
+  it("is nothing when no card is up", () => {
+    expect(spanOfAll([null, null])).toBeNull();
   });
 });

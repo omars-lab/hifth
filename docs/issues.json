@@ -3548,6 +3548,18 @@
       "note": "The page slides aside for the roots list beside one page; the other way, keeping it in the middle and drawing it smaller, was set aside on paper and never tried by hand. Closes when that way is built as an info-panel setting with the slide as the default, or closed with a stated reason."
     },
     {
+      "id": "share-card-covers-page-laptop",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑫"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "On a laptop the share card kept its own corner at the window's foot: on one page it covered the start of the lines and the shared verse, on two pages it covered the verse's own page, and it hid the end of the tool row. It now stands above the bars, moves one page aside, and lies over the facing page on a spread; laptop browser tests for each failed first."
+    },
+    {
       "id": "app-walk-whole-demo-path",
       "source": {
         "file": "docs/design/native-shell.md",
