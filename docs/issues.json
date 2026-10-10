@@ -3732,6 +3732,18 @@
       "note": "Found walking the live site on a laptop (2026-10-10): magnified to 125% on an open book, a turn grew the page being read but left the page beside it at its normal size. The facing page is built afresh for each opening, and its first-load centring reset the zoom the turn had just mirrored. The page stage now takes the level to open at, and the facing page asks the live page for it. Test turns forward twice and back once, watched failing first."
     },
     {
+      "id": "seam-covers-line-ends-phone",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "48"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/bookmarks.spec.ts",
+      "note": "Found walking the live site on a phone (2026-10-10): on a page bound on its left, the red ribbon marking where you left off lay over the ends of the lines by about a point and a half, because the writing starts closer to that edge than the ribbon is wide. On one page alone the ribbon now lies across the bound edge, half on the paper, as on an open book. Test on a left-bound and a right-bound page on both phones, watched failing first on the left-bound one."
+    },
+    {
       "id": "lookalike-chip-over-modal-phone",
       "source": {
         "file": "docs/design/lookalike-rows.md",

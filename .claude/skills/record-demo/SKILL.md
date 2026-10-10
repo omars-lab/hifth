@@ -61,7 +61,8 @@ The steps in `ACT`:
 - `evalfile=<path>` — run a script in the page: how an option that is not built
   yet is mocked into the real app. **Load it before the step that shows it.**
 - `press=<Key>` — `ArrowLeft` turns forward in a right-to-left book, `Escape` closes.
-- `drag=<x>,<y>><x>,<y>` — press, glide, let go: turning a page by its edge.
+- `drag=<x>,<y>><x>,<y>` — a mouse: press, glide, let go: turning a page by its edge.
+- `swipe=<x>,<y>><x>,<y>` — the same with a real finger (Chrome only).
 - `click=<css>`, `clickrole=<role>|<name>` — click a control.
 - `move=<x>,<y>` — move the pointer (hover states, the magnifier).
 - `wait=<css>`, `waitrole=<role>|<name>` — wait for something to appear.

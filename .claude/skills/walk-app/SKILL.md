@@ -46,6 +46,10 @@ flowchart LR
 | the iPad app held sideways | the iPad simulator, turned; the native-shell skill's "Walking the app in the simulator" — the iPad's own WebKit is not Playwright's, so the pitch gets walked here too |
 | first visit vs returning reader | leave the hint owed, or `SEEN_COACH=1` |
 
+A swipe is `swipe=x,y>x,y` in `ACT`: a real finger that moves (Chrome only). `drag=` is a
+mouse, so a swipe walked with it only shows what a mouse does — on an open book a mouse turns
+only from the outer edge, and so does a finger.
+
 A useful hash: `#/hafs-kfqc/2:255` (a verse), `#/hafs-kfqc/p42` (a page), `?view=one` / `?view=two`.
 
 ## Scripts — when to use each

@@ -37,7 +37,8 @@
  *   scroll=<css>|<bottom|top|±px>  scroll a container so a shot catches what is below its fold
  *   settle=<ms>               pause (for an animation to finish before the shot)
  *   move=<x>,<y>              move the mouse to a viewport point (hover states)
- *   drag=<x>,<y>><x>,<y>      press at one point, glide to the other, let go (a page turn by its edge)
+ *   drag=<x>,<y>><x>,<y>      press at one point, glide to the other, let go (a mouse: a page turn by its edge)
+ *   swipe=<x>,<y>><x>,<y>     the same with a real finger (a phone or iPad swipe; Chromium only)
  *   eval=<js expression>      evaluate in the page and log the JSON result (measure, don't guess)
  *   evalfile=<path>           the same, with the script read from a file (an option mocked into the real app)
  *   tap=<css | x,y>           a real finger, down and up at once (aimed at a point that is really on the element)
@@ -190,6 +191,25 @@ async function pointFor(page, target) {
 }
 
 const cdpSessions = new WeakMap();
+/** A real finger down at one point, moved to the other over a quarter second, lifted. */
+async function swipe(page, from, to) {
+  if (mouse) throw new Error("swipe= is a finger; drop --mouse, or use drag=");
+  if (engine !== chromium) throw new Error("swipe= sends touches through Chromium's own input; drop --browser firefox");
+  if (!cdpSessions.has(page)) cdpSessions.set(page, await page.context().newCDPSession(page));
+  const cdp = cdpSessions.get(page);
+  log("touch_down", `kind=swipe x=${from[0]} y=${from[1]}`);
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: from[0], y: from[1], id: 1 }] });
+  const steps = 12;
+  for (let i = 1; i <= steps; i += 1) {
+    const x = from[0] + ((to[0] - from[0]) * i) / steps;
+    const y = from[1] + ((to[1] - from[1]) * i) / steps;
+    await page.waitForTimeout(20);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y, id: 1 }] });
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  log("touch_up", `kind=swipe x=${to[0]} y=${to[1]}`);
+}
+
 /** Put a real finger down on `target`, keep it there `ms`, lift it. */
 async function touch(page, kind, target, ms) {
   const { x, y } = await pointFor(page, target);
@@ -313,6 +333,11 @@ async function runStep(page, step) {
       await page.mouse.down();
       await page.mouse.move(to[0], to[1], { steps: 20 });
       await page.mouse.up();
+      return;
+    }
+    case "swipe": {
+      const [from, to] = arg.split(">").map((p) => p.split(",").map(Number));
+      await swipe(page, from, to);
       return;
     }
     case "eval": {

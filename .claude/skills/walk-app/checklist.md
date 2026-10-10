@@ -33,6 +33,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Turn by swiping, by the arrow keys, and at a desk by grabbing the outer edge. · any · The
   page follows the hand; a drag in the middle of a page never turns it. · tests: page-turn,
   desktop, edge-peel specs
+- [ ] Walk swipes with `swipe=` (a finger), not `drag=` (a mouse). A phone turns under a swipe
+  both ways; an open book on an iPad on its side turns only from its outer edge, a finger in the
+  middle never turns it. · phone, phone-side, ipad-side · test: drive-touch spec, "swipe="
 - [ ] A large iPad on one page turns under a finger. · ipad-big-side with `?view=one` · issue:
   `large-ipad-one-page-no-swipe`
 - [ ] Zoom in, then turn: the zoom carries to the next page. · desktop, ipad-side · test: desktop spec
@@ -274,6 +277,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   pen-colours specs
 - [ ] Bookmark a page: the ribbon and folded corner look right, in Firefox too. · desktop with
   `BROWSER=firefox` · test: edge-peel spec
+- [ ] Stay on a page for a few seconds until the red ribbon appears down its bound edge: it covers
+  none of the writing, on a page bound on the left and one bound on the right. · phone · test:
+  bookmarks spec · issue: `seam-covers-line-ends-phone`
 - [ ] Switch the interface to Arabic: everything mirrors, nothing is cut off; on an iPad, upright
   and on its side, open a note too: its close button is on the left and the card stays whole. ·
   phone, desktop, ipad, ipad-side · tests: lang, chrome-fit specs, pitch "the note mirrors"

@@ -1508,6 +1508,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     its picture loaded, undoing the matching the turn had just done. **Fixed the same day:**
     a fresh page beside the one being read now opens at that page's size. Tested on a laptop
     by turning forward twice and back once while magnified; the test failed first.
+48. ~~**On a phone, the red "where you left off" ribbon covered the ends of the lines.**~~
+    Found on 2026-10-10 walking the live site on a phone: on a page bound on its left (page 7,
+    say), the lines start closer to the bound edge than the ribbon is wide, so the ribbon lay
+    over the last letters of every line. **Fixed the same day:** on one page alone the ribbon
+    now lies across the bound edge, half on the paper, as it already did on an open book. A
+    phone test on a page bound on each side checks the ribbon is clear of the writing; it
+    failed first on the left-bound page.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
