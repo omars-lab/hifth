@@ -559,8 +559,12 @@ book's title) show upright in the panel, except in the notes the demo opens: nei
 nor the page readings record the slant. For the demo's verses (2:255, 18:10–13 and 18:60, with the note
 18:60–82 share, and since 2026-10-09 2:48 and the note 15:30–31 share) the slant was read off the page pictures by
 hand, about a hundred and thirty runs, and the panel draws them in italics. Since 2026-10-09 the same
-was done for half the notes a reader reaches in one tap from a demo note (a verse link in it, or a
-look-alike): 42 of the 84 were read, 38 had slanted words, 205 runs. The other 42 are next.
+was done for every note a reader reaches in one tap from a demo note (a verse link in it, or a
+look-alike): all 84 were read, 79 had slanted words, 636 runs.
+Reading them turned up one more difference from the print: where the book slants a closing square
+bracket, the capture sometimes read it as a slash, a round bracket or a letter, so the bracket
+never closed. Three notes had it (14:48, 28:88 and 43:86); each was read off its page picture and
+put right, and a scan of every note finds no other bracket left open.
 Everywhere else stays upright.
 One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted

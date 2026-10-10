@@ -46,6 +46,7 @@ import { readKey } from "./key.mjs";
 import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
 import { slantSurah } from "./italics.mjs";
+import { mendSurah } from "./misreads.mjs";
 import { addCited, citedIn, foldRuns } from "./runs.mjs";
 import { endPrint, endsClosed } from "./ends.mjs";
 import { orphanPrint, rescueOrphans } from "./orphans.mjs";
@@ -77,6 +78,8 @@ const HAND = existsSync(TAILS_SRC) ? JSON.parse(readFileSync(TAILS_SRC, "utf8"))
 const TAILS = HAND.tails ?? [];
 // The words the print sets in italics, read off the pages for the demo verses.
 const ITALICS = HAND.italics ?? [];
+// Closing brackets the capture misread, read off the pages (see misreads.mjs).
+const MISREADS = HAND.misreads ?? [];
 
 // How many road edges a single verse shows when they come from the source's own
 // cross-references. A few dozen refs on one ayah would bury the hop list; a
@@ -367,6 +370,7 @@ const usedEnds = new Set();
 const LIST_ENDS = process.argv.includes("--ends");
 const usedTails = new Set();
 const usedItalics = new Set();
+const usedMisreads = new Set();
 // Notes the capture set aside with no verse, read off the printed page (see orphans.mjs).
 const ORPHANS = JSON.parse(readFileSync(resolve(HERE, "print-orphans.json"), "utf8")).orphans;
 const usedOrphans = new Set();
@@ -441,6 +445,7 @@ function buildSurah(surah) {
     };
     previous = done.handOn;
   }
+  for (const i of mendSurah(surah, verses, MISREADS)) usedMisreads.add(i);
   for (const i of slantSurah(surah, verses, ITALICS)) usedItalics.add(i);
 
   // Al-Fātiḥah keeps its hand-written roads; every other surah takes the
@@ -534,6 +539,12 @@ const staleItalics = ITALICS.filter((m, i) => surahs.includes(Number(m.verse.spl
 if (staleItalics.length) {
   console.error(`${TAILS_SRC} names ${staleItalics.length} slanted run(s) for verses the capture no longer has:`);
   for (const m of staleItalics) console.error(`  ${m.verse} (page image ${m.page})`);
+  process.exit(1);
+}
+const staleMisreads = MISREADS.filter((m, i) => surahs.includes(Number(m.verse.split(":")[0])) && !usedMisreads.has(i));
+if (staleMisreads.length) {
+  console.error(`${TAILS_SRC} names ${staleMisreads.length} misread mark(s) for verses the capture no longer has:`);
+  for (const m of staleMisreads) console.error(`  ${m.verse} (page image ${m.page})`);
   process.exit(1);
 }
 if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS || LIST_ORPHANS) process.exit(0);
