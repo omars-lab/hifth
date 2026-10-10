@@ -32,3 +32,14 @@ cut short. The extractor's list of endings it cannot close now holds only those 
 
 So the page text is a good way to find candidates and a poor judge of a small mark at the end of a
 line; for a stop, the picture decides.
+
+## Later: a bracket that never closes
+
+**2026-10-09.** Reading the slanted words off the pictures turned up a second fault at a bracket.
+Where the book slants a closing square bracket inside a slanted quotation, the capture sometimes
+read it as a slash, a round bracket or a letter, so the bracket never closed. A first scan that
+only counted opening against closing brackets missed one, because a later bracket in the same
+note balanced the count; measuring how far each bracket runs before it closes found all three
+(14:48, 28:88 and 43:86). No rule can tell which mark was meant, so each was read off its page
+picture and goes on a hand-read list of fixes in the private repository, applied before the
+slanted words are laid on. A row that finds nothing, or finds two places, is refused.
