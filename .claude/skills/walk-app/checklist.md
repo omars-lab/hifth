@@ -198,7 +198,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `share-card-clips-verse-sideways-phone`
 - [ ] On an iPad held upright, both sizes, press Share (2:48, English and Arabic): no line of the
   verse sits under the card, and the card stands above the row of tools, every tool in sight. ·
-  ipad, `VIEWPORT=744x1133` · issues: `share-card-covers-verse-ipad-upright`,
+  ipad, `VIEWPORT=744x1133`, the iPad app on both sizes (`make app-probe IPAD='iPad mini (A17 Pro)'`)
+  · issues: `share-card-covers-verse-ipad-upright`,
   `share-card-covers-tool-row-ipad-mini-upright`
 - [ ] On a phone on its side with Share open, in the private build (where the card is a row taller),
   the card stands below the top bar with every one of its own buttons whole; it lies over half the
@@ -209,13 +210,15 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   line may still sit under the card's edge (2:48). · `VIEWPORT=1133x744` · issue:
   `share-card-covers-line-start-ipad-mini-side`
 - [ ] On an iPad mini held upright, no card open, the look-alike buttons stand clear of the page's
-  top lines (2:48). · `VIEWPORT=744x1133` · issue: `lookalike-buttons-on-top-lines-ipad-mini-upright`
+  top lines (2:48). · `VIEWPORT=744x1133`, the iPad app on the mini · issue:
+  `lookalike-buttons-on-top-lines-ipad-mini-upright`
 - [ ] On an iPad mini held upright, with the verse's drawer up the look-alike buttons sit in its
   head, and with it put away (Escape twice) in the bottom bar; the drawer covers the whole bar,
-  cutting none of its buttons (2:48, English and Arabic). · `VIEWPORT=744x1133` · issue:
+  cutting none of its buttons (2:48, English and Arabic). · `VIEWPORT=744x1133`, the iPad app on the
+  mini · issue:
   `verse-drawer-cuts-bar-buttons-ipad-mini-upright`
 - [ ] On a laptop, follow a link and press + the moment the page lands: the page grows, it never
-  shrinks, and the readout ends on the level drawn. · `DEVICE=laptop` · issue:
+  shrinks, and the readout ends on the level drawn. · `DEVICE=laptop`, the Mac app · issue:
   `zoom-press-steps-from-stale-readout`
 - [ ] Closed to one page with the tajweed key open, the key covers none of the page and stands
   above the row of tools; the page comes back once it closes (2:48 `?view=one`, in English and in

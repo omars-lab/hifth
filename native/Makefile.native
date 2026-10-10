@@ -46,7 +46,12 @@ ROUTE        ?= /hafs-kfqc/2:255
 TARGET       ?= ipad
 # app-probe: one more JavaScript question for the page, asked DELAY_MS after it
 # says it is ready (double quotes inside it; the Makefile wraps it in single).
+# A longer one goes in a file, EVALFILE=path, and may hold any quote at all.
 EVAL         ?=
+EVALFILE     ?=
+# The question as the launch line hands it on. Its dollar signs are the page's,
+# not make's: read as a make variable, `/^Close$/` reached the page as `/^Close`.
+PROBE_EVAL    = $(if $(EVALFILE),"$$(cat '$(EVALFILE)')",'$(value EVAL)')
 # app-test: some XCUITests instead of the whole run, space-separated, e.g. ONLY=SmokeTests/testOpensAtAVerse
 ONLY         ?=
 # app-walk: the routes to open, space-separated, and whether to hold it sideways.
@@ -176,20 +181,20 @@ endif
 	@sips -g pixelWidth $(SHOT_OUT) | awk '/pixelWidth/ { exit !($$2 > 0) }' || { echo "  ✗ $(SHOT_OUT) has no pixels"; exit 1; }
 	@echo "  ✓ $(SHOT_OUT)"
 
-app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression'] [DELAY_MS=…]
+app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…]
 ifeq ($(TARGET),ipad)
 	$(MAKE) app-build-ipad
 	xcrun simctl bootstatus $(IPAD_UDID) -b
 	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
-	SIMCTL_CHILD_HIFTH_PROBE=1 SIMCTL_CHILD_HIFTH_ROUTE='$(ROUTE)' SIMCTL_CHILD_HIFTH_PROBE_EVAL='$(EVAL)' \
+	SIMCTL_CHILD_HIFTH_PROBE=1 SIMCTL_CHILD_HIFTH_ROUTE='$(ROUTE)' SIMCTL_CHILD_HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
 	  SIMCTL_CHILD_HIFTH_PROBE_DELAY_MS=$(DELAY_MS) \
 	  xcrun simctl launch --console-pty --terminate-running-process $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS) \
 	  | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
 else
 	$(MAKE) app-build-mac
 	@: > $(MAC_LOG)
-	$(MAC_OPEN) --env HIFTH_PROBE=1 --env HIFTH_ROUTE='$(ROUTE)' --env HIFTH_PROBE_EVAL='$(EVAL)' \
+	$(MAC_OPEN) --env HIFTH_PROBE=1 --env HIFTH_ROUTE='$(ROUTE)' --env HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
 	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) $(MAC_APP) $(MAC_ARGS)
 	@grep '^probe' $(MAC_LOG) | sed 's/^probe //' | python3 -m json.tool
 endif
