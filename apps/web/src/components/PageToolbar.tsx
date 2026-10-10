@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useT } from "../i18n";
+import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import type { Pen } from "../pen";
 import type { PageTool } from "./PageStage";
 import styles from "./PageToolbar.module.css";
@@ -138,6 +139,7 @@ interface PageToolbarProps {
  */
 export function PageToolbar({ tool, locked, onTool, pen, onPen, end }: PageToolbarProps): JSX.Element {
   const { t } = useT();
+  const touch = useMediaQuery(TOUCH_QUERY);
   const press = useToolPress(tool, onTool);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
   const nameOf = (x: PageTool) => toolName(t, x);
@@ -202,7 +204,15 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen, end }: PageToolb
         {/* For the eye. The change is announced once, by App, through the one
             polite announcer the app has — a second live region here would talk
             over it. */}
-        <span className={styles.name}>{locked ? t.toolLockedHint(nameOf(tool)) : toolHint(t, tool)}</span>
+        {/* An iPad on its side is wide enough for this bar, and a finger is
+            told to tap where a mouse is told to click. */}
+        <span className={styles.name}>
+          {locked
+            ? touch
+              ? t.toolLockedHintTouch(nameOf(tool))
+              : t.toolLockedHint(nameOf(tool))
+            : toolHint(t, tool, touch)}
+        </span>
         {end}
       </div>
     </div>
@@ -210,22 +220,23 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen, end }: PageToolb
 }
 
 /** What to do with the tool that is on, or its name when there is nothing to add. */
-export function toolHint(t: ReturnType<typeof useT>["t"], x: PageTool, touch = false): string {
+export function toolHint(t: ReturnType<typeof useT>["t"], x: PageTool, touch: boolean): string {
   // A finger has no hover, so the harakat tool's magnifier cannot follow it:
   // on a phone a tap takes the sign nearest the finger.
   if (touch && x === "sign") return t.toolSignHintTouch;
+  // A finger is told to tap, a mouse to click: the bar said tap at a desk.
   return x === "read"
-    ? t.toolReadHint
+    ? touch ? t.toolReadHint : t.toolReadHintClick
     : x === "bookmark"
-    ? t.toolBookmarkHint
+    ? touch ? t.toolBookmarkHint : t.toolBookmarkHintClick
     : x === "note"
-      ? t.toolNoteHint
+      ? touch ? t.toolNoteHint : t.toolNoteHintClick
       : x === "mistake"
-        ? t.toolMistakeHint
+        ? touch ? t.toolMistakeHint : t.toolMistakeHintClick
         : x === "sign"
           ? t.toolSignHint
           : x === "word"
-            ? t.toolWordHint
+            ? touch ? t.toolWordHint : t.toolWordHintClick
             : x === "crop"
               ? t.toolCropHint
               : x === "jump"

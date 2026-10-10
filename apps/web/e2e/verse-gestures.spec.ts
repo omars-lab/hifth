@@ -360,7 +360,9 @@ test.describe("Hifth · the four new verse buttons", () => {
     await hold(page, "#verse-46");
     await small(page).getByRole("menuitem", { name: "Play to" }).click();
     const said = page.locator('[role="status"][aria-live="polite"]');
-    await expect(said).toHaveText("Tap the verse to stop at");
+    // A finger is told to tap, a mouse to click.
+    const finger = await page.evaluate(() => matchMedia("(pointer: coarse)").matches);
+    await expect(said).toHaveText(finger ? "Tap the verse to stop at" : "Click the verse to stop at");
     await tap(page, false, "#verse-48");
     await expect(said).toHaveText("Playing Al-Baqarah · 2:39 to 2:41");
     // The tap that ended the pick did not also open a menu.

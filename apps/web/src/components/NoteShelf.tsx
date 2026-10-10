@@ -1,4 +1,5 @@
 import { useT } from "../i18n";
+import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import styles from "./NoteShelf.module.css";
 
 /** One note as the list shows it: what to call it, and what it is about. */
@@ -24,13 +25,14 @@ interface NoteShelfProps {
  */
 export function NoteShelf({ notes, onFollow }: NoteShelfProps): JSX.Element {
   const { t } = useT();
+  const touch = useMediaQuery(TOUCH_QUERY);
   return (
     <section className={styles.shelf} aria-labelledby="note-shelf-head">
       <h3 id="note-shelf-head" className={styles.head}>
         {t.noteShelfHead}
       </h3>
       {notes.length === 0 ? (
-        <p className={styles.empty}>{t.noteShelfEmpty}</p>
+        <p className={styles.empty}>{touch ? t.noteShelfEmpty : t.noteShelfEmptyClick}</p>
       ) : (
         <ul className={styles.list}>
           {notes.map((n) => (

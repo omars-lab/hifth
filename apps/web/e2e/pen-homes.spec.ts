@@ -108,6 +108,8 @@ test.describe("where the pens sit", () => {
     await coversNoLine(page, pens);
     await pens.getByRole("radio", { name: "Mistake" }).click();
     await expect(pens.getByRole("radio", { name: "Mistake" })).toHaveAttribute("aria-checked", "true");
+    // Said to a mouse, as here: click, not tap.
+    await expect(pens).toContainText("Click a word to mark a slip");
     await pens.getByRole("button", { name: "Done" }).click();
     await expect(bar.getByRole("radio")).toHaveCount(0);
     await expect(bar).toHaveAttribute("data-tool", "select");

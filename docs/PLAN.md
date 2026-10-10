@@ -1492,6 +1492,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     of the press. Tested in the zoom buttons' unit tests (a stale readout under a page at
     155%: + asks for 200%), which failed first; the pitch test then passed 40 of 40. The
     write-up is [the zoom press write-up](issues/zoom-press-stepped-from-stale-readout.md).
+46. ~~**At a desk, a dozen lines still told a mouse to tap.**~~
+    Found on 2026-10-10 walking the live site on a laptop: the line under the page said
+    "Tap an ayah" to a mouse, and so did each tool's line on the desk tools bar, the first
+    tips, the current verse's button name, the empty notes list, two spoken lines, and the
+    line over a note's related verses in the private build. In Arabic the same lines said
+    "click" to a finger on an iPad held sideways. **Fixed the same day:** each line now has
+    a finger wording and a mouse wording, picked by whether the screen is touched. Tested on
+    a laptop in English and Arabic, on an iPad on its side, and in the private build; each
+    test failed first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

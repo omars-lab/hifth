@@ -468,6 +468,23 @@ test.describe("Hifth · the desktop spread", () => {
     expect(await verse.evaluate((el) => getComputedStyle(el).cursor)).toBe("pointer");
   });
 
+  test("the line under the page tells a mouse to click, in both languages", async ({ page }) => {
+    // It said "Tap an ayah" to a visitor at a desk with a mouse. The pitch's own
+    // line had learnt to say click; the public one had not.
+    // This file runs in Arabic, the suite's language; English is asked for after.
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await expect(page.getByText("انقر آية على الصفحة لتحديدها")).toBeVisible();
+    await expect(page.getByText("المس آية على الصفحة لتحديدها")).toHaveCount(0);
+
+    await page.evaluate(() => localStorage.setItem("hifth.lang.v1", "en"));
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.getByText("Click an ayah on the page to select it")).toBeVisible();
+    await expect(page.getByText("Tap an ayah on the page to select it")).toHaveCount(0);
+  });
+
   test("the fore-edge wears a hand, and a grab from it turns the page", async ({ page }) => {
     await watchFolds(page);
     await page.goto("/#/hafs-kfqc/p8");
@@ -1945,6 +1962,43 @@ test.describe("Hifth · the page tools bar", () => {
     await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
   });
 
+  test("each tool's line on the bar tells a mouse to click, never to tap", async ({ page }) => {
+    // The bar said "Tap a page to drop a bookmark" to a visitor holding a mouse.
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    for (const [key, words] of [
+      ["KeyB", "Click a page to drop a bookmark"],
+      ["KeyN", "Click a word to pin a note"],
+      ["KeyM", "Click a word to mark a slip"],
+      ["KeyW", "Click a word to open it into its parts"],
+      ["KeyK", "Point at a vowel-sign, click to note it"],
+    ] as const) {
+      await page.keyboard.press(key);
+      await expect(bar(page), key).toContainText(words);
+      await expect(bar(page), key).not.toContainText(/\btap/i);
+      await page.keyboard.press("Escape");
+    }
+  });
+
+  test("the verse you are on is named as a click away from clearing", async ({ page }) => {
+    // Its bead's spoken name said "tap to clear" to a mouse.
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    await expect(page.getByRole("button", { name: /^Current ayah .* — click to clear$/ })).toBeVisible();
+  });
+
+  test("the first tips tell a mouse to click", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p8?open=tips");
+    const tips = page.getByRole("region", { name: "How to navigate" });
+    await expect(tips.getByText("Click an ayah", { exact: true })).toBeVisible();
+    await tips.getByRole("button", { name: "Next" }).click();
+    await tips.getByRole("button", { name: "Next" }).click();
+    await expect(tips.getByText("Click a chip", { exact: true })).toBeVisible();
+    await expect(tips).not.toContainText(/\btap/i);
+  });
+
   // selection-drawer = D: a Read mode where a stray tap opens nothing, and the
   // verse and word modes each wear their own pointer.
   test("in Read mode a tap selects nothing; Verse and Word each have their own pointer", async ({
@@ -1956,9 +2010,13 @@ test.describe("Hifth · the page tools bar", () => {
 
     await page.keyboard.press("KeyR");
     await expect(toolBtn(page, "Read")).toHaveAttribute("aria-checked", "true");
-    await expect(bar(page)).toContainText("Taps do nothing");
-    // The line under the page must not still invite a tap.
+    // With a mouse it speaks of clicks; the footer says the same.
+    await expect(bar(page)).toContainText("Clicks do nothing");
+    await expect(bar(page)).not.toContainText("Taps do nothing");
+    // The line under the page must not still invite a tap, or (with a mouse,
+    // as here) a click.
     await expect(page.getByText("Tap an ayah on the page to select it")).toHaveCount(0);
+    await expect(page.getByText("Click an ayah on the page to select it")).toHaveCount(0);
     await page.mouse.click(at.x, at.y);
     await expect(page.locator("#hifth-overlay .hl-sel")).toHaveCount(0);
 
@@ -2046,7 +2104,7 @@ test.describe("Hifth · the page tools bar", () => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
     await page.keyboard.press("KeyB");
-    await expect(bar(page)).toContainText("Tap a page to drop a bookmark");
+    await expect(bar(page)).toContainText("Click a page to drop a bookmark");
     await tapAyahAt(page, "#verse-46");
 
     const drawer = page.getByRole("dialog", { name: "Bookmark" });

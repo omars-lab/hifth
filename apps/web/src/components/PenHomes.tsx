@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
+import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import type { Pen } from "../pen";
 import { rememberPenFloat, savedPenFloat, sideFits, snapToEdge, type FloatSpot } from "../pen-home";
 import type { PageTool } from "./PageStage";
@@ -102,6 +103,7 @@ function DoneTick({ onDone }: { onDone: () => void }): JSX.Element {
 export function PenHomeBottom(props: PenHomeProps): JSX.Element {
   const { tool, locked, onTool, pen, onPen } = props;
   const { t, dir } = useT();
+  const touch = useMediaQuery(TOUCH_QUERY);
   const [open, setOpen] = useState(false);
   return (
     <div className={styles.bottomHost} data-pen-home="bottom" data-tool={tool}>
@@ -121,7 +123,13 @@ export function PenHomeBottom(props: PenHomeProps): JSX.Element {
           />
           <ToolRow {...props} />
           {tool === "highlight" && <PenPicker pen={pen} onPen={onPen} />}
-          <span className={styles.hint}>{locked ? t.toolLockedHint(toolName(t, tool)) : toolHint(t, tool)}</span>
+          <span className={styles.hint}>
+            {locked
+              ? touch
+                ? t.toolLockedHintTouch(toolName(t, tool))
+                : t.toolLockedHint(toolName(t, tool))
+              : toolHint(t, tool, touch)}
+          </span>
         </div>
       )}
     </div>
