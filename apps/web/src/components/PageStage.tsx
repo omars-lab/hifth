@@ -326,6 +326,13 @@ interface PageStageProps {
    */
   bound?: boolean;
   /**
+   * The level a first opening lands at, asked once the page has loaded. Unset,
+   * a page opens at its normal size. The facing leaf of an open book is built
+   * afresh for every opening, and asks the live leaf, so a magnified opening
+   * turns to two magnified pages rather than a big one beside a small one.
+   */
+  startZoom?: () => number;
+  /**
    * The tool the reader has picked from the page toolbar
    * (`docs/design/page-toolbar-plan.md`, step 1). It sets the pointer's shape,
    * and with the highlighter a drag paints straight away instead of moving the
@@ -1125,6 +1132,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     railBottom = null,
     turnStyle = "seam",
     bound = false,
+    startZoom,
     tool = "select",
     notes,
     noteLabel,
@@ -1356,6 +1364,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // Read by `applyTransform`, which runs from gestures and tweens, not renders.
   const boundRef = useRef(bound);
   boundRef.current = bound;
+  const startZoomRef = useRef(startZoom);
+  startZoomRef.current = startZoom;
   // How a verse a little too tall for the room above the note is shown whole.
   const longVerse = useLongVerse();
   const longVerseRef = useRef(longVerse);
@@ -2839,36 +2849,46 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     }
   }, [selectedKey]);
 
+  /*
+   * The stepper's press, and a first opening's `startZoom`: one way to set the
+   * level. Held in a ref so the cold-mount effect, which runs once, calls the
+   * current one.
+   */
+  const zoomToRef = useRef<(z: number) => number>(() => view.current.z);
+  zoomToRef.current = (z: number): number => {
+    const layer = layerRef.current;
+    if (!layer) return view.current.z;
+    // The same two things a wheel gesture used to do at its first event:
+    // stop any tween that is still landing, and re-measure, because the box
+    // may have changed since the last gesture (the spread toggle changes it
+    // without touching this surface at all).
+    cancelTween();
+    measureFit();
+    const rect = layer.getBoundingClientRect();
+    const base = { z: view.current.z, x: view.current.x, y: view.current.y };
+    // A button has no pointer to anchor to, so the stage picks the point.
+    // The lone leaf grows from its own centre; an open book pins each leaf at
+    // its gutter edge (`foldEdgeOf`) so the fold stays put and the opening
+    // grows outward as one sheet. Vertically always the middle — the fold is
+    // a vertical line, so height has no side to prefer. Through `zoomAbout`
+    // rather than writing `view` directly: the anchor arithmetic §7 ⑨ fixed
+    // has one implementation and this is not a second.
+    const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
+    const ox = edge === "left" ? rect.left : edge === "right" ? rect.right : rect.left + rect.width / 2;
+    zoomAbout(clampZoom(z, MIN_ZOOM, MAX_ZOOM), ox, rect.top + rect.height / 2, base);
+    // The rail sits beside the selected ayah and has just been moved.
+    emitSelectionRect();
+    // What was *applied*, which is not always what was asked: `clampView`
+    // runs inside `applyTransform` and the caller's own idea of the zoom
+    // would drift from the page's on the first press against a limit.
+    return view.current.z;
+  };
+
   useImperativeHandle(
     ref,
     (): PageStageHandle => ({
       setZoom(z) {
-        const layer = layerRef.current;
-        if (!layer) return view.current.z;
-        // The same two things a wheel gesture used to do at its first event:
-        // stop any tween that is still landing, and re-measure, because the box
-        // may have changed since the last gesture (the spread toggle changes it
-        // without touching this surface at all).
-        cancelTween();
-        measureFit();
-        const rect = layer.getBoundingClientRect();
-        const base = { z: view.current.z, x: view.current.x, y: view.current.y };
-        // A button has no pointer to anchor to, so the stage picks the point.
-        // The lone leaf grows from its own centre; an open book pins each leaf at
-        // its gutter edge (`foldEdgeOf`) so the fold stays put and the opening
-        // grows outward as one sheet. Vertically always the middle — the fold is
-        // a vertical line, so height has no side to prefer. Through `zoomAbout`
-        // rather than writing `view` directly: the anchor arithmetic §7 ⑨ fixed
-        // has one implementation and this is not a second.
-        const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
-        const ox = edge === "left" ? rect.left : edge === "right" ? rect.right : rect.left + rect.width / 2;
-        zoomAbout(clampZoom(z, MIN_ZOOM, MAX_ZOOM), ox, rect.top + rect.height / 2, base);
-        // The rail sits beside the selected ayah and has just been moved.
-        emitSelectionRect();
-        // What was *applied*, which is not always what was asked: `clampView`
-        // runs inside `applyTransform` and the caller's own idea of the zoom
-        // would drift from the page's on the first press against a limit.
-        return view.current.z;
+        return zoomToRef.current(z);
       },
       zoomNow() {
         return view.current.z;
@@ -3045,7 +3065,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         // A deep link may have navigated while this fetch was in flight. Showing
         // `page` now would hide the page the reader actually asked for, and
         // re-centering would throw away the hop's framing.
-        if (!navigatedRef.current) arrive(page);
+        if (!navigatedRef.current) {
+          arrive(page);
+          const z = startZoomRef.current?.() ?? 1;
+          if (z !== 1) zoomToRef.current(z);
+        }
         setStatus("ready");
       })
       .catch(() => {

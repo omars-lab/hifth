@@ -589,6 +589,9 @@ export function App(): JSX.Element {
     };
   }, []);
   const pinchedLive = useCallback((z: number) => stage.pinched(z, false), [stage]);
+  // The facing leaf is built afresh for every opening, so it opens at the
+  // live leaf's level rather than its normal size.
+  const facingStartZoom = useCallback(() => stageRef.current?.zoomNow() ?? 1, []);
   const pinchedFacing = useCallback((z: number) => stage.pinched(z, true), [stage]);
   /*
    * A pinch across the fold of the open book. Each page is its own surface and
@@ -3527,6 +3530,7 @@ export function App(): JSX.Element {
                   onSelectWords={handleSelectWords}
                   onTurn={stepPage}
                   onPinchZoom={pinchedFacing}
+                  startZoom={facingStartZoom}
                   /* Both leaves, for the same reason `onTurn` is on both: a
                      wheel over the facing page that did nothing would read as a
                      dead half of the book. */
