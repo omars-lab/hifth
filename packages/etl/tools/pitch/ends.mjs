@@ -23,6 +23,14 @@ export function endsClosed(text) {
   return CLOSED.test(text.trimEnd());
 }
 
+/**
+ * Whether a note's ending still wants reading off the page: it ends open and
+ * no row settles it. A row with an empty stop records a page that prints none.
+ */
+export function endUnread(text, ends) {
+  return !endsClosed(text) && !ends.some((e) => e.print === endPrint(text));
+}
+
 /** A fingerprint of a note's last words. */
 export function endPrint(text) {
   return createHash("sha1").update(text.trimEnd().slice(-REACH)).digest("hex").slice(0, 12);

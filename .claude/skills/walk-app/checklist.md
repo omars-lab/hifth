@@ -334,6 +334,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   · test: `e2e/pitch.spec.ts` ("the demo's notes set the book's italics")
 - [ ] No paragraph in a note stops mid-sentence: the list of cut sentences is empty, and where a
   put-back break is listed for a note, the paragraph before it ends on a stop. A break placed one
-  word early leaves a paragraph ending on a small word and the next opening on one word and a stop.
+  word early leaves a paragraph ending on a small word and the next opening on one word and a stop;
+  one placed a word late leaves the next opening on that word, or on a closing quote, and a stop.
+  The listing shows both.
   · `node packages/etl/tools/pitch/extract.mjs --splits`
   · test: `e2e/pitch.spec.ts` ("breaks where its page does, not one word early")

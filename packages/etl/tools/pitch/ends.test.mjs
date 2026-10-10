@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { endPrint, restoreCutTail, restoreLastStop } from "./ends.mjs";
+import { endPrint, endUnread, restoreCutTail, restoreLastStop } from "./ends.mjs";
 
 // Made-up notes: the shape of the capture, none of its words.
 const NOTE = "The caravan rested by the well, see 4:12c";
@@ -47,6 +47,21 @@ describe("restoreLastStop", () => {
   it("does not read a page's trailing space as part of the last words", () => {
     const ends = [{ verse: "9:9", print: endPrint(NOTE) }];
     expect(restoreLastStop([`${NOTE} `], ends).blocks).toEqual([`${NOTE}.`]);
+  });
+});
+
+describe("endUnread", () => {
+  // An ending read off the page and found to print no stop is listed with an
+  // empty stop, so the listing stops asking for it (four notes, 2026-10-10).
+  it("asks for an open ending nobody has read, and not for one the page settled", () => {
+    expect(endUnread(NOTE, [])).toBe(true);
+    expect(endUnread(NOTE, [{ verse: "9:9", print: endPrint(NOTE), stop: "", page: "page_0009" }])).toBe(false);
+    expect(endUnread(`${NOTE}.`, [])).toBe(false);
+  });
+
+  it("leaves a note the page prints with no stop just as it is", () => {
+    const ends = [{ verse: "9:9", print: endPrint(NOTE), stop: "", page: "page_0009" }];
+    expect(restoreLastStop([NOTE], ends)).toEqual({ blocks: [NOTE], used: new Set([0]) });
   });
 });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { suspects } from "./suspects.mjs";
+import { opensOnStray, suspects } from "./suspects.mjs";
 
 // Made-up notes: the shape of the capture, none of its words.
 describe("suspects", () => {
@@ -15,6 +15,27 @@ describe("suspects", () => {
 
   it("reads past the marks around slanted words", () => {
     expect(suspects("The lamp (see 4:2;")).toEqual([{ kind: "open-bracket", at: 11 }]);
+  });
+
+  it("finds a paragraph that opens on the end of the sentence before it", () => {
+    // A break placed a word late leaves the next paragraph opening on a word
+    // and a stop, or on the closing quote alone (27:7's, 3:83's, 2026-10-10).
+    expect(suspects("lamp. The oil ran out.")).toEqual([{ kind: "stray-opening", at: 0 }]);
+    expect(suspects(".” The oil ran out.")).toEqual([{ kind: "stray-opening", at: 0 }]);
+    expect(suspects("lamp.) The oil ran out.")).toEqual([{ kind: "stray-opening", at: 0 }]);
+  });
+
+  it("finds it before the book's quotes are set, so the splits listing can show the seam", () => {
+    expect(opensOnStray('." The oil ran out.')).toBe(true);
+    expect(opensOnStray('lamp." The oil ran out.')).toBe(true);
+    expect(opensOnStray('"The oil ran out."')).toBe(false);
+  });
+
+  it("passes a paragraph that opens on a short sentence of its own or a numbered aside", () => {
+    expect(suspects("Lit. The oil ran out.")).toEqual([]);
+    expect(suspects("2. The oil ran out.")).toEqual([]);
+    expect(suspects("V. 4 The oil ran out.")).toEqual([]);
+    expect(suspects("The lamp. The oil ran out.")).toEqual([]);
   });
 
   it("passes a paragraph whose brackets close and whose references are set apart", () => {

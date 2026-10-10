@@ -54,10 +54,10 @@ import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
 import { letterSurah } from "./lettering.mjs";
 import { refileSurah } from "./refile.mjs";
-import { suspects } from "./suspects.mjs";
+import { opensOnStray, suspects } from "./suspects.mjs";
 import { paragraphStarts, placeStarts } from "./indents.mjs";
 import { addCited, citedIn, foldRuns } from "./runs.mjs";
-import { endPrint, endsClosed } from "./ends.mjs";
+import { endPrint, endUnread } from "./ends.mjs";
 import { orphanPrint, rescueOrphans } from "./orphans.mjs";
 import { wordsOf } from "./splits.mjs";
 
@@ -463,11 +463,11 @@ function buildSurah(surah) {
     const blocks = done.blocks;
     if (LIST_SPLITS)
       for (let i = 1; i < blocks.length; i++)
-        if (!/[.!?;:”"’)\]]\s*$/u.test(blocks[i - 1])) {
+        if (!/[.!?;:”"’)\]]\s*$/u.test(blocks[i - 1]) || opensOnStray(blocks[i])) {
           const prev = blocks[i - 1].trimEnd();
           console.log(`${s}:${a} ${seamPrint(`${prev} ${blocks[i]}`, prev.length)} …${prev.slice(-30)} | ${blocks[i].slice(0, 30)}…`);
         }
-    if (LIST_ENDS && blocks.length && !endsClosed(blocks.at(-1)))
+    if (LIST_ENDS && blocks.length && endUnread(blocks.at(-1), ENDS))
       console.log(`${s}:${a} ${endPrint(blocks.at(-1))}`);
     if (LIST_SEAMS)
       for (const block of blocks)
