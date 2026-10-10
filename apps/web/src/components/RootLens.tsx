@@ -87,6 +87,8 @@ export function RootLens({
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  // Whether this opening has picked its open group yet, by itself or by a tap.
+  const chosen = useRef(false);
 
   const open = families !== null;
 
@@ -99,15 +101,20 @@ export function RootLens({
     return () => {
       restoreRef.current?.focus?.();
       setExpanded(null);
+      chosen.current = false;
     };
   }, [open]);
 
   // Open the nearest family by default — the lens should say something useful
-  // before the first tap. Keyed on the top family so a new selection re-opens.
+  // before the first tap. Once per opening, and only when every family is in:
+  // they arrive one by one, not nearest first, and re-picking the nearest so far
+  // shut the group under the reader's thumb. A tap by the reader also counts.
   const top = families?.[0]?.root ?? null;
   useEffect(() => {
+    if (chosen.current || loading || top === null) return;
+    chosen.current = true;
     setExpanded(top);
-  }, [top]);
+  }, [top, loading]);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -245,7 +252,10 @@ export function RootLens({
                     aria-expanded={isOpen}
                     aria-controls={panelId}
                     onClick={() =>
-                      setExpanded((r) => (r === family.root ? null : family.root))
+                      {
+                        chosen.current = true;
+                        setExpanded((r) => (r === family.root ? null : family.root));
+                      }
                     }
                   >
                     {/* The root itself is Arabic in both languages — it is the
