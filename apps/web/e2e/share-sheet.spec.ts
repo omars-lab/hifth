@@ -119,3 +119,52 @@ test.describe("Hifth · the share sheet builds a link", () => {
     await expect.poll(() => copied(page)).toEqual([siteLink(page, "#/hafs-kfqc/2:48")]);
   });
 });
+
+test.describe("Hifth · the share card on a phone held sideways", () => {
+  test.use({ viewport: { width: 844, height: 390 } });
+
+  for (const [lang, shareName, dialogName] of [
+    ["en", "Share this ayah as a link", "Share this ayah as a link"],
+    ["ar", "شارك", "شارك"],
+  ] as const) {
+    test(`held sideways (${lang}), the share card covers no line of the verse it shares, and the look-alike buttons cover none either`, async ({ page }) => {
+      // Sideways the phone is wide enough for the card to stand in a corner, as
+      // on a laptop, but not tall enough to be a laptop: the page stayed where
+      // it was and the card lay over half of the verse, with the look-alike
+      // buttons half showing from behind its edge. Moved to the corner the
+      // card leaves free, the buttons kept a band over the page so tall that
+      // the verse's last line ran off the foot of the page. They now ride the
+      // card's own top row, clear of its close button (plan item 38).
+      await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
+      await page.goto(`/?lang=${lang}#/hafs-kfqc/2:48`);
+      await page.getByRole("button", { name: shareName }).first().click();
+      const sheet = page.getByRole("dialog", { name: dialogName });
+      await expect(sheet).toBeVisible();
+      await sheet.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const seen = () =>
+        page.evaluate(() => {
+          const card = document.querySelector("[role=dialog]")!.getBoundingClientRect();
+          const stage = document.querySelector("#hifth-overlay")!.closest("[class*=stage]")!.getBoundingClientRect();
+          const hit = (r: DOMRect, s: DOMRect) =>
+            r.left < s.right && r.right > s.left && r.top < s.bottom && r.bottom > s.top;
+          const lines = [...document.querySelectorAll("#hifth-overlay .hl-sel")].map((el) => el.getBoundingClientRect());
+          const chips = [...document.querySelectorAll("button[data-direction]")].map((el) => el.getBoundingClientRect());
+          const cardButtons = [...document.querySelectorAll("[role=dialog] button")].map((el) => el.getBoundingClientRect());
+          return {
+            lines: lines.length,
+            underCard: lines.filter((l) => hit(l, card)).length,
+            offTheFoot: lines.filter((l) => l.bottom > stage.bottom + 1).length,
+            underChips: lines.filter((l) => chips.some((c) => hit(l, c))).length,
+            chipsBehindCard: chips.filter((c) => hit(c, card) && !(c.top >= card.top && c.bottom <= card.bottom && c.left >= card.left && c.right <= card.right)).length,
+            chipsOnCardButtons: chips.filter((c) => cardButtons.some((b) => hit(c, b))).length,
+          };
+        });
+      const whole = { lines: 2, underCard: 0, offTheFoot: 0, underChips: 0, chipsBehindCard: 0, chipsOnCardButtons: 0 };
+      await expect.poll(seen, { message: "every line of the verse shows, and every button shows whole", timeout: 5_000 }).toEqual(whole);
+      // And stays so once the page has come to rest: a later move put the
+      // verse's last line back off the foot after it had first shown whole.
+      await page.waitForTimeout(800);
+      expect(await seen(), "the page moved the verse off its foot after first showing it whole").toEqual(whole);
+    });
+  }
+});

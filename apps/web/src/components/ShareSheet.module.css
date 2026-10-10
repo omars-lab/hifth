@@ -125,6 +125,12 @@
   }
 }
 
+/* The same on the card in a sideways phone's corner, where the chips ride its
+   top row (HopRail's `onCard`) and would otherwise sit on its close button. */
+:root:has([data-seated][data-card]) .sheet {
+  padding-block-start: calc(var(--space-3) + 36px);
+}
+
 .sheetHead {
   display: flex;
   align-items: center;

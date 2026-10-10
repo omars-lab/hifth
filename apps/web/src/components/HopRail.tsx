@@ -41,6 +41,12 @@ interface HopRailProps {
    */
   seat?: number | null;
   /**
+   * The seat is a card in a window's corner (the share card on a phone held
+   * sideways), not a tray across the foot: the chips sit inside its top row,
+   * at its own padding, on whichever side `crossed` says the card stands.
+   */
+  onCard?: boolean;
+  /**
    * A phone note grown over the page: the page behind it is dimmed and takes
    * no taps, and the strip the chips stand in at rest is off on an earlier
    * verse's words, so they step out of sight until the note is short again.
@@ -70,6 +76,7 @@ export function HopRail({
   onBand,
   beside,
   seat = null,
+  onCard = false,
   away = false,
   home,
 }: HopRailProps): JSX.Element | null {
@@ -99,6 +106,7 @@ export function HopRail({
       data-beside={beside}
       data-home={home}
       data-seated={seated || undefined}
+      data-card={(seated && onCard) || undefined}
       data-away={away || undefined}
       style={seated ? ({ "--seat": `${seat}px` } as CSSProperties) : undefined}
     >

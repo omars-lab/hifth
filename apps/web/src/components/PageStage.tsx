@@ -2279,7 +2279,6 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // A note that has gone gives back the room it gave up for the next one.
     if (coverTop === null) giveNoteRoom(0);
     lift();
-    return () => cancelAnimationFrame(liftRaf.current);
   }, [coverTop, lift]);
   // A card docked beside one page arriving, going or changing width: the page
   // moves into the middle of what it leaves, or back to the middle of the
@@ -2290,21 +2289,28 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (was === coverSide || (was && coverSide && was.left === coverSide.left && was.right === coverSide.right)) return;
     sideSeen.current = coverSide;
     lift();
-    return () => cancelAnimationFrame(liftRaf.current);
   }, [coverSide, lift]);
   // The chips move when a list opens: from their column at the stage's side
   // onto the list's top row. The page was placed while they still stood in
   // the column, kept below where it ended, and a phone held sideways has too
   // little room above the list for that — the list covered the verse's last
-  // line. So once they have moved, place the page again.
+  // line. So once they have moved, place the page again. The same when they
+  // move onto the share card standing beside the page on a phone held
+  // sideways: placed beneath the column, the verse's last line ran off the
+  // page's foot (plan item 38).
   const railSeen = useRef(railBottom);
   useEffect(() => {
     if (railSeen.current === railBottom) return;
     railSeen.current = railBottom;
-    if (coverTopRef.current === null) return;
+    if (coverTopRef.current === null && coverSideRef.current === null) return;
     lift();
-    return () => cancelAnimationFrame(liftRaf.current);
   }, [railBottom, lift]);
+  // A lift waiting on a glide is let wait until the stage goes. Each of the
+  // three above used to cancel it on its next run, even a run that then found
+  // nothing new and placed nothing: the card beside a sideways phone's page
+  // reports its same span again as it settles, and that dropped the placement
+  // the chips' move had asked for, leaving the verse's last line off the foot.
+  useEffect(() => () => cancelAnimationFrame(liftRaf.current), []);
 
   /**
    * The one settle step every road onto a page ends with.

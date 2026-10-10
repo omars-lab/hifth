@@ -3596,6 +3596,29 @@
       "note": "On a phone a link to 2:1 put a jump's closer look on top of the first two pages' already larger text, so page 2 landed at more than twice other pages' type with its opening lines off the left edge. A jump there now takes off what the page already enlarged; a pitch phone test failed first, plus unit tests of the rule."
     },
     {
+      "id": "share-card-clips-verse-sideways-phone",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "38"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/share-sheet.spec.ts",
+      "note": "On a phone on its side the look-alike buttons stood over the page's column while the share card was open, so the verse moved beneath them and its last line ran off the foot. Sending them to the other corner was tried first and still clipped it. They now ride the card's top row, and the page moves the verse back once they leave, without a repeated report from the card cancelling that move. Phone share tests in both languages and a pitch phone test, which failed first."
+    },
+    {
+      "id": "share-card-covers-line-start-ipad-mini-side",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "39"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On a 1133 by 744 window (an iPad mini on its side) the share card in the corner covers about 20 pixels of the page's right edge, where the verse's second line begins. The verse is whole top to bottom; the page does not move aside for the card."
+    },
+    {
       "id": "lookalike-chip-over-modal-phone",
       "source": {
         "file": "docs/design/lookalike-rows.md",

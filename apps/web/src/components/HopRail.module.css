@@ -197,6 +197,16 @@
   inset-inline: 0;
 }
 
+/* Seated on the share card in a sideways phone's corner (HopRail's `onCard`):
+   inside the card's top row, at its own padding, on the side it stands. */
+.rail[data-seated][data-card]:not([data-beside]) {
+  right: calc(var(--space-4) * 2);
+}
+.rail[data-seated][data-card][data-crossed]:not([data-beside]) {
+  right: auto;
+  left: calc(var(--space-4) * 2);
+}
+
 /* Behind a phone note grown over the page (HopRail's `away`). */
 .rail[data-away] {
   visibility: hidden;
