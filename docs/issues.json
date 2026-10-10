@@ -3720,6 +3720,18 @@
       "note": "Found walking the live site on a laptop (2026-10-10): the public line under the page, each tool's line on the desk tools bar, the first tips, the current verse's button name, the empty notes list, two spoken lines and the private build's related-verses line all said tap to a mouse; in Arabic the tool lines said click to a finger on an iPad on its side. Each now has a finger and a mouse wording picked by TOUCH_QUERY. Tests in desktop, ipad, pitch, verse-gestures, scoped-notes and CoachMarks specs, each watched failing first."
     },
     {
+      "id": "zoomed-spread-turn-facing-unzoomed",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "47"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "Found walking the live site on a laptop (2026-10-10): magnified to 125% on an open book, a turn grew the page being read but left the page beside it at its normal size. The facing page is built afresh for each opening, and its first-load centring reset the zoom the turn had just mirrored. The page stage now takes the level to open at, and the facing page asks the live page for it. Test turns forward twice and back once, watched failing first."
+    },
+    {
       "id": "lookalike-chip-over-modal-phone",
       "source": {
         "file": "docs/design/lookalike-rows.md",

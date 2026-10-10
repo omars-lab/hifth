@@ -36,6 +36,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] A large iPad on one page turns under a finger. · ipad-big-side with `?view=one` · issue:
   `large-ipad-one-page-no-swipe`
 - [ ] Zoom in, then turn: the zoom carries to the next page. · desktop, ipad-side · test: desktop spec
+- [ ] With two pages open, zoom in, then turn both ways: both pages of the new opening are
+  magnified and meet at the fold. · desktop, laptop, ipad-side · test: desktop spec, "a turn grows
+  both of the next two pages"
 - [ ] Jump to a juz or surah: the page arrives centred, with no flash of the wrong page. · any ·
   test: hop spec
 - [ ] With two pages open and a note beside them, the page still turns by its edge. · desktop ·

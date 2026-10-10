@@ -1501,6 +1501,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     a finger wording and a mouse wording, picked by whether the screen is touched. Tested on
     a laptop in English and Arabic, on an iPad on its side, and in the private build; each
     test failed first.
+47. ~~**With two pages open and magnified, a turn left the facing page at its normal size.**~~
+    Found on 2026-10-10 walking the live site on a laptop: zoom in to 125% on an open book,
+    turn, and the page being read grew while the page beside it came back small. The page
+    beside is drawn afresh for every opening, and a fresh page opened at its normal size once
+    its picture loaded, undoing the matching the turn had just done. **Fixed the same day:**
+    a fresh page beside the one being read now opens at that page's size. Tested on a laptop
+    by turning forward twice and back once while magnified; the test failed first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

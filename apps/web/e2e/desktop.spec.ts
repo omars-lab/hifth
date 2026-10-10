@@ -1287,6 +1287,35 @@ test.describe("Hifth · one page or two, and how big", () => {
     await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
   });
 
+  test("with two pages open and magnified, a turn grows both of the next two pages", async ({ page }) => {
+    // 2026-10-10, walking the live site on a laptop: magnify the opening, press
+    // the arrow, and the new right-hand page came up at 125% while the page
+    // facing it stayed at 100%, a big page and a small one either side of a
+    // broken fold, turn after turn.
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    await expect(spread(page)).toBeVisible();
+    await zoomBtn(page, "in").click();
+    await expect.poll(() => scaleOf(page, 8)).toBeCloseTo(1.25, 2);
+
+    for (const [live, facing] of [
+      [9, 10],
+      [11, 12],
+    ] as const) {
+      await page.keyboard.press("ArrowLeft");
+      await expect(page.locator(NUM)).toHaveText(pageNumber(live));
+      await expect.poll(() => scaleOf(page, live)).toBeCloseTo(1.25, 2);
+      await expect
+        .poll(() => scaleOf(page, facing), "the facing page stayed at its normal size")
+        .toBeCloseTo(1.25, 2);
+    }
+    // And back the other way.
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
+    await expect.poll(() => scaleOf(page, 10), "the facing page after a turn back").toBeCloseTo(1.25, 2);
+    await expect(readout(page)).toHaveText("١٢٥٪");
+  });
+
   test("a turn keeps the reader's magnification; a hop reframes it", async ({ page }) => {
     // §4.5 of the page-turning design: turning a page is continuing to read the
     // same book, so a reader who has magnified to study one line lands on the next
