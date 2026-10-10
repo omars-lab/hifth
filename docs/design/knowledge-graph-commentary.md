@@ -585,13 +585,20 @@ refuses one listed twice for the same note (four were, in four other surahs, and
 once). 18:65's own note had also run its five printed paragraphs into one; they are put back.
 
 **Paragraphs run together where the stop survived.** Where a new paragraph starts at the top of
-a printed column, the capture keeps the full stop but loses the break, so the panel shows two
-printed paragraphs as one. The demo's own notes (2:255, 2:48, and other verses' own notes in
-18:60–82) still have some. The searches so far looked for a lost stop, so they never see these.
-The page readings place every line, and a paragraph's first line sits a little further in than
-the lines around it, so a listing of every line that starts further in, matched to the seam it
-opens, would find them. It is worth trusting only once it finds again the breaks already put
-back by hand, and passes over the 103 places where the book runs a sentence on.
+a printed column, the capture keeps the full stop but loses the break, so the panel showed two
+printed paragraphs as one: the note on 2:255 has ten paragraphs in print and showed two. The
+searches before this one looked for a lost stop, so they never saw these. The page readings
+place every line, and the book sets a paragraph's first line a little further in than the
+lines around it, so the extractor now lists every set-in line and finds the spot in the notes
+it opens, matching the whole line by its letters and forgiving the few the reading gets wrong.
+It found again 43 of the 45 breaks already put back by hand, and it cannot touch the 103 places
+where the book runs a sentence on, since it only names spots where the stop is still there.
+Checked on the page pictures, every one of 62 spots looked at was a real paragraph start: all
+18 in the demo's notes (2:48, 2:255 and 18:60 to 18:82) and 44 drawn at random from the rest
+of the book. All 1,425 are put back, across the whole book. The 2:255 note now shows its ten
+paragraphs, and a browser test counts them. Left for a hand reading: 76 set-in lines where the
+capture lost the stop as well, most after a closing bracket, where the mark to put back has to
+be read off the page, and 4 lines the listing could not place in one note.
 One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted
 without reading the slant at all. About 4,000 notes have such a run, but checked against the
