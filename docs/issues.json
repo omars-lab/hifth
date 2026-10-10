@@ -3678,6 +3678,18 @@
       "note": "On an iPad mini held upright the verse's drawer stood as a middle card over the bottom bar and half covered the buttons either side of it. Below 900 pixels wide it now covers the whole bar, as on a phone. Same iPad mini test, which failed first with the page's tools button half under the drawer."
     },
     {
+      "id": "zoom-press-steps-from-stale-readout",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "45"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/src/components/DesktopChrome.test.tsx",
+      "note": "A link lands the page at 155% but the zoom readout says 100% until the landing finishes, and a press of + in that gap stepped from 100% to 125%, drawing the page smaller. Found as a pitch test failing one run in twenty in Firefox. The buttons now step from the level the page is drawn at; unit test failed first, the pitch test then passed 40 of 40. Write-up: docs/issues/zoom-press-stepped-from-stale-readout.md."
+    },
+    {
       "id": "lookalike-chip-over-modal-phone",
       "source": {
         "file": "docs/design/lookalike-rows.md",

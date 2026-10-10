@@ -36,6 +36,13 @@ interface DesktopChromeProps {
   zoom: number;
   /** Ask for a new level. What actually lands comes back through `zoom`. */
   onZoom: (z: number) => void;
+  /**
+   * The level the page is drawn at this moment. `zoom` learns of a link's
+   * landing only once it has finished, up to a second after the page stopped
+   * moving, and a press stepped from the stale level in between: + from 100%
+   * drew a page landed at 155% smaller. A press steps from this when given.
+   */
+  zoomNow?: (() => number) | undefined;
 }
 
 /**
@@ -60,6 +67,7 @@ export function DesktopChrome({
   onPageMode,
   zoom,
   onZoom,
+  zoomNow,
 }: DesktopChromeProps): JSX.Element {
   const { t, lang, setLang } = useT();
   // The stepper works whether the book is open or closed: a spread magnifies
@@ -69,6 +77,10 @@ export function DesktopChrome({
   // the old finding no longer holds.)
   const out = rung(zoom, -1);
   const into = rung(zoom, 1);
+  const press = (step: 1 | -1): void => {
+    const next = rung(zoomNow?.() ?? zoom, step);
+    if (next !== null) onZoom(next);
+  };
 
   return (
     <div className={styles.extras}>
@@ -141,7 +153,7 @@ export function DesktopChrome({
           className={styles.zoomBtn}
           aria-label={t.zoomOut}
           disabled={out === null}
-          onClick={() => out !== null && onZoom(out)}
+          onClick={() => press(-1)}
         >
           −
         </button>
@@ -151,7 +163,7 @@ export function DesktopChrome({
           className={styles.zoomBtn}
           aria-label={t.zoomIn}
           disabled={into === null}
-          onClick={() => into !== null && onZoom(into)}
+          onClick={() => press(1)}
         >
           +
         </button>

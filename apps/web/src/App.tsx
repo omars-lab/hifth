@@ -712,6 +712,7 @@ export function App(): JSX.Element {
    * can refuse part of a step near an edge, and a chrome that announces 250%
    * over paper sitting at 200% is worse than one that says nothing.
    */
+  const zoomNow = useCallback(() => stageRef.current?.zoomNow() ?? 1, []);
   const handleZoom = useCallback(
     (z: number) => {
       stage.setZoom(z);
@@ -3357,6 +3358,7 @@ export function App(): JSX.Element {
           onPageMode={handlePageMode}
           zoom={zoom}
           onZoom={handleZoom}
+          zoomNow={zoomNow}
         />
         {/* No install button here. There used to be one, and it was a ~126px
             text pill in a row that could not afford 126px on any phone — on

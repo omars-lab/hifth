@@ -31,7 +31,7 @@ beforeEach(() => {
  * it hands back are what the assertions read: what a press *asked for*, never
  * what the component decided on its own.
  */
-function chrome(props: Partial<{ pageMode: PageMode; zoom: number }> = {}) {
+function chrome(props: Partial<{ pageMode: PageMode; zoom: number; zoomNow: () => number }> = {}) {
   const onPageMode = vi.fn();
   const onZoom = vi.fn();
   render(
@@ -41,6 +41,7 @@ function chrome(props: Partial<{ pageMode: PageMode; zoom: number }> = {}) {
         onPageMode={onPageMode}
         zoom={props.zoom ?? 1}
         onZoom={onZoom}
+        zoomNow={props.zoomNow}
       />
       <LangProbe />
     </LangProvider>,
@@ -252,6 +253,19 @@ describe("DesktopChrome · the zoom stepper", () => {
     expect(onZoom).toHaveBeenLastCalledWith(1.5);
     fireEvent.click(into);
     expect(onZoom).toHaveBeenLastCalledWith(2);
+  });
+
+  it("steps from where the page is drawn now, not from a readout that has not caught up", () => {
+    // A link lands the page at 155%, and the readout learns it only once the
+    // landing has finished, up to a second later. A press of + in between
+    // stepped from the stale 100% to 125% and drew the page smaller.
+    const { onZoom } = chrome({ pageMode: "one", zoom: 1, zoomNow: () => 1.55 });
+    const { out, into } = steppers();
+
+    fireEvent.click(into);
+    expect(onZoom).toHaveBeenLastCalledWith(2);
+    fireEvent.click(out);
+    expect(onZoom).toHaveBeenLastCalledWith(1.5);
   });
 
   it("stops at the floor rather than pretending to move", () => {
