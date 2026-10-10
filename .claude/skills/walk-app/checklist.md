@@ -87,7 +87,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   breaks into the same paragraphs") · issue: `pitch-commentary-differs-from-print`
 - [ ] Open 2:255's note and count its paragraphs against the printed page: ten, each starting
   where the print sets a line in, none run on after a full stop (the short line that opens the
-  related verses comes after them and is not one of the ten). · laptop, iPad simulator · test:
+  related verses comes after them and is not one of the ten). · laptop, iPad simulator, Mac app · test:
   `e2e/pitch.spec.ts` ("the note on the Throne Verse keeps the paragraphs") · issue:
   `pitch-commentary-differs-from-print`
 - [ ] A note longer than its card fades at its foot, not cut through a line, until its end is
@@ -216,9 +216,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   middle of the desk. · iPad simulator, landscape · issue: `ipad-app-sideways-spread-tiny` · test:
   `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize`
 - [ ] Walk the Mac app in Arabic too, not only the iPad: the look-alike list and a note open,
-  mirrored, nothing cut off. · `make app-shot TARGET=mac LOCALE=ar ROUTE=…` (the app keeps a
-  language picked with its own button over the one it is launched in) · test:
-  `scripts/native-make-locale.test.mjs`
+  mirrored, nothing cut off. · `make app-shot TARGET=mac LOCALE=ar ROUTE=…` (shows that language
+  for the one launch, even where another is picked with the app's own button) · tests:
+  `scripts/native-make-locale.test.mjs`, `native/HifthTests/RouteTests.swift`
 - [ ] The Mac app's own picture of a page is the page, not an empty file: two pages, full size.
   · `make app-shot TARGET=mac ROUTE=/hafs-kfqc/p45` (fails on an empty picture) · issue:
   `mac-app-shot-empty`
