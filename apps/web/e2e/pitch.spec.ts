@@ -673,6 +673,16 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     for (const verse of ["18:61", "18:82"]) expect(await opening(verse), verse).toEqual(first);
   });
 
+  test("the note on the Throne Verse keeps the paragraphs its printed page has", async ({ page }) => {
+    // The capture kept the full stop at the end of each paragraph but lost the
+    // break after it, so the drawer showed ten printed paragraphs as two. The
+    // page sets each paragraph's first line in a little; those set-in lines are
+    // where the breaks went back. Counted on the printed page, by paragraph.
+    await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    await expect(sheet(page).getByRole("region", { name: "Commentary" }).locator("p")).toHaveCount(10);
+  });
+
   test("a related verse in the note hops there and opens its own note", async ({ page }) => {
     // 1:6 — the straight-path verse — carries The Study Quran's own
     // cross-references, folded into the note as a "Related verses" list. This is

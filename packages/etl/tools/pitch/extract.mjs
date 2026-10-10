@@ -33,11 +33,15 @@
  *   node packages/etl/tools/pitch/extract.mjs --suspects # list brackets left open and references
  *                                                        # set side by side, in notes and intros,
  *                                                        # to check against the page; writes nothing
+ *   node packages/etl/tools/pitch/extract.mjs --indents  # list paragraph starts the page readings
+ *                                                        # show set in, where the capture ran them on,
+ *                                                        # by fingerprint and page; writes nothing
+ *   node packages/etl/tools/pitch/extract.mjs --indents --all  # every set-in line, placed or not
  *
  * Re-run it whenever the source capture changes or the curation below is edited.
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { joinPageBreaks } from "./blocks.mjs";
@@ -51,6 +55,7 @@ import { finishNote } from "./finish.mjs";
 import { slantSurah } from "./italics.mjs";
 import { mendSurah } from "./misreads.mjs";
 import { suspects } from "./suspects.mjs";
+import { paragraphStarts, placeStarts } from "./indents.mjs";
 import { addCited, citedIn, foldRuns } from "./runs.mjs";
 import { endPrint, endsClosed } from "./ends.mjs";
 import { orphanPrint, rescueOrphans } from "./orphans.mjs";
@@ -381,6 +386,12 @@ const usedOrphans = new Set();
 const LIST_ORPHANS = process.argv.includes("--orphans");
 // Brackets left open and references set side by side, to check (see suspects.mjs).
 const LIST_SUSPECTS = process.argv.includes("--suspects");
+// Paragraph starts the page readings show set in, found in the notes (see indents.mjs).
+const LIST_INDENTS = process.argv.includes("--indents");
+const LIST_ALL = process.argv.includes("--all");
+const READINGS = resolve(SRC_DIR, "../.work/pages");
+const NOTES = [];
+const HOLDING = new Map();
 
 function buildSurah(surah) {
   const src = readSurah(surah);
@@ -425,6 +436,10 @@ function buildSurah(surah) {
     );
     cleaned.push({ entry, ref, joined });
     for (const b of joined) holding.set(b, [...(holding.get(b) ?? []), `${s}:${a}`]);
+  }
+  if (LIST_INDENTS) {
+    for (const { ref, joined } of cleaned) NOTES.push({ verse: ref.join(":"), blocks: joined });
+    for (const [b, held] of holding) HOLDING.set(b, [...(HOLDING.get(b) ?? []), ...held]);
   }
   let previous = [];
   for (const { entry, ref, joined } of cleaned) {
@@ -492,7 +507,7 @@ function buildSurah(surah) {
         console.log(`${where} ${kind} …${text.slice(Math.max(0, at - 30), at + 30)}…`);
     return { surah, listed: true };
   }
-  if (LIST_SEAMS || LIST_SPLITS || LIST_ORPHANS) return { surah, listed: true };
+  if (LIST_SEAMS || LIST_SPLITS || LIST_ORPHANS || LIST_INDENTS) return { surah, listed: true };
   const outPath = resolve(OUT_DIR, `${surah}.json`);
   writeFileSync(outPath, JSON.stringify(out, null, 2));
   const edgeCount = Object.values(shard).reduce((n, adj) => n + adj.edges.length, 0);
@@ -574,7 +589,29 @@ if (staleMisreads.length) {
   for (const m of staleMisreads) console.error(`  ${m.verse} (page image ${m.page})`);
   process.exit(1);
 }
-if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS || LIST_ORPHANS || LIST_SUSPECTS) process.exit(0);
+if (LIST_INDENTS) {
+  const starts = readdirSync(READINGS)
+    .filter((f) => /^page_\d+\.json$/.test(f))
+    .sort()
+    .flatMap((f) => {
+      const page = f.replace(/\.json$/, "");
+      return paragraphStarts(JSON.parse(readFileSync(resolve(READINGS, f), "utf8"))).map((st) => ({ ...st, page }));
+    });
+  const placed = placeStarts(starts, NOTES, (b) => HOLDING.get(b) ?? []);
+  const listed = new Set(MARKS.map((m) => m.print));
+  const count = {};
+  for (const p of placed) {
+    const kind = p.print && listed.has(p.print) ? `${p.kind} listed` : p.kind;
+    count[kind] = (count[kind] ?? 0) + 1;
+    if (LIST_ALL) console.log(`${p.kind} ${p.page} x=${p.x.toFixed(3)} y=${p.y.toFixed(3)} ${p.verse ?? "-"} ${p.print ?? "-"}`);
+    else if (p.print && !listed.has(p.print)) console.log(`${p.verse} ${p.print} ${p.kind} ${p.page} x=${p.x.toFixed(3)} y=${p.y.toFixed(3)}`);
+  }
+  const breaks = MARKS.filter((m) => m.kind === "break").length;
+  const refound = new Set(placed.filter((p) => p.print && listed.has(p.print)).map((p) => p.print)).size;
+  console.error(`${starts.length} set-in lines: ${JSON.stringify(count)}`);
+  console.error(`found again ${refound} of the ${breaks} breaks print-breaks.json lists`);
+}
+if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS || LIST_ORPHANS || LIST_SUSPECTS || LIST_INDENTS) process.exit(0);
 
 if (existsSync(KEY_SRC)) {
   const raw = JSON.parse(readFileSync(KEY_SRC, "utf8"));

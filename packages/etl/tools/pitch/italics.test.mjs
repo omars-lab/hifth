@@ -24,6 +24,17 @@ describe("slantSurah", () => {
     expect(v["9:1"].commentary[0]).toBe(`1 The word ${S}qarya${E} means a town; the ${S}qarya${E} here is by the sea.`);
   });
 
+  it("finds a row that runs on across a paragraph break the print puts back", () => {
+    const v = verses();
+    v["9:1"].commentary = ["1 The elder said, the well is deep.", "Some say it is dry."];
+    slantSurah(9, v, [{ verse: "9:1", at: "said, _the well is deep_. Some" }]);
+    expect(v["9:1"].commentary).toEqual([`1 The elder said, ${S}the well is deep${E}.`, "Some say it is dry."]);
+    // A run that itself crosses the break is slanted on both sides of it.
+    v["9:1"].commentary = ["1 The elder said, the well is deep.", "Some say it is dry."];
+    slantSurah(9, v, [{ verse: "9:1", at: "said, _the well is deep. Some_ say" }]);
+    expect(v["9:1"].commentary).toEqual([`1 The elder said, ${S}the well is deep.${E}`, `${S}Some${E} say it is dry.`]);
+  });
+
   it("matches a space in the row against the capture's no-break spaces", () => {
     const v = verses();
     v["9:2"].commentary = ["2 The well .\u00a0.\u00a0. ran dry."];

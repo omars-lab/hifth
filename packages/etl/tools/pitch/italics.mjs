@@ -33,17 +33,32 @@ function rowPattern(row) {
   return new RegExp(`${before}${body}${after}`, "gdu");
 }
 
-/** Where a row's runs fall in each note: [note, start, end] triples. */
+/**
+ * Where a row's runs fall in each note: [note, start, end] triples. The notes
+ * are searched as one, a line break between paragraphs, so a row read off the
+ * page still finds its words where the print starts a new paragraph inside
+ * them; a run that crosses the break is slanted on both sides of it.
+ */
 function runsOf(row, notes) {
   const re = rowPattern(row);
+  const starts = [];
+  let joined = "";
+  for (const note of notes) {
+    if (starts.length) joined += "\n";
+    starts.push(joined.length);
+    joined += note;
+  }
   const found = [];
   let places = 0;
-  notes.forEach((note, n) => {
-    for (const m of note.matchAll(re)) {
-      places++;
-      for (const [start, end] of m.indices.slice(1)) found.push([n, start, end]);
-    }
-  });
+  for (const m of joined.matchAll(re)) {
+    places++;
+    for (const [start, end] of m.indices.slice(1))
+      notes.forEach((note, n) => {
+        const s = Math.max(start, starts[n]);
+        const e = Math.min(end, starts[n] + note.length);
+        if (s < e) found.push([n, s - starts[n], e - starts[n]]);
+      });
+  }
   if (!places) throw new Error(`${row.verse}: italics row "${row.at}" finds nothing in the verse's notes`);
   if (places > 1 && !row.every)
     throw new Error(`${row.verse}: italics row "${row.at}" is in ${places} places; give it more context`);
