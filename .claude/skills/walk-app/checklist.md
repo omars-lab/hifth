@@ -192,6 +192,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Closed to one page with the tajweed key open, the key covers none of the page and stands
   above the row of tools; the page comes back once it closes (2:48 `?view=one`, in English and in
   Arabic). · laptop, desktop · issue: `tajweed-key-covers-page-laptop`
+- [ ] On two pages with the tajweed key open, the key lies over the facing page, not the verse's
+  (2:48 and 2:49, in English and in Arabic). · laptop, desktop · issue: `tajweed-key-covers-page-spread`
 - [ ] A look-alike row that names a whole passage says how the two are alike and opens onto the verse
   inside it that matches (try 15:30's later surahs: the passage in surah 38 opens onto 38:73, not
   its first verse; 23:7 opens onto 70:31). · desktop (Firefox), phone, the iPad app · issue:

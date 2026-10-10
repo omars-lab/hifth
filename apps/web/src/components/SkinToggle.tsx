@@ -1,11 +1,13 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
   TAJWEED_RULES,
+  type LeafSide,
   type SkinId,
   type TajweedMark,
   type TajweedRuleId,
 } from "@hifth/core";
 import { useT } from "../i18n";
+import { leafStyle, useOverLeaf } from "./over-leaf";
 import { useSideCover, type CardSpan } from "./short-band";
 import styles from "./SkinToggle.module.css";
 
@@ -75,6 +77,11 @@ interface TajweedLegendProps {
    * single page on a laptop moves aside for it as it does for the roots list.
    */
   onSide?: (span: CardSpan | null) => void;
+  /**
+   * On a spread, the leaf the key lies over: the one the verse is not on, as
+   * the roots list and the share card do. Null keeps the corner.
+   */
+  side?: LeafSide | null;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -107,13 +114,16 @@ export function TajweedLegend({
   credit,
   onClose,
   onSide,
+  side = null,
 }: TajweedLegendProps): JSX.Element | null {
   const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
   // The key counts the colours on this page, so a reader holds it up against
   // the page; in its corner it covered where the lines begin (look-alike rows ⑬).
-  useSideCover(open, false, sheetRef, onSide);
+  // On a spread it lies over the facing leaf instead (look-alike rows ⑭).
+  const place = useOverLeaf(open, side);
+  useSideCover(open, side !== null, sheetRef, onSide);
   // Whether the card holds more than it shows. On a laptop-sized window the
   // key is taller than its card, and the last thing in it is the source's
   // credit, a licence condition; without a cue nothing says it is there.
@@ -182,6 +192,8 @@ export function TajweedLegend({
       <div
         ref={sheetRef}
         className={styles.sheet}
+        style={leafStyle(place, "content")}
+        data-side={side ?? undefined}
         role="dialog"
         aria-modal="true"
         aria-label={t.legendAria}

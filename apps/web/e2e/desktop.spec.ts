@@ -2315,6 +2315,23 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       const across = Math.min(open.x + open.width, box.x + box.width) - Math.max(open.x, box.x);
       expect(across, `the card ${JSON.stringify(box)} over the verse's page ${JSON.stringify(open)}`).toBeLessThanOrEqual(0);
     });
+
+    test(`on a spread, the tajweed key lies over the facing page, not the one ${at} is on`, async ({ page }) => {
+      // The key kept its corner on a spread, over the page whose colours it
+      // names when the verse stood on that side (look-alike rows ⑭).
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/#/hafs-kfqc/${at}`);
+      const paper = pageSvg(page, pageNo);
+      await expect(paper).toBeVisible({ timeout: 20_000 });
+      await page.getByRole("button", { name: /^(مفتاح ألوان التجويد|Tajweed colour key)$/ }).click();
+      const key = page.getByRole("dialog", { name: /^(مفتاح ألوان التجويد|Tajweed colour key)$/ });
+      await expect(key).toBeVisible();
+      await key.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const box = await boxOf(key);
+      const open = await boxOf(paper);
+      const across = Math.min(open.x + open.width, box.x + box.width) - Math.max(open.x, box.x);
+      expect(across, `the key ${JSON.stringify(box)} over the verse's page ${JSON.stringify(open)}`).toBeLessThanOrEqual(0);
+    });
   }
 
   // In both languages: the list stands on the left in Arabic, and on the right
