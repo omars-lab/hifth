@@ -1453,11 +1453,23 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     between the two bars is only about 185 pixels, too little to stand the card inside it as
     an iPad does, so this needs a choice of shape (a shorter card, the card replacing the tool
     row, or the bars stepping aside) rather than a quick fix.
-43. **On an iPad mini held upright, the look-alike buttons stand on the start of the page's top lines.**
+43. ~~**On an iPad mini held upright, the look-alike buttons stand on the start of the page's top lines.**~~
     Found on 2026-10-10 on a 744 by 1133 window, with no card open: the buttons at rest sit in
     the top corner over the first letters of the page's first two lines. The large iPad had
     the same fault after a link or a hop and sends them into the bars; the mini's narrower
-    page leaves them on the paper.
+    page leaves them on the paper. **Fixed the same day:** on a screen wider than a phone
+    but narrower than a laptop, the buttons leave the page as they do on the large iPad:
+    into the head of the verse's drawer while it is up, and into the bottom bar once it is
+    put away. A phone keeps its row above the first line. Tested on the iPad mini upright in
+    English and Arabic (no button on the paper, either way), which failed first, one button
+    on the page's top lines in each language.
+44. ~~**On an iPad mini held upright, the verse's drawer cut into the bottom bar's buttons.**~~
+    Found on 2026-10-10 while fixing item 43: the drawer stood as a card in the middle of the
+    bottom bar, and the bar's buttons either side of it (full screen, the verse's name and the
+    page's tools) were half under it. **Fixed the same day:** below the width where the room
+    either side of the card can hold those buttons, the drawer covers the whole bar, as it
+    does on a phone. Tested in the same iPad mini test (every bar button is either clear of
+    the drawer or wholly under it), which failed first, the page's tools button half under it.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

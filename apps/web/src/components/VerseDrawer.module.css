@@ -24,9 +24,12 @@
  * On a phone it covers the bar and the slider whole, upright or held sideways:
  * a sliver of the bar's buttons above it, or one cut in half by its side, reads
  * as broken. A wider screen keeps the card in the middle, the bar's ends clear
- * beside it.
+ * beside it — from 900px, where the room either side (130px) first holds the
+ * bar's end buttons. Between a phone and that, an iPad mini held upright, the
+ * card cut into all three of them (plan item 44). The share card changes shape
+ * at the same width.
  */
-@media (max-width: 40rem), (max-height: 31rem) {
+@media (max-width: 899.98px), (max-height: 31rem) {
   .drawer {
     max-inline-size: none;
     min-block-size: var(--reach, auto);

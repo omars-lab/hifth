@@ -21,12 +21,15 @@ export function VerseDrawer({
   label,
   open,
   onClose,
+  end,
   children,
 }: {
   /** The verse's own name, "Al-Baqarah 2:48"; null when no verse is lit. */
   label: string | null;
   open: boolean;
   onClose: () => void;
+  /** At the head's end, before its ×: the look-alike buttons, when this is the tool row they go to. */
+  end?: ReactNode;
   /** The tool buttons, each with its caption. */
   children: ReactNode;
 }): JSX.Element | null {
@@ -69,6 +72,7 @@ export function VerseDrawer({
     <section ref={ref} className={styles.drawer} aria-label={t.verseTools(label)}>
       <header className={styles.head}>
         <span className={styles.title}>{label}</span>
+        {end}
         <button type="button" className={styles.close} aria-label={t.close} onClick={onClose}>
           <span aria-hidden="true">×</span>
         </button>

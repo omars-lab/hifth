@@ -204,6 +204,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   phone-side · issue: `share-card-covers-tool-row-sideways-phone`
 - [ ] On an iPad mini held upright, no card open, the look-alike buttons stand clear of the page's
   top lines (2:48). · `VIEWPORT=744x1133` · issue: `lookalike-buttons-on-top-lines-ipad-mini-upright`
+- [ ] On an iPad mini held upright, with the verse's drawer up the look-alike buttons sit in its
+  head, and with it put away (Escape twice) in the bottom bar; the drawer covers the whole bar,
+  cutting none of its buttons (2:48, English and Arabic). · `VIEWPORT=744x1133` · issue:
+  `verse-drawer-cuts-bar-buttons-ipad-mini-upright`
 - [ ] Closed to one page with the tajweed key open, the key covers none of the page and stands
   above the row of tools; the page comes back once it closes (2:48 `?view=one`, in English and in
   Arabic). · laptop, desktop · issue: `tajweed-key-covers-page-laptop`

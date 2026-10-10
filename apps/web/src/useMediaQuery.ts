@@ -48,6 +48,13 @@ import { useEffect, useState } from "react";
  */
 export const DESKTOP_QUERY = "(min-width: 1024px) and (min-height: 775px)";
 
+/**
+ * A phone's width, where the look-alike buttons lie in a row above the page's
+ * first line. The same width as HopRail.module.css's rule, which a media query
+ * cannot read from here; the two must agree.
+ */
+export const PHONE_QUERY = "(max-width: 600px)";
+
 /** A screen taller than it is wide, as an iPad held upright: one page reads larger than two. */
 export const UPRIGHT_QUERY = "(orientation: portrait)";
 
