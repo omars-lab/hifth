@@ -4,7 +4,7 @@
 .scrim {
   position: fixed;
   inset: 0;
-  z-index: var(--z-sheet);
+  z-index: var(--z-modal);
   display: grid;
   place-items: center;
   padding: 12px;
