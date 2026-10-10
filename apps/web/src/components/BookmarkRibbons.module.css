@@ -150,7 +150,7 @@
 .seam {
   position: absolute;
   inset-block-start: var(--leaf-y, 0px);
-  left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) - var(--seam-w));
+  left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) - var(--seam-w) / 2);
   --seam-w: calc(9px * var(--leaf-z, 1));
   /* Short: the field ends a few pixels under the paper, and a longer tail is cut off. */
   --seam-tail: calc(8px * var(--leaf-z, 1));
@@ -164,18 +164,14 @@
 }
 
 :global([data-free-side="right"]) .seam {
-  left: var(--leaf-x, 0px);
-}
-
-/* On an open book the seam lies on the crease itself, centred on it, half on
-   each page. (On one page alone there is no crease, and it stays inside the
-   page's inner edge, as above.) */
-:global([data-bound]) .seam {
-  left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) - var(--seam-w) / 2);
-}
-:global([data-bound]) :global([data-free-side="right"]) .seam {
   left: calc(var(--leaf-x, 0px) - var(--seam-w) / 2);
 }
+
+/* It lies across the bound edge, half on the paper: on an open book that edge
+   is the crease, so it is half on each page. On one page alone it once lay
+   wholly on the paper, and on a page bound on its left the ink starts closer
+   to that edge than the seam is wide, so it covered the ends of the lines
+   (2026-10-10, walking a phone); half its width clears the ink on every page. */
 
 /* The ribbons hang from their own page, a little in from the spine and so
    well clear of the folded corner on the other side. Measured against the

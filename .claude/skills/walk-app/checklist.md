@@ -277,6 +277,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   pen-colours specs
 - [ ] Bookmark a page: the ribbon and folded corner look right, in Firefox too. · desktop with
   `BROWSER=firefox` · test: edge-peel spec
+- [ ] Stay on a page for a few seconds until the red ribbon appears down its bound edge: it covers
+  none of the writing, on a page bound on the left and one bound on the right. · phone · test:
+  bookmarks spec · issue: `seam-covers-line-ends-phone`
 - [ ] Switch the interface to Arabic: everything mirrors, nothing is cut off; on an iPad, upright
   and on its side, open a note too: its close button is on the left and the card stays whole. ·
   phone, desktop, ipad, ipad-side · tests: lang, chrome-fit specs, pitch "the note mirrors"

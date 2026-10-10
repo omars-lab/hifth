@@ -108,6 +108,36 @@ test.describe("Hifth · bookmarks", () => {
     await expect(seam).toHaveCount(1, { timeout: 3000 });
   });
 
+  // 2026-10-10, walking the live site on a phone: on a page bound on its left,
+  // the seam lay wholly on the paper, nine points wide, and the ink starts about
+  // eight points in, so the ribbon covered the ends of the lines on that side.
+  for (const at of [7, 8]) {
+    test(`the red seam on page ${at} lies across the bound edge and covers no ink`, async ({ page }) => {
+      const seam = page.getByRole("img", { name: "Where you left off" });
+      await page.goto(`/#/hafs-kfqc/p${at}`);
+      await expect(page.locator(`svg[aria-labelledby="page-label-${at}"]`)).toBeVisible();
+      await page.waitForTimeout(7000);
+      await expect(seam).toHaveCount(1);
+      const m = await page.evaluate((n) => {
+        const host = document.querySelector(`[data-host-page="${n}"]`)!;
+        const hb = host.getBoundingClientRect();
+        let l = Infinity;
+        let r = -Infinity;
+        for (const p of host.querySelectorAll("svg path")) {
+          if (p.closest("defs") || /ayahPolygon/.test(p.getAttribute("class") ?? "")) continue;
+          const b = p.getBoundingClientRect();
+          if (b.width === 0 || b.width > hb.width * 0.97) continue;
+          l = Math.min(l, b.left);
+          r = Math.max(r, b.right);
+        }
+        const s = document.querySelector("[data-bookmark-seam]")!.getBoundingClientRect();
+        return { inkLeft: l, inkRight: r, seamLeft: s.left, seamRight: s.right };
+      }, at);
+      const overlap = Math.min(m.seamRight, m.inkRight) - Math.max(m.seamLeft, m.inkLeft);
+      expect(overlap, `the seam (${m.seamLeft}..${m.seamRight}) is clear of the ink (${m.inkLeft}..${m.inkRight})`).toBeLessThan(0);
+    });
+  }
+
   test("clearing all from the page map asks first, and names the count", async ({ page }) => {
     await ready(page);
     // The corner folds once; a second bookmark on the same page comes from the
