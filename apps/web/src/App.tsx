@@ -319,6 +319,9 @@ export function App(): JSX.Element {
   // Where the open share tray starts on a phone; the page lifts the verse above
   // whichever of the two reaches higher.
   const [shareTop, setShareTop] = useState<number | null>(null);
+  // Where the open share sheet starts at any width: the card in a sideways
+  // phone's corner is where the look-alike chips ride.
+  const [shareCardTop, setShareCardTop] = useState<number | null>(null);
   // Where an open roots or similar-verses list starts on a phone: it takes the
   // note's place, so the page lifts the verse above it the same way.
   const [listTop, setListTop] = useState<number | null>(null);
@@ -3162,6 +3165,14 @@ export function App(): JSX.Element {
     const picked = selectedRange?.[0] ?? selectedKey;
     return introSheet ? (sideOf(formatAyahKey(resolver.edition, introSurah!, 1)) ?? sideOf(picked)) : sideOf(picked);
   }, [desktop, pageMode, resolver, introSheet, introSurah, selectedRange, selectedKey, page, totalPages]);
+  // A phone held sideways is wide enough for the share card to stand in a
+  // corner, as on a laptop, but is no laptop: the page stayed put under it and
+  // the card covered the verse it shares, with the look-alike chips half behind
+  // its edge (plan item 38). The page moves clear of it as on a laptop, and the
+  // chips ride the card's own top row, as they ride a phone's tray: crossed to
+  // the free corner instead, they kept a band over the page so tall the verse's
+  // last line ran off its foot.
+  const shareCorner = !desktop && !upright && shareTop === null ? shareSide : null;
   const selectedSurah = selectedKey ? parseAyahKey(selectedKey)?.surah : null;
 
   // The sheets that load on first open are mounted from their first opening on,
@@ -3185,10 +3196,22 @@ export function App(): JSX.Element {
       // The pitch note for a left-leaf verse lands on the right, over the
       // rail's corner; the chips cross to the left while it is up. Beside the
       // book there is no corner to share: the note rises over the other leaf.
-      crossed={!beside && !home && COMMENTARY && commentaryOpen && hasCommentary && sheetSide === "right"}
+      crossed={
+        !beside &&
+        !home &&
+        ((COMMENTARY && commentaryOpen && hasCommentary && sheetSide === "right") ||
+          // Seated on the share card, the chips go where the card stands:
+          // the chrome's end, which is the left when it reads right to left.
+          (shareCorner !== null && dir === "rtl"))
+      }
       onBand={setRailBottom}
       beside={beside}
-      seat={beside || home || noteTall ? null : highestTop(coverTop, shareTop, listTop)}
+      seat={
+        beside || home || noteTall
+          ? null
+          : (highestTop(coverTop, shareTop, listTop) ?? (shareCorner !== null ? shareCardTop : null))
+      }
+      onCard={highestTop(coverTop, shareTop, listTop) === null && shareCorner !== null}
       away={!beside && !home && noteTall}
       home={home}
     />
@@ -3209,7 +3232,7 @@ export function App(): JSX.Element {
   // to stand it there; held upright, it lies across the page's foot instead,
   // and covers that (⑩). The share card opens over either, in the same corner
   // (⑫), so the page clears whichever reaches further in.
-  const sideCard = desktop && pageMode === "one" && !upright ? cornerSpan : null;
+  const sideCard = desktop && pageMode === "one" && !upright ? cornerSpan : shareCorner;
   const railAt: "bar" | "tools" | null =
     !desktop || roomBeside ? null : railHome === "tools" && penAt === "strip" ? "tools" : "bar";
 
@@ -3522,7 +3545,7 @@ export function App(): JSX.Element {
                 // A card beside one page covers its side, not its foot: the
                 // page moves clear of it, and lifting it as well left a band
                 // of empty stage under the page.
-                coverTop={sideCard ? null : highestTop(coverTop, shareTop, listTop)}
+                coverTop={desktop && sideCard ? null : highestTop(coverTop, shareTop, listTop)}
                 coverSide={sideCard}
                 railBottom={railBottom}
                 resolver={resolver}
@@ -3941,6 +3964,7 @@ export function App(): JSX.Element {
           hasTrail={trail.length > 0}
           pitch={PITCH}
           onCover={setShareTop}
+          onTop={setShareCardTop}
           onSide={setShareSide}
           side={sheetSide}
         />

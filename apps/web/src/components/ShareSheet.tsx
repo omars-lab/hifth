@@ -29,6 +29,12 @@ interface ShareSheetProps {
    */
   onCover?: (top: number | null) => void;
   /**
+   * Where the open sheet starts (window px) at any width, card or tray, or
+   * null once it closes: a card in a sideways phone's corner covers no foot of
+   * the page, but the look-alike chips ride its top row all the same.
+   */
+  onTop?: (top: number | null) => void;
+  /**
    * Where the open card spans across the window, or null once it closes, so
    * a single page on a laptop moves aside for it as it does for the roots list.
    */
@@ -72,6 +78,7 @@ export function ShareSheet({
   shape = SHAPE,
   pitch = false,
   onCover,
+  onTop,
   onSide,
   side = null,
 }: ShareSheetProps): JSX.Element | null {
@@ -150,13 +157,18 @@ export function ShareSheet({
   // starts so it moves the verse up clear of it (owner, 2026-09-30, choosing C:
   // "keep the verse visible"). The same path the commentary note uses.
   useLayoutEffect(() => {
-    if (!onCover) return;
+    if (!onCover && !onTop) return;
     const sheet = sheetRef.current;
     if (!open || !sheet) {
-      onCover(null);
+      onCover?.(null);
+      onTop?.(null);
       return;
     }
-    const report = () => onCover(window.matchMedia(WIDE).matches ? null : sheet.getBoundingClientRect().top);
+    const report = () => {
+      const top = sheet.getBoundingClientRect().top;
+      onCover?.(window.matchMedia(WIDE).matches ? null : top);
+      onTop?.(top);
+    };
     report();
     window.addEventListener("resize", report);
     // The tray grows a row for the look-alike chips once they come down onto
@@ -167,8 +179,9 @@ export function ShareSheet({
       seen.disconnect();
       window.removeEventListener("resize", report);
     };
-  }, [open, onCover]);
+  }, [open, onCover, onTop]);
   useEffect(() => () => onCover?.(null), [onCover]);
+  useEffect(() => () => onTop?.(null), [onTop]);
   // On a laptop the card stands in the corner beside the page, where the roots
   // list stands, and covered the start of the page's lines (look-alike rows ⑫).
   const place = useOverLeaf(open, side);

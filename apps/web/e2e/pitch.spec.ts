@@ -1613,6 +1613,35 @@ test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
     for (const bottom of boxes) expect(bottom, "a line of the verse is under the note").toBeLessThanOrEqual(top);
   });
 
+  test("on a phone held sideways, sharing a verse once its note is closed shows every line of it", async ({ page }) => {
+    // The share card stands in the corner and the page moves aside for it; the
+    // look-alike chips leave their column for the card's top row, and the page
+    // is placed again once they have. A second report of the card's same span
+    // cancelled that second placement, so the verse stayed where the column
+    // had put it, with its last line off the page's foot (plan item 38).
+    await page.goto("/#/hafs-kfqc/2:48");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const lines = page.locator("#hifth-overlay .hl-sel");
+    await page.keyboard.press("Escape");
+    await expect(sheet(page)).toBeHidden();
+    await settle(lines.first());
+    await page.getByRole("button", { name: "Share this ayah as a link" }).first().click();
+    const card = page.getByRole("dialog", { name: "Share this ayah as a link" });
+    await expect(card).toBeVisible();
+    await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    // The wrong move came late, once the page had first shown the verse whole:
+    // look only after the page has come to rest.
+    await page.waitForTimeout(600);
+    await settle(lines.last());
+    const { stageFoot, feet } = await page.evaluate(() => ({
+      stageFoot: document.querySelector("#hifth-overlay")!.closest("[class*=stage]")!.getBoundingClientRect().bottom,
+      feet: [...document.querySelectorAll("#hifth-overlay .hl-sel")].map((el) => el.getBoundingClientRect().bottom),
+    }));
+    expect(feet.length).toBeGreaterThan(1);
+    for (const foot of feet) expect(foot, "a line of the verse runs off the page's foot").toBeLessThanOrEqual(stageFoot + 1);
+  });
+
   test("turning a phone sideways the moment a link opens a verse still lights the verse", async ({ page }) => {
     // The page glides to the verse a link names and lights it once it gets
     // there. Turned before it got there, the glide was cut short to fit the

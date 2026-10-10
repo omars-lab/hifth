@@ -1413,6 +1413,24 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     nothing changes. Tested in the pitch phone browser tests (a link to 2:1 keeps page 2's
     lines on the screen, which failed first, 171 pixels off the left edge) and unit tests of
     the rule.
+38. ~~**On a phone held sideways, sharing a verse ran its last line off the page's foot.**~~
+    Found on 2026-10-10 walking the pitch on a phone on its side: the share card stands in
+    the window's corner beside the page, and the look-alike buttons, with nowhere else to
+    go, stood over the top of the page's column, so the page moved the verse down beneath
+    them, and its last line ran a few pixels past the page's foot. A first try sent the
+    buttons to the other corner instead, and still clipped the line. **Fixed the same day:**
+    the buttons now ride the card's own top row, as they ride a phone's tray, and the card
+    leaves them room above its close button. Two timing faults kept the page from moving the
+    verse back once they had gone: it only looked again when a tray had moved, not a card in
+    the corner, and the card reporting its same place again as it settled cancelled the move
+    already asked for. Tested in the share tests on phone browsers in English and Arabic (all
+    lines whole, and still whole once the page comes to rest) and a pitch phone test, which
+    failed first, the last line 2 pixels past the foot.
+39. **On an iPad mini on its side, the share card covers the start of the verse it shares.**
+    Found on 2026-10-10 on a window that size (1133 by 744): the verse shows from top to
+    bottom, but the card in the corner covers about 20 pixels of the page's right edge, which
+    is where a line of the mus'haf begins, so the first letters of the verse's second line sit
+    under it. The page is drawn as wide as the window and does not move aside for the card.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

@@ -192,6 +192,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the row of tools, every tool in sight: on one page the page stands clear of it, on two pages it lies
   over the facing page (2:48 and 2:49, `?view=one` and two pages, in English and in Arabic). · laptop,
   desktop · issue: `share-card-covers-page-laptop`
+- [ ] On a phone on its side, close the note and press Share (2:48, English and Arabic): every line
+  of the verse shows, its last line included, and stays so a second later; the look-alike buttons
+  sit on the card's top row, clear of its close button. · phone-side · issue:
+  `share-card-clips-verse-sideways-phone`
 - [ ] Closed to one page with the tajweed key open, the key covers none of the page and stands
   above the row of tools; the page comes back once it closes (2:48 `?view=one`, in English and in
   Arabic). · laptop, desktop · issue: `tajweed-key-covers-page-laptop`
