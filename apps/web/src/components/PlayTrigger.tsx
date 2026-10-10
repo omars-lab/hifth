@@ -35,7 +35,7 @@ export function PlayTrigger({
 
   const playing = phase === "playing";
   const loading = phase === "loading";
-  const glyph = playing ? "⏸" : loading ? "↻" : "▶";
+  const glyph = playing ? "⏸\uFE0E" : loading ? "↻" : "▶\uFE0E";
 
   return (
     <button

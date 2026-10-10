@@ -236,7 +236,7 @@ export function HopPopover({
                       aria-label={t.openOnQulAria(label)}
                     >
                       <span className={styles.qulLabel}>{t.openOnQul}</span>
-                      <span aria-hidden="true">↗</span>
+                      <span aria-hidden="true">{"↗\uFE0E"}</span>
                     </a>
                   ) : (
                     <button
@@ -246,7 +246,7 @@ export function HopPopover({
                       onClick={() => onHop(edge)}
                       aria-label={t.hopTo(label)}
                     >
-                      <span aria-hidden="true">↪</span>
+                      <span aria-hidden="true">{"↪\uFE0E"}</span>
                     </button>
                   )}
                 </div>

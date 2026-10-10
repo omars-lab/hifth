@@ -895,7 +895,7 @@ test.describe("Hifth · the way back from a note on a phone", () => {
     await sheet(page).getByRole("button", { name: /^انتقل إلى .*(6:153|٦:١٥٣)/ }).click();
     const back = sheet(page).getByRole("button", { name: /^ارجع إلى / });
     await expect(back).toBeVisible();
-    await expect(back.locator("[aria-hidden]")).toHaveText("↪");
+    await expect(back.locator("[aria-hidden]")).toHaveText("↪\uFE0E");
     const gap = await back.evaluate((el) => {
       const arrow = el.querySelector("[aria-hidden]")!.getBoundingClientRect();
       const words = document.createRange();
@@ -2133,7 +2133,7 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     const icon = (name: RegExp) => item(name).locator("[data-glyph]");
     await expect(icon(/^Commentary/)).toHaveText("✎");
     await expect(icon(/^Same roots/)).toHaveText("⬡");
-    await expect(icon(/^Listen/)).toHaveText("▶");
+    await expect(icon(/^Listen/)).toHaveText("▶\uFE0E");
     await expect(items.locator("[data-glyph]").filter({ hasText: "▶" })).toHaveCount(1);
     await expect(icon(/^Surah introduction/)).toHaveText("ⓘ");
     // The icons stand in one column, so the words line up after them.

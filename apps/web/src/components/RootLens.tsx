@@ -165,7 +165,7 @@ export function RootLens({
           onClick={() => onHop(hop)}
           aria-label={t.hopTo(label)}
         >
-          <span aria-hidden="true">↪</span>
+          <span aria-hidden="true">{"↪\uFE0E"}</span>
         </button>
       </li>
     );
@@ -236,7 +236,7 @@ export function RootLens({
                       onClick={() => onHopEdge?.(edge)}
                       aria-label={t.hopTo(label)}
                     >
-                      <span aria-hidden="true">↪</span>
+                      <span aria-hidden="true">{"↪\uFE0E"}</span>
                     </button>
                   </li>
                 );
@@ -318,7 +318,7 @@ export function RootLens({
               for its copyright notice to be reproduced in derived works — the
               shards are one, so the line below is an obligation, not a courtesy.
               The full block ships at assets/roots/<edition>/NOTICE.txt. */}
-          <span className={styles.copyright}>© 2011 Kais Dukes · GNU GPL</span>
+          <span className={styles.copyright}>{"©\uFE0E"} 2011 Kais Dukes · GNU GPL</span>
         </footer>
       </div>
     </>

@@ -38,7 +38,7 @@ export function QulTrigger({
       aria-label={t.qulVerse(label)}
       title={t.qulVerse(label)}
     >
-      <span aria-hidden="true">↗</span>
+      <span aria-hidden="true">{"↗\uFE0E"}</span>
       {caption && <span data-caption="">{caption}</span>}
     </a>
   );

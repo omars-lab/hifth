@@ -20,7 +20,7 @@ export { COACH_STORAGE_KEY, coachDismissed };
  * vocabulary, active voice, one verb per flow). Nothing here describes a
  * feature that does not exist yet, in either language.
  */
-const GLYPHS: readonly string[] = ["◉", "▤", "↪"];
+const GLYPHS: readonly string[] = ["◉", "▤", "↪\uFE0E"];
 
 /**
  * In the pitch build a tap does something different from the public app: it

@@ -279,3 +279,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Open the tips from settings in the pitch build: the foot line does not repeat the first
   tip, and comes back once the tips are skipped or done. · `make drive DEVICE=phone
   HASH='#/hafs-kfqc/p1?open=tips'` · issue: `tips-repeat-foot-line` · test: `e2e/pitch.spec.ts`
+- [ ] In the iPad and Mac apps, every go-to arrow (a note's related verses, the look-alike rows,
+  the way back) and the play buttons draw as plain marks, not coloured emoji tiles, in Arabic and
+  English. · `make app-walk SIDEWAYS=1 LOCALE=ar ROUTES='/hafs-kfqc/2:48?open=lookalikes
+  /hafs-kfqc/15:30?open=commentary'` · test: `src/glyphs-as-text.test.ts`, `e2e/hop.spec.ts`
