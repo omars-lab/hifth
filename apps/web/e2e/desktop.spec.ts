@@ -1017,6 +1017,31 @@ test.describe("Hifth · one page or two, and how big", () => {
   const readout = (page: Page): Locator =>
     page.getByRole("group", { name: "التكبير" }).locator("span");
 
+  test("a list in the corner beside one page keeps its height, and leaves the page bright", async ({ page }) => {
+    // 2026-10-09: the lists were made short wherever they are not beside a
+    // spread, for the iPad held upright, where they lie across the page. Closed
+    // to one page on a laptop the card stands in the corner beside the page,
+    // covering none of it, and cut to a third of the screen it showed two rows.
+    await page.goto("/#/hafs-kfqc/2:255?open=roots");
+    const list = page.getByRole("dialog");
+    await expect(list).toBeVisible({ timeout: 20_000 });
+    await modeBtn(page, "one").click();
+    await expect.poll(() => soloOf(page)).toBe("true");
+    await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const paper = await boxOf(book(page).locator('[data-live="true"] [data-host-page]').first());
+    const card = await boxOf(list);
+    expect(card.x >= paper.x + paper.width || card.x + card.width <= paper.x, "the card is beside the page").toBe(
+      true,
+    );
+    const tall = await page.evaluate(() => window.innerHeight);
+    expect(card.height, "a long list keeps more than half the screen").toBeGreaterThan(tall / 2);
+    const onTop = await page.evaluate(
+      ([x, y]) => document.elementFromPoint(x!, y!)?.closest("svg") !== null,
+      [paper.x + paper.width / 2, paper.y + paper.height / 2],
+    );
+    expect(onTop, "the page, not a veil, is under its middle").toBe(true);
+  });
+
   test("the toggle closes the book and opens it again", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });

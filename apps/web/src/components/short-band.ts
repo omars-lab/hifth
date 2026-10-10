@@ -13,12 +13,14 @@ import { useLayoutEffect, type RefObject } from "react";
  *
  * The same card on that upright iPad still drew a veil over the page and the
  * toolbar, and the roots list rose over nearly the whole screen, where the
- * note in the same place leaves the page bright (2026-10-09). So any list not
- * beside the page is the band, whatever the width: short, no veil, the page
- * live, as it is under the note.
+ * note in the same place leaves the page bright (2026-10-09). So no list not
+ * beside a spread draws a veil, whatever the width, and the page stays live,
+ * as it is under the note.
  *
  * Returns whether the list is that band now; the sheet carries `data-band`
- * then, which is what keeps it short.
+ * then, which keeps it short where it lies across the page (a phone, or a wide
+ * screen held upright). Wide and not upright, the card stands in the corner
+ * beside one page and keeps its height.
  */
 export function useShortBand(
   open: boolean,
