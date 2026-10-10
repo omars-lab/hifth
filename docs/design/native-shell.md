@@ -652,3 +652,29 @@ facing page beside its verse, and a plain spread reads in the right order. The r
 look-alikes with their shared-words pictures, and the notes of 2:255, 2:48, 15:30 and 18:60 all read
 as they do in the browser. Nothing new turned up, so no new item. The red strip at 15:30's inner
 edge is the where-you-left-off ribbon, as before.
+
+### ㉗ Do the notes one tap from the demo look right in the iPad app? · **fixed**
+
+The walks so far follow the demo's own stops. The first thing a scholar does off that path is tap a
+verse a note cites, and none of the notes that lands on had been looked at in the app.
+
+**What it changes for a hafiz:** a note the book shares across a run of verses opens on the run, so a
+reader knows the note covers the verse beside it and its neighbours. Set in the prose's own type, the
+run read as the first words of the first sentence.
+
+**Seen, 2026-10-10.** Walked by picture in the iPad app on its side, in English: the notes of 3:91,
+5:36, 70:11, 7:156, 2:143 and 18:50, each one tap from a demo note. Each lay over the facing page
+beside its verse, its slanted words and links as in the browser. One fault: 5:36's and 70:11's notes
+open on their run of verses (70:11 holds two shared notes, so two runs) at body weight, run into the
+sentence. The print sets that run smaller, in its red, with a gap before the prose. The demo's own
+shared notes, 15:30's and 18:60's, opened the same way.
+
+**The fix:** a run at the head of a paragraph that holds the note's own verse is drawn apart: smaller,
+in the book's red (not the link colour, so it does not read as something to tap), with a gap after it.
+A number that only opens a sentence, or a run that does not hold the verse, stays prose. Looked at
+again in the iPad app at 70:11 and 15:30, and measured in Firefox with the app in Arabic.
+
+Tests: unit tests on the drawer (a run at the head is set apart; each paragraph opening a new run is;
+a number opening a sentence, a run mid-line, and a run that misses the verse are not), and a browser
+test on 15:30, 18:60, 70:11 and 2:255 that counts the runs and checks each sits first, in its own
+colour, with a gap. Both failed first.

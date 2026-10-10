@@ -109,6 +109,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   look-alike rows included ("Most alike: …", the shared words); the shared words sit under the
   captions and the arrow stays at the row's end. · laptop and phone, both languages · issue:
   `note-list-lookalike-rows-bare`
+- [ ] A note shared by a run of verses opens on the run, set smaller, in red, with a gap before the
+  prose, as the print does; a note of one verse has none. Also walk a few notes one tap from a demo
+  note (3:91, 5:36, 70:11, 7:156), not only the demo's own. · iPad app on its side, laptop, Firefox ·
+  `make app-walk SIDEWAYS=1 ROUTES='/hafs-kfqc/70:11?open=commentary /hafs-kfqc/15:30?open=commentary'`
+  · issue: `shared-note-run-head-unset` · test: `e2e/pitch.spec.ts`
 - [ ] Where a note's related verses have fewer than eight cards (try 18:65 and 18:22), every verse
   the note links is among them. · any · issue: `related-verses-drop-bare-numbers`
 - [ ] At 2:255, the eight related cards end on a line that says how many more the note points to;

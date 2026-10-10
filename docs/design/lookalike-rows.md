@@ -235,7 +235,8 @@ What looking at it taught us:
 - **Walked in the real apps, 2026-10-10:** in the iPad app and the Mac app, in English and in Arabic,
   both demo notes were measured from inside the page: every row has a line under its name, and every
   picture sits under its captions, clear of the arrow. The iPad app was also looked at by picture,
-  upright and on its side.
+  upright and on its side. In Firefox on a laptop, in both languages, 2:48's note shows the same: the
+  picture under the captions, the arrow at the row's end.
 
 Tests: unit tests on the note's list (a passage row says which verse is most alike and how many words it
 shares; a loose row says it is alike but not word for word; a book row keeps only its own line), which
