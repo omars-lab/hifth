@@ -111,6 +111,35 @@ nonisolated enum Route {
             .flatMap(hash(from:))
     }
 
+    // MARK: - The language for this launch
+
+    static let languageKey = "HIFTH_LANG"
+    static let languageArgumentPrefix = "--lang="
+    /// The interface languages the web app has (its `LOCALE_IDS`).
+    static let languages = ["ar", "en"]
+
+    /// A language named for this launch (`HIFTH_LANG`, or `--lang=` for
+    /// XCUITest), or `nil`. The web app takes `?lang=` for one visit and never
+    /// saves it, so it shows that language even where the reader has picked
+    /// another with the app's own button, and leaves their pick as it was.
+    static func language(
+        _ environment: [String: String] = ProcessInfo.processInfo.environment,
+        arguments: [String] = CommandLine.arguments
+    ) -> String? {
+        let named = environment[languageKey]
+            ?? arguments.first { $0.hasPrefix(languageArgumentPrefix) }.map { String($0.dropFirst(languageArgumentPrefix.count)) }
+        return named.flatMap { languages.contains($0) ? $0 : nil }
+    }
+
+    /// The address the shell opens first: the language before the `#`, where
+    /// the web app reads it, and the route after it.
+    static func startURL(route: String?, language: String?) -> URL {
+        var start = BundleFiles.indexURL.absoluteString
+        if let language { start += "?lang=" + language }
+        if let route { start += route }
+        return URL(string: start) ?? BundleFiles.indexURL
+    }
+
     // MARK: - Grammar (mirrors parseHash in the web router, then narrows the
     // edition to what the app ships — the web router takes any name, and would
     // show the Hafs pages under a lying address)

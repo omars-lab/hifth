@@ -114,11 +114,9 @@ final class ShellModel {
             webView.loadHTMLString(Self.missingBundlePage, baseURL: nil)
             return
         }
-        // A launch route rides in the first URL: no timing, no race, the page
-        // simply opens there.
-        var start = BundleFiles.indexURL.absoluteString
-        if let launchRoute { start += launchRoute }
-        webView.load(URLRequest(url: URL(string: start) ?? BundleFiles.indexURL))
+        // A launch route (and language) rides in the first URL: no timing, no
+        // race, the page simply opens there.
+        webView.load(URLRequest(url: Route.startURL(route: launchRoute, language: Route.language())))
     }
 
     // MARK: - Routes in
