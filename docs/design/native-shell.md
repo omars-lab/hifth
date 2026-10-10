@@ -589,3 +589,26 @@ something and then counts what changed got `{}` back, because the answer comes a
 press. The probe now waits for an answer that comes later; three tests run its question in a real
 web view (the waiting one and a failing one failed first). With both, the iPad app at 2:255 shows
 the line under its eight related verses, and pressing it lists all 25.
+
+### ㉓ Scrolled to its end, the tajweed key took its title and close button with it · **fixed**
+
+Found walking the pitch on a laptop-sized window on 2026-10-09, just after ㉑: scrolled down to
+reach the credit, the key moved as one, so its title and its close button went up and out of the
+card and the top line was cut part way. The look-alike list had the same fault and the same fix
+(⑨ in the commentary record).
+
+**The fix:** the title row stays pinned to the top of the card over the scrolling rules, and the
+handle is drawn above it. A browser test scrolls the key to its end on a laptop-sized window and
+expects the title and the close button still inside the card and not covered (failed first, on
+phone-sized Safari and Chrome); it runs in Firefox too.
+
+### ㉔ In Firefox the credit's web address broke in two · **fixed**
+
+Found on the same walk, in Firefox: the address of the rules' source broke after its "https://",
+so the first half ended one line and the rest began the next, and in Arabic the two halves read
+as two things. Chrome and Safari kept it whole.
+
+**The fix:** the address moves to its own line whole, and a card narrower than it still wraps it
+rather than let it spill out. A browser test counts the lines the address takes, at the default
+size and on a laptop-sized window, and expects one and that it fits the card (failed first in
+Firefox only, which is why the key's tests now also run there).

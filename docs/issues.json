@@ -3165,6 +3165,30 @@
       "note": "Found walking the pitch in the Mac app (2026-10-08), the same in a laptop-sized browser: the tajweed key is taller than its card, so its last rule was cut at the edge and the rules' source credit, a licence condition, sat out of sight with nothing saying the card scrolls. The card's foot now fades while there is more below and the fade goes at the end. Tests: 'a key taller than its card says there is more, until the end is reached' (failed first) and 'a key that fits its card shows no cue'."
     },
     {
+      "id": "tajweed-key-title-scrolls-away",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉓"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/tajweed-key.spec.ts",
+      "note": "Found walking the pitch on a laptop-sized window (2026-10-09): scrolled to its credit, the key moved as one, so its title and close button left the card. Fixed the same day as the look-alike list was: .head is sticky over the card's top padding, the grip drawn above it. Test: 'scrolled to its end, the key keeps its title and close button at the top' (failed first)."
+    },
+    {
+      "id": "tajweed-key-credit-address-cut",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉔"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/tajweed-key.spec.ts",
+      "note": "Found on the same walk, Firefox only: the credit's address broke after https://, splitting it across two lines (in Arabic the halves read as two things). The link is now an inline block that moves down whole and still wraps in a narrower card. Test: 'the credit's web address is never cut in two' at two sizes, failed first in Firefox; the key's new spec file runs in the Firefox project."
+    },
+    {
       "id": "reader-words-plumbing",
       "source": {
         "file": "docs/design/native-shell.md",
