@@ -1430,7 +1430,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     Found on 2026-10-10 on a window that size (1133 by 744): the verse shows from top to
     bottom, but the card in the corner covers about 20 pixels of the page's right edge, which
     is where a line of the mus'haf begins, so the first letters of the verse's second line sit
-    under it. The page is drawn as wide as the window and does not move aside for the card.
+    under it. Measured again the same day, more carefully: the page does move aside, about 200
+    pixels, but at the size a link lands it is about 715 pixels wide and the room beside the
+    card is about 650, so the verse's first word is kept clear (the rule in
+    [look-alike rows ⑩](design/lookalike-rows.md)) and about 27 pixels of the second line's
+    first letters stay under the card. What should give is an open question,
+    [look-alike rows ⑯](design/lookalike-rows.md), waiting on ⑪ there.
 40. ~~**On an iPad held upright, the share card covered the verse it shares.**~~
     Found on 2026-10-10 walking the pitch on both iPad sizes held upright: the card stands in
     the window's lower corner, over the foot of the page, and the page was never told it was

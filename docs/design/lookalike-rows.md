@@ -374,6 +374,10 @@ about 85% from 130%), not tried by hand.
 **Ways it could go:** build the smaller page as a setting in the info panel, with the slide as the
 default; or leave the slide as the only way and close this.
 
+**Seen again, 2026-10-10:** on an iPad mini on its side the share card leaves a page only a few
+percent too wide for the room, so the start of the verse's second line sits under it. That smaller
+case is ⑯, and it waits on this one.
+
 ### ⑫ On a laptop, does the share card cover the verse it shares, or the row of tools it opens from? · **fixed**
 
 **What it changes for a hafiz:** a reader who taps Share to send a verse to a teacher could not see
@@ -460,3 +464,33 @@ Checked by picture on a phone, 390 wide, in the pitch, in English: 2:49 with the
 note shows the key whole and no look-alike button above it. Tests: a pitch phone test for each of the
 six panels that the look-alike buttons are not the top thing where they stand, which failed first for
 all six.
+
+### ⑯ On an iPad mini on its side, when the page is a little wider than the room beside the share card, what should give? · **blocked**
+
+**What it changes for a hafiz:** a link lands with the page magnified, and on a window the size of an
+iPad mini on its side (1133 by 744) the page is then about 715 pixels wide. Open Share and the page
+slides about 200 pixels aside, as ⑩ makes it, but the room left beside the card is only about 650
+pixels. ⑩ keeps the first word of the verse clear, and it is; but a verse that runs on to a second
+full line has that line start under the card, about 27 pixels of its first letters. A hafiz checking
+where the line begins before sending the verse has to pan or close the card. Found walking the pitch
+on that window, 2026-10-10 (2:48, Share open).
+
+**Why it is asked now:** the walk found it, and the page is only a few percent too wide, which is a
+smaller shortfall than the laptop case ⑩ was built on (there the page was hundreds of pixels too
+wide). A small shortfall is where drawing the page a little smaller would cost least.
+
+**What happens if nobody decides:** the page slides, the verse's first word stays clear, and the start
+of its second line sits under the card until the reader pans or closes it.
+
+**Ways it could go:**
+
+- Draw the page smaller by the little it overflows (here about 9%) while the card is up, and back to
+  the reader's size when it closes. Clears the whole verse; the page changes size under the reader's
+  eye, and it is ⑪'s question in a small form, so it waits on ⑪.
+- Let the page run past the window's far edge instead, so the line starts are clear and the line
+  ends (and the verse marker) leave the window. Swaps one hidden part for another.
+- Narrow the share card on windows this size. Its buttons wrap to more rows, and it stops matching
+  the roots list's width beside the page.
+- Leave it as it is, ⑩'s limit, and close this.
+
+Blocked on ⑪: whichever way ⑪ goes for drawing the page smaller decides most of this.
