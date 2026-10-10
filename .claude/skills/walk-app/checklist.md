@@ -62,6 +62,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 
 ## The note (pitch)
 
+- [ ] Walk the demo path in Firefox at a desk: open 2:255's note, its look-alikes, 2:48's note and
+  its links, a verse's number menu, the tajweed key. Every push runs the pitch suite's
+  laptop-sized tests in Firefox too; its phone and iPad tests do not run there, since the test
+  tool cannot make Firefox a phone, so look at those by hand. · desktop (Firefox), laptop
+  (Firefox) · `make drive BROWSER=firefox DEVICE=desktop` · test: the `pitch-firefox` run,
+  `docs/issues/firefox-pitch-run-laptop-only.md`
 - [ ] Open a verse's note: it never covers its own verse, also after turning the phone. · phone,
   phone-side · issue: `note-covers-verse-after-turn`. Sideways, a verse too long for the room
   above the note (2:255) starts at its first line with the rest under the note; that is known
@@ -160,7 +166,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   with the fade gone. · desktop, the Mac app · issue: `tajweed-key-hidden-credit`
 - [ ] Scrolled to its end, the tajweed key still shows its title and close button at the top of
   the card, and the credit's web address sits whole on one line, in Firefox and in Arabic too. ·
-  desktop, laptop, phone, Firefox · `make drive DEVICE=laptop BROWSER=firefox LOCALE=ar
+  desktop, laptop, phone, Firefox, the Mac app · `make drive DEVICE=laptop BROWSER=firefox LOCALE=ar
   HASH='/hafs-kfqc/p45?open=key'` · issues: `tajweed-key-title-scrolls-away`,
   `tajweed-key-credit-address-cut` · test: `e2e/tajweed-key.spec.ts`
 - [ ] Read every sentence a panel shows as a hafiz would: no word for how the app is built

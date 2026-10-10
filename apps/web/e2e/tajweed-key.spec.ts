@@ -41,7 +41,14 @@ for (const size of [null, { width: 1280, height: 800 }]) {
     await expect(legend).toBeVisible();
     const link = legend.locator("p a[href^='https://']");
     await expect(link).toHaveCount(1);
-    expect(await link.evaluate((el) => el.getClientRects().length), "the address is on one line").toBe(1);
+    // Count the lines the address's letters take, not the link's boxes: a link
+    // that is one box can still wrap inside it.
+    const lines = await link.evaluate((el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+    });
+    expect(lines, "the address is on one line").toBe(1);
     const box = (await link.boundingBox())!;
     const card = (await legend.boundingBox())!;
     expect(box.x + box.width, "the address fits the card").toBeLessThanOrEqual(card.x + card.width);

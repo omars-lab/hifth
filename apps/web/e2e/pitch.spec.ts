@@ -1840,17 +1840,20 @@ test.describe("Hifth · a verse named without its surah is a link too", () => {
           const end = nodes[nodes.length - 1]!;
           return [end, end.data.length];
         };
-        const out: number[] = [];
+        const out: boolean[] = [];
         for (const m of all.matchAll(/\(v\. 60\)/g)) {
           const r = document.createRange();
           r.setStart(...at(m.index!));
           r.setEnd(...at(m.index! + m[0].length));
-          out.push(new Set([...r.getClientRects()].filter((b) => b.width > 0).map((b) => Math.round(b.bottom))).size);
+          // One line when every box of it shares some height. Not "one bottom":
+          // Firefox gives the word's own box a few pixels taller than its text.
+          const boxes = [...r.getClientRects()].filter((b) => b.width > 0);
+          out.push(Math.max(...boxes.map((b) => b.top)) < Math.min(...boxes.map((b) => b.bottom)));
         }
         return out;
       });
       expect(lines.length).toBeGreaterThan(0);
-      expect(lines.every((n) => n === 1), `lines per mention: ${lines}`).toBe(true);
+      expect(lines.every(Boolean), `on one line, per mention: ${lines}`).toBe(true);
     });
   });
 
@@ -2395,8 +2398,10 @@ test.describe("Hifth · the verse's tools on a phone", () => {
       const tools = page.getByRole("region", { name: lang === "ar" ? "أدوات البقرة، ٢:٤٤" : "Tools for Al-Baqarah · 2:44" });
       await expect(tools).toBeVisible({ timeout: 20_000 });
       await tools.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => undefined))));
+      // The row of tools, not the drawer's title and close mark above it: in
+      // Firefox the close mark's glyph reads a hair wider than its box.
       const cut = await tools
-        .locator("span")
+        .locator(":scope > div span")
         .evaluateAll((els) => els.filter((el) => el.scrollWidth > el.clientWidth + 0.5).map((el) => el.textContent ?? ""));
       expect(cut, `${lang}: words cut short under a tool`).toEqual([]);
       // Wider cells must still leave the whole row on the screen.

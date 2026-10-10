@@ -143,6 +143,17 @@ export default defineConfig({
             viewport: { width: 1440, height: 900 },
           },
         },
+        {
+          // The same suite in Firefox, the owner's own browser, on the screen
+          // they read it on: a laptop. The phone and iPad tests stay out, since
+          // Playwright cannot make Firefox a phone, and an iPad or a phone held
+          // in the room is WebKit or Chromium anyway. Firefox broke the tajweed
+          // key's web address in two where the other two did not.
+          name: "pitch-firefox",
+          testMatch: /pitch\.spec\.ts/,
+          grepInvert: /phone|iPad/i,
+          use: { browserName: "firefox", viewport: { width: 1440, height: 900 } },
+        },
       ]
     : shots
     ? [
