@@ -673,6 +673,12 @@ shared notes, 15:30's and 18:60's, opened the same way.
 in the book's red (not the link colour, so it does not read as something to tap), with a gap after it.
 A number that only opens a sentence, or a run that does not hold the verse, stays prose. Looked at
 again in the iPad app at 70:11 and 15:30, and measured in Firefox with the app in Arabic.
+Built one way only, with no setting: the point is to match the print, so there is no second way worth
+a switch.
+Walked again upright with the app in Arabic (2026-10-10), on 70:11, 3:91, 36:1, 55:13, 112:1 and
+18:50: each note lies over the page foot with its verse in sight, and 70:11's two heads are red and
+spaced. A same-surah reference near the drawer's lower edge looks plain because the fade hides its
+underline; it is still a link (measured), so nothing to fix.
 
 Tests: unit tests on the drawer (a run at the head is set apart; each paragraph opening a new run is;
 a number opening a sentence, a run mid-line, and a run that misses the verse are not), and a browser
