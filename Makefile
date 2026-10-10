@@ -113,6 +113,8 @@ pitch-e2e: core ## Playwright check of the PRIVATE pitch commentary (local only 
 	@# gitignored file (build it with the extractor below), so CI could not run
 	@# this even if it wanted to. HIFTH_PITCH=1 swaps the whole Playwright run for
 	@# a single project that builds and serves the pitch bundle on its own port.
+	@# A second pass runs the laptop-sized tests in Firefox, the owner's browser;
+	@# its phone and iPad tests stay out, as Playwright cannot make Firefox a phone.
 	@test -f $(PITCH_DATA) || { \
 	  echo ""; \
 	  echo "  No private pitch data — $(PITCH_DATA)"; \
@@ -120,7 +122,7 @@ pitch-e2e: core ## Playwright check of the PRIVATE pitch commentary (local only 
 	  echo ""; \
 	  exit 1; \
 	}
-	HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch
+	HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch --project=pitch-firefox
 
 .PHONY: report
 report: ## Open the last e2e run's report — traces, image diffs, the failing screen
