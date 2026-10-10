@@ -246,8 +246,9 @@ export default defineConfig({
           // `lazy-tools`: a sheet fetched on first open must open in Firefox too.
           // And `lookalike-compare-view`: nothing else moves a look-alike list in
           // Firefox, so an opened comparison has to bring itself into view.
+          // And `tajweed-key`: Firefox broke the key's credit address in two.
           name: "desktop-firefox",
-          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view)\.spec\.ts/,
+          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },

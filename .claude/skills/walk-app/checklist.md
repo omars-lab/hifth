@@ -158,6 +158,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] On a laptop-sized window (and in the Mac app) open the tajweed key: if it is taller than its
   card, its foot fades to say there is more, and scrolling to the end shows the source's credit
   with the fade gone. · desktop, the Mac app · issue: `tajweed-key-hidden-credit`
+- [ ] Scrolled to its end, the tajweed key still shows its title and close button at the top of
+  the card, and the credit's web address sits whole on one line, in Firefox and in Arabic too. ·
+  desktop, laptop, phone, Firefox · `make drive DEVICE=laptop BROWSER=firefox LOCALE=ar
+  HASH='/hafs-kfqc/p45?open=key'` · issues: `tajweed-key-title-scrolls-away`,
+  `tajweed-key-credit-address-cut` · test: `e2e/tajweed-key.spec.ts`
 - [ ] Read every sentence a panel shows as a hafiz would: no word for how the app is built
   ("build", "table", "ids", "pack"…), and nothing that says "phone" on an iPad or a Mac. Inside
   the iPad app, the juz map has no keep-offline shelf. · every flavour · issue:
