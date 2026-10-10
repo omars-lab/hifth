@@ -228,7 +228,9 @@ own phone layout rather than the shell:
 - **The hop chips sit on the verse they are about.** With a verse open, the page is lifted so
   the verse sits above the bottom sheet, which puts its first line in the corner the chips
   float in. On an iPad the chips sit on the desk beside the page; on a phone there is no desk,
-  so they sit on the words. Item ⑩ carries it.
+  so they sit on the words. Item ⑩ carries it. (An upright iPad has no desk either once a link
+  magnifies the page to its width; there the chips now leave the page for a row of their own,
+  item ⑧ of the look-alike rows page.)
 
 An `iphone` row now sits in the shell goldens (`GOLDEN_IPHONE_ROUTES`, the verse route on an
 iPhone 17), so the phone look is checked every time the iPad's is.

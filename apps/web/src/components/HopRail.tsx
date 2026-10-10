@@ -46,6 +46,13 @@ interface HopRailProps {
    * verse's words, so they step out of sight until the note is short again.
    */
   away?: boolean;
+  /**
+   * In a bar rather than over the stage: a page magnified to fill a wide
+   * window leaves no desk beside it, so the chips stand in a slim row in the
+   * bottom bar or at the end of the tool row (rail-home.ts). Nothing of the
+   * page is under them there, so they report no band and never ride a sheet.
+   */
+  home?: "bar" | "tools" | undefined;
 }
 
 /**
@@ -64,17 +71,18 @@ export function HopRail({
   beside,
   seat = null,
   away = false,
+  home,
 }: HopRailProps): JSX.Element | null {
   const { t } = useT();
   const railRef = useRef<HTMLDivElement>(null);
   const count = chips.length;
-  const seated = seat !== null && !beside;
+  const seated = seat !== null && !beside && !home;
   useLayoutEffect(() => {
     if (!onBand) return;
     const rail = railRef.current;
     // Down on a sheet, the chips leave the top of the screen to the page.
-    onBand(count === 0 || !rail || seated || away ? null : rail.getBoundingClientRect().bottom);
-  }, [count, crossed, onBand, seated, away]);
+    onBand(count === 0 || !rail || seated || away || home ? null : rail.getBoundingClientRect().bottom);
+  }, [count, crossed, onBand, seated, away, home]);
   useEffect(() => () => onBand?.(null), [onBand]);
   if (count === 0) return null;
   return (
@@ -89,6 +97,7 @@ export function HopRail({
       aria-label={t.railGroup}
       data-crossed={crossed || undefined}
       data-beside={beside}
+      data-home={home}
       data-seated={seated || undefined}
       data-away={away || undefined}
       style={seated ? ({ "--seat": `${seat}px` } as CSSProperties) : undefined}

@@ -147,6 +147,49 @@ test.describe("Hifth · on an iPad", () => {
     expect(new URL(page.url()).hash).toBe("#/hafs-kfqc/p8");
     await expect.poll(async () => (await leaf(page, 7).boundingBox())!.width).toBeGreaterThan(before * 1.3);
   });
+
+  // A link to a verse, and a hop from one verse to its look-alike, land with the
+  // page magnified. On the large iPad held upright the magnified page then fills
+  // the screen from edge to edge, with no desk left beside it, and the look-alike
+  // buttons stood on the first letters of the top line (walking the pitch,
+  // 2026-10-10). They go into the bars around the page instead.
+  for (const how of ["a link", "a hop"] as const) {
+    test(`after ${how}, the look-alike buttons on the large iPad upright stay off the page`, async ({ page }) => {
+      await page.setViewportSize({ width: 1024, height: 1366 });
+      const pageNo = how === "a link" ? 7 : 19;
+      await page.goto("/#/hafs-kfqc/2:48");
+      await shown(page, 7);
+      if (how === "a hop") {
+        await page.getByRole("group", { name: "روابط الآية" }).getByRole("button", { name: /متشابهات في السورة/ }).tap();
+        await page.getByRole("dialog").getByRole("button", { name: /انتقل إلى البقرة، ٢:١٢٣/ }).tap();
+        await shown(page, 19);
+      }
+      // Landed magnified, so the page has no desk left either side.
+      await expect(page.getByText("١٥٥٪")).toHaveCount(1);
+      await expect.poll(async () => (await leaf(page, pageNo).boundingBox())!.width).toBeGreaterThan(850);
+      const rail = page.getByRole("group", { name: "روابط الآية" });
+      await expect(rail).toBeVisible();
+      const stage = (await page.locator("main").boundingBox())!;
+      const paper = (await leaf(page, pageNo).boundingBox())!;
+      // The part of the page on screen: the page, cut to the stage it is shown in.
+      const shownPaper = {
+        x0: Math.max(stage.x, paper.x),
+        y0: Math.max(stage.y, paper.y),
+        x1: Math.min(stage.x + stage.width, paper.x + paper.width),
+        y1: Math.min(stage.y + stage.height, paper.y + paper.height),
+      };
+      for (const chip of await rail.locator("button[data-direction]").all()) {
+        const c = (await chip.boundingBox())!;
+        const over =
+          c.x < shownPaper.x1 && c.x + c.width > shownPaper.x0 && c.y < shownPaper.y1 && c.y + c.height > shownPaper.y0;
+        expect(over, `a button at ${JSON.stringify(c)} on the page shown at ${JSON.stringify(shownPaper)}`).toBe(false);
+        // And still on the screen, where a finger can reach it.
+        expect(c.x).toBeGreaterThanOrEqual(0);
+        expect(c.x + c.width).toBeLessThanOrEqual(1024);
+        expect(c.y + c.height).toBeLessThanOrEqual(1366);
+      }
+    });
+  }
 });
 
 /**

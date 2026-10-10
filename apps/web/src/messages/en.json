@@ -513,5 +513,9 @@
   "penHomeFloat": "Floating",
   "penHomeBottom": "Mark up button",
   "penHomeSide": "Down the side",
-  "penHomeNote": "On a computer, or an iPad held sideways. Above the page: a row of tools over the book, as before. Floating: drag it by its handle to any edge of the window. Mark up button: the tools wait behind one button in the bottom row, and the page is for reading until you open them. Down the side: the tools stand in the empty margin beside the book, and go to the bottom row where there is no margin."
+  "penHomeNote": "On a computer, or an iPad held sideways. Above the page: a row of tools over the book, as before. Floating: drag it by its handle to any edge of the window. Mark up button: the tools wait behind one button in the bottom row, and the page is for reading until you open them. Down the side: the tools stand in the empty margin beside the book, and go to the bottom row where there is no margin.",
+  "railHomeTitle": "Where the look-alike buttons go when the page fills the screen",
+  "railHomeBar": "Bottom row",
+  "railHomeTools": "Tool row",
+  "railHomeNote": "On a computer or an iPad. The buttons for similar verses stand beside the page; when the page is magnified to fill the screen there is no room beside it, so they leave the page. Bottom row: beside the trail of verses you came from. Tool row: at the end of the row of tools above the page, or in the bottom row when the tools are somewhere else."
 }

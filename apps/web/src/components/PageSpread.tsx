@@ -1,6 +1,7 @@
-import type { ReactNode, Ref } from "react";
+import { useEffect, useRef, useState, type ReactNode, type Ref } from "react";
 import { spreadOf } from "@hifth/core";
 import { useT } from "../i18n";
+import { deskHoldsRail } from "../rail-home";
 import styles from "./PageSpread.module.css";
 
 interface PageSpreadProps {
@@ -85,13 +86,19 @@ interface PageSpreadProps {
    * corner. Here the window's corner is out on the desk, a long way from the
    * verse they belong to, so the spread offers them a place beside the paper.
    */
-  beside?: (side: "left" | "right") => ReactNode;
+  beside?: ((side: "left" | "right") => ReactNode) | undefined;
   /**
    * The page the chips belong beside, when it is not the live one: a verse
    * picked on the facing page. Its note is laid over the live page, so chips
    * left there would sit under the note's edge.
    */
   besideSide?: "left" | "right" | undefined;
+  /**
+   * Told whether the desk is still wide enough for the chips, each time that
+   * changes. A page magnified to fill the window leaves no desk, and the chips
+   * then go to a bar instead of over the paper (rail-home.ts).
+   */
+  onDeskRoom?: (holds: boolean) => void;
 }
 
 /**
@@ -177,8 +184,29 @@ export function PageSpread({
   edgeRails,
   beside,
   besideSide,
+  onDeskRoom,
 }: PageSpreadProps): JSX.Element {
   const { t } = useT();
+
+  // The two desks are equal shares of what the book leaves, so one measured
+  // tells for both. Measured as laid out, which is what a magnified page spills
+  // into, rather than worked out from the zoom.
+  const [deskEl, setDeskEl] = useState<HTMLDivElement | null>(null);
+  const deskRoomRef = useRef(onDeskRoom);
+  deskRoomRef.current = onDeskRoom;
+  useEffect(() => {
+    if (!deskEl || typeof ResizeObserver === "undefined") return;
+    let last: boolean | null = null;
+    const sizes = new ResizeObserver(([entry]) => {
+      if (!entry) return;
+      const holds = deskHoldsRail(entry.contentRect.width);
+      if (holds === last) return;
+      last = holds;
+      deskRoomRef.current?.(holds);
+    });
+    sizes.observe(deskEl);
+    return () => sizes.disconnect();
+  }, [deskEl]);
 
   // Below the breakpoint the stage is the whole story — no wrapper, so nothing
   // about the phone layout depends on this component having been rendered.
@@ -191,7 +219,7 @@ export function PageSpread({
      stays centred. Only the one beside the chosen verse's page holds anything,
      which is the live page unless the verse was picked on the facing one. */
   const desk = (side: "left" | "right") => (
-    <div className={styles.desk} data-desk={side}>
+    <div className={styles.desk} data-desk={side} ref={side === "right" ? setDeskEl : undefined}>
       {side === (besideSide ?? liveSide) && beside?.(side)}
     </div>
   );

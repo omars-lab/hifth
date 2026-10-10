@@ -16,6 +16,7 @@ import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-ro
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { PEN_HOMES, type PenHome } from "../pen-home";
+import { RAIL_HOMES, type RailHome } from "../rail-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import styles from "./Colophon.module.css";
 
@@ -43,6 +44,9 @@ interface ColophonProps {
   /** Where the page tools sit on a computer or an iPad held sideways; remembered on this device. */
   penHome?: PenHome | undefined;
   onPenHome?: ((home: PenHome) => void) | undefined;
+  /** Where the look-alike chips go when a magnified page leaves no desk; remembered on this device. */
+  railHome?: RailHome | undefined;
+  onRailHome?: ((home: RailHome) => void) | undefined;
   /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
   onShowTips?: () => void;
   /** Whether this screen can show two pages side by side. What a card does at the
@@ -198,6 +202,11 @@ const PEN_HOME_NAME: Record<PenHome, (t: ReturnType<typeof useT>["t"]) => string
   side: (t) => t.penHomeSide,
 };
 
+const RAIL_HOME_NAME: Record<RailHome, (t: ReturnType<typeof useT>["t"]) => string> = {
+  bar: (t) => t.railHomeBar,
+  tools: (t) => t.railHomeTools,
+};
+
 export function Colophon({
   open,
   onClose,
@@ -213,6 +222,8 @@ export function Colophon({
   onScopeLook,
   penHome,
   onPenHome,
+  railHome,
+  onRailHome,
   onShowTips,
   spread = false,
 }: ColophonProps): JSX.Element | null {
@@ -674,6 +685,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.penHomeNote}</p>
+          </section>
+        )}
+        {/* Where the look-alike chips go when a magnified page leaves no desk
+            beside it (docs/design/lookalike-rows.md, ⑧): both homes built,
+            the bottom row by default. Only on the layout with a desk. */}
+        {railHome && onRailHome && (
+          <section className={styles.block} aria-labelledby="colophon-rail-home">
+            <h3 className={styles.subhead} id="colophon-rail-home">
+              {t.railHomeTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-rail-home">
+              {RAIL_HOMES.map((home) => (
+                <button
+                  key={home}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={railHome === home}
+                  data-rail-home-choice={home}
+                  onClick={() => onRailHome(home)}
+                >
+                  {RAIL_HOME_NAME[home](t)}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.railHomeNote}</p>
           </section>
         )}
 

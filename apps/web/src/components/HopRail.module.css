@@ -37,18 +37,38 @@
   right: var(--space-3);
 }
 
-/* No desk to stand in — the pages fill a tall, narrow window — so the chips
-   go back to the page's own top corner, the way a phone has them: anchored to
-   the window's edge and reaching in over the paper. */
-@container desk (max-width: 96px) {
-  .rail[data-beside="right"] {
-    left: auto;
-    right: var(--space-3);
-  }
-  .rail[data-beside="left"] {
-    right: auto;
-    left: var(--space-3);
-  }
+/*
+ * No desk to stand in — a page magnified to fill the window, or a tall, narrow
+ * window the pages fill — so the chips leave the stage for a bar (HopRail's
+ * `home`, rail-home.ts): the bottom row beside the trail, or the end of the
+ * tool row. One slim row, as on a phone's sheet. They used to reach in over the
+ * paper from the window's edge, and stood on the top line's first letters.
+ */
+.rail[data-home] {
+  position: static;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  inline-size: max-content;
+}
+.rail[data-home] .chip {
+  position: relative;
+  min-block-size: 32px;
+  padding-inline: 8px;
+}
+/* Still a whole thumb's worth to tap: the reach grows up and down, into the
+   bar's own padding. */
+.rail[data-home] .chip::after {
+  content: "";
+  position: absolute;
+  inset-block: -6px;
+  inset-inline: 0;
+}
+.rail[data-home="bar"] {
+  margin-inline-end: var(--space-3);
+}
+.rail[data-home="tools"] {
+  margin-inline-start: auto;
 }
 
 .chip {
