@@ -265,6 +265,7 @@ When the page is not magnified, or the iPad is on its side and shows two pages, 
 and the buttons stand beside the page as before.
 
 Checked by picture on the upright iPad, after a link to 2:48 and after a hop to 2:122, in English and
-in Arabic, in both homes, and on the iPad on its side. Tests: a browser test on the upright iPad, after
+in Arabic, in both homes, and on the iPad on its side; and in Firefox on the upright iPad after the
+link, the same. Tests: a browser test on the upright iPad, after
 a link and after a hop, that no button sits on the page, which failed first; a laptop-size test that
 the buttons go to each row as the reader chose; and a unit test of the choice and the desk's width.
