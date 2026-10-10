@@ -513,7 +513,7 @@ export function CommentarySheet({
           <button type="button" className={styles.back} onClick={back.onBack}>
             {/* The hook bends back toward where the line starts, so it turns
                 with the reading direction; the row's gap is the space after it. */}
-            <span aria-hidden="true">{dir === "rtl" ? "↪" : "↩"}</span>
+            <span aria-hidden="true">{dir === "rtl" ? "↪\uFE0E" : "↩\uFE0E"}</span>
             {t.beadBack(back.label)}
           </button>
         )}
@@ -587,7 +587,7 @@ export function CommentarySheet({
                           <span className={styles.roadUnavailable}>{t.pageUnavailable}</span>
                         )}
                         <span className={styles.roadArrow} aria-hidden="true">
-                          ↪
+                          {"↪\uFE0E"}
                         </span>
                       </button>
                     </li>

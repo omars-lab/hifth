@@ -2360,7 +2360,7 @@ export function App(): JSX.Element {
     items.push({
       id: "listen",
       caption: audio.phaseFor(key) === "playing" ? t.vdPause : t.vdListen,
-      glyph: audio.phaseFor(key) === "playing" ? "⏸" : "▶",
+      glyph: audio.phaseFor(key) === "playing" ? "⏸\uFE0E" : "▶\uFE0E",
       onPick: () => audio.toggle(key),
     });
     const surah = parseAyahKey(key)?.surah;
@@ -3879,9 +3879,9 @@ export function App(): JSX.Element {
         {/* The fuller drawer of options A and B: what C keeps for its hold. */}
         {selectedKey && verseGestures !== "c" && (
           <>
-            <DrawerTool glyph="⏭" caption={t.vdPlayTo} label={t.vdPlayToAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => startPlayTo(selectedKey)} />
+            <DrawerTool glyph={"⏭\uFE0E"} caption={t.vdPlayTo} label={t.vdPlayToAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => startPlayTo(selectedKey)} />
             <DrawerTool glyph="✎" caption={t.vdMark} label={t.vdMarkAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => markVerse(selectedKey)} />
-            <DrawerTool glyph="✍" caption={t.vdNote} label={t.vdNoteAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => noteOnVerse(selectedKey)} />
+            <DrawerTool glyph={"✍\uFE0E"} caption={t.vdNote} label={t.vdNoteAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => noteOnVerse(selectedKey)} />
             <DrawerTool glyph="⧉" caption={t.vdCopy} label={t.vdCopyAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => copyVerse(selectedKey)} />
             <DrawerTool glyph="↝" caption={t.vdJump} label={t.vdJumpAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => askJumpFrom(selectedKey)} />
           </>

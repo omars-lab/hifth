@@ -250,7 +250,7 @@ export function HighlightMenu({
                       onClick={() => onHop(edge)}
                       aria-label={t.hopTo(label)}
                     >
-                      <span aria-hidden="true">↪</span>
+                      <span aria-hidden="true">{"↪\uFE0E"}</span>
                     </button>
                   </div>
                   {isOpen && diffable && (

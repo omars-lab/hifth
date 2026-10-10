@@ -89,7 +89,8 @@ test.describe("Hifth · the hop", () => {
     expect(rows.length, "the list has rows").toBeGreaterThan(0);
     for (const row of rows) {
       expect(row, "no English left in the row").not.toMatch(/[A-Za-z]/);
-      expect(row, "any arrow is asked for as text").not.toMatch(/↔(?!︎)/);
+      // The go-to arrow on each row drew as an emoji tile too (2026-10-09).
+      expect(row, "any arrow is asked for as text").not.toMatch(/[↔↪↩↗](?!\uFE0E)/u);
     }
   });
 
