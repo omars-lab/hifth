@@ -217,7 +217,7 @@ import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
-import { rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
+import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
 import { applyPen, rememberPen, savedPen, type Pen } from "./pen";
 import { usePassageRows } from "./passage-rows";
@@ -1181,6 +1181,19 @@ export function App(): JSX.Element {
     setRailHome(home);
   }, []);
   const [deskRoom, setDeskRoom] = useState(true);
+  // Closed to one page, the room beside it is inside the book: the stage says
+  // how much the page leaves each time it draws the paper (every frame of a
+  // pinch), so the width goes straight onto the book for the chips' box, and
+  // only a change in whether the chips fit there re-renders anything.
+  const [slackRoom, setSlackRoom] = useState(true);
+  const slackRoomRef = useRef<boolean | null>(null);
+  const reportSlack = useCallback((px: number) => {
+    bookRef.current?.style.setProperty("--page-slack", `${px}px`);
+    const holds = deskHoldsRail(px);
+    if (holds === slackRoomRef.current) return;
+    slackRoomRef.current = holds;
+    setSlackRoom(holds);
+  }, []);
   // Full screen: every bar hidden, the page alone (the same note, all options).
   const [full, setFull] = useState(false);
   // The verse a hold opened the small menu on (option C), and where it is.
@@ -3164,9 +3177,19 @@ export function App(): JSX.Element {
     />
   );
   // No desk beside a page magnified to fill the window: the chips go to a bar,
-  // never over the paper (docs/design/lookalike-rows.md, ⑧).
+  // never over the paper (docs/design/lookalike-rows.md, ⑧). Closed to one
+  // page, the room is what the page leaves inside the book, not the desk (⑨).
+  const roomBeside = pageMode === "one" ? slackRoom : deskRoom;
+  // Closed to one page there is no facing leaf for a tall list to rise over:
+  // the roots list, or a note too tall for its corner, stands at the chrome's
+  // end, on the chips beside a page on that side. They cross to the page's
+  // other side while it is up (⑨).
+  const soloAside: "left" | "right" | undefined =
+    desktop && pageMode === "one" && (rootsOpen || (noteTall && commentaryOpen))
+      ? dir === "rtl" ? "right" : "left"
+      : undefined;
   const railAt: "bar" | "tools" | null =
-    !desktop || deskRoom ? null : railHome === "tools" && penAt === "strip" ? "tools" : "bar";
+    !desktop || roomBeside ? null : railHome === "tools" && penAt === "strip" ? "tools" : "bar";
 
   return (
     // The chrome reads in the UI language's direction — every offset in the
@@ -3366,10 +3389,10 @@ export function App(): JSX.Element {
                  gesture. */
               /* The look-alike chips, on the desk just outside the live page's
                  outer edge rather than out at the window's corner. */
-              beside={deskRoom ? (side) => hopRail(side) : undefined}
+              beside={roomBeside ? (side) => hopRail(side) : undefined}
               onDeskRoom={setDeskRoom}
               // By the chosen verse's page, the side its note does not cover.
-              besideSide={sheetSide === "left" ? "right" : sheetSide === "right" ? "left" : undefined}
+              besideSide={sheetSide === "left" ? "right" : sheetSide === "right" ? "left" : soloAside}
               edgeRails={
                 desktop ? (
                   <EdgeGrabRails
@@ -3473,6 +3496,7 @@ export function App(): JSX.Element {
             >
               <PageStage
                 ref={stageRef}
+                onSlack={reportSlack}
                 coverTop={highestTop(coverTop, shareTop, listTop)}
                 railBottom={railBottom}
                 resolver={resolver}

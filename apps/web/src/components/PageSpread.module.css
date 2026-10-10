@@ -142,6 +142,28 @@
   pointer-events: none;
 }
 
+/*
+ * The room beside one page, with the book closed to it. The book then runs the
+ * window's width and the page sits in the middle of it, so the desks above
+ * measure nothing and the empty space is inside the book: this box covers it on
+ * the page's outer side, as wide as the page leaves at its magnification. It
+ * plays the desk's part for the chips — they stand at its inner edge, as they
+ * do on a desk — and goes to nothing as the page grows to fill the window.
+ */
+.slack {
+  position: absolute;
+  inset-block: 0;
+  inline-size: var(--page-slack, 0px);
+  z-index: var(--z-chrome);
+  pointer-events: none;
+}
+.slack[data-slack="right"] {
+  right: 0;
+}
+.slack[data-slack="left"] {
+  left: 0;
+}
+
 /* Except while a magnified leaf hangs over the desk (#148): then the book is
    wider than this box on purpose, and the leaves clip themselves at the fold,
    head and foot (PageStage.module.css, `data-spills`). The desk still stops

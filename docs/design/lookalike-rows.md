@@ -269,3 +269,52 @@ in Arabic, in both homes, and on the iPad on its side; and in Firefox on the upr
 link, the same. Tests: a browser test on the upright iPad, after
 a link and after a hop, that no button sits on the page, which failed first; a laptop-size test that
 the buttons go to each row as the reader chose; and a unit test of the choice and the desk's width.
+
+### ⑨ With a laptop window closed to one page, do the look-alike buttons stand beside it? · **fixed**
+
+**What it changes for a hafiz:** on a laptop, a reader can close the open book to one page, and an iPad
+held upright opens that way. The page then sits in the middle of the window with wide empty space either
+side, yet the buttons for a verse's look-alikes were not beside it: they went to the bottom row, and
+before ⑧ they stood out at the window's far corner, a long way from the verse they belong to. A hafiz
+looking at a verse had to look away from it to find where its look-alikes lead. Found walking the pitch
+on a laptop closed to one page, 2026-10-10. Not new: one page never had a place beside it for the
+buttons; ⑧ moved them from the far corner to the bottom row.
+
+**Why:** with one page, the box that holds the book runs the whole window's width and the page sits in
+the middle of it, so the space either side of the book that ⑧ measures was nothing, however much empty
+space there was beside the page.
+
+**Fixed, 2026-10-10:** with one page, the room beside it is measured as what the page leaves of the
+window at its present size, every time the page is drawn. The buttons stand just outside the page's
+edge, level with its head, and follow that edge out as the reader zooms in; when the page grows too
+wide to leave room for a button (a link on an upright iPad, or a page zoomed to fill the window), they
+go to the reader's chosen row as in ⑧.
+
+Checked by picture on a laptop closed to one page: 2:48 (a right-hand page), 2:49 (a left-hand page)
+in Chrome and Firefox, 15:30 with its note open (the button stands above the note, beside the page's
+head), and 2:48 zoomed to 200% (the buttons move out with the page's edge). Tests: a laptop browser
+test for a right-hand and a left-hand page that the buttons sit just outside the page, which failed
+first; the iPad tests from ⑧, still sending the buttons to the bottom row when the page fills the
+width; and a unit test of the room left beside the page as it grows.
+
+The same walk found the roots list standing on the buttons: with one page there is no facing page for a
+tall list to rise over, so the roots list (or a note too tall for its corner) stands in the window's
+corner, on the buttons beside a page on that side. While it is up they cross to the page's other side,
+still just outside its edge. Checked by picture at 2:48 with the roots open in English (the list on the
+right, the buttons cross to the left); a laptop browser test for both pages in Arabic, where the list
+stands on the left, which failed first for the left-hand page.
+
+### ⑩ With one page and the roots list open, does the list hide where the lines begin? · **open**
+
+**What it changes for a hafiz:** a link lands with the page magnified (130% on a laptop with a note's
+arrival). Open the roots list beside one page and the list's card covers about 44 pixels of the page's
+right edge, which in the mus'haf is where every line begins. A hafiz following a line from its start
+cannot see its first word until the list is closed. Found walking the pitch on a laptop closed to one
+page, 2026-10-10 (2:48, the roots list open).
+
+**Why:** the page is centred in the window whatever stands beside it; the list is drawn over the window's
+corner and the page is not moved aside for it, though there is room on the other side.
+
+**Ways it could go:** move the page sideways into the free space while the list is up; draw the page a
+little smaller so it fits between the window's edge and the list; or narrow the list. To be built and
+tried rather than chosen on paper.

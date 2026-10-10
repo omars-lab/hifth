@@ -3513,6 +3513,29 @@
       "closedBy": "apps/web/e2e/ipad.spec.ts"
     },
     {
+      "id": "lookalike-chips-not-beside-one-page",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑨"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "With a laptop window closed to one page, the box holding the book runs the window's width, so the space beside it measured nothing and the look-alike buttons went to the bottom row (before that, the window's far corner) despite wide empty space beside the page. The room is now what the page leaves at its present size, measured each time it is drawn; the buttons stand just outside its edge and follow it as the reader zooms. A laptop browser test for a right-hand and a left-hand page failed first. The same walk found the tall roots list standing on the buttons beside a page on its side; they now cross to the page's other side while it is up (a test in Arabic, list on the left, failed first for the left-hand page).",
+      "closedBy": "apps/web/e2e/desktop.spec.ts"
+    },
+    {
+      "id": "roots-list-hides-line-starts-one-page",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑩"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Closed to one page on a laptop, a magnified page with the roots list open loses about 44px of its right edge, where every line begins, under the list's card. The page stays centred though there is free room on its other side."
+    },
+    {
       "id": "app-walk-whole-demo-path",
       "source": {
         "file": "docs/design/native-shell.md",
