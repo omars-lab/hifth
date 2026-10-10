@@ -87,6 +87,29 @@ test.describe("Hifth · a link that opens a panel", () => {
     });
   }
 
+  // The same for every panel a link opens: the roots list's close button wore
+  // a ring when its link opened it (walking a phone held sideways, 2026-10-10),
+  // a day after the look-alike list's was taken off. Not the go-to box: it is
+  // there to be typed in, so it takes the cursor and shows it has it.
+  for (const [name, at, panel] of [
+    ...Object.entries(PANELS)
+      .filter(([n]) => n !== "tips" && n !== "jump")
+      .map(([n, p]) => [n, "p19", p] as const),
+    ["roots", "2:48", (p: Page) => p.getByRole("dialog", { name: /^الجذور، / })] as const,
+  ]) {
+    test(`?open=${name} draws no focus ring, and holds focus inside`, async ({ page }) => {
+      await page.goto(`/#/hafs-kfqc/${at}?open=${name}`);
+      await expect(panel(page)).toBeVisible({ timeout: 20_000 });
+      // What is drawn, not the browser's own flag: the focused element's outline.
+      const ringed = await page.evaluate(() => {
+        const el = document.activeElement;
+        return el && getComputedStyle(el).outlineStyle !== "none" ? el.outerHTML.slice(0, 80) : null;
+      });
+      expect(ringed, "something wears a focus ring on arrival").toBeNull();
+      expect(await panel(page).evaluate((el) => el.contains(document.activeElement))).toBe(true);
+    });
+  }
+
   test("?open=roots opens the verse's roots", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/2:48?open=roots");
     await expect(page.getByRole("dialog", { name: /^الجذور، / })).toBeVisible({ timeout: 20_000 });
