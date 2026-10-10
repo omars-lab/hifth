@@ -181,7 +181,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `lookalike-chips-not-beside-one-page`
 - [ ] Closed to one page with the roots list open, the list covers none of the page: the page stands
   in the room the list leaves, and comes back to the middle once it closes (2:48 `?view=one`, the
-  roots open, in English and in Arabic, where the list stands on the other side). · laptop, desktop · issue:
+  roots open, in English and in Arabic, where the list stands on the other side); zoomed wider than
+  that room, the verse's first word still stands clear of the list (2:45). · laptop, desktop, desktop in
+  Firefox · issue:
   `roots-list-hides-line-starts-one-page`
 - [ ] A look-alike row that names a whole passage says how the two are alike and opens onto the verse
   inside it that matches (try 15:30's later surahs: the passage in surah 38 opens onto 38:73, not
