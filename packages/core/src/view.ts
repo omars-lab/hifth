@@ -234,6 +234,19 @@ export function hopZoomFor(bbox: Rect, ctx: FrameContext, z: number = DEFAULT_HO
   return Math.max(1, Math.min(z, (across - 2 * LEAD_INSET) / wide));
 }
 
+/**
+ * The hop zoom on a page whose type is already drawn `larger` times the size
+ * every other page uses: lowered by that much, so a hop lands at the same size
+ * of type on every page, but never below the whole page. The first two pages
+ * draw their text larger to fill their paper, and the hop's closer look went on
+ * top of that: 2:1, one word, landed at more than twice other pages' type with
+ * the opening lines off both edges (plan item 37).
+ */
+export function hopZoomOnLargeType(z: number, larger: number): number {
+  if (!(larger > 1)) return z;
+  return Math.max(1, z / larger);
+}
+
 /** The most a page is drawn smaller so a verse shows whole: a fifth. */
 const NEAR_FIT = 0.8;
 

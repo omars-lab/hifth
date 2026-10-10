@@ -21,6 +21,7 @@ import {
   formatWordKey,
   frameBboxToView,
   hopZoomFor,
+  hopZoomOnLargeType,
   nearFitRoom,
   nearFitZoom,
   isMarkShard,
@@ -2915,7 +2916,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           let target = frameBboxToView(
             bbox,
             ctx,
-            hopZoomFor(bbox, ctx, clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM)),
+            hopZoomFor(
+              bbox,
+              ctx,
+              // On the first two pages the type is already drawn larger, so
+              // the closer look is that much less (plan item 37).
+              hopZoomOnLargeType(
+                clampZoom(opts?.zoom ?? DEFAULT_HOP_ZOOM, MIN_ZOOM, MAX_ZOOM),
+                typeLargerBy(mp.svg, openingTextRef.current),
+              ),
+            ),
             lead,
           );
           // With a note already up, land where the lift would move the verse
@@ -4437,6 +4447,18 @@ function fitDrawingToPage(svg: SVGSVGElement, choice: OpeningText): void {
   svg.style.width = even ? pct(vb.width) : "";
   svg.style.marginInline = even ? pct((PAGE_W - vb.width) / 2) : "";
   svg.style.marginBlock = even ? pct((PAGE_H - vb.height) / 2) : pct((PAGE_H - tall) / 2);
+}
+
+/**
+ * How many times larger than every other page's this page's type is drawn: the
+ * share of the width `fitDrawingToPage` stretched a squat drawing by, and 1 for
+ * a page-shaped one or with the opening text kept at the usual size.
+ */
+function typeLargerBy(svg: SVGSVGElement, choice: OpeningText): number {
+  const vb = svg.viewBox?.baseVal;
+  if (!vb || !(vb.width > 0) || choice === "even") return 1;
+  if ((PAGE_W * vb.height) / vb.width >= PAGE_H) return 1;
+  return Math.max(1, PAGE_W / vb.width);
 }
 
 /** Read a page's viewBox width (defaults to the Madani 345). */
