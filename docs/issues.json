@@ -3483,7 +3483,7 @@
         "file": "docs/design/native-shell.md",
         "item": "㉕"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "risk",
       "owner": "agent",
       "note": "The list and note fixes of 2026-10-09 (short lists with no veil upright, the corner card's height at one page, go-to buttons near their verse) were checked in browser tests and pictures only; the app's copy of the web build predates them, and every real-app walk so far has found a fault the browser tests missed. Closes when the iPad app upright in English and the Mac app in English and Arabic are walked on a fresh build, each fault found getting its own item and test."

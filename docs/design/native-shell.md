@@ -613,7 +613,7 @@ rather than let it spill out. A browser test counts the lines the address takes,
 size and on a laptop-sized window, and expects one and that it fits the card (failed first in
 Firefox only, which is why the key's tests now also run there).
 
-### ㉕ Have the latest list and note fixes been seen in the real iPad and Mac apps? · **open**
+### ㉕ Have the latest list and note fixes been seen in the real iPad and Mac apps? · **answered**
 
 The last few changes (the lists opening short with no veil on an upright iPad, the corner card
 keeping its height at one page, each row's go-to button staying near its verse) were checked in
@@ -625,3 +625,11 @@ next thing to look at for the pitch, which is shown on the iPad and the Mac.
 **What closes it:** rebuild the app's copy of the pitch build, then walk the iPad app upright in
 English (the roots list, the look-alike list, the note, a page turn), then the Mac app in English
 and in Arabic. Each new fault gets its own item, a test, and a walk checklist line.
+
+**Seen, 2026-10-10.** The app's copy of the pitch build was rebuilt and walked. On the iPad held
+upright, in English, the roots list and the look-alike list lie across the foot of the page with
+their rows centred and each go-to button beside its verse, and the note reads as before; the
+swipe page turn passes in the simulator. On the Mac, in English and in Arabic, each list and the
+note sit over the facing page with the buttons within reach, mirrored correctly in Arabic.
+Nothing new turned up, so no new item. The Mac's own Page-menu test was not run: it presses keys
+on this laptop's keyboard, and the swipe and the browser tests already cover the turn.
