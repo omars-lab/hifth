@@ -44,6 +44,20 @@ describe("dropMarginRefs", () => {
     expect(dropMarginRefs("See 2:41 and 3:6 on the lamp.")).toBe("See 2:41 and 3:6 on the lamp.");
     expect(dropMarginRefs("12 The lamp here")).toBe("12 The lamp here");
   });
+
+  // Where the capture ran two paragraphs together, the margin's scraps and
+  // references can sit between them (seen at 2:285–86, 6:125 and 21:5).
+  it("drops the margin's scraps and references left between two sentences", () => {
+    expect(dropMarginRefs("The lamp was lit. in 4:1 5:1–18 The oil ran out.")).toBe("The lamp was lit. The oil ran out.");
+    expect(dropMarginRefs("The lamp was lit (M). u 9:44 The oil ran out.")).toBe("The lamp was lit (M). The oil ran out.");
+    expect(dropMarginRefs("The lamp was lit (Q). an 1:12 2:97 3:1 Thus the oil ran out.")).toBe("The lamp was lit (Q). Thus the oil ran out.");
+  });
+
+  it("leaves references a sentence cites between two sentences", () => {
+    expect(dropMarginRefs("The lamp was lit. Cf. 4:1; 5:2. The oil ran out.")).toBe("The lamp was lit. Cf. 4:1; 5:2. The oil ran out.");
+    expect(dropMarginRefs("The lamp was lit. in v. 155 The oil")).toBe("The lamp was lit. in v. 155 The oil");
+    expect(dropMarginRefs("The lamp was lit (cf. 4:1; 5:2). The oil ran out.")).toBe("The lamp was lit (cf. 4:1; 5:2). The oil ran out.");
+  });
 });
 
 describe("dropStrayBlocks", () => {

@@ -16,12 +16,16 @@ const LONE_LETTERS = /^\p{L}{1,2}$/u;
 // to the end. A paragraph's real last words ("in v. 155", "See 2:41") stay, and
 // the stop of a short form (v., vv., cf.) is not a sentence's.
 const TRAILING_SCRAPS = new RegExp(`(?<!\\b(?:vv?|[Cc]f)\\.)(?<=[.?!][”’")\\]]*)(?:\\s+(?:\\p{Ll}{1,2}|${REF}c?|\\d+))+\\s*$`, "u");
+// …and the same between two sentences the capture ran together: a short
+// lowercase scrap, then references with nothing between them, then the next
+// sentence's capital. A reference a sentence cites has a word or a stop by it.
+const MIDDLE_SCRAPS = new RegExp(`(?<=[.?!][”’")\\]]*)(?:\\s+\\p{Ll}{1,2})+(?:\\s+${REF})+(?=\\s+\\p{Lu})`, "gu");
 
 /** One captured block with the margin's references and lone letters taken out. */
 export function dropMarginRefs(text) {
   const s = text.trim();
   if (ONLY_REFS.test(s) || LONE_LETTERS.test(s)) return "";
-  return text.replace(LEADING_REFS, "").replace(TRAILING_SCRAPS, "");
+  return text.replace(LEADING_REFS, "").replace(MIDDLE_SCRAPS, "").replace(TRAILING_SCRAPS, "");
 }
 
 /**
