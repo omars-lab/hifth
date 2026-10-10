@@ -9,8 +9,9 @@
  * capture has them (`was`), and as the page prints them (`is`).
  *
  * A row that finds nothing, or finds two places, is refused rather than
- * guessed, as the slanted words are. Mended before the slant is laid on, so a
- * slanted-words row is written against the text as printed.
+ * guessed, as the slanted words are. Mended after the book's quotes are set and
+ * before the slant is laid on (lettering.mjs), so a row of either kind is written
+ * against the text as printed.
  */
 
 /**

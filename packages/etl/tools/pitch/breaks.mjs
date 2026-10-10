@@ -25,10 +25,15 @@ import { createHash } from "node:crypto";
 // Characters either side of the seam that make up its fingerprint.
 const REACH = 16;
 
-/** Every space that runs into a capital: where a paragraph might have ended. */
+/**
+ * Every space that runs into a capital, or into a bracketed capital (the book
+ * brackets a word it adds, and a sentence can open on one), or into a name
+ * that opens on the ʿayn mark, which is not a capital itself: where a paragraph
+ * might have ended.
+ */
 export function seams(text) {
   const out = [];
-  for (const m of text.matchAll(/(?<=\S) (?=\p{Lu})/gu)) out.push({ at: m.index });
+  for (const m of text.matchAll(/(?<=\S) (?=[[\u02BF]?\p{Lu})/gu)) out.push({ at: m.index });
   return out;
 }
 

@@ -52,9 +52,8 @@ import { dropMarginRefs } from "./strays.mjs";
 import { readKey } from "./key.mjs";
 import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
-import { slantSurah } from "./italics.mjs";
-import { mendSurah } from "./misreads.mjs";
-import { setSurahTypography } from "./typography.mjs";
+import { letterSurah } from "./lettering.mjs";
+import { refileSurah } from "./refile.mjs";
 import { suspects } from "./suspects.mjs";
 import { paragraphStarts, placeStarts } from "./indents.mjs";
 import { addCited, citedIn, foldRuns } from "./runs.mjs";
@@ -385,6 +384,10 @@ const usedMisreads = new Set();
 const ORPHANS = JSON.parse(readFileSync(resolve(HERE, "print-orphans.json"), "utf8")).orphans;
 const usedOrphans = new Set();
 const LIST_ORPHANS = process.argv.includes("--orphans");
+// Paragraphs the capture filed under the wrong verse, read off the printed page (see refile.mjs).
+const REFILES = JSON.parse(readFileSync(resolve(HERE, "print-refiles.json"), "utf8")).refiles;
+const usedRefiles = new Set();
+const LIST_REFILES = process.argv.includes("--refiles");
 // Brackets left open and references set side by side, to check (see suspects.mjs).
 const LIST_SUSPECTS = process.argv.includes("--suspects");
 // Paragraph starts the page readings show set in, found in the notes (see indents.mjs).
@@ -478,9 +481,13 @@ function buildSurah(surah) {
     };
     previous = done.handOn;
   }
-  for (const i of mendSurah(surah, verses, MISREADS)) usedMisreads.add(i);
-  setSurahTypography(verses);
-  for (const i of slantSurah(surah, verses, ITALICS)) usedItalics.add(i);
+  if (LIST_REFILES)
+    for (const v of Object.values(verses))
+      v.commentary.forEach((text, i) => console.log(`${v.ref} ${i} ${orphanPrint(text)} …${text.slice(0, 30)}…`));
+  for (const i of refileSurah(surah, verses, REFILES)) usedRefiles.add(i);
+  const lettered = letterSurah(surah, verses, { misreads: MISREADS, italics: ITALICS });
+  for (const i of lettered.misreads) usedMisreads.add(i);
+  for (const i of lettered.italics) usedItalics.add(i);
 
   // Al-Fātiḥah keeps its hand-written roads; every other surah takes the
   // source's own cross-references.
@@ -509,7 +516,7 @@ function buildSurah(surah) {
         console.log(`${where} ${kind} …${text.slice(Math.max(0, at - 30), at + 30)}…`);
     return { surah, listed: true };
   }
-  if (LIST_SEAMS || LIST_SPLITS || LIST_ORPHANS || LIST_INDENTS) return { surah, listed: true };
+  if (LIST_SEAMS || LIST_SPLITS || LIST_ORPHANS || LIST_INDENTS || LIST_REFILES) return { surah, listed: true };
   const outPath = resolve(OUT_DIR, `${surah}.json`);
   writeFileSync(outPath, JSON.stringify(out, null, 2));
   const edgeCount = Object.values(shard).reduce((n, adj) => n + adj.edges.length, 0);
@@ -572,6 +579,13 @@ if (staleOrphans.length) {
   console.error("  read those pages again and list each note's new fingerprint (--orphans).");
   process.exit(1);
 }
+const staleRefiles = REFILES.filter((m, i) => surahs.includes(m.surah) && !usedRefiles.has(i));
+if (staleRefiles.length) {
+  console.error(`print-refiles.json names ${staleRefiles.length} misfiled paragraph run(s) the capture no longer has:`);
+  for (const m of staleRefiles) console.error(`  ${m.from} to ${m.to} (page image ${m.page})`);
+  console.error("  read those pages again and list each paragraph's new fingerprint (--refiles).");
+  process.exit(1);
+}
 const staleTails = TAILS.filter((m, i) => surahs.includes(Number(m.verse.split(":")[0])) && !usedTails.has(i));
 if (staleTails.length) {
   console.error(`${TAILS_SRC} names ${staleTails.length} cut-short note(s) the capture no longer has:`);
@@ -615,7 +629,7 @@ if (LIST_INDENTS) {
   console.error(`${starts.length} set-in lines: ${JSON.stringify(count)}`);
   console.error(`found again ${refound} of the ${breaks} breaks print-breaks.json lists`);
 }
-if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS || LIST_ORPHANS || LIST_SUSPECTS || LIST_INDENTS) process.exit(0);
+if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS || LIST_ORPHANS || LIST_SUSPECTS || LIST_INDENTS || LIST_REFILES) process.exit(0);
 
 if (existsSync(KEY_SRC)) {
   const raw = JSON.parse(readFileSync(KEY_SRC, "utf8"));

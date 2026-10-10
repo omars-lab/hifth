@@ -4,9 +4,9 @@
  * sometimes gives straight quotes and a hyphen instead (about one note in fifty).
  * One rule for the whole book, so no hand-read row is spent on it.
  *
- * Run after the misreads are mended and before the slant is laid on, so a
- * slanted-words row is written against the text as a reader sees it, curly
- * quotes and all. Each mark is swapped for one mark, so a row written against
+ * Run first of the three last touches (lettering.mjs), before the misreads are
+ * mended and the slant is laid on, so both kinds of hand-read row are written
+ * against the text as a reader sees it, curly quotes and all. Each mark is swapped for one mark, so a row written against
  * the text before this rule moves to it by position alone. The slant's marks,
  * where a note already carries them, count as part of the line: a quote
  * straight after a run opens is an opening quote.

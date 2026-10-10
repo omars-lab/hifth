@@ -70,6 +70,14 @@ describe("where the capture lost a full stop the printed page has", () => {
     expect(seams("One. Two three Four (five) Six").map((s) => s.at)).toEqual([4, 14, 26]);
   });
 
+  it("offers a space before a bracketed word that opens a sentence, as the book sets a word it adds", () => {
+    expect(seams("One went. [Two] went. [and] three").map((s) => s.at)).toEqual([9]);
+  });
+
+  it("offers a space before a name that opens on the ʿayn mark", () => {
+    expect(seams("by another ʿUmar went ʿan").map((s) => s.at)).toEqual([10]);
+  });
+
   it("names a seam without carrying the words around it", () => {
     const print = seamPrint(NOTE, at(NOTE, "for the water").at);
     expect(print).toMatch(/^[0-9a-f]{12}$/);
