@@ -1,0 +1,36 @@
+{
+  "about": "Paragraphs the capture filed under the wrong verse, where the printed page shows them under another (see refile.mjs). from: the verse they sit under; to: the verse they belong to; prints: a fingerprint of each paragraph in order, never its words; keep: leave them under from as well, for a note the two verses share; split: instead of prints, the fingerprint of the spot where a verse's own note was run on from the end of a shared note (see breaks.mjs), cut there under every verse holding it; page: the page image it was read on.",
+  "refiles": [
+    {
+      "surah": 2,
+      "from": "2:203",
+      "to": "2:185",
+      "prints": [
+        "7de1018bd627",
+        "5224df59ee17"
+      ],
+      "page": "page_0068"
+    },
+    {
+      "surah": 6,
+      "from": "6:79",
+      "to": "6:74",
+      "split": "45290deaf063",
+      "page": "page_0222"
+    },
+    {
+      "surah": 9,
+      "from": "9:37",
+      "to": "9:36",
+      "prints": [
+        "58fc381a324c",
+        "0624839cab62",
+        "2ec029c43662",
+        "bc5974c90170",
+        "3c9b73c8c86b"
+      ],
+      "keep": true,
+      "page": "page_0305"
+    }
+  ]
+}

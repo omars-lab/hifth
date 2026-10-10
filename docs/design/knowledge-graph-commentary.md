@@ -580,7 +580,9 @@ Reading them also showed the capture often gave straight quote marks where the b
 ones, and a hyphen where it prints a dash between two numbers (about one note in fifty, all
 through the book). One rule now sets them back in every note and every verse's translation, so no
 hand-read fix is spent on them; a quote mark between two letters is left alone, since there it
-is a misread letter. A pitch test checks a demo note shows none, watched failing first.
+is a misread letter. The rule runs before the misread and slant fixes, so every hand-read fix
+is copied off the page as a reader sees it, curly quotes and all. A pitch test checks a demo
+note shows none, watched failing first.
 Reading them turned up one more difference from the print: where the book slants a closing square
 bracket, the capture sometimes read it as a slash, a round bracket or a letter, so the bracket
 never closed. Three notes had it (14:48, 28:88 and 43:86); each was read off its page picture and
@@ -622,6 +624,17 @@ note's own first line, scripture set in large, a quotation. One of those had com
 stop because the page reading skipped the lines above it; the listing now treats a line read
 more than two lines up as unknown. The 4 lines the listing matched to two places are a real
 start already in place under both verses that carry the note, and three that are not starts.
+Reading the last of the lost breaks on 2026-10-10 turned up three places where a whole
+paragraph sat under the wrong verse, which no break could mend. A note's last paragraphs were
+filed under a later verse its text names (2:185's, shown under 2:203). A note two verses share
+had its later paragraphs reach only one of them (9:36 and 9:37). And a verse's own note was run
+straight on from the end of a note it shares with the verses after it, its number and all, so
+every one of them showed it (6:74's). Each is listed with its page and a fingerprint, never its
+words, and moved; the extractor refuses a listed one that matches nothing, and a browser test
+holds each, watched failing first. Eleven more lost breaks, each checked on its page picture,
+are put back (in 5:54, 5:96, 9:60, 12:40, 12:100, 20:104, 21:98, 23:100, 23:101 and 27:7), and
+the search for them now also sees a paragraph that opens on a bracket or an ʿayn. Why the last
+of these had to be moved rather than broken is in [the glued note](../issues/own-note-run-on-from-a-shared-note.md).
 One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted
 without reading the slant at all. About 4,000 notes have such a run, but checked against the

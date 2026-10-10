@@ -783,6 +783,52 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(sheet(page).getByRole("region", { name: "Commentary" }).locator("p")).toHaveCount(10);
   });
 
+  test("a note's last paragraphs the capture filed under a later verse are back under their own", async ({ page }) => {
+    // 2:185's note runs on to the top of the next page, and the capture filed
+    // those two paragraphs under 2:203, whose note then opened on them.
+    // Counted on the printed page, by paragraph.
+    const paragraphs = (p: typeof page) => sheet(p).getByRole("region", { name: "Commentary" }).locator("p");
+    await page.goto("/#/hafs-kfqc/2:185?open=commentary");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    await expect(paragraphs(page)).toHaveCount(5);
+    await page.goto("/#/hafs-kfqc/2:203?open=commentary");
+    await page.reload();
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    await expect(paragraphs(page)).toHaveCount(2);
+  });
+
+  test("a note two verses share shows whole under both, not only its opening under the first", async ({ page }) => {
+    const notes = async (ref: string) => {
+      await page.goto(`/#/hafs-kfqc/${ref}?open=commentary`);
+      await page.reload();
+      await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+      const region = sheet(page).getByRole("region", { name: "Commentary" });
+      return { count: await region.locator("p").count(), text: await region.locator("p").allInnerTexts() };
+    };
+    const first = await notes("9:36");
+    const second = await notes("9:37");
+    expect(first.count).toBe(6);
+    expect(first.text).toEqual(second.text);
+  });
+
+  test("a verse's own note the capture ran on from a note it shares shows under that verse alone", async ({ page }) => {
+    // 6:74–83 share four paragraphs; the capture ran 6:74's own note on from the
+    // last of them, label and all, so every verse in the range showed it.
+    // Counted on the printed page, by paragraph.
+    const notes = async (ref: string) => {
+      await page.goto(`/#/hafs-kfqc/${ref}?open=commentary`);
+      await page.reload();
+      await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+      return sheet(page).getByRole("region", { name: "Commentary" }).locator("p").allInnerTexts();
+    };
+    const own = await notes("6:74");
+    const other = await notes("6:80");
+    expect(own).toHaveLength(5);
+    expect(other).toHaveLength(5);
+    expect(other.slice(0, 4)).toEqual(own.slice(0, 4));
+    expect(other).not.toContain(own[4]);
+  });
+
   test("a related verse in the note hops there and opens its own note", async ({ page }) => {
     // 1:6 — the straight-path verse — carries The Study Quran's own
     // cross-references, folded into the note as a "Related verses" list. This is

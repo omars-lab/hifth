@@ -322,3 +322,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   have set it. A straight quote between two letters is a misread letter for the hand-read
   misreads. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/28:88'` · test: `e2e/pitch.spec.ts`
   ("prints the book's curly quotes")
+- [ ] A note shared by a run of verses shows whole under every one of them, and a verse's own note
+  shows under that verse alone: a paragraph that opens on a verse number mid-note, or a note that
+  stops short under one verse of the run, is the capture filing it in the wrong place; read it off
+  the page picture and list it in the misfiled paragraphs. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/6:74?open=commentary'`
+  · test: `e2e/pitch.spec.ts` ("a verse's own note the capture ran on")
