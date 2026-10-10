@@ -400,3 +400,26 @@ right-hand and a left-hand page on one page that the card covers none of the pag
 failed first (44 pixels over it); a laptop browser test on two pages, for a verse on each page, that
 the card covers none of the verse's page, which failed first for the left-hand page (143 pixels
 covered); unit tests of how two cards in the corner add up to one span.
+
+### ⑬ On a laptop with one page, does the tajweed key cover the page it explains? · **fixed**
+
+**What it changes for a hafiz:** the tajweed key says which colour stands for which rule and how many
+verses on this page carry each, so a reader holds it up against the page. Closed to one page, the key
+stood in the window's corner over where the lines begin, the very colours it was explaining, and ran
+down over the row of tools at the foot. Found walking the pitch on a laptop, 2026-10-10 (2:48, the
+key open), the same fault ⑫ had just fixed for the share card.
+
+**Fixed, 2026-10-10:** the key now stands as the roots list, the note and the share card do: above
+the bars at the foot (it scrolls when the room is short, as it already did), and with one page the
+page moves aside for it and comes back to where it stood once the key closes.
+
+**Left as they are, and why:** the mus'haf picker and the About panel open in the same corner but
+are about the app, not the page. Each dims the page behind it and closes with a tap outside, so
+there is nothing on the page a reader needs to see while one is up.
+
+Checked by picture on a laptop closed to one page, 1280 wide, in the pitch: 2:48 with the key open in
+English (the key on the right, the page to its left, the whole row of tools in sight) and in Arabic
+(the key on the left, the page to its right). Tests: a laptop browser test for a right-hand and a
+left-hand page that the key stands above the tool row, covers none of the page, and that the page
+comes back once it closes, which failed first (the key's foot 36 pixels below the top of the tool
+row, then, with that fixed, 111 and 91 pixels of the page covered).

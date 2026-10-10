@@ -328,8 +328,12 @@ export function App(): JSX.Element {
   const [listSide, setListSide] = useState<CardSpan | null>(null);
   const [noteSide, setNoteSide] = useState<CardSpan | null>(null);
   const [shareSide, setShareSide] = useState<CardSpan | null>(null);
+  const [keySide, setKeySide] = useState<CardSpan | null>(null);
   // Held, not rebuilt each render, so the page frames afresh only when a card moves.
-  const cornerSpan = useMemo(() => spanOfAll([listSide ?? noteSide, shareSide]), [listSide, noteSide, shareSide]);
+  const cornerSpan = useMemo(
+    () => spanOfAll([listSide ?? noteSide, shareSide, keySide]),
+    [listSide, noteSide, shareSide, keySide],
+  );
   // Where the hop chips floating over the page's top corner end, so the lift
   // above a phone note stops the verse's first line beneath them.
   const [railBottom, setRailBottom] = useState<number | null>(null);
@@ -3714,6 +3718,7 @@ export function App(): JSX.Element {
         counts={tajweedCounts}
         page={page}
         selection={tajweedSelection}
+        onSide={setKeySide}
         credit={{
           text: t.tajweedCredit,
           href: "https://github.com/cpfair/quran-tajweed",

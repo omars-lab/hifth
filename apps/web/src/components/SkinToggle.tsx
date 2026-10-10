@@ -6,6 +6,7 @@ import {
   type TajweedRuleId,
 } from "@hifth/core";
 import { useT } from "../i18n";
+import { useSideCover, type CardSpan } from "./short-band";
 import styles from "./SkinToggle.module.css";
 
 interface SkinToggleProps {
@@ -69,6 +70,11 @@ interface TajweedLegendProps {
   /** Attribution required by the rule source's licence, rendered verbatim. */
   credit: { text: string; href: string } | null;
   onClose: () => void;
+  /**
+   * Where the open key spans across the window, or null once it closes, so a
+   * single page on a laptop moves aside for it as it does for the roots list.
+   */
+  onSide?: (span: CardSpan | null) => void;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -100,10 +106,14 @@ export function TajweedLegend({
   selection,
   credit,
   onClose,
+  onSide,
 }: TajweedLegendProps): JSX.Element | null {
   const { t, dir } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
+  // The key counts the colours on this page, so a reader holds it up against
+  // the page; in its corner it covered where the lines begin (look-alike rows ⑬).
+  useSideCover(open, false, sheetRef, onSide);
   // Whether the card holds more than it shows. On a laptop-sized window the
   // key is taller than its card, and the last thing in it is the source's
   // credit, a licence condition; without a cue nothing says it is there.

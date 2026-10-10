@@ -2236,6 +2236,45 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
         .toBeLessThanOrEqual(0);
     });
 
+    test(`closed to one page, the tajweed key stands clear of a ${side}-hand page`, async ({ page }) => {
+      // The key counts the colours on this page, so a reader holds it up
+      // against the page; in its corner it covered where the lines begin, and
+      // ran down over the tool row (look-alike rows ⑬).
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/#/hafs-kfqc/${at}?view=one`);
+      const paper = pageSvg(page, pageNo);
+      await expect(paper).toBeVisible({ timeout: 20_000 });
+      for (let i = 0; i < 8 && (await boxOf(paper)).width <= 480; i++) {
+        const was = (await boxOf(paper)).width;
+        await page.getByRole("button", { name: /^(تكبير|Zoom in)$/ }).click();
+        await expect.poll(async () => (await boxOf(paper)).width).toBeGreaterThan(was + 1);
+      }
+      const from = await boxOf(page.getByRole("button", { name: /^(شارك هذه الآية كرابط|Share this ayah as a link)$/ }));
+      // Zooming in leaves the page panned a little off the middle; it comes
+      // back to where it stood.
+      const stood = await boxOf(paper);
+      await page.getByRole("button", { name: /^(مفتاح ألوان التجويد|Tajweed colour key)$/ }).click();
+      const card = page.getByRole("dialog", { name: /^(مفتاح ألوان التجويد|Tajweed colour key)$/ });
+      await expect(card).toBeVisible();
+      await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const key = await boxOf(card);
+      expect(key.y + key.height, `the key ${JSON.stringify(key)} above the tool row ${JSON.stringify(from)}`).toBeLessThanOrEqual(from.y);
+      await expect
+        .poll(async () => {
+          const open = await boxOf(paper);
+          return Math.min(open.x + open.width, key.x + key.width) - Math.max(open.x, key.x);
+        }, { message: "how far the key stands over the page, across" })
+        .toBeLessThanOrEqual(0);
+      await page.keyboard.press("Escape");
+      await expect(card).toBeHidden();
+      await expect
+        .poll(async () => {
+          const open = await boxOf(paper);
+          return Math.abs(open.x - stood.x);
+        }, { message: "how far the page is from where it stood before the key" })
+        .toBeLessThan(2);
+    });
+
   }
 
   test("on a laptop, the share card stands above the row of tools it opens from", async ({ page }) => {

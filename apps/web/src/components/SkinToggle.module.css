@@ -332,7 +332,11 @@
   .sheet {
     inset-inline-start: auto;
     inset-inline-end: var(--space-5);
-    inset-block-end: var(--space-5);
+    /* Inside the page's room, above the bars under it (useRoomForCards), as
+       the roots list stands: off the window's foot it ran over the tool row
+       (look-alike rows ⑬). It scrolls when the room is short. */
+    inset-block-end: calc(var(--room-foot, 0px) + var(--space-5));
+    max-block-size: min(78vh, calc(var(--room-block, 100vh) - 2 * var(--space-5)));
     inline-size: 420px;
     border-radius: var(--radius-lg);
   }

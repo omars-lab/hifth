@@ -3560,6 +3560,18 @@
       "note": "On a laptop the share card kept its own corner at the window's foot: on one page it covered the start of the lines and the shared verse, on two pages it covered the verse's own page, and it hid the end of the tool row. It now stands above the bars, moves one page aside, and lies over the facing page on a spread; laptop browser tests for each failed first."
     },
     {
+      "id": "tajweed-key-covers-page-laptop",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑬"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "On a laptop closed to one page the tajweed key stood over where the lines begin, the colours it explains, and ran over the tool row. It now stands above the bars and the page moves aside for it; a laptop browser test for each page side failed first."
+    },
+    {
       "id": "app-walk-whole-demo-path",
       "source": {
         "file": "docs/design/native-shell.md",
