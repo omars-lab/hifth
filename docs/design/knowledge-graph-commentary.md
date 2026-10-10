@@ -498,6 +498,9 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
 - **Pieces that are not the note.** The page's margin column of verse references became
   paragraphs, or was glued to the front of one (4 verses); single stray letters became paragraphs
   (7 verses); and 98:5 carried a piece of 98:4's note and a cut-short copy of its own. All dropped.
+  Since 2026-10-09 also the margin's references and stray letters left between two sentences the
+  capture ran together (three notes, 2:285–86, 6:125 and 21:5, each checked against its page
+  picture).
 - **Verses the capture lost.** Where the book prints a note before or inside its verse, the
   capture took the note as the verse (85:12, 87:1, 88:11 to 88:14, and 4:107, whose verse ran on
   into the note shared by 4:105 to 4:107). Three more verses were cut at the foot of a page
