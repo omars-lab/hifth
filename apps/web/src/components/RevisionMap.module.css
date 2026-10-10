@@ -428,3 +428,9 @@ button.cell {
     animation: none;
   }
 }
+
+/* Focus rests on the sheet itself when a link opened it; the sheet is the
+   dialog, not a control, so it wears no ring (as the look-alike list). */
+.sheet:focus {
+  outline: none;
+}
