@@ -280,6 +280,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Stay on a page for a few seconds until the red ribbon appears down its bound edge: it covers
   none of the writing, on a page bound on the left and one bound on the right. · phone · test:
   bookmarks spec · issue: `seam-covers-line-ends-phone`
+- [ ] Drop a bookmark on a page bound on the left and one bound on the right: the ribbon stops
+  above the first line and hides none of its words; in settings, the long ribbon still hangs
+  down with its name. · phone, desktop · test: bookmarks spec · issue: `ribbon-covers-first-words`
 - [ ] Switch the interface to Arabic: everything mirrors, nothing is cut off; on an iPad, upright
   and on its side, open a note too: its close button is on the left and the card stays whole. ·
   phone, desktop, ipad, ipad-side · tests: lang, chrome-fit specs, pitch "the note mirrors"

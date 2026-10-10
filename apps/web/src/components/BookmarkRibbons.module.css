@@ -237,6 +237,24 @@
   animation: unroll 260ms var(--ease-hop, ease-out);
 }
 
+/* The short ribbon, the default: it stops in the band above the first line,
+   which is about 31px at the narrowest on a phone and a laptop, so the first
+   words of the page stay in view (docs/PLAN.md, item 49). Its name is its
+   accessible name and its tooltip, not written on it. Every button is at
+   least 44px tall so a thumb finds it; this one cannot be and still clear
+   the first line, so it is 26px tall and the full 44px wide, above the 24px
+   a pointer target needs. */
+[data-ribbon="short"] .ribbon {
+  block-size: 26px;
+  min-block-size: 0;
+  padding: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 7px), 0 100%);
+}
+
+[data-ribbon="short"] .name {
+  display: none;
+}
+
 .name {
   display: block;
   max-block-size: 100%;

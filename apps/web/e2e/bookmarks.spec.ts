@@ -138,6 +138,55 @@ test.describe("Hifth · bookmarks", () => {
     });
   }
 
+  // The first words of a page are the cue a hafiz revises by, and a ribbon as
+  // long as a finger hung over the start of the first three lines (2026-10-10,
+  // walking the live site). It now stops in the band above the first line.
+  for (const at of [42, 43]) {
+    test(`a ribbon dropped on page ${at} hangs above the first line and covers no writing`, async ({ page }) => {
+      await page.goto(`/#/hafs-kfqc/p${at}`);
+      await expect(page.locator(`svg[aria-labelledby="page-label-${at}"]`)).toBeVisible();
+      await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
+      const drawer = page.getByRole("dialog", { name: "Bookmark" });
+      await drawer.getByRole("button", { name: "Close" }).click();
+      await expect(drawer).toBeHidden();
+      const ribbon = page.locator("[data-bookmark-overlay] [data-bookmark]");
+      await expect(ribbon).toHaveCount(1);
+      // Past the unrolling, so the ribbon is at its full length.
+      await page.waitForTimeout(400);
+      const m = await page.evaluate((n) => {
+        const host = document.querySelector(`[data-host-page="${n}"]`)!;
+        const hb = host.getBoundingClientRect();
+        const r = document.querySelector("[data-bookmark-overlay] [data-bookmark]")!.getBoundingClientRect();
+        // The writing comes as a few large shapes, so take the highest ink in
+        // the ribbon's own column: the ribbon must end above it.
+        let inkTop = Infinity;
+        for (const p of host.querySelectorAll("svg path")) {
+          if (p.closest("defs") || /ayahPolygon/.test(p.getAttribute("class") ?? "")) continue;
+          const b = p.getBoundingClientRect();
+          if (b.width === 0 || b.width > hb.width * 0.97) continue;
+          if (b.right > r.left && b.left < r.right) inkTop = Math.min(inkTop, b.top);
+        }
+        return { ribbonTop: r.top, ribbonBottom: r.bottom, inkTop };
+      }, at);
+      expect(m.ribbonBottom, `the ribbon (${m.ribbonTop}..${m.ribbonBottom}) ends above the writing (${m.inkTop})`).toBeLessThan(m.inkTop);
+    });
+  }
+
+  test("the long ribbon stays as a setting, and hangs down with its name on it", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("hifth.ribbon-length.v1", "long"));
+    await page.goto("/#/hafs-kfqc/p42");
+    await expect(page.locator(`svg[aria-labelledby="page-label-42"]`)).toBeVisible();
+    await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
+    const drawer = page.getByRole("dialog", { name: "Bookmark" });
+    await drawer.getByLabel("Name").fill("Morning review");
+    await drawer.getByRole("button", { name: "Save name" }).click();
+    await expect(drawer).toBeHidden();
+    const ribbon = page.getByRole("button", { name: "Bookmark: Morning review" });
+    await expect(ribbon.getByText("Morning review")).toBeVisible();
+    await page.waitForTimeout(400);
+    expect((await ribbon.boundingBox())!.height).toBeGreaterThan(100);
+  });
+
   test("clearing all from the page map asks first, and names the count", async ({ page }) => {
     await ready(page);
     // The corner folds once; a second bookmark on the same page comes from the
