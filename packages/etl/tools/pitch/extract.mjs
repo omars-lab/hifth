@@ -54,6 +54,7 @@ import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
 import { slantSurah } from "./italics.mjs";
 import { mendSurah } from "./misreads.mjs";
+import { setSurahTypography } from "./typography.mjs";
 import { suspects } from "./suspects.mjs";
 import { paragraphStarts, placeStarts } from "./indents.mjs";
 import { addCited, citedIn, foldRuns } from "./runs.mjs";
@@ -478,6 +479,7 @@ function buildSurah(surah) {
     previous = done.handOn;
   }
   for (const i of mendSurah(surah, verses, MISREADS)) usedMisreads.add(i);
+  setSurahTypography(verses);
   for (const i of slantSurah(surah, verses, ITALICS)) usedItalics.add(i);
 
   // Al-Fātiḥah keeps its hand-written roads; every other surah takes the

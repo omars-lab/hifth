@@ -387,6 +387,18 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(page.getByRole("dialog", { name: /14:48/ })).toBeVisible();
   });
 
+  test("the commentary prints the book's curly quotes, not the straight ones the capture gave", async ({ page }) => {
+    // The book sets curly quotes and an en dash between two numbers. The capture
+    // sometimes flattened them; one rule sets them back across every note.
+    await page.goto("/#/hafs-kfqc/28:88");
+    const notes = page.getByRole("region", { name: "Commentary" });
+    await expect(notes).toBeVisible({ timeout: 20_000 });
+    const text = await notes.innerText();
+    expect(text.length).toBeGreaterThan(200);
+    expect(text).not.toMatch(/["']/);
+    expect(text).not.toMatch(/\d-\d/);
+  });
+
   test("in English the drawer reads left to right, though it lies on the right-to-left page", async ({ page }) => {
     // It inherited the mus'haf's direction, so the line under the credit read
     // ".Shown privately, …" — its full stop in front — and sat against the
