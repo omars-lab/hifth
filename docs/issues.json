@@ -3490,6 +3490,17 @@
       "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
+      "id": "app-walk-whole-demo-path",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉖"
+      },
+      "status": "answered",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "The iPad app's copy of the pitch build was rebuilt with the note's look-alike rows, and no real-app walk has yet opened a surah's introduction or followed the whole demo path. Closes when the iPad app is walked upright in Arabic and on its side in English over that path, each fault found getting its own item and test."
+    },
+    {
       "id": "app-walk-after-list-fixes",
       "source": {
         "file": "docs/design/native-shell.md",
