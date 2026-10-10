@@ -575,6 +575,23 @@ two of them where it had also run two paragraphs into one; all three are put rig
 page pictures. Two places stay as the book prints them: a bracket the book itself never closes,
 and two references it sets side by side with nothing between them.
 Everywhere else stays upright.
+One note the demo links to was still upright on 2026-10-09: 18:60's note links on to 18:65's,
+whose own note carries the most slanted words of any (13 runs, read off its two pages by hand).
+Putting them in turned up why the shared note's paragraphs had looked right only under 18:60: the
+book files the note on 18:60–82 under every verse it covers, but a paragraph break put back in
+it reached only the verse it was listed under, so 18:61 to 18:82 ran its opening paragraphs
+together. A break in a shared note now reaches every verse that holds it, and the extractor
+refuses one listed twice for the same note (four were, in four other surahs, and are now listed
+once). 18:65's own note had also run its five printed paragraphs into one; they are put back.
+
+**Paragraphs run together where the stop survived.** Where a new paragraph starts at the top of
+a printed column, the capture keeps the full stop but loses the break, so the panel shows two
+printed paragraphs as one. The demo's own notes (2:255, 2:48, and other verses' own notes in
+18:60–82) still have some. The searches so far looked for a lost stop, so they never see these.
+The page readings place every line, and a paragraph's first line sits a little further in than
+the lines around it, so a listing of every line that starts further in, matched to the seam it
+opens, would find them. It is worth trusting only once it finds again the breaks already put
+back by hand, and passes over the 103 places where the book runs a sentence on.
 One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted
 without reading the slant at all. About 4,000 notes have such a run, but checked against the
