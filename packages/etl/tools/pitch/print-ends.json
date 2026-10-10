@@ -1,5 +1,5 @@
 {
-  "about": "Notes whose last sentence lost its closing stop in the capture, where the printed page shows the stop right after the note's last words (or after its closing bracket) (see ends.mjs). print: a fingerprint of the note's last words, never the words. stop: the page's own stop where it is not a full stop. page: the page image the ending was read on. Found under whichever verse holds the note.",
+  "about": "Notes whose last sentence lost its closing stop in the capture, where the printed page shows the stop right after the note's last words (or after its closing bracket) (see ends.mjs). print: a fingerprint of the note's last words, never the words. stop: the page's own stop where it is not a full stop, or empty where the page prints none and the note stays as it is. page: the page image the ending was read on. Found under whichever verse holds the note.",
   "ends": [
     {
       "verse": "2:75",
@@ -1261,6 +1261,30 @@
       "print": "c2c9174e1b06",
       "page": "page_0953",
       "stop": "?"
+    },
+    {
+      "verse": "3:165",
+      "print": "38ac1749006b",
+      "stop": "",
+      "page": "page_0120"
+    },
+    {
+      "verse": "26:150",
+      "print": "45f3b4503181",
+      "stop": "",
+      "page": "page_0552"
+    },
+    {
+      "verse": "31:11",
+      "print": "00dff03c36c6",
+      "stop": "",
+      "page": "page_0605"
+    },
+    {
+      "verse": "47:29",
+      "print": "92414bd476e3",
+      "stop": "",
+      "page": "page_0755"
     }
   ]
 }
