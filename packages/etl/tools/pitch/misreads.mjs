@@ -1,8 +1,10 @@
 /**
  * Marks the capture misread: the book slants a closing square bracket inside a
  * slanted quotation, and the capture took it for a slash, a round bracket or a
- * letter, leaving a bracket that never closes. No rule can tell which character
- * was meant, so each is read off the page picture by hand and listed in the
+ * letter, leaving a bracket that never closes. It also misreads the odd word or
+ * verse number (a letter for a digit, and the reference is no longer a link). No
+ * rule can tell which character was meant, so each is read off the page picture
+ * by hand and listed in the
  * private books repository: a row names the verse, the few characters as the
  * capture has them (`was`), and as the page prints them (`is`).
  *

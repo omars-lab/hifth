@@ -23,6 +23,15 @@ describe("mendSurah", () => {
     expect(v["9:3"].commentary[0]).toBe("2–3 The rain [came] late.");
   });
 
+  it("lets a second row on the same note build on the first", () => {
+    const v = verses();
+    mendSurah(9, v, [
+      { verse: "9:1", was: "[of the townl", is: "[of the town]" },
+      { verse: "9:1", was: "as at 4:2.", is: "as at 4:9." },
+    ]);
+    expect(v["9:1"].commentary[0]).toBe("1 The well [of the town] ran dry, as at 4:9.");
+  });
+
   it("leaves the other surahs' rows for their own surah", () => {
     const v = verses();
     const used = mendSurah(9, v, [{ verse: "10:1", was: "x", is: "y" }]);

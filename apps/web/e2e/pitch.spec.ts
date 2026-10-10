@@ -374,6 +374,19 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(page.getByRole("dialog", { name: /2:140/ })).toBeVisible();
   });
 
+  test("a verse number the capture misread is put back, so it is a link again", async ({ page }) => {
+    // 28:88's note cites 14:48, but the capture read its last digit as a letter,
+    // so the reference was plain words. The hand-read misreads put it right.
+    await page.goto("/#/hafs-kfqc/28:88");
+    await expect(page.getByRole("dialog", { name: /28:88/ })).toBeVisible({ timeout: 20_000 });
+    const cited = page
+      .getByRole("region", { name: "Commentary" })
+      .getByRole("button", { name: /14:48/ });
+    await expect(cited).toBeVisible();
+    await cited.click();
+    await expect(page.getByRole("dialog", { name: /14:48/ })).toBeVisible();
+  });
+
   test("in English the drawer reads left to right, though it lies on the right-to-left page", async ({ page }) => {
     // It inherited the mus'haf's direction, so the line under the credit read
     // ".Shown privately, …" — its full stop in front — and sat against the
