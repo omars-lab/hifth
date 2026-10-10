@@ -243,3 +243,20 @@
   min-block-size: 1.2em;
   text-align: center;
 }
+
+/* A phone on its side: the card stands on the window's foot and the room up to
+   the top bar is short, so with the commentary among what a link can open it
+   ran up over the bar's buttons (plan item 42). Here its rows sit closer, the
+   "open with it" label starts the row of choices instead of taking a row of
+   its own, and it is never taller than the room under the bar. */
+@media (min-width: 40rem) and (max-height: 499.98px) {
+  .sheet {
+    gap: var(--space-2);
+    max-block-size: calc(var(--room-foot, 0px) + var(--room-block, 100vh) - var(--space-4) - var(--space-2));
+    overflow-y: auto;
+  }
+
+  .legend {
+    flex-basis: auto;
+  }
+}
