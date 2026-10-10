@@ -220,7 +220,7 @@ export function PageSpread({
      which is the live page unless the verse was picked on the facing one. */
   const desk = (side: "left" | "right") => (
     <div className={styles.desk} data-desk={side} ref={side === "right" ? setDeskEl : undefined}>
-      {side === (besideSide ?? liveSide) && beside?.(side)}
+      {!solo && side === (besideSide ?? liveSide) && beside?.(side)}
     </div>
   );
 
@@ -318,6 +318,17 @@ export function PageSpread({
             away: there is no facing page to turn toward, and a fore-edge grab
             over a page the reader is panning would fight the pan. */}
         {!solo && edgeRails}
+        {/* Closed to one page, the book runs the window's width and the desks
+            are empty boxes; the room beside the page is inside the book, as
+            wide as the stage says the page leaves (`--page-slack`, written
+            by the app each time the paper is drawn). There is no facing page
+            to pick a verse on, so the chips stand beside the live one —
+            on its other side while a tall list stands on theirs. */}
+        {solo && beside && (
+          <div className={styles.slack} data-slack={besideSide ?? liveSide}>
+            {beside(besideSide ?? liveSide)}
+          </div>
+        )}
       </div>
       {desk("left")}
     </div>

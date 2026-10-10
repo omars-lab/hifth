@@ -73,6 +73,7 @@ import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT, type Strings } from "../i18n";
 import { giveNoteRoom, noteRoom, useLongVerse } from "../long-verse";
 import { useOpeningText, type OpeningText } from "../opening-text";
+import { pageSlack } from "../rail-home";
 import type { TurnStyle } from "../turn-style";
 import styles from "./PageStage.module.css";
 import { printedNumbersOf } from "./verse-numbers";
@@ -192,6 +193,13 @@ interface PageStageProps {
    * the level before it and the facing leaf stayed behind.
    */
   onPinchZoom?: (z: number) => void;
+  /**
+   * The empty space either side of the page at its present magnification, in
+   * pixels, each time the paper is drawn — every frame of a pinch, so whatever
+   * listens must not re-render on it. With the book closed to one page this,
+   * not the desk, is the room the look-alike buttons stand in (rail-home.ts).
+   */
+  onSlack?: (px: number) => void;
   /**
    * Which page a turn in this direction would land on, or `null` for none.
    *
@@ -1091,6 +1099,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onSelectionRect,
     onTurn,
     onPinchZoom,
+    onSlack,
     turnTargetOf,
     dragToTurn = true,
     onJuzTurn,
@@ -1199,6 +1208,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onTurnRef.current = onTurn;
   const onPinchZoomRef = useRef(onPinchZoom);
   onPinchZoomRef.current = onPinchZoom;
+  const onSlackRef = useRef(onSlack);
+  onSlackRef.current = onSlack;
   const turnTargetOfRef = useRef(turnTargetOf);
   turnTargetOfRef.current = turnTargetOf;
   const dragToTurnRef = useRef(dragToTurn);
@@ -1516,6 +1527,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // have to stop doing so on the outer side while a page hangs over the desk.
     const stageEl = stageRef.current;
     if (stageEl) stageEl.toggleAttribute("data-spills", over > 0.5);
+    if (fit) onSlackRef.current?.(pageSlack(fit.stageWidth, fit.contentWidth, view.current.z));
     const { x, y, z } = view.current;
     cur.host.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`;
     // Tell the overlay where the paper is, so a thing that belongs *to* the

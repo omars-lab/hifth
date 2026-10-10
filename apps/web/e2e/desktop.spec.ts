@@ -2129,6 +2129,53 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
     });
   }
 
+  for (const { at, pageNo, side } of [
+    { at: "2:48", pageNo: 7, side: "right" },
+    { at: "2:49", pageNo: 8, side: "left" },
+  ] as const) {
+    test(`closed to one page, a verse on a ${side}-hand page keeps its chips just outside the page`, async ({ page }) => {
+      // One page in a laptop window leaves wide empty space either side of it,
+      // but the book box runs the window's width there, so the space beside it
+      // measured nothing. The chips went to the bottom row (and before that,
+      // out to the window's far corner) though there was room by the page.
+      // A link lands magnified, so this is the magnified page's edge.
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/#/hafs-kfqc/${at}?view=one`);
+      const paper = pageSvg(page, pageNo);
+      await expect(paper).toBeVisible({ timeout: 20_000 });
+      await expect(rail(page)).toHaveAttribute("data-beside", side);
+      await expect(rail(page)).not.toHaveAttribute("data-home", /.*/);
+      const open = await boxOf(paper);
+      const chips = await boxOf(rail(page));
+      const gap = side === "right" ? chips.x - (open.x + open.width) : open.x - (chips.x + chips.width);
+      expect(gap, `the chips ${JSON.stringify(chips)} beside the page ${JSON.stringify(open)}`).toBeGreaterThanOrEqual(4);
+      expect(gap).toBeLessThanOrEqual(32);
+    });
+
+    test(`closed to one page, the roots list leaves a ${side}-hand page's chips in sight`, async ({ page }) => {
+      // The roots list stands tall in the corner at the chrome's end, and with
+      // one page there is no facing leaf for it to rise over: it stood on the
+      // chips beside a page on that side. They cross to the other side of the
+      // page while it is up.
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/#/hafs-kfqc/${at}?view=one&open=roots`);
+      const list = page.getByRole("dialog");
+      await expect(list).toBeVisible({ timeout: 20_000 });
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      await expect(rail(page)).toBeVisible();
+      const card = await boxOf(list);
+      const chips = await boxOf(rail(page));
+      const overlaps =
+        chips.x < card.x + card.width && card.x < chips.x + chips.width &&
+        chips.y < card.y + card.height && card.y < chips.y + chips.height;
+      expect(overlaps, `the chips ${JSON.stringify(chips)} under the list ${JSON.stringify(card)}`).toBe(false);
+      const open = await boxOf(pageSvg(page, pageNo));
+      const gap = Math.max(chips.x - (open.x + open.width), open.x - (chips.x + chips.width));
+      expect(gap, "the chips still stand just outside the page").toBeGreaterThanOrEqual(4);
+      expect(gap).toBeLessThanOrEqual(32);
+    });
+  }
+
   for (const { home, row } of [
     { home: "bar", row: (page: Page) => page.locator("footer") },
     { home: "tools", row: (page: Page) => page.getByRole("toolbar") },

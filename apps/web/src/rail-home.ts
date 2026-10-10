@@ -35,6 +35,16 @@ export function deskHoldsRail(deskWidth: number): boolean {
   return deskWidth > RAIL_DESK_MIN;
 }
 
+/**
+ * The empty space either side of one page, at its magnification: what the
+ * page leaves of its box, halved, since a page narrower than its box sits in
+ * the middle of it (`clampView`). With the book closed to one page the box
+ * runs the window's width, so this, not the desk, is the room beside the page.
+ */
+export function pageSlack(boxWidth: number, pageWidth: number, zoom: number): number {
+  return Math.max(0, (boxWidth - pageWidth * zoom) / 2);
+}
+
 function isRailHome(value: unknown): value is RailHome {
   return value === "bar" || value === "tools";
 }
