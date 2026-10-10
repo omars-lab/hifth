@@ -77,4 +77,22 @@ describe("a paragraph a page or column break cut part way through a sentence", (
   it("joins a run of three pieces into one", () => {
     expect(joinSplits("9:9", ["They rode", "on through", "the night."], WORDS).blocks).toEqual(["They rode on through the night."]);
   });
+
+  // A list of references broken over a page turn: the capture started a new
+  // paragraph and set down the first reference twice, the first copy cut short
+  // (seen at 10:21 and 46:24).
+  it("runs a list of references on over the break, without the cut-short copy", () => {
+    expect(joinSplits("9:9", ["The well ran dry (see 4:2; 5:3;", "6:4 6:47; 8:1). Then it rained."], WORDS).blocks).toEqual([
+      "The well ran dry (see 4:2; 5:3; 6:47; 8:1). Then it rained.",
+    ]);
+    expect(joinSplits("9:9", ["The well ran dry (see 4:2;", "7:10–1 7:10–12; 8:1)."], WORDS).blocks).toEqual([
+      "The well ran dry (see 4:2; 7:10–12; 8:1).",
+    ]);
+    expect(joinSplits("9:9", ["The well ran dry (see 4:2;", "6:47; 8:1)."], WORDS).blocks).toEqual(["The well ran dry (see 4:2; 6:47; 8:1)."]);
+  });
+
+  it("leaves a paragraph that opens on a reference after one whose brackets are closed", () => {
+    const blocks = ["The well ran dry (see 4:2; 5:3).", "6:4 The rain came."];
+    expect(joinSplits("9:9", blocks, WORDS).blocks).toEqual(blocks);
+  });
 });

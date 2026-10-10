@@ -499,8 +499,8 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
   paragraphs, or was glued to the front of one (4 verses); single stray letters became paragraphs
   (7 verses); and 98:5 carried a piece of 98:4's note and a cut-short copy of its own. All dropped.
   Since 2026-10-09 also the margin's references and stray letters left between two sentences the
-  capture ran together (three notes, 2:285–86, 6:125 and 21:5, each checked against its page
-  picture).
+  capture ran together (four notes, 2:285–86, 6:125, 7:150 and 21:5, each checked against its
+  page picture).
 - **Verses the capture lost.** Where the book prints a note before or inside its verse, the
   capture took the note as the verse (85:12, 87:1, 88:11 to 88:14, and 4:107, whose verse ran on
   into the note shared by 4:105 to 4:107). Three more verses were cut at the foot of a page
@@ -515,7 +515,9 @@ extractor now joins those paragraphs, and after a re-run 124 of the 125 read onc
   joined to it, without a space when the two halves only make a word together. The 18 places
   that needed more than that (a lost letter, a leftover number, a full stop that belonged there)
   were read off the page pictures; that list is kept with the extractor, and it refuses to run if
-  one of them stops matching. None of the 83 is left.
+  one of them stops matching. None of the 83 is left. Since 2026-10-09 also two lists of verse
+  references cut inside their bracket at a page turn (10:21, and the note 46:24–25 share), where
+  the capture had also set the first reference after the break down twice, once cut short.
 
 **Third pass, 2026-10-07:**
 
@@ -567,7 +569,11 @@ look-alike): all 84 were read, 79 had slanted words, 636 runs.
 Reading them turned up one more difference from the print: where the book slants a closing square
 bracket, the capture sometimes read it as a slash, a round bracket or a letter, so the bracket
 never closed. Three notes had it (14:48, 28:88 and 43:86); each was read off its page picture and
-put right, and a scan of every note finds no other bracket left open.
+put right. A later check of every note and surah introduction, which the extractor can now
+print as a list, found three more brackets the capture never closed (2:189, 9:111 and 91:15),
+two of them where it had also run two paragraphs into one; all three are put right off their
+page pictures. Two places stay as the book prints them: a bracket the book itself never closes,
+and two references it sets side by side with nothing between them.
 Everywhere else stays upright.
 One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted

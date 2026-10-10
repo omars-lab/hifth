@@ -1,5 +1,5 @@
 {
-  "about": "Places the printed Study Quran starts a new paragraph where its capture ran two paragraphs together and lost the stop between them, each read off the printed page (see breaks.mjs). print: a fingerprint of the words around the spot, never the words. stop: the mark put back, a full stop unless given, empty where the capture kept it. page: the captured page image the spot was read on.",
+  "about": "Places the printed Study Quran starts a new paragraph where its capture ran two paragraphs together and lost the stop between them, each read off the printed page (see breaks.mjs). print: a fingerprint of the words around the spot, never the words. stop: the mark put back, a full stop unless given, empty where the capture kept it, a closing bracket where the capture lost that instead. page: the captured page image the spot was read on.",
   "marks": [
     {
       "verse": "2:62",
@@ -31,6 +31,13 @@
       "print": "0e1c439e989e",
       "kind": "break",
       "page": "chapter-2_p33"
+    },
+    {
+      "verse": "2:189",
+      "print": "2b1a474d5001",
+      "kind": "break",
+      "stop": ")",
+      "page": "page_0069"
     },
     {
       "verse": "2:255",
@@ -171,6 +178,13 @@
       "print": "99818cd290b7",
       "kind": "break",
       "page": "chapter-9_p19"
+    },
+    {
+      "verse": "9:111",
+      "print": "582cd74f269e",
+      "kind": "break",
+      "stop": ")",
+      "page": "page_0315"
     },
     {
       "verse": "15:39",

@@ -17,9 +17,13 @@ const LONE_LETTERS = /^\p{L}{1,2}$/u;
 // the stop of a short form (v., vv., cf.) is not a sentence's.
 const TRAILING_SCRAPS = new RegExp(`(?<!\\b(?:vv?|[Cc]f)\\.)(?<=[.?!][”’")\\]]*)(?:\\s+(?:\\p{Ll}{1,2}|${REF}c?|\\d+))+\\s*$`, "u");
 // …and the same between two sentences the capture ran together: a short
-// lowercase scrap, then references with nothing between them, then the next
-// sentence's capital. A reference a sentence cites has a word or a stop by it.
-const MIDDLE_SCRAPS = new RegExp(`(?<=[.?!][”’")\\]]*)(?:\\s+\\p{Ll}{1,2})+(?:\\s+${REF})+(?=\\s+\\p{Lu})`, "gu");
+// lowercase scrap then references, or two or more references with no scrap,
+// with nothing between them, then the next sentence's capital. A reference a
+// sentence cites has a word or a stop by it.
+const MIDDLE_SCRAPS = new RegExp(
+  `(?<!\\b(?:vv?|[Cc]f|e\\.g|i\\.e)\\.)(?<=[.?!][”’")\\]]*)(?:(?:\\s+\\p{Ll}{1,2})+(?:\\s+${REF}c?)+|(?:\\s+${REF}c?){2,})(?=\\s+\\p{Lu})`,
+  "gu",
+);
 
 /** One captured block with the margin's references and lone letters taken out. */
 export function dropMarginRefs(text) {

@@ -9,7 +9,9 @@
  * Where a paragraph ends with no closing mark and the next carries on in
  * lowercase, the two are one sentence and run back together. If the break cut a
  * word, the halves close up with no space, but only when the book itself spells
- * the whole word somewhere and the halves are not both words of their own.
+ * the whole word somewhere and the halves are not both words of their own. A
+ * list of references cut inside its bracket runs on the same way, without the
+ * cut-short copy of its first reference the capture sometimes set down.
  *
  * What text cannot tell — a sentence that carries on into a capital ("the" then
  * a name), a word that also lost the letter before its hyphen ("wor-ship" read
@@ -23,6 +25,17 @@ import { seamPrint } from "./breaks.mjs";
 
 const CLOSED = /[.!?;:”"’)\]]\s*$/u;
 const CARRIES_ON = /^[\p{Ll}(]/u;
+// A list of references the break cut: the bracket is still open and the next
+// paragraph opens on a reference, its first copy sometimes cut short ("6:4 6:47").
+const OPENS_ON_REF = /^(\d+:\d+(?:[–-]\d+)?)\s+(?=(\d+:\d+(?:[–-]\d+)?))|^(?=\d+:\d+)/u;
+const inBracket = (text) => (text.match(/\(/g) ?? []).length > (text.match(/\)/g) ?? []).length;
+
+function runOnRefs(a, block) {
+  const m = block.match(OPENS_ON_REF);
+  if (!m || !inBracket(a) || !/[;,]$/.test(a)) return null;
+  const rest = m[1] && m[2].startsWith(m[1]) ? block.slice(m[0].length) : block;
+  return `${a} ${rest}`;
+}
 
 /**
  * Every word the book uses, lowercased, to tell a cut word from two words. A
@@ -72,7 +85,11 @@ export function joinSplits(verse, blocks, words, marks = []) {
       } else out[last] = kept + (space ? " " : "") + rest;
     } else if (!CLOSED.test(a) && CARRIES_ON.test(block)) {
       out[last] = a + (closeUp(a, block, words) ? "" : " ") + block;
-    } else out.push(block);
+    } else {
+      const joined = runOnRefs(a, block);
+      if (joined) out[last] = joined;
+      else out.push(block);
+    }
   }
   return { blocks: out, used };
 }
