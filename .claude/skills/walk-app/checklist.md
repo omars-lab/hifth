@@ -313,3 +313,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   stand in a centred column, not stretched edge to edge with the name at one side and the button
   at the other. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:255?open=roots'` · test:
   `e2e/pitch.spec.ts` ("sits near the verse it opens")
+- [ ] In a note, every verse number the prose names is a link: a reference left as plain words, or a
+  number with a letter in it, is a word the capture misread; read it off the page picture and add it
+  to the hand-read misreads. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/28:88'` · test:
+  `e2e/pitch.spec.ts` ("a verse number the capture misread is put back")
