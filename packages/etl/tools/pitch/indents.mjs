@@ -17,8 +17,7 @@
 import { seams, seamPrint } from "./breaks.mjs";
 
 // Where lines sit, as a share of the spread's width, measured from each half's
-// own body column so a page scanned a little askew still reads. A body line, or
-// one with a quote mark hung in the margin, sits within 0.004 of the column.
+// own body column so a page scanned a little askew still reads.
 const INDENT = [0.008, 0.018]; // a paragraph's first line
 const COLUMN = [-0.01, 0.04]; // anything else here is a margin, a head or a folio
 
@@ -37,7 +36,7 @@ const opensWithCapital = (text) => /^\P{L}*\p{Lu}/u.test(text);
 /**
  * The lines of one page reading (a two-page spread, each line `{x, y, text}`)
  * set in by a paragraph indent, in reading order, each with where it sits and
- * the line read just before it.
+ * the line read just before it, or "" where the reading skipped the lines between.
  */
 export function paragraphStarts(lines) {
   const out = [];
@@ -48,10 +47,18 @@ export function paragraphStarts(lines) {
     const column = half
       .filter((l) => l.x - body >= COLUMN[0] && l.x - body <= COLUMN[1])
       .sort((a, b) => a.y - b.y);
+    // The step from one line to the next. A reading sometimes skips lines, so
+    // the step is taken from the shorter gaps, and a line read further up than
+    // two steps is not the line before.
+    const steps = column.slice(1).map((l, i) => l.y - column[i].y).filter((d) => d > 0.005).sort((a, b) => a - b);
+    const step = steps[Math.floor(steps.length / 4)] ?? Infinity;
+    let above = -Infinity;
     for (const l of column) {
+      if (l.y - above > 2 * step) before = "";
       const inset = l.x - body;
       if (inset >= INDENT[0] && inset <= INDENT[1] && opensWithCapital(l.text)) out.push({ text: l.text, before, x: l.x, y: l.y });
       before = l.text;
+      above = l.y;
     }
   }
   return out;
@@ -70,6 +77,8 @@ const letters = (text) =>
     .replace(/[^a-z0-9]/g, "");
 
 const STOP = /[.!?][”’")\]\uE001]*$/u;
+/** The marks a text ends on, after its last letter or digit; never a word. */
+const endMarks = (text) => (text.trimEnd().match(/[^\p{L}\p{N}\s]*$/u) ?? [""])[0].replace(/[\uE000\uE001]/gu, "");
 // Letters a start must carry to be placed at all, how many open the index,
 // and how many letters in a line's worth the reading may have got wrong.
 const LEAST = 15;
@@ -96,7 +105,8 @@ function misread(a, b) {
  * open the same way, on the end of the line before. Each start comes back as: `split` (the capture already
  * starts a paragraph there), `stop-kept` (run on after a full stop it kept: the
  * kind this finds), `stop-lost` (run on, the stop lost too), `unmatched` or
- * `ambiguous`.
+ * `ambiguous`. A placed start also says which marks the page and the capture
+ * each end the line before on (`ends`), so a lost stop can be read off the page.
  */
 export function placeStarts(starts, notes, holders = () => []) {
   // Every place a paragraph could start, by its first letters.
@@ -140,6 +150,7 @@ export function placeStarts(starts, notes, holders = () => []) {
     const [p] = found;
     if (p.at < 0) return { kind: "split", verse: p.verse, ...at };
     const kind = STOP.test(p.block.slice(0, p.at)) ? "stop-kept" : "stop-lost";
-    return { kind, verse: p.verse, print: seamPrint(p.block, p.at), ...at };
+    const ends = { page: endMarks(start.before ?? ""), capture: endMarks(p.block.slice(0, p.at)) };
+    return { kind, verse: p.verse, print: seamPrint(p.block, p.at), ends, ...at };
   });
 }

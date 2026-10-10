@@ -34,8 +34,8 @@
  *                                                        # set side by side, in notes and intros,
  *                                                        # to check against the page; writes nothing
  *   node packages/etl/tools/pitch/extract.mjs --indents  # list paragraph starts the page readings
- *                                                        # show set in, where the capture ran them on,
- *                                                        # by fingerprint and page; writes nothing
+ *                                                        # show set in, where the capture ran them on, with
+ *                                                        # fingerprint, page and end marks; writes nothing
  *   node packages/etl/tools/pitch/extract.mjs --indents --all  # every set-in line, placed or not
  *
  * Re-run it whenever the source capture changes or the curation below is edited.
@@ -600,11 +600,13 @@ if (LIST_INDENTS) {
   const placed = placeStarts(starts, NOTES, (b) => HOLDING.get(b) ?? []);
   const listed = new Set(MARKS.map((m) => m.print));
   const count = {};
+  // The marks each side ends the line before on, so a lost stop shows; "-" for none.
+  const ends = (p) => (p.ends ? ` page=${p.ends.page || "-"} capture=${p.ends.capture || "-"}` : "");
   for (const p of placed) {
     const kind = p.print && listed.has(p.print) ? `${p.kind} listed` : p.kind;
     count[kind] = (count[kind] ?? 0) + 1;
-    if (LIST_ALL) console.log(`${p.kind} ${p.page} x=${p.x.toFixed(3)} y=${p.y.toFixed(3)} ${p.verse ?? "-"} ${p.print ?? "-"}`);
-    else if (p.print && !listed.has(p.print)) console.log(`${p.verse} ${p.print} ${p.kind} ${p.page} x=${p.x.toFixed(3)} y=${p.y.toFixed(3)}`);
+    if (LIST_ALL) console.log(`${p.kind} ${p.page} x=${p.x.toFixed(3)} y=${p.y.toFixed(3)} ${p.verse ?? "-"} ${p.print ?? "-"}${ends(p)}`);
+    else if (p.print && !listed.has(p.print)) console.log(`${p.verse} ${p.print} ${p.kind} ${p.page} x=${p.x.toFixed(3)} y=${p.y.toFixed(3)}${ends(p)}`);
   }
   const breaks = MARKS.filter((m) => m.kind === "break").length;
   const refound = new Set(placed.filter((p) => p.print && listed.has(p.print)).map((p) => p.print)).size;
