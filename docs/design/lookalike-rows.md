@@ -373,3 +373,30 @@ about 85% from 130%), not tried by hand.
 
 **Ways it could go:** build the smaller page as a setting in the info panel, with the slide as the
 default; or leave the slide as the only way and close this.
+
+### ⑫ On a laptop, does the share card cover the verse it shares, or the row of tools it opens from? · **fixed**
+
+**What it changes for a hafiz:** a reader who taps Share to send a verse to a teacher could not see
+that verse while the card was up. Closed to one page, the card stood in the window's corner over the
+start of the page's lines and the shared verse's last line; on two pages it stood over the page the
+verse is on. It also stood over the row of tools at the foot, hiding the last of them. Found walking
+the pitch on a laptop, 2026-10-10 (2:48, Share open).
+
+**Why:** the share card was the one card on a wide screen that kept its own corner at the window's
+foot. The roots list and the note already stand above the bars at the foot, move one page aside
+(⑩), and lie over the facing page on a spread; the share card did none of these.
+
+**Fixed, 2026-10-10:** the share card now stands as the other cards do. It sits above the bars at the
+foot, the same width as the roots list. Closed to one page, the page moves aside for it, as it does
+for the list. On two pages it lies over the page the verse is not on. Opening the note or the roots
+list closes the share card, so only one card stands beside the page at a time; if two ever did, the
+page would clear both.
+
+Checked by picture on a laptop, 1280 wide, in the pitch: 2:48 on one page with Share open (the page
+clear of the card, the whole row of tools and the verse's name below it in sight), and on two pages
+(the card over the facing page, the shared verse in full view). Tests: a laptop browser test for a
+right-hand and a left-hand page on one page that the card covers none of the page, which failed first
+(99 and 79 pixels covered); a laptop browser test that the card stands above the share button, which
+failed first (44 pixels over it); a laptop browser test on two pages, for a verse on each page, that
+the card covers none of the verse's page, which failed first for the left-hand page (143 pixels
+covered); unit tests of how two cards in the corner add up to one span.

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { type AppState } from "@hifth/core";
+import { type AppState, type LeafSide } from "@hifth/core";
 import { useT } from "../i18n";
 import { nativeShare, shareBase } from "../native-bridge";
 import { linksFor, shareShapeFromUrl, type SharePanel, type ShareShape } from "../share-links";
+import { leafStyle, useOverLeaf } from "./over-leaf";
+import { useSideCover, type CardSpan } from "./short-band";
 import styles from "./ShareSheet.module.css";
 
 interface ShareSheetProps {
@@ -26,6 +28,17 @@ interface ShareSheetProps {
    * nothing — so the page can lift the verse being shared above it.
    */
   onCover?: (top: number | null) => void;
+  /**
+   * Where the open card spans across the window, or null once it closes, so
+   * a single page on a laptop moves aside for it as it does for the roots list.
+   */
+  onSide?: (span: CardSpan | null) => void;
+  /**
+   * Which side of a spread the card lies over, or null for its corner. The app
+   * passes the leaf the verse is *not* on, as it does for the roots list: in
+   * the corner the card covered the very verse being shared (look-alike rows ⑫).
+   */
+  side?: LeafSide | null;
 }
 
 /** Wider than this, the tray is a small card in the corner, not a band across the page. */
@@ -59,6 +72,8 @@ export function ShareSheet({
   shape = SHAPE,
   pitch = false,
   onCover,
+  onSide,
+  side = null,
 }: ShareSheetProps): JSX.Element | null {
   const { t } = useT();
   const [feedback, setFeedback] = useState<Feedback>(null);
@@ -154,6 +169,10 @@ export function ShareSheet({
     };
   }, [open, onCover]);
   useEffect(() => () => onCover?.(null), [onCover]);
+  // On a laptop the card stands in the corner beside the page, where the roots
+  // list stands, and covered the start of the page's lines (look-alike rows ⑫).
+  const place = useOverLeaf(open, side);
+  useSideCover(open, side !== null, sheetRef, onSide);
 
   // A sheet that is open takes the focus, and Escape gives it back.
   useEffect(() => {
@@ -182,7 +201,14 @@ export function ShareSheet({
   const sheet =
     open &&
     createPortal(
-      <div ref={sheetRef} className={styles.sheet} role="dialog" aria-label={ariaLabel}>
+      <div
+        ref={sheetRef}
+        className={styles.sheet}
+        style={leafStyle(place, "content")}
+        data-side={side ?? undefined}
+        role="dialog"
+        aria-label={ariaLabel}
+      >
         <div className={styles.sheetHead}>
           <span className={styles.sheetTitle}>{ariaLabel}</span>
           <button type="button" className={styles.close} onClick={close} aria-label={t.close}>

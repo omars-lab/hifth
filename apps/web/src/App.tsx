@@ -122,7 +122,7 @@ import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
 import { DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, useMediaQuery } from "./useMediaQuery";
 import { useRoomForCards } from "./components/over-leaf";
-import type { CardSpan } from "./components/short-band";
+import { spanOfAll, type CardSpan } from "./components/short-band";
 import {
   PageStage,
   pageSpan,
@@ -327,6 +327,9 @@ export function App(): JSX.Element {
   // the page then moves clear of it rather than hide its line ends under it.
   const [listSide, setListSide] = useState<CardSpan | null>(null);
   const [noteSide, setNoteSide] = useState<CardSpan | null>(null);
+  const [shareSide, setShareSide] = useState<CardSpan | null>(null);
+  // Held, not rebuilt each render, so the page frames afresh only when a card moves.
+  const cornerSpan = useMemo(() => spanOfAll([listSide ?? noteSide, shareSide]), [listSide, noteSide, shareSide]);
   // Where the hop chips floating over the page's top corner end, so the lift
   // above a phone note stops the verse's first line beneath them.
   const [railBottom, setRailBottom] = useState<number | null>(null);
@@ -3200,8 +3203,9 @@ export function App(): JSX.Element {
       : undefined;
   // A list or the note in the corner beside one page, on a window wide enough
   // to stand it there; held upright, it lies across the page's foot instead,
-  // and covers that (⑩).
-  const sideCard = desktop && pageMode === "one" && !upright ? (listSide ?? noteSide) : null;
+  // and covers that (⑩). The share card opens over either, in the same corner
+  // (⑫), so the page clears whichever reaches further in.
+  const sideCard = desktop && pageMode === "one" && !upright ? cornerSpan : null;
   const railAt: "bar" | "tools" | null =
     !desktop || roomBeside ? null : railHome === "tools" && penAt === "strip" ? "tools" : "bar";
 
@@ -3931,6 +3935,8 @@ export function App(): JSX.Element {
           hasTrail={trail.length > 0}
           pitch={PITCH}
           onCover={setShareTop}
+          onSide={setShareSide}
+          side={sheetSide}
         />
         {selectedKey && (
           <DrawerTool

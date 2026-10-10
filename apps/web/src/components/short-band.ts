@@ -145,6 +145,17 @@ export function useSideCover(
 }
 
 /**
+ * The span of every card that is up, from the furthest left edge to the
+ * furthest right: the note, the roots list and the share card all stand in
+ * the same corner, so the page has to clear whichever reaches furthest in.
+ */
+export function spanOfAll(cards: readonly (CardSpan | null)[]): CardSpan | null {
+  const up = cards.filter((c): c is CardSpan => c !== null);
+  if (!up.length) return null;
+  return { left: Math.min(...up.map((c) => c.left)), right: Math.max(...up.map((c) => c.right)) };
+}
+
+/**
  * How much of the stage's left or right side a card covers: a card in the
  * stage's right half covers it from the card's left edge on, one in its left
  * half up to the card's right edge.
