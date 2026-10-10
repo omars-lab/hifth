@@ -134,7 +134,10 @@ test.describe("Hifth · the share card on a phone held sideways", () => {
       // buttons half showing from behind its edge. Moved to the corner the
       // card leaves free, the buttons kept a band over the page so tall that
       // the verse's last line ran off the foot of the page. They now ride the
-      // card's own top row, clear of its close button (plan item 38).
+      // card's own top row, clear of its close button (plan item 38). The card
+      // also ran up over the foot of the top bar, cutting its buttons; it now
+      // stands below the bar and keeps every one of its own buttons in sight
+      // (plan item 42).
       await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
       await page.goto(`/?lang=${lang}#/hafs-kfqc/2:48`);
       await page.getByRole("button", { name: shareName }).first().click();
@@ -157,9 +160,11 @@ test.describe("Hifth · the share card on a phone held sideways", () => {
             underChips: lines.filter((l) => chips.some((c) => hit(l, c))).length,
             chipsBehindCard: chips.filter((c) => hit(c, card) && !(c.top >= card.top && c.bottom <= card.bottom && c.left >= card.left && c.right <= card.right)).length,
             chipsOnCardButtons: chips.filter((c) => cardButtons.some((b) => hit(c, b))).length,
+            cardOverTopBar: Math.max(0, Math.round(document.querySelector("header[class*=chrome]")!.getBoundingClientRect().bottom - card.top)),
+            cardButtonsCut: cardButtons.filter((b) => b.top < card.top || b.bottom > card.bottom || b.bottom > innerHeight).length,
           };
         });
-      const whole = { lines: 2, underCard: 0, offTheFoot: 0, underChips: 0, chipsBehindCard: 0, chipsOnCardButtons: 0 };
+      const whole = { lines: 2, underCard: 0, offTheFoot: 0, underChips: 0, chipsBehindCard: 0, chipsOnCardButtons: 0, cardOverTopBar: 0, cardButtonsCut: 0 };
       await expect.poll(seen, { message: "every line of the verse shows, and every button shows whole", timeout: 5_000 }).toEqual(whole);
       // And stays so once the page has come to rest: a later move put the
       // verse's last line back off the foot after it had first shown whole.

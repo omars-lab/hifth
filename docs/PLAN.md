@@ -1430,7 +1430,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     Found on 2026-10-10 on a window that size (1133 by 744): the verse shows from top to
     bottom, but the card in the corner covers about 20 pixels of the page's right edge, which
     is where a line of the mus'haf begins, so the first letters of the verse's second line sit
-    under it. The page is drawn as wide as the window and does not move aside for the card.
+    under it. Measured again the same day, more carefully: the page does move aside, about 200
+    pixels, but at the size a link lands it is about 715 pixels wide and the room beside the
+    card is about 650, so the verse's first word is kept clear (the rule in
+    [look-alike rows ⑩](design/lookalike-rows.md)) and about 27 pixels of the second line's
+    first letters stay under the card. What should give is an open question,
+    [look-alike rows ⑯](design/lookalike-rows.md), waiting on ⑪ there.
 40. ~~**On an iPad held upright, the share card covered the verse it shares.**~~
     Found on 2026-10-10 walking the pitch on both iPad sizes held upright: the card stands in
     the window's lower corner, over the foot of the page, and the page was never told it was
@@ -1446,13 +1451,22 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     laptop; a phone on its side is too short for that and keeps the old place. Tested in the
     same share tests (no button outside the card under it), which failed first, 26 buttons
     covered in English and 24 in Arabic.
-42. **On a phone held sideways, the share card covers the tool row and the foot of the top bar.**
+42. ~~**On a phone held sideways, the share card covers the tool row and the foot of the top bar.**~~
     Found on 2026-10-10 on an 844 by 390 window: the card runs nearly the window's full
     height, so the tool row under the page (its look-up, share and bookmark buttons and the
     page ticks) and the lower edge of the top bar sit under it while it is open. The room
     between the two bars is only about 185 pixels, too little to stand the card inside it as
     an iPad does, so this needs a choice of shape (a shorter card, the card replacing the tool
-    row, or the bars stepping aside) rather than a quick fix.
+    row, or the bars stepping aside) rather than a quick fix. **Fixed the same day for the top
+    bar:** the card is only that tall in the private build, where the commentary is a fourth
+    thing a link can open; on a window that short its rows now sit closer and the "open with
+    it" label starts the row of choices, so the card stands below the top bar with every one of
+    its buttons in sight. Tested in the pitch's sideways phone tests (the card clear of the bar,
+    none of its own buttons cut), which failed first, the card 21 pixels over the bar, and the
+    public share tests check the same. **Left as it is:** the card still lies over half the
+    verse's tool row. The room between the bars cannot hold it, and what it covers are the
+    verse's other tools (bookmark, the outside site), which a reader does not need while sending
+    a link; the card closes with its own button.
 43. ~~**On an iPad mini held upright, the look-alike buttons stand on the start of the page's top lines.**~~
     Found on 2026-10-10 on a 744 by 1133 window, with no card open: the buttons at rest sit in
     the top corner over the first letters of the page's first two lines. The large iPad had

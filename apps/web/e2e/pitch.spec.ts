@@ -1642,6 +1642,30 @@ test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
     for (const foot of feet) expect(foot, "a line of the verse runs off the page's foot").toBeLessThanOrEqual(stageFoot + 1);
   });
 
+  test("on a phone held sideways, the share card stands below the top bar and keeps its own buttons in sight", async ({ page }) => {
+    // With the commentary among what a link can open, the card is a row
+    // taller than in the public app, and standing on the window's foot it ran
+    // up over the top bar, cutting the foot of its buttons (plan item 42).
+    await page.goto("/#/hafs-kfqc/2:48");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await page.keyboard.press("Escape");
+    await expect(sheet(page)).toBeHidden();
+    await page.getByRole("button", { name: "Share this ayah as a link" }).first().click();
+    const card = page.getByRole("dialog", { name: "Share this ayah as a link" });
+    await expect(card).toBeVisible();
+    await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const seen = await page.evaluate(() => {
+      const box = document.querySelector("[role=dialog]")!.getBoundingClientRect();
+      const bar = document.querySelector("header[class*=chrome]")!.getBoundingClientRect();
+      const own = [...document.querySelectorAll("[role=dialog] button")].map((b) => b.getBoundingClientRect());
+      return {
+        overTheBar: Math.max(0, Math.round(bar.bottom - box.top)),
+        cut: own.filter((b) => b.top < box.top || b.bottom > box.bottom || b.bottom > innerHeight).length,
+      };
+    });
+    expect(seen, "the card is clear of the top bar and none of its own buttons is cut").toEqual({ overTheBar: 0, cut: 0 });
+  });
+
   test("turning a phone sideways the moment a link opens a verse still lights the verse", async ({ page }) => {
     // The page glides to the verse a link names and lights it once it gets
     // there. Turned before it got there, the glide was cut short to fit the

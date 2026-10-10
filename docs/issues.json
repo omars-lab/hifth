@@ -3613,10 +3613,27 @@
         "file": "docs/PLAN.md",
         "item": "39"
       },
-      "status": "open",
+      "status": "blocked",
       "severity": "defect",
       "owner": "agent",
-      "note": "On a 1133 by 744 window (an iPad mini on its side) the share card in the corner covers about 20 pixels of the page's right edge, where the verse's second line begins. The verse is whole top to bottom; the page does not move aside for the card."
+      "blockedBy": [
+        "share-card-page-slightly-too-wide-ipad-mini-side"
+      ],
+      "note": "On a 1133 by 744 window (an iPad mini on its side) the page does move about 200 pixels aside for the share card, but at the size a link lands it is about 715 pixels wide and the room beside the card about 650, so the verse's first word stays clear and about 27 pixels of its second line's first letters sit under the card. What should give is lookalike-rows item 16."
+    },
+    {
+      "id": "share-card-page-slightly-too-wide-ipad-mini-side",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑯"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "roots-list-smaller-page-setting"
+      ],
+      "note": "When a page is only a few percent wider than the room beside the share card (an iPad mini on its side), should it be drawn that little smaller while the card is up, run past the far edge instead, have the card narrowed, or stay as it is? Waits on item 11, which asks whether drawing the page smaller is wanted at all."
     },
     {
       "id": "share-card-covers-verse-ipad-upright",
@@ -3648,10 +3665,11 @@
         "file": "docs/PLAN.md",
         "item": "42"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "On an 844 by 390 window the share card runs nearly the full height, over the tool row and the foot of the top bar. The room between the bars is about 185 pixels, too little to stand the card inside it, so it needs a choice of shape."
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "On an 844 by 390 window the share card in the private build ran up over the top bar's buttons. On a window that short its rows now sit closer and the label starts the row of choices, so it stands below the bar with all its buttons in sight. A pitch sideways phone test, which failed first (21 pixels over the bar); the public share tests check the same. The card still lies over half the verse's tool row, left as it is: the room between the bars cannot hold it, and the tools it covers are not needed while sending a link."
     },
     {
       "id": "lookalike-buttons-on-top-lines-ipad-mini-upright",

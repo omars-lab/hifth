@@ -200,8 +200,14 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   verse sits under the card, and the card stands above the row of tools, every tool in sight. ·
   ipad, `VIEWPORT=744x1133` · issues: `share-card-covers-verse-ipad-upright`,
   `share-card-covers-tool-row-ipad-mini-upright`
-- [ ] On a phone on its side with Share open, the tool row and the top bar stay in reach. ·
-  phone-side · issue: `share-card-covers-tool-row-sideways-phone`
+- [ ] On a phone on its side with Share open, in the private build (where the card is a row taller),
+  the card stands below the top bar with every one of its own buttons whole; it lies over half the
+  verse's tool row, on purpose (2:48, English and Arabic). · phone-side · issue:
+  `share-card-covers-tool-row-sideways-phone`
+- [ ] On an iPad mini on its side with Share open, the page moves aside for the card and the verse's
+  first word stands clear of it; until look-alike rows ⑯ is settled, the start of a second full
+  line may still sit under the card's edge (2:48). · `VIEWPORT=1133x744` · issue:
+  `share-card-covers-line-start-ipad-mini-side`
 - [ ] On an iPad mini held upright, no card open, the look-alike buttons stand clear of the page's
   top lines (2:48). · `VIEWPORT=744x1133` · issue: `lookalike-buttons-on-top-lines-ipad-mini-upright`
 - [ ] On an iPad mini held upright, with the verse's drawer up the look-alike buttons sit in its
