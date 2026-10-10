@@ -60,6 +60,12 @@
   min-inline-size: 0;
 }
 
+/* The look-alike chips at the row's far end: the column is theirs to the
+   window's edge, the hint still beside the tools. */
+.side[data-end] {
+  justify-self: stretch;
+}
+
 .tool {
   position: relative;
   display: inline-grid;

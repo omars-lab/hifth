@@ -80,6 +80,7 @@ All in `scripts/` next to this file; each one's header says the rest.
 | `make-gif.sh` | frames or a video → the looping GIF: 390 wide, 10 a second, 64 colours, the last frame held 1.5 s; refuses anything over 1 MB and says what to try. `--start <s>` skips the first moments, while a mock script is still setting the page up. Every clip plays at half speed, each frame shown 0.2 s (`--slow 2`; real speed was too quick to follow), an exact repeat kept as one longer frame, then packed with gifsicle; `pnpm gate:gifs` refuses any GIF under docs/ at another pace, unpacked, or over 1 MB. Pass a finished `.gif` as `--in` to re-time it (it keeps its width and colours) |
 | `frame-strip.sh` | chosen moments, numbered and labelled in a row — the folded picture under a clip, and the way to check it |
 | `side-by-side.sh` | two to four option clips in one GIF under their letters, playing in step; `--width 300` brings three phones under 1 MB |
+| `label-font.sh` | not run on its own: the two scripts above read it for the font file their labels are drawn in, since an ImageMagick with no font list of its own refuses every label ("unable to read font") |
 
 ## Putting clips in an options note
 

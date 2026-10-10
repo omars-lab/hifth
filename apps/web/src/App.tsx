@@ -217,6 +217,7 @@ import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
+import { rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
 import { applyPen, rememberPen, savedPen, type Pen } from "./pen";
 import { usePassageRows } from "./passage-rows";
@@ -1172,6 +1173,14 @@ export function App(): JSX.Element {
   // While the margin is still unmeasured nothing is drawn, so the rail never
   // flashes over a book too wide for it.
   const penAt: PenHome | null = penHome !== "side" ? penHome : sideRoom === null ? null : sideRoom ? "side" : "bottom";
+  // Where the look-alike chips go when a magnified page leaves no desk beside
+  // it (rail-home.ts): the bottom row by default, or the tool row's end.
+  const [railHome, setRailHome] = useState<RailHome>(() => savedRailHome());
+  const chooseRailHome = useCallback((home: RailHome) => {
+    rememberRailHome(home);
+    setRailHome(home);
+  }, []);
+  const [deskRoom, setDeskRoom] = useState(true);
   // Full screen: every bar hidden, the page alone (the same note, all options).
   const [full, setFull] = useState(false);
   // The verse a hold opened the small menu on (option C), and where it is.
@@ -3136,7 +3145,7 @@ export function App(): JSX.Element {
 
   /* The look-alike chips. One rail, placed by whoever renders it: the stage's
      corner on a phone, the desk beside the live page above the breakpoint. */
-  const hopRail = (beside?: "left" | "right") => (
+  const hopRail = (beside?: "left" | "right", home?: "bar" | "tools") => (
     <HopRail
       chips={railChips}
       openDirection={openDirection}
@@ -3146,13 +3155,18 @@ export function App(): JSX.Element {
       // The pitch note for a left-leaf verse lands on the right, over the
       // rail's corner; the chips cross to the left while it is up. Beside the
       // book there is no corner to share: the note rises over the other leaf.
-      crossed={!beside && COMMENTARY && commentaryOpen && hasCommentary && sheetSide === "right"}
+      crossed={!beside && !home && COMMENTARY && commentaryOpen && hasCommentary && sheetSide === "right"}
       onBand={setRailBottom}
       beside={beside}
-      seat={beside || noteTall ? null : highestTop(coverTop, shareTop, listTop)}
-      away={!beside && noteTall}
+      seat={beside || home || noteTall ? null : highestTop(coverTop, shareTop, listTop)}
+      away={!beside && !home && noteTall}
+      home={home}
     />
   );
+  // No desk beside a page magnified to fill the window: the chips go to a bar,
+  // never over the paper (docs/design/lookalike-rows.md, ⑧).
+  const railAt: "bar" | "tools" | null =
+    !desktop || deskRoom ? null : railHome === "tools" && penAt === "strip" ? "tools" : "bar";
 
   return (
     // The chrome reads in the UI language's direction — every offset in the
@@ -3297,7 +3311,16 @@ export function App(): JSX.Element {
           argue with the page. */}
       {/* Its own row above the book, not floated over it: floated, it sat on
           the page's first line. */}
-      {resolver && desktop && penAt === "strip" && <PageToolbar tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+      {resolver && desktop && penAt === "strip" && (
+        <PageToolbar
+          tool={tool}
+          locked={locked}
+          onTool={chooseTool}
+          pen={pen}
+          onPen={choosePen}
+          end={railAt === "tools" ? hopRail(undefined, "tools") : undefined}
+        />
+      )}
       {resolver && desktop && penAt === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
       {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
@@ -3343,7 +3366,8 @@ export function App(): JSX.Element {
                  gesture. */
               /* The look-alike chips, on the desk just outside the live page's
                  outer edge rather than out at the window's corner. */
-              beside={(side) => hopRail(side)}
+              beside={deskRoom ? (side) => hopRail(side) : undefined}
+              onDeskRoom={setDeskRoom}
               // By the chosen verse's page, the side its note does not cover.
               besideSide={sheetSide === "left" ? "right" : sheetSide === "right" ? "left" : undefined}
               edgeRails={
@@ -3676,6 +3700,8 @@ export function App(): JSX.Element {
             onScopeLook={chooseScopeLook}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
+            railHome={desktop ? railHome : undefined}
+            onRailHome={desktop ? chooseRailHome : undefined}
             spread={desktop}
             onShowTips={() => {
               setColophonOpen(false);
@@ -3772,6 +3798,7 @@ export function App(): JSX.Element {
         {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
         {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+        {railAt === "bar" && hopRail(undefined, "bar")}
         <TrailBeads
           trail={trail}
           currentKey={selectedKey}

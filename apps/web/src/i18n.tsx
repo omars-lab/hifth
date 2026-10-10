@@ -820,6 +820,10 @@ export interface Strings {
   penHomeBottom: string;
   penHomeSide: string;
   penHomeNote: string;
+  railHomeTitle: string;
+  railHomeBar: string;
+  railHomeTools: string;
+  railHomeNote: string;
   scopeLookTitle: string;
   scopeLookSide: string;
   scopeLookLines: string;
@@ -1503,6 +1507,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     penHomeBottom: m.penHomeBottom,
     penHomeSide: m.penHomeSide,
     penHomeNote: m.penHomeNote,
+    railHomeTitle: m.railHomeTitle,
+    railHomeBar: m.railHomeBar,
+    railHomeTools: m.railHomeTools,
+    railHomeNote: m.railHomeNote,
     scopeLookTitle: m.scopeLookTitle,
     scopeLookSide: m.scopeLookSide,
     scopeLookLines: m.scopeLookLines,

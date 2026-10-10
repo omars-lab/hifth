@@ -356,6 +356,10 @@ export interface Catalog {
   readonly "railDirection.loop": string;
   readonly "railDirection.root": string;
   readonly railGroup: string;
+  readonly railHomeBar: string;
+  readonly railHomeNote: string;
+  readonly railHomeTitle: string;
+  readonly railHomeTools: string;
   readonly railSummary: (d: { readonly surah: string | number; readonly n: number; readonly linksText: string | number }) => string;
   readonly rangeAria: (d: { readonly title: string | number; readonly n: number; readonly linksText: string | number }) => string;
   readonly rangeEmpty: string;

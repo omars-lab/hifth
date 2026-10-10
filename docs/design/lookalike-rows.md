@@ -242,3 +242,30 @@ Tests: unit tests on the note's list (a passage row says which verse is most ali
 shares; a loose row says it is alike but not word for word; a book row keeps only its own line), which
 failed first; and a browser test that opens both demo notes and checks every row has a line under its name
 and that each picture sits under its captions, clear of the arrow. Both halves failed first.
+
+### ⑧ When a link or a hop fills an upright iPad with the page, do the look-alike buttons cover its words? · **fixed**
+
+**What it changes for a hafiz:** a link to a verse, and a hop to a look-alike, both open the page
+magnified so the verse is easy to read. On a large iPad held upright that magnified page is as wide as
+the screen, so the desk the buttons stand on beside the page is gone. The buttons then reached in over
+the paper and stood on the first letters of the top line, the line a hafiz is reading after a hop.
+Found walking the pitch on an iPad in Firefox, 2026-10-10; it happened in every browser, with or
+without a note open, in the public build as much as the pitch build.
+
+**Fixed, 2026-10-10:** when the desk beside the page is too narrow for a button, the buttons leave the
+page for a row of their own. Built two ways, both kept, as a choice in the info panel:
+
+- **Bottom row** (the default): beside the trail of verses the reader came from, at the foot of the
+  screen. It sits where the thumb already is, and the card a button opens rises from there.
+- **Tool row**: at the end of the row of tools above the page. Nearer the top line, but further from
+  the hand; when the reader keeps the tools somewhere other than that row, the buttons go to the bottom
+  row instead.
+
+When the page is not magnified, or the iPad is on its side and shows two pages, the desk is wide enough
+and the buttons stand beside the page as before.
+
+Checked by picture on the upright iPad, after a link to 2:48 and after a hop to 2:122, in English and
+in Arabic, in both homes, and on the iPad on its side; and in Firefox on the upright iPad after the
+link, the same. Tests: a browser test on the upright iPad, after
+a link and after a hop, that no button sits on the page, which failed first; a laptop-size test that
+the buttons go to each row as the reader chose; and a unit test of the choice and the desk's width.

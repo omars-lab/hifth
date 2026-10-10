@@ -2129,18 +2129,45 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
     });
   }
 
-  test("with no desk either side of the book, the chips stay on the screen", async ({ page }) => {
-    // Tall and narrow: the two pages fill the width, so there is no desk to sit
-    // in. The chips fall back to the page's own top corner, all of them visible.
+  for (const { home, row } of [
+    { home: "bar", row: (page: Page) => page.locator("footer") },
+    { home: "tools", row: (page: Page) => page.getByRole("toolbar") },
+  ] as const) {
+    test(`with no desk either side of the book, the chips go to the ${home === "bar" ? "bottom" : "tool"} row, off the page`, async ({ page }) => {
+      // Tall and narrow: the page fills the width, so there is no desk to sit
+      // in. The chips used to reach in over the paper and stand on the top
+      // line's first letters; they now leave the page for a row of their own,
+      // the one the reader chose in the info panel (the bottom row unless they
+      // chose otherwise).
+      if (home === "tools") await page.addInitScript(() => localStorage.setItem("hifth.rail.home.v1", "tools"));
+      await page.setViewportSize({ width: 1024, height: 1366 });
+      await page.goto("/#/hafs-kfqc/2:49");
+      await expect(pageSvg(page, 8)).toBeVisible({ timeout: 20_000 });
+      await expect(row(page).locator("button[data-direction]").first()).toBeVisible();
+      const chips = await boxOf(rail(page));
+      const open = await boxOf(book(page));
+      expect(chips.x).toBeGreaterThanOrEqual(0);
+      expect(chips.x + chips.width).toBeLessThanOrEqual(1024);
+      const overlaps =
+        chips.x < open.x + open.width && open.x < chips.x + chips.width &&
+        chips.y < open.y + open.height && open.y < chips.y + chips.height;
+      expect(overlaps, `the chips ${JSON.stringify(chips)} on the book ${JSON.stringify(open)}`).toBe(false);
+    });
+  }
+
+  test("the info panel moves the chips between the two rows at once, and remembers the choice", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 1366 });
     await page.goto("/#/hafs-kfqc/2:49");
     await expect(pageSvg(page, 8)).toBeVisible({ timeout: 20_000 });
-    await expect(rail(page)).toBeVisible();
-    const chips = await boxOf(rail(page));
-    const open = await boxOf(book(page));
-    expect(chips.x).toBeGreaterThanOrEqual(0);
-    expect(chips.x + chips.width).toBeLessThanOrEqual(1024);
-    expect(chips.x).toBeGreaterThanOrEqual(open.x);
-    expect(chips.x + chips.width).toBeLessThanOrEqual(open.x + open.width);
+    await expect(page.locator("footer").locator("button[data-direction]").first()).toBeVisible();
+    await page.getByRole("button", { name: /عن حِفظ/ }).click();
+    const choices = page.getByRole("dialog").locator('[aria-labelledby="colophon-rail-home"]').getByRole("radio");
+    await expect(choices).toHaveCount(2);
+    await choices.and(page.locator('[data-rail-home-choice="tools"]')).click();
+    await expect(choices.and(page.locator('[data-rail-home-choice="tools"]'))).toHaveAttribute("aria-checked", "true");
+    expect(await page.evaluate(() => localStorage.getItem("hifth.rail.home.v1"))).toBe("tools");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("toolbar").locator("button[data-direction]").first()).toBeVisible();
+    await expect(page.locator("footer").locator("button[data-direction]")).toHaveCount(0);
   });
 });

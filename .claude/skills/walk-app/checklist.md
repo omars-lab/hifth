@@ -171,8 +171,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   behind it, and "Show less" puts them back on the note's top edge (2:48 in the pitch build). · phone ·
   issue: `lookalike-chips-left-behind-grown-note`
 - [ ] The look-alike buttons cover no words, no close button, and are not hidden by a note. ·
-  phone, phone-side, desktop · issues: `lookalike-chips-cover-lifted-page`,
-  `lookalike-chips-sideways-cover-close`, `chips-under-facing-note`
+  phone, phone-side, desktop, ipad (after a link and after a hop, when the page fills the width) ·
+  issues: `lookalike-chips-cover-lifted-page`, `lookalike-chips-sideways-cover-close`,
+  `chips-under-facing-note`, `lookalike-chips-cover-filled-ipad`
 - [ ] A look-alike row that names a whole passage says how the two are alike and opens onto the verse
   inside it that matches (try 15:30's later surahs: the passage in surah 38 opens onto 38:73, not
   its first verse; 23:7 opens onto 70:31). · desktop (Firefox), phone, the iPad app · issue:

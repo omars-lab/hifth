@@ -8,6 +8,7 @@
 # --at picks each moment by its time in seconds from the start; --labels gives
 # one label per moment, and each is numbered in order ("1  before").
 set -euo pipefail
+. "$(dirname "$0")/label-font.sh"
 
 IN="" AT="" LABELS="" OUT="" WIDTH=1400
 while [ $# -gt 0 ]; do
@@ -41,6 +42,6 @@ for i in "${!times[@]}"; do
   montage+=(-label "$((i + 1))  ${labels[$i]}" "$work/$(printf %05d "$n").png")
 done
 mkdir -p "$(dirname "$OUT")"
-magick montage "${montage[@]}" -tile "${#times[@]}x1" -geometry +8+0 -pointsize 18 -background "#faf7f0" "$work/strip.png"
+magick montage ${LABEL_FONT[@]+"${LABEL_FONT[@]}"} "${montage[@]}" -tile "${#times[@]}x1" -geometry +8+0 -pointsize 18 -background "#faf7f0" "$work/strip.png"
 magick "$work/strip.png" -resize "${WIDTH}x>" -colors 128 -depth 8 "$OUT"
 echo "ev=strip out=$OUT bytes=$(wc -c < "$OUT" | tr -d ' ') stills=${#times[@]}"

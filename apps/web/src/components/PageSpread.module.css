@@ -127,18 +127,17 @@
  * of the window's height and the page's shape, and a second copy of that sum
  * would drift from the first.
  *
- * Named as a container so the chips can tell when there is no desk to sit in —
- * a tall, narrow window where the pages fill the width — and fall back to the
- * page's corner (HopRail.module.css).
+ * Measured by PageSpread, so the app can tell when there is no desk to sit in —
+ * a page magnified to fill the window, or a tall, narrow window the pages fill
+ * — and send the chips to a bar rather than over the paper (rail-home.ts).
  */
 .desk {
   position: relative;
   flex: 1 1 0;
   min-inline-size: 0;
-  container: desk / inline-size;
-  /* Above the book, so that with no desk to stand in the chips still draw over
-     the page they fall back onto; and transparent to the pointer, so the box
-     never catches a drag meant for a magnified page lying under it. */
+  /* Above the book, so a chip's open card is never drawn under a magnified
+     page; and transparent to the pointer, so the box never catches a drag
+     meant for a magnified page lying under it. */
   z-index: var(--z-chrome);
   pointer-events: none;
 }

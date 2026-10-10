@@ -15,6 +15,7 @@
 # than doubled at 0.1 s, the file is packed with gifsicle, and the end is held
 # 1.5 s like a single clip's.
 set -euo pipefail
+. "$(dirname "$0")/label-font.sh"
 
 OUT="" MAX_BYTES=1000000 WIDTH="" letters=() clips=()
 while [ $# -gt 0 ]; do
@@ -43,7 +44,7 @@ done
 inputs=() graph="" stacked=""
 for i in "${!clips[@]}"; do
   w=${WIDTH:-$(probe stream=width "${clips[$i]}")}
-  magick -size "${w}x44" xc:"#faf7f0" -fill "#14181c" -pointsize 28 -gravity center \
+  magick -size "${w}x44" xc:"#faf7f0" ${LABEL_FONT[@]+"${LABEL_FONT[@]}"} -fill "#14181c" -pointsize 28 -gravity center \
     -annotate +0+0 "${letters[$i]}" "PNG24:$work/h$i.png"
   d=$(probe format=duration "${clips[$i]}")
   rest=$(awk -v a="$longest" -v b="$d" 'BEGIN { printf "%.2f", a - b }')

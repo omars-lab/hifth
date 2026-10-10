@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useT } from "../i18n";
 import type { Pen } from "../pen";
 import type { PageTool } from "./PageStage";
@@ -110,6 +110,12 @@ interface PageToolbarProps {
   /** The highlighter's pen, offered beside the tools while the highlighter is on. */
   pen: Pen;
   onPen: (pen: Pen) => void;
+  /**
+   * Held at the far end of the row: the look-alike chips, when a magnified
+   * page leaves no desk beside it and the reader keeps them up here
+   * (rail-home.ts).
+   */
+  end?: ReactNode;
 }
 
 /**
@@ -130,7 +136,7 @@ interface PageToolbarProps {
  * Hidden below the desktop breakpoint by CSS, like `DesktopChrome`: a phone
  * layout for the bar is the plan's step 5 and a decision of its own.
  */
-export function PageToolbar({ tool, locked, onTool, pen, onPen }: PageToolbarProps): JSX.Element {
+export function PageToolbar({ tool, locked, onTool, pen, onPen, end }: PageToolbarProps): JSX.Element {
   const { t } = useT();
   const press = useToolPress(tool, onTool);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
@@ -192,11 +198,12 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen }: PageToolbarPro
           <PenPicker pen={pen} onPen={onPen} />
         </div>
       )}
-      <div className={styles.side}>
+      <div className={styles.side} data-end={end ? "" : undefined}>
         {/* For the eye. The change is announced once, by App, through the one
             polite announcer the app has — a second live region here would talk
             over it. */}
         <span className={styles.name}>{locked ? t.toolLockedHint(nameOf(tool)) : toolHint(t, tool)}</span>
+        {end}
       </div>
     </div>
   );

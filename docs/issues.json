@@ -3501,6 +3501,18 @@
       "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
+      "id": "lookalike-chips-cover-filled-ipad",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑧"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On an upright large iPad, a link or a hop magnifies the page to the screen's width, leaving no desk beside it, and the look-alike buttons stood on the top line's first letters. When the desk is too narrow they now leave the page for the bottom row (the default) or the tool row, an info-panel choice. A browser test after a link and after a hop failed first.",
+      "closedBy": "apps/web/e2e/ipad.spec.ts"
+    },
+    {
       "id": "app-walk-whole-demo-path",
       "source": {
         "file": "docs/design/native-shell.md",
