@@ -83,7 +83,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Follow a demo note's verse link (18:60 to 18:65): the note it opens has its slanted words too.
   A note the book shares across verses (18:60–82) breaks into the same paragraphs under each of
   them; open two of its verses, not only the first. Where the print starts a new paragraph, the
-  panel does too. · laptop · test: `e2e/pitch.spec.ts` ("a note the book shares across verses
+  panel does too. In the Mac and iPad apps the link stays in the app, and the note's back button
+  returns to 18:60 · laptop, phone, ipad, Mac app, iPad app (`make app-probe EVAL=…` clicks the link from inside
+  the page) · test: `e2e/pitch.spec.ts` ("a note the book shares across verses
   breaks into the same paragraphs") · issue: `pitch-commentary-differs-from-print`
 - [ ] Open 2:255's note and count its paragraphs against the printed page: ten, each starting
   where the print sets a line in, none run on after a full stop (the short line that opens the
