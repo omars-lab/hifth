@@ -5,6 +5,7 @@ import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 import { CARD_EDGE_KEY } from "../card-edge";
 import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
+import { RIBBON_LENGTH_KEY } from "../ribbon-length";
 import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
 
 /*
@@ -152,6 +153,21 @@ describe("what a look-alike list does with a passage and a verse inside it, in s
     expect(way("both")).toHaveAttribute("aria-checked", "false");
     expect(localStorage.getItem(PASSAGE_ROWS_KEY)).toBe("group");
     localStorage.removeItem(PASSAGE_ROWS_KEY);
+  });
+});
+
+describe("how far a bookmark's ribbon hangs, in settings", () => {
+  it("offers short and long, short checked, and keeps the one picked", () => {
+    localStorage.removeItem(RIBBON_LENGTH_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-ribbon-length="${c}"]`)!;
+    expect(way("short")).toHaveAttribute("aria-checked", "true");
+    expect(way("long")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("long"));
+    expect(way("long")).toHaveAttribute("aria-checked", "true");
+    expect(way("short")).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem(RIBBON_LENGTH_KEY)).toBe("long");
+    localStorage.removeItem(RIBBON_LENGTH_KEY);
   });
 });
 

@@ -259,3 +259,14 @@ Assumptions made while building it, to be corrected on sight:
   Nothing is asked first; instead a line at the foot of the screen says what was lifted and
   offers **Undo** for a few seconds. A second bookmark on a page that is already folded comes
   from the first one's drawer ("Add another here"), since the corner itself now unfolds.
+
+## What changed (2026-10-10)
+
+- **A ribbon is short now, and stops above the first line.** Walking the live site, the long
+  ribbon with its name written along it hung over the first words of the first three lines, the
+  words a hafiz reads to find their place. The short ribbon is the default; its name is still its
+  tooltip and what a screen reader says, and opening it shows the name in its drawer.
+- **The long ribbon stays as a setting** in the info panel, for a reader who would rather see the
+  names on the page.
+- **It still covers the small juz label** in the head margin. The page bar shows the juz too, so
+  that is accepted.

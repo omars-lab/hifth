@@ -380,6 +380,10 @@ export interface Catalog {
   readonly relatedListTitle: string;
   readonly relatedMore: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly relatedVerses: string;
+  readonly ribbonLengthLong: string;
+  readonly ribbonLengthNote: string;
+  readonly ribbonLengthShort: string;
+  readonly ribbonLengthTitle: string;
   readonly rootsAria: (d: { readonly countText: string | number }) => string;
   readonly rootsCredit: string;
   readonly rootsEmpty: string;

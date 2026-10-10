@@ -1,6 +1,7 @@
 import { useEffect, useRef, type MouseEvent } from "react";
 import type { Bookmark } from "@hifth/core";
 import { useT } from "../i18n";
+import { useRibbonLength } from "../ribbon-length";
 import styles from "./BookmarkRibbons.module.css";
 
 interface BookmarkRibbonsProps {
@@ -49,6 +50,7 @@ export function BookmarkRibbons({
   aside = false,
 }: BookmarkRibbonsProps): JSX.Element {
   const { t } = useT();
+  const ribbonLength = useRibbonLength();
   const rootRef = useRef<HTMLDivElement>(null);
   const act = useRef<(button: HTMLButtonElement) => void>(() => {});
   // A page that holds a bookmark keeps its corner folded down until the reader
@@ -95,7 +97,9 @@ export function BookmarkRibbons({
   };
 
   return (
-    <div ref={rootRef} className={styles.overlay} data-bookmark-overlay="" data-aside={aside ? "" : undefined}>
+    <div ref={rootRef} className={styles.overlay} data-bookmark-overlay="" data-aside={aside ? "" : undefined}
+      data-ribbon={ribbonLength}
+    >
       {seam && <span className={styles.seam} role="img" aria-label={t.bmSeam} title={t.bmSeam} data-bookmark-seam="" />}
       <button
         type="button"
@@ -122,6 +126,7 @@ export function BookmarkRibbons({
               data-bookmark={b.id}
               onClick={onKeyClick}
               aria-label={t.bmRibbon(b.name)}
+              title={b.name}
             >
               <span className={styles.name}>{b.name}</span>
             </button>

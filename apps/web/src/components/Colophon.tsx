@@ -13,6 +13,7 @@ import { PITCH } from "../pitch/pitch";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
 import { LOOKALIKE_COMPARES, rememberLookalikeCompare, useLookalikeCompare } from "../lookalike-compare";
 import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-rows";
+import { RIBBON_LENGTHS, rememberRibbonLength, useRibbonLength } from "../ribbon-length";
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { PEN_HOMES, type PenHome } from "../pen-home";
@@ -234,6 +235,7 @@ export function Colophon({
   const longVerse = useLongVerse();
   const lookalikeCompare = useLookalikeCompare();
   const passageRows = usePassageRows();
+  const ribbonLength = useRibbonLength();
   const lookalikePreview = useLookalikePreview();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -605,6 +607,30 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.passageRowsNote}</p>
+        </section>
+
+        {/* How long a bookmark's ribbon hangs (docs/PLAN.md, item 49): short,
+            above the first line, is the default; the long one stays. */}
+        <section className={styles.block} aria-labelledby="colophon-ribbon-length">
+          <h3 className={styles.subhead} id="colophon-ribbon-length">
+            {t.ribbonLengthTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-ribbon-length">
+            {RIBBON_LENGTHS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={ribbonLength === choice}
+                data-ribbon-length={choice}
+                onClick={() => rememberRibbonLength(choice)}
+              >
+                {choice === "short" ? t.ribbonLengthShort : t.ribbonLengthLong}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.ribbonLengthNote}</p>
         </section>
 
         {/* What a closed look-alike row shows of the words the pair shares

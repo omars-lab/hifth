@@ -1515,6 +1515,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     now lies across the bound edge, half on the paper, as it already did on an open book. A
     phone test on a page bound on each side checks the ribbon is clear of the writing; it
     failed first on the left-bound page.
+49. ~~**A dropped bookmark's ribbon covered the first words of the page.**~~
+    Found on 2026-10-10 walking the live site on a phone and a laptop: a bookmark's ribbon
+    hung from the head of the page well down over the starts of the first three lines, so the
+    words a hafiz looks at to find their place were the ones it hid. **Fixed the same day,
+    built two ways:** the ribbon is now short by default and stops in the margin above the
+    first line, with its name kept as its tooltip and spoken name; the long ribbon with its
+    name written along it stays as a setting in the info panel. It still covers the small juz
+    label in the head margin, which the page bar repeats. A phone test on a page bound on each
+    side checks the ribbon ends above the writing; it failed first on both.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

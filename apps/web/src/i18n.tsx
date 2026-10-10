@@ -813,6 +813,10 @@ export interface Strings {
   passageRowsGroup: string;
   passageRowsDrop: string;
   passageRowsNote: string;
+  ribbonLengthTitle: string;
+  ribbonLengthShort: string;
+  ribbonLengthLong: string;
+  ribbonLengthNote: string;
   lookalikePreviewTitle: string;
   lookalikePreviewPicture: string;
   lookalikePreviewCount: string;
@@ -1510,6 +1514,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     passageRowsGroup: m.passageRowsGroup,
     passageRowsDrop: m.passageRowsDrop,
     passageRowsNote: m.passageRowsNote,
+    ribbonLengthTitle: m.ribbonLengthTitle,
+    ribbonLengthShort: m.ribbonLengthShort,
+    ribbonLengthLong: m.ribbonLengthLong,
+    ribbonLengthNote: m.ribbonLengthNote,
     lookalikePreviewTitle: m.lookalikePreviewTitle,
     lookalikePreviewPicture: m.lookalikePreviewPicture,
     lookalikePreviewCount: m.lookalikePreviewCount,
