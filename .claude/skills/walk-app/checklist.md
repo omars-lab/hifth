@@ -102,6 +102,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] In a note, a bare verse number that carries a list on after a comma is a link, also when a colon,
   a bracket or "of this surah" follows it; one after a semicolon stays plain text, as the book puts
   a semicolon between surahs · laptop · test: `packages/core/src/citations.test.ts`
+- [ ] A reference with a trailing "c" ("2:48c", the book's way of saying "the note on 2:48") is a
+  link, and a tap lands on that verse with its note open, not on the bare page (3:91's note, checked
+  2026-10-10). · laptop, iPad app · test: `packages/core/src/citations.test.ts`
 - [ ] At the foot of 18:60's note, the related verses show each cited run as one card
   (in the shape "9:4–9:7") beside the note's references to other surahs, not eight cards of one run. ·
   any · issue: `related-verses-ranges-crowd-out`
