@@ -14,11 +14,11 @@ import { dropStrayBlocks } from "./strays.mjs";
 
 /**
  * `blocks` is this verse's joined paragraphs, `previous` the previous verse's
- * before this step. Returns the finished paragraphs, the ones to hand on as
+ * before this step; `holders` names the verses that share a paragraph. Returns the finished paragraphs, the ones to hand on as
  * `previous`, and which hand-read entries matched.
  */
-export function finishNote(verse, blocks, previous, { marks, joins, words, ends = [], tails = [] }) {
-  const restored = restoreBreaks(verse, blocks, marks);
+export function finishNote(verse, blocks, previous, { marks, joins, words, ends = [], tails = [], holders }) {
+  const restored = restoreBreaks(verse, blocks, marks, holders);
   const split = joinSplits(verse, dropStrayBlocks(restored.blocks, previous), words, joins);
   const whole = restoreCutTail(split.blocks, tails);
   const closed = restoreLastStop(whole.blocks, ends);

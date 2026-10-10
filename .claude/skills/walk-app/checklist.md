@@ -80,6 +80,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   where a slant starts or ends, and a slanted run next to a cited verse keeps the verse a link.
   · laptop, and the iPad app after `make app-web` · test: `e2e/pitch.spec.ts` ("the demo's notes
   set the book's italics")
+- [ ] Follow a demo note's verse link (18:60 to 18:65): the note it opens has its slanted words too.
+  A note the book shares across verses (18:60–82) breaks into the same paragraphs under each of
+  them; open two of its verses, not only the first. Where the print starts a new paragraph, the
+  panel does too. · laptop · test: `e2e/pitch.spec.ts` ("a note the book shares across verses
+  breaks into the same paragraphs") · issue: `pitch-paragraphs-run-together-stop-kept`
 - [ ] A note longer than its card fades at its foot, not cut through a line, until its end is
   reached; on a phone, also once the card is pulled up. · any · issue: `note-card-no-more-below-cue`
 - [ ] The commentators' initials can be tapped and say whose comment it is. · phone · issues:

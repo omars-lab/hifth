@@ -404,7 +404,11 @@ function buildSurah(surah) {
     for (const o of src.orphans ?? [])
       if (!/^verse_dup/.test(o.reason ?? ""))
         console.log(`${surah} ${orphanPrint(o.text ?? "")} ${o.reason} page ${o.page} ${(o.text ?? "").length} chars`);
-  let previous = [];
+  // Each verse's paragraphs as captured and cleaned, before the hand-read
+  // lists are applied, and which verses hold each one: a note the book shares
+  // across verses is filed under every one of them.
+  const cleaned = [];
+  const holding = new Map();
   for (const entry of src.entries) {
     const ref = parseRef(entry.key);
     if (!ref) continue;
@@ -419,12 +423,19 @@ function buildSurah(surah) {
         .map(dropRaisedEndings)
         .filter(Boolean),
     );
+    cleaned.push({ entry, ref, joined });
+    for (const b of joined) holding.set(b, [...(holding.get(b) ?? []), `${s}:${a}`]);
+  }
+  let previous = [];
+  for (const { entry, ref, joined } of cleaned) {
+    const [s, a] = ref;
     const done = finishNote(`${s}:${a}`, joined, previous, {
       marks: MARKS,
       joins: JOINS,
       words: WORDS,
       ends: ENDS,
       tails: TAILS,
+      holders: (b) => holding.get(b) ?? [],
     });
     for (const i of done.usedMarks) usedMarks.add(i);
     for (const i of done.usedJoins) usedJoins.add(i);

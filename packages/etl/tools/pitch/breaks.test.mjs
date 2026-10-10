@@ -29,6 +29,28 @@ describe("where the capture lost a full stop the printed page has", () => {
     expect(used.size).toBe(0);
   });
 
+  it("puts a shared note's break back under every verse that holds the note", () => {
+    const seam = at(NOTE, "for the water");
+    const marks = [{ verse: "9:9", print: seamPrint(NOTE, seam.at), kind: "break" }];
+    const holders = (block) => (block === NOTE ? ["9:9", "9:10", "9:11"] : []);
+    const { blocks, used } = restoreBreaks("9:11", [NOTE, "Their own words."], marks, holders);
+    expect(blocks).toEqual([
+      "The travellers rested by the well on the third day and gave thanks for the water.",
+      "The next morning they set out again.",
+      "Their own words.",
+    ]);
+    expect(used).toEqual(new Set([0]));
+    // Another verse's own note is not reached through the shared one.
+    expect(restoreBreaks("9:11", ["Their own words."], marks, holders).blocks).toEqual(["Their own words."]);
+  });
+
+  it("refuses a spot in a shared note listed under two of its verses", () => {
+    const print = seamPrint(NOTE, at(NOTE, "for the water").at);
+    const marks = ["9:9", "9:10"].map((verse) => ({ verse, print, kind: "break" }));
+    const holders = () => ["9:9", "9:10"];
+    expect(() => restoreBreaks("9:10", [NOTE], marks, holders)).toThrow(/twice, under 9:9 and 9:10/);
+  });
+
   it("puts back the question mark the print ends on, and nothing where the stop survived", () => {
     const asked = "Who will carry the water up the hill Nobody answered.";
     const kept = "The well was dry. The travellers went on.";

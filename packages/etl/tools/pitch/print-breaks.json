@@ -108,12 +108,6 @@
       "page": "chapter-6_p06"
     },
     {
-      "verse": "6:13",
-      "print": "d34458c3c79c",
-      "kind": "break",
-      "page": "chapter-6_p06"
-    },
-    {
       "verse": "6:52",
       "print": "a0977802d38a",
       "kind": "break",
@@ -121,12 +115,6 @@
     },
     {
       "verse": "7:38",
-      "print": "cb1da65b2a26",
-      "kind": "break",
-      "page": "chapter-7_p12"
-    },
-    {
-      "verse": "7:39",
       "print": "cb1da65b2a26",
       "kind": "break",
       "page": "chapter-7_p12"
@@ -194,13 +182,6 @@
       "page": "chapter-15_p05"
     },
     {
-      "verse": "15:40",
-      "print": "614ecf435654",
-      "kind": "break",
-      "stop": "?",
-      "page": "chapter-15_p05"
-    },
-    {
       "verse": "17:23",
       "print": "bea1e56725bc",
       "kind": "break",
@@ -249,10 +230,59 @@
       "page": "chapter-45_p05"
     },
     {
-      "verse": "45:29",
-      "print": "598fae60e8a7",
+      "verse": "18:60",
+      "print": "2a0fee3362ec",
       "kind": "break",
-      "page": "chapter-45_p05"
+      "stop": "",
+      "page": "page_0442"
+    },
+    {
+      "verse": "18:60",
+      "print": "945e8dfdf6cc",
+      "kind": "break",
+      "stop": "",
+      "page": "page_0442"
+    },
+    {
+      "verse": "18:60",
+      "print": "2d3cf135c383",
+      "kind": "break",
+      "stop": "",
+      "page": "page_0442"
+    },
+    {
+      "verse": "18:60",
+      "print": "a8a6704e5fde",
+      "kind": "break",
+      "stop": "",
+      "page": "page_0442"
+    },
+    {
+      "verse": "18:65",
+      "print": "d303a9d03e86",
+      "kind": "break",
+      "stop": "",
+      "page": "page_0443"
+    },
+    {
+      "verse": "18:65",
+      "print": "fb27be8500a4",
+      "kind": "break",
+      "stop": "",
+      "page": "page_0443"
+    },
+    {
+      "verse": "18:65",
+      "print": "b3fd1bb89e3d",
+      "kind": "break",
+      "stop": "",
+      "page": "page_0443"
+    },
+    {
+      "verse": "18:65",
+      "print": "02b7d29a8707",
+      "kind": "break",
+      "page": "page_0444"
     }
   ]
 }

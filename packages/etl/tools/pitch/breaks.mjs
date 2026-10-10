@@ -49,14 +49,25 @@ export function seamPrint(text, at) {
 
 /**
  * Put back the listed stops and breaks in one verse's paragraphs. `marks` is
- * the whole list; `used` says which of its entries matched, by index.
+ * the whole list; `used` says which of its entries matched, by index. A note
+ * the book shares across several verses is filed under each of them, and a
+ * spot in it is listed once, under any one: `holders` names the verses that
+ * hold a paragraph, so the spot is put back under all of them.
  */
-export function restoreBreaks(verse, blocks, marks) {
-  const mine = new Map();
-  marks.forEach((m, i) => m.verse === verse && mine.set(m.print, i));
+export function restoreBreaks(verse, blocks, marks, holders = () => []) {
   const used = new Set();
   const out = [];
   for (const block of blocks) {
+    const reach = new Set([verse, ...holders(block)]);
+    const mine = new Map();
+    marks.forEach((m, i) => {
+      if (!reach.has(m.verse)) return;
+      if (mine.has(m.print)) {
+        const twin = marks[mine.get(m.print)].verse;
+        throw new Error(`print-breaks.json lists ${m.print} twice, under ${twin} and ${m.verse}: the note is shared, so once is enough`);
+      }
+      mine.set(m.print, i);
+    });
     let from = 0;
     let text = "";
     for (const { at } of seams(block)) {
