@@ -3302,7 +3302,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (toolRef.current !== "sign") return;
       const sign = shard ? nearestSignOnPage(shard, x, y, SIGN_REACH) : null;
       const vb = svg.viewBox.baseVal;
-      setLoupe(sign ? { page: targetPage, sign, clientX, clientY, w: vb?.width || 345, h: vb?.height || 550 } : null);
+      // A finger's tap is over once it lands: the marks arrive after it has
+      // lifted, so the magnifier would come back with nothing under it. A
+      // mouse is still there, and keeps it.
+      const lifted = take && e.pointerType !== "mouse";
+      setLoupe(sign && !lifted ? { page: targetPage, sign, clientX, clientY, w: vb?.width || 345, h: vb?.height || 550 } : null);
       if (!take || !sign) return;
       const [surah, ayah] = sign.ayah.split(":").map(Number) as [number, number];
       onPickSignRef.current?.({

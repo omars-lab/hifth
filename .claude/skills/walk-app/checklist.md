@@ -283,6 +283,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] With the tools open, highlight a passage: its card opens whole over the tools, title and
   all, and the same for the word tool's card. · phone · test: phone-toolbar spec · issue:
   `highlight-card-under-tools-phone`
+- [ ] With the harakat tool, tap a vowel-sign with a finger: its note box opens and no
+  magnifier is left on the page once the finger lifts. · phone · test: phone-toolbar spec ·
+  issue: `sign-loupe-stays-after-tap-phone`
 - [ ] Drop a bookmark on a page bound on the left and one bound on the right: the ribbon stops
   above the first line and hides none of its words; in settings, the long ribbon still hangs
   down with its name. · phone, desktop · test: bookmarks spec · issue: `ribbon-covers-first-words`

@@ -3744,6 +3744,18 @@
       "note": "Found walking the live site on a phone (2026-10-10): with the tools open, a highlight's card slid up behind the tool row, which hid its title. The tools were on the layer kept for passing messages; they now sit below every card. Test on both phones, watched failing first."
     },
     {
+      "id": "sign-loupe-stays-after-tap-phone",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "51"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/phone-toolbar.spec.ts",
+      "note": "Found walking the live site on a phone (2026-10-10): after a tap on a vowel-sign the magnifier came back once the signs had loaded and stayed with no finger on the page. A finger's tap now leaves no magnifier; a mouse keeps it. Test on both phones, watched failing first."
+    },
+    {
       "id": "ribbon-covers-first-words",
       "source": {
         "file": "docs/PLAN.md",

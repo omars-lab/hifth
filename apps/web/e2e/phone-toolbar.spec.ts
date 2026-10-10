@@ -1,5 +1,6 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
+import { midSign } from "./signs";
 
 /*
  * The page tools on a phone, step 5 of docs/design/page-toolbar-plan.md: three
@@ -122,6 +123,24 @@ test.describe("Hifth · the page tools on a phone", () => {
           await page.evaluate(([px, py]) => !!document.elementFromPoint(px!, py!)?.closest('[role="dialog"]'), [x, y]),
           `at ${Math.round(x)},${Math.round(y)} the card is on top`,
         ).toBe(true);
+  });
+
+  test("the harakat tool's magnifier goes once the finger lifts, and the sign keeps its note", async ({ page }) => {
+    // A tap rang the sign and opened its note, and the magnifier stayed on over
+    // the lines above it while the note was written: it was put up again a
+    // moment after the finger had already gone (2026-10-10, the live site).
+    // The iPhone's install notice is put away first, as a reader does once: it
+    // pushes the page down and the middle of it under the tools.
+    await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
+    await page.goto("/#/hafs-kfqc/p7");
+    await bar(page, "c").getByRole("button", { name: /^Page tools · Select is on$/ }).click();
+    await radio(page, "Harakat").click();
+    const at = await midSign(page);
+    await page.touchscreen.tap(at.x, at.y);
+    await expect(page.getByRole("dialog", { name: /^Your note on / })).toBeVisible();
+    await expect(page.locator("[data-note-pin]:visible")).toHaveCount(1);
+    await page.waitForTimeout(500);
+    await expect(page.locator("[data-sign-loupe]")).toHaveCount(0);
   });
 
   test("every tool, and the highlighter's pens, fit across the phone without pushing the page sideways", async ({
