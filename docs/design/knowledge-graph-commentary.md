@@ -566,6 +566,8 @@ nor the page readings record the slant. For the demo's verses (2:255, 18:10–13
 hand, about a hundred and thirty runs, and the panel draws them in italics. Since 2026-10-09 the same
 was done for every note a reader reaches in one tap from a demo note (a verse link in it, or a
 look-alike): all 84 were read, 79 had slanted words, 636 runs.
+The pitch test opens four of the densest of these, and 2:34, one the book prints plain, which must stay
+plain; the five plain ones were looked at again on their pages on 2026-10-10 and none slants there.
 Reading them turned up one more difference from the print: where the book slants a closing square
 bracket, the capture sometimes read it as a slash, a round bracket or a letter, so the bracket
 never closed. Three notes had it (14:48, 28:88 and 43:86); each was read off its page picture and
