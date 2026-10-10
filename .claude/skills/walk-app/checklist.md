@@ -296,3 +296,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the page at their full height, with no veil: the short height is only for where a list lies
   across the page (a phone, an iPad held upright). · `make drive DEVICE=laptop HASH='#/hafs-kfqc/2:255?open=roots' ACT='clickrole=radio|one page'`
   · test: `e2e/desktop.spec.ts` ("keeps its height, and leaves the page bright")
+- [ ] On an iPad held upright, each row of the look-alike and roots lists keeps its go-to button
+  within reach of the verse it opens: the card spans the page, as the note does, but its rows
+  stand in a centred column, not stretched edge to edge with the name at one side and the button
+  at the other. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:255?open=roots'` · test:
+  `e2e/pitch.spec.ts` ("sits near the verse it opens")

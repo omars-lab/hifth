@@ -1473,6 +1473,28 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
       );
       expect(onTop, "the verse, not a veil, is under its first line").toBe(true);
     });
+
+    test(`each go-to button in a list at the foot of the page sits near the verse it opens: ${link}`, async ({
+      page,
+    }) => {
+      // Walking upright (2026-10-09): laid across the whole width of the page,
+      // a row put its verse's name at one edge and the button that opens it at
+      // the other, about 900 points apart, so the eye lost the row between them.
+      await page.goto(`/#/hafs-kfqc/${link}`);
+      const list = page.getByRole("dialog");
+      await expect(list).toHaveCount(1, { timeout: 20_000 });
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const hop = list.getByRole("button", { name: /^Hop to / }).first();
+      await expect(hop).toBeVisible();
+      const { reach, middle } = await hop.evaluate((btn) => {
+        const row = btn.closest("li")!.getBoundingClientRect();
+        const b = btn.getBoundingClientRect();
+        return { reach: Math.max(b.right - row.left, row.right - b.left), middle: row.left + row.width / 2 };
+      });
+      expect(reach, "from the row's start to the far side of its button").toBeLessThanOrEqual(720);
+      const wide = await page.evaluate(() => window.innerWidth);
+      expect(Math.abs(middle - wide / 2), "the rows stand centred, as the note's lines do").toBeLessThan(4);
+    });
   }
 
   test("a verse a little taller than the room above the note is shown whole, the page drawn a little smaller", async ({ page }) => {
