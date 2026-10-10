@@ -788,6 +788,16 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(sheet(page).getByRole("region", { name: "Commentary" }).locator("p")).toHaveCount(10);
   });
 
+  test("a note two taps from the demo breaks where its page does, not one word early", async ({ page }) => {
+    // 27:7's first paragraph lost its last word to the next, which then opened
+    // on it; the printed page ends each of its two paragraphs on a stop.
+    await page.goto("/#/hafs-kfqc/27:7?open=commentary");
+    await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+    const paragraphs = await sheet(page).getByRole("region", { name: "Commentary" }).locator("p").allInnerTexts();
+    expect(paragraphs).toHaveLength(2);
+    for (const p of paragraphs) expect(p.trim()).toMatch(/[.)”]$/);
+  });
+
   test("a note's last paragraphs the capture filed under a later verse are back under their own", async ({ page }) => {
     // 2:185's note runs on to the top of the next page, and the capture filed
     // those two paragraphs under 2:203, whose note then opened on them.
