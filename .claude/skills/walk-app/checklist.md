@@ -86,7 +86,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   panel does too. · laptop · test: `e2e/pitch.spec.ts` ("a note the book shares across verses
   breaks into the same paragraphs") · issue: `pitch-commentary-differs-from-print`
 - [ ] Open 2:255's note and count its paragraphs against the printed page: ten, each starting
-  where the print sets a line in, none run on after a full stop. · iPad · test:
+  where the print sets a line in, none run on after a full stop (the short line that opens the
+  related verses comes after them and is not one of the ten). · laptop, iPad simulator · test:
   `e2e/pitch.spec.ts` ("the note on the Throne Verse keeps the paragraphs") · issue:
   `pitch-commentary-differs-from-print`
 - [ ] A note longer than its card fades at its foot, not cut through a line, until its end is
