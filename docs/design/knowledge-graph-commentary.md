@@ -568,6 +568,12 @@ was done for every note a reader reaches in one tap from a demo note (a verse li
 look-alike): all 84 were read, 79 had slanted words, 636 runs.
 The pitch test opens four of the densest of these, and 2:34, one the book prints plain, which must stay
 plain; the five plain ones were looked at again on their pages on 2026-10-10 and none slants there.
+Then the notes two taps from the demo (a link in a one-tap note): there are 504, about 130,000
+words. The 68 that two or more one-tap notes lead to were read on 2026-10-10, 477 rows; 63 had
+slanted words, one has none on its page, one is only a cross-reference, and three share a note
+another verse slants. Two were checked again on their pages by eye and match word for word.
+The pitch test opens four of the densest. Two rows match a word the capture misread, so they must be
+read again if that word is ever put right. The other 436 notes two taps out are still upright.
 Reading them turned up one more difference from the print: where the book slants a closing square
 bracket, the capture sometimes read it as a slash, a round bracket or a letter, so the bracket
 never closed. Three notes had it (14:48, 28:88 and 43:86); each was read off its page picture and
