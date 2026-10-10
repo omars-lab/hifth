@@ -575,7 +575,12 @@ another verse slants. A few lines of two of them were checked again on their pag
 slants match. The pitch test opens four of the densest. Two notes had a word the capture misread
 (a verse number with a letter for its last digit, so the reference was not a link, and a dot under a
 letter read as another letter); both were read off their page pictures and put right, and the
-reference is a link again. The other 436 notes two taps out are still upright.
+reference is a link again. Of the other 436 notes two taps out, 398 were read the same way on
+2026-10-10, in twelve batches: 2,127 rows, each checked to match its note's text before it went
+in, and twelve more words the capture misread, put right off the page pictures. The pitch test
+opens four more of the densest, watched failing first with their rows taken out. The last 38
+wait on the owner: the reader for that batch was refused the note files it reads
+([commentary lettering ①](commentary-lettering.md)).
 Reading them also showed the capture often gave straight quote marks where the book prints curly
 ones, and a hyphen where it prints a dash between two numbers (about one note in fifty, all
 through the book). One rule now sets them back in every note and every verse's translation, so no
