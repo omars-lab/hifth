@@ -3476,6 +3476,17 @@
       "severity": "question",
       "owner": "agent",
       "note": "A row whose shared words sit in one place showed only a verse name until opened. Built three ways as an info-panel choice: the other verse's shared words cut from its page under the row's name (the default, because it shows where the two part), a count of shared words, or nothing. Unit and browser tests cover each way and the strip's starting edge in both languages."
+    },
+    {
+      "id": "app-walk-after-list-fixes",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉕"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "The list and note fixes of 2026-10-09 (short lists with no veil upright, the corner card's height at one page, go-to buttons near their verse) were checked in browser tests and pictures only; the app's copy of the web build predates them, and every real-app walk so far has found a fault the browser tests missed. Closes when the iPad app upright in English and the Mac app in English and Arabic are walked on a fresh build, each fault found getting its own item and test."
     }
   ]
 }

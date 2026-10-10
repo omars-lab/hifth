@@ -612,3 +612,16 @@ as two things. Chrome and Safari kept it whole.
 rather than let it spill out. A browser test counts the lines the address takes, at the default
 size and on a laptop-sized window, and expects one and that it fits the card (failed first in
 Firefox only, which is why the key's tests now also run there).
+
+### ㉕ Have the latest list and note fixes been seen in the real iPad and Mac apps? · **open**
+
+The last few changes (the lists opening short with no veil on an upright iPad, the corner card
+keeping its height at one page, each row's go-to button staying near its verse) were checked in
+the browser tests and in browser pictures, but the app's own copy of the web build is older than
+all of them. Every walk of the real app so far has found something the browser tests did not:
+the go-to arrows drawn as emoji tiles, the veil over the page, the list height. So this is the
+next thing to look at for the pitch, which is shown on the iPad and the Mac.
+
+**What closes it:** rebuild the app's copy of the pitch build, then walk the iPad app upright in
+English (the roots list, the look-alike list, the note, a page turn), then the Mac app in English
+and in Arabic. Each new fault gets its own item, a test, and a walk checklist line.
