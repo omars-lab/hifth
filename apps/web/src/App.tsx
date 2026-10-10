@@ -122,6 +122,7 @@ import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
 import { DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, useMediaQuery } from "./useMediaQuery";
 import { useRoomForCards } from "./components/over-leaf";
+import type { CardSpan } from "./components/short-band";
 import {
   PageStage,
   pageSpan,
@@ -321,6 +322,11 @@ export function App(): JSX.Element {
   // Where an open roots or similar-verses list starts on a phone: it takes the
   // note's place, so the page lifts the verse above it the same way.
   const [listTop, setListTop] = useState<number | null>(null);
+  // Where an open list or the note spans across the window, kept for a wide
+  // window closed to one page, where it stands in the corner beside the page:
+  // the page then moves clear of it rather than hide its line ends under it.
+  const [listSide, setListSide] = useState<CardSpan | null>(null);
+  const [noteSide, setNoteSide] = useState<CardSpan | null>(null);
   // Where the hop chips floating over the page's top corner end, so the lift
   // above a phone note stops the verse's first line beneath them.
   const [railBottom, setRailBottom] = useState<number | null>(null);
@@ -1187,8 +1193,12 @@ export function App(): JSX.Element {
   // only a change in whether the chips fit there re-renders anything.
   const [slackRoom, setSlackRoom] = useState(true);
   const slackRoomRef = useRef<boolean | null>(null);
-  const reportSlack = useCallback((px: number) => {
-    bookRef.current?.style.setProperty("--page-slack", `${px}px`);
+  const reportSlack = useCallback((px: number, cover: { left: number; right: number }) => {
+    const book = bookRef.current?.style;
+    book?.setProperty("--page-slack", `${px}px`);
+    // The chips' box starts where a card beside the page stops.
+    book?.setProperty("--slack-cover-left", `${cover.left}px`);
+    book?.setProperty("--slack-cover-right", `${cover.right}px`);
     const holds = deskHoldsRail(px);
     if (holds === slackRoomRef.current) return;
     slackRoomRef.current = holds;
@@ -3188,6 +3198,10 @@ export function App(): JSX.Element {
     desktop && pageMode === "one" && (rootsOpen || (noteTall && commentaryOpen))
       ? dir === "rtl" ? "right" : "left"
       : undefined;
+  // A list or the note in the corner beside one page, on a window wide enough
+  // to stand it there; held upright, it lies across the page's foot instead,
+  // and covers that (⑩).
+  const sideCard = desktop && pageMode === "one" && !upright ? (listSide ?? noteSide) : null;
   const railAt: "bar" | "tools" | null =
     !desktop || roomBeside ? null : railHome === "tools" && penAt === "strip" ? "tools" : "bar";
 
@@ -3497,7 +3511,11 @@ export function App(): JSX.Element {
               <PageStage
                 ref={stageRef}
                 onSlack={reportSlack}
-                coverTop={highestTop(coverTop, shareTop, listTop)}
+                // A card beside one page covers its side, not its foot: the
+                // page moves clear of it, and lifting it as well left a band
+                // of empty stage under the page.
+                coverTop={sideCard ? null : highestTop(coverTop, shareTop, listTop)}
+                coverSide={sideCard}
                 railBottom={railBottom}
                 resolver={resolver}
                 page={page}
@@ -3586,6 +3604,7 @@ export function App(): JSX.Element {
               onHop={handleHop}
               onClose={() => setOpenDirection(null)}
               onCover={setListTop}
+              onSide={setListSide}
             />
             <HighlightMenu
               rangeKeys={selectedRange}
@@ -3611,6 +3630,7 @@ export function App(): JSX.Element {
                   onHopEdge={handleHop}
                   onClose={() => setRootsOpen(false)}
                   onCover={setListTop}
+                  onSide={setListSide}
                 />
               </Suspense>
             )}
@@ -3634,6 +3654,7 @@ export function App(): JSX.Element {
                 onHop={handleHop}
                 onGo={hopTo}
                 onCover={setCoverTop}
+                onSide={setNoteSide}
                 onTall={setNoteTall}
                 onClose={() => (introSheet ? setIntroSurah(null) : setCommentaryOpen(false))}
                 creditNote={PITCH ? t.pitchCredit : undefined}

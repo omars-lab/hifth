@@ -157,11 +157,13 @@
   z-index: var(--z-chrome);
   pointer-events: none;
 }
+/* Beside a card docked over the stage's side, the box starts at the card's
+   edge, so the buttons stand by the page and not out under the card (⑩). */
 .slack[data-slack="right"] {
-  right: 0;
+  right: var(--slack-cover-right, 0px);
 }
 .slack[data-slack="left"] {
-  left: 0;
+  left: var(--slack-cover-left, 0px);
 }
 
 /* Except while a magnified leaf hangs over the desk (#148): then the book is

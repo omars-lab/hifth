@@ -16,7 +16,7 @@ import { DiffView } from "./later";
 import { LookalikeReason } from "./SharedPreview";
 import styles from "./HopPopover.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
-import { useShortBand } from "./short-band";
+import { useShortBand, useSideCover, type CardSpan } from "./short-band";
 import { RailGlyph } from "./RailGlyph";
 
 interface HopPopoverProps {
@@ -38,6 +38,11 @@ interface HopPopoverProps {
   side?: LeafSide | null;
   /** On a phone, where the list starts, so the page can lift the verse above it; null when it covers nothing. */
   onCover?: (top: number | null) => void;
+  /**
+   * Where the card spans across the window while it is up and not beside a
+   * spread, so a page alone in a wide window can move clear of it.
+   */
+  onSide?: (span: CardSpan | null) => void;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -67,6 +72,7 @@ export function HopPopover({
   onClose,
   side = null,
   onCover,
+  onSide,
 }: HopPopoverProps): JSX.Element | null {
   const { t, dir, lang } = useT();
   const passageRows = usePassageRows();
@@ -76,6 +82,7 @@ export function HopPopover({
   const place = useOverLeaf(chip !== null, side);
   const sheetRef = useRef<HTMLDivElement>(null);
   const band = useShortBand(chip !== null, beside, sheetRef, onCover);
+  useSideCover(chip !== null, beside, sheetRef, onSide);
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);

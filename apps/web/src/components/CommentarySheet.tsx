@@ -17,7 +17,7 @@ import { splitSigla, type Siglum } from "../tafsir/sigla";
 import { isIntroOnly, textDir, type CommentaryNote } from "../tafsir/commentary";
 import styles from "./CommentarySheet.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
-import { watchCover } from "./short-band";
+import { useSideCover, watchCover, type CardSpan } from "./short-band";
 import { LookalikeReason } from "./SharedPreview";
 
 export { overLeaf } from "./over-leaf";
@@ -159,6 +159,7 @@ export function CommentarySheet({
   onHop,
   onGo,
   onCover,
+  onSide,
   onTall,
   back = null,
   creditNote,
@@ -197,6 +198,11 @@ export function CommentarySheet({
    * covered then anyway, and moving it would only be motion nobody sees.
    */
   onCover?: (top: number | null) => void;
+  /**
+   * Where the card spans across the window while it is up and not beside a
+   * spread, so a page alone in a wide window can move clear of it.
+   */
+  onSide?: (span: CardSpan | null) => void;
   /**
    * Whether the phone note is grown to its full height, a modal over the whole
    * page. The look-alike chips ride the short note's top row, and a grown note
@@ -333,6 +339,7 @@ export function CommentarySheet({
     return watchCover(sheet, () => Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE - room), onCover);
   }, [open, beside, verseKey, onCover, room]);
   useEffect(() => () => onCover?.(null), [onCover]);
+  useSideCover(open, beside, sheetRef, onSide);
 
   // Beside a spread, lie over the facing page.
   const place = useOverLeaf(open, side);

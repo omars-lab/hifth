@@ -304,7 +304,7 @@ still just outside its edge. Checked by picture at 2:48 with the roots open in E
 right, the buttons cross to the left); a laptop browser test for both pages in Arabic, where the list
 stands on the left, which failed first for the left-hand page.
 
-### ⑩ With one page and the roots list open, does the list hide where the lines begin? · **open**
+### ⑩ With one page and the roots list open, does the list hide where the lines begin? · **fixed**
 
 **What it changes for a hafiz:** a link lands with the page magnified (130% on a laptop with a note's
 arrival). Open the roots list beside one page and the list's card covers about 44 pixels of the page's
@@ -318,3 +318,58 @@ corner and the page is not moved aside for it, though there is room on the other
 **Ways it could go:** move the page sideways into the free space while the list is up; draw the page a
 little smaller so it fits between the window's edge and the list; or narrow the list. To be built and
 tried rather than chosen on paper.
+
+**Fixed, 2026-10-10: the page moves aside.** While a list or a note stands in the corner beside one
+page, the page is centred in the room the card leaves, not in the window, and comes back to the
+middle once the card closes. Its magnification does not change. If the page is wider than that room,
+the page is held so that the first word of the verse the reader is on stands clear of the card: in the
+mus'haf that is the right-hand end of the verse's first line. A verse can still run on under the card
+further along its lines; the reader pans to it, as on a page wider than the window.
+
+What building it taught, which the list of ways above did not have:
+
+- The card stands on opposite sides in English and in Arabic (on the right in English, on the left
+  in Arabic), so the page moves left in one and right in the other. Measuring where the card really
+  stands, rather than assuming a side, covers both.
+- A note that has grown into the corner covers the page just as the roots list does, so it moves the
+  page aside too. The setting that draws a note shorter only applies to a note at the foot of the
+  page; beside the page it would only have hidden lines for nothing.
+- With the page moved aside, the look-alike buttons from ⑨ come back to the page's own side when the
+  list closes but the note stays, standing in the gap between the page and the note.
+- The cost: the page slides when the list opens and slides back when it closes. In a 1280-pixel
+  window that is about 240 pixels each way. It reads as making room, not as a jump, because the
+  page keeps its size.
+
+**Not built, and why:** drawing the page smaller would undo the size the reader chose, which a turn
+carries to the next page; at 130% it would have had to fall to about 85% to stay in the middle and clear of the list, well under the size a link
+lands at. Narrowing the list would wrap the roots rows, which already hold a root, its meaning and a
+count on one line. Both stay possible if the slide turns out to be unwelcome.
+
+Checked by picture on a laptop closed to one page, 1280 wide: 2:48 with the roots open in English
+(the page stands between the window's left edge and the list, the buttons to its left), the same
+after closing the list with the note still up (the page stays clear, the buttons cross back between
+the page and the note), and in Arabic (the page stands right of the list), and with everything
+closed (the page back in the middle). Tests: a laptop browser test for a right-hand and a left-hand
+page that the list covers none of the page and that the page comes back to the middle, which failed
+first (the list covered 66 and 82 pixels); a laptop browser test, in English and in Arabic, that a
+page zoomed wider than the room keeps the verse's first word out from under the list and inside the
+window, which failed first with the move switched off (210 pixels under the list); a pitch test, in
+Chrome and Firefox, for the one case only a check across the page catches, where the verse is in
+sight top to bottom but its first word is under the list, which failed first with that check
+switched off (77 pixels under); unit tests of centring in the room left, panning inside it, framing
+a verse inside it, and of which side a card covers.
+
+### ⑪ Should a reader be able to keep the page in the middle, drawn smaller, instead of having it slide aside for the list? · **open**
+
+**What it changes for a hafiz:** with ⑩ the page slides about 240 pixels when the roots list opens beside
+one page, and slides back when it closes. A reader who keeps their eye on a line may find the slide
+harder to follow than a page that stays put and shrinks a little to clear the list.
+
+**Why it is asked now:** the house way is to build a feature's main ways and keep the runners-up as a
+setting. ⑩ built only the slide; drawing the page smaller was set aside on paper (it would fall to
+about 85% from 130%), not tried by hand.
+
+**What happens if nobody decides:** the page slides, which works, and there is no other choice.
+
+**Ways it could go:** build the smaller page as a setting in the info panel, with the slide as the
+default; or leave the slide as the only way and close this.

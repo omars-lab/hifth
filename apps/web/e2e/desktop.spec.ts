@@ -2174,6 +2174,89 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       expect(gap, "the chips still stand just outside the page").toBeGreaterThanOrEqual(4);
       expect(gap).toBeLessThanOrEqual(32);
     });
+
+    test(`closed to one page, the roots list stands clear of a ${side}-hand page, which comes back to the middle once it closes`, async ({ page }) => {
+      // The page stayed in the middle of the window whatever stood beside it,
+      // so at the size a link lands at the list hid the ends of its lines —
+      // where an Arabic line begins, on the list's side in English. The page
+      // now moves into the middle of what the list leaves (look-alike rows ⑩).
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/#/hafs-kfqc/${at}?view=one&open=roots`);
+      const list = page.getByRole("dialog");
+      await expect(list).toBeVisible({ timeout: 20_000 });
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const paper = pageSvg(page, pageNo);
+      const card = await boxOf(list);
+      await expect
+        .poll(async () => {
+          const open = await boxOf(paper);
+          return Math.min(open.x + open.width, card.x + card.width) - Math.max(open.x, card.x);
+        }, { message: "how far the list stands over the page, across" })
+        .toBeLessThanOrEqual(0);
+      await page.keyboard.press("Escape");
+      await expect(list).toBeHidden();
+      // The whole leaf, not its picture: the picture sits to one side of the
+      // leaf, since only one edge of a page is its fore-edge.
+      const leaf = page.locator(`[data-live="true"] [data-host-page="${pageNo}"]`);
+      await expect
+        .poll(async () => {
+          const open = await boxOf(leaf);
+          return Math.abs(open.x + open.width / 2 - 640);
+        }, { message: "how far the page's middle is from the window's" })
+        .toBeLessThan(2);
+    });
+
+  }
+
+  // In both languages: the list stands on the left in Arabic, and on the right
+  // in English, over the end of each line where it begins. 2:45 begins a line,
+  // so its first word is at that end, where the list stands in English. The
+  // pitch suite holds the case where only the check across the page moves it.
+  for (const locale of ["ar", "en-US"]) {
+    test.describe(locale, () => {
+      test.use({ locale });
+      verseStartInSight("2:45", 7);
+    });
+  }
+
+  function verseStartInSight(at: string, pageNo: number): void {
+    test(`closed to one page and zoomed wider than the room the roots list leaves, the start of a verse that begins a line stays in sight`, async ({ page }) => {
+      // Zoomed past the room beside the list, the page cannot stand clear of
+      // it, but the verse it is open at begins outside it: at its first line's
+      // right-hand end, where an Arabic line begins (look-alike rows ⑩).
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/#/hafs-kfqc/${at}?view=one`);
+      const paper = pageSvg(page, pageNo);
+      await expect(paper).toBeVisible({ timeout: 20_000 });
+      // Step up until the page is wider than the 796px the list leaves.
+      for (let i = 0; i < 8 && (await boxOf(paper)).width <= 820; i++) {
+        const was = (await boxOf(paper)).width;
+        await page.getByRole("button", { name: /^(تكبير|Zoom in)$/ }).click();
+        await expect.poll(async () => (await boxOf(paper)).width).toBeGreaterThan(was + 1);
+      }
+      expect((await boxOf(paper)).width, "the page grown wider than the room").toBeGreaterThan(820);
+      await page.getByRole("button", { name: /^(الجذور، |Roots · )/ }).click();
+      const list = page.getByRole("dialog");
+      await expect(list).toBeVisible();
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const card = await boxOf(list);
+      const wash = page.locator(`[data-live="true"] [data-host-page="${pageNo}"] #hifth-overlay [data-hl-group='selection']`);
+      await expect
+        .poll(async () => {
+          // The verse begins at the right-hand end of its first (topmost) line.
+          // The wash may come in more than one piece per line, so it is the
+          // furthest right of every piece on the topmost line.
+          const start = await wash.evaluateAll((els) => {
+            const boxes = els.map((el) => el.getBoundingClientRect());
+            const top = Math.min(...boxes.map((b) => b.top));
+            const first = boxes.filter((b) => b.top < top + b.height / 2);
+            return first.length ? Math.max(...first.map((b) => b.right)) : Number.POSITIVE_INFINITY;
+          });
+          // How far inside the list, or past the window's edge, that stands.
+          return Math.max(0, start - 1280, Math.min(start - card.x, card.x + card.width - start));
+        }, { message: "how far the verse's start stands under the list or off the window" })
+        .toBe(0);
+    });
   }
 
   for (const { home, row } of [

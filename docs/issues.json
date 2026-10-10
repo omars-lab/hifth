@@ -3530,10 +3530,22 @@
         "file": "docs/design/lookalike-rows.md",
         "item": "⑩"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Closed to one page on a laptop, a magnified page with the roots list open loses about 44px of its right edge, where every line begins, under the list's card. The page stays centred though there is free room on its other side."
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "Closed to one page on a laptop, a magnified page with the roots list open lost the edge where every line begins under the list's card, because the page stayed centred in the window. Fixed by centring the page in the room the card leaves (a list or a grown note, on whichever side it stands) and bringing it back to the middle once the card closes; the first word of the verse being read is kept clear of the card, which a pitch test checks for the case only the across-the-page check catches."
+    },
+    {
+      "id": "roots-list-smaller-page-setting",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑪"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The page slides aside for the roots list beside one page; the other way, keeping it in the middle and drawing it smaller, was set aside on paper and never tried by hand. Closes when that way is built as an info-panel setting with the slide as the default, or closed with a stated reason."
     },
     {
       "id": "app-walk-whole-demo-path",

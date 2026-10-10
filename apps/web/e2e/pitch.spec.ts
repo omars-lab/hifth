@@ -578,6 +578,43 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("with one page grown wider than the room the roots list leaves, the verse's first word comes out from under the list", async ({ page }) => {
+    // Here the verse is in sight top to bottom once the list opens, so only
+    // a check across the page moves it: without one, 2:45's first word stood
+    // under the list's left edge (look-alike rows ⑩). The public build cannot
+    // show this, since there the verse also sits under the list from above
+    // and is moved for that.
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/#/hafs-kfqc/2:45?view=one");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await settle(sheet(page));
+    await sheet(page).getByRole("button", { name: "Close" }).click();
+    await expect(sheet(page)).toHaveCount(0);
+    const paper = pageSvg(page, 7);
+    await settle(paper);
+    for (let i = 0; i < 8 && (await paper.boundingBox())!.width <= 820; i++) {
+      const was = (await paper.boundingBox())!.width;
+      await page.getByRole("button", { name: "Zoom in" }).click();
+      await expect.poll(async () => (await paper.boundingBox())!.width).toBeGreaterThan(was + 1);
+      await settle(paper);
+    }
+    expect((await paper.boundingBox())!.width, "the page grown wider than the room").toBeGreaterThan(820);
+    await page.getByRole("button", { name: /^Roots · / }).click();
+    await expect(sheet(page)).toBeVisible();
+    await settle(sheet(page));
+    const card = (await sheet(page).boundingBox())!;
+    await expect
+      .poll(async () => {
+        // The verse begins at the right-hand end of its topmost line.
+        const lines = (await litLineBoxes(page)).filter((line) => line.width > 0);
+        if (!lines.length) return Number.POSITIVE_INFINITY;
+        const first = lines.filter((line) => line.y < lines[0]!.y + line.height / 2);
+        return Math.max(...first.map((line) => line.x + line.width)) - card.x;
+      }, { message: "how far the verse's first word stands under the list", timeout: 8_000 })
+      .toBeLessThanOrEqual(0);
+  });
+
   test("an iPad held upright opens on one page, and turned on its side opens the book", async ({ browser }) => {
     // Upright, two pages side by side were each half the screen wide, with
     // empty space above and below: the mus'haf read small on the very screen
