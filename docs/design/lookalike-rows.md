@@ -394,8 +394,10 @@ page would clear both.
 
 Checked by picture on a laptop, 1280 wide, in the pitch: 2:48 on one page with Share open (the page
 clear of the card, the whole row of tools and the verse's name below it in sight), and on two pages
-(the card over the facing page, the shared verse in full view). Tests: a laptop browser test for a
-right-hand and a left-hand page on one page that the card covers none of the page, which failed first
+(the card over the facing page, the shared verse in full view). Measured in the Mac app too, on two
+pages at 2:49 in English: with the note that opens on arrival closed (the verse's tools step aside
+while it is up, Share among them), the card lies over page 7 and clears 2:49's page 8. Tests: a
+laptop browser test for a right-hand and a left-hand page on one page that the card covers none of the page, which failed first
 (99 and 79 pixels covered); a laptop browser test that the card stands above the share button, which
 failed first (44 pixels over it); a laptop browser test on two pages, for a verse on each page, that
 the card covers none of the verse's page, which failed first for the left-hand page (143 pixels
@@ -436,6 +438,25 @@ roots list, the note and the share card do on a spread. It still dims the book b
 with a tap outside.
 
 Checked by picture on a laptop, 1280 wide, two pages, in the pitch, in Arabic: 2:49 with the key
-open lies over the right page and page 8 stands whole beside it. Tests: a laptop browser test for
+open lies over the right page and page 8 stands whole beside it. Seen again in the iPad app on its
+side, in English, on the rebuilt pitch build: at 2:48 the key lies over the left page with page 7
+whole, and at 2:49 over the right with page 8 whole. Tests: a laptop browser test for
 2:48 and 2:49 that the key covers none of the verse's page, which failed first for 2:49 (the key
 over 103 pixels of page 8 across).
+
+### ⑮ On a phone, do the look-alike buttons stay on top of a panel opened over the note? · **fixed**
+
+**What it changes for a hafiz:** on a phone the look-alike buttons ride the top edge of the note
+while it is up. Open the tajweed key (or the jump box, About, the mus'haf picker, the shelf or the
+revision record) over the note, and the page dims behind the panel, but the buttons stayed bright on
+top of it, at the panel's edge, and a tap there opened a look-alike instead of reaching the panel.
+Found walking the phone, 2026-10-10, at 2:49 with the note open and the key opened over it.
+
+**Fixed, 2026-10-10:** every panel that dims the page now stands one layer above the note and the
+buttons on its edge, so the buttons go dim with the rest of the page and come back when the panel
+closes. The note itself, which the buttons ride, is unchanged.
+
+Checked by picture on a phone, 390 wide, in the pitch, in English: 2:49 with the key open over the
+note shows the key whole and no look-alike button above it. Tests: a pitch phone test for each of the
+six panels that the look-alike buttons are not the top thing where they stand, which failed first for
+all six.

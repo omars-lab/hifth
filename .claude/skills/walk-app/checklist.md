@@ -194,6 +194,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   Arabic). · laptop, desktop · issue: `tajweed-key-covers-page-laptop`
 - [ ] On two pages with the tajweed key open, the key lies over the facing page, not the verse's
   (2:48 and 2:49, in English and in Arabic). · laptop, desktop · issue: `tajweed-key-covers-page-spread`
+- [ ] On a phone with the note up and its look-alike buttons on its edge, open the tajweed key (and
+  About, the jump box, the shelf): the buttons go dim with the page, none stands over the panel
+  (2:49). · phone, iphone · issue: `lookalike-chip-over-modal-phone`
 - [ ] A look-alike row that names a whole passage says how the two are alike and opens onto the verse
   inside it that matches (try 15:30's later surahs: the passage in surah 38 opens onto 38:73, not
   its first verse; 23:7 opens onto 70:31). · desktop (Firefox), phone, the iPad app · issue:

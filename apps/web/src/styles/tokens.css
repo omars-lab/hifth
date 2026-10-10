@@ -257,6 +257,10 @@
   --z-stage: 0;
   --z-chrome: 10;
   --z-sheet: 20;
+  /* A panel that dims the page stands over every sheet and over the look-alike
+     buttons riding a sheet's top edge (one above --z-sheet); level with them,
+     they stayed bright and pressable on the tajweed key (look-alike rows ⑮). */
+  --z-modal: 22;
   --z-toast: 30;
 
   color-scheme: light;

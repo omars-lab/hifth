@@ -1149,6 +1149,24 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
     await context.close();
   });
 
+  for (const open of ["key", "about", "jump", "editions", "shelf", "record"] as const) {
+    test(`a panel that dims the page (${open}) stands over the look-alike buttons on the note's edge`, async ({ page }) => {
+      // The look-alike buttons ride the top edge of the note on a phone, one
+      // layer above every sheet; the tajweed key opened over the note left
+      // them bright and pressable on top of it (look-alike rows ⑮).
+      await page.goto(`/#/hafs-kfqc/2:49?open=${open}`);
+      const rail = page.locator("[data-seated]");
+      await expect(rail).toBeVisible({ timeout: 20_000 });
+      await expect(page.locator('[role="dialog"][aria-modal="true"]')).toBeVisible();
+      const onTop = await rail.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return hit !== null && el.contains(hit);
+      });
+      expect(onTop, "the look-alike buttons are the top thing where they stand").toBe(false);
+    });
+  }
+
   test("the first screen's hint does not leave one word alone on its second line", async ({ page }) => {
     // At a phone's width the line wrapped after "Study Quran", leaving "note"
     // by itself under it — the first thing a visitor reads looked unfinished.

@@ -6,7 +6,7 @@
 .scrim {
   position: fixed;
   inset: 0;
-  z-index: var(--z-sheet);
+  z-index: var(--z-modal);
   background: rgba(38, 32, 26, 0.28);
   animation: fade var(--dur-fast) ease;
 }
@@ -15,7 +15,7 @@
   position: fixed;
   inset-inline: 0;
   inset-block-end: 0;
-  z-index: var(--z-sheet);
+  z-index: var(--z-modal);
   max-block-size: 75vh;
   overflow-y: auto;
   padding: var(--space-3) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));

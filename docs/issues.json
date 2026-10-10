@@ -3584,6 +3584,18 @@
       "note": "On a laptop with two pages the tajweed key kept the corner and covered the verse's page whenever the verse stood on that side. It now lies over the facing page, as the share card does; a laptop browser test for a verse on each page failed first."
     },
     {
+      "id": "lookalike-chip-over-modal-phone",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑮"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "On a phone the look-alike buttons riding the note's top edge stayed bright and pressable on top of any panel that dims the page, the tajweed key among them. Those panels now stand one layer above; a pitch phone test for each of six panels failed first."
+    },
+    {
       "id": "app-walk-whole-demo-path",
       "source": {
         "file": "docs/design/native-shell.md",
