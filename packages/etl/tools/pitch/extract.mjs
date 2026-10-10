@@ -30,6 +30,9 @@
  *                                                        # together, with each spot's
  *                                                        # fingerprint for print-breaks.json;
  *                                                        # prints to the terminal, writes nothing
+ *   node packages/etl/tools/pitch/extract.mjs --suspects # list brackets left open and references
+ *                                                        # set side by side, in notes and intros,
+ *                                                        # to check against the page; writes nothing
  *
  * Re-run it whenever the source capture changes or the curation below is edited.
  */
@@ -47,6 +50,7 @@ import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
 import { slantSurah } from "./italics.mjs";
 import { mendSurah } from "./misreads.mjs";
+import { suspects } from "./suspects.mjs";
 import { addCited, citedIn, foldRuns } from "./runs.mjs";
 import { endPrint, endsClosed } from "./ends.mjs";
 import { orphanPrint, rescueOrphans } from "./orphans.mjs";
@@ -375,6 +379,8 @@ const usedMisreads = new Set();
 const ORPHANS = JSON.parse(readFileSync(resolve(HERE, "print-orphans.json"), "utf8")).orphans;
 const usedOrphans = new Set();
 const LIST_ORPHANS = process.argv.includes("--orphans");
+// Brackets left open and references set side by side, to check (see suspects.mjs).
+const LIST_SUSPECTS = process.argv.includes("--suspects");
 
 function buildSurah(surah) {
   const src = readSurah(surah);
@@ -465,6 +471,16 @@ function buildSurah(surah) {
     note: "PRIVATE pitch data. Held copy (The Study Quran, HarperOne 2015). Never commit or deploy.",
   };
 
+  if (LIST_SUSPECTS) {
+    const places = [
+      ...out.intro.map((text, i) => [`${surah} intro ${i}`, text]),
+      ...Object.values(verses).flatMap((v) => v.commentary.map((text, i) => [`${v.ref} ${i}`, text])),
+    ];
+    for (const [where, text] of places)
+      for (const { kind, at } of suspects(text))
+        console.log(`${where} ${kind} …${text.slice(Math.max(0, at - 30), at + 30)}…`);
+    return { surah, listed: true };
+  }
   if (LIST_SEAMS || LIST_SPLITS || LIST_ORPHANS) return { surah, listed: true };
   const outPath = resolve(OUT_DIR, `${surah}.json`);
   writeFileSync(outPath, JSON.stringify(out, null, 2));
@@ -547,7 +563,7 @@ if (staleMisreads.length) {
   for (const m of staleMisreads) console.error(`  ${m.verse} (page image ${m.page})`);
   process.exit(1);
 }
-if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS || LIST_ORPHANS) process.exit(0);
+if (LIST_SEAMS || LIST_SPLITS || LIST_ENDS || LIST_ORPHANS || LIST_SUSPECTS) process.exit(0);
 
 if (existsSync(KEY_SRC)) {
   const raw = JSON.parse(readFileSync(KEY_SRC, "utf8"));
