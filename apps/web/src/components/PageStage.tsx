@@ -74,6 +74,7 @@ import { useT, type Strings } from "../i18n";
 import { giveNoteRoom, noteRoom, useLongVerse } from "../long-verse";
 import { useOpeningText, type OpeningText } from "../opening-text";
 import { pageSlack } from "../rail-home";
+import { sideCoverOf, type CardSpan } from "./short-band";
 import type { TurnStyle } from "../turn-style";
 import styles from "./PageStage.module.css";
 import { printedNumbersOf } from "./verse-numbers";
@@ -198,8 +199,11 @@ interface PageStageProps {
    * pixels, each time the paper is drawn — every frame of a pinch, so whatever
    * listens must not re-render on it. With the book closed to one page this,
    * not the desk, is the room the look-alike buttons stand in (rail-home.ts).
+   * Measured in the part a card beside the page leaves showing, with how much
+   * of each side that card stands over, so the buttons stand by the page and
+   * not out under the card.
    */
-  onSlack?: (px: number) => void;
+  onSlack?: (px: number, cover: { left: number; right: number }) => void;
   /**
    * Which page a turn in this direction would land on, or `null` for none.
    *
@@ -288,6 +292,14 @@ interface PageStageProps {
    * into it, and the page's last lines can be scrolled up clear of it.
    */
   coverTop?: number | null;
+  /**
+   * Where a card docked beside one page spans across the window, in window
+   * px — a list or a note in the corner of a laptop window closed to one page
+   * — or null when nothing stands beside the page. The page is centred in the
+   * part the card leaves, so the card no longer hides the ends of its lines,
+   * and the selected verse is brought out from under it (look-alike rows ⑩).
+   */
+  coverSide?: CardSpan | null;
   /**
    * Where the hop chips floating over the stage's top corner end, in window px,
    * or null when there are none. Read by the lift above a phone note only: the
@@ -1108,6 +1120,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     overlay,
     foldTarget = null,
     coverTop = null,
+    coverSide = null,
     railBottom = null,
     turnStyle = "seam",
     bound = false,
@@ -1383,6 +1396,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   foldTargetRef.current = foldTarget;
   const coverTopRef = useRef(coverTop);
   coverTopRef.current = coverTop;
+  const coverSideRef = useRef(coverSide);
+  coverSideRef.current = coverSide;
   const railBottomRef = useRef(railBottom);
   railBottomRef.current = railBottom;
   /** The lift above a phone note (below), for the resize observer declared before it. */
@@ -1501,6 +1516,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       stageWidth: box.width,
       stageHeight: box.height,
       coverBottom: coverTopRef.current === null ? 0 : Math.max(0, box.bottom - coverTopRef.current),
+      ...sideCoverOf(coverSideRef.current, box),
     };
     fitRef.current = fit;
     return fit;
@@ -1527,7 +1543,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // have to stop doing so on the outer side while a page hangs over the desk.
     const stageEl = stageRef.current;
     if (stageEl) stageEl.toggleAttribute("data-spills", over > 0.5);
-    if (fit) onSlackRef.current?.(pageSlack(fit.stageWidth, fit.contentWidth, view.current.z));
+    if (fit) {
+      const cover = { left: fit.coverLeft ?? 0, right: fit.coverRight ?? 0 };
+      const shown = fit.stageWidth - cover.left - cover.right;
+      onSlackRef.current?.(pageSlack(shown, fit.contentWidth, view.current.z), cover);
+    }
     const { x, y, z } = view.current;
     cur.host.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`;
     // Tell the overlay where the paper is, so a thing that belongs *to* the
@@ -1574,7 +1594,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // A note is still up over the foot of a stage that has changed size —
       // the phone turned sideways — so its verse is brought up into what
       // still shows, the same as when the note arrived.
-      if (coverTopRef.current !== null) liftRef.current();
+      if (coverTopRef.current !== null || coverSideRef.current !== null) liftRef.current();
     });
     ro.observe(layer);
     return () => ro.disconnect();
@@ -2168,7 +2188,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // the page keeps its zoom. Worked out from the note's full height, the
       // room it already gave added back, so the run its own shrinking sets
       // off gives the same answer.
-      const shorter = longVerseRef.current === "shorter" && !boundRef.current;
+      const shorter = longVerseRef.current === "shorter" && !boundRef.current && (fit.coverBottom ?? 0) > 0;
       if (shorter) {
         const full = (fit.coverBottom ?? 0) + noteRoom();
         const roomy = fit.stageHeight - full;
@@ -2176,7 +2196,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         giveNoteRoom(give);
         shown = roomy + give;
       } else giveNoteRoom(0);
-      if (!(at.y < head || at.y + at.height > shown)) return start;
+      // And across: a card docked beside one page leaves only part of the
+      // stage's width showing, and a verse under it is brought out too.
+      const from = fit.coverLeft ?? 0;
+      const to = fit.stageWidth - (fit.coverRight ?? 0);
+      const across = at.x < from || at.x + at.width > to;
+      if (!(at.y < head || at.y + at.height > shown) && !across) return start;
       let target = frameBboxToView(bbox, ctx, start.z, lead);
       // A verse only a little taller than that is drawn a little smaller
       // and shown whole, rather than lose its last line under the note. Not
@@ -2255,6 +2280,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     lift();
     return () => cancelAnimationFrame(liftRaf.current);
   }, [coverTop, lift]);
+  // A card docked beside one page arriving, going or changing width: the page
+  // moves into the middle of what it leaves, or back to the middle of the
+  // stage, and the selected verse comes out from under it.
+  const sideSeen = useRef(coverSide);
+  useEffect(() => {
+    const was = sideSeen.current;
+    if (was === coverSide || (was && coverSide && was.left === coverSide.left && was.right === coverSide.right)) return;
+    sideSeen.current = coverSide;
+    lift();
+    return () => cancelAnimationFrame(liftRaf.current);
+  }, [coverSide, lift]);
   // The chips move when a list opens: from their column at the stage's side
   // onto the list's top row. The page was placed while they still stood in
   // the column, kept below where it ended, and a phone held sideways has too
@@ -2312,7 +2348,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       setCurrentPage(next);
       if (carry) reclampCurrent();
       else centerCurrent();
-      if (!carry && coverTopRef.current !== null) {
+      if (!carry && (coverTopRef.current !== null || coverSideRef.current !== null)) {
         cancelAnimationFrame(liftRaf.current);
         liftRaf.current = requestAnimationFrame(() => liftRef.current());
       }

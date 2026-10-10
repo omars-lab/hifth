@@ -53,6 +53,14 @@ export interface StageFit {
    * Absent or 0 when nothing covers the stage.
    */
   coverBottom?: number;
+  /**
+   * How much of the stage's left and right side a card stands over, in CSS px —
+   * a list docked beside one page on a wide screen. The page is centred, and
+   * held, in the part still showing, so it moves clear of the card rather than
+   * slide its line ends under it. Absent or 0 when nothing stands beside it.
+   */
+  coverLeft?: number;
+  coverRight?: number;
 }
 
 /** Geometry the framing math needs — all in CSS px except `viewBoxWidth`. */
@@ -111,6 +119,13 @@ function shownHeight(fit: StageFit): number {
   return fit.stageHeight - Math.max(0, fit.coverBottom ?? 0);
 }
 
+/** Where the stage still shows across: from its left edge, how far in and how wide. */
+function shownAcross(fit: StageFit): { from: number; width: number } {
+  const left = Math.max(0, fit.coverLeft ?? 0);
+  const right = Math.max(0, fit.coverRight ?? 0);
+  return { from: left, width: fit.stageWidth - left - right };
+}
+
 /**
  * Hold a view inside the stage, so no gesture and no hop can put blank stage
  * where the mus'haf should be.
@@ -121,9 +136,10 @@ function shownHeight(fit: StageFit): number {
  * dragged half a screen past its own end. Framing proposes; this decides.
  */
 export function clampView(v: View, fit: StageFit): View {
+  const across = shownAcross(fit);
   return {
     z: v.z,
-    x: holdAxis(fit.stageWidth, fit.contentWidth * v.z, v.x),
+    x: across.from + holdAxis(across.width, fit.contentWidth * v.z, v.x - across.from),
     y: holdAxis(shownHeight(fit), fit.contentHeight * v.z, v.y),
   };
 }
@@ -158,8 +174,11 @@ export function viewFitsAcross(v: View, fit: StageFit): boolean {
   // "fits" for the same reason: a zero box is a measurement that has not
   // happened yet, and answering "yes, it fits" would arm a turn against a page
   // nobody has seen.
-  if (!(fit.contentWidth > 0) || !(fit.stageWidth > 0)) return false;
-  return fit.contentWidth * v.z <= fit.stageWidth;
+  // A list beside the page narrows what the clamp centres in, so it narrows
+  // this too, or the two would disagree about a page that fits only without it.
+  const across = shownAcross(fit).width;
+  if (!(fit.contentWidth > 0) || !(across > 0)) return false;
+  return fit.contentWidth * v.z <= across;
 }
 
 /**
@@ -187,9 +206,10 @@ export function frameBboxToView(
   const s = t.s;
   const cx = t.x + (bbox.x + bbox.width / 2) * s;
   const cy = t.y + (bbox.y + bbox.height / 2) * s;
-  let x = ctx.stageWidth / 2 - z * cx;
-  if (lead && bbox.width * s * z > ctx.stageWidth) {
-    x = ctx.stageWidth - LEAD_INSET - z * (t.x + (lead.x + lead.width) * s);
+  const across = shownAcross(ctx);
+  let x = across.from + across.width / 2 - z * cx;
+  if (lead && bbox.width * s * z > across.width) {
+    x = across.from + across.width - LEAD_INSET - z * (t.x + (lead.x + lead.width) * s);
   }
   return clampView({ z, x, y: shownHeight(ctx) / 2 - z * cy }, ctx);
 }
@@ -209,8 +229,9 @@ const LEAD_INSET = 16;
 export function hopZoomFor(bbox: Rect, ctx: FrameContext, z: number = DEFAULT_HOP_ZOOM): number {
   if (!(z > 1)) return z;
   const wide = bbox.width * textOf(ctx).s;
-  if (!(wide > 0) || !(ctx.stageWidth > 0)) return z;
-  return Math.max(1, Math.min(z, (ctx.stageWidth - 2 * LEAD_INSET) / wide));
+  const across = shownAcross(ctx).width;
+  if (!(wide > 0) || !(across > 0)) return z;
+  return Math.max(1, Math.min(z, (across - 2 * LEAD_INSET) / wide));
 }
 
 /** The most a page is drawn smaller so a verse shows whole: a fifth. */

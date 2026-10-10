@@ -265,6 +265,71 @@ describe("clampView", () => {
   });
 });
 
+// A laptop window closed to one page, with a list docked beside the page: the
+// stage runs the window's width, the page sits in the middle of it, and a card
+// 484px wide stands over the stage's right side (left, in Arabic).
+describe("a list standing beside one page", () => {
+  const WIDE: FrameContext = {
+    contentWidth: 400,
+    contentHeight: (400 * 550) / 345,
+    stageWidth: 1280,
+    stageHeight: 700,
+    viewBoxWidth: 345,
+  };
+
+  it("centres a page that fits in the part the list leaves, on either side", () => {
+    const right = clampView({ x: 0, y: 0, z: 1 }, { ...WIDE, coverRight: 484 });
+    expect(right.x).toBeCloseTo((796 - 400) / 2, 6);
+    const left = clampView({ x: 0, y: 0, z: 1 }, { ...WIDE, coverLeft: 484 });
+    expect(left.x).toBeCloseTo(484 + (796 - 400) / 2, 6);
+  });
+
+  it("with nothing beside it, still centres the page in the whole stage", () => {
+    expect(clampView({ x: 0, y: 0, z: 1 }, WIDE).x).toBeCloseTo((1280 - 400) / 2, 6);
+    expect(clampView({ x: 0, y: 0, z: 1 }, { ...WIDE, coverLeft: 0, coverRight: 0 }).x).toBeCloseTo(440, 6);
+  });
+
+  it("lets a page wider than what shows be panned until each edge comes clear of the list", () => {
+    const covered = { ...WIDE, coverRight: 484 };
+    // At z=2.5 the page is 1000px wide in the 796px still showing.
+    expect(clampView({ x: 1e6, y: 0, z: 2.5 }, covered).x).toBeCloseTo(0, 6);
+    expect(clampView({ x: -1e6, y: 0, z: 2.5 }, covered).x).toBeCloseTo(796 - 1000, 6);
+    const mirrored = { ...WIDE, coverLeft: 484 };
+    expect(clampView({ x: 1e6, y: 0, z: 2.5 }, mirrored).x).toBeCloseTo(484, 6);
+    expect(clampView({ x: -1e6, y: 0, z: 2.5 }, mirrored).x).toBeCloseTo(1280 - 1000, 6);
+  });
+
+  it("frames a verse in the middle of the part the list leaves", () => {
+    const covered = { ...WIDE, coverLeft: 484 };
+    const bbox: Rect = { x: 145, y: 265, width: 55, height: 20 };
+    // At z=2.5 the page overhangs what shows, so the clamp leaves the centring alone.
+    const screen = bboxToScreen(bbox, frameBboxToView(bbox, covered, 2.5), covered);
+    expect(screen.x + screen.width / 2).toBeCloseTo(484 + 796 / 2, 6);
+  });
+
+  it("starts a verse too wide for what shows at its first word, inside the list's edge", () => {
+    const covered = { ...WIDE, coverRight: 484 };
+    const bbox: Rect = { x: 10, y: 265, width: 325, height: 40 };
+    const lead: Rect = { x: 200, y: 265, width: 135, height: 20 };
+    const v = frameBboxToView(bbox, covered, 2.5, lead);
+    const first = bboxToScreen(lead, v, covered);
+    expect(first.x + first.width).toBeLessThanOrEqual(796);
+    expect(first.x + first.width).toBeGreaterThan(796 - 40);
+  });
+
+  it("says a page fits across only when it fits beside the list", () => {
+    const covered = { ...WIDE, coverRight: 484 };
+    expect(viewFitsAcross({ x: 0, y: 0, z: 1.9 }, covered)).toBe(true);
+    expect(viewFitsAcross({ x: 0, y: 0, z: 2.1 }, covered)).toBe(false);
+  });
+
+  it("is idempotent beside a list, too", () => {
+    const covered = { ...WIDE, coverLeft: 484 };
+    const once = clampView({ x: -1e6, y: -1e6, z: 2.5 }, covered);
+    expect(clampView(once, covered)).toEqual(once);
+  });
+});
+
 describe("viewFitsAcross", () => {
   const FIT = {
     contentWidth: CTX.contentWidth,

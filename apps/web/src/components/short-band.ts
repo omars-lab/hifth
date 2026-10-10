@@ -102,3 +102,59 @@ export function watchCover(sheet: HTMLElement, height: () => number, onCover: (t
     window.removeEventListener("resize", report);
   };
 }
+
+/** Where a card spans across the window, in window px. */
+export interface CardSpan {
+  left: number;
+  right: number;
+}
+
+/**
+ * Tell `onSide` where a card spans across the window for as long as it is up,
+ * and null once it is gone or stands beside a spread. A laptop window closed
+ * to one page puts the lists and the note in its corner, and the page was
+ * centred as though nothing stood there: at the size a link lands at, the
+ * card hid where the page's lines begin (look-alike rows ⑩). The app decides
+ * whether the card is beside the page or across its foot; this only says
+ * where it is. Read from layout, not its box, as the cover above is.
+ */
+export function useSideCover(
+  open: boolean,
+  beside: boolean,
+  sheetRef: RefObject<HTMLElement | null>,
+  onSide: ((span: CardSpan | null) => void) | undefined,
+): void {
+  useLayoutEffect(() => {
+    if (!onSide) return;
+    const sheet = sheetRef.current;
+    if (!open || beside || !sheet) {
+      onSide(null);
+      return;
+    }
+    const report = () => onSide({ left: sheet.offsetLeft, right: sheet.offsetLeft + sheet.offsetWidth });
+    report();
+    window.addEventListener("resize", report);
+    const seen = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(report);
+    seen?.observe(sheet);
+    return () => {
+      seen?.disconnect();
+      window.removeEventListener("resize", report);
+      onSide(null);
+    };
+  }, [open, beside, sheetRef, onSide]);
+}
+
+/**
+ * How much of the stage's left or right side a card covers: a card in the
+ * stage's right half covers it from the card's left edge on, one in its left
+ * half up to the card's right edge.
+ */
+export function sideCoverOf(
+  card: CardSpan | null,
+  stage: CardSpan,
+): { coverLeft?: number; coverRight?: number } {
+  if (!card) return {};
+  return card.left + card.right >= stage.left + stage.right
+    ? { coverRight: Math.max(0, stage.right - card.left) }
+    : { coverLeft: Math.max(0, card.right - stage.left) };
+}

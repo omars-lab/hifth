@@ -2174,6 +2174,37 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       expect(gap, "the chips still stand just outside the page").toBeGreaterThanOrEqual(4);
       expect(gap).toBeLessThanOrEqual(32);
     });
+
+    test(`closed to one page, the roots list stands clear of a ${side}-hand page, which comes back to the middle once it closes`, async ({ page }) => {
+      // The page stayed in the middle of the window whatever stood beside it,
+      // so at the size a link lands at the list hid the ends of its lines —
+      // where an Arabic line begins, on the list's side in English. The page
+      // now moves into the middle of what the list leaves (look-alike rows ⑩).
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await page.goto(`/#/hafs-kfqc/${at}?view=one&open=roots`);
+      const list = page.getByRole("dialog");
+      await expect(list).toBeVisible({ timeout: 20_000 });
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const paper = pageSvg(page, pageNo);
+      const card = await boxOf(list);
+      await expect
+        .poll(async () => {
+          const open = await boxOf(paper);
+          return Math.min(open.x + open.width, card.x + card.width) - Math.max(open.x, card.x);
+        }, { message: "how far the list stands over the page, across" })
+        .toBeLessThanOrEqual(0);
+      await page.keyboard.press("Escape");
+      await expect(list).toBeHidden();
+      // The whole leaf, not its picture: the picture sits to one side of the
+      // leaf, since only one edge of a page is its fore-edge.
+      const leaf = page.locator(`[data-live="true"] [data-host-page="${pageNo}"]`);
+      await expect
+        .poll(async () => {
+          const open = await boxOf(leaf);
+          return Math.abs(open.x + open.width / 2 - 640);
+        }, { message: "how far the page's middle is from the window's" })
+        .toBeLessThan(2);
+    });
   }
 
   for (const { home, row } of [

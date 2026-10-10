@@ -3,7 +3,7 @@ import type { Edge, LeafSide, RootFamily, RootHop } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./RootLens.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
-import { useShortBand } from "./short-band";
+import { useShortBand, useSideCover, type CardSpan } from "./short-band";
 
 // The ⬡ button has its own file so it can stay in the start-up script while
 // the lens loads on first open. Re-exported here for existing importers.
@@ -35,6 +35,11 @@ interface RootLensProps {
   side?: LeafSide | null;
   /** On a phone, where the list starts, so the page can lift the verse above it; null when it covers nothing. */
   onCover?: (top: number | null) => void;
+  /**
+   * Where the card spans across the window while it is up and not beside a
+   * spread, so a page alone in a wide window can move clear of it.
+   */
+  onSide?: (span: CardSpan | null) => void;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -77,6 +82,7 @@ export function RootLens({
   onClose,
   side = null,
   onCover,
+  onSide,
 }: RootLensProps): JSX.Element | null {
   const { t, dir } = useT();
   // Beside the verse on a spread: no dimming, no trapped Tab (see HopPopover).
@@ -84,6 +90,7 @@ export function RootLens({
   const place = useOverLeaf(families !== null, side);
   const sheetRef = useRef<HTMLDivElement>(null);
   const band = useShortBand(families !== null, beside, sheetRef, onCover);
+  useSideCover(families !== null, beside, sheetRef, onSide);
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);

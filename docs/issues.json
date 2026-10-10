@@ -3530,10 +3530,11 @@
         "file": "docs/design/lookalike-rows.md",
         "item": "⑩"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Closed to one page on a laptop, a magnified page with the roots list open loses about 44px of its right edge, where every line begins, under the list's card. The page stays centred though there is free room on its other side."
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "Closed to one page on a laptop, a magnified page with the roots list open lost the edge where every line begins under the list's card, because the page stayed centred in the window. Fixed by centring the page in the room the card leaves (a list or a grown note, on whichever side it stands) and bringing it back to the middle once the card closes; the verse being read is kept in sight."
     },
     {
       "id": "app-walk-whole-demo-path",
