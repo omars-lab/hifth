@@ -3,9 +3,9 @@
 > In the private pitch build, each verse opens The Study Quran's note on it. The note's words
 > come from a capture of the printed book, and the capture lost things the print has: slanted
 > words, some paragraph breaks, the odd letter. This page holds the open questions about putting
-> those back, one numbered item each. The first fifty items, and the whole history of the work,
-> are item ① in [the commentary design](knowledge-graph-commentary.md); that page's numbering is
-> full, so the items continue here from ①. Nothing here reaches the public site.
+> those back, one numbered item each. The history of this work so far is item ① in
+> [the commentary design](knowledge-graph-commentary.md); that page's numbering is full, so new
+> items continue here from ①. Nothing here reaches the public site.
 
 ## A few words, defined once
 

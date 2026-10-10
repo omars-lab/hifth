@@ -683,7 +683,10 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     const oneTapAway = [["7:156", 15], ["2:143", 15], ["18:50", 5], ["7:11", 5]] as const;
     const twoTapsAway = [["2:106", 30], ["54:49", 25], ["6:80", 15], ["13:28", 10]] as const;
     const restTwoTapsAway = [["4:171", 25], ["1:3", 25], ["4:24", 30], ["5:54", 20]] as const;
-    for (const [verse, least] of [...slanted, ...oneTapAway, ...twoTapsAway, ...restTwoTapsAway]) {
+    // Paragraphs moved into a shared note are read for slant on the page they
+    // were printed on, not only the page the note starts on (9:37's, 2026-10-10).
+    const movedIn = [["9:37", 8]] as const;
+    for (const [verse, least] of [...slanted, ...oneTapAway, ...twoTapsAway, ...restTwoTapsAway, ...movedIn]) {
       await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
       await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
       expect(await sheet(page).locator("em").count(), verse).toBeGreaterThan(least);

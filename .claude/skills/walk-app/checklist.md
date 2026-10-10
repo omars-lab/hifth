@@ -327,3 +327,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   stops short under one verse of the run, is the capture filing it in the wrong place; read it off
   the page picture and list it in the misfiled paragraphs. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/6:74?open=commentary'`
   · test: `e2e/pitch.spec.ts` ("a verse's own note the capture ran on")
+- [ ] A paragraph moved or shared into a note carries the slant the print gives it: its slant is
+  read on the page it was printed on, which may be a later page than the one the note starts on.
+  Open the note under each verse that holds it and compare its slanted words with the page
+  picture. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/9:37?open=commentary'`
+  · test: `e2e/pitch.spec.ts` ("the demo's notes set the book's italics")
