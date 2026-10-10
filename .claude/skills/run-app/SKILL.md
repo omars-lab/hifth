@@ -78,6 +78,7 @@ make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # pitch server, deskto
   at the pitch server. `OUT` is under `apps/web/` and the run prints the path.
 - `MOUSE=1` drives a desktop with a real pointer (hover styles, the page-edge grab);
   `drag=x,y>x,y` in `ACT` presses, glides and lets go — a page turn by its edge.
+  `swipe=x,y>x,y` is the same with a real finger (Chrome only): a phone or iPad swipe.
 
 For a GIF or video of a run — something that moves — use the `record-demo` skill. To walk the
 whole app in every device and build, down a checklist that grows with each fault, use `walk-app`.

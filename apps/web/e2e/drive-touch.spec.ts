@@ -93,6 +93,34 @@ test("drive's tap= reaches the app as a real finger: the tapped verse's menu ope
   }
 });
 
+// 2026-10-10, walking the live site on an iPad on its side: drag= is a mouse,
+// so a "swipe" walked with it only ever showed what a mouse does. A finger
+// needs its own verb, sent as a touch that moves.
+test("drive's swipe= is a finger that moves: on a phone, a swipe to the right turns to the next page", async ({ baseURL }) => {
+  test.setTimeout(60_000);
+  const dir = mkdtempSync(join(tmpdir(), "drive-touch-"));
+  try {
+    const log = execFileSync(
+      process.execPath,
+      [
+        DRIVE,
+        "--base", String(baseURL),
+        "--hash", "#/hafs-kfqc/p7",
+        "--locale", "en-US",
+        "--device", "phone",
+        "--seen-coach",
+        "--act", "settle=800; swipe=110,420>320,420; settle=1500; eval=location.hash",
+        "--out", join(dir, "shot.png"),
+      ],
+      { stdio: "pipe", timeout: 50_000 },
+    ).toString();
+    expect(log).toMatch(/ev=touch_down kind=swipe x=110 y=420/);
+    expect(log).toMatch(/ev=eval result="#\/hafs-kfqc\/p8"/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("drive with --marks and --frames records a held touch as timed screenshots, labelled by step=", async ({ baseURL }) => {
   test.setTimeout(60_000);
   const dir = mkdtempSync(join(tmpdir(), "drive-touch-"));
