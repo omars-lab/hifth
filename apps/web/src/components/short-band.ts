@@ -1,8 +1,4 @@
 import { useLayoutEffect, type RefObject } from "react";
-import { useMediaQuery } from "../useMediaQuery";
-
-/** Below this width a list is a band across the foot of the screen, not a card. */
-export const BAND_QUERY = "(max-width: 899.98px)";
 
 /**
  * On a phone, the roots and similar-verses lists open as a short band at the
@@ -15,8 +11,14 @@ export const BAND_QUERY = "(max-width: 899.98px)";
  * verse under it, while the note on the same screen slid its verse clear
  * (2026-10-08).
  *
- * Returns whether the list is that band now: then there is no veil over the
- * page, and the page stays live, as it does under the note.
+ * The same card on that upright iPad still drew a veil over the page and the
+ * toolbar, and the roots list rose over nearly the whole screen, where the
+ * note in the same place leaves the page bright (2026-10-09). So any list not
+ * beside the page is the band, whatever the width: short, no veil, the page
+ * live, as it is under the note.
+ *
+ * Returns whether the list is that band now; the sheet carries `data-band`
+ * then, which is what keeps it short.
  */
 export function useShortBand(
   open: boolean,
@@ -24,7 +26,7 @@ export function useShortBand(
   sheetRef: RefObject<HTMLElement | null>,
   onCover: ((top: number | null) => void) | undefined,
 ): boolean {
-  const band = useMediaQuery(BAND_QUERY) && !beside;
+  const band = !beside;
   useLayoutEffect(() => {
     if (!onCover) return;
     const sheet = sheetRef.current;
