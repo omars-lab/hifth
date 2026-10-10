@@ -146,7 +146,7 @@ export function useSideCover(
 
 /**
  * The span of every card that is up, from the furthest left edge to the
- * furthest right: the note, the roots list and the share card all stand in
+ * furthest right: the note, the roots list, the share card and the tajweed key stand in
  * the same corner, so the page has to clear whichever reaches furthest in.
  */
 export function spanOfAll(cards: readonly (CardSpan | null)[]): CardSpan | null {
