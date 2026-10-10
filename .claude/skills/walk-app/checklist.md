@@ -283,3 +283,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the way back) and the play buttons draw as plain marks, not coloured emoji tiles, in Arabic and
   English. · `make app-walk SIDEWAYS=1 LOCALE=ar ROUTES='/hafs-kfqc/2:48?open=lookalikes
   /hafs-kfqc/15:30?open=commentary'` · test: `src/glyphs-as-text.test.ts`, `e2e/hop.spec.ts`
+- [ ] A red ribbon down the crease is the where-you-left-off marker, not a fault: it moves to a
+  page after six seconds there and is saved, and the simulator keeps it between installs. For a
+  clean picture uninstall the app first; when it shows, it lies in the margin, clear of the
+  letters. · `make app-walk SIDEWAYS=1 ROUTES='/hafs-kfqc/15:30?open=commentary'` · test:
+  `e2e/desktop.spec.ts`
+- [ ] On an iPad held upright, the look-alike and roots lists open short at the foot of the
+  page with the page bright behind them, as the note does: no dimmed page or toolbar, and the
+  verse they are about sits above them, not under. · `make app-walk ROUTES='/hafs-kfqc/2:255?open=roots'`
+  · test: `e2e/pitch.spec.ts` ("leaves its verse bright")

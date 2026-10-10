@@ -78,10 +78,14 @@ describe("RootLens", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("is a modal dialog that takes focus on open", () => {
-    render(<RootLens families={FAMILIES} canHop={always} onHop={noop} onClose={noop} />);
+  // At the foot of the screen it is a short band over a live page, as the note
+  // is: no veil, so not modal (an upright iPad dimmed the page, 2026-10-09).
+  it("is a dialog at the foot that takes focus on open and leaves the page live", () => {
+    const { container } = render(<RootLens families={FAMILIES} canHop={always} onHop={noop} onClose={noop} />);
     const dialog = screen.getByRole("dialog");
-    expect(dialog).toHaveAttribute("aria-modal", "true");
+    expect(dialog).toHaveAttribute("aria-modal", "false");
+    expect(dialog).toHaveAttribute("data-band");
+    expect(container.querySelector('[aria-hidden="true"][class*="scrim"]')).toBeNull();
     expect(dialog.contains(document.activeElement)).toBe(true);
   });
 

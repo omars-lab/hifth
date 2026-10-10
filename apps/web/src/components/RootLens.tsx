@@ -84,8 +84,6 @@ export function RootLens({
   const place = useOverLeaf(families !== null, side);
   const sheetRef = useRef<HTMLDivElement>(null);
   const band = useShortBand(families !== null, beside, sheetRef, onCover);
-  // Under the page on a phone, or beside it on a spread: the page stays live.
-  const live = beside || band;
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -118,23 +116,8 @@ export function RootLens({
         onClose();
         return;
       }
-      if (e.key !== "Tab" || live) return;
-      const sheet = sheetRef.current;
-      if (!sheet) return;
-      const items = focusables(sheet);
-      if (items.length === 0) return;
-      const first = items[0]!;
-      const last = items[items.length - 1]!;
-      const active = document.activeElement;
-      if (e.shiftKey && active === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && active === last) {
-        e.preventDefault();
-        first.focus();
-      }
     },
-    [onClose, live],
+    [onClose],
   );
 
   if (!families) return null;
@@ -173,14 +156,14 @@ export function RootLens({
 
   return (
     <>
-      {!live && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
       <div
         ref={sheetRef}
         className={styles.sheet}
         style={leafStyle(place, "content")}
         data-over-leaf={place ? "" : undefined}
         role="dialog"
-        aria-modal={!live}
+        aria-modal={false}
+        data-band={band ? "" : undefined}
         aria-label={t.rootsAria(families.length)}
         dir={dir}
         data-side={side ?? undefined}

@@ -1450,6 +1450,31 @@ test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
 test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
   test.use({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
 
+  for (const link of ["2:48?open=lookalikes", "2:255?open=roots"]) {
+    test(`a list at the foot of the page leaves its verse bright, as the note does: ${link}`, async ({ page }) => {
+      // Walking the iPad app upright (2026-10-09): the look-alike list slid its
+      // verse clear above it, but dimmed the whole page and the toolbar behind
+      // a veil, where the note in the same place leaves the page bright. The
+      // verse is the thing a reader holds the list against.
+      await page.goto(`/#/hafs-kfqc/${link}`);
+      const list = page.getByRole("dialog");
+      await expect(list).toHaveCount(1, { timeout: 20_000 });
+      await expect(list).not.toContainText("Study Quran");
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const lit = page.locator("#hifth-overlay .hl-sel").first();
+      await settle(lit);
+      const first = (await litLineBoxes(page))[0]!;
+      expect(first.y + first.height, "the verse's first line is above the list").toBeLessThanOrEqual(
+        (await list.boundingBox())!.y,
+      );
+      const onTop = await page.evaluate(
+        ([x, y]) => document.elementFromPoint(x!, y!)?.closest("svg") !== null,
+        [first.x + first.width / 2, first.y + first.height / 2],
+      );
+      expect(onTop, "the verse, not a veil, is under its first line").toBe(true);
+    });
+  }
+
   test("a verse a little taller than the room above the note is shown whole, the page drawn a little smaller", async ({ page }) => {
     // A link to a verse lands zoomed in, and the note rises over the lower part
     // of the screen. 2:255 runs six lines: at that zoom it was a few dozen
