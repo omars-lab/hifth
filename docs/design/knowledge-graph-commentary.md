@@ -596,9 +596,17 @@ where the book runs a sentence on, since it only names spots where the stop is s
 Checked on the page pictures, every one of 62 spots looked at was a real paragraph start: all
 18 in the demo's notes (2:48, 2:255 and 18:60 to 18:82) and 44 drawn at random from the rest
 of the book. All 1,425 are put back, across the whole book. The 2:255 note now shows its ten
-paragraphs, and a browser test counts them. Left for a hand reading: 76 set-in lines where the
-capture lost the stop as well, most after a closing bracket, where the mark to put back has to
-be read off the page, and 4 lines the listing could not place in one note.
+paragraphs, and a browser test counts them. That left 76 set-in lines where the capture lost
+the stop as well. The listing now prints the marks the page and the capture each end the line
+before on, never the words: in 64 the page shows a full stop the capture dropped (46 of them
+after a closing bracket), and all 64 were looked at on the page pictures and are put back. Of
+the other 12, looked at the same way, three are real paragraph starts (two with a full stop the
+reading missed, one where the print itself has none, put back as printed) and nine are not
+paragraph starts at all: a line that only looks set in because it opens with a bracket, a
+note's own first line, scripture set in large, a quotation. One of those had come out as a full
+stop because the page reading skipped the lines above it; the listing now treats a line read
+more than two lines up as unknown. The 4 lines the listing matched to two places are a real
+start already in place under both verses that carry the note, and three that are not starts.
 One shortcut was tried and set aside: the book often sets in italics a note's
 quotation of its own verse, so a run of the verse's words inside its note could be slanted
 without reading the slant at all. About 4,000 notes have such a run, but checked against the

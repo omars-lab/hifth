@@ -33,6 +33,11 @@ describe("paragraphStarts", () => {
     expect(starts.some((t) => t.startsWith("“"))).toBe(false);
   });
 
+  it("does not take a line read further up for the line before, where the reading skipped some", () => {
+    const skipped = [...PAGE.slice(1, 3), line(0.07, 0.2, "The next morning they set out again over"), line(0.058, 0.22, "the hills.")];
+    expect(paragraphStarts(skipped)[0].before).toBe("");
+  });
+
   it("carries the end of the line before, to tell two places with the same opening apart", () => {
     expect(paragraphStarts(PAGE)[0].before).toBe("third day and gave thanks for the water.");
   });
@@ -56,6 +61,12 @@ describe("placeStarts", () => {
   it("tells a start whose full stop the capture also lost", () => {
     const lost = RUN.replace("water.", "water");
     expect(placeStarts([start], [{ verse: "9:9", blocks: [lost] }])[0].kind).toBe("stop-lost");
+  });
+
+  it("names the marks the page and the capture each end the line before on, and no words", () => {
+    const lost = RUN.replace("water.", "water (cf. 4:2)");
+    const page = { ...start, before: "thanks for the water (cf. 4:2)." };
+    expect(placeStarts([page], [{ verse: "9:9", blocks: [lost] }])[0]).toMatchObject({ kind: "stop-lost", ends: { page: ").", capture: ")" } });
   });
 
   it("reads past the marks the print's slant and its curly quotes leave", () => {

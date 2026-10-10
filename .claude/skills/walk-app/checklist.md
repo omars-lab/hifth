@@ -84,11 +84,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   A note the book shares across verses (18:60–82) breaks into the same paragraphs under each of
   them; open two of its verses, not only the first. Where the print starts a new paragraph, the
   panel does too. · laptop · test: `e2e/pitch.spec.ts` ("a note the book shares across verses
-  breaks into the same paragraphs") · issue: `pitch-paragraphs-lost-stop-set-in`
+  breaks into the same paragraphs") · issue: `pitch-commentary-differs-from-print`
 - [ ] Open 2:255's note and count its paragraphs against the printed page: ten, each starting
   where the print sets a line in, none run on after a full stop. · iPad · test:
   `e2e/pitch.spec.ts` ("the note on the Throne Verse keeps the paragraphs") · issue:
-  `pitch-paragraphs-lost-stop-set-in`
+  `pitch-commentary-differs-from-print`
 - [ ] A note longer than its card fades at its foot, not cut through a line, until its end is
   reached; on a phone, also once the card is pulled up. · any · issue: `note-card-no-more-below-cue`
 - [ ] The commentators' initials can be tapped and say whose comment it is. · phone · issues:

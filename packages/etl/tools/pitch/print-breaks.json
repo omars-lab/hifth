@@ -1,5 +1,5 @@
 {
-  "about": "Places the printed Study Quran starts a new paragraph where its capture ran two paragraphs together and lost the stop between them, each read off the printed page (see breaks.mjs): by hand, or, where the capture kept the stop, from the set-in first line the page gives every paragraph (see indents.mjs), with a sample checked on the page pictures. print: a fingerprint of the words around the spot, never the words. stop: the mark put back, a full stop unless given, empty where the capture kept it, a closing bracket where the capture lost that instead. page: the captured page image the spot was read on.",
+  "about": "Places the printed Study Quran starts a new paragraph where its capture ran two paragraphs together and lost the stop between them, each read off the printed page (see breaks.mjs): by hand, or, where the capture kept the stop, from the set-in first line the page gives every paragraph (see indents.mjs), with a sample checked on the page pictures, or, where the capture lost the stop too, with every one checked on its page picture. print: a fingerprint of the words around the spot, never the words. stop: the mark put back, a full stop unless given, empty where nothing is added (the capture kept it, or the print has none), a closing bracket where the capture lost that instead. page: the captured page image the spot was read on.",
   "marks": [
     {
       "verse": "1:1",
@@ -56,6 +56,12 @@
       "kind": "break",
       "stop": "",
       "page": "page_0023"
+    },
+    {
+      "verse": "1:4",
+      "print": "cf7f73790701",
+      "kind": "break",
+      "page": "page_0024"
     },
     {
       "verse": "1:5",
@@ -463,6 +469,13 @@
       "page": "page_0043"
     },
     {
+      "verse": "2:62",
+      "print": "f2fea75d0f98",
+      "kind": "break",
+      "stop": "",
+      "page": "page_0043"
+    },
+    {
       "verse": "2:65",
       "print": "e9ca1714ad21",
       "kind": "break",
@@ -565,6 +578,12 @@
       "print": "c3db4a5aaa6e",
       "kind": "break",
       "stop": "",
+      "page": "page_0046"
+    },
+    {
+      "verse": "2:78",
+      "print": "740b1c5d3f87",
+      "kind": "break",
       "page": "page_0046"
     },
     {
@@ -944,6 +963,12 @@
       "page": "page_0059"
     },
     {
+      "verse": "2:142",
+      "print": "49e30fa09b37",
+      "kind": "break",
+      "page": "page_0059"
+    },
+    {
       "verse": "2:143",
       "print": "0e1c439e989e",
       "kind": "break",
@@ -1017,6 +1042,12 @@
       "print": "b2b0020a2bd3",
       "kind": "break",
       "stop": "",
+      "page": "page_0062"
+    },
+    {
+      "verse": "2:158",
+      "print": "df3483e43161",
+      "kind": "break",
       "page": "page_0062"
     },
     {
@@ -1139,6 +1170,12 @@
       "page": "page_0065"
     },
     {
+      "verse": "2:177",
+      "print": "77b2b036c8c6",
+      "kind": "break",
+      "page": "page_0065"
+    },
+    {
       "verse": "2:178",
       "print": "f3aad8ce5244",
       "kind": "break",
@@ -1185,6 +1222,12 @@
       "print": "53144d1c906f",
       "kind": "break",
       "stop": "",
+      "page": "page_0066"
+    },
+    {
+      "verse": "2:178",
+      "print": "6088b07f894a",
+      "kind": "break",
       "page": "page_0066"
     },
     {
@@ -2082,6 +2125,12 @@
       "page": "page_0096"
     },
     {
+      "verse": "3:7",
+      "print": "7d16c094ae9c",
+      "kind": "break",
+      "page": "page_0096"
+    },
+    {
       "verse": "3:8",
       "print": "8ee880bd79cc",
       "kind": "break",
@@ -2187,6 +2236,12 @@
       "page": "page_0100"
     },
     {
+      "verse": "3:31",
+      "print": "107f31a6e990",
+      "kind": "break",
+      "page": "page_0101"
+    },
+    {
       "verse": "3:33",
       "print": "2699a1d89598",
       "kind": "break",
@@ -2212,6 +2267,12 @@
       "print": "eff1473bf6ef",
       "kind": "break",
       "stop": "",
+      "page": "page_0102"
+    },
+    {
+      "verse": "3:37",
+      "print": "3b85260da785",
+      "kind": "break",
       "page": "page_0102"
     },
     {
@@ -2282,6 +2343,12 @@
       "print": "17bead16b6c7",
       "kind": "break",
       "stop": "",
+      "page": "page_0110"
+    },
+    {
+      "verse": "3:97",
+      "print": "e0f44f77201c",
+      "kind": "break",
       "page": "page_0110"
     },
     {
@@ -2418,6 +2485,12 @@
       "page": "page_0121"
     },
     {
+      "verse": "3:169",
+      "print": "04286f45f2c0",
+      "kind": "break",
+      "page": "page_0121"
+    },
+    {
       "verse": "3:172",
       "print": "37eafdbe2a36",
       "kind": "break",
@@ -2479,6 +2552,12 @@
       "kind": "break",
       "stop": "",
       "page": "page_0130"
+    },
+    {
+      "verse": "4:1",
+      "print": "2431fba058a7",
+      "kind": "break",
+      "page": "page_0131"
     },
     {
       "verse": "4:3",
@@ -2600,6 +2679,12 @@
       "page": "page_0136"
     },
     {
+      "verse": "4:23",
+      "print": "cbb7a7c8ea89",
+      "kind": "break",
+      "page": "page_0136"
+    },
+    {
       "verse": "4:24",
       "print": "ca41302605be",
       "kind": "break",
@@ -2635,6 +2720,12 @@
       "page": "page_0136"
     },
     {
+      "verse": "4:24",
+      "print": "5da982144d2c",
+      "kind": "break",
+      "page": "page_0136"
+    },
+    {
       "verse": "4:25",
       "print": "df2a340f0223",
       "kind": "break",
@@ -2660,6 +2751,12 @@
       "print": "924fb6f63ea3",
       "kind": "break",
       "stop": "",
+      "page": "page_0138"
+    },
+    {
+      "verse": "4:31",
+      "print": "9262324e416d",
+      "kind": "break",
       "page": "page_0138"
     },
     {
@@ -3090,6 +3187,12 @@
       "page": "page_0151"
     },
     {
+      "verse": "4:88",
+      "print": "458f7a70ca6f",
+      "kind": "break",
+      "page": "page_0151"
+    },
+    {
       "verse": "4:92",
       "print": "062e36b7bd76",
       "kind": "break",
@@ -3303,6 +3406,12 @@
       "print": "cd3c3744b474",
       "kind": "break",
       "stop": "",
+      "page": "page_0159"
+    },
+    {
+      "verse": "4:128",
+      "print": "0257b3a9ac0f",
+      "kind": "break",
       "page": "page_0159"
     },
     {
@@ -3709,6 +3818,12 @@
       "page": "page_0176"
     },
     {
+      "verse": "5:5",
+      "print": "0c5030e03b79",
+      "kind": "break",
+      "page": "page_0176"
+    },
+    {
       "verse": "5:6",
       "print": "6bf173efb934",
       "kind": "break",
@@ -3810,6 +3925,12 @@
       "print": "e70510971cc8",
       "kind": "break",
       "stop": "",
+      "page": "page_0178"
+    },
+    {
+      "verse": "5:13",
+      "print": "1b9619814d1d",
+      "kind": "break",
       "page": "page_0178"
     },
     {
@@ -3987,6 +4108,12 @@
       "page": "page_0185"
     },
     {
+      "verse": "5:41",
+      "print": "913e44ab5888",
+      "kind": "break",
+      "page": "page_0185"
+    },
+    {
       "verse": "5:43",
       "print": "0797bed48d35",
       "kind": "break",
@@ -4092,6 +4219,12 @@
       "page": "page_0190"
     },
     {
+      "verse": "5:57",
+      "print": "4934f6145947",
+      "kind": "break",
+      "page": "page_0190"
+    },
+    {
       "verse": "5:58",
       "print": "bee346dd7598",
       "kind": "break",
@@ -4152,6 +4285,12 @@
       "print": "b254af607778",
       "kind": "break",
       "stop": "",
+      "page": "page_0192"
+    },
+    {
+      "verse": "5:64",
+      "print": "f51e97fac673",
+      "kind": "break",
       "page": "page_0192"
     },
     {
@@ -4285,6 +4424,12 @@
       "print": "6af70a2199e5",
       "kind": "break",
       "stop": "",
+      "page": "page_0198"
+    },
+    {
+      "verse": "5:93",
+      "print": "08d716850119",
+      "kind": "break",
       "page": "page_0198"
     },
     {
@@ -4456,6 +4601,12 @@
       "page": "page_0203"
     },
     {
+      "verse": "5:116",
+      "print": "857bacf3180d",
+      "kind": "break",
+      "page": "page_0204"
+    },
+    {
       "verse": "5:117",
       "print": "dd1d919294bb",
       "kind": "break",
@@ -4509,6 +4660,12 @@
       "kind": "break",
       "stop": "",
       "page": "page_0211"
+    },
+    {
+      "verse": "6:19",
+      "print": "d9de24cbda55",
+      "kind": "break",
+      "page": "page_0212"
     },
     {
       "verse": "6:25",
@@ -4567,6 +4724,12 @@
       "page": "page_0215"
     },
     {
+      "verse": "6:38",
+      "print": "4efe4c595b77",
+      "kind": "break",
+      "page": "page_0215"
+    },
+    {
       "verse": "6:40",
       "print": "2f32cab289c1",
       "kind": "break",
@@ -4595,6 +4758,12 @@
       "page": "page_0217"
     },
     {
+      "verse": "6:50",
+      "print": "847ed426aea1",
+      "kind": "break",
+      "page": "page_0217"
+    },
+    {
       "verse": "6:52",
       "print": "a0977802d38a",
       "kind": "break",
@@ -4613,6 +4782,12 @@
       "kind": "break",
       "stop": "",
       "page": "page_0218"
+    },
+    {
+      "verse": "6:57",
+      "print": "6230dc3d2fdc",
+      "kind": "break",
+      "page": "page_0219"
     },
     {
       "verse": "6:59",
@@ -4699,6 +4874,12 @@
       "page": "page_0221"
     },
     {
+      "verse": "6:73",
+      "print": "356408c3229c",
+      "kind": "break",
+      "page": "page_0222"
+    },
+    {
       "verse": "6:74",
       "print": "9565e8469554",
       "kind": "break",
@@ -4776,6 +4957,12 @@
       "page": "page_0226"
     },
     {
+      "verse": "6:96",
+      "print": "962071e4ec73",
+      "kind": "break",
+      "page": "page_0227"
+    },
+    {
       "verse": "6:98",
       "print": "65eee2316c4b",
       "kind": "break",
@@ -4809,6 +4996,12 @@
       "kind": "break",
       "stop": "",
       "page": "page_0227"
+    },
+    {
+      "verse": "6:101",
+      "print": "601146a2d23f",
+      "kind": "break",
+      "page": "page_0228"
     },
     {
       "verse": "6:103",
@@ -4916,6 +5109,12 @@
       "page": "page_0234"
     },
     {
+      "verse": "6:138",
+      "print": "79e896b4a0ea",
+      "kind": "break",
+      "page": "page_0235"
+    },
+    {
       "verse": "6:141",
       "print": "9f194bda575d",
       "kind": "break",
@@ -4930,11 +5129,23 @@
       "page": "page_0235"
     },
     {
+      "verse": "6:142",
+      "print": "017f353c371f",
+      "kind": "break",
+      "page": "page_0236"
+    },
+    {
       "verse": "6:146",
       "print": "b0a6102b9b48",
       "kind": "break",
       "stop": "",
       "page": "page_0236"
+    },
+    {
+      "verse": "6:148",
+      "print": "73deb02d4dee",
+      "kind": "break",
+      "page": "page_0237"
     },
     {
       "verse": "6:149",
@@ -5014,10 +5225,22 @@
       "page": "page_0246"
     },
     {
+      "verse": "7:12",
+      "print": "89b67f71e80b",
+      "kind": "break",
+      "page": "page_0247"
+    },
+    {
       "verse": "7:16",
       "print": "676cf7ee0fbc",
       "kind": "break",
       "stop": "",
+      "page": "page_0247"
+    },
+    {
+      "verse": "7:16",
+      "print": "33137e804442",
+      "kind": "break",
       "page": "page_0247"
     },
     {
@@ -5053,6 +5276,12 @@
       "print": "f86e90a4f683",
       "kind": "break",
       "stop": "",
+      "page": "page_0249"
+    },
+    {
+      "verse": "7:26",
+      "print": "420b3ac6cf21",
+      "kind": "break",
       "page": "page_0249"
     },
     {
@@ -5152,6 +5381,12 @@
       "page": "page_0254"
     },
     {
+      "verse": "7:46",
+      "print": "01d7dd60ccc7",
+      "kind": "break",
+      "page": "page_0254"
+    },
+    {
       "verse": "7:51",
       "print": "f9c1512e65a0",
       "kind": "break",
@@ -5189,6 +5424,12 @@
     {
       "verse": "7:56",
       "print": "2b09e14d3ced",
+      "kind": "break",
+      "page": "page_0256"
+    },
+    {
+      "verse": "7:58",
+      "print": "ada509190c90",
       "kind": "break",
       "page": "page_0256"
     },
@@ -5372,6 +5613,12 @@
       "print": "d33fe8ef8a29",
       "kind": "break",
       "stop": "",
+      "page": "page_0269"
+    },
+    {
+      "verse": "7:143",
+      "print": "382068ae6cf5",
+      "kind": "break",
       "page": "page_0269"
     },
     {
@@ -5561,6 +5808,12 @@
       "page": "page_0276"
     },
     {
+      "verse": "7:172",
+      "print": "fc880829fcec",
+      "kind": "break",
+      "page": "page_0275"
+    },
+    {
       "verse": "7:175",
       "print": "84e70e8fe968",
       "kind": "break",
@@ -5586,6 +5839,12 @@
       "print": "4fc8d02a4956",
       "kind": "break",
       "stop": "",
+      "page": "page_0277"
+    },
+    {
+      "verse": "7:175",
+      "print": "32d391290fae",
+      "kind": "break",
       "page": "page_0277"
     },
     {
@@ -5645,6 +5904,12 @@
       "page": "page_0278"
     },
     {
+      "verse": "7:180",
+      "print": "9488bfac622f",
+      "kind": "break",
+      "page": "page_0278"
+    },
+    {
       "verse": "7:187",
       "print": "6b6e081463ca",
       "kind": "break",
@@ -5673,10 +5938,22 @@
       "page": "page_0279"
     },
     {
+      "verse": "7:194",
+      "print": "e989264a581b",
+      "kind": "break",
+      "page": "page_0280"
+    },
+    {
       "verse": "7:199",
       "print": "32a9e0b0e8bd",
       "kind": "break",
       "stop": "",
+      "page": "page_0281"
+    },
+    {
+      "verse": "7:199",
+      "print": "0cdebc4c9eac",
+      "kind": "break",
       "page": "page_0281"
     },
     {
@@ -5925,6 +6202,12 @@
       "page": "page_0294"
     },
     {
+      "verse": "8:72",
+      "print": "81533e7553c4",
+      "kind": "break",
+      "page": "page_0294"
+    },
+    {
       "verse": "9:1",
       "print": "b022f5bbdef6",
       "kind": "break",
@@ -6019,6 +6302,12 @@
       "print": "e11c447c332b",
       "kind": "break",
       "stop": "",
+      "page": "page_0303"
+    },
+    {
+      "verse": "9:28",
+      "print": "f86b597727ca",
+      "kind": "break",
       "page": "page_0303"
     },
     {
@@ -6643,6 +6932,12 @@
       "page": "page_0368"
     },
     {
+      "verse": "13:25",
+      "print": "5d0a1254777e",
+      "kind": "break",
+      "page": "page_0369"
+    },
+    {
       "verse": "13:28",
       "print": "905e1661b9d5",
       "kind": "break",
@@ -6669,6 +6964,12 @@
       "kind": "break",
       "stop": "",
       "page": "page_0369"
+    },
+    {
+      "verse": "13:30",
+      "print": "688b815fd751",
+      "kind": "break",
+      "page": "page_0370"
     },
     {
       "verse": "13:31",
@@ -6843,6 +7144,12 @@
       "print": "2a32d284c084",
       "kind": "break",
       "stop": "",
+      "page": "page_0394"
+    },
+    {
+      "verse": "16:26",
+      "print": "b4a549598abd",
+      "kind": "break",
       "page": "page_0394"
     },
     {
@@ -7063,6 +7370,12 @@
       "page": "page_0408"
     },
     {
+      "verse": "16:120",
+      "print": "54870c20fbad",
+      "kind": "break",
+      "page": "page_0409"
+    },
+    {
       "verse": "16:126",
       "print": "aa8622fbdd3a",
       "kind": "break",
@@ -7131,6 +7444,12 @@
       "kind": "break",
       "stop": "",
       "page": "page_0415"
+    },
+    {
+      "verse": "17:18",
+      "print": "752e39067033",
+      "kind": "break",
+      "page": "page_0416"
     },
     {
       "verse": "17:23",
@@ -7220,6 +7539,12 @@
       "print": "0ee13dcc8876",
       "kind": "break",
       "stop": "",
+      "page": "page_0422"
+    },
+    {
+      "verse": "17:60",
+      "print": "70822a7f3f21",
+      "kind": "break",
       "page": "page_0422"
     },
     {
@@ -7475,6 +7800,12 @@
       "page": "page_0436"
     },
     {
+      "verse": "18:23",
+      "print": "bd219a8e2122",
+      "kind": "break",
+      "page": "page_0437"
+    },
+    {
       "verse": "18:25",
       "print": "c3f3bc357455",
       "kind": "break",
@@ -7501,6 +7832,12 @@
       "kind": "break",
       "stop": "",
       "page": "page_0438"
+    },
+    {
+      "verse": "18:39",
+      "print": "4345f15c54bb",
+      "kind": "break",
+      "page": "page_0439"
     },
     {
       "verse": "18:42",
@@ -7668,6 +8005,12 @@
       "kind": "break",
       "stop": "",
       "page": "page_0447"
+    },
+    {
+      "verse": "18:94",
+      "print": "83561e7a7895",
+      "kind": "break",
+      "page": "page_0448"
     },
     {
       "verse": "19:2",
@@ -8020,6 +8363,12 @@
       "page": "page_0484"
     },
     {
+      "verse": "21:30",
+      "print": "e02c46b44611",
+      "kind": "break",
+      "page": "page_0484"
+    },
+    {
       "verse": "21:34",
       "print": "a27f2e90ec4c",
       "kind": "break",
@@ -8069,6 +8418,12 @@
       "page": "page_0489"
     },
     {
+      "verse": "21:87",
+      "print": "9c9636665919",
+      "kind": "break",
+      "page": "page_0489"
+    },
+    {
       "verse": "21:91",
       "print": "6d444b2e7e2f",
       "kind": "break",
@@ -8115,6 +8470,12 @@
       "print": "e16a80a46642",
       "kind": "break",
       "stop": "",
+      "page": "page_0496"
+    },
+    {
+      "verse": "22:15",
+      "print": "7fbabfdfce5e",
+      "kind": "break",
       "page": "page_0496"
     },
     {
@@ -8626,6 +8987,12 @@
       "page": "page_0528"
     },
     {
+      "verse": "24:61",
+      "print": "531d46a31313",
+      "kind": "break",
+      "page": "page_0529"
+    },
+    {
       "verse": "24:63",
       "print": "4b89e78c8b14",
       "kind": "break",
@@ -8679,6 +9046,12 @@
       "print": "0ba86a337940",
       "kind": "break",
       "stop": "",
+      "page": "page_0539"
+    },
+    {
+      "verse": "25:70",
+      "print": "08a5c9cbf02d",
+      "kind": "break",
       "page": "page_0539"
     },
     {
@@ -9081,6 +9454,12 @@
       "page": "page_0600"
     },
     {
+      "verse": "30:41",
+      "print": "3f12f169bea3",
+      "kind": "break",
+      "page": "page_0600"
+    },
+    {
       "verse": "30:43",
       "print": "350266312c9c",
       "kind": "break",
@@ -9444,6 +9823,12 @@
       "page": "page_0674"
     },
     {
+      "verse": "38:79",
+      "print": "1e6a3d3f5a2e",
+      "kind": "break",
+      "page": "page_0677"
+    },
+    {
       "verse": "38:86",
       "print": "fc45273e090b",
       "kind": "break",
@@ -9462,6 +9847,12 @@
       "print": "b8f6e41531db",
       "kind": "break",
       "stop": "",
+      "page": "page_0683"
+    },
+    {
+      "verse": "39:23",
+      "print": "5c33a9180cbd",
+      "kind": "break",
       "page": "page_0683"
     },
     {
@@ -9708,6 +10099,12 @@
       "page": "page_0739"
     },
     {
+      "verse": "45:5",
+      "print": "c7922dd01d45",
+      "kind": "break",
+      "page": "page_0740"
+    },
+    {
       "verse": "45:14",
       "print": "34f42522fe2e",
       "kind": "break",
@@ -9830,6 +10227,12 @@
       "print": "9fbd3a0de4af",
       "kind": "break",
       "stop": "",
+      "page": "page_0764"
+    },
+    {
+      "verse": "49:6",
+      "print": "f9dafe5737b8",
+      "kind": "break",
       "page": "page_0764"
     },
     {
