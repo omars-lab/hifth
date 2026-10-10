@@ -90,6 +90,18 @@ function focusables(root: HTMLElement): HTMLElement[] {
 const SLANT = /([\uE000\uE001])/;
 
 /**
+ * A note shared by a run of verses opens on the run ("30–31 …"), and the print
+ * sets it apart from the prose that follows. Only a run at a paragraph's head
+ * that holds the note's own verse counts: a sentence can open on a number too.
+ */
+export function noteRange(para: string, ayah: number | undefined): { label: string; rest: string } | null {
+  const m = /^(\d+)[–-](\d+)(?=\s)/.exec(para);
+  if (!m || ayah === undefined) return null;
+  if (ayah < Number(m[1]) || ayah > Number(m[2])) return null;
+  return { label: m[0], rest: para.slice(m[0].length) };
+}
+
+/**
  * Keep the punctuation that touches a link or an initial on its line, as it
  * would stay with a word: a button is one box in the line, so the line could
  * otherwise break between "(" and the verse it opens, stranding the bracket.
@@ -539,11 +551,15 @@ export function CommentarySheet({
 
           {!introOnly && (
           <section className={styles.commentary} aria-label={t.commentaryTitle} {...own}>
-            {entry.paragraphs.map((para, i) => (
-              <p key={i} className={styles.para}>
-                {prose(para, `${i}`, entry.ayahKey)}
-              </p>
-            ))}
+            {entry.paragraphs.map((para, i) => {
+              const run = noteRange(para, opening?.ayah);
+              return (
+                <p key={i} className={styles.para}>
+                  {run && <span className={styles.noteRange} data-note-range="">{run.label}</span>}
+                  {prose(run ? run.rest : para, `${i}`, entry.ayahKey)}
+                </p>
+              );
+            })}
           </section>
           )}
 

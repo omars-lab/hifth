@@ -243,6 +243,34 @@ describe("words the book sets in italics", () => {
   });
 });
 
+// Walking the notes one tap from the demo in the iPad app, 2026-10-10: a note
+// shared by a run of verses opens on the run ("30–31 …"), which the print sets
+// apart from the prose and the drawer ran into its first sentence.
+describe("the verses a shared note covers, at its head", () => {
+  beforeEach(() => localStorage.setItem(LANG_STORAGE_KEY, "en"));
+  const at = (paragraphs: string[]) =>
+    drawer(note(undefined, { ayahKey: "quran/hafs-kfqc/9:31", paragraphs }));
+  const heads = (body: HTMLElement) =>
+    [...body.querySelectorAll("[data-note-range]")].map((e) => e.textContent);
+
+  it("is set apart from the words that follow it", () => {
+    const body = at(["30–31 Made-up words about the pair."]);
+    expect(heads(body)).toEqual(["30–31"]);
+    const head = body.querySelector("[data-note-range]")!;
+    expect(head.nextSibling?.textContent).toMatch(/^\s+Made-up words/);    expect(body.textContent).toContain("Made-up words about the pair.");
+  });
+
+  it("is set apart at each paragraph that starts a new run holding the verse", () => {
+    const body = at(["29–31 First made-up note.", "Its second paragraph.", "31–34 Second made-up note."]);
+    expect(heads(body)).toEqual(["29–31", "31–34"]);
+  });
+
+  it("is not a number that only opens a sentence", () => {
+    const body = at(["40 made-up days passed.", "Words first, then 30–31 in the line.", "40–42 made-up days later."]);
+    expect(heads(body)).toEqual([]);
+  });
+});
+
 // Walking the Arabic iPad app, 2026-10-09 (look-alike rows ③): a look-alike
 // pair's own note read in English in the Arabic app, its arrow an emoji.
 describe("a look-alike's own note in the related verses", () => {

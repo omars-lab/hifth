@@ -672,6 +672,30 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(note.locator("em")).toHaveCount(0);
   });
 
+  test("a note shared by a run of verses sets the run apart at its head, as the print does", async ({ page }) => {
+    // Walking the notes one tap from the demo, 2026-10-10: the run ran into the
+    // first sentence in the prose's own type. 70:11 holds two shared notes, so
+    // two heads; 2:255's note is its own and has none.
+    const heads = [["15:30", 1], ["18:60", 1], ["70:11", 2], ["2:255", 0]] as const;
+    for (const [verse, count] of heads) {
+      await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
+      const note = sheet(page).getByRole("region", { name: "Commentary" });
+      await expect(note.locator("p").first()).toBeVisible({ timeout: 20_000 });
+      const found = await note.locator("[data-note-range]").evaluateAll((els) =>
+        els.map((e) => {
+          const p = e.parentElement!;
+          return {
+            first: p.firstChild === e,
+            own: getComputedStyle(e).color !== getComputedStyle(p).color,
+            gap: parseFloat(getComputedStyle(e).marginInlineEnd) > 0,
+          };
+        }),
+      );
+      expect(found.length, verse).toBe(count);
+      for (const head of found) expect(head, verse).toEqual({ first: true, own: true, gap: true });
+    }
+  });
+
   test("every row in a demo note's related verses says something under its name", async ({ page }) => {
     // The book writes a line under its own rows; the app's own look-alikes
     // (15:30's passage in surah 38 and its twin, 2:48's passage) came bare

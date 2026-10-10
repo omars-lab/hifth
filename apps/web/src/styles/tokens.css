@@ -114,6 +114,10 @@
   /* Feedback */
   --danger: #a23b2c;
 
+  /* The red the book prints its verse numbers in, for the verses a shared note
+     covers. Kept apart from --danger: it means "which verses", not "wrong". */
+  --rubric: #b03a2e;
+
   /* Diff readings (comparison-crop decision, option F) — a mutashabih pair is
      drawn the same on both sides, not one colour each. The words the two ayat
      SHARE carry a leaf-green wash; the words that DIVERGE carry an ochre one

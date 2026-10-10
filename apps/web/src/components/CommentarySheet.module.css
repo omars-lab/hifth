@@ -243,6 +243,17 @@ button.grip {
   line-height: 1.7;
 }
 
+/* The verses a shared note covers, at its head: smaller and in the book's red,
+   with a gap before the prose, as the print sets them. Not the link colour, so
+   it does not read as something to tap. */
+.noteRange {
+  color: var(--rubric);
+  font-size: 0.85em;
+  font-variant-numeric: lining-nums;
+  margin-inline-end: 0.6em;
+  white-space: nowrap;
+}
+
 /* A verse the prose cites: a quiet link in the line, going there on a tap. */
 .cite {
   display: inline;

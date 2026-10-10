@@ -3501,6 +3501,18 @@
       "note": "The iPad app's copy of the pitch build was rebuilt with the note's look-alike rows, and no real-app walk has yet opened a surah's introduction or followed the whole demo path. Closes when the iPad app is walked upright in Arabic and on its side in English over that path, each fault found getting its own item and test."
     },
     {
+      "id": "shared-note-run-head-unset",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉗"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Walking the notes one tap from the demo in the iPad app: a note the book shares across a run of verses opens on the run, and it ran into the first sentence in the prose's own type, where the print sets it smaller, in red, with a gap. It is now drawn apart the same way, only at a paragraph's head and only when the run holds the note's verse. A unit test and a browser test failed first.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
+    },
+    {
       "id": "app-walk-after-list-fixes",
       "source": {
         "file": "docs/design/native-shell.md",
