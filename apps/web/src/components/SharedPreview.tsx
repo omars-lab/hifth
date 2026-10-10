@@ -39,3 +39,39 @@ export function SharedPreview({
     </span>
   );
 }
+
+/**
+ * Why a look-alike row is listed, under its name: which verse inside a passage
+ * is the alike one, a likeness that is loose or repeats, a pair the next verse
+ * tells apart, then the shared words. All three lists that show look-alikes
+ * draw it (the two look-alike lists, and a note's related verses when the book
+ * wrote no line for the row), so a row says the same thing wherever it is.
+ */
+export function LookalikeReason({
+  edge,
+  open,
+  className,
+}: {
+  edge: Edge;
+  /** Whether the row's comparison is showing. */
+  open: boolean;
+  /** The row's note style. */
+  className: string | undefined;
+}): JSX.Element {
+  const { t } = useT();
+  return (
+    <>
+      {/* A passage is measured against the verse inside it that matches best;
+          the closed row says which, so the reader knows where to look. */}
+      {edge.through && edge.like && (
+        <span className={className}>{t.likeVerse(t.ayahRef(edge.like.to) ?? edge.like.to)}</span>
+      )}
+      {/* With no words to mark, the row still says why it is listed. */}
+      {edge.match && <span className={className}>{edge.match === "repeat" ? t.matchRepeat : t.matchLoose}</span>}
+      {edge.ctx && <span className={className}>{t.nextTellsApart}</span>}
+      {/* The words the two share, before the row is opened: after every
+          caption, so it sits in the same place on every row. */}
+      <SharedPreview edge={edge} open={open} className={className} />
+    </>
+  );
+}

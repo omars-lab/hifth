@@ -5,7 +5,7 @@ import { useT } from "../i18n";
 import { usePassageRows } from "../passage-rows";
 // Loaded the first time a look-alike is opened out (see ./later.tsx).
 import { DiffView } from "./later";
-import { SharedPreview } from "./SharedPreview";
+import { LookalikeReason } from "./SharedPreview";
 import { ShareSheet } from "./ShareSheet";
 import styles from "./HighlightMenu.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
@@ -226,21 +226,7 @@ export function HighlightMenu({
                           {note.text}
                         </span>
                       )}
-                      {/* A passage is measured against the verse inside it that matches best;
-                          the closed row says which, so the reader knows where to look. */}
-                      {edge.through && edge.like && (
-                        <span className={styles.note}>{t.likeVerse(t.ayahRef(edge.like.to) ?? edge.like.to)}</span>
-                      )}
-                      {/* With no words to mark, the row still says why it is listed. */}
-                      {edge.match && (
-                        <span className={styles.note}>
-                          {edge.match === "repeat" ? t.matchRepeat : t.matchLoose}
-                        </span>
-                      )}
-                      {edge.ctx && <span className={styles.note}>{t.nextTellsApart}</span>}
-                      {/* The words the two share, before the row is opened: after every
-                          caption, so it sits in the same place on every row. */}
-                      <SharedPreview edge={edge} open={isOpen} className={styles.note} />
+                      <LookalikeReason edge={edge} open={isOpen} className={styles.note} />
                       {blocker && <span className={styles.unavailable}>{blocker}</span>}
                     </button>
                     <button

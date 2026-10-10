@@ -3478,6 +3478,18 @@
       "note": "A row whose shared words sit in one place showed only a verse name until opened. Built three ways as an info-panel choice: the other verse's shared words cut from its page under the row's name (the default, because it shows where the two part), a count of shared words, or nothing. Unit and browser tests cover each way and the strip's starting edge in both languages."
     },
     {
+      "id": "note-list-lookalike-rows-bare",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑦"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "In a demo note's related verses, the app's own look-alike rows showed only a verse name, while the book's rows each had a line. They now carry the same reasons and shared-words picture as the look-alike lists, the picture under the captions and clear of the arrow. A unit test and a browser test failed first.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
+    },
+    {
       "id": "app-walk-after-list-fixes",
       "source": {
         "file": "docs/design/native-shell.md",

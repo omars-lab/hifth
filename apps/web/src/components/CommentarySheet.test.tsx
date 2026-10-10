@@ -6,6 +6,7 @@ import { LangProvider } from "../i18n";
 import type { CommentaryNote } from "../tafsir/commentary";
 import { CommentarySheet, overLeaf } from "./CommentarySheet";
 import { RELATED_LIST_KEY } from "../related-list";
+import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
 
 /*
  * The one commentary drawer, in both of the app's languages and with sources in
@@ -267,5 +268,41 @@ describe("a look-alike's own note in the related verses", () => {
     localStorage.setItem(LANG_STORAGE_KEY, "ar");
     drawer(note("en"), { roads: [books] });
     expect(screen.getByText("see the other verse").getAttribute("lang")).toBe("en");
+  });
+});
+
+describe("a look-alike with no note of its own, in the related verses", () => {
+  // The app's own look-alikes join the book's list with no line from the book;
+  // they say why they are there the way the look-alike lists do, not nothing.
+  const passage: Edge = {
+    ...road,
+    type: "mutashabih",
+    to: "quran/hafs-kfqc/3:4",
+    through: "quran/hafs-kfqc/3:7",
+    like: { to: "quran/hafs-kfqc/3:5", page: 3 },
+    span: { from: [1, 4] },
+    toSpan: { from: [2, 5] },
+  };
+  const loose: Edge = { ...road, type: "mutashabih", to: "quran/hafs-kfqc/4:1", match: "loose" };
+  beforeEach(() => {
+    localStorage.setItem(LANG_STORAGE_KEY, "en");
+    localStorage.setItem(LOOKALIKE_PREVIEW_KEY, "count");
+  });
+
+  it("names the verse inside a passage that is most alike, and how many words they share", () => {
+    drawer(note("en"), { roads: [passage] });
+    const row = screen.getByRole("button", { name: /3:4/ });
+    expect(row.textContent).toContain("Most alike: 3:5");
+    expect(row.textContent).toContain("Shares 4 words");
+  });
+
+  it("says a loose look-alike is alike but not word for word", () => {
+    drawer(note("en"), { roads: [loose] });
+    expect(screen.getByRole("button", { name: /4:1/ }).textContent).toContain("Alike, but not word for word");
+  });
+
+  it("gives a row the book wrote a line for nothing more", () => {
+    drawer(note("en"), { roads: [{ ...passage, note: "a line from the book" }] });
+    expect(screen.getByRole("button", { name: /3:4/ }).textContent).not.toContain("Most alike");
   });
 });

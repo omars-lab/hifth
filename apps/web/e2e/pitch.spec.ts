@@ -672,6 +672,41 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(note.locator("em")).toHaveCount(0);
   });
 
+  test("every row in a demo note's related verses says something under its name", async ({ page }) => {
+    // The book writes a line under its own rows; the app's own look-alikes
+    // (15:30's passage in surah 38 and its twin, 2:48's passage) came bare
+    // until they said why they are listed, as the look-alike lists do.
+    for (const verse of ["15:30", "2:48"]) {
+      await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
+      const list = sheet(page).getByRole("region", { name: "Related verses" });
+      await expect(list.getByRole("listitem").first()).toBeVisible({ timeout: 20_000 });
+      const bare = await list
+        .getByRole("listitem")
+        .evaluateAll((rows) =>
+          rows
+            .filter((r) => !r.querySelector("[class*=roadNote], [data-shared-words]"))
+            .map((r) => r.textContent),
+        );
+      expect(bare, verse).toEqual([]);
+      // The shared words sit under the captions before them, in the row's
+      // text column, not beside a caption in the arrow's place.
+      const misplaced = await list.locator("[data-shared-words]").evaluateAll((strips) =>
+        strips.flatMap((s) => {
+          const top = s.getBoundingClientRect().top;
+          const label = s.parentElement!.querySelector("[class*=roadLabel]")!.getBoundingClientRect();
+          const above = [...s.parentElement!.querySelectorAll("[class*=roadNote]")].filter(
+            (n) => n.compareDocumentPosition(s) & Node.DOCUMENT_POSITION_FOLLOWING,
+          );
+          const under = above.every((n) => n.getBoundingClientRect().bottom <= top + 1);
+          const arrow = s.parentElement!.querySelector("[class*=roadArrow]")!.getBoundingClientRect();
+          const clear = s.getBoundingClientRect().right <= arrow.left + 1 || s.getBoundingClientRect().left >= arrow.right - 1;
+          return under && clear && top >= label.bottom - 1 ? [] : [s.parentElement!.textContent];
+        }),
+      );
+      expect(misplaced, verse).toEqual([]);
+    }
+  });
+
   test("a note the book shares across verses breaks into the same paragraphs under each of them", async ({ page }) => {
     // The note on 18:60–82 is filed under every verse it covers. Its printed
     // paragraph breaks were put back under 18:60 only, so the other verses ran

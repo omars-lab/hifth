@@ -105,6 +105,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] At the foot of 18:60's note, the related verses show each cited run as one card
   (in the shape "9:4–9:7") beside the note's references to other surahs, not eight cards of one run. ·
   any · issue: `related-verses-ranges-crowd-out`
+- [ ] In 2:48's and 15:30's notes, every related-verses row has a line under its name, the app's own
+  look-alike rows included ("Most alike: …", the shared words); the shared words sit under the
+  captions and the arrow stays at the row's end. · laptop and phone, both languages · issue:
+  `note-list-lookalike-rows-bare`
 - [ ] Where a note's related verses have fewer than eight cards (try 18:65 and 18:22), every verse
   the note links is among them. · any · issue: `related-verses-drop-bare-numbers`
 - [ ] At 2:255, the eight related cards end on a line that says how many more the note points to;
