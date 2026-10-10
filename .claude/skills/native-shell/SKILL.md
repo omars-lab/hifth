@@ -172,11 +172,16 @@ flowchart LR
 4. **Measure from inside the page.** `make app-probe TARGET=ipad ROUTE=/hafs-kfqc/p45 EVAL='JSON.stringify(document.querySelector("[data-testid=page-book]")?.getBoundingClientRect())' DELAY_MS=3000`
    launches the app, waits, runs the expression in the page and prints it with the usual probe
    fields (viewport, screen, orientation). Keep longer expressions in a file and pass
-   `EVAL="$(cat probe.js)"`. This is what found the 14-point leaves: a number, where a picture
+   `EVALFILE=probe.js`: the file reaches the page as written, any quote and any `$` in it
+   (a `$` in a `$(cat …)` handed to `EVAL` was read by make and dropped, so `/^Close$/` ran as
+   `/^Close`). This is what found the 14-point leaves: a number, where a picture
    only said "small". To press something and read what changed, answer with a promise that
    waits for the redraw; the probe waits for it:
    `EVAL='new Promise(done => { document.querySelector("button").click(); setTimeout(() => done(document.title), 600); })'`.
-   Use double quotes inside: the Makefile wraps `EVAL` in single ones.
+   Use double quotes inside a typed `EVAL`: the Makefile wraps it in single ones.
+   To close the note the pitch opens first, send Escape **to the note**, not the document
+   (its key handler is on the note itself):
+   `document.querySelector("[role=dialog]").dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`.
 5. **Pin it with a simulator test** in `native/HifthUITests/SmokeTests.swift`, watched failing
    first: `make app-test ONLY=SmokeTests/<name>`. For anything drawn sideways, measure the web
    view's own picture (`app.webViews.firstMatch.screenshot()`), redrawn upright with
