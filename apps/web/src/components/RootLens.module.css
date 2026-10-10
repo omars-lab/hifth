@@ -375,12 +375,16 @@
   background: var(--accent-strong);
 }
 
-/* At the foot of the screen the list opens short, like the note, so the verse
-   it is about stays in sight above it (the page moves up to make room). On a
-   phone, and on an iPad held upright too: there the roots list rose over
-   nearly the whole screen (2026-10-09). */
-.sheet[data-band] {
-  max-block-size: 38vh;
+/* Across the foot of the page the list opens short, like the note, so the
+   verse it is about stays in sight above it (the page moves up to make room).
+   On a phone, and on an iPad held upright too: there the roots list rose over
+   nearly the whole screen (2026-10-09). Wide and not upright, one page leaves
+   room beside it, and the card in that corner covers none of the page, so it
+   keeps its height: cut short there it showed two rows. */
+@media (max-width: 899.98px), (orientation: portrait) {
+  .sheet[data-band] {
+    max-block-size: 38vh;
+  }
 }
 
 /* On a phone the look-alike chips ride this sheet's top row while it is up
