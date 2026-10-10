@@ -3544,8 +3544,16 @@ export function App(): JSX.Element {
                 onSlack={reportSlack}
                 // A card beside one page covers its side, not its foot: the
                 // page moves clear of it, and lifting it as well left a band
-                // of empty stage under the page.
-                coverTop={desktop && sideCard ? null : highestTop(coverTop, shareTop, listTop)}
+                // of empty stage under the page. Held upright on a screen wide
+                // enough for the share card to stand in the corner (an iPad), it
+                // still covers the page's foot, so the page lifts the verse
+                // above it: told nothing, it left the verse under the card, its
+                // first word included (plan item 40).
+                coverTop={
+                  desktop && sideCard
+                    ? null
+                    : highestTop(coverTop, shareTop ?? (upright ? shareCardTop : null), listTop)
+                }
                 coverSide={sideCard}
                 railBottom={railBottom}
                 resolver={resolver}

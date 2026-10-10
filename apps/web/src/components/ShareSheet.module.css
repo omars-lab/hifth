@@ -90,6 +90,16 @@
   }
 }
 
+/* Narrower than a laptop but tall (an iPad mini upright), the card stands above
+   the bars at the foot, as it does on a laptop: at the window's foot it covered
+   the row of tools it opens from (plan item 41). A phone on its side is too
+   short for that, and keeps the window's foot. */
+@media (min-width: 40rem) and (max-width: 899.98px) and (min-height: 600px) {
+  .sheet {
+    margin-block-end: calc(var(--room-foot, 0px) + var(--space-4));
+  }
+}
+
 @media (min-width: 900px) {
   .sheet {
     margin: 0;

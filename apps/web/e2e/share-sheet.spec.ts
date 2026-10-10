@@ -168,3 +168,51 @@ test.describe("Hifth · the share card on a phone held sideways", () => {
     });
   }
 });
+
+for (const [held, width, height] of [
+  ["a large iPad", 1024, 1366],
+  ["an iPad mini", 744, 1133],
+] as const) {
+  test.describe(`Hifth · the share card on ${held} held upright`, () => {
+    test.use({ viewport: { width, height } });
+
+    for (const [lang, shareName] of [
+      ["en", "Share this ayah as a link"],
+      ["ar", "شارك"],
+    ] as const) {
+      test(`upright (${lang}), the share card covers no line of the verse it shares, and none of the buttons under it`, async ({ page }) => {
+        // Upright and this wide, the card stands in the corner above the page's
+        // foot, not across it as on a phone, so it never said where it starts,
+        // and on its side it would have moved the page aside: told nothing,
+        // the page left the verse under it, its first word included (plan
+        // item 40). Narrower than a laptop, it also stood at the window's foot,
+        // over the row of tools it opens from (plan item 41).
+        await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
+        await page.goto(`/?lang=${lang}#/hafs-kfqc/2:48`);
+        await page.getByRole("button", { name: shareName }).first().click();
+        const sheet = page.getByRole("dialog", { name: shareName });
+        await expect(sheet).toBeVisible();
+        await sheet.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        const seen = () =>
+          page.evaluate(() => {
+            const card = document.querySelector("[role=dialog]")!.getBoundingClientRect();
+            const stage = document.querySelector("#hifth-overlay")!.closest("[class*=stage]")!.getBoundingClientRect();
+            const lines = [...document.querySelectorAll("#hifth-overlay .hl-sel")].map((el) => el.getBoundingClientRect());
+            return {
+              lines: lines.length > 0,
+              underCard: lines.filter((l) => l.left < card.right && l.right > card.left && l.top < card.bottom && l.bottom > card.top).length,
+              offTheStage: lines.filter((l) => l.top < stage.top - 1 || l.bottom > stage.bottom + 1).length,
+              buttonsUnderCard: [...document.querySelectorAll("button")]
+                .filter((b) => !b.closest("[role=dialog]"))
+                .map((b) => b.getBoundingClientRect())
+                .filter((r) => r.width > 0 && r.left < card.right && r.right > card.left && r.top < card.bottom && r.bottom > card.top).length,
+            };
+          });
+        const whole = { lines: true, underCard: 0, offTheStage: 0, buttonsUnderCard: 0 };
+        await expect.poll(seen, { message: "every line of the verse and every button shows, clear of the card", timeout: 5_000 }).toEqual(whole);
+        await page.waitForTimeout(800);
+        expect(await seen(), "the page moved the verse under the card after first showing it clear").toEqual(whole);
+      });
+    }
+  });
+}
