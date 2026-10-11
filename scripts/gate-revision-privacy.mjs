@@ -107,6 +107,19 @@ const RECORDS = [
       ["packages/core/src/index.ts", "the barrel that exports it"],
     ]),
   },
+  {
+    name: "the usage counts",
+    why: "The counts are the owner's own record of how they use the app",
+    modules: ["apps/web/src/usage.ts", "apps/web/src/usage-store.ts"],
+    files: ["usage", "usage-store"],
+    symbols: ["countUse", "readUse", "forgetUse", "rollUpUse", "UseFeature", "UseDay"],
+    allowed: new Map([
+      ["apps/web/src/App.tsx", "where a feature opening becomes one count"],
+      ["apps/web/src/use-count.ts", "the two hooks that count an opening, and nothing else"],
+      ["apps/web/src/components/UsageReadout.tsx", "the list in the info panel; reads the counts, sends nothing"],
+      ["apps/web/src/usage-store.ts", "the store is built on the pure module"],
+    ]),
+  },
 ];
 
 /** Ways out of the device. Matched as plain substrings — a grep, not a parse. */

@@ -483,6 +483,10 @@ upright and on its side, English and Arabic, iPad and Mac.
   In the apps, the `settings-walk` script. The large iPad upright shows one page but keeps the
   two-page and pen choices, rightly: it can open two pages, and the pens' place applies there;
   the iPad mini drops them.
+- [ ] Open the app at a page, turn two pages, then open the info panel: *How you use the app* says
+  turning the page twice, not three times, and still says so after the app is closed and opened
+  again; in Arabic the counts are in the words' own letters, not stretched, and today's bar ends
+  the strip on the left. · phone, desktop, iPad app · test: usage spec
 
 ## The Mac and iPad apps
 

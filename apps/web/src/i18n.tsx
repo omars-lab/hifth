@@ -823,6 +823,31 @@ export interface Strings {
   openingTextLarge: string;
   openingTextEven: string;
   openingTextNote: string;
+  /** The owner's own count of what gets used (usage.ts, docs/design/feature-usage.md). */
+  useTitle: string;
+  useNote: string;
+  useSince(day: string): string;
+  useTimes(count: number): string;
+  useLast(day: string): string;
+  useStripAria: string;
+  useForget: string;
+  useEmpty: string;
+  useNeverHead(count: number): string;
+  usePen(name: string): string;
+  useTurnPage: string;
+  useLookalikes: string;
+  useCommentary: string;
+  useRoots: string;
+  useListen: string;
+  useShare: string;
+  useGoTo: string;
+  useZoom: string;
+  useVerseMenu: string;
+  useWordParts: string;
+  useOpenedMap: string;
+  useTajweedKey: string;
+  useEdition: string;
+  useInfoPanel: string;
   /** How many related verses a note lists before asking (related-list.ts). */
   longVerseTitle: string;
   longVerseSmaller: string;
@@ -1547,6 +1572,30 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     openingTextLarge: m.openingTextLarge,
     openingTextEven: m.openingTextEven,
     openingTextNote: m.openingTextNote,
+    useTitle: m.useTitle,
+    useNote: m.useNote,
+    useSince: (day) => m.useSince({ dayText: longDay(day, lang) }),
+    useTimes: (count) => m.useTimes({ n: count, nText: n(count) }),
+    useLast: (day) => m.useLast({ dayText: longDay(day, lang) }),
+    useNeverHead: (count) => m.useNeverHead({ n: count, nText: n(count) }),
+    usePen: (name) => m.usePen({ name }),
+    useStripAria: m.useStripAria,
+    useForget: m.useForget,
+    useEmpty: m.useEmpty,
+    useTurnPage: m.useTurnPage,
+    useLookalikes: m.useLookalikes,
+    useCommentary: m.useCommentary,
+    useRoots: m.useRoots,
+    useListen: m.useListen,
+    useShare: m.useShare,
+    useGoTo: m.useGoTo,
+    useZoom: m.useZoom,
+    useVerseMenu: m.useVerseMenu,
+    useWordParts: m.useWordParts,
+    useOpenedMap: m.useOpenedMap,
+    useTajweedKey: m.useTajweedKey,
+    useEdition: m.useEdition,
+    useInfoPanel: m.useInfoPanel,
     longVerseTitle: m.longVerseTitle,
     longVerseSmaller: m.longVerseSmaller,
     longVerseShorter: m.longVerseShorter,

@@ -743,3 +743,19 @@ build copied in again: the note tool picked, a verse tapped, one pin with its bo
 on the device; the app closed and opened again, and no pin and no box on the page. The empty note
 stays on the device until the next save writes the set again; it is left out each time the notes
 are read, so a reader never sees it.
+
+### ㉚ After using the app on your own iPad and Mac, send it to the named testers? · **open**
+
+Asked 2026-10-11. The owner settled the TestFlight question on C for now (own devices only,
+shown in the room) and said the plan is to move to A, the whole build to a few named testers,
+once they have used the app themselves.
+
+**What it changes for a hafiz:** a hafiz on The Study Quran team could keep the app on their own
+iPad and open it the next morning, instead of holding the owner's iPad for ten minutes in a
+meeting.
+
+**What is owed before the move:** a person qualified to read the licences says an internal test
+to named people is not the kind of sharing the verse-link data's licence and Apple's terms are
+about (the record names this under what would change the answer), and the paid Apple membership.
+The upload steps stay locked until the decision record says A or B. Record:
+`docs/decisions/native-testflight-licence.md`.
