@@ -1665,7 +1665,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     itself, the verse it ended on is lit, with its tools up, the way a run that stays on its
     page ends with its first verse lit. Only then: a run stopped, or cut short by a tap on
     another verse, leaves the page as it was; so does one ended while the reader had turned to
-    another page or lit a verse of their own. A browser test on the computer and both phones,
+    a page the run never reached or lit a verse of their own. A browser test on the computer and both phones,
     and four tests of when the sound code says a run has ended, all watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
