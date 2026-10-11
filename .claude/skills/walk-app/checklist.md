@@ -270,7 +270,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] With a note up while a surah plays, the note's title row has a Pause named for the verse
   being heard; pressing it stops the sound and leaves the same note open, and it turns to Play,
   which picks the run up again. The `run-note` script presses it last. · ipad, phone, Firefox,
-  the iPad app, private build · issue: `no-pause-with-note-up`
+  Arabic, the iPad app, private build · issue: `no-pause-with-note-up`
+- [ ] With a note up while a surah plays, let the run reach the next page (or the next pair of
+  pages on its side): the page turns, the note on the earlier verse goes with its verse, and the
+  run plays on with Pause in reach; each verse recited before the turn stays clear of the note.
+  The `run-note` script with `__page` set walks it. · ipad upright and on its side, the iPad app,
+  private build
 - [ ] With a note open, play its surah from the corner: the page goes to the surah's start and
   the note closes (a jump, on purpose); the run plays from there. · ipad, the iPad app, private
   build

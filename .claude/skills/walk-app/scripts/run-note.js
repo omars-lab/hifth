@@ -4,7 +4,8 @@
   // never note words. Set before it runs, from a Playwright page: window.__before, how long
   // the run plays first (ms, 14000 by default, so the second verse is heard); window.__after,
   // how long it watches with the note up; window.__mode "bare" (a tap on bare page) or "hold"
-  // (a long press on the verse being recited) instead of the number and the note.
+  // (a long press on the verse being recited) instead of the number and the note; window.__page,
+  // the page whose surah corner to play; window.__rate, how fast the sound plays.
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const out = [];
   const play = HTMLMediaElement.prototype.play;
@@ -28,7 +29,8 @@
   await wait(1500);
   // A: play the surah from its corner.
   const mid = (b) => document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
-  const heads = [...document.querySelectorAll("[data-running-head='surah']")];
+  // window.__page picks the surah corner on that page (the open book shows two).
+  const heads = [...document.querySelectorAll(window.__page ? `[data-host-page="${window.__page}"] [data-running-head='surah']` : "[data-running-head='surah']")];
   const host = heads.find((h) => on(box(h)) && h.contains(mid(box(h))));
   if (!host) return `A: no reachable surah corner; heads=${heads.map((h) => f(box(h)) + ":" + (box(h) ? mid(box(h))?.tagName : "-")).join(",")}`;
   if (!host) return "A: no surah corner on screen";

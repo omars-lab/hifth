@@ -29,6 +29,10 @@ flowchart LR
   line --> ship[Commit, push, merge] --> next
 ```
 
+To run this over and over on its own, paste the prompt in `.claude/loop-prompts/walk-and-fix.md`
+into `/loop`: each pass picks the worst open item, walks it everywhere, fixes and ships it, and
+writes down what it found.
+
 ## Which flavours are there?
 
 | flavour | how to open it |
