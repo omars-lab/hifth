@@ -87,6 +87,30 @@ describe("Highlighter", () => {
     expect(overlay.querySelectorAll("[data-hl-group='breadcrumb']")).toHaveLength(0);
   });
 
+  it("isolates groups: the ring on a verse being recited never clobbers selection", () => {
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    hl.highlight("quran/hafs-kfqc/2:39", "heard", "heard");
+    const overlay = svg.querySelector("#hifth-overlay")!;
+    expect(overlay.querySelectorAll("[data-hl-group='selection']")).toHaveLength(1);
+    const ring = overlay.querySelectorAll("[data-hl-group='heard']");
+    expect(ring).toHaveLength(1);
+    // A ring is an outline, not ink.
+    expect(ring[0]!.getAttribute("class")).toBe("hl hl-heard");
+    hl.clear("heard");
+    expect(overlay.querySelectorAll("[data-hl-group='selection']")).toHaveLength(1);
+    expect(overlay.querySelectorAll("[data-hl-group='heard']")).toHaveLength(0);
+  });
+
+  it("every mark names the verse it is on", () => {
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    hl.highlight("quran/hafs-kfqc/2:39", "crumb", "breadcrumb");
+    const overlay = svg.querySelector("#hifth-overlay")!;
+    const keyOf = (group: string) =>
+      [...overlay.querySelectorAll(`[data-hl-group='${group}']`)].map((el) => el.getAttribute("data-hl-key"));
+    expect(keyOf("selection")).toEqual(["quran/hafs-kfqc/2:38"]);
+    expect(keyOf("breadcrumb")).toEqual(["quran/hafs-kfqc/2:39"]);
+  });
+
   it("re-highlighting a group replaces, not stacks", () => {
     hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
     hl.highlight("quran/hafs-kfqc/2:39", "sel", "selection");

@@ -786,6 +786,11 @@ export interface Strings {
   verseGesturesB: string;
   verseGesturesC: string;
   verseGesturesNote: string;
+  /** Settings: how the page shows the verse a "Play to" run is reciting. */
+  runMarkTitle: string;
+  runMarkLight: string;
+  runMarkRing: string;
+  runMarkNote: string;
   /** Settings: how the saved jump arrows show. */
   jumpArrowsTitle: string;
   jumpArrowsStays: string;
@@ -1491,6 +1496,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     verseGesturesB: m.verseGesturesB,
     verseGesturesC: m.verseGesturesC,
     verseGesturesNote: m.verseGesturesNote,
+    runMarkTitle: m.runMarkTitle,
+    runMarkLight: m.runMarkLight,
+    runMarkRing: m.runMarkRing,
+    runMarkNote: m.runMarkNote,
     jumpArrowsTitle: m.jumpArrowsTitle,
     jumpArrowsStays: m.jumpArrowsStays,
     jumpArrowsAsked: m.jumpArrowsAsked,

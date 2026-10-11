@@ -3891,10 +3891,11 @@
         "file": "docs/PLAN.md",
         "item": "57"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "During Play to the page keeps the run's first verse lit, and the tools' heading names it, while later verses are heard, so nobody watching can see where the recitation is. The selection cannot follow the run (it would open each verse's note), so the verse being heard wants a mark of its own."
+      "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
+      "note": "During Play to the page kept the run's first verse lit while later verses were heard, so nobody watching could see where the recitation was. Built two ways, a setting in the info panel: the verse's light moves with the recitation (default) or a ring goes round the verse being heard while the first stays lit. Tests failed first; both looked at in Firefox."
     }
   ]
 }

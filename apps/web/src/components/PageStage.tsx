@@ -77,6 +77,7 @@ import { useOpeningText, type OpeningText } from "../opening-text";
 import { pageSlack } from "../rail-home";
 import { sideCoverOf, type CardSpan } from "./short-band";
 import type { TurnStyle } from "../turn-style";
+import type { RunMark } from "../run-mark";
 import styles from "./PageStage.module.css";
 import { printedNumbersOf } from "./verse-numbers";
 
@@ -127,6 +128,13 @@ interface PageStageProps {
    * above it, as it does the selected verse for a verse's note.
    */
   introSurah?: number | null;
+  /**
+   * The verse a "Play to" run is reciting, while it lasts (docs/PLAN.md, item
+   * 57), and how to show it: the verse's light moves to it, or a ring goes
+   * round it while the chosen verse stays lit. The chosen verse never moves.
+   */
+  heardKey?: string | null;
+  runMark?: RunMark;
   /** The origin ayah to mark with the breadcrumb group (persists across hops). */
   breadcrumbKey: string | null;
   /**
@@ -1110,6 +1118,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     label,
     selectedKey,
     introSurah = null,
+    heardKey = null,
+    runMark = "light",
     breadcrumbKey,
     rangeKeys = null,
     onSelect,
@@ -3175,6 +3185,35 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     }
     emitSelectionRect();
   }, [selectedKey, status, emitSelectionRect, clearWords]);
+
+  // Show the verse a run is reciting. Its own step, after the selection's, so
+  // the light can move without the word band, the swept passage or the drawer's
+  // anchor following it: those belong to the chosen verse, which stays put.
+  // With the light, the current page's selection ink is moved to the heard
+  // verse and put back when the run ends; with the ring, the ink stays and a
+  // ring is drawn on whichever mounted page carries the heard verse. A run that
+  // crosses onto a page that is not showing draws its light nowhere until the
+  // reader turns to it — the run's first verse is always on the page it began.
+  const lightMovedRef = useRef(false);
+  useEffect(() => {
+    if (status !== "ready") return;
+    for (const mp of pagesRef.current.values()) mp.hl.clear("heard");
+    const cur = pagesRef.current.get(currentPageRef.current);
+    if (runMark === "light" && heardKey) {
+      cur?.hl.highlight(heardKey, "sel", "selection");
+      lightMovedRef.current = true;
+      return;
+    }
+    if (lightMovedRef.current) {
+      lightMovedRef.current = false;
+      if (selectedKey) cur?.hl.highlight(selectedKey, "sel", "selection");
+      else cur?.hl.clear("selection");
+    }
+    if (runMark !== "ring" || !heardKey) return;
+    const loc = resolver.resolve(heardKey);
+    const mp = loc ? pagesRef.current.get(loc.page) : undefined;
+    mp?.hl.highlight(heardKey, "heard", "heard");
+  }, [heardKey, runMark, selectedKey, status, resolver]);
 
   // Draw the breadcrumb on whichever mounted page carries the origin ayah — and
   // clear it off the others, which is the half `mountPage` cannot do. Between

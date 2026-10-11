@@ -217,6 +217,7 @@ import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
+import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
@@ -1175,6 +1176,13 @@ export function App(): JSX.Element {
   const chooseVerseGestures = useCallback((choice: VerseGestures) => {
     rememberVerseGestures(choice);
     setVerseGestures(choice);
+  }, []);
+  // How the page shows the verse a "Play to" run is reciting (docs/PLAN.md,
+  // item 57): the light moves with it unless this device picked the ring.
+  const [runMark, setRunMark] = useState<RunMark>(() => savedRunMark());
+  const chooseRunMark = useCallback((choice: RunMark) => {
+    rememberRunMark(choice);
+    setRunMark(choice);
   }, []);
   // How a note draws the parts it can be about (docs/design/scoped-notes.md,
   // step 7; a setting since 2026-10-03, the lines on their side by default).
@@ -3523,6 +3531,8 @@ export function App(): JSX.Element {
                   pageBudget={spreadBudget().facing}
                   label={t.pageN(facing)}
                   selectedKey={selectedKey}
+                  heardKey={audio.runKey}
+                  runMark={runMark}
                   breadcrumbKey={breadcrumbKey}
                   rangeKeys={selectedRange}
                   onSelect={handleVerse}
@@ -3603,6 +3613,8 @@ export function App(): JSX.Element {
                 pageBudget={desktop ? spreadBudget().reading : MOUNTED_PAGE_CAP}
                 label={t.pageN(page)}
                 selectedKey={selectedKey}
+                heardKey={audio.runKey}
+                runMark={runMark}
                 introSurah={introSheet ? introSurah : null}
                 breadcrumbKey={breadcrumbKey}
                 rangeKeys={selectedRange}
@@ -3817,6 +3829,8 @@ export function App(): JSX.Element {
             onTurnStyle={chooseTurnStyle}
             verseGestures={verseGestures}
             onVerseGestures={chooseVerseGestures}
+            runMark={runMark}
+            onRunMark={chooseRunMark}
             arrowShowing={arrowShowing}
             onArrowShowing={chooseArrowShowing}
             scopeLook={scopeLook}

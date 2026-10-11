@@ -82,6 +82,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the run still reaches its last verse. Do the same after turning the wifi off on the second
   verse, then back on. · desktop and a phone · issue: `run-could-not-be-paused` · test:
   e2e/verse-gestures.spec.ts ("pausing a run part way", "failed to load carries on")
+- [ ] During a "Play to" run, look at the page from across the room: the verse being recited is
+  the one marked (the light moves to it, or, with the ring picked in the info panel, a ring
+  goes round it while the first stays lit), and at the end the light is back on the first.
+  Check both in Firefox and on a phone. · issue: `run-verse-not-shown` · test:
+  e2e/verse-gestures.spec.ts ("light moves to each verse", "ring chosen")
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
 

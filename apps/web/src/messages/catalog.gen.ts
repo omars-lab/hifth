@@ -397,6 +397,10 @@ export interface Catalog {
   readonly rootsTrigger: (d: { readonly curated: "some" | "other"; readonly countText: string | number; readonly curatedText: string | number }) => string;
   readonly rootsTruncated: (d: { readonly shownText: string | number }) => string;
   readonly rootsUnavailable: string;
+  readonly runMarkLight: string;
+  readonly runMarkNote: string;
+  readonly runMarkRing: string;
+  readonly runMarkTitle: string;
   readonly scopeHizb: string;
   readonly scopeJuz: string;
   readonly scopeLookLines: string;
