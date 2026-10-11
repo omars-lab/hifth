@@ -146,13 +146,18 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       const el = element();
       // A tap on any one verse ends a run that was playing.
       queueRef.current = [];
+      // A player whose file never loaded will not fetch it again on play(),
+      // and may still say it is not paused, so a second tap on that verse
+      // once the connection is back would pause or resume nothing and the
+      // verse would stay silent. It starts over instead, below.
+      const same = keyRef.current === next && !el.error;
       // A second tap on the verse already playing pauses it.
-      if (keyRef.current === next && !el.paused) {
+      if (same && !el.paused) {
         el.pause();
         return;
       }
       // A tap on the paused-but-loaded same verse resumes without reloading.
-      if (keyRef.current === next && el.paused && el.src) {
+      if (same && el.paused && el.src) {
         setPhase("loading");
         el.play().catch(() => {
           setPhase("error");

@@ -1566,6 +1566,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     unit test gives the page Firefox's answer. Running them in Firefox also showed its test
     browser does not restyle an open page when the "more contrast" setting is switched, so
     that test opens the page again under each setting.
+55. ~~**With no internet, the listen button looked as if the tap had been missed.**~~
+    Found on 2026-10-10 asking what the pitch does in a meeting room with no wifi. The
+    recitation is the one thing the app fetches from outside, and when it would not load,
+    the only message went to screen readers: the button's warning colour named a colour that
+    was never defined, so it looked exactly as it did before the tap. And once the wifi came
+    back, a second tap on the same verse asked the failed player to carry on, which never
+    fetches the file again, so the verse stayed silent until another was chosen. **Fixed the
+    same day:** the button turns red and its caption says "Offline" (or "Can't play" for any
+    other failure), and a tap on a verse that failed starts it over. Both have tests, on the
+    phone in both engines, and both failed first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

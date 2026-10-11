@@ -3792,6 +3792,18 @@
       "note": "Found walking the live site in Firefox on a laptop (2026-10-10): a dragged highlight left each line's first word unwashed, because Firefox measured the page's block of words a ninth too narrow. Now measured the way both browsers agree on. The highlight tests run in Firefox too and failed there first; a unit test gives the page Firefox's answer."
     },
     {
+      "id": "listen-offline-looked-untouched",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "55"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/audio.spec.ts",
+      "note": "Found asking what the pitch does with no wifi (2026-10-10): a recitation that would not load left the listen button looking untouched (its warning colour was never defined, the message went only to screen readers), and a second tap after the wifi returned never fetched the file again. Now the button turns red and says Offline, and a failed verse starts over on the next tap. Both tests failed first."
+    },
+    {
       "id": "ribbon-covers-first-words",
       "source": {
         "file": "docs/PLAN.md",

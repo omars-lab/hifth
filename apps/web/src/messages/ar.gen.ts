@@ -514,6 +514,8 @@ const messages: Catalog = {
   vdJump: "انتقال…",
   vdJumpAria: (d) => "انتقال: إلى أين أخذتك " + d.label,
   vdListen: "استمع",
+  vdListenFailed: "تعذّر التشغيل",
+  vdListenOffline: "بلا إنترنت",
   vdMark: "تظليل",
   vdMarkAria: (d) => "تظليل " + d.label,
   vdNote: "ملاحظة",

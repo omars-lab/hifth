@@ -22,8 +22,11 @@
   color: var(--accent-strong);
 }
 
+/* It would not load: the caption says why, in the colour the app keeps for
+   "wrong". This once named a --warn colour that was never defined, so the
+   failed button looked exactly like an untouched one. */
 .trigger[data-phase="error"] {
-  color: var(--warn, var(--ink-soft));
+  color: var(--danger);
 }
 
 .trigger:focus-visible {
