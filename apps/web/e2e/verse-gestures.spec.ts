@@ -64,6 +64,85 @@ const topBar = (page: Page): Locator => page.getByRole("banner");
 const FIVE = ["Play to", "Mark", "Note", "Copy", "Jump…"];
 const words = (page: Page): Locator => page.locator("#hifth-overlay [data-hl-group='word']");
 
+/**
+ * A stand-in for the browser's player: no sound in a test runner, so play and
+ * pause flip a flag and send the events a real player sends, and the test ends
+ * or fails the verse when it chooses. `files` lists each file the app asked for.
+ */
+async function fakePlayer(page: Page): Promise<{
+  files: () => Promise<string[]>;
+  end: () => Promise<void>;
+  fail: () => Promise<void>;
+}> {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __files: string[]; __player?: HTMLMediaElement };
+    w.__files = [];
+    const still = new WeakMap<HTMLMediaElement, boolean>();
+    const failed = new WeakMap<HTMLMediaElement, MediaError>();
+    const proto = HTMLMediaElement.prototype;
+    Object.defineProperty(proto, "paused", {
+      configurable: true,
+      get(this: HTMLMediaElement) {
+        return still.get(this) ?? true;
+      },
+    });
+    Object.defineProperty(proto, "error", {
+      configurable: true,
+      get(this: HTMLMediaElement) {
+        return failed.get(this) ?? null;
+      },
+    });
+    proto.play = function (this: HTMLMediaElement) {
+      w.__player = this;
+      still.set(this, false);
+      setTimeout(() => this.dispatchEvent(new Event("playing")), 0);
+      return Promise.resolve();
+    };
+    proto.pause = function (this: HTMLMediaElement) {
+      if (still.get(this) === false) {
+        still.set(this, true);
+        this.dispatchEvent(new Event("pause"));
+      }
+    };
+    const src = Object.getOwnPropertyDescriptor(proto, "src")!;
+    Object.defineProperty(proto, "src", {
+      ...src,
+      set(this: HTMLMediaElement, v: string) {
+        w.__files.push(String(v).replace(/^.*\//, ""));
+        failed.delete(this);
+        src.set!.call(this, v);
+      },
+    });
+    (w as unknown as { __fail: () => void }).__fail = () => {
+      const el = w.__player!;
+      still.set(el, true);
+      failed.set(el, { code: 2, message: "network" } as MediaError);
+      el.dispatchEvent(new Event("error"));
+    };
+  });
+  await page.route("https://verses.quran.com/**", (route) =>
+    route.fulfill({ status: 200, contentType: "audio/mpeg", body: "" }),
+  );
+  return {
+    files: () => page.evaluate(() => (window as unknown as { __files: string[] }).__files),
+    end: () =>
+      page.evaluate(() => {
+        const el = (window as unknown as { __player: HTMLMediaElement }).__player;
+        el.pause();
+        el.dispatchEvent(new Event("ended"));
+      }),
+    fail: () => page.evaluate(() => (window as unknown as { __fail: () => void }).__fail()),
+  };
+}
+
+/** "Play to" from the verse 2:39 to 2:41, on page 7. */
+async function playThreeVerses(page: Page): Promise<void> {
+  await openWith(page, null);
+  await hold(page, "#verse-46");
+  await small(page).getByRole("menuitem", { name: "Play to" }).click();
+  await tap(page, false, "#verse-48");
+}
+
 test.describe("Hifth · tap and hold on a verse", () => {
   test("the setting is in the info panel, C when nobody chose, and remembered", async ({ page, isMobile }) => {
     await openWith(page, null);
@@ -365,8 +444,10 @@ test.describe("Hifth · the four new verse buttons", () => {
     await expect(said).toHaveText(finger ? "Tap the verse to stop at" : "Click the verse to stop at");
     await tap(page, false, "#verse-48");
     await expect(said).toHaveText("Playing Al-Baqarah · 2:39 to 2:41");
-    // The tap that ended the pick did not also open a menu.
-    await expect(drawer(page)).toHaveCount(0);
+    // The tap that ended the pick did not also open a menu; the verse's tools
+    // come back instead, with the run's Pause on them.
+    await expect(small(page)).toHaveCount(0);
+    await expect(drawer(page).getByRole("button", { name: /^(Play|Pause) Al-Baqarah · 2:39$/ })).toBeVisible();
   });
 
   // The run is the one place the app starts a verse with no tap behind it:
@@ -374,40 +455,57 @@ test.describe("Hifth · the four new verse buttons", () => {
   test("Play to moves on to the next verse each time one ends, and stops after the last", async ({
     page,
   }) => {
-    await page.addInitScript(() => {
-      const w = window as unknown as { __srcs: string[]; __player?: HTMLMediaElement };
-      w.__srcs = [];
-      HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) {
-        w.__player = this;
-        return Promise.resolve();
-      };
-      const d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src")!;
-      Object.defineProperty(HTMLMediaElement.prototype, "src", {
-        ...d,
-        set(this: HTMLMediaElement, v: string) {
-          w.__srcs.push(String(v).replace(/^.*\//, ""));
-          d.set!.call(this, v);
-        },
-      });
-    });
-    await page.route("https://verses.quran.com/**", (route) =>
-      route.fulfill({ status: 200, contentType: "audio/mpeg", body: "" }),
-    );
-    await openWith(page, null);
-    await hold(page, "#verse-46");
-    await small(page).getByRole("menuitem", { name: "Play to" }).click();
-    await tap(page, false, "#verse-48");
-    const srcs = () => page.evaluate(() => (window as unknown as { __srcs: string[] }).__srcs);
-    const end = () =>
-      page.evaluate(() => (window as unknown as { __player: HTMLMediaElement }).__player.dispatchEvent(new Event("ended")));
-    await expect.poll(srcs).toEqual(["002039.mp3"]);
-    await end();
-    await expect.poll(srcs).toEqual(["002039.mp3", "002040.mp3"]);
-    await end();
-    await expect.poll(srcs).toEqual(["002039.mp3", "002040.mp3", "002041.mp3"]);
-    await end();
+    const player = await fakePlayer(page);
+    await playThreeVerses(page);
+    await expect.poll(player.files).toEqual(["002039.mp3"]);
+    await player.end();
+    await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3"]);
+    await player.end();
+    await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3", "002041.mp3"]);
+    await player.end();
     await page.waitForTimeout(300);
-    expect(await srcs()).toEqual(["002039.mp3", "002040.mp3", "002041.mp3"]);
+    expect(await player.files()).toEqual(["002039.mp3", "002040.mp3", "002041.mp3"]);
+  });
+
+  // A presenter stops a run to say something about the verse, then carries on.
+  // The verse's tools had been set aside to pick where to stop, so there was no
+  // Pause at all; and the button sat on the run's first verse, so once the
+  // second was playing it read Play, and a press started that first verse
+  // alone, dropping the rest.
+  test("pausing a run part way through pauses it, and the next press carries on from there", async ({
+    page,
+  }) => {
+    const player = await fakePlayer(page);
+    await playThreeVerses(page);
+    await expect.poll(player.files).toEqual(["002039.mp3"]);
+    await player.end();
+    await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3"]);
+    // The button speaks for the verse being recited, and pauses it.
+    await drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:40" }).click();
+    await expect(drawer(page).getByRole("button", { name: "Play Al-Baqarah · 2:40" })).toBeVisible();
+    // The next press resumes that verse, not the run's first, and the run goes on.
+    await drawer(page).getByRole("button", { name: "Play Al-Baqarah · 2:40" }).click();
+    await expect(drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:40" })).toBeVisible();
+    expect(await player.files()).toEqual(["002039.mp3", "002040.mp3"]);
+    await player.end();
+    await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3", "002041.mp3"]);
+  });
+
+  // The room's wifi drops on the second verse of a run: a press once it is back
+  // fetches that verse again, and the run still reaches its last verse.
+  test("a run whose next verse failed to load carries on from it on the next press", async ({ page }) => {
+    const player = await fakePlayer(page);
+    await playThreeVerses(page);
+    await expect.poll(player.files).toEqual(["002039.mp3"]);
+    await player.end();
+    await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3"]);
+    await player.fail();
+    const retry = drawer(page).getByRole("button", { name: "Play Al-Baqarah · 2:40" });
+    await expect(retry).toHaveAttribute("data-phase", "error");
+    await retry.click();
+    await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3", "002040.mp3"]);
+    await player.end();
+    await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3", "002040.mp3", "002041.mp3"]);
   });
 
   test("F switches full screen on a computer", async ({ page }) => {

@@ -921,6 +921,7 @@ export function App(): JSX.Element {
   // you are on, so a hop or a fresh tap should not leave the last one sounding.
   // `stopAudio` is stable, so this fires only when the selection actually moves.
   const stopAudio = audio.stop;
+  const listenKey = audio.runKey ?? selectedKey;
   useEffect(() => {
     stopAudio();
   }, [selectedKey, stopAudio]);
@@ -2682,6 +2683,9 @@ export function App(): JSX.Element {
       const run = versesBetween(from, to);
       if (run.length === 0) return;
       audio.playRun(run);
+      // Picking where to stop set the verse's tools aside; bring them back, so
+      // the recitation has its Pause in reach.
+      setDrawerAway(false);
       const first = run[0]!;
       const last = run[run.length - 1]!;
       const lastName = t.ayahLabel(last) ?? last;
@@ -3971,12 +3975,14 @@ export function App(): JSX.Element {
         onClose={putDrawerAway}
         end={!desktop && railAt === "tools" ? hopRail(undefined, "tools") : undefined}
       >
+        {/* While a "Play to" run lasts, the button speaks for the verse being
+            recited, not the one the run started from. */}
         <PlayTrigger
-          selectedKey={selectedKey}
-          label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
-          phase={audio.phaseFor(selectedKey)}
+          selectedKey={listenKey}
+          label={listenKey ? (t.ayahLabel(listenKey) ?? listenKey) : null}
+          phase={audio.phaseFor(listenKey)}
           onToggle={audio.toggle}
-          caption={listenCaption(audio.phaseFor(selectedKey), t)}
+          caption={listenCaption(audio.phaseFor(listenKey), t)}
         />
         {COMMENTARY && (
           <CommentaryTrigger

@@ -1579,6 +1579,26 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     offline, but on a wifi with no internet behind it the browser says it is online, and that
     is the likelier meeting room; a test stages it and the caption now says "Offline" for every
     failure, since the network is the only place the file comes from.
+56. ~~**A run of verses could not be paused, and a press started it over.**~~ Found on
+    2026-10-10 asking what a presenter does mid-run: pick "Play to" across three verses, then
+    stop to say something about the second. Picking where to stop sets the verse's tools
+    aside, and they stayed aside, so there was no Pause anywhere on the screen. And the play
+    button belongs to the selected verse, which stays the run's first: once the second was
+    playing the button read Play, and a press started the first verse alone and dropped the
+    rest. The same press after a verse in the run failed to load also ended the run. **Fixed
+    the same day:** the tools come back once the run starts, the button speaks for the verse
+    being recited, and pausing, resuming or retrying that verse keeps the run going; a press
+    on any other verse still ends it. Three tests on the computer and both phones, two of
+    them watched failing with the old rule. *Why the button follows the recitation and the
+    selection does not:* moving the selection opens that verse's note in the pitch build,
+    brings its tools back up and closes the surah's introduction, so a selection that moved
+    with the run would open a note on every verse. What is left is item 57.
+57. **Nothing on the page shows which verse a run is reciting.** Found with item 56 on
+    2026-10-10: during "Play to" the page keeps the run's first verse lit, and the verse
+    tools' heading names it too, while the second and third are heard. A hafiz listening
+    along, or a room watching, cannot see where the recitation is. Moving the selection with
+    the run is ruled out (item 56 says why), so it wants a mark of its own on the verse being
+    heard, built more than one way and tried by hand.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

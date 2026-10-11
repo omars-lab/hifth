@@ -3872,6 +3872,29 @@
       "severity": "risk",
       "owner": "agent",
       "note": "The list and note fixes of 2026-10-09 (short lists with no veil upright, the corner card's height at one page, go-to buttons near their verse) were checked in browser tests and pictures only; the app's copy of the web build predates them, and every real-app walk so far has found a fault the browser tests missed. Closes when the iPad app upright in English and the Mac app in English and Arabic are walked on a fresh build, each fault found getting its own item and test."
+    },
+    {
+      "id": "run-could-not-be-paused",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "56"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
+      "note": "Found asking what a presenter does mid-run (2026-10-10): after Play to, the verse's tools stayed aside so there was no Pause on screen, and the play button stayed on the run's first verse, so a press once the second was playing started the first alone and dropped the rest; a press after a failed load ended the run too. Now the tools come back, the button follows the verse being recited, and pause, resume and retry keep the run. Tests failed first with the old rule."
+    },
+    {
+      "id": "run-verse-not-shown",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "57"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "During Play to the page keeps the run's first verse lit, and the tools' heading names it, while later verses are heard, so nobody watching can see where the recitation is. The selection cannot follow the run (it would open each verse's note), so the verse being heard wants a mark of its own."
     }
   ]
 }
