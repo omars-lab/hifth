@@ -152,6 +152,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   phone-side · issue: `note-covers-verse-after-turn`. Sideways, a verse too long for the room
   above the note (2:255) starts at its first line with the rest under the note; that is known
   and open, not a new fault · issue: `sideways-phone-long-verse-under-note`
+- [ ] Tap a verse that is not on the demo path, as a visitor will: its note opens like any
+  other, never an empty panel or a wait that does not end. · any, pitch · checked 2026-10-11
+  by counting the private notes: every one of the 6236 verses has one
 - [ ] Read a note to the end: it ends above the page bar, and reads like the printed book. · any ·
   **open** — issue: `pitch-commentary-differs-from-print` (outside the demo notes, italic words
   still show upright)

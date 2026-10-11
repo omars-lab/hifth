@@ -105,6 +105,7 @@ each finding. It only reads files and the command's own output; it never builds 
 | --- | --- | --- |
 | 2026-07 | 150 KB | set in the original plan alongside the 2.5 s start-up goal |
 | 2026-09-27 | 175 KB | the app reached 149.3 KB. Sweep: start-up 2254 ms as built; still ≤ 2500 ms with +50 KB (2408), over it from +60 KB (2553). So ~50 KB of room for download-only code; raised by half of that (+25 KB). The owner chose to raise now and trim later |
+| 2026-10-11 | 200 KB | the app reached 171.7 KB, its start-up script 118.4 KB. Sweep: start-up 2138 ms as built; still ≤ 2500 ms with +75 KB (2437), over it from +100 KB (2586). So ~75 KB of room; raised by a third of it (+25 KB), inside the rule above. Moving code into a file loaded later would not have helped: every shipped script counts toward this total |
 
 ### What the 2026-09-27 sweep taught us
 
@@ -115,6 +116,14 @@ each finding. It only reads files and the command's own output; it never builds 
 - **Near a step, runs disagree.** +25 KB measured 2404 ms in one sweep and 2257 ms in the next,
   because it sits right at a step's edge. Trust the pattern across several amounts, not one point.
 - **Today: +0 to +50 KB is on the 2.25–2.41 s steps, +60 to +80 KB on 2.55 s (over), +90 KB on 2.71 s.**
+
+### What the 2026-10-11 sweep taught us
+
+- **The steps moved down after the page-drawing library swap.** As built, start-up is 2138 ms, not
+  2254; +0 to +25 KB sits on 2.14–2.29 s, +50 to +75 KB on 2.44 s, +100 KB on 2.59 s (over),
+  +125 KB on 2.74 s. Two sweeps the same day agreed within 2 ms at every point.
+- **The size cap counts every script shipped, the late-loaded ones too**, so moving code out of the
+  start-up script lowers start-up time but not the number this cap checks.
 
 ## Tools
 
