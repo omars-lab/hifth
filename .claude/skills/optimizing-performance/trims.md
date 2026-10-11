@@ -14,6 +14,10 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Checked again 2026-10-10 (night), nothing taken.** 170.5 KB against the 175 KB cap, after a
+run's end lights its last verse and the turn-by-hand setting; still well inside the ~50 KB of real
+room.
+
 **Checked again 2026-10-10 (evening), nothing taken.** 169.5 KB against the 175 KB cap, after
 the page started following a run of verses; still well inside the ~50 KB of real room.
 

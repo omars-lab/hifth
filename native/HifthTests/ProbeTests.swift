@@ -34,4 +34,40 @@ struct ProbeTests {
         let late = "Promise.reject(new Error(\"no dialog\"))"
         #expect(try await ask(late)["eval"] as? String == "Error: no dialog")
     }
+
+    // On its side the app is started by a UI test, which cannot read what the
+    // app prints, so the answer is also kept in a file the walk reads back.
+    @Test("the answer is kept in the file asked for")
+    func keptInAFile() throws {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("probe-\(UUID().uuidString).json").path
+        try ShellModel.keepProbeAnswer("{\"eval\":42}", at: path)
+        #expect(try String(contentsOfFile: path, encoding: .utf8) == "{\"eval\":42}")
+        try FileManager.default.removeItem(atPath: path)
+    }
+
+    @Test("with no file asked for, nothing is written")
+    func noFileNoWrite() throws {
+        try ShellModel.keepProbeAnswer("{}", at: nil)
+        try ShellModel.keepProbeAnswer("{}", at: "")
+    }
+
+    // The app and the test that starts it work from different folders, so a
+    // relative path names two different files and the answer is never found.
+    @Test("a path that is not absolute is refused, not written somewhere else")
+    func relativePathRefused() throws {
+        // From a folder where the relative write would succeed, so the refusal
+        // is what stops it, not a missing folder.
+        let files = FileManager.default
+        let here = files.currentDirectoryPath
+        let tmp = files.temporaryDirectory.path
+        files.changeCurrentDirectoryPath(tmp)
+        defer { files.changeCurrentDirectoryPath(here) }
+        let name = "probe-\(UUID().uuidString).json"
+        #expect(throws: (any Error).self) {
+            try ShellModel.keepProbeAnswer("{}", at: name)
+        }
+        let strayed = (tmp as NSString).appendingPathComponent(name)
+        #expect(!files.fileExists(atPath: strayed))
+        try? files.removeItem(atPath: strayed)
+    }
 }

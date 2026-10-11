@@ -700,8 +700,13 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
           .evaluateAll((els) => [...new Set(els.map((el) => (el.getAttribute("data-hl-key") ?? "?").split("/").pop()))]),
       )
       .toEqual(["67:30"]);
-    await expect(page.getByRole("region", { name: /^Tools for / }).getByRole("button", { name: /^Play .*67:30$/ })).toBeVisible();
+    const tools = page.getByRole("region", { name: /^Tools for / });
+    await expect(tools.getByRole("button", { name: /^Play .*67:30$/ })).toBeVisible();
     await expect(sheet(page)).toHaveCount(0);
+    // Shut, but a press away: its button is on the verse's tools.
+    const note = tools.getByRole("button", { name: / commentary$/ });
+    await expect(note).toBeVisible();
+    await expect(note).toHaveAttribute("aria-expanded", "false");
     await context.close();
   });
 

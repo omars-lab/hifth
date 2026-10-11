@@ -20,7 +20,7 @@ by hand: `make app-generate` rewrites it.
 | run in the iPad simulator | `make app-run-ipad ROUTE=/hafs-kfqc/p45` |
 | turn a running app to a route | `make app-open ROUTE=/hafs-kfqc/2:255 TARGET=ipad` (or `TARGET=mac`) |
 | screenshot the page | `make app-shot ROUTE='/hafs-kfqc/p45?field=dark' TARGET=ipad` → `native/shots/` |
-| what the page can see inside the shell | `make app-probe` (Mac) · `make app-probe TARGET=ipad ROUTE=… EVAL='js'` |
+| what the page can see inside the shell | `make app-probe` (Mac) · `make app-probe TARGET=ipad ROUTE=… EVAL='js'` · on its side: add `SIDEWAYS=1` |
 | a picture of each of many routes, upright or sideways | `make app-walk ROUTES='/hafs-kfqc/2:48?open=lookalikes /hafs-kfqc/p45' SIDEWAYS=1` → `native/shots/walk/side/` (upright runs go to `walk/upright/`) |
 | walk the app held sideways, by eye | see "Walking the app in the simulator" below |
 | tests, fast | `make app-unit-test` (route, bundle paths, bridge; Mac, seconds) |
@@ -124,6 +124,14 @@ derived from the route: `/hafs-kfqc/p45?field=dark` on iPad → `native/shots/ip
 page can see (origin, secure context, `caches`, service worker, `navigator.share`, clipboard,
 storage, the native marker, viewport, touch points, user agent) and exits. Run it first when
 something works in Safari and not in the shell.
+
+On its side, `make app-probe TARGET=ipad SIDEWAYS=1 ROUTE=… EVALFILE=…` runs the same probe on the
+open book. The app cannot turn itself (the system refuses an iPad app that may share the screen),
+so a UI test turns the simulator, starts the app with the probe and reads the answer from
+`native/shots/probe-side.json`; it fails if the page was not wider than tall. It restarts the
+simulator first and takes about a minute plus the question's own time; give a long question
+`PROBE_TIMEOUT_S=…` (180 by default). Why it is built this way:
+`docs/issues/ipad-app-cannot-turn-itself.md`.
 
 ## Walking the app in the simulator
 

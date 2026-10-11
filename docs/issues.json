@@ -3863,6 +3863,18 @@
       "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
+      "id": "app-probe-sideways",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉘"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "closedBy": "native/HifthUITests/WalkTests.swift",
+      "note": "The probe that presses things in the iPad app and reports what the page shows ran only upright, so a recitation turning the open book could be checked in the app on its side only as still pictures. The app cannot turn itself (the system refuses an iPad app that may share the screen), so make app-probe TARGET=ipad SIDEWAYS=1 has a UI test turn the simulator, start the probe and read its answer from a file, failing when the page was not wider than tall; a relative answer path is refused (ProbeTests.swift). First run: the surah played from its corner on the open book followed opening to opening and ended with its last verse lit, clean. docs/issues/ipad-app-cannot-turn-itself.md."
+    },
+    {
       "id": "app-walk-after-list-fixes",
       "source": {
         "file": "docs/design/native-shell.md",

@@ -688,3 +688,31 @@ Tests: unit tests on the drawer (a run at the head is set apart; each paragraph 
 a number opening a sentence, a run mid-line, and a run that misses the verse are not), and a browser
 test on 15:30, 18:60, 70:11 and 2:255 that counts the runs and checks each sits first, in its own
 colour, with a gap. Both failed first.
+
+### ㉘ Can we play a recitation in the iPad app while it is on its side? · **fixed**
+
+The demo will most likely be shown on an iPad on its side, as an open book. Today the app can be
+turned on its side only by the walk that takes pictures, and that walk turns it upright again before
+anything else can run. The tool that presses things in the app and reports what the page shows only
+runs upright. So anything that moves, such as a recitation turning the book, can be watched in the
+app upright and only as still pictures on its side.
+
+**What it changes for a hafiz:** nothing directly. It decides whether a fault that shows only on the
+open book in the real app is found before the room finds it.
+
+**Found, 2026-10-10.** A surah played from its corner was checked on the open book at the size of an
+iPad on its side, in the same browser engine the app uses, and was clean (a test covers it). It could
+not be walked in the app itself on its side.
+
+**What would answer it:** let the app be started on its side when asked at launch, so the same probe
+runs on the open book; or have the walk run a probe between its turn and its turn back. Either needs
+a check that the app really is on its side (a wide picture), since the simulator sometimes says it
+turned and stays upright.
+
+**Fixed, 2026-10-10.** The app cannot turn itself: the system refuses an iPad app that may share
+the screen the right to choose its own orientation. So a UI test turns the simulator, starts the
+app with the probe asked for, and reads the answer back from a file; it fails when the page it
+answered from was not wider than tall. The first run walked the surah played from its corner on
+the open book in the real app: back to the opening where the surah starts, forward with the
+recitation, and its last verse lit at the end, clean. What was tried and why is in
+`docs/issues/ipad-app-cannot-turn-itself.md`; the command is `make app-probe TARGET=ipad SIDEWAYS=1`.

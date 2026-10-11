@@ -252,16 +252,38 @@ final class ShellModel {
     }
 
     private func probe(_ extra: String) {
+        let path = ProcessInfo.processInfo.environment["HIFTH_PROBE_PATH"]
         webView.callAsyncJavaScript(Self.probeScript, arguments: ["extra": extra], in: nil, in: .page) { result in
             switch result {
             case .success(let value):
                 print("probe \(value)")
+                do {
+                    try Self.keepProbeAnswer("\(value)", at: path)
+                } catch {
+                    print("probe failed to keep its answer \(error)")
+                    exit(1)
+                }
                 exit(0)
             case .failure(let error):
                 print("probe failed \(error)")
                 exit(1)
             }
         }
+    }
+
+    /// On its side the app is started by a UI test (make app-probe SIDEWAYS=1),
+    /// which cannot read what the app prints: with `HIFTH_PROBE_PATH` the
+    /// answer is also written there, for the walk to read back. The app and
+    /// the test work from different folders, so only an absolute path names
+    /// the same file for both; anything else is refused.
+    static func keepProbeAnswer(_ answer: String, at path: String?) throws {
+        guard let path, !path.isEmpty else { return }
+        guard path.hasPrefix("/") else { throw ProbePathNotAbsolute(path: path) }
+        try Data(answer.utf8).write(to: URL(fileURLWithPath: path))
+    }
+
+    struct ProbePathNotAbsolute: Error {
+        let path: String
     }
 
     static let probeScript = """
