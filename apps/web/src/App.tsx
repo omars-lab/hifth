@@ -956,18 +956,19 @@ export function App(): JSX.Element {
   // next page: the chosen verse is left behind with its page, and the run is
   // what took the page there (docs/PLAN.md, item 58). The other is choosing the
   // very verse a run is reciting, its number tapped or held to open its note:
-  // that is the verse already sounding, so it goes on (item 76).
+  // that is the verse already sounding, so it goes on (item 76). A kept run
+  // only covers the page being left with nothing chosen, or the recited verse
+  // chosen: anything else chosen on the way, a hop from a note among them, is
+  // choosing that verse, and the recitation stops there (item 81).
   const stopAudio = audio.stop;
   const listenKey = audio.runKey ?? selectedKey;
   const keepRunRef = useRef(false);
   const runKeyRef = useRef(audio.runKey);
   runKeyRef.current = audio.runKey;
   useEffect(() => {
-    if (keepRunRef.current) {
-      keepRunRef.current = false;
-      return;
-    }
-    if (selectedKey !== null && selectedKey === runKeyRef.current) return;
+    const kept = keepRunRef.current;
+    keepRunRef.current = false;
+    if (selectedKey === null ? kept : selectedKey === runKeyRef.current) return;
     stopAudio();
   }, [selectedKey, stopAudio]);
   // The note for the current selection, from whichever source is on; in the

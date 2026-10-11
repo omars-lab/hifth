@@ -1107,6 +1107,47 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("with the note up over a recitation, following one of its references to another verse ends the recitation", async ({
+    browser,
+  }) => {
+    // The other side of items 79 and 80: a page turned by hand keeps the sound,
+    // but a hop to another verse is choosing that verse, so the recitation
+    // stops there, as a tap on another verse's number does (docs/PLAN.md, item 81).
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    const player = await fakePlayer(page);
+    const playing = () => page.evaluate(() => !(window as unknown as { __player: HTMLMediaElement }).__player.paused);
+    await page.goto("/#/hafs-kfqc/p2?view=one");
+    await expect(pageSvg(page, 2)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    const head = (await page.locator('[data-host-page="2"] [data-running-head="surah"]').boundingBox())!;
+    await page.mouse.move(head.x + head.width / 2, head.y + head.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    await page.getByRole("menu").getByRole("menuitem", { name: "Play", exact: true }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    await player.end();
+    await player.end();
+    await expect.poll(player.files).toEqual(["002001.mp3", "002002.mp3", "002003.mp3"]);
+    const number = pageSvg(page, 2).locator('[data-verse-number][data-verse-key="quran/hafs-kfqc/2:3"]');
+    await settle(number);
+    const at = (await number.boundingBox())!;
+    await page.mouse.click(at.x + at.width / 2, at.y + at.height / 2);
+    await page.getByRole("menu", { name: /2:3/ }).getByRole("menuitem", { name: /Commentary/ }).click();
+    await expect(sheet(page)).toBeVisible();
+    await player.end();
+    await expect.poll(async () => (await player.files()).at(-1)).toBe("002004.mp3");
+    await expect.poll(playing).toBe(true);
+
+    const hop = sheet(page).getByRole("button", { name: /^(Go to|Hop to) / }).first();
+    await hop.click();
+    await expect.poll(() => page.evaluate(() => location.hash)).not.toContain("/p2");
+    await expect.poll(playing).toBe(false);
+    await context.close();
+  });
+
   test("an iPad held upright opens on one page, and turned on its side opens the book", async ({ browser }) => {
     // Upright, two pages side by side were each half the screen wide, with
     // empty space above and below: the mus'haf read small on the very screen

@@ -1899,6 +1899,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     three engines; walked with the recitation a verse past the note in a browser, Arabic, the
     iPad app and the Mac app. The walks now wait a verse before the hand-off, and say which
     verse is heard against the note's, read off the recitation's Pause.
+81. ~~**A hop from a note during a recitation stopped the sound only by luck of timing.**~~
+    Found while checking item 80, 2026-10-11: the rule that lets a hand turn keep the sound was
+    loose enough to keep it for anything chosen on the way, and a hop to another verse from the
+    note stopped the recitation only because the hop arrives a moment after the turn's leftover
+    allowance was used up. Fixed by making the rule say what it means: a recitation is kept
+    when nothing is chosen (the page was left) or the verse being recited is chosen; any other
+    verse chosen, a hop among them, ends it. A browser test, watched failing against the loose
+    rule first, in all three engines; walked every hand-off with the sound on, in English and
+    Arabic: a hop ends the sound, pressing the number of the verse being heard keeps it, and the
+    rest keep it.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
