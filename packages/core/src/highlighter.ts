@@ -364,13 +364,16 @@ export class Highlighter {
   private textSpan(): TextSpan | undefined {
     if (this.textSpanCache !== undefined) return this.textSpanCache ?? undefined;
     const words = this.svg.querySelector<SVGGraphicsElement>(`#${TEXT_ID}`);
-    if (!words || typeof words.getBBox !== "function" || typeof words.getCTM !== "function") {
+    if (!words || typeof words.getBBox !== "function" || typeof words.getScreenCTM !== "function") {
       this.textSpanCache = null;
       return undefined;
     }
     try {
-      const wordsCtm = words.getCTM() as Matrix2D | null;
-      const pageCtm = this.svg.getCTM() as Matrix2D | null;
+      // The screen matrices, not each element's own: the two browsers agree on
+      // those. Asked for the page's own, Firefox leaves out its sizing to its
+      // box, and every band stopped a ninth of the way short of its first word.
+      const wordsCtm = words.getScreenCTM() as Matrix2D | null;
+      const pageCtm = this.svg.getScreenCTM() as Matrix2D | null;
       if (!wordsCtm || !pageCtm) return undefined;
       const span = textSpanOf(words.getBBox(), wordsCtm, pageCtm);
       if (span) this.textSpanCache = span;

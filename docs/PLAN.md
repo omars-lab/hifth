@@ -1556,6 +1556,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     on a wide window the sheet sits on the window's foot, as it does on a phone, and the map
     gets the extra height. A laptop test checks that no line is sliced by the sheet's foot; it
     failed first.
+54. ~~**In Firefox, every highlighted line stopped short of its first word.**~~
+    Found on 2026-10-10 walking the live site in Firefox on a laptop: a highlight dragged
+    across a page left the first word of each line unwashed, and in Chrome the same drag
+    covered it. The highlight is trimmed to the page's block of words, and Firefox measured
+    that block about a ninth too narrow, because the two browsers answer one question about
+    the page's scale differently. **Fixed the same day:** the block is measured the way both
+    browsers agree on. The highlight tests now run in Firefox too and failed there first; a
+    unit test gives the page Firefox's answer. Running them in Firefox also showed its test
+    browser does not restyle an open page when the "more contrast" setting is switched, so
+    that test opens the page again under each setting.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

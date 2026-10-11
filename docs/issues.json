@@ -3780,6 +3780,18 @@
       "note": "Found walking the live site on a laptop in Firefox and Chrome (2026-10-10): the reading record's sheet stood a little above the window's foot and its bottom edge cut the page bar's count line in half. On a wide window it now sits on the foot. Laptop test watched failing first."
     },
     {
+      "id": "firefox-highlight-short-of-first-word",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "54"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/highlight.spec.ts",
+      "note": "Found walking the live site in Firefox on a laptop (2026-10-10): a dragged highlight left each line's first word unwashed, because Firefox measured the page's block of words a ninth too narrow. Now measured the way both browsers agree on. The highlight tests run in Firefox too and failed there first; a unit test gives the page Firefox's answer."
+    },
+    {
       "id": "ribbon-covers-first-words",
       "source": {
         "file": "docs/PLAN.md",
