@@ -172,7 +172,7 @@ import { NoteFollow } from "./components/NoteFollow";
 import { useBookmarks, useConfusions, useNotes, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
-import { PlayTrigger, listenCaption } from "./components/PlayTrigger";
+import { PlayTrigger, listenCaption, listenGlyph } from "./components/PlayTrigger";
 import { DrawerTool, VerseDrawer } from "./components/VerseDrawer";
 import { VerseMenu, type VerseMenuItem } from "./components/VerseMenu";
 import { QulTrigger } from "./components/QulTrigger";
@@ -2504,7 +2504,7 @@ export function App(): JSX.Element {
     items.push({
       id: "listen",
       caption: listenCaption(audio.phaseFor(key), t),
-      glyph: audio.phaseFor(key) === "playing" ? "⏸\uFE0E" : "▶\uFE0E",
+      glyph: listenGlyph(audio.phaseFor(key)),
       onPick: () => audio.toggle(key),
     });
     const surah = parseAyahKey(key)?.surah;

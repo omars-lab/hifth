@@ -22,9 +22,17 @@ import styles from "./PlayTrigger.module.css";
  * and the network is still the only place the file can come from.
  */
 export function listenCaption(phase: AudioPhase, t: Strings): string {
-  if (phase === "playing") return t.vdPause;
+  // While the file opens, the sound is already asked for and a press stops it.
+  if (phase === "playing" || phase === "loading") return t.vdPause;
   if (phase === "error") return t.vdListenOffline;
   return t.vdListen;
+}
+
+/** The listen glyph, the same in the bar and in the verse's menu. */
+export function listenGlyph(phase: AudioPhase): string {
+  if (phase === "playing") return "⏸\uFE0E";
+  if (phase === "loading") return "↻";
+  return "▶\uFE0E";
 }
 
 export function PlayTrigger({
@@ -48,9 +56,9 @@ export function PlayTrigger({
   const { t } = useT();
   if (!selectedKey || !label) return null;
 
-  const playing = phase === "playing";
   const loading = phase === "loading";
-  const glyph = playing ? "⏸\uFE0E" : loading ? "↻" : "▶\uFE0E";
+  // Asked for counts as playing: a press now pauses, so the control says so.
+  const playing = phase === "playing" || loading;
 
   return (
     <button
@@ -63,7 +71,7 @@ export function PlayTrigger({
       onClick={() => onToggle(selectedKey)}
     >
       <span aria-hidden="true" className={loading ? styles.spinning : undefined}>
-        {glyph}
+        {listenGlyph(phase)}
       </span>
       {caption && <span data-caption="">{caption}</span>}
     </button>

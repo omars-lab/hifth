@@ -74,6 +74,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   "Offline" (try a wifi with no internet behind it too); turn the wifi back on and press it again: the verse plays. A pitch room may have
   no wifi, and the recitation is the one thing the app fetches from outside. · phone · issue:
   `listen-offline-looked-untouched` · test: e2e/audio.spec.ts
+- [ ] Press Listen on a slow connection and look at the button before the verse sounds: it
+  already says Pause and turns, in the bar and in the verse's menu, since a press then stops the
+  sound. A Play still showing there invites a second tap that silences the verse before it
+  began. · any, slow wifi · issue: `loading-says-play` · test: PlayTrigger.test.tsx
 - [ ] Pick "Play to" on a verse and stop it two verses on: the three verses play one after
   another with no second tap, and nothing plays after the last. · desktop · test:
   e2e/verse-gestures.spec.ts ("moves on to the next verse each time one ends")
@@ -389,6 +393,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   though only the iPad sets that up by name. · `make app-probe TARGET=mac EVALFILE=…` with a
   script that plays two recitations back to back, with the sound above zero (the web view lets a
   silent one start anyway, so a silent check proves nothing) · walked 2026-10-10, nothing wrong
+- [ ] Make one whole visit **in the iPad app on its side**, in English and in Arabic, as a reader
+  in the room would: open a note, read it to its end, follow a reference in it and come back,
+  play the surah from its corner with the note still open, then pause. Nothing lit sits under the
+  note, the way back returns to the first verse, the run starts with the note shut, and Pause
+  stops it. · `make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en EVALFILE=.claude/skills/walk-app/scripts/visit-walk.js …`
+  · walked 2026-10-11, nothing wrong but the loading label (`loading-says-play`)
 - [ ] Start a "Play to" run **in the iPad app**, with the moving light and again with the ring
   picked: the mark moves with each verse recited, and the light comes back to the first at the
   end. · `make app-probe TARGET=ipad LOCALE=en EVALFILE=…` with a script that holds a verse,
