@@ -1683,7 +1683,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     silences the verse before it began. **Fixed the same day:** while the file opens the control
     says Pause, counts as pressed, and the menu item turns as the bar's button does. A unit
     test, watched failing first.
-63. **On a poor connection, a run of verses goes quiet for over a second between verses.** Found
+63. ~~**On a poor connection, a run of verses goes quiet for over a second between verses.**~~ Found
     2026-10-11 walking a run in the iPad app: each verse's recitation is fetched only once the
     one before it ends, so the silence between them is the time to open the next file. Measured
     on the live site at iPad size, four gaps each: about 0.1 s at home speed, about 0.5 s on a
@@ -1693,6 +1693,20 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     connection at all only carrying the recitations inside the app helps, and that is the
     owner's question, since the reciters' site sets the terms. The iPad's browser may also ignore
     a request to fetch early, so any fix is measured in the iPad app, not only in a browser.
+    **Fixed the same day,** built three ways and kept as a setting in the info panel ("The next
+    verse in a recitation"): while one verse of a run plays, the next one's file is fetched and
+    kept, and the next verse plays from that copy (the default); or the file is only asked for
+    early and the next verse still plays from the network; or off. Measured with the walk
+    skill's gap scripts, four gaps each. In Chromium both early ways bring the gap to about
+    0.03 s at every speed, against 0.5 s (slow wifi) and 1.3 s (poor) with it off. In the iPad
+    app, at home speed, keeping the copy gives about 0.03 s, while only asking early gives
+    about 0.15 s, the same as off: the iPad's player does not reuse the early fetch, as feared.
+    Unit tests and a browser test on every engine, watched failing first.
+64. **On a poor connection, a short verse followed by a long one still leaves a gap.** Found
+    2026-10-11 measuring item 63: on the poor wifi, one gap in four stayed at 1.3 s, where the
+    next verse's file had not finished arriving before the short verse before it ended. Only
+    the next verse is fetched early. Fetching further ahead, one file after another so they do
+    not share the slow line, would cover it; measure with the gap scripts as for item 63.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

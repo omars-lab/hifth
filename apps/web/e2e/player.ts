@@ -4,15 +4,32 @@ import type { Page } from "@playwright/test";
  * A stand-in for the browser's player: no sound in a test runner, so play and
  * pause flip a flag and send the events a real player sends, and the test ends
  * or fails the verse when it chooses. `files` lists each file the app asked for.
+ *
+ * A run fetches its next verse's file early (docs/PLAN.md, item 63). The page
+ * answers that itself, with `recitation` as the file's bytes (none unless
+ * given), because a page the offline helper controls can send a fetch past
+ * the test's own network on some browsers. `asked` lists the files fetched so.
  */
-export async function fakePlayer(page: Page): Promise<{
+export async function fakePlayer(
+  page: Page,
+  { recitation = "" }: { recitation?: string } = {},
+): Promise<{
   files: () => Promise<string[]>;
+  asked: () => Promise<string[]>;
   end: () => Promise<void>;
   fail: () => Promise<void>;
 }> {
-  await page.addInitScript(() => {
-    const w = window as unknown as { __files: string[]; __player?: HTMLMediaElement };
+  await page.addInitScript((recitation: string) => {
+    const w = window as unknown as { __files: string[]; __asked: string[]; __player?: HTMLMediaElement };
     w.__files = [];
+    w.__asked = [];
+    const fetched = window.fetch.bind(window);
+    window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input instanceof Request ? input.url : input);
+      if (!url.startsWith("https://verses.quran.com/")) return fetched(input, init);
+      w.__asked.push(url.replace(/^.*\//, ""));
+      return Promise.resolve(new Response(recitation, { status: 200, headers: { "content-type": "audio/mpeg" } }));
+    };
     const still = new WeakMap<HTMLMediaElement, boolean>();
     const failed = new WeakMap<HTMLMediaElement, MediaError>();
     const proto = HTMLMediaElement.prototype;
@@ -55,12 +72,13 @@ export async function fakePlayer(page: Page): Promise<{
       failed.set(el, { code: 2, message: "network" } as MediaError);
       el.dispatchEvent(new Event("error"));
     };
-  });
+  }, recitation);
   await page.route("https://verses.quran.com/**", (route) =>
     route.fulfill({ status: 200, contentType: "audio/mpeg", body: "" }),
   );
   return {
     files: () => page.evaluate(() => (window as unknown as { __files: string[] }).__files),
+    asked: () => page.evaluate(() => (window as unknown as { __asked: string[] }).__asked),
     end: () =>
       page.evaluate(() => {
         const el = (window as unknown as { __player: HTMLMediaElement }).__player;

@@ -795,6 +795,11 @@ export interface Strings {
   runFollowStay: string;
   runFollowBack: string;
   runFollowNote: string;
+  runAheadTitle: string;
+  runAheadHold: string;
+  runAheadAsk: string;
+  runAheadOff: string;
+  runAheadNote: string;
   /** Settings: how the saved jump arrows show. */
   jumpArrowsTitle: string;
   jumpArrowsStays: string;
@@ -1508,6 +1513,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     runFollowStay: m.runFollowStay,
     runFollowBack: m.runFollowBack,
     runFollowNote: m.runFollowNote,
+    runAheadTitle: m.runAheadTitle,
+    runAheadHold: m.runAheadHold,
+    runAheadAsk: m.runAheadAsk,
+    runAheadOff: m.runAheadOff,
+    runAheadNote: m.runAheadNote,
     jumpArrowsTitle: m.jumpArrowsTitle,
     jumpArrowsStays: m.jumpArrowsStays,
     jumpArrowsAsked: m.jumpArrowsAsked,

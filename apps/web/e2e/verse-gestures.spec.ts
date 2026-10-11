@@ -628,6 +628,26 @@ test.describe("Hifth · the four new verse buttons", () => {
     expect(await player.files()).toEqual(["002039.mp3", "002040.mp3", "002041.mp3"]);
   });
 
+  // The silence between two verses of a run is the next file coming over the
+  // network once the last ends: about a second on a poor connection
+  // (docs/PLAN.md, item 63). By default the next file is fetched while the
+  // verse before it sounds, and the next verse plays from that copy.
+  test("a run fetches its next verse while the one before sounds, and plays it from that copy", async ({
+    page,
+  }) => {
+    const player = await fakePlayer(page, { recitation: "a recitation" });
+    await playThreeVerses(page);
+    await expect.poll(player.asked).toContain("002040.mp3");
+    expect(await player.files()).toEqual(["002039.mp3"]);
+    await player.end();
+    await expect.poll(async () => (await player.files()).length).toBe(2);
+    const fromCopy = () =>
+      page.evaluate(() => (window as unknown as { __player: HTMLMediaElement }).__player.src.startsWith("blob:"));
+    expect(await fromCopy()).toBe(true);
+    // And the one after it is asked for in turn.
+    await expect.poll(player.asked).toContain("002041.mp3");
+  });
+
   // A presenter stops a run to say something about the verse, then carries on.
   // The verse's tools had been set aside to pick where to stop, so there was no
   // Pause at all; and the button sat on the run's first verse, so once the

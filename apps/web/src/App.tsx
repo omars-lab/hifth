@@ -219,6 +219,7 @@ import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style"
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { useRunFollow } from "./run-follow";
+import { useRunAhead } from "./run-ahead";
 import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
@@ -704,9 +705,12 @@ export function App(): JSX.Element {
   // What a run that reached its end by itself does next; set further down,
   // once the page's own state is in reach.
   const runEndRef = useRef<((key: string, run: number) => void) | null>(null);
+  // How a run makes its next verse ready while one sounds (docs/PLAN.md, item 63).
+  const runAhead = useRunAhead();
   const audio = useVerseAudio(
     (k) => announce(`${t.ayahLabel(k) ?? k} — ${t.audioUnavailable}`),
     (k, n) => runEndRef.current?.(k, n),
+    runAhead,
   );
   /*
    * The stepper's press, said out loud.
