@@ -3968,6 +3968,17 @@
       "owner": "agent",
       "closedBy": "apps/web/src/components/PlayTrigger.test.tsx",
       "note": "While a verse was still loading, its play control read Play and the verse menu showed the play arrow and Listen, yet a press then stopped the sound. On a slow connection a second tap silenced the verse before it began. The control now says Pause while the file opens, and the menu item turns as the bar does. Unit test watched failing first."
+    },
+    {
+      "id": "run-gap-on-poor-wifi",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "63"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Each verse in a run is fetched only once the one before ends, so the silence between verses is the time to open the next file: about 0.1 s at home speed, 0.5 s on slow wifi, 1.3 s on poor wifi, measured on the live site at iPad size. Fetching the next verse early would shorten it on a slow but working connection; carrying the recitations inside the app is the owner's question."
     }
   ]
 }

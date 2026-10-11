@@ -1683,6 +1683,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     silences the verse before it began. **Fixed the same day:** while the file opens the control
     says Pause, counts as pressed, and the menu item turns as the bar's button does. A unit
     test, watched failing first.
+63. **On a poor connection, a run of verses goes quiet for over a second between verses.** Found
+    2026-10-11 walking a run in the iPad app: each verse's recitation is fetched only once the
+    one before it ends, so the silence between them is the time to open the next file. Measured
+    on the live site at iPad size, four gaps each: about 0.1 s at home speed, about 0.5 s on a
+    slow wifi (a 0.3 s delay), and about 1.3 s on a poor one (a 0.6 s delay and a slow
+    download). A meeting room's wifi may be the poor one. Starting the next verse's file while
+    the one before still plays would shorten it on a slow but working connection; with no
+    connection at all only carrying the recitations inside the app helps, and that is the
+    owner's question, since the reciters' site sets the terms. The iPad's browser may also ignore
+    a request to fetch early, so any fix is measured in the iPad app, not only in a browser.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
