@@ -398,10 +398,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] On a phone with the note up and its look-alike buttons on its edge, open the tajweed key (and
   About, the jump box, the shelf): the buttons go dim with the page, none stands over the panel
   (2:49). · phone, iphone · issue: `lookalike-chip-over-modal-phone`
-- [ ] A look-alike row that names a whole passage says how the two are alike and opens onto the verse
-  inside it that matches (try 15:30's later surahs: the passage in surah 38 opens onto 38:73, not
-  its first verse; 23:7 opens onto 70:31). · desktop (Firefox), phone, the iPad app · issue:
-  `lookalike-passage-row-reason`
+- [ ] A look-alike row that names a whole passage says how the two are alike, and opening the row
+  lays your verse beside the verse inside it that matches (try 15:30's later surahs: the passage in
+  surah 38 is laid beside 38:73, not its first verse; 23:7 beside 70:31). Its hop arrow still lands
+  on the passage's first verse, by choice (look-alike rows ⑤), so 38:72 there is not a fault. ·
+  desktop (Firefox), phone, the iPad app · issue: `lookalike-passage-row-reason`
 - [ ] Closed, a passage row says which verse inside it is most alike (15:30's later surahs: the passage
   38:72 to 38:75 says 38:73), in English and Arabic. · phone, desktop (Firefox), the iPad app · issue:
   `lookalike-passage-row-names-match`
@@ -430,6 +431,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the iPad app, the juz map has no keep-offline shelf. · every flavour · issue:
   `reader-words-plumbing`
   · test: the pitch test "opens the look-alike list even when the note's file arrives first"
+
+The `lookalike-walk` script walks this section's app lines (the link, the rows' reasons, the first
+and last rows opened, the passage rows, Share and the bars on both iPad sizes, the tajweed key),
+upright and on its side, English and Arabic, iPad and Mac.
 
 ## Pens, bookmarks, the interface language
 
