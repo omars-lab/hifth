@@ -52,6 +52,8 @@ EVALFILE     ?=
 # The question as the launch line hands it on. Its dollar signs are the page's,
 # not make's: read as a make variable, `/^Close$/` reached the page as `/^Close`.
 PROBE_EVAL    = $(if $(EVALFILE),"$$(cat '$(EVALFILE)')",'$(value EVAL)')
+# app-probe SIDEWAYS=1: where the app keeps its answer for the UI test to read.
+PROBE_OUT    ?= $(SHOTS)/probe-side.json
 # app-test: some XCUITests instead of the whole run, space-separated, e.g. ONLY=SmokeTests/testOpensAtAVerse
 ONLY         ?=
 # app-walk: the routes to open, space-separated, and whether to hold it sideways.
@@ -181,8 +183,24 @@ endif
 	@sips -g pixelWidth $(SHOT_OUT) | awk '/pixelWidth/ { exit !($$2 > 0) }' || { echo "  ✗ $(SHOT_OUT) has no pixels"; exit 1; }
 	@echo "  ✓ $(SHOT_OUT)"
 
-app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…]
-ifeq ($(TARGET),ipad)
+app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1, iPad only]
+ifeq ($(TARGET)$(SIDEWAYS),ipad1)
+	@# The app may not turn itself on an iPad, so a UI test turns the
+	@# simulator and starts the probe; the app keeps its answer in a file,
+	@# named by its absolute path (the app and the test start in different folders).
+	@# A restart first, as for a sideways walk: a stuck simulator stays upright.
+	$(MAKE) app-generate
+	@rm -rf $(SHOTS)/ipad-probe.xcresult $(PROBE_OUT)
+	-xcrun simctl shutdown $(IPAD_UDID)
+	xcrun simctl boot $(IPAD_UDID)
+	xcrun simctl bootstatus $(IPAD_UDID) -b > /dev/null
+	set -o pipefail; TEST_RUNNER_PROBE_OUT='$(abspath $(PROBE_OUT))' TEST_RUNNER_PROBE_ROUTE='$(ROUTE)' TEST_RUNNER_PROBE_EVAL=$(PROBE_EVAL) \
+	  TEST_RUNNER_PROBE_DELAY_MS='$(DELAY_MS)' TEST_RUNNER_PROBE_LOCALE='$(LOCALE)' TEST_RUNNER_PROBE_TIMEOUT_S='$(PROBE_TIMEOUT_S)' \
+	  $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
+	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-probe.xcresult \
+	  -only-testing:HifthUITests-iOS/WalkTests/testProbeOnItsSide test | $(XCPRETTY)
+	@python3 -m json.tool $(PROBE_OUT)
+else ifeq ($(TARGET),ipad)
 	$(MAKE) app-build-ipad
 	xcrun simctl bootstatus $(IPAD_UDID) -b
 	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)

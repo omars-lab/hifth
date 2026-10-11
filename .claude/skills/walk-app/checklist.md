@@ -108,9 +108,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   run part way instead: the page is left as it was. On the private build no note opens at the
   end; the verse's tools are up instead, with the note's button a press away. On a phone the
   lit verse at the foot of the page stays clear of the tools card. On the iPad held sideways the
-  open book turns from opening to opening with the run and ends the same way. · desktop, a phone,
-  an iPad upright and sideways, and the private build in the iPad app · issue:
-  `run-end-after-follow-unlit`, `run-end-opens-note` · test: e2e/verse-gestures.spec.ts ("ends
+  open book turns from opening to opening with the run and ends the same way, in the browser and
+  in the iPad app on its side (`make app-probe TARGET=ipad SIDEWAYS=1`). · desktop, a phone,
+  an iPad upright and sideways, the iPad app sideways, and the private build in the iPad app · issue:
+  `run-end-after-follow-unlit`, `run-end-opens-note`, `app-probe-sideways` · test: e2e/verse-gestures.spec.ts ("ends
   with its last verse lit"), e2e/ipad.spec.ts ("turns the open book with it"), src/audio.test.ts,
   e2e/pitch.spec.ts ("tools up, not its note")
 - [ ] On the pitch build, with a note open on an iPad held upright, play a run to a verse that
