@@ -79,6 +79,14 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
    gap read from the network means fetching ahead fell behind; that becomes a unit test of the
    case (issues `run-gap-on-poor-wifi`, `run-gap-short-then-long`, PLAN 63 and 64).
 
+12. **The first Play on the real iPad, just after installing.** Install the pitch build on the
+   iPad (`make app-device-install`), open it, hold the surah corner on any page and press Play,
+   counting to the first sound. In the simulator that takes about a second even though the
+   verse's file is already in hand, and every verse after it starts at once, so the second is
+   likely the simulator starting its sound, not the app. Right: under half a second on the real
+   iPad. About a second there too means the app should start its sound sooner, and that becomes
+   a backlog item with the walk's gap script as its measure.
+
 ## Done
 
 (Items move here with the date and where their test or ledger record is.)

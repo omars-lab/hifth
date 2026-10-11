@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * CI gate: JS bundle budget. The web app's total gzipped JS must stay under
- * 175 KB (PLAN §6 set 150; raised 2026-09-27 on a measured start-up sweep —
+ * 200 KB (PLAN §6 set 150; raised 2026-09-27 and 2026-10-11 on measured start-up sweeps —
  * see the optimizing-performance skill). Runs after `pnpm build`.
  *
  * The budget alone was not enough, and performance.md ⑤ named why: **it notices at the
@@ -51,7 +51,7 @@ import { gzipSync } from "node:zlib";
 const ROOT = process.env.HIFTH_GATE_ROOT ?? new URL("..", import.meta.url).pathname;
 const DIST = join(ROOT, "apps", "web", "dist");
 const BASELINE = join(ROOT, "scripts", "budget-baseline.json");
-const BUDGET_GZ = 175 * 1024;
+const BUDGET_GZ = 200 * 1024;
 
 /** How far the total may drift before someone has to look. See the docblock. */
 const TOLERANCE_GZ = 1024;

@@ -14,6 +14,10 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Checked again 2026-10-11, cap raised, nothing taken.** 171.7 KB against the 175 KB cap, so a fresh
+sweep was run: ~75 KB of real room, and the cap went to 200 KB by the skill's rule. The rarely used
+tools trim on this list moves code between files, so it would not have lowered the counted total.
+
 **Checked again 2026-10-10 (night), nothing taken.** 170.5 KB against the 175 KB cap, after a
 run's end lights its last verse and the turn-by-hand setting; still well inside the ~50 KB of real
 room.
