@@ -539,7 +539,8 @@ upright and on its side, English and Arabic, iPad and Mac.
 - [ ] Walk the Mac app in Arabic too, not only the iPad: the look-alike list and a note open,
   mirrored, nothing cut off. · `make app-shot TARGET=mac LOCALE=ar ROUTE=…` (shows that language
   for the one launch, even where another is picked with the app's own button) · tests:
-  `scripts/native-make-locale.test.mjs`, `native/HifthTests/RouteTests.swift`
+  `scripts/native-make-locale.test.mjs`, `native/HifthTests/RouteTests.swift` · walked
+  2026-10-11 at 2:48 (the list, then the note), nothing wrong
 - [ ] The Mac app's own picture of a page is the page, not an empty file: two pages, full size.
   · `make app-shot TARGET=mac ROUTE=/hafs-kfqc/p45` (fails on an empty picture) · issue:
   `mac-app-shot-empty`
@@ -603,7 +604,8 @@ upright and on its side, English and Arabic, iPad and Mac.
 - [ ] In the iPad and Mac apps, every go-to arrow (a note's related verses, the look-alike rows,
   the way back) and the play buttons draw as plain marks, not coloured emoji tiles, in Arabic and
   English. · `make app-walk SIDEWAYS=1 LOCALE=ar ROUTES='/hafs-kfqc/2:48?open=lookalikes
-  /hafs-kfqc/15:30?open=commentary'` · test: `src/glyphs-as-text.test.ts`, `e2e/hop.spec.ts`
+  /hafs-kfqc/15:30?open=commentary'` · test: `src/glyphs-as-text.test.ts`, `e2e/hop.spec.ts` ·
+  walked 2026-10-11 in Arabic, the iPad app on its side and the Mac app, nothing wrong
 - [ ] A red ribbon down the crease is the where-you-left-off marker, not a fault: it moves to a
   page after six seconds there and is saved, and the simulator keeps it between installs. For a
   clean picture uninstall the app first; when it shows, it lies in the margin, clear of the
