@@ -226,6 +226,14 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   stays above the note; at 300%, too tall for that space, its first line is at the top of the
   screen, not above it. · ipad, the iPad app upright, private build · issue:
   `zoom-button-slips-verse-under-upright-note`
+- [ ] With the note up, press + twice quickly, then four times quickly: the page lands on the same
+  level, and the verse in the same place, as pressing slowly; four presses keep the verse's first
+  line at the top. · ipad, the iPad app upright, private build · checked 2026-10-11 in WebKit and
+  Chromium, clean
+- [ ] Zoomed in with the note up, hop to the next verse and the one before by the verse arrows or a
+  link: the page goes back to its opening level, the new verse's note opens, and every line of the
+  new verse is in sight and clear of it. · ipad, ipad-side, private build · checked 2026-10-11 in
+  WebKit upright and on its side by a link, clean; the verse arrows not yet
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 
