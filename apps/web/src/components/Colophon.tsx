@@ -7,6 +7,7 @@ import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { RUN_MARKS, type RunMark } from "../run-mark";
+import { RUN_FOLLOWS, rememberRunFollow, useRunFollow } from "../run-follow";
 import { ARROW_SHOWINGS } from "../jump-arrows";
 import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
@@ -242,6 +243,7 @@ export function Colophon({
   const lookalikeCompare = useLookalikeCompare();
   const passageRows = usePassageRows();
   const ribbonLength = useRibbonLength();
+  const runFollow = useRunFollow();
   const lookalikePreview = useLookalikePreview();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -452,6 +454,30 @@ export function Colophon({
             <p className={styles.note}>{t.runMarkNote}</p>
           </section>
         )}
+
+        {/* What the page does when the reader turns away from a run while it
+            plays (docs/PLAN.md, item 59): staying is the default; going back stays. */}
+        <section className={styles.block} aria-labelledby="colophon-run-follow">
+          <h3 className={styles.subhead} id="colophon-run-follow">
+            {t.runFollowTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-run-follow">
+            {RUN_FOLLOWS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={runFollow === choice}
+                data-run-follow={choice}
+                onClick={() => rememberRunFollow(choice)}
+              >
+                {choice === "stay" ? t.runFollowStay : t.runFollowBack}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.runFollowNote}</p>
+        </section>
 
         {/* How the saved jump arrows show (docs/design/jump-arrows-options.md):
             the owner chose staying, and kept the other way as a choice. */}

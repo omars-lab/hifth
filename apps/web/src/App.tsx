@@ -218,6 +218,7 @@ import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
+import { useRunFollow } from "./run-follow";
 import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
@@ -2237,21 +2238,39 @@ export function App(): JSX.Element {
   // A run of verses that reaches a verse on a page not showing takes the page
   // there: a turn when it is the next page (or opening), a jump otherwise — the
   // whole surah played from its corner starts on the surah's first page. The
-  // room hears the verse and sees it.
+  // room hears the verse and sees it. A page the reader turned to by hand while
+  // it plays stays turned, unless they chose to be brought back, until the
+  // recitation reaches the page they are showing (docs/PLAN.md, item 59).
   const runKey = audio.runKey;
+  const runNo = audio.runNo;
+  const runFollow = useRunFollow();
+  // The opening the run last had on screen; a new run starts with none.
+  const runShownRef = useRef<{ run: number; opening: number } | null>(null);
   useEffect(() => {
-    if (!runKey || !resolver) return;
+    if (!runKey || runNo === null) {
+      runShownRef.current = null;
+      return;
+    }
+    if (!resolver) return;
     const at = resolver.resolve(runKey)?.page;
     if (at === undefined) return;
     const here = pendingPageRef.current;
     const book = bookOpenRef.current;
     const openingOf = (p: number) => (book && p % 2 === 0 ? p - 1 : p);
     const shown = openingOf(here);
-    if (openingOf(at) === shown) return;
-    const to = book && pageTurns.anchors.has(openingOf(at)) ? openingOf(at) : at;
-    const nextDoor = Math.abs(openingOf(at) - shown) === (book ? 2 : 1);
+    const there = openingOf(at);
+    if (there === shown) {
+      runShownRef.current = { run: runNo, opening: shown };
+      return;
+    }
+    const last = runShownRef.current;
+    const turnedAway = last !== null && last.run === runNo && last.opening !== shown;
+    if (turnedAway && runFollow === "stay") return;
+    const to = book && pageTurns.anchors.has(there) ? there : at;
+    const nextDoor = Math.abs(there - shown) === (book ? 2 : 1);
     goToPage(to, undefined, nextDoor, true);
-  }, [runKey, resolver, pageTurns, goToPage]);
+    runShownRef.current = { run: runNo, opening: there };
+  }, [runKey, runNo, resolver, pageTurns, goToPage, runFollow]);
 
   /*
    * Where each juz opens in this build — thirty entries, computed once.

@@ -67,6 +67,12 @@ export interface VerseAudio {
    * verse's note in turn), so the play control follows this instead.
    */
   runKey: string | null;
+  /**
+   * Which run this is, counted from one, while it lasts; null otherwise. A run
+   * started straight after another keeps `runKey` set throughout, so this is how
+   * the page tells a new run from the next verse of the same one.
+   */
+  runNo: number | null;
 }
 
 /**
@@ -85,6 +91,7 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
   const [key, setKey] = useState<string | null>(null);
   const [phase, setPhase] = useState<AudioPhase>("idle");
   const [inRun, setInRun] = useState(false);
+  const [runNo, setRunNo] = useState(0);
   // The verses still to come in a "Play to" run, in order.
   const queueRef = useRef<string[]>([]);
 
@@ -193,6 +200,7 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       if (!first) return;
       queueRef.current = run;
       setInRun(true);
+      setRunNo((n) => n + 1);
       start(element(), first);
     },
     [element, start],
@@ -215,5 +223,5 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
     [key, phase],
   );
 
-  return { phaseFor, toggle, stop, playRun, runKey: inRun ? key : null };
+  return { phaseFor, toggle, stop, playRun, runKey: inRun ? key : null, runNo: inRun ? runNo : null };
 }

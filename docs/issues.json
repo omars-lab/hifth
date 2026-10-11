@@ -3908,6 +3908,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
       "note": "A run played past the page while the page stayed put, and on the private build an open note could cover the verse being recited. Now the page turns or jumps to follow the run, quietly, keeping the verse's tools up with Pause, and the verse being recited is kept clear of the note or list. Tests failed first (verse-gestures and pitch suites); looked at at iPad and phone size."
+    },
+    {
+      "id": "run-hand-turn-pulled-back",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "59"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
+      "note": "During a run, a page turned by hand was pulled back to the recitation by the next verse, so a presenter could not show another page while it played. Built two ways, a setting in the info panel: stay where the reader turned (default; the run picks the page up again when the recitation reaches it) or go back to the recitation. A new run always takes the page to its start. The default's test failed first."
     }
   ]
 }

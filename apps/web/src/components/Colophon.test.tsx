@@ -6,6 +6,7 @@ import { CARD_EDGE_KEY } from "../card-edge";
 import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
 import { RIBBON_LENGTH_KEY } from "../ribbon-length";
+import { RUN_FOLLOW_KEY } from "../run-follow";
 import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
 
 /*
@@ -168,6 +169,21 @@ describe("how far a bookmark's ribbon hangs, in settings", () => {
     expect(way("short")).toHaveAttribute("aria-checked", "false");
     expect(localStorage.getItem(RIBBON_LENGTH_KEY)).toBe("long");
     localStorage.removeItem(RIBBON_LENGTH_KEY);
+  });
+});
+
+describe("what the page does when the reader turns away from a recitation, in settings", () => {
+  it("offers staying and going back, staying checked, and keeps the one picked", () => {
+    localStorage.removeItem(RUN_FOLLOW_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-run-follow="${c}"]`)!;
+    expect(way("stay")).toHaveAttribute("aria-checked", "true");
+    expect(way("back")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("back"));
+    expect(way("back")).toHaveAttribute("aria-checked", "true");
+    expect(way("stay")).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem(RUN_FOLLOW_KEY)).toBe("back");
+    localStorage.removeItem(RUN_FOLLOW_KEY);
   });
 });
 
