@@ -2284,7 +2284,10 @@ export function App(): JSX.Element {
   // page going dark under the room (docs/PLAN.md, item 60). Only while that
   // verse is still on the page shown: a reader who turned elsewhere, or lit a
   // verse of their own, keeps what they chose. A run that never left its page
-  // gives back the selection it started from, as before (item 57).
+  // gives back the selection it started from, as before (item 57). On the
+  // pitch build the verse's note stays shut, as for a verse picked by its
+  // number: the room was listening, not asking for the note, and the tools
+  // keep Play in reach (item 61).
   useEffect(() => {
     runEndRef.current = (key, run) => {
       if (followedRunRef.current !== run || selectedKeyRef.current !== null) return;
@@ -2296,6 +2299,7 @@ export function App(): JSX.Element {
       setOpenDirection(null);
       setSelectedRange(null);
       setDrawerAway(false);
+      pickedFromNumberRef.current = key;
       setSelectedKey(key);
     };
   }, [resolver]);

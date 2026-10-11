@@ -1667,6 +1667,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     another verse, leaves the page as it was; so does one ended while the reader had turned to
     a page the run never reached or lit a verse of their own. A browser test on the computer and both phones,
     and four tests of when the sound code says a run has ended, all watched failing first.
+61. ~~**On the private build, a run's lit end opened a note nobody asked for.**~~ Found
+    2026-10-10 walking item 60 in the iPad app held upright: on the private build, lighting a
+    verse also opens its commentary, and the commentary takes the place of the verse's tools.
+    So when a surah played from its corner ran out, the last verse's note came up over the page
+    on its own, with no Play in reach. **Fixed the same day:** the end lights the verse with its
+    tools up and leaves the note shut, as a verse picked by its number already does; the note
+    is a press away. A private-build test at iPad size, watched failing first, and walked again
+    in the iPad app: the last verse lit, Play on it, no note.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

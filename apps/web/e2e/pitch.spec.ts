@@ -670,6 +670,41 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("a run that took the page along ends with its verse's tools up, not its note", async ({ browser }) => {
+    // Walking the pitch in the iPad app, 2026-10-10: a surah played from its
+    // corner went to the surah's start, turned with the recitation, and at the
+    // end lit the last verse, which here opens that verse's note: a note the
+    // presenter never asked for, over the page, with no Play in reach. The end
+    // lights the verse with its tools up; the note is one tap away.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    const player = await fakePlayer(page);
+    await page.goto("/#/hafs-kfqc/p563?view=one");
+    await expect(pageSvg(page, 563)).toBeVisible({ timeout: 20_000 });
+    const head = (await page.locator('[data-host-page="563"] [data-running-head="surah"]').boundingBox())!;
+    await page.mouse.move(head.x + head.width / 2, head.y + head.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    await page.getByRole("menu").getByRole("menuitem", { name: "Play", exact: true }).click();
+    await expect.poll(player.files).toEqual(["067001.mp3"]);
+    for (let n = 2; n <= 30; n++) await player.end();
+    await expect.poll(async () => (await player.files()).at(-1)).toBe("067030.mp3");
+    await page.waitForTimeout(400);
+    await player.end();
+    await expect
+      .poll(() =>
+        page
+          .locator("#hifth-overlay [data-hl-group='selection']")
+          .evaluateAll((els) => [...new Set(els.map((el) => (el.getAttribute("data-hl-key") ?? "?").split("/").pop()))]),
+      )
+      .toEqual(["67:30"]);
+    await expect(page.getByRole("region", { name: /^Tools for / }).getByRole("button", { name: /^Play .*67:30$/ })).toBeVisible();
+    await expect(sheet(page)).toHaveCount(0);
+    await context.close();
+  });
+
   test("an iPad held upright opens on one page, and turned on its side opens the book", async ({ browser }) => {
     // Upright, two pages side by side were each half the screen wide, with
     // empty space above and below: the mus'haf read small on the very screen

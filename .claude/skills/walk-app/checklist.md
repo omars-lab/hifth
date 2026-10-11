@@ -105,9 +105,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   finger pulling the open book's outer edge")
 - [ ] Play a short surah from its corner on a page before it and let it run out: the page goes
   along, and at the end the last verse recited is lit with its tools up and Play on it. Stop a
-  run part way instead: the page is left as it was. · desktop, a phone and an iPad · issue:
-  `run-end-after-follow-unlit` · test: e2e/verse-gestures.spec.ts ("ends with its last verse
-  lit"), src/audio.test.ts
+  run part way instead: the page is left as it was. On the private build no note opens at the
+  end; the verse's tools are up instead. · desktop, a phone and an iPad, and the private build
+  in the iPad app · issue: `run-end-after-follow-unlit`, `run-end-opens-note` · test:
+  e2e/verse-gestures.spec.ts ("ends with its last verse lit"), src/audio.test.ts,
+  e2e/pitch.spec.ts ("tools up, not its note")
 - [ ] On the pitch build, with a note open on an iPad held upright, play a run to a verse that
   sits under the note: the page lifts so the verse being recited stays in sight above the note.
   · iPad upright, pitch · issue: `run-leaves-page-behind` · test: e2e/pitch.spec.ts ("keeps the
