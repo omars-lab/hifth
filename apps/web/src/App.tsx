@@ -954,15 +954,20 @@ export function App(): JSX.Element {
   // `stopAudio` is stable, so this fires only when the selection actually moves.
   // The one move that leaves it sounding is the page following a run onto the
   // next page: the chosen verse is left behind with its page, and the run is
-  // what took the page there (docs/PLAN.md, item 58).
+  // what took the page there (docs/PLAN.md, item 58). The other is choosing the
+  // very verse a run is reciting, its number tapped or held to open its note:
+  // that is the verse already sounding, so it goes on (item 76).
   const stopAudio = audio.stop;
   const listenKey = audio.runKey ?? selectedKey;
   const keepRunRef = useRef(false);
+  const runKeyRef = useRef(audio.runKey);
+  runKeyRef.current = audio.runKey;
   useEffect(() => {
     if (keepRunRef.current) {
       keepRunRef.current = false;
       return;
     }
+    if (selectedKey !== null && selectedKey === runKeyRef.current) return;
     stopAudio();
   }, [selectedKey, stopAudio]);
   // The note for the current selection, from whichever source is on; in the

@@ -1842,6 +1842,25 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     above it, with the note up or not. The question is for the opening level only: should a turn
     forward from a page shown at the level it opened at land at the top of the next page (and a
     turn back at the foot of the one before), the way reading carries on?
+76. ~~**Tapping the number of the verse being recited stopped the recitation.**~~ Found walking a
+    note opened mid-run, 2026-10-11: a presenter plays a surah from its corner and, while a
+    verse is heard, taps that verse's number to show the room its note. The sound stopped at
+    the tap, before the menu was even up; a long press on the same verse stopped it too. Choosing
+    a verse stopped whatever was playing (item 56's rule), and it made no exception for the
+    very verse being played. **Fixed the same day:** choosing the verse a run is reciting, by
+    its number or by a long press, leaves the recitation going; its menu offers Pause instead
+    of Listen, its note opens over the sound, and the run carries on to the next verse, which
+    the page lifts clear of the note (item 58). A tap on any other verse still ends the run, and
+    a tap on bare page never did. A private-build test at iPad size, watched failing first, and
+    walked in Safari's engine, Firefox and the iPad app: the sound ran through the tap and the
+    note, and the next verse rose above the note within half a second.
+77. **With the note up while a surah plays, no Pause is on the screen.** Found with item 76: the
+    note takes the place of the verse's tools, and Pause lives on those tools, so while the note
+    is open over a recitation the only way to stop it is the verse's number (its menu offers
+    Pause) or closing the note, which brings the tools back with Pause on them. This was already
+    so for a run started from a verse whose note was open (item 58); item 76 makes it a state the
+    room reaches more often. The question for the owner: should the note carry a small Pause of
+    its own while a recitation plays, or is the number's menu close enough?
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

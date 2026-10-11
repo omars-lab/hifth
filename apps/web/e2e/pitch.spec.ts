@@ -922,6 +922,54 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("the number of the verse being recited opens its note without stopping the recitation", async ({ browser }) => {
+    // Walking a note opened mid-run, 2026-10-11: a presenter plays a surah from
+    // its corner and, while a verse is heard, taps that verse's number to show
+    // the room its note. The sound stopped at the tap, before the menu was even
+    // up, because choosing a verse stopped whatever was playing, even the verse
+    // being played (docs/PLAN.md, item 76). A tap on any other verse still ends it.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    const player = await fakePlayer(page);
+    const playing = () => page.evaluate(() => !(window as unknown as { __player: HTMLMediaElement }).__player.paused);
+    await page.goto("/#/hafs-kfqc/p2?view=one");
+    await expect(pageSvg(page, 2)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    const head = (await page.locator('[data-host-page="2"] [data-running-head="surah"]').boundingBox())!;
+    await page.mouse.move(head.x + head.width / 2, head.y + head.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    await page.getByRole("menu").getByRole("menuitem", { name: "Play", exact: true }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    await player.end();
+    await expect.poll(player.files).toEqual(["002001.mp3", "002002.mp3"]);
+    await expect.poll(playing).toBe(true);
+
+    const number = pageSvg(page, 2).locator('[data-verse-number][data-verse-key="quran/hafs-kfqc/2:2"]');
+    await settle(number);
+    const at = (await number.boundingBox())!;
+    await page.mouse.click(at.x + at.width / 2, at.y + at.height / 2);
+    await page.getByRole("menu", { name: /2:2/ }).getByRole("menuitem", { name: /Commentary/ }).click();
+    await expect(sheet(page)).toBeVisible();
+    expect(await playing(), "the verse is still being heard").toBe(true);
+    expect(await player.files()).toEqual(["002001.mp3", "002002.mp3"]);
+    // And the run goes on to the next verse, with the note up.
+    await player.end();
+    await expect.poll(player.files).toEqual(["002001.mp3", "002002.mp3", "002003.mp3"]);
+    await expect.poll(playing).toBe(true);
+    await expect(sheet(page)).toBeVisible();
+
+    // Another verse's number still ends the run.
+    const other = pageSvg(page, 2).locator('[data-verse-number][data-verse-key="quran/hafs-kfqc/2:1"]');
+    await settle(other);
+    const there = (await other.boundingBox())!;
+    await page.mouse.click(there.x + there.width / 2, there.y + there.height / 2);
+    await expect.poll(playing).toBe(false);
+    await context.close();
+  });
+
   test("an iPad held upright opens on one page, and turned on its side opens the book", async ({ browser }) => {
     // Upright, two pages side by side were each half the screen wide, with
     // empty space above and below: the mus'haf read small on the very screen
