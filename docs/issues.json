@@ -2859,6 +2859,17 @@
       "note": "Notes has an eraser and undo/redo; Hifth has neither. Waits on marking-pens-home-on-ipad for where the buttons sit."
     },
     {
+      "id": "pens-stay-right-in-arabic",
+      "source": {
+        "file": "docs/design/notes-style-toolbar.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Walked in the iPad app 2026-10-11: in Arabic the side pens stay in the right margin and the Mark up button at the right end of the bottom row. Staying by the marking hand and mirroring with the language are both defensible; a hafiz reading in Arabic should try both."
+    },
+    {
       "id": "pencil-double-tap-and-squeeze",
       "source": {
         "file": "docs/design/pencil-gestures.md",

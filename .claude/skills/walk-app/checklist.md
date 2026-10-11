@@ -445,8 +445,9 @@ upright and on its side, English and Arabic, iPad and Mac.
   is picked and checked, and the ones that mark by a tap leave their mark on a verse; the drag
   pens (highlight, crop, jump) are only picked there, so the browser tests are what drag them.
   On the large iPad upright the side place has no margin and falls back to the Mark up button.
-  In Arabic the side rail stays on the right edge, as drawn; nothing says yet whether it should
-  move to the left (notes-style-toolbar ①).
+  In Arabic the side rail and the Mark up button stay on the right: that is the owner's open
+  question (notes-style-toolbar ④), not a fault, until it is answered. · issue:
+  `pens-stay-right-in-arabic`
 - [ ] Bookmark a page: the ribbon and folded corner look right, in Firefox too. · desktop with
   `BROWSER=firefox` · test: edge-peel spec
 - [ ] Stay on a page for a few seconds until the red ribbon appears down its bound edge: it covers
