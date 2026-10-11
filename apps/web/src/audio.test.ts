@@ -276,4 +276,99 @@ describe("useVerseAudio's next verse, made ready while a run plays", () => {
     await settle();
     expect(fetched).not.toHaveBeenCalled();
   });
+  /*
+   * One verse ahead is not always enough: a short verse before a long one ends
+   * before the long one's file is in (docs/PLAN.md, item 64). So once one file
+   * has come, the next is asked for, a few verses ahead, one after another so
+   * they do not share a slow line.
+   */
+  const asked = (fetched: ReturnType<typeof answer>) => fetched.mock.calls.map((c) => c[0]);
+
+  it("asks for the verse after the next once the next one's file is in", async () => {
+    const fetched = answer("sound");
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.playRun([v(1), v(2), v(3), v(4)]));
+    sounds();
+    expect(asked(fetched)).toEqual([url(2)]);
+    await settle();
+    expect(asked(fetched)).toEqual([url(2), url(3), url(4)]);
+  });
+
+  it("asks no further than three verses ahead", async () => {
+    const fetched = answer("sound");
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.playRun([1, 2, 3, 4, 5, 6, 7, 8].map(v)));
+    sounds();
+    await settle();
+    await settle();
+    expect(asked(fetched)).toEqual([url(2), url(3), url(4)]);
+    act(() => FakePlayer.last!.finish());
+    sounds();
+    await settle();
+    expect(asked(fetched)).toEqual([url(2), url(3), url(4), url(5)]);
+  });
+
+  it("keeps the copies for the verses still to come when the next one starts", async () => {
+    answer("sound");
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.playRun([v(1), v(2), v(3)]));
+    sounds();
+    await settle();
+    act(() => FakePlayer.last!.finish());
+    expect(FakePlayer.last!.src).toBe("blob:held/1");
+    expect(letGo).toEqual([]);
+    act(() => FakePlayer.last!.finish());
+    expect(FakePlayer.last!.src).toBe("blob:held/2");
+    expect(letGo).toEqual(["blob:held/1"]);
+  });
+
+  it("lets a later verse's file keep coming when the next verse starts", async () => {
+    vi.stubGlobal("Audio", FakePlayer);
+    made = [];
+    urls.createObjectURL = () => `blob:held/${made.push("x")}`;
+    urls.revokeObjectURL = () => {};
+    const waiting: { url: string; signal: AbortSignal | null | undefined; come: () => void }[] = [];
+    vi.stubGlobal("fetch", (u: string, init?: RequestInit) =>
+      new Promise<Response>((done) => {
+        const come = () => done({ ok: true, blob: () => Promise.resolve(new Blob(["sound"])) } as Response);
+        waiting.push({ url: u, signal: init?.signal, come });
+      }),
+    );
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.playRun([v(1), v(2), v(3)]));
+    sounds();
+    waiting[0]!.come();
+    await settle();
+    expect(waiting.map((w) => w.url)).toEqual([url(2), url(3)]);
+    act(() => FakePlayer.last!.finish());
+    expect(FakePlayer.last!.src).toBe("blob:held/1");
+    expect(waiting[1]!.signal?.aborted).toBe(false);
+    waiting[1]!.come();
+    await settle();
+    act(() => FakePlayer.last!.finish());
+    expect(FakePlayer.last!.src).toBe("blob:held/2");
+  });
+
+  it("asking early only, does not ask twice for a verse already asked for", async () => {
+    const fetched = answer("sound");
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "ask"));
+    act(() => result.current.playRun([1, 2, 3, 4, 5].map(v)));
+    sounds();
+    await settle();
+    act(() => FakePlayer.last!.finish());
+    sounds();
+    await settle();
+    expect(asked(fetched)).toEqual([url(2), url(3), url(4), url(5)]);
+  });
+
+  it("lets go of every copy in hand on stop", async () => {
+    answer("sound");
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.playRun([1, 2, 3, 4].map(v)));
+    sounds();
+    await settle();
+    expect(made).toEqual(["blob:held/1", "blob:held/2", "blob:held/3"]);
+    act(() => result.current.stop());
+    expect([...letGo].sort()).toEqual(made);
+  });
 });

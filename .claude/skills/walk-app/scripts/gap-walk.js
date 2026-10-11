@@ -2,7 +2,9 @@
  * How long the silence is between two verses of a run (docs/PLAN.md, item 63).
  *
  * Holds the surah corner, presses Play, and times each verse's end to the next
- * one sounding, for five gaps; then pauses. Numbers only, never note words.
+ * one sounding, for five gaps; then pauses. Each gap reads like 120@002041.mp3/after4s:
+ * the silence in ms, the file it waited for ("held" when it played from a copy
+ * already in hand), and how long the verse before it ran. Numbers only, never note words.
  * Runs in the page: in the iPad or Mac app through
  *   make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en ROUTE=/hafs-kfqc/p600 EVALFILE=.claude/skills/walk-app/scripts/gap-walk.js DELAY_MS=2500 PROBE_TIMEOUT_S=200
  * and in Chromium at three connection speeds through gap-throttle.mjs.
@@ -17,8 +19,18 @@
     this.volume = 0.01;
     if (!seen.has(this)) {
       seen.add(this);
-      this.addEventListener("ended", () => { endedAt = performance.now(); });
-      this.addEventListener("playing", () => { if (endedAt) { gaps.push(Math.round(performance.now() - endedAt)); endedAt = 0; } });
+      // Each gap names the file it waited for and how long the verse before it sounded.
+      // The app points the player at the next file inside its own end listener,
+      // so the length is read while the verse still sounds, not at its end.
+      let length = 0; let before = 0;
+      this.addEventListener("timeupdate", () => { if (this.duration > 0) length = this.duration; });
+      this.addEventListener("ended", () => { endedAt = performance.now(); before = length; });
+      this.addEventListener("playing", () => {
+        if (!endedAt) return;
+        const file = this.currentSrc.startsWith("blob:") ? "held" : this.currentSrc.split("/").pop();
+        gaps.push(`${Math.round(performance.now() - endedAt)}@${file}/after${Math.round(before)}s`);
+        endedAt = 0;
+      });
     }
     return play.call(this);
   };
