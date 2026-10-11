@@ -3893,6 +3893,16 @@ export function App(): JSX.Element {
                       }
                     : null
                 }
+                listen={
+                  audio.runKey
+                    ? {
+                        label: t.ayahLabel(audio.runKey) ?? audio.runKey,
+                        playing: audio.phaseFor(audio.runKey) !== "idle" && audio.phaseFor(audio.runKey) !== "error",
+                        glyph: listenGlyph(audio.phaseFor(audio.runKey)),
+                        onToggle: () => audio.runKey && audio.toggle(audio.runKey),
+                      }
+                    : null
+                }
               />
             )}
           </>
