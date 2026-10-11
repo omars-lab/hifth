@@ -5,7 +5,7 @@ import { contextWithout } from "./inventory";
 import { ayahTarget } from "./ayah";
 import { lum, pixelsAt } from "./ink";
 import { pageNumber, readPageNumber } from "./page-number";
-import { oversizeSquares } from "./map";
+import { linesCutBy, oversizeSquares } from "./map";
 
 /*
  * The desktop spread — an open mus'haf, and honest about the half it does not
@@ -657,6 +657,18 @@ test.describe("Hifth · the revision map at desktop", () => {
     // its contents: three scopes are three widths, and a sheet that resizes
     // under the cursor makes the radio you just pressed jump away from it.
     expect((await boxOf(sheet)).width, "the sheet resizes when the scope does").toBe(card.width);
+  });
+
+  test("covers the page bar whole or not at all, never half a line of it", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(spread(page)).toBeVisible();
+    await page.getByRole("button", { name: /ما فتحتَه من المصحف/ }).click();
+    const sheet = page.getByRole("dialog", { name: "ما فتحتَه من المصحف" });
+    await expect(sheet).toBeVisible();
+    await sheet.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    // The page scope is the tallest map, so the sheet reaches its full height.
+    await sheet.getByRole("radio", { name: "صفحة" }).click();
+    expect(await linesCutBy(sheet), "a line beside the sheet is cut in half by its edge").toEqual([]);
   });
 });
 

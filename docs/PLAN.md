@@ -1548,6 +1548,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     squares are smaller than that on purpose. **Fixed the same day:** the map's squares keep
     their own size, the smallest still above what a pointer needs. Tests on both phones (every
     division) and on a laptop check each square fits its own place; they failed first.
+53. ~~**On a laptop, the reading record's sheet cut a line of the page bar in half.**~~
+    Found on 2026-10-10 walking the live site in Firefox and Chrome on a laptop: the record of
+    what you have opened stood a little above the window's foot, and its bottom edge ran
+    through the page bar's line counting the pages held, so the lower half of the letters
+    showed under the sheet and read as the sheet's own text cut off. **Fixed the same day:**
+    on a wide window the sheet sits on the window's foot, as it does on a phone, and the map
+    gets the extra height. A laptop test checks that no line is sliced by the sheet's foot; it
+    failed first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
