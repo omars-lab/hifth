@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   bboxToScreen,
   clampView,
+  clampViewWithSlack,
   clampZoom,
   DEFAULT_HOP_ZOOM,
   easeInOutCubic,
@@ -11,6 +12,7 @@ import {
   lerpView,
   nearFitRoom,
   nearFitZoom,
+  outsideClamp,
   viewFitsAcross,
   type FrameContext,
   type View,
@@ -281,6 +283,63 @@ describe("clampView", () => {
     // fixed point or the motion would creep.
     const once = clampView({ x: -1e6, y: -1e6, z: 2 }, FIT);
     expect(clampView(once, FIT)).toEqual(once);
+  });
+});
+
+// A note closing takes away the room the page was standing in. The clamp alone
+// would drop the page into its new place in one frame; a glide down needs the
+// clamp to let it stay, for a while, as far outside as it already was.
+describe("letting a glide leave from outside the room it is given", () => {
+  const FIT = {
+    contentWidth: CTX.contentWidth,
+    contentHeight: CTX.contentHeight,
+    stageWidth: CTX.stageWidth,
+    stageHeight: CTX.stageHeight,
+  };
+  const covered = { ...FIT, coverBottom: 300 };
+
+  it("says how far a view sits outside the room, axis by axis", () => {
+    // Scrolled up as far as the note allowed, then the note is gone: at z=1 the
+    // page fits the bare stage and belongs in its middle, so it sits above it by
+    // the difference.
+    const up = clampView({ x: 0, y: -1e6, z: 1 }, covered);
+    const out = outsideClamp(up, FIT);
+    expect(out.y).toBeCloseTo(up.y - (640 - CTX.contentHeight) / 2, 6);
+    expect(out.x).toBeCloseTo(0, 6);
+    expect(outsideClamp(clampView(up, FIT), FIT)).toEqual({ x: 0, y: 0 });
+  });
+
+  it("lets a view stay outside by up to the slack, and only on that side", () => {
+    const rest = (640 - CTX.contentHeight) / 2;
+    const slack = { x: 0, y: -100 };
+    expect(clampViewWithSlack({ x: 20, y: rest - 60, z: 1 }, FIT, slack).y).toBeCloseTo(rest - 60, 6);
+    expect(clampViewWithSlack({ x: 20, y: rest - 160, z: 1 }, FIT, slack).y).toBeCloseTo(rest - 100, 6);
+    // The other side is the clamp's as ever: slack above is no licence below.
+    expect(clampViewWithSlack({ x: 20, y: rest + 60, z: 1 }, FIT, slack).y).toBeCloseTo(rest, 6);
+  });
+
+  it("is the clamp itself with no slack", () => {
+    for (const v of [{ x: -900, y: 900, z: 1 }, { x: -100, y: -400, z: 1.2 }, { x: 0, y: -1e6, z: 2 }]) {
+      expect(clampViewWithSlack(v, covered, { x: 0, y: 0 })).toEqual(clampView(v, covered));
+    }
+  });
+
+  it("walks a glide down from where the note left it, no step bigger than the glide's own", () => {
+    // The tween's frames, each allowed what is left of the start's overreach.
+    const from = clampView({ x: 0, y: -1e6, z: 1 }, covered);
+    const target = clampView(from, FIT);
+    const out = outsideClamp(from, FIT);
+    const ys: number[] = [];
+    for (let i = 0; i <= 10; i++) {
+      const e = easeInOutCubic(i / 10);
+      const v = lerpView(from, target, e);
+      ys.push(clampViewWithSlack(v, FIT, { x: out.x * (1 - e), y: out.y * (1 - e) }).y);
+    }
+    expect(ys[0]).toBeCloseTo(from.y, 6);
+    expect(ys.at(-1)).toBeCloseTo(target.y, 6);
+    const steps = ys.slice(1).map((y, i) => y - ys[i]!);
+    expect(Math.min(...steps)).toBeGreaterThanOrEqual(0);
+    expect(Math.max(...steps)).toBeLessThan((target.y - from.y) * 0.4);
   });
 });
 

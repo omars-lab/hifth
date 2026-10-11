@@ -239,6 +239,15 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   switches and every line of that verse comes into sight, clear of the note, at the opening level
   and at 200%. · ipad, the iPad app upright, private build · issue:
   `tap-other-verse-with-note-up-leaves-it-off-top`
+- [ ] With the note up on an iPad held upright, at 250%, play a run two verses on from a verse's
+  menu: every verse it recites stays in sight above the note and the page follows. A run that
+  stays on its page ends back on the verse it started from, and one that took the page along
+  ends on its last verse with that verse's tools up; both are meant. · ipad, private build ·
+  checked 2026-10-11 in WebKit, clean
+- [ ] With the note up on an iPad held upright, close it: the page eases down to fill the screen,
+  with no jump; on a laptop with one page, opening and closing a note beside the page moves the
+  page across smoothly too. · ipad, the iPad app upright, desktop, private build · issue:
+  `closing-note-jumps-page`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 

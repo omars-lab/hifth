@@ -144,6 +144,31 @@ export function clampView(v: View, fit: StageFit): View {
   };
 }
 
+/** How far a view sits outside what `clampView` allows, axis by axis (0 where it is inside). */
+export function outsideClamp(v: View, fit: StageFit): { x: number; y: number } {
+  const c = clampView(v, fit);
+  return { x: v.x - c.x, y: v.y - c.y };
+}
+
+/**
+ * `clampView`, but a view may stay outside on each axis by up to `slack`, on
+ * the side the slack points to and no further.
+ *
+ * The clamp holds the page to the room it has now. When that room shrinks under
+ * a page already standing in it (a note over the page's foot closes, and the
+ * page had been scrolled up above it), the clamp alone moves the page to its new
+ * place in one frame. A glide passes the start's own overreach as `slack`,
+ * shrinking it to nothing as the glide runs, so the page leaves from where it
+ * was and arrives where the clamp wants it (docs/PLAN.md, item 71). With no
+ * slack this is `clampView`.
+ */
+export function clampViewWithSlack(v: View, fit: StageFit, slack: { x: number; y: number }): View {
+  const c = clampView(v, fit);
+  const keep = (over: number, room: number): number =>
+    room > 0 ? Math.min(room, Math.max(0, over)) : room < 0 ? Math.max(room, Math.min(0, over)) : 0;
+  return { z: c.z, x: c.x + keep(v.x - c.x, slack.x), y: c.y + keep(v.y - c.y, slack.y) };
+}
+
 /**
  * Does the page fit the stage *across*, with no horizontal slack to roam over?
  *

@@ -13,6 +13,8 @@ import { useGesture } from "@use-gesture/react";
 import {
   bboxToScreen,
   clampView,
+  clampViewWithSlack,
+  outsideClamp,
   juzOf,
   clampZoom,
   easeInOutCubic,
@@ -1515,6 +1517,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const startTimeRef = useRef<number | null>(null);
   /** Says the glide under way is over, whether it got there or was cut short. */
   const tweenDoneRef = useRef<(() => void) | null>(null);
+  /**
+   * How far outside the clamp the glide under way may still go, shrinking to
+   * nothing as it runs: the room a closing note took away (docs/PLAN.md, item
+   * 71). Null when no glide started outside it, which is nearly always.
+   */
+  const glideSlackRef = useRef<{ x: number; y: number } | null>(null);
   /*
    * The stage and the page inside it, last time anyone asked.
    *
@@ -1570,7 +1578,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // frames are lerped between two legal views at a zoom that is neither of
     // theirs, which is legal for neither.
     const fit = fitRef.current;
-    if (fit) view.current = clampView(view.current, fit);
+    const slack = glideSlackRef.current;
+    if (fit) view.current = slack ? clampViewWithSlack(view.current, fit, slack) : clampView(view.current, fit);
     // A leaf of an open book that is wider than its box stays pinned at the fold
     // across: the gutter edge of the page sits on the gutter, and the rest runs
     // outward over the desk. Without this a sideways pan, or a zoom about any
@@ -1650,6 +1659,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       tweenRef.current = null;
       startTimeRef.current = null;
     }
+    glideSlackRef.current = null;
     // A glide cut short still ends. Left waiting, whatever was to follow it
     // never ran: a link's verse was lit only once the page got there, so a
     // phone turned mid-glide (which glides again, to fit the new screen)
@@ -1743,16 +1753,26 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         applyTransform();
         return Promise.resolve();
       }
+      // A page standing where the room it had has just been taken away (a note
+      // over its foot closed) leaves from there, not from the clamp's new
+      // edge: each frame may still stand outside by what is left of that, so
+      // the first frame is not a jump. Inside the room, as nearly every glide
+      // starts, there is nothing to allow.
+      const out = fitRef.current ? outsideClamp(from, fitRef.current) : { x: 0, y: 0 };
+      const slackOf = (e: number) => (out.x || out.y ? { x: out.x * (1 - e), y: out.y * (1 - e) } : null);
       return new Promise((resolve) => {
         tweenDoneRef.current = resolve;
         const step = (now: number) => {
           if (startTimeRef.current === null) startTimeRef.current = now;
           const t = Math.min(1, (now - startTimeRef.current) / duration);
-          view.current = lerpView(from, target, easeInOutCubic(t));
+          const e = easeInOutCubic(t);
+          view.current = lerpView(from, target, e);
+          glideSlackRef.current = slackOf(e);
           applyTransform();
           if (t < 1) {
             tweenRef.current = requestAnimationFrame(step);
           } else {
+            glideSlackRef.current = null;
             view.current = target;
             applyTransform();
             tweenRef.current = null;

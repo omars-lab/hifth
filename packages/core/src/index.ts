@@ -231,6 +231,8 @@ export {
   nearFitZoom,
   bboxToScreen,
   clampView,
+  clampViewWithSlack,
+  outsideClamp,
   clampZoom,
   easeInOutCubic,
   lerpView,

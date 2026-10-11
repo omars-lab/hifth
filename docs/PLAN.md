@@ -1791,6 +1791,26 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     changed. Upright at 35:44, tapping the verse above now shows every line of it, clear of the
     note, at the opening level and at 200%, in Chromium, WebKit and the iPad app. A browser test,
     watched failing first.
+71. ~~**Closing the note on an upright iPad drops the page some 400 px in one frame.**~~ Found
+    2026-10-11 walking the hand-off. With the note across the page's foot, the page may sit higher
+    than the screen otherwise allows, so a verse low on it shows above the note. Closing the note
+    took that room away at once, and the very first frame of the glide back was held to the new
+    room, so the page fell the whole way in one frame, the verse the reader was on with it. On a
+    laptop with one page, a note opening or closing beside the page threw the page sideways about
+    240 px the same way. **Fixed the same day.** A glide that starts outside the room the page now
+    has may stay outside by what is left of the distance, shrinking to nothing as it runs, so the
+    page leaves from where it was and lands where it did before. Upright, the page now eases down
+    about 400 px over half a second (never more than about 40 px in a frame) in Chromium, WebKit
+    and the iPad app; beside the page on a laptop it eases across both ways. Every other glide is
+    unchanged, since it starts inside its room. A unit test and a browser test, watched failing
+    first. What it leaves: the note still goes in one frame, so for that half second the strip it
+    covered shows the desk below the page (item 72).
+72. **When the note closes on an upright iPad, the desk shows below the page for half a second.**
+    Found with item 71's fix, 2026-10-11. The note leaves in one frame while the page glides down
+    to fill the screen, so the strip the note covered, about 400 px on a 13-inch iPad held upright,
+    shows the brown desk for about 0.46 s. Brief, but in the room it is the moment the reader's
+    eyes are on the page. A note that slides down out of sight in step with the page would cover
+    it; to build and look at side by side with today's, the loser kept as a setting.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
