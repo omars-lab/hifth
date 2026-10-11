@@ -20,6 +20,7 @@ import styles from "./CommentarySheet.module.css";
 import { leafStyle, useOverLeaf } from "./over-leaf";
 import { useSideCover, watchCover, type CardSpan } from "./short-band";
 import { LookalikeReason } from "./SharedPreview";
+import { acrossTheFoot, leaveBehind, leaveMs, useNoteLeave } from "../note-leave";
 
 export { overLeaf } from "./over-leaf";
 
@@ -229,7 +230,29 @@ export function CommentarySheet({
 }): JSX.Element | null {
   const { t, dir, lang } = useT();
   const touch = useMediaQuery(TOUCH_QUERY);
-  const sheetRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  // A note across the page's foot leaves by sliding down off the screen as the
+  // page glides down after it, unless the reader set it to go at once
+  // (docs/PLAN.md, item 72). Whether it slides is the note as it was last
+  // shown: by the time it is taken away, it is gone and cannot be measured.
+  // Read after every showing, as its width follows the window's.
+  const leave = useNoteLeave();
+  const slidesRef = useRef(false);
+  useLayoutEffect(() => {
+    const sheet = sheetRef.current;
+    slidesRef.current = leave === "slide" && side === null && !!sheet && acrossTheFoot(sheet.offsetWidth, window.innerWidth);
+  });
+  const standRef = useRef<{ node: HTMLDivElement; parent: Node | null } | null>(null);
+  const attachSheet = useCallback((node: HTMLDivElement | null) => {
+    sheetRef.current = node;
+    if (node) {
+      standRef.current = { node, parent: node.parentNode };
+      return;
+    }
+    const was = standRef.current;
+    standRef.current = null;
+    if (was && slidesRef.current) leaveBehind(was.node, was.parent, leaveMs());
+  }, []);
   const cardRef = useRef<HTMLDivElement>(null);
   const cardId = useId();
   // The lines of the key that are open: every initial in the bracket that was
@@ -476,7 +499,7 @@ export function CommentarySheet({
     <>
       {modal && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
       <div
-        ref={sheetRef}
+        ref={attachSheet}
         className={styles.sheet}
         role="dialog"
         // The drawer is drawn inside the mus'haf's right-to-left stage, so it
