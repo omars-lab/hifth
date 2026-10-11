@@ -306,6 +306,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `intro-from-deep-verse-floats`
 - [ ] The surah's name stays in sight, and the verse's tools step aside. · any · issues:
   `intro-card-covers-surah-name`, `intro-leaves-verse-tools-up`
+- The `intro-walk` script walks both lines in the apps (`window.__from = "deep"` for the verse far
+  into the surah), upright and on its side, English and Arabic.
 
 ## Roots and look-alikes (pitch)
 
