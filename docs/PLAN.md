@@ -1864,7 +1864,19 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     note carries the recitation's Pause on its title row, beside Close, named for the verse being
     heard; pressed, the sound stops, the same note stays up and the button turns to Play, which
     picks the run up where it stopped. The number's menu keeps its Pause. A browser test, watched
-    failing first; walked in Safari's engine, Firefox, a phone's size and the iPad app.
+    failing first; walked in Safari's engine, Firefox, a phone's size, Arabic, the iPad app and
+    the Mac app.
+78. **When a surah playing with a note up reaches the next page, the note closes.** Found
+    walking a run past a page turn in the iPad app, upright and on its side, 2026-10-11: a
+    presenter plays a surah from its corner, opens the note on the verse being heard and reads
+    from it to the room. When the recitation reaches the next page, the page turns with it, the
+    note's verse leaves the screen, and the note closes with it, perhaps mid-sentence. The run
+    plays on with Pause in reach, and every verse recited before the turn stays clear of the note.
+    This follows what a turn by hand already does (a turn closes the note, since its verse has
+    left the page; the note design page, item 26), but here the presenter did not turn. The
+    question for the owner: should the note stay up when the recitation, not the presenter,
+    turns the page (the way a page turned away during a recitation stays turned, item 59), or
+    is closing it with its verse right? Today's way stays until then.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

@@ -18,13 +18,14 @@
   const litBoxes = () => [...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']")].map(box).filter(on);
   const sel = () => [...new Set([...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']")].filter((e) => on(box(e))).map((e) => (e.getAttribute("data-hl-key") || "?").split("/").pop()))].join("+");
   const note = () => [...document.querySelectorAll("[role=dialog]")].find((e) => box(e));
-  const runBtns = () => [...document.querySelectorAll("button")].filter((e) => on(box(e))).map((e) => e.getAttribute("aria-label") || "").filter((s) => (isAr ? /^(تشغيل|إيقاف)/ : /^(Play|Pause|Stop)/).test(s)).map((s) => s.split(" ")[0]).join("/");
+  // The copy of a closing note that slides away is inert: nobody can press it, so it is not counted.
+  const runBtns = () => [...document.querySelectorAll("button")].filter((e) => on(box(e)) && !e.closest("[inert]")).map((e) => e.getAttribute("aria-label") || "").filter((s) => (isAr ? /^(تشغيل|إيقاف)/ : /^(Play|Pause|Stop)/).test(s)).map((s) => s.split(" ")[0]).join("/");
   const look = () => {
     const nb = box(note());
     const lit = litBoxes();
     const all = lit.reduce((s, b) => s + b.width * b.height, 0);
     const under = nb ? lit.reduce((s, b) => s + Math.max(0, Math.min(b.right, nb.right) - Math.max(b.left, nb.left)) * Math.max(0, Math.min(b.bottom, nb.bottom) - Math.max(b.top, nb.top)), 0) : 0;
-    return `shown=${shown()} sel=${sel()} lit=${lit.length ? f({ top: Math.min(...lit.map((b) => b.top)), bottom: Math.max(...lit.map((b) => b.bottom)) }) : "none"} note=${f(nb)} litUnderNote=${all ? Math.round((100 * under) / all) : 0}% run=${runBtns()} audio=${(window.__aud || []).map((a) => (a.paused ? "p" : "P") + Math.round(a.currentTime)).join(",")} pressed=${[...document.querySelectorAll("button[aria-pressed=true]")].filter((e) => on(box(e))).length}`;
+    return `shown=${shown()} sel=${sel()} lit=${lit.length ? f({ top: Math.min(...lit.map((b) => b.top)), bottom: Math.max(...lit.map((b) => b.bottom)) }) : "none"} note=${f(nb)} litUnderNote=${all ? Math.round((100 * under) / all) : 0}% run=${runBtns()} audio=${(window.__aud || []).map((a) => (a.paused ? "p" : "P") + Math.round(a.currentTime)).join(",")} pressed=${[...document.querySelectorAll("button[aria-pressed=true]")].filter((e) => on(box(e)) && !e.closest("[inert]")).length}`;
   };
   await wait(1500);
   // A: play the surah from its corner.

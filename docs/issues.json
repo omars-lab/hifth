@@ -2971,8 +2971,8 @@
         "item": "㉖"
       },
       "status": "open",
-      "severity": "defect",
-      "owner": "agent",
+      "severity": "question",
+      "owner": "user",
       "note": "With two pages open (a computer, or an iPad on its side) a note opens over the facing page and covers that page's outer edge, so grabbing the edge to turn selects note text instead. Keys and the arrows under the page still turn, and a turn closes the note. Options in the design note: leave it, a narrower note, or a press on the note's outer margin that closes it and turns. All three are built as a setting (2026-10-08, 'Turning with a card open'); leaving it is the default until the owner picks one."
     },
     {
@@ -4147,6 +4147,16 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "While a run plays the note carries the recitation's Pause; the browser test presses it with the note up, hears the sound stop with the same note open, and resumes the run."
+    },
+    {
+      "id": "run-turn-closes-note",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "78"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user"
     }
   ]
 }
