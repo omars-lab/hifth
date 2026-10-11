@@ -1462,7 +1462,9 @@ export function App(): JSX.Element {
   //
   // `follow` is the page going after a run of verses as it is recited: it says
   // nothing over the run's own line, and the verse left behind is let go
-  // without stopping the recitation that left it.
+  // without stopping the recitation that left it. So is the very verse being
+  // recited, chosen to show its note, when the reader turns the page by hand:
+  // a turn during a recitation leaves it playing (items 59 and 79).
   const goToPage = useCallback(
     (next: number, said?: string, turn = false, follow = false) => {
       // Against the destination, not the visible page: two quick arrow presses
@@ -1478,7 +1480,8 @@ export function App(): JSX.Element {
       pendingPageRef.current = next;
       if (!follow) announce(said ?? t.pageN(next));
       const leaveVerse = () => {
-        if (follow && selectedKeyRef.current !== null) keepRunRef.current = true;
+        const chosen = selectedKeyRef.current;
+        if (chosen !== null && (follow || chosen === runKeyRef.current)) keepRunRef.current = true;
         setSelectedKey(null);
         setSelectedRange(null);
         setTrail([]);

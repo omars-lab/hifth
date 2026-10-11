@@ -4,7 +4,10 @@
   // never note words. Set before it runs, from a Playwright page: window.__before, how long
   // the run plays first (ms, 14000 by default, so the second verse is heard); window.__after,
   // how long it watches with the note up; window.__mode "bare" (a tap on bare page) or "hold"
-  // (a long press on the verse being recited) instead of the number and the note.
+  // (a long press on the verse being recited) instead of the number and the note, or "turn" (a
+  // swipe with the note up, in place of its Pause; window.__turnBy "key" turns by the arrow key,
+  // for the Mac); window.__page,
+  // the page whose surah corner to play; window.__rate, how fast the sound plays.
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const out = [];
   const play = HTMLMediaElement.prototype.play;
@@ -17,18 +20,20 @@
   const litBoxes = () => [...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']")].map(box).filter(on);
   const sel = () => [...new Set([...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']")].filter((e) => on(box(e))).map((e) => (e.getAttribute("data-hl-key") || "?").split("/").pop()))].join("+");
   const note = () => [...document.querySelectorAll("[role=dialog]")].find((e) => box(e));
-  const runBtns = () => [...document.querySelectorAll("button")].filter((e) => on(box(e))).map((e) => e.getAttribute("aria-label") || "").filter((s) => (isAr ? /^(تشغيل|إيقاف)/ : /^(Play|Pause|Stop)/).test(s)).map((s) => s.split(" ")[0]).join("/");
+  // The copy of a closing note that slides away is inert: nobody can press it, so it is not counted.
+  const runBtns = () => [...document.querySelectorAll("button")].filter((e) => on(box(e)) && !e.closest("[inert]")).map((e) => e.getAttribute("aria-label") || "").filter((s) => (isAr ? /^(تشغيل|إيقاف)/ : /^(Play|Pause|Stop)/).test(s)).map((s) => s.split(" ")[0]).join("/");
   const look = () => {
     const nb = box(note());
     const lit = litBoxes();
     const all = lit.reduce((s, b) => s + b.width * b.height, 0);
     const under = nb ? lit.reduce((s, b) => s + Math.max(0, Math.min(b.right, nb.right) - Math.max(b.left, nb.left)) * Math.max(0, Math.min(b.bottom, nb.bottom) - Math.max(b.top, nb.top)), 0) : 0;
-    return `shown=${shown()} sel=${sel()} lit=${lit.length ? f({ top: Math.min(...lit.map((b) => b.top)), bottom: Math.max(...lit.map((b) => b.bottom)) }) : "none"} note=${f(nb)} litUnderNote=${all ? Math.round((100 * under) / all) : 0}% run=${runBtns()} audio=${(window.__aud || []).map((a) => (a.paused ? "p" : "P") + Math.round(a.currentTime)).join(",")} pressed=${[...document.querySelectorAll("button[aria-pressed=true]")].filter((e) => on(box(e))).length}`;
+    return `shown=${shown()} sel=${sel()} lit=${lit.length ? f({ top: Math.min(...lit.map((b) => b.top)), bottom: Math.max(...lit.map((b) => b.bottom)) }) : "none"} note=${f(nb)} litUnderNote=${all ? Math.round((100 * under) / all) : 0}% run=${runBtns()} audio=${(window.__aud || []).map((a) => (a.paused ? "p" : "P") + Math.round(a.currentTime)).join(",")} pressed=${[...document.querySelectorAll("button[aria-pressed=true]")].filter((e) => on(box(e)) && !e.closest("[inert]")).length}`;
   };
   await wait(1500);
   // A: play the surah from its corner.
   const mid = (b) => document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
-  const heads = [...document.querySelectorAll("[data-running-head='surah']")];
+  // window.__page picks the surah corner on that page (the open book shows two).
+  const heads = [...document.querySelectorAll(window.__page ? `[data-host-page="${window.__page}"] [data-running-head='surah']` : "[data-running-head='surah']")];
   const host = heads.find((h) => on(box(h)) && h.contains(mid(box(h))));
   if (!host) return `A: no reachable surah corner; heads=${heads.map((h) => f(box(h)) + ":" + (box(h) ? mid(box(h))?.tagName : "-")).join(",")}`;
   if (!host) return "A: no surah corner on screen";
@@ -72,6 +77,24 @@
   const lbl = (e) => (e.getAttribute("aria-label") || e.textContent || "").trim();
   const pauses = [...document.querySelectorAll("button,[role=button],[role=menuitem]")].filter((e) => on(box(e)) && /Pause|Stop|⏸/.test(lbl(e)));
   out.push(`D pause controls on screen=${pauses.length} inNote=${pauses.filter((e) => e.closest("[role=dialog]")).length} at=${pauses.map((e) => f(box(e))).join(",")}`);
+  // T, with window.__mode "turn": a one-finger swipe turns the page by hand with the note up;
+  // the recitation plays on (items 59 and 79).
+  if (window.__mode === "turn") {
+    if (window.__turnBy === "key") {
+      // A desktop spread turns only from its outer edge, so the Mac turns by the arrow key.
+      for (const type of ["keydown", "keyup"]) document.body.dispatchEvent(new KeyboardEvent(type, { key: "ArrowLeft", code: "ArrowLeft", bubbles: true, cancelable: true }));
+    } else {
+      const pt = { x: innerWidth / 2, y: Math.min(400, innerHeight / 3) };
+      const el = document.elementFromPoint(pt.x, pt.y);
+      const finger = (type, cx) => el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, composed: true, pointerId: 1, pointerType: "touch", isPrimary: true, clientX: cx, clientY: pt.y, button: 0, buttons: type === "pointerup" ? 0 : 1 }));
+      finger("pointerdown", pt.x);
+      for (let k = 1; k <= 8; k++) { finger("pointermove", pt.x + k * 40); await wait(16); }
+      finger("pointerup", pt.x + 320);
+    }
+    await wait(2500);
+    out.push(`T after a ${window.__turnBy === "key" ? "key" : "swipe"}: ${look()}`);
+    return `view=${innerWidth}x${innerHeight} ; ` + out.join(" ; ");
+  }
   // E: the note's own Pause (item 77): the sound stops and the same note stays up.
   const noteFor = () => (note()?.getAttribute("aria-label") || "").match(/\d+:\d+/)?.[0] || "none";
   const before = noteFor();
