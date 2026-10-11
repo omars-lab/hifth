@@ -4021,6 +4021,18 @@
       "note": "With a note open on an iPad on its side, three presses of the zoom button (to 200%) left the chosen verse wholly below the bottom of the screen: the buttons grew the page from the middle of its height whatever was chosen. They now grow it from the chosen verse, and both pages of an open book from the same height, so they stay level; growing from the middle stays as a setting in the info panel. Clean at 200% in Chromium, WebKit, the Mac app and the iPad app on its side."
     },
     {
+      "id": "zoom-button-slips-verse-under-upright-note",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "68"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "On an iPad held upright, the note lies across the page's foot, and growing from the chosen verse's middle slipped its last line under the note by 200% to 250%. Growing now moves the height just enough to keep the grown verse above the note, or keeps its first line at the top once it is too tall for that space; both pages of an open book still grow from one height. Clean upright in Chromium, WebKit and the iPad app; unchanged on its side and in the Mac app."
+    },
+    {
       "id": "spread-zoom-hides-line-starts",
       "source": {
         "file": "docs/PLAN.md",

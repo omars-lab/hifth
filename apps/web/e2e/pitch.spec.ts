@@ -834,6 +834,65 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
       .evaluateAll((svgs) => svgs.map((s) => Math.round(s.getBoundingClientRect().top)));
     expect(tops, "both pages of the opening are up").toHaveLength(2);
     expect(Math.abs(tops[0]! - tops[1]!), "the two pages stay level at the fold").toBeLessThan(2);
+    // And back down to the whole opening, still level.
+    const zoomOut = page.getByRole("group", { name: "Zoom" }).getByRole("button", { name: "Zoom out" });
+    for (let i = 0; i < 3; i++) await zoomOut.click();
+    await expect(page.getByRole("group", { name: "Zoom" })).toContainText("100%");
+    await expect
+      .poll(async () => {
+        const back = await page
+          .locator("svg[aria-labelledby^='page-label-']:visible")
+          .evaluateAll((svgs) => svgs.map((s) => Math.round(s.getBoundingClientRect().top)));
+        return back.length === 2 && Math.abs(back[0]! - back[1]!) < 2 ? "level" : back.join(" and ");
+      }, { message: "zoomed back out, the two pages are still level at the fold" })
+      .toBe("level");
+    await context.close();
+  });
+
+  test("upright with a note open, the zoom buttons keep the chosen verse above the note", async ({ browser }) => {
+    // Found the same day (docs/PLAN.md, item 68): held upright, the note lies
+    // across the page's foot, and growing from the verse's middle carried its
+    // last line under the note by the second press. The height now moves just
+    // enough to keep the grown verse above the note; once the verse is taller
+    // than the space left, its first line stays at the top, where reading starts.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await settle(sheet(page));
+    const zoom = page.getByRole("group", { name: "Zoom" });
+    const zoomIn = zoom.getByRole("button", { name: "Zoom in" });
+    const where = async () => {
+      const card = (await sheet(page).boundingBox())!;
+      const lines = await litLineBoxes(page);
+      if (!lines.length) return "no lit lines";
+      const off = lines.filter((b) => b.y < 0 || b.y + b.height > 1366).length;
+      const under = lines.filter((b) => overlaps(b, card)).length;
+      return `${off} off the screen, ${under} under the note`;
+    };
+    // The page opens at a level of its own upright, so press until each level.
+    const level = async () => Number((await zoom.textContent())?.replace(/[^0-9]/g, "") || 0);
+    const pressTo = async (want: number) => {
+      for (let i = 0; i < 8 && (await level()) < want; i++) {
+        const was = await level();
+        await zoomIn.click();
+        await expect.poll(level).toBeGreaterThan(was);
+      }
+      expect(await level()).toBe(want);
+    };
+    for (const want of [200, 250]) {
+      await pressTo(want);
+      await expect
+        .poll(where, { message: `at ${want}%, every line of the verse is in sight and clear of the note` })
+        .toBe("0 off the screen, 0 under the note");
+    }
+    await pressTo(300);
+    await expect
+      .poll(async () => (await where()).startsWith("0 off the screen"), {
+        message: "at 300%, too tall for the space above the note, the verse still starts on the screen",
+      })
+      .toBe(true);
     await context.close();
   });
 

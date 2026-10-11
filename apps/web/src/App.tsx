@@ -581,14 +581,18 @@ export function App(): JSX.Element {
       //
       // Vertically, both leaves grow from the chosen verse, wherever it is, so
       // it stays on the screen (docs/PLAN.md, item 66), and from the one same
-      // height, so the two pages stay level at the fold. The reader can set the
-      // middle instead (`zoom-anchor.ts`).
+      // height, so the two pages stay level at the fold; a note over the page's
+      // foot moves that height just enough to keep the grown verse above it
+      // (item 68). The reader can set the middle instead (`zoom-anchor.ts`).
       setZoom: (z: number) => {
         const live = stageRef.current;
         const facing = facingStageRef.current;
         const verse = verseToGrowFrom(savedZoomAnchor(), live?.verseSpan() ?? facing?.verseSpan() ?? null);
-        const applied = live?.setZoom(z, verse) ?? 1;
-        facing?.setZoom(z, verse);
+        // Only the live leaf is told where a note covers the page's foot, so
+        // it picks the one height, and the facing leaf grows from it too.
+        const at = live?.zoomAnchorFor(z, verse) ?? facing?.zoomAnchorFor(z, verse) ?? null;
+        const applied = live?.setZoom(z, at) ?? 1;
+        facing?.setZoom(z, at);
         setZoom(applied);
       },
       // A pinch has already moved the leaf under the fingers; the other leaf of

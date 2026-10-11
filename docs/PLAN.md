@@ -1756,6 +1756,20 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     and the end stays in sight; the reader slides the page to see it. That is how the open book
     has zoomed since both pages were made to grow together, so this is a question, not a fault:
     should the right-hand page keep the starts of its lines in sight instead?
+68. ~~**Upright, with a note open, the zoom buttons slip the verse's last line under the note.**~~
+    Found 2026-10-11 checking item 66's fix the other way up: on an iPad held upright the note lies
+    across the page's foot, and growing from the verse's middle carried its last line under the
+    note at 250% (and at 200% in Chromium).
+    **Fixed the same day.** When growing, the height the page grows from now moves just as far as
+    keeps the grown verse between the top of the stage and the top of the note; if the verse has
+    grown taller than that space, its first line stays at the top, where a hafiz starts reading.
+    Shrinking still goes from the verse's middle. The highlight drawn over the verse reaches a
+    little past its letters, so the measure takes both. Only the page under the note is told where
+    the note is, so it picks the height and the other page of an open book grows from the same
+    one, and they stay level. Upright at 35:44, the verse is clear of the note at 200% and 250% in
+    Chromium, WebKit and the iPad app; at 300% its first line sits at the top of the stage. On its
+    side and in the Mac app, nothing changed and the pages stay level, zoomed in and back out. A
+    unit test and a browser test, both watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
