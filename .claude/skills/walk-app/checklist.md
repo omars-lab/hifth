@@ -84,13 +84,21 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   e2e/verse-gestures.spec.ts ("pausing a run part way", "failed to load carries on")
 - [ ] During a "Play to" run, look at the page from across the room: the verse being recited is
   the one marked (the light moves to it, or, with the ring picked in the info panel, a ring
-  goes round it while the first stays lit), and at the end the light is back on the first.
+  goes round it while the first stays lit), and at the end the light is back on the first
+  (for a run that stays on its page; one that took the page with it ends with nothing lit, on
+  purpose, PLAN 59).
   Check both in Firefox and on a phone. · issue: `run-verse-not-shown` · test:
   e2e/verse-gestures.spec.ts ("light moves to each verse", "ring chosen")
 - [ ] Hold the surah's corner and pick Play, from a page in the middle of the surah: the page
   jumps to the surah's first verse, and when the recitation runs onto the next page the page
   turns by itself, with Pause still on the verse's tools. · desktop and a phone · issue:
   `run-leaves-page-behind` · test: e2e/verse-gestures.spec.ts ("goes past the page")
+- [ ] While a surah plays from its corner, turn ahead two pages by hand: the page stays where
+  you turned while the recitation plays on, Pause still on the verse's tools, and picks the run
+  up again once the recitation reaches that page. Pick "Go back to the recitation" in the info
+  panel and do it again: the next verse brings the page back. · desktop and an iPad · issue:
+  `run-hand-turn-pulled-back` · test: e2e/verse-gestures.spec.ts ("turned by hand", "going
+  back chosen")
 - [ ] On the pitch build, with a note open on an iPad held upright, play a run to a verse that
   sits under the note: the page lifts so the verse being recited stays in sight above the note.
   · iPad upright, pitch · issue: `run-leaves-page-behind` · test: e2e/pitch.spec.ts ("keeps the

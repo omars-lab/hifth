@@ -3,6 +3,7 @@ import { ayahTarget } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { VERSE_GESTURES_KEY } from "../src/verse-gestures";
 import { RUN_MARK_KEY } from "../src/run-mark";
+import { RUN_FOLLOW_KEY } from "../src/run-follow";
 import { fakePlayer } from "./player";
 
 /*
@@ -368,6 +369,63 @@ test.describe("Hifth · holding the page's corners", () => {
     await page.waitForTimeout(400);
     await player.end();
     await expect.poll(async () => (await player.files()).at(-1)).toBe("002007.mp3");
+  });
+
+  // Mid-surah the presenter turns ahead to show the room something else. The
+  // next verse pulled the page straight back to the recitation, so a page could
+  // not be shown while the run played. A turn by hand now stands, and the page
+  // picks the run up again when the recitation reaches the page being shown.
+  test("a page turned by hand during a run stays turned", async ({ page, isMobile }) => {
+    test.skip(isMobile, "the arrow keys turn the page on a computer");
+    const player = await fakePlayer(page);
+    await openWith(page, null);
+    await tap(page, isMobile, "#verse-46");
+    await expect(drawer(page)).toBeVisible();
+    await holdCorner(page, "surah");
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("svg[aria-labelledby='page-label-3']:visible")).toBeVisible();
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("svg[aria-labelledby='page-label-5']:visible")).toBeVisible();
+    await page.waitForTimeout(400);
+    await player.end();
+    await expect.poll(player.files).toHaveLength(2);
+    await page.waitForTimeout(800);
+    await expect(page.locator("svg[aria-labelledby='page-label-5']:visible")).toBeVisible();
+    await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toHaveCount(0);
+    // The recitation still plays on, Pause in reach.
+    await expect(drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:2" })).toBeVisible();
+  });
+
+  test("with going back chosen, the next verse brings a turned page back to the recitation", async ({ page, isMobile }) => {
+    test.skip(isMobile, "the arrow keys turn the page on a computer");
+    await page.addInitScript((key) => {
+      try {
+        localStorage.setItem(key, "back");
+      } catch {
+        /* private mode */
+      }
+    }, RUN_FOLLOW_KEY);
+    const player = await fakePlayer(page);
+    await openWith(page, null);
+    await tap(page, isMobile, "#verse-46");
+    await expect(drawer(page)).toBeVisible();
+    await holdCorner(page, "surah");
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("svg[aria-labelledby='page-label-3']:visible")).toBeVisible();
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("svg[aria-labelledby='page-label-5']:visible")).toBeVisible();
+    await page.waitForTimeout(400);
+    await player.end();
+    await expect.poll(player.files).toHaveLength(2);
+    await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
   });
 });
 

@@ -1628,6 +1628,27 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     while a run plays, the page keeps the verse being recited clear of the note or the
     look-alike list, the way it already kept the chosen verse clear. Tests for both, watched
     failing first; looked at at iPad and phone size.
+59. ~~**A page turned by hand during a run was pulled straight back.**~~ Found 2026-10-10,
+    the day after item 58, asking what a presenter does mid-surah: they turn ahead to show the
+    room another page while the recitation plays on, and with the next verse the page jumped
+    back to the recitation, so no other page could be shown while a run played. **Fixed the same
+    day, two ways, a setting in the info panel ("Turning away during a recitation"):**
+    - *Stay where I turned* (the default): a page turned by hand stays turned while the
+      recitation plays on, Pause still in reach, and the page picks the run up again once the
+      recitation reaches the page being shown. A presenter who turns away means to show that
+      page.
+    - *Go back to the recitation*: the next verse recited brings the page back to it, so the
+      page never drifts from the recitation.
+
+    A run started straight after another (a juz played while a surah still plays) counts as
+    new and always takes the page to where it starts; building it found that the two runs
+    looked the same from the page until the sound code counted them. Two things item 58 left,
+    written down rather than changed: once a run has taken the page off the page it started
+    on, the chosen verse is let go, so when the run ends nothing is lit and the verse's tools
+    close (the light does not come back to the first verse, which is pages away); and with the
+    ring picked, the first verse's light goes with it, leaving only the ring. Tests for both
+    ways, the default watched failing first; the setting looked at in English and Arabic, at
+    phone and computer width.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
