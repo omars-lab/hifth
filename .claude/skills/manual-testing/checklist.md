@@ -92,6 +92,13 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
     and the browser test only changes the window's size. Right: the note stays open each way up,
     across the page when upright and over the facing page on its side, with every line of its verse
     in sight above or beside it. Anything else becomes a backlog item and a test.
+14. **Dragging the real Mac app's window smaller with a note up, and back.** On the pitch build,
+    open the Mac app at a demo verse so its note is up, then drag the window's corner in until it
+    shows one page (narrower than about 1024 wide, or shorter than about 740), then back out. The
+    browser test only sets the window's size; it cannot drag a real Mac window. Right: the note
+    stays open the whole time and every line of its verse stays in sight and clear of it, with no
+    flicker between one page and two while the corner moves. Anything else becomes a backlog
+    item and a test.
 
 ## Done
 

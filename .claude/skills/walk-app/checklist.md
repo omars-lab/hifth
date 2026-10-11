@@ -214,8 +214,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   boxes only). · the iPad app sideways, private build · issue: `app-probe-sideways`
 - [ ] Open a note with the iPad on its side, turn it upright, then back, as when it is handed
   across a table: the note stays open each way up and every line of its verse stays in sight and
-  clear of it. · ipad-side, ipad, private build · checked 2026-10-11 in Chromium and WebKit, clean;
-  the real iPad's turn is parked (manual testing 13)
+  clear of it. Then zoom in to 150% and turn it upright again: the same. · ipad-side, ipad, private
+  build · checked 2026-10-11 in Chromium and WebKit, clean, zoomed in too; the real iPad's turn is
+  parked (manual testing 13)
 - [ ] With a verse chosen low on the page and its note open, press + until 200%: every line of the
   verse stays on the screen, and with the book open both pages stay level at the fold, and still
   level pressed back down to 100%; set "Grow from the middle" and the verse goes down as before. ·
@@ -396,6 +397,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 
 - [ ] Open the app at a verse and at a page; turn, zoom, open a note. · `make app-run-mac`,
   `make app-run-ipad` · Same as the browser. · see the native-shell skill
+- [ ] With a note up, make the Mac window too small for the open book (1000 wide, or 700 high),
+  then back to 1280 by 828: the note stays open and its verse stays in sight and clear of it at
+  every size. · desktop at the Mac app's sizes, private build · checked 2026-10-11 in Chromium and
+  WebKit, clean; dragging the real window is parked (manual testing 14)
 - [ ] Walk the pitch **in the iPad app**, not only in the browser: the iPad's own WebKit lays out
   differently from Playwright's. Rebuild the bundle (`make app-web FLAVOUR=pitch`), launch at a
   verse, turn the simulator, screenshot, and measure from inside the page with
