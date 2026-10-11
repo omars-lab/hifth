@@ -52,6 +52,8 @@ const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTou
 await ctx.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
 const p = await ctx.newPage();
 const from = arg("from", "");
+// Back with nothing before it leaves the app, and the page with it.
+if (mode === "back" && !from) throw new Error("--mode back needs --from <route>, the page to go back to");
 if (mode === "back" && from) {
   await p.goto(base + "#" + from);
   await p.waitForTimeout(2000);
