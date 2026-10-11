@@ -3863,6 +3863,17 @@
       "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
+      "id": "app-probe-sideways",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉘"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "The probe that presses things in the iPad app and reports what the page shows runs only upright; the only way to turn the app is the picture walk, which turns it back before anything else runs. So a recitation turning the open book, the likely way the demo is shown, can be checked in the app on its side only as still pictures. Checked instead at the size of an iPad on its side in the same browser engine (e2e/ipad.spec.ts, clean). Closes when a probe can run in the app on its side, confirmed by a wide picture."
+    },
+    {
       "id": "app-walk-after-list-fixes",
       "source": {
         "file": "docs/design/native-shell.md",

@@ -1,4 +1,6 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { COACH_STORAGE_KEY } from "../src/coach";
+import { fakePlayer } from "./player";
 
 /*
  * The web app on an iPad-sized WebKit — the same engine the native shell hosts.
@@ -355,3 +357,72 @@ for (const [lang, group, close] of [
     });
   });
 }
+
+// Walked for item 60 on the open book: a surah played from its corner on the
+// iPad held sideways turns the book from opening to opening with the
+// recitation, and its end leaves the last verse lit with Play on it, as it
+// does on one page. The hold is a finger's, sent as touch pointer events.
+test.describe("Hifth · a recitation on the iPad held sideways", () => {
+  test.use({ locale: "en-US" });
+
+  test("a surah played from its corner turns the open book with it and ends with its last verse lit", async ({ page }) => {
+    const player = await fakePlayer(page);
+    await page.addInitScript((coach) => {
+      try {
+        localStorage.setItem(coach, "1");
+      } catch {
+        /* private mode */
+      }
+    }, COACH_STORAGE_KEY);
+    await page.setViewportSize(LANDSCAPE);
+    await page.goto("/#/hafs-kfqc/p563");
+    await shown(page, 563);
+    await shown(page, 564);
+    const head = page.locator('[data-host-page="563"] [data-running-head="surah"]');
+    const b = (await head.boundingBox())!;
+    const finger = (type: string) =>
+      page.evaluate(
+        ({ type, x, y }) => {
+          document.elementFromPoint(x, y)?.dispatchEvent(
+            new PointerEvent(type, {
+              bubbles: true,
+              cancelable: true,
+              pointerId: 1,
+              pointerType: "touch",
+              isPrimary: true,
+              clientX: x,
+              clientY: y,
+              button: 0,
+              buttons: type === "pointerup" ? 0 : 1,
+            }),
+          );
+        },
+        { type, x: b.x + b.width / 2, y: b.y + b.height / 2 },
+      );
+    await finger("pointerdown");
+    await page.waitForTimeout(600);
+    await finger("pointerup");
+    await page.getByRole("menu", { name: /^More for / }).getByRole("menuitem", { name: "Play", exact: true }).click();
+    await expect.poll(player.files).toEqual(["067001.mp3"]);
+    // The surah begins on 562, the left leaf of the opening before.
+    await shown(page, 562);
+    await shown(page, 561);
+    for (let n = 2; n <= 30; n++) {
+      await player.end();
+      await expect.poll(player.files).toHaveLength(n);
+    }
+    await shown(page, 564);
+    await shown(page, 563);
+    await page.waitForTimeout(400);
+    await player.end();
+    await page.waitForTimeout(400);
+    const lit = await page
+      .locator("#hifth-overlay [data-hl-group='selection']")
+      .evaluateAll((els) => [...new Set(els.map((el) => (el.getAttribute("data-hl-key") ?? "?").split("/").pop()))]);
+    expect(lit).toEqual(["67:30"]);
+    await expect(page).toHaveURL(/#\/hafs-kfqc\/67:30(\?|$)/);
+    await expect(page.getByRole("region", { name: /^Tools for / }).getByRole("button", { name: /^Play .*67:30$/ })).toBeVisible();
+    await shown(page, 564);
+    await shown(page, 563);
+  });
+});

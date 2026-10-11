@@ -460,6 +460,21 @@ test.describe("Hifth · holding the page's corners", () => {
     await expect(page).toHaveURL(/#\/hafs-kfqc\/67:30(\?|$)/);
     await expect(drawer(page).getByRole("button", { name: /^Play .*67:30$/ })).toBeVisible();
     await expect(page.locator("svg[aria-labelledby='page-label-564']:visible")).toBeVisible();
+    // The last verse sits at the foot of its page, where a phone's tools card
+    // rises: the light is only worth having if the card leaves it in sight.
+    await page.waitForTimeout(600);
+    const card = (await drawer(page).boundingBox())!;
+    const lines = await page.evaluate(() =>
+      [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")].map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.x, y: r.y, width: r.width, height: r.height };
+      }),
+    );
+    expect(lines.length).toBeGreaterThan(0);
+    for (const l of lines) {
+      const under = l.x < card.x + card.width && card.x < l.x + l.width && l.y < card.y + card.height && card.y < l.y + l.height;
+      expect(under, `a lit line at ${JSON.stringify(l)} under the tools at ${JSON.stringify(card)}`).toBe(false);
+    }
   });
 
   // A verse can end while the hand is still taking the page over, the turn not
