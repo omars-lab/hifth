@@ -86,6 +86,25 @@ final class SmokeTests: XCTestCase {
         XCTAssertEqual(app.staticTexts["hifth.route"].label, "#/hafs-kfqc/p45")
     }
 
+    /// With the note tool in hand, a pinch still only magnifies: no note is
+    /// pinned and no note box opens. The browser tests pinch with the note
+    /// tool in Playwright's WebKit; this pinches with the iPad's own.
+    func testPinchWithTheNoteToolPinsNothing() {
+        let app = launch(route: "/hafs-kfqc/p45")
+        waitForRoute("#/hafs-kfqc/p45", in: app)
+        sleep(2)
+        let web = app.webViews.firstMatch
+        let note = web.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Note")).firstMatch
+        XCTAssertTrue(note.waitForExistence(timeout: 5), "no Note tool in the tools row")
+        note.tap()
+        sleep(1)
+        XCTAssertEqual(web.textViews.count, 0, "a note box was open before the pinch")
+        web.pinch(withScale: 2.5, velocity: 2)
+        sleep(2)
+        attach(app, named: "page-45-after-note-tool-pinch")
+        XCTAssertEqual(web.textViews.count, 0, "the pinch pinned a note")
+    }
+
     /// The zoom readout says what a pinch landed at. It once stayed at 100%
     /// while the page sat many times larger, because only the − and + buttons
     /// told it anything; a press of + then dropped the page to 125% (found

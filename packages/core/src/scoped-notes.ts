@@ -212,6 +212,17 @@ export function editScopedNote(set: readonly ScopedNote[], id: string, text: str
   return set.map((x) => (x.id === id && x.text !== clean ? { ...x, text: clean, updatedAt: now, usedAt: now } : x));
 }
 
+/**
+ * The notes someone actually wrote in. A note is kept the moment its pin or
+ * its "new note" is made, and closing its box empty takes it away again; an
+ * app shut with the box still open never got that far. A note with no words
+ * that has not changed since it was made is that one, and it goes. A note
+ * someone emptied later on purpose changed after it was made, and stays.
+ */
+export function dropUnwritten(set: readonly ScopedNote[]): ScopedNote[] {
+  return set.filter((n) => n.text.trim() !== "" || n.updatedAt !== n.createdAt);
+}
+
 /** The verses a note holds that its scope does not: only a loaded file can bring these. */
 export function outsideScope(note: ScopedNote, pageOf?: PageOf): string[] {
   return note.verses.filter((v) => !scopeContains(note.scope, v.key, pageOf)).map((v) => v.key);

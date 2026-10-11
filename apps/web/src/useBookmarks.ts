@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  dropUnwritten,
   fromPins,
   isMistake,
   mergeConfusions,
@@ -152,10 +153,12 @@ export function useNotes(
     const read = loadNotes().then((got) => {
       if (!live || !got) return;
       stored.current = got;
-      // Notes made before the read landed are kept beside what was read.
+      // Notes made before the read landed are kept beside what was read. A note
+      // left open and never written when the app last closed is not.
       const now = latest.current;
+      const kept = dropUnwritten(got.scoped);
       hold({
-        scoped: [...got.scoped, ...now.scoped.filter((n) => !got.scoped.some((s) => s.id === n.id))],
+        scoped: [...kept, ...now.scoped.filter((n) => !got.scoped.some((s) => s.id === n.id))],
         mistakes: [...got.mistakes, ...now.mistakes.filter((n) => !got.mistakes.some((s) => s.id === n.id))],
       });
     });

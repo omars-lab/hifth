@@ -389,6 +389,7 @@ from the moment a second finger joins it, and nothing in a pinch is a tap or a h
 finger lifts last. The next one-finger tap counts again. Tests: three in the page's own
 tap-reading code, two in the iPad browser tests (a verse is not selected, a note is not pinned),
 and one in the app on the simulator that pinches page 45 and checks the reader is still there.
+On 2026-10-11 a second app test pinches with the note tool picked and checks no note box opens.
 
 ### ⑬ On the iPad, the zoom readout stays at 100% after a pinch · **fixed**
 
@@ -716,3 +717,23 @@ answered from was not wider than tall. The first run walked the surah played fro
 the open book in the real app: back to the opening where the surah starts, forward with the
 recitation, and its last verse lit at the end, clean. What was tried and why is in
 `docs/issues/ipad-app-cannot-turn-itself.md`; the command is `make app-probe TARGET=ipad SIDEWAYS=1`.
+
+### ㉙ A note pinned and left open when the app closes stays on the page, empty · **fixed**
+
+Seen in the iPad app on 2026-10-11, while proving the pinch test could catch a pinned note: a tap
+with the note tool pinned a note and opened its box, and the app was then shut with the box still
+open. The next time the app started, the pin was still on the page with nothing in it.
+
+**What it changes for a hafiz:** a pin on a verse that says nothing, which they have to open to
+find it empty and then delete by hand. It happens whenever the app is closed, or a phone locks and
+drops it, before a fresh note is written or closed.
+
+**What it was, and the fix:** a note is kept on the device the moment its pin is made, so that a
+fresh pin survives the page turning, and only closing its box empty took it away again. An app
+that went away first never got that far. Now, when the app reads its notes back, a note with no
+words that has not changed since it was made is dropped; a note someone emptied later on purpose
+changed after it was made, and stays. Notes about a page, surah or juz made from the notes list
+had the same gap and are covered by the same rule. Mistake marks carry no words by design and are
+kept apart, so they are untouched. Tests: three in the shared notes code, and one in the browser
+that pins a note, waits until the device holds it, reloads with the box still open, and checks
+only the written note is back.

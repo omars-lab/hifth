@@ -86,6 +86,45 @@ test.describe("Hifth · the note tool", () => {
     await expect(box(page).getByRole("textbox")).toHaveValue("A question");
   });
 
+  // Found in the iPad app (2026-10-11): a pin is kept the moment it is made, and
+  // only closing its box empty took it away. An app shut with the box still open
+  // left a pin with nothing in it on the page for good.
+  test("a pin left open and never written is gone after a reload", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    // One written note, so the reload is seen to have read the notes back.
+    await pinOnVerse(page, "#verse-47");
+    await box(page).getByRole("textbox").fill("A question");
+    await box(page).getByRole("button", { name: "Done" }).click();
+    await pinOnVerse(page, "#verse-46");
+    await expect(box(page)).toBeVisible();
+    await expect(pins(page)).toHaveCount(2);
+    // The device has kept the empty note before the app goes away.
+    const kept = () =>
+      page.evaluate(
+        () =>
+          new Promise<number>((resolve, reject) => {
+            const open = indexedDB.open("hifth.bookmarks.v1");
+            open.onerror = () => reject(open.error);
+            open.onsuccess = () => {
+              const get = open.result.transaction("sets").objectStore("sets").get("scoped-notes");
+              get.onsuccess = () => {
+                open.result.close();
+                resolve(((get.result as { notes: unknown[] } | undefined)?.notes ?? []).length);
+              };
+              get.onerror = () => reject(get.error);
+            };
+          }),
+      );
+    await expect.poll(kept).toBe(2);
+
+    await page.reload();
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await expect(pins(page)).toHaveCount(1);
+    await pins(page).first().click();
+    await expect(box(page).getByRole("textbox")).toHaveValue("A question");
+  });
+
   test("deleting a note asks nothing, and Undo puts it back", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();

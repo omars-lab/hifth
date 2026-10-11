@@ -6,6 +6,7 @@ import {
   addScopedNote,
   addVerse,
   changeScope,
+  dropUnwritten,
   isScopedNote,
   joinNote,
   mergeScopedNotes,
@@ -540,5 +541,23 @@ describe("the notes a juz, surah or page label lists", () => {
   it("a page lists its own notes and those holding one of its verses", () => {
     expect(ids(page7)).toEqual(["whole", "page"]);
     expect(ids({ type: "page", edition: "hafs-kfqc", page: 9 })).toEqual([]);
+  });
+});
+
+describe("notes nobody wrote in", () => {
+  it("goes when it was made and never written, as a box closed empty does", () => {
+    const fresh = note("a", page7, T, { text: "", createdAt: T, updatedAt: T });
+    const written = note("b", page7, T, { text: "Made-up words", createdAt: T, updatedAt: T });
+    expect(dropUnwritten([fresh, written]).map((n) => n.id)).toEqual(["b"]);
+  });
+
+  it("stays when someone emptied it on purpose, later than it was made", () => {
+    const emptied = note("c", page7, T + 5, { text: "", createdAt: T, updatedAt: T + 5 });
+    expect(dropUnwritten([emptied]).map((n) => n.id)).toEqual(["c"]);
+  });
+
+  it("treats only spaces as nothing written", () => {
+    const spaces = note("d", page7, T, { text: "  \n ", createdAt: T, updatedAt: T });
+    expect(dropUnwritten([spaces])).toEqual([]);
   });
 });

@@ -74,6 +74,7 @@ export {
   addVerse,
   canTake,
   changeScope,
+  dropUnwritten,
   editScopedNote,
   fromPins,
   isScopedNote,

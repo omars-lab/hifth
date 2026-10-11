@@ -3107,6 +3107,18 @@
       "closedBy": "packages/core/src/highlighter.ts"
     },
     {
+      "id": "note-left-open-stays-empty",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉙"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Found in the iPad app (2026-10-11): a note pinned and left open when the app closed came back the next time as an empty pin. A pin is kept the moment it is made, and only closing its box empty took it away. Fixed 2026-10-11: notes read back from the device drop any with no words that never changed since they were made. Tests in the shared notes code and the note tool's browser tests.",
+      "closedBy": "packages/core/src/scoped-notes.ts"
+    },
+    {
       "id": "ipad-pinch-readout-stuck",
       "source": {
         "file": "docs/design/native-shell.md",

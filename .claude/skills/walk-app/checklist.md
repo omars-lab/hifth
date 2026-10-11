@@ -448,6 +448,9 @@ upright and on its side, English and Arabic, iPad and Mac.
   In Arabic the side rail and the Mark up button stay on the right: that is the owner's open
   question (notes-style-toolbar ④), not a fault, until it is answered. · issue:
   `pens-stay-right-in-arabic`
+- [ ] Pin a note with the note tool and close the app with its box still open, writing nothing:
+  next time the app starts, that pin is gone, and a note that was written is still there. ·
+  desktop, iPad app · test: notes spec ("never written") · issue: `note-left-open-stays-empty`
 - [ ] Bookmark a page: the ribbon and folded corner look right, in Firefox too. · desktop with
   `BROWSER=firefox` · test: edge-peel spec
 - [ ] Stay on a page for a few seconds until the red ribbon appears down its bound edge: it covers
@@ -552,8 +555,10 @@ upright and on its side, English and Arabic, iPad and Mac.
   `node --test scripts/native-golden-public.test.mjs`
 - [ ] Pinch a page in the iPad app to look closer, ending with a finger on a verse: the page grows,
   and no verse is selected and no menu opens. Same with the note tool picked: no note is pinned.
-  · iPad simulator · issue: `ipad-pinch-selects-verse` · test:
-  `make app-test ONLY=SmokeTests/testPinchSelectsNothing`
+  · iPad simulator · issue: `ipad-pinch-selects-verse` · tests:
+  `make app-test ONLY=SmokeTests/testPinchSelectsNothing`, and with the note tool
+  `make app-test ONLY=SmokeTests/testPinchWithTheNoteToolPinsNothing`. Start that one with the
+  app removed from the simulator, or a note an earlier run left shows in its picture.
 - [ ] After that pinch, the zoom readout says the new size, not 100%, and + goes up from there.
   · iPad simulator · issue: `ipad-pinch-readout-stuck` · test:
   `make app-test ONLY=SmokeTests/testPinchMovesTheZoomReadout`
