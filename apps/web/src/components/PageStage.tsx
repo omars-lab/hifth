@@ -955,15 +955,22 @@ export interface PageStageHandle {
    * the first press against a limit, and the readout would then be describing a
    * magnification nobody is looking at.
    */
-  setZoom: (z: number, verse?: VerseSpan | null) => number;
+  setZoom: (z: number, at?: number | null) => number;
   /**
    * Where the chosen verse's lines sit on the screen, top of the first to
    * bottom of the last, or null when no verse on this leaf is chosen. The
-   * stepper grows the page from it (`zoom-anchor.ts`), and with the book open
-   * both leaves are handed the same span, so they grow from one height and
-   * stay level at the fold.
+   * stepper grows the page from it (`zoom-anchor.ts`).
    */
   verseSpan: () => VerseSpan | null;
+  /**
+   * The screen height a press to `z` should grow this leaf from: the verse's
+   * middle, moved as little as keeps the grown verse clear of a note over the
+   * page's foot (docs/PLAN.md, item 68), or the leaf's middle with no verse.
+   * With the book open, the live leaf works it out, since only it is told where
+   * the note is, and both leaves are handed it through `setZoom`, so they grow
+   * from one height and stay level at the fold.
+   */
+  zoomAnchorFor: (z: number, verse: VerseSpan | null) => number | null;
   /**
    * The magnification the paper is at right now.
    *
@@ -2892,8 +2899,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * level. Held in a ref so the cold-mount effect, which runs once, calls the
    * current one.
    */
-  const zoomToRef = useRef<(z: number, verse?: VerseSpan | null) => number>(() => view.current.z);
-  zoomToRef.current = (z: number, verse: VerseSpan | null = null): number => {
+  const zoomToRef = useRef<(z: number, at?: number | null) => number>(() => view.current.z);
+  zoomToRef.current = (z: number, at: number | null = null): number => {
     const layer = layerRef.current;
     if (!layer) return view.current.z;
     // The same two things a wheel gesture used to do at its first event:
@@ -2907,14 +2914,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // A button has no pointer to anchor to, so the stage picks the point.
     // The lone leaf grows from its own centre; an open book pins each leaf at
     // its gutter edge (`foldEdgeOf`) so the fold stays put and the opening
-    // grows outward as one sheet. Vertically, the chosen verse the caller
-    // hands in, or the middle without one: growing from the middle carried a
-    // verse low on the page off the screen (docs/PLAN.md, item 66). Through
+    // grows outward as one sheet. Vertically, the height the caller hands in
+    // (`zoomAnchorFor`, from the chosen verse), or the middle without one:
+    // growing from the middle carried a verse low on the page off the screen
+    // (docs/PLAN.md, item 66). Through
     // `zoomAbout` rather than writing `view` directly: the anchor arithmetic
     // §7 ⑨ fixed has one implementation and this is not a second.
     const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
     const ox = edge === "left" ? rect.left : edge === "right" ? rect.right : rect.left + rect.width / 2;
-    const oy = zoomAnchorY(verse, { top: rect.top, bottom: rect.bottom });
+    const oy = at ?? (rect.top + rect.bottom) / 2;
     zoomAbout(clampZoom(z, MIN_ZOOM, MAX_ZOOM), ox, oy, base);
     // The rail sits beside the selected ayah and has just been moved.
     emitSelectionRect();
@@ -2927,8 +2935,20 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useImperativeHandle(
     ref,
     (): PageStageHandle => ({
-      setZoom(z, verse) {
-        return zoomToRef.current(z, verse);
+      setZoom(z, at) {
+        return zoomToRef.current(z, at);
+      },
+      zoomAnchorFor(z, verse) {
+        const layer = layerRef.current;
+        if (!layer) return null;
+        const rect = layer.getBoundingClientRect();
+        const box = { top: rect.top, bottom: rect.bottom };
+        // How much this press grows the page, and the part of the stage no
+        // note covers: a note over the page's foot starts at its top edge.
+        const k = clampZoom(z, MIN_ZOOM, MAX_ZOOM) / view.current.z;
+        const cover = coverTopRef.current;
+        const free = { top: rect.top, bottom: cover === null ? rect.bottom : Math.min(rect.bottom, cover) };
+        return zoomAnchorY(verse, box, k, free);
       },
       verseSpan() {
         const key = selectedKeyRef.current;
@@ -2937,8 +2957,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         if (!cur || !ids?.length) return null;
         let top = Infinity;
         let bottom = -Infinity;
-        for (const id of ids) {
-          const el = cur.svg.querySelector<SVGGraphicsElement>(`#${cssEscapeId(id)}`);
+        // The verse's own shapes, and the highlight drawn over them, which
+        // reaches a little past them: it is the highlight the reader sees go
+        // under a note (docs/PLAN.md, item 68).
+        const shapes = [
+          ...ids.map((id) => cur.svg.querySelector<SVGGraphicsElement>(`#${cssEscapeId(id)}`)),
+          ...cur.svg.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel"),
+        ];
+        for (const el of shapes) {
           if (!el || typeof el.getBoundingClientRect !== "function") continue;
           const b = el.getBoundingClientRect();
           if (!b.height) continue;

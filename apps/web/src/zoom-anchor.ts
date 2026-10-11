@@ -74,11 +74,28 @@ export function verseToGrowFrom(choice: ZoomAnchor, verse: VerseSpan | null): Ve
   return choice === "middle" ? null : verse;
 }
 
+const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
+
 /**
  * The height a press grows the page from: the middle of the verse, kept inside
  * the page's box, or the middle of the box with no verse to follow.
+ *
+ * Growing by `k` about a height `y` puts a point `p` at `y + (p - y) * k`. When
+ * a note covers part of the stage, `free` is the part it leaves, and growing
+ * from the verse's middle can carry the verse's last line under the note (an
+ * iPad held upright, the note across the page's foot: docs/PLAN.md, item 68).
+ * So, growing, the height moves just enough that the grown verse stays inside
+ * the free part; a verse too tall for it keeps its first line at the top, where
+ * a hafiz starts reading. Shrinking never pushes the verse out, so it shrinks
+ * from its middle.
  */
-export function zoomAnchorY(verse: VerseSpan | null, box: VerseSpan): number {
+export function zoomAnchorY(verse: VerseSpan | null, box: VerseSpan, k = 1, free: VerseSpan = box): number {
   if (!verse) return (box.top + box.bottom) / 2;
-  return Math.min(box.bottom, Math.max(box.top, (verse.top + verse.bottom) / 2));
+  const middle = clamp((verse.top + verse.bottom) / 2, box.top, box.bottom);
+  if (k <= 1) return middle;
+  // The lowest height that keeps the last line above the free part's foot,
+  // and the highest that keeps the first line below its top.
+  const lowest = (verse.bottom * k - free.bottom) / (k - 1);
+  const highest = (verse.top * k - free.top) / (k - 1);
+  return lowest <= highest ? clamp(middle, lowest, highest) : highest;
 }

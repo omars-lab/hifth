@@ -217,9 +217,14 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   clear of it. · ipad-side, ipad, private build · checked 2026-10-11 in Chromium and WebKit, clean;
   the real iPad's turn is parked (manual testing 13)
 - [ ] With a verse chosen low on the page and its note open, press + until 200%: every line of the
-  verse stays on the screen, and with the book open both pages stay level at the fold; set "Grow
-  from the middle" and the verse goes down as before. · desktop, desktop-firefox, ipad-side, the
-  Mac app and the iPad app on its side, private build · issue: `zoom-button-carries-chosen-verse-off`
+  verse stays on the screen, and with the book open both pages stay level at the fold, and still
+  level pressed back down to 100%; set "Grow from the middle" and the verse goes down as before. ·
+  desktop, desktop-firefox, ipad-side, the Mac app and the iPad app on its side, private build ·
+  issue: `zoom-button-carries-chosen-verse-off`
+- [ ] Held upright with the note across the page's foot, press + to 250%: every line of the verse
+  stays above the note; at 300%, too tall for that space, its first line is at the top of the
+  screen, not above it. · ipad, the iPad app upright, private build · issue:
+  `zoom-button-slips-verse-under-upright-note`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 

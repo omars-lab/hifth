@@ -48,3 +48,33 @@ describe("the height a press grows the page from", () => {
     expect(zoomAnchorY({ top: -300, bottom: 0 }, box)).toBe(100);
   });
 });
+
+describe("the height a press grows the page from, with a note over the page's lower part", () => {
+  // The stage runs 0 to 1000; a note covers it from 700 down, so 0 to 700 is free.
+  const box = { top: 0, bottom: 1000 };
+  const free = { top: 0, bottom: 700 };
+  // Where a point lands once the page grows by `k` about the height `y`.
+  const land = (p: number, y: number, k: number) => y + (p - y) * k;
+
+  it("grows from the verse's middle while the grown verse still clears the note", () => {
+    expect(zoomAnchorY({ top: 200, bottom: 300 }, box, 1.25, free)).toBe(250);
+  });
+
+  it("moves the height just enough that the grown verse's last line stays above the note", () => {
+    // From its middle (480), its last line would land at 705, under the note.
+    const verse = { top: 300, bottom: 660 };
+    const y = zoomAnchorY(verse, box, 1.25, free);
+    expect(land(verse.bottom, y, 1.25)).toBeCloseTo(700);
+    expect(land(verse.top, y, 1.25)).toBeGreaterThanOrEqual(0);
+  });
+
+  it("keeps the verse's first line at the top when the grown verse is too tall for the free space", () => {
+    const verse = { top: 100, bottom: 680 };
+    const y = zoomAnchorY(verse, box, 1.5, free);
+    expect(land(verse.top, y, 1.5)).toBeCloseTo(0);
+  });
+
+  it("grows from the verse's middle when zooming out, wherever the note is", () => {
+    expect(zoomAnchorY({ top: 500, bottom: 900 }, box, 0.8, free)).toBe(700);
+  });
+});
