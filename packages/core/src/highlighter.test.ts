@@ -678,6 +678,12 @@ describe("Highlighter marker swipes", () => {
    * flips and scales it. jsdom lays nothing out, so the words' box and both
    * matrices are the ones page 7 reports in a real browser. `laidOut(false)`
    * gives the empty box a page reports while it is not on screen yet.
+   *
+   * The two browsers agree on the screen matrices and not on the page's own:
+   * asked for it, Firefox leaves out the page's sizing to its box and answers
+   * with no scale at all, which measured the words a ninth too narrow and cut
+   * every band short of its first word (2026-10-10). The page's own matrix
+   * here is Firefox's answer, so only the screen ones give the right span.
    */
   function addWords(): { laidOut(on: boolean): void } {
     const NS = "http://www.w3.org/2000/svg";
@@ -690,8 +696,12 @@ describe("Highlighter marker swipes", () => {
     Object.assign(words, {
       getBBox: () => (on ? { x: 45.445, y: 0, width: 245.455, height: 400 } : { x: 0, y: 0, width: 0, height: 0 }),
       getCTM: () => ({ a: 1.476, b: 0, c: 0, d: -1.476, e: -60.898, f: 708.636 }),
+      getScreenCTM: () => ({ a: 1.476, b: 0, c: 0, d: -1.476, e: 581.102, f: 867.636 }),
     });
-    Object.assign(svg, { getCTM: () => ({ a: 1.107, b: 0, c: 0, d: 1.107, e: 0, f: 0 }) });
+    Object.assign(svg, {
+      getCTM: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }),
+      getScreenCTM: () => ({ a: 1.107, b: 0, c: 0, d: 1.107, e: 642, f: 159 }),
+    });
     return { laidOut: (v) => (on = v) };
   }
 

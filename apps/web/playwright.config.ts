@@ -258,8 +258,11 @@ export default defineConfig({
           // And `lookalike-compare-view`: nothing else moves a look-alike list in
           // Firefox, so an opened comparison has to bring itself into view.
           // And `tajweed-key`: Firefox broke the key's credit address in two.
+          // And `highlight`: Firefox measured the page's block of words a ninth
+          // too narrow, and every line's band stopped short of its first word
+          // (2026-10-10, walking the live site).
           name: "desktop-firefox",
-          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key)\.spec\.ts/,
+          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },

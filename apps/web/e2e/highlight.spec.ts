@@ -22,6 +22,12 @@ async function openVerse(page: Page): Promise<void> {
   await expect(page.locator(`${OVERLAY} .hl-sel.hl-ink`)).toHaveCount(2, { timeout: 20_000 });
 }
 
+/** Load the verse again; a link to the same address would not reload it. */
+async function reopen(page: Page): Promise<void> {
+  await page.reload();
+  await expect(page.locator(`${OVERLAY} .hl-sel.hl-ink`)).toHaveCount(2, { timeout: 20_000 });
+}
+
 type Span = { left: number; right: number };
 
 /**
@@ -36,7 +42,10 @@ async function measure(page: Page, overlay = OVERLAY): Promise<{ text: Span; fra
     const inRoot = (el: SVGGraphicsElement): Span => {
       const b = el.getBBox();
       // The element's own units to the page's: up to the screen, back down.
-      const m = svg.getCTM()!.inverse().multiply(el.getCTM()!);
+      // The screen matrix on both sides, because it is the one both browsers
+      // agree on: asked for the page's own matrix, Firefox leaves out the
+      // page's sizing to its box and Chrome puts it in.
+      const m = svg.getScreenCTM()!.inverse().multiply(el.getScreenCTM()!);
       const xs = [b.x, b.x + b.width].flatMap((x) =>
         [b.y, b.y + b.height].map((y) => new DOMPoint(x, y).matrixTransform(m).x),
       );
@@ -154,10 +163,15 @@ test.describe("Hifth · the highlighter on the page", () => {
       page.locator(`${OVERLAY} .hl-band`).first().evaluate((el) => getComputedStyle(el).filter);
     expect(await filterOf(), "the streaks are on by default").toMatch(/url\(/);
 
+    // Opened again under each setting, the way a reader who has it set arrives:
+    // Firefox under test does not restyle a page already open when the setting
+    // is flipped, though it matches the query (found 2026-10-10).
     await page.emulateMedia({ contrast: "more" });
+    await reopen(page);
     expect(await filterOf(), "more contrast: flat ink").toBe("none");
 
     await page.emulateMedia({ contrast: "no-preference", forcedColors: "active" });
+    await reopen(page);
     expect(await filterOf(), "forced colours: flat ink").toBe("none");
   });
 

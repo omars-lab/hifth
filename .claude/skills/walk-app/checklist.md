@@ -295,6 +295,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] With any sheet or card open, look along its bottom edge: no line of text shows half its
   letters under it. · desktop, laptop, Firefox · test: desktop spec ("never half a line") ·
   issue: `record-sheet-slices-bar-line`
+- [ ] In Firefox, drag a highlight across a full page of lines: each line's wash covers its
+  first word and its last, just as in Chrome. · desktop and laptop with `BROWSER=firefox` ·
+  test: highlight spec (runs in Firefox) · issue: `firefox-highlight-short-of-first-word`
 - [ ] Switch the interface to Arabic: everything mirrors, nothing is cut off; on an iPad, upright
   and on its side, open a note too: its close button is on the left and the card stays whole. ·
   phone, desktop, ipad, ipad-side · tests: lang, chrome-fit specs, pitch "the note mirrors"

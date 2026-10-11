@@ -412,7 +412,7 @@ export interface TextSpan {
   readonly right: number;
 }
 
-/** A 2D matrix as the browser reports one (`getCTM`): x' = a·x + c·y + e. */
+/** A 2D matrix as the browser reports one (`getScreenCTM`): x' = a·x + c·y + e. */
 export interface Matrix2D {
   readonly a: number;
   readonly b: number;
