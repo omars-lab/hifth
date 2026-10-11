@@ -252,6 +252,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   slides down out of sight as the page comes down after it, and no brown desk shows between them
   at any moment; a card in a corner beside one page on a laptop goes at once. · ipad, the iPad
   app upright, phone, desktop, private build · issue: `closing-note-shows-desk-strip`
+- [ ] With the note up across the page's foot, long-press a verse above it: the note gives way,
+  the page comes down, and the menu comes down with its verse, still right beside it. · ipad,
+  the iPad app upright, phone, private build · issue: `hold-menu-left-behind`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 

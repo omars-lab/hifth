@@ -241,6 +241,15 @@ function highestTop(...tops: readonly (number | null)[]): number | null {
   return open.length === 0 ? null : Math.min(...open);
 }
 
+/** Where a held verse's first line is on screen now, or undefined when it is out of sight. */
+function heldVerseBox(key: string): DOMRect | undefined {
+  const p = parseAyahKey(key);
+  if (!p) return undefined;
+  return Array.from(document.querySelectorAll<SVGGraphicsElement>(`[id="verse-${toAbsoluteAyah(p.surah, p.ayah)}"]`))
+    .map((el) => el.getBoundingClientRect())
+    .find((r) => r.width > 0 && r.height > 0);
+}
+
 function refOf(key: string): AyahRef | null {
   const parsed = parseAyahKey(key);
   return parsed ? { surah: parsed.surah, ayah: parsed.ayah } : null;
@@ -1263,6 +1272,14 @@ export function App(): JSX.Element {
   // The verse a hold opened the small menu on (option C), and where it is.
   const [verseMenu, setVerseMenu] = useState<{ key: string; around: DOMRect } | null>(null);
   const closeVerseMenu = useCallback(() => setVerseMenu(null), []);
+  // Where the held verse is now. The menu reads it again while the page
+  // settles: with the note up across the foot, the note gives way to the menu
+  // and the page glides down after it, and a menu left where it opened stood
+  // over a verse two lines up (docs/PLAN.md, item 73).
+  const followVerseMenu = useMemo(() => {
+    const key = verseMenu?.key;
+    return key ? () => { const around = heldVerseBox(key); return around ? { around } : null; } : undefined;
+  }, [verseMenu?.key]);
   // The same small menu, for a hold on a printed corner (PLAN 27).
   const [cornerMenu, setCornerMenu] = useState<{ which: Corner; page: number; around: DOMRect } | null>(null);
   // A label's list of notes, opened from its menu, and the box of a note that
@@ -2824,15 +2841,7 @@ export function App(): JSX.Element {
       if (how === "hold") {
         if (verseGestures === "c") {
           lightVerse(key, false);
-          const id = (() => {
-            const p = parseAyahKey(key);
-            return p ? `verse-${toAbsoluteAyah(p.surah, p.ayah)}` : null;
-          })();
-          const shape = id
-            ? Array.from(document.querySelectorAll<SVGGraphicsElement>(`[id="${id}"]`))
-                .map((el) => el.getBoundingClientRect())
-                .find((r) => r.width > 0 && r.height > 0)
-            : undefined;
+          const shape = heldVerseBox(key);
           if (shape) setVerseMenu({ key, around: shape });
         } else lightVerse(key, true);
         return;
@@ -4179,6 +4188,7 @@ export function App(): JSX.Element {
         <VerseMenu
           name={t.verseMore(t.ayahLabel(verseMenu.key) ?? verseMenu.key)}
           around={verseMenu.around}
+          follow={followVerseMenu}
           onClose={closeVerseMenu}
           items={[
             { caption: t.vdPlayTo, onPick: () => startPlayTo(verseMenu.key) },
@@ -4187,7 +4197,7 @@ export function App(): JSX.Element {
             { caption: t.vdCopy, onPick: () => copyVerse(verseMenu.key) },
             // Straight to "where did it take you?", with no arrow to draw: the
             // phone's way in, where a finger is already resting on the verse.
-            { caption: t.vdJump, onPick: () => askJumpFrom(verseMenu.key, verseMenu.around) },
+            { caption: t.vdJump, onPick: () => askJumpFrom(verseMenu.key, heldVerseBox(verseMenu.key) ?? verseMenu.around) },
           ]}
         />
       )}

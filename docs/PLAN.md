@@ -1819,6 +1819,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     panel. A card standing in a corner beside one page (a laptop) still goes at once: the page
     moves sideways there, and a copy sliding down ended half off the screen before it went. With
     reduced motion both go at once. Unit tests and browser tests, watched failing first.
+73. ~~**A long press with the note up on an upright iPad leaves its menu over the wrong verse.**~~
+    Found walking the hand-offs, 2026-10-11. The note gives way to a long press's menu, so the
+    page glides about 400 px down to fill the screen, and the menu stayed where it opened: over
+    a verse two lines up, about 400 px from the one it is for. **Fixed the same day:** the menu
+    finds its verse again while the page settles, as the verse number's menu already did, and
+    "Jump…" starts from where the verse is now. A browser test, watched failing first (406 px).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

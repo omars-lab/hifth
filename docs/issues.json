@@ -4089,6 +4089,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "When the note across the page's foot closed, it went in one frame while the page glided down, so for half a second the strip it covered showed the desk, about 400 px on an upright iPad. A copy of the note nobody can press now slides down off the screen in step with the page; no more desk shows than at rest, in Chromium, WebKit and the iPad app, and on a phone at most about 60 px more. Going at once stays as a setting; a card in a corner on a laptop still goes at once."
+    },
+    {
+      "id": "hold-menu-left-behind",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "73"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "With the note up on an upright iPad, a long press's menu took the note's place and the page glided about 400 px down, leaving the menu over a verse two lines up. The menu now finds its verse again while the page settles, as the number's menu did, and Jump starts from where the verse is now."
     }
   ]
 }

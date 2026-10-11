@@ -807,6 +807,43 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("an iPad held upright, a long press with the note up keeps its menu beside the verse as the page comes down", async ({ browser }) => {
+    // Walking the hand-offs, 2026-10-11: the note gives way to a long press's
+    // menu, so the page glides some 400 px down to fill the screen, and the
+    // menu stayed where it opened, over a verse two lines up, not the one it
+    // is for (docs/PLAN.md, item 73).
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/2:46?view=one");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await settle(sheet(page));
+    await settle(pageSvg(page, 7));
+    const note = (await sheet(page).boundingBox())!;
+    // The held verse's line that shows above the note.
+    const lines = async () =>
+      (await verse(page, 7, 53).evaluateAll((els) =>
+        els.map((e) => e.getBoundingClientRect()).filter((b) => b.width > 0).map((b) => ({ top: b.top, bottom: b.bottom })),
+      ));
+    const at = (await lines()).find((b) => b.bottom < note.y)!;
+    expect(at, "a line of the verse in sight above the note").toBeTruthy();
+    await page.mouse.move(512, (at.top + at.bottom) / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(700);
+    await page.mouse.up();
+    const small = page.getByRole("menu", { name: /^More for .*2:46/ });
+    await expect(small).toBeVisible();
+    await expect(sheet(page)).toHaveCount(0);
+    await settle(pageSvg(page, 7));
+    await page.waitForTimeout(300);
+    const m = (await small.boundingBox())!;
+    const gaps = (await lines()).map((b) => Math.max(b.top - (m.y + m.height), m.y - b.bottom, 0));
+    expect(Math.min(...gaps), `pixels between the menu and the nearest line of its verse: ${gaps.map(Math.round).join(" ")}`)
+      .toBeLessThan(40);
+    await context.close();
+  });
+
   test("a run that took the page along ends with its verse's tools up, not its note", async ({ browser }) => {
     // Walking the pitch in the iPad app, 2026-10-10: a surah played from its
     // corner went to the surah's start, turned with the recitation, and at the
