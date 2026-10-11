@@ -17,6 +17,9 @@ import type { RunAhead } from "./run-ahead";
 export const RECITER = "Mohamed Siddiq al-Minshawi";
 export const RECITER_SOURCE = "Quran.com audio CDN";
 
+/** How many verses of a run are asked for ahead of the one sounding (docs/PLAN.md, item 64). */
+const RUN_AHEAD_VERSES = 3;
+
 /**
  * The public URL of one ayah's recitation, or null when the key is not a bare
  * ayah (a word or range has no single file). Pure and deterministic.
@@ -119,50 +122,48 @@ export function useVerseAudio(
   const aheadRef = useRef(ahead);
   aheadRef.current = ahead;
 
-  // The run's next verse, asked for while this one sounds: the request still
-  // on its way, and the copy kept in hand once it has come.
-  const askedRef = useRef<{ key: string; cancel: AbortController } | null>(null);
-  const heldRef = useRef<{ key: string; copy: string } | null>(null);
+  // The run's coming verses, asked for while one sounds, by verse: `cancel`
+  // while the request is on its way, `copy` once it has come and is kept.
+  const readyRef = useRef(new Map<string, { cancel: AbortController | null; copy: string | null }>());
 
-  // Let go of whatever was made ready for any verse but `keep`.
+  // Let go of whatever was made ready for any verse but `keep` and those still to come.
   const forget = useCallback((keep?: string): void => {
-    const asked = askedRef.current;
-    if (asked && asked.key !== keep) {
-      asked.cancel.abort();
-      askedRef.current = null;
-    }
-    const held = heldRef.current;
-    if (held && held.key !== keep) {
-      URL.revokeObjectURL(held.copy);
-      heldRef.current = null;
+    const coming = new Set(queueRef.current);
+    for (const [k, r] of readyRef.current) {
+      if (k === keep || coming.has(k)) continue;
+      r.cancel?.abort();
+      if (r.copy) URL.revokeObjectURL(r.copy);
+      readyRef.current.delete(k);
     }
   }, []);
 
-  // While a run's verse sounds, ask for the next one's file.
-  const askAhead = useCallback((): void => {
+  // While a run's verse sounds, ask for the files of the verses after it, up
+  // to RUN_AHEAD_VERSES ahead and one after another, so they do not share a
+  // slow line: a short verse can end before a long one's file is in.
+  const askAhead = useCallback(function ask(): void {
     const way = aheadRef.current;
-    const next = queueRef.current[0];
-    if (way === "off" || !inRunRef.current || !next || typeof fetch !== "function") return;
-    if (askedRef.current?.key === next || heldRef.current?.key === next) return;
-    const url = verseAudioUrl(next);
-    if (!url) return;
-    forget();
-    const cancel = new AbortController();
-    askedRef.current = { key: next, cancel };
-    fetch(url, { signal: cancel.signal })
+    if (way === "off" || !inRunRef.current || typeof fetch !== "function") return;
+    const ready = readyRef.current;
+    for (const r of ready.values()) if (r.cancel) return;
+    const next = queueRef.current.slice(0, RUN_AHEAD_VERSES).find((k) => !ready.has(k));
+    const url = next && verseAudioUrl(next);
+    if (!next || !url) return;
+    const entry = { cancel: new AbortController() as AbortController | null, copy: null as string | null };
+    ready.set(next, entry);
+    fetch(url, { signal: entry.cancel!.signal })
       .then((r) => (r.ok ? r.blob() : null))
       .then((bytes) => {
-        if (askedRef.current?.cancel !== cancel) return;
-        askedRef.current = null;
+        if (ready.get(next) !== entry) return;
+        entry.cancel = null;
         // An empty answer is no file; the verse then plays from the network.
-        if (way === "hold" && bytes && bytes.size > 0) {
-          heldRef.current = { key: next, copy: URL.createObjectURL(bytes) };
-        }
+        if (way === "hold" && bytes && bytes.size > 0) entry.copy = URL.createObjectURL(bytes);
+        ask();
       })
       .catch(() => {
-        if (askedRef.current?.cancel === cancel) askedRef.current = null;
+        // Asked for again when the next verse sounds, not straight away.
+        if (ready.get(next) === entry) ready.delete(next);
       });
-  }, [forget]);
+  }, []);
 
   // Point the element at one verse's file and start it. Only refs and state
   // setters, so it never changes and the listeners below may keep it.
@@ -172,12 +173,16 @@ export function useVerseAudio(
     keyRef.current = next;
     setKey(next);
     setPhase("loading");
-    // The copy made ready while the last verse sounded, if it came in time;
-    // a request still on its way is dropped, and the verse plays from the network.
+    // The copy made ready while an earlier verse sounded, if it came in time;
+    // its request still on its way is dropped, and the verse plays from the
+    // network. Requests for the verses after it carry on.
+    const ready = readyRef.current.get(next);
+    if (ready?.cancel) {
+      ready.cancel.abort();
+      readyRef.current.delete(next);
+    }
     forget(next);
-    askedRef.current?.cancel.abort();
-    askedRef.current = null;
-    el.src = heldRef.current?.copy ?? url;
+    el.src = readyRef.current.get(next)?.copy ?? url;
     el.currentTime = 0;
     el.play().catch(() => {
       setPhase("error");
@@ -292,6 +297,7 @@ export function useVerseAudio(
         el.removeAttribute("src");
         el.load();
       }
+      queueRef.current = [];
       forget();
     };
   }, [forget]);

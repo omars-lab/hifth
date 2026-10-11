@@ -8,6 +8,8 @@
  * --url    the app to open, default the public site; a local build served by
  *          `vite preview` works the same (http://localhost:<port>/).
  * --ahead  which of the settings to try, default all three.
+ * --route  the page whose surah is recited, default /hafs-kfqc/p600; pick one
+ *          where a short verse comes before a long one to test that case.
  *
  * Each speed and setting gets a fresh browser, so nothing one run fetched is
  * there for the next. Prints one line each: speed, setting, the gaps in
@@ -26,6 +28,7 @@ const arg = (name, fallback) => {
 };
 const base = arg("url", "https://blog.bytesofpurpose.com/hifth/");
 const aheads = arg("ahead", "hold,ask,off").split(",");
+const route = arg("route", "/hafs-kfqc/p600");
 const walk = readFileSync(new URL("gap-walk.js", here), "utf8");
 
 /** Name, added delay each way in ms, and download speed in kilobits a second. */
@@ -42,7 +45,7 @@ for (const [speed, latency, kbps] of SPEEDS) {
     await ctx.addInitScript((way) => localStorage.setItem("hifth.run.ahead.v1", way), ahead);
     const page = await ctx.newPage();
     const cdp = await ctx.newCDPSession(page);
-    await page.goto(new URL("#/hafs-kfqc/p600", base).href);
+    await page.goto(new URL(`#${route}`, base).href);
     await page.waitForTimeout(4000);
     if (latency) {
       await cdp.send("Network.emulateNetworkConditions", {

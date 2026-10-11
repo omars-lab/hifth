@@ -81,8 +81,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Play a run on a slow connection and listen between verses: the next one starts at once,
   with no pause, since its file is fetched while the one before plays. Time it with the walk
   skill's gap scripts, in the iPad app as well as a browser: there, only asking early does not
-  help. · iPad app, slow wifi · issue: `run-gap-on-poor-wifi` · test: audio.test.ts,
-  e2e/verse-gestures.spec.ts
+  help. Include a long verse right after a short one (surah 98, verses 3 and 4, on poor wifi):
+  each gap names the file it waited for, and one played from the network there means the
+  fetching ahead fell behind. · iPad app, slow wifi · issue: `run-gap-on-poor-wifi`,
+  `run-gap-short-then-long` · test: audio.test.ts, e2e/verse-gestures.spec.ts
 - [ ] Pick "Play to" on a verse and stop it two verses on: the three verses play one after
   another with no second tap, and nothing plays after the last. · desktop · test:
   e2e/verse-gestures.spec.ts ("moves on to the next verse each time one ends")

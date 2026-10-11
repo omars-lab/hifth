@@ -1702,11 +1702,18 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     app, at home speed, keeping the copy gives about 0.03 s, while only asking early gives
     about 0.15 s, the same as off: the iPad's player does not reuse the early fetch, as feared.
     Unit tests and a browser test on every engine, watched failing first.
-64. **On a poor connection, a short verse followed by a long one still leaves a gap.** Found
+64. ~~**On a poor connection, a short verse followed by a long one still leaves a gap.**~~ Found
     2026-10-11 measuring item 63: on the poor wifi, one gap in four stayed at 1.3 s, where the
     next verse's file had not finished arriving before the short verse before it ended. Only
     the next verse is fetched early. Fetching further ahead, one file after another so they do
     not share the slow line, would cover it; measure with the gap scripts as for item 63.
+    **Fixed the same day.** The gap script now names the file each gap waited for and how long
+    the verse before it ran, which confirmed the cause: the 1.3 s fell before a verse of about
+    16 s that follows one of about 5 s. A run now asks for up to three verses ahead, one file
+    after another, and keeps each copy until its verse has played; the setting covers all of
+    them. On the poor wifi in Chromium that gap fell to about 0.03 s, like the rest, and in the
+    iPad app all four verses played from copies already in hand (about 0.03 s each). Unit
+    tests and a browser test on every engine, watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
