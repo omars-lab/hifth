@@ -77,6 +77,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Pick "Play to" on a verse and stop it two verses on: the three verses play one after
   another with no second tap, and nothing plays after the last. · desktop · test:
   e2e/verse-gestures.spec.ts ("moves on to the next verse each time one ends")
+- [ ] Halfway through a "Play to" run, press Pause on the verse's tools: the verse being heard
+  pauses (the button names it, not the run's first), the next press carries on from there, and
+  the run still reaches its last verse. Do the same after turning the wifi off on the second
+  verse, then back on. · desktop and a phone · issue: `run-could-not-be-paused` · test:
+  e2e/verse-gestures.spec.ts ("pausing a run part way", "failed to load carries on")
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
 

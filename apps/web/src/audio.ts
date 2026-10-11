@@ -61,6 +61,12 @@ export interface VerseAudio {
   stop(): void;
   /** Recite a run of verses one after another ("Play to"). */
   playRun(keys: readonly string[]): void;
+  /**
+   * The verse a "Play to" run is reciting, while the run lasts; null otherwise.
+   * The run moves on without moving the selection (which would open each
+   * verse's note in turn), so the play control follows this instead.
+   */
+  runKey: string | null;
 }
 
 /**
@@ -78,6 +84,7 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
   const keyRef = useRef<string | null>(null);
   const [key, setKey] = useState<string | null>(null);
   const [phase, setPhase] = useState<AudioPhase>("idle");
+  const [inRun, setInRun] = useState(false);
   // The verses still to come in a "Play to" run, in order.
   const queueRef = useRef<string[]>([]);
 
@@ -114,7 +121,10 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       el.addEventListener("ended", () => {
         const next = queueRef.current.shift();
         if (next) start(elRef.current!, next);
-        else setPhase("idle");
+        else {
+          setPhase("idle");
+          setInRun(false);
+        }
       });
       el.addEventListener("error", () => {
         setPhase("error");
@@ -128,6 +138,7 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
 
   const stop = useCallback(() => {
     queueRef.current = [];
+    setInRun(false);
     const el = elRef.current;
     if (el) {
       el.pause();
@@ -144,8 +155,12 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       const url = verseAudioUrl(next);
       if (!url) return;
       const el = element();
-      // A tap on any one verse ends a run that was playing.
-      queueRef.current = [];
+      // A tap on another verse ends a run that was playing. A tap on the verse
+      // the run is on pauses, resumes or retries it, and the run carries on.
+      if (keyRef.current !== next) {
+        queueRef.current = [];
+        setInRun(false);
+      }
       // A player whose file never loaded will not fetch it again on play(),
       // and may still say it is not paused, so a second tap on that verse
       // once the connection is back would pause or resume nothing and the
@@ -177,6 +192,7 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       const first = run.shift();
       if (!first) return;
       queueRef.current = run;
+      setInRun(true);
       start(element(), first);
     },
     [element, start],
@@ -199,5 +215,5 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
     [key, phase],
   );
 
-  return { phaseFor, toggle, stop, playRun };
+  return { phaseFor, toggle, stop, playRun, runKey: inRun ? key : null };
 }
