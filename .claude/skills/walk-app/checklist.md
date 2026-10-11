@@ -289,8 +289,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   Mac app, private build · issues: `hand-turn-stops-run-with-note`, `hand-turn-stops-run-past-note`,
   `hop-keeps-run-by-timing`
 - [ ] With a note open, play its surah from the corner: the page goes to the surah's start and
-  the note closes (a jump, on purpose); the run plays from there. · ipad, the iPad app, private
-  build
+  the note closes (a jump, on purpose); the run plays from there, its first verse lit at once.
+  Let it play onto the next page: that page's first verse is lit as the page turns, not one
+  verse later. · ipad, ipad on its side, Arabic, the iPad app, private build · issue:
+  `run-light-misses-new-page`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 
