@@ -1648,7 +1648,11 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     close (the light does not come back to the first verse, which is pages away); and with the
     ring picked, the first verse's light goes with it, leaving only the ring. Tests for both
     ways, the default watched failing first; the setting looked at in English and Arabic, at
-    phone and computer width.
+    phone and computer width. The same evening the tests learned to turn by a swipe on the two
+    phones, since a finger is how the page turns in the room, with one more for a verse that
+    ends while the hand is still down, by a swipe on the phones and by the open book's outer
+    edge on a computer (the way an iPad held sideways turns); all held, and all fail when the
+    page goes back.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

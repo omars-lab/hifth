@@ -61,6 +61,37 @@ async function hold(page: Page, sel: string): Promise<void> {
   await page.mouse.up();
 }
 
+/**
+ * Turn ahead one page by hand, from page `from` to page `to`: the arrow key on
+ * a computer, a finger swept to the right across the page on a phone. `during`
+ * runs with the hand still down, past the distance that turns the page; on a
+ * computer, and an iPad held sideways, that hand is on the open book's outer
+ * edge, pulling the page over.
+ */
+async function turnAhead(page: Page, isMobile: boolean, from: number, to: number, during?: () => Promise<void>): Promise<void> {
+  if (!isMobile && !during) {
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await page.keyboard.press("ArrowLeft");
+  } else if (!isMobile) {
+    const rail = (await page.getByTestId("edge-grab-left").boundingBox())!;
+    const y = rail.y + rail.height * 0.2;
+    await page.mouse.move(rail.x + 6, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i += 1) await page.mouse.move(rail.x + 6 + i * 45, y);
+    if (during) await during();
+    await page.mouse.up();
+  } else {
+    const box = (await page.locator(`svg[aria-labelledby='page-label-${from}']:visible`).boundingBox())!;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width * 0.3, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i += 1) await page.mouse.move(box.x + box.width * (0.3 + i * 0.05), y);
+    if (during) await during();
+    await page.mouse.up();
+  }
+  await expect(page.locator(`svg[aria-labelledby='page-label-${to}']:visible`)).toBeVisible();
+}
+
 const drawer = (page: Page): Locator => page.getByRole("region", { name: /^Tools for / });
 const small = (page: Page): Locator => page.getByRole("menu", { name: /^More for / });
 const topBar = (page: Page): Locator => page.getByRole("banner");
@@ -376,7 +407,6 @@ test.describe("Hifth · holding the page's corners", () => {
   // not be shown while the run played. A turn by hand now stands, and the page
   // picks the run up again when the recitation reaches the page being shown.
   test("a page turned by hand during a run stays turned", async ({ page, isMobile }) => {
-    test.skip(isMobile, "the arrow keys turn the page on a computer");
     const player = await fakePlayer(page);
     await openWith(page, null);
     await tap(page, isMobile, "#verse-46");
@@ -385,11 +415,9 @@ test.describe("Hifth · holding the page's corners", () => {
     await menu(page).getByRole("menuitem", { name: "Play" }).click();
     await expect.poll(player.files).toEqual(["002001.mp3"]);
     await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
-    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator("svg[aria-labelledby='page-label-3']:visible")).toBeVisible();
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator("svg[aria-labelledby='page-label-5']:visible")).toBeVisible();
+    await turnAhead(page, isMobile, 2, 3);
+    if (isMobile) await turnAhead(page, isMobile, 3, 4);
+    await turnAhead(page, isMobile, isMobile ? 4 : 3, 5);
     await page.waitForTimeout(400);
     await player.end();
     await expect.poll(player.files).toHaveLength(2);
@@ -400,8 +428,34 @@ test.describe("Hifth · holding the page's corners", () => {
     await expect(drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:2" })).toBeVisible();
   });
 
+  // A verse can end while the hand is still taking the page over, the turn not
+  // yet let go (a swipe on a phone, a pull on the open book's edge on a
+  // computer or an iPad held sideways): the page is still the recitation's
+  // page then, and the turn that follows is still a turn by hand.
+  test("a verse that ends mid-swipe does not undo the swipe", async ({ page, isMobile }) => {
+    const player = await fakePlayer(page);
+    await openWith(page, null);
+    await tap(page, isMobile, "#verse-46");
+    await expect(drawer(page)).toBeVisible();
+    await holdCorner(page, "surah");
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
+    await page.waitForTimeout(400);
+    await turnAhead(page, isMobile, 2, 3, async () => {
+      await player.end();
+      await expect.poll(player.files).toHaveLength(2);
+    });
+    await page.waitForTimeout(400);
+    await player.end();
+    await expect.poll(player.files).toHaveLength(3);
+    await page.waitForTimeout(800);
+    await expect(page.locator("svg[aria-labelledby='page-label-3']:visible")).toBeVisible();
+    await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toHaveCount(0);
+    await expect(drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:3" })).toBeVisible();
+  });
+
   test("with going back chosen, the next verse brings a turned page back to the recitation", async ({ page, isMobile }) => {
-    test.skip(isMobile, "the arrow keys turn the page on a computer");
     await page.addInitScript((key) => {
       try {
         localStorage.setItem(key, "back");
@@ -417,11 +471,9 @@ test.describe("Hifth · holding the page's corners", () => {
     await menu(page).getByRole("menuitem", { name: "Play" }).click();
     await expect.poll(player.files).toEqual(["002001.mp3"]);
     await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
-    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator("svg[aria-labelledby='page-label-3']:visible")).toBeVisible();
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.locator("svg[aria-labelledby='page-label-5']:visible")).toBeVisible();
+    await turnAhead(page, isMobile, 2, 3);
+    if (isMobile) await turnAhead(page, isMobile, 3, 4);
+    await turnAhead(page, isMobile, isMobile ? 4 : 3, 5);
     await page.waitForTimeout(400);
     await player.end();
     await expect.poll(player.files).toHaveLength(2);

@@ -96,9 +96,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] While a surah plays from its corner, turn ahead two pages by hand: the page stays where
   you turned while the recitation plays on, Pause still on the verse's tools, and picks the run
   up again once the recitation reaches that page. Pick "Go back to the recitation" in the info
-  panel and do it again: the next verse brings the page back. · desktop and an iPad · issue:
-  `run-hand-turn-pulled-back` · test: e2e/verse-gestures.spec.ts ("turned by hand", "going
-  back chosen")
+  panel and do it again: the next verse brings the page back. On a phone or an iPad turn by a
+  swipe, not only the page bar, and let a verse end while the finger is still down: the swipe
+  still stands. · desktop, a phone and an iPad · issue: `run-hand-turn-pulled-back` · test:
+  e2e/verse-gestures.spec.ts ("turned by hand", "mid-swipe", "going back chosen")
 - [ ] On the pitch build, with a note open on an iPad held upright, play a run to a verse that
   sits under the note: the page lifts so the verse being recited stays in sight above the note.
   · iPad upright, pitch · issue: `run-leaves-page-behind` · test: e2e/pitch.spec.ts ("keeps the
