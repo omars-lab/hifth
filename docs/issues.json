@@ -3956,6 +3956,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "On the private build, lighting the verse a run ended on also opened its note, which takes the place of the verse's tools, so a note nobody asked for came up over the page with no Play in reach. The end now keeps the note shut, as a verse picked by its number does. Private-build test at iPad size watched failing first; walked again in the iPad app."
+    },
+    {
+      "id": "loading-says-play",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "62"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/src/components/PlayTrigger.test.tsx",
+      "note": "While a verse was still loading, its play control read Play and the verse menu showed the play arrow and Listen, yet a press then stopped the sound. On a slow connection a second tap silenced the verse before it began. The control now says Pause while the file opens, and the menu item turns as the bar does. Unit test watched failing first."
     }
   ]
 }

@@ -1675,6 +1675,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     tools up and leaves the note shut, as a verse picked by its number already does; the note
     is a press away. A private-build test at iPad size, watched failing first, and walked again
     in the iPad app: the last verse lit, Play on it, no note.
+62. ~~**While a verse was still loading, its play control offered to play.**~~ Found 2026-10-11
+    walking a whole visit in the iPad app: in the moment between a press and the first sound,
+    the button still read Play, and in the verse's menu the item still showed the play arrow
+    and the word Listen, yet a press then stops the sound, as it does once the verse sounds. On
+    a slow connection a reader who sees Play taps again, thinking the first tap was missed, and
+    silences the verse before it began. **Fixed the same day:** while the file opens the control
+    says Pause, counts as pressed, and the menu item turns as the bar's button does. A unit
+    test, watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
