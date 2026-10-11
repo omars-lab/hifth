@@ -1,5 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { LONG_VERSE_KEY } from "../src/long-verse";
+import { ayahTarget } from "./ayah";
+import { fakePlayer } from "./player";
 
 /*
  * The pitch build's held commentary — the one screen no public test can touch.
@@ -614,6 +616,58 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
         return Math.max(...first.map((line) => line.x + line.width)) - card.x;
       }, { message: "how far the verse's first word stands under the list", timeout: 8_000 })
       .toBeLessThanOrEqual(0);
+  });
+
+  test("an iPad held upright keeps the verse being recited above the open note", async ({ browser }) => {
+    // Walking the pitch in the iPad app, 2026-10-10: a run started from a verse
+    // with its note open across the foot of the page, and as the recitation
+    // moved down the page the light went on under the note, out of the room's
+    // sight. The page lifted only the verse the note was about.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    const player = await fakePlayer(page);
+    await page.goto("/#/hafs-kfqc/2:46?view=one");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await settle(sheet(page));
+    const at = await ayahTarget(page, "#verse-53");
+    await page.mouse.move(at.x, at.y);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    await page.getByRole("menu", { name: /^More for / }).getByRole("menuitem", { name: "Play to" }).click();
+    // The run's last verse lies under the note, where no finger reaches it, so
+    // it is picked from the keyboard.
+    await verse(page, 7, 55).focus();
+    await page.keyboard.press("Enter");
+    await expect.poll(player.files).toEqual(["002046.mp3"]);
+    await player.end();
+    await player.end();
+    await expect.poll(player.files).toEqual(["002046.mp3", "002047.mp3", "002048.mp3"]);
+    // The light has moved down to the verse being recited before it is measured.
+    await expect
+      .poll(() =>
+        page
+          .locator("#hifth-overlay [data-hl-group='selection']")
+          .evaluateAll((els) => [...new Set(els.map((el) => (el.getAttribute("data-hl-key") ?? "?").split("/").pop()))]),
+      )
+      .toEqual(["2:48"]);
+    await expect(sheet(page)).toBeVisible();
+    // The note stood aside while the run's end was picked and slides back as
+    // the run starts, and the page moves for it: measure once both are still.
+    let last = "";
+    await expect
+      .poll(async () => {
+        const card = (await sheet(page).boundingBox())!;
+        const lines = await litLineBoxes(page);
+        const now = JSON.stringify([card, lines]);
+        const still = now === last;
+        last = now;
+        return still && lines.length > 0 && lines.every((line) => !overlaps(line, card));
+      }, { message: "the verse being recited is clear of the note", intervals: [150, 150, 200, 300], timeout: 8_000 })
+      .toBe(true);
+    await context.close();
   });
 
   test("an iPad held upright opens on one page, and turned on its side opens the book", async ({ browser }) => {

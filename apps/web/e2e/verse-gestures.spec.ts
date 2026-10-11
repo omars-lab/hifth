@@ -3,6 +3,7 @@ import { ayahTarget } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { VERSE_GESTURES_KEY } from "../src/verse-gestures";
 import { RUN_MARK_KEY } from "../src/run-mark";
+import { fakePlayer } from "./player";
 
 /*
  * What a tap and a hold on a verse do (docs/design/verse-tap-and-hold.md). The
@@ -64,77 +65,6 @@ const small = (page: Page): Locator => page.getByRole("menu", { name: /^More for
 const topBar = (page: Page): Locator => page.getByRole("banner");
 const FIVE = ["Play to", "Mark", "Note", "Copy", "Jump…"];
 const words = (page: Page): Locator => page.locator("#hifth-overlay [data-hl-group='word']");
-
-/**
- * A stand-in for the browser's player: no sound in a test runner, so play and
- * pause flip a flag and send the events a real player sends, and the test ends
- * or fails the verse when it chooses. `files` lists each file the app asked for.
- */
-async function fakePlayer(page: Page): Promise<{
-  files: () => Promise<string[]>;
-  end: () => Promise<void>;
-  fail: () => Promise<void>;
-}> {
-  await page.addInitScript(() => {
-    const w = window as unknown as { __files: string[]; __player?: HTMLMediaElement };
-    w.__files = [];
-    const still = new WeakMap<HTMLMediaElement, boolean>();
-    const failed = new WeakMap<HTMLMediaElement, MediaError>();
-    const proto = HTMLMediaElement.prototype;
-    Object.defineProperty(proto, "paused", {
-      configurable: true,
-      get(this: HTMLMediaElement) {
-        return still.get(this) ?? true;
-      },
-    });
-    Object.defineProperty(proto, "error", {
-      configurable: true,
-      get(this: HTMLMediaElement) {
-        return failed.get(this) ?? null;
-      },
-    });
-    proto.play = function (this: HTMLMediaElement) {
-      w.__player = this;
-      still.set(this, false);
-      setTimeout(() => this.dispatchEvent(new Event("playing")), 0);
-      return Promise.resolve();
-    };
-    proto.pause = function (this: HTMLMediaElement) {
-      if (still.get(this) === false) {
-        still.set(this, true);
-        this.dispatchEvent(new Event("pause"));
-      }
-    };
-    const src = Object.getOwnPropertyDescriptor(proto, "src")!;
-    Object.defineProperty(proto, "src", {
-      ...src,
-      set(this: HTMLMediaElement, v: string) {
-        w.__files.push(String(v).replace(/^.*\//, ""));
-        failed.delete(this);
-        src.set!.call(this, v);
-      },
-    });
-    (w as unknown as { __fail: () => void }).__fail = () => {
-      const el = w.__player!;
-      still.set(el, true);
-      failed.set(el, { code: 2, message: "network" } as MediaError);
-      el.dispatchEvent(new Event("error"));
-    };
-  });
-  await page.route("https://verses.quran.com/**", (route) =>
-    route.fulfill({ status: 200, contentType: "audio/mpeg", body: "" }),
-  );
-  return {
-    files: () => page.evaluate(() => (window as unknown as { __files: string[] }).__files),
-    end: () =>
-      page.evaluate(() => {
-        const el = (window as unknown as { __player: HTMLMediaElement }).__player;
-        el.pause();
-        el.dispatchEvent(new Event("ended"));
-      }),
-    fail: () => page.evaluate(() => (window as unknown as { __fail: () => void }).__fail()),
-  };
-}
 
 /** The verses the page has marked in one of its highlight groups, as "2:40". */
 async function marked(page: Page, group: string): Promise<string[]> {
@@ -383,13 +313,22 @@ test.describe("Hifth · holding the page's corners", () => {
   test("the surah's and the juz's menus play all of it and go to where it starts", async ({ page }) => {
     test.skip(test.info().project.name !== "desktop", "what each item does is the same on every device");
     await open(page);
+    const backToSeven = async () => {
+      await page.goto("/#/hafs-kfqc/p7");
+      await expect(page.locator("svg[aria-labelledby='page-label-7']:visible")).toBeVisible();
+    };
+    // Playing it takes the page to its first verse, where the recitation is.
     await holdCorner(page, "surah");
     await menu(page).getByRole("menuitem", { name: "Play" }).click();
     await expect(said(page)).toHaveText("Playing Al-Baqarah · 2:1 to 2:286");
+    await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
+    await backToSeven();
 
     await holdCorner(page, "juz");
     await menu(page).getByRole("menuitem", { name: "Play" }).click();
     await expect(said(page)).toHaveText("Playing Al-Fatihah · 1:1 to Al-Baqarah · 2:141");
+    await expect(page.locator("svg[aria-labelledby='page-label-1']:visible")).toBeVisible();
+    await backToSeven();
 
     await holdCorner(page, "juz");
     await menu(page).getByRole("menuitem", { name: "Copy" }).click();
@@ -399,6 +338,36 @@ test.describe("Hifth · holding the page's corners", () => {
     await holdCorner(page, "surah");
     await menu(page).getByRole("menuitem", { name: "Go to the start" }).click();
     await expect(page).toHaveURL(/#\/hafs-kfqc\/2:1(\?|$)/);
+  });
+
+  // A presenter holds the surah's corner and plays it, then talks over the
+  // recitation. The page stayed where it was: the room heard 2:1 with page 7 on
+  // the screen, and heard the run go on past every page after it. The page goes
+  // to the verse being recited, and turns as the run reaches the next page,
+  // with the recitation carrying on across the turn. A verse chosen before the
+  // run is left behind with its page, and does not stop the run when it goes.
+  test("a run that goes past the page takes the page with it", async ({ page, isMobile }) => {
+    const player = await fakePlayer(page);
+    await openWith(page, null);
+    await tap(page, isMobile, "#verse-46");
+    await expect(drawer(page)).toBeVisible();
+    await holdCorner(page, "surah");
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
+    await expect(page.locator("svg[aria-labelledby='page-label-7']:visible")).toHaveCount(0);
+    for (let n = 2; n <= 6; n++) {
+      await player.end();
+      await expect.poll(player.files).toHaveLength(n);
+    }
+    expect((await player.files()).at(-1)).toBe("002006.mp3");
+    await expect(page.locator("svg[aria-labelledby='page-label-3']:visible")).toBeVisible();
+    // The verse's tools stay up for the verse being recited, Pause in reach.
+    await expect(drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:6" })).toBeVisible();
+    // Still reciting on the far side of the turn.
+    await page.waitForTimeout(400);
+    await player.end();
+    await expect.poll(async () => (await player.files()).at(-1)).toBe("002007.mp3");
   });
 });
 

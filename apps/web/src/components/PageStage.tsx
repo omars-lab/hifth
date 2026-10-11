@@ -1224,6 +1224,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onSelectWordsRef.current = onSelectWords;
   const selectedKeyRef = useRef(selectedKey);
   selectedKeyRef.current = selectedKey;
+  const heardKeyRef = useRef(heardKey);
+  heardKeyRef.current = heardKey;
   const introSurahRef = useRef(introSurah);
   introSurahRef.current = introSurah;
   const labelForRef = useRef(labelFor);
@@ -2271,7 +2273,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const name = introSurahRef.current === null
         ? null
         : cur.svg.querySelector<SVGGElement>(`[data-intro-badge][data-surah="${introSurahRef.current}"]`);
-      const key = name ? null : selectedKeyRef.current;
+      // While a run is reciting, the verse the room is listening to is the one
+      // kept in sight; one on a page not showing leaves the chosen verse's place.
+      const heard = heardKeyRef.current;
+      const key = name
+        ? null
+        : heard && cur.hl.resolve(heard)?.elementIds.length
+          ? heard
+          : selectedKeyRef.current;
       const ids = key ? cur.hl.resolve(key)?.elementIds : undefined;
       const bbox = name ? nameBoxOf(name) : ids?.length ? cur.hl.bboxOf(ids) : null;
       if (bbox) {
@@ -2325,6 +2334,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (coverTopRef.current === null && coverSideRef.current === null) return;
     lift();
   }, [railBottom, lift]);
+  // A run moving on to its next verse, or ending: under a note or a list, the
+  // verse now being recited comes out from under it, and once the run is over
+  // the chosen verse has its place back (docs/PLAN.md, item 58).
+  const heardSeen = useRef(heardKey);
+  useEffect(() => {
+    if (heardSeen.current === heardKey) return;
+    heardSeen.current = heardKey;
+    if (coverTopRef.current === null && coverSideRef.current === null) return;
+    lift();
+  }, [heardKey, lift]);
   // A lift waiting on a glide is let wait until the stage goes. Each of the
   // three above used to cancel it on its next run, even a run that then found
   // nothing new and placed nothing: the card beside a sideways phone's page
