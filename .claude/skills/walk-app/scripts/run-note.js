@@ -6,7 +6,9 @@
   // how long it watches with the note up; window.__mode "bare" (a tap on bare page) or "hold"
   // (a long press on the verse being recited) instead of the number and the note, or "turn" (a
   // swipe with the note up, in place of its Pause; window.__turnBy "key" turns by the arrow key,
-  // for the Mac); window.__page,
+  // for the Mac), or "light" (no note: it watches, for window.__watch ms, which page shows,
+  // the verse heard, and the verse lit or ringed, so a page the run jumps or turns to can be
+  // seen to light its first verse at once, items 82 and 83); window.__page,
   // the page whose surah corner to play; window.__rate, how fast the sound plays.
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const out = [];
@@ -44,6 +46,19 @@
   const item = [...document.querySelectorAll("[role=menuitem]")].find((e) => (isAr ? /^تلاوة$/ : /^Play$/).test(e.textContent.trim()));
   if (!item) return `A: no Play; host=${f(r)} hit=${hit.tagName} items=${[...document.querySelectorAll("[role=menuitem]")].map((e) => e.textContent.trim().slice(0, 10)).join("|")}`;
   item.click();
+  if (window.__mode === "light") {
+    const heard = () => { const b = [...document.querySelectorAll("button")].find((e) => on(box(e)) && !e.closest("[inert]") && (isAr ? /^إيقاف/ : /^Pause/).test(e.getAttribute("aria-label") || "")); const m = b && (b.getAttribute("aria-label") || "").match(/[\d٠-٩]+:[\d٠-٩]+$/); return m ? m[0].replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))) : "-"; };
+    const ringed = () => [...new Set([...document.querySelectorAll("#hifth-overlay [data-hl-group='heard']")].filter((e) => on(box(e))).map((e) => (e.getAttribute("data-hl-key") || "?").split("/").pop()))].join("+");
+    let last = ""; const t0 = Date.now();
+    while (Date.now() - t0 < Number(window.__watch || 30000)) {
+      const now = `shown=${shown()} heard=${heard()} lit=${sel() || "none"} ring=${ringed() || "none"}`;
+      if (now !== last) { out.push(`${((Date.now() - t0) / 1000).toFixed(1)}s ${now}`); last = now; }
+      await wait(150);
+    }
+    const stop = [...document.querySelectorAll("button")].find((e) => on(box(e)) && (isAr ? /^إيقاف/ : /^Pause/).test(e.getAttribute("aria-label") || ""));
+    if (stop) stop.click();
+    return `view=${innerWidth}x${innerHeight} ; ` + out.join(" ; ");
+  }
   await wait(Number(window.__before || 14000));
   out.push("A playing: " + look());
   if (window.__mode === "bare" || window.__mode === "hold") {

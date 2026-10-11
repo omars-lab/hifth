@@ -1918,8 +1918,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     follows it, so it went onto the page being left. Fixed: the light goes on the page that
     carries the verse being heard, and a page that arrives after the verse was set draws it
     itself. A browser test, watched failing first on a laptop and a phone (the jump and the
-    turn); walked in the iPad app upright, on its side and in Arabic, lit within a tenth of a
-    second of each jump and turn.
+    turn); walked in the iPad app upright, on its side and in Arabic, lit within a fifth of a
+    second of each jump and turn (the walk looks every 150 ms, so it cannot say closer).
+83. ~~**The ring had the same gap as the light.**~~ Found checking item 82, 2026-10-11: with
+    "a ring moves" chosen in the info panel, a recitation that turned onto the next page left
+    that page's first verse without its ring for its whole length, because the ring was only
+    drawn when the verse changed and the page was not there yet. Fixed: a page that arrives
+    after the verse was set draws the ring itself, as it does the light. A browser test with
+    the ring chosen, watched failing first on a laptop (the turn); walked in the iPad app
+    upright and on its side, the ring on each page's first verse within a fifth of a second
+    of the jump and the turn.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
