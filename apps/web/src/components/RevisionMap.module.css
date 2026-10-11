@@ -398,9 +398,13 @@ button.cell {
     inset-inline: 0;
     inline-size: min(620px, 92vw);
     margin-inline: auto;
-    border-end-start-radius: var(--radius-lg);
-    border-end-end-radius: var(--radius-lg);
-    inset-block-end: var(--space-4);
+    /* On the window's foot, as on a phone. Lifted a little above it, the card's
+       foot ran through the middle of the page bar's count line, centred like the
+       card, and the half that showed read as the sheet's own text cut off
+       (2026-10-10). The cards that stand over the page lift themselves clear of
+       the bar so it stays usable; this sheet dims the bar anyway, so the height
+       goes to the map. */
+    inset-block-end: 0;
   }
 
   .grid {
