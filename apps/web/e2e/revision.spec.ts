@@ -1,6 +1,7 @@
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
 import { tapAyah } from "./ayah";
 import { contextWithout } from "./inventory";
+import { oversizeSquares } from "./map";
 
 /*
  * The revision map, against a real build — task #91, under umbrella #88.
@@ -58,6 +59,27 @@ function absentHizb(sheet: ReturnType<Page["getByRole"]>, name: RegExp) {
 }
 
 test.describe("Hifth · the revision map", () => {
+  test.describe("in English", () => {
+    test.use({ locale: "en-US" });
+
+    test("every square fits its own place on the map, in every division", async ({ page }) => {
+      // Every button is at least a thumb's width, and the map's squares are
+      // smaller than that on purpose, so each one spilled over its neighbours
+      // and past the sheet's edge; on a phone the hizb map's ten columns read
+      // as a strip of overlapping tiles (2026-10-10, the live site).
+      await page.goto("/#/hafs-kfqc/p7");
+      await page.getByRole("button", { name: /what you have opened$/ }).click();
+      const sheet = page.getByRole("dialog", { name: "What you have opened" });
+      await expect(sheet).toBeVisible();
+      for (const scope of ["Page", "Hizb", "Juz"]) {
+        await sheet.getByRole("radio", { name: scope, exact: true }).click();
+        await expect(sheet.getByRole("radio", { name: scope, exact: true })).toHaveAttribute("aria-checked", "true");
+        const spill = await oversizeSquares(sheet.getByRole("list", { name: "Map of the mus'haf" }));
+        expect(spill.slice(0, 5), `${scope}: squares bigger than their place`).toEqual([]);
+      }
+    });
+  });
+
   test("a tap on an ayah is still on the map after a reload", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();

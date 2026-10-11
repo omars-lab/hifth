@@ -186,11 +186,18 @@
  * `inline-size: 100%` because half of these are buttons, which do not stretch to
  * their box the way a grid item does; the legend's swatches override it with a
  * fixed size below, and absent cells are grid items where it is a no-op.
+ *
+ * No minimum size: every button is at least a thumb's width (44px), and the
+ * hizb and page squares are smaller than that on purpose, so each one spilled
+ * over its neighbours and past the sheet's edge (2026-10-10). The smallest,
+ * 25px on a wide window, is still above the 24px a pointer target needs.
  */
 .cell {
   display: grid;
   place-items: center;
   inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
   aspect-ratio: 1;
   padding: 0;
   border: 1px solid transparent;

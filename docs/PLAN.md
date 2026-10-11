@@ -1530,7 +1530,8 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     what lay under it. The tools were drawn on the layer kept for passing messages, above
     every card. **Fixed the same day:** the tools now sit above the rest of the app's frame and
     below every card. A phone test highlights with the tools open and checks the card is on top
-    wherever the two meet; it failed first on both phones.
+    wherever the two meet; it failed first on both phones. The word tool's card had the same
+    fault and has its own test, which failed first on both phones too.
 51. ~~**On a phone, the harakat magnifier came back after the finger had lifted.**~~
     Found on 2026-10-10 walking the live site on a phone: tapping a vowel-sign rang it and
     opened its note box, and a moment later the magnifier came back and stayed over the page,
@@ -1539,6 +1540,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     tap pins its note and leaves no magnifier behind; a mouse, still over the page, keeps it.
     A phone test taps a sign and checks the note box opens and the magnifier is gone; it failed
     first on both phones.
+52. ~~**The squares of the reading record's map ran into each other.**~~
+    Found on 2026-10-10 walking the live site on a phone: in the record of what you have
+    opened, the hizb and page squares were drawn larger than their places on the map, so each
+    lay over its neighbours and the last ones ran past the sheet's edge; on a laptop the page
+    squares did the same. Every button in the app is at least a thumb's width, and these
+    squares are smaller than that on purpose. **Fixed the same day:** the map's squares keep
+    their own size, the smallest still above what a pointer needs. Tests on both phones (every
+    division) and on a laptop check each square fits its own place; they failed first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

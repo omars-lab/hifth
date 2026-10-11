@@ -5,6 +5,7 @@ import { contextWithout } from "./inventory";
 import { ayahTarget } from "./ayah";
 import { lum, pixelsAt } from "./ink";
 import { pageNumber, readPageNumber } from "./page-number";
+import { oversizeSquares } from "./map";
 
 /*
  * The desktop spread — an open mus'haf, and honest about the half it does not
@@ -644,6 +645,12 @@ test.describe("Hifth · the revision map at desktop", () => {
     // the whole book unreadable.
     await sheet.getByRole("radio", { name: "صفحة" }).click();
     expect(await rowsAt(), "604 pages stacked too deep to read").toBeLessThan(32);
+    // Its squares are 25px, under a thumb's width on purpose; each keeps to its
+    // own place rather than spilling over its neighbours.
+    expect(
+      (await oversizeSquares(sheet.getByRole("list", { name: "خريطة المصحف" }))).slice(0, 5),
+      "page squares bigger than their place",
+    ).toEqual([]);
 
     // The card's width does not move as the scope does. This is the reason the
     // grid is centred inside a fixed card rather than the card being sized to

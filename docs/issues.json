@@ -3741,7 +3741,7 @@
       "severity": "defect",
       "owner": "agent",
       "closedBy": "apps/web/e2e/phone-toolbar.spec.ts",
-      "note": "Found walking the live site on a phone (2026-10-10): with the tools open, a highlight's card slid up behind the tool row, which hid its title. The tools were on the layer kept for passing messages; they now sit below every card. Test on both phones, watched failing first."
+      "note": "Found walking the live site on a phone (2026-10-10): with the tools open, a highlight's card slid up behind the tool row, which hid its title. The tools were on the layer kept for passing messages; they now sit below every card, the word tool's card too. A test for each card on both phones, watched failing first."
     },
     {
       "id": "sign-loupe-stays-after-tap-phone",
@@ -3754,6 +3754,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/phone-toolbar.spec.ts",
       "note": "Found walking the live site on a phone (2026-10-10): after a tap on a vowel-sign the magnifier came back once the signs had loaded and stayed with no finger on the page. A finger's tap now leaves no magnifier; a mouse keeps it. Test on both phones, watched failing first."
+    },
+    {
+      "id": "map-squares-overlap",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "52"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/revision.spec.ts",
+      "note": "Found walking the live site on a phone (2026-10-10): the reading record's hizb and page squares were drawn at a thumb's width, larger than their places, so they overlapped and ran past the sheet's edge; the page squares on a laptop too. They keep their own size now. Tests on both phones and a laptop, watched failing first."
     },
     {
       "id": "ribbon-covers-first-words",
