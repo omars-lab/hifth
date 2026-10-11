@@ -3,7 +3,7 @@
  * The silence between two verses of a run, in Chromium, at three connection
  * speeds and for each way of making the next verse ready (docs/PLAN.md, item 63).
  *
- *   node .claude/skills/walk-app/scripts/gap-throttle.mjs [--url <app>] [--ahead hold,ask,off] [--pause 600,2000] [--gaps 5]
+ *   node .claude/skills/walk-app/scripts/gap-throttle.mjs [--url <app>] [--ahead hold,ask,off] [--pause 600,2000] [--gaps 5] [--from corner|tools]
  *
  * --url    the app to open, default the public site; a local build served by
  *          `vite preview` works the same (http://localhost:<port>/).
@@ -14,6 +14,9 @@
  *          for each, default 600; the first verse's wait depends on it
  *          (docs/PLAN.md, item 65).
  * --gaps   how many gaps to time, default 5; 0 times only the first verse.
+ * --from   where Play is pressed: corner (the surah corner's menu, default) or
+ *          tools (the chosen verse's tools; give a --route that picks a verse,
+ *          such as /hafs-kfqc/2:255; it times the first verse only).
  *
  * Each speed and setting gets a fresh browser, so nothing one run fetched is
  * there for the next. Prints one line each: speed, setting, the gaps in
@@ -35,6 +38,7 @@ const aheads = arg("ahead", "hold,ask,off").split(",");
 const route = arg("route", "/hafs-kfqc/p600");
 const pauses = arg("pause", "600").split(",").map(Number);
 const count = Number(arg("gaps", "5"));
+const from = arg("from", "corner");
 const walk = readFileSync(new URL("gap-walk.js", here), "utf8");
 
 /** Name, added delay each way in ms, and download speed in kilobits a second. */
@@ -61,7 +65,7 @@ for (const [speed, latency, kbps] of SPEEDS) {
         uploadThroughput: kbps * 128,
       });
     }
-    await page.evaluate(([p, n]) => Object.assign(window, { __gapPause: p, __gapCount: n }), [pause, count]);
+    await page.evaluate(([p, n, f]) => Object.assign(window, { __gapPause: p, __gapCount: n, __gapFrom: f }), [pause, count, from]);
     const result = await page.evaluate(walk).catch((e) => String(e));
     console.log(`speed=${speed} ahead=${ahead} pause=${pause} ${result}`);
     await ctx.close();
