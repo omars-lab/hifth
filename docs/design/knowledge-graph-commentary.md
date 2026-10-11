@@ -475,7 +475,12 @@ just facts."
 
 ## Open questions, and what would answer each
 
-### ① Where does the commentary the pitch shows still differ from the printed book? · **open**
+### ① Where does the commentary the pitch shows still differ from the printed book? · **blocked**
+
+**Where it stands, 2026-10-11:** within two taps of a demo note, the only difference left that
+anyone has found is the slant of the words in the last 38 notes two taps out, and reading those
+waits on the owner's yes ([commentary lettering ①](commentary-lettering.md)). Notes further out
+than that still show slanted words upright; nobody in the room reaches them from the demo.
 
 The private pitch reads The Study Quran's commentary from a capture of the book, page by page.
 Walking the pitch on 2026-10-05 found that where a paragraph ran over the foot of a printed
