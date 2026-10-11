@@ -70,6 +70,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `number-menu-keyboard-pulled-back` · test: VerseMenu.keys.test.tsx
 - [ ] Press and hold a verse: one menu, not a menu with a note stacked on it. · phone · issue:
   `long-press-menu-and-note-stack-on-phone`
+- [ ] Turn the wifi off and press Listen on a verse: the button turns red and says it is
+  offline; turn the wifi back on and press it again: the verse plays. A pitch room may have
+  no wifi, and the recitation is the one thing the app fetches from outside. · phone · issue:
+  `listen-offline-looked-untouched` · test: e2e/audio.spec.ts
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
 
@@ -322,6 +326,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Hold the iPad app sideways: two pages fill the height between the bars, not a sliver in the
   middle of the desk. · iPad simulator, landscape · issue: `ipad-app-sideways-spread-tiny` · test:
   `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize`
+- [ ] Set the iPad itself to dark mode and open the app at a verse with its note: the app keeps
+  its paper look, and the clock and battery above it stay dark and readable on the cream bar.
+  The app's own picture leaves the clock out, so grab the whole screen. · `xcrun simctl ui
+  <iPad> appearance dark`, launch, `xcrun simctl io <iPad> screenshot …`, then set it back to
+  light · walked 2026-10-10, nothing wrong
 - [ ] Walk the Mac app in Arabic too, not only the iPad: the look-alike list and a note open,
   mirrored, nothing cut off. · `make app-shot TARGET=mac LOCALE=ar ROUTE=…` (shows that language
   for the one launch, even where another is picked with the app's own button) · tests:

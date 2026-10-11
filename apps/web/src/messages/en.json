@@ -318,6 +318,8 @@
   "verseTools": "Tools for {label}",
   "vdListen": "Listen",
   "vdPause": "Pause",
+  "vdListenOffline": "Offline",
+  "vdListenFailed": "Can't play",
   "vdRoots": "Same roots",
   "vdCommentary": "Commentary",
   "vdQul": "On QUL",

@@ -56,4 +56,68 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
       )
       .toContain("/Minshawi/Murattal/mp3/002048.mp3");
   });
+
+  // A pitch room may have no wifi, and the recitation is the one thing the app
+  // fetches from outside. The screen-reader announcement alone left a sighted
+  // reader with a button that looked exactly as it did before the tap (its
+  // "warning" colour named a colour that was never defined), so the control
+  // now says on its face why nothing sounds (docs/PLAN.md, item 55).
+  test("with no connection, the play control says so on its face", async ({ browser }) => {
+    // Our own service worker would answer from its cache; keep it out so the
+    // only thing deciding is the network.
+    const context = await browser.newContext({ serviceWorkers: "block" });
+    const page = await context.newPage();
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await tapAyah(page, "#verse-55");
+    const play = page.getByRole("button", { name: /تشغيل .*٢:٤٨/ });
+    await expect(play).toBeVisible();
+    const before = await play.evaluate((el) => getComputedStyle(el).color);
+
+    await context.setOffline(true);
+    await play.tap();
+
+    await expect(play).toHaveAttribute("data-phase", "error");
+    await expect(play).toContainText("بلا إنترنت");
+    expect(await play.evaluate((el) => getComputedStyle(el).color)).not.toBe(before);
+    await expect(page.getByRole("status").filter({ hasText: "تعذّر تشغيل هذا التسجيل" })).toHaveCount(1);
+    await context.close();
+  });
+
+  // The wifi comes back mid-meeting. A second tap on the same verse used to
+  // ask the failed player to carry on, which never fetches the file again, so
+  // the verse stayed silent until another one was chosen.
+  test("once the connection is back, a second tap fetches the verse again", async ({ browser }) => {
+    const context = await browser.newContext({ serviceWorkers: "block" });
+    const page = await context.newPage();
+    await page.addInitScript(() => {
+      const w = window as unknown as { __srcSets: number };
+      w.__srcSets = 0;
+      const d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src")!;
+      Object.defineProperty(HTMLMediaElement.prototype, "src", {
+        ...d,
+        set(this: HTMLMediaElement, v: string) {
+          w.__srcSets += 1;
+          d.set!.call(this, v);
+        },
+      });
+    });
+    await page.route("https://verses.quran.com/**", (route) =>
+      route.fulfill({ status: 200, contentType: "audio/mpeg", body: "" }),
+    );
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await tapAyah(page, "#verse-55");
+    const play = page.getByRole("button", { name: /تشغيل .*٢:٤٨/ });
+    await context.setOffline(true);
+    await play.tap();
+    await expect(play).toHaveAttribute("data-phase", "error");
+    const sets = () => page.evaluate(() => (window as unknown as { __srcSets: number }).__srcSets);
+    const first = await sets();
+
+    await context.setOffline(false);
+    await play.tap();
+    await expect.poll(sets).toBeGreaterThan(first);
+    await context.close();
+  });
 });

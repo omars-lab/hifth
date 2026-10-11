@@ -172,7 +172,7 @@ import { NoteFollow } from "./components/NoteFollow";
 import { useBookmarks, useConfusions, useNotes, useSeam } from "./useBookmarks";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
-import { PlayTrigger } from "./components/PlayTrigger";
+import { PlayTrigger, listenCaption } from "./components/PlayTrigger";
 import { DrawerTool, VerseDrawer } from "./components/VerseDrawer";
 import { VerseMenu, type VerseMenuItem } from "./components/VerseMenu";
 import { QulTrigger } from "./components/QulTrigger";
@@ -2406,7 +2406,7 @@ export function App(): JSX.Element {
       });
     items.push({
       id: "listen",
-      caption: audio.phaseFor(key) === "playing" ? t.vdPause : t.vdListen,
+      caption: listenCaption(audio.phaseFor(key), t),
       glyph: audio.phaseFor(key) === "playing" ? "⏸\uFE0E" : "▶\uFE0E",
       onPick: () => audio.toggle(key),
     });
@@ -3976,7 +3976,7 @@ export function App(): JSX.Element {
           label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
           phase={audio.phaseFor(selectedKey)}
           onToggle={audio.toggle}
-          caption={audio.phaseFor(selectedKey) === "playing" ? t.vdPause : t.vdListen}
+          caption={listenCaption(audio.phaseFor(selectedKey), t)}
         />
         {COMMENTARY && (
           <CommentaryTrigger

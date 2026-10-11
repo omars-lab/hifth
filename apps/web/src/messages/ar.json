@@ -318,6 +318,8 @@
   "verseTools": "أدوات {label}",
   "vdListen": "استمع",
   "vdPause": "إيقاف",
+  "vdListenOffline": "بلا إنترنت",
+  "vdListenFailed": "تعذّر التشغيل",
   "vdRoots": "الجذور نفسها",
   "vdCommentary": "التفسير",
   "vdQul": "في QUL",
