@@ -2997,7 +2997,7 @@ export function App(): JSX.Element {
   // surah and juz opened where they start. A link to a surah or a juz is a link
   // to its first verse; a link never carries the words.
   const cornerItems = useCallback(
-    (which: Corner, page: number, around: DOMRect): { name: string; items: VerseMenuItem[] } | null => {
+    (which: Corner, page: number, around: DOMRect): { name: string; items: VerseMenuItem[]; play: string } | null => {
       if (!resolver) return null;
       const edition = resolver.edition;
       const span = pageSpan(resolver, page);
@@ -3067,11 +3067,18 @@ export function App(): JSX.Element {
         { caption: t.vdCopy, onPick: copy },
         { caption: t.vdShare, onPick: () => void share() },
       ];
-      return { name, items };
+      return { name, items, play: key(first.surah, first.ayah) };
     },
     [announce, dropOn, newNoteAbout, pageOfKey, playBetween, resolver, restoreState, scoped, t],
   );
   const cornerMenuOf = cornerMenu ? cornerItems(cornerMenu.which, cornerMenu.page, cornerMenu.around) : null;
+  // The first verse a held corner's Play would recite is asked for as the
+  // menu opens, so the press finds it in hand (docs/PLAN.md, item 65).
+  const prepareAudio = audio.prepare;
+  const cornerPlay = cornerMenuOf?.play ?? null;
+  useEffect(() => {
+    if (cornerPlay) prepareAudio(cornerPlay);
+  }, [cornerPlay, prepareAudio]);
 
   // Gate cold-open restore on the resolver: a deep link parsed before the
   // manifest loads must not be dropped (restoreState no-ops without a resolver).
@@ -3356,6 +3363,15 @@ export function App(): JSX.Element {
     !introSheet &&
     openDirection === null &&
     verseMenuAt === null;
+  // The drawer's Play, the Listen in a verse number's menu and the Play to in
+  // a held verse's menu have their verse asked for as they come into reach
+  // (docs/PLAN.md, item 65). Declared after the effect that stops a recitation
+  // when the selection moves, so that one runs first and does not let the new
+  // copy go.
+  const reachKey = verseMenuAt?.key ?? verseMenu?.key ?? (drawerUp ? listenKey : null);
+  useEffect(() => {
+    if (reachKey) prepareAudio(reachKey);
+  }, [reachKey, prepareAudio]);
   // Narrower than a laptop but wider than a phone (an iPad mini upright), a
   // page magnified to the window's width leaves no room either side either,
   // and the chips stood in its top corner on the first letters of its top two

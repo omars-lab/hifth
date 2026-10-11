@@ -342,6 +342,21 @@ test.describe("Hifth · holding the page's corners", () => {
     await expect(said(page)).toContainText("Bookmark dropped");
   });
 
+  // The first verse of a recitation waited for its whole file after Play was
+  // pressed: about a second and a half on a poor line (docs/PLAN.md, item 65).
+  // It is asked for as the menu offering Play opens, and plays from that copy.
+  test("a corner's menu asks for its first verse as it opens, and Play starts from that copy", async ({ page }) => {
+    test.skip(test.info().project.name !== "desktop", "what each item does is the same on every device");
+    const player = await fakePlayer(page, { recitation: "a recitation" });
+    await open(page);
+    await holdCorner(page, "surah");
+    await expect.poll(player.asked).toEqual(["002001.mp3"]);
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    // A copy's address ends in a made-up name, not the verse's file.
+    await expect.poll(player.files).toEqual([expect.stringMatching(/^[0-9a-f-]{36}$/)]);
+    expect((await player.asked()).filter((f) => f === "002001.mp3")).toHaveLength(1);
+  });
+
   test("the surah's and the juz's menus play all of it and go to where it starts", async ({ page }) => {
     test.skip(test.info().project.name !== "desktop", "what each item does is the same on every device");
     await open(page);
@@ -641,9 +656,12 @@ test.describe("Hifth · the four new verse buttons", () => {
     // the other, since a short verse can end before a long one's file is in
     // (docs/PLAN.md, item 64).
     await expect.poll(player.asked).toEqual(expect.arrayContaining(["002040.mp3", "002041.mp3"]));
-    expect(await player.files()).toEqual(["002039.mp3"]);
     const fromCopy = () =>
       page.evaluate(() => (window as unknown as { __player: HTMLMediaElement }).__player.src.startsWith("blob:"));
+    // The first verse was asked for when its menu opened, its Play to then in
+    // reach (docs/PLAN.md, item 65), so it too plays from its copy.
+    expect(await player.files()).toHaveLength(1);
+    expect(await fromCopy()).toBe(true);
     await player.end();
     await expect.poll(async () => (await player.files()).length).toBe(2);
     expect(await fromCopy()).toBe(true);

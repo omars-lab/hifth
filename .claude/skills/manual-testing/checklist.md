@@ -71,6 +71,14 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
    with a connection, without you doing anything. Anything else becomes a Playwright test of
    the "kept juz is gone" notice and its refetch (issue `storage-not-kept`, performance.md ⑰).
 
+11. **A recitation in the iPad app on a slow connection.** The simulator shares the laptop's
+   connection, so slow it in System Settings with Apple's Network Link Conditioner (a 600 ms
+   delay and a 400 kbps download, the walk's "poor" speed), then run the gap walk in the iPad
+   app on its side at `/hafs-kfqc/p600` (the command is in the walk-app skill). Right: every
+   gap reads "held" and about 0.03 s, including the long verse 98:4 after the short 98:3. A
+   gap read from the network means fetching ahead fell behind; that becomes a unit test of the
+   case (issues `run-gap-on-poor-wifi`, `run-gap-short-then-long`, PLAN 63 and 64).
+
 ## Done
 
 (Items move here with the date and where their test or ledger record is.)

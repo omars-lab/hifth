@@ -33,3 +33,9 @@ test("the runner sets the next-verse choice by the setting's own key and words",
   const ways = setting.match(/export type RunAhead = ([^;]+);/)?.[1].match(/"(\w+)"/g).map((w) => w.slice(1, -1));
   assert.deepEqual(runner.match(/arg\("ahead", "([^"]+)"\)/)?.[1].split(","), ways);
 });
+
+test("the runner sets the same page numbers the walk reads for its pause and gap count", () => {
+  const read = [...new Set([...walk.matchAll(/window\.(__gap\w+)/g)].map((m) => m[1]))].sort();
+  assert.deepEqual(read, ["__gapCount", "__gapPause"]);
+  for (const name of read) assert.ok(runner.includes(`${name}:`), `the runner does not set ${name}`);
+});
