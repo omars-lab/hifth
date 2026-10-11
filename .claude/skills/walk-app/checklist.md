@@ -70,8 +70,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `number-menu-keyboard-pulled-back` · test: VerseMenu.keys.test.tsx
 - [ ] Press and hold a verse: one menu, not a menu with a note stacked on it. · phone · issue:
   `long-press-menu-and-note-stack-on-phone`
-- [ ] Turn the wifi off and press Listen on a verse: the button turns red and says it is
-  offline; turn the wifi back on and press it again: the verse plays. A pitch room may have
+- [ ] Turn the wifi off and press Listen on a verse: the button turns red and says
+  "Offline" (try a wifi with no internet behind it too); turn the wifi back on and press it again: the verse plays. A pitch room may have
   no wifi, and the recitation is the one thing the app fetches from outside. · phone · issue:
   `listen-offline-looked-untouched` · test: e2e/audio.spec.ts
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:

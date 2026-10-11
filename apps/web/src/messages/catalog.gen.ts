@@ -508,7 +508,6 @@ export interface Catalog {
   readonly vdJump: string;
   readonly vdJumpAria: (d: { readonly label: string | number }) => string;
   readonly vdListen: string;
-  readonly vdListenFailed: string;
   readonly vdListenOffline: string;
   readonly vdMark: string;
   readonly vdMarkAria: (d: { readonly label: string | number }) => string;

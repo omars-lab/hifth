@@ -3801,7 +3801,7 @@
       "severity": "defect",
       "owner": "agent",
       "closedBy": "apps/web/e2e/audio.spec.ts",
-      "note": "Found asking what the pitch does with no wifi (2026-10-10): a recitation that would not load left the listen button looking untouched (its warning colour was never defined, the message went only to screen readers), and a second tap after the wifi returned never fetched the file again. Now the button turns red and says Offline, and a failed verse starts over on the next tap. Both tests failed first."
+      "note": "Found asking what the pitch does with no wifi (2026-10-10): a recitation that would not load left the listen button looking untouched (its warning colour was never defined, the message went only to screen readers), and a second tap after the wifi returned never fetched the file again. Now the button turns red and says Offline (also on a wifi with no internet behind it, where the browser still reports being online), and a failed verse starts over on the next tap. Each test failed first."
     },
     {
       "id": "ribbon-covers-first-words",

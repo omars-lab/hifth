@@ -16,14 +16,14 @@ import styles from "./PlayTrigger.module.css";
  * The word under the listen glyph. Once a recitation will not load it says
  * why, on the button the reader just pressed: the files are streamed, so with
  * no connection (a meeting room without wifi) nothing can sound, and a caption
- * that still read "Listen" looked as if the tap had been missed.
+ * that still read "Listen" looked as if the tap had been missed. It says
+ * "Offline" for every failure, without asking the browser whether it is
+ * online: joined to a wifi with no internet behind it, the browser says it is,
+ * and the network is still the only place the file can come from.
  */
 export function listenCaption(phase: AudioPhase, t: Strings): string {
   if (phase === "playing") return t.vdPause;
-  if (phase === "error")
-    return typeof navigator !== "undefined" && navigator.onLine === false
-      ? t.vdListenOffline
-      : t.vdListenFailed;
+  if (phase === "error") return t.vdListenOffline;
   return t.vdListen;
 }
 
