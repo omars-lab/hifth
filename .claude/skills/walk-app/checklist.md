@@ -306,6 +306,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `intro-from-deep-verse-floats`
 - [ ] The surah's name stays in sight, and the verse's tools step aside. · any · issues:
   `intro-card-covers-surah-name`, `intro-leaves-verse-tools-up`
+- The `intro-walk` script walks both lines in the apps (`window.__from = "deep"` for the verse far
+  into the surah), upright and on its side, English and Arabic.
 
 ## Roots and look-alikes (pitch)
 
@@ -396,15 +398,18 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] On a phone with the note up and its look-alike buttons on its edge, open the tajweed key (and
   About, the jump box, the shelf): the buttons go dim with the page, none stands over the panel
   (2:49). · phone, iphone · issue: `lookalike-chip-over-modal-phone`
-- [ ] A look-alike row that names a whole passage says how the two are alike and opens onto the verse
-  inside it that matches (try 15:30's later surahs: the passage in surah 38 opens onto 38:73, not
-  its first verse; 23:7 opens onto 70:31). · desktop (Firefox), phone, the iPad app · issue:
-  `lookalike-passage-row-reason`
+- [ ] A look-alike row that names a whole passage says how the two are alike, and opening the row
+  lays your verse beside the verse inside it that matches (try 15:30's later surahs: the passage in
+  surah 38 is laid beside 38:73, not its first verse; 23:7 beside 70:31). Its hop arrow still lands
+  on the passage's first verse (38:72), as ① and ⑤ record; whether it should is look-alike rows ⑰,
+  the owner's question, so it is not a fault to fix on a walk. ·
+  desktop (Firefox), phone, the iPad app · issue: `lookalike-passage-row-reason`
 - [ ] Closed, a passage row says which verse inside it is most alike (15:30's later surahs: the passage
   38:72 to 38:75 says 38:73), in English and Arabic. · phone, desktop (Firefox), the iPad app · issue:
   `lookalike-passage-row-names-match`
 - [ ] A link that asks for a verse's look-alikes (`?open=lookalikes`, try 2:48) opens the list, not
   the note, even on a slow load. · desktop, the iPad app · issue: `pitch-link-lookalikes-opens-note`
+  · test: the pitch test "opens the look-alike list even when the note's file arrives first"
 - [ ] Opened from a link, the look-alike list (and the passage menu) shows no focus ring round its
   close button, since nothing was pressed; opened by a press on a chip, the first control takes it.
   · phone on its side, desktop · test: `HopPopover.test.tsx` ("opened by a link")
@@ -427,12 +432,25 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   ("build", "table", "ids", "pack"…), and nothing that says "phone" on an iPad or a Mac. Inside
   the iPad app, the juz map has no keep-offline shelf. · every flavour · issue:
   `reader-words-plumbing`
-  · test: the pitch test "opens the look-alike list even when the note's file arrives first"
+
+The `lookalike-walk` script walks this section's app lines (the link, the rows' reasons, the first
+and last rows opened, the passage rows, Share and the bars on both iPad sizes, the tajweed key),
+upright and on its side, English and Arabic, iPad and Mac.
 
 ## Pens, bookmarks, the interface language
 
 - [ ] Mark up a page with each pen from each place the pens can live. · any · tests: pen-homes,
   pen-colours specs
+  In the iPad and Mac apps, walk it with the `pen-walk` script, each place set first: every pen
+  is picked and checked, and the ones that mark by a tap leave their mark on a verse; the drag
+  pens (highlight, crop, jump) are only picked there, so the browser tests are what drag them.
+  On the large iPad upright the side place has no margin and falls back to the Mark up button.
+  In Arabic the side rail and the Mark up button stay on the right: that is the owner's open
+  question (notes-style-toolbar ④), not a fault, until it is answered. · issue:
+  `pens-stay-right-in-arabic`
+- [ ] Pin a note with the note tool and close the app with its box still open, writing nothing:
+  next time the app starts, that pin is gone, and a note that was written is still there. ·
+  desktop, iPad app · test: notes spec ("never written") · issue: `note-left-open-stays-empty`
 - [ ] Bookmark a page: the ribbon and folded corner look right, in Firefox too. · desktop with
   `BROWSER=firefox` · test: edge-peel spec
 - [ ] Stay on a page for a few seconds until the red ribbon appears down its bound edge: it covers
@@ -462,6 +480,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Open settings and scroll to the end: one line under the title, and no choice that this screen
   cannot use (nothing about two facing pages on a phone). · phone, desktop · issue:
   `phone-settings-spread-choice-and-double-line`
+  In the apps, the `settings-walk` script. The large iPad upright shows one page but keeps the
+  two-page and pen choices, rightly: it can open two pages, and the pens' place applies there;
+  the iPad mini drops them.
 
 ## The Mac and iPad apps
 
@@ -534,8 +555,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `node --test scripts/native-golden-public.test.mjs`
 - [ ] Pinch a page in the iPad app to look closer, ending with a finger on a verse: the page grows,
   and no verse is selected and no menu opens. Same with the note tool picked: no note is pinned.
-  · iPad simulator · issue: `ipad-pinch-selects-verse` · test:
-  `make app-test ONLY=SmokeTests/testPinchSelectsNothing`
+  · iPad simulator · issue: `ipad-pinch-selects-verse` · tests:
+  `make app-test ONLY=SmokeTests/testPinchSelectsNothing`, and with the note tool
+  `make app-test ONLY=SmokeTests/testPinchWithTheNoteToolPinsNothing`. Start that one with the
+  app removed from the simulator, or a note an earlier run left shows in its picture.
 - [ ] After that pinch, the zoom readout says the new size, not 100%, and + goes up from there.
   · iPad simulator · issue: `ipad-pinch-readout-stuck` · test:
   `make app-test ONLY=SmokeTests/testPinchMovesTheZoomReadout`

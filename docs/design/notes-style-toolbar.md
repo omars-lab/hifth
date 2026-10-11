@@ -192,8 +192,9 @@ the one extra tap to start marking feels like a cost or a relief.
 **Built, all of them, as a setting (owner, 2026-10-05: "can we implement all and have settings
 option?").** Settings now has "Where the page tools sit", with four answers: above the page
 (today's strip, still the default), floating (A), a Mark up button (B) and down the side (C). It
-shows on a computer and on an iPad held sideways; an upright iPad and a phone already have their
-own bottom-row tray. What is still open is which one becomes the default, and that waits on
+shows on a computer and on a large iPad either way up (an iPad mini held sideways is too short
+for it). Upright, the side answer has no margin and falls back to the Mark up button. A smaller
+iPad and a phone already have their own bottom-row tray. What is still open is which one becomes the default, and that waits on
 trying them by hand.
 
 What building them taught, that the drawings did not:
@@ -227,3 +228,13 @@ between them is too much. Watching one revise with the merged pen would show it.
 Notes has all three and Hifth has none of them: today a mark comes off through its own tool. What
 would answer it: deciding what the eraser removes (one mark at a time, like Notes' object
 eraser, or anything dragged across), then building it with whichever home ① picks.
+
+### ④ With the app in Arabic, should the pens stay on the right edge, or move to the left? · **open**
+
+Walked in the iPad app on 2026-10-11: with the app in Arabic, the pens down the side still stand
+in the right-hand margin, and the Mark up button still sits at the right end of the bottom row,
+where a mirrored row would put it at the left. The row of pens itself reads right to left. Either
+can be right. The pens are held in the hand that marks, and most hands are right hands whatever
+language the buttons are in, so the pens might rightly stay on the right. Or a reader who
+switched to Arabic expects the whole screen to mirror, and the pens look forgotten. What would
+answer it: a hafiz who reads the app in Arabic trying both, on a real iPad held sideways.
