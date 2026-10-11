@@ -230,10 +230,15 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   level, and the verse in the same place, as pressing slowly; four presses keep the verse's first
   line at the top. · ipad, the iPad app upright, private build · checked 2026-10-11 in WebKit and
   Chromium, clean
-- [ ] Zoomed in with the note up, hop to the next verse and the one before by the verse arrows or a
-  link: the page goes back to its opening level, the new verse's note opens, and every line of the
-  new verse is in sight and clear of it. · ipad, ipad-side, private build · checked 2026-10-11 in
-  WebKit upright and on its side by a link, clean; the verse arrows not yet
+- [ ] Zoomed in with the note up, move to another verse by a link in the note or by tapping it (the
+  note has no verse arrows): a link goes back to the opening level, and either way the new verse's
+  note opens and every line of the new verse is in sight and clear of it. · ipad, ipad-side,
+  private build · checked 2026-10-11 in WebKit upright and on its side, by a link and by a tap,
+  clean
+- [ ] With the note up on an iPad held upright, tap the visible end of the verse above: the note
+  switches and every line of that verse comes into sight, clear of the note, at the opening level
+  and at 200%. · ipad, the iPad app upright, private build · issue:
+  `tap-other-verse-with-note-up-leaves-it-off-top`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 

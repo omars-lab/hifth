@@ -4041,7 +4041,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "Zoomed in on the open book, each page grows outward from the fold, so on the right-hand page the starts of the Arabic lines go off the screen's right edge while the ends stay in sight. Should the right-hand page keep the starts of its lines in sight instead?"
+      "note": "Zoomed in on the open book, each page grows outward from the fold, so on the right-hand page the starts of the Arabic lines go off the screen's right edge while the ends stay in sight. Should the right-hand page keep the starts of its lines in sight instead? Upright on one page, past 155%, both ends of a full line go off the screen by about the same amount, so the question holds upright too."
     },
     {
       "id": "turn-back-upright-loses-opening-zoom",
@@ -4053,6 +4053,18 @@
       "severity": "question",
       "owner": "user",
       "note": "Held upright the iPad opens the page a little magnified (155%); turned to the open book it shows both pages whole (100%), and turned back upright it stays at 100% instead of going back to 155%. The verse and its note stay in sight either way. Should a turn back upright bring back the level the page opened at?"
+    },
+    {
+      "id": "tap-other-verse-with-note-up-leaves-it-off-top",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "70"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "On an iPad held upright with a note open, tapping the verse above turned the note to it but left its first line or two hidden above the page's top: its note was the same height, so nothing moved the page. Choosing another verse with a note up now brings it into the part of the page the note leaves; a verse already in sight does not move. Clean upright at the opening level and at 200% in Chromium, WebKit and the iPad app; unchanged on its side."
     }
   ]
 }
