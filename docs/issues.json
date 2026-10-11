@@ -3975,10 +3975,22 @@
         "file": "docs/PLAN.md",
         "item": "63"
       },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "closedBy": "apps/web/src/audio.test.ts",
+      "note": "Each verse in a run was fetched only once the one before ended: about 0.1 s of silence at home speed, 0.5 s on slow wifi, 1.3 s on poor wifi. Now the next verse's file is fetched while one plays and kept, and played from that copy; asking early only, and off, stay as settings. Gaps fell to about 0.03 s in Chromium at every speed and in the iPad app, where asking early only did nothing. Carrying the recitations inside the app stays the owner's question."
+    },
+    {
+      "id": "run-gap-short-then-long",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "64"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "agent",
-      "note": "Each verse in a run is fetched only once the one before ends, so the silence between verses is the time to open the next file: about 0.1 s at home speed, 0.5 s on slow wifi, 1.3 s on poor wifi, measured on the live site at iPad size. Fetching the next verse early would shorten it on a slow but working connection; carrying the recitations inside the app is the owner's question."
+      "note": "On a poor connection a short verse followed by a long one still leaves a gap of about 1.3 s, because only the next verse is fetched early and its file had not arrived yet. Fetching further ahead, one file at a time, would cover it."
     }
   ]
 }

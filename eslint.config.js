@@ -86,9 +86,10 @@ export default tseslint.config(
   // The perf harness is a Node script that ALSO ships browser code inside
   // page.evaluate() callbacks — ESLint parses those bodies (they run in
   // Chromium, not Node), so it needs both global sets. The tap-area sweeps in
-  // apps/web/scripts are the same shape.
+  // apps/web/scripts, and a skill's own Node scripts that drive a browser, are
+  // the same shape.
   {
-    files: ["apps/web/perf/**/*.mjs", "apps/web/scripts/**/*.mjs"],
+    files: ["apps/web/perf/**/*.mjs", "apps/web/scripts/**/*.mjs", ".claude/skills/**/scripts/*.mjs"],
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
   // The encoding inspector's client half never runs in Node: `probe-encodings.mjs`

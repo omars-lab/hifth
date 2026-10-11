@@ -78,6 +78,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   already says Pause and turns, in the bar and in the verse's menu, since a press then stops the
   sound. A Play still showing there invites a second tap that silences the verse before it
   began. · any, slow wifi · issue: `loading-says-play` · test: PlayTrigger.test.tsx
+- [ ] Play a run on a slow connection and listen between verses: the next one starts at once,
+  with no pause, since its file is fetched while the one before plays. Time it with the walk
+  skill's gap scripts, in the iPad app as well as a browser: there, only asking early does not
+  help. · iPad app, slow wifi · issue: `run-gap-on-poor-wifi` · test: audio.test.ts,
+  e2e/verse-gestures.spec.ts
 - [ ] Pick "Play to" on a verse and stop it two verses on: the three verses play one after
   another with no second tap, and nothing plays after the last. · desktop · test:
   e2e/verse-gestures.spec.ts ("moves on to the next verse each time one ends")

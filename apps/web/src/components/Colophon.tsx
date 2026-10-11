@@ -8,6 +8,7 @@ import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { RUN_MARKS, type RunMark } from "../run-mark";
 import { RUN_FOLLOWS, rememberRunFollow, useRunFollow } from "../run-follow";
+import { RUN_AHEADS, rememberRunAhead, useRunAhead } from "../run-ahead";
 import { ARROW_SHOWINGS } from "../jump-arrows";
 import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
@@ -244,6 +245,7 @@ export function Colophon({
   const passageRows = usePassageRows();
   const ribbonLength = useRibbonLength();
   const runFollow = useRunFollow();
+  const runAhead = useRunAhead();
   const lookalikePreview = useLookalikePreview();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -477,6 +479,30 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.runFollowNote}</p>
+        </section>
+
+        {/* How a run makes its next verse ready while one sounds (docs/PLAN.md,
+            item 63): holding it in hand is the default; asking early and off stay. */}
+        <section className={styles.block} aria-labelledby="colophon-run-ahead">
+          <h3 className={styles.subhead} id="colophon-run-ahead">
+            {t.runAheadTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-run-ahead">
+            {RUN_AHEADS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={runAhead === choice}
+                data-run-ahead={choice}
+                onClick={() => rememberRunAhead(choice)}
+              >
+                {choice === "hold" ? t.runAheadHold : choice === "ask" ? t.runAheadAsk : t.runAheadOff}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.runAheadNote}</p>
         </section>
 
         {/* How the saved jump arrows show (docs/design/jump-arrows-options.md):

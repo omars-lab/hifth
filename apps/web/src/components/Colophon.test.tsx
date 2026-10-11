@@ -7,6 +7,7 @@ import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
 import { RIBBON_LENGTH_KEY } from "../ribbon-length";
 import { RUN_FOLLOW_KEY } from "../run-follow";
+import { RUN_AHEAD_KEY } from "../run-ahead";
 import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
 
 /*
@@ -184,6 +185,22 @@ describe("what the page does when the reader turns away from a recitation, in se
     expect(way("stay")).toHaveAttribute("aria-checked", "false");
     expect(localStorage.getItem(RUN_FOLLOW_KEY)).toBe("back");
     localStorage.removeItem(RUN_FOLLOW_KEY);
+  });
+});
+
+describe("how a recitation makes its next verse ready, in settings", () => {
+  it("offers keeping it, asking early and off, keeping it checked, and keeps the one picked", () => {
+    localStorage.removeItem(RUN_AHEAD_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-run-ahead="${c}"]`)!;
+    expect(way("hold")).toHaveAttribute("aria-checked", "true");
+    expect(way("ask")).toHaveAttribute("aria-checked", "false");
+    expect(way("off")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("ask"));
+    expect(way("ask")).toHaveAttribute("aria-checked", "true");
+    expect(way("hold")).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem(RUN_AHEAD_KEY)).toBe("ask");
+    localStorage.removeItem(RUN_AHEAD_KEY);
   });
 });
 

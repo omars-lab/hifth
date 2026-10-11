@@ -11,6 +11,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fromAbsoluteAyah, parseAyahKey, toAbsoluteAyah } from "@hifth/core";
+import type { RunAhead } from "./run-ahead";
 
 /** Who is reciting, for the credit line — the app never guesses this from a URL. */
 export const RECITER = "Mohamed Siddiq al-Minshawi";
@@ -85,11 +86,13 @@ export interface VerseAudio {
  * render, rather than trusting `play()` to have succeeded. `onError` lets the
  * caller announce a CDN failure through the app's live region. `onRunEnd` hears
  * a run reach its last verse's end by itself (not one stopped or cut short),
- * with that verse and the run's number.
+ * with that verse and the run's number. `ahead` is how a run makes its next
+ * verse ready while one sounds (run-ahead.ts); it changes nothing outside a run.
  */
 export function useVerseAudio(
   onError?: (key: string) => void,
   onRunEnd?: (key: string, run: number) => void,
+  ahead: RunAhead = "off",
 ): VerseAudio {
   const elRef = useRef<HTMLAudioElement | null>(null);
   const keyRef = useRef<string | null>(null);
@@ -113,6 +116,53 @@ export function useVerseAudio(
   onErrorRef.current = onError;
   const onRunEndRef = useRef(onRunEnd);
   onRunEndRef.current = onRunEnd;
+  const aheadRef = useRef(ahead);
+  aheadRef.current = ahead;
+
+  // The run's next verse, asked for while this one sounds: the request still
+  // on its way, and the copy kept in hand once it has come.
+  const askedRef = useRef<{ key: string; cancel: AbortController } | null>(null);
+  const heldRef = useRef<{ key: string; copy: string } | null>(null);
+
+  // Let go of whatever was made ready for any verse but `keep`.
+  const forget = useCallback((keep?: string): void => {
+    const asked = askedRef.current;
+    if (asked && asked.key !== keep) {
+      asked.cancel.abort();
+      askedRef.current = null;
+    }
+    const held = heldRef.current;
+    if (held && held.key !== keep) {
+      URL.revokeObjectURL(held.copy);
+      heldRef.current = null;
+    }
+  }, []);
+
+  // While a run's verse sounds, ask for the next one's file.
+  const askAhead = useCallback((): void => {
+    const way = aheadRef.current;
+    const next = queueRef.current[0];
+    if (way === "off" || !inRunRef.current || !next || typeof fetch !== "function") return;
+    if (askedRef.current?.key === next || heldRef.current?.key === next) return;
+    const url = verseAudioUrl(next);
+    if (!url) return;
+    forget();
+    const cancel = new AbortController();
+    askedRef.current = { key: next, cancel };
+    fetch(url, { signal: cancel.signal })
+      .then((r) => (r.ok ? r.blob() : null))
+      .then((bytes) => {
+        if (askedRef.current?.cancel !== cancel) return;
+        askedRef.current = null;
+        // An empty answer is no file; the verse then plays from the network.
+        if (way === "hold" && bytes && bytes.size > 0) {
+          heldRef.current = { key: next, copy: URL.createObjectURL(bytes) };
+        }
+      })
+      .catch(() => {
+        if (askedRef.current?.cancel === cancel) askedRef.current = null;
+      });
+  }, [forget]);
 
   // Point the element at one verse's file and start it. Only refs and state
   // setters, so it never changes and the listeners below may keep it.
@@ -122,13 +172,18 @@ export function useVerseAudio(
     keyRef.current = next;
     setKey(next);
     setPhase("loading");
-    el.src = url;
+    // The copy made ready while the last verse sounded, if it came in time;
+    // a request still on its way is dropped, and the verse plays from the network.
+    forget(next);
+    askedRef.current?.cancel.abort();
+    askedRef.current = null;
+    el.src = heldRef.current?.copy ?? url;
     el.currentTime = 0;
     el.play().catch(() => {
       setPhase("error");
       onErrorRef.current?.(next);
     });
-  }, []);
+  }, [forget]);
 
   // Lazily build the element the first time it is needed, on the client only.
   const element = useCallback((): HTMLAudioElement => {
@@ -136,7 +191,10 @@ export function useVerseAudio(
     if (!el) {
       el = new Audio();
       el.preload = "none";
-      el.addEventListener("playing", () => setPhase("playing"));
+      el.addEventListener("playing", () => {
+        setPhase("playing");
+        askAhead();
+      });
       el.addEventListener("waiting", () => setPhase("loading"));
       el.addEventListener("pause", () => setPhase((p) => (p === "error" ? p : "idle")));
       el.addEventListener("ended", () => {
@@ -158,11 +216,12 @@ export function useVerseAudio(
       elRef.current = el;
     }
     return el;
-  }, [start, setInRun]);
+  }, [start, setInRun, askAhead]);
 
   const stop = useCallback(() => {
     queueRef.current = [];
     setInRun(false);
+    forget();
     const el = elRef.current;
     if (el) {
       el.pause();
@@ -172,7 +231,7 @@ export function useVerseAudio(
     keyRef.current = null;
     setKey(null);
     setPhase("idle");
-  }, [setInRun]);
+  }, [setInRun, forget]);
 
   const toggle = useCallback(
     (next: string) => {
@@ -233,8 +292,9 @@ export function useVerseAudio(
         el.removeAttribute("src");
         el.load();
       }
+      forget();
     };
-  }, []);
+  }, [forget]);
 
   const phaseFor = useCallback(
     (k: string | null): AudioPhase => (k !== null && k === key ? phase : "idle"),
