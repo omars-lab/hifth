@@ -429,6 +429,38 @@ test.describe("Hifth · holding the page's corners", () => {
     await expect.poll(async () => (await player.files()).at(-1)).toBe("002007.mp3");
   });
 
+  // The ring is drawn on the page its verse is on, so a run that jumps to the
+  // surah's start, or turns as it reaches the next page, rings that page's
+  // first verse as soon as the page is there, not one verse late (item 83).
+  test("with the ring chosen, a run that goes past the page rings the first verse of each page it goes to", async ({
+    page,
+    isMobile,
+  }) => {
+    await page.addInitScript((key) => {
+      try {
+        localStorage.setItem(key, "ring");
+      } catch {
+        /* private mode */
+      }
+    }, RUN_MARK_KEY);
+    const player = await fakePlayer(page);
+    await openWith(page, null);
+    await tap(page, isMobile, "#verse-46");
+    await expect(drawer(page)).toBeVisible();
+    await holdCorner(page, "surah");
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
+    await expect.poll(() => markedOn(page, 2, "heard")).toEqual(["2:1"]);
+    for (let n = 2; n <= 6; n++) {
+      await player.end();
+      await expect.poll(player.files).toHaveLength(n);
+    }
+    await expect(page.locator("svg[aria-labelledby='page-label-3']:visible")).toBeVisible();
+    await expect.poll(() => markedOn(page, 3, "heard")).toEqual(["2:6"]);
+    expect(await markedOn(page, 2, "heard")).toEqual([]);
+  });
+
   // Mid-surah the presenter turns ahead to show the room something else. The
   // next verse pulled the page straight back to the recitation, so a page could
   // not be shown while the run played. A turn by hand now stands, and the page

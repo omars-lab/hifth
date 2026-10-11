@@ -4205,6 +4205,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
       "note": "The run's light is drawn on the page carrying the verse being heard, and drawn by a page that arrives late; the browser test plays a surah from a later page and finds its first verse lit after the jump, and the first verse of the next page lit after the turn."
+    },
+    {
+      "id": "run-ring-misses-new-page",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "83"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
+      "note": "With the ring chosen, a page that arrives after the verse being heard was set draws the ring itself; the browser test plays a surah from a later page with the ring chosen and finds the ring on the first verse after the jump and after the turn, and none left on the page behind."
     }
   ]
 }

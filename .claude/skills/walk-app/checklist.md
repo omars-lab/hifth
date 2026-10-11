@@ -291,8 +291,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] With a note open, play its surah from the corner: the page goes to the surah's start and
   the note closes (a jump, on purpose); the run plays from there, its first verse lit at once.
   Let it play onto the next page: that page's first verse is lit as the page turns, not one
-  verse later. · ipad, ipad on its side, Arabic, the iPad app, private build · issue:
-  `run-light-misses-new-page`
+  verse later. Again with "a ring moves" chosen in the info panel: the ring is on each page's
+  first verse as it arrives. The `run-note` script with `__mode` "light" walks it in the apps
+  (set the ring with a probe of its own first, and clear it after). · ipad, ipad on its side,
+  Arabic, the iPad app, private build · issues: `run-light-misses-new-page`,
+  `run-ring-misses-new-page`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 

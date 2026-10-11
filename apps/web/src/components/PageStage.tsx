@@ -2140,12 +2140,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (range && range.some((k) => resolver.resolve(k)?.page === targetPage)) {
         hl.highlightRange(range, "hlt", "phrase");
       }
-      // And the run's light, for the same reason: the page a run jumps or turns
-      // to often mounts after the verse it is reciting was set (item 82).
+      // And the run's light or ring, for the same reason: the page a run jumps
+      // or turns to often mounts after the verse it is reciting was set (items
+      // 82 and 83).
       const heard = heardKeyRef.current;
-      if (runMarkRef.current === "light" && heard && resolver.resolve(heard)?.page === targetPage) {
-        hl.highlight(heard, "sel", "selection");
-        lightPageRef.current = targetPage;
+      if (heard && resolver.resolve(heard)?.page === targetPage) {
+        if (runMarkRef.current === "light") {
+          hl.highlight(heard, "sel", "selection");
+          lightPageRef.current = targetPage;
+        } else if (runMarkRef.current === "ring") {
+          hl.highlight(heard, "heard", "heard");
+        }
       }
       // Pins, for the same reason as the crumb: the effect that redraws them
       // runs on a change of notes, not on a page arriving.
@@ -3312,7 +3317,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // one showing: a run that jumps or turns sets its verse a moment before its
   // page arrives, and the light drawn on the page being left was lost, so the
   // first verse on every page a run reached went unlit (docs/PLAN.md, item 82).
-  // A page that mounts after this ran draws the light itself (mountPage).
+  // A page that mounts after this ran draws the light, or the ring, itself
+  // (mountPage; the ring had the same gap, item 83).
   const lightMovedRef = useRef(false);
   useEffect(() => {
     if (status !== "ready") return;
