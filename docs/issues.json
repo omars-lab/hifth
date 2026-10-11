@@ -4157,6 +4157,18 @@
       "status": "open",
       "severity": "question",
       "owner": "user"
+    },
+    {
+      "id": "hand-turn-stops-run-with-note",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "79"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "A hand turn that lets go of the verse being recited no longer stops the recitation; the browser test opens the note on the verse being heard, turns the page by key and hears the run go on to the next verse."
     }
   ]
 }

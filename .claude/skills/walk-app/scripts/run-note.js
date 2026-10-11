@@ -4,7 +4,9 @@
   // never note words. Set before it runs, from a Playwright page: window.__before, how long
   // the run plays first (ms, 14000 by default, so the second verse is heard); window.__after,
   // how long it watches with the note up; window.__mode "bare" (a tap on bare page) or "hold"
-  // (a long press on the verse being recited) instead of the number and the note; window.__page,
+  // (a long press on the verse being recited) instead of the number and the note, or "turn" (a
+  // swipe with the note up, in place of its Pause; window.__turnBy "key" turns by the arrow key,
+  // for the Mac); window.__page,
   // the page whose surah corner to play; window.__rate, how fast the sound plays.
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const out = [];
@@ -75,6 +77,24 @@
   const lbl = (e) => (e.getAttribute("aria-label") || e.textContent || "").trim();
   const pauses = [...document.querySelectorAll("button,[role=button],[role=menuitem]")].filter((e) => on(box(e)) && /Pause|Stop|⏸/.test(lbl(e)));
   out.push(`D pause controls on screen=${pauses.length} inNote=${pauses.filter((e) => e.closest("[role=dialog]")).length} at=${pauses.map((e) => f(box(e))).join(",")}`);
+  // T, with window.__mode "turn": a one-finger swipe turns the page by hand with the note up;
+  // the recitation plays on (items 59 and 79).
+  if (window.__mode === "turn") {
+    if (window.__turnBy === "key") {
+      // A desktop spread turns only from its outer edge, so the Mac turns by the arrow key.
+      for (const type of ["keydown", "keyup"]) document.body.dispatchEvent(new KeyboardEvent(type, { key: "ArrowLeft", code: "ArrowLeft", bubbles: true, cancelable: true }));
+    } else {
+      const pt = { x: innerWidth / 2, y: Math.min(400, innerHeight / 3) };
+      const el = document.elementFromPoint(pt.x, pt.y);
+      const finger = (type, cx) => el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, composed: true, pointerId: 1, pointerType: "touch", isPrimary: true, clientX: cx, clientY: pt.y, button: 0, buttons: type === "pointerup" ? 0 : 1 }));
+      finger("pointerdown", pt.x);
+      for (let k = 1; k <= 8; k++) { finger("pointermove", pt.x + k * 40); await wait(16); }
+      finger("pointerup", pt.x + 320);
+    }
+    await wait(2500);
+    out.push(`T after a ${window.__turnBy === "key" ? "key" : "swipe"}: ${look()}`);
+    return `view=${innerWidth}x${innerHeight} ; ` + out.join(" ; ");
+  }
   // E: the note's own Pause (item 77): the sound stops and the same note stays up.
   const noteFor = () => (note()?.getAttribute("aria-label") || "").match(/\d+:\d+/)?.[0] || "none";
   const before = noteFor();

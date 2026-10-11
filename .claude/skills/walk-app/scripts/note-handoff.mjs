@@ -17,11 +17,19 @@
  *             chip     a look-alike chip, --chip <selector>, the "later" one by default
  *             swipe    one finger drawn across the page, --dir 1 or -1
  *             pinch    two fingers drawn apart (Chromium only: real touches)
+ *             grip     the note's handle, which grows it (a second press shrinks it)
+ *             hop      the first verse the note links to, followed from the note
  * --size    the window, default 1024x1366 (the large iPad upright)
  * --engine  webkit (default) or chromium
  * --lang    en-US (default) or ar
  * --shots   a path prefix: pictures in the middle and at the end. They show
  *           scripture and note text, so they go to a scratch folder only.
+ * --run     with the sound going (items 76 to 78): --route is a page, such as
+ *           /hafs-kfqc/p2?view=one; the surah on that page is played from its
+ *           corner at --rate (3 by default) for --before ms (7000), then the
+ *           number of the verse being recited is tapped and its note opened,
+ *           and only then does the hand-off happen. The last line says whether
+ *           the sound is still going and which verse it is on.
  *
  * Prints, for 40 frames: how many sliding copies of the note stand, the copy's
  * top, the live note's top and how many drawers are up, any menu's top and
@@ -50,6 +58,18 @@ const CLOSE = /^Close|^إغلاق/;
 const browser = await (engine === "chromium" ? chromium : webkit).launch();
 const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: true, locale: arg("lang", "en-US") });
 await ctx.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+const run = process.argv.includes("--run");
+if (run)
+  await ctx.addInitScript((rate) => {
+    const play = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function () {
+      this.volume = 0.01;
+      this.playbackRate = rate;
+      window.__aud ||= [];
+      if (!window.__aud.includes(this)) window.__aud.push(this);
+      return play.call(this);
+    };
+  }, Number(arg("rate", "3")));
 const p = await ctx.newPage();
 const from = arg("from", "");
 // Back with nothing before it leaves the app, and the page with it.
@@ -61,6 +81,38 @@ if (mode === "back" && from) {
     location.hash = "#" + r;
   }, route);
 } else await p.goto(base + "#" + route);
+// The verse being recited, read off the lit verse's own key.
+const recited = () =>
+  p.evaluate(() =>
+    [...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']")]
+      .filter((e) => {
+        const r = e.getBoundingClientRect();
+        return r.width && r.bottom > 0 && r.top < innerHeight;
+      })
+      .map((e) => (e.getAttribute("data-hl-key") || "").split("/").pop())
+      .pop() ?? null,
+  );
+if (run) {
+  await p.waitForTimeout(3000);
+  const page = (route.match(/\/p(\d+)/) || [])[1];
+  if (!page) throw new Error("--run needs --route to be a page, such as /hafs-kfqc/p2?view=one");
+  const head = await p.locator(`[data-host-page="${page}"] [data-running-head="surah"]`).first().boundingBox();
+  if (!head) throw new Error(`no surah corner on page ${page}`);
+  await p.mouse.move(head.x + head.width / 2, head.y + head.height / 2);
+  await p.mouse.down();
+  await p.waitForTimeout(700);
+  await p.mouse.up();
+  await p.getByRole("menuitem").filter({ hasText: /^(Play|تلاوة)$/ }).first().click();
+  await p.waitForTimeout(Number(arg("before", "7000")));
+  const key = await recited();
+  const num = p.locator(`[data-verse-number][data-verse-key$="/${key}"]`).first();
+  const at = await num.boundingBox();
+  if (!at) throw new Error(`no number on screen for the verse being recited, ${key}`);
+  await p.mouse.click(at.x + at.width / 2, at.y + at.height / 2);
+  await p.waitForTimeout(700);
+  await p.getByRole("menuitem").filter({ hasText: "✎" }).first().click();
+  console.log(`run: note opened on ${key}`);
+}
 await p.getByRole("dialog").waitFor({ timeout: 30000 });
 await p.waitForTimeout(1500);
 
@@ -101,8 +153,10 @@ const pickFromMenu = async (pick) => {
 const above = (sel) =>
   p.evaluate((sel) => {
     const d = [...document.querySelectorAll("[role=dialog]")].map((e) => e.getBoundingClientRect()).find((r) => r.width && r.height);
-    const r = [...document.querySelectorAll(sel)].map((e) => e.getBoundingClientRect()).filter((r) => r.height && r.top > 0 && (!d || r.bottom < d.top)).at(-1);
-    return r ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null;
+    const hit = [...document.querySelectorAll(sel)].map((e) => ({ e, r: e.getBoundingClientRect() })).filter(({ r }) => r.height && r.top > 0 && (!d || r.bottom < d.top)).at(-1);
+    if (!hit) return null;
+    const { e, r } = hit;
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2, key: (e.getAttribute("data-verse-key") || "").split("/").pop() || null };
   }, sel);
 
 let trail;
@@ -118,6 +172,14 @@ if (mode === "close") {
   const t = watch();
   await p.evaluate(() => history.back());
   trail = await t;
+} else if (mode === "grip") {
+  const t = watch();
+  await p.getByRole("dialog").getByRole("button", { name: /^(Show all of the note|اعرض التفسير كله)/ }).click();
+  trail = await t;
+} else if (mode === "hop") {
+  const t = watch();
+  await p.getByRole("dialog").getByRole("button", { name: /^(Go to|Hop to)|^(انتقل|اذهب)/ }).first().click();
+  trail = await t;
 } else if (mode === "chip") {
   const t = watch();
   await p.locator(arg("chip", 'button[data-direction="later"]')).first().click();
@@ -126,6 +188,7 @@ if (mode === "close") {
 } else if (mode === "menu" || mode === "number") {
   const at = await above(mode === "menu" ? "#hifth-overlay .hl-sel" : "[data-verse-number]");
   if (!at) throw new Error("nothing to press above the note");
+  if (at.key) console.log(`${mode}: pressing the number of ${at.key}` + (run ? `, while ${await recited()} is recited` : ""));
   if (mode === "menu") {
     await p.mouse.move(at.x, at.y);
     await p.mouse.down();
@@ -144,6 +207,7 @@ if (mode === "close") {
     const t = watch();
     await p.mouse.click(at.x, at.y);
     console.log("tap=" + (await t).join(","));
+    if (run) console.log(`after the tap: sound=${(await p.evaluate(() => (window.__aud || []).some((a) => !a.paused))) ? "going" : "stopped"}`);
     trail = await pickFromMenu(arg("pick", "⬡"));
   }
 } else if (mode === "swipe" || mode === "pinch") {
@@ -201,8 +265,10 @@ const end = await p.evaluate(() => {
     copies: document.querySelectorAll("[data-note-leaving]").length,
     dialogs: [...document.querySelectorAll("[role=dialog]")].filter((d) => d.getBoundingClientRect().height).length,
     menus: document.querySelectorAll("[role=menu]").length,
+    sound: (window.__aud || []).some((a) => !a.paused) ? "going" : "stopped",
   };
 });
+if (run) end.recited = await recited();
 console.log(`mode=${mode} frames(copies:copyTop/noteTop x drawers/menu/page)=` + trail.join(","));
 console.log("end=" + JSON.stringify(end));
 await browser.close();
