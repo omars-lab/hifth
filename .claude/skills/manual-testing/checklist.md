@@ -86,6 +86,12 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
    likely the simulator starting its sound, not the app. Right: under half a second on the real
    iPad. About a second there too means the app should start its sound sooner, and that becomes
    a backlog item with the walk's gap script as its measure.
+13. **Turning the real iPad with a note open, and back.** On the pitch build, lay the iPad on
+    its side, tap a demo verse so its note opens, then hand it to someone and let it turn upright
+    in their hands, then back. The simulator check can only start on its side, not turn mid-walk,
+    and the browser test only changes the window's size. Right: the note stays open each way up,
+    across the page when upright and over the facing page on its side, with every line of its verse
+    in sight above or beside it. Anything else becomes a backlog item and a test.
 
 ## Done
 
