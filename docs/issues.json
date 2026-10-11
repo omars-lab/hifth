@@ -3991,7 +3991,19 @@
       "severity": "risk",
       "owner": "agent",
       "closedBy": "apps/web/src/audio.test.ts",
-      "note": "On a poor connection a short verse followed by a long one still left a gap of about 1.3 s, because only the next verse was fetched early and the long one's file had not arrived. A run now fetches up to three verses ahead, one file after another; the gap fell to about 0.03 s in Chromium, and in the iPad app every verse played from its copy."
+      "note": "On a poor connection a short verse followed by a long one still left a gap of about 1.3 s, because only the next verse was fetched early and the long one's file had not arrived. A run now fetches up to three verses ahead, one file after another; the gap fell to about 0.03 s in Chromium, and in the iPad app at home speed every verse played from its copy; the iPad app on a slow line is parked as a by-hand check."
+    },
+    {
+      "id": "first-verse-wait-on-poor-wifi",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "65"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "closedBy": "apps/web/src/audio.test.ts",
+      "note": "Pressing Play on a poor connection took about 1.4 s for the first verse to sound. The verse a control offers is now asked for as the control comes into reach, and a press plays from that copy when it is ready and streams otherwise; making the press wait for the copy was tried and was up to three times slower on a poor line. At home speed the first verse fell from about 0.18 s to 0.1 s in Chromium and from 1.73 s to 1.07 s in the iPad app; on a poor line it still streams unless the reader lingers longer than the download."
     }
   ]
 }

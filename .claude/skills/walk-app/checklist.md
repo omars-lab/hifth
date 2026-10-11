@@ -85,6 +85,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   each gap names the file it waited for, and one played from the network there means the
   fetching ahead fell behind. · iPad app, slow wifi · issue: `run-gap-on-poor-wifi`,
   `run-gap-short-then-long` · test: audio.test.ts, e2e/verse-gestures.spec.ts
+- [ ] Open a surah's corner menu, wait a moment, and press Play: the first verse sounds at once,
+  since its file was asked for when the menu opened. Time it with the gap script and no gaps
+  (`--pause 600,2000 --gaps 0`): at a 2 s pause it plays from the copy at home speed and on
+  slow wifi, and on no line is it slower than with the setting off. · iPad app, slow wifi ·
+  issue: `first-verse-wait-on-poor-wifi` · test: audio.test.ts, e2e/verse-gestures.spec.ts
 - [ ] Pick "Play to" on a verse and stop it two verses on: the three verses play one after
   another with no second tap, and nothing plays after the last. · desktop · test:
   e2e/verse-gestures.spec.ts ("moves on to the next verse each time one ends")

@@ -1712,8 +1712,28 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     16 s that follows one of about 5 s. A run now asks for up to three verses ahead, one file
     after another, and keeps each copy until its verse has played; the setting covers all of
     them. On the poor wifi in Chromium that gap fell to about 0.03 s, like the rest, and in the
-    iPad app all four verses played from copies already in hand (about 0.03 s each). Unit
-    tests and a browser test on every engine, watched failing first.
+    iPad app, at home speed, all four verses played from copies already in hand (about 0.03 s
+    each). The simulator shares the laptop's connection, so the iPad app on a slow line is a
+    by-hand check, parked on the manual-testing list. Unit tests and a browser test on every
+    engine, watched failing first.
+65. ~~**On a poor connection, the first verse of a recitation takes about a second and a half to
+    start.**~~ Found 2026-10-11 measuring item 64: the gap walk now also times the press of Play
+    to the first verse sounding, in Chromium at iPad size: about 0.3 s at home speed, 0.6 s on
+    a slow wifi and 1.4 s on a poor one. The control says it is loading meanwhile, so nothing
+    is hidden, but it is the first thing a room hears, or does not. Fetching ahead cannot help,
+    since nothing played before it. One way is to ask for the first verse's file as soon as the
+    menu that offers Play opens, so the press finds it in hand; carrying the recitations inside
+    the app stays the owner's question.
+    **Fixed the same day.** The verse a control offers to play is now asked for as that control
+    comes into reach: a corner's menu, a verse's menu, the tools bar. A press that finds the copy
+    ready plays it; one that finds it still on its way lets it go and plays from the network,
+    because making the press wait for the whole file measured up to three times slower on a poor
+    line (docs/issues/first-verse-wait-for-copy.md). In Chromium the first verse fell from about
+    0.18 s to 0.1 s at home speed with a 0.6 s pause before the press, and from about 0.6 s to
+    0.01 s on slow wifi with a 2 s pause; in the iPad app at home speed from 1.73 s to 1.07 s,
+    with every gap after it about 0.03 s. The limit, measured: on a poor line the first verse
+    still streams unless the reader lingers longer than the download. Unit tests and a browser
+    test, watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

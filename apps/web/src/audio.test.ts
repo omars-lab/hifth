@@ -232,13 +232,17 @@ describe("useVerseAudio's next verse, made ready while a run plays", () => {
     expect(letGo).toEqual(["blob:held/1", "blob:held/2"]);
   });
 
-  it("plays from the network when the copy has not come yet", async () => {
-    answer("sound");
+  // A file streamed from the network starts once a little of it is in; a copy
+  // needs all of it, so on a slow line waiting for one is the longer wait
+  // (docs/issues/first-verse-wait-for-copy.md).
+  it("plays from the network when the copy has not come yet, and drops its request", async () => {
+    const fetched = answer("sound");
     const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
     act(() => result.current.playRun([v(1), v(2)]));
     sounds();
     act(() => FakePlayer.last!.finish());
     expect(FakePlayer.last!.src).toBe(url(2));
+    expect(fetched.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
     await settle();
     expect(made).toEqual([]);
   });
@@ -361,6 +365,23 @@ describe("useVerseAudio's next verse, made ready while a run plays", () => {
     expect(asked(fetched)).toEqual([url(2), url(3), url(4), url(5)]);
   });
 
+  // A presenter stops part way and picks a new range that starts on a verse
+  // already fetched: the copies still wanted are kept, not fetched again.
+  it("a new run from a verse already fetched plays it from its copy and keeps the rest", async () => {
+    const fetched = answer("sound");
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.playRun([v(1), v(2), v(3)]));
+    sounds();
+    await settle();
+    expect(made).toEqual(["blob:held/1", "blob:held/2"]);
+    act(() => result.current.playRun([v(2), v(3), v(4)]));
+    expect(FakePlayer.last!.src).toBe("blob:held/1");
+    expect(letGo).toEqual([]);
+    sounds();
+    await settle();
+    expect(asked(fetched)).toEqual([url(2), url(3), url(4)]);
+  });
+
   it("lets go of every copy in hand on stop", async () => {
     answer("sound");
     const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
@@ -370,5 +391,175 @@ describe("useVerseAudio's next verse, made ready while a run plays", () => {
     expect(made).toEqual(["blob:held/1", "blob:held/2", "blob:held/3"]);
     act(() => result.current.stop());
     expect([...letGo].sort()).toEqual(made);
+  });
+});
+
+/*
+ * The first verse of a recitation waits for its whole file after Play is
+ * pressed: about a second and a half on a poor connection (docs/PLAN.md, item
+ * 65). So the verse whose Play is in reach is asked for as soon as the menu or
+ * panel that offers it opens, and the press finds it in hand.
+ */
+describe("useVerseAudio's verse made ready before Play is pressed", () => {
+  const url = (n: number) => verseAudioUrl(v(n))!;
+  const urls = URL as unknown as { createObjectURL?: unknown; revokeObjectURL?: unknown };
+  let made: string[] = [];
+  let letGo: string[] = [];
+  const waiting: { url: string; come: () => void; fail: () => void }[] = [];
+
+  function line() {
+    vi.stubGlobal("Audio", FakePlayer);
+    made = [];
+    letGo = [];
+    waiting.length = 0;
+    urls.createObjectURL = () => {
+      const copy = `blob:held/${made.length + 1}`;
+      made.push(copy);
+      return copy;
+    };
+    urls.revokeObjectURL = (copy: string) => letGo.push(copy);
+    const fetched = vi.fn((u: string, _init?: RequestInit) =>
+      new Promise<Response>((done, refuse) => {
+        waiting.push({
+          url: u,
+          come: () => done({ ok: true, blob: () => Promise.resolve(new Blob(["sound"])) } as Response),
+          fail: () => refuse(new Error("no line")),
+        });
+      }),
+    );
+    vi.stubGlobal("fetch", fetched);
+    return fetched;
+  }
+  const asked = (fetched: ReturnType<typeof line>) => fetched.mock.calls.map((c) => c[0]);
+  const settle = () => act(async () => { await new Promise((r) => setTimeout(r, 0)); });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+    delete urls.createObjectURL;
+    delete urls.revokeObjectURL;
+    FakePlayer.last = null;
+  });
+
+  it("asks for the verse as soon as its Play is in reach, and plays it from the copy", async () => {
+    const fetched = line();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.prepare(v(5)));
+    expect(asked(fetched)).toEqual([url(5)]);
+    waiting[0]!.come();
+    await settle();
+    act(() => result.current.toggle(v(5)));
+    expect(FakePlayer.last!.src).toBe("blob:held/1");
+    expect(asked(fetched)).toEqual([url(5)]);
+  });
+
+  it("a press while the file is on its way lets the request go and plays from the network", async () => {
+    const fetched = line();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.prepare(v(5)));
+    act(() => result.current.toggle(v(5)));
+    expect(FakePlayer.last!.src).toBe(url(5));
+    expect(fetched.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+    waiting[0]!.come();
+    await settle();
+    expect(FakePlayer.last!.src).toBe(url(5));
+    expect(made).toEqual([]);
+  });
+
+  it("starts a run from the copy of its first verse", async () => {
+    line();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.prepare(v(5)));
+    waiting[0]!.come();
+    await settle();
+    act(() => result.current.playRun([v(5), v(6)]));
+    expect(FakePlayer.last!.src).toBe("blob:held/1");
+  });
+
+  it("asking early only, plays from the network once the request has come", async () => {
+    line();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "ask"));
+    act(() => result.current.prepare(v(5)));
+    waiting[0]!.come();
+    await settle();
+    act(() => result.current.toggle(v(5)));
+    expect(FakePlayer.last!.src).toBe(url(5));
+    expect(made).toEqual([]);
+  });
+
+  it("a request that fails at once neither throws nor stops the press playing from the network", async () => {
+    line();
+    vi.stubGlobal("fetch", () => {
+      throw new Error("no fetch here");
+    });
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    expect(() => act(() => result.current.prepare(v(5)))).not.toThrow();
+    await settle();
+    act(() => result.current.toggle(v(5)));
+    expect(FakePlayer.last!.src).toBe(url(5));
+  });
+
+  it("asks for nothing when the setting is off", async () => {
+    const fetched = line();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "off"));
+    act(() => result.current.prepare(v(5)));
+    act(() => result.current.toggle(v(5)));
+    expect(fetched).not.toHaveBeenCalled();
+    expect(FakePlayer.last!.src).toBe(url(5));
+  });
+
+  it("asks nothing for the verse already playing, nor while a run plays", async () => {
+    const fetched = line();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.toggle(v(1)));
+    act(() => result.current.prepare(v(1)));
+    expect(fetched).not.toHaveBeenCalled();
+    act(() => result.current.playRun([v(2), v(3)]));
+    act(() => result.current.prepare(v(9)));
+    expect(asked(fetched)).not.toContain(url(9));
+  });
+
+  it("lets the last verse's copy go when another verse's Play comes in reach", async () => {
+    const fetched = line();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.prepare(v(5)));
+    waiting[0]!.come();
+    await settle();
+    act(() => result.current.prepare(v(6)));
+    expect(letGo).toEqual(["blob:held/1"]);
+    expect(asked(fetched)).toEqual([url(5), url(6)]);
+  });
+
+  it("drops a request still on its way when another verse's Play comes in reach", async () => {
+    line();
+    const signals: (AbortSignal | null | undefined)[] = [];
+    vi.stubGlobal("fetch", (_u: string, init?: RequestInit) => {
+      signals.push(init?.signal);
+      return new Promise<Response>(() => {});
+    });
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.prepare(v(5)));
+    act(() => result.current.prepare(v(6)));
+    expect(signals.map((s) => s?.aborted)).toEqual([true, false]);
+  });
+
+  it("plays from the network when the request failed", async () => {
+    line();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.prepare(v(5)));
+    waiting[0]!.fail();
+    await settle();
+    act(() => result.current.toggle(v(5)));
+    expect(FakePlayer.last!.src).toBe(url(5));
+  });
+
+  it("lets the copy go on stop", async () => {
+    line();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "hold"));
+    act(() => result.current.prepare(v(5)));
+    waiting[0]!.come();
+    await settle();
+    act(() => result.current.stop());
+    expect(letGo).toEqual(["blob:held/1"]);
   });
 });
