@@ -109,8 +109,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   end; the verse's tools are up instead, with the note's button a press away. On a phone the
   lit verse at the foot of the page stays clear of the tools card. On the iPad held sideways the
   open book turns from opening to opening with the run and ends the same way, in the browser and
-  in the iPad app on its side (`make app-probe TARGET=ipad SIDEWAYS=1`). · desktop, a phone,
-  an iPad upright and sideways, the iPad app sideways, and the private build in the iPad app · issue:
+  in the iPad app on its side (`make app-probe TARGET=ipad SIDEWAYS=1`), in English and Arabic.
+  · desktop, Firefox, a phone, an iPad upright and sideways, the iPad app sideways, the Mac app
+  (`make app-probe TARGET=mac`), and the private build in the iPad app · issue:
   `run-end-after-follow-unlit`, `run-end-opens-note`, `app-probe-sideways` · test: e2e/verse-gestures.spec.ts ("ends
   with its last verse lit"), e2e/ipad.spec.ts ("turns the open book with it"), src/audio.test.ts,
   e2e/pitch.spec.ts ("tools up, not its note")
@@ -186,6 +187,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   still does after a reload. · any · issue: `related-verses-cut-at-eight`
 - [ ] Beside two pages, a card lies over the facing page and shows no drag bar. · desktop,
   ipad-side · issue: `spread-cards-show-drag-bar`
+- [ ] In the iPad app on its side, open a note from each page of the opening (closing the first
+  before tapping under it): it lies over the other page, the verse stays fully in sight, and the
+  next verse tapped moves the note to it (`make app-probe TARGET=ipad SIDEWAYS=1`, measuring
+  boxes only). · the iPad app sideways, private build · issue: `app-probe-sideways`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 

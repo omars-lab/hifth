@@ -359,8 +359,11 @@ pre-push: secrets-history checks-fast ## Everything checked before each push —
 	$(PNPM) gate:bundle-notext
 	@# All four browser projects, iPhone included: it runs on WebKit, which
 	@# needs a one-time `pnpm -C apps/web exec playwright install webkit`, and
-	@# it is the project that caught a jump bug the Android one missed.
-	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=ipad --project=golden --project=ipad-golden
+	@# it is the project that caught a jump bug the Android one missed. And the
+	@# two Firefox ones, the owner's browser (about 30 s): until 2026-10-11 they
+	@# were on no list and ran nowhere. scripts/prepush-projects.test.mjs fails
+	@# when a project is on no list again.
+	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=ipad --project=golden --project=ipad-golden --project=desktop-firefox --project=desktop-firefox-runs
 	@# The pitch suite, where most faults a walk of the demo finds keep their
 	@# test (about a minute). It needs the gitignored notes, so on a machine
 	@# without them it is skipped with a line saying so, not failed.
