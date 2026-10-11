@@ -939,6 +939,18 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
         message: "at 300%, too tall for the space above the note, the verse still starts on the screen",
       })
       .toBe(true);
+    // And it starts at the top of the page's frame, where a hafiz starts reading.
+    const firstLineGap = () =>
+      page.evaluate(() => {
+        const lines = [...document.querySelectorAll("#hifth-overlay .hl-sel")]
+          .map((e) => e.getBoundingClientRect())
+          .filter((b) => b.height);
+        const frame = document.querySelector("#hifth-overlay")!.closest("[aria-busy]")!.getBoundingClientRect();
+        return Math.round(Math.abs(Math.min(...lines.map((b) => b.top)) - frame.top));
+      });
+    await expect
+      .poll(firstLineGap, { message: "at 300%, the verse's first line sits at the top of the page's frame" })
+      .toBeLessThan(4);
     await context.close();
   });
 

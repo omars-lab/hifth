@@ -4042,6 +4042,17 @@
       "severity": "question",
       "owner": "user",
       "note": "Zoomed in on the open book, each page grows outward from the fold, so on the right-hand page the starts of the Arabic lines go off the screen's right edge while the ends stay in sight. Should the right-hand page keep the starts of its lines in sight instead?"
+    },
+    {
+      "id": "turn-back-upright-loses-opening-zoom",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "69"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Held upright the iPad opens the page a little magnified (155%); turned to the open book it shows both pages whole (100%), and turned back upright it stays at 100% instead of going back to 155%. The verse and its note stay in sight either way. Should a turn back upright bring back the level the page opened at?"
     }
   ]
 }

@@ -1770,6 +1770,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     Chromium, WebKit and the iPad app; at 300% its first line sits at the top of the stage. On its
     side and in the Mac app, nothing changed and the pages stay level, zoomed in and back out. A
     unit test and a browser test, both watched failing first.
+69. **Turned to the open book and back upright, the iPad shows the page at 100%, not the level it
+    opened at.** Found 2026-10-11 checking item 68 with the iPad turned: held upright the page
+    opens a little magnified (155%); turned on its side the open book shows both pages whole
+    (100%), and turned back upright it stays at 100% instead of going back to 155%. The chosen
+    verse and its note stay in sight either way, so nothing is lost; the question is which a
+    hafiz handing the iPad across a table expects: the page as it first opened, or as it was
+    left. Should a turn back upright bring back the level the page opened at?
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
