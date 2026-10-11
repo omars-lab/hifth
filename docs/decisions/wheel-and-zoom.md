@@ -124,7 +124,9 @@ and *which* one is the point of each assertion.
 what came back; there is no per-frame zoom callback, because `view` is a ref precisely so a
 pan does not re-render a 170 KB inline SVG's parent. And `setZoom` anchors at the **layer**
 centre through the existing `zoomAbout` — the one implementation of §7 ⑨'s anchor arithmetic.
-No second copy. This matters more than it did yesterday: `ctrl`+wheel was the second caller of
+No second copy. (Since 2026-10-11 the height of that anchor is the chosen verse's middle when a
+verse is chosen, still through `zoomAbout`: growing from the layer's middle carried a verse low
+on the page off the screen, docs/PLAN.md item 66; the middle stays as a setting.) This matters more than it did yesterday: `ctrl`+wheel was the second caller of
 that function and the only one an e2e could drive at a phone viewport, where `--stage-pad` is
 16 px and a stage-vs-layer mistake is visible. A spread zeroes that padding, so the desktop
 test can no longer see that particular drift — it still catches an anchor converted against

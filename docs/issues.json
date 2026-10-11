@@ -4007,6 +4007,29 @@
       "owner": "agent",
       "closedBy": "apps/web/src/audio.test.ts",
       "note": "Pressing Play on a poor connection took about 1.4 s for the first verse to sound. The verse a control offers is now asked for as the control comes into reach, and a press plays from that copy when it is ready and streams otherwise; making the press wait for the copy was tried and was up to three times slower on a poor line. At home speed the first verse fell from about 0.18 s to 0.1 s in Chromium and from 1.73 s to 1.07 s in the iPad app; on a poor line it still streams unless the reader lingers longer than the download."
+    },
+    {
+      "id": "zoom-button-carries-chosen-verse-off",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "66"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "With a note open on an iPad on its side, three presses of the zoom button (to 200%) left the chosen verse wholly below the bottom of the screen: the buttons grew the page from the middle of its height whatever was chosen. They now grow it from the chosen verse, and both pages of an open book from the same height, so they stay level; growing from the middle stays as a setting in the info panel. Clean at 200% in Chromium, WebKit, the Mac app and the iPad app on its side."
+    },
+    {
+      "id": "spread-zoom-hides-line-starts",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "67"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Zoomed in on the open book, each page grows outward from the fold, so on the right-hand page the starts of the Arabic lines go off the screen's right edge while the ends stay in sight. Should the right-hand page keep the starts of its lines in sight instead?"
     }
   ]
 }

@@ -795,6 +795,10 @@ export interface Strings {
   runFollowStay: string;
   runFollowBack: string;
   runFollowNote: string;
+  zoomAnchorTitle: string;
+  zoomAnchorVerse: string;
+  zoomAnchorMiddle: string;
+  zoomAnchorNote: string;
   runAheadTitle: string;
   runAheadHold: string;
   runAheadAsk: string;
@@ -1513,6 +1517,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     runFollowStay: m.runFollowStay,
     runFollowBack: m.runFollowBack,
     runFollowNote: m.runFollowNote,
+    zoomAnchorTitle: m.zoomAnchorTitle,
+    zoomAnchorVerse: m.zoomAnchorVerse,
+    zoomAnchorMiddle: m.zoomAnchorMiddle,
+    zoomAnchorNote: m.zoomAnchorNote,
     runAheadTitle: m.runAheadTitle,
     runAheadHold: m.runAheadHold,
     runAheadAsk: m.runAheadAsk,

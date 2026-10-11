@@ -216,6 +216,7 @@ import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
+import { savedZoomAnchor, verseToGrowFrom } from "./zoom-anchor";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { useRunFollow } from "./run-follow";
@@ -577,9 +578,17 @@ export function App(): JSX.Element {
       // off-screen. The live leaf can be either side of the opening (an even page
       // is the left-hand one), so the stage picks its own edge; on a lone leaf
       // there is no fold, so it grows from its centre.
+      //
+      // Vertically, both leaves grow from the chosen verse, wherever it is, so
+      // it stays on the screen (docs/PLAN.md, item 66), and from the one same
+      // height, so the two pages stay level at the fold. The reader can set the
+      // middle instead (`zoom-anchor.ts`).
       setZoom: (z: number) => {
-        const applied = stageRef.current?.setZoom(z) ?? 1;
-        facingStageRef.current?.setZoom(z);
+        const live = stageRef.current;
+        const facing = facingStageRef.current;
+        const verse = verseToGrowFrom(savedZoomAnchor(), live?.verseSpan() ?? facing?.verseSpan() ?? null);
+        const applied = live?.setZoom(z, verse) ?? 1;
+        facing?.setZoom(z, verse);
         setZoom(applied);
       },
       // A pinch has already moved the leaf under the fingers; the other leaf of

@@ -1734,6 +1734,28 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     with every gap after it about 0.03 s. The limit, measured: on a poor line the first verse
     still streams unless the reader lingers longer than the download. Unit tests and a browser
     test, watched failing first.
+66. ~~**With a verse chosen, the zoom buttons carry it off the screen.**~~ Found 2026-10-11 walking
+    the hand-off in the room: with a note open on an iPad on its side, three presses of the zoom
+    button (to 200%) left the verse the note is about wholly below the bottom of the screen, its
+    last line about 160 px under it. The buttons grow the page from the middle of its height,
+    whatever is chosen, and a verse near the page's foot moves down and out as the page grows. A
+    laptop or Mac in the room zooms with these buttons. One way: with a verse chosen, grow from the
+    verse's own height, so it stays where it was as it grows; growing from the middle stays as a
+    setting in the info panel.
+    **Fixed the same day.** With a verse chosen, the + and − buttons now grow the page from the
+    middle of that verse, and with the book open both pages grow from that one height, so they
+    stay level at the fold. With no verse chosen, they grow from the middle as before. "Grow from
+    the middle" stays as a setting in the info panel. At 200% at the same verse, all three of its
+    lines stay on the screen in Chromium and WebKit, in the Mac app and in the iPad app on its
+    side, and the two pages sit level. Across the page nothing changed: an open book still grows
+    from its fold. A unit test and two browser tests, watched failing first; handing the other
+    page the middle instead put the two pages 273 px apart, and the level check caught it.
+67. **Zoomed in on the open book, a verse's first words go off the screen's right edge.** Found
+    2026-10-11 with item 66: at 200% on an iPad on its side, each page grows outward from the fold,
+    so on the right-hand page the start of each line, where the Arabic begins, is off the screen
+    and the end stays in sight; the reader slides the page to see it. That is how the open book
+    has zoomed since both pages were made to grow together, so this is a question, not a fault:
+    should the right-hand page keep the starts of its lines in sight instead?
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

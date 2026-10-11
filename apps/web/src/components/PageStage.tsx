@@ -78,6 +78,7 @@ import { pageSlack } from "../rail-home";
 import { sideCoverOf, type CardSpan } from "./short-band";
 import type { TurnStyle } from "../turn-style";
 import type { RunMark } from "../run-mark";
+import { zoomAnchorY, type VerseSpan } from "../zoom-anchor";
 import styles from "./PageStage.module.css";
 import { printedNumbersOf } from "./verse-numbers";
 
@@ -954,7 +955,15 @@ export interface PageStageHandle {
    * the first press against a limit, and the readout would then be describing a
    * magnification nobody is looking at.
    */
-  setZoom: (z: number) => number;
+  setZoom: (z: number, verse?: VerseSpan | null) => number;
+  /**
+   * Where the chosen verse's lines sit on the screen, top of the first to
+   * bottom of the last, or null when no verse on this leaf is chosen. The
+   * stepper grows the page from it (`zoom-anchor.ts`), and with the book open
+   * both leaves are handed the same span, so they grow from one height and
+   * stay level at the fold.
+   */
+  verseSpan: () => VerseSpan | null;
   /**
    * The magnification the paper is at right now.
    *
@@ -2883,8 +2892,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * level. Held in a ref so the cold-mount effect, which runs once, calls the
    * current one.
    */
-  const zoomToRef = useRef<(z: number) => number>(() => view.current.z);
-  zoomToRef.current = (z: number): number => {
+  const zoomToRef = useRef<(z: number, verse?: VerseSpan | null) => number>(() => view.current.z);
+  zoomToRef.current = (z: number, verse: VerseSpan | null = null): number => {
     const layer = layerRef.current;
     if (!layer) return view.current.z;
     // The same two things a wheel gesture used to do at its first event:
@@ -2898,13 +2907,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // A button has no pointer to anchor to, so the stage picks the point.
     // The lone leaf grows from its own centre; an open book pins each leaf at
     // its gutter edge (`foldEdgeOf`) so the fold stays put and the opening
-    // grows outward as one sheet. Vertically always the middle — the fold is
-    // a vertical line, so height has no side to prefer. Through `zoomAbout`
-    // rather than writing `view` directly: the anchor arithmetic §7 ⑨ fixed
-    // has one implementation and this is not a second.
+    // grows outward as one sheet. Vertically, the chosen verse the caller
+    // hands in, or the middle without one: growing from the middle carried a
+    // verse low on the page off the screen (docs/PLAN.md, item 66). Through
+    // `zoomAbout` rather than writing `view` directly: the anchor arithmetic
+    // §7 ⑨ fixed has one implementation and this is not a second.
     const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
     const ox = edge === "left" ? rect.left : edge === "right" ? rect.right : rect.left + rect.width / 2;
-    zoomAbout(clampZoom(z, MIN_ZOOM, MAX_ZOOM), ox, rect.top + rect.height / 2, base);
+    const oy = zoomAnchorY(verse, { top: rect.top, bottom: rect.bottom });
+    zoomAbout(clampZoom(z, MIN_ZOOM, MAX_ZOOM), ox, oy, base);
     // The rail sits beside the selected ayah and has just been moved.
     emitSelectionRect();
     // What was *applied*, which is not always what was asked: `clampView`
@@ -2916,8 +2927,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useImperativeHandle(
     ref,
     (): PageStageHandle => ({
-      setZoom(z) {
-        return zoomToRef.current(z);
+      setZoom(z, verse) {
+        return zoomToRef.current(z, verse);
+      },
+      verseSpan() {
+        const key = selectedKeyRef.current;
+        const cur = pagesRef.current.get(currentPageRef.current);
+        const ids = key && cur ? cur.hl.resolve(key)?.elementIds : undefined;
+        if (!cur || !ids?.length) return null;
+        let top = Infinity;
+        let bottom = -Infinity;
+        for (const id of ids) {
+          const el = cur.svg.querySelector<SVGGraphicsElement>(`#${cssEscapeId(id)}`);
+          if (!el || typeof el.getBoundingClientRect !== "function") continue;
+          const b = el.getBoundingClientRect();
+          if (!b.height) continue;
+          top = Math.min(top, b.top);
+          bottom = Math.max(bottom, b.bottom);
+        }
+        return top <= bottom ? { top, bottom } : null;
       },
       zoomNow() {
         return view.current.z;
