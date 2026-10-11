@@ -413,6 +413,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   note, the way back returns to the first verse, the run starts with the note shut, and Pause
   stops it. · `make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en EVALFILE=.claude/skills/walk-app/scripts/visit-walk.js …`
   · walked 2026-10-11, nothing wrong but the loading label (`loading-says-play`)
+- [ ] **Take the iPad app off the simulator and open it fresh**, as on a borrowed iPad in the
+  room: it opens on the first two pages with nothing over them and nothing stored, the first
+  note opens beside its verse, a reference goes and comes back, and the first Play sounds in
+  about a second from the copy asked for early. · `xcrun simctl uninstall`, then
+  `scripts/fresh-look.js`, `visit-walk.js` and `gap-walk.js` (`__gapCount = 0`) on the same fresh
+  install · walked 2026-10-11, nothing wrong; the real iPad's first sound is parked (manual
+  testing 12)
 - [ ] Start a "Play to" run **in the iPad app**, with the moving light and again with the ring
   picked: the mark moves with each verse recited, and the light comes back to the first at the
   end. · `make app-probe TARGET=ipad LOCALE=en EVALFILE=…` with a script that holds a verse,

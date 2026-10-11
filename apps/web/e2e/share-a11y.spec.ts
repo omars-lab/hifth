@@ -59,7 +59,9 @@ test.describe("Hifth · share links (spec §7)", () => {
     // gone for good — nothing re-runs the effect, because it reads the mounted
     // set through a ref and no render is owed. This is the container failure
     // reproduced on purpose instead of waited for.
+    let held = 0;
     await page.route("**/assets/pages/hafs-kfqc/7.svg", async (route) => {
+      held += 1;
       await new Promise((r) => setTimeout(r, 400));
       await route.continue();
     });
@@ -68,6 +70,8 @@ test.describe("Hifth · share links (spec §7)", () => {
     await expect(
       page.locator('svg[aria-labelledby="page-label-7"] #hifth-overlay .hl-crumb'),
     ).toBeAttached();
+    // The page really was held back; a page that came another way proves nothing.
+    expect(held).toBeGreaterThan(0);
   });
 
   test("a full trail link restores the whole chain of beads", async ({ page }) => {
