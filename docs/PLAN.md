@@ -1645,14 +1645,28 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     looked the same from the page until the sound code counted them. Two things item 58 left,
     written down rather than changed: once a run has taken the page off the page it started
     on, the chosen verse is let go, so when the run ends nothing is lit and the verse's tools
-    close (the light does not come back to the first verse, which is pages away); and with the
+    close (the light does not come back to the first verse, which is pages away; item 60 has
+    since lit the verse the run ended on instead); and with the
     ring picked, the first verse's light goes with it, leaving only the ring. Tests for both
     ways, the default watched failing first; the setting looked at in English and Arabic, at
     phone and computer width. The same evening the tests learned to turn by a swipe on the two
     phones, since a finger is how the page turns in the room, with one more for a verse that
     ends while the hand is still down, by a swipe on the phones and by the open book's outer
-    edge on a computer (the way an iPad held sideways turns); all held, and all fail when the
-    page goes back.
+    edge on a computer; all held, and all fail when the page goes back. Whether a finger
+    pulling that edge turns the open book, as on an iPad held sideways, is tested apart, with
+    real touches sent through Chromium at that size (WebKit's own touches cannot be driven by a
+    test without a screen).
+60. ~~**A run that took the page along ended on a plain page.**~~ Found 2026-10-10 asking what
+    the room sees when a presenter plays a short surah from its corner and lets it run out: the
+    page went to the surah's start and turned with the recitation, and when the last verse
+    ended the page went plain, nothing lit and the verse's tools closed, so there was no Play in
+    reach to hear it again and nothing told the room where the recitation had stopped (the gap
+    item 59 wrote down). **Fixed the same day:** when a run that took the page along ends by
+    itself, the verse it ended on is lit, with its tools up, the way a run that stays on its
+    page ends with its first verse lit. Only then: a run stopped, or cut short by a tap on
+    another verse, leaves the page as it was; so does one ended while the reader had turned to
+    a page the run never reached or lit a verse of their own. A browser test on the computer and both phones,
+    and four tests of when the sound code says a run has ended, all watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

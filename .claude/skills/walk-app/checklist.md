@@ -85,8 +85,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] During a "Play to" run, look at the page from across the room: the verse being recited is
   the one marked (the light moves to it, or, with the ring picked in the info panel, a ring
   goes round it while the first stays lit), and at the end the light is back on the first
-  (for a run that stays on its page; one that took the page with it ends with nothing lit, on
-  purpose, PLAN 59).
+  (for a run that stays on its page; one that took the page with it ends with its last verse
+  lit, PLAN 60).
   Check both in Firefox and on a phone. · issue: `run-verse-not-shown` · test:
   e2e/verse-gestures.spec.ts ("light moves to each verse", "ring chosen")
 - [ ] Hold the surah's corner and pick Play, from a page in the middle of the surah: the page
@@ -100,6 +100,14 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   swipe, not only the page bar, and let a verse end while the finger is still down: the swipe
   still stands. · desktop, a phone and an iPad · issue: `run-hand-turn-pulled-back` · test:
   e2e/verse-gestures.spec.ts ("turned by hand", "mid-swipe", "going back chosen")
+- [ ] On an iPad on its side, pull the open book's outer edge with a finger while a run plays:
+  the book turns. · iPad sideways, and the iPad app · test: e2e/verse-gestures.spec.ts ("a
+  finger pulling the open book's outer edge")
+- [ ] Play a short surah from its corner on a page before it and let it run out: the page goes
+  along, and at the end the last verse recited is lit with its tools up and Play on it. Stop a
+  run part way instead: the page is left as it was. · desktop, a phone and an iPad · issue:
+  `run-end-after-follow-unlit` · test: e2e/verse-gestures.spec.ts ("ends with its last verse
+  lit"), src/audio.test.ts
 - [ ] On the pitch build, with a note open on an iPad held upright, play a run to a verse that
   sits under the note: the page lifts so the verse being recited stays in sight above the note.
   · iPad upright, pitch · issue: `run-leaves-page-behind` · test: e2e/pitch.spec.ts ("keeps the
