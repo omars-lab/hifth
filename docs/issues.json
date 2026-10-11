@@ -3896,6 +3896,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
       "note": "During Play to the page kept the run's first verse lit while later verses were heard, so nobody watching could see where the recitation was. Built two ways, a setting in the info panel: the verse's light moves with the recitation (default) or a ring goes round the verse being heard while the first stays lit. Tests failed first; both looked at in Firefox."
+    },
+    {
+      "id": "run-leaves-page-behind",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "58"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
+      "note": "A run played past the page while the page stayed put, and on the private build an open note could cover the verse being recited. Now the page turns or jumps to follow the run, quietly, keeping the verse's tools up with Pause, and the verse being recited is kept clear of the note or list. Tests failed first (verse-gestures and pitch suites); looked at at iPad and phone size."
     }
   ]
 }

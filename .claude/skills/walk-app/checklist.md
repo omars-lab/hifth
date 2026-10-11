@@ -87,6 +87,14 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   goes round it while the first stays lit), and at the end the light is back on the first.
   Check both in Firefox and on a phone. · issue: `run-verse-not-shown` · test:
   e2e/verse-gestures.spec.ts ("light moves to each verse", "ring chosen")
+- [ ] Hold the surah's corner and pick Play, from a page in the middle of the surah: the page
+  jumps to the surah's first verse, and when the recitation runs onto the next page the page
+  turns by itself, with Pause still on the verse's tools. · desktop and a phone · issue:
+  `run-leaves-page-behind` · test: e2e/verse-gestures.spec.ts ("goes past the page")
+- [ ] On the pitch build, with a note open on an iPad held upright, play a run to a verse that
+  sits under the note: the page lifts so the verse being recited stays in sight above the note.
+  · iPad upright, pitch · issue: `run-leaves-page-behind` · test: e2e/pitch.spec.ts ("keeps the
+  verse being recited above the open note")
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
 
@@ -348,6 +356,15 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   turns to Pause. On the pitch build a tapped verse opens its note first; close the note to reach
   Listen. · `make app-probe TARGET=ipad EVALFILE=…` with a script that taps the verse, closes the
   note and presses Listen · walked 2026-10-10, nothing wrong
+- [ ] Start a "Play to" run **in the Mac app**: each next verse starts on its own when the last
+  one ends, with no click per verse. The Mac's web view lets sound start without a click even
+  though only the iPad sets that up by name. · `make app-probe TARGET=mac EVALFILE=…` with a
+  script that plays two recitations back to back, with the sound above zero (the web view lets a
+  silent one start anyway, so a silent check proves nothing) · walked 2026-10-10, nothing wrong
+- [ ] Start a "Play to" run **in the iPad app**, with the moving light and again with the ring
+  picked: the mark moves with each verse recited, and the light comes back to the first at the
+  end. · `make app-probe TARGET=ipad LOCALE=en EVALFILE=…` with a script that holds a verse,
+  picks Play to and taps the last verse · walked 2026-10-10 (both marks), nothing wrong
 - [ ] Walk the Mac app in Arabic too, not only the iPad: the look-alike list and a note open,
   mirrored, nothing cut off. · `make app-shot TARGET=mac LOCALE=ar ROUTE=…` (shows that language
   for the one launch, even where another is picked with the app's own button) · tests:

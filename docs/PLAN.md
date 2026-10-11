@@ -1614,6 +1614,20 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     the setting's module. Known edge: a run that carries on onto a page that is not showing
     draws its mark nowhere until the reader turns there. Four tests on the computer, the two
     marks' tests and the setting's watched failing first, and both looked at in Firefox.
+58. ~~**A run that goes past the page leaves the page behind, and a note can hide the verse being
+    recited.**~~ Found 2026-10-10 asking what happens in the room when a presenter plays a
+    whole surah from the corner menu: the recitation carried on past the page, but the page
+    stayed where it was, so the room watched a page nobody was reciting (the known edge item
+    57 named). And on the private build, with a note open on an iPad held upright, the run's
+    later verses could sit under the note, so the moving light was drawn where nobody could
+    see it. **Fixed the same day:** the page now follows the run. It turns, as a page turn,
+    when the verse being recited is on the next page or opening, and jumps when it is further
+    away (the surah's first verse, say). It does this quietly, without saying the page number
+    over the recitation; the chosen verse is let go without stopping the sound; and the
+    verse's tools stay up, named for the verse being recited, so Pause is still in reach. And
+    while a run plays, the page keeps the verse being recited clear of the note or the
+    look-alike list, the way it already kept the chosen verse clear. Tests for both, watched
+    failing first; looked at at iPad and phone size.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

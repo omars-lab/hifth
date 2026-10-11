@@ -921,9 +921,17 @@ export function App(): JSX.Element {
   // Moving the selection also stops any recitation: the ▶ belongs to the verse
   // you are on, so a hop or a fresh tap should not leave the last one sounding.
   // `stopAudio` is stable, so this fires only when the selection actually moves.
+  // The one move that leaves it sounding is the page following a run onto the
+  // next page: the chosen verse is left behind with its page, and the run is
+  // what took the page there (docs/PLAN.md, item 58).
   const stopAudio = audio.stop;
   const listenKey = audio.runKey ?? selectedKey;
+  const keepRunRef = useRef(false);
   useEffect(() => {
+    if (keepRunRef.current) {
+      keepRunRef.current = false;
+      return;
+    }
     stopAudio();
   }, [selectedKey, stopAudio]);
   // The note for the current selection, from whichever source is on; in the
@@ -1407,8 +1415,12 @@ export function App(): JSX.Element {
   // is a *jump*, and a jump draws no fold at all, because a band crossing the
   // page would assert an adjacency that the reader did not travel through
   // (docs/design/page-transition.md §3.1).
+  //
+  // `follow` is the page going after a run of verses as it is recited: it says
+  // nothing over the run's own line, and the verse left behind is let go
+  // without stopping the recitation that left it.
   const goToPage = useCallback(
-    (next: number, said?: string, turn = false) => {
+    (next: number, said?: string, turn = false, follow = false) => {
       // Against the destination, not the visible page: two quick arrow presses
       // must be two steps, and the second one arrives while the first is still
       // in the air.
@@ -1420,7 +1432,13 @@ export function App(): JSX.Element {
       if (!anchor) return;
       setOpenDirection(null);
       pendingPageRef.current = next;
-      announce(said ?? t.pageN(next));
+      if (!follow) announce(said ?? t.pageN(next));
+      const leaveVerse = () => {
+        if (follow && selectedKeyRef.current !== null) keepRunRef.current = true;
+        setSelectedKey(null);
+        setSelectedRange(null);
+        setTrail([]);
+      };
       if (turn) {
         // The header follows the *landing*, not the request: `page` drives the
         // page chip, the leaf's resting edge and the announcer's next line, and
@@ -1434,14 +1452,14 @@ export function App(): JSX.Element {
             // as the leaf lands — atomically with the header — so the highlight,
             // the back-beads and the ayah in the URL all leave together and the
             // address becomes the page you are now on.
-            setSelectedKey(null);
-            setSelectedRange(null);
-            setTrail([]);
+            leaveVerse();
           } else pendingPageRef.current = pageRef.current;
         });
         return;
       }
       setPage(next);
+      // A run's jump leaves the chosen verse behind the same way a turn does.
+      if (follow) leaveVerse();
       // zoom 1 = the page as it sits, not a hop's close framing; no pulse,
       // because nothing here was selected.
       void stage.navigateTo(anchor, { pulse: false, zoom: 1 });
@@ -2215,6 +2233,25 @@ export function App(): JSX.Element {
     },
     [pageAfter, pageTurns, announce, t, goToPage],
   );
+
+  // A run of verses that reaches a verse on a page not showing takes the page
+  // there: a turn when it is the next page (or opening), a jump otherwise — the
+  // whole surah played from its corner starts on the surah's first page. The
+  // room hears the verse and sees it.
+  const runKey = audio.runKey;
+  useEffect(() => {
+    if (!runKey || !resolver) return;
+    const at = resolver.resolve(runKey)?.page;
+    if (at === undefined) return;
+    const here = pendingPageRef.current;
+    const book = bookOpenRef.current;
+    const openingOf = (p: number) => (book && p % 2 === 0 ? p - 1 : p);
+    const shown = openingOf(here);
+    if (openingOf(at) === shown) return;
+    const to = book && pageTurns.anchors.has(openingOf(at)) ? openingOf(at) : at;
+    const nextDoor = Math.abs(openingOf(at) - shown) === (book ? 2 : 1);
+    goToPage(to, undefined, nextDoor, true);
+  }, [runKey, resolver, pageTurns, goToPage]);
 
   /*
    * Where each juz opens in this build — thirty entries, computed once.
@@ -3251,8 +3288,11 @@ export function App(): JSX.Element {
   // (⑫), so the page clears whichever reaches further in.
   const sideCard = desktop && pageMode === "one" && !upright ? cornerSpan : shareCorner;
   // The verse's drawer, while it is up (its own rule, below).
+  // A run keeps it up, with its Pause, once the page has followed the run away
+  // from the verse it started on; it is then named for the verse being recited.
+  const drawerKey = selectedKey ?? audio.runKey;
   const drawerUp =
-    selectedKey !== null &&
+    drawerKey !== null &&
     !drawerAway &&
     !full &&
     (tool === "select" || tool === "highlight") &&
@@ -3984,7 +4024,7 @@ export function App(): JSX.Element {
           The number's menu is one of those: it lists the same things, so the
           two never show at once. */}
       <VerseDrawer
-        label={selectedKey ? (t.ayahLabel(selectedKey) ?? selectedKey) : null}
+        label={drawerKey ? (t.ayahLabel(drawerKey) ?? drawerKey) : null}
         open={drawerUp}
         onClose={putDrawerAway}
         end={!desktop && railAt === "tools" ? hopRail(undefined, "tools") : undefined}
