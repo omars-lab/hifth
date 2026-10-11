@@ -4101,6 +4101,28 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "With the note up on an upright iPad, a long press's menu took the note's place and the page glided about 400 px down, leaving the menu over a verse two lines up. The menu now finds its verse again while the page settles, as the number's menu did, and Jump starts from where the verse is now."
+    },
+    {
+      "id": "list-under-leaving-note",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "74"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "With the note up on an upright iPad, a look-alike list rose into the note's place while the copy of the note was still sliding down over it, two drawers stacked for a moment. The sliding note now stands one layer under every drawer, so the list rises in front of it."
+    },
+    {
+      "id": "upright-turn-lands-lower-half",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "75"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user"
     }
   ]
 }

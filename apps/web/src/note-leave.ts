@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
  *   at-once  the note goes at once, as it always did.
  *
  * Only the note across the foot: one beside the page has no page coming after it.
+ * A drawer that takes the note's place (a list, the roots) rises over the copy.
  * Its own module, free of CSS, as `zoom-anchor.ts` is.
  */
 export type NoteLeave = "slide" | "at-once";
@@ -109,6 +110,10 @@ export function leaveBehind(node: HTMLElement, parent: Node | null, ms: number):
   // It is already where it rose to: its own rise must not play again.
   copy.style.animation = "none";
   copy.style.pointerEvents = "none";
+  // One layer under every drawer: a list that takes the note's place rose into
+  // it while the copy slid down over it, two drawers stacked (item 74). Still
+  // over the page's own bars, which it slides down across.
+  copy.style.zIndex = "calc(var(--z-sheet) - 1)";
   parent.appendChild(copy);
   copy.scrollTop = node.scrollTop;
   const run = copy.animate([{ transform: "translateY(0)" }, { transform: "translateY(100%)" }], {

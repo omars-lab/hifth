@@ -1825,6 +1825,23 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     a verse two lines up, about 400 px from the one it is for. **Fixed the same day:** the menu
     finds its verse again while the page settles, as the verse number's menu already did, and
     "Jump…" starts from where the verse is now. A browser test, watched failing first (406 px).
+74. ~~**A look-alike list taking the note's place rises under the note as it slides away.**~~
+    Found walking the hand-offs, 2026-10-11, with item 72's fix: with the note up on an upright
+    iPad, a look-alike chip opens its list in the note's place, and the list rose into it while
+    the copy of the note was still sliding down over it, two drawers stacked for a moment. **Fixed
+    the same day:** the sliding note stands one layer under every drawer, so the list rises in
+    front of it, and it still slides over the page's own bars on its way off the screen. A unit
+    test and a browser test, watched failing first (the copy over the list in 29 frames).
+75. **Upright on an iPad, turning from the foot of a page opens the next one on its lower half.**
+    Found walking the hand-offs, 2026-10-11. Held upright the page opens a little taller than
+    the screen (155%, item 69), so a hafiz reads down to its foot and turns; the next page then
+    opens at the same height, on its lower half, and they slide it down to start at the top. That
+    is on purpose: a turn keeps the same lines in view, for a reader who zoomed in to read the
+    third line of one page and wants the third line of the next (docs/design/page-turning.md,
+    §4.5). Measured at 2:46, page 7 sat 383 px above the screen's top and page 8 opened 382 px
+    above it, with the note up or not. The question is for the opening level only: should a turn
+    forward from a page shown at the level it opened at land at the top of the next page (and a
+    turn back at the foot of the one before), the way reading carries on?
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
