@@ -1909,6 +1909,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     rule first, in all three engines; walked every hand-off with the sound on, in English and
     Arabic: a hop ends the sound, pressing the number of the verse being heard keeps it, and the
     rest keep it.
+82. ~~**The first verse on each page a recitation reached was not lit.**~~ Found walking a surah
+    played from its corner with a note open, 2026-10-11: the page went to the surah's start and
+    the recitation played, but its first verse sat unlit, and so did the first verse of every
+    page the recitation turned onto, each for its whole length, until the next verse lit up.
+    With or without a note, upright and on its side, in every engine. The light was drawn on
+    the page showing at the moment the recitation moved on, which is a moment before the page
+    follows it, so it went onto the page being left. Fixed: the light goes on the page that
+    carries the verse being heard, and a page that arrives after the verse was set draws it
+    itself. A browser test, watched failing first on a laptop and a phone (the jump and the
+    turn); walked in the iPad app upright, on its side and in Arabic, lit within a tenth of a
+    second of each jump and turn.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

@@ -1244,6 +1244,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   selectedKeyRef.current = selectedKey;
   const heardKeyRef = useRef(heardKey);
   heardKeyRef.current = heardKey;
+  const runMarkRef = useRef(runMark);
+  runMarkRef.current = runMark;
+  // The page the run's light is drawn on, when it is drawn at all.
+  const lightPageRef = useRef<number | null>(null);
   const introSurahRef = useRef(introSurah);
   introSurahRef.current = introSurah;
   const labelForRef = useRef(labelFor);
@@ -2135,6 +2139,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const range = rangeKeysRef.current;
       if (range && range.some((k) => resolver.resolve(k)?.page === targetPage)) {
         hl.highlightRange(range, "hlt", "phrase");
+      }
+      // And the run's light, for the same reason: the page a run jumps or turns
+      // to often mounts after the verse it is reciting was set (item 82).
+      const heard = heardKeyRef.current;
+      if (runMarkRef.current === "light" && heard && resolver.resolve(heard)?.page === targetPage) {
+        hl.highlight(heard, "sel", "selection");
+        lightPageRef.current = targetPage;
       }
       // Pins, for the same reason as the crumb: the effect that redraws them
       // runs on a change of notes, not on a page arriving.
@@ -3295,22 +3306,34 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // the light can move without the word band, the swept passage or the drawer's
   // anchor following it: those belong to the chosen verse, which stays put.
   // With the light, the current page's selection ink is moved to the heard
-  // verse and put back when the run ends; with the ring, the ink stays and a
-  // ring is drawn on whichever mounted page carries the heard verse. A run that
-  // crosses onto a page that is not showing draws its light nowhere until the
-  // reader turns to it — the run's first verse is always on the page it began.
+  // verse, on the page that carries it, and put back when the run ends; with
+  // the ring, the ink stays and a ring is drawn on whichever mounted page
+  // carries the heard verse. The light goes on the verse's own page, not the
+  // one showing: a run that jumps or turns sets its verse a moment before its
+  // page arrives, and the light drawn on the page being left was lost, so the
+  // first verse on every page a run reached went unlit (docs/PLAN.md, item 82).
+  // A page that mounts after this ran draws the light itself (mountPage).
   const lightMovedRef = useRef(false);
   useEffect(() => {
     if (status !== "ready") return;
     for (const mp of pagesRef.current.values()) mp.hl.clear("heard");
     const cur = pagesRef.current.get(currentPageRef.current);
     if (runMark === "light" && heardKey) {
-      cur?.hl.highlight(heardKey, "sel", "selection");
+      const at = resolver.resolve(heardKey)?.page ?? null;
+      for (const p of [lightPageRef.current, currentPageRef.current]) {
+        if (p !== null && p !== at) pagesRef.current.get(p)?.hl.clear("selection");
+      }
+      const own = at === null ? undefined : pagesRef.current.get(at);
+      own?.hl.highlight(heardKey, "sel", "selection");
+      lightPageRef.current = own ? at : null;
       lightMovedRef.current = true;
       return;
     }
     if (lightMovedRef.current) {
       lightMovedRef.current = false;
+      const was = lightPageRef.current;
+      lightPageRef.current = null;
+      if (was !== null && was !== currentPageRef.current) pagesRef.current.get(was)?.hl.clear("selection");
       if (selectedKey) cur?.hl.highlight(selectedKey, "sel", "selection");
       else cur?.hl.clear("selection");
     }

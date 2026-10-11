@@ -106,6 +106,14 @@ async function marked(page: Page, group: string): Promise<string[]> {
   return [...new Set(keys.map((k) => k.slice(k.lastIndexOf("/") + 1)))];
 }
 
+/** The verses lit in one ink group on one page. */
+async function markedOn(page: Page, at: number, group: string): Promise<string[]> {
+  const keys = await page
+    .locator(`[data-host-page='${at}'] #hifth-overlay [data-hl-group='${group}']`)
+    .evaluateAll((els) => els.map((el) => el.getAttribute("data-hl-key") ?? "?"));
+  return [...new Set(keys.map((k) => k.slice(k.lastIndexOf("/") + 1)))];
+}
+
 /** "Play to" from the verse 2:39 to 2:41, on page 7. */
 async function playThreeVerses(page: Page): Promise<void> {
   await openWith(page, null);
@@ -403,12 +411,16 @@ test.describe("Hifth · holding the page's corners", () => {
     await expect.poll(player.files).toEqual(["002001.mp3"]);
     await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
     await expect(page.locator("svg[aria-labelledby='page-label-7']:visible")).toHaveCount(0);
+    // The verse being recited is lit on the page it went to, the first one
+    // too: the light used to be drawn on the page left behind (item 82).
+    await expect.poll(() => markedOn(page, 2, "selection")).toEqual(["2:1"]);
     for (let n = 2; n <= 6; n++) {
       await player.end();
       await expect.poll(player.files).toHaveLength(n);
     }
     expect((await player.files()).at(-1)).toBe("002006.mp3");
     await expect(page.locator("svg[aria-labelledby='page-label-3']:visible")).toBeVisible();
+    await expect.poll(() => markedOn(page, 3, "selection")).toEqual(["2:6"]);
     // The verse's tools stay up for the verse being recited, Pause in reach.
     await expect(drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:6" })).toBeVisible();
     // Still reciting on the far side of the turn.
