@@ -2360,6 +2360,18 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     if (coverTopRef.current === null && coverSideRef.current === null) return;
     lift();
   }, [heardKey, lift]);
+  // Another verse tapped while a note is up: the note turns to it, and the
+  // verse comes into what the note leaves showing. Its note is often the same
+  // height, so the note's own arrival never fires again, and held upright the
+  // verse above was left with its first line hidden over the page's top
+  // (docs/PLAN.md, item 70). A verse already in sight does not move.
+  const chosenSeen = useRef(selectedKey);
+  useEffect(() => {
+    if (chosenSeen.current === selectedKey) return;
+    chosenSeen.current = selectedKey;
+    if (coverTopRef.current === null && coverSideRef.current === null) return;
+    lift();
+  }, [selectedKey, lift]);
   // A lift waiting on a glide is let wait until the stage goes. Each of the
   // three above used to cancel it on its next run, even a run that then found
   // nothing new and placed nothing: the card beside a sideways phone's page

@@ -1755,7 +1755,9 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     so on the right-hand page the start of each line, where the Arabic begins, is off the screen
     and the end stays in sight; the reader slides the page to see it. That is how the open book
     has zoomed since both pages were made to grow together, so this is a question, not a fault:
-    should the right-hand page keep the starts of its lines in sight instead?
+    should the right-hand page keep the starts of its lines in sight instead? Upright on one page
+    the same thing happens past 155%, evenly: at 200% both ends of a full line are off the screen
+    by about the same amount, so the question holds upright too.
 68. ~~**Upright, with a note open, the zoom buttons slip the verse's last line under the note.**~~
     Found 2026-10-11 checking item 66's fix the other way up: on an iPad held upright the note lies
     across the page's foot, and growing from the verse's middle carried its last line under the
@@ -1777,6 +1779,18 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     verse and its note stay in sight either way, so nothing is lost; the question is which a
     hafiz handing the iPad across a table expects: the page as it first opened, or as it was
     left. Should a turn back upright bring back the level the page opened at?
+70. ~~**Upright, with a note open, tapping the verse above leaves its first lines hidden over the
+    page's top.**~~ Found 2026-10-11 walking the hand-off: a reader moves from verse to verse with
+    the note open by tapping the next one, and on an iPad held upright, at the level the page
+    opens at, the verse above came up lit with its first line or two above the top of the page.
+    The note turned to the new verse, but its new note was the same height, so nothing that moves
+    the page into sight ever ran again; the tap changed the chosen verse and nothing else.
+    **Fixed the same day.** Choosing another verse while a note is up now brings it into the part
+    of the page the note leaves, the same way the note's own arrival does; a verse already in
+    sight does not move, so on its side, where the note lies over the facing page, nothing
+    changed. Upright at 35:44, tapping the verse above now shows every line of it, clear of the
+    note, at the opening level and at 200%, in Chromium, WebKit and the iPad app. A browser test,
+    watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

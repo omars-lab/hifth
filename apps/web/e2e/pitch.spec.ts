@@ -930,7 +930,7 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     for (const want of [200, 250]) {
       await pressTo(want);
       await expect
-        .poll(where, { message: `at ${want}%, every line of the verse is in sight and clear of the note` })
+        .poll(where, { message: `at ${want}%, every line of the verse is on the screen top to bottom and clear of the note` })
         .toBe("0 off the screen, 0 under the note");
     }
     await pressTo(300);
@@ -951,6 +951,71 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect
       .poll(firstLineGap, { message: "at 300%, the verse's first line sits at the top of the page's frame" })
       .toBeLessThan(4);
+    await context.close();
+  });
+
+  test("upright with a note open, tapping the verse above brings that verse into sight", async ({ browser }) => {
+    // Found 2026-10-11 (docs/PLAN.md, item 70): held upright at the level the
+    // page opens at, a tap on the end of the verse above switched the note to
+    // it but left the page still, so that verse's first line was hidden above
+    // the page's frame while its note was open beneath. The page now moves just
+    // enough to show the whole of the newly chosen verse, as it does when a note
+    // first opens; a verse already in sight does not move.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await settle(sheet(page));
+    // And the page has come to rest with the chosen verse lit: a tap while the
+    // opening glide is still under way is carried by that glide, and would pass
+    // without the fix.
+    let last = "";
+    await expect
+      .poll(async () => {
+        const now = JSON.stringify(await litLineBoxes(page));
+        const still = now === last && now !== "[]";
+        last = now;
+        return still;
+      })
+      .toBe(true);
+    // The point a finger would press: on the verse above, in sight and clear of
+    // the note, nearest the chosen verse.
+    const above = await page.evaluate(() => {
+      const card = [...document.querySelectorAll("[role=dialog]")].map((e) => e.getBoundingClientRect()).find((b) => b.height)!;
+      const lit = [...document.querySelectorAll("#hifth-overlay .hl-sel")].map((e) => e.getBoundingClientRect());
+      const litTop = Math.min(...lit.map((b) => b.top));
+      const frame = document.querySelector("#hifth-overlay")!.closest("[aria-busy]")!.getBoundingClientRect();
+      let best: { x: number; y: number; d: number } | null = null;
+      for (const el of document.querySelectorAll("[id^='verse-']")) {
+        const r = el.getBoundingClientRect();
+        if (!r.height || r.top + r.height / 2 >= litTop) continue;
+        for (const fy of [0.5, 0.35, 0.65]) for (const fx of [0.5, 0.35, 0.65, 0.2, 0.8]) {
+          const x = r.x + r.width * fx, y = r.y + r.height * fy;
+          if (x < 0 || x > innerWidth || y < frame.top || y > card.top || document.elementFromPoint(x, y) !== el) continue;
+          if (!best || litTop - y < best.d) best = { x, y, d: litTop - y };
+        }
+      }
+      return best;
+    });
+    expect(above, "a verse above the chosen one is in sight to tap").not.toBeNull();
+    const before = JSON.stringify(await litLineBoxes(page));
+    await page.touchscreen.tap(above!.x, above!.y);
+    await expect.poll(async () => JSON.stringify(await litLineBoxes(page))).not.toBe(before);
+    await expect(sheet(page)).toBeVisible();
+    const placed = async () => {
+      const card = (await sheet(page).boundingBox())!;
+      const frameTop = await page.evaluate(
+        () => document.querySelector("#hifth-overlay")!.closest("[aria-busy]")!.getBoundingClientRect().top,
+      );
+      const lines = await litLineBoxes(page);
+      const hidden = lines.filter((b) => b.y < frameTop - 2).length;
+      const under = lines.filter((b) => overlaps(b, card)).length;
+      return `${lines.length ? "lit" : "nothing lit"}, ${hidden} above the frame, ${under} under the note`;
+    };
+    await expect
+      .poll(placed, { message: "the verse tapped is in sight, every line of it, and clear of the note" })
+      .toBe("lit, 0 above the frame, 0 under the note");
     await context.close();
   });
 
