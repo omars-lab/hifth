@@ -755,6 +755,49 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("a note opened on its side stays open, clear of its verse, as the iPad is turned upright and back", async ({
+    browser,
+  }) => {
+    // The hand-off in the room: a note is open on the iPad lying on its side,
+    // it is passed across the table, and it turns upright in the new hands,
+    // then back. The note should still be open, and its verse in sight and
+    // not under it, each way up.
+    const context = await browser.newContext({ viewport: { width: 1366, height: 1024 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBeNull();
+    const clear = async (way: string, width: number, height: number) => {
+      await settle(sheet(page));
+      await expect.poll(async () => (await litLineBoxes(page)).length, { message: `${way}: the verse is lit` }).toBeGreaterThan(0);
+      await expect
+        .poll(
+          async () => {
+            const card = (await sheet(page).boundingBox())!;
+            const lines = await litLineBoxes(page);
+            const off = lines.filter((b) => b.y < 0 || b.y + b.height > height || b.x < 0 || b.x + b.width > width);
+            const under = lines.filter((b) => overlaps(b, card));
+            return `${off.length} off the screen, ${under.length} under the note`;
+          },
+          { message: `${way}: every line of the verse is in sight and clear of the note` },
+        )
+        .toBe("0 off the screen, 0 under the note");
+    };
+    await clear("on its side", 1366, 1024);
+
+    await page.setViewportSize({ width: 1024, height: 1366 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await expect(sheet(page), "upright: the note is still open").toBeVisible();
+    await clear("upright", 1024, 1366);
+
+    await page.setViewportSize({ width: 1366, height: 1024 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBeNull();
+    await expect(sheet(page), "back on its side: the note is still open").toBeVisible();
+    await clear("back on its side", 1366, 1024);
+    await context.close();
+  });
+
   test("once the reader picks two pages upright, turning the iPad does not undo it", async ({ browser }) => {
     const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
     await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));

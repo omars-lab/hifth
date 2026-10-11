@@ -212,6 +212,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   before tapping under it): it lies over the other page, the verse stays fully in sight, and the
   next verse tapped moves the note to it (`make app-probe TARGET=ipad SIDEWAYS=1`, measuring
   boxes only). · the iPad app sideways, private build · issue: `app-probe-sideways`
+- [ ] Open a note with the iPad on its side, turn it upright, then back, as when it is handed
+  across a table: the note stays open each way up and every line of its verse stays in sight and
+  clear of it. · ipad-side, ipad, private build · checked 2026-10-11 in Chromium and WebKit, clean;
+  the real iPad's turn is parked (manual testing 13)
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 
