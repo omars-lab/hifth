@@ -796,6 +796,52 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect.poll(() => book(page).getAttribute("data-solo")).toBeNull();
     await expect(sheet(page), "back on its side: the note is still open").toBeVisible();
     await clear("back on its side", 1366, 1024);
+
+    // Zoomed in to read, then handed across and turned: the two were each
+    // checked alone, and the room does them one after the other.
+    const zoom = page.getByRole("group", { name: "Zoom" });
+    // 150%: further in, the right-hand page's line starts leave the screen's
+    // edge, which is the owner's open question (docs/PLAN.md, item 67).
+    for (let i = 0; i < 2; i++) await zoom.getByRole("button", { name: "Zoom in" }).click();
+    await expect(zoom).toContainText("150%");
+    await clear("zoomed in on its side", 1366, 1024);
+    await page.setViewportSize({ width: 1024, height: 1366 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await expect(sheet(page), "zoomed, then turned upright: the note is still open").toBeVisible();
+    await clear("zoomed, then turned upright", 1024, 1366);
+    await context.close();
+  });
+
+  test("a Mac window with a note up, made too small for the open book and back, keeps the note and its verse in sight", async ({
+    browser,
+  }) => {
+    // The Mac app opens at 1280 by 828; a window dragged smaller than 1024 wide
+    // or 740 high shows one page instead of two. In the room the window gets
+    // moved about mid-sentence, the note should not close or cover its verse.
+    const context = await browser.newContext({ viewport: { width: 1280, height: 828 } });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    for (const [width, height] of [[1280, 828], [1000, 828], [1280, 700], [1280, 828]] as const) {
+      const way = `at ${width} by ${height}`;
+      await page.setViewportSize({ width, height });
+      await expect(sheet(page), `${way}: the note is still open`).toBeVisible();
+      await settle(sheet(page));
+      await expect
+        .poll(
+          async () => {
+            const card = (await sheet(page).boundingBox())!;
+            const lines = await litLineBoxes(page);
+            if (!lines.length) return "no lit lines";
+            const off = lines.filter((b) => b.y < 0 || b.y + b.height > height || b.x < 0 || b.x + b.width > width);
+            const under = lines.filter((b) => overlaps(b, card));
+            return `${off.length} off the screen, ${under.length} under the note`;
+          },
+          { message: `${way}: every line of the verse is in sight and clear of the note` },
+        )
+        .toBe("0 off the screen, 0 under the note");
+    }
     await context.close();
   });
 
