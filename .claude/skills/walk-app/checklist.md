@@ -259,6 +259,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   rises in front of the note as the note slides away behind it, never two drawers stacked with
   the note on top. · ipad, the iPad app upright, phone, private build · issue:
   `list-under-leaving-note`
+- [ ] With the note up across the page's foot, every hand-off once (Close, a page-turn key, Back,
+  a long press, a verse number's menu, a look-alike chip, a swipe, a pinch, and in Arabic): the
+  note slides away under whatever takes its place, nothing is left behind, and a pinch keeps the
+  note up. The `note-handoff` script walks them all. · ipad, the iPad app upright, private build
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 
