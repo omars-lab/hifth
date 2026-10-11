@@ -1889,6 +1889,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     a tap on another verse's number still end it, on purpose. A browser test, watched failing
     first, in Chrome's, Safari's and Firefox's engines; walked in Arabic, the iPad app (a swipe)
     and the Mac app (the arrow key).
+80. ~~**The fix for item 79 held only while the note's verse was still the one being heard.**~~
+    Found again one verse later, 2026-10-11: a presenter reads a note while the recitation goes
+    on, so by the time they turn the page the note is on a verse already heard and the sound is
+    on the next one. That turn still stopped the sound, because the fix spared only the verse
+    being recited, and the walks behind it had turned the page the moment the note opened.
+    Fixed: a page turned by hand during a recitation never stops it, whichever verse was chosen,
+    since a turn is not choosing another verse. A browser test, watched failing first, in all
+    three engines; walked with the recitation a verse past the note in a browser, Arabic, the
+    iPad app and the Mac app. The walks now wait a verse before the hand-off, and say which
+    verse is heard against the note's, read off the recitation's Pause.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
