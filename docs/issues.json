@@ -3932,6 +3932,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
       "note": "A run that took the page along ended on a plain page: the verse chosen before it had been let go pages back, so nothing was lit and no Play was in reach. Now the verse the run ended on is lit with its tools up, only when the run ends by itself on the page shown. Browser test on the computer and both phones, and unit tests of the sound code's end signal, all watched failing first."
+    },
+    {
+      "id": "run-end-opens-note",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "61"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "On the private build, lighting the verse a run ended on also opened its note, which takes the place of the verse's tools, so a note nobody asked for came up over the page with no Play in reach. The end now keeps the note shut, as a verse picked by its number does. Private-build test at iPad size watched failing first; walked again in the iPad app."
     }
   ]
 }
