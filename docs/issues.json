@@ -3920,6 +3920,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
       "note": "During a run, a page turned by hand was pulled back to the recitation by the next verse, so a presenter could not show another page while it played. Built two ways, a setting in the info panel: stay where the reader turned (default; the run picks the page up again when the recitation reaches it) or go back to the recitation. A new run always takes the page to its start. The default's test failed first."
+    },
+    {
+      "id": "run-end-after-follow-unlit",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "60"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
+      "note": "A run that took the page along ended on a plain page: the verse chosen before it had been let go pages back, so nothing was lit and no Play was in reach. Now the verse the run ended on is lit with its tools up, only when the run ends by itself on the page shown. Browser test on the computer and both phones, and unit tests of the sound code's end signal, all watched failing first."
     }
   ]
 }

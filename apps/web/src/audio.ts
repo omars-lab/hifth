@@ -83,15 +83,27 @@ export interface VerseAudio {
  * once. The hook owns the element's lifecycle and mirrors its real events
  * (`playing`, `pause`, `ended`, `error`, `waiting`) into a phase the trigger can
  * render, rather than trusting `play()` to have succeeded. `onError` lets the
- * caller announce a CDN failure through the app's live region.
+ * caller announce a CDN failure through the app's live region. `onRunEnd` hears
+ * a run reach its last verse's end by itself (not one stopped or cut short),
+ * with that verse and the run's number.
  */
-export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
+export function useVerseAudio(
+  onError?: (key: string) => void,
+  onRunEnd?: (key: string, run: number) => void,
+): VerseAudio {
   const elRef = useRef<HTMLAudioElement | null>(null);
   const keyRef = useRef<string | null>(null);
   const [key, setKey] = useState<string | null>(null);
   const [phase, setPhase] = useState<AudioPhase>("idle");
-  const [inRun, setInRun] = useState(false);
+  const [inRun, setInRunState] = useState(false);
   const [runNo, setRunNo] = useState(0);
+  // Mirrors of the two above for the `ended` listener, which is added once.
+  const inRunRef = useRef(false);
+  const runNoRef = useRef(0);
+  const setInRun = useCallback((on: boolean) => {
+    inRunRef.current = on;
+    setInRunState(on);
+  }, []);
   // The verses still to come in a "Play to" run, in order.
   const queueRef = useRef<string[]>([]);
 
@@ -99,6 +111,8 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
   // stale `onError`; keep the latest in a ref the listener reads at fire time.
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
+  const onRunEndRef = useRef(onRunEnd);
+  onRunEndRef.current = onRunEnd;
 
   // Point the element at one verse's file and start it. Only refs and state
   // setters, so it never changes and the listeners below may keep it.
@@ -129,8 +143,11 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
         const next = queueRef.current.shift();
         if (next) start(elRef.current!, next);
         else {
+          const ran = inRunRef.current;
           setPhase("idle");
           setInRun(false);
+          const k = keyRef.current;
+          if (ran && k) onRunEndRef.current?.(k, runNoRef.current);
         }
       });
       el.addEventListener("error", () => {
@@ -141,7 +158,7 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       elRef.current = el;
     }
     return el;
-  }, [start]);
+  }, [start, setInRun]);
 
   const stop = useCallback(() => {
     queueRef.current = [];
@@ -155,7 +172,7 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
     keyRef.current = null;
     setKey(null);
     setPhase("idle");
-  }, []);
+  }, [setInRun]);
 
   const toggle = useCallback(
     (next: string) => {
@@ -190,7 +207,7 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       // Otherwise it is a new verse: point the element at its file and start.
       start(el, next);
     },
-    [element, start],
+    [element, start, setInRun],
   );
 
   const playRun = useCallback(
@@ -200,10 +217,11 @@ export function useVerseAudio(onError?: (key: string) => void): VerseAudio {
       if (!first) return;
       queueRef.current = run;
       setInRun(true);
-      setRunNo((n) => n + 1);
+      runNoRef.current += 1;
+      setRunNo(runNoRef.current);
       start(element(), first);
     },
-    [element, start],
+    [element, start, setInRun],
   );
 
   // Tear the element down when the app unmounts, so no audio outlives the page.

@@ -428,9 +428,43 @@ test.describe("Hifth · holding the page's corners", () => {
     await expect(drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:2" })).toBeVisible();
   });
 
+  // A presenter plays a short surah from its corner and talks over it; the
+  // page goes to the surah's start and turns with it. When the recitation was
+  // over, the page went plain: the verse chosen before the run had been let go
+  // pages back, so nothing was lit and the verse's tools closed, with no Play
+  // in reach to hear it again. The last verse recited is lit instead, its
+  // tools up, as a run that stays on its page ends lit (items 57 and 60).
+  test("a run that took the page along ends with its last verse lit", async ({ page }) => {
+    const player = await fakePlayer(page);
+    await openWith(page, null);
+    await page.goto("/#/hafs-kfqc/p563");
+    await expect(page.locator("svg[aria-labelledby='page-label-563']:visible")).toBeVisible();
+    const head = (await page.locator('[data-host-page="563"] [data-running-head="surah"]').boundingBox())!;
+    await page.mouse.move(head.x + head.width / 2, head.y + head.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    await menu(page).getByRole("menuitem", { name: "Play" }).click();
+    await expect.poll(player.files).toEqual(["067001.mp3"]);
+    await expect(page.locator("svg[aria-labelledby='page-label-562']:visible")).toBeVisible();
+    for (let n = 2; n <= 30; n++) {
+      await player.end();
+      await expect.poll(player.files).toHaveLength(n);
+    }
+    expect((await player.files()).at(-1)).toBe("067030.mp3");
+    await expect(page.locator("svg[aria-labelledby='page-label-564']:visible")).toBeVisible();
+    await page.waitForTimeout(400);
+    await player.end();
+    await page.waitForTimeout(400);
+    expect(await marked(page, "selection")).toEqual(["67:30"]);
+    await expect(page).toHaveURL(/#\/hafs-kfqc\/67:30(\?|$)/);
+    await expect(drawer(page).getByRole("button", { name: /^Play .*67:30$/ })).toBeVisible();
+    await expect(page.locator("svg[aria-labelledby='page-label-564']:visible")).toBeVisible();
+  });
+
   // A verse can end while the hand is still taking the page over, the turn not
   // yet let go (a swipe on a phone, a pull on the open book's edge on a
-  // computer or an iPad held sideways): the page is still the recitation's
+  // computer; a finger on that edge is tested below): the page is still the recitation's
   // page then, and the turn that follows is still a turn by hand.
   test("a verse that ends mid-swipe does not undo the swipe", async ({ page, isMobile }) => {
     const player = await fakePlayer(page);
@@ -479,6 +513,30 @@ test.describe("Hifth · holding the page's corners", () => {
     await expect.poll(player.files).toHaveLength(2);
     await expect(page.locator("svg[aria-labelledby='page-label-2']:visible")).toBeVisible();
   });
+});
+
+// Held sideways, the iPad shows the open book, which turns by its outer edge.
+// The tests above pull that edge with a mouse; this one with a finger, sent
+// through Chromium's own touch input (WebKit's cannot be driven so headless),
+// at the size of an iPad on its side, since a finger is how the room turns it.
+test("a finger pulling the open book's outer edge turns it, at the size of an iPad on its side", async ({ page }) => {
+  test.skip(test.info().project.name !== "android", "real touches are sent through Chromium");
+  await page.setViewportSize({ width: 1194, height: 834 });
+  await page.goto("/#/hafs-kfqc/p8");
+  await expect(page.locator("svg[aria-labelledby='page-label-7']:visible")).toBeVisible();
+  await expect(page.locator("svg[aria-labelledby='page-label-8']:visible")).toBeVisible();
+  const rail = (await page.getByTestId("edge-grab-left").boundingBox())!;
+  const cdp = await page.context().newCDPSession(page);
+  const y = rail.y + rail.height * 0.2;
+  const x0 = rail.x + 6;
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: x0, y, id: 1 }] });
+  for (let i = 1; i <= 12; i += 1) {
+    await page.waitForTimeout(20);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x0 + i * 30, y, id: 1 }] });
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await expect(page.locator("svg[aria-labelledby='page-label-9']:visible")).toBeVisible();
+  await expect(page.locator("svg[aria-labelledby='page-label-7']:visible")).toHaveCount(0);
 });
 
 test.describe("Hifth · the four new verse buttons", () => {

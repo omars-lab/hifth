@@ -701,8 +701,12 @@ export function App(): JSX.Element {
   // Per-verse recitation: one <audio> for the app, streamed from the public
   // Quran.com CDN (see audio.ts — nothing is held in the tree). A CDN failure is
   // said out loud, so a silent verse is never a mystery.
-  const audio = useVerseAudio((k) =>
-    announce(`${t.ayahLabel(k) ?? k} — ${t.audioUnavailable}`),
+  // What a run that reached its end by itself does next; set further down,
+  // once the page's own state is in reach.
+  const runEndRef = useRef<((key: string, run: number) => void) | null>(null);
+  const audio = useVerseAudio(
+    (k) => announce(`${t.ayahLabel(k) ?? k} — ${t.audioUnavailable}`),
+    (k, n) => runEndRef.current?.(k, n),
   );
   /*
    * The stepper's press, said out loud.
@@ -2246,6 +2250,8 @@ export function App(): JSX.Element {
   const runFollow = useRunFollow();
   // The opening the run last had on screen; a new run starts with none.
   const runShownRef = useRef<{ run: number; opening: number } | null>(null);
+  // The run that last took the page along, if any.
+  const followedRunRef = useRef<number | null>(null);
   useEffect(() => {
     if (!runKey || runNo === null) {
       runShownRef.current = null;
@@ -2270,7 +2276,29 @@ export function App(): JSX.Element {
     const nextDoor = Math.abs(there - shown) === (book ? 2 : 1);
     goToPage(to, undefined, nextDoor, true);
     runShownRef.current = { run: runNo, opening: there };
+    followedRunRef.current = runNo;
   }, [runKey, runNo, resolver, pageTurns, goToPage, runFollow]);
+
+  // A run that took the page along left nothing lit behind it, so when it ends
+  // by itself the verse it ended on is lit, with its tools, rather than the
+  // page going dark under the room (docs/PLAN.md, item 60). Only while that
+  // verse is still on the page shown: a reader who turned elsewhere, or lit a
+  // verse of their own, keeps what they chose. A run that never left its page
+  // gives back the selection it started from, as before (item 57).
+  useEffect(() => {
+    runEndRef.current = (key, run) => {
+      if (followedRunRef.current !== run || selectedKeyRef.current !== null) return;
+      const at = resolver?.resolve(key)?.page;
+      if (at === undefined) return;
+      const book = bookOpenRef.current;
+      const openingOf = (p: number) => (book && p % 2 === 0 ? p - 1 : p);
+      if (openingOf(at) !== openingOf(pendingPageRef.current)) return;
+      setOpenDirection(null);
+      setSelectedRange(null);
+      setDrawerAway(false);
+      setSelectedKey(key);
+    };
+  }, [resolver]);
 
   /*
    * Where each juz opens in this build — thirty entries, computed once.
