@@ -4181,6 +4181,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "A page turned by hand during a recitation never stops it, whichever verse is chosen; the browser test lets the run move a verse past the note's before turning by key, and hears it go on."
+    },
+    {
+      "id": "hop-keeps-run-by-timing",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "81"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "A recitation is kept only when nothing is chosen or the verse being recited is chosen; the browser test follows a reference from the note while the run is a verse past it, and hears the sound stop."
     }
   ]
 }
