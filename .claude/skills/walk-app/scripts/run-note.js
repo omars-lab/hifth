@@ -80,6 +80,12 @@
   // T, with window.__mode "turn": a one-finger swipe turns the page by hand with the note up;
   // the recitation plays on (items 59 and 79).
   if (window.__mode === "turn") {
+    // Which verse is heard, from the name of the recitation's Pause, against the note's verse:
+    // set window.__after to a verse's length or more, so the run has moved past the note's.
+    const west = (s) => s.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660));
+    const heard = () => [...document.querySelectorAll("button[aria-label]")].filter((e) => !e.closest("[inert]") && box(e)).map((e) => west(e.getAttribute("aria-label"))).filter((s) => /^(Pause|إيقاف)/.test(s)).map((s) => s.match(/(\d+):(\d+)\s*$/)?.slice(1).join(":")).find(Boolean) || "none";
+    const noteOn = () => west(note()?.getAttribute("aria-label") || "").match(/\d+:\d+/)?.[0] || "none";
+    out.push(`T before: the note is on ${noteOn()} and ${heard()} is heard`);
     if (window.__turnBy === "key") {
       // A desktop spread turns only from its outer edge, so the Mac turns by the arrow key.
       for (const type of ["keydown", "keyup"]) document.body.dispatchEvent(new KeyboardEvent(type, { key: "ArrowLeft", code: "ArrowLeft", bubbles: true, cancelable: true }));
@@ -92,7 +98,7 @@
       finger("pointerup", pt.x + 320);
     }
     await wait(2500);
-    out.push(`T after a ${window.__turnBy === "key" ? "key" : "swipe"}: ${look()}`);
+    out.push(`T after a ${window.__turnBy === "key" ? "key" : "swipe"}: ${look()} heard=${heard()}`);
     return `view=${innerWidth}x${innerHeight} ; ` + out.join(" ; ");
   }
   // E: the note's own Pause (item 77): the sound stops and the same note stays up.

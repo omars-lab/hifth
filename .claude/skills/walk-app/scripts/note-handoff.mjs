@@ -28,8 +28,11 @@
  *           /hafs-kfqc/p2?view=one; the surah on that page is played from its
  *           corner at --rate (3 by default) for --before ms (7000), then the
  *           number of the verse being recited is tapped and its note opened,
- *           and only then does the hand-off happen. The last line says whether
- *           the sound is still going and which verse it is on.
+ *           and --wait ms later (0 by default; give it a verse's length, so
+ *           the recitation has moved past the note's verse) the hand-off
+ *           happens. It says which verse is heard at that moment, against the
+ *           note's, and the last line says whether the sound is still going and
+ *           which verse it is on, read off the sound itself.
  *
  * Prints, for 40 frames: how many sliding copies of the note stand, the copy's
  * top, the live note's top and how many drawers are up, any menu's top and
@@ -92,6 +95,18 @@ const recited = () =>
       .map((e) => (e.getAttribute("data-hl-key") || "").split("/").pop())
       .pop() ?? null,
   );
+// The verse being heard, read off the name of the recitation's Pause, which names
+// it wherever it is, so it is known after a turn takes the verse off the screen.
+// The sound's own file is no help: verses ahead are held as in-memory copies.
+const heard = () =>
+  p.evaluate(() => {
+    const west = (s) => s.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660));
+    const names = [...document.querySelectorAll("button[aria-label]")]
+      .filter((e) => !e.closest("[inert]") && e.getBoundingClientRect().width)
+      .map((e) => west(e.getAttribute("aria-label")))
+      .filter((s) => /^(Pause|إيقاف)/.test(s));
+    return names.map((s) => s.match(/(\d+):(\d+)\s*$/)?.slice(1).join(":")).find(Boolean) ?? null;
+  });
 if (run) {
   await p.waitForTimeout(3000);
   const page = (route.match(/\/p(\d+)/) || [])[1];
@@ -115,6 +130,15 @@ if (run) {
 }
 await p.getByRole("dialog").waitFor({ timeout: 30000 });
 await p.waitForTimeout(1500);
+if (run) {
+  await p.waitForTimeout(Number(arg("wait", "0")));
+  const noteFor = await p.evaluate(() =>
+    ([...document.querySelectorAll("[role=dialog]")].find((d) => d.getBoundingClientRect().height)?.getAttribute("aria-label") || "")
+      .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660))
+      .match(/\d+:\d+/)?.[0] ?? null,
+  );
+  console.log(`run: at the hand-off the note is on ${noteFor} and ${await heard()} is heard`);
+}
 
 const watch = () =>
   p.evaluate(
@@ -268,7 +292,10 @@ const end = await p.evaluate(() => {
     sound: (window.__aud || []).some((a) => !a.paused) ? "going" : "stopped",
   };
 });
-if (run) end.recited = await recited();
+if (run) {
+  end.recited = await recited();
+  end.heard = await heard();
+}
 console.log(`mode=${mode} frames(copies:copyTop/noteTop x drawers/menu/page)=` + trail.join(","));
 console.log("end=" + JSON.stringify(end));
 await browser.close();

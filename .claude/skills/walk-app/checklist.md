@@ -278,12 +278,14 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   script with `__page` set walks it. · ipad upright and on its side, the iPad app, private build ·
   issue: `run-turn-closes-note`
 - [ ] With a note up on the verse being heard while a surah plays, turn the page by hand (an
-  arrow key, a swipe): the page turns, the note closes with its verse, and the recitation plays
-  on with Pause in reach. Closing the note, its grip, a look-alike chip and a long press keep the
+  arrow key, a swipe), both at once and again after the recitation has moved a verse past the
+  note's: the page turns, the note closes with its verse, and the recitation plays on with Pause
+  in reach. Closing the note, its grip, a look-alike chip and a long press keep the
   sound too; a hop to another verse or another verse's number ends it. `note-handoff --run`
-  walks each in a browser; the `run-note` script with `__mode` "turn" walks it in the apps
-  (`__turnBy` "key" on the Mac). · ipad, Firefox, Arabic, the iPad app, the Mac app, private
-  build · issue: `hand-turn-stops-run-with-note`
+  walks each in a browser (`--wait 5000` for a verse later); the `run-note` script with `__mode`
+  "turn" walks it in the apps (`__turnBy` "key" on the Mac, `__after` 9000 for a verse later).
+  Each says which verse is heard against the note's. · ipad, Firefox, Arabic, the iPad app, the
+  Mac app, private build · issues: `hand-turn-stops-run-with-note`, `hand-turn-stops-run-past-note`
 - [ ] With a note open, play its surah from the corner: the page goes to the surah's start and
   the note closes (a jump, on purpose); the run plays from there. · ipad, the iPad app, private
   build
