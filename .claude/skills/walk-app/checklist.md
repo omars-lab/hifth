@@ -289,6 +289,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Drop a bookmark on a page bound on the left and one bound on the right: the ribbon stops
   above the first line and hides none of its words; in settings, the long ribbon still hangs
   down with its name. · phone, desktop · test: bookmarks spec · issue: `ribbon-covers-first-words`
+- [ ] Open the record of what you have opened and try Page, Hizb and Juz: every square sits in its
+  own place with a gap round it, and none runs past the sheet's edge. · phone, desktop · tests:
+  revision spec, desktop spec ("stays a map") · issue: `map-squares-overlap`
 - [ ] Switch the interface to Arabic: everything mirrors, nothing is cut off; on an iPad, upright
   and on its side, open a note too: its close button is on the left and the card stays whole. ·
   phone, desktop, ipad, ipad-side · tests: lang, chrome-fit specs, pitch "the note mirrors"

@@ -15,6 +15,23 @@ const parts = (page: Page): Locator => page.getByRole("dialog", { name: /^The pa
 const radio = (page: Page, name: string): Locator => page.getByRole("radio", { name, exact: true });
 const bar = (page: Page, id: string): Locator => page.locator(`[data-phone-bar="${id}"]`);
 
+/** The card is open, and wherever it meets the open tools it is the card a finger lands on. */
+async function overTheTools(page: Page, card: Locator): Promise<void> {
+  await expect(card).toBeVisible();
+  await card.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((x) => x.finished)));
+  const tray = (await page.getByRole("toolbar", { name: "Page tools" }).boundingBox())!;
+  const box = (await card.boundingBox())!;
+  const top = Math.max(tray.y, box.y);
+  const bottom = Math.min(tray.y + tray.height, box.y + box.height);
+  expect(bottom, "the card reaches down over the tray").toBeGreaterThan(top);
+  for (const y of [top + 4, (top + bottom) / 2, bottom - 4])
+    for (const x of [box.x + 24, box.x + box.width / 2, box.x + box.width - 24])
+      expect(
+        await page.evaluate(([px, py]) => !!document.elementFromPoint(px!, py!)?.closest('[role="dialog"]'), [x, y]),
+        `at ${Math.round(x)},${Math.round(y)} the card is on top`,
+      ).toBe(true);
+}
+
 test.describe("Hifth · the page tools on a phone", () => {
   test("C, shown by default: the Tools button slides the tools up, and a tool picked works by a tap", async ({
     page,
@@ -108,21 +125,20 @@ test.describe("Hifth · the page tools on a phone", () => {
     await page.mouse.down();
     await page.mouse.move(to.x, to.y, { steps: 8 });
     await page.mouse.up();
-    const card = page.getByRole("dialog", { name: /^Highlighted passage · / });
-    await expect(card).toBeVisible();
-    await card.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((x) => x.finished)));
-    const tray = (await page.getByRole("toolbar", { name: "Page tools" }).boundingBox())!;
-    const box = (await card.boundingBox())!;
-    // Wherever the two overlap, it is the card a finger lands on.
-    const top = Math.max(tray.y, box.y);
-    const bottom = Math.min(tray.y + tray.height, box.y + box.height);
-    expect(bottom, "the card reaches down over the tray").toBeGreaterThan(top);
-    for (const y of [top + 4, (top + bottom) / 2, bottom - 4])
-      for (const x of [box.x + 24, box.x + box.width / 2, box.x + box.width - 24])
-        expect(
-          await page.evaluate(([px, py]) => !!document.elementFromPoint(px!, py!)?.closest('[role="dialog"]'), [x, y]),
-          `at ${Math.round(x)},${Math.round(y)} the card is on top`,
-        ).toBe(true);
+    await overTheTools(page, page.getByRole("dialog", { name: /^Highlighted passage · / }));
+  });
+
+  test("a word's parts open over the open tools, not under them", async ({ page }) => {
+    // The same layer put the word tool's card under the tray: the tray hid
+    // its top row of parts (2026-10-10, the live site). The iPhone's install
+    // notice is put away first: it pushes the verse down under the tools.
+    await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
+    await page.goto("/#/hafs-kfqc/p7");
+    await bar(page, "c").getByRole("button", { name: /^Page tools · Select is on$/ }).click();
+    await radio(page, "Word").click();
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    await overTheTools(page, parts(page));
   });
 
   test("the harakat tool's magnifier goes once the finger lifts, and the sign keeps its note", async ({ page }) => {
