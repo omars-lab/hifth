@@ -4065,6 +4065,28 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "On an iPad held upright with a note open, tapping the verse above turned the note to it but left its first line or two hidden above the page's top: its note was the same height, so nothing moved the page. Choosing another verse with a note up now brings it into the part of the page the note leaves; a verse already in sight does not move. Clean upright at the opening level and at 200% in Chromium, WebKit and the iPad app; unchanged on its side."
+    },
+    {
+      "id": "closing-note-jumps-page",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "71"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Closing the note on an upright iPad dropped the page about 400 px in one frame, because the glide's first frame was held to the room the note had just taken away; a note beside one page on a laptop threw the page sideways the same way, opening and closing. A glide that starts outside its room may now stay outside by what is left of the distance, so the page eases down over half a second, never more than about 40 px a frame, in Chromium, WebKit and the iPad app."
+    },
+    {
+      "id": "closing-note-shows-desk-strip",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "72"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent"
     }
   ]
 }

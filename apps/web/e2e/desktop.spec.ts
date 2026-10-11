@@ -1,5 +1,5 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
-import { boxOf } from "./box";
+import { boxOf, stillBoxOf } from "./box";
 import { watchFolds, foldsSeen } from "./fold";
 import { contextWithout } from "./inventory";
 import { ayahTarget } from "./ayah";
@@ -1066,7 +1066,7 @@ test.describe("Hifth · one page or two, and how big", () => {
     await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
     // The page by its own picture: the first page holder in the open leaf can
     // be the hidden half of the spread, which has no box at one page.
-    const paper = await boxOf(pageSvg(page, 42));
+    const paper = await stillBoxOf(pageSvg(page, 42));
     const card = await boxOf(list);
     expect(card.x >= paper.x + paper.width || card.x + card.width <= paper.x, "the card is beside the page").toBe(
       true,
@@ -2269,13 +2269,13 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       await expect(list).toBeVisible({ timeout: 20_000 });
       await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
       await expect(rail(page)).toBeVisible();
+      const open = await stillBoxOf(pageSvg(page, pageNo));
       const card = await boxOf(list);
-      const chips = await boxOf(rail(page));
+      const chips = await stillBoxOf(rail(page));
       const overlaps =
         chips.x < card.x + card.width && card.x < chips.x + chips.width &&
         chips.y < card.y + card.height && card.y < chips.y + chips.height;
       expect(overlaps, `the chips ${JSON.stringify(chips)} under the list ${JSON.stringify(card)}`).toBe(false);
-      const open = await boxOf(pageSvg(page, pageNo));
       const gap = Math.max(chips.x - (open.x + open.width), open.x - (chips.x + chips.width));
       expect(gap, "the chips still stand just outside the page").toBeGreaterThanOrEqual(4);
       expect(gap).toBeLessThanOrEqual(32);

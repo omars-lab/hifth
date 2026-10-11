@@ -18,3 +18,28 @@ export async function boxOf(target: Locator): Promise<Box> {
     .not.toBeNull();
   return box!;
 }
+
+/**
+ * Where an element is once it has stopped moving: two reads a beat apart agree.
+ *
+ * A list opening beside the page used to throw the page into the middle of what
+ * the list leaves in one frame; it glides there now (docs/PLAN.md, item 71), so
+ * a box read the moment the list has landed can be the page on its way.
+ */
+export async function stillBoxOf(target: Locator): Promise<Box> {
+  let last = "";
+  let box: Box | null = null;
+  await expect
+    .poll(
+      async () => {
+        box = await target.boundingBox();
+        const now = JSON.stringify(box);
+        const still = box !== null && now === last;
+        last = now;
+        return still;
+      },
+      { message: "element is still moving", intervals: [100, 100, 100, 150, 200, 300] },
+    )
+    .toBe(true);
+  return box!;
+}

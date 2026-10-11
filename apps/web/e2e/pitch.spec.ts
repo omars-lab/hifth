@@ -671,6 +671,58 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("an iPad held upright, closing the note glides the page back down rather than jumping", async ({ browser }) => {
+    // Walking the hand-off, 2026-10-11: with the note up over the page's foot,
+    // the page may sit higher than the screen otherwise allows, so a verse low
+    // on it shows above the note. Closing the note took that room away, and the
+    // page fell some 400 px in one frame, the verse with it (docs/PLAN.md,
+    // item 71). It glides down now. The note goes at once, so for the glide the
+    // strip it covered shows the desk; never more than that strip.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/2:46?view=one");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await settle(sheet(page));
+    await settle(pageSvg(page, 7));
+    const noteTop = (await sheet(page).boundingBox())!.y;
+    // Each frame from the press on: the top and the foot of the leaf the page
+    // is drawn on.
+    await page.evaluate(() => {
+      const w = window as unknown as { __trail: { top: number; foot: number }[] };
+      w.__trail = [];
+      const leaf = document.querySelector('svg[aria-labelledby="page-label-7"]')!.parentElement!;
+      const step = () => {
+        const b = leaf.getBoundingClientRect();
+        w.__trail.push({ top: b.top, foot: b.bottom });
+        if (w.__trail.length < 60) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+    await sheet(page).getByRole("button", { name: /^Close/ }).first().click();
+    await expect(sheet(page)).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __trail: unknown[] }).__trail.length))
+      .toBe(60);
+    const trail = await page.evaluate(
+      () => (window as unknown as { __trail: { top: number; foot: number }[] }).__trail,
+    );
+    const frame = await pageSvg(page, 7).evaluate((svg) => svg.closest("[aria-busy]")!.getBoundingClientRect().bottom);
+    const tops = trail.map((t) => t.top);
+    const fell = tops.at(-1)! - tops[0]!;
+    const steps = tops.slice(1).map((top, i) => top - tops[i]!);
+    const path = tops.map(Math.round).filter((top, i, all) => i === 0 || top !== all[i - 1]).join(" ");
+    // A glide of about half a second moves a tenth of the way or so a frame;
+    // a jump moves all of it in one.
+    expect(Math.max(...steps), `the most the page moves in one frame, against ${Math.round(fell)} in all: ${path}`).toBeLessThan(fell * 0.4);
+    expect(Math.min(...steps), `always down, never back up: ${path}`).toBeGreaterThan(-1);
+    expect(tops.at(-1)!, "and ends lower than it began").toBeGreaterThan(tops[0]!);
+    expect(Math.min(...trail.map((t) => t.foot)), "the page's foot uncovers no more than the note's strip").toBeGreaterThanOrEqual(noteTop - 1);
+    expect(Math.abs(trail.at(-1)!.foot - frame), "and lands with its foot on the frame's foot").toBeLessThanOrEqual(1);
+    await context.close();
+  });
+
   test("a run that took the page along ends with its verse's tools up, not its note", async ({ browser }) => {
     // Walking the pitch in the iPad app, 2026-10-10: a surah played from its
     // corner went to the surah's start, turned with the recitation, and at the
