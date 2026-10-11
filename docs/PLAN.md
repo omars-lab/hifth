@@ -1573,9 +1573,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     was never defined, so it looked exactly as it did before the tap. And once the wifi came
     back, a second tap on the same verse asked the failed player to carry on, which never
     fetches the file again, so the verse stayed silent until another was chosen. **Fixed the
-    same day:** the button turns red and its caption says "Offline" (or "Can't play" for any
-    other failure), and a tap on a verse that failed starts it over. Both have tests, on the
-    phone in both engines, and both failed first.
+    same day:** the button turns red and its caption says "Offline", and a tap on a
+    verse that failed starts it over. Both have tests, on the phone in both engines, and both
+    failed first. The first version said "Offline" only when the browser reported being
+    offline, but on a wifi with no internet behind it the browser says it is online, and that
+    is the likelier meeting room; a test stages it and the caption now says "Offline" for every
+    failure, since the network is the only place the file comes from.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

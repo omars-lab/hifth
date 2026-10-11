@@ -70,10 +70,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `number-menu-keyboard-pulled-back` · test: VerseMenu.keys.test.tsx
 - [ ] Press and hold a verse: one menu, not a menu with a note stacked on it. · phone · issue:
   `long-press-menu-and-note-stack-on-phone`
-- [ ] Turn the wifi off and press Listen on a verse: the button turns red and says it is
-  offline; turn the wifi back on and press it again: the verse plays. A pitch room may have
+- [ ] Turn the wifi off and press Listen on a verse: the button turns red and says
+  "Offline" (try a wifi with no internet behind it too); turn the wifi back on and press it again: the verse plays. A pitch room may have
   no wifi, and the recitation is the one thing the app fetches from outside. · phone · issue:
   `listen-offline-looked-untouched` · test: e2e/audio.spec.ts
+- [ ] Pick "Play to" on a verse and stop it two verses on: the three verses play one after
+  another with no second tap, and nothing plays after the last. · desktop · test:
+  e2e/verse-gestures.spec.ts ("moves on to the next verse each time one ends")
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
 
@@ -331,6 +334,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   The app's own picture leaves the clock out, so grab the whole screen. · `xcrun simctl ui
   <iPad> appearance dark`, launch, `xcrun simctl io <iPad> screenshot …`, then set it back to
   light · walked 2026-10-10, nothing wrong
+- [ ] Press Listen **in the iPad app**: the recitation plays inside the app, and the button
+  turns to Pause. On the pitch build a tapped verse opens its note first; close the note to reach
+  Listen. · `make app-probe TARGET=ipad EVALFILE=…` with a script that taps the verse, closes the
+  note and presses Listen · walked 2026-10-10, nothing wrong
 - [ ] Walk the Mac app in Arabic too, not only the iPad: the look-alike list and a note open,
   mirrored, nothing cut off. · `make app-shot TARGET=mac LOCALE=ar ROUTE=…` (shows that language
   for the one launch, even where another is picked with the app's own button) · tests:

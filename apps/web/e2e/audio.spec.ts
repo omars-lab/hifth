@@ -78,9 +78,32 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
     await play.tap();
 
     await expect(play).toHaveAttribute("data-phase", "error");
-    await expect(play).toContainText("بلا إنترنت");
+    await expect(play).toContainText("بلا اتصال");
     expect(await play.evaluate((el) => getComputedStyle(el).color)).not.toBe(before);
     await expect(page.getByRole("status").filter({ hasText: "تعذّر تشغيل هذا التسجيل" })).toHaveCount(1);
+    await context.close();
+  });
+
+  // The likelier room: joined to a wifi that has no internet behind it. The
+  // device still believes it is online, so the caption cannot lean on that;
+  // the file has no source but the network, so it names the network anyway.
+  // Android only: the iPhone engine fetches media outside Playwright's reach,
+  // so a blocked address cannot be staged there.
+  test("on a wifi with no internet behind it, the caption still says offline", async ({
+    browser,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "android", "media requests are only interceptable in Chromium");
+    const context = await browser.newContext({ serviceWorkers: "block" });
+    const page = await context.newPage();
+    await page.route("https://verses.quran.com/**", (route) => route.abort("internetdisconnected"));
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await tapAyah(page, "#verse-55");
+    const play = page.getByRole("button", { name: /تشغيل .*٢:٤٨/ });
+    await play.tap();
+    await expect(play).toHaveAttribute("data-phase", "error");
+    expect(await page.evaluate(() => navigator.onLine)).toBe(true);
+    await expect(play).toContainText("بلا اتصال");
     await context.close();
   });
 

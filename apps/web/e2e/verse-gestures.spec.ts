@@ -369,6 +369,47 @@ test.describe("Hifth · the four new verse buttons", () => {
     await expect(drawer(page)).toHaveCount(0);
   });
 
+  // The run is the one place the app starts a verse with no tap behind it:
+  // each next file begins when the last one ends. Nothing checked that it did.
+  test("Play to moves on to the next verse each time one ends, and stops after the last", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { __srcs: string[]; __player?: HTMLMediaElement };
+      w.__srcs = [];
+      HTMLMediaElement.prototype.play = function (this: HTMLMediaElement) {
+        w.__player = this;
+        return Promise.resolve();
+      };
+      const d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "src")!;
+      Object.defineProperty(HTMLMediaElement.prototype, "src", {
+        ...d,
+        set(this: HTMLMediaElement, v: string) {
+          w.__srcs.push(String(v).replace(/^.*\//, ""));
+          d.set!.call(this, v);
+        },
+      });
+    });
+    await page.route("https://verses.quran.com/**", (route) =>
+      route.fulfill({ status: 200, contentType: "audio/mpeg", body: "" }),
+    );
+    await openWith(page, null);
+    await hold(page, "#verse-46");
+    await small(page).getByRole("menuitem", { name: "Play to" }).click();
+    await tap(page, false, "#verse-48");
+    const srcs = () => page.evaluate(() => (window as unknown as { __srcs: string[] }).__srcs);
+    const end = () =>
+      page.evaluate(() => (window as unknown as { __player: HTMLMediaElement }).__player.dispatchEvent(new Event("ended")));
+    await expect.poll(srcs).toEqual(["002039.mp3"]);
+    await end();
+    await expect.poll(srcs).toEqual(["002039.mp3", "002040.mp3"]);
+    await end();
+    await expect.poll(srcs).toEqual(["002039.mp3", "002040.mp3", "002041.mp3"]);
+    await end();
+    await page.waitForTimeout(300);
+    expect(await srcs()).toEqual(["002039.mp3", "002040.mp3", "002041.mp3"]);
+  });
+
   test("F switches full screen on a computer", async ({ page }) => {
     await openWith(page, "a");
     await page.keyboard.press("KeyF");

@@ -773,9 +773,8 @@ export interface Strings {
   verseTools(label: string): string;
   vdListen: string;
   vdPause: string;
-  /** The listen caption once a recitation would not load: offline, or any other failure. */
+  /** The listen caption once a recitation would not load. */
   vdListenOffline: string;
-  vdListenFailed: string;
   vdRoots: string;
   vdCommentary: string;
   vdQul: string;
@@ -1481,7 +1480,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     vdListen: m.vdListen,
     vdPause: m.vdPause,
     vdListenOffline: m.vdListenOffline,
-    vdListenFailed: m.vdListenFailed,
     vdRoots: m.vdRoots,
     vdCommentary: m.vdCommentary,
     vdQul: m.vdQul,
