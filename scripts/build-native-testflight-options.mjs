@@ -161,7 +161,7 @@ const html = `<!doctype html>
 <body>
 <div class="wrap">
 <header>
-  <p class="status">Open decision &middot; nobody has chosen yet</p>
+  <p class="status">Decided &middot; C, by Omar on 2026-10-11 &middot; A once the owner has used it, after a licence reading</p>
   <h1>May a build of the app that carries The Study Quran's commentary go to a few named outside testers through TestFlight?</h1>
   <p class="lede">The Mac and iPad app exists and runs on this project's own devices. The next step the pitch wants is
   for a handful of people at The Study Quran to install it themselves and keep it. The only way to do that on an

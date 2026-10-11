@@ -296,13 +296,13 @@ app-device-install: app-generate ## Build for a plugged-in iPad, install and lau
 	DEVICECTL_CHILD_HIFTH_ROUTE=$(ROUTE) xcrun devicectl device process launch --device "$(DEVICE)" $(BUNDLE_ID)
 
 # ---- TestFlight: gated on the licence decision, not on the build
-# Both refuse while docs/decisions.json still holds `native-testflight-licence`
-# open. The record says why in plain words; settle it there first.
-TESTFLIGHT_SETTLED = $(shell python3 -c "import json; r=[d for d in json.load(open('docs/decisions.json'))['decisions'] if d['id']=='native-testflight-licence']; print('yes' if r and r[0]['status']!='open' else 'no')" 2>/dev/null)
+# Both refuse until docs/decisions.json settles `native-testflight-licence` on
+# an upload option (A or B). Settled on C, own devices only, they still refuse.
+TESTFLIGHT_SETTLED = $(shell node scripts/testflight-allowed.mjs 2>/dev/null && echo yes || echo no)
 define TESTFLIGHT_GATE
 	@test "$(TESTFLIGHT_SETTLED)" = yes || { echo ""; \
-	  echo "  Not yet. Whether a build with the held commentary may go to outside testers is"; \
-	  echo "  still open: docs/decisions/native-testflight-licence.md. Settle it there first."; echo ""; exit 1; }
+	  echo "  Not yet. A build with the held commentary goes to outside testers only once"; \
+	  echo "  docs/decisions/native-testflight-licence.md says A or B; today it does not."; echo ""; exit 1; }
 endef
 
 app-archive: app-generate ## Archive the iPad app for upload (refuses until the TestFlight decision is settled)
