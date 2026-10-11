@@ -16,8 +16,8 @@ only on the open book in the real app could reach the room unseen.
   apps is not allowed to choose its own orientation (the error says the current windowing mode
   does not allow it). Making the app full-screen only to allow this would change the shipped
   app for the sake of a check, so this was dropped.
-- **Turning the simulator from outside by keystroke.** Ruled out before this began: it steals
-  the laptop's focus and is unreliable.
+- **Turning the simulator from outside by keystroke.** Not tried: this project does not turn the
+  simulator by keystroke, because it takes over the laptop's keyboard focus.
 - **A UI test turns the simulator, then starts the app with the probe asked for.** This is the
   same way the picture walk already turns it. It works, with one catch found on the way: the
   test cannot read what the app prints, so the app also writes its answer to a file, and the

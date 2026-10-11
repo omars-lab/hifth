@@ -269,6 +269,20 @@ export default defineConfig({
           },
         },
         {
+          // A recitation played from a page's corner, in Firefox: the page going
+          // along with it and the last verse lit at the end. Only that part of
+          // the verse-gestures file, which is mostly touch; about 13 s
+          // (2026-10-11, after the run's end had been seen in every other
+          // browser but this one).
+          name: "desktop-firefox-runs",
+          testMatch: /verse-gestures\.spec\.ts/,
+          grep: /holding the page's corners/,
+          use: {
+            browserName: "firefox",
+            viewport: { width: 1440, height: 900 },
+          },
+        },
+        {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
           testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device)\.spec\.ts/,
