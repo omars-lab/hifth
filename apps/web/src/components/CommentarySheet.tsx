@@ -164,6 +164,7 @@ export function CommentarySheet({
   onSide,
   onTall,
   back = null,
+  listen = null,
   creditNote,
   sigla = NO_KEY,
 }: {
@@ -218,6 +219,14 @@ export function CommentarySheet({
    * started.
    */
   back?: { label: string; onBack: () => void } | null;
+  /**
+   * The recitation playing while the note is up, when a surah or a "Play to"
+   * run is going. The note stands where the verse's tools were, and Pause lives
+   * on those tools, so the note carries it on its title row: without it the
+   * only way to stop the sound was the verse's number, which closes the note.
+   * Named for the verse being heard, which is often not the note's own.
+   */
+  listen?: { label: string; playing: boolean; glyph: string; onToggle: () => void } | null;
   /** A line under the credit about where this is shown (the pitch says it is private). */
   creditNote?: string | undefined;
   /**
@@ -548,6 +557,18 @@ export function CommentarySheet({
               </h2>
               <span className={styles.ref}>{label}</span>
             </div>
+            {listen && (
+              <button
+                type="button"
+                className={styles.close}
+                onClick={listen.onToggle}
+                aria-label={listen.playing ? t.pauseAyah(listen.label) : t.playAyah(listen.label)}
+                aria-pressed={listen.playing}
+                data-note-listen=""
+              >
+                {listen.glyph}
+              </button>
+            )}
             <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
               ✕
             </button>

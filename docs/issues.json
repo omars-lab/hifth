@@ -4142,9 +4142,11 @@
         "file": "docs/PLAN.md",
         "item": "77"
       },
-      "status": "open",
-      "severity": "question",
-      "owner": "user"
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "While a run plays the note carries the recitation's Pause; the browser test presses it with the note up, hears the sound stop with the same note open, and resumes the run."
     }
   ]
 }

@@ -1854,13 +1854,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     a tap on bare page never did. A private-build test at iPad size, watched failing first, and
     walked in Safari's engine, Firefox and the iPad app: the sound ran through the tap and the
     note, and the next verse rose above the note within half a second.
-77. **With the note up while a surah plays, no Pause is on the screen.** Found with item 76: the
-    note takes the place of the verse's tools, and Pause lives on those tools, so while the note
-    is open over a recitation the only way to stop it is the verse's number (its menu offers
-    Pause) or closing the note, which brings the tools back with Pause on them. This was already
-    so for a run started from a verse whose note was open (item 58); item 76 makes it a state the
-    room reaches more often. The question for the owner: should the note carry a small Pause of
-    its own while a recitation plays, or is the number's menu close enough?
+77. ~~**With the note up while a surah plays, stopping the sound closed the note.**~~ Found with
+    item 76, 2026-10-11: the note takes the place of the verse's tools, and Pause lives on those
+    tools, so while the note was open over a recitation the only way to stop it was the number of
+    the verse being heard, whose menu offers Pause. Walked in the private build, that tap closed
+    the note the presenter was showing before the menu came up, so stopping the sound always cost
+    the note. First filed as a question for the owner; it is a fault, because a presenter has no
+    way to quiet the room and keep the note. Fixed: while a surah or a "Play to" run plays, the
+    note carries the recitation's Pause on its title row, beside Close, named for the verse being
+    heard; pressed, the sound stops, the same note stays up and the button turns to Play, which
+    picks the run up where it stopped. The number's menu keeps its Pause. A browser test, watched
+    failing first; walked in Safari's engine, Firefox, a phone's size and the iPad app.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

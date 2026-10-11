@@ -72,7 +72,11 @@
   const lbl = (e) => (e.getAttribute("aria-label") || e.textContent || "").trim();
   const pauses = [...document.querySelectorAll("button,[role=button],[role=menuitem]")].filter((e) => on(box(e)) && /Pause|Stop|⏸/.test(lbl(e)));
   out.push(`D pause controls on screen=${pauses.length} inNote=${pauses.filter((e) => e.closest("[role=dialog]")).length} at=${pauses.map((e) => f(box(e))).join(",")}`);
-  const pause = [...document.querySelectorAll("button")].find((e) => on(box(e)) && (isAr ? /^إيقاف/ : /^Pause/).test(e.getAttribute("aria-label") || ""));
-  if (pause) pause.click();
+  // E: the note's own Pause (item 77): the sound stops and the same note stays up.
+  const noteFor = () => (note()?.getAttribute("aria-label") || "").match(/\d+:\d+/)?.[0] || "none";
+  const before = noteFor();
+  const pause = [...(note()?.querySelectorAll("button") || [])].find((e) => on(box(e)) && (isAr ? /^إيقاف/ : /^Pause/).test(e.getAttribute("aria-label") || ""))
+    || [...document.querySelectorAll("button")].find((e) => on(box(e)) && (isAr ? /^إيقاف/ : /^Pause/).test(e.getAttribute("aria-label") || ""));
+  if (pause) { pause.click(); await wait(1500); out.push(`E after ${pause.closest("[role=dialog]") ? "the note's" : "a"} Pause: noteFor ${before}->${noteFor()} ${look()}`); }
   return `view=${innerWidth}x${innerHeight} ; ` + out.join(" ; ");
 })()

@@ -970,6 +970,56 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("with the note up over a recitation, the note's own Pause stops the sound and keeps the note", async ({
+    browser,
+  }) => {
+    // Found with item 76, 2026-10-11: the note takes the place of the verse's
+    // tools, where Pause lives, so the one way left to stop the sound was the
+    // verse's number, and tapping it closed the note the presenter was showing
+    // (docs/PLAN.md, item 77). The note carries the recitation's Pause while a
+    // run plays.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    const player = await fakePlayer(page);
+    const playing = () => page.evaluate(() => !(window as unknown as { __player: HTMLMediaElement }).__player.paused);
+    await page.goto("/#/hafs-kfqc/p2?view=one");
+    await expect(pageSvg(page, 2)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    const head = (await page.locator('[data-host-page="2"] [data-running-head="surah"]').boundingBox())!;
+    await page.mouse.move(head.x + head.width / 2, head.y + head.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    await page.getByRole("menu").getByRole("menuitem", { name: "Play", exact: true }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    await player.end();
+    await expect.poll(player.files).toEqual(["002001.mp3", "002002.mp3"]);
+    const number = pageSvg(page, 2).locator('[data-verse-number][data-verse-key="quran/hafs-kfqc/2:2"]');
+    await settle(number);
+    const at = (await number.boundingBox())!;
+    await page.mouse.click(at.x + at.width / 2, at.y + at.height / 2);
+    await page.getByRole("menu", { name: /2:2/ }).getByRole("menuitem", { name: /Commentary/ }).click();
+    await expect(sheet(page)).toBeVisible();
+    await expect(sheet(page)).toHaveAttribute("aria-label", /2:2\b/);
+    await player.end();
+    await expect.poll(player.files).toEqual(["002001.mp3", "002002.mp3", "002003.mp3"]);
+
+    // Named for the verse being heard, not the note's.
+    const pause = sheet(page).getByRole("button", { name: /^Pause .*2:3$/ });
+    await expect(pause).toBeVisible();
+    await pause.click();
+    await expect.poll(playing).toBe(false);
+    await expect(sheet(page)).toBeVisible();
+    await expect(sheet(page)).toHaveAttribute("aria-label", /2:2\b/);
+    // And it picks the run up again from where it stopped.
+    await sheet(page).getByRole("button", { name: /^Play .*2:3$/ }).click();
+    await expect.poll(playing).toBe(true);
+    await player.end();
+    await expect.poll(async () => (await player.files()).at(-1)).toBe("002004.mp3");
+    await context.close();
+  });
+
   test("an iPad held upright opens on one page, and turned on its side opens the book", async ({ browser }) => {
     // Upright, two pages side by side were each half the screen wide, with
     // empty space above and below: the mus'haf read small on the very screen
