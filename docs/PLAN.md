@@ -1801,16 +1801,24 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     has may stay outside by what is left of the distance, shrinking to nothing as it runs, so the
     page leaves from where it was and lands where it did before. Upright, the page now eases down
     about 400 px over half a second (never more than about 40 px in a frame) in Chromium, WebKit
-    and the iPad app; beside the page on a laptop it eases across both ways. Every other glide is
+    and the iPad app, and on a phone about 170 px over the same time; beside the page on a laptop
+    it eases across both ways. Every other glide is
     unchanged, since it starts inside its room. A unit test and a browser test, watched failing
     first. What it leaves: the note still goes in one frame, so for that half second the strip it
     covered shows the desk below the page (item 72).
-72. **When the note closes on an upright iPad, the desk shows below the page for half a second.**
+72. ~~**When the note closes on an upright iPad, the desk shows below the page for half a second.**~~
     Found with item 71's fix, 2026-10-11. The note leaves in one frame while the page glides down
     to fill the screen, so the strip the note covered, about 400 px on a 13-inch iPad held upright,
     shows the brown desk for about 0.46 s. Brief, but in the room it is the moment the reader's
-    eyes are on the page. A note that slides down out of sight in step with the page would cover
-    it; to build and look at side by side with today's, the loser kept as a setting.
+    eyes are on the page. **Fixed the same day, both ways built.** When the note across the page's
+    foot closes, a copy of it, which nobody can press or hear, stays where the note stood and
+    slides down off the screen over the same half second and with the same easing as the page, so
+    the page follows it down and nothing shows between them. The worst frame went from about 400
+    px of desk to none beyond what shows at rest, in Chromium, WebKit and the iPad app; on a phone
+    from about 230 px to about 60 px more than at rest. Going at once stays as a setting in the info
+    panel. A card standing in a corner beside one page (a laptop) still goes at once: the page
+    moves sideways there, and a copy sliding down ended half off the screen before it went. With
+    reduced motion both go at once. Unit tests and browser tests, watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

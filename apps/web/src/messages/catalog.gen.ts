@@ -266,6 +266,10 @@ export interface Catalog {
   readonly noteFollowing: string;
   readonly noteHarakahOf: (d: { readonly label: string | number }) => string;
   readonly noteJoined: (d: { readonly label: string | number }) => string;
+  readonly noteLeaveAtOnce: string;
+  readonly noteLeaveNote: string;
+  readonly noteLeaveSlide: string;
+  readonly noteLeaveTitle: string;
   readonly noteLoaded: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly noteMore: string;
   readonly noteOutside: (d: { readonly n: number; readonly scope: string | number; readonly label: string | number; readonly nText: string | number }) => string;

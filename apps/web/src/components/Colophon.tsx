@@ -23,6 +23,7 @@ import { PEN_HOMES, type PenHome } from "../pen-home";
 import { RAIL_HOMES, type RailHome } from "../rail-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import { ZOOM_ANCHORS, rememberZoomAnchor, useZoomAnchor } from "../zoom-anchor";
+import { NOTE_LEAVES, rememberNoteLeave, useNoteLeave } from "../note-leave";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -248,6 +249,7 @@ export function Colophon({
   const runFollow = useRunFollow();
   const runAhead = useRunAhead();
   const zoomAnchor = useZoomAnchor();
+  const noteLeave = useNoteLeave();
   const lookalikePreview = useLookalikePreview();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -505,6 +507,30 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.zoomAnchorNote}</p>
+        </section>
+
+        {/* How a note across the page's foot leaves (docs/PLAN.md, item 72):
+            sliding away as the page comes down is the default; at once stays. */}
+        <section className={styles.block} aria-labelledby="colophon-note-leave">
+          <h3 className={styles.subhead} id="colophon-note-leave">
+            {t.noteLeaveTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-note-leave">
+            {NOTE_LEAVES.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={noteLeave === choice}
+                data-note-leave={choice}
+                onClick={() => rememberNoteLeave(choice)}
+              >
+                {choice === "slide" ? t.noteLeaveSlide : t.noteLeaveAtOnce}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.noteLeaveNote}</p>
         </section>
 
         {/* How a run makes its next verse ready while one sounds (docs/PLAN.md,

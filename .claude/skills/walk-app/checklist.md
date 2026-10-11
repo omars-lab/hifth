@@ -246,8 +246,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   checked 2026-10-11 in WebKit, clean
 - [ ] With the note up on an iPad held upright, close it: the page eases down to fill the screen,
   with no jump; on a laptop with one page, opening and closing a note beside the page moves the
-  page across smoothly too. · ipad, the iPad app upright, desktop, private build · issue:
+  page across smoothly too. · ipad, the iPad app upright, desktop, phone, private build · issue:
   `closing-note-jumps-page`
+- [ ] With the note up across the page's foot (an iPad held upright, a phone), close it: the note
+  slides down out of sight as the page comes down after it, and no brown desk shows between them
+  at any moment; a card in a corner beside one page on a laptop goes at once. · ipad, the iPad
+  app upright, phone, desktop, private build · issue: `closing-note-shows-desk-strip`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 

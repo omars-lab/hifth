@@ -723,6 +723,90 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("an iPad held upright, closing the note slides it away with the page, so the desk never shows", async ({ browser }) => {
+    // Walking the hand-off, 2026-10-11: the page glides back down when the
+    // note closes, but the note went in one frame, so for half a second the
+    // strip it covered showed the bare desk under the page, some 370 px of it
+    // (docs/PLAN.md, item 72). A copy of the note slides down off the screen
+    // now, as the page comes down after it.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/2:46?view=one");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await settle(sheet(page));
+    await settle(pageSvg(page, 7));
+    const note = (await sheet(page).boundingBox())!;
+    // Each frame from the press on: how many pixels, down the middle of the
+    // screen from the leaf's foot to the frame's, show the desk itself rather
+    // than the page or anything over it. The copy of the note that leaves
+    // takes no press, so a press's own test looks through it: its box is read.
+    await page.evaluate(() => {
+      const w = window as unknown as { __bare: number[] };
+      w.__bare = [];
+      const svg = document.querySelector('svg[aria-labelledby="page-label-7"]')!;
+      const frame = svg.closest("[aria-busy]")!;
+      const x = innerWidth / 2;
+      const step = () => {
+        const foot = svg.parentElement!.getBoundingClientRect().bottom;
+        const end = frame.getBoundingClientRect().bottom;
+        const over = [...document.querySelectorAll("[data-note-leaving]")].map((e) => e.getBoundingClientRect());
+        let bare = 0;
+        for (let y = Math.ceil(foot); y < end; y += 2) {
+          if (over.some((b) => y >= b.top && y < b.bottom && x >= b.left && x < b.right)) continue;
+          const el = document.elementFromPoint(x, y);
+          if (el && (el.contains(frame) || (frame.contains(el) && !el.closest("svg")))) bare += 2;
+        }
+        w.__bare.push(bare);
+        if (w.__bare.length < 45) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+    await sheet(page).getByRole("button", { name: /^Close/ }).first().click();
+    await expect(sheet(page)).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __bare: unknown[] }).__bare.length))
+      .toBe(45);
+    const bare = await page.evaluate(() => (window as unknown as { __bare: number[] }).__bare);
+    expect(Math.max(...bare), `the most desk that shows in a frame, against a note ${Math.round(note.height)} px tall: ${bare.join(" ")}`)
+      .toBeLessThan(note.height * 0.15);
+    // And the copy is gone once the page is down: nothing is left over it.
+    await expect(page.locator("[data-note-leaving]")).toHaveCount(0);
+    await context.close();
+  });
+
+  test("on a laptop, the note in the corner beside one page goes at once: nothing slides down there", async ({ browser }) => {
+    // Building item 72, 2026-10-11: a copy slid down from the card in the
+    // corner too, where the page moves sideways, not down, and the copy ended
+    // half off the screen over the bar at its foot before it vanished. Only
+    // the note across the page's foot leaves that way.
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/2:46?view=one");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await settle(sheet(page));
+    // Each frame from the press on: whether a copy of the note is up.
+    await page.evaluate(() => {
+      const w = window as unknown as { __copies: number[] };
+      w.__copies = [];
+      const step = () => {
+        w.__copies.push(document.querySelectorAll("[data-note-leaving]").length);
+        if (w.__copies.length < 20) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+    await sheet(page).getByRole("button", { name: /^Close/ }).first().click();
+    await expect(sheet(page)).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __copies: unknown[] }).__copies.length))
+      .toBe(20);
+    const copies = await page.evaluate(() => (window as unknown as { __copies: number[] }).__copies);
+    expect(Math.max(...copies), "no copy of the card in any frame").toBe(0);
+    await context.close();
+  });
+
   test("a run that took the page along ends with its verse's tools up, not its note", async ({ browser }) => {
     // Walking the pitch in the iPad app, 2026-10-10: a surah played from its
     // corner went to the surah's start, turned with the recitation, and at the
