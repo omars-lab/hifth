@@ -807,6 +807,44 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("an iPad held upright, a look-alike list taking the note's place rises over the note sliding away, not under it", async ({ browser }) => {
+    // Walking the hand-offs, 2026-10-11: the list rose into its place while
+    // the copy of the note was still sliding down over it, two drawers stacked
+    // for a moment, the look one drawer at a time had put an end to
+    // (docs/PLAN.md, item 74). The note slides away beneath what replaces it.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/2:49?view=one");
+    await expect(page.getByRole("dialog", { name: /2:49/ })).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    await settle(sheet(page));
+    // Each frame from the press on, while both are up: whether the copy of the
+    // note stands on a lower layer than the list.
+    await page.evaluate(() => {
+      const w = window as unknown as { __under: string[]; __frames: number };
+      w.__under = [];
+      w.__frames = 0;
+      const step = () => {
+        const copy = document.querySelector("[data-note-leaving]");
+        const list = [...document.querySelectorAll("[role=dialog]")].find((e) => e.getBoundingClientRect().height > 0);
+        if (copy && list) {
+          const z = (e: Element) => Number(getComputedStyle(e).zIndex) || 0;
+          w.__under.push(z(copy) < z(list) ? "under" : `over:${z(copy)}/${z(list)}`);
+        }
+        if (++w.__frames < 30) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+    await page.locator('button[data-direction="later"]').click();
+    await expect(page.getByRole("dialog", { name: /later/i })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => (window as unknown as { __frames: number }).__frames)).toBe(30);
+    const under = await page.evaluate(() => (window as unknown as { __under: string[] }).__under);
+    expect(under.length, "frames with both the copy and the list up").toBeGreaterThan(0);
+    expect(under.filter((u) => u !== "under"), "frames with the copy over the list").toEqual([]);
+    await context.close();
+  });
+
   test("an iPad held upright, a long press with the note up keeps its menu beside the verse as the page comes down", async ({ browser }) => {
     // Walking the hand-offs, 2026-10-11: the note gives way to a long press's
     // menu, so the page glides some 400 px down to fill the screen, and the

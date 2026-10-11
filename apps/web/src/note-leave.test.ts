@@ -70,6 +70,9 @@ describe("the copy of the note left behind to slide away", () => {
     expect(copy.hasAttribute("aria-label")).toBe(false);
     expect(copy.querySelector("[id]")).toBeNull();
     expect(copy.hasAttribute("tabindex")).toBe(false);
+    // One layer under every drawer, so a list that takes the note's place
+    // rises over it, and still over the page's own bars.
+    expect(copy.style.zIndex).toBe("calc(var(--z-sheet) - 1)");
     // It slides down over the time it was given, and is gone at the end.
     expect(animate).toHaveBeenCalledTimes(1);
     const [frames, timing] = animate.mock.calls[0] as unknown as [Keyframe[], KeyframeAnimationOptions];
