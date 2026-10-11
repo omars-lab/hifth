@@ -9,6 +9,12 @@ import { tapAyah } from "./ayah";
 // browser's job and codec-dependent in a headless runner, so this test stops at
 // the request and never waits on audio to actually play.
 test.describe("Hifth · per-verse recitation (task #67)", () => {
+  // The app asks early for the verse a control offers to play (docs/PLAN.md,
+  // item 65), with fetch. A service worker's fetch passes the route below by in
+  // WebKit, so the real file came in, was kept, and the tap played that copy
+  // instead of asking for the address (docs/issues/early-ask-escaped-e2e-route.md).
+  test.use({ serviceWorkers: "block" });
+
   test("the play control appears on selection and asks the CDN for that verse", async ({ page }) => {
     let requested: string | null = null;
     // Catch the media request before it streams; fulfil it with an empty body so
