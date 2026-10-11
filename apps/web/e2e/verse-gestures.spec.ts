@@ -2,6 +2,7 @@ import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { VERSE_GESTURES_KEY } from "../src/verse-gestures";
+import { RUN_MARK_KEY } from "../src/run-mark";
 
 /*
  * What a tap and a hold on a verse do (docs/design/verse-tap-and-hold.md). The
@@ -133,6 +134,14 @@ async function fakePlayer(page: Page): Promise<{
       }),
     fail: () => page.evaluate(() => (window as unknown as { __fail: () => void }).__fail()),
   };
+}
+
+/** The verses the page has marked in one of its highlight groups, as "2:40". */
+async function marked(page: Page, group: string): Promise<string[]> {
+  const keys = await page
+    .locator(`#hifth-overlay [data-hl-group='${group}']`)
+    .evaluateAll((els) => els.map((el) => el.getAttribute("data-hl-key") ?? "?"));
+  return [...new Set(keys.map((k) => k.slice(k.lastIndexOf("/") + 1)))];
 }
 
 /** "Play to" from the verse 2:39 to 2:41, on page 7. */
@@ -506,6 +515,62 @@ test.describe("Hifth · the four new verse buttons", () => {
     await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3", "002040.mp3"]);
     await player.end();
     await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3", "002040.mp3", "002041.mp3"]);
+  });
+
+  // A presenter plays a run and talks over it: the room has to see which verse
+  // is being recited, not only the first one, which stays chosen. By default the
+  // verse's light moves with the recitation and comes back to the first verse
+  // when the run is over; the other way keeps the first verse lit and rings the
+  // one being recited.
+  test("a run's light moves to each verse as it is recited, and back to the first when it is over", async ({
+    page,
+  }) => {
+    const player = await fakePlayer(page);
+    await playThreeVerses(page);
+    await expect.poll(player.files).toEqual(["002039.mp3"]);
+    await expect.poll(() => marked(page, "selection")).toEqual(["2:39"]);
+    await player.end();
+    await expect.poll(() => marked(page, "selection")).toEqual(["2:40"]);
+    await player.end();
+    await expect.poll(() => marked(page, "selection")).toEqual(["2:41"]);
+    expect(await marked(page, "heard")).toEqual([]);
+    await player.end();
+    await expect.poll(() => marked(page, "selection")).toEqual(["2:39"]);
+  });
+
+  test("how a run shows its verse is a setting in the info panel, the light by default, and remembered", async ({
+    page,
+  }) => {
+    await openWith(page, null);
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    const group = page
+      .getByRole("dialog", { name: /About Hifth/ })
+      .getByRole("radiogroup", { name: "The verse being recited" });
+    await expect(group.getByRole("radio", { checked: true })).toHaveText("The light moves");
+    await group.getByRole("radio", { name: "A ring moves" }).click();
+    await expect(group.getByRole("radio", { checked: true })).toHaveText("A ring moves");
+    expect(await page.evaluate((k) => localStorage.getItem(k), RUN_MARK_KEY)).toBe("ring");
+  });
+
+  test("with the ring chosen, the first verse stays lit and a ring follows the recitation", async ({ page }) => {
+    await page.addInitScript((key) => {
+      try {
+        localStorage.setItem(key, "ring");
+      } catch {
+        /* private mode */
+      }
+    }, RUN_MARK_KEY);
+    const player = await fakePlayer(page);
+    await playThreeVerses(page);
+    await expect.poll(player.files).toEqual(["002039.mp3"]);
+    await expect.poll(() => marked(page, "heard")).toEqual(["2:39"]);
+    await player.end();
+    await expect.poll(() => marked(page, "heard")).toEqual(["2:40"]);
+    expect(await marked(page, "selection")).toEqual(["2:39"]);
+    await player.end();
+    await player.end();
+    await expect.poll(() => marked(page, "heard")).toEqual([]);
+    expect(await marked(page, "selection")).toEqual(["2:39"]);
   });
 
   test("F switches full screen on a computer", async ({ page }) => {

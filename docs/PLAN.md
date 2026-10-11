@@ -1588,17 +1588,32 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     rest. The same press after a verse in the run failed to load also ended the run. **Fixed
     the same day:** the tools come back once the run starts, the button speaks for the verse
     being recited, and pausing, resuming or retrying that verse keeps the run going; a press
-    on any other verse still ends it. Three tests on the computer and both phones, two of
-    them watched failing with the old rule. *Why the button follows the recitation and the
+    on any other verse still ends it. Three tests on the computer (the phones share the same
+    buttons, so that group runs once), two of them watched failing with the old rule. *Why the button follows the recitation and the
     selection does not:* moving the selection opens that verse's note in the pitch build,
     brings its tools back up and closes the surah's introduction, so a selection that moved
     with the run would open a note on every verse. What is left is item 57.
-57. **Nothing on the page shows which verse a run is reciting.** Found with item 56 on
+57. ~~**Nothing on the page shows which verse a run is reciting.**~~ Found with item 56 on
     2026-10-10: during "Play to" the page keeps the run's first verse lit, and the verse
     tools' heading names it too, while the second and third are heard. A hafiz listening
     along, or a room watching, cannot see where the recitation is. Moving the selection with
     the run is ruled out (item 56 says why), so it wants a mark of its own on the verse being
-    heard, built more than one way and tried by hand.
+    heard. **Fixed the same day, two ways, a setting in the info panel ("The verse being
+    recited"):**
+    - *The light moves* (the default): the verse's light goes to each verse as it is recited
+      and comes back to the run's first when the run is over. One mark, readable from across a
+      room, and what a listener knows from other Qur'an players that follow along.
+    - *A ring moves*: the first verse stays lit and a solid ring goes round the verse being
+      recited. Two marks, so where the run began is never lost.
+
+    What building them showed that a list beforehand did not: with the moving light, the
+    verse's tools under the page still name the run's first verse (their heading, Share,
+    Bookmark), because those act on the chosen verse, which does not move; so the lit verse
+    and the tools' verse disagree until the run ends. The ring has no such gap, at the price of
+    a second mark. The light stays the default for the single mark; switching it is one line in
+    the setting's module. Known edge: a run that carries on onto a page that is not showing
+    draws its mark nowhere until the reader turns there. Four tests on the computer, the two
+    marks' tests and the setting's watched failing first, and both looked at in Firefox.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

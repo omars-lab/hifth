@@ -55,15 +55,16 @@ import {
 const SVG_NS = "http://www.w3.org/2000/svg";
 const OVERLAY_ID = "hifth-overlay";
 
-export type GroupId = "selection" | "phrase" | "breadcrumb" | "preview" | "word";
+export type GroupId = "selection" | "phrase" | "breadcrumb" | "preview" | "word" | "heard";
 /**
  * What a mark means, which is what decides its colour (highlight.css): `sel`
  * the verse you are on, `hlt` a passage you swept, `run` a run of words you
- * held, `crumb` where you came from. Three inks since the highlight-texture
- * decision (2026-09-30): a passage and a word run each take their own colour,
- * blended with the amber verse where they cross.
+ * held, `crumb` where you came from, `heard` the verse a "Play to" run is
+ * reciting while the verse it started from stays lit. Three inks since the
+ * highlight-texture decision (2026-09-30): a passage and a word run each take
+ * their own colour, blended with the amber verse where they cross.
  */
-export type StyleToken = "sel" | "crumb" | "hlt" | "run" | "preview" | "marquee";
+export type StyleToken = "sel" | "crumb" | "hlt" | "run" | "preview" | "marquee" | "heard";
 
 /**
  * The styles that are ink, and so get marker swipes instead of a filled clone
@@ -455,6 +456,9 @@ export class Highlighter {
     for (const id of loc.elementIds) {
       drawn.push(...this.paint(id, style, group));
     }
+    // Which verse a mark is on, so a reader of the page (and a test) can ask
+    // without measuring it against the verses beneath.
+    for (const el of drawn) el.setAttribute("data-hl-key", key);
     this.drawn.set(group, drawn);
   }
 

@@ -6,6 +6,7 @@ import { LOCALE_IDS } from "../messages/locales.gen";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
+import { RUN_MARKS, type RunMark } from "../run-mark";
 import { ARROW_SHOWINGS } from "../jump-arrows";
 import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
@@ -36,6 +37,9 @@ interface ColophonProps {
   /** What a tap and a hold on a verse do; remembered on this device. */
   verseGestures?: VerseGestures;
   onVerseGestures?: (choice: VerseGestures) => void;
+  /** How the page shows the verse a "Play to" run is reciting; remembered on this device. */
+  runMark?: RunMark;
+  onRunMark?: (choice: RunMark) => void;
   /** Whether the saved jump arrows stay on the page; remembered on this device. */
   arrowShowing?: ArrowShowing;
   onArrowShowing?: (choice: ArrowShowing) => void;
@@ -217,6 +221,8 @@ export function Colophon({
   onTurnStyle,
   verseGestures,
   onVerseGestures,
+  runMark,
+  onRunMark,
   arrowShowing,
   onArrowShowing,
   scopeLook,
@@ -418,6 +424,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.verseGesturesNote}</p>
+          </section>
+        )}
+
+        {/* How the page shows the verse a "Play to" run is reciting
+            (docs/PLAN.md, item 57): built two ways, the moving light first. */}
+        {runMark && onRunMark && (
+          <section className={styles.block} aria-labelledby="colophon-run-mark">
+            <h3 className={styles.subhead} id="colophon-run-mark">
+              {t.runMarkTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-run-mark">
+              {RUN_MARKS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={runMark === choice}
+                  data-run-mark={choice}
+                  onClick={() => onRunMark(choice)}
+                >
+                  {choice === "light" ? t.runMarkLight : t.runMarkRing}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.runMarkNote}</p>
           </section>
         )}
 

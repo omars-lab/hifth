@@ -124,6 +124,17 @@
   opacity: 0.8;
 }
 
+/* The verse a "Play to" run is reciting, when the reader chose the ring over
+   the moving light (docs/PLAN.md, item 57): a solid outline in the accent, so
+   it reads apart from the breadcrumb's dashed one, round a verse whose own ink
+   is left alone. */
+#hifth-overlay .hl-heard {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
 /* Range — the passage a drag painted (Loop 5) — and the word run a hold
    painted. Each in its own colour since the highlight-texture decision
    (settled 2026-09-30, option F): a passage in a second colour under the amber
