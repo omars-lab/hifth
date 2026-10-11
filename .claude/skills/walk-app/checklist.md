@@ -259,6 +259,17 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   rises in front of the note as the note slides away behind it, never two drawers stacked with
   the note on top. · ipad, the iPad app upright, phone, private build · issue:
   `list-under-leaving-note`
+- [ ] With the note up across the page's foot, every hand-off once (Close, a page-turn key, Back,
+  a long press, a verse number's menu, a look-alike chip, a swipe, a pinch, and in Arabic): the
+  note slides away under whatever takes its place, nothing is left behind, and a pinch keeps the
+  note up. The `note-handoff` script walks them all. · ipad, the iPad app upright, private build
+- [ ] Play a surah from its corner and, while a verse is heard, tap that verse's number and open
+  its note: the sound never stops, the run goes on to the next verse, and the page lifts that
+  verse above the note. A tap on another verse still stops it. The `run-note` script walks it. ·
+  ipad, the iPad app upright, private build · issue: `recited-verse-tap-stops-run`
+- [ ] With a note open, play its surah from the corner: the page goes to the surah's start and
+  the note closes (a jump, on purpose); the run plays from there. · ipad, the iPad app, private
+  build
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 

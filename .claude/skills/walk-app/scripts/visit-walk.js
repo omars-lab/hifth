@@ -19,7 +19,10 @@
   const shownSvgs = () => [...document.querySelectorAll("svg[aria-labelledby^='page-label-']")]
     .filter((e) => { const r = box(e); return r && r.right > 0 && r.left < innerWidth; });
   const shown = () => shownSvgs().map((e) => e.getAttribute("aria-labelledby").replace("page-label-", "")).join("+");
-  const sel = () => [...new Set([...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']")].map((e) => (e.getAttribute("data-hl-key") || "?").split("/").pop()))].join("+");
+  // Lit verses on screen only: upright, the page left behind stays in the page with its
+  // verse still lit, drawn nowhere, and counting it read as two verses lit at once.
+  const onScreen = (e) => { const r = box(e); return r && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth; };
+  const sel = () => [...new Set([...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']")].filter(onScreen).map((e) => (e.getAttribute("data-hl-key") || "?").split("/").pop()))].join("+");
   const runBtns = () => [...document.querySelectorAll("button")].filter((e) => box(e) && box(e).bottom > 0 && box(e).top < innerHeight)
     .map((e) => e.getAttribute("aria-label") || "").filter((s) => (isAr ? /^(تشغيل|إيقاف)/ : /^(Play|Pause|Stop)/).test(s)).map((s) => s.split(" ")[0]).join("/");
   const note = () => document.querySelector("[role=dialog]");

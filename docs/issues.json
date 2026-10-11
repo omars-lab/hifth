@@ -4123,6 +4123,28 @@
       "status": "open",
       "severity": "question",
       "owner": "user"
+    },
+    {
+      "id": "recited-verse-tap-stops-run",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "76"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Choosing the verse a run is reciting no longer stops the sound; the browser test taps its number mid-run, opens its note and hears the next verse."
+    },
+    {
+      "id": "no-pause-with-note-up",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "77"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user"
     }
   ]
 }
