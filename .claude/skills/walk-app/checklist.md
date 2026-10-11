@@ -441,6 +441,12 @@ upright and on its side, English and Arabic, iPad and Mac.
 
 - [ ] Mark up a page with each pen from each place the pens can live. · any · tests: pen-homes,
   pen-colours specs
+  In the iPad and Mac apps, walk it with the `pen-walk` script, each place set first: every pen
+  is picked and checked, and the ones that mark by a tap leave their mark on a verse; the drag
+  pens (highlight, crop, jump) are only picked there, so the browser tests are what drag them.
+  On the large iPad upright the side place has no margin and falls back to the Mark up button.
+  In Arabic the side rail stays on the right edge, as drawn; nothing says yet whether it should
+  move to the left (notes-style-toolbar ①).
 - [ ] Bookmark a page: the ribbon and folded corner look right, in Firefox too. · desktop with
   `BROWSER=firefox` · test: edge-peel spec
 - [ ] Stay on a page for a few seconds until the red ribbon appears down its bound edge: it covers
@@ -470,6 +476,9 @@ upright and on its side, English and Arabic, iPad and Mac.
 - [ ] Open settings and scroll to the end: one line under the title, and no choice that this screen
   cannot use (nothing about two facing pages on a phone). · phone, desktop · issue:
   `phone-settings-spread-choice-and-double-line`
+  In the apps, the `settings-walk` script. The large iPad upright shows one page but keeps the
+  two-page and pen choices, rightly: it can open two pages, and the pens' place applies there;
+  the iPad mini drops them.
 
 ## The Mac and iPad apps
 
