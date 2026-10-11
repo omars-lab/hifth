@@ -3639,6 +3639,17 @@
       "note": "When a page is only a few percent wider than the room beside the share card (an iPad mini on its side), should it be drawn that little smaller while the card is up, run past the far edge instead, have the card narrowed, or stay as it is? Waits on item 11, which asks whether drawing the page smaller is wanted at all."
     },
     {
+      "id": "lookalike-passage-hop-lands-before-match",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑰"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "A passage row names the verse inside it that is most alike (15:30's passage in surah 38 names 38:73), but its arrow lands on the passage's first verse (38:72). Should it land on the alike verse, stay on the first, or land on the first and light the whole passage with the alike verse marked more strongly?"
+    },
+    {
       "id": "share-card-covers-verse-ipad-upright",
       "source": {
         "file": "docs/PLAN.md",

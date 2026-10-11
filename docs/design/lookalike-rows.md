@@ -494,3 +494,29 @@ of its second line sits under the card until the reader pans or closes it.
 - Leave it as it is, ⑩'s limit, and close this.
 
 Blocked on ⑪: whichever way ⑪ goes for drawing the page smaller decides most of this.
+
+### ⑰ When a passage row says which verse inside it is most alike, where should its arrow take you? · **open**
+
+**What it changes for a hafiz:** 15:30's later-surahs list names the passage 38:72 to 38:75, and under
+it "Most alike: 38:73" (⑤). Opening the row lays 15:30 beside 38:73. But the row's arrow, the hop, lands
+on 38:72, the passage's first verse, so a hafiz who presses it to see the alike verse in its place on
+the page has to find 38:73 themselves. Found walking the look-alike lists in the iPad app, 2026-10-11;
+the same in the Mac app, and for 23:7, whose passage row names 70:31 and lands on 70:29.
+
+**Why it is asked now:** ① kept the hop on the first verse because that is where the outside list
+points, not for a reason a hafiz would give, and ⑤ then put the better verse on the closed row, so the
+row now names one verse and lands on another.
+
+**What happens if nobody decides:** the arrow keeps landing on the passage's first verse.
+
+**Ways it could go:**
+
+- Land on the most-alike verse. The eye goes straight to the verse the row named; where the passage
+  begins is then a verse or two above it, unmarked.
+- Keep landing on the first verse (today). The passage is read from its start; the alike verse is
+  left to find.
+- Land on the first verse and light the whole passage, with the alike verse marked more strongly.
+  Shows both; two marks on one page to tell apart, and the most to build.
+
+Per the project's habit, the one not picked would stay as a setting in the info panel.
+

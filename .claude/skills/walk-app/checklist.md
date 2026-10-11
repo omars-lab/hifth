@@ -401,13 +401,15 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] A look-alike row that names a whole passage says how the two are alike, and opening the row
   lays your verse beside the verse inside it that matches (try 15:30's later surahs: the passage in
   surah 38 is laid beside 38:73, not its first verse; 23:7 beside 70:31). Its hop arrow still lands
-  on the passage's first verse, by choice (look-alike rows ⑤), so 38:72 there is not a fault. ·
+  on the passage's first verse (38:72), as ① and ⑤ record; whether it should is look-alike rows ⑰,
+  the owner's question, so it is not a fault to fix on a walk. ·
   desktop (Firefox), phone, the iPad app · issue: `lookalike-passage-row-reason`
 - [ ] Closed, a passage row says which verse inside it is most alike (15:30's later surahs: the passage
   38:72 to 38:75 says 38:73), in English and Arabic. · phone, desktop (Firefox), the iPad app · issue:
   `lookalike-passage-row-names-match`
 - [ ] A link that asks for a verse's look-alikes (`?open=lookalikes`, try 2:48) opens the list, not
   the note, even on a slow load. · desktop, the iPad app · issue: `pitch-link-lookalikes-opens-note`
+  · test: the pitch test "opens the look-alike list even when the note's file arrives first"
 - [ ] Opened from a link, the look-alike list (and the passage menu) shows no focus ring round its
   close button, since nothing was pressed; opened by a press on a chip, the first control takes it.
   · phone on its side, desktop · test: `HopPopover.test.tsx` ("opened by a link")
@@ -430,7 +432,6 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   ("build", "table", "ids", "pack"…), and nothing that says "phone" on an iPad or a Mac. Inside
   the iPad app, the juz map has no keep-offline shelf. · every flavour · issue:
   `reader-words-plumbing`
-  · test: the pitch test "opens the look-alike list even when the note's file arrives first"
 
 The `lookalike-walk` script walks this section's app lines (the link, the rows' reasons, the first
 and last rows opened, the passage rows, Share and the bars on both iPad sizes, the tajweed key),
