@@ -216,6 +216,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   across a table: the note stays open each way up and every line of its verse stays in sight and
   clear of it. · ipad-side, ipad, private build · checked 2026-10-11 in Chromium and WebKit, clean;
   the real iPad's turn is parked (manual testing 13)
+- [ ] With a verse chosen low on the page and its note open, press + until 200%: every line of the
+  verse stays on the screen, and with the book open both pages stay level at the fold; set "Grow
+  from the middle" and the verse goes down as before. · desktop, desktop-firefox, ipad-side, the
+  Mac app and the iPad app on its side, private build · issue: `zoom-button-carries-chosen-verse-off`
 - [ ] On an iPad held upright, the note and the lists lie across the page, not in a corner beside
   an empty block. · ipad, and the iPad app · issue: `upright-ipad-note-in-corner`
 

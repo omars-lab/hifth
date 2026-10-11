@@ -1,5 +1,6 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { LONG_VERSE_KEY } from "../src/long-verse";
+import { ZOOM_ANCHOR_KEY } from "../src/zoom-anchor";
 import { ayahTarget } from "./ayah";
 import { fakePlayer } from "./player";
 
@@ -795,6 +796,68 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect.poll(() => book(page).getAttribute("data-solo")).toBeNull();
     await expect(sheet(page), "back on its side: the note is still open").toBeVisible();
     await clear("back on its side", 1366, 1024);
+    await context.close();
+  });
+
+  test("zoomed in with the buttons, a chosen verse low on the page stays on the screen, and the two pages stay level", async ({
+    browser,
+  }) => {
+    // Found walking the hand-off (docs/PLAN.md, item 66): with a note open on an
+    // iPad on its side, three presses of + left the verse the note is about
+    // wholly below the screen, because the buttons grew the page from the middle
+    // of its height. A laptop in the room zooms with these buttons.
+    const context = await browser.newContext({ viewport: { width: 1366, height: 1024 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBeNull();
+    await settle(sheet(page));
+    const zoomIn = page.getByRole("group", { name: "Zoom" }).getByRole("button", { name: "Zoom in" });
+    for (let i = 0; i < 3; i++) await zoomIn.click();
+    await expect(page.getByRole("group", { name: "Zoom" })).toContainText("200%");
+    await expect
+      .poll(
+        async () => {
+          const lines = await litLineBoxes(page);
+          if (!lines.length) return "no lit lines";
+          const below = lines.filter((b) => b.y + b.height > 1024).length;
+          const above = lines.filter((b) => b.y < 0).length;
+          return `${above} above the screen, ${below} below it`;
+        },
+        { message: "every line of the chosen verse stays on the screen, top to bottom" },
+      )
+      .toBe("0 above the screen, 0 below it");
+    // Both leaves of the opening, whichever pages they are.
+    const tops = await page
+      .locator("svg[aria-labelledby^='page-label-']:visible")
+      .evaluateAll((svgs) => svgs.map((s) => Math.round(s.getBoundingClientRect().top)));
+    expect(tops, "both pages of the opening are up").toHaveLength(2);
+    expect(Math.abs(tops[0]! - tops[1]!), "the two pages stay level at the fold").toBeLessThan(2);
+    await context.close();
+  });
+
+  test("set to grow from the middle, the zoom buttons keep the page's middle still, as before", async ({ browser }) => {
+    // The old way, kept as a setting (docs/PLAN.md, item 66): the same three
+    // presses carry the verse low on the page down past the screen's bottom.
+    const context = await browser.newContext({ viewport: { width: 1366, height: 1024 }, hasTouch: true });
+    await context.addInitScript((key) => {
+      localStorage.setItem("hifth.coach.v1", "1");
+      localStorage.setItem(key, "middle");
+    }, ZOOM_ANCHOR_KEY);
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBeNull();
+    await settle(sheet(page));
+    const zoomIn = page.getByRole("group", { name: "Zoom" }).getByRole("button", { name: "Zoom in" });
+    for (let i = 0; i < 3; i++) await zoomIn.click();
+    await expect(page.getByRole("group", { name: "Zoom" })).toContainText("200%");
+    await expect
+      .poll(async () => (await litLineBoxes(page)).filter((b) => b.y + b.height > 1024).length, {
+        message: "the verse's lower lines go below the screen, as they did",
+      })
+      .toBeGreaterThan(0);
     await context.close();
   });
 

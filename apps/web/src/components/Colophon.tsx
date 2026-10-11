@@ -22,6 +22,7 @@ import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-l
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { RAIL_HOMES, type RailHome } from "../rail-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
+import { ZOOM_ANCHORS, rememberZoomAnchor, useZoomAnchor } from "../zoom-anchor";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -246,6 +247,7 @@ export function Colophon({
   const ribbonLength = useRibbonLength();
   const runFollow = useRunFollow();
   const runAhead = useRunAhead();
+  const zoomAnchor = useZoomAnchor();
   const lookalikePreview = useLookalikePreview();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -479,6 +481,30 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.runFollowNote}</p>
+        </section>
+
+        {/* Where the zoom buttons grow the page from (docs/PLAN.md, item 66):
+            the chosen verse is the default; the middle, as it was, stays. */}
+        <section className={styles.block} aria-labelledby="colophon-zoom-anchor">
+          <h3 className={styles.subhead} id="colophon-zoom-anchor">
+            {t.zoomAnchorTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-zoom-anchor">
+            {ZOOM_ANCHORS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={zoomAnchor === choice}
+                data-zoom-anchor={choice}
+                onClick={() => rememberZoomAnchor(choice)}
+              >
+                {choice === "verse" ? t.zoomAnchorVerse : t.zoomAnchorMiddle}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.zoomAnchorNote}</p>
         </section>
 
         {/* How a run makes its next verse ready while one sounds (docs/PLAN.md,
