@@ -1999,6 +1999,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     in English the screen's edge. Fixed: the space is always on the button's left, where the
     hint is. A browser test on a sideways iPad in both languages, watched failing first in
     English; seen again in the iPad app, the hint now clear of the button.
+88. ~~**The page slider's two end arrows did not match.**~~ Found walking the first screen in
+    Firefox, 2026-10-12: in English the left arrow was a third the size of the right one, and in
+    Chrome one was short and wide and the other tall and narrow. Each was a text mark drawn from
+    whichever font on the machine had it, and no two marks came from the same one. Fixed: both are
+    one drawn triangle, mirrored, pointing the same ways as before (earlier in the book is to the
+    right). A browser test in Chrome, Firefox and both phones, in both languages, watched failing
+    first; seen again in Chrome and Firefox, the pair now matching.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

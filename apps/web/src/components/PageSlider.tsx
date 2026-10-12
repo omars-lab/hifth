@@ -679,11 +679,11 @@ export function PageSlider({
         disabled={empty}
         aria-label={t.prevPage}
       >
-        {/* Solid triangles, not ‹ ›: the angle quotes are Bidi_Mirrored, so an
-            RTL container silently flips them and both edges end up pointing the
-            same way. These are not mirrored, so they mean what they draw —
-            earlier in the book is to the right. */}
-        <span aria-hidden="true">▸</span>
+        {/* Earlier in the book is to the right. A drawn shape, not a text
+            mark: the angle quotes ‹ › flip inside the right-to-left row, and
+            the solid triangles ▸ ◂ came each from whichever font had it, so the
+            pair never matched (Firefox drew one a third the size of the other). */}
+        <EdgeArrow points="right" />
       </button>
 
       <div className={styles.track} ref={trackRef}>
@@ -911,7 +911,7 @@ export function PageSlider({
         disabled={empty}
         aria-label={t.nextPage}
       >
-        <span aria-hidden="true">◂</span>
+        <EdgeArrow points="left" />
       </button>
 
       {/* Visible, small and permanent: how much of the book is here. It reads
@@ -926,5 +926,16 @@ export function PageSlider({
         {t.pagesVendored(available.length, total)}
       </span>
     </nav>
+  );
+}
+
+/** One solid triangle for both ends of the slider, mirrored, so the pair matches. */
+function EdgeArrow({ points }: { points: "left" | "right" }) {
+  return (
+    <span aria-hidden="true" data-points={points} className={styles.arrow}>
+      <svg width="7" height="10" viewBox="0 0 7 10" focusable="false">
+        <path d={points === "right" ? "M0 0L7 5L0 10Z" : "M7 0L0 5L7 10Z"} fill="currentColor" />
+      </svg>
+    </span>
   );
 }
