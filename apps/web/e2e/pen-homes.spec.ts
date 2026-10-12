@@ -93,6 +93,17 @@ test.describe("where the pens sit", () => {
     for (const other of ["float", "bottom", "side"]) await expect(home(page, other)).toHaveCount(0);
   });
 
+  test("on a large iPad nobody has set, the pens wait behind the Mark up button", async ({ browser }) => {
+    // The owner's pick, 2026-10-11 (notes-style-toolbar ①): a finger, not a mouse.
+    const context = await browser.newContext({ hasTouch: true, isMobile: true, viewport: IPAD, locale: "en-US" });
+    const page = await context.newPage();
+    expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
+    await openWith(page, null);
+    await expect(home(page, "bottom")).toBeVisible();
+    await expect(home(page, "strip")).toHaveCount(0);
+    await context.close();
+  });
+
   test("B · a Mark up button opens the pens in the bottom row, covering no line, and Done puts them away", async ({ page }) => {
     await openWith(page, "bottom");
     await expect(home(page, "strip")).toHaveCount(0);

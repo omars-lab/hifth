@@ -26,6 +26,16 @@ describe("where the pens sit, as the reader set it", () => {
     localStorage.setItem(PEN_HOME_KEY, "nonsense");
     expect(savedPenHome()).toBe("strip");
   });
+
+  it("on a large iPad nobody has set, the pens wait behind the Mark up button; a choice still wins", () => {
+    // The owner's pick, 2026-10-11 (notes-style-toolbar ①).
+    expect(savedPenHome({ touch: true })).toBe("bottom");
+    expect(savedPenHome({ touch: false })).toBe("strip");
+    localStorage.setItem(PEN_HOME_KEY, "nonsense");
+    expect(savedPenHome({ touch: true })).toBe("bottom");
+    rememberPenHome("strip");
+    expect(savedPenHome({ touch: true })).toBe("strip");
+  });
 });
 
 describe("where a dragged palette lands", () => {

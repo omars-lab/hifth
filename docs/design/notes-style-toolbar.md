@@ -182,7 +182,12 @@ It does not settle Pencil gestures or Apple's own palette; those belong to the o
 
 ## Open questions, and what would answer each
 
-### ① Where should the marking pens live on an iPad: the bottom row, the side margin, or both? · **open**
+### ① Where should the marking pens live on an iPad: the bottom row, the side margin, or both? · **answered**
+
+**Answered 2026-10-11 by the owner: B.** On a large iPad that nobody has set, the pens now wait
+behind the Mark up button in the bottom row, so the page reads clean until marking starts. A
+computer keeps the strip above the page. A, C and the strip stay in Settings, and a choice made
+there still wins.
 
 B (a Mark up button, pens in the bottom row) is recommended, and C (pens down the empty side
 margin in landscape) is worth trying beside it. What would answer it: both built as swappable

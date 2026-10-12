@@ -1245,9 +1245,12 @@ export function App(): JSX.Element {
     setScopeLook(look);
   }, []);
   // Where the page tools sit on the wide layout (docs/design/notes-style-toolbar.md,
-  // ①; every home a setting since 2026-10-05, today's strip by default). Down
-  // the side only where the margin holds it, else the bottom row's button.
-  const [penHome, setPenHome] = useState<PenHome>(() => savedPenHome());
+  // ①; every home a setting since 2026-10-05; unset, the strip on a computer
+  // and the Mark up button on a large iPad, the owner's pick of 2026-10-11).
+  // Down the side only where the margin holds it, else the bottom row's button.
+  const [penHome, setPenHome] = useState<PenHome>(() =>
+    savedPenHome({ touch: typeof matchMedia === "function" && matchMedia(TOUCH_QUERY).matches }),
+  );
   const choosePenHome = useCallback((home: PenHome) => {
     rememberPenHome(home);
     setPenHome(home);

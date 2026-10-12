@@ -134,9 +134,12 @@ test.describe("Hifth · on an iPad", () => {
   test("on its side, the tools bar tells a finger to tap, not to click", async ({ page }) => {
     // Held sideways the iPad is wide enough for the desk's tools bar, and the
     // bar spoke to a mouse: "point at a vowel-sign, click" to a finger.
+    // Since 2026-10-11 the tools wait behind the Mark up button there
+    // (notes-style-toolbar ①), so it is opened first.
     await page.setViewportSize(LANDSCAPE);
     await page.goto("/#/hafs-kfqc/p8");
     await shown(page, 7);
+    await page.getByRole("button", { name: "الأقلام" }).tap();
     const bar = page.getByRole("toolbar");
     await page.keyboard.press("KeyK");
     await expect(bar).toContainText("اضغط قرب علامة تشكيل لتكتب عليها ملاحظة");

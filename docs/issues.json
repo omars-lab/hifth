@@ -2831,10 +2831,11 @@
         "file": "docs/design/notes-style-toolbar.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "All three homes are built and offered in settings (owner, 2026-10-05): floating, a Mark up button in the bottom row, and down the side, beside today's strip, which stays the default. Still open: which one becomes the default, after trying them by hand on a real iPad held sideways."
+      "closedBy": "apps/web/src/pen-home.test.ts",
+      "note": "Answered 2026-10-11 by the owner: B. A large iPad nobody has set opens with the pens behind the Mark up button; a computer keeps the strip; the other homes stay in settings and a choice there still wins. Held by pen-home.test.ts and the large-iPad test in e2e/pen-homes.spec.ts."
     },
     {
       "id": "note-harakat-word-one-pen",
@@ -3123,10 +3124,25 @@
         "file": "docs/design/feature-usage.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "The owner's own feature counts are built and kept on each device separately. Open: keep it that way, carry a file between devices by hand (or one file per device in an iCloud Drive folder), send them to the owner's own online store, or let the two Apple apps sync through the owner's own iCloud (needs the paid membership). Two researchers and a checker looked on 2026-10-11 (docs/research/usage-sync-consolidated.md): every road needs each device's counts to carry the device's name, and the iPad and Mac apps cannot save or open a file today."
+      "closedBy": "docs/design/feature-usage.md",
+      "note": "Answered 2026-10-11 by the owner: D, the two Apple apps keep the counts in step through the owner's own iCloud, with Firefox and the phone joining by a file. Picked from A, B, B2, C and D after two researchers and a checker looked (docs/research/usage-sync-consolidated.md). The build waits on the paid membership; that is item two on the same page."
+    },
+    {
+      "id": "usage-sync-own-icloud",
+      "source": {
+        "file": "docs/design/feature-usage.md",
+        "item": "②"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "the paid Apple membership and proper signing"
+      ],
+      "note": "Build the owner's pick for the usage counts: per-device names and keep-the-larger merging first, then the iPad and Mac apps syncing through the owner's private iCloud database, Firefox and the phone by file, a named exception in the privacy check for the app's bridge, and each device on its own kept as a setting. The iCloud database will not open under today's signing, so nothing can be tried for real until the membership is bought, which the TestFlight move needs too."
     },
     {
       "id": "note-left-open-stays-empty",
