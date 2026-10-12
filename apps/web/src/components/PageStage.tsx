@@ -2528,6 +2528,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       }
       setErrorPage(null);
       setStatus("ready");
+      // A note kept up through a recitation's turn (docs/PLAN.md, item 78): the
+      // page had been raised to keep a verse of the last page clear of it, and
+      // the carried view raised the new page's first verse, lit, off the top.
+      // The lift asked for as that verse began ran while the old page still
+      // showed and found nothing to move, so it is asked for again here.
+      if (coverTopRef.current !== null || coverSideRef.current !== null) {
+        cancelAnimationFrame(liftRaf.current);
+        liftRaf.current = requestAnimationFrame(() => liftRef.current());
+      }
     },
     [arrive],
   );
