@@ -2831,10 +2831,11 @@
         "file": "docs/design/notes-style-toolbar.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "All three homes are built and offered in settings (owner, 2026-10-05): floating, a Mark up button in the bottom row, and down the side, beside today's strip, which stays the default. Still open: which one becomes the default, after trying them by hand on a real iPad held sideways."
+      "closedBy": "apps/web/src/pen-home.test.ts",
+      "note": "Answered 2026-10-11 by the owner: B. A large iPad nobody has set opens with the pens behind the Mark up button; a computer keeps the strip; the other homes stay in settings and a choice there still wins. Held by pen-home.test.ts and the large-iPad test in e2e/pen-homes.spec.ts."
     },
     {
       "id": "note-harakat-word-one-pen",

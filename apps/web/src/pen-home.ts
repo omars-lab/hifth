@@ -5,14 +5,16 @@
  * The owner asked on 2026-10-05 for every home the study drew to be built and
  * offered as a setting, so each can be tried by hand:
  *
- *   strip   today's row above the book (the default until one is chosen);
+ *   strip   the row above the book (a computer's default);
  *   float   A · a palette over the page, dragged to any edge, as in Notes;
  *   bottom  B · a Mark up button in the bottom row, the pens in its place;
  *   side    C · the pens down the empty margin beside the book, falling back
  *           to B where there is no margin.
  *
- * A phone, and an iPad held upright, already use the bottom-row tray, which is
- * B; this setting is for the wider layout only.
+ * Unset, a computer keeps the strip and a large iPad gets B: the owner's pick
+ * on 2026-10-11, so the page is only for reading until the reader asks for
+ * the pens. A phone, and a smaller iPad, already use the bottom-row tray,
+ * which is B; this setting is for the wider layout only.
  *
  * Its own module, free of React and CSS, so the e2e tier imports the keys
  * rather than retyping them — the discipline `verse-gestures.ts` keeps.
@@ -33,15 +35,19 @@ function isPenHome(value: unknown): value is PenHome {
   return value === "strip" || value === "float" || value === "bottom" || value === "side";
 }
 
-/** The home this device chose, or the strip when it never chose. */
-export function savedPenHome(): PenHome {
+/**
+ * The home this device chose, or, when it never chose, the strip on a
+ * computer and the Mark up button where the pointer is a finger.
+ */
+export function savedPenHome({ touch = false }: { touch?: boolean } = {}): PenHome {
+  const fallback: PenHome = touch ? "bottom" : "strip";
   try {
     const stored = localStorage.getItem(PEN_HOME_KEY);
-    return isPenHome(stored) ? stored : "strip";
+    return isPenHome(stored) ? stored : fallback;
   } catch {
     // Safari private mode throws on localStorage; a device we cannot remember
     // gets the default.
-    return "strip";
+    return fallback;
   }
 }
 
