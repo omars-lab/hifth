@@ -362,6 +362,12 @@ interface PageStageProps {
   /** A pin was pressed (click, Enter or Space): open its note. */
   onOpenNote?: (id: string) => void;
   /**
+   * Under the eraser, a pin or a jump mark was pressed: take it off. A jump
+   * mark names its verse, and an arrow the word it leaves too (`null` for an
+   * arrow marked with no word); a mistake is erased through `onMarkWord`.
+   */
+  onErase?: (what: Erased) => void;
+  /**
    * How many notes hold each verse, by its key, for the dot by its number
    * (scoped-notes-verse-mark = A). A verse whose notes all pinned it is left
    * out, since its pins already show. `verseDotLabel` names the dot.
@@ -463,6 +469,9 @@ export interface WordRect {
  * takes the whole verse; "read" is the mode where a tap opens nothing
  * (selection-drawer = D).
  */
+/** What the eraser was pressed on: a note's pin, or a jump mark (see `onErase`). */
+export type Erased = { pin: string } | { jumps: string; word?: number | null };
+
 export type PageTool =
   | "read"
   | "select"
@@ -473,7 +482,8 @@ export type PageTool =
   | "word"
   | "mistake"
   | "crop"
-  | "jump";
+  | "jump"
+  | "erase";
 
 /**
  * How far, in page units, the harakat tool's magnifier reaches for a sign. A
@@ -806,6 +816,7 @@ function drawJumpArrows(
     el.setAttribute("data-jump-arrow", `${at.surah}:${at.ayah}`);
     el.setAttribute("data-verse-key", arrow.key);
     el.setAttribute("data-word", String(arrow.word ?? span.from));
+    if (arrow.word !== null) el.setAttribute("data-from-word", String(arrow.word));
     if (arrow.beaten) el.setAttribute("data-beaten", "");
     el.setAttribute("role", "button");
     el.setAttribute("tabindex", "0");
@@ -1182,6 +1193,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onJump,
     onPlaceNote,
     onOpenNote,
+    onErase,
     onMarkWord,
     onPickSign,
     onOpenWord,
@@ -1282,6 +1294,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onPlaceNoteRef.current = onPlaceNote;
   const onOpenNoteRef = useRef(onOpenNote);
   onOpenNoteRef.current = onOpenNote;
+  const onEraseRef = useRef(onErase);
+  onEraseRef.current = onErase;
   const verseDotsRef = useRef(verseDots);
   verseDotsRef.current = verseDots;
   const verseDotLabelRef = useRef(verseDotLabel);
@@ -2024,7 +2038,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       };
       onOpenVerseMenuRef.current?.(key, locate);
     };
+    // Under the eraser a pin or a jump mark is taken off, not opened.
+    const erasedBy = (e: Event): Erased | null => {
+      if (toolRef.current !== "erase") return null;
+      const pin = pinOf(e);
+      if (pin) return { pin };
+      const mark = (e.target as Element | null)?.closest("[data-confusion-mark], [data-wasl-mark], [data-jump-arrow]");
+      const key = mark?.getAttribute("data-verse-key");
+      if (!mark || !key) return null;
+      if (!mark.hasAttribute("data-jump-arrow")) return { jumps: key };
+      const word = mark.getAttribute("data-from-word");
+      return { jumps: key, word: word === null ? null : Number(word) };
+    };
     svg.addEventListener("click", (e) => {
+      const erased = erasedBy(e);
+      if (erased) {
+        e.stopPropagation();
+        onEraseRef.current?.(erased);
+        return;
+      }
       const badge = introOf(e);
       if (badge) {
         e.stopPropagation();
@@ -2050,6 +2082,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     });
     svg.addEventListener("keydown", (e) => {
       if (e.key !== "Enter" && e.key !== " ") return;
+      const erased = erasedBy(e);
+      if (erased) {
+        e.preventDefault();
+        e.stopPropagation();
+        onEraseRef.current?.(erased);
+        return;
+      }
       const badge = introOf(e);
       if (badge) {
         e.preventDefault();

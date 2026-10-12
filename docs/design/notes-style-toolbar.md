@@ -239,7 +239,7 @@ each one from the keyboard, and a tool locked on stays locked when another of th
 picked. The phone's two older bars, which only open from the address, keep three buttons.
 Still open: which should be the default. Watching a hafiz revise with each would answer it.
 
-### ③ Should marking gain an eraser, and undo and redo? · **open**
+### ③ Should marking gain an eraser, and undo and redo? · **answered**
 
 Notes has all three and Hifth has none of them: today a mark comes off through its own tool. What
 would answer it: deciding what the eraser removes (one mark at a time, like Notes' object
@@ -251,6 +251,26 @@ so the eraser needs no "are you sure?". Undo reaches back over bookmarks, notes,
 and jumps, a hundred steps; Ctrl+Z (⌘Z on a Mac) undoes and Shift with it redoes, except while
 a note is being typed, where the keys stay with the text. The eraser follows: tap a mark to
 take it off, one at a time, like Notes' object eraser. Rubbing across many at once is later.
+
+Built 2026-10-12, both of them. The eraser is the first button beside Undo and Redo, so it is on
+every bar those are on: the strip above the page, the phone's tray, and each of the iPad's homes.
+E picks it up and puts it down, and so does a second press on it. It stays on for the next mark,
+like the sign and word tools, until it is put down. With it on, a tap takes off whatever kept
+mark is under it, with no question asked: a slip, a note's pin, a bookmark's ribbon, or a jump.
+A pin on a note that gathers other verses takes only that verse out, and the note keeps its
+words. A tap on a verse's jump mark takes off every jump from that verse, and a tap on an arrow
+only the jumps from its word; a jump the reader set aside stays. A tap where there is no mark does
+nothing, so the eraser never marks. Undo puts back each thing it took.
+
+One placement was assumed, not asked: the eraser sits beside Undo rather than as one more tool in
+the row of tools. That row is already full down the iPad's side margin, and the eraser belongs
+with Undo, which is what makes it safe. If it should be a tool in the row instead, that is a small
+move.
+
+Building it found one fault in the Undo made just before it: a change that exactly reversed the
+one before it was thrown away along with it, so a slip marked and then rubbed out left nothing to
+undo. That rule was meant only for a note's pin opened and closed empty, which has its own path;
+any other pair of changes now stays as two steps.
 
 ### ④ With the app in Arabic, should the pens stay on the right edge, or move to the left? · **open**
 

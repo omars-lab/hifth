@@ -26,6 +26,7 @@ export const TOOL_KEYS: Readonly<Record<string, PageTool>> = {
   KeyM: "mistake",
   KeyC: "crop",
   KeyJ: "jump",
+  KeyE: "erase",
 };
 
 export interface ToolEntry {
@@ -310,7 +311,9 @@ export function toolHint(t: ReturnType<typeof useT>["t"], x: PageTool, touch: bo
               ? t.toolCropHint
               : x === "jump"
                 ? t.toolJumpHint
-                : t.toolOn(toolName(t, x));
+                : x === "erase"
+                  ? touch ? t.toolEraseHint : t.toolEraseHintClick
+                  : t.toolOn(toolName(t, x));
 }
 
 /** A tool's spoken name. App says the same name when a tool is switched on. */
@@ -333,7 +336,9 @@ export function toolName(t: ReturnType<typeof useT>["t"], x: PageTool): string {
                 ? t.toolCrop
                 : x === "jump"
                   ? t.toolJump
-                  : t.toolMistake;
+                  : x === "erase"
+                    ? t.toolErase
+                    : t.toolMistake;
 }
 
 export function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {

@@ -5,11 +5,12 @@
  * whole set back, so one step is simply the set as it was and the set as it
  * became; taking it back writes the old set again.
  *
- * A step that only undoes the one before it (a pin dropped and then closed
- * empty) cancels it, so Undo never brings back something that was never there
- * for the reader. And a change that opens a box to type in (a fresh pin) takes
- * in what is saved from that box, so one Undo takes the pin and its words off
- * together, rather than leaving an empty pin behind.
+ * A change that opens a box to type in (a fresh pin) takes in what is saved
+ * from that box, so one Undo takes the pin and its words off together, rather
+ * than leaving an empty pin behind; and a pin closed empty leaves no step at
+ * all, so Undo never brings back something that was never there for the
+ * reader. Any other change that happens to reverse the one before it (a slip
+ * marked, then rubbed out) is a step of its own: the reader did both.
  */
 export type MarkStore = "bookmarks" | "notes" | "jumps";
 
@@ -56,9 +57,6 @@ export function recordStep(h: MarkHistory, step: MarkStep): MarkHistory {
     const joined: MarkStep = { store: step.store, before: last.before, after: step.after, said: step.said || last.said, ...(step.folds ? { folds: true } : {}) };
     const past = h.past.slice(0, -1);
     return { past: same(joined.before, joined.after) ? past : [...past, joined], future: [] };
-  }
-  if (last && last.store === step.store && same(last.before, step.after)) {
-    return { past: h.past.slice(0, -1), future: [] };
   }
   return { past: [...h.past, step].slice(-HISTORY_DEPTH), future: [] };
 }

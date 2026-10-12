@@ -3,6 +3,7 @@ import {
   againConfusion,
   allConfusions,
   dismissedConfusions,
+  eraseJumps,
   confusionsFrom,
   confusionMarks,
   arrowsShown,
@@ -358,5 +359,29 @@ describe("two devices that marked different jumps in the same moment", () => {
     expect(new Set(merged.map((c) => c.id)).size).toBe(2);
     // Loading the same file again changes nothing.
     expect(mergeConfusions(merged, laptop)).toEqual(merged);
+  });
+});
+
+describe("the eraser on a jump mark", () => {
+  it("takes off every jump from the verse its number mark stands for, and leaves the others", () => {
+    let set = markConfusion([], { key: K("2:58"), word: 15 }, { key: K("7:161") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:58"), word: 4 }, { key: K("2:35") }, 2_000, PHONE);
+    set = markConfusion(set, { key: K("2:59") }, null, 3_000, PHONE);
+    expect(eraseJumps(set, K("2:58")).map((c) => c.from.key)).toEqual([K("2:59")]);
+  });
+
+  it("takes off only the jumps from the word an arrow leaves", () => {
+    let set = markConfusion([], { key: K("2:58"), word: 15 }, { key: K("7:161") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:58"), word: 4 }, { key: K("2:35") }, 2_000, PHONE);
+    set = markConfusion(set, { key: K("2:58") }, { key: K("2:36") }, 3_000, PHONE);
+    expect(eraseJumps(set, K("2:58"), 15).map((c) => c.from.word)).toEqual([4, undefined]);
+    // An arrow drawn with no word stands for the jumps marked with none.
+    expect(eraseJumps(set, K("2:58"), null).map((c) => c.from.word)).toEqual([15, 4]);
+  });
+
+  it("keeps a dismissed jump, which the page no longer shows and the page map can bring back", () => {
+    let set = markConfusion([], { key: K("2:58"), word: 15 }, { key: K("7:161") }, 1_000, PHONE);
+    set = setConfusionState(set, set[0]!.id, "dismissed", 2_000);
+    expect(eraseJumps(set, K("2:58"))).toHaveLength(1);
   });
 });

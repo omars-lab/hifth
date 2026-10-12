@@ -119,6 +119,22 @@ export function removeConfusion(set: readonly Confusion[], id: string): Confusio
   return set.filter((c) => c.id !== id);
 }
 
+/**
+ * The eraser on a jump mark (notes-style-toolbar ③): the mark by a verse's
+ * number, or at its next pause sign, stands for every jump from that verse, so
+ * all of them come off; an arrow stands for the jumps from the one word it
+ * leaves (`null` for those marked with no word). A dismissed jump is not on the
+ * page to be tapped, so it stays for the page map's Bring back.
+ */
+export function eraseJumps(set: readonly Confusion[], key: string, word?: number | null): Confusion[] {
+  return set.filter(
+    (c) =>
+      c.state === "dismissed" ||
+      c.from.key !== key ||
+      (word !== undefined && (c.from.word ?? null) !== word),
+  );
+}
+
 /** Put back a record just deleted (the Undo after Delete). */
 export function restoreConfusion(set: readonly Confusion[], record: Confusion): Confusion[] {
   return set.some((c) => c.id === record.id) ? [...set] : [...set, record];

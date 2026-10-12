@@ -761,6 +761,10 @@ export interface Strings {
   noteFollowStop: string;
   toolMistake: string;
   toolMistakeHint: string;
+  toolErase: string;
+  toolEraseHint: string;
+  toolEraseHintClick: string;
+  jumpsErased(fromText: string): string;
   toolMistakeHintClick: string;
   /** Said when a word is marked, named by its verse. */
   mistakeMarked(label: string): string;
@@ -1530,6 +1534,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     noteFollowStop: m.noteFollowStop,
     toolMistake: m.toolMistake,
     toolMistakeHint: m.toolMistakeHint,
+    toolErase: m.toolErase,
+    toolEraseHint: m.toolEraseHint,
+    toolEraseHintClick: m.toolEraseHintClick,
+    jumpsErased: (from) => m.jumpsErased({ fromText: fmtAyahRef(from, lang) ?? from }),
     toolMistakeHintClick: m.toolMistakeHintClick,
     mistakeMarked: (label) => m.mistakeMarked({ label }),
     mistakePicker: (label) => m.mistakePicker({ label }),

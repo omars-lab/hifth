@@ -28,6 +28,11 @@
   outline-offset: -2px;
 }
 
+.button[aria-pressed="true"] {
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+}
+
 .button:disabled {
   color: var(--ink-faint);
   cursor: default;

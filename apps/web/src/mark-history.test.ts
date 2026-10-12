@@ -30,8 +30,17 @@ describe("undo and redo for kept marks", () => {
   });
 
   it("a pin dropped and then closed empty leaves no step behind", () => {
-    const h = recordStep(recordStep(NO_HISTORY, step([1], [1, 2])), step([1, 2], [1]));
+    const open: MarkStep = { ...step([1], [1, 2]), folds: true };
+    const h = recordStep(recordStep(NO_HISTORY, open), step([1, 2], [1]));
     expect(h.past).toHaveLength(0);
+  });
+
+  // The eraser (notes-style-toolbar ③): a slip marked and then rubbed out is
+  // two things the reader did, and Undo brings the slip back.
+  it("a mark taken off right after it was made is a step of its own", () => {
+    const h = recordStep(recordStep(NO_HISTORY, step([1], [1, 2])), step([1, 2], [1]));
+    expect(h.past).toHaveLength(2);
+    expect(undoStep(h)!.step.before).toEqual([1, 2]);
   });
 
   it("the same set put back in another store is still a step", () => {
