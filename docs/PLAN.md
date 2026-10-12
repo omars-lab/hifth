@@ -2033,6 +2033,21 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     shorter room, watched failing first; a walk script that opens each corner card and reports what
     is covered (look-alike rows ⑱); measured again in the iPad app, 2% in English and none in
     Arabic.
+91. ~~**A check on the pitch build failed whenever the laptop was busy: the one that follows a second
+    link while the first is still moving.**~~ Found when the checks before a push failed it twice,
+    2026-10-12, while the Firefox checks ran beside it; run twelve at once it failed all twelve. The
+    check holds the verse's note back until the second link is followed, so the note rises while the
+    page is moving, and it said the page must never zoom in further than where it ends. On a busy
+    laptop the note rose only after the move had ended, at the zoom that suits a page with no note,
+    and the page then rightly zoomed out a little to make room for it, which from the zooms alone
+    looks just like the fault the check guards. Fixed in the check, not the app: the note is held and
+    let go inside the page, in the same frame as the second link, and the zoom is read from the
+    moment the note rose; from then on the page must head straight to where it ends. Twenty-four at
+    once, sixteen side by side: all pass on that count.
+92. **The same check, run sixteen side by side, once in twenty-four lost its page part-way through,
+    as if the page had reloaded.** Seen 2026-10-12 while fixing item 91, before and after the fix,
+    and never in the checks before a push. Nothing in the app reloads there that the check does not
+    switch off, so the cause is not known yet. Next: catch it with a trace and see what navigated.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

@@ -4389,6 +4389,29 @@
       "note": "On an iPad mini on its side the roots list stands full height in its corner from the start and covered about a third of its verse; with it or a look-alike list open, the two look-alike buttons sat on the list's close button (and in English half past the card's edge). A look-alike list did the same in the iPad app, whose own bars leave less room (15%). Any list there now moves the page aside, and the buttons ride the list's top row with its heading a row lower. Browser tests at the mini's size and at the app's shorter room, in both languages. The design-page record is look-alike rows ⑱."
     },
     {
+      "id": "pitch-second-link-zoom-check-busy-laptop",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "91"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "The pitch check for a second link followed mid-move failed whenever the laptop was busy (twice before a push; twelve of twelve run at once): the note rose only after the move had ended, and the page rightly zoomed out a little for it, which looks like the fault from the zooms alone. The check now holds the note inside the page, lets it go in the same frame as the second link, and reads the zoom from the moment the note rose. Twenty-four at once pass that count."
+    },
+    {
+      "id": "pitch-second-link-check-loses-page",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "92"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Run sixteen side by side, the second-link pitch check once in twenty-four lost its page part-way through, as if it had reloaded; never seen in the checks before a push. Cause not known; catch it with a trace."
+    },
+    {
       "id": "mini-side-corner-cards-walk",
       "source": {
         "file": "docs/design/lookalike-rows.md",
