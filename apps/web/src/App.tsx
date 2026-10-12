@@ -3468,7 +3468,10 @@ export function App(): JSX.Element {
    * anchor it came up from the foot like a phone's card and lifted its page out
    * of line with the facing one. Opened from a verse's number pages past the
    * surah's start, the first verse is not on the spread, so the picked verse
-   * places it instead; with neither, it floated past the book's edge.
+   * places it instead; with neither, it floated past the book's edge. A note
+   * kept up while a recitation has taken the book on past its verse
+   * (docs/PLAN.md, item 78) is placed by the verse being recited: left to the
+   * chrome's side, in Arabic it lay over the very page being read to the room.
    */
   const sheetSide = useMemo<"left" | "right" | null>(() => {
     if (!desktop || pageMode !== "two" || !resolver) return null;
@@ -3480,8 +3483,9 @@ export function App(): JSX.Element {
       return null;
     };
     const picked = selectedRange?.[0] ?? selectedKey;
-    return introSheet ? (sideOf(formatAyahKey(resolver.edition, introSurah!, 1)) ?? sideOf(picked)) : sideOf(picked);
-  }, [desktop, pageMode, resolver, introSheet, introSurah, selectedRange, selectedKey, page, totalPages]);
+    const own = introSheet ? (sideOf(formatAyahKey(resolver.edition, introSurah!, 1)) ?? sideOf(picked)) : sideOf(picked);
+    return own ?? sideOf(runKey);
+  }, [desktop, pageMode, resolver, introSheet, introSurah, selectedRange, selectedKey, page, totalPages, runKey]);
   // A phone held sideways is wide enough for the share card to stand in a
   // corner, as on a laptop, but is no laptop: the page stayed put under it and
   // the card covered the verse it shares, with the look-alike chips half behind

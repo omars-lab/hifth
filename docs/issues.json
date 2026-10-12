@@ -4305,6 +4305,38 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/verse-gestures.spec.ts",
       "note": "With the ring chosen, a page that arrives after the verse being heard was set draws the ring itself; the browser test plays a surah from a later page with the ring chosen and finds the ring on the first verse after the jump and after the turn, and none left on the page behind."
+    },
+    {
+      "id": "kept-note-covers-recited-page",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "84"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "With its own verse off the open pages, a note kept up over a recitation stands opposite the verse being recited; the browser test plays a surah from its corner on a sideways iPad in English and Arabic and finds the card on the other page with none of the lit verse under it."
+    },
+    {
+      "id": "kept-note-hops-sides",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "85"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent"
+    },
+    {
+      "id": "quick-second-flick-lost",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "86"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent"
     }
   ]
 }

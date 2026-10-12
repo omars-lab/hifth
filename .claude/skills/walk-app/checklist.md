@@ -137,6 +137,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   sits under the note: the page lifts so the verse being recited stays in sight above the note.
   · iPad upright, pitch · issue: `run-leaves-page-behind` · test: e2e/pitch.spec.ts ("keeps the
   verse being recited above the open note")
+- [ ] On the pitch build, on its side, with a note open, play the surah from its corner in
+  English and in Arabic: the note stays up on the other page, and none of the verse being
+  recited is under it (the visit walk's `litUnderNote=0%` at "E playing"). · iPad sideways, the
+  iPad app sideways, pitch, Arabic · issue: `kept-note-covers-recited-page` · test:
+  e2e/pitch.spec.ts ("lies clear of the verse being recited")
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
 
