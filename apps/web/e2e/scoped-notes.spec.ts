@@ -336,7 +336,7 @@ test.describe("Hifth · notes moved across on upgrade", () => {
     await expect
       .poll(async () => ((await readRecord(page, "scoped-notes"))!.notes.find((n) => n.id === "nold1")!.verses as unknown[]).length)
       .toBe(1);
-    await page.getByRole("button", { name: "Undo" }).click();
+    await page.locator("[data-undo-bar]").getByRole("button", { name: "Undo" }).click();
     await expect(pins(page)).toHaveCount(3);
     await expect
       .poll(async () => ((await readRecord(page, "scoped-notes"))!.notes.find((n) => n.id === "nold1")!.verses as unknown[]).length)
@@ -983,7 +983,7 @@ test.describe("Hifth · notes from the juz, surah and page labels", () => {
     await box(page).getByRole("button", { name: "Delete note" }).click();
     await expect(box(page)).toBeHidden();
     await expect.poll(async () => (await readRecord(page, "scoped-notes"))?.notes.length).toBe(0);
-    await page.getByRole("button", { name: "Undo" }).click();
+    await page.locator("[data-undo-bar]").getByRole("button", { name: "Undo" }).click();
     await expect
       .poll(async () => (await readRecord(page, "scoped-notes"))?.notes)
       .toEqual([expect.objectContaining({ id: "nj9", scope: { type: "juz", juz: 1 }, text: "Juz 1 openings" })]);

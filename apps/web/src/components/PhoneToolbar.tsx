@@ -5,6 +5,7 @@ import type { Pen } from "../pen";
 import type { PageTool } from "./PageStage";
 import { AimPicker, LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress, type ToolEntry } from "./PageToolbar";
 import styles from "./PhoneToolbar.module.css";
+import { UndoRedo } from "./UndoRedo";
 import { PenPicker } from "./PenPicker";
 
 /**
@@ -192,6 +193,7 @@ export function PhoneToolbarC({
             <span className={styles.trayHint}>
               {locked ? t.toolLockedHintTouch(toolName(t, tool)) : toolHint(t, tool, true)}
             </span>
+            <UndoRedo />
             <button
               type="button"
               className={styles.close}

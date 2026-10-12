@@ -7,6 +7,7 @@ import { rememberPenFloat, savedPenFloat, sideFits, snapToEdge, type FloatSpot }
 import type { PageTool } from "./PageStage";
 import { AimPicker, LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress, type ToolEntry } from "./PageToolbar";
 import styles from "./PenHomes.module.css";
+import { UndoRedo } from "./UndoRedo";
 import { PenPicker } from "./PenPicker";
 
 /**
@@ -134,6 +135,7 @@ export function PenHomeBottom(props: PenHomeProps): JSX.Element {
           />
           <ToolRow {...props} />
           <Offered {...props} />
+          <UndoRedo />
           <span className={styles.hint}>
             {locked
               ? touch
@@ -242,6 +244,7 @@ export function PenHomeFloat(props: PenHomeProps): JSX.Element {
       </button>
       <DoneTick onDone={() => onTool("select")} />
       <ToolRow {...props} upright={upright} />
+      <UndoRedo upright={upright} />
       <Offered {...props} />
     </div>
   );
@@ -293,15 +296,23 @@ export function useSideRoom(on: boolean): boolean | null {
 export function PenHomeSide(props: PenHomeProps): JSX.Element {
   const { tool, onTool } = props;
   const { t } = useT();
+  const pens = tool === "highlight" || (props.aim && isMarkAim(tool));
   return (
     // Laid out left to right in both languages, so the tools keep to the
     // window's edge and the pens to the book's side; the buttons are icons.
     <div className={styles.side} role="toolbar" aria-label={t.toolbarLabel} dir="ltr" data-pen-home="side" data-tool={tool} data-keep-clear="">
-      {(tool === "highlight" || (props.aim && isMarkAim(tool))) && (
-        <div className={styles.sidePens}>
-          <Offered {...props} />
+      {/* Undo and redo stand at the foot of the pens' side, in the room the
+          pens leave under them, so the rail grows no taller than the tools. */}
+      <div className={styles.sideNear}>
+        {pens && (
+          <div className={styles.sidePens}>
+            <Offered {...props} />
+          </div>
+        )}
+        <div className={styles.sideUndo}>
+          <UndoRedo upright={!pens} />
         </div>
-      )}
+      </div>
       <div className={styles.sideColumn}>
         <DoneTick onDone={() => onTool("select")} />
         <ToolRow {...props} upright />

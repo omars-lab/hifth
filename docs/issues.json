@@ -2858,7 +2858,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Notes has an eraser and undo/redo; Hifth has neither. Waits on marking-pens-home-on-ipad for where the buttons sit."
+      "note": "Owner chose both on 2026-10-12: undo/redo first (it makes the eraser safe, no confirm), then a tap-to-erase eraser, one mark at a time."
     },
     {
       "id": "pens-stay-right-in-arabic",

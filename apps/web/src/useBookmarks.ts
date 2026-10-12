@@ -24,6 +24,7 @@ import {
   type Device,
   type HeldNotes,
 } from "./bookmark-store";
+import type { CommitHow, Recorder } from "./mark-history";
 
 /**
  * The reader's bookmarks, held for the app: loaded from the phone once, and every
@@ -33,15 +34,25 @@ import {
  * core rules and says one line about it. When the phone refuses the write the
  * line is replaced by `notSaved`, so a reader is never told a bookmark was
  * dropped that will not be there tomorrow.
+ *
+ * `record` hears each change as the set before and after, for Undo
+ * (mark-history.ts); `restore` puts a set back without being heard.
  */
 export function useBookmarks(
   announce: (line: string) => void,
   notSaved: string,
+  record?: Recorder,
 ): {
   bookmarks: readonly Bookmark[];
-  commit: (next: Bookmark[], said: string) => void;
+  commit: (next: Bookmark[], said: string, how?: CommitHow) => void;
+  restore: (set: unknown, said: string) => void;
 } {
-  const [bookmarks, setBookmarks] = useState<readonly Bookmark[]>([]);
+  const [bookmarks, setBookmarksState] = useState<readonly Bookmark[]>([]);
+  const latest = useRef<readonly Bookmark[]>([]);
+  const setBookmarks = useCallback((next: readonly Bookmark[] | ((now: readonly Bookmark[]) => readonly Bookmark[])) => {
+    latest.current = typeof next === "function" ? next(latest.current) : next;
+    setBookmarksState(latest.current);
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -53,24 +64,32 @@ export function useBookmarks(
     return () => {
       live = false;
     };
-  }, []);
+  }, [setBookmarks]);
 
   // Writes go one after another. Each opens the store on its own, and two
   // opened close together (a drop, then the rename a moment later) could
   // otherwise finish in either order — and the older set, landing last, would
   // quietly put the old name back.
   const queue = useRef<Promise<unknown>>(Promise.resolve());
-  const commit = useCallback(
-    (next: Bookmark[], said: string) => {
+  const write = useCallback(
+    (next: readonly Bookmark[], said: string) => {
       setBookmarks(next);
       queue.current = queue.current
-        .then(() => writeBookmarks(next))
+        .then(() => writeBookmarks([...next]))
         .then((ok) => announce(ok ? said : notSaved));
     },
-    [announce, notSaved],
+    [announce, notSaved, setBookmarks],
   );
+  const commit = useCallback(
+    (next: Bookmark[], said: string, how?: CommitHow) => {
+      if (!how?.unrecorded) record?.(latest.current, next, said);
+      write(next, said);
+    },
+    [record, write],
+  );
+  const restore = useCallback((set: unknown, said: string) => write(set as readonly Bookmark[], said), [write]);
 
-  return { bookmarks, commit };
+  return { bookmarks, commit, restore };
 }
 
 /**
@@ -125,13 +144,15 @@ export function useSeam(page: number | null): number | null {
 export function useNotes(
   announce: (line: string) => void,
   notSaved: string,
+  record?: Recorder,
 ): {
   notes: readonly Note[];
   scoped: readonly ScopedNote[];
-  commit: (next: Note[], said: string) => void;
+  commit: (next: Note[], said: string, how?: CommitHow) => void;
   /** Replace the notes that gather verses outright, as joining a note and its Undo do. */
-  commitScoped: (next: readonly ScopedNote[], said: string) => void;
+  commitScoped: (next: readonly ScopedNote[], said: string, how?: CommitHow) => void;
   loadFile: (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => number;
+  restore: (held: unknown, said: string) => void;
 } {
   const [held, setHeld] = useState<Held>(EMPTY);
   // The latest notes, for the write: a write queued before the read landed
@@ -185,24 +206,43 @@ export function useNotes(
     [announce, notSaved],
   );
 
-  const commit = useCallback(
-    (next: Note[], said: string) => {
-      hold({
-        scoped: fromPins(
-          latest.current.scoped,
-          next.filter((n) => !isMistake(n)),
-          Date.now(),
-        ),
-        mistakes: next.filter(isMistake),
-      });
+  // Undo hears the notes as a whole, before and after: the notes that gather
+  // verses and the mistakes together, so taking a change back is one write.
+  const change = useCallback(
+    (next: Held, said: string, how?: CommitHow) => {
+      if (!how?.unrecorded) record?.(latest.current, next, said, how?.opens);
+      hold(next);
       save(said);
     },
-    [hold, save],
+    [hold, record, save],
+  );
+
+  const commit = useCallback(
+    (next: Note[], said: string, how?: CommitHow) =>
+      change(
+        {
+          scoped: fromPins(
+            latest.current.scoped,
+            next.filter((n) => !isMistake(n)),
+            Date.now(),
+          ),
+          mistakes: next.filter(isMistake),
+        },
+        said,
+        how,
+      ),
+    [change],
   );
 
   const commitScoped = useCallback(
-    (next: readonly ScopedNote[], said: string) => {
-      hold({ scoped: [...next], mistakes: latest.current.mistakes });
+    (next: readonly ScopedNote[], said: string, how?: CommitHow) =>
+      change({ scoped: [...next], mistakes: latest.current.mistakes }, said, how),
+    [change],
+  );
+
+  const restore = useCallback(
+    (held: unknown, said: string) => {
+      hold(held as Held);
       save(said);
     },
     [hold, save],
@@ -220,7 +260,7 @@ export function useNotes(
   );
 
   const notes = useMemo(() => [...pinsOf(held.scoped), ...held.mistakes], [held]);
-  return { notes, scoped: held.scoped, commit, commitScoped, loadFile };
+  return { notes, scoped: held.scoped, commit, commitScoped, loadFile, restore };
 }
 
 interface Held {
@@ -240,11 +280,13 @@ const EMPTY: Held = { scoped: [], mistakes: [] };
 export function useConfusions(
   announce: (line: string) => void,
   notSaved: string,
+  record?: Recorder,
 ): {
   confusions: readonly Confusion[];
   device: Device | null;
-  commit: (next: readonly Confusion[], said: string) => void;
+  commit: (next: readonly Confusion[], said: string, how?: CommitHow) => void;
   loadFile: (fileJumps: readonly Confusion[]) => number;
+  restore: (jumps: unknown, said: string) => void;
 } {
   const [held, setHeld] = useState<readonly Confusion[]>([]);
   const [device, setDevice] = useState<Device | null>(null);
@@ -286,8 +328,16 @@ export function useConfusions(
   );
 
   const commit = useCallback(
-    (next: readonly Confusion[], said: string) => {
+    (next: readonly Confusion[], said: string, how?: CommitHow) => {
+      if (!how?.unrecorded) record?.(latest.current, next, said);
       hold(next);
+      save(said);
+    },
+    [hold, record, save],
+  );
+  const restore = useCallback(
+    (jumps: unknown, said: string) => {
+      hold(jumps as readonly Confusion[]);
       save(said);
     },
     [hold, save],
@@ -303,5 +353,5 @@ export function useConfusions(
     [hold, save],
   );
 
-  return { confusions: held, device, commit, loadFile };
+  return { confusions: held, device, commit, loadFile, restore };
 }

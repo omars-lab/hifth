@@ -6,6 +6,7 @@ import type { Pen } from "../pen";
 import aimStyles from "./AimPicker.module.css";
 import type { PageTool } from "./PageStage";
 import styles from "./PageToolbar.module.css";
+import { UndoRedo } from "./UndoRedo";
 import { PenPicker } from "./PenPicker";
 
 /**
@@ -266,6 +267,9 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen, tools = TOOLS, a
         </div>
       )}
       <div className={styles.side} data-end={end ? "" : undefined}>
+        {/* Beside the tools, not among them: they take nothing up, so the
+            bar's middle keeps its width at the narrowest window. */}
+        <UndoRedo />
         {/* For the eye. The change is announced once, by App, through the one
             polite announcer the app has — a second live region here would talk
             over it. */}

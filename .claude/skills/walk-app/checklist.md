@@ -500,6 +500,12 @@ upright and on its side, English and Arabic, iPad and Mac.
   turning the page twice, not three times, and still says so after the app is closed and opened
   again; in Arabic the counts are in the words' own letters, not stretched, and today's bar ends
   the strip on the left. · phone, desktop, iPad app · test: usage spec
+- [ ] Mark a mistake, drop a note and type in it, then press Undo beside the tools until it greys
+  out: each press takes back one thing (the note and its words go together), Redo puts them back,
+  and Ctrl+Z (⌘Z on a Mac) while typing in a note changes only the words. Set the pens down the
+  side on an iPad on its side, with the highlighter on: the rail, Undo and Redo at its foot, stays
+  between the bars. In Arabic the two arrows mirror. · desktop, desktop-firefox, phone, ipad-side ·
+  tests: undo-redo, pen-homes specs
 
 ## The Mac and iPad apps
 

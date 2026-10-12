@@ -642,6 +642,14 @@ export interface Strings {
   bmUnfold(count: number): string;
   bmUnfolded(count: number): string;
   bmUndo: string;
+  /** Undo and redo for every kept mark (notes-style-toolbar ③). */
+  markUndo: string;
+  markRedo: string;
+  /** Said when a change is taken back: what the change itself said, when it said anything. */
+  markUndone(said: string): string;
+  markRedone(said: string): string;
+  markNothingToUndo: string;
+  markNothingToRedo: string;
   /** Said when an unfold is undone. */
   bmRestored: string;
   bmRibbon(name: string): string;
@@ -1414,6 +1422,12 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     bmUnfold: (count) => m.bmUnfold({ count, countText: n(count) }),
     bmUnfolded: (count) => m.bmUnfolded({ count, countText: n(count) }),
     bmUndo: m.bmUndo,
+    markUndo: m.markUndo,
+    markRedo: m.markRedo,
+    markUndone: (said) => (said ? m.markUndone({ said }) : m.markUndoneBare),
+    markRedone: (said) => (said ? m.markRedone({ said }) : m.markRedoneBare),
+    markNothingToUndo: m.markNothingToUndo,
+    markNothingToRedo: m.markNothingToRedo,
     bmRestored: m.bmRestored,
     bmRibbon: (name) => m.bmRibbon({ name }),
     bmDrawerTitle: m.bmDrawerTitle,
