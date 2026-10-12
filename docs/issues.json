@@ -3107,6 +3107,28 @@
       "closedBy": "packages/core/src/highlighter.ts"
     },
     {
+      "id": "testflight-after-own-use",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉚"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "The owner settled the TestFlight question on own devices only (2026-10-11) and plans to move to sending the whole build to named testers once they have used the app themselves. Owed first: a licence reading by someone qualified, and the paid Apple membership. The upload steps open only when the decision record says A or B."
+    },
+    {
+      "id": "usage-across-devices",
+      "source": {
+        "file": "docs/design/feature-usage.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "The owner's own feature counts are built and kept on each device separately. Open: keep it that way, add a by-hand file to carry counts between devices, or send them to the owner's own online store (the last would be the first thing in the app to send anything off the device)."
+    },
+    {
       "id": "note-left-open-stays-empty",
       "source": {
         "file": "docs/design/native-shell.md",

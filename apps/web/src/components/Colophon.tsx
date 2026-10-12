@@ -24,6 +24,7 @@ import { RAIL_HOMES, type RailHome } from "../rail-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import { ZOOM_ANCHORS, rememberZoomAnchor, useZoomAnchor } from "../zoom-anchor";
 import { NOTE_LEAVES, rememberNoteLeave, useNoteLeave } from "../note-leave";
+import { UsageReadout } from "./UsageReadout";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -890,6 +891,10 @@ export function Colophon({
             <p className={styles.note}>{t.tipsNote}</p>
           </section>
         )}
+
+        {/* The owner's own count of what gets used, kept on this device only
+            (docs/design/feature-usage.md). */}
+        <UsageReadout />
 
         <p className={styles.lede}>{t.aboutLede}</p>
         <p className={styles.caveat}>{t.aboutCaveat}</p>

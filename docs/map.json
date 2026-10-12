@@ -2396,6 +2396,46 @@
           "note": "The web app at iPad size on WebKit, without the shell: one page upright, an open mus'haf on its side, place kept across rotation, a finger selects a verse. ipad-golden.spec.ts holds the two pictures."
         }
       ]
+    },
+    {
+      "id": "feature-usage",
+      "what": "The owner's own count of how often each feature is used: one count each time something opens, by feature name only, never which verse, kept on this device for 400 days and listed in the info panel with a fortnight strip and a button that forgets it. Whether counts from several devices should be added together is docs/design/feature-usage.md ①.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "apps/web/src/usage.ts",
+          "symbol": "USE_FEATURES",
+          "note": "Every feature that is counted, by name; the roll-up the panel draws, and its own day helpers so it stays off the revision record's list."
+        },
+        {
+          "file": "apps/web/src/usage-store.ts",
+          "symbol": "countUse",
+          "note": "Where the counts live: IndexedDB, one record per day, never throws."
+        },
+        {
+          "file": "apps/web/src/use-count.ts",
+          "symbol": "useCountChange",
+          "note": "The two ways the app says a feature was used; a page change counts only after the reader has touched the app, so where it opens is not a turn."
+        },
+        {
+          "file": "apps/web/src/components/UsageReadout.tsx",
+          "symbol": "UsageReadout",
+          "note": "The info panel's list."
+        }
+      ],
+      "extend": [
+        "Add the name to USE_FEATURES in usage.ts.",
+        "Add its words to both message files and a case in UsageReadout's nameOf.",
+        "Say where it is used in App.tsx with useCountUse (something opens) or countUse (a single act)."
+      ],
+      "gates": [
+        "pnpm gate:revision-privacy",
+        "vitest usage.test.ts usage-store.test.ts",
+        "playwright usage.spec.ts"
+      ],
+      "seeAlso": [
+        "revision-record"
+      ]
     }
   ]
 }

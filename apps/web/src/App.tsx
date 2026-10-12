@@ -115,6 +115,9 @@ import {
 } from "./assets";
 import { applyFieldToDocument, fieldFromHash } from "./field";
 import { recordLook } from "./revision-store";
+import { countUse } from "./usage-store";
+import { useCountChange, useCountUse } from "./use-count";
+import { USE_PENS } from "./usage";
 import { useT, type Strings } from "./i18n";
 import { JumpPicker, type JumpChoice } from "./components/JumpPicker";
 import { useHashRouter } from "./useHashRouter";
@@ -1576,6 +1579,8 @@ export function App(): JSX.Element {
     (next: PageTool, lock = false) => {
       const keep = lock && next !== "select";
       if (toolRef.current === next && lockedRef.current === keep) return;
+      const pen = USE_PENS.find((p) => p === next);
+      if (pen && toolRef.current !== next) void countUse(`pen-${pen}`);
       toolRef.current = next;
       lockedRef.current = keep;
       setToolState(next);
@@ -2549,7 +2554,10 @@ export function App(): JSX.Element {
       id: "listen",
       caption: listenCaption(audio.phaseFor(key), t),
       glyph: listenGlyph(audio.phaseFor(key)),
-      onPick: () => audio.toggle(key),
+      onPick: () => {
+        if (audio.phaseFor(key) === "idle") void countUse("listen");
+        audio.toggle(key);
+      },
     });
     const surah = parseAyahKey(key)?.surah;
     if (surah && INTRO_SURAHS.has(surah))
@@ -2822,6 +2830,7 @@ export function App(): JSX.Element {
     (from: string, to: string) => {
       const run = versesBetween(from, to);
       if (run.length === 0) return;
+      void countUse("listen");
       audio.playRun(run);
       // Picking where to stop set the verse's tools aside; bring them back, so
       // the recitation has its Pause in reach.
@@ -3421,6 +3430,22 @@ export function App(): JSX.Element {
       : drawerUp
         ? "tools"
         : "bar";
+
+  // The owner's own count of what gets used (docs/design/feature-usage.md):
+  // one use each time a thing opens, by name only, kept on this device.
+  useCountChange("turn-page", page);
+  useCountUse(openDirection !== null ? "lookalikes" : null);
+  useCountUse(commentaryOpen ? "commentary" : null);
+  useCountUse(rootsOpen ? "roots" : null);
+  useCountUse(shareCardTop !== null ? "share" : null);
+  useCountUse(jumperOpen ? "go-to" : null);
+  useCountUse(zoom > 1.01 ? "zoom" : null);
+  useCountUse(verseMenu !== null || verseMenuAt !== null ? "verse-menu" : null);
+  useCountUse(wordOpen !== null ? "word-parts" : null);
+  useCountUse(revisionOpen ? "opened-map" : null);
+  useCountUse(legendOpen ? "tajweed-key" : null);
+  useCountUse(editionOpen ? "edition" : null);
+  useCountUse(colophonOpen ? "info-panel" : null);
 
   return (
     // The chrome reads in the UI language's direction — every offset in the

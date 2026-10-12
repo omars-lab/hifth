@@ -1,8 +1,11 @@
 # May a build of the app that carries The Study Quran's commentary go to a few named outside testers through TestFlight?
 
-*Status: open, since 2026-09-29. Until it is settled the app stays on this project's own
-devices, and the two build steps that would upload it refuse to run. Nothing is blocked by
-that except the upload itself.*
+*Status: decided, C, by Omar on 2026-10-11 (asked since 2026-09-29). The app stays on the
+owner's own Mac and iPad and is shown in the room; the two build steps that would upload it
+still refuse, because they open only on A or B. In the owner's words, start with C and move
+to A after using it: once the owner has lived with the app on their own devices, this
+question comes back as a move to A, and the licence reading named under "What would change
+the answer?" is still owed before that upload.*
 
 **The picture:** <https://blog.bytesofpurpose.com/hifth/docs/design/native-testflight-options.html> —
 `native-testflight-options.html`, checked in and rebuilt by
