@@ -235,6 +235,11 @@ export interface Catalog {
   readonly mapSlips: string;
   readonly mapTitle: string;
   readonly mapWentTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
+  readonly markAimsLabel: string;
+  readonly markToolsNote: string;
+  readonly markToolsOne: string;
+  readonly markToolsThree: string;
+  readonly markToolsTitle: string;
   readonly matchLoose: string;
   readonly matchRepeat: string;
   readonly mistakeClear: string;

@@ -23,3 +23,14 @@ the other recitation tests use fakes fetch inside the page, so nothing slips pas
 
 A test that fakes the recitation host with a route must also turn the service worker off, or
 anything the app fetches early reaches the real host.
+
+## 2026-10-12: the offline test had no route at all
+
+The test that turns the connection off before the tap faked nothing, so its early ask went to
+the real host. Alone it lost the race and passed; with the whole suite running, or eight copies
+side by side, the file was in before the connection went, the tap played it, and the button
+said Stop instead of Offline (24 failures in 24). It now refuses the recitation host from the
+start, so only the dropped connection decides; 48 runs in 48 green on Android and iPhone.
+
+A test about the recitation failing must refuse the host from the start, not only go offline
+before the tap: the early ask has already gone out by then.

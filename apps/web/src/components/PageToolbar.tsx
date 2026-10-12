@@ -1,7 +1,9 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useT } from "../i18n";
 import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
+import { isMarkAim, MARK_AIMS, type MarkAim } from "../mark-tools";
 import type { Pen } from "../pen";
+import aimStyles from "./AimPicker.module.css";
 import type { PageTool } from "./PageStage";
 import styles from "./PageToolbar.module.css";
 import { PenPicker } from "./PenPicker";
@@ -25,8 +27,13 @@ export const TOOL_KEYS: Readonly<Record<string, PageTool>> = {
   KeyJ: "jump",
 };
 
+export interface ToolEntry {
+  tool: PageTool;
+  letter: string;
+}
+
 /** The tools in the order every bar shows them, desktop and phone alike. */
-export const TOOLS: ReadonlyArray<{ tool: PageTool; letter: string }> = [
+export const TOOLS: readonly ToolEntry[] = [
   { tool: "read", letter: "R" },
   { tool: "select", letter: "V" },
   { tool: "highlight", letter: "H" },
@@ -99,6 +106,55 @@ export function LockMark(): JSX.Element {
   );
 }
 
+/**
+ * Note, Harakat and Word, offered beside the one button that stands for them
+ * while it is on (docs/design/notes-style-toolbar.md, ②): the same place the
+ * highlighter offers its colours, so a second choice lives where the reader
+ * already looks for one. A pick keeps the tool locked if it was.
+ *
+ * One tab stop and arrow keys along it, like the pens; its own arrows stop
+ * there, so they do not also move along the tools bar it sits in.
+ */
+export function AimPicker({ aim, onAim }: { aim: MarkAim; onAim: (aim: MarkAim) => void }): JSX.Element {
+  const { t } = useT();
+  const buttons = useRef<Array<HTMLButtonElement | null>>([]);
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const at = MARK_AIMS.indexOf(aim);
+    const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
+    let to: number | null = null;
+    if (e.key === (rtl ? "ArrowLeft" : "ArrowRight") || e.key === "ArrowDown") to = (at + 1) % MARK_AIMS.length;
+    else if (e.key === (rtl ? "ArrowRight" : "ArrowLeft") || e.key === "ArrowUp") to = (at - 1 + MARK_AIMS.length) % MARK_AIMS.length;
+    if (to === null) return;
+    e.stopPropagation();
+    e.preventDefault();
+    onAim(MARK_AIMS[to]!);
+    buttons.current[to]?.focus();
+  };
+  return (
+    <div className={aimStyles.aims} role="radiogroup" aria-label={t.markAimsLabel} onKeyDown={onKeyDown}>
+      {MARK_AIMS.map((x, i) => (
+        <button
+          key={x}
+          ref={(el) => {
+            buttons.current[i] = el;
+          }}
+          type="button"
+          role="radio"
+          className={aimStyles.aim}
+          aria-checked={aim === x}
+          aria-label={toolName(t, x)}
+          title={toolName(t, x)}
+          tabIndex={aim === x ? 0 : -1}
+          data-aim={x}
+          onClick={() => onAim(x)}
+        >
+          <ToolIcon tool={x} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 interface PageToolbarProps {
   tool: PageTool;
   /** The tool on is locked on, and stays after it is used. */
@@ -111,6 +167,10 @@ interface PageToolbarProps {
   /** The highlighter's pen, offered beside the tools while the highlighter is on. */
   pen: Pen;
   onPen: (pen: Pen) => void;
+  /** The tools this bar shows: all of them, or Note, Harakat and Word as one (mark-tools.ts). */
+  tools?: readonly ToolEntry[] | undefined;
+  /** Set while Note, Harakat and Word are one button: the one it stands for. */
+  aim?: MarkAim | undefined;
   /**
    * Held at the far end of the row: the look-alike chips, when a magnified
    * page leaves no desk beside it and the reader keeps them up here
@@ -137,7 +197,7 @@ interface PageToolbarProps {
  * Hidden below the desktop breakpoint by CSS, like `DesktopChrome`: a phone
  * layout for the bar is the plan's step 5 and a decision of its own.
  */
-export function PageToolbar({ tool, locked, onTool, pen, onPen, end }: PageToolbarProps): JSX.Element {
+export function PageToolbar({ tool, locked, onTool, pen, onPen, tools = TOOLS, aim, end }: PageToolbarProps): JSX.Element {
   const { t } = useT();
   const touch = useMediaQuery(TOUCH_QUERY);
   const press = useToolPress(tool, onTool);
@@ -148,25 +208,25 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen, end }: PageToolb
   // arrows do in any radio group. The bar is laid out in reading order, so in
   // the right-to-left chrome the left arrow is "next".
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const at = TOOLS.findIndex((x) => x.tool === tool);
+    const at = tools.findIndex((x) => x.tool === tool);
     const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
     const forward = rtl ? "ArrowLeft" : "ArrowRight";
     const back = rtl ? "ArrowRight" : "ArrowLeft";
     let to: number | null = null;
-    if (e.key === forward || e.key === "ArrowDown") to = (at + 1) % TOOLS.length;
-    else if (e.key === back || e.key === "ArrowUp") to = (at - 1 + TOOLS.length) % TOOLS.length;
+    if (e.key === forward || e.key === "ArrowDown") to = (at + 1) % tools.length;
+    else if (e.key === back || e.key === "ArrowUp") to = (at - 1 + tools.length) % tools.length;
     else if (e.key === "Home") to = 0;
-    else if (e.key === "End") to = TOOLS.length - 1;
+    else if (e.key === "End") to = tools.length - 1;
     if (to === null) return;
     e.preventDefault();
-    onTool(TOOLS[to]!.tool);
+    onTool(tools[to]!.tool);
     buttons.current[to]?.focus();
   };
 
   return (
     <div className={styles.bar} role="toolbar" aria-label={t.toolbarLabel} data-tool={tool} data-pen-home="strip">
       <div className={styles.tools} role="radiogroup" aria-label={t.toolbarLabel} onKeyDown={onKeyDown}>
-        {TOOLS.map(({ tool: x, letter }, i) => (
+        {tools.map(({ tool: x, letter }, i) => (
           <button
             key={x}
             ref={(el) => {
@@ -198,6 +258,11 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen, end }: PageToolb
       {tool === "highlight" && (
         <div className={styles.start}>
           <PenPicker pen={pen} onPen={onPen} narrow />
+        </div>
+      )}
+      {aim && isMarkAim(tool) && (
+        <div className={styles.start}>
+          <AimPicker aim={aim} onAim={(x) => onTool(x, locked)} />
         </div>
       )}
       <div className={styles.side} data-end={end ? "" : undefined}>

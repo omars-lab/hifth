@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
+import { isMarkAim, type MarkAim } from "../mark-tools";
 import type { Pen } from "../pen";
 import type { PageTool } from "./PageStage";
-import { LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress } from "./PageToolbar";
+import { AimPicker, LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress, type ToolEntry } from "./PageToolbar";
 import styles from "./PhoneToolbar.module.css";
 import { PenPicker } from "./PenPicker";
 
@@ -39,12 +40,18 @@ export function phoneBarFromUrl(search: string): PhoneBarId {
   return asked === "a" || asked === "b" ? asked : "c";
 }
 
-function ToolButtons({ tool, locked, onTool, labelled }: PhoneToolbarProps & { labelled?: boolean }): JSX.Element {
+function ToolButtons({
+  tool,
+  locked,
+  onTool,
+  labelled,
+  tools = TOOLS,
+}: PhoneToolbarProps & { labelled?: boolean; tools?: readonly ToolEntry[] | undefined }): JSX.Element {
   const { t } = useT();
   const press = useToolPress(tool, onTool);
   return (
     <>
-      {TOOLS.map(({ tool: x }) => (
+      {tools.map(({ tool: x }) => (
         <button
           key={x}
           type="button"
@@ -137,7 +144,15 @@ export function PhoneToolbarC({
   onTool,
   pen,
   onPen,
-}: PhoneToolbarProps & { pen: Pen; onPen: (pen: Pen) => void }): JSX.Element {
+  tools,
+  aim,
+}: PhoneToolbarProps & {
+  pen: Pen;
+  onPen: (pen: Pen) => void;
+  /** Note, Harakat and Word as one button, when the reader set it (mark-tools.ts). */
+  tools?: readonly ToolEntry[] | undefined;
+  aim?: MarkAim | undefined;
+}): JSX.Element {
   const { t, dir } = useT();
   const [open, setOpen] = useState(false);
   return (
@@ -157,7 +172,7 @@ export function PhoneToolbarC({
         // it covers is pinned right to left for the mus'haf, the tools are not.
         <div className={styles.tray} role="toolbar" aria-label={t.toolbarLabel} dir={dir} data-keep-clear="">
           <div className={styles.row} role="radiogroup" aria-label={t.toolbarLabel}>
-            <ToolButtons tool={tool} locked={locked} onTool={onTool} />
+            <ToolButtons tool={tool} locked={locked} onTool={onTool} tools={tools} />
           </div>
           {/* The close sits on the line under the tools, not beside them: eight
               tools at thumb size are the whole width of a 390px phone. */}
@@ -167,6 +182,11 @@ export function PhoneToolbarC({
             {tool === "highlight" && (
               <div className={styles.trayPens}>
                 <PenPicker pen={pen} onPen={onPen} />
+              </div>
+            )}
+            {aim && isMarkAim(tool) && (
+              <div className={styles.trayPens}>
+                <AimPicker aim={aim} onAim={(x) => onTool(x, locked)} />
               </div>
             )}
             <span className={styles.trayHint}>

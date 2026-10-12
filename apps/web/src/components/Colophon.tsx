@@ -19,6 +19,7 @@ import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-ro
 import { RIBBON_LENGTHS, rememberRibbonLength, useRibbonLength } from "../ribbon-length";
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
+import { MARK_TOOLS, type MarkTools } from "../mark-tools";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { RAIL_HOMES, type RailHome } from "../rail-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
@@ -51,6 +52,9 @@ interface ColophonProps {
   /** How a note draws the parts it can be about; remembered on this device. */
   scopeLook?: ScopeLook;
   onScopeLook?: (look: ScopeLook) => void;
+  /** Note, Harakat and Word as three buttons or one; remembered on this device. */
+  markTools?: MarkTools | undefined;
+  onMarkTools?: ((shape: MarkTools) => void) | undefined;
   /** Where the page tools sit on a computer or an iPad held sideways; remembered on this device. */
   penHome?: PenHome | undefined;
   onPenHome?: ((home: PenHome) => void) | undefined;
@@ -205,6 +209,11 @@ const SCOPE_LOOK_NAME: Record<ScopeLook, (t: ReturnType<typeof useT>["t"]) => st
   trail: (t) => t.scopeLookTrail,
 };
 
+const MARK_TOOLS_NAME: Record<MarkTools, (t: ReturnType<typeof useT>["t"]) => string> = {
+  three: (t) => t.markToolsThree,
+  one: (t) => t.markToolsOne,
+};
+
 const PEN_HOME_NAME: Record<PenHome, (t: ReturnType<typeof useT>["t"]) => string> = {
   strip: (t) => t.penHomeStrip,
   float: (t) => t.penHomeFloat,
@@ -232,6 +241,8 @@ export function Colophon({
   onArrowShowing,
   scopeLook,
   onScopeLook,
+  markTools,
+  onMarkTools,
   penHome,
   onPenHome,
   railHome,
@@ -822,6 +833,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.scopeLookNote}</p>
+          </section>
+        )}
+        {/* Note, Harakat and Word as three buttons or one (docs/design/notes-
+            style-toolbar.md, ②): the one button built as a setting, three kept
+            as the default (owner, 2026-10-12). Every layout has a tools bar. */}
+        {markTools && onMarkTools && (
+          <section className={styles.block} aria-labelledby="colophon-mark-tools">
+            <h3 className={styles.subhead} id="colophon-mark-tools">
+              {t.markToolsTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-mark-tools">
+              {MARK_TOOLS.map((shape) => (
+                <button
+                  key={shape}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={markTools === shape}
+                  data-mark-tools-choice={shape}
+                  onClick={() => onMarkTools(shape)}
+                >
+                  {MARK_TOOLS_NAME[shape](t)}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.markToolsNote}</p>
           </section>
         )}
         {/* Where the page tools sit (docs/design/notes-style-toolbar.md, ①): all
