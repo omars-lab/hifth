@@ -242,7 +242,7 @@ export default defineConfig({
           // docs page the build stages beside the app.
           // `pen-colours` is the highlighter's colours, picked from the tools
           // bar; it runs on the phones too, from their own bar.
-          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser)\.spec\.ts/,
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -261,8 +261,10 @@ export default defineConfig({
           // And `highlight`: Firefox measured the page's block of words a ninth
           // too narrow, and every line's band stopped short of its first word
           // (2026-10-10, walking the live site).
+          // And `slider-arrows`: Firefox drew the slider's two end arrows from
+          // different fonts, one a third the size of the other (2026-10-12).
           name: "desktop-firefox",
-          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser)\.spec\.ts/,
+          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },

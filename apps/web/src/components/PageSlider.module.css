@@ -60,9 +60,18 @@
   border-radius: var(--radius-pill);
   background: none;
   color: var(--ink-soft);
-  font-size: var(--text-md);
-  line-height: 1;
   cursor: pointer;
+}
+
+/* The drawn arrow sits in the middle of the button, with no line of text
+   round it to make it taller than it is. */
+.arrow {
+  display: block;
+  line-height: 0;
+}
+
+.arrow svg {
+  display: block;
 }
 
 .edge:disabled {
