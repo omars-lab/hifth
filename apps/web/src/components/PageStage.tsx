@@ -1451,6 +1451,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const foldElRef = useRef<HTMLDivElement | null>(null);
   const armedRef = useRef(false);
   const turnRef = useRef(0);
+  // The turn already decided and not yet landed, and the one a new stroke
+  // landed for it. A flick made while the last page is still landing starts
+  // from the page arriving, not the one leaving (docs/PLAN.md, item 86): the
+  // stroke lands that turn at once rather than taking its band from under it,
+  // and the turn, finding itself overtaken, still says its page arrived.
+  const flyingRef = useRef<{ gen: number; next: number } | null>(null);
+  const landedEarlyRef = useRef(0);
   const foldTargetRef = useRef(foldTarget);
   foldTargetRef.current = foldTarget;
   const coverTopRef = useRef(coverTop);
@@ -2650,37 +2657,39 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (style === "curl") {
         moveFold(el, sweepOf(el, dir).middle, sweepMs);
         await sleep(sweepMs);
-        if (!mine()) return false;
+        if (!mine()) return landedEarlyRef.current === gen;
         el.dataset.flat = "1";
         if (!pagesRef.current.has(next)) {
           setTurnPhase("stalled");
           const mp = await mount;
-          if (!mine()) return false;
+          if (!mine()) return landedEarlyRef.current === gen;
           if (!mp) return giveBack();
           setTurnPhase("crossing");
         }
         // Covered by the leaf, so the swap needs no fade of its own.
         const mp = await mount;
-        if (!mine()) return false;
+        if (!mine()) return landedEarlyRef.current === gen;
         if (!mp) return giveBack();
         land(next);
+        flyingRef.current = null;
         fadeFold(el, 0, fadeMs * 2);
         await sleep(fadeMs * 2);
       } else {
         fadeFold(el, 1, sweepMs / 2);
         await sleep(sweepMs / 2);
-        if (!mine()) return false;
+        if (!mine()) return landedEarlyRef.current === gen;
         if (!pagesRef.current.has(next)) {
           setTurnPhase("stalled");
           const mp = await mount;
-          if (!mine()) return false;
+          if (!mine()) return landedEarlyRef.current === gen;
           if (!mp) return giveBack();
           setTurnPhase("crossing");
         }
         crossFade(from, next, fadeMs);
         await sleep(fadeMs);
-        if (!mine()) return false;
+        if (!mine()) return landedEarlyRef.current === gen;
         land(next);
+        flyingRef.current = null;
         fadeFold(el, 0, sweepMs / 2);
         await sleep(sweepMs / 2);
       }
@@ -2713,6 +2722,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const fadeMs = durationMs("--dur-fast", 120);
       const gen = (turnRef.current += 1);
       const mine = (): boolean => turnRef.current === gen;
+      flyingRef.current = { gen, next };
       const quiet = quietTurnRef.current;
       quietTurnRef.current = false;
 
@@ -2737,13 +2747,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         !quiet && kind !== "none" && sweepMs > 0 && !(kind === "crease" && foldTargetRef.current?.current);
       if (!drawn) {
         const mp = await ensurePage(next);
-        if (!mine()) return false;
+        if (!mine()) return landedEarlyRef.current === gen;
         if (!mp) {
           setErrorPage(next);
           setStatus("error");
           return false;
         }
         land(next);
+        flyingRef.current = null;
         return true;
       }
 
@@ -2756,7 +2767,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       foldRef.current = { kind: kind as FoldKind, dir, style: drawnStyle(kind as FoldKind, turnStyleRef.current) };
       setFold(foldRef.current);
       const el = await armedFold(gen);
-      if (!el || !mine()) return false;
+      if (!mine()) return landedEarlyRef.current === gen;
+      if (!el) return false;
 
       const style = foldRef.current?.style ?? "seam";
       if (style !== "seam") return runStyledTurn(el, style, from, next, dir, mount, gen, sweepMs, fadeMs);
@@ -2768,7 +2780,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // The swap is centred on the band's centre, so with a 240 ms sweep and a
       // 120 ms fade it runs from 60 ms to 180 ms.
       await sleep(Math.max(0, sweepMs / 2 - fadeMs / 2));
-      if (!mine()) return false;
+      if (!mine()) return landedEarlyRef.current === gen;
 
       if (!pagesRef.current.has(next)) {
         /*
@@ -2780,7 +2792,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         setTurnPhase("stalled");
         moveFold(el, middle, fadeMs);
         const mp = await mount;
-        if (!mine()) return false;
+        if (!mine()) return landedEarlyRef.current === gen;
         if (!mp) {
           // It will never arrive — offline, unvendored, a 404. Retreat the way
           // it came and leave the reader where they were. Landing would paint
@@ -2801,8 +2813,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
 
       crossFade(from, next, fadeMs);
       await sleep(fadeMs);
-      if (!mine()) return false;
+      if (!mine()) return landedEarlyRef.current === gen;
       land(next);
+      flyingRef.current = null;
 
       await sleep(Math.max(0, sweepMs / 2 - fadeMs / 2));
       // A newer turn owning the band is not a failure of this one: the page it
@@ -2856,6 +2869,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    */
   const beginTrackedTurn = useCallback(
     (step: 1 | -1): void => {
+      const flying = flyingRef.current;
+      flyingRef.current = null;
+      if (flying && turnRef.current === flying.gen && pagesRef.current.has(flying.next)) {
+        landedEarlyRef.current = flying.gen;
+        land(flying.next);
+      }
       const from = currentPageRef.current;
       const next = turnTarget(step);
       const dir: TurnDir = step > 0 ? "forward" : "back";
@@ -2880,7 +2899,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // thinking time has been spent on the fetch that would otherwise stall.
       if (next !== null) void ensurePage(next).catch(() => null);
     },
-    [durationMs, ensurePage, setTurnPhase, turnTarget],
+    [durationMs, ensurePage, land, setTurnPhase, turnTarget],
   );
 
   /**

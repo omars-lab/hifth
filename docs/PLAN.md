@@ -1961,7 +1961,20 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     restless, the fix is to keep the side the card has until the verse being recited would
     land under it, and only then move; that one would be built beside this one and kept as
     a setting.
-86. **A second quick flick, made while the first turn is still landing, is lost.** Found
+
+    Walked 2026-10-12 in the iPad app on its side, English, for a hundred seconds from the
+    start of the surah (pages 1 to 4). The card moved three times: once as the book turned to
+    the next opening, and once in the middle of each opening, at the moment the recitation
+    reached the other page. It never covered any of the verse being recited, and it moved
+    nowhere else. The same walk in Arabic gave the same three moves at the same moments. The second way, keeping the side until the verse would land under it, moves
+    at exactly the same three moments: a recitation always goes from the right page to the
+    left page, so the page the card is over is always the next one to be read. It would only
+    differ when the recitation jumps somewhere, so it is not being built. Whether one move a
+    page reads as restless is a matter of feel, which only a person can judge; it is parked on
+    the manual-testing list as item 16. If it does read as restless, the next thing to try is a
+    different way of keeping out of the way, such as a smaller card while the recitation plays,
+    not a stickier side.
+86. ~~**A second quick flick, made while the first turn is still landing, was lost.**~~ Found
     fixing a flaky browser test, 2026-10-12: on a phone, after a flick is let go the page
     takes about a fifth of a second to land, with the arriving page already in sight beside
     the one leaving. A flick that starts on the arriving page in that time turns nothing.
@@ -1969,6 +1982,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     the hand; a hafiz flicking quickly through pages to find one would lose every other
     flick if they flick about four times a second. The test that found it now waits for each
     turn to land; the fix wants its own test of two quick flicks, watched failing first.
+    The cause: the new flick took the turn over before the page it was landing had
+    arrived, so the first flick was undone and the second turned only one page from where
+    the first had started. Fixed: a flick that starts while a page is still landing lands
+    that page at once, then turns from it. Two browser tests at phone size, one with the
+    turn slowed so the second flick starts inside the landing and one with the second flick
+    made the moment the first is let go, both watched failing first (12 of 12 and 3 of 24)
+    and passing 96 of 96 after, in the iPhone and Android browsers. Not yet felt on a phone
+    in the hand.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

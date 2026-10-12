@@ -108,6 +108,14 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
     and the shelf shows the bookmarks it held. Anything else becomes a backlog item and a test
     (docs/design/native-shell.md, item ㉛).
 
+16. **Watching the note move as a recitation crosses the open book.** On the pitch build, lay
+    the iPad on its side, tap a demo verse so its note opens, then play the surah from its corner
+    and let it run across two openings. The note moves to the other page each time the recitation
+    reaches the page it is over, about once a page. The walk measured where it stands but cannot
+    say how the move feels. Right: each move reads as the note getting out of the way, not as a
+    note that will not sit still. If it reads as restless, that becomes a backlog item, with a
+    smaller note while the recitation plays as the first thing to try (docs/PLAN.md, item 85).
+
 ## Done
 
 (Items move here with the date and where their test or ledger record is.)

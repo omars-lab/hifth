@@ -89,8 +89,9 @@ async function turnAhead(page: Page, isMobile: boolean, from: number, to: number
     if (during) await during();
     await page.mouse.up();
     // Landed, not only begun: the page arriving shows for a fifth of a second
-    // beside the one leaving, and a swipe that starts then is not counted
-    // (docs/PLAN.md, item 86), so the next turn waits for this one to end.
+    // beside the one leaving. A swipe that starts then counts too (docs/PLAN.md,
+    // item 86, tested in page-turn), but these tests are about what each swipe
+    // leaves on the page, so each waits for the last to end.
     await expect(page.locator(`svg[aria-labelledby='page-label-${from}']:visible`)).toHaveCount(0);
   }
   await expect(page.locator(`svg[aria-labelledby='page-label-${to}']:visible`)).toBeVisible();
