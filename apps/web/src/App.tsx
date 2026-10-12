@@ -43,6 +43,7 @@ import {
   jumpArrows,
   arrowsShown,
   confusionsFrom,
+  eraseJumps,
   wordDiff,
   type ArrowShowing,
   type Confusion,
@@ -130,6 +131,7 @@ import {
   PageStage,
   pageSpan,
   type Corner,
+  type Erased,
   type PageStageHandle,
   type PageTool,
   type VerseSpot,
@@ -2201,20 +2203,23 @@ export function App(): JSX.Element {
     commitScoped(scoped.filter((s) => s.id !== n.id), t.noteDeleted);
     if (!labelNoteFresh) setDeletedNote({ said: t.noteDeleted, restored: t.noteRestored, whole: n });
   };
+  // A pin taken off, from its box or by the eraser: the note goes, or only
+  // this verse when the note gathers others too.
+  const takeOutPin = (n: Note) => {
+    const owner = noteOfPin(n.id);
+    const gathers = owner !== null && owner.verses.length > 1;
+    commitNotes(removeNote(notes, n.id), gathers ? t.noteVerseTakenOut : t.noteDeleted);
+    return gathers ? owner : null;
+  };
   const deleteNote = () => {
     const n = openNote;
     setNoteOpenId(null);
     setFreshNoteId(null);
     setJoined(null);
     if (!n) return;
-    const owner = noteOfPin(n.id);
-    if (owner && owner.verses.length > 1) {
-      commitNotes(removeNote(notes, n.id), t.noteVerseTakenOut);
-      setDeletedNote({ note: n, said: t.noteVerseTakenOut, restored: t.noteRestored, owner });
-      return;
-    }
-    commitNotes(removeNote(notes, n.id), t.noteDeleted);
-    setDeletedNote({ note: n, said: t.noteDeleted, restored: t.noteRestored });
+    const owner = takeOutPin(n);
+    if (owner) setDeletedNote({ note: n, said: t.noteVerseTakenOut, restored: t.noteRestored, owner });
+    else setDeletedNote({ note: n, said: t.noteDeleted, restored: t.noteRestored });
   };
   const undoDelete = () => {
     if (!deletedNote) return;
@@ -2270,9 +2275,26 @@ export function App(): JSX.Element {
       canRedo: undoable.future.length > 0,
       onUndo: () => stepMarks(true),
       onRedo: () => stepMarks(false),
+      erasing: tool === "erase",
+      onErase: () => chooseTool(toolRef.current === "erase" ? "select" : "erase"),
     }),
-    [undoable, stepMarks],
+    [undoable, stepMarks, tool, chooseTool],
   );
+  // The eraser (notes-style-toolbar ③): one mark off per tap, no question
+  // asked, since Undo puts it back. A slip comes off through `markWord`.
+  const erase = (what: Erased) => {
+    if ("pin" in what) {
+      const n = notes.find((x) => x.id === what.pin);
+      if (n) takeOutPin(n);
+      return;
+    }
+    const next = eraseJumps(confusions, what.jumps, what.word);
+    if (next.length !== confusions.length) commitConfusions(next, t.jumpsErased(what.jumps));
+  };
+  const liftRibbon = (id: string) => {
+    const b = bookmarks.find((x) => x.id === id);
+    if (b) commitBookmarks(liftBookmark(bookmarks, id), t.bmLifted(b.name));
+  };
   // Ctrl+Z (⌘Z on a Mac) and Shift with it, or Ctrl+Y. Not while a box is
   // being typed in, where the keys belong to the text, and not under a sheet.
   useEffect(() => {
@@ -2298,6 +2320,11 @@ export function App(): JSX.Element {
   const markWord = useCallback(
     (at: { page: number; key: string; word: number; x: number; y: number }) => {
       const held = mistakeOn(notes, at.page, at.key, at.word);
+      // The eraser takes a slip off with no question; a word with none is left.
+      if (toolRef.current === "erase") {
+        if (held) commitNotes(removeNote(notes, held.id), t.mistakeCleared);
+        return;
+      }
       if (held) {
         setPickingId(held.id);
         return;
@@ -2333,7 +2360,7 @@ export function App(): JSX.Element {
       bookmarks={bookmarksOnPage(bookmarks, p)}
       onDrop={() => dropOn(p)}
       onUnfold={() => unfold(p)}
-      onOpen={setDrawerId}
+      onOpen={tool === "erase" ? liftRibbon : setDrawerId}
       freshId={freshId}
       seam={seamPage === p}
       aside={tool === "sign" || tool === "word"}
@@ -3370,6 +3397,12 @@ export function App(): JSX.Element {
       const next = TOOL_KEYS[e.code];
       if (!next) return;
       e.preventDefault();
+      // E puts the eraser down again, as a second press on its button does:
+      // it has no place in the row of tools to click away from.
+      if (next === "erase" && toolRef.current === "erase") {
+        chooseTool("select");
+        return;
+      }
       // The letter of a locked tool leaves it locked.
       chooseTool(next, next === toolRef.current && lockedRef.current);
     };
@@ -3873,6 +3906,7 @@ export function App(): JSX.Element {
                   onOpenJumps={openJumps}
                   onPlaceNote={placeNote}
                   onOpenNote={setNoteOpenId}
+                  onErase={erase}
                   onMarkWord={markWord}
                 onPickSign={pickSignNote}
                 onOpenWord={setWordOpen}
@@ -3972,6 +4006,7 @@ export function App(): JSX.Element {
                 onOpenJumps={openJumps}
                 onPlaceNote={placeNote}
                 onOpenNote={setNoteOpenId}
+                  onErase={erase}
                 onMarkWord={markWord}
                 onPickSign={pickSignNote}
                 onOpenWord={setWordOpen}

@@ -2855,10 +2855,11 @@
         "file": "docs/design/notes-style-toolbar.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner chose both on 2026-10-12: undo/redo first (it makes the eraser safe, no confirm), then a tap-to-erase eraser, one mark at a time."
+      "closedBy": "apps/web/e2e/eraser.spec.ts",
+      "note": "Owner chose both on 2026-10-12: undo/redo first (it makes the eraser safe, no confirm), then a tap-to-erase eraser, one mark at a time. Both built the same day: the eraser sits beside Undo on every bar, E or a second press puts it down, and a tap takes off one slip, pin, ribbon or verse's jumps. Building it found Undo throwing away a change that reversed the one before it; now only a pin closed empty does."
     },
     {
       "id": "pens-stay-right-in-arabic",

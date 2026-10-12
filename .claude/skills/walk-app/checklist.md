@@ -506,6 +506,13 @@ upright and on its side, English and Arabic, iPad and Mac.
   side on an iPad on its side, with the highlighter on: the rail, Undo and Redo at its foot, stays
   between the bars. In Arabic the two arrows mirror. · desktop, desktop-firefox, phone, ipad-side ·
   tests: undo-redo, pen-homes specs
+- [ ] Pick up the eraser beside Undo (or press E) and tap, in turn, a slip, a note's pin, a
+  bookmark's ribbon and a jump mark: each comes off with no question and no box or drawer
+  opening, the eraser stays on, a tap on a bare word marks nothing, and Undo brings each back.
+  On a note seeded on two verses, rubbing one pin leaves the other with the words still in it.
+  Mark a slip and rub it straight out: Undo still has it. E or a second press puts the eraser
+  down. On the iPad's side rail, three buttons at the foot still stay between the bars. ·
+  desktop, desktop-firefox, phone, ipad-side · tests: eraser, undo-redo specs
 
 ## The Mac and iPad apps
 

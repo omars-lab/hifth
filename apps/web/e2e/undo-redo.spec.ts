@@ -42,8 +42,12 @@ test.describe("Hifth · undo and redo for marks", () => {
 
     await page.keyboard.press("ControlOrMeta+KeyZ");
     await expect(washes(page)).toHaveCount(0);
+    await expect(said(page)).toHaveText(/^Undone: /);
     await page.keyboard.press("ControlOrMeta+Shift+KeyZ");
     await expect(washes(page)).toHaveCount(1);
+    // The line is said once the device has the set, so wait for this one:
+    // the last "Undone" line is still showing until it comes.
+    await expect(said(page)).toHaveText(/^Redone: /);
 
     // What was undone stays undone after a reload: the device holds it too.
     await page.keyboard.press("ControlOrMeta+KeyZ");
