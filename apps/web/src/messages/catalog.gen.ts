@@ -236,10 +236,18 @@ export interface Catalog {
   readonly mapTitle: string;
   readonly mapWentTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
   readonly markAimsLabel: string;
+  readonly markNothingToRedo: string;
+  readonly markNothingToUndo: string;
+  readonly markRedo: string;
+  readonly markRedone: (d: { readonly said: string | number }) => string;
+  readonly markRedoneBare: string;
   readonly markToolsNote: string;
   readonly markToolsOne: string;
   readonly markToolsThree: string;
   readonly markToolsTitle: string;
+  readonly markUndo: string;
+  readonly markUndone: (d: { readonly said: string | number }) => string;
+  readonly markUndoneBare: string;
   readonly matchLoose: string;
   readonly matchRepeat: string;
   readonly mistakeClear: string;

@@ -1,0 +1,47 @@
+.pair {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.upright {
+  flex-direction: column;
+}
+
+.button {
+  display: inline-grid;
+  place-items: center;
+  min-block-size: var(--touch-min);
+  min-inline-size: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  color: var(--accent-strong);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.button:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+}
+
+.redo {
+  transform: scaleX(-1);
+}
+
+/* In the Arabic chrome "back" points the other way, as it does in Notes. */
+.pair:dir(rtl) .icon {
+  transform: scaleX(-1);
+}
+
+.pair:dir(rtl) .redo {
+  transform: none;
+}

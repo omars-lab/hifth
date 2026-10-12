@@ -245,6 +245,13 @@ Notes has all three and Hifth has none of them: today a mark comes off through i
 would answer it: deciding what the eraser removes (one mark at a time, like Notes' object
 eraser, or anything dragged across), then building it with whichever home ① picks.
 
+Chosen 2026-10-12 by the owner: both, an eraser and undo and redo. Undo and redo come first,
+because they also make the eraser safe: a mark rubbed out by mistake comes back with one tap,
+so the eraser needs no "are you sure?". Undo reaches back over bookmarks, notes, mistake marks
+and jumps, a hundred steps; Ctrl+Z (⌘Z on a Mac) undoes and Shift with it redoes, except while
+a note is being typed, where the keys stay with the text. The eraser follows: tap a mark to
+take it off, one at a time, like Notes' object eraser. Rubbing across many at once is later.
+
 ### ④ With the app in Arabic, should the pens stay on the right edge, or move to the left? · **open**
 
 Walked in the iPad app on 2026-10-11: with the app in Arabic, the pens down the side still stand

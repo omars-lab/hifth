@@ -173,6 +173,17 @@ import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
 import { NoteFollow } from "./components/NoteFollow";
 import { useBookmarks, useConfusions, useNotes, useSeam } from "./useBookmarks";
+import {
+  NO_HISTORY,
+  recordStep,
+  redoStep,
+  typingIn,
+  undoStep,
+  type MarkHistory,
+  type MarkStore,
+  type Recorder,
+} from "./mark-history";
+import { MarkUndoContext } from "./components/UndoRedo";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger, listenCaption, listenGlyph } from "./components/PlayTrigger";
@@ -1537,7 +1548,26 @@ export function App(): JSX.Element {
   // Bookmarks (docs/decisions/bookmark-fold.md, bookmark-admin.md): ribbons on
   // the page, a drawer per ribbon, and the tidy-up in the page map. Every change
   // is one core rule, then one whole-set write, then one announced line.
-  const { bookmarks, commit: commitBookmarks } = useBookmarks(announce, t.bmNotSaved);
+  // Undo and redo over every kept mark (docs/design/notes-style-toolbar.md ③):
+  // each store tells the history what it held before and after a change.
+  const markHistory = useRef<MarkHistory>(NO_HISTORY);
+  const [undoable, setUndoable] = useState<MarkHistory>(NO_HISTORY);
+  const keepHistory = useCallback((h: MarkHistory) => {
+    markHistory.current = h;
+    setUndoable(h);
+  }, []);
+  const recorders = useMemo(() => {
+    const of =
+      (store: MarkStore): Recorder =>
+      (before, after, said, opens) =>
+        keepHistory(recordStep(markHistory.current, { store, before, after, said, ...(opens ? { folds: true } : {}) }));
+    return { bookmarks: of("bookmarks"), notes: of("notes"), jumps: of("jumps") };
+  }, [keepHistory]);
+  const {
+    bookmarks,
+    commit: commitBookmarks,
+    restore: restoreBookmarks,
+  } = useBookmarks(announce, t.bmNotSaved, recorders.bookmarks);
   // The red seam: where the reader left off, following the last page they stayed on.
   const seamPage = useSeam(page);
   const [drawerId, setDrawerId] = useState<string | null>(null);
@@ -1635,7 +1665,8 @@ export function App(): JSX.Element {
       const b = bookmarks.find((x) => x.id === id);
       if (!b) return;
       setRevisionOpen(false);
-      commitBookmarks(openBookmark(bookmarks, id, Date.now()), t.bmOpen(b.name, b.page));
+      // Opening one only stamps the time; Undo has nothing to take back.
+      commitBookmarks(openBookmark(bookmarks, id, Date.now()), t.bmOpen(b.name, b.page), { unrecorded: true });
       goToPage(b.page, t.bmOpen(b.name, b.page));
     },
     [bookmarks, commitBookmarks, goToPage, t],
@@ -1651,7 +1682,8 @@ export function App(): JSX.Element {
     commit: commitNotes,
     commitScoped,
     loadFile: loadNotesFile,
-  } = useNotes(announce, t.bmNotSaved);
+    restore: restoreNotes,
+  } = useNotes(announce, t.bmNotSaved, recorders.notes);
   const [noteOpenId, setNoteOpenId] = useState<string | null>(null);
   const openNote = notes.find((n) => n.id === noteOpenId) ?? null;
   // A pin just made by the note, harakat or word tool: its box offers the
@@ -1705,7 +1737,8 @@ export function App(): JSX.Element {
     device,
     commit: commitConfusions,
     loadFile: loadConfusionsFile,
-  } = useConfusions(announce, t.bmNotSaved);
+    restore: restoreConfusions,
+  } = useConfusions(announce, t.bmNotSaved, recorders.jumps);
   const confusionMarks = useMemo(() => countConfusionMarks(confusions), [confusions]);
   // And the smaller one at the next pause sign after where each jump left
   // (step 8). The page knows where its pause signs are; the jumps stay here.
@@ -1912,7 +1945,7 @@ export function App(): JSX.Element {
     if (!n) return;
     const got = joinNote(scoped, n.id, intoId, Date.now(), pageOfKey);
     if (!got) return;
-    commitScoped(got.notes, "");
+    commitScoped(got.notes, "", { opens: true });
     setJoined({ before: scoped, freshId: n.id, pin: got.pin });
     setNoteOpenId(got.pin);
   };
@@ -2036,7 +2069,8 @@ export function App(): JSX.Element {
         ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
         ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
       ];
-      commitBookmarks(merged, parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0));
+      // A file loaded is not a step: its notes and jumps are not either.
+      commitBookmarks(merged, parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0), { unrecorded: true });
     },
     [announce, bookmarks, commitBookmarks, loadNotesFile, loadConfusionsFile, t],
   );
@@ -2073,7 +2107,7 @@ export function App(): JSX.Element {
   const placeNote = useCallback(
     (at: { page: number; key: string; word: number | null; x: number; y: number }) => {
       const next = addNote(notes, at, Date.now());
-      commitNotes(next, "");
+      commitNotes(next, "", { opens: true });
       putDownAfterUse();
       openFresh(next[next.length - 1]!.id);
     },
@@ -2084,7 +2118,7 @@ export function App(): JSX.Element {
   const pickSignNote = useCallback(
     (at: { page: number; key: string; word: number; mark: number; x: number; y: number }) => {
       const next = addNote(notes, at, Date.now());
-      commitNotes(next, "");
+      commitNotes(next, "", { opens: true });
       openFresh(next[next.length - 1]!.id);
     },
     [notes, commitNotes, openFresh],
@@ -2107,7 +2141,7 @@ export function App(): JSX.Element {
     setWordOpen(null);
     if (!w) return;
     const next = addNote(notes, { page: w.page, key: w.key, word: w.word, ...at }, Date.now());
-    commitNotes(next, "");
+    commitNotes(next, "", { opens: true });
     openFresh(next[next.length - 1]!.id);
   };
   /** Put focus back on a pin after its box closes, so the keyboard is not lost. */
@@ -2140,7 +2174,7 @@ export function App(): JSX.Element {
   const newNoteAbout = useCallback(
     (scope: NoteScope) => {
       const next = addScopedNote(scoped, scope, Date.now());
-      commitScoped(next, "");
+      commitScoped(next, "", { opens: true });
       setLabelNoteId(next[next.length - 1]!.id);
       setLabelNoteFresh(true);
     },
@@ -2206,6 +2240,54 @@ export function App(): JSX.Element {
     setDeletedNote(null);
   };
   const endNoteUndo = useCallback(() => setDeletedNote(null), []);
+
+  // One step back, or forward again, over every kept mark. The one-change
+  // Undo bars are put away first: theirs would now take back something
+  // already taken back.
+  const stepMarks = useCallback(
+    (back: boolean) => {
+      const got = back ? undoStep(markHistory.current) : redoStep(markHistory.current);
+      if (!got) {
+        announce(back ? t.markNothingToUndo : t.markNothingToRedo);
+        return;
+      }
+      keepHistory(got.history);
+      setUnfolded(null);
+      setDeletedNote(null);
+      setJumpUndo(null);
+      setJoined(null);
+      setPickingId(null);
+      const { step } = got;
+      const said = back ? t.markUndone(step.said) : t.markRedone(step.said);
+      const put = step.store === "bookmarks" ? restoreBookmarks : step.store === "notes" ? restoreNotes : restoreConfusions;
+      put(back ? step.before : step.after, said);
+    },
+    [announce, keepHistory, restoreBookmarks, restoreNotes, restoreConfusions, t],
+  );
+  const markUndo = useMemo(
+    () => ({
+      canUndo: undoable.past.length > 0,
+      canRedo: undoable.future.length > 0,
+      onUndo: () => stepMarks(true),
+      onRedo: () => stepMarks(false),
+    }),
+    [undoable, stepMarks],
+  );
+  // Ctrl+Z (⌘Z on a Mac) and Shift with it, or Ctrl+Y. Not while a box is
+  // being typed in, where the keys belong to the text, and not under a sheet.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey || !(e.ctrlKey || e.metaKey)) return;
+      const z = e.code === "KeyZ";
+      const y = e.code === "KeyY" && e.ctrlKey && !e.shiftKey;
+      if (!z && !y) return;
+      if (typingIn(document.activeElement) || document.querySelector('[role="dialog"]') !== null) return;
+      e.preventDefault();
+      stepMarks(z && !e.shiftKey);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [stepMarks]);
 
   // The mistake tool (docs/design/page-toolbar-plan.md, step 3): a tap marks a
   // word in a quiet red and the tool stays up for the next one; a tap on a
@@ -3497,6 +3579,7 @@ export function App(): JSX.Element {
     // stylesheet is a logical property, so the flip is the whole change. What
     // does *not* flip is below: the stage, the rail and the trail are pinned
     // RTL because they are furniture around a mus'haf, not around a sentence.
+    <MarkUndoContext.Provider value={markUndo}>
     <div className={styles.app} dir={dir} data-full={full || undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
@@ -4488,6 +4571,7 @@ export function App(): JSX.Element {
       )}
       <LiveAnnouncer message={message} />
     </div>
+    </MarkUndoContext.Provider>
   );
 }
 

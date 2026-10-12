@@ -185,6 +185,17 @@
   gap: 2px;
 }
 
+.sideNear {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  align-items: center;
+}
+
+.sideUndo {
+  margin-block-start: auto;
+}
+
 /* Down the side, each row of pens stands up, the two side by side. */
 .sidePens [role="radiogroup"] {
   flex-direction: column;
