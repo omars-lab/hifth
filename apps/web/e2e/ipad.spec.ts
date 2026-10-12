@@ -371,8 +371,8 @@ for (const [lang, group, close] of [
 // Moved aside, the page stood in Arabic under the look-alike buttons' corner,
 // and they sat on its top line; they cross to the list's side, as they do for
 // the share card there.
-/** Whether the lit verse shows beside an open corner card: its start clear, at most a tenth of it under. */
-async function verseInSight(page: Page, list: Locator) {
+/** Whether the lit verse shows beside an open corner card: its start clear, at most `most` of it under (a tenth unless asked). */
+async function verseInSight(page: Page, list: Locator, most = 0.1) {
   const wash = page.locator("#hifth-overlay [data-hl-group='selection']");
   const card = (await list.boundingBox())!;
   const lit = (await wash.evaluateAll((els) =>
@@ -388,7 +388,7 @@ async function verseInSight(page: Page, list: Locator) {
   const start = Math.max(...top.map((b) => b.x + b.width));
   const y = top[0]!.y + top[0]!.height / 2;
   const startUnder = start - 1 > card.x && start - 1 < card.x + card.width && y > card.y && y < card.y + card.height;
-  return !startUnder && share <= 0.1 ? "in sight" : `start under=${startUnder} share=${Math.round(share * 100)}%`;
+  return !startUnder && share <= most ? "in sight" : `start under=${startUnder} share=${Math.round(share * 100)}%`;
 }
 
 for (const [locale, roots, group] of [
@@ -419,6 +419,22 @@ for (const [locale, roots, group] of [
         const hits = c.x < x.x + x.width && c.x + c.width > x.x && c.y < x.y + x.height && c.y + c.height > x.y;
         expect(hits, `a look-alike button at ${JSON.stringify(c)} on the list's Close at ${JSON.stringify(x)}`).toBe(false);
       }
+    });
+
+    test("the roots list leaves the whole of a verse too wide for the room beside it in sight", async ({ page }) => {
+      // Walking the demo's headline verse on the mini held sideways, 2026-10-12,
+      // after item 90: with the page moved aside, 2:255 at the zoom a link
+      // lands it at is wider than the room beside the list, and its lines'
+      // ends stayed under the card, a tenth of the verse. Nothing drew a verse
+      // too wide for the room a little smaller, as one too tall is (plan item 92).
+      await page.addInitScript((key) => localStorage.setItem(key, "1"), COACH_STORAGE_KEY);
+      await page.goto("/#/hafs-kfqc/2:255");
+      await shown(page, 42);
+      await page.getByRole("button", { name: roots }).click();
+      const list = page.getByRole("dialog");
+      await expect(list).toBeVisible();
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      await expect.poll(() => verseInSight(page, list, 0), { message: "how much of the verse the roots list covers", timeout: 8_000 }).toBe("in sight");
     });
 
     test("a look-alike list's buttons ride its top row, clear of its Close and inside the card", async ({ page }) => {

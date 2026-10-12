@@ -1227,6 +1227,37 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     });
   }
 
+  for (const locale of ["en-US", "ar"]) {
+    test(`on an iPad mini on its side, a freshly opened note on a long verse leaves the verse in sight (${locale})`, async ({ browser }) => {
+      // Walking the demo's headline verse on the mini held sideways,
+      // 2026-10-12: 2:255 at the zoom its link lands at is too tall to lift
+      // above the note's card, which opened over the end of its lines, a
+      // quarter of the verse. The page only moved aside once the note was read
+      // to its end (plan items 89 and 92).
+      const context = await browser.newContext({ viewport: { width: 1133, height: 744 }, hasTouch: true, locale });
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+      const page = await context.newPage();
+      await page.goto("/#/hafs-kfqc/2:255");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await settle(sheet(page));
+      await expect
+        .poll(async () => {
+          const card = (await sheet(page).boundingBox())!;
+          const lit = (await litLineBoxes(page)).filter((b) => b.width > 0);
+          if (!lit.length) return "nothing lit";
+          const cut = (b: Box) =>
+            Math.max(0, Math.min(b.x + b.width, card.x + card.width) - Math.max(b.x, card.x)) *
+            Math.max(0, Math.min(b.y + b.height, card.y + card.height) - Math.max(b.y, card.y));
+          const share = lit.reduce((s, b) => s + cut(b), 0) / lit.reduce((s, b) => s + b.width * b.height, 0);
+          const view = page.viewportSize()!;
+          const off = lit.some((b) => b.x < -1 || b.x + b.width > view.width + 1 || b.y < -1 || b.y + b.height > view.height + 1);
+          return share === 0 && !off ? "in sight" : `share=${Math.round(share * 100)}% off-screen=${off}`;
+        }, { message: "how much of the verse the note covers", timeout: 8_000 })
+        .toBe("in sight");
+      await context.close();
+    });
+  }
+
   test("with the note up over a recitation, turning the page by hand keeps the sound going", async ({ browser }) => {
     // Walking the note's hand-offs with a surah playing, 2026-10-11: with the
     // note open on the verse being heard, a page turned by key or by swipe

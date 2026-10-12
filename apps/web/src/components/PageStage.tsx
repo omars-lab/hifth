@@ -313,6 +313,12 @@ interface PageStageProps {
    */
   coverSide?: CardSpan | null;
   /**
+   * Called when the selected verse cannot be shown whole above what covers the
+   * page's foot, even drawn a little smaller: a long verse under a short screen's
+   * note. The app can then move the page aside for the note instead (plan item 92).
+   */
+  onLiftShort?: () => void;
+  /**
    * Where the hop chips floating over the stage's top corner end, in window px,
    * or null when there are none. Read by the lift above a phone note only: the
    * verse it moves up is stopped with its first line beneath the chips rather
@@ -1168,6 +1174,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     foldTarget = null,
     coverTop = null,
     coverSide = null,
+    onLiftShort,
     railBottom = null,
     turnStyle = "seam",
     bound = false,
@@ -1275,6 +1282,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const onTurnRef = useRef(onTurn);
   onTurnRef.current = onTurn;
   const onPinchZoomRef = useRef(onPinchZoom);
+  const onLiftShortRef = useRef(onLiftShort);
+  onLiftShortRef.current = onLiftShort;
   onPinchZoomRef.current = onPinchZoom;
   const onSlackRef = useRef(onSlack);
   onSlackRef.current = onSlack;
@@ -2329,7 +2338,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // with the book open: its two pages keep one zoom between them.
       const tall = bboxToScreen(bbox, target, ctx).height;
       const smaller = boundRef.current || shorter ? null : nearFitZoom(tall, shown - head - LIFT_SLACK, target.z);
-      if (smaller !== null) target = frameBboxToView(bbox, ctx, smaller, lead);
+      // And one only a little wider than the room a card beside the page
+      // leaves, the same way: 2:255 beside the roots list on a small iPad on
+      // its side kept the ends of its lines under the card (plan item 92).
+      const wide = bboxToScreen(bbox, target, ctx).width;
+      const narrower = boundRef.current || !(from > 0 || to < fit.stageWidth) ? null : nearFitZoom(wide, to - from - 2 * LIFT_SLACK, target.z);
+      const least = narrower === null ? smaller : smaller === null ? narrower : Math.min(smaller, narrower);
+      if (least !== null) target = frameBboxToView(bbox, ctx, least, lead);
       // A verse taller than what shows beneath the chips starts at its
       // first line, just under them; one that fits is kept out from under
       // them too.
@@ -2337,6 +2352,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (framed.height > shown - head || framed.y < head) {
         target = clampView({ ...target, y: target.y - framed.y + head }, fit);
       }
+      if ((fit.coverBottom ?? 0) > 0 && framed.height > shown - head) onLiftShortRef.current?.();
       return target;
     },
     [],
