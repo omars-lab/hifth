@@ -162,9 +162,13 @@ export function PhoneToolbarC({
           {/* The close sits on the line under the tools, not beside them: eight
               tools at thumb size are the whole width of a 390px phone. */}
           <div className={styles.trayRow}>
-            {/* The highlighter's pens share the line with its hint, where the
-                thumb already is. */}
-            {tool === "highlight" && <PenPicker pen={pen} onPen={onPen} />}
+            {/* The highlighter's pens, where the thumb already is; its two rows
+                take the line, and the hint wraps under them. */}
+            {tool === "highlight" && (
+              <div className={styles.trayPens}>
+                <PenPicker pen={pen} onPen={onPen} />
+              </div>
+            )}
             <span className={styles.trayHint}>
               {locked ? t.toolLockedHintTouch(toolName(t, tool)) : toolHint(t, tool, true)}
             </span>

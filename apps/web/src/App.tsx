@@ -227,7 +227,7 @@ import { useRunAhead } from "./run-ahead";
 import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
-import { applyPen, rememberPen, savedPen, type Pen } from "./pen";
+import { applyPen, applyWordPen, rememberPen, savedPen, savedWordPen, type Pen } from "./pen";
 import { usePassageRows } from "./passage-rows";
 import styles from "./App.module.css";
 
@@ -1312,6 +1312,9 @@ export function App(): JSX.Element {
   // colours the passage the highlighter paints.
   const [pen, setPen] = useState<Pen>(() => savedPen());
   useEffect(() => applyPen(pen), [pen]);
+  // The pen for the words you hold (⑤, 2026-10-12) is picked and kept by the
+  // pen picker itself; the remembered one goes on the page from the start.
+  useEffect(() => applyWordPen(savedWordPen()), []);
   const choosePen = useCallback((next: Pen) => {
     rememberPen(next);
     setPen(next);

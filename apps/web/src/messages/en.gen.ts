@@ -357,6 +357,7 @@ const messages: Catalog = {
   penLabel: "Highlighter colour",
   penMarkUp: "Mark up",
   penPink: "Pink",
+  penWordsLabel: "Colour of words you hold",
   penYellow: "Yellow",
   phoneTools: (d) => "Page tools · " + d.name + " is on",
   phoneToolsClose: "Close the tools",

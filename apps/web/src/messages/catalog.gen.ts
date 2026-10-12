@@ -351,6 +351,7 @@ export interface Catalog {
   readonly penLabel: string;
   readonly penMarkUp: string;
   readonly penPink: string;
+  readonly penWordsLabel: string;
   readonly penYellow: string;
   readonly phoneTools: (d: { readonly name: string | number }) => string;
   readonly phoneToolsClose: string;

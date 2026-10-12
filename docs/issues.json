@@ -2407,10 +2407,11 @@
         "file": "docs/design/highlight-texture-options.md",
         "item": "⑤"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Whether a reader should also pick the run of words' colour, or mix a pen of their own; a free colour must be checked (and pulled paler) to keep the letters at 4.5:1 over the amber verse."
+      "note": "Answered 2026-10-12 by the owner: a run of words takes the same four pens, blue until another is picked, from a second row beside the passage pens, remembered on the device. A pen of the reader's own is not built; a free colour would still have to be checked (and pulled paler) to keep the letters at 4.5:1 over the amber verse. pen.test.ts holds the default and the four colour rules; e2e/pen-colours.spec.ts picks one in a browser.",
+      "closedBy": "apps/web/src/pen.test.ts"
     },
     {
       "id": "streak-filter-iphone-speed",

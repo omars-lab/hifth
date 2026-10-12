@@ -166,7 +166,9 @@ test.describe("where the pens sit", () => {
       await coversNoLine(page, rail);
       // The highlighter's pens join it without pushing it into the bars.
       await rail.getByRole("radio", { name: "Highlight" }).click();
-      await expect(rail.getByRole("radio", { name: "Pink" })).toBeVisible();
+      // Both rows: the passage's pens and the held words' (⑤, 2026-10-12).
+      for (const row of ["Highlighter colour", "Colour of words you hold"])
+        await expect(rail.getByRole("radiogroup", { name: row }).getByRole("radio", { name: "Pink" })).toBeVisible();
       await insideReadingArea(page, rail);
       await coversNoLine(page, rail);
       // Done puts the pen down, so the next size starts as this one did.

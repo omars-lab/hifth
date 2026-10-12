@@ -30,6 +30,7 @@ async function highlighterOn(page: Page, isMobile: boolean): Promise<void> {
 }
 
 const pens = (page: Page): Locator => page.getByRole("radiogroup", { name: "Highlighter colour" });
+const wordPens = (page: Page): Locator => page.getByRole("radiogroup", { name: "Colour of words you hold" });
 
 test.describe("Hifth · the highlighter's colours", () => {
   test("a passage is pastel green and a run of words pastel blue by default", async ({ page }) => {
@@ -64,5 +65,23 @@ test.describe("Hifth · the highlighter's colours", () => {
     expect(await passageFill(page), "the passage, after a reload").toBe(PINK);
     // The run of words keeps its own colour whatever pen is picked.
     expect(await inkToken(page, "--ink-run")).toBe(BLUE);
+  });
+
+  // The owner, 2026-10-12 (highlight-texture-options.md ⑤): the words you hold
+  // take the same four pens, picked beside the passage's.
+  test("the words you hold take one of the same four pens, blue until another is picked", async ({ page, isMobile }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(wordPens(page)).toHaveCount(0);
+    await highlighterOn(page, !!isMobile);
+    await expect(wordPens(page).getByRole("radio")).toHaveCount(4);
+    await expect(wordPens(page).getByRole("radio", { name: "Blue" })).toHaveAttribute("aria-checked", "true");
+    await wordPens(page).getByRole("radio", { name: "Pink" }).click();
+    await expect(wordPens(page).getByRole("radio", { name: "Pink" })).toHaveAttribute("aria-checked", "true");
+    await expect(pens(page).getByRole("radio", { name: "Green" }), "the passage keeps its pen").toHaveAttribute("aria-checked", "true");
+
+    await page.goto(PASSAGE);
+    await page.reload();
+    expect(await passageFill(page), "the passage").toBe(GREEN);
+    expect(await inkToken(page, "--ink-run"), "the words, after a reload").toBe(PINK);
   });
 });

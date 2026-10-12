@@ -679,6 +679,8 @@ export interface Strings {
   toolHighlight: string;
   /** The highlighter's pens, offered in the tools bar while it is on. */
   penLabel: string;
+  /** The second row of pens: the colour of the words you hold. */
+  penWordsLabel: string;
   penGreen: string;
   penBlue: string;
   penYellow: string;
@@ -1449,6 +1451,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolSelect: m.toolSelect,
     toolHighlight: m.toolHighlight,
     penLabel: m.penLabel,
+    penWordsLabel: m.penWordsLabel,
     penGreen: m.penGreen,
     penBlue: m.penBlue,
     penYellow: m.penYellow,

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
-import { PEN_KEY, PENS, rememberPen, savedPen } from "./pen";
+import { PEN_KEY, PENS, rememberPen, rememberWordPen, savedPen, savedWordPen, WORD_PEN_KEY } from "./pen";
 
 /*
  * The highlighter's pens: four pastels, green first (the owner, 2026-09-30:
@@ -57,6 +57,25 @@ describe("the highlighter's pens", () => {
     expect(token("--pen-green").toLowerCase()).toBe("#9bd9b5");
     expect(token("--pen-blue").toLowerCase()).toBe("#bacbf3");
   });
+
+  // The owner, 2026-10-12: the words you hold take the same four pens, still
+  // blue until another is picked (highlight-texture-options.md ⑤).
+  it("let the words you hold take any of the four, blue until another is picked", () => {
+    expect(savedWordPen()).toBe("blue");
+    rememberWordPen("pink");
+    expect(localStorage.getItem(WORD_PEN_KEY)).toBe("pink");
+    expect(savedWordPen()).toBe("pink");
+    expect(savedPen(), "the passage keeps its own pick").toBe("green");
+    localStorage.setItem(WORD_PEN_KEY, "purple");
+    expect(savedWordPen()).toBe("blue");
+  });
+
+  for (const pen of PENS) {
+    it(`put the ${pen} pen on the words you hold when it is picked for them`, () => {
+      const rule = new RegExp(`:root\\[data-word-pen="${pen}"\\]\\s*\\{\\s*--ink-run:\\s*var\\(--pen-${pen}\\);`);
+      expect(tokens).toMatch(rule);
+    });
+  }
 
   // The reading floor: wherever a pen crosses the amber verse, the letters
   // under both inks still stand 4.5 to 1 off the paper under both inks.

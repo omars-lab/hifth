@@ -375,11 +375,11 @@ verse:
 - **A passage is green** until the reader picks another pen. While the highlighter is on, the
   four pens sit beside it in the tools bar, on a computer and on a phone; the pen picked colours
   the passage and is remembered on that device.
-- **A run of words is blue**, over the amber verse, whichever pen is picked for passages.
+- **A run of words is blue** until the reader picks another of the same four pens for it
+  (⑤, 2026-10-12); the words' pens sit beside the passage pens, drawn as bands.
 - **The verse stays amber.**
 
-Left for later, on the backlog: whether the reader should also be able to change the run's
-colour, or mix a pen of their own. The pens are held to the floor by a test that works out
+Left for later, on the backlog: whether a reader may mix a pen of their own. The pens are held to the floor by a test that works out
 each one's contrast over the amber, so a new pen that fails it cannot be added by accident.
 
 ### ③ Does the streak filter slow a page turn on a real iPhone? · **blocked**
@@ -396,7 +396,7 @@ and Firefox draw it; whether Safari clips a group that way was not checked on a 
 does not, the mark simply appears whole, which is what a reader who asked for less motion
 already sees. What would answer it: select a verse in Safari on an iPhone and watch.
 
-### ⑤ Should a reader also choose the colour of a run of words, or mix a pen of their own? · **open**
+### ⑤ Should a reader also choose the colour of a run of words, or mix a pen of their own? · **answered**
 
 The highlighter's pen is picked from four pastels in the tools bar, and a run of words is
 always blue. The owner asked for "settings to update them"; the four pens answer that for a
@@ -404,6 +404,14 @@ passage. What is still open: whether a run of words gets a choice too, and wheth
 mix a colour of their own. A free colour picker cannot promise the letters stay readable where
 the colour crosses the amber verse, so a pen of the reader's own would have to be checked, and
 pulled paler, before it is used. Nothing is lost by waiting: the four pens already pass.
+
+**Answered 2026-10-12 by the owner:** a run of words takes the same four pens, blue until
+another is picked. A pen of the reader's own is not built; the four already clear the floor.
+Built: a second row of the four pens beside the passage pens, drawn as bands so the two rows
+are told apart, remembered on the device like the passage pen. On a phone the pens get their
+own line in the tools tray; down the side of an iPad the two rows stand as two columns.
+One thing to know: a run of words is a passing choice, not a kept mark, so its colour shows
+while the words are held and is not left on the page afterwards.
 
 ---
 
