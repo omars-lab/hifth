@@ -2847,7 +2847,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "Proposed by the Notes-style tool bar study: one Note pen with three ways to aim it on a second tap. Needs a hafiz's revision habits to judge."
+      "note": "Owner chose 2026-10-12 to build the one button as a setting and keep three buttons as the default. Built: the info panel switches between them, and the three choices wait beside the tools while the one button is on. Still open: which should be the default, judged by watching a hafiz revise with each."
     },
     {
       "id": "marking-eraser-and-undo",

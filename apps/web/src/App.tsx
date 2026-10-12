@@ -135,7 +135,7 @@ import {
   type VerseSpot,
   type WordRect,
 } from "./components/PageStage";
-import { PageToolbar, TOOL_KEYS, toolHint, toolName } from "./components/PageToolbar";
+import { PageToolbar, TOOL_KEYS, TOOLS, toolHint, toolName } from "./components/PageToolbar";
 import { PenHomeBottom, PenHomeFloat, PenHomeSide, useSideRoom } from "./components/PenHomes";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 import { rememberArrowShowing, savedArrowShowing } from "./jump-arrows";
@@ -225,6 +225,7 @@ import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { useRunFollow } from "./run-follow";
 import { useRunAhead } from "./run-ahead";
 import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
+import { isMarkAim, rememberMarkTools, savedMarkTools, toolsFor, type MarkAim, type MarkTools } from "./mark-tools";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
 import { applyPen, applyWordPen, rememberPen, savedPen, savedWordPen, type Pen } from "./pen";
@@ -1589,6 +1590,17 @@ export function App(): JSX.Element {
   // Escape, or a click on the locked one puts it down.
   const [locked, setLocked] = useState(false);
   const lockedRef = useRef(false);
+  // Note, Harakat and Word as three buttons or one (docs/design/notes-style-
+  // toolbar.md, ②; the one button built as a setting on 2026-10-12, three
+  // kept as the default). The one button stands for the one last used.
+  const [markTools, setMarkTools] = useState<MarkTools>(() => savedMarkTools());
+  const chooseMarkTools = useCallback((shape: MarkTools) => {
+    rememberMarkTools(shape);
+    setMarkTools(shape);
+  }, []);
+  const [lastAim, setLastAim] = useState<MarkAim>("note");
+  const markAim = markTools === "one" ? (isMarkAim(tool) ? tool : lastAim) : undefined;
+  const barTools = toolsFor(TOOLS, markTools, markAim ?? "note");
   const chooseTool = useCallback(
     (next: PageTool, lock = false) => {
       const keep = lock && next !== "select";
@@ -1597,6 +1609,7 @@ export function App(): JSX.Element {
       if (pen && toolRef.current !== next) void countUse(`pen-${pen}`);
       toolRef.current = next;
       lockedRef.current = keep;
+      if (isMarkAim(next)) setLastAim(next);
       setToolState(next);
       setLocked(keep);
       announce(keep ? t.toolLocked(toolName(t, next)) : t.toolOn(toolName(t, next)));
@@ -3630,11 +3643,13 @@ export function App(): JSX.Element {
           onTool={chooseTool}
           pen={pen}
           onPen={choosePen}
+          tools={barTools}
+          aim={markAim}
           end={railAt === "tools" ? hopRail(undefined, "tools") : undefined}
         />
       )}
-      {resolver && desktop && penAt === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
-      {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+      {resolver && desktop && penAt === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
+      {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
       <main
         ref={roomRef}
@@ -4047,6 +4062,8 @@ export function App(): JSX.Element {
             onArrowShowing={chooseArrowShowing}
             scopeLook={scopeLook}
             onScopeLook={chooseScopeLook}
+            markTools={markTools}
+            onMarkTools={chooseMarkTools}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
             railHome={desktop ? railHome : undefined}
@@ -4144,9 +4161,9 @@ export function App(): JSX.Element {
         />
       )}
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
-        {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+        {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
-        {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} />}
+        {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
         {railAt === "bar" && hopRail(undefined, "bar")}
         <TrailBeads
           trail={trail}

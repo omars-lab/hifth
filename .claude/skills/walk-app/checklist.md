@@ -457,6 +457,10 @@ upright and on its side, English and Arabic, iPad and Mac.
   an iPad's side two columns. At a 1024-wide window the tools do not slide when the highlighter
   is picked. Pick a band, hold some words: they come out that colour. · phone,
   ipad-big-side, desktop · tests: pen-colours, pen-homes specs · issue: `run-colour-and-own-pen`
+- [ ] In the info panel, set Note, Harakat and Word to one button: the bar has two tools fewer,
+  the button shows the one used last, and while it is on the three wait beside the tools (on a
+  phone in their own line of the tray) without the tools sliding; N, K and W still pick each. ·
+  phone, ipad-big-side, desktop · test: mark-tools spec · issue: `note-harakat-word-one-pen`
 - [ ] Pin a note with the note tool and close the app with its box still open, writing nothing:
   next time the app starts, that pin is gone, and a note that was written is still there. ·
   desktop, iPad app · test: notes spec ("never written") · issue: `note-left-open-stays-empty`

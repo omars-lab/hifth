@@ -228,6 +228,17 @@ It takes three buttons off the bar, the way Notes keeps its two erasers behind o
 would answer it: whether a hafiz uses the three often enough that a second tap to switch
 between them is too much. Watching one revise with the merged pen would show it.
 
+Chosen 2026-10-12 by the owner: build the one button and offer it as a setting, and keep the
+three buttons as the default until use shows which is better. Built the same day. In the info
+panel, "Note, Harakat and Word" switches between three buttons and one. The one button stands
+where Note stood and shows the one used last. While it is on, the three wait beside the tools,
+in the place the highlighter's colours wait. They are not on a second tap of the button, as
+the question first put it, because on every bar a second tap already puts a tool down; taking
+that away from one button would make it behave unlike its neighbours. N, K and W still pick
+each one from the keyboard, and a tool locked on stays locked when another of the three is
+picked. The phone's two older bars, which only open from the address, keep three buttons.
+Still open: which should be the default. Watching a hafiz revise with each would answer it.
+
 ### ③ Should marking gain an eraser, and undo and redo? · **open**
 
 Notes has all three and Hifth has none of them: today a mark comes off through its own tool. What

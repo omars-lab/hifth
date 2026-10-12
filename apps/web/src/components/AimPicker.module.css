@@ -1,0 +1,34 @@
+/* Note, Harakat and Word beside the one button that stands for them
+   (AimPicker.tsx): small icon buttons, the one picked filled, as a tool that
+   is on is filled, so the pick is not said by colour alone. */
+.aims {
+  display: flex;
+  gap: 0;
+}
+
+.aim {
+  display: inline-grid;
+  place-items: center;
+  min-block-size: var(--touch-min);
+  min-inline-size: 34px;
+  padding-inline: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.aim:hover {
+  color: var(--accent-strong);
+}
+
+.aim[aria-checked="true"] {
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+}
+
+.aim:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}

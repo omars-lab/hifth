@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
 import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
+import { isMarkAim, type MarkAim } from "../mark-tools";
 import type { Pen } from "../pen";
 import { rememberPenFloat, savedPenFloat, sideFits, snapToEdge, type FloatSpot } from "../pen-home";
 import type { PageTool } from "./PageStage";
-import { LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress } from "./PageToolbar";
+import { AimPicker, LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress, type ToolEntry } from "./PageToolbar";
 import styles from "./PenHomes.module.css";
 import { PenPicker } from "./PenPicker";
 
@@ -30,24 +31,34 @@ export interface PenHomeProps {
   onTool: (tool: PageTool, lock?: boolean) => void;
   pen: Pen;
   onPen: (pen: Pen) => void;
+  /** Note, Harakat and Word as one button, when the reader set it (mark-tools.ts). */
+  tools?: readonly ToolEntry[] | undefined;
+  aim?: MarkAim | undefined;
+}
+
+/** Beside the tools, what the tool on offers: the highlighter's colours, or the three the one button stands for. */
+function Offered({ tool, locked, onTool, pen, onPen, aim }: PenHomeProps): JSX.Element | null {
+  if (tool === "highlight") return <PenPicker pen={pen} onPen={onPen} />;
+  if (aim && isMarkAim(tool)) return <AimPicker aim={aim} onAim={(x) => onTool(x, locked)} />;
+  return null;
 }
 
 /** The tools, standing in a row or a column, with arrow keys along them. */
-function ToolRow({ tool, locked, onTool, upright }: PenHomeProps & { upright?: boolean }): JSX.Element {
+function ToolRow({ tool, locked, onTool, upright, tools = TOOLS }: PenHomeProps & { upright?: boolean }): JSX.Element {
   const { t } = useT();
   const press = useToolPress(tool, onTool);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const at = TOOLS.findIndex((x) => x.tool === tool);
+    const at = tools.findIndex((x) => x.tool === tool);
     const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
     let to: number | null = null;
-    if (e.key === (rtl ? "ArrowLeft" : "ArrowRight") || e.key === "ArrowDown") to = (at + 1) % TOOLS.length;
-    else if (e.key === (rtl ? "ArrowRight" : "ArrowLeft") || e.key === "ArrowUp") to = (at - 1 + TOOLS.length) % TOOLS.length;
+    if (e.key === (rtl ? "ArrowLeft" : "ArrowRight") || e.key === "ArrowDown") to = (at + 1) % tools.length;
+    else if (e.key === (rtl ? "ArrowRight" : "ArrowLeft") || e.key === "ArrowUp") to = (at - 1 + tools.length) % tools.length;
     else if (e.key === "Home") to = 0;
-    else if (e.key === "End") to = TOOLS.length - 1;
+    else if (e.key === "End") to = tools.length - 1;
     if (to === null) return;
     e.preventDefault();
-    onTool(TOOLS[to]!.tool);
+    onTool(tools[to]!.tool);
     buttons.current[to]?.focus();
   };
   return (
@@ -59,7 +70,7 @@ function ToolRow({ tool, locked, onTool, upright }: PenHomeProps & { upright?: b
       aria-orientation={upright ? "vertical" : "horizontal"}
       onKeyDown={onKeyDown}
     >
-      {TOOLS.map(({ tool: x, letter }, i) => (
+      {tools.map(({ tool: x, letter }, i) => (
         <button
           key={x}
           ref={(el) => {
@@ -101,7 +112,7 @@ function DoneTick({ onDone }: { onDone: () => void }): JSX.Element {
  * for printed beside them, until Done.
  */
 export function PenHomeBottom(props: PenHomeProps): JSX.Element {
-  const { tool, locked, onTool, pen, onPen } = props;
+  const { tool, locked, onTool } = props;
   const { t, dir } = useT();
   const touch = useMediaQuery(TOUCH_QUERY);
   const [open, setOpen] = useState(false);
@@ -122,7 +133,7 @@ export function PenHomeBottom(props: PenHomeProps): JSX.Element {
             }}
           />
           <ToolRow {...props} />
-          {tool === "highlight" && <PenPicker pen={pen} onPen={onPen} />}
+          <Offered {...props} />
           <span className={styles.hint}>
             {locked
               ? touch
@@ -159,7 +170,7 @@ function placeFor(spot: FloatSpot, size: { w: number; h: number }, view: { w: nu
  * standing up along a side. Where it was left is remembered.
  */
 export function PenHomeFloat(props: PenHomeProps): JSX.Element {
-  const { tool, onTool, pen, onPen } = props;
+  const { tool, onTool } = props;
   const { t, dir } = useT();
   const [spot, setSpot] = useState<FloatSpot>(() => savedPenFloat());
   const [drag, setDrag] = useState<{ left: number; top: number } | null>(null);
@@ -231,7 +242,7 @@ export function PenHomeFloat(props: PenHomeProps): JSX.Element {
       </button>
       <DoneTick onDone={() => onTool("select")} />
       <ToolRow {...props} upright={upright} />
-      {tool === "highlight" && <PenPicker pen={pen} onPen={onPen} />}
+      <Offered {...props} />
     </div>
   );
 }
@@ -280,15 +291,15 @@ export function useSideRoom(on: boolean): boolean | null {
  * `useSideRoom` says the margin is too narrow.
  */
 export function PenHomeSide(props: PenHomeProps): JSX.Element {
-  const { tool, onTool, pen, onPen } = props;
+  const { tool, onTool } = props;
   const { t } = useT();
   return (
     // Laid out left to right in both languages, so the tools keep to the
     // window's edge and the pens to the book's side; the buttons are icons.
     <div className={styles.side} role="toolbar" aria-label={t.toolbarLabel} dir="ltr" data-pen-home="side" data-tool={tool} data-keep-clear="">
-      {tool === "highlight" && (
+      {(tool === "highlight" || (props.aim && isMarkAim(tool))) && (
         <div className={styles.sidePens}>
-          <PenPicker pen={pen} onPen={onPen} />
+          <Offered {...props} />
         </div>
       )}
       <div className={styles.sideColumn}>
