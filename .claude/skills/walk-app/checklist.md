@@ -512,7 +512,8 @@ upright and on its side, English and Arabic, iPad and Mac.
   On a note seeded on two verses, rubbing one pin leaves the other with the words still in it.
   Mark a slip and rub it straight out: Undo still has it. E or a second press puts the eraser
   down. On the iPad's side rail, three buttons at the foot still stay between the bars. ·
-  desktop, desktop-firefox, phone, ipad-side · tests: eraser, undo-redo specs
+  In the iPad and Mac apps the pen walk rubs out the slip it left and presses Undo. ·
+  desktop, desktop-firefox, phone, ipad-side, iPad app, Mac app · tests: eraser, undo-redo specs
 
 ## The Mac and iPad apps
 
