@@ -220,7 +220,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] With "All at once" set in the info panel, 2:255 lists every related verse with no line, and
   still does after a reload. · any · issue: `related-verses-cut-at-eight`
 - [ ] Beside two pages, a card lies over the facing page and shows no drag bar. · desktop,
-  ipad-side · issue: `spread-cards-show-drag-bar`
+  ipad-side · issue: `spread-cards-show-drag-bar` · walked 2026-10-12 in the Mac app
+  (`make app-shot TARGET=mac`) with a note on 2:255, the look-alikes of 2:48 and the
+  introduction from 2:2: each on the far page, the verse in sight, nothing wrong
 - [ ] In the iPad app on its side, open a note from each page of the opening (closing the first
   before tapping under it): it lies over the other page, the verse stays fully in sight, and the
   next verse tapped moves the note to it (`make app-probe TARGET=ipad SIDEWAYS=1`, measuring
@@ -275,7 +277,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] With the note up across the page's foot, every hand-off once (Close, a page-turn key, Back,
   a long press, a verse number's menu, a look-alike chip, a swipe, a pinch, and in Arabic): the
   note slides away under whatever takes its place, nothing is left behind, and a pinch keeps the
-  note up. The `note-handoff` script walks them all. · ipad, the iPad app upright, private build
+  note up. The `note-handoff` script walks them all. · ipad, the iPad app upright, private build ·
+  walked 2026-10-12, every hand-off in English, five in Arabic, nothing wrong
 - [ ] Play a surah from its corner and, while a verse is heard, tap that verse's number and open
   its note: the sound never stops, the run goes on to the next verse, and the page lifts that
   verse above the note. A tap on another verse still stops it. The `run-note` script walks it. ·
@@ -302,6 +305,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   or another verse's number ends it, at once and a verse later. `note-handoff --run`
   walks each in a browser (`--wait 5000` for a verse later); the `run-note` script with `__mode`
   "turn" walks it in the apps (`__turnBy` "key" on the Mac, `__after` 9000 for a verse later).
+  Walked 2026-10-12 in a browser (close, key, swipe, grip, long press, a hop), nothing wrong.
   Each says which verse is heard against the note's. · ipad, Firefox, Arabic, the iPad app, the
   Mac app, private build · issues: `hand-turn-stops-run-with-note`, `hand-turn-stops-run-past-note`,
   `hop-keeps-run-by-timing`
@@ -320,7 +324,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 
 - [ ] Open it from the surah's first verse and from a verse far into the surah. · desktop,
   ipad-side, and the iPad app upright and on its side · It lies over the facing page both times. · issues: `intro-on-spread-opens-as-phone-card`,
-  `intro-from-deep-verse-floats`
+  `intro-from-deep-verse-floats` · walked 2026-10-12 in the 13-inch iPad app, both ways, from p293's
+  name and from 2:255's number, nothing wrong
 - [ ] The surah's name stays in sight, and the verse's tools step aside. · any · issues:
   `intro-card-covers-surah-name`, `intro-leaves-verse-tools-up`
 - The `intro-walk` script walks both lines in the apps (`window.__from = "deep"` for the verse far
@@ -387,7 +392,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   verse sits under the card, and the card stands above the row of tools, every tool in sight. ·
   ipad, `VIEWPORT=744x1133`, the iPad app on both sizes (`make app-probe IPAD='iPad mini (A17 Pro)'`)
   · issues: `share-card-covers-verse-ipad-upright`,
-  `share-card-covers-tool-row-ipad-mini-upright`
+  `share-card-covers-tool-row-ipad-mini-upright` · walked 2026-10-12 in the app, both sizes, both
+  languages, nothing wrong
 - [ ] On a phone on its side with Share open, in the private build (where the card is a row taller),
   the card stands below the top bar with every one of its own buttons whole; it lies over half the
   verse's tool row, on purpose (2:48, English and Arabic). · phone-side · issue:
@@ -592,6 +598,8 @@ upright and on its side, English and Arabic, iPad and Mac.
   the same script through `make app-probe` on the mini · walked 2026-10-12: the roots list covered
   its verse, the buttons sat on the lists' close buttons, and in the app a look-alike list
   covered part of its verse too (plan item 90, look-alike rows ⑱); now 2% in the app and the browser.
+  Walked again 2026-10-12 on the 13-inch iPad, in the app and the browser, upright and on its side,
+  in both languages: every card 0%.
   Run it in the app as well as the browser: the app's own bars leave the page about 40 pixels less
 - [ ] **Take the iPad app off the simulator and open it fresh**, as on a borrowed iPad in the
   room: it opens on the first two pages with nothing over them and nothing stored, the first
