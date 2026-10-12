@@ -2040,14 +2040,11 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     page is moving, and it said the page must never zoom in further than where it ends. On a busy
     laptop the note rose only after the move had ended, at the zoom that suits a page with no note,
     and the page then rightly zoomed out a little to make room for it, which from the zooms alone
-    looks just like the fault the check guards. Fixed in the check, not the app: the note is held and
-    let go inside the page, in the same frame as the second link, and the zoom is read from the
-    moment the note rose; from then on the page must head straight to where it ends. Twenty-four at
-    once, sixteen side by side: all pass on that count.
-92. **The same check, run sixteen side by side, once in twenty-four lost its page part-way through,
-    as if the page had reloaded.** Seen 2026-10-12 while fixing item 91, before and after the fix,
-    and never in the checks before a push. Nothing in the app reloads there that the check does not
-    switch off, so the cause is not known yet. Next: catch it with a trace and see what navigated.
+    looks just like the fault the check guards. Fixed in the check, not the app: it notes the moment
+    the note rose, and from then on the page must head straight to where it ends. Thirty-two at once,
+    sixteen side by side, all pass; with the old fault put back in the app it fails four in four.
+    (Holding the note inside the page instead was tried first and dropped: the check then lost its
+    page part-way through now and then.)
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

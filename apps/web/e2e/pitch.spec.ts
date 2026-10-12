@@ -2921,23 +2921,18 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     // The first link's move, cut short by the second, forgot the second was
     // under way, so a note rising during the second move no longer turned it:
     // it zoomed in and then back out. The note's file is held back until the
-    // second move has begun. It is held in the page itself and let go in the
-    // same frame as the second link. On a busy machine the note can still rise
-    // only once the move has ended, and the page then rightly fits itself round
-    // the late note, which looks like the fault from the zooms alone (2026-10-12,
-    // twelve at once: all twelve failed). So the zoom is read against the moment
-    // the note rose: from then on the page heads straight to where it ends.
+    // second move has begun. On a busy machine the note can rise only once the
+    // move has ended, and the page then rightly fits itself round the late
+    // note, which looks like the fault from the zooms alone (2026-10-12, twelve
+    // at once: all twelve failed). So the zoom is read against the moment the
+    // note rose: from then on the page heads straight to where it ends.
     const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true, serviceWorkers: "block" });
     await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
-    await context.addInitScript(() => {
-      const w = window as unknown as { __letNoteGo: () => void };
-      const held = new Promise<void>((done) => (w.__letNoteGo = done));
-      const fetchFile = window.fetch.bind(window);
-      window.fetch = async (input, init) => {
-        const response = await fetchFile(input, init);
-        if (/assets\/private\/study-quran\/2\.json$/.test(String(input instanceof Request ? input.url : input))) await held;
-        return response;
-      };
+    let release!: () => void;
+    const held = new Promise<void>((done) => (release = done));
+    await context.route("**/assets/private/study-quran/2.json", async (route) => {
+      await held;
+      await route.continue();
     });
     const page = await context.newPage();
     await page.goto("/#/hafs-kfqc/p42");
@@ -2945,7 +2940,7 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     await page.evaluate(
       () =>
         new Promise<void>((done) => {
-          const w = window as unknown as { __zooms: number[]; __noteAt: number; __letNoteGo: () => void };
+          const w = window as unknown as { __zooms: number[]; __noteAt: number };
           w.__zooms = [];
           w.__noteAt = -1;
           // The two verses' page; the page beneath it keeps whatever zoom it was left at.
@@ -2961,7 +2956,6 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
               // The first move is under way: follow the second link now.
               second = true;
               location.hash = "#/hafs-kfqc/2:255";
-              w.__letNoteGo();
               done();
             }
             requestAnimationFrame(look);
@@ -2970,6 +2964,7 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
           requestAnimationFrame(look);
         }),
     );
+    release();
     await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
     const lines = page.locator("#hifth-overlay .hl-sel");
     await settle(lines.first());
