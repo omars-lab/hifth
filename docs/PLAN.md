@@ -2056,8 +2056,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     within the same fifth as one a little too tall. And when the page cannot show the note's verse
     whole above the note, the page moves aside for it at once, as it already did once the note was
     read to its end; it stays aside until the note closes. A short verse such as 2:48 still opens
-    as before, lifted above the note. Browser tests at the mini's size in both languages, watched
-    failing first; measured again in the iPad app on its side, none under either card.
+    as before, lifted above the note. On this screen that also overrides the setting that opens
+    the note shorter, when even the shorter note would cover the verse. Once the page had moved
+    aside for the note, the look-alike buttons stayed where they stand over an open page, so on
+    a look-alike verse (3:84) they sat on the page in Arabic and just past the card in English;
+    they now ride the note card's top row, as they already did for the roots list and Share. The
+    width rule reaches the laptop too: closed to one page and zoomed a little wider than the room
+    beside the roots list, the page is drawn a little smaller when the list opens; zoomed further,
+    it keeps the reader's size and only the verse's start is kept in sight. Browser tests at the
+    mini's size in both languages, and on the laptop, watched failing first; measured again in
+    the iPad app on its side, none under either card.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

@@ -1258,6 +1258,40 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     });
   }
 
+  for (const locale of ["en-US", "ar"]) {
+    test(`on an iPad mini on its side, the look-alike buttons ride the top row of a note the page moved aside for (${locale})`, async ({ browser }) => {
+      // The same walk, on a long verse with a look-alike (3:84): with the page
+      // moved aside for the freshly opened note, the button stayed in its own
+      // corner on the right, over the page in Arabic, where the note stands on
+      // the left, and in English 8 pixels past the card's edge (plan item 92).
+      const context = await browser.newContext({ viewport: { width: 1133, height: 744 }, hasTouch: true, locale });
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+      const page = await context.newPage();
+      await page.goto("/#/hafs-kfqc/3:84");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await settle(sheet(page));
+      const chips = page.locator("button[data-direction]");
+      await expect(chips.first()).toBeVisible();
+      await expect
+        .poll(async () => {
+          const card = (await sheet(page).boundingBox())!;
+          const close = (await sheet(page).getByRole("button", { name: locale === "ar" ? "\u0625\u063a\u0644\u0627\u0642" : "Close" }).first().boundingBox())!;
+          const paper = (await pageSvg(page, 61).boundingBox())!;
+          const meets = (a: Box, b: Box) => a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+          const out: string[] = [];
+          for (const chip of await chips.all()) {
+            const c = (await chip.boundingBox())!;
+            if (meets(c, paper)) out.push("on the page");
+            if (meets(c, close)) out.push("on Close");
+            if (c.x < card.x - 0.5 || c.x + c.width > card.x + card.width + 0.5 || c.y < card.y - 0.5) out.push("outside the card");
+          }
+          return out.join(", ") || "on the card";
+        }, { message: "where the look-alike buttons stand", timeout: 8_000 })
+        .toBe("on the card");
+      await context.close();
+    });
+  }
+
   test("with the note up over a recitation, turning the page by hand keeps the sound going", async ({ browser }) => {
     // Walking the note's hand-offs with a surah playing, 2026-10-11: with the
     // note open on the verse being heard, a page turned by key or by swipe

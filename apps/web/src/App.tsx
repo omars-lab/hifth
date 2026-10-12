@@ -3536,8 +3536,10 @@ export function App(): JSX.Element {
           // the chrome's end, which is the left when it reads right to left.
           // So on a list in a small corner, inside its top row as on the
           // share card's: the page moved aside stands under their own corner
-          // (plan item 90).
-          ((shareCorner !== null || listCorner !== null) && dir === "rtl"))
+          // (plan item 90). The same for a note the page moved aside for:
+          // in Arabic it stands on the left, and the chips had stayed on the
+          // right, over the page (plan item 92).
+          ((shareCorner !== null || listCorner !== null || noteCorner !== null) && dir === "rtl"))
       }
       onBand={setRailBottom}
       beside={beside}
@@ -3548,7 +3550,8 @@ export function App(): JSX.Element {
       }
       onCard={
         (highestTop(coverTop, shareTop, listTop) === null && shareCorner !== null) ||
-        listCorner !== null
+        listCorner !== null ||
+        noteCorner !== null
       }
       away={!beside && !home && noteTall}
       home={home}

@@ -406,7 +406,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `share-card-covers-line-start-ipad-mini-side`
 - [ ] On an iPad mini on its side, open the note on a long verse (2:255) and then the roots list: the
   page moves aside for each card and the whole verse shows beside it, drawn a little smaller if
-  need be; a short verse (2:48) still opens lifted above the note. · `VIEWPORT=1133x744`, the iPad
+  need be; a short verse (2:48) still opens lifted above the note. On a look-alike verse (3:84) the
+  look-alike buttons ride the note card's top row, never the page. · `VIEWPORT=1133x744`, the iPad
   app on its side (`make app-probe TARGET=ipad SIDEWAYS=1 "IPAD=iPad mini (A17 Pro)"` with the
   corner-cards script) · issue: `mini-side-long-verse-under-note` · walked 2026-10-12 in the
   browser and the app, both languages, none under either card
