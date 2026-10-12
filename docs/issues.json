@@ -4326,7 +4326,7 @@
       },
       "status": "open",
       "severity": "question",
-      "owner": "agent"
+      "owner": "user"
     },
     {
       "id": "quick-second-flick-lost",
@@ -4334,9 +4334,11 @@
         "file": "docs/PLAN.md",
         "item": "86"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
-      "owner": "agent"
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/page-turn.spec.ts",
+      "note": "A flick that starts while the last page is still landing lands that page at once and turns from it; two phone-size browser tests, one inside a slowed landing and one the moment the first flick is let go, both watched failing first."
     }
   ]
 }

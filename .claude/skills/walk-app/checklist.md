@@ -36,6 +36,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Walk swipes with `swipe=` (a finger), not `drag=` (a mouse). A phone turns under a swipe
   both ways; an open book on an iPad on its side turns only from its outer edge, a finger in the
   middle never turns it. · phone, phone-side, ipad-side · test: drive-touch spec, "swipe="
+- [ ] Flick four pages quickly, each flick starting before the last page has settled: four pages
+  turn, none is lost or undone. · phone, phone-side · issue: `quick-second-flick-lost` · tests:
+  page-turn spec, "a second flick made"
 - [ ] A large iPad on one page turns under a finger. · ipad-big-side with `?view=one` · issue:
   `large-ipad-one-page-no-swipe`
 - [ ] Zoom in, then turn: the zoom carries to the next page. · desktop, ipad-side · test: desktop spec
@@ -142,6 +145,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   recited is under it (the visit walk's `litUnderNote=0%` at "E playing"). · iPad sideways, the
   iPad app sideways, pitch, Arabic · issue: `kept-note-covers-recited-page` · test:
   e2e/pitch.spec.ts ("lies clear of the verse being recited")
+- [ ] Same setup, let the recitation run across two openings (about a hundred seconds at the
+  walk's speed): the note moves exactly once a page, when the recitation reaches the page it is
+  over, and at no other moment; count the moves. More than one a page is a fault. · the iPad app
+  sideways, pitch, English and Arabic · issue: `kept-note-hops-sides` · how it feels: the
+  manual-testing list, item 16
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
 

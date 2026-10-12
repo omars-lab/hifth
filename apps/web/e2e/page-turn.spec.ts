@@ -437,6 +437,56 @@ test.describe("Hifth · the fold", () => {
     await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
+  test("a second flick made while the first turn is still landing turns the page again", async ({ page }) => {
+    await open(page);
+    // docs/PLAN.md, item 86: a hafiz flicking through to find a page flicks
+    // again before the last page has settled, and that flick is theirs too.
+    // The turn slowed tenfold, so the second flick starts inside the landing
+    // however busy the machine running the test is.
+    await page.addStyleTag({ content: ":root { --dur-med: 2400ms; --dur-fast: 1200ms; }" });
+    const shown = (n: number) => page.locator(`svg[aria-labelledby='page-label-${n}']:visible`);
+    // On the page in the hand's eye: the one arriving, wherever it is yet.
+    const flick = async (on: number, held?: () => Promise<void>): Promise<void> => {
+      const box = (await shown(on).boundingBox())!;
+      const stage = await stageBox(page);
+      const y = stage.y + stage.height / 2;
+      await page.mouse.move(box.x + box.width * 0.3, y);
+      await page.mouse.down();
+      for (let i = 1; i <= 8; i += 1) await page.mouse.move(box.x + box.width * (0.3 + i * 0.05), y);
+      if (held) await held();
+      await page.mouse.up();
+    };
+    await flick(7);
+    // Inside the landing: the page arriving is in sight and the one leaving
+    // has not yet gone.
+    await expect(shown(8)).toBeVisible();
+    expect(await shown(7).count(), "still landing when the second flick starts").toBe(1);
+    // The page the first flick asked for has arrived by the time the second
+    // is let go, even though the second began before it had: it counts.
+    await flick(8, () => expect(page.locator(NUM)).toHaveText(pageNumber(8)));
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
+  });
+
+  test("a second flick made the moment the first is let go turns the page again", async ({ page }) => {
+    await open(page);
+    // docs/PLAN.md, item 86, at its sharpest: the next flick starts before the
+    // first turn has even drawn its band.
+    const shown = (n: number) => page.locator(`svg[aria-labelledby='page-label-${n}']:visible`);
+    const stage = await stageBox(page);
+    const y = stage.y + stage.height / 2;
+    const first = (await shown(7).boundingBox())!;
+    await page.mouse.move(first.x + first.width * 0.3, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i += 1) await page.mouse.move(first.x + first.width * (0.3 + i * 0.05), y);
+    await page.mouse.up();
+    // On a phone the page arriving lands where the one leaving stood.
+    await page.mouse.move(first.x + first.width * 0.3, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i += 1) await page.mouse.move(first.x + first.width * (0.3 + i * 0.05), y);
+    await page.mouse.up();
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
+  });
+
   test("a short drag springs back and turns nothing", async ({ page }) => {
     await open(page);
 
