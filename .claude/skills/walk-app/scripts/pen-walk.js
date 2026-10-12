@@ -120,6 +120,36 @@
     await wait(400);
     home = homeEl() || home;
   }
+  // The eraser beside Undo: on, a tap on a mark the pens left takes it off with nothing asked,
+  // it stays on, and Undo puts the mark back. `window.__erase = false` skips it.
+  if (window.__erase !== false) {
+    const pair = () => [...document.querySelectorAll("[data-mark-undo]")].find((e) => on(box(e)));
+    const eraser = () => pair()?.querySelector("[aria-keyshortcuts=E]");
+    if (!eraser()) out.push("eraser: none in sight");
+    else {
+      const eb = box(eraser());
+      eraser().click();
+      await wait(600);
+      const on1 = eraser()?.getAttribute("aria-pressed");
+      const mark = [...document.querySelectorAll("[data-mistake-word], [data-note-pin]")].find((e) => on(box(e)));
+      const before = count();
+      let what = "none";
+      if (mark) {
+        what = mark.hasAttribute("data-note-pin") ? "pin" : "slip";
+        const mb = box(mark);
+        await tap({ x: mb.left + mb.width / 2, y: mb.top + mb.height / 2 });
+        await wait(1500);
+      }
+      const after = count();
+      const on2 = eraser()?.getAttribute("aria-pressed");
+      pair()?.querySelectorAll("button")[1]?.click();
+      await wait(1500);
+      const back = count();
+      eraser()?.click();
+      await wait(600);
+      out.push(`eraser: box=${f(eb)} on=${on1} rubbed=${what} left=${diff(before, after)} stillOn=${on2} undo=${diff(after, back)} down=${eraser()?.getAttribute("aria-pressed") === "false" ? "yes" : "no"}`);
+    }
+  }
   await wait(1500);
   await restore();
   const left = await unlike();
