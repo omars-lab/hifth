@@ -1112,6 +1112,26 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
   });
 
   for (const locale of ["en-US", "ar"]) {
+    test(`the first screen's hint stands clear of the Mark up button on an iPad on its side (${locale})`, async ({ browser }) => {
+      // In English the hint ran into the button with no space between them:
+      // the row is laid out right to left for the mus'haf, and the button's
+      // space was on the side its own language ends, the screen's edge.
+      const context = await browser.newContext({ viewport: { width: 1376, height: 1032 }, hasTouch: true, locale });
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+      const page = await context.newPage();
+      await page.goto("/");
+      const hint = page.locator("footer").getByText(locale === "ar" ? /\u0644\u062a\u0642\u0631\u0623/ : /to read its/);
+      await expect(hint).toBeVisible({ timeout: 20_000 });
+      const markUp = page.locator("[data-pen-home='bottom'] button[aria-expanded]");
+      await expect(markUp).toBeVisible();
+      const [h, m] = [(await hint.boundingBox())!, (await markUp.boundingBox())!];
+      // The button stands at the row's right, the hint to its left.
+      expect(m.x - (h.x + h.width), "space between the hint and the button").toBeGreaterThanOrEqual(8);
+      await context.close();
+    });
+  }
+
+  for (const locale of ["en-US", "ar"]) {
     test(`on its side, a note kept up over a recitation on other pages lies clear of the verse being recited (${locale})`, async ({
       browser,
     }) => {
