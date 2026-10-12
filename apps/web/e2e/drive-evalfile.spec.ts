@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
@@ -38,6 +38,34 @@ test("a drive run can run a page script kept in a file", async ({ baseURL }) => 
       { stdio: "pipe", timeout: 50_000 },
     ).toString();
     expect(log).toMatch(/ev=eval result="yes"/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// The walk scripts live in the walk skill's own folder, and every other tool
+// that runs them takes their path from the top of the repository. This one ran
+// from the web app's folder and read the path from there, so the walk skill's
+// own command for its corner-card walk found no file (2026-10-12).
+test("a page script can be named by its path from the top of the repository", async ({ baseURL }) => {
+  test.setTimeout(60_000);
+  const repo = fileURLToPath(new URL("../../../", import.meta.url));
+  const dir = mkdtempSync(join(repo, "apps/web/test-results/drive-root-"));
+  try {
+    writeFileSync(join(dir, "mock.js"), 'document.body.dataset.mocked = "root";\ndocument.body.dataset.mocked;\n');
+    const fromTop = relative(repo, join(dir, "mock.js"));
+    const log = execFileSync(
+      process.execPath,
+      [
+        DRIVE,
+        "--base", String(baseURL),
+        "--hash", "#/hafs-kfqc/p8",
+        "--act", `settle=200; evalfile=${fromTop}`,
+        "--out", join(dir, "shot.png"),
+      ],
+      { stdio: "pipe", timeout: 50_000, cwd: fileURLToPath(new URL("../", import.meta.url)) },
+    ).toString();
+    expect(log).toMatch(/ev=eval result="root"/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
