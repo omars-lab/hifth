@@ -1,7 +1,7 @@
 # How should my usage counts from the iPad, the Mac and the browser be added together? (researcher A)
 
 > [!tip] Short version
-> We searched what Apple and others offer. The Apple routes (iCloud) are real and cheap in code, but they all need the paid Apple Developer membership, they only reach the iPad and Mac apps, and they never reach Firefox or Safari on the phone.
+> We searched what Apple and others offer. The Apple routes (iCloud) are real and cheap in code, but they all need the paid Apple Developer membership, and the ones worth building here only reach the iPad and Mac apps, not Firefox or Safari on the phone. (Apple's web library could in principle reach a browser; we found no sign it works in Firefox today.)
 > Nothing found reaches all of your devices automatically without either a server or someone else's account.
 > The search also found a fix for the file option: if each device keeps its own column of counts, adding a file twice can no longer count twice.
 > **Recommended: carry a file, built the per-device way, now. Add iCloud for the two Apple apps later, only if you already pay for the developer membership and carrying the file between the iPad and the Mac becomes a chore.**
