@@ -72,6 +72,14 @@
   background: var(--paper-raised);
 }
 
+/* Standing in a corner of a screen too short for the laptop layout (an iPad
+   mini on its side), the list carries the look-alike chips on its top row
+   (HopRail's `onCard`), where they sat on its close button: its head starts a
+   row lower, as the share card's does, and keeps that row as it sticks. */
+:root:has([data-seated][data-card]) .head {
+  padding-block-start: calc(var(--space-3) + 36px);
+}
+
 .glyph {
   font-size: var(--text-lg);
   color: var(--accent-strong);

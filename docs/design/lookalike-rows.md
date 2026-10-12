@@ -478,7 +478,9 @@ on that window, 2026-10-10 (2:48, Share open).
 The same leftover comes with the note read to its end on that window, since the grown note now moves
 the page aside the way the card does (plan item 89, 2026-10-12). In Arabic, where the card or note
 stands on the left, the page slides right instead, and the second line's first letters run about 27
-pixels past the screen's edge rather than under the card.
+pixels past the screen's edge rather than under the card. The roots list and the look-alike lists do the same
+since they move the page aside there too (⑱, 2026-10-12): 2% of the verse under them in English, and
+in Arabic one lit line's start past the screen's edge.
 
 **Why it is asked now:** the walk found it, and the page is only a few percent too wide, which is a
 smaller shortfall than the laptop case ⑩ was built on (there the page was hundreds of pixels too
@@ -525,3 +527,26 @@ row now names one verse and lands on another.
 
 Per the project's habit, the one not picked would stay as a setting in the info panel.
 
+### ⑱ On an iPad mini on its side, do the other corner cards cover the verse the way the note did? · **fixed**
+
+**What it changes for a hafiz:** on a window the size of an iPad mini on its side, the note, the roots
+list, the look-alike lists and the share card each stand as a card in a corner of the page. After the
+note read to its end was found covering its verse (plan item 89), each card was opened in turn on 2:48.
+The roots list covered about a third of the verse from the moment it opened, so a hafiz looking up a
+word's root lost sight of the verse the word is in. With the roots list or a look-alike list open, the
+two look-alike buttons sat on the list's close button, so a press meant for one could hit the other; in
+English the second button also stuck out past the card's edge, and in Arabic the buttons stayed on the
+right while the list stood on the left. Found 2026-10-12.
+
+A look-alike list is shorter, and in the browser the page lifted the verse above it. But the iPad app
+keeps the iPad's own bars above and below the page, which take about 40 pixels of that short screen,
+and there the verse did not fit above the list either: 6% of it under the first list, 15% once its
+heading had moved down a row for the buttons.
+
+**Fixed, 2026-10-12:** any list there moves the page aside, as the note and the share card do. On the
+roots list and on a look-alike list the two buttons ride the card's own top row, and the list's heading
+starts a row lower so its close button is clear, the same as on the share card. Browser tests at the
+mini's size and at the app's shorter room, in English and Arabic, watched failing first; a walk script
+opens each corner card in turn and reports how much of the verse is under it and whether a button meets
+the page or a close button (plan item 90). Measured again in the iPad app: 2% under in English, none in
+Arabic. The leftover is ⑯'s.
