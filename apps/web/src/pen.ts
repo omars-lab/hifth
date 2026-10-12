@@ -5,8 +5,9 @@
  * options.md ②): a passage is pastel green and a run of words pastel blue by
  * default, and the highlighter carries four pens, green, blue, yellow and
  * pink, picked from the tools bar while it is on. The pen colours the passage
- * the highlighter paints; the run of words keeps its blue, and the verse you
- * are on its amber.
+ * the highlighter paints, and the verse you are on keeps its amber. Since
+ * 2026-10-12 (⑤) the words you hold take one of the same four, picked beside
+ * it and blue until another is.
  *
  * The colours themselves live in tokens.css (`--pen-*`), each held to the
  * reading floor where it crosses the amber verse by pen.test.ts. This module
@@ -49,4 +50,30 @@ export function rememberPen(pen: Pen): void {
 /** Puts the pen on the page: the stylesheet maps it to the passage's ink. */
 export function applyPen(pen: Pen): void {
   document.documentElement.dataset.pen = pen;
+}
+
+/** Versioned, as the passage's pen is. */
+export const WORD_PEN_KEY = "hifth.highlighter.wordPen.v1";
+
+/** The pen this device picked for the words you hold, or blue. */
+export function savedWordPen(): Pen {
+  try {
+    const stored = localStorage.getItem(WORD_PEN_KEY);
+    return isPen(stored) ? stored : "blue";
+  } catch {
+    return "blue";
+  }
+}
+
+export function rememberWordPen(pen: Pen): void {
+  try {
+    localStorage.setItem(WORD_PEN_KEY, pen);
+  } catch {
+    /* nothing to do — see savedPen */
+  }
+}
+
+/** Puts it on the page: the stylesheet maps it to the held words' ink. */
+export function applyWordPen(pen: Pen): void {
+  document.documentElement.dataset.wordPen = pen;
 }

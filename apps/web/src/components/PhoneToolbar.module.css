@@ -144,10 +144,17 @@
   animation: tray-up 160ms ease-out;
 }
 
+/* With the highlighter on, its two rows of pens fill this line, and the hint
+   and the close drop to the one under it. */
 .trayRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1);
+}
+
+.trayPens {
+  flex-basis: 100%;
 }
 
 .trayRow .trayHint {

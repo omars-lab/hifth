@@ -197,7 +197,7 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen, end }: PageToolb
           other: at the narrowest window neither side has room for both. */}
       {tool === "highlight" && (
         <div className={styles.start}>
-          <PenPicker pen={pen} onPen={onPen} />
+          <PenPicker pen={pen} onPen={onPen} narrow />
         </div>
       )}
       <div className={styles.side} data-end={end ? "" : undefined}>

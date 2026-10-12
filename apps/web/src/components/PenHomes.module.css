@@ -185,6 +185,7 @@
   gap: 2px;
 }
 
-.sidePens > * {
+/* Down the side, each row of pens stands up, the two side by side. */
+.sidePens [role="radiogroup"] {
   flex-direction: column;
 }

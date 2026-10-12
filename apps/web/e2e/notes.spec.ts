@@ -166,6 +166,13 @@ test.describe("Hifth · the note tool", () => {
     await page.setViewportSize({ width: 1024, height: 800 });
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();
+    // Both rows of pens fit to the tools' left, so picking the highlighter
+    // does not slide the tools out from under the pointer.
+    const before = (await toolBtn(page, "Highlight").boundingBox())!.x;
+    await toolBtn(page, "Highlight").click();
+    await expect(page.getByRole("radiogroup", { name: "Colour of words you hold" })).toBeVisible();
+    expect((await toolBtn(page, "Highlight").boundingBox())!.x).toBe(before);
+    await toolBtn(page, "Select").click();
     for (const name of ["Read", "Highlight"]) {
       await toolBtn(page, name).dblclick();
       await expect(toolBtn(page, name)).toHaveAttribute("data-locked", "true");

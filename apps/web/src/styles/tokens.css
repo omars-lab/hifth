@@ -278,6 +278,21 @@
   --ink-range: var(--pen-pink);
 }
 
+/* The pen picked for the words you hold (the owner, 2026-10-12): the same four,
+   blue by default. Blue is written out too, so the four read as one list. */
+:root[data-word-pen="green"] {
+  --ink-run: var(--pen-green);
+}
+:root[data-word-pen="blue"] {
+  --ink-run: var(--pen-blue);
+}
+:root[data-word-pen="yellow"] {
+  --ink-run: var(--pen-yellow);
+}
+:root[data-word-pen="pink"] {
+  --ink-run: var(--pen-pink);
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-fast: 0ms;

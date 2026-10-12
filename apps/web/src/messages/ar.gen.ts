@@ -357,6 +357,7 @@ const messages: Catalog = {
   penLabel: "لون قلم التظليل",
   penMarkUp: "الأقلام",
   penPink: "وردي",
+  penWordsLabel: "لون الكلمات المحددة",
   penYellow: "أصفر",
   phoneTools: (d) => "أدوات الصفحة، أداة " + d.name + " مفعّلة",
   phoneToolsClose: "أغلق الأدوات",
