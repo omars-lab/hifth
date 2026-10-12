@@ -82,7 +82,7 @@
  */
 import { chromium, firefox } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -347,8 +347,12 @@ async function runStep(page, step) {
     }
     case "evalfile": {
       // A mock kept beside an options note: too long for the command line, and
-      // kept so the picture can be taken again.
-      const result = await page.evaluate((src) => (0, eval)(src), readFileSync(resolve(arg), "utf8"));
+      // kept so the picture can be taken again. A path not found from here is
+      // read from the top of the repository, where the walk skill's scripts are
+      // named from.
+      const here = resolve(arg);
+      const file = existsSync(here) ? here : fileURLToPath(new URL(`../../../../${arg}`, import.meta.url));
+      const result = await page.evaluate((src) => (0, eval)(src), readFileSync(file, "utf8"));
       log("eval", `result=${JSON.stringify(result)}`);
       return;
     }

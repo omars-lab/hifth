@@ -8,9 +8,14 @@
   const f = (r) => (r ? `${Math.round(r.left)},${Math.round(r.top)}-${Math.round(r.right)},${Math.round(r.bottom)}` : "none");
   const cut = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
   const isClose = (b) => /^(Close|إغلاق)$/.test((b.getAttribute("aria-label") || b.textContent || "").trim());
-  const cards = () => [...document.querySelectorAll("[role=dialog], section")]
-    .map((e) => [e, e.getBoundingClientRect()])
-    .filter(([e, r]) => r.width > 200 && r.height > 80 && r.width < innerWidth - 40 && getComputedStyle(e).visibility !== "hidden");
+  // Only the outer card: a section inside a card's scroll is clipped by it, and one scrolled out
+  // of sight counted as a card over the page (51% under, on a large iPad upright).
+  const cards = () => {
+    const all = [...document.querySelectorAll("[role=dialog], section")]
+      .map((e) => [e, e.getBoundingClientRect()])
+      .filter(([e, r]) => r.width > 200 && r.height > 80 && r.width < innerWidth - 40 && getComputedStyle(e).visibility !== "hidden");
+    return all.filter(([e]) => !all.some(([o]) => o !== e && o.contains(e)));
+  };
   const look = (t) => {
     const lit = [...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']")].map((e) => e.getBoundingClientRect()).filter((r) => r.width);
     const all = lit.reduce((s, b) => s + b.width * b.height, 0);
