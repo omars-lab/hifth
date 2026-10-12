@@ -1938,6 +1938,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     the ring chosen, watched failing first on a laptop (the turn); walked in the iPad app
     upright and on its side, the ring on each page's first verse within a fifth of a second
     of the jump and the turn.
+84. ~~**In Arabic, a note kept up over a recitation covered the page being recited.**~~ Found
+    walking the visit in the iPad app on its side in Arabic, 2026-10-12: with a note open, a
+    surah played from its corner took the book to the surah's first pages, and the note,
+    kept up (item 78), had no verse of its own on the open pages to stand opposite. It fell
+    back to the side the chrome reads from, which in Arabic is the left page, the one being
+    recited, and it hid 60% of the lit verse. In English it fell on the other page by luck.
+    Fixed: with its own verse off the open pages, the note stands opposite the verse being
+    recited. A browser test in both languages on a sideways iPad, watched failing first in
+    Arabic; walked in the iPad app in Arabic, the card on the other page and none of the lit
+    verse under it.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

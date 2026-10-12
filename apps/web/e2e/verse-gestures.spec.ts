@@ -421,6 +421,10 @@ test.describe("Hifth · holding the page's corners", () => {
     expect((await player.files()).at(-1)).toBe("002006.mp3");
     await expect(page.locator("svg[aria-labelledby='page-label-3']:visible")).toBeVisible();
     await expect.poll(() => markedOn(page, 3, "selection")).toEqual(["2:6"]);
+    // The address follows the run too, once the turn has landed: the page it
+    // took the reader to, not the verse left behind, so a link copied now
+    // opens where the room is looking.
+    await expect(page).toHaveURL(/#\/hafs-kfqc\/p3(\?|$)/);
     // The verse's tools stay up for the verse being recited, Pause in reach.
     await expect(drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:6" })).toBeVisible();
     // Still reciting on the far side of the turn.

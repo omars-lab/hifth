@@ -1111,6 +1111,59 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  for (const locale of ["en-US", "ar"]) {
+    test(`on its side, a note kept up over a recitation on other pages lies clear of the verse being recited (${locale})`, async ({
+      browser,
+    }) => {
+      // Walking the visit in the iPad app in Arabic, 2026-10-12: a surah
+      // played from its corner with a note open took the book to the surah's
+      // first pages, and the note, kept up, fell back to the side the chrome
+      // reads from. In Arabic that is the left page, the one being recited, and
+      // the card hid most of the lit verse. In English it happened to lie over
+      // the other page.
+      const context = await browser.newContext({ viewport: { width: 1366, height: 1024 }, hasTouch: true, locale });
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+      const page = await context.newPage();
+      const player = await fakePlayer(page);
+      await page.goto("/#/hafs-kfqc/2:48");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await settle(sheet(page));
+      const note = (await sheet(page).boundingBox())!;
+      const heads = page.locator('[data-host-page] [data-running-head="surah"]:visible');
+      let head: Box | null = null;
+      for (const h of await heads.all()) {
+        const b = await h.boundingBox();
+        if (b && b.width > 0 && !overlaps(b, note)) head = b;
+      }
+      expect(head, "a surah's corner is in sight beside the note").not.toBeNull();
+      await page.mouse.move(head!.x + head!.width / 2, head!.y + head!.height / 2);
+      await page.mouse.down();
+      await page.waitForTimeout(600);
+      await page.mouse.up();
+      const play = locale === "ar" ? "\u062a\u0644\u0627\u0648\u0629" : "Play";
+      await page.getByRole("menu").getByRole("menuitem", { name: play, exact: true }).click();
+      await expect.poll(player.files).toEqual(["002001.mp3"]);
+      await expect(pageSvg(page, 2)).toBeVisible();
+      await expect(sheet(page), "the note stays up").toBeVisible();
+      // On down the page, where the card would reach it from either corner.
+      for (let n = 2; n <= 5; n++) await player.end();
+      await expect.poll(async () => (await player.files()).at(-1)).toBe("002005.mp3");
+      await settle(sheet(page));
+      expect(await sideOf(page, sheet(page)), "the note lies over the other page").not.toBe(
+        await sideOf(page, pageSvg(page, 2)),
+      );
+      await expect
+        .poll(async () => {
+          const card = (await sheet(page).boundingBox())!;
+          const lit = await litLineBoxes(page);
+          if (!lit.length) return "nothing lit";
+          return lit.some((b) => overlaps(b, card)) ? "under the note" : "clear";
+        })
+        .toBe("clear");
+      await context.close();
+    });
+  }
+
   test("with the note up over a recitation, turning the page by hand keeps the sound going", async ({ browser }) => {
     // Walking the note's hand-offs with a surah playing, 2026-10-11: with the
     // note open on the verse being heard, a page turned by key or by swipe
