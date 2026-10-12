@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/preact";
-import { DESKTOP_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
+import { CARD_QUERY, DESKTOP_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
 
 /**
  * A controllable `matchMedia`. jsdom does not implement one, which is itself the
@@ -72,6 +72,18 @@ describe("PHONE_QUERY", () => {
     // buttons in neither place, or in both. Read off disk for the reason above.
     const css = readFileSync(resolve(process.cwd(), "src/components/HopRail.module.css"), "utf8");
     expect(css).toContain(`@media ${PHONE_QUERY}`);
+  });
+});
+
+describe("CARD_QUERY", () => {
+  it("is the same width the note's stylesheet stands it in a corner at", () => {
+    // From this width the note is a card in a corner, and below the laptop
+    // layout the page moves aside for it once it grows (plan item 89). If the
+    // two drift apart, the page moves aside for a note lying across the foot
+    // of the screen, or stays under a card in a corner. Read off disk for the
+    // reason above.
+    const css = readFileSync(resolve(process.cwd(), "src/components/CommentarySheet.module.css"), "utf8");
+    expect(css).toContain(`@media ${CARD_QUERY}`);
   });
 });
 

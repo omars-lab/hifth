@@ -2006,6 +2006,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     one drawn triangle, mirrored, pointing the same ways as before (earlier in the book is to the
     right). A browser test in Chrome, Firefox and both phones, in both languages, watched failing
     first; seen again in Chrome and Firefox, the pair now matching.
+89. ~~**On an iPad mini on its side, a note read to its end covered its verse.**~~ Found walking
+    the visit in the iPad app on the mini held sideways, 2026-10-12: the screen is wide enough for
+    the note to stand as a card in a corner but too short for the laptop layout, so the page lifts
+    the verse above the card and the card opens clear of it. Read to its end, the card grows to the
+    full height of its corner, and nothing moved the page out from under it: it covered a quarter
+    of the verse in English and half in Arabic, where the card is on the left. Fixed: grown, the
+    note covers the page's side, as the share card does on that screen, and the page slides aside
+    for it. The leftover is the share card's own (look-alike rows ⑯): the verse's first word is
+    clear, and about 27 pixels of its second line's first letters stay under the card in English,
+    or past the screen's edge in Arabic. A browser test at the mini's size in both languages,
+    watched failing first (23% and 48% covered); seen again in the iPad app, 2% and none.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

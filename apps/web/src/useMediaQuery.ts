@@ -55,6 +55,14 @@ export const DESKTOP_QUERY = "(min-width: 1024px) and (min-height: 775px)";
  */
 export const PHONE_QUERY = "(max-width: 600px)";
 
+/**
+ * A window wide enough for the note and the lists to stand as a card in a
+ * corner rather than lie across the foot of the screen. The same width as
+ * CommentarySheet.module.css's rule, which a media query cannot read from
+ * here; the two must agree.
+ */
+export const CARD_QUERY = "(min-width: 900px)";
+
 /** A screen taller than it is wide, as an iPad held upright: one page reads larger than two. */
 export const UPRIGHT_QUERY = "(orientation: portrait)";
 

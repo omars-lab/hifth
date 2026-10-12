@@ -1184,6 +1184,49 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     });
   }
 
+  for (const locale of ["en-US", "ar"]) {
+    test(`on an iPad mini on its side, a note read to its end leaves its verse in sight (${locale})`, async ({ browser }) => {
+      // Walking the visit in the iPad app on the mini held sideways,
+      // 2026-10-12: the screen is too short for the laptop layout, so the note
+      // stands as a card in a corner, clear of its verse. Read to its end, the
+      // card grew to the full height of its corner and lay over the verse: a
+      // quarter of it in English, half in Arabic, where the card is on the left.
+      const context = await browser.newContext({ viewport: { width: 1133, height: 744 }, hasTouch: true, locale });
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+      const page = await context.newPage();
+      await page.goto("/#/hafs-kfqc/2:48");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await settle(sheet(page));
+      const under = async () => {
+        const card = (await sheet(page).boundingBox())!;
+        const lit = (await litLineBoxes(page)).filter((b) => b.width > 0);
+        if (!lit.length) return { lit: 0, firstWordUnder: false, share: 0 };
+        const area = (b: Box) => b.width * b.height;
+        const cut = (b: Box) =>
+          Math.max(0, Math.min(b.x + b.width, card.x + card.width) - Math.max(b.x, card.x)) *
+          Math.max(0, Math.min(b.y + b.height, card.y + card.height) - Math.max(b.y, card.y));
+        // The verse begins at the right-hand end of its topmost line.
+        const top = lit.filter((b) => b.y < lit[0]!.y + b.height / 2);
+        const start = Math.max(...top.map((b) => b.x + b.width));
+        const startY = top[0]!.y + top[0]!.height / 2;
+        const firstWordUnder = start - 1 > card.x && start - 1 < card.x + card.width && startY > card.y && startY < card.y + card.height;
+        const share = lit.reduce((s, b) => s + cut(b), 0) / lit.reduce((s, b) => s + area(b), 0);
+        return { lit: lit.length, firstWordUnder, share: Math.round(share * 100) };
+      };
+      expect(await under(), "opened, the card stands clear of its verse").toMatchObject({ firstWordUnder: false, share: 0 });
+      await sheet(page).evaluate((el) => el.scrollTo({ top: el.scrollHeight }));
+      await expect(sheet(page), "read to its end, the card grows").toHaveAttribute("data-tall", "true");
+      await settle(sheet(page));
+      await expect
+        .poll(async () => {
+          const u = await under();
+          return u.lit > 0 && !u.firstWordUnder && u.share <= 10 ? "in sight" : JSON.stringify(u);
+        }, { message: "how much of the verse the grown card covers", timeout: 8_000 })
+        .toBe("in sight");
+      await context.close();
+    });
+  }
+
   test("with the note up over a recitation, turning the page by hand keeps the sound going", async ({ browser }) => {
     // Walking the note's hand-offs with a surah playing, 2026-10-11: with the
     // note open on the verse being heard, a page turned by key or by swipe
