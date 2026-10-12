@@ -1020,6 +1020,97 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("with the note up, the recitation turning the page leaves the note up, with a way back to its verse", async ({
+    browser,
+  }) => {
+    // Walking a run past a page turn in the iPad app, 2026-10-11: a presenter
+    // reading a note to the room had it closed, perhaps mid-sentence, when the
+    // recitation reached the next page and took the page along. The presenter
+    // did not turn, so the note stays up, names its verse, and offers the way
+    // back to it (docs/PLAN.md, item 78; owner, 2026-10-11).
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    const player = await fakePlayer(page);
+    const playing = () => page.evaluate(() => !(window as unknown as { __player: HTMLMediaElement }).__player.paused);
+    await page.goto("/#/hafs-kfqc/p2?view=one");
+    await expect(pageSvg(page, 2)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    const head = (await page.locator('[data-host-page="2"] [data-running-head="surah"]').boundingBox())!;
+    await page.mouse.move(head.x + head.width / 2, head.y + head.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    await page.getByRole("menu").getByRole("menuitem", { name: "Play", exact: true }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    // The note opens on a verse early on the page, as the iPad walk did, so
+    // the recitation goes on under it before it reaches the turn.
+    for (let n = 2; n <= 3; n++) await player.end();
+    await expect.poll(async () => (await player.files()).at(-1)).toBe("002003.mp3");
+    const number = pageSvg(page, 2).locator('[data-verse-number][data-verse-key="quran/hafs-kfqc/2:3"]');
+    await settle(number);
+    const at = (await number.boundingBox())!;
+    await page.mouse.click(at.x + at.width / 2, at.y + at.height / 2);
+    await page.getByRole("menu", { name: /2:3/ }).getByRole("menuitem", { name: /Commentary/ }).click();
+    await expect(sheet(page)).toHaveAttribute("aria-label", /2:3\b/);
+    for (let n = 4; n <= 5; n++) await player.end();
+    await expect.poll(async () => (await player.files()).at(-1)).toBe("002005.mp3");
+    // The page rises to keep 2:5 clear of the note, as it would with a person
+    // listening, before the recitation reaches the turn.
+    const noteTop = (await sheet(page).boundingBox())!.y;
+    await expect
+      .poll(() =>
+        pageSvg(page, 2)
+          .locator("[data-hl-group='selection']")
+          .evaluateAll((els) => Math.max(...els.map((el) => el.getBoundingClientRect().bottom))),
+      )
+      .toBeLessThanOrEqual(noteTop);
+    await settle(pageSvg(page, 2).locator("[data-hl-group='selection']").first());
+
+    // The recitation goes on to the next page, and takes the page with it.
+    await player.end();
+    await expect.poll(async () => (await player.files()).at(-1)).toBe("002006.mp3");
+    await expect(pageSvg(page, 3)).toBeVisible();
+    await page.waitForTimeout(600);
+    expect(await playing(), "the recitation plays on").toBe(true);
+    await expect(sheet(page), "the note the presenter was reading stays up").toBeVisible();
+    await expect(sheet(page)).toHaveAttribute("aria-label", /2:3\b/);
+    // And the verse now being recited is lit, and in sight, on the page it
+    // turned to. The page had been raised to keep the note's verse clear of
+    // the note, and the turn carried that over: the first verse of the new
+    // page sat lit above the top of the screen until the next verse began
+    // (the iPad app, 2026-10-11).
+    await expect
+      .poll(() =>
+        pageSvg(page, 3)
+          .locator("[data-hl-group='selection']")
+          .evaluateAll((els) =>
+            [
+              ...new Set(
+                els
+                  .filter((el) => {
+                    const r = el.getBoundingClientRect();
+                    return r.width > 0 && r.top >= 0 && r.bottom <= innerHeight;
+                  })
+                  .map((el) => (el.getAttribute("data-hl-key") ?? "?").split("/").pop()),
+              ),
+            ],
+          ),
+      )
+      .toEqual(["2:6"]);
+
+    // Its verse is off the page now; the note offers the way back to it.
+    const back = sheet(page).getByRole("button", { name: /^Back to .*2:3$/ });
+    await expect(back).toBeVisible();
+    // A picture for whoever walks it next; test-results is not committed.
+    await page.screenshot({ path: test.info().outputPath("note-kept-after-run-turn.png") });
+    await back.click();
+    await expect(pageSvg(page, 2)).toBeVisible();
+    await expect(sheet(page)).toHaveAttribute("aria-label", /2:3\b/);
+    await expect(back, "on its verse's page the way back has nothing left to do").toHaveCount(0);
+    await context.close();
+  });
+
   test("with the note up over a recitation, turning the page by hand keeps the sound going", async ({ browser }) => {
     // Walking the note's hand-offs with a surah playing, 2026-10-11: with the
     // note open on the verse being heard, a page turned by key or by swipe

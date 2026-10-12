@@ -1866,7 +1866,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     picks the run up where it stopped. The number's menu keeps its Pause. A browser test, watched
     failing first; walked in Safari's engine, Firefox, a phone's size, Arabic, the iPad app and
     the Mac app.
-78. **When a surah playing with a note up reaches the next page, the note closes.** Found
+78. ~~**When a surah playing with a note up reaches the next page, the note closes.**~~ Found
     walking a run past a page turn in the iPad app, upright and on its side, 2026-10-11: a
     presenter plays a surah from its corner, opens the note on the verse being heard and reads
     from it to the room. When the recitation reaches the next page, the page turns with it, the
@@ -1876,7 +1876,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     left the page; the note design page, item 26), but here the presenter did not turn. The
     question for the owner: should the note stay up when the recitation, not the presenter,
     turns the page (the way a page turned away during a recitation stays turned, item 59), or
-    is closing it with its verse right? Today's way stays until then.
+    is closing it with its verse right? Today's way stays until then. Answered by the owner,
+    2026-10-11: keep the note up. Built: when the recitation turns the page, a note that is up
+    stays up on its verse, the recitation plays on with Pause in the note, and the note offers
+    the way back to its verse while the verse is off the page shown. A turn by hand still
+    closes the note with its verse. A browser test, watched failing first; seen on an iPad-sized
+    screen. Walked in the iPad app, the first build left the new page's first verse lit above
+    the top of the screen until the next verse began: the page had been raised to keep the
+    last page's verses clear of the note, and the turn carried that over. A turn that lands
+    with a note up now places the page again; the same test, made to wait for the page to
+    rise first, failed in Chrome before that and passes in both engines; walked again in the
+    iPad app, the verse is lit and in sight a moment after the page lands.
 79. ~~**With the note up while a surah plays, turning the page by hand stopped the sound.**~~
     Found walking the note's hand-offs with a recitation going, 2026-10-11: a presenter opens the
     note on the verse being heard, then turns the page by key or by swipe. The page turned and

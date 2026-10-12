@@ -988,6 +988,11 @@ export function App(): JSX.Element {
     return noteFor(entryForAyah(indexEntries(entries), selectedKey), commentarySource.source, selectedKey, intro);
   }, [commentarySource, selectedKey, commentaryBySurah, pitchSurahs, contextFor]);
   const hasCommentary = commentaryEntry !== null;
+  // Whether a verse's note is up, for the page following a run: a note the
+  // presenter is reading stays up when the recitation, not the presenter,
+  // turns the page (docs/PLAN.md, item 78).
+  const noteUpRef = useRef(false);
+  noteUpRef.current = commentaryOpen && hasCommentary;
 
   // The surah whose introduction is open by itself, from a press on its name
   // (owner, 2026-10-04); it gives way the moment the selection moves.
@@ -1466,7 +1471,9 @@ export function App(): JSX.Element {
   //
   // `follow` is the page going after a run of verses as it is recited: it says
   // nothing over the run's own line, and the verse left behind is let go
-  // without stopping the recitation that left it. So is any verse chosen while
+  // without stopping the recitation that left it, unless its note is up: the
+  // presenter may be reading it to the room, and did not turn, so the verse and
+  // its note stay chosen, with a way back to the verse (item 78). So is any verse chosen while
   // a recitation plays, its note open, when the reader turns the page by hand:
   // a turn is not choosing another verse, and a turn during a recitation leaves
   // it playing (items 59, 79 and 80).
@@ -1485,6 +1492,7 @@ export function App(): JSX.Element {
       pendingPageRef.current = next;
       if (!follow) announce(said ?? t.pageN(next));
       const leaveVerse = () => {
+        if (follow && noteUpRef.current) return;
         const chosen = selectedKeyRef.current;
         if (chosen !== null && runKeyRef.current !== null) keepRunRef.current = true;
         setSelectedKey(null);
@@ -2470,6 +2478,24 @@ export function App(): JSX.Element {
 
   // The origin ayah keeps its breadcrumb until the trail is empty.
   const breadcrumbKey = trail.length > 0 ? trail[trail.length - 1]!.key : null;
+  // A note kept up while the recitation took the page on: its verse is off the
+  // page shown, and the note offers the way back to it (docs/PLAN.md, item 78).
+  const noteAwayKey = useMemo(() => {
+    if (!commentaryOpen || !selectedKey || !resolver) return null;
+    const at = resolver.resolve(selectedKey)?.page;
+    if (at === undefined) return null;
+    const book = desktop && pageMode === "two";
+    const openingOf = (p: number) => (book && p % 2 === 0 ? p - 1 : p);
+    return openingOf(at) === openingOf(page) ? null : selectedKey;
+  }, [commentaryOpen, selectedKey, resolver, desktop, pageMode, page]);
+  const backToNote = useCallback(() => {
+    if (!noteAwayKey) return;
+    const at = resolver?.resolve(noteAwayKey)?.page;
+    if (at === undefined) return;
+    setPage(at);
+    announce(t.hoppedTo(t.ayahLabel(noteAwayKey) ?? noteAwayKey, at));
+    void stage.navigateTo(noteAwayKey, { pulse: true });
+  }, [noteAwayKey, resolver, announce, t]);
 
   // Tapping the same ayah again clears it (toggle); otherwise select it. The
   // announcement is a side effect, so it lives outside the state updater (React
@@ -3921,7 +3947,9 @@ export function App(): JSX.Element {
                         label: t.ayahLabel(breadcrumbKey) ?? breadcrumbKey,
                         onBack: () => handleBeadBack(trail.length - 1),
                       }
-                    : null
+                    : noteAwayKey && !introSheet
+                      ? { label: t.ayahLabel(noteAwayKey) ?? noteAwayKey, onBack: backToNote }
+                      : null
                 }
                 listen={
                   audio.runKey

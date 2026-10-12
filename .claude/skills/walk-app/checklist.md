@@ -273,8 +273,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   Arabic, the iPad app, the Mac app, private build · issue: `no-pause-with-note-up`
 - [ ] With a note up while a surah plays, let the run reach the next page (or the next pair of
   pages on its side): the page turns and the run plays on with Pause in reach; each verse recited
-  before the turn stays clear of the note. Today the note on the earlier verse closes with its
-  verse at the turn; whether it should stay is an open question for the owner. The `run-note`
+  before the turn stays clear of the note. The note on the earlier verse stays up through the
+  recitation's turn (the owner's answer), still naming its verse, with Pause in it and a "Back
+  to" line that takes the page back to that verse and then goes. The first verse of the new page
+  is lit and in sight at once, not lit above the top of the screen until the next verse begins:
+  open the note early on the page, so the page has risen for the later verses before the turn,
+  and read the light's box, not only its verse (the iPad app, 2026-10-11). The `run-note`
   script with `__page` set walks it. · ipad upright and on its side, the iPad app, private build ·
   issue: `run-turn-closes-note`
 - [ ] With a note up on the verse being heard while a surah plays, turn the page by hand (an
