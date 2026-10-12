@@ -44,6 +44,22 @@
   border-radius: 6px;
 }
 
+/* Narrow, for the strip above the page (see PenPicker): still a full finger's
+   height, a little under one wide, with no gap between. */
+.both[data-narrow] .pens {
+  gap: 0;
+}
+
+.both[data-narrow] .pen {
+  min-inline-size: 30px;
+  padding-inline: 0;
+}
+
+/* The bands as wide as the circles, so a picked one's ring clears the next. */
+.both[data-narrow] .pens[data-words] .swatch {
+  inline-size: 22px;
+}
+
 .pen[aria-checked="true"] .swatch {
   box-shadow:
     0 0 0 2px var(--paper-raised, var(--paper)),

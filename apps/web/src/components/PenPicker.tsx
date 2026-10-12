@@ -18,8 +18,22 @@ import styles from "./PenPicker.module.css";
  * One tab stop and arrow keys along each row, like the tools beside them: the
  * pens are radios because exactly one is picked. The pick is said by a ring as
  * well as by the colour, so colour is never the only sign of it.
+ *
+ * `narrow` packs the eight buttons tighter, for the strip above the page: there
+ * the tools stay centred only while the pens fit in the room to their left
+ * (256 pixels at the narrowest computer window), and pens that overflowed it
+ * slid the tools sideways the moment the highlighter was picked, so the second
+ * click of a double-click landed on the next tool.
  */
-export function PenPicker({ pen, onPen }: { pen: Pen; onPen: (pen: Pen) => void }): JSX.Element {
+export function PenPicker({
+  pen,
+  onPen,
+  narrow = false,
+}: {
+  pen: Pen;
+  onPen: (pen: Pen) => void;
+  narrow?: boolean;
+}): JSX.Element {
   const { t } = useT();
   const [wordPen, setWordPen] = useState<Pen>(() => savedWordPen());
   const chooseWordPen = (next: Pen) => {
@@ -28,7 +42,7 @@ export function PenPicker({ pen, onPen }: { pen: Pen; onPen: (pen: Pen) => void 
     setWordPen(next);
   };
   return (
-    <div className={styles.both}>
+    <div className={styles.both} data-narrow={narrow || undefined}>
       <PenRow label={t.penLabel} pen={pen} onPen={onPen} />
       <PenRow label={t.penWordsLabel} pen={wordPen} onPen={chooseWordPen} words />
     </div>
