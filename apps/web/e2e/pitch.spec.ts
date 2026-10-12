@@ -2921,7 +2921,11 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     // The first link's move, cut short by the second, forgot the second was
     // under way, so a note rising during the second move no longer turned it:
     // it zoomed in and then back out. The note's file is held back until the
-    // second move has begun, so the note always rises during it.
+    // second move has begun. On a busy machine the note can rise only once the
+    // move has ended, and the page then rightly fits itself round the late
+    // note, which looks like the fault from the zooms alone (2026-10-12, twelve
+    // at once: all twelve failed). So the zoom is read against the moment the
+    // note rose: from then on the page heads straight to where it ends.
     const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true, serviceWorkers: "block" });
     await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
     let release!: () => void;
@@ -2936,16 +2940,19 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     await page.evaluate(
       () =>
         new Promise<void>((done) => {
-          const w = window as unknown as { __zooms: number[] };
+          const w = window as unknown as { __zooms: number[]; __noteAt: number };
           w.__zooms = [];
+          w.__noteAt = -1;
           // The two verses' page; the page beneath it keeps whatever zoom it was left at.
           const zoom = () =>
             Number(document.querySelector<HTMLElement>('[data-host-page="42"]')?.style.transform.match(/scale\(([^)]*)\)/)?.[1] ?? 1);
           let second = false;
           const look = () => {
             const z = zoom();
-            if (second) w.__zooms.push(z);
-            else if (z > 1.02) {
+            if (second) {
+              w.__zooms.push(z);
+              if (w.__noteAt < 0 && document.querySelector("[role=dialog]")) w.__noteAt = w.__zooms.length - 1;
+            } else if (z > 1.02) {
               // The first move is under way: follow the second link now.
               second = true;
               location.hash = "#/hafs-kfqc/2:255";
@@ -2963,10 +2970,15 @@ test.describe("Hifth · the pitch commentary on an iPad held upright", () => {
     await settle(lines.first());
     await settle(lines.last());
     await page.waitForTimeout(600);
-    const zooms = await page.evaluate(() => (window as unknown as { __zooms: number[] }).__zooms);
+    const { zooms, noteAt } = await page.evaluate(() => {
+      const w = window as unknown as { __zooms: number[]; __noteAt: number };
+      return { zooms: w.__zooms, noteAt: w.__noteAt };
+    });
     const last = zooms.at(-1)!;
     expect(last, "the page ends zoomed in").toBeGreaterThan(1.2);
-    expect(Math.max(...zooms), "the page never went past where it ends").toBeLessThanOrEqual(last + 0.01);
+    expect(noteAt, "the note rose while the zoom was watched").toBeGreaterThanOrEqual(0);
+    const afterNote = Math.max(...zooms.slice(noteAt));
+    expect(afterNote, "once the note rose, the page never went past where it ends").toBeLessThanOrEqual(Math.max(zooms[noteAt]!, last) + 0.01);
     await context.close();
   });
 

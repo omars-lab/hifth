@@ -361,6 +361,110 @@ for (const [lang, group, close] of [
   });
 }
 
+// Checking the corner cards on the iPad mini held sideways, 2026-10-12, after
+// the note (plan item 89): the screen is wide enough for the roots list to
+// stand as a card in a corner but too short for the laptop layout, and the
+// list, the full height of its corner, lay over the verse it is open on: a
+// quarter of it in English, nearly half in Arabic, where the list stands on
+// the left. The page lifted the verse above the list's top, which on a card
+// that tall is no lift at all, and nothing moved the page aside (plan item 90).
+// Moved aside, the page stood in Arabic under the look-alike buttons' corner,
+// and they sat on its top line; they cross to the list's side, as they do for
+// the share card there.
+/** Whether the lit verse shows beside an open corner card: its start clear, at most a tenth of it under. */
+async function verseInSight(page: Page, list: Locator) {
+  const wash = page.locator("#hifth-overlay [data-hl-group='selection']");
+  const card = (await list.boundingBox())!;
+  const lit = (await wash.evaluateAll((els) =>
+    els.map((el) => { const r = el.getBoundingClientRect(); return { x: r.left, y: r.top, width: r.width, height: r.height }; }),
+  )).filter((b) => b.width > 0);
+  if (!lit.length) return "no verse lit";
+  const cut = (b: (typeof lit)[number]) =>
+    Math.max(0, Math.min(b.x + b.width, card.x + card.width) - Math.max(b.x, card.x)) *
+    Math.max(0, Math.min(b.y + b.height, card.y + card.height) - Math.max(b.y, card.y));
+  const share = lit.reduce((s, b) => s + cut(b), 0) / lit.reduce((s, b) => s + b.width * b.height, 0);
+  // The verse begins at the right-hand end of its topmost line.
+  const top = lit.filter((b) => b.y < Math.min(...lit.map((l) => l.y)) + b.height / 2);
+  const start = Math.max(...top.map((b) => b.x + b.width));
+  const y = top[0]!.y + top[0]!.height / 2;
+  const startUnder = start - 1 > card.x && start - 1 < card.x + card.width && y > card.y && y < card.y + card.height;
+  return !startUnder && share <= 0.1 ? "in sight" : `start under=${startUnder} share=${Math.round(share * 100)}%`;
+}
+
+for (const [locale, roots, group] of [
+  ["en-US", /^Roots · /, "Links from this ayah"],
+  ["ar", /^الجذور، /, "روابط الآية"],
+] as const) {
+  test.describe(`Hifth · the corner lists on an iPad mini on its side (${locale})`, () => {
+    test.use({ viewport: { width: 1133, height: 744 }, locale });
+
+    test("the open list leaves its verse in sight", async ({ page }) => {
+      await page.addInitScript((key) => localStorage.setItem(key, "1"), COACH_STORAGE_KEY);
+      await page.goto("/#/hafs-kfqc/2:48");
+      await shown(page, 7);
+      await page.getByRole("button", { name: roots }).click();
+      const list = page.getByRole("dialog");
+      await expect(list).toBeVisible();
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      await expect.poll(() => verseInSight(page, list), { message: "how much of the verse the roots list covers", timeout: 8_000 }).toBe("in sight");
+      const paper = (await leaf(page, 7).boundingBox())!;
+      const chips = await page.getByRole("group", { name: group }).locator("button[data-direction]").all();
+      expect(chips.length).toBeGreaterThan(0);
+      for (const chip of chips) {
+        const c = (await chip.boundingBox())!;
+        const on = c.x < paper.x + paper.width && c.x + c.width > paper.x && c.y < paper.y + paper.height && c.y + c.height > paper.y;
+        expect(on, `a look-alike button at ${JSON.stringify(c)} on the page at ${JSON.stringify(paper)}`).toBe(false);
+        // Riding the list's top row, clear of its own Close.
+        const x = (await list.getByRole("button", { name: locale === "ar" ? "إغلاق" : "Close" }).first().boundingBox())!;
+        const hits = c.x < x.x + x.width && c.x + c.width > x.x && c.y < x.y + x.height && c.y + c.height > x.y;
+        expect(hits, `a look-alike button at ${JSON.stringify(c)} on the list's Close at ${JSON.stringify(x)}`).toBe(false);
+      }
+    });
+
+    test("a look-alike list's buttons ride its top row, clear of its Close and inside the card", async ({ page }) => {
+      // The same walk: with a look-alike list open in English, its two buttons
+      // sat on the list's Close, the second half past the card's edge.
+      await page.addInitScript((key) => localStorage.setItem(key, "1"), COACH_STORAGE_KEY);
+      await page.goto("/#/hafs-kfqc/2:48");
+      await shown(page, 7);
+      const rail = page.getByRole("group", { name: group });
+      await rail.locator("button[data-direction]").first().click();
+      const list = page.getByRole("dialog");
+      await expect(list).toBeVisible();
+      await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const card = (await list.boundingBox())!;
+      const x = (await list.getByRole("button", { name: locale === "ar" ? "إغلاق" : "Close" }).first().boundingBox())!;
+      for (const chip of await rail.locator("button[data-direction]").all()) {
+        const c = (await chip.boundingBox())!;
+        const hits = c.x < x.x + x.width && c.x + c.width > x.x && c.y < x.y + x.height && c.y + c.height > x.y;
+        expect(hits, `a look-alike button at ${JSON.stringify(c)} on the list's Close at ${JSON.stringify(x)}`).toBe(false);
+        const inside = c.x >= card.x - 0.5 && c.x + c.width <= card.x + card.width + 0.5 && c.y >= card.y - 0.5;
+        expect(inside, `a look-alike button at ${JSON.stringify(c)} outside the card at ${JSON.stringify(card)}`).toBe(true);
+      }
+    });
+
+    test.describe("in the iPad app's shorter room", () => {
+      // The iPad app keeps the iPad's own bars above and below the page, so its
+      // room is about 40 pixels shorter than this window's. There the verse did
+      // not fit above the first look-alike list, which covered 6% of it, and 15%
+      // once the list's heading moved down a row for its buttons: the page now
+      // moves aside for it, as for the roots list (plan item 90).
+      test.use({ viewport: { width: 1133, height: 700 } });
+
+      test("the first look-alike list leaves its verse in sight", async ({ page }) => {
+        await page.addInitScript((key) => localStorage.setItem(key, "1"), COACH_STORAGE_KEY);
+        await page.goto("/#/hafs-kfqc/2:48");
+        await shown(page, 7);
+        await page.getByRole("group", { name: group }).locator("button[data-direction]").first().click();
+        const list = page.getByRole("dialog");
+        await expect(list).toBeVisible();
+        await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        await expect.poll(() => verseInSight(page, list), { message: "how much of the verse the look-alike list covers", timeout: 8_000 }).toBe("in sight");
+      });
+    });
+  });
+}
+
 // Walked for item 60 on the open book: a surah played from its corner on the
 // iPad held sideways turns the book from opening to opening with the
 // recitation, and its end leaves the last verse lit with Play on it, as it

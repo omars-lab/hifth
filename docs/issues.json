@@ -4375,6 +4375,42 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "On an iPad mini on its side the note is a corner card but the laptop layout is off, so the page only lifted the verse above the short card; read to its end the card grew and covered the verse (23% in English, 48% in Arabic). Grown, it now covers the page's side as the share card does, and the page slides aside. The pitch test reads a note to its end at the mini's size in both languages."
+    },
+    {
+      "id": "mini-side-corner-lists-cover-verse",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "90"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/ipad.spec.ts",
+      "note": "On an iPad mini on its side the roots list stands full height in its corner from the start and covered about a third of its verse; with it or a look-alike list open, the two look-alike buttons sat on the list's close button (and in English half past the card's edge). A look-alike list did the same in the iPad app, whose own bars leave less room (15%). Any list there now moves the page aside, and the buttons ride the list's top row with its heading a row lower. Browser tests at the mini's size and at the app's shorter room, in both languages. The design-page record is look-alike rows ⑱."
+    },
+    {
+      "id": "pitch-second-link-zoom-check-busy-laptop",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "91"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "The pitch check for a second link followed mid-move failed whenever the laptop was busy (twice before a push; twelve of twelve run at once): the note rose only after the move had ended, and the page rightly zoomed out a little for it, which looks like the fault from the zooms alone. The check now reads the zoom from the moment the note rose: from then on the page must head straight to where it ends. Thirty-two at once pass; with the old fault put back it fails four in four."
+    },
+    {
+      "id": "mini-side-corner-cards-walk",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑱"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/ipad.spec.ts",
+      "note": "On an iPad mini on its side the roots list stands full height in its corner from the start and covered about a third of its verse; with it or a look-alike list open, the two look-alike buttons sat on the list's close button (and in English half past the card's edge). A look-alike list did the same in the iPad app, whose own bars leave less room (15%). Any list there now moves the page aside, and the buttons ride the list's top row with its heading a row lower. Browser tests at the mini's size and at the app's shorter room, in both languages. Plan item 90."
     }
   ]
 }

@@ -3524,7 +3524,10 @@ export function App(): JSX.Element {
         ((COMMENTARY && commentaryOpen && hasCommentary && sheetSide === "right") ||
           // Seated on the share card, the chips go where the card stands:
           // the chrome's end, which is the left when it reads right to left.
-          (shareCorner !== null && dir === "rtl"))
+          // So on a list in a small corner, inside its top row as on the
+          // share card's: the page moved aside stands under their own corner
+          // (plan item 90).
+          ((shareCorner !== null || listCorner !== null) && dir === "rtl"))
       }
       onBand={setRailBottom}
       beside={beside}
@@ -3533,7 +3536,10 @@ export function App(): JSX.Element {
           ? null
           : (highestTop(coverTop, shareTop, listTop) ?? (shareCorner !== null ? shareCardTop : null))
       }
-      onCard={highestTop(coverTop, shareTop, listTop) === null && shareCorner !== null}
+      onCard={
+        (highestTop(coverTop, shareTop, listTop) === null && shareCorner !== null) ||
+        listCorner !== null
+      }
       away={!beside && !home && noteTall}
       home={home}
     />
@@ -3560,7 +3566,18 @@ export function App(): JSX.Element {
   // short card, and nothing moved it aside for the tall one. Grown, the note
   // covers the page's side, as the share card does there (plan item 89).
   const noteCorner = !desktop && !upright && cardWide && noteTall && commentaryOpen ? noteSide : null;
-  const smallCorner = useMemo(() => spanOfAll([noteCorner, shareCorner]), [noteCorner, shareCorner]);
+  // The roots list stands there the full height of its corner from the start,
+  // and lay over its verse the same way: the lift above its top is no lift on
+  // a card that tall. A look-alike list is shorter, but in the iPad app, whose
+  // own bars take some 40 pixels of that short screen, the room above it is
+  // too little for the verse as well. So any list there covers the page's side,
+  // and the chips ride its top row, as on the share card's, or they sat on its
+  // close button and half past its edge (plan item 90).
+  const listCorner = !desktop && !upright && cardWide && (rootsOpen || openDirection !== null) ? listSide : null;
+  const smallCorner = useMemo(
+    () => spanOfAll([noteCorner, listCorner, shareCorner]),
+    [noteCorner, listCorner, shareCorner],
+  );
   const sideCard = desktop && pageMode === "one" && !upright ? cornerSpan : smallCorner;
   // The verse's drawer, while it is up (its own rule, below).
   // A run keeps it up, with its Pause, once the page has followed the run away
@@ -3943,7 +3960,7 @@ export function App(): JSX.Element {
                 coverTop={
                   desktop && sideCard
                     ? null
-                    : highestTop(noteCorner ? null : coverTop, shareTop ?? (upright ? shareCardTop : null), listTop)
+                    : highestTop(noteCorner ? null : coverTop, shareTop ?? (upright ? shareCardTop : null), listCorner ? null : listTop)
                 }
                 coverSide={sideCard}
                 railBottom={railBottom}
