@@ -1,11 +1,11 @@
 # How often do I use each part of the app?
 
-**Status:** built, device-only. One question is open for the owner: ①, whether the counts from the iPad, the Mac and the phone should be added together.
+**Status:** built, device-only. The owner chose (①, 2026-10-11) to have the iPad and Mac apps keep their counts in step through the owner's own iCloud; that waits on the paid Apple membership (②). Until then each device keeps its own list.
 
 > [!tip] Short version
 > The info panel now has a section, *How you use the app*. It lists every feature you have used, most used first, with how many times, a little strip of the last fourteen days, and the last day you used it.
 > It counts on this device only, by feature name only. It never records which verse was open, what a note said, or which commentary was read, and nothing leaves the device.
-> Recommended: keep it device-only for now (A). Adding devices together by carrying a file (B, or B2 through an iCloud Drive folder) needs no server and no money, but first the iPad and Mac apps must learn to save and open a file, which they cannot do today.
+> Chosen: the iPad and Mac apps will keep the counts in step through your own iCloud (D), with Firefox and the phone joining by a file. It waits on the paid Apple membership; until then each device counts on its own.
 
 ## Words used here
 
@@ -49,12 +49,14 @@ iOS can empty a web page's storage after weeks without a visit. The panel says t
 
 ## Open questions, and what would answer each
 
-### ① Should the counts from my iPad, Mac and phone be added together? · **open**
+### ① Should the counts from my iPad, Mac and phone be added together? · **answered**
 
 Today each device keeps its own counts, and the iPad app, the Mac app and the browser each count separately even on the same machine.
 Two researchers looked at what Apple and others offer, and a third checked them; the checked note is [usage-sync-consolidated.md](../research/usage-sync-consolidated.md), with the sources behind each claim.
 
-Two things hold whichever option is chosen. Each device's counts must carry that device's name, and arriving counts keep the larger number for each device, day and feature, so the same file taken in twice changes nothing. And the iPad and Mac apps cannot save or open a file today (the Mac app's web view refuses to open files, and neither app catches a download), so every file option starts with a small fix there.
+**Answered 2026-10-11 by the owner: D**, the owner's own iCloud for the two Apple apps, picked with the paid membership and the privacy-rule change in front of them. What it waits on and what building it involves is ②.
+
+Two things hold whichever option is chosen. Each device's counts must carry that device's name, and arriving counts keep the larger number for each device, day and feature, so the same file taken in twice changes nothing. And the iPad and Mac apps could not save or open a file when this was asked; that is now fixed (native-shell ㉛), so the file leg no longer waits on anything.
 
 | | A. Each device on its own (built) | B. Carry a file between devices | B2. One file per device, in an iCloud Drive folder (new) | C. Keep them in your own online store | D. Your own iCloud, for the two Apple apps (new) |
 | --- | --- | --- | --- | --- | --- |
@@ -66,8 +68,24 @@ Two things hold whichever option is chosen. Each device's counts must carry that
 
 Not offered, and why: Apple's small iCloud settings box (Apple says not to keep personal information in it, and to move to its database past tens of kilobytes); Apple's web library for Firefox (nothing current shows it working there); analytics services (they all send to a server).
 
-Recommended: **A now; B2 when you want one total, after the per-device change and the Apple-app file fix; D only if the paid membership is bought for TestFlight and you decide your own iCloud is fair to use.** C crosses a line the app has held since the record of what you have opened was built, for a convenience B2 gets without crossing it.
-What would answer it: a week or two of using the app on more than one device, and whether four separate lists turn out to be a nuisance. What would change it: the membership being bought anyway (then D for the two Apple apps), or sign-in arriving (then C).
+Recommended when asked: A now, B2 for one total, D only once the paid membership is bought. The owner chose D.
+C was not chosen and stays set aside: it would send the counts to a store outside Apple, crossing a line the app has held since the record of what you have opened was built.
+
+### ② Keep the iPad and Mac counts in step through my own iCloud · **blocked**
+
+Waiting on the paid Apple membership and proper signing: the iCloud database will not open for an app signed the way the apps are signed today, so nothing built for it could be tried for real. The same membership is owed before sending the app to named testers (native-shell ㉚).
+
+**What it changes for a hafiz:** for the owner, one list of what got used across the iPad and the Mac, without doing anything; for any other reader, nothing until they choose to turn it on.
+
+What building it involves, in order, once the membership is in hand:
+
+1. Each device's counts carry the device's name, and arriving counts keep the larger number for each device, day and feature. Every road needs this, and it can be tested on its own.
+2. The two Apple apps keep each device's counts in the owner's private iCloud database, with Apple's ready-made sync helper. The page hands its counts to the app and reads the others back; the page itself still sends nothing anywhere.
+3. Firefox and the phone join by a file: *Save my counts* on one, *Add counts from a file* on another, using the save and open windows the apps now have.
+4. The privacy check fails any new reader of the counts on purpose. This is the deliberate exception to it: the app's own bridge, named in the check and written down in this page when it is added, not slipped past it.
+5. Following the rule that a built runner-up stays as a setting: syncing is the default once built, and *each device on its own* stays in the info panel for a reader without iCloud or who would rather not.
+
+What would unblock it: the membership being bought, which the TestFlight move needs anyway.
 
 ## What else could it show?
 
