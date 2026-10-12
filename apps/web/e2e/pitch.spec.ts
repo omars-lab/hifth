@@ -1824,9 +1824,22 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     // Paragraphs moved into a shared note are read for slant on the page they
     // were printed on, not only the page the note starts on (9:37's, 2026-10-10).
     const movedIn = [["9:37", 8]] as const;
+    // Each goto only changes the link's hash, so the last verse's note is
+    // still up, "Related verses" and all, while the next one loads: counted
+    // then, a note read as having no slant at all (6:80 in Firefox, after
+    // 54:49). So wait for the note itself to have changed.
+    let was = "";
     for (const [verse, least] of [...slanted, ...oneTapAway, ...twoTapsAway, ...restTwoTapsAway, ...movedIn]) {
       await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
       await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
+      await expect
+        .poll(async () => {
+          // Changed, and whole again: a note still loading has changed too.
+          const now = (await sheet(page).textContent()) ?? "";
+          return now !== was && now.includes("Related verses");
+        }, { message: `${verse}'s note in place of the last one`, timeout: 20_000 })
+        .toBe(true);
+      was = (await sheet(page).textContent()) ?? "";
       expect(await sheet(page).locator("em").count(), verse).toBeGreaterThan(least);
       expect(await sheet(page).textContent()).not.toMatch(/[\uE000\uE001]/);
     }
