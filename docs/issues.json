@@ -4210,9 +4210,11 @@
         "file": "docs/PLAN.md",
         "item": "78"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
-      "owner": "user"
+      "owner": "user",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Owner, 2026-10-11: keep the note up when the recitation turns the page; built with a way back to its verse."
     },
     {
       "id": "hand-turn-stops-run-with-note",
