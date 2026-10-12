@@ -580,7 +580,10 @@ upright and on its side, English and Arabic, iPad and Mac.
   play the surah from its corner with the note still open, then pause. Nothing lit sits under the
   note, the way back returns to the first verse, the run starts with the note shut, and Pause
   stops it. · `make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en EVALFILE=.claude/skills/walk-app/scripts/visit-walk.js …`
-  · walked 2026-10-11, nothing wrong but the loading label (`loading-says-play`)
+  · walked 2026-10-11, nothing wrong but the loading label (`loading-says-play`). Walk it on the
+  **iPad mini on its side** too (`"IPAD=iPad mini (A17 Pro)" SIDEWAYS=1`), in both languages: there
+  the note read to its end grew over its verse (plan item 89). Walked 2026-10-12 on the mini,
+  nothing wrong now but the share card's own leftover (look-alike rows ⑯)
 - [ ] **Take the iPad app off the simulator and open it fresh**, as on a borrowed iPad in the
   room: it opens on the first two pages with nothing over them and nothing stored, the first
   note opens beside its verse, a reference goes and comes back, and the first Play sounds in

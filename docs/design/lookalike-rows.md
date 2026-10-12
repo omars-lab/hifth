@@ -475,6 +475,11 @@ full line has that line start under the card, about 27 pixels of its first lette
 where the line begins before sending the verse has to pan or close the card. Found walking the pitch
 on that window, 2026-10-10 (2:48, Share open).
 
+The same leftover comes with the note read to its end on that window, since the grown note now moves
+the page aside the way the card does (plan item 89, 2026-10-12). In Arabic, where the card or note
+stands on the left, the page slides right instead, and the second line's first letters run about 27
+pixels past the screen's edge rather than under the card.
+
 **Why it is asked now:** the walk found it, and the page is only a few percent too wide, which is a
 smaller shortfall than the laptop case ⑩ was built on (there the page was hundreds of pixels too
 wide). A small shortfall is where drawing the page a little smaller would cost least.

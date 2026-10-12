@@ -124,7 +124,7 @@ import { JumpPicker, type JumpChoice } from "./components/JumpPicker";
 import { useHashRouter } from "./useHashRouter";
 import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
 import { linksFor } from "./share-links";
-import { DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
+import { CARD_QUERY, DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
 import { useRoomForCards } from "./components/over-leaf";
 import { spanOfAll, type CardSpan } from "./components/short-band";
 import {
@@ -472,6 +472,7 @@ export function App(): JSX.Element {
   // and below them.
   const upright = useMediaQuery(UPRIGHT_QUERY);
   const phone = useMediaQuery(PHONE_QUERY);
+  const cardWide = useMediaQuery(CARD_QUERY);
   const touchScreen = useMediaQuery(TOUCH_QUERY);
   const [pageMode, setPageMode] = useState<"one" | "two">(() => (upright ? "one" : "two"));
   const pageModePickedRef = useRef(false);
@@ -3553,7 +3554,14 @@ export function App(): JSX.Element {
   // to stand it there; held upright, it lies across the page's foot instead,
   // and covers that (⑩). The share card opens over either, in the same corner
   // (⑫), so the page clears whichever reaches further in.
-  const sideCard = desktop && pageMode === "one" && !upright ? cornerSpan : shareCorner;
+  // On a screen wide enough for the note's corner card but too short for the
+  // laptop layout (an iPad mini on its side), the note grown to the full height
+  // of its corner lay over its verse: the page had lifted the verse above the
+  // short card, and nothing moved it aside for the tall one. Grown, the note
+  // covers the page's side, as the share card does there (plan item 89).
+  const noteCorner = !desktop && !upright && cardWide && noteTall && commentaryOpen ? noteSide : null;
+  const smallCorner = useMemo(() => spanOfAll([noteCorner, shareCorner]), [noteCorner, shareCorner]);
+  const sideCard = desktop && pageMode === "one" && !upright ? cornerSpan : smallCorner;
   // The verse's drawer, while it is up (its own rule, below).
   // A run keeps it up, with its Pause, once the page has followed the run away
   // from the verse it started on; it is then named for the verse being recited.
@@ -3935,7 +3943,7 @@ export function App(): JSX.Element {
                 coverTop={
                   desktop && sideCard
                     ? null
-                    : highestTop(coverTop, shareTop ?? (upright ? shareCardTop : null), listTop)
+                    : highestTop(noteCorner ? null : coverTop, shareTop ?? (upright ? shareCardTop : null), listTop)
                 }
                 coverSide={sideCard}
                 railBottom={railBottom}

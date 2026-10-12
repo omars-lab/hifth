@@ -4363,6 +4363,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/slider-arrows.spec.ts",
       "note": "The page slider's end arrows were two text marks, each drawn from a different fallback font, so they never matched (in Firefox in English one was a third the size of the other). Both are now one drawn triangle, mirrored, pointing as before. The browser test measures the pair in Chrome, Firefox and both phones, in both languages."
+    },
+    {
+      "id": "mini-side-grown-note-covers-verse",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "89"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "On an iPad mini on its side the note is a corner card but the laptop layout is off, so the page only lifted the verse above the short card; read to its end the card grew and covered the verse (23% in English, 48% in Arabic). Grown, it now covers the page's side as the share card does, and the page slides aside. The pitch test reads a note to its end at the mini's size in both languages."
     }
   ]
 }
