@@ -115,6 +115,14 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
     say how the move feels. Right: each move reads as the note getting out of the way, not as a
     note that will not sit still. If it reads as restless, that becomes a backlog item, with a
     smaller note while the recitation plays as the first thing to try (docs/PLAN.md, item 85).
+17. **Feeling the page shrink a little when a card opens beside it.** On the laptop, show one
+    page, zoom in a step or two, tap 2:45 and open its roots list; on the small iPad on its side,
+    open 2:255's note. The page is drawn a little smaller, up to a fifth, so the whole verse
+    stands beside the card, and it goes back to your size when the card closes. The tests
+    measure the sizes but cannot say how the shrink feels. Right: it reads as the page making
+    room, not as the app undoing your zoom. If it feels like the app fighting you, that becomes
+    a backlog item, with keeping the size and showing only the verse's start as the first thing
+    to try (docs/PLAN.md, items 92 and 93).
 
 ## Done
 

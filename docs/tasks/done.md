@@ -9,6 +9,16 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #200 — Small iPad on its side: 2:255's note covers the end of its verse
+
+**Done:** 2026-10-12, pull request #476 "Keep 2:255 whole beside its note and the roots list on a
+small iPad on its side", then the follow-up that gives the reader's zoom back once a card closes.
+
+A verse a little too wide for the room beside a card is drawn a little smaller; one that cannot
+fit above the note moves the page aside at once; the look-alike buttons ride the note card. The
+laptop showing one page gets the same width rule, and closing the card now restores the reader's
+size (docs/PLAN.md, items 92 and 93).
+
 ## #209 — Rebuild the piece-union candidate script (reach-for-the-ink)
 
 **Done:** 2026-08-19, commit `650ecbd` "Rebuild the piece-union script the doc's numbers came

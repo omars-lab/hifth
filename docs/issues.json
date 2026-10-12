@@ -4423,6 +4423,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "On an iPad mini on its side, 2:255 at its link's zoom was too tall to lift above a freshly opened note (24% under in English, 14% in Arabic) and, with the page moved aside for the roots list, too wide for the room beside it (8%). A verse a little too wide for that room is now drawn a little smaller, within the same fifth as one too tall, and a verse that cannot be lifted whole above the note moves the page aside at once, until the note closes. 2:48 still opens lifted. The look-alike buttons now ride the top row of a note the page moved aside for (3:84), and on the laptop closed to one page the same width rule draws a zoomed page a little smaller beside the roots list. Browser tests in both languages (pitch for the note and the buttons, iPad for the roots list, desktop for the laptop); none under either card in the iPad app."
+    },
+    {
+      "id": "closing-a-card-keeps-the-page-smaller",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "93"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "On the laptop closed to one page at 250%, the roots list drew the page a little smaller (234%) so the verse fit beside it, and closing the list left it there. The page now goes back to the reader's own size once nothing covers it, unless the reader zoomed in between. Desktop test in both languages, watched failing first; measured in Firefox."
     }
   ]
 }

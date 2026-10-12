@@ -2296,6 +2296,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * verse to begin with.
    */
   const liftRaf = useRef(0);
+  /**
+   * The reader's own zoom, while a card has the page drawn a little smaller
+   * (`to`): given back once nothing covers the page, unless the reader has
+   * zoomed since. Closing the roots list had left the page smaller.
+   */
+  const ownZoomRef = useRef<{ from: number; to: number } | null>(null);
   /** A hop's glide while it is under way: where it is going, and the verse it frames. */
   const hopRef = useRef<{ target: View; bbox: Rect; lead: Rect | undefined } | null>(null);
   /*
@@ -2344,7 +2350,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const wide = bboxToScreen(bbox, target, ctx).width;
       const narrower = boundRef.current || !(from > 0 || to < fit.stageWidth) ? null : nearFitZoom(wide, to - from - 2 * LIFT_SLACK, target.z);
       const least = narrower === null ? smaller : smaller === null ? narrower : Math.min(smaller, narrower);
-      if (least !== null) target = frameBboxToView(bbox, ctx, least, lead);
+      if (least !== null) {
+        target = frameBboxToView(bbox, ctx, least, lead);
+        const own = ownZoomRef.current;
+        ownZoomRef.current = { from: own && own.to === start.z ? own.from : start.z, to: target.z };
+      }
       // A verse taller than what shows beneath the chips starts at its
       // first line, just under them; one that fits is kept out from under
       // them too.
@@ -2397,9 +2407,16 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           : selectedKeyRef.current;
       const ids = key ? cur.hl.resolve(key)?.elementIds : undefined;
       const bbox = name ? nameBoxOf(name) : ids?.length ? cur.hl.bboxOf(ids) : null;
+      // Nothing covers the page any more: a page a card had drawn smaller
+      // goes back to the reader's own size, the verse framed as it was.
+      const own = ownZoomRef.current;
+      const covered = (fit.coverBottom ?? 0) > 0 || (fit.coverLeft ?? 0) > 0 || (fit.coverRight ?? 0) > 0;
+      if (own && !covered) ownZoomRef.current = null;
+      const back = own !== null && !covered && own.to === view.current.z;
       if (bbox) {
         const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg), text: textBoxOf(cur.host, cur.svg) };
-        target = aboveCover(bbox, ctx, fit, target, firstLineOf(cur.svg, ids ?? []));
+        const lead = firstLineOf(cur.svg, ids ?? []);
+        target = back && own ? clampView(frameBboxToView(bbox, ctx, own.from, lead), fit) : aboveCover(bbox, ctx, fit, target, lead);
       } else giveNoteRoom(0);
       const before = view.current.z;
       void tweenTo(target).then(() => {

@@ -2067,6 +2067,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     mini's size in both languages, and on the laptop, watched failing first; measured again in
     the iPad app on its side, none under either card.
 
+93. ~~**Closing the roots list left the page smaller than the reader had zoomed it.**~~ Found
+    walking the laptop in Firefox, 2026-10-12, right after item 92. Closed to one page and zoomed
+    to 250%, opening the roots list drew the page a little smaller (234%) so the whole verse
+    showed beside it, as item 92 meant; but closing the list left it at 234%, and the reader's
+    own size was gone. The same held for a note that had drawn the page a little smaller to fit
+    above it. Now the page remembers the size it was drawn smaller from, and goes back to it
+    once nothing covers the page, unless the reader has zoomed since. A desktop test in both
+    languages, watched failing first (the page stayed at 87% of the reader's size); measured
+    again in Firefox, back to 250%.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source
