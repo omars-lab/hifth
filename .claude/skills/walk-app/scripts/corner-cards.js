@@ -8,12 +8,16 @@
   const f = (r) => (r ? `${Math.round(r.left)},${Math.round(r.top)}-${Math.round(r.right)},${Math.round(r.bottom)}` : "none");
   const cut = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
   const isClose = (b) => /^(Close|إغلاق)$/.test((b.getAttribute("aria-label") || b.textContent || "").trim());
+  // On a phone the note and the lists rise from the foot across the whole width: set
+  // `window.__wide = true;` on a line before the script to count them (a whole-screen box is
+  // still left out).
+  const wide = window.__wide === true;
   // Only the outer card: a section inside a card's scroll is clipped by it, and one scrolled out
   // of sight counted as a card over the page (51% under, on a large iPad upright).
   const cards = () => {
     const all = [...document.querySelectorAll("[role=dialog], section")]
       .map((e) => [e, e.getBoundingClientRect()])
-      .filter(([e, r]) => r.width > 200 && r.height > 80 && r.width < innerWidth - 40 && getComputedStyle(e).visibility !== "hidden");
+      .filter(([e, r]) => r.width > 200 && r.height > 80 && (wide ? r.height < innerHeight - 60 : r.width < innerWidth - 40) && getComputedStyle(e).visibility !== "hidden");
     return all.filter(([e]) => !all.some(([o]) => o !== e && o.contains(e)));
   };
   const look = (t) => {

@@ -2447,31 +2447,44 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
   for (const locale of ["ar", "en-US"]) {
     test.describe(locale, () => {
       test.use({ locale });
-      verseStartInSight("2:45", 7);
+      verseStartInSight("2:45", 7, 820, true);
+      verseStartInSight("2:45", 7, 1150, false);
     });
   }
 
-  function verseStartInSight(at: string, pageNo: number): void {
-    test(`closed to one page and zoomed wider than the room the roots list leaves, the start of a verse that begins a line stays in sight`, async ({ page }) => {
-      // Zoomed past the room beside the list, the page cannot stand clear of
-      // it, but the verse it is open at begins outside it: at its first line's
-      // right-hand end, where an Arabic line begins (look-alike rows ⑩).
+  /**
+   * Zoomed past the room beside the list, the page cannot stand clear of it,
+   * but the verse it is open at begins outside it: at its first line's
+   * right-hand end, where an Arabic line begins (look-alike rows ⑩). A verse
+   * only a little wider than the room is drawn a little smaller so the whole
+   * of it fits (plan item 92); one much wider keeps the reader's size, and
+   * only its start is kept in sight.
+   */
+  function verseStartInSight(at: string, pageNo: number, past: number, shrinks: boolean): void {
+    test(`closed to one page and zoomed ${shrinks ? "a little" : "far"} wider than the room the roots list leaves, the start of a verse that begins a line stays in sight${shrinks ? ", the page drawn a little smaller" : " at the reader's own size"}`, async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 800 });
       await page.goto(`/#/hafs-kfqc/${at}?view=one`);
       const paper = pageSvg(page, pageNo);
       await expect(paper).toBeVisible({ timeout: 20_000 });
       // Step up until the page is wider than the 796px the list leaves.
-      for (let i = 0; i < 8 && (await boxOf(paper)).width <= 820; i++) {
+      for (let i = 0; i < 12 && (await boxOf(paper)).width <= past; i++) {
         const was = (await boxOf(paper)).width;
         await page.getByRole("button", { name: /^(تكبير|Zoom in)$/ }).click();
         await expect.poll(async () => (await boxOf(paper)).width).toBeGreaterThan(was + 1);
       }
-      expect((await boxOf(paper)).width, "the page grown wider than the room").toBeGreaterThan(820);
+      const zoomed = (await boxOf(paper)).width;
+      expect(zoomed, "the page grown wider than the room").toBeGreaterThan(past);
       await page.getByRole("button", { name: /^(الجذور، |Roots · )/ }).click();
       const list = page.getByRole("dialog");
       await expect(list).toBeVisible();
       await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
       const card = await boxOf(list);
+      // Drawn smaller by at most a fifth, or not at all.
+      await expect
+        .poll(async () => (await stillBoxOf(paper)).width / zoomed, { message: "the page's size beside the list, against the reader's own" })
+        .toBeGreaterThan(shrinks ? 0.8 : 0.995);
+      if (shrinks) expect((await boxOf(paper)).width / zoomed, "the page drawn a little smaller").toBeLessThan(0.99);
+      else expect((await boxOf(paper)).width / zoomed, "the page kept at the reader's size").toBeLessThan(1.005);
       const wash = page.locator(`[data-live="true"] [data-host-page="${pageNo}"] #hifth-overlay [data-hl-group='selection']`);
       await expect
         .poll(async () => {

@@ -222,7 +222,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Beside two pages, a card lies over the facing page and shows no drag bar. · desktop,
   ipad-side · issue: `spread-cards-show-drag-bar` · walked 2026-10-12 in the Mac app
   (`make app-shot TARGET=mac`) with a note on 2:255, the look-alikes of 2:48 and the
-  introduction from 2:2: each on the far page, the verse in sight, nothing wrong
+  introduction from 2:2, in English and Arabic: each on the far page, the verse in sight,
+  nothing wrong (the bottom bar keeps the book's right-to-left order in both languages, by
+  design)
 - [ ] In the iPad app on its side, open a note from each page of the opening (closing the first
   before tapping under it): it lies over the other page, the verse stays fully in sight, and the
   next verse tapped moves the note to it (`make app-probe TARGET=ipad SIDEWAYS=1`, measuring
@@ -402,6 +404,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   first word stands clear of it; until look-alike rows ⑯ is settled, the start of a second full
   line may still sit under the card's edge (2:48). · `VIEWPORT=1133x744` · issue:
   `share-card-covers-line-start-ipad-mini-side`
+- [ ] On an iPad mini on its side, open the note on a long verse (2:255) and then the roots list: the
+  page moves aside for each card and the whole verse shows beside it, drawn a little smaller if
+  need be; a short verse (2:48) still opens lifted above the note. On a look-alike verse (3:84) the
+  look-alike buttons ride the note card's top row, never the page. · `VIEWPORT=1133x744`, the iPad
+  app on its side (`make app-probe TARGET=ipad SIDEWAYS=1 "IPAD=iPad mini (A17 Pro)"` with the
+  corner-cards script) · issue: `mini-side-long-verse-under-note` · walked 2026-10-12 in the
+  browser and the app, both languages, none under either card
 - [ ] On an iPad mini held upright, no card open, the look-alike buttons stand clear of the page's
   top lines (2:48). · `VIEWPORT=744x1133`, the iPad app on the mini · issue:
   `lookalike-buttons-on-top-lines-ipad-mini-upright`

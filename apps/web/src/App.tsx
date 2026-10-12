@@ -373,6 +373,16 @@ export function App(): JSX.Element {
   // Whether the phone note is grown over the whole page; the chips sit on the
   // short note's top row, and step back under a grown one.
   const [noteTall, setNoteTall] = useState(false);
+  // Whether the page could not show the note's verse whole above the note's top,
+  // since the note opened: on a screen with room for a corner card (an iPad mini
+  // on its side), the page then moves aside for it, as for a grown note. Kept
+  // until the note closes, so the page does not swing back and forth as the
+  // lift it no longer needs stops falling short (plan item 92).
+  const [noteShort, setNoteShort] = useState(false);
+  const liftShort = useCallback(() => setNoteShort(true), []);
+  useEffect(() => {
+    if (!commentaryOpen) setNoteShort(false);
+  }, [commentaryOpen]);
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // The drag-highlighted passage: its ayah keys in reading order (spec §3's
@@ -3526,8 +3536,10 @@ export function App(): JSX.Element {
           // the chrome's end, which is the left when it reads right to left.
           // So on a list in a small corner, inside its top row as on the
           // share card's: the page moved aside stands under their own corner
-          // (plan item 90).
-          ((shareCorner !== null || listCorner !== null) && dir === "rtl"))
+          // (plan item 90). The same for a note the page moved aside for:
+          // in Arabic it stands on the left, and the chips had stayed on the
+          // right, over the page (plan item 92).
+          ((shareCorner !== null || listCorner !== null || noteCorner !== null) && dir === "rtl"))
       }
       onBand={setRailBottom}
       beside={beside}
@@ -3538,7 +3550,8 @@ export function App(): JSX.Element {
       }
       onCard={
         (highestTop(coverTop, shareTop, listTop) === null && shareCorner !== null) ||
-        listCorner !== null
+        listCorner !== null ||
+        noteCorner !== null
       }
       away={!beside && !home && noteTall}
       home={home}
@@ -3565,7 +3578,10 @@ export function App(): JSX.Element {
   // of its corner lay over its verse: the page had lifted the verse above the
   // short card, and nothing moved it aside for the tall one. Grown, the note
   // covers the page's side, as the share card does there (plan item 89).
-  const noteCorner = !desktop && !upright && cardWide && noteTall && commentaryOpen ? noteSide : null;
+  // A verse too long to lift whole above the freshly opened note (2:255) is the
+  // same: the page moves aside at once, rather than leave the ends of its lines
+  // under the card until the note is read to its end (plan item 92).
+  const noteCorner = !desktop && !upright && cardWide && (noteTall || noteShort) && commentaryOpen ? noteSide : null;
   // The roots list stands there the full height of its corner from the start,
   // and lay over its verse the same way: the lift above its top is no lift on
   // a card that tall. A look-alike list is shorter, but in the iPad app, whose
@@ -3963,6 +3979,7 @@ export function App(): JSX.Element {
                     : highestTop(noteCorner ? null : coverTop, shareTop ?? (upright ? shareCardTop : null), listCorner ? null : listTop)
                 }
                 coverSide={sideCard}
+                onLiftShort={liftShort}
                 railBottom={railBottom}
                 resolver={resolver}
                 page={page}

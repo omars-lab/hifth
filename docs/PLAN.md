@@ -2045,6 +2045,27 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     sixteen side by side, all pass; with the old fault put back in the app it fails four in four.
     (Holding the note inside the page instead was tried first and dropped: the check then lost its
     page part-way through now and then.)
+92. ~~**On an iPad mini on its side, the demo's headline verse, 2:255, was a quarter under its
+    note and a tenth under the roots list.**~~ Found walking the corner cards on the mini held
+    sideways, 2026-10-12, after items 89 and 90. At the zoom its link lands at, 2:255 is too tall
+    for the room above a freshly opened note, so the lift could only start it at its first line, and
+    the note covered the ends of its lower lines: 24% of it in English, 14% in Arabic. With the
+    roots list open the page moved aside, but the verse was wider than the room beside the list,
+    and the ends of its lines stayed under the card (8% in English). Fixed in two parts. A verse
+    only a little wider than the room a card beside the page leaves is drawn a little smaller,
+    within the same fifth as one a little too tall. And when the page cannot show the note's verse
+    whole above the note, the page moves aside for it at once, as it already did once the note was
+    read to its end; it stays aside until the note closes. A short verse such as 2:48 still opens
+    as before, lifted above the note. On this screen that also overrides the setting that opens
+    the note shorter, when even the shorter note would cover the verse. Once the page had moved
+    aside for the note, the look-alike buttons stayed where they stand over an open page, so on
+    a look-alike verse (3:84) they sat on the page in Arabic and just past the card in English;
+    they now ride the note card's top row, as they already did for the roots list and Share. The
+    width rule reaches the laptop too: closed to one page and zoomed a little wider than the room
+    beside the roots list, the page is drawn a little smaller when the list opens; zoomed further,
+    it keeps the reader's size and only the verse's start is kept in sight. Browser tests at the
+    mini's size in both languages, and on the laptop, watched failing first; measured again in
+    the iPad app on its side, none under either card.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
