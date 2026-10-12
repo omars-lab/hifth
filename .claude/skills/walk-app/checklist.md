@@ -465,6 +465,9 @@ upright and on its side, English and Arabic, iPad and Mac.
   In Arabic the side rail and the Mark up button stay on the right: that is the owner's open
   question (notes-style-toolbar ④), not a fault, until it is answered. · issue:
   `pens-stay-right-in-arabic`
+- [ ] On the first screen, closed, the Mark up button stands clear of the hint beside it, with
+  a space between them, in English and in Arabic. · ipad-side, desktop, iPad app · issue:
+  `hint-touches-mark-up` · test: pitch spec, "stands clear of the Mark up button"
 - [ ] Pick the highlighter: both colour rows show, the passage circles and the held-words bands,
   with nothing cut off or off the screen; on a phone they get their own line in the tray, down
   an iPad's side two columns. At a 1024-wide window the tools do not slide when the highlighter

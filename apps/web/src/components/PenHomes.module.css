@@ -122,7 +122,10 @@
 
 .markUp {
   flex: none;
-  margin-inline-end: var(--space-3);
+  /* The row is laid out right to left for the mus'haf whatever the app's
+     language, and the button speaks its own: the hint is always to its left,
+     so the space is too. */
+  margin-left: var(--space-3);
   /* Finger-sized, but reaching into the row's own padding rather than
      growing it: a taller row is a shorter page. */
   margin-block: calc(-1 * var(--space-2));

@@ -1991,6 +1991,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     and passing 96 of 96 after, in the iPhone and Android browsers. Not yet felt on a phone
     in the hand.
 
+87. ~~**In English, the first screen's hint ran into the Mark up button.**~~ Found on a fresh
+    install of the iPad app on its side, 2026-10-12: "note", the hint's last word, ended
+    against the button's edge with no space, on the first screen a visitor sees. The bottom
+    row is laid out right to left for the mus'haf whatever the app's language, and the
+    button kept its space on the side its own language ends: in Arabic that faces the hint,
+    in English the screen's edge. Fixed: the space is always on the button's left, where the
+    hint is. A browser test on a sideways iPad in both languages, watched failing first in
+    English; seen again in the iPad app, the hint now clear of the button.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source

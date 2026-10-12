@@ -4339,6 +4339,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/page-turn.spec.ts",
       "note": "A flick that starts while the last page is still landing lands that page at once and turns from it; two phone-size browser tests, one inside a slowed landing and one the moment the first flick is let go, both watched failing first."
+    },
+    {
+      "id": "hint-touches-mark-up",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "87"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "The Mark up button's space is always on its left, where the hint is, since the bottom row runs right to left in both languages; the browser test measures the space on a sideways iPad in English and Arabic."
     }
   ]
 }
