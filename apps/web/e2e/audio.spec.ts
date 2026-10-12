@@ -73,6 +73,10 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
     // only thing deciding is the network.
     const context = await browser.newContext({ serviceWorkers: "block" });
     const page = await context.newPage();
+    // The early ask (docs/PLAN.md, item 65) goes out the moment the control
+    // shows. Left to the real network on a busy machine, the whole file came
+    // in before the connection went, and the tap played it.
+    await page.route("https://verses.quran.com/**", (route) => route.abort("internetdisconnected"));
     await page.goto("/");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
     await tapAyah(page, "#verse-55");
