@@ -88,6 +88,10 @@ async function turnAhead(page: Page, isMobile: boolean, from: number, to: number
     for (let i = 1; i <= 8; i += 1) await page.mouse.move(box.x + box.width * (0.3 + i * 0.05), y);
     if (during) await during();
     await page.mouse.up();
+    // Landed, not only begun: the page arriving shows for a fifth of a second
+    // beside the one leaving, and a swipe that starts then is not counted
+    // (docs/PLAN.md, item 86), so the next turn waits for this one to end.
+    await expect(page.locator(`svg[aria-labelledby='page-label-${from}']:visible`)).toHaveCount(0);
   }
   await expect(page.locator(`svg[aria-labelledby='page-label-${to}']:visible`)).toBeVisible();
 }

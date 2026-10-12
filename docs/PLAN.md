@@ -1947,7 +1947,28 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     Fixed: with its own verse off the open pages, the note stands opposite the verse being
     recited. A browser test in both languages on a sideways iPad, watched failing first in
     Arabic; walked in the iPad app in Arabic, the card on the other page and none of the lit
-    verse under it.
+    verse under it. The rule places every card that opens beside a verse on the open book,
+    not only the note: with no verse chosen and a recitation running, the look-alike list,
+    the verse menu, the roots list and the share card now open opposite the verse being
+    recited too, where before they took the chrome's side.
+85. **Does the kept note jumping across the gutter read as moving out of the way, or as not
+    sitting still?** Follows item 84: with the note kept up, the card now stands opposite the
+    verse being recited, so as the recitation crosses from one page of the open book to the
+    other the card changes sides, about once a page. Before, in English, it stayed on the
+    right the whole run, and covered the recited verse whenever that verse was on the right
+    page. To answer: walk the visit in the iPad app on its side in English, and let the
+    recitation run past the turn onto the next opening, watching the card. If it reads as
+    restless, the fix is to keep the side the card has until the verse being recited would
+    land under it, and only then move; that one would be built beside this one and kept as
+    a setting.
+86. **A second quick flick, made while the first turn is still landing, is lost.** Found
+    fixing a flaky browser test, 2026-10-12: on a phone, after a flick is let go the page
+    takes about a fifth of a second to land, with the arriving page already in sight beside
+    the one leaving. A flick that starts on the arriving page in that time turns nothing.
+    Seen in a browser at phone size (a page-by-page log of the turn), not yet on a phone in
+    the hand; a hafiz flicking quickly through pages to find one would lose every other
+    flick if they flick about four times a second. The test that found it now waits for each
+    turn to land; the fix wants its own test of two quick flicks, watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
