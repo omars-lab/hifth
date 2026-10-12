@@ -3141,6 +3141,18 @@
       "closedBy": "packages/core/src/scoped-notes.ts"
     },
     {
+      "id": "apps-save-and-open-files",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉛"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Found 2026-10-11 by the usage-count research check: the iPad and Mac apps sent a file the page saves (bookmarks, a cropped picture) to the system browser, which dropped it, and the Mac app never opened a choose-a-file window. Fixed: saved files download in the app and open the system save window on both (the Mac first wrote to Downloads, which raised a privacy prompt) and the Mac opens its file window. Shell unit tests for the rule, the offered name and the free file name; seen saving in the iPad app.",
+      "closedBy": "native/HifthTests/DownloadTests.swift"
+    },
+    {
       "id": "ipad-pinch-readout-stuck",
       "source": {
         "file": "docs/design/native-shell.md",

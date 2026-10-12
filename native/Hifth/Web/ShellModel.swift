@@ -429,20 +429,64 @@ final class ShellModel {
     """
 }
 
-/// Where navigation may go: inside the bundle, or out to the system browser.
+/// Where navigation may go: inside the bundle, out to the system browser, or,
+/// for a file the page saves, into a download.
 /// A page that opened a new window (`target="_blank"`) also goes out.
 final class NavigationPolicy: NSObject, WKNavigationDelegate, WKUIDelegate {
     var onLoaded: () -> Void = {}
+    /// Kept here: a download holds its delegate weakly.
+    private let downloads = Downloads()
 
     func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction
     ) async -> WKNavigationActionPolicy {
         guard let url = navigationAction.request.url else { return .cancel }
-        if url.scheme == BundleFiles.scheme || url.scheme == "about" { return .allow }
-        Sharing.openExternally(url)
-        return .cancel
+        switch Self.decision(for: url, shouldPerformDownload: navigationAction.shouldPerformDownload) {
+        case .allow: return .allow
+        case .download: return .download
+        case .external:
+            Sharing.openExternally(url)
+            return .cancel
+        }
     }
+
+    enum Decision: Equatable { case allow, download, external }
+
+    /// A file the page saves (the bookmarks, a cropped picture) is a `blob:`
+    /// address or a link marked to download; it is saved here, not sent to the
+    /// system browser, which dropped it (docs/design/native-shell.md, item 31).
+    nonisolated static func decision(for url: URL, shouldPerformDownload: Bool) -> Decision {
+        if url.scheme == "blob" || shouldPerformDownload { return .download }
+        if url.scheme == BundleFiles.scheme || url.scheme == "about" { return .allow }
+        return .external
+    }
+
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        download.delegate = downloads
+    }
+
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        download.delegate = downloads
+    }
+
+    #if os(macOS)
+    /// A page's choose-a-file button (loading bookmarks, adding commentary):
+    /// without this the Mac web view opens nothing. The iPad shows its own.
+    func webView(
+        _ webView: WKWebView,
+        runOpenPanelWith parameters: WKOpenPanelParameters,
+        initiatedByFrame frame: WKFrameInfo
+    ) async -> [URL]? {
+        guard let window = webView.window else { return nil }
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = parameters.allowsDirectories
+        panel.allowsMultipleSelection = parameters.allowsMultipleSelection
+        let answer = await panel.beginSheetModal(for: window)
+        return answer == .OK ? panel.urls : nil
+    }
+    #endif
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         onLoaded()
@@ -495,7 +539,7 @@ enum Sharing {
 }
 
 #if os(iOS)
-private extension UIViewController {
+extension UIViewController {
     /// The controller a sheet can be presented from: the top of the stack.
     var presentedOrSelf: UIViewController {
         presentedViewController?.presentedOrSelf ?? self

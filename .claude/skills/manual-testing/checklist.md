@@ -100,6 +100,14 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
     flicker between one page and two while the corner moves. Anything else becomes a backlog
     item and a test.
 
+15. **Loading a bookmarks file in the real Mac app.** In the Mac app, save the bookmarks from the
+    bookmarks shelf (the save window drops down; save it anywhere), then press the shelf's load button and pick that
+    file. The Mac app's window for choosing a file opens on the laptop's own screen and waits for a
+    real click, so no automatic walk can drive it without taking over the keyboard and mouse.
+    Right: the choose-a-file window drops down from the app's title bar, the file can be picked,
+    and the shelf shows the bookmarks it held. Anything else becomes a backlog item and a test
+    (docs/design/native-shell.md, item ㉛).
+
 ## Done
 
 (Items move here with the date and where their test or ledger record is.)
