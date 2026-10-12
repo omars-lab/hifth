@@ -759,3 +759,31 @@ to named people is not the kind of sharing the verse-link data's licence and App
 about (the record names this under what would change the answer), and the paid Apple membership.
 The upload steps stay locked until the decision record says A or B. Record:
 `docs/decisions/native-testflight-licence.md`.
+
+### ㉛ In the iPad and Mac apps, saving a file did nothing, and on the Mac so did choosing one · **fixed**
+
+Found 2026-10-11 by the check on the usage-count research, which read the apps' own code: every
+address that is not the app's own was sent out to the system browser, and a file the page saves
+(the bookmarks file, a cropped picture of a passage) is a short-lived address the browser cannot
+open, so it was dropped without a word. On the Mac the page's choose-a-file buttons (loading a
+bookmarks file, adding commentary) opened nothing either, because the Mac web view only shows that
+window when the app asks for it. The iPad shows its own.
+
+**What it changes for a hafiz:** the bookmarks and notes could not be saved out of the apps, so a
+reader could not keep a copy or carry them to another device; the passage picture's Save button did
+nothing. In a browser all of this already worked.
+
+**The fix:** a file the page saves is now downloaded by the app itself, and both apps open the
+system's own save window, offering the page's own name for the file, so the reader picks the
+folder, iCloud Drive included. The Mac app now also opens its choose-a-file window when the page
+asks.
+
+The Mac first wrote straight into Downloads, the way Safari does. Walking it raised a macOS prompt
+asking to let the app into the Downloads folder, and the save stopped there. A folder the reader
+picks in the save window needs no such permission, so the Mac moved to the save window too, which
+also makes the two apps behave alike.
+
+Tests: the shell's unit tests for which addresses become downloads, for the name offered, and for
+the iPad's free file name, written first and seen failing against the old rule. Seen in the iPad
+app: a made-up file saved from the page was written, and the save window opened offering iCloud
+Drive and the iPad itself.

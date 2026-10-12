@@ -506,6 +506,12 @@ upright and on its side, English and Arabic, iPad and Mac.
   `make app-probe TARGET=ipad EVAL=…`. For many links at once, `make app-walk ROUTES='…'`
   (add `SIDEWAYS=1` to turn it) keeps one picture per link. · the native-shell skill, "Walking
   the app in the simulator"
+- [ ] Save a file out of each app (the bookmarks from the shelf, a passage picture's Save), and
+  load one back: anything the page saves is a download, and an app that sends it to the browser
+  drops it without a word. Both apps: the system's save window opens with the page's name for the file; no privacy prompt.
+  · iPad simulator: `make app-probe TARGET=ipad EVALFILE=…` clicking a made-up download, then
+  `xcrun simctl io <iPad> screenshot` while it waits · test: `native/HifthTests/DownloadTests.swift`
+  · issue: `apps-save-and-open-files`; the Mac's choose-a-file window is parked (manual testing 15)
 - [ ] Walk the iPad app in English as well as Arabic (`LOCALE=en`): the buttons read English even
   though the simulator has Arabic picked in the app, and Arabic is still picked afterwards. ·
   iPad simulator · test: `native/HifthTests/RouteTests.swift` ("a language named for this
