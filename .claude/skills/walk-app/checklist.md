@@ -610,6 +610,13 @@ upright and on its side, English and Arabic, iPad and Mac.
 
 ## The Mac and iPad apps
 
+- [ ] Hand the page a pencil squeeze and double-tap **in the iPad app**, both ways up, both
+  sizes, both languages: the pens open beside the tip and whole on the screen (the highlighter's
+  two rows wrap when upright), Escape and a pick put them away, and a double-tap swaps the last
+  pen used with plain selecting. · `make app-probe TARGET=ipad [SIDEWAYS=1] EVALFILE=…` calling
+  `window.__HIFTH_PAGE__.pencil({kind, pref, x, y})` · test: `apps/web/e2e/pencil.spec.ts`,
+  `native/HifthTests/PencilTests.swift` · walked 2026-10-13, nothing wrong; the real pencil is
+  parked (manual testing 19)
 - [ ] Open the app at a verse and at a page; turn, zoom, open a note. · `make app-run-mac`,
   `make app-run-ipad` · Same as the browser. · see the native-shell skill
 - [ ] With a note up, make the Mac window too small for the open book (1000 wide, or 700 high),

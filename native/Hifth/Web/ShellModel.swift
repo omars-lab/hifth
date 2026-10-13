@@ -28,6 +28,10 @@ final class ShellModel {
     private let navigation = NavigationPolicy()
     private var pendingHash: String?
     private var snapshotTaken = false
+    #if os(iOS)
+    /// Kept here because the pencil interaction holds it only weakly.
+    @ObservationIgnored private let pencilListener = PencilListener()
+    #endif
 
     /// How an x-callback answer leaves the shell: the system opens the
     /// caller's address. Replaced by the tests with a collector.
@@ -106,6 +110,12 @@ final class ShellModel {
         runScript = { [weak self] source, arguments in
             self?.webView.callAsyncJavaScript(source, arguments: arguments, in: nil, in: .page) { _ in }
         }
+        #if os(iOS)
+        pencilListener.model = self
+        let pencil = UIPencilInteraction()
+        pencil.delegate = pencilListener
+        webView.addInteraction(pencil)
+        #endif
 
         applyAppearanceOverride()
 

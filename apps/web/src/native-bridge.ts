@@ -28,6 +28,9 @@
  * modified keys are ignored on purpose, see core's keymap — so the page hands
  * the shell its own `stepPage` under `window.__HIFTH_PAGE__`, inside the
  * shell only, and the shell calls it by name (`ShellModel.stepPage`).
+ * The iPad app hands the Apple Pencil's double-tap and squeeze the same way,
+ * to `pencil`, since a web page never hears either (`ShellModel.pencil`,
+ * pencil.ts).
  */
 
 export interface NativeInfo {
@@ -52,6 +55,8 @@ type Shelled = Window & {
 export interface PageApi {
   /** Turn one page: `1` is the next page (to the left), `-1` the previous. */
   readonly stepPage: (step: 1 | -1) => void;
+  /** A pencil gesture, as the app sends it: checked by `pencilGesture`. */
+  readonly pencil: (gesture: unknown) => void;
 }
 
 /** The shell's marker, if it is well-formed; `null` in a browser. */

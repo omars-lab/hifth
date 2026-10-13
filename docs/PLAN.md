@@ -2114,14 +2114,21 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     colours on the book's side of them, and Mark up stands at the left end of the bottom row,
     past Full screen. Browser tests on an iPad held sideways, in English and Arabic, each side,
     watched failing first; and one that the setting moves them at once and is remembered.
-96. **Let the pencil's double-tap and squeeze open Hifth's pens at the tip.** Chosen 2026-10-12
+96. ~~**Let the pencil's double-tap and squeeze open Hifth's pens at the tip.**~~ Chosen 2026-10-12
     by the owner ([pencil gestures ①](design/pencil-gestures.md), option B): the iPad app hears
     the pencil's double-tap (2nd generation pencil) and squeeze (Pencil Pro) and hands them to
     the page, which opens its own pens beside the pencil's tip; a web page alone never hears
     either. Its tests: a Swift test that each gesture becomes one message to the page, and a
     browser test that the message opens the pens at the point it names. The feel on a real iPad
     with a real pencil goes on the manual testing list, because the simulator cannot send these
-    gestures.
+    gestures. Built 2026-10-13: the app hands each gesture to the page with the reader's own pencil
+    setting and, when the pencil hovers, its tip. A squeeze (or a double-tap set to show the tool
+    palette) opens Hifth's pens beside the tip, whole on the screen; picking one puts it in hand and
+    puts the pens away. A double-tap set to switch to the eraser or to the last tool picks up the
+    last tool used, or, with one in hand, puts it down; with none used yet it opens the pens. The
+    colour palette setting opens the highlighter's pens. Off and run shortcut do nothing. Swift
+    tests, browser tests on an iPad both ways up in both languages, and a walk in the real iPad app
+    on both sizes; the real pencil is parked (manual testing 19).
 97. ~~**Upright on an iPad, a turn from the page's foot opens the next page at its top.**~~ Chosen
     2026-10-13 by the owner (item 75). Only at the size the page opened at: a turn forward lands
     at the top of the next page, a turn back at the foot of the one before. A page the reader

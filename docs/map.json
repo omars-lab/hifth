@@ -2376,6 +2376,16 @@
           "note": "The three words the page says to the shell — ready, route, share — and nothing else. The route is mirrored into a hidden native label so a test has something native to wait on."
         },
         {
+          "file": "native/Hifth/Web/Pencil.swift",
+          "symbol": "PencilListener",
+          "note": "The Apple Pencil's double-tap and squeeze, heard on the iPad and handed to the page's lent `window.__HIFTH_PAGE__.pencil` with the reader's own pencil setting and, when it hovers, the tip. The shell only names the setting; what it means in Hifth is apps/web/src/pencil.ts. PencilTests.swift reads what reaches the page."
+        },
+        {
+          "file": "apps/web/src/pencil.ts",
+          "symbol": "pencilAction",
+          "note": "What each pencil setting does in Hifth (swap the pen in hand, open the pens beside the tip, open the highlighter's pens, or nothing), the check on the app's message, and where the pens stand beside the tip so they are whole on the screen. e2e/pencil.spec.ts plays the app's side on an iPad both ways up."
+        },
+        {
           "file": "packages/core/src/link-builder.ts",
           "symbol": "predictLink",
           "note": "The shell's link rules copied into JavaScript, so the contract page can say what the app will do with a link before anyone sends it, and compose the plain link, the app request and the site link from a form. Imports nothing, so the renderer inlines its compiled form and the page stays one file. Held to the shell by the contract's examples: the Swift tests run each through the real parser, link-builder.test.ts runs each through this, and a difference names the link."
