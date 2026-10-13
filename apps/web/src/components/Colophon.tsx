@@ -25,6 +25,7 @@ import { RIBBON_LENGTHS, rememberRibbonLength, useRibbonLength } from "../ribbon
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { MARK_TOOLS, type MarkTools } from "../mark-tools";
+import { MISTAKE_TAPS, type MistakeTap } from "../mistake-tap";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { RAIL_HOMES, type RailHome } from "../rail-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
@@ -62,6 +63,9 @@ interface ColophonProps {
   /** Note, Harakat and Word as three buttons or one; remembered on this device. */
   markTools?: MarkTools | undefined;
   onMarkTools?: ((shape: MarkTools) => void) | undefined;
+  /** What a tap with the Mistake pen does; remembered on this device. */
+  mistakeTap?: MistakeTap | undefined;
+  onMistakeTap?: ((choice: MistakeTap) => void) | undefined;
   /** Where the page tools sit on a computer or an iPad held sideways; remembered on this device. */
   penHome?: PenHome | undefined;
   onPenHome?: ((home: PenHome) => void) | undefined;
@@ -221,6 +225,11 @@ const MARK_TOOLS_NAME: Record<MarkTools, (t: ReturnType<typeof useT>["t"]) => st
   one: (t) => t.markToolsOne,
 };
 
+const MISTAKE_TAP_NAME: Record<MistakeTap, (t: ReturnType<typeof useT>["t"]) => string> = {
+  ask: (t) => t.mistakeTapAsk,
+  quiet: (t) => t.mistakeTapQuiet,
+};
+
 const PEN_HOME_NAME: Record<PenHome, (t: ReturnType<typeof useT>["t"]) => string> = {
   strip: (t) => t.penHomeStrip,
   float: (t) => t.penHomeFloat,
@@ -250,6 +259,8 @@ export function Colophon({
   onScopeLook,
   markTools,
   onMarkTools,
+  mistakeTap,
+  onMistakeTap,
   penHome,
   onPenHome,
   railHome,
@@ -1020,6 +1031,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.markToolsNote}</p>
+          </section>
+        )}
+        {/* What a tap with the Mistake pen does (docs/PLAN.md, item 103): ask
+            what went wrong is the default the owner chose on 2026-10-13; the
+            first way, mark at once, is kept as the other choice. */}
+        {mistakeTap && onMistakeTap && (
+          <section className={styles.block} aria-labelledby="colophon-mistake-tap">
+            <h3 className={styles.subhead} id="colophon-mistake-tap">
+              {t.mistakeTapTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-mistake-tap">
+              {MISTAKE_TAPS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={mistakeTap === choice}
+                  data-mistake-tap-choice={choice}
+                  onClick={() => onMistakeTap(choice)}
+                >
+                  {MISTAKE_TAP_NAME[choice](t)}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.mistakeTapNote}</p>
           </section>
         )}
         {/* Where the page tools sit (docs/design/notes-style-toolbar.md, ①): all

@@ -39,6 +39,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Flick four pages quickly, each flick starting before the last page has settled: four pages
   turn, none is lost or undone. · phone, phone-side · issue: `quick-second-flick-lost` · tests:
   page-turn spec, "a second flick made"
+- [ ] Flick twice fast on a page you have not opened before (the next page still on its way):
+  two pages turn. Let a second flick go just as the first lands: it still counts. · phone,
+  iphone · issue: `quick-flick-after-slow-page-or-landing` · tests: page-turn spec, "before the
+  first flick's page has even arrived"; page-destination unit test
+- [ ] With no place chosen for the pens, they sit where the screen puts them (the foot on a
+  touch screen, the strip at a desk), even if touch is only found after the app starts. · ipad,
+  desktop · issue: `unset-pen-home-follows-screen` · test: pen-homes spec, "nobody has set it"
 - [ ] A large iPad on one page turns under a finger. · ipad-big-side with `?view=one` · issue:
   `large-ipad-one-page-no-swipe`
 - [ ] Zoom in, then turn: the zoom carries to the next page. · desktop, ipad-side · test: desktop spec
@@ -162,6 +169,18 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   manual-testing list, item 16
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
+- [ ] Tap a word with the Mistake pen: it asks what went wrong, with three kinds (a harakat sign,
+  the whole word, "Went into another verse…") and nothing pressed; closing it marks nothing.
+  "Went into another verse…" asks where it *pulled* you, leaves no red mark, and the row in the
+  verse's list has "A mistake" pressed. No word on screen says "slip". · phone, iPad, desktop ·
+  test: e2e/mistakes.spec.ts, e2e/confusions.spec.ts, src/messages/plain-words.test.ts
+- [ ] Every tap-and-hold menu, with all its lines, stays beside the verse and inside the screen.
+  · phone, iPad · test: e2e/confusions.spec.ts
+- [ ] A test that checks "none of these are on screen" can pass before a list has even opened:
+  wait for the list first, then check. · tests · found 2026-10-13 in the jump list's Go test
+- [ ] Every design page's status line matches what is built: a page saying "nothing is built"
+  when part of it is sent the owner a question about something already done. · docs · found
+  2026-10-13 on the confusion-points page
 
 ## The note (pitch)
 

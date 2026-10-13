@@ -13,6 +13,8 @@ export interface JumpShelfItem {
   times: number;
   lastAt: number;
   beaten: boolean;
+  /** The reader said it was a slip. */
+  slip: boolean;
 }
 
 interface JumpShelfProps {
@@ -54,6 +56,7 @@ export function JumpShelf({ jumps, dismissed, onGo, onBringBack }: JumpShelfProp
                 <span className={styles.title}>{j.to ? t.jumpPair(j.from, j.to) : t.jumpPairUnsure(j.from)}</span>
                 <span className={styles.about}>
                   {t.jumpTimes(j.times, lastWhen(j.lastAt, now, lang, t))}
+                  {j.slip && `${t.sep}${t.jumpSlip}`}
                   {j.beaten && `${t.sep}${t.jumpBeaten}`}
                 </span>
               </button>

@@ -104,6 +104,21 @@ test.describe("where the pens sit", () => {
     await context.close();
   });
 
+  test("nobody has set it: when the screen turns out to be a finger's after the app starts, the pens follow", async ({ page, browserName }) => {
+    // The first screen once came up on an iPad with the computer's strip,
+    // because the app asked "is this a finger?" a single time, as it started,
+    // and the answer was not in yet. An unset home now follows the answer.
+    test.skip(browserName !== "chromium", "only Chromium can make the screen a finger's after the start");
+    await openWith(page, null);
+    await expect(home(page, "strip")).toBeVisible();
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
+    await cdp.send("Emulation.setEmitTouchEventsForMouse", { enabled: true, configuration: "mobile" });
+    await expect.poll(() => page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
+    await expect(home(page, "bottom")).toBeVisible();
+    await expect(home(page, "strip")).toHaveCount(0);
+  });
+
   test("B · a Mark up button opens the pens in the bottom row, covering no line, and Done puts them away", async ({ page }) => {
     await openWith(page, "bottom");
     await expect(home(page, "strip")).toHaveCount(0);
@@ -120,7 +135,7 @@ test.describe("where the pens sit", () => {
     await pens.getByRole("radio", { name: "Mistake" }).click();
     await expect(pens.getByRole("radio", { name: "Mistake" })).toHaveAttribute("aria-checked", "true");
     // Said to a mouse, as here: click, not tap.
-    await expect(pens).toContainText("Click a word to mark a slip");
+    await expect(pens).toContainText("Click a word to mark a mistake");
     await pens.getByRole("button", { name: "Done" }).click();
     await expect(bar.getByRole("radio")).toHaveCount(0);
     await expect(bar).toHaveAttribute("data-tool", "select");

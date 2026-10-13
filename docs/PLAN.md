@@ -2192,6 +2192,37 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     space it has used shown beside it; and a run usually starts mid-surah, so "heard it through"
     needs saying exactly before it is built. Its test: a browser test that runs a short surah to
     its end with the setting on and finds it listed in the info panel.
+103. ~~**The Mistake pen asks what went wrong.**~~ Chosen 2026-10-13 by the owner, asked whether
+    to build the slip half of the confusion-points design: a small first version. Then, the same
+    day, reshaped by the owner: there is one way in, the Mistake pen, and each kind of mistake is
+    named by what went wrong rather than by our design words. Tap a word with the pen and it asks
+    "What went wrong in …?": the harakat (pick the sign), the whole word, or "Went into another
+    verse…", which asks where it pulled you with the look-alikes first. Nothing is marked until a
+    button is pressed, and closing the question marks nothing. Jump… stays in a verse's menu, as
+    a link you noticed rather than a mistake. The word "slip" is gone from what the app says: a
+    row in a verse's list of jumps has a switch, "A mistake", and the page map's list says so.
+    The old tap that marks at once is kept as a setting in the info panel. Everything saved
+    before stays a jump, and an older copy of the app still reads a file that holds mistakes.
+    Built 2026-10-13: unit tests for the record, the saved file and the setting, a check that no
+    message calls a mistake a slip, and browser tests on the pen, the question, the list and the
+    page map, all watched failing first.
+104. ~~**A quick second flick always turns the page again.**~~ Found 2026-10-13 on a walk, not
+    asked: two quick flicks sometimes turned one page. Two causes. If the next page had not
+    arrived yet when the second flick began, the first turn was given up and the second flick
+    asked for the same page again; now the second flick waits for that page, lands it, and turns
+    on from it. And a flick let go just as the last turn landed could be pulled back by the app
+    catching up with where the reader was; now a turn's own landing never resets where the
+    reader is going. Built 2026-10-13: a unit test on where the reader is going and a browser test
+    that slows the next page down, both watched failing first, and the turn tests ran clean many
+    times over with the laptop fully loaded. A test that watched for the fold's short flash on
+    screen, and missed it under load, now reads the record the page keeps of every flash.
+105. ~~**When nobody has chosen where the pens live, they follow the screen.**~~ Found
+    2026-10-13, not asked: the pens' place was settled once, when the app started, so a screen
+    that turned out to be touched by a finger after that kept the desk's place. Now, until the
+    reader picks a place in the info panel, the pens go where that kind of screen puts them, and
+    a place the reader picks always stays. Built 2026-10-13: a unit test that tells a chosen
+    place from none, and a browser test that turns on touch after the app starts, both watched
+    failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

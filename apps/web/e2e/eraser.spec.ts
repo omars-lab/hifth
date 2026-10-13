@@ -58,11 +58,12 @@ async function notePin(page: Page, verse: string, words: string): Promise<void> 
 }
 
 test.describe("Hifth · the eraser", () => {
-  test("a tap takes a slip off, the eraser stays on, and Undo puts it back", async ({ page }) => {
+  test("a tap takes a mistake off, the eraser stays on, and Undo puts it back", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7?tool=mistake");
     await expect(pageSvg(page, 7)).toBeVisible();
     const at = await ayahTarget(page, "#verse-46");
     await page.mouse.click(at.x, at.y);
+    await page.getByRole("dialog", { name: /^What went wrong in / }).getByRole("button", { name: "The whole word" }).click();
     await expect(washes(page)).toHaveCount(1);
 
     await expect(eraser(page)).toHaveAttribute("aria-pressed", "false");

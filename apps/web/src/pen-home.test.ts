@@ -6,6 +6,7 @@ import {
   rememberPenHome,
   savedPenFloat,
   savedPenHome,
+  chosenPenHome,
   sideFits,
   snapToEdge,
 } from "./pen-home";
@@ -35,6 +36,14 @@ describe("where the pens sit, as the reader set it", () => {
     expect(savedPenHome({ touch: true })).toBe("bottom");
     rememberPenHome("strip");
     expect(savedPenHome({ touch: true })).toBe("strip");
+  });
+
+  it("an unset home is told apart from a chosen one, so the default can follow the screen", () => {
+    expect(chosenPenHome()).toBeNull();
+    localStorage.setItem(PEN_HOME_KEY, "nonsense");
+    expect(chosenPenHome()).toBeNull();
+    rememberPenHome("float");
+    expect(chosenPenHome()).toBe("float");
   });
 });
 

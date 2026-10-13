@@ -771,6 +771,8 @@ export interface Strings {
   /** The sign picker, named by its verse. */
   mistakePicker(label: string): string;
   mistakeWholeWord: string;
+  /** The third kind of mistake: the verse went into another one. */
+  mistakeAnother: string;
   /** Said when a sign is picked, named by the sign ("fatha"). */
   mistakeSignPicked(name: string): string;
   mistakeWordPicked: string;
@@ -926,6 +928,10 @@ export interface Strings {
   markToolsThree: string;
   markToolsOne: string;
   markToolsNote: string;
+  mistakeTapTitle: string;
+  mistakeTapAsk: string;
+  mistakeTapQuiet: string;
+  mistakeTapNote: string;
   markAimsLabel: string;
   railHomeTitle: string;
   railHomeBar: string;
@@ -949,6 +955,7 @@ export interface Strings {
   vdCopyAria(label: string): string;
   vdJump: string;
   vdJumpAria(label: string): string;
+  /** A slip: the wrong turn a look-alike pulls you into (docs/PLAN.md, item 103). */
   verseMore(label: string): string;
   playToPick: string;
   playToPickClick: string;
@@ -1004,6 +1011,11 @@ export interface Strings {
   /** "Jump from 2:58 to 7:161 marked", with ", 2 times now" once it has happened before. */
   jumpMarked(from: string, to: string, times: number): string;
   jumpMarkedUnsure(from: string): string;
+  slipWhere(from: string): string;
+  slipMarked(from: string, to: string, times: number): string;
+  slipMarkedUnsure(from: string): string;
+  /** The switch on a list row that says the jump was a slip. */
+  jumpSlip: string;
   jumpList(from: string): string;
   jumpTimes(times: number, when: string): string;
   jumpToday: string;
@@ -1581,6 +1593,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mistakeMarked: (label) => m.mistakeMarked({ label }),
     mistakePicker: (label) => m.mistakePicker({ label }),
     mistakeWholeWord: m.mistakeWholeWord,
+    mistakeAnother: m.mistakeAnother,
     mistakeSignPicked: (name) => m.mistakeSignPicked({ name }),
     mistakeWordPicked: m.mistakeWordPicked,
     mistakeNoSigns: m.mistakeNoSigns,
@@ -1728,6 +1741,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     markToolsThree: m.markToolsThree,
     markToolsOne: m.markToolsOne,
     markToolsNote: m.markToolsNote,
+    mistakeTapTitle: m.mistakeTapTitle,
+    mistakeTapAsk: m.mistakeTapAsk,
+    mistakeTapQuiet: m.mistakeTapQuiet,
+    mistakeTapNote: m.mistakeTapNote,
     markAimsLabel: m.markAimsLabel,
     railHomeTitle: m.railHomeTitle,
     railHomeBar: m.railHomeBar,
@@ -1803,6 +1820,16 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         nText: n(times),
       }),
     jumpMarkedUnsure: (from) => m.jumpMarkedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
+    slipWhere: (from) => m.slipWhere({ fromText: fmtAyahRef(from, lang) ?? from }),
+    slipMarked: (from, to, times) =>
+      m.slipMarked({
+        fromText: fmtAyahRef(from, lang) ?? from,
+        toText: fmtAyahRef(to, lang) ?? to,
+        n: times,
+        nText: n(times),
+      }),
+    slipMarkedUnsure: (from) => m.slipMarkedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
+    jumpSlip: m.jumpSlip,
     jumpList: (from) => m.jumpList({ fromText: fmtAyahRef(from, lang) ?? from }),
     jumpTimes: (times, when) => m.jumpTimes({ n: times, nText: n(times), whenText: when }),
     jumpToday: m.jumpToday,

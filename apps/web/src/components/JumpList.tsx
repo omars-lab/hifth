@@ -80,6 +80,8 @@ export interface JumpRow {
   times: number;
   lastAt: number;
   beaten: boolean;
+  /** The reader said it was a slip, not only a jump. */
+  slip: boolean;
   /** The two verses' look-alike link, when the app knows one: what Compare shows. */
   edge?: Edge;
 }
@@ -94,6 +96,8 @@ interface JumpListProps {
   onGo: (to: string) => void;
   onAgain: (id: string) => void;
   onBeaten: (id: string, beaten: boolean) => void;
+  /** Say it was a slip, or take that back. */
+  onSlip: (id: string, slip: boolean) => void;
   /** Hide it from the page; the page map keeps it, to bring back. */
   onDismiss: (id: string) => void;
   onDelete: (id: string) => void;
@@ -106,7 +110,8 @@ interface JumpListProps {
  * "How do you list, follow and delete jumps?"): one row for each verse your
  * memory went to from here, the most often first, each with Go, Compare
  * (the two verses side by side, as the look-alike list shows them), Again
- * (one more time, without drawing), Beaten, Dismiss (off the page, kept in
+ * (one more time, without drawing), Beaten, A slip (the reader's word that
+ * a look-alike pulled them there), Dismiss (off the page, kept in
  * the page map's list to bring back), and Delete. A jump not named yet
  * offers Say where instead. Built and closed like the list a note dot opens.
  */
@@ -118,6 +123,7 @@ export function JumpList({
   onGo,
   onAgain,
   onBeaten,
+  onSlip,
   onDismiss,
   onDelete,
   onSayWhere,
@@ -197,6 +203,14 @@ export function JumpList({
                       onClick={() => onBeaten(r.id, !r.beaten)}
                     >
                       {t.jumpBeaten}
+                    </button>
+                    <button
+                      type="button"
+                      className={own.action}
+                      aria-pressed={r.slip}
+                      onClick={() => onSlip(r.id, !r.slip)}
+                    >
+                      {t.jumpSlip}
                     </button>
                   </>
                 ) : (

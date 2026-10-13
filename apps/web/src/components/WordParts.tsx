@@ -59,18 +59,24 @@ interface WordPartsProps {
   anchor: () => WordRect | null;
   /**
    * "note": the word tool, where picking a part drops a note on it.
-   * "mistake": the mistake tool's second tap, where picking a part says where
-   * the slip was, the current pick is shown pressed, and the mark can be cleared.
+   * "mistake": the mistake tool's question, what went wrong: a sign (the
+   * harakat), the whole word, or another verse it went into. A mark already
+   * made shows its pick pressed and can be cleared.
    */
   mode: "note" | "mistake";
   /**
    * Stand in the verse drawer's place — on the bottom of the window, over the
    * bar under the page — rather than beside the word (selection-drawer = D).
-   * The word tool's row does; the slip picker still opens on its word.
+   * The word tool's row does; the mistake picker still opens on its word.
    */
   docked?: boolean | undefined;
-  /** The sign picked so far (mistake mode); null for the whole word. */
+  /**
+   * The sign picked so far (mistake mode); null for the whole word. Left out
+   * when nothing is marked yet, so nothing is shown pressed.
+   */
   chosen?: number | null | undefined;
+  /** Mistake mode: the reader went into another verse; asking where is App's. */
+  onAnother?: (() => void) | undefined;
   /** A part was picked: a sign's place in its verse's list, or null for the whole word. */
   onPick: (mark: number | null, name: string | null) => void;
   /**
@@ -121,11 +127,12 @@ export function WordParts({
   anchor,
   mode,
   docked = false,
-  chosen = null,
+  chosen,
   onPick,
   onPickMany,
   onPickLetter,
   onClear,
+  onAnother,
   onClose,
 }: WordPartsProps): JSX.Element {
   const { t } = useT();
@@ -361,11 +368,18 @@ export function WordParts({
         </div>
       )}
       {mode === "mistake" && signs.length === 0 && <p className={styles.none}>{t.mistakeNoSigns}</p>}
-      {mode === "mistake" && onClear && (
+      {mode === "mistake" && (onAnother || onClear) && (
         <div className={styles.actions}>
-          <button type="button" className={styles.clear} onClick={onClear}>
-            {t.mistakeClear}
-          </button>
+          {onAnother && (
+            <button type="button" className={styles.another} data-part="another" onClick={onAnother}>
+              {t.mistakeAnother}
+            </button>
+          )}
+          {onClear && (
+            <button type="button" className={styles.clear} onClick={onClear}>
+              {t.mistakeClear}
+            </button>
+          )}
         </div>
       )}
     </div>

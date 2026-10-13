@@ -26,6 +26,18 @@ describe("the words a reader sees", () => {
       expect(offending).toEqual([]);
     });
 
+    // The owner, 2026-10-13: a hafiz should know which mistake to pick, so the
+    // app names each by what went wrong (the harakat, the whole word, another
+    // verse it went into). "Slip" was the design's word, and it had come to
+    // mean two different things on two buttons. The records may still say it.
+    it(`${locale}: never call a mistake a slip`, () => {
+      const slip = locale === "en" ? /\bslip/i : /التباس|التبست/;
+      const offending = Object.entries(catalog as Record<string, string>)
+        .filter(([, text]) => slip.test(text))
+        .map(([key, text]) => `${key}: ${text}`);
+      expect(offending).toEqual([]);
+    });
+
     it(`${locale}: carry none of our own plumbing words`, () => {
       const offending = Object.entries(catalog as Record<string, string>)
         .filter(([, text]) => PLUMBING[locale].test(text))

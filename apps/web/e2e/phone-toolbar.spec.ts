@@ -205,9 +205,10 @@ test.describe("Hifth · the page tools on a phone", () => {
     await expect(bar(page, "a").getByRole("radio")).toHaveCount(10);
     await radio(page, "Mistake").click();
     await expect(radio(page, "Mistake")).toHaveAttribute("aria-checked", "true");
-    await expect(page.getByText("Tap a word to mark a slip")).toBeVisible();
+    await expect(page.getByText("Tap a word to mark a mistake")).toBeVisible();
     const at = await ayahTarget(page, "#verse-46");
     await page.mouse.click(at.x, at.y);
+    await page.getByRole("dialog", { name: /^What went wrong in / }).getByRole("button", { name: "The whole word" }).click();
     await expect(page.locator("[data-mistake-word]:visible")).toHaveCount(1);
   });
 

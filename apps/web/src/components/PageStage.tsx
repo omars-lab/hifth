@@ -442,9 +442,10 @@ interface PageStageProps {
   onJump?: (jump: { from: { key: string; word?: number }; to: string | null; at: { top: number; bottom: number; x: number } }) => void;
   /**
    * Under the mistake tool (step 3), a tap on a word. Whether that marks it or
-   * opens its signs is App's business; the stage only says which word.
+   * asks what went wrong is App's business; the stage only says which word,
+   * and where it is on screen for the question to open beside.
    */
-  onMarkWord?: (at: { page: number; key: string; word: number; x: number; y: number }) => void;
+  onMarkWord?: (at: { page: number; key: string; word: number; x: number; y: number; rect: WordRect | null }) => void;
   /**
    * Under the harakat tool (harakah-pick = D), a click takes the vowel-sign the
    * magnifier rings. The stage says which sign; App pins a note on it.
@@ -472,6 +473,15 @@ interface PageStageProps {
 export type Corner = "surah" | "juz" | "page";
 
 /** A word's box on screen, in window pixels. */
+/** A box in the page's own units, where it is on screen now; null before the page is laid out. */
+function screenRect(svg: SVGSVGElement, box: { x: number; y: number; width: number; height: number }): WordRect | null {
+  const m = svg.getScreenCTM();
+  if (!m) return null;
+  const a = new DOMPoint(box.x, box.y).matrixTransform(m);
+  const b = new DOMPoint(box.x + box.width, box.y + box.height).matrixTransform(m);
+  return { left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), right: Math.max(a.x, b.x), bottom: Math.max(a.y, b.y) };
+}
+
 export interface WordRect {
   readonly left: number;
   readonly top: number;
@@ -1368,7 +1378,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const placeNoteRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
   const onMarkWordRef = useRef(onMarkWord);
   onMarkWordRef.current = onMarkWord;
-  const markWordRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
+  const markWordRef = useRef<(page: number, svg: SVGSVGElement, key: string, x: number, y: number) => void>(() => {});
   const onPickSignRef = useRef(onPickSign);
   onPickSignRef.current = onPickSign;
   const onOpenWordRef = useRef(onOpenWord);
@@ -1492,6 +1502,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   // and the turn, finding itself overtaken, still says its page arrived.
   const flyingRef = useRef<{ gen: number; next: number } | null>(null);
   const landedEarlyRef = useRef(0);
+  // An overtaken turn whose page had not arrived when the new stroke began: it
+  // lands when the page comes, unless a newer move has the stage by then, and
+  // says so only then. Answering "not landed" at once sent the app back to the
+  // page leaving, so the second of two quick flicks asked for the same page
+  // again and the two turned one page between them.
+  const catchUpRef = useRef<{ gen: number; landed: Promise<boolean> } | null>(null);
   const foldTargetRef = useRef(foldTarget);
   foldTargetRef.current = foldTarget;
   const coverTopRef = useRef(coverTop);
@@ -2070,7 +2086,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const key = hl.pressedKey;
       if (!key) return;
       if (using === "word") openWordRef.current(targetPage, svg, key, at.x, at.y);
-      else (using === "note" ? placeNoteRef : markWordRef).current(targetPage, key, at.x, at.y);
+      else if (using === "note") placeNoteRef.current(targetPage, key, at.x, at.y);
+      else markWordRef.current(targetPage, svg, key, at.x, at.y);
     });
     // The harakat tool's magnifier follows the pointer with no press first:
     // the tool being on is what says a touch means "take a sign".
@@ -2687,6 +2704,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     [reclampCurrent, turnView],
   );
 
+  /** What an overtaken turn reports: whether the page it asked for arrived. */
+  const overtaken = useCallback(
+    (gen: number): boolean | Promise<boolean> =>
+      landedEarlyRef.current === gen || (catchUpRef.current?.gen === gen ? catchUpRef.current.landed : false),
+    [],
+  );
+
   /** End a turn on the destination page: display swapped, inline fades cleared. */
   const land = useCallback(
     (next: number): void => {
@@ -2783,18 +2807,18 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       if (style === "curl") {
         moveFold(el, sweepOf(el, dir).middle, sweepMs);
         await sleep(sweepMs);
-        if (!mine()) return landedEarlyRef.current === gen;
+        if (!mine()) return overtaken(gen);
         el.dataset.flat = "1";
         if (!pagesRef.current.has(next)) {
           setTurnPhase("stalled");
           const mp = await mount;
-          if (!mine()) return landedEarlyRef.current === gen;
+          if (!mine()) return overtaken(gen);
           if (!mp) return giveBack();
           setTurnPhase("crossing");
         }
         // Covered by the leaf, so the swap needs no fade of its own.
         const mp = await mount;
-        if (!mine()) return landedEarlyRef.current === gen;
+        if (!mine()) return overtaken(gen);
         if (!mp) return giveBack();
         land(next);
         flyingRef.current = null;
@@ -2803,17 +2827,17 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       } else {
         fadeFold(el, 1, sweepMs / 2);
         await sleep(sweepMs / 2);
-        if (!mine()) return landedEarlyRef.current === gen;
+        if (!mine()) return overtaken(gen);
         if (!pagesRef.current.has(next)) {
           setTurnPhase("stalled");
           const mp = await mount;
-          if (!mine()) return landedEarlyRef.current === gen;
+          if (!mine()) return overtaken(gen);
           if (!mp) return giveBack();
           setTurnPhase("crossing");
         }
         crossFade(from, next, fadeMs);
         await sleep(fadeMs);
-        if (!mine()) return landedEarlyRef.current === gen;
+        if (!mine()) return overtaken(gen);
         land(next);
         flyingRef.current = null;
         fadeFold(el, 0, sweepMs / 2);
@@ -2826,7 +2850,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       setTurnPhase(null);
       return true;
     },
-    [abortTurn, crossFade, fadeFold, land, moveFold, setTurnPhase, sweepOf],
+    [abortTurn, crossFade, fadeFold, land, moveFold, overtaken, setTurnPhase, sweepOf],
   );
 
   /**
@@ -2873,7 +2897,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         !quiet && kind !== "none" && sweepMs > 0 && !(kind === "crease" && foldTargetRef.current?.current);
       if (!drawn) {
         const mp = await ensurePage(next);
-        if (!mine()) return landedEarlyRef.current === gen;
+        if (!mine()) return overtaken(gen);
         if (!mp) {
           setErrorPage(next);
           setStatus("error");
@@ -2893,7 +2917,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       foldRef.current = { kind: kind as FoldKind, dir, style: drawnStyle(kind as FoldKind, turnStyleRef.current) };
       setFold(foldRef.current);
       const el = await armedFold(gen);
-      if (!mine()) return landedEarlyRef.current === gen;
+      if (!mine()) return overtaken(gen);
       if (!el) return false;
 
       const style = foldRef.current?.style ?? "seam";
@@ -2906,7 +2930,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // The swap is centred on the band's centre, so with a 240 ms sweep and a
       // 120 ms fade it runs from 60 ms to 180 ms.
       await sleep(Math.max(0, sweepMs / 2 - fadeMs / 2));
-      if (!mine()) return landedEarlyRef.current === gen;
+      if (!mine()) return overtaken(gen);
 
       if (!pagesRef.current.has(next)) {
         /*
@@ -2918,7 +2942,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         setTurnPhase("stalled");
         moveFold(el, middle, fadeMs);
         const mp = await mount;
-        if (!mine()) return landedEarlyRef.current === gen;
+        if (!mine()) return overtaken(gen);
         if (!mp) {
           // It will never arrive — offline, unvendored, a 404. Retreat the way
           // it came and leave the reader where they were. Landing would paint
@@ -2939,7 +2963,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
 
       crossFade(from, next, fadeMs);
       await sleep(fadeMs);
-      if (!mine()) return landedEarlyRef.current === gen;
+      if (!mine()) return overtaken(gen);
       land(next);
       flyingRef.current = null;
 
@@ -2961,6 +2985,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       ensurePage,
       land,
       moveFold,
+      overtaken,
       runStyledTurn,
       setTurnPhase,
       sweepOf,
@@ -2997,9 +3022,28 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     (step: 1 | -1): void => {
       const flying = flyingRef.current;
       flyingRef.current = null;
-      if (flying && turnRef.current === flying.gen && pagesRef.current.has(flying.next)) {
-        landedEarlyRef.current = flying.gen;
-        land(flying.next);
+      if (flying && turnRef.current === flying.gen) {
+        if (pagesRef.current.has(flying.next)) {
+          landedEarlyRef.current = flying.gen;
+          land(flying.next);
+        } else {
+          // Its page is still coming. The stroke turns on from it all the
+          // same, and the page lands when it comes, unless the stroke's own
+          // turn, or a hop, has moved the stage on by then.
+          const ticket = relocateRef.current;
+          const leaving = currentPageRef.current;
+          catchUpRef.current = {
+            gen: flying.gen,
+            landed: ensurePage(flying.next).then(
+              (mp) => {
+                if (!mp || ticket !== relocateRef.current || currentPageRef.current !== leaving) return false;
+                land(flying.next);
+                return true;
+              },
+              () => false,
+            ),
+          };
+        }
       }
       const from = currentPageRef.current;
       const next = turnTarget(step);
@@ -3648,10 +3692,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
 
   // The mistake tool's tap: the word under it, or its nearest neighbour. A tap
   // that finds no word (a page with no word data) marks nothing.
-  markWordRef.current = (targetPage, key, x, y) => {
+  markWordRef.current = (targetPage, svg, key, x, y) => {
     void ensureWords(resolver.edition, targetPage).then((idx) => {
       const word = idx?.wordAt(key, x, y) ?? null;
-      if (word !== null) onMarkWordRef.current?.({ page: targetPage, key, word, x, y });
+      if (word === null) return;
+      const box = idx?.boxOf(key, word);
+      onMarkWordRef.current?.({ page: targetPage, key, word, x, y, rect: box ? screenRect(svg, box) : null });
     });
   };
 
@@ -3700,16 +3746,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     void ensureWords(resolver.edition, targetPage).then((idx) => {
       const word = idx?.wordAt(key, x, y) ?? null;
       const box = word === null ? null : idx?.boxOf(key, word);
-      const m = svg.getScreenCTM();
-      if (word === null || !box || !m) return;
-      const a = new DOMPoint(box.x, box.y).matrixTransform(m);
-      const b = new DOMPoint(box.x + box.width, box.y + box.height).matrixTransform(m);
-      onOpenWordRef.current?.({
-        page: targetPage,
-        key,
-        word,
-        rect: { left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), right: Math.max(a.x, b.x), bottom: Math.max(a.y, b.y) },
-      });
+      const rect = box ? screenRect(svg, box) : null;
+      if (word === null || !rect) return;
+      onOpenWordRef.current?.({ page: targetPage, key, word, rect });
     });
   };
 
