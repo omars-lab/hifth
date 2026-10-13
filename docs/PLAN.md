@@ -2158,7 +2158,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     A pinch on the open book slides the book the same way; a pinch on a page on its own still
     grows from the fingers. There are no zoom keys, and an upright iPad has no zoom buttons, so
     upright the rule only reaches the sizes the app sets itself (the opening size and turning
-    back upright), which already fit the screen; the test is on an iPad on its side, both pages
+    back upright), which were measured to fit the width on the 11- and 13-inch iPads; the test is on an iPad on its side, both pages
     at 200% and 300%, the next opening, back at 100%, a page on its own at 400%, and the fold
     setting. The settings test and the browser tests watched failing first.
 

@@ -34,9 +34,15 @@ edge of the paper beside the print. It now measures the printed page alone, once
 settles, rather than on every frame.
 
 The old way, growing from the fold, stays as a setting ("Zooming in on the page" in the info
-panel). The tests that check the #148 fix still pass with the new default, since the two pages
-still meet at the fold; they now meet a little further left.
+panel). The tests that check the #148 fix still pass with the new default, but not because they
+cover the slide: at 150% in the desktop window they use, the right-hand page does not reach the
+window's edge, so the book never moves there. The slide has its own tests on an iPad on its side.
 
 Left alone: an upright iPad has no zoom buttons, so the rule only reaches the sizes the app sets
-itself there. A verse card is docked on the left in both languages and jumping to a verse resets
-the zoom, so a card never covers the line starts this keeps on screen.
+itself there, and those were measured to fit the width (a verse's page opened upright spans 40 to
+762 of an 11-inch iPad's 834 points, and 9 to 1001 of a 13-inch's 1024).
+
+A verse card lies over the facing page. Zoomed to 200% on its side, a tap on a verse of the
+left-hand page put its card over the right-hand page from the fold to 957 of 1180 points, so the
+strip where that page's lines begin stays uncovered. Jumping to a verse by its address resets the
+zoom, so there is nothing slid to cover.
