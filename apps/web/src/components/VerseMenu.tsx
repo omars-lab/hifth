@@ -14,6 +14,11 @@ export interface VerseMenuItem {
   onPick: () => void;
   /** The icon the line leads with: the one the app shows for the same thing elsewhere. */
   glyph?: string;
+  /**
+   * Leave the menu open when picked, for a line whose words then say how it is
+   * going (saving a surah's recitation counts its verses as they come).
+   */
+  stay?: boolean;
 }
 
 interface VerseMenuProps {
@@ -92,10 +97,21 @@ export function placeMenu(
 export function VerseMenu({ name, around, clear, follow, items, onClose, stacked = false }: VerseMenuProps): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
+  // A row wider than the window stands as a column instead: the surah's menu,
+  // a row, ran Play off the side of a phone once it gained a long line.
+  const [crowded, setCrowded] = useState(false);
+  const columned = stacked || crowded;
+  // Measured again when a line's words change, not only when lines come and
+  // go: the line saving a surah's recitation counts, and grows as it does.
+  const words = items.map((i) => i.caption).join("\n");
 
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (!columned && el.scrollWidth > window.innerWidth - 2 * EDGE) {
+      setCrowded(true);
+      return;
+    }
     setAt(
       placeMenu(around, { width: el.offsetWidth, height: el.offsetHeight }, {
         width: window.innerWidth,
@@ -103,7 +119,7 @@ export function VerseMenu({ name, around, clear, follow, items, onClose, stacked
       }, clear),
     );
     // Placed again when lines arrive: a taller menu must still clear the verse.
-  }, [around, clear, items.length]);
+  }, [around, clear, items.length, words, columned]);
 
   // Kept beside the verse while the page settles, then left alone.
   useEffect(() => {
@@ -189,7 +205,7 @@ export function VerseMenu({ name, around, clear, follow, items, onClose, stacked
       style={at ? { left: at.left, top: at.top } : { visibility: "hidden" }}
       onKeyDown={onKeyDown}
       data-verse-menu=""
-      data-stacked={stacked ? "" : undefined}
+      data-stacked={columned ? "" : undefined}
     >
       {items.map((item) => (
         <button
@@ -198,7 +214,7 @@ export function VerseMenu({ name, around, clear, follow, items, onClose, stacked
           role="menuitem"
           className={styles.item}
           onClick={() => {
-            onClose();
+            if (!item.stay) onClose();
             item.onPick();
           }}
         >

@@ -291,7 +291,7 @@ test.describe("Hifth · holding the page's corners", () => {
 
     await holdCorner(page, "surah");
     await expect(menu(page)).toHaveAccessibleName("More for Al-Baqarah");
-    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Go to the start", "New note", "Copy", "Share"]);
+    await expect(menu(page).getByRole("menuitem")).toHaveText(["Play", "Keep its recitation on this device", "Go to the start", "New note", "Copy", "Share"]);
     await page.keyboard.press("Escape");
 
     await holdCorner(page, "juz");

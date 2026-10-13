@@ -32,6 +32,7 @@ import { ZOOM_ACROSSES, rememberZoomAcross, useZoomAcross } from "../zoom-across
 import { ZOOM_ANCHORS, rememberZoomAnchor, useZoomAnchor } from "../zoom-anchor";
 import { NOTE_LEAVES, rememberNoteLeave, useNoteLeave } from "../note-leave";
 import { UsageReadout } from "./UsageReadout";
+import { RecitationShelf } from "./RecitationShelf";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -604,6 +605,10 @@ export function Colophon({
           </div>
           <p className={styles.note}>{t.runAheadNote}</p>
         </section>
+
+        {/* The surahs whose recitation is kept on this device (docs/PLAN.md,
+            item 101), beside the setting for how the next verses are fetched. */}
+        <RecitationShelf />
 
         {/* How the saved jump arrows show (docs/design/jump-arrows-options.md):
             the owner chose staying, and kept the other way as a choice. */}

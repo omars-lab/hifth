@@ -2162,6 +2162,27 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     back upright), which were measured to fit the width on the 11- and 13-inch iPads; the test is on an iPad on its side, both pages
     at 200% and 300%, the next opening, back at 100%, a page on its own at 400%, and the fold
     setting. The settings test and the browser tests watched failing first.
+101. ~~**A surah's recitation can be kept on the reader's own device, with one button.**~~ Chosen
+    2026-10-13 by the owner, asked whether the private demo should carry its own recordings
+    (items 63 and 65 left it as the owner's question): neither carrying them inside the app nor
+    only streaming, but a button for each surah that saves its verses' recordings on the device
+    the reader is holding, so the surah recites with no connection at all and its first verse
+    starts at once. The files come from the same recording server the app already plays from;
+    nothing lands in this repository or in what the app ships, and the device keeps its copy the
+    way a browser keeps what it has played, so this asks nothing of the reciter's rights that
+    streaming does not. Asking the rights holder stays the step before anything wider. The button
+    is in the surah name's menu at the top of the page, beside Play, and says how much it has
+    saved as it goes; the info panel lists what is kept, with its size and a way to remove it.
+    A saved verse plays from the copy, whatever the setting for the next verses in a recitation
+    says. Its test: a browser test that keeps a short surah, goes offline, and plays it.
+    Built 2026-10-13: the line in the surah's menu stays open and counts the verses as they save,
+    then offers to remove them with their size, and the info panel lists each kept surah, says
+    when the device has let some of its files go, and offers to keep it again. Measured off the
+    recording server: Al-Fatihah is 0.71 MB, Ya-Sin 15.2 MB, Al-Baqarah 131.4 MB. A verse that
+    fails from the network while its surah is kept plays from the copy instead. The browser test
+    keeps Al-Baqarah and plays it, and nothing more is asked of the recording server; with the
+    copy unhooked from the player it went red. A long surah on a real iPad on a slow line is
+    parked for the owner as manual item 18.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

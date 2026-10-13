@@ -88,6 +88,16 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   each gap names the file it waited for, and one played from the network there means the
   fetching ahead fell behind. · iPad app, slow wifi · issue: `run-gap-on-poor-wifi`,
   `run-gap-short-then-long` · test: audio.test.ts, e2e/verse-gestures.spec.ts
+- [ ] Hold the surah's name at the top of the page and press "Keep its recitation on this
+  device": the line stays open and counts the verses as they save, then offers to remove them
+  with their size. Turn the wifi off and play the surah: it recites, and its first verse starts
+  at once. The info panel lists it with its size and a Remove button. · any, then the iPad app
+  with the wifi off · issue: `keep-surah-recitation-on-device` · test:
+  e2e/recitation-keep.spec.ts, recitation-keep.test.ts
+- [ ] On a phone, hold the surah's name and the juz's name at the top of the page: every line
+  of the menu is on the screen and can be pressed. A row too wide for the screen stands as a
+  column; the surah's row once ran Play off the edge. · phone · issue: `surah-menu-ran-off-phone`
+  · test: VerseMenu.keys.test.tsx, e2e/recitation-keep.spec.ts
 - [ ] Open a surah's corner menu, wait a moment, and press Play: the first verse sounds at once,
   since its file was asked for when the menu opened. Time it with the gap script and no gaps
   (`--pause 600,2000 --gaps 0`): at a 2 s pause it plays from the copy at home speed and on
