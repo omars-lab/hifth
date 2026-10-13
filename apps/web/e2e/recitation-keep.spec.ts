@@ -60,8 +60,10 @@ test("a surah kept from its menu plays from the device, and the info panel lists
   await expect(menu(page).getByRole("menuitem", { name: "Remove its kept recitation · 0.3 MB" })).toBeVisible({ timeout: 20_000 });
   await page.keyboard.press("Escape");
 
-  // Kept: Play hands the player the copy on the device, and nothing more is
-  // asked of the recording server, for this verse or the ones after it.
+  // Kept: with no connection at all, Play hands the player the copy on the
+  // device, and nothing more is asked of the recording server, for this verse
+  // or the ones after it.
+  await page.context().setOffline(true);
   const asked = (await player.asked()).length;
   const played = (await player.files()).length;
   await holdSurah(page);
@@ -70,7 +72,9 @@ test("a surah kept from its menu plays from the device, and the info panel lists
   expect((await player.files()).at(-1)).not.toMatch(/\.mp3$/);
   await page.waitForTimeout(500);
   expect((await player.asked()).length).toBe(asked);
+  await expect(page.getByText("This recitation could not be played")).toHaveCount(0);
   await page.keyboard.press("Escape");
+  await page.context().setOffline(false);
 
   await page.getByRole("button", { name: /About Hifth/ }).click();
   const shelf = page.getByRole("region", { name: "Recitations kept on this device" });

@@ -4538,6 +4538,17 @@
       "note": "Owner chose 2026-10-13: a button per surah that saves its recordings on the reader's own device, so it recites offline. Built the same day: the surah menu's line keeps it and counts, the info panel lists and removes it, and a kept verse plays from its copy; the browser test went red with the copy unhooked."
     },
     {
+      "id": "keep-surah-once-heard-through",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "102"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The second way to keep a surah's recitation on the device, beside the button: a setting that keeps a surah once it has been recited through. Waits on showing the space used beside it and on saying what 'heard through' means for a run that starts mid-surah."
+    },
+    {
       "id": "surah-menu-ran-off-phone",
       "source": {
         "file": "docs/PLAN.md",

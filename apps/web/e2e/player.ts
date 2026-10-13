@@ -9,6 +9,7 @@ import type { Page } from "@playwright/test";
  * answers that itself, with `recitation` as the file's bytes (none unless
  * given), because a page the offline helper controls can send a fetch past
  * the test's own network on some browsers. `asked` lists the files fetched so.
+ * A browser the test has taken offline is refused every file, as it would be.
  */
 export async function fakePlayer(
   page: Page,
@@ -28,6 +29,8 @@ export async function fakePlayer(
       const url = String(input instanceof Request ? input.url : input);
       if (!url.startsWith("https://verses.quran.com/")) return fetched(input, init);
       w.__asked.push(url.replace(/^.*\//, ""));
+      // A browser the test has taken offline gets no file, as a real one would not.
+      if (!navigator.onLine) return Promise.reject(new TypeError("Failed to fetch"));
       return Promise.resolve(new Response(recitation, { status: 200, headers: { "content-type": "audio/mpeg" } }));
     };
     const still = new WeakMap<HTMLMediaElement, boolean>();
@@ -57,6 +60,15 @@ export async function fakePlayer(
         this.dispatchEvent(new Event("pause"));
       }
     };
+    // The made-up bytes are not sound, and the real element says so with an
+    // error of its own; only a failure the test asks for is passed on.
+    const listen = proto.addEventListener;
+    proto.addEventListener = function (this: HTMLMediaElement, type: string, fn: EventListenerOrEventListenerObject, opts?: boolean | AddEventListenerOptions) {
+      if (type !== "error" || typeof fn !== "function") return listen.call(this, type, fn, opts);
+      return listen.call(this, type, function (this: HTMLMediaElement, e: Event) {
+        if (failed.has(this)) fn.call(this, e);
+      }, opts);
+    } as typeof proto.addEventListener;
     const src = Object.getOwnPropertyDescriptor(proto, "src")!;
     Object.defineProperty(proto, "src", {
       ...src,

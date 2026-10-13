@@ -2180,9 +2180,18 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     when the device has let some of its files go, and offers to keep it again. Measured off the
     recording server: Al-Fatihah is 0.71 MB, Ya-Sin 15.2 MB, Al-Baqarah 131.4 MB. A verse that
     fails from the network while its surah is kept plays from the copy instead. The browser test
-    keeps Al-Baqarah and plays it, and nothing more is asked of the recording server; with the
-    copy unhooked from the player it went red. A long surah on a real iPad on a slow line is
-    parked for the owner as manual item 18.
+    keeps Al-Baqarah, cuts the connection, and plays it, and nothing more is asked of the
+    recording server; with the copy unhooked from the player it went red. A long surah on a real
+    iPad on a slow line is parked for the owner as manual item 18.
+102. **A second way to keep a surah: kept once the reader has heard it through.** The one button
+    of item 101 is the way the owner asked for. The other way the build showed is a setting in the
+    info panel: a surah recited from its first verse to its last is kept without being asked, so a
+    hafiz who revises the same surahs every week has them offline without thinking of it. The
+    button stays the default. Not built yet, for two reasons the build found: a long surah heard
+    through once would quietly take over a hundred megabytes on a phone, so the setting needs the
+    space it has used shown beside it; and a run usually starts mid-surah, so "heard it through"
+    needs saying exactly before it is built. Its test: a browser test that runs a short surah to
+    its end with the setting on and finds it listed in the info panel.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
