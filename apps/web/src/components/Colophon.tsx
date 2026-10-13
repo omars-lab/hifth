@@ -16,6 +16,8 @@ import { PITCH } from "../pitch/pitch";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
 import { LOOKALIKE_COMPARES, rememberLookalikeCompare, useLookalikeCompare } from "../lookalike-compare";
 import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-rows";
+import { PASSAGE_HOPS, rememberPassageHop, usePassageHop } from "../passage-hop";
+import { LOOKALIKE_ARROWS, rememberLookalikeArrows, useLookalikeArrows } from "../lookalike-arrows";
 import { RIBBON_LENGTHS, rememberRibbonLength, useRibbonLength } from "../ribbon-length";
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
@@ -257,6 +259,8 @@ export function Colophon({
   const longVerse = useLongVerse();
   const lookalikeCompare = useLookalikeCompare();
   const passageRows = usePassageRows();
+  const passageHop = usePassageHop();
+  const lookalikeArrows = useLookalikeArrows();
   const ribbonLength = useRibbonLength();
   const runFollow = useRunFollow();
   const runAhead = useRunAhead();
@@ -730,7 +734,7 @@ export function Colophon({
 
         {/* What a look-alike list does with a passage row when a verse inside
             it is listed too (knowledge-graph-commentary.md, item 47): all three
-            ways built, both rows kept as the default until the owner picks. */}
+            ways built; the owner picked the verse under its passage, 2026-10-12. */}
         <section className={styles.block} aria-labelledby="colophon-passage-rows">
           <h3 className={styles.subhead} id="colophon-passage-rows">
             {t.passageRowsTitle}
@@ -755,6 +759,54 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.passageRowsNote}</p>
+        </section>
+
+        {/* Where a passage row's arrow lands (lookalike-rows.md, item 17): the
+            owner picked the most-alike verse, 2026-10-12; the first verse stays. */}
+        <section className={styles.block} aria-labelledby="colophon-passage-hop">
+          <h3 className={styles.subhead} id="colophon-passage-hop">
+            {t.passageHopTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-passage-hop">
+            {PASSAGE_HOPS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={passageHop === choice}
+                data-passage-hop={choice}
+                onClick={() => rememberPassageHop(choice)}
+              >
+                {choice === "alike" ? t.passageHopAlike : t.passageHopFirst}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.passageHopNote}</p>
+        </section>
+
+        {/* Which way the look-alike signs' arrows point (knowledge-graph-commentary.md,
+            item 8): the owner picked the book's way, 2026-10-12; the old way stays. */}
+        <section className={styles.block} aria-labelledby="colophon-lookalike-arrows">
+          <h3 className={styles.subhead} id="colophon-lookalike-arrows">
+            {t.lookalikeArrowsTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-lookalike-arrows">
+            {LOOKALIKE_ARROWS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={lookalikeArrows === choice}
+                data-lookalike-arrows={choice}
+                onClick={() => rememberLookalikeArrows(choice)}
+              >
+                {choice === "book" ? t.lookalikeArrowsBook : t.lookalikeArrowsReading}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.lookalikeArrowsNote}</p>
         </section>
 
         {/* How long a bookmark's ribbon hangs (docs/PLAN.md, item 49): short,

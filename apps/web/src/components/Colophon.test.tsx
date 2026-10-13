@@ -5,6 +5,8 @@ import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 import { CARD_EDGE_KEY } from "../card-edge";
 import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
+import { PASSAGE_HOP_KEY } from "../passage-hop";
+import { LOOKALIKE_ARROWS_KEY } from "../lookalike-arrows";
 import { RIBBON_LENGTH_KEY } from "../ribbon-length";
 import { RUN_FOLLOW_KEY } from "../run-follow";
 import { RUN_AHEAD_KEY } from "../run-ahead";
@@ -143,17 +145,20 @@ describe("how two look-alikes that share words in several places are compared, i
 });
 
 describe("what a look-alike list does with a passage and a verse inside it, in settings", () => {
-  it("offers all three ways, both rows checked, and keeps the one picked", () => {
+  it("offers all three ways, the verse under its passage first and checked, and keeps the one picked", () => {
+    // The owner's pick, 2026-10-12: the verse sits under its passage by default.
     localStorage.removeItem(PASSAGE_ROWS_KEY);
     const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
     const way = (c: string) => container.querySelector(`[data-passage-rows="${c}"]`)!;
-    expect(way("both")).toHaveAttribute("aria-checked", "true");
-    expect(way("group")).toHaveAttribute("aria-checked", "false");
-    expect(way("drop")).toHaveAttribute("aria-checked", "false");
-    fireEvent.click(way("group"));
+    const order = [...container.querySelectorAll("[data-passage-rows]")].map((b) => b.getAttribute("data-passage-rows"));
+    expect(order).toEqual(["group", "both", "drop"]);
     expect(way("group")).toHaveAttribute("aria-checked", "true");
     expect(way("both")).toHaveAttribute("aria-checked", "false");
-    expect(localStorage.getItem(PASSAGE_ROWS_KEY)).toBe("group");
+    expect(way("drop")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("both"));
+    expect(way("both")).toHaveAttribute("aria-checked", "true");
+    expect(way("group")).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem(PASSAGE_ROWS_KEY)).toBe("both");
     localStorage.removeItem(PASSAGE_ROWS_KEY);
   });
 });
@@ -231,5 +236,33 @@ describe("provenance", () => {
     // A dev server corresponds to a working tree; there is no tree to link.
     expect(isCommit("dev")).toBe(false);
     expect(urlFor("dev")).toBe(SOURCE_REPO);
+  });
+});
+
+describe("where a passage row's arrow lands, in settings", () => {
+  it("offers both, the most-alike verse checked, and keeps the one picked", () => {
+    localStorage.removeItem(PASSAGE_HOP_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-passage-hop="${c}"]`)!;
+    expect(way("alike")).toHaveAttribute("aria-checked", "true");
+    expect(way("first")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("first"));
+    expect(way("first")).toHaveAttribute("aria-checked", "true");
+    expect(localStorage.getItem(PASSAGE_HOP_KEY)).toBe("first");
+    localStorage.removeItem(PASSAGE_HOP_KEY);
+  });
+});
+
+describe("which way the look-alike arrows point, in settings", () => {
+  it("offers both, the book's way checked, and keeps the one picked", () => {
+    localStorage.removeItem(LOOKALIKE_ARROWS_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-lookalike-arrows="${c}"]`)!;
+    expect(way("book")).toHaveAttribute("aria-checked", "true");
+    expect(way("reading")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("reading"));
+    expect(way("reading")).toHaveAttribute("aria-checked", "true");
+    expect(localStorage.getItem(LOOKALIKE_ARROWS_KEY)).toBe("reading");
+    localStorage.removeItem(LOOKALIKE_ARROWS_KEY);
   });
 });

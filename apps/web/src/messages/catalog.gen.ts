@@ -203,6 +203,10 @@ export interface Catalog {
   readonly longVerseShorter: string;
   readonly longVerseSmaller: string;
   readonly longVerseTitle: string;
+  readonly lookalikeArrowsBook: string;
+  readonly lookalikeArrowsNote: string;
+  readonly lookalikeArrowsReading: string;
+  readonly lookalikeArrowsTitle: string;
   readonly lookalikeCompareEvery: string;
   readonly lookalikeCompareNote: string;
   readonly lookalikeComparePlain: string;
@@ -346,6 +350,10 @@ export interface Catalog {
   readonly pagebarFisheyeNote: string;
   readonly pagebarSectionTitle: string;
   readonly pagesVendored: (d: { readonly haveText: string | number; readonly totalText: string | number }) => string;
+  readonly passageHopAlike: string;
+  readonly passageHopFirst: string;
+  readonly passageHopNote: string;
+  readonly passageHopTitle: string;
   readonly passageRowsBoth: string;
   readonly passageRowsDrop: string;
   readonly passageRowsGroup: string;

@@ -3698,9 +3698,10 @@ test.describe("Hifth · a verse's number opens a menu of what to read on it", ()
     // Similar verses wear "looks like" with a small mark for which way, the
     // same as their buttons on the page's edge: a bare arrow said where, not
     // what, and the later one was the very triangle that means listen (owner,
-    // 2026-10-04).
-    await expect(icon(/^Similar verses in earlier surahs/)).toHaveText("≈←");
-    await expect(icon(/^Similar verses in later surahs/)).toHaveText("≈→");
+    // 2026-10-04). The arrows follow the book, where later pages lie to the
+    // left (owner, 2026-10-12, knowledge-graph-commentary item 8).
+    await expect(icon(/^Similar verses in earlier surahs/)).toHaveText("≈→");
+    await expect(icon(/^Similar verses in later surahs/)).toHaveText("≈←");
   });
 
   test("picking similar verses opens that list, not the note", async ({ page }) => {

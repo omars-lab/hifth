@@ -370,10 +370,17 @@ The pattern among the big third-party apps is option B: hear the gesture and sho
 
 ## Open questions, and what would answer each
 
-### ① Should the native app catch the pencil's double-tap and squeeze, and open Hifth's own tools at the tip? · **open**
+### ① Should the native app catch the pencil's double-tap and squeeze, and open Hifth's own tools at the tip? · **answered**
 
 Option B above is recommended. It waits on the native app, which is planned and not yet built,
 and on the tool bar's own shape, which [the Notes-style tool bar note](notes-style-toolbar.md)
 is still settling. What would answer it: the native app running on a real iPad with a 2nd
 generation pencil or a Pencil Pro, because the simulator cannot send either gesture. That
 by-hand check goes on the manual testing list when the wrapper exists.
+
+**Answered 2026-10-12 by the owner: option B.** The app hears the double-tap and the squeeze and
+passes them to the page, and the page opens Hifth's own pens at the pencil's tip. The native app
+now exists (it runs on the iPad simulator and the Mac), so the build is
+[plan item 96](../PLAN.md). What still waits is a real iPad with a pencil that has those
+gestures, because the simulator cannot send them; that check goes on the manual testing list
+once the build lands.

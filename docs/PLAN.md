@@ -1842,6 +1842,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     above it, with the note up or not. The question is for the opening level only: should a turn
     forward from a page shown at the level it opened at land at the top of the next page (and a
     turn back at the foot of the one before), the way reading carries on?
+
+    Chosen 2026-10-13 by the owner: yes, the top of the next page. At the size the page opened
+    at, a turn forward lands at the top of the next page and a turn back at the foot of the one
+    before. A page the reader zoomed in on still keeps the same lines in view. Today's way stays
+    as a setting. The build is item 97; the owner also asked for the upright opening size to be
+    a setting, which is item 98.
 76. ~~**Tapping the number of the verse being recited stopped the recitation.**~~ Found walking a
     note opened mid-run, 2026-10-11: a presenter plays a surah from its corner and, while a
     verse is heard, taps that verse's number to show the room its note. The sound stopped at
@@ -2094,6 +2100,25 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     left instead, mirrored, so a hafiz reading in Arabic can try the screen fully mirrored. Its
     test: each side in both languages, the pens and Mark up wholly on that side and clear of the
     page.
+96. **Let the pencil's double-tap and squeeze open Hifth's pens at the tip.** Chosen 2026-10-12
+    by the owner ([pencil gestures ①](design/pencil-gestures.md), option B): the iPad app hears
+    the pencil's double-tap (2nd generation pencil) and squeeze (Pencil Pro) and hands them to
+    the page, which opens its own pens beside the pencil's tip; a web page alone never hears
+    either. Its tests: a Swift test that each gesture becomes one message to the page, and a
+    browser test that the message opens the pens at the point it names. The feel on a real iPad
+    with a real pencil goes on the manual testing list, because the simulator cannot send these
+    gestures.
+97. **Upright on an iPad, a turn from the page's foot opens the next page at its top.** Chosen
+    2026-10-13 by the owner (item 75). Only at the size the page opened at: a turn forward lands
+    at the top of the next page, a turn back at the foot of the one before. A page the reader
+    zoomed in on keeps the same lines in view, as before. Keeping the same height on every turn
+    stays as a setting in the info panel. Its test: a browser test on an upright iPad that turns
+    from the foot of a page and finds the next one's top at the screen's top.
+98. **Let the reader choose how big the page opens on an upright iPad.** Asked 2026-10-13 by the
+    owner while answering item 75. Today it opens a little bigger than the screen (155%), so the
+    letters are larger and the page slides. A setting in the info panel offers that, and the
+    whole page at once (100%), at least. Its test: a browser test that each choice opens the
+    page at its own size, and a unit test for the saved choice.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

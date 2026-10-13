@@ -761,7 +761,7 @@ page waits.
 open, and comes back the moment the menu closes. A test presses a number, checks that only the
 menu shows, closes it with Escape, and checks that the row is back.
 
-### ⑧ Should the "later surahs" arrow point left, the way the book runs? · **open**
+### ⑧ Should the "later surahs" arrow point left, the way the book runs? · **fixed**
 
 The look-alike signs use an arrow to say where the other verse is: "≈←" for an earlier surah
 and "≈→" for a later one. But the book, and the page bar under it, run right to left: page 1 is
@@ -772,6 +772,13 @@ from where a reader's eye would go to find a later page. The owner looked over t
 **What would answer it:** the owner choosing, from the two arrows drawn on a real page, whether
 "later" points left (with the book) or right (as now, the way most English readers expect
 "next").
+
+**Chosen 2026-10-12 by the owner: follow the book.** Built 2026-10-13: a later surah's sign is
+now "≈←" and an earlier one "≈→", on the page's edge, in the verse menu and in the list's title,
+in both languages, so the arrow points the same way as the page slider's own "next page" arrow.
+The old way stays a setting in the info panel ("Later points right"). A unit test turns each
+arrow round, a settings test checks the book's way is picked when nobody chose, and the pitch
+test of the verse menu was turned round to expect the new arrows.
 
 ### ⑨ Deep in a list of roots or look-alikes, can the reader still close it? · **fixed**
 
@@ -1352,7 +1359,7 @@ the second, and our build kept the start but threw away where the passage ends. 
 in the look-alike list and the highlight menu, the way the note card already named a range of verses. A
 word-for-word twin stays one verse. A data test on the shipped links and a test on each list failed first.
 
-### ㊼ When a verse lists both a passage and one verse inside it, is that one look-alike or two? · **open**
+### ㊼ When a verse lists both a passage and one verse inside it, is that one look-alike or two? · **fixed**
 
 After ㊻, 2:48's list shows "2:122–2:123" (the passage match) and, under it, "2:123" (a hand-written
 note: the same two words in the other order, and different verbs). Both are true, and the second says
@@ -1402,7 +1409,12 @@ in those cases the two rows carry the very same picture, one above the other, on
 iPad app as much as the browser (walked 2026-10-09, upright and on its side). Nothing is decided by
 that; it only makes what *Both* costs easier to see.
 
-The default stays "both" and the question stays open: the owner picks.
+**Chosen 2026-10-12 by the owner: the verse under its passage.** Since 2026-10-13 that is what a
+list shows when the reader never chose: the verse rows sit set in under their passage, as one
+block. "Show both rows" and "Verse only" stay as settings in the info panel, listed after it. A
+settings test checks the order and that the verse-under-passage way is the one picked when nobody
+chose; it failed first, with both rows picked. Looked at on the iPad held sideways at 7:106, in
+both languages.
 
 ### ㊽ When two look-alikes share no one stretch of words, does the row still say why? · **fixed**
 

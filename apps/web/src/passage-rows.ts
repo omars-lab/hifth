@@ -7,17 +7,17 @@ import type { PassageRows } from "@hifth/core";
  *
  * About 40 verses list both, mostly in the Moses and Iblis stories, so a hafiz
  * sees two or three rows for one memory (docs/design/knowledge-graph-commentary.md,
- * item 47). All three ways are built and kept here as a setting; until the owner
- * picks, the list stays as it was:
+ * item 47). All three ways are built and kept here as a setting. The owner
+ * picked the verse under its passage on 2026-10-12, so that is the default:
  *
- *   both   every row where it was
  *   group  the verses inside the passage sit, indented, right under it
+ *   both   every row where it was
  *   drop   the passage row is left out; its verses keep their own rows
  */
 export type { PassageRows };
 
 /** In settings order. */
-export const PASSAGE_ROWS: readonly PassageRows[] = ["both", "group", "drop"];
+export const PASSAGE_ROWS: readonly PassageRows[] = ["group", "both", "drop"];
 
 /** Versioned: a way that later changes what it does gets a new key. */
 export const PASSAGE_ROWS_KEY = "hifth.passage-rows.v1";
@@ -26,15 +26,15 @@ function isPassageRows(value: unknown): value is PassageRows {
   return value === "both" || value === "group" || value === "drop";
 }
 
-/** The way this device chose, or both rows when it never chose. */
+/** The way this device chose, or the verse under its passage when it never chose. */
 export function savedPassageRows(): PassageRows {
   try {
     const stored = localStorage.getItem(PASSAGE_ROWS_KEY);
-    return isPassageRows(stored) ? stored : "both";
+    return isPassageRows(stored) ? stored : "group";
   } catch {
     // Safari private mode throws on localStorage; a device we cannot remember
     // gets the default.
-    return "both";
+    return "group";
   }
 }
 
