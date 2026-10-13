@@ -2895,7 +2895,7 @@
       "severity": "question",
       "owner": "user",
       "closedBy": "docs/design/pencil-gestures.md",
-      "note": "The owner chose on 2026-10-12: option B, the iPad app hears double-tap and squeeze and the page opens Hifth's own pens at the tip. The build is plan item 96 (pencil-gestures-build); the real-pencil check goes on the manual testing list once it lands."
+      "note": "The owner chose on 2026-10-12: option B, the iPad app hears double-tap and squeeze and the page opens Hifth's own pens at the tip. The build is plan item 96 (pencil-gestures-build); built 2026-10-13, and the real-pencil check is manual testing 19."
     },
     {
       "id": "intro-and-same-surah-verses-unlinked",
@@ -4487,10 +4487,11 @@
         "file": "docs/PLAN.md",
         "item": "96"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Build the owner's choice (pencil gestures ①, option B): the iPad app passes the pencil's double-tap and squeeze to the page, which opens Hifth's pens at the tip. Swift test plus browser test; the feel on a real pencil goes on the manual testing list."
+      "note": "Build the owner's choice (pencil gestures ①, option B): the iPad app passes the pencil's double-tap and squeeze to the page, which opens Hifth's pens at the tip. Swift test plus browser test; the feel on a real pencil goes on the manual testing list. Built 2026-10-13: a squeeze opens the pens beside the tip, a double-tap swaps the last pen used with plain selecting, the colour palette setting opens the highlighter's pens, off and run shortcut do nothing. Swift test native/HifthTests/PencilTests.swift and the browser test, both watched failing first; the real pencil is manual testing 19.",
+      "closedBy": "apps/web/e2e/pencil.spec.ts"
     },
     {
       "id": "upright-turn-lands-at-top-build",

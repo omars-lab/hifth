@@ -125,7 +125,8 @@ import { USE_PENS } from "./usage";
 import { useT, type Strings } from "./i18n";
 import { JumpPicker, type JumpChoice } from "./components/JumpPicker";
 import { useHashRouter } from "./useHashRouter";
-import { exposeToShell, nativeShare, shareBase } from "./native-bridge";
+import { exposeToShell, isNative, nativeShare, shareBase } from "./native-bridge";
+import { pencilAction, pencilGesture, swapTool } from "./pencil";
 import { linksFor } from "./share-links";
 import { CARD_QUERY, DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
 import { useRoomForCards } from "./components/over-leaf";
@@ -141,7 +142,7 @@ import {
   type WordRect,
 } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, TOOLS, toolHint, toolName } from "./components/PageToolbar";
-import { PenHomeBottom, PenHomeFloat, PenHomeSide, useSideRoom } from "./components/PenHomes";
+import { PenHomeAt, PenHomeBottom, PenHomeFloat, PenHomeSide, useSideRoom } from "./components/PenHomes";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 import { rememberArrowShowing, savedArrowShowing } from "./jump-arrows";
 // Opened by few readers and never before the page is up: loaded on first open.
@@ -1706,6 +1707,8 @@ export function App(): JSX.Element {
     setMistakeTap(choice);
   }, []);
   const [lastAim, setLastAim] = useState<MarkAim>("note");
+  // The last tool other than plain selecting, for the pencil's double-tap swap.
+  const lastToolRef = useRef<PageTool | null>(null);
   const markAim = markTools === "one" ? (isMarkAim(tool) ? tool : lastAim) : undefined;
   const barTools = toolsFor(TOOLS, markTools, markAim ?? "note");
   const chooseTool = useCallback(
@@ -1716,6 +1719,7 @@ export function App(): JSX.Element {
       if (pen && toolRef.current !== next) void countUse(`pen-${pen}`);
       toolRef.current = next;
       lockedRef.current = keep;
+      if (next !== "select") lastToolRef.current = next;
       if (isMarkAim(next)) setLastAim(next);
       setToolState(next);
       setLocked(keep);
@@ -3461,7 +3465,42 @@ export function App(): JSX.Element {
   useHashRouter(currentState, restoreState, resolver !== null);
   // The Mac shell's Page menu turns the page through this; nothing outside
   // the shell can see it.
-  useEffect(() => exposeToShell({ stepPage }), [stepPage]);
+  // And the iPad app hands it the Apple Pencil's double-tap and squeeze, with
+  // the reader's own pencil setting (docs/PLAN.md, 96; pencil.ts says what each
+  // setting does here). The pens open at the tip, or where the pencil last
+  // hovered when it was not near, or mid-screen.
+  const [pencilPens, setPencilPens] = useState<{ x: number; y: number } | null>(null);
+  const closePencilPens = useCallback(() => setPencilPens(null), []);
+  const hoverRef = useRef<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    if (!isNative()) return;
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === "pen" && e.buttons === 0) hoverRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
+  const onPencil = useCallback(
+    (raw: unknown) => {
+      const g = pencilGesture(raw);
+      if (!g) return;
+      const spot = g.at ?? hoverRef.current ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      const action = pencilAction(g.pref);
+      if (action === "none") return;
+      if (action === "previous") {
+        const next = swapTool(toolRef.current, lastToolRef.current);
+        if (next) {
+          setPencilPens(null);
+          chooseTool(next);
+          return;
+        }
+      }
+      if (action === "pens") chooseTool("highlight");
+      setPencilPens(spot);
+    },
+    [chooseTool],
+  );
+  useEffect(() => exposeToShell({ stepPage, pencil: onPencil }), [stepPage, onPencil]);
 
   // A jump lands through `restoreState` — the same path a live hop and a
   // cold-opened link take (spec §7; Loop 3's record says why a second navigation
@@ -3982,6 +4021,26 @@ export function App(): JSX.Element {
           tools={barTools}
           aim={markAim}
           end={railAt === "tools" ? hopRail(undefined, "tools") : undefined}
+        />
+      )}
+      {resolver && pencilPens && (
+        <PenHomeAt
+          at={pencilPens}
+          onClose={closePencilPens}
+          tool={tool}
+          locked={locked}
+          onTool={(next, lock) => {
+            chooseTool(next, lock);
+            // The highlighter offers its four pens; the pick among them closes these.
+            if (next !== "highlight") closePencilPens();
+          }}
+          pen={pen}
+          onPen={(next) => {
+            choosePen(next);
+            closePencilPens();
+          }}
+          tools={barTools}
+          aim={markAim}
         />
       )}
       {resolver && desktop && penAt === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}

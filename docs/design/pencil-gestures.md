@@ -384,3 +384,13 @@ now exists (it runs on the iPad simulator and the Mac), so the build is
 [plan item 96](../PLAN.md). What still waits is a real iPad with a pencil that has those
 gestures, because the simulator cannot send them; that check goes on the manual testing list
 once the build lands.
+
+**Built 2026-10-13.** The page's handler is `window.__HIFTH_PAGE__.pencil`, beside the Mac
+menu's page turn, rather than the `__hifthPencil` sketched above. Each of Apple's settings has
+one answer: tool palette opens Hifth's pens beside the tip; switch to eraser and switch to last
+used swap the tool in hand (Hifth has no eraser, and its tools put themselves down after one use,
+so the swap picks up the last tool used, or puts down the one in hand); colour palette and ink
+attributes open the highlighter's pens; off and run shortcut do nothing. With the tip away from
+the screen the pens open where the pencil last hovered, or mid-screen. Upright, the highlighter's
+two rows of pens were wider than the screen; they now wrap. Tests: `native/HifthTests/PencilTests.swift`
+and `apps/web/e2e/pencil.spec.ts`. The by-hand list above is parked as manual testing 19.

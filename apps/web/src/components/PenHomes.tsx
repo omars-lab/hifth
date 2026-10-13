@@ -4,6 +4,7 @@ import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import { isMarkAim, type MarkAim } from "../mark-tools";
 import type { Pen } from "../pen";
 import type { PenSide } from "../pen-side";
+import { besideTip } from "../pencil";
 import { rememberPenFloat, savedPenFloat, sideFits, snapToEdge, type FloatSpot } from "../pen-home";
 import type { PageTool } from "./PageStage";
 import { AimPicker, LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress, type ToolEntry } from "./PageToolbar";
@@ -248,6 +249,51 @@ export function PenHomeFloat(props: PenHomeProps): JSX.Element {
       <DoneTick onDone={() => onTool("select")} />
       <ToolRow {...props} upright={upright} />
       <UndoRedo upright={upright} />
+      <Offered {...props} />
+    </div>
+  );
+}
+
+/**
+ * The pens beside the Apple Pencil's tip, opened by a squeeze or a double-tap
+ * in the iPad app (docs/PLAN.md, 96). Over the page on any layout, upright or
+ * sideways, beside the tip and never under it, whole inside the window. What
+ * a pick does is the caller's (App.tsx puts the pens away after one); Escape
+ * or a touch anywhere else puts them away too.
+ */
+export function PenHomeAt(props: PenHomeProps & { at: { x: number; y: number }; onClose: () => void }): JSX.Element {
+  const { at, onClose } = props;
+  const { t, dir } = useT();
+  const box = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const p = besideTip(at, { w: el.offsetWidth, h: el.offsetHeight }, { w: window.innerWidth, h: window.innerHeight });
+    el.style.left = `${p.left}px`;
+    el.style.top = `${p.top}px`;
+  });
+  // Heard from the moment the pens are drawn, not a beat later: a key pressed
+  // as they appeared did nothing.
+  useLayoutEffect(() => {
+    // Capture, so Escape closes the pens before it would put the tool down.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      onClose();
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!box.current?.contains(e.target as Node)) onClose();
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onDown, true);
+    };
+  }, [onClose]);
+  return (
+    <div ref={box} className={styles.atTip} role="toolbar" aria-label={t.toolbarLabel} dir={dir} data-pencil-pens="" data-tool={props.tool}>
+      <ToolRow {...props} />
       <Offered {...props} />
     </div>
   );

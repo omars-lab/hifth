@@ -91,6 +91,15 @@
   flex-direction: column;
 }
 
+/* The pens beside the pencil's tip: on a narrow screen the highlighter's
+   colours go under the tools rather than off the edge. */
+.atTip {
+  composes: float;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-inline-size: calc(100vw - 16px);
+}
+
 .grip {
   display: inline-grid;
   place-items: center;

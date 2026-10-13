@@ -128,7 +128,7 @@ describe("exposeToShell", () => {
 
   it("hands the page nothing outside the shell", () => {
     const stepPage = vi.fn();
-    const away = exposeToShell({ stepPage });
+    const away = exposeToShell({ stepPage, pencil: vi.fn() });
     expect(pw.__HIFTH_PAGE__).toBeUndefined();
     away();
   });
@@ -136,7 +136,7 @@ describe("exposeToShell", () => {
   it("in the shell, the page's turn is reachable by name, and taken away again", () => {
     inShell();
     const stepPage = vi.fn();
-    const away = exposeToShell({ stepPage });
+    const away = exposeToShell({ stepPage, pencil: vi.fn() });
     pw.__HIFTH_PAGE__?.stepPage(1);
     pw.__HIFTH_PAGE__?.stepPage(-1);
     expect(stepPage.mock.calls).toEqual([[1], [-1]]);
@@ -148,11 +148,20 @@ describe("exposeToShell", () => {
     inShell();
     const first = vi.fn();
     const second = vi.fn();
-    const awayFirst = exposeToShell({ stepPage: first });
-    exposeToShell({ stepPage: second });
+    const awayFirst = exposeToShell({ stepPage: first, pencil: vi.fn() });
+    exposeToShell({ stepPage: second, pencil: vi.fn() });
     awayFirst();
     pw.__HIFTH_PAGE__?.stepPage(1);
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledWith(1);
+  });
+
+  it("in the shell, the pencil's gestures reach the page by name, as the app sends them", () => {
+    inShell();
+    const pencil = vi.fn();
+    const away = exposeToShell({ stepPage: vi.fn(), pencil });
+    (pw.__HIFTH_PAGE__ as unknown as { pencil: (e: unknown) => void }).pencil({ kind: "squeeze", pref: "palette", x: 1, y: 2 });
+    expect(pencil).toHaveBeenCalledWith({ kind: "squeeze", pref: "palette", x: 1, y: 2 });
+    away();
   });
 });

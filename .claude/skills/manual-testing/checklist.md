@@ -130,6 +130,16 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
     Stop stops it, and once it is done the surah plays with the wifi off. If it stalls, or the
     iPad later lets the files go (the info panel then says the surah is incomplete), that becomes
     a backlog item and a test (docs/PLAN.md, item 101).
+19. **Double-tapping and squeezing a real Apple Pencil in the iPad app.** On the iPad, with a 2nd
+    generation pencil and a Pencil Pro, open a page and try each pencil setting (in the iPad's
+    own Settings, Apple Pencil). Right: a squeeze, or a double-tap set to show the tool palette,
+    opens Hifth's pens beside the tip when it hovers, and somewhere sensible when it does not; a
+    double-tap set to the eraser or the last tool swaps between the last pen used and plain
+    selecting; colour palette opens the highlighter's pens; off and run shortcut do nothing. It
+    still works after typing in a note or text box, and after the share sheet. The squeeze's
+    little buzz feels right; with Scribble on no stroke on the page is lost; an older pencil and
+    a finger break nothing. Why not a machine: the simulator cannot send either gesture, so the
+    tests play the app's side by hand (docs/PLAN.md, item 96; docs/design/pencil-gestures.md).
 
 ## Done
 
