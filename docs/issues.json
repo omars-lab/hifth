@@ -4138,10 +4138,11 @@
         "file": "docs/PLAN.md",
         "item": "69"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Held upright the iPad opens the page a little magnified (155%); turned to the open book it shows both pages whole (100%), and turned back upright it stays at 100% instead of going back to 155%. The verse and its note stay in sight either way. Should a turn back upright bring back the level the page opened at?"
+      "note": "Owner, 2026-10-13: yes, turning back upright brings back the size the page opened at (the setting from item 98); staying at 100% stays as a setting. The build is item 99.",
+      "closedBy": "docs/PLAN.md"
     },
     {
       "id": "tap-other-verse-with-note-up-leaves-it-off-top",
@@ -4498,6 +4499,17 @@
       "owner": "agent",
       "note": "Built 2026-10-13: an info-panel setting, a little closer (155%) by default or the whole page. iPad browser test and unit tests watched failing first.",
       "closedBy": "apps/web/e2e/ipad.spec.ts"
+    },
+    {
+      "id": "upright-again-brings-back-opening-size",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "99"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Build the owner's answer to item 69: turned back upright, the page comes back at its opening size, not 100%; staying at 100% stays as a setting."
     }
   ]
 }

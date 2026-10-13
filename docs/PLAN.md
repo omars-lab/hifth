@@ -1779,6 +1779,11 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     verse and its note stay in sight either way, so nothing is lost; the question is which a
     hafiz handing the iPad across a table expects: the page as it first opened, or as it was
     left. Should a turn back upright bring back the level the page opened at?
+
+    Chosen 2026-10-13 by the owner: yes, back to the size the page opened at. The open book made
+    the page 100%, not the reader, so turning back upright brings back the size set under "How
+    big a verse's page opens" (item 98). Staying at 100% stays as a setting. The build is item
+    99.
 70. ~~**Upright, with a note open, tapping the verse above leaves its first lines hidden over the
     page's top.**~~ Found 2026-10-11 walking the hand-off: a reader moves from verse to verse with
     the note open by tapping the next one, and on an iPad held upright, at the level the page
@@ -2123,6 +2128,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     page at its own size, and a unit test for the saved choice. Built 2026-10-13: "How big a
     verse's page opens" in the info panel, "A little closer" by default or "The whole page". It
     also governs a phone, which opens a verse the same way. Both tests watched failing first.
+99. **Turned back upright, the iPad brings back the size the page opened at.** Chosen 2026-10-13
+    by the owner (item 69). Turned on its side the open book shows both pages whole; turned back
+    upright, the page comes back at the size set under "How big a verse's page opens", not at
+    100%. A page the reader zoomed in on before turning keeps what they chose. Staying at 100%
+    stays as a setting in the info panel. Its test: a browser test that turns an iPad on its
+    side and back and finds the page at its opening size.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
