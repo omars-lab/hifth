@@ -310,6 +310,8 @@ export function PageSpread({
         ref={bookRef}
         className={styles.book}
         data-testid="page-book"
+        // So a leaf can find the book it slides (zoom-across.ts).
+        data-book=""
         data-solo={solo ? "true" : undefined}
       >
         {leaf(right, "right")}

@@ -813,6 +813,10 @@ export interface Strings {
   zoomAnchorVerse: string;
   zoomAnchorMiddle: string;
   zoomAnchorNote: string;
+  zoomAcrossTitle: string;
+  zoomAcrossStarts: string;
+  zoomAcrossFold: string;
+  zoomAcrossNote: string;
   noteLeaveTitle: string;
   noteLeaveSlide: string;
   noteLeaveAtOnce: string;
@@ -1600,6 +1604,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     zoomAnchorVerse: m.zoomAnchorVerse,
     zoomAnchorMiddle: m.zoomAnchorMiddle,
     zoomAnchorNote: m.zoomAnchorNote,
+    zoomAcrossTitle: m.zoomAcrossTitle,
+    zoomAcrossStarts: m.zoomAcrossStarts,
+    zoomAcrossFold: m.zoomAcrossFold,
+    zoomAcrossNote: m.zoomAcrossNote,
     noteLeaveTitle: m.noteLeaveTitle,
     noteLeaveSlide: m.noteLeaveSlide,
     noteLeaveAtOnce: m.noteLeaveAtOnce,

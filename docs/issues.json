@@ -4519,10 +4519,11 @@
         "file": "docs/PLAN.md",
         "item": "100"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Build the owner's answer to item 67: the zoom buttons grow the page across from where its lines begin, so the line starts stay on screen; growing evenly from the fold stays as a setting."
+      "note": "Built 2026-10-13: zoomed past the screen, the open book slides so the right-hand page's line starts stay on screen, and a page on its own grows from its right edge; growing from the fold is an info-panel setting. iPad browser tests and a settings test watched failing first.",
+      "closedBy": "apps/web/e2e/ipad.spec.ts"
     }
   ]
 }

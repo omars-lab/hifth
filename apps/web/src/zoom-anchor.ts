@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
  *           reader was looking (the default); with no verse chosen, the middle.
  *   middle  the page grows from its middle, as it always did.
  *
- * Only the height: across the page, an open book still grows from its fold.
+ * Only the height: across the page is `zoom-across.ts` (PLAN item 100).
  * Its own module, free of CSS, as `run-follow.ts` is.
  */
 export type ZoomAnchor = "verse" | "middle";
