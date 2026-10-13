@@ -272,7 +272,9 @@ export function PenHomeAt(props: PenHomeProps & { at: { x: number; y: number }; 
     el.style.left = `${p.left}px`;
     el.style.top = `${p.top}px`;
   });
-  useEffect(() => {
+  // Heard from the moment the pens are drawn, not a beat later: a key pressed
+  // as they appeared did nothing.
+  useLayoutEffect(() => {
     // Capture, so Escape closes the pens before it would put the tool down.
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;

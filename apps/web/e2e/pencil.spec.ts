@@ -94,6 +94,29 @@ for (const [held, view] of [["sideways", SIDEWAYS], ["upright", UPRIGHT]] as con
         await context.close();
       });
 
+      test("Escape puts the pens away even the moment they appear", async ({ browser }) => {
+        const { page, context } = await openOn(browser, view, lang);
+        // The pens heard Escape only once the browser had a spare moment after
+        // drawing them, so a key pressed as they appeared did nothing (a push
+        // run caught it). Press it as soon as they are on the page.
+        await page.evaluate(
+          (g) =>
+            new Promise<void>((done) => {
+              const seen = new MutationObserver(() => {
+                if (!document.querySelector("[data-pencil-pens]")) return;
+                seen.disconnect();
+                window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+                done();
+              });
+              seen.observe(document.body, { childList: true, subtree: true });
+              (window as unknown as { __HIFTH_PAGE__?: { pencil?: (x: unknown) => void } }).__HIFTH_PAGE__?.pencil?.(g);
+            }),
+          { kind: "squeeze", pref: "palette", x: 300, y: 300 },
+        );
+        await expect(palette(page)).toHaveCount(0);
+        await context.close();
+      });
+
       test("a double-tap swaps between the last tool used and plain selecting", async ({ browser }) => {
         const { page, context } = await openOn(browser, view, lang);
         // Nothing used yet: there is nothing to swap to, so the pens open instead.
