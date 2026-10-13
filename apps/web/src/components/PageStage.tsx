@@ -81,6 +81,7 @@ import { sideCoverOf, type CardSpan } from "./short-band";
 import type { TurnStyle } from "../turn-style";
 import type { RunMark } from "../run-mark";
 import { zoomAnchorY, type VerseSpan } from "../zoom-anchor";
+import { savedTurnLanding, turnLandsAt } from "../turn-landing";
 import styles from "./PageStage.module.css";
 import { printedNumbersOf } from "./verse-numbers";
 
@@ -1229,6 +1230,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * mount effect is a default, so the request wins regardless of timing.
    */
   const navigatedRef = useRef(false);
+  /**
+   * The size the page was opened at by the last relocation (a link, a hop, a
+   * cold open), kept across turns, or null before any. A turn at this size lands
+   * at the top of the next page; a reader who zoomed since has another size, and
+   * their turn keeps the same lines (docs/PLAN.md, item 97).
+   */
+  const openedZRef = useRef<number | null>(null);
   /**
    * Which relocation is the latest. A hop and a deep link each wait for their
    * page to mount before they arrive, and a page that is already mounted
@@ -2537,6 +2545,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       setCurrentPage(next);
       if (carry) reclampCurrent();
       else centerCurrent();
+      if (!carry) openedZRef.current = view.current.z;
       if (!carry && (coverTopRef.current !== null || coverSideRef.current !== null)) {
         cancelAnimationFrame(liftRaf.current);
         liftRaf.current = requestAnimationFrame(() => liftRef.current());
@@ -2544,6 +2553,22 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     },
     [cancelTween, centerCurrent, reclampCurrent, setCurrentPage],
   );
+
+  /**
+   * Where a turn lands on a page taller than the stage (docs/PLAN.md, item 97).
+   *
+   * A turn carries the reader's view (§4.5), which keeps the same lines in sight
+   * — right for a reader who zoomed in to read one line, wrong for one reading
+   * straight down a page that only opened bigger than the screen: the next page
+   * opened on its lower half. So at the size the page opened at, a turn forward
+   * puts the incoming page's top at the stage's top and a turn back its foot at
+   * the foot; the clamp that follows keeps it inside. Before the clamp, so the
+   * incoming leaf fades in where it lands.
+   */
+  const turnView = useCallback((from: number, to: number): void => {
+    const at = turnLandsAt(from, to, view.current.z, openedZRef.current, savedTurnLanding());
+    if (at) view.current = { ...view.current, y: at === "top" ? 0 : -Number.MAX_SAFE_INTEGER };
+  }, []);
 
   /**
    * Swap the two pages *under* the band, with the fade's midpoint at its centre.
@@ -2567,6 +2592,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     (from: number, to: number, ms: number): void => {
       const incoming = pagesRef.current.get(to);
       if (!incoming) return;
+      turnView(from, to);
       const outgoing = pagesRef.current.get(from);
       for (const [p, mp] of pagesRef.current) {
         if (p === from || p === to) continue;
@@ -2594,12 +2620,15 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         outgoing.host.style.opacity = "0";
       }
     },
-    [reclampCurrent],
+    [reclampCurrent, turnView],
   );
 
   /** End a turn on the destination page: display swapped, inline fades cleared. */
   const land = useCallback(
     (next: number): void => {
+      // A turn that came under the leaf, not through the fade, has not had its
+      // landing chosen yet.
+      if (currentPageRef.current !== next) turnView(currentPageRef.current, next);
       arrive(next, /* carry the reader's view across the turn (§4.5) */ true);
       for (const mp of pagesRef.current.values()) {
         mp.host.style.transition = "";
@@ -2617,7 +2646,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         liftRaf.current = requestAnimationFrame(() => liftRef.current());
       }
     },
-    [arrive],
+    [arrive, turnView],
   );
 
   /**
@@ -3198,6 +3227,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           await tweenTo(target);
           if (hopRef.current === mine) hopRef.current = null;
           if (ticket !== relocateRef.current) return;
+          openedZRef.current = view.current.z;
         }
         if (opts?.pulse !== false) {
           mp.hl.highlight(key, "sel", "selection");

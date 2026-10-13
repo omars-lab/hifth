@@ -723,6 +723,13 @@ upright and on its side, English and Arabic, iPad and Mac.
   stand in a centred column, not stretched edge to edge with the name at one side and the button
   at the other. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:255?open=roots'` · test:
   `e2e/pitch.spec.ts` ("sits near the verse it opens")
+- [ ] On an iPad held upright, open a verse low on its page and turn forward: the next page
+  starts at its top, just under the bars; turn back and the page before shows its foot, where
+  you left it. Pinch in first and the turn keeps the same lines in view instead. With the info
+  panel set to "Keep the same height" the page lands where the last one was, and set to "The
+  whole page" a verse's page opens whole. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:46'
+  ACT='press=ArrowLeft'` · issues: `upright-turn-lands-at-top-build`,
+  `upright-opening-size-setting` · test: `e2e/ipad.spec.ts` ("opened bigger than the screen")
 - [ ] In a note, every verse number the prose names is a link: a reference left as plain words, or a
   number with a letter in it, is a word the capture misread; read it off the page picture and add it
   to the hand-read misreads. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/28:88'` · test:

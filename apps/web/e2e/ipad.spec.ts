@@ -603,3 +603,80 @@ test.describe("Hifth · a recitation on the iPad held sideways", () => {
     await shown(page, 563);
   });
 });
+
+/*
+ * Held upright, a verse's page opens a little bigger than the screen, so a
+ * hafiz reads down to its foot and turns. The next page used to open at the
+ * same height, on its lower half, and they slid it down to start at the top
+ * (docs/PLAN.md, item 75). The owner chose on 2026-10-13: at the size the page
+ * opened at, a turn forward lands at the top of the next page and a turn back
+ * at the foot of the one before. Keeping the same height is a setting, and so
+ * is opening the page whole (item 98).
+ */
+test.describe("Hifth · turning an upright iPad's page that opened bigger than the screen", () => {
+  /** Where the page's top edge sits once it has stopped moving. */
+  async function settledTop(page: Page, n: number): Promise<{ top: number; height: number }> {
+    let last = Number.NaN;
+    let box = { top: 0, height: 0 };
+    await expect
+      .poll(async () => {
+        const b = (await leaf(page, n).boundingBox())!;
+        const same = Math.abs(b.y - last) < 0.5;
+        last = b.y;
+        box = { top: b.y, height: b.height };
+        return same;
+      }, { intervals: [300] })
+      .toBe(true);
+    return box;
+  }
+
+  async function open(page: Page, settings: Record<string, string> = {}): Promise<void> {
+    await page.addInitScript((pairs) => {
+      for (const [k, v] of Object.entries(pairs)) localStorage.setItem(k, v);
+    }, { [COACH_STORAGE_KEY]: "1", ...settings });
+    await page.setViewportSize(PORTRAIT);
+    // 2:46 is low on page 7, so the page opens framed on its lower half.
+    await page.goto("/#/hafs-kfqc/2:46");
+    await shown(page, 7);
+  }
+
+  // By key: the verse's card stands over the page bar's arrows while it is up.
+  // The pages run right to left, so the left arrow turns forward.
+  const turn = (page: Page, way: "forward" | "back") =>
+    page.keyboard.press(way === "forward" ? "ArrowLeft" : "ArrowRight");
+
+  test("a turn forward lands at the top of the next page, and back at the foot of the one before", async ({ page }) => {
+    await open(page);
+    const opened = await settledTop(page, 7);
+    expect(opened.top, "the page opens bigger than the screen, framed on its lower half").toBeLessThan(-100);
+
+    await turn(page, "forward");
+    await shown(page, 8);
+    const next = await settledTop(page, 8);
+    expect(next.top, "the next page's top is in sight").toBeGreaterThan(-2);
+    // It sits just under the bars at the top of the screen, not a screen lower.
+    expect(next.top, "the next page starts high on the screen").toBeLessThan(PORTRAIT.height / 4);
+
+    await turn(page, "back");
+    await shown(page, 7);
+    const back = await settledTop(page, 7);
+    expect(back.top, "the page before shows its foot").toBeLessThan(-100);
+    expect(back.top + back.height, "its foot is in sight").toBeLessThanOrEqual(PORTRAIT.height + 2);
+  });
+
+  test("set to keep the same height, the next page opens where the last one was", async ({ page }) => {
+    await open(page, { "hifth.turn-landing.v1": "same" });
+    const opened = await settledTop(page, 7);
+    await turn(page, "forward");
+    await shown(page, 8);
+    const next = await settledTop(page, 8);
+    expect(Math.abs(next.top - opened.top), "the same height as the page before").toBeLessThan(4);
+  });
+
+  test("set to open the page whole, a verse's page fits the screen", async ({ page }) => {
+    await open(page, { "hifth.open-size.v1": "whole" });
+    const opened = await settledTop(page, 7);
+    expect(opened.top, "the page's top is in sight").toBeGreaterThanOrEqual(-1);
+    expect(opened.top + opened.height, "and so is its foot").toBeLessThanOrEqual(PORTRAIT.height);
+  });
+});

@@ -4138,10 +4138,11 @@
         "file": "docs/PLAN.md",
         "item": "69"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Held upright the iPad opens the page a little magnified (155%); turned to the open book it shows both pages whole (100%), and turned back upright it stays at 100% instead of going back to 155%. The verse and its note stay in sight either way. Should a turn back upright bring back the level the page opened at?"
+      "note": "Owner, 2026-10-13: yes, turning back upright brings back the size the page opened at (the setting from item 98); staying at 100% stays as a setting. The build is item 99.",
+      "closedBy": "docs/PLAN.md"
     },
     {
       "id": "tap-other-verse-with-note-up-leaves-it-off-top",
@@ -4481,10 +4482,11 @@
         "file": "docs/PLAN.md",
         "item": "97"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Build the owner's answer to item 75: upright, at the opening size, a turn lands at the next page's top; today's way stays as a setting."
+      "note": "Built 2026-10-13: at the size the page opened at, a turn forward lands at the next page's top and a turn back at the foot of the one before; keeping the same height is the other setting. iPad browser test watched failing first.",
+      "closedBy": "apps/web/e2e/ipad.spec.ts"
     },
     {
       "id": "upright-opening-size-setting",
@@ -4492,10 +4494,22 @@
         "file": "docs/PLAN.md",
         "item": "98"
       },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Built 2026-10-13: an info-panel setting, a little closer (155%) by default or the whole page. iPad browser test and unit tests watched failing first.",
+      "closedBy": "apps/web/e2e/ipad.spec.ts"
+    },
+    {
+      "id": "upright-again-brings-back-opening-size",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "99"
+      },
       "status": "open",
       "severity": "defect",
       "owner": "agent",
-      "note": "Owner, 2026-10-13: let the reader choose how big the page opens on an upright iPad (today 155%; the whole page at 100% as another choice)."
+      "note": "Build the owner's answer to item 69: turned back upright, the page comes back at its opening size, not 100%; staying at 100% stays as a setting."
     }
   ]
 }
