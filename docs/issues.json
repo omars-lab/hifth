@@ -4209,9 +4209,11 @@
         "file": "docs/PLAN.md",
         "item": "75"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
-      "owner": "user"
+      "owner": "user",
+      "closedBy": "docs/PLAN.md",
+      "note": "Owner, 2026-10-13: at the size the page opened at, a turn lands at the top of the next page. Today's way stays as a setting. Built as item 97."
     },
     {
       "id": "recited-verse-tap-stops-run",
@@ -4472,6 +4474,28 @@
       "severity": "defect",
       "owner": "agent",
       "note": "Build the owner's choice (pencil gestures ①, option B): the iPad app passes the pencil's double-tap and squeeze to the page, which opens Hifth's pens at the tip. Swift test plus browser test; the feel on a real pencil goes on the manual testing list."
+    },
+    {
+      "id": "upright-turn-lands-at-top-build",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "97"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Build the owner's answer to item 75: upright, at the opening size, a turn lands at the next page's top; today's way stays as a setting."
+    },
+    {
+      "id": "upright-opening-size-setting",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "98"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Owner, 2026-10-13: let the reader choose how big the page opens on an upright iPad (today 155%; the whole page at 100% as another choice)."
     }
   ]
 }
