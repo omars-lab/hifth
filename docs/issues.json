@@ -4524,6 +4524,30 @@
       "owner": "agent",
       "note": "Built 2026-10-13: zoomed past the screen, the open book slides so the right-hand page's line starts stay on screen, and a page on its own grows from its right edge; growing from the fold is an info-panel setting. iPad browser tests and a settings test watched failing first.",
       "closedBy": "apps/web/e2e/ipad.spec.ts"
+    },
+    {
+      "id": "keep-surah-recitation-on-device",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "101"
+      },
+      "status": "fixed",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/recitation-keep.spec.ts",
+      "note": "Owner chose 2026-10-13: a button per surah that saves its recordings on the reader's own device, so it recites offline. Built the same day: the surah menu's line keeps it and counts, the info panel lists and removes it, and a kept verse plays from its copy; the browser test went red with the copy unhooked."
+    },
+    {
+      "id": "surah-menu-ran-off-phone",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "101"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/src/components/VerseMenu.keys.test.tsx",
+      "note": "Found building PLAN 101 (2026-10-13): the menu on the surah's name is a row, and once it gained the long line for keeping the recitation, on a phone the row ran past the screen's edge and Play could not be pressed. A row menu wider than the window now stands as a column, measured again whenever its words change. Tests: VerseMenu.keys.test.tsx (failed first), and e2e/recitation-keep.spec.ts checks every line is on the screen on the phone projects."
     }
   ]
 }

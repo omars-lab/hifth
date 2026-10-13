@@ -960,6 +960,21 @@ export interface Strings {
   cornerNewNote: string;
   /** The head of a label's list of notes: "Notes in Juz 1", "Notes on Page 7". */
   cornerNotesHead(which: "page" | "surah" | "juz", name: string): string;
+  /** A surah's recitation kept on the device (docs/PLAN.md, item 101). */
+  recKeep: string;
+  recKeeping(done: number, total: number): string;
+  recRemove(mb: number): string;
+  recShelfHead: string;
+  recShelfHint: string;
+  recShelfNone: string;
+  recShelfUnsupported: string;
+  recSaving(name: string, done: number, total: number): string;
+  recWhole(name: string, mb: number): string;
+  recTorn(name: string, present: number, total: number): string;
+  recRepin: string;
+  recGone(name: string): string;
+  recRemoveSurah(name: string): string;
+  recKeptSaid(name: string): string;
   fullScreen: string;
   showBars: string;
   fullScreenOn: string;
@@ -1746,6 +1761,20 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     cornerNotes: (count) => m.cornerNotes({ nText: n(count) }),
     cornerNewNote: m.cornerNewNote,
     cornerNotesHead: (which, name) => m.cornerNotesHead({ which: which === "page" ? "page" : "other", name }),
+    recKeep: m.recKeep,
+    recKeeping: (done, total) => m.recKeeping({ doneText: n(done), totalText: n(total) }),
+    recRemove: (mb) => m.recRemove({ sizeText: tenths(mb, lang) }),
+    recShelfHead: m.recShelfHead,
+    recShelfHint: m.recShelfHint,
+    recShelfNone: m.recShelfNone,
+    recShelfUnsupported: m.recShelfUnsupported,
+    recSaving: (name, done, total) => m.recSaving({ name, doneText: n(done), totalText: n(total) }),
+    recWhole: (name, mb) => m.recWhole({ name, sizeText: tenths(mb, lang) }),
+    recTorn: (name, present, total) => m.recTorn({ name, presentText: n(present), totalText: n(total) }),
+    recRepin: m.recRepin,
+    recGone: (name) => m.recGone({ name }),
+    recRemoveSurah: (name) => m.recRemoveSurah({ name }),
+    recKeptSaid: (name) => m.recKeptSaid({ name }),
     fullScreen: m.fullScreen,
     showBars: m.showBars,
     fullScreenOn: m.fullScreenOn,

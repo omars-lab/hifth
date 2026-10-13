@@ -563,3 +563,102 @@ describe("useVerseAudio's verse made ready before Play is pressed", () => {
     expect(letGo).toEqual(["blob:held/1"]);
   });
 });
+
+// A surah the reader kept on the device (docs/PLAN.md, item 101) plays from its
+// copy whatever the setting for asking early says, and with no connection at
+// all: the copy is the reason the reader kept it.
+describe("useVerseAudio's verse kept on the device", () => {
+  const url = (n: number) => verseAudioUrl(v(n))!;
+  const urls = URL as unknown as { createObjectURL?: unknown; revokeObjectURL?: unknown };
+  let made: string[] = [];
+
+  /** The first surah kept; any other not. */
+  function kept() {
+    const copied: string[] = [];
+    return {
+      copied,
+      source: {
+        has: (u: string) => u.includes("/001"),
+        copy: (u: string) => {
+          copied.push(u);
+          return Promise.resolve(new Blob(["sound"]));
+        },
+      },
+    };
+  }
+  function line() {
+    vi.stubGlobal("Audio", FakePlayer);
+    made = [];
+    urls.createObjectURL = () => {
+      const copy = `blob:held/${made.length + 1}`;
+      made.push(copy);
+      return copy;
+    };
+    urls.revokeObjectURL = () => {};
+    const fetched = vi.fn(() => new Promise<Response>(() => {}));
+    vi.stubGlobal("fetch", fetched);
+    return fetched;
+  }
+  const settle = () => act(async () => { await new Promise((r) => setTimeout(r, 0)); });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+    delete urls.createObjectURL;
+    delete urls.revokeObjectURL;
+    FakePlayer.last = null;
+  });
+
+  it("makes a kept verse ready from its copy with the setting off, and asks the network nothing", async () => {
+    const fetched = line();
+    const k = kept();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "off", k.source));
+    act(() => result.current.prepare(v(5)));
+    await settle();
+    act(() => result.current.toggle(v(5)));
+    expect(k.copied).toEqual([url(5)]);
+    expect(FakePlayer.last!.src).toBe("blob:held/1");
+    expect(fetched).not.toHaveBeenCalled();
+  });
+
+  it("a run with the setting off still makes its next kept verse ready", async () => {
+    line();
+    const k = kept();
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "off", k.source));
+    act(() => result.current.playRun([v(1), v(2)]));
+    act(() => { FakePlayer.last!.dispatchEvent(new Event("playing")); });
+    await settle();
+    act(() => FakePlayer.last!.finish());
+    expect(FakePlayer.last!.src).toBe("blob:held/1");
+  });
+
+  it("a kept verse that will not load from the network plays from its copy, with no word of failure", async () => {
+    line();
+    const k = kept();
+    const failed: string[] = [];
+    const { result } = renderHook(() => useVerseAudio((key) => failed.push(key), undefined, "off", k.source));
+    // Pressed before its copy was ready: it starts from the network, which is down.
+    act(() => result.current.toggle(v(5)));
+    expect(FakePlayer.last!.src).toBe(url(5));
+    act(() => { FakePlayer.last!.dispatchEvent(new Event("error")); });
+    await settle();
+    expect(FakePlayer.last!.src).toBe("blob:held/1");
+    expect(failed).toEqual([]);
+    // The copy failing too is a real failure, and says so.
+    act(() => { FakePlayer.last!.dispatchEvent(new Event("error")); });
+    expect(failed).toEqual([v(5)]);
+  });
+
+  it("a verse not kept, with the setting off, plays from the network as before", async () => {
+    const fetched = line();
+    const k = kept();
+    const failed: string[] = [];
+    const { result } = renderHook(() => useVerseAudio((key) => failed.push(key), undefined, "off", k.source));
+    act(() => result.current.prepare("quran/hafs-kfqc/2:5"));
+    act(() => result.current.toggle("quran/hafs-kfqc/2:5"));
+    expect(k.copied).toEqual([]);
+    expect(fetched).not.toHaveBeenCalled();
+    act(() => { FakePlayer.last!.dispatchEvent(new Event("error")); });
+    expect(failed).toEqual(["quran/hafs-kfqc/2:5"]);
+  });
+});

@@ -123,6 +123,13 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/
     room, not as the app undoing your zoom. If it feels like the app fighting you, that becomes
     a backlog item, with keeping the size and showing only the verse's start as the first thing
     to try (docs/PLAN.md, items 92 and 93).
+18. **Keeping a long surah on a real iPad, on a slow line.** On the iPad, on an ordinary or poor
+    wifi, hold Al-Baqarah's name at the top of the page and keep its recitation: about 131 MB in
+    286 files. The tests save made-up files in a second; only a real line says how long the real
+    ones take, and whether the iPad lets the app keep that much. Right: the count keeps moving,
+    Stop stops it, and once it is done the surah plays with the wifi off. If it stalls, or the
+    iPad later lets the files go (the info panel then says the surah is incomplete), that becomes
+    a backlog item and a test (docs/PLAN.md, item 101).
 
 ## Done
 

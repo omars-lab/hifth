@@ -193,6 +193,16 @@ import { DrawerTool, VerseDrawer } from "./components/VerseDrawer";
 import { VerseMenu, type VerseMenuItem } from "./components/VerseMenu";
 import { QulTrigger } from "./components/QulTrigger";
 import { useVerseAudio, versesBetween } from "./audio";
+import {
+  DEVICE_RECITATION,
+  forgetSurah,
+  keepInProgress,
+  keepSupported,
+  keptSurahs,
+  startKeeping,
+  stopKeeping,
+  useKeptChanges,
+} from "./recitation-keep";
 // The private pitch layer (see src/pitch/pitch.ts). `PITCH` is a build-time
 // constant that is false in every public build, so every guarded branch below is
 // dead code the bundler drops, and the held-copy JSON those branches would load
@@ -807,7 +817,11 @@ export function App(): JSX.Element {
     (k) => announce(`${t.ayahLabel(k) ?? k} — ${t.audioUnavailable}`),
     (k, n) => runEndRef.current?.(k, n),
     runAhead,
+    DEVICE_RECITATION,
   );
+  // The surah menu's line for keeping its recitation counts as it saves, so the
+  // app hears every step (docs/PLAN.md, item 101).
+  useKeptChanges();
   /*
    * The stepper's press, said out loud.
    *
@@ -3251,6 +3265,36 @@ export function App(): JSX.Element {
     [resolver, announce, t, chooseTool, handlePageMode],
   );
 
+  // The surah menu's line for keeping its recitation on the device
+  // (docs/PLAN.md, item 101). Picked, it stays open and counts the verses as
+  // they are saved, and a second pick stops it; once kept, it offers to remove it.
+  const keepRecitationItem = useCallback(
+    (surah: number, name: string): VerseMenuItem => {
+      const saving = keepInProgress();
+      if (saving?.surah === surah) {
+        return { id: "keep-recitation", caption: t.recKeeping(saving.done, saving.total), onPick: stopKeeping, stay: true };
+      }
+      const kept = keptSurahs().find((k) => k.surah === surah);
+      if (kept) {
+        return {
+          id: "keep-recitation",
+          caption: t.recRemove(kept.bytes / 1_000_000),
+          onPick: () => void forgetSurah(surah),
+        };
+      }
+      return {
+        id: "keep-recitation",
+        caption: t.recKeep,
+        stay: true,
+        onPick: () =>
+          void startKeeping(surah).then((done) => {
+            if (done) announce(t.recKeptSaid(name));
+          }),
+      };
+    },
+    [announce, t],
+  );
+
   // What a held corner offers: the page, the surah or the juz it names, each
   // played whole, its link copied or shared, and the page bookmarked or the
   // surah and juz opened where they start. A link to a surah or a juz is a link
@@ -3316,6 +3360,7 @@ export function App(): JSX.Element {
       const about = notesAbout(scoped, scope, pageOfKey);
       const items: VerseMenuItem[] = [
         { caption: t.cornerPlay, onPick: () => playBetween(key(first.surah, first.ayah), key(last.surah, last.ayah)) },
+        ...(which === "surah" && keepSupported() ? [keepRecitationItem(first.surah, name)] : []),
         which === "page"
           ? { caption: t.vdBookmark, onPick: () => dropOn(page) }
           : { caption: t.cornerStart, onPick: () => restoreState({ edition, select: first }, "jump") },
@@ -3328,7 +3373,7 @@ export function App(): JSX.Element {
       ];
       return { name, items, play: key(first.surah, first.ayah) };
     },
-    [announce, dropOn, newNoteAbout, pageOfKey, playBetween, resolver, restoreState, scoped, t],
+    [announce, dropOn, keepRecitationItem, newNoteAbout, pageOfKey, playBetween, resolver, restoreState, scoped, t],
   );
   const cornerMenuOf = cornerMenu ? cornerItems(cornerMenu.which, cornerMenu.page, cornerMenu.around) : null;
   // The first verse a held corner's Play would recite is asked for as the
