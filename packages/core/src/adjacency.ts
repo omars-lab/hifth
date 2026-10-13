@@ -170,6 +170,8 @@ export type RailDirection = "loop" | "earlier" | "later" | "root";
  * arrows (`↻ 3` `◀ 1` `▶ 2`); the owner (2026-10-04) found an arrow does not
  * read as "similar", and the later one was the very triangle that means
  * listen. So each wears "looks like" (≈) with a small mark for which way.
+ * The arrows are written the reading way here; the app draws them the book's
+ * way by default, later pointing left (apps/web/src/lookalike-arrows.ts).
  */
 export const RAIL_GLYPH: Readonly<Record<RailDirection, string>> = {
   loop: "≈↻",

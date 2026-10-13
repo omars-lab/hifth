@@ -2686,10 +2686,11 @@
         "file": "docs/design/knowledge-graph-commentary.md",
         "item": "⑧"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "user",
-      "note": "RAIL_GLYPH in packages/core/src/adjacency.ts gives later = ≈→ and earlier = ≈←, while the book and the page bar run right to left. Not flipped by the agent: the owner reviewed the signs on 2026-10-04, so the direction is theirs to choose."
+      "closedBy": "apps/web/src/lookalike-arrows.test.ts",
+      "note": "The owner chose on 2026-10-12: follow the book. A later surah's sign is now ≈← and an earlier one ≈→, everywhere the signs are drawn, in both languages; the old way stays an info-panel setting. Unit and settings tests, and the pitch verse-menu test turned round to expect the new arrows."
     },
     {
       "id": "list-sheet-title-scrolls-away",
@@ -2876,10 +2877,11 @@
         "file": "docs/design/pencil-gestures.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "The pencil study (2026-10-05): a web page never hears double-tap or squeeze; the native wrapper does, and can pass them to the page. Waits on the native app (docs/design/native-shell plan) and on marking-pens-home-on-ipad."
+      "closedBy": "docs/design/pencil-gestures.md",
+      "note": "The owner chose on 2026-10-12: option B, the iPad app hears double-tap and squeeze and the page opens Hifth's own pens at the tip. The build is plan item 96 (pencil-gestures-build); the real-pencil check goes on the manual testing list once it lands."
     },
     {
       "id": "intro-and-same-surah-verses-unlinked",
@@ -3453,10 +3455,11 @@
         "file": "docs/design/knowledge-graph-commentary.md",
         "item": "㊼"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "user",
-      "note": "A verse can list a passage match and, separately, one verse inside that passage with its own hand-written note (2:48: 2:122–2:123 and 2:123). Both are true; a hafiz sees two rows for one memory. Counted 2026-10-09: 41 of 101 passage rows (on 40 verses) sit beside a verse inside them; 15 of those passage rows could not be opened, and at 7:106 the passage row is the only one marking shared words. All three ways are built as an info-panel setting (both rows, the default; verse under its passage; verse only). The owner picks the default. Building it found the rail button counting the passage row \"verse only\" leaves out (3 above a list of 2 at 7:106); it now counts the rows shown (adjacency.test.ts, \"counts on the rail only the rows the list will show\", failed first), and the passage menu told a screen reader the same wrong number (HighlightMenu.test.tsx, failed first). Seen at 15:30 too, where it cuts the other way: the passage row cannot be opened, so \"verse only\" drops the right row and \"verse under its passage\" heads the block with a dead row. Since 2026-10-09 (lookalike-rows ①) every passage row is compared with the verse inside it that matches, so none of the 41 is dead; in 22 the passage row now opens the same comparison as the verse row beside it (15:30, 23:7)."
+      "closedBy": "apps/web/src/components/Colophon.test.tsx",
+      "note": "The owner chose on 2026-10-12: the verse under its passage. It is now the default (listed first in settings); both rows and verse-only stay as settings. A settings test of the order and the default failed first. Looked at on the iPad held sideways at 7:106 in both languages."
     },
     {
       "id": "lookalike-row-no-reason",
@@ -3718,10 +3721,11 @@
         "file": "docs/design/lookalike-rows.md",
         "item": "⑰"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "user",
-      "note": "A passage row names the verse inside it that is most alike (15:30's passage in surah 38 names 38:73), but its arrow lands on the passage's first verse (38:72). Should it land on the alike verse, stay on the first, or land on the first and light the whole passage with the alike verse marked more strongly?"
+      "closedBy": "apps/web/e2e/lookalike-compare-view.spec.ts",
+      "note": "The owner chose on 2026-10-12: land on the most-alike verse. A passage row's arrow now lands on the verse it names (15:30 to 38:73); the passage's first verse stays an info-panel setting. A browser test presses the arrow both ways; it failed first, landing on 38:72."
     },
     {
       "id": "share-card-covers-verse-ipad-upright",
@@ -4457,6 +4461,17 @@
       "severity": "defect",
       "owner": "agent",
       "note": "The owner chose on 2026-10-12 (notes-style-toolbar ④): the pens and Mark up stay on the right by default; build the mirrored layout, pens and Mark up on the left, as an info-panel setting, tested in both languages on the iPad held sideways."
+    },
+    {
+      "id": "pencil-gestures-build",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "96"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Build the owner's choice (pencil gestures ①, option B): the iPad app passes the pencil's double-tap and squeeze to the page, which opens Hifth's pens at the tip. Swift test plus browser test; the feel on a real pencil goes on the manual testing list."
     }
   ]
 }

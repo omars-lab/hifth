@@ -243,6 +243,7 @@ import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from ".
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
 import { applyPen, applyWordPen, rememberPen, savedPen, savedWordPen, type Pen } from "./pen";
 import { usePassageRows } from "./passage-rows";
+import { passageLanding, usePassageHop } from "./passage-hop";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -2862,9 +2863,16 @@ export function App(): JSX.Element {
   const stopFollowing = useCallback(() => setFollowing(null), []);
   const followed = following ? scoped.find((n) => n.id === following.id) : undefined;
 
+  // A passage lands on the verse inside it that is most alike, unless the
+  // reader chose its first verse (lookalike-rows item 17); a verse it cannot
+  // open falls back to the first.
+  const passageHop = usePassageHop();
   const handleHop = useCallback(
-    (edge: Edge, origin?: string) => hopTo(edge.to, origin),
-    [hopTo],
+    (edge: Edge, origin?: string) => {
+      const to = passageLanding(edge, passageHop);
+      hopTo(canHop(to) ? to : edge.to, origin);
+    },
+    [hopTo, canHop, passageHop],
   );
 
   // Bead-back: rewind to a trail origin (pops everything after it) — same path.

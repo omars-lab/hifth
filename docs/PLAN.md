@@ -2094,6 +2094,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     left instead, mirrored, so a hafiz reading in Arabic can try the screen fully mirrored. Its
     test: each side in both languages, the pens and Mark up wholly on that side and clear of the
     page.
+96. **Let the pencil's double-tap and squeeze open Hifth's pens at the tip.** Chosen 2026-10-12
+    by the owner ([pencil gestures ①](design/pencil-gestures.md), option B): the iPad app hears
+    the pencil's double-tap (2nd generation pencil) and squeeze (Pencil Pro) and hands them to
+    the page, which opens its own pens beside the pencil's tip; a web page alone never hears
+    either. Its tests: a Swift test that each gesture becomes one message to the page, and a
+    browser test that the message opens the pens at the point it names. The feel on a real iPad
+    with a real pencil goes on the manual testing list, because the simulator cannot send these
+    gestures.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

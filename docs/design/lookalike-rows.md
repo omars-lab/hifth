@@ -502,7 +502,7 @@ of its second line sits under the card until the reader pans or closes it.
 
 Blocked on ⑪: whichever way ⑪ goes for drawing the page smaller decides most of this.
 
-### ⑰ When a passage row says which verse inside it is most alike, where should its arrow take you? · **open**
+### ⑰ When a passage row says which verse inside it is most alike, where should its arrow take you? · **fixed**
 
 **What it changes for a hafiz:** 15:30's later-surahs list names the passage 38:72 to 38:75, and under
 it "Most alike: 38:73" (⑤). Opening the row lays 15:30 beside 38:73. But the row's arrow, the hop, lands
@@ -526,6 +526,12 @@ row now names one verse and lands on another.
   Shows both; two marks on one page to tell apart, and the most to build.
 
 Per the project's habit, the one not picked would stay as a setting in the info panel.
+
+**Chosen 2026-10-12 by the owner: land on the most-alike verse.** Built 2026-10-13: a passage
+row's arrow now lands on the verse the row names (15:30's passage in surah 38 lands on 38:73),
+and a single-verse row lands on itself as before. "The passage's first verse" stays a setting in
+the info panel. A browser test presses the arrow at 15:30 both ways; with the most-alike verse it
+failed first, landing on 38:72.
 
 ### ⑱ On an iPad mini on its side, do the other corner cards cover the verse the way the note did? · **fixed**
 

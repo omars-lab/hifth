@@ -82,6 +82,25 @@ test.describe("Hifth · a look-alike comparison", () => {
     );
   });
 
+  // The passage row named 38:73 as the verse inside it most alike, but its
+  // arrow landed on 38:72, the passage's first verse, so a hafiz had to find
+  // the alike verse themselves. The owner chose the alike verse (2026-10-12,
+  // lookalike-rows ⑰); landing on the first verse stays a setting.
+  for (const [way, lands] of [["alike", "38:73"], ["first", "38:72"]] as const) {
+    test(`a passage row's arrow lands on ${lands} when set to "${way}"`, async ({ page }) => {
+      await page.addInitScript((w) => {
+        localStorage.setItem("hifth.lang.v1", "en");
+        if (w === "first") localStorage.setItem("hifth.passage-hop.v1", "first");
+      }, way);
+      await page.goto("/#/hafs-kfqc/15:30?open=lookalikes");
+      const list = page.getByRole("dialog", { name: /later surahs/ });
+      await expect(list).toBeVisible({ timeout: 20_000 });
+      const row = list.getByRole("listitem").filter({ hasText: /38:72.38:75/ });
+      await row.getByRole("button", { name: /^Hop to / }).click();
+      await expect.poll(() => new URL(page.url()).hash.split("?")[0], { timeout: 10_000 }).toBe(`#/hafs-kfqc/${lands}`);
+    });
+  }
+
   // A row whose two verses share one stretch showed nothing of it until opened
   // (lookalike-rows ⑥). Closed, it now shows those words cut from the page,
   // and the strip starts on the same side as the row's name: in English it sat
