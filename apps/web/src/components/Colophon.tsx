@@ -20,6 +20,7 @@ import { PASSAGE_HOPS, rememberPassageHop, usePassageHop } from "../passage-hop"
 import { LOOKALIKE_ARROWS, rememberLookalikeArrows, useLookalikeArrows } from "../lookalike-arrows";
 import { TURN_LANDINGS, rememberTurnLanding, useTurnLanding } from "../turn-landing";
 import { OPEN_SIZES, rememberOpenSize, useOpenSize } from "../open-size";
+import { UPRIGHT_AGAINS, rememberUprightAgain, useUprightAgain } from "../upright-again";
 import { RIBBON_LENGTHS, rememberRibbonLength, useRibbonLength } from "../ribbon-length";
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
@@ -265,6 +266,7 @@ export function Colophon({
   const lookalikeArrows = useLookalikeArrows();
   const turnLanding = useTurnLanding();
   const openSize = useOpenSize();
+  const uprightAgain = useUprightAgain();
   const ribbonLength = useRibbonLength();
   const runFollow = useRunFollow();
   const runAhead = useRunAhead();
@@ -859,6 +861,30 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.openSizeNote}</p>
+        </section>
+
+        {/* How big the page is when the iPad comes back upright (docs/PLAN.md,
+            item 99): the size it opened at is the default; whole is the other way. */}
+        <section className={styles.block} aria-labelledby="colophon-upright-again">
+          <h3 className={styles.subhead} id="colophon-upright-again">
+            {t.uprightAgainTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-upright-again">
+            {UPRIGHT_AGAINS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={uprightAgain === choice}
+                data-upright-again={choice}
+                onClick={() => rememberUprightAgain(choice)}
+              >
+                {choice === "opening" ? t.uprightAgainOpening : t.uprightAgainWhole}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.uprightAgainNote}</p>
         </section>
 
         {/* How long a bookmark's ribbon hangs (docs/PLAN.md, item 49): short,

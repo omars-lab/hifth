@@ -245,6 +245,7 @@ import { applyPen, applyWordPen, rememberPen, savedPen, savedWordPen, type Pen }
 import { usePassageRows } from "./passage-rows";
 import { passageLanding, usePassageHop } from "./passage-hop";
 import { openZoom, savedOpenSize } from "./open-size";
+import { savedUprightAgain, uprightAgainZoom } from "./upright-again";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -750,6 +751,47 @@ export function App(): JSX.Element {
     // Opened as the control opens it: both pages at fit, or they disagree.
     if (mode === "two") stage.setZoom(1);
   }, [upright, desktop, stage]);
+  /*
+   * Upright again, the page comes back at the size it opened at (docs/PLAN.md,
+   * item 99). On its side the open book shows both pages whole, and crossing
+   * the breakpoint puts the paper at fit, so without this the page stayed whole
+   * once the iPad was upright again. The stage says each size a page opens at
+   * as it lands, and only an upright one is kept: turning the iPad swaps the
+   * stage for the open book's before this hears the turn, so asking the stage
+   * then would ask the wrong one. Back upright, the new stage may not have
+   * landed yet; the size waits for it. A size the reader zoomed to on its side
+   * stands, and the reader can set the page to stay whole.
+   */
+  const uprightOpenedRef = useRef<number | null>(null);
+  const sidewaysFromRef = useRef<number | null>(null);
+  const restoreRef = useRef<number | null>(null);
+  const wasUprightRef = useRef(upright);
+  if (wasUprightRef.current && !upright) sidewaysFromRef.current = uprightOpenedRef.current;
+  const pageOpened = useCallback(
+    (z: number) => {
+      if (typeof window.matchMedia === "function" && !window.matchMedia(UPRIGHT_QUERY).matches) return;
+      const back = restoreRef.current;
+      restoreRef.current = null;
+      if (back === null) {
+        uprightOpenedRef.current = z;
+        return;
+      }
+      uprightOpenedRef.current = back;
+      // After the landing that called this has finished framing the page.
+      requestAnimationFrame(() => stage.setZoom(back));
+    },
+    [stage],
+  );
+  useEffect(() => {
+    const was = wasUprightRef.current;
+    wasUprightRef.current = upright;
+    restoreRef.current = null;
+    if (was === upright || !upright) return;
+    const z = uprightAgainZoom(stageRef.current?.zoomNow() ?? 1, sidewaysFromRef.current, savedUprightAgain());
+    if (z === null) return;
+    if (stageRef.current?.openedZoom() == null) restoreRef.current = z;
+    else pageOpened(z);
+  }, [upright, stage, pageOpened]);
   const { t, dir } = useT();
   const { message, announce } = useAnnouncer();
 
@@ -3982,6 +4024,7 @@ export function App(): JSX.Element {
               <PageStage
                 ref={stageRef}
                 onSlack={reportSlack}
+                onOpened={pageOpened}
                 // A card beside one page covers its side, not its foot: the
                 // page moves clear of it, and lifting it as well left a band
                 // of empty stage under the page. Held upright on a screen wide

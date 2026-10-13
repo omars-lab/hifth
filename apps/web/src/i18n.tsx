@@ -892,6 +892,10 @@ export interface Strings {
   openSizeCloser: string;
   openSizeWhole: string;
   openSizeNote: string;
+  uprightAgainTitle: string;
+  uprightAgainOpening: string;
+  uprightAgainWhole: string;
+  uprightAgainNote: string;
   ribbonLengthTitle: string;
   ribbonLengthShort: string;
   ribbonLengthLong: string;
@@ -1671,6 +1675,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     openSizeCloser: m.openSizeCloser,
     openSizeWhole: m.openSizeWhole,
     openSizeNote: m.openSizeNote,
+    uprightAgainTitle: m.uprightAgainTitle,
+    uprightAgainOpening: m.uprightAgainOpening,
+    uprightAgainWhole: m.uprightAgainWhole,
+    uprightAgainNote: m.uprightAgainNote,
     ribbonLengthTitle: m.ribbonLengthTitle,
     ribbonLengthShort: m.ribbonLengthShort,
     ribbonLengthLong: m.ribbonLengthLong,

@@ -2132,12 +2132,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     page at its own size, and a unit test for the saved choice. Built 2026-10-13: "How big a
     verse's page opens" in the info panel, "A little closer" by default or "The whole page". It
     also governs a phone, which opens a verse the same way. Both tests watched failing first.
-99. **Turned back upright, the iPad brings back the size the page opened at.** Chosen 2026-10-13
+99. ~~**Turned back upright, the iPad brings back the size the page opened at.**~~ Chosen 2026-10-13
     by the owner (item 69). Turned on its side the open book shows both pages whole; turned back
     upright, the page comes back at the size set under "How big a verse's page opens", not at
-    100%. A page the reader zoomed in on before turning keeps what they chose. Staying at 100%
-    stays as a setting in the info panel. Its test: a browser test that turns an iPad on its
-    side and back and finds the page at its opening size.
+    100%. A size the reader zoomed to while it was on its side stands. Staying at 100% stays as a
+    setting in the info panel. Its test: a browser test that turns an iPad on its side and back
+    and finds the page at its opening size. Built 2026-10-13: "Turning the iPad back upright" in
+    the info panel, "The size it opened at" by default or "The whole page". Building it found the
+    open book replacing the page a moment before the app hears the iPad has turned, so the size
+    is now told by the page as it lands rather than asked for afterwards. On an 11-inch iPad,
+    turning back resets the page to whole first, so there a size zoomed to on its side gives way
+    to the opening size. A settings test and the browser test (both ways) watched failing first.
 100. **Zooming in keeps the starts of the lines in sight.** Chosen 2026-10-13 by the owner (item
     67). With the zoom buttons or keys, the page grows across from where its lines begin, the
     right-hand edge, so a hafiz reads each line from its first word without sliding. On the open

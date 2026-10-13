@@ -730,6 +730,11 @@ upright and on its side, English and Arabic, iPad and Mac.
   whole page" a verse's page opens whole. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:46'
   ACT='press=ArrowLeft'` · issues: `upright-turn-lands-at-top-build`,
   `upright-opening-size-setting` · test: `e2e/ipad.spec.ts` ("opened bigger than the screen")
+- [ ] Open a verse on an upright iPad, turn it on its side (two whole pages), then upright again:
+  the page comes back at the size it opened at, not whole. With the info panel's "Turning the
+  iPad back upright" set to "The whole page" it stays whole. · `make app-walk SIDEWAYS=1` for the
+  side; the browser test turns it both ways · issue: `upright-again-brings-back-opening-size` ·
+  test: `e2e/ipad.spec.ts` ("on its side and back upright")
 - [ ] In a note, every verse number the prose names is a link: a reference left as plain words, or a
   number with a letter in it, is a word the capture misread; read it off the page picture and add it
   to the hand-read misreads. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/28:88'` · test:

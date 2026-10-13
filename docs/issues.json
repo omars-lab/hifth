@@ -4507,10 +4507,11 @@
         "file": "docs/PLAN.md",
         "item": "99"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Build the owner's answer to item 69: turned back upright, the page comes back at its opening size, not 100%; staying at 100% stays as a setting."
+      "note": "Built 2026-10-13: turned back upright, the page comes back at its opening size; staying whole is an info-panel setting. iPad browser test (both ways) and a settings test watched failing first.",
+      "closedBy": "apps/web/e2e/ipad.spec.ts"
     },
     {
       "id": "zoom-keeps-line-starts-in-sight",

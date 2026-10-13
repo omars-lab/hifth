@@ -680,3 +680,57 @@ test.describe("Hifth · turning an upright iPad's page that opened bigger than t
     expect(opened.top + opened.height, "and so is its foot").toBeLessThanOrEqual(PORTRAIT.height);
   });
 });
+
+/*
+ * Held upright, a verse's page opens a little bigger than the screen. Turned on
+ * its side the open book shows both pages whole, and turned back upright the
+ * page stayed whole, so the reader lost the size it had opened at
+ * (docs/PLAN.md, item 69). The owner chose on 2026-10-13: turning back upright
+ * brings back the opening size; staying whole is a setting (item 99).
+ */
+test.describe("Hifth · turning an iPad on its side and back upright", () => {
+  /** The page's width once it has stopped changing. */
+  async function settledWidth(page: Page, n: number): Promise<number> {
+    let last = Number.NaN;
+    let width = 0;
+    await expect
+      .poll(async () => {
+        const b = await leaf(page, n).boundingBox();
+        if (!b) return false;
+        const same = Math.abs(b.width - last) < 0.5;
+        last = b.width;
+        width = b.width;
+        return same;
+      }, { intervals: [300], timeout: 20_000 })
+      .toBe(true);
+    return width;
+  }
+
+  async function sidewaysAndBack(page: Page, settings: Record<string, string> = {}) {
+    await page.addInitScript((pairs) => {
+      for (const [k, v] of Object.entries(pairs)) localStorage.setItem(k, v);
+    }, { [COACH_STORAGE_KEY]: "1", ...settings });
+    await page.setViewportSize(PORTRAIT);
+    await page.goto("/#/hafs-kfqc/2:46");
+    await shown(page, 7);
+    const opened = await settledWidth(page, 7);
+    await page.setViewportSize(LANDSCAPE);
+    await shown(page, 8);
+    const sideways = await settledWidth(page, 7);
+    await page.setViewportSize(PORTRAIT);
+    await shown(page, 7);
+    await expect(leaf(page, 8)).toHaveCount(0);
+    return { opened, sideways, back: await settledWidth(page, 7) };
+  }
+
+  test("back upright, the page comes back at the size it opened at", async ({ page }) => {
+    const { opened, back } = await sidewaysAndBack(page);
+    expect(Math.abs(back - opened), "back upright, the same size as it opened").toBeLessThan(2);
+  });
+
+  test("set to stay whole, back upright the page fits the screen", async ({ page }) => {
+    const { opened, back } = await sidewaysAndBack(page, { "hifth.upright-again.v1": "whole" });
+    // It opened at 155%; whole is 100%, about two thirds as wide.
+    expect(back / opened, "back upright, the whole page").toBeLessThan(0.7);
+  });
+});

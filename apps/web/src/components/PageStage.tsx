@@ -218,6 +218,13 @@ interface PageStageProps {
    */
   onSlack?: (px: number, cover: { left: number; right: number }) => void;
   /**
+   * A page has landed, at this size, before the reader zoomed it: what
+   * `openedZoom` reads. Told to the app as it happens, since turning an iPad
+   * on its side swaps this stage for the open book's before the app hears the
+   * iPad has turned (docs/PLAN.md, item 99).
+   */
+  onOpened?: (z: number) => void;
+  /**
    * Which page a turn in this direction would land on, or `null` for none.
    *
    * Needed only by the *dragged* turn, and only because a fold has an appearance
@@ -1007,6 +1014,12 @@ export interface PageStageHandle {
    */
   zoomNow: () => number;
   /**
+   * The size the page now showing opened at, before the reader zoomed it, or
+   * null before any page has landed. Turning an iPad back upright brings it
+   * back (docs/PLAN.md, item 99).
+   */
+  openedZoom: () => number | null;
+  /**
    * Turn the page from a grab that this stage's own gesture cannot feel.
    *
    * On a desktop spread the reader turns by grabbing the book's outer edge —
@@ -1166,6 +1179,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onTurn,
     onPinchZoom,
     onSlack,
+    onOpened,
     turnTargetOf,
     dragToTurn = true,
     onJuzTurn,
@@ -1295,6 +1309,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onPinchZoomRef.current = onPinchZoom;
   const onSlackRef = useRef(onSlack);
   onSlackRef.current = onSlack;
+  const onOpenedRef = useRef(onOpened);
+  onOpenedRef.current = onOpened;
   const turnTargetOfRef = useRef(turnTargetOf);
   turnTargetOfRef.current = turnTargetOf;
   const dragToTurnRef = useRef(dragToTurn);
@@ -2545,7 +2561,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       setCurrentPage(next);
       if (carry) reclampCurrent();
       else centerCurrent();
-      if (!carry) openedZRef.current = view.current.z;
+      if (!carry) {
+        openedZRef.current = view.current.z;
+        onOpenedRef.current?.(view.current.z);
+      }
       if (!carry && (coverTopRef.current !== null || coverSideRef.current !== null)) {
         cancelAnimationFrame(liftRaf.current);
         liftRaf.current = requestAnimationFrame(() => liftRef.current());
@@ -3153,6 +3172,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       zoomNow() {
         return view.current.z;
       },
+      openedZoom() {
+        return openedZRef.current;
+      },
       async navigateTo(key, opts) {
         const loc = resolver.resolve(key);
         if (!loc) return; // unvendored target — App gates the chip, this is a no-op
@@ -3228,6 +3250,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           if (hopRef.current === mine) hopRef.current = null;
           if (ticket !== relocateRef.current) return;
           openedZRef.current = view.current.z;
+          onOpenedRef.current?.(view.current.z);
         }
         if (opts?.pulse !== false) {
           mp.hl.highlight(key, "sel", "selection");
