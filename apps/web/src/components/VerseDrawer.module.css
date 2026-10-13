@@ -36,6 +36,13 @@
   }
 }
 
+/* Wider than that, where a bar button would still be cut by the card (plan
+   item 94): the drawer checks, and covers the whole bar as on a phone. */
+.drawer[data-whole] {
+  max-inline-size: none;
+  min-block-size: var(--reach, auto);
+}
+
 @keyframes rise {
   from {
     transform: translateY(100%);

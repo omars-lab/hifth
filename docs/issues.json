@@ -4435,6 +4435,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/desktop.spec.ts",
       "note": "On the laptop closed to one page at 250%, the roots list drew the page a little smaller (234%) so the verse fit beside it, and closing the list left it there. The page now goes back to the reader's own size once nothing covers it, unless the reader zoomed in between. Desktop test in both languages, watched failing first; measured in Firefox."
+    },
+    {
+      "id": "verse-drawer-cuts-bar-large-ipad-upright",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "94"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/ipad.spec.ts",
+      "note": "On a large iPad upright (1024 to 1112 wide) the verse's drawer stood as a middle card over the bottom bar and the verse's name slid half under it, the bar's far end wider than the room beside the card. The drawer now covers the whole bar whenever a bar button would be cut, and the look-alike buttons ride its head meanwhile. iPad test at 1032 by 1376 and 1024 by 700 in both languages, watched failing first."
     }
   ]
 }

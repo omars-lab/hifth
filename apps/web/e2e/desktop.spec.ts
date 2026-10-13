@@ -2512,7 +2512,9 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
   }
 
   for (const { home, row } of [
-    { home: "bar", row: (page: Page) => page.locator("footer") },
+    // Tall enough that the verse's drawer would cut the bar's far end, so it
+    // covers the whole bar (plan item 94): the bottom row's chips ride its head.
+    { home: "bar", row: (page: Page) => page.locator("section[data-whole]") },
     { home: "tools", row: (page: Page) => page.getByRole("toolbar") },
   ] as const) {
     test(`with no desk either side of the book, the chips go to the ${home === "bar" ? "bottom" : "tool"} row, off the page`, async ({ page }) => {
@@ -2541,7 +2543,9 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
     await page.setViewportSize({ width: 1024, height: 1366 });
     await page.goto("/#/hafs-kfqc/2:49");
     await expect(pageSvg(page, 8)).toBeVisible({ timeout: 20_000 });
-    await expect(page.locator("footer").locator("button[data-direction]").first()).toBeVisible();
+    // The bottom row, which the verse's drawer covers here, so on its head.
+    const drawer = page.locator("section[data-whole]");
+    await expect(drawer.locator("button[data-direction]").first()).toBeVisible();
     await page.getByRole("button", { name: /عن حِفظ/ }).click();
     const choices = page.getByRole("dialog").locator('[aria-labelledby="colophon-rail-home"]').getByRole("radio");
     await expect(choices).toHaveCount(2);
@@ -2551,5 +2555,6 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
     await page.keyboard.press("Escape");
     await expect(page.getByRole("toolbar").locator("button[data-direction]").first()).toBeVisible();
     await expect(page.locator("footer").locator("button[data-direction]")).toHaveCount(0);
+    await expect(drawer.locator("button[data-direction]")).toHaveCount(0);
   });
 });
