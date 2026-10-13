@@ -542,8 +542,10 @@ and no more, and should not need a second one.
   (never pushed, last touched 2026-09-30) still sits on the old history. Whoever picks it up runs
   `git rebase --onto bac4da8 f94a8f1 native-shell`, after first bringing in anything on old main it
   lacks.
-- **Decide whether the comparison runs before every push.** It adds a few minutes, and a fresh yes
-  whenever the page's look changes.
+- ~~**Decide whether the comparison runs before every push.**~~ It adds a few minutes, and a fresh
+  yes whenever the page's look changes. Answered by the owner on 2026-10-13: only when asked. It is
+  run on purpose before a pitch run-through and after changes to the app shell; the browser picture
+  checks still run on every push.
 
 ### ⑳ Switching the app to the public build kept the pitch's private folder · **fixed**
 
