@@ -1614,6 +1614,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     the setting's module. Known edge: a run that carries on onto a page that is not showing
     draws its mark nowhere until the reader turns there. Four tests on the computer, the two
     marks' tests and the setting's watched failing first, and both looked at in Firefox.
+    The owner kept the moving light as the default on 2026-10-13; the ring stays the setting.
 58. ~~**A run that goes past the page leaves the page behind, and a note can hide the verse being
     recited.**~~ Found 2026-10-10 asking what happens in the room when a presenter plays a
     whole surah from the corner menu: the recitation carried on past the page, but the page
