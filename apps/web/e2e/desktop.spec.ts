@@ -2501,6 +2501,13 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
           return Math.max(0, start - 1280, Math.min(start - card.x, card.x + card.width - start));
         }, { message: "how far the verse's start stands under the list or off the window" })
         .toBe(0);
+      // Closed again, the page is back at the size the reader chose: the list
+      // moved the page, not the reader (it had stayed drawn smaller).
+      await list.getByRole("button", { name: /^(إغلاق|Close)$/ }).click();
+      await expect(list).toBeHidden();
+      await expect
+        .poll(async () => (await stillBoxOf(paper)).width / zoomed, { message: "the page's size once the list has closed, against the reader's own" })
+        .toBeCloseTo(1, 2);
     });
   }
 

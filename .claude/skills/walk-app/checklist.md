@@ -411,6 +411,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   app on its side (`make app-probe TARGET=ipad SIDEWAYS=1 "IPAD=iPad mini (A17 Pro)"` with the
   corner-cards script) · issue: `mini-side-long-verse-under-note` · walked 2026-10-12 in the
   browser and the app, both languages, none under either card
+- [ ] On the laptop closed to one page, zoom in a step or two past the room the roots list leaves
+  (2:45), open the roots list, then close it: open, the page is drawn a little smaller and the
+  whole verse stands clear of the list; closed, the page and the zoom readout are back at the
+  size you chose. Zoomed in a lot, the list leaves the size alone and keeps the verse's start in
+  sight. · `VIEWPORT=1280x800`, `BROWSER=firefox` and Chrome, both languages · issue:
+  `closing-a-card-keeps-the-page-smaller` · walked 2026-10-12 in Firefox, both languages
 - [ ] On an iPad mini held upright, no card open, the look-alike buttons stand clear of the page's
   top lines (2:48). · `VIEWPORT=744x1133`, the iPad app on the mini · issue:
   `lookalike-buttons-on-top-lines-ipad-mini-upright`
