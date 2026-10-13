@@ -285,3 +285,8 @@ answer it: a hafiz who reads the app in Arabic trying both, on a real iPad held 
 Chosen 2026-10-12 by the owner: the pens stay on the right by default, in both languages, and
 the mirrored layout, with the pens and Mark up on the left, is built beside it as a setting in
 the info panel, so a hafiz reading in Arabic can try both. The build is plan item 95.
+
+Built 2026-10-13: the info panel's "Which side the pens stand on" offers Right (the default)
+and Left. Left puts the pens down the side at the window's left edge, mirrored so the
+highlighter's colours still stand on the book's side of the tools, and the Mark up button at
+the left end of the bottom row.

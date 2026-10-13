@@ -383,6 +383,10 @@ export interface Catalog {
   readonly penLabel: string;
   readonly penMarkUp: string;
   readonly penPink: string;
+  readonly penSideLeft: string;
+  readonly penSideNote: string;
+  readonly penSideRight: string;
+  readonly penSideTitle: string;
   readonly penWordsLabel: string;
   readonly penYellow: string;
   readonly phoneTools: (d: { readonly name: string | number }) => string;

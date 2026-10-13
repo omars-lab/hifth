@@ -255,6 +255,7 @@ import { usePageDestination } from "./page-destination";
 import { isMarkAim, rememberMarkTools, savedMarkTools, toolsFor, type MarkAim, type MarkTools } from "./mark-tools";
 import { rememberMistakeTap, savedMistakeTap, type MistakeTap } from "./mistake-tap";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
+import { rememberPenSide, savedPenSide, type PenSide } from "./pen-side";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
 import { applyPen, applyWordPen, rememberPen, savedPen, savedWordPen, type Pen } from "./pen";
 import { usePassageRows } from "./passage-rows";
@@ -1328,6 +1329,14 @@ export function App(): JSX.Element {
     setChosenHome(home);
   }, []);
   const sideRoom = useSideRoom(desktop && penHome === "side");
+  // Which side the pens down the side and the Mark up button stand on
+  // (docs/PLAN.md, 95): the right by default in both languages, or the left,
+  // mirrored, the owner's pick of 2026-10-12.
+  const [penSide, setPenSide] = useState<PenSide>(() => savedPenSide());
+  const choosePenSide = useCallback((side: PenSide) => {
+    rememberPenSide(side);
+    setPenSide(side);
+  }, []);
   // While the margin is still unmeasured nothing is drawn, so the rail never
   // flashes over a book too wide for it.
   const penAt: PenHome | null = penHome !== "side" ? penHome : sideRoom === null ? null : sideRoom ? "side" : "bottom";
@@ -3976,7 +3985,7 @@ export function App(): JSX.Element {
         />
       )}
       {resolver && desktop && penAt === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
-      {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
+      {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
       <main
         ref={roomRef}
@@ -4399,6 +4408,8 @@ export function App(): JSX.Element {
             onMistakeTap={chooseMistakeTap}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
+            penSide={desktop ? penSide : undefined}
+            onPenSide={desktop ? choosePenSide : undefined}
             railHome={desktop ? railHome : undefined}
             onRailHome={desktop ? chooseRailHome : undefined}
             spread={desktop}
@@ -4494,7 +4505,7 @@ export function App(): JSX.Element {
         />
       )}
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
-        {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
+        {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
         {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
         {railAt === "bar" && !railOnDrawer && hopRail(undefined, "bar")}

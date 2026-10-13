@@ -143,6 +143,14 @@
   cursor: pointer;
 }
 
+/* On the left (docs/PLAN.md, 95): last in the right-to-left row, past the
+   full-screen button, with the hint now to its right, so the space is too. */
+.markUp[data-pen-side="left"] {
+  order: 1;
+  margin-left: 0;
+  margin-right: var(--space-3);
+}
+
 .markUp:hover {
   background: var(--accent-tint);
 }
@@ -180,6 +188,14 @@
   top: 50%;
   transform: translateY(-50%);
   align-items: flex-start;
+}
+
+/* On the left (docs/PLAN.md, 95), mirrored: the tools at the window's edge,
+   the pens on the book's side of them. */
+.side[data-pen-side="left"] {
+  right: auto;
+  left: 8px;
+  flex-direction: row-reverse;
 }
 
 .sideColumn {

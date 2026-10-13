@@ -4475,10 +4475,11 @@
         "file": "docs/PLAN.md",
         "item": "95"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "The owner chose on 2026-10-12 (notes-style-toolbar ④): the pens and Mark up stay on the right by default; build the mirrored layout, pens and Mark up on the left, as an info-panel setting, tested in both languages on the iPad held sideways."
+      "note": "The owner chose on 2026-10-12 (notes-style-toolbar ④): the pens and Mark up stay on the right by default; build the mirrored layout, pens and Mark up on the left, as an info-panel setting, tested in both languages on the iPad held sideways. Built 2026-10-13: the info panel's \"Which side the pens stand on\", Right or Left; on the left the pens down the side stand at the window's left edge, mirrored, and Mark up at the left end of the bottom row. Browser tests on an iPad held sideways, English and Arabic, each side, watched failing first.",
+      "closedBy": "apps/web/e2e/pen-homes.spec.ts"
     },
     {
       "id": "pencil-gestures-build",

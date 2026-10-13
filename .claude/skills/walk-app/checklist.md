@@ -185,6 +185,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   ROUTE=/hafs-kfqc/p7 EVALFILE=.claude/skills/walk-app/scripts/mistake-ask-walk.js DELAY_MS=2500
   PROBE_TIMEOUT_S=200` · test: e2e/ipad.spec.ts ("a drag brings the page's foot into sight") ·
   found 2026-10-13
+- [ ] With the pens set to the left in the info panel ("Which side the pens stand on"), on an
+  iPad held sideways in English and Arabic: the pens down the side stand at the left edge, the
+  colours on the book's side of them, clear of the page; Mark up sits at the left end of the
+  bottom row on top of nothing. · iPad sideways · test: e2e/pen-homes.spec.ts ("which side the
+  pens stand on") · built 2026-10-13
 - [ ] Every tap-and-hold menu, with all its lines, stays beside the verse and inside the screen.
   · phone, iPad · test: e2e/confusions.spec.ts
 - [ ] A test that checks "none of these are on screen" can pass before a list has even opened:
