@@ -566,8 +566,12 @@ test.describe("Hifth · the list behind a jump mark", () => {
     // shared run to line up: no Compare is offered that would open on nothing.
     await jumpFrom(page, 65, "2:58", (l) => l.getByRole("button", { name: /7:161/ }).click());
     await mark(page, "2:58").click();
+    // The row first: a count of none passes before the list has even opened,
+    // and an Escape pressed then leaves it to open over the next verse.
+    await expect(row(jumps(page, "2:58"), "7:161")).toBeVisible();
     await expect(row(jumps(page, "2:58"), "7:161").getByRole("button", { name: "Compare" })).toHaveCount(0);
     await page.keyboard.press("Escape");
+    await expect(jumps(page, "2:58")).toHaveCount(0);
 
     await jumpFrom(page, 67, "2:60", (l) => l.getByRole("button", { name: /7:160/ }).click());
     await mark(page, "2:60").click();
@@ -584,51 +588,61 @@ test.describe("Hifth · the list behind a jump mark", () => {
     await expect(page).toHaveURL(/7:160/);
   });
 
-  test("I slipped here… marks a slip, the list and the page map say so, and the row takes it back", async ({ page }) => {
-    // A slip is the wrong turn a look-alike pulls you into (docs/PLAN.md, item
-    // 103). It is asked the same way as a jump, in its own words, and the
-    // look-alikes it likely pulled you toward come first.
+  test("the Mistake pen's \"went into another verse\" marks a mistake, and the list and the page map say so", async ({ page }) => {
+    // One way in for every mistake (docs/PLAN.md, item 103, the owner on
+    // 2026-10-13): the Mistake pen, a tap on the word, then what went wrong.
+    // Going into another verse asks where, the look-alikes first, and marks no
+    // word red: the record is of where the verse pulled you.
+    await page.goto("/#/hafs-kfqc/p9?tool=mistake");
+    await expect(pageSvg(page, 9)).toBeVisible();
     const at = await ayahTarget(page, verse(65)); // 2:58
-    await page.mouse.move(at.x, at.y);
-    await page.mouse.down();
-    await page.waitForTimeout(600);
-    await page.mouse.up();
-    const menu = page.getByRole("menu", { name: /^More for / });
-    // Every line can be pressed, on a phone too, with one more line in the menu.
-    const view = page.viewportSize()!;
-    for (const line of await menu.getByRole("menuitem").all()) {
-      const b = (await line.boundingBox())!;
-      expect(b.x, await line.innerText()).toBeGreaterThanOrEqual(0);
-      expect(b.x + b.width, await line.innerText()).toBeLessThanOrEqual(view.width);
-    }
-    await menu.getByRole("menuitem", { name: "I slipped here…" }).click();
+    await page.mouse.click(at.x, at.y);
+    await page.getByRole("dialog", { name: /^What went wrong in / }).getByRole("button", { name: "Went into another verse…" }).click();
     const where = page.getByRole("dialog", { name: "Where did 2:58 pull you?" });
     await expect(where).toBeVisible();
     await where.getByRole("button", { name: /7:161/ }).click();
-    await expect(undoBar(page)).toContainText("Slip from 2:58 to 7:161 marked");
-    // A slip is counted on the verse's mark like any jump.
+    await expect(undoBar(page)).toContainText("Mistake marked: 2:58 went into 7:161");
+    await expect(page.locator("[data-mistake-word]:visible")).toHaveCount(0);
+    // It is counted on the verse's mark like any jump.
     await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
 
+    await page.keyboard.press("Escape");
     await mark(page, "2:58").click();
     const r = row(jumps(page, "2:58"), "7:161");
-    await expect(r.getByRole("button", { name: "A slip" })).toHaveAttribute("aria-pressed", "true");
-    // Marked again from the Jump line, it stays a slip: only the switch takes the word back.
+    await expect(r.getByRole("button", { name: "A mistake" })).toHaveAttribute("aria-pressed", "true");
+    // Marked again from the Jump line, it stays a mistake: only the switch takes the word back.
+    // The page opened again without the pen, which a phone's Escape does not put down.
     await page.keyboard.press("Escape");
+    await expect(jumps(page, "2:58")).toHaveCount(0);
+    await page.goto("/#/hafs-kfqc/p9");
+    await page.reload();
+    await expect(pageSvg(page, 9)).toBeVisible();
     await jumpFrom(page, 65, "2:58", (l) => l.getByRole("button", { name: /7:161/ }).click());
-    await expect(undoBar(page)).toContainText("Slip from 2:58 to 7:161 marked, 2 times now");
+    await expect(undoBar(page)).toContainText("Mistake marked: 2:58 went into 7:161, 2 times now");
 
     await page.getByRole("button", { name: /what you have opened/ }).click();
     const sheet = page.getByRole("dialog", { name: "What you have opened" });
     await expect(sheet.getByRole("list", { name: "Your jumps" }).getByRole("button")).toHaveText([
-      /^From 2:58 to 7:161.*2 times.*A slip/,
+      /^From 2:58 to 7:161.*2 times.*A mistake/,
     ]);
     await page.keyboard.press("Escape");
     await expect(sheet).toBeHidden();
 
     await mark(page, "2:58").click();
     const again = row(jumps(page, "2:58"), "7:161");
-    await again.getByRole("button", { name: "A slip" }).click();
-    await expect(again.getByRole("button", { name: "A slip" })).toHaveAttribute("aria-pressed", "false");
+    await again.getByRole("button", { name: "A mistake" }).click();
+    await expect(again.getByRole("button", { name: "A mistake" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  test("a verse's hold menu offers Jump…, a link, and no mistake", async ({ page }) => {
+    const at = await ayahTarget(page, verse(65)); // 2:58
+    await page.mouse.move(at.x, at.y);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    const menu = page.getByRole("menu", { name: /^More for / });
+    await expect(menu.getByRole("menuitem", { name: "Jump…" })).toBeVisible();
+    for (const line of await menu.getByRole("menuitem").allInnerTexts()) expect(line).not.toMatch(/slip|mistake|went into/i);
   });
 
   test("a jump not named yet is named from its row", async ({ page }) => {

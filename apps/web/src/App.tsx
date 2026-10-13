@@ -252,6 +252,7 @@ import { useRunFollow } from "./run-follow";
 import { useRunAhead } from "./run-ahead";
 import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
 import { isMarkAim, rememberMarkTools, savedMarkTools, toolsFor, type MarkAim, type MarkTools } from "./mark-tools";
+import { rememberMistakeTap, savedMistakeTap, type MistakeTap } from "./mistake-tap";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
 import { applyPen, applyWordPen, rememberPen, savedPen, savedWordPen, type Pen } from "./pen";
@@ -1704,6 +1705,13 @@ export function App(): JSX.Element {
     rememberMarkTools(shape);
     setMarkTools(shape);
   }, []);
+  // What a tap with the Mistake pen does (docs/PLAN.md, item 103): ask what
+  // went wrong first (the default), or mark the word at once as first built.
+  const [mistakeTap, setMistakeTap] = useState<MistakeTap>(() => savedMistakeTap());
+  const chooseMistakeTap = useCallback((choice: MistakeTap) => {
+    rememberMistakeTap(choice);
+    setMistakeTap(choice);
+  }, []);
   const [lastAim, setLastAim] = useState<MarkAim>("note");
   const markAim = markTools === "one" ? (isMarkAim(tool) ? tool : lastAim) : undefined;
   const barTools = toolsFor(TOOLS, markTools, markAim ?? "note");
@@ -1827,7 +1835,8 @@ export function App(): JSX.Element {
   // the question to the go-to box (`jumpNaming`). A jump just marked waits in
   // `jumpUndo` for its Undo, which takes back only that change: a time added,
   // a record deleted, a destination said. Both carry the kind the reader
-  // asked for: "I slipped here…" marks a slip, everything else a jump.
+  // asked for: the Mistake pen's "Went into another verse…" marks a slip
+  // (the record's word for a mistake of that kind), everything else a jump.
   const [jumpAsking, setJumpAsking] = useState<{
     from: JumpEnd;
     at: { top: number; bottom: number; x: number };
@@ -1898,8 +1907,9 @@ export function App(): JSX.Element {
     setJumpRenaming(null);
   }, []);
   // A jump said from a verse's menu rather than drawn: the list opens by the
-  // verse (or by the menu that was round it), with no seam word to keep.
-  const askJumpFrom = useCallback((key: string, around?: DOMRect, kind: ConfusionKind = "jump") => {
+  // verse (or by the menu that was round it). From the Mistake pen it keeps
+  // the word the reader tapped, as a drawn arrow keeps its seam word.
+  const askJumpFrom = useCallback((key: string, around?: DOMRect, kind: ConfusionKind = "jump", word?: number) => {
     const p = parseAyahKey(key);
     const box =
       around ??
@@ -1911,7 +1921,7 @@ export function App(): JSX.Element {
     const at = box
       ? { top: box.top, bottom: box.bottom, x: box.left + box.width / 2 }
       : { top: window.innerHeight / 3, bottom: window.innerHeight / 3, x: window.innerWidth / 2 };
-    setJumpAsking({ from: { key }, at, kind });
+    setJumpAsking({ from: word === undefined ? { key } : { key, word }, at, kind });
   }, []);
   // The list a tap on a jump mark opens (confusion-jumps, step 6).
   const [jumpsAt, setJumpsAt] = useState<{ key: string; anchor: { top: number; bottom: number; x: number } } | null>(null);
@@ -2367,7 +2377,7 @@ export function App(): JSX.Element {
     [undoable, stepMarks, tool, chooseTool],
   );
   // The eraser (notes-style-toolbar ③): one mark off per tap, no question
-  // asked, since Undo puts it back. A slip comes off through `markWord`.
+  // asked, since Undo puts it back. A mistake comes off through `markWord`.
   const erase = (what: Erased) => {
     if ("pin" in what) {
       const n = notes.find((x) => x.id === what.pin);
@@ -2397,16 +2407,29 @@ export function App(): JSX.Element {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [stepMarks]);
 
-  // The mistake tool (docs/design/page-toolbar-plan.md, step 3): a tap marks a
-  // word in a quiet red and the tool stays up for the next one; a tap on a
-  // word already marked opens the sign picker. A mistake is a note of kind
-  // "correction", so it is kept and saved with the notes (notes-export = C).
+  // The mistake tool (docs/design/page-toolbar-plan.md, step 3, reshaped by
+  // the owner on 2026-10-13 as docs/PLAN.md item 103): a tap on a word asks
+  // what went wrong, the harakat (pick the sign), the whole word, or another
+  // verse it went into, and nothing is marked until the reader says. The tool
+  // stays up for the next one; a tap on a word already marked opens the same
+  // question to change or clear it. Set to "mark at once", the first tap marks
+  // the whole word, as first built. A mistake is a note of kind "correction",
+  // so it is kept and saved with the notes (notes-export = C).
   const [pickingId, setPickingId] = useState<string | null>(null);
   const picking = notes.find((n) => n.id === pickingId) ?? null;
+  // The word asked about, before anything is marked on it.
+  const [askingMistake, setAskingMistake] = useState<{
+    page: number;
+    key: string;
+    word: number;
+    x: number;
+    y: number;
+    rect: WordRect | null;
+  } | null>(null);
   const markWord = useCallback(
-    (at: { page: number; key: string; word: number; x: number; y: number }) => {
+    (at: { page: number; key: string; word: number; x: number; y: number; rect: WordRect | null }) => {
       const held = mistakeOn(notes, at.page, at.key, at.word);
-      // The eraser takes a slip off with no question; a word with none is left.
+      // The eraser takes a mistake off with no question; a word with none is left.
       if (toolRef.current === "erase") {
         if (held) commitNotes(removeNote(notes, held.id), t.mistakeCleared);
         return;
@@ -2415,14 +2438,52 @@ export function App(): JSX.Element {
         setPickingId(held.id);
         return;
       }
-      commitNotes(markMistake(notes, at, Date.now()), t.mistakeMarked(t.ayahLabel(at.key) ?? at.key));
+      if (mistakeTap === "ask") {
+        setAskingMistake(at);
+        return;
+      }
+      const { rect: _rect, ...where } = at;
+      commitNotes(markMistake(notes, where, Date.now()), t.mistakeMarked(t.ayahLabel(at.key) ?? at.key));
       // Into the revision record too, so the calendar can show where the reader
-      // slips. Only on the first tap: picking the sign or clearing the mark
-      // later is the same slip, not another one.
+      // went wrong. Only when it is first marked: picking the sign or clearing
+      // the mark later is the same mistake, not another one.
       void recordLook({ key: at.key, page: at.page, slip: true });
     },
-    [notes, commitNotes, t],
+    [notes, commitNotes, t, mistakeTap],
   );
+  // The question answered for a word not marked yet: one change, one Undo.
+  const answerMistake = (mark: number | null, name: string | null) => {
+    const a = askingMistake;
+    setAskingMistake(null);
+    if (!a) return;
+    const { rect: _rect, ...where } = a;
+    const now = Date.now();
+    let next = markMistake(notes, where, now);
+    const made = mistakeOn(next, a.page, a.key, a.word);
+    if (made && mark !== null) next = pickMistakeSign(next, made.id, mark, now);
+    commitNotes(next, name ? t.mistakeSignPicked(name) : t.mistakeMarked(t.ayahLabel(a.key) ?? a.key));
+    void recordLook({ key: a.key, page: a.page, slip: true });
+  };
+  // "Went into another verse…": no red on the word, which was read right;
+  // the mistake is the turn, said the way a jump is, look-alikes first.
+  const mistakeIntoAnother = (key: string, page: number, word: number, first: boolean) => {
+    if (first) void recordLook({ key, page, slip: true });
+    askJumpFrom(key, heldVerseBox(key), "slip", word);
+  };
+  const answerAnother = () => {
+    const a = askingMistake;
+    setAskingMistake(null);
+    if (a) mistakeIntoAnother(a.key, a.page, a.word, true);
+  };
+  // A word marked wrong that was really a turn into another verse: the red
+  // comes off, and the turn is asked for instead.
+  const turnMistakeIntoAnother = () => {
+    const n = picking;
+    setPickingId(null);
+    if (!n || n.word === null) return;
+    commitNotes(removeNote(notes, n.id), t.mistakeCleared);
+    mistakeIntoAnother(n.key, n.page, n.word, false);
+  };
   const pickSign = (mark: number | null, name: string | null) => {
     const n = picking;
     setPickingId(null);
@@ -4347,6 +4408,8 @@ export function App(): JSX.Element {
             onScopeLook={chooseScopeLook}
             markTools={markTools}
             onMarkTools={chooseMarkTools}
+            mistakeTap={mistakeTap}
+            onMistakeTap={chooseMistakeTap}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
             railHome={desktop ? railHome : undefined}
@@ -4560,7 +4623,6 @@ export function App(): JSX.Element {
             <DrawerTool glyph={"✍\uFE0E"} caption={t.vdNote} label={t.vdNoteAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => noteOnVerse(selectedKey)} />
             <DrawerTool glyph="⧉" caption={t.vdCopy} label={t.vdCopyAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => copyVerse(selectedKey)} />
             <DrawerTool glyph="↝" caption={t.vdJump} label={t.vdJumpAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => askJumpFrom(selectedKey)} />
-            <DrawerTool glyph="≈" caption={t.vdSlip} label={t.vdSlipAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => askJumpFrom(selectedKey, undefined, "slip")} />
           </>
         )}
       </VerseDrawer>
@@ -4578,13 +4640,8 @@ export function App(): JSX.Element {
             { caption: t.vdCopy, onPick: () => copyVerse(verseMenu.key) },
             // Straight to "where did it take you?", with no arrow to draw: the
             // phone's way in, where a finger is already resting on the verse.
+            // A link noticed, not a mistake: mistakes are the Mistake pen's.
             { caption: t.vdJump, onPick: () => askJumpFrom(verseMenu.key, heldVerseBox(verseMenu.key) ?? verseMenu.around) },
-            // A slip, said the same way: the look-alikes it likely pulled you
-            // toward come first in the list, as for a jump.
-            {
-              caption: t.vdSlip,
-              onPick: () => askJumpFrom(verseMenu.key, heldVerseBox(verseMenu.key) ?? verseMenu.around, "slip"),
-            },
           ]}
         />
       )}
@@ -4767,7 +4824,25 @@ export function App(): JSX.Element {
             chosen={picking.mark ?? null}
             onPick={(mark, name) => pickSign(mark, name)}
             onClear={clearMistake}
+            onAnother={turnMistakeIntoAnother}
             onClose={() => setPickingId(null)}
+          />
+        </Suspense>
+      )}
+      {askingMistake && manifest && (
+        <Suspense fallback={null}>
+          <WordPartsHost
+            key={`${askingMistake.key}#${askingMistake.word}`}
+            manifest={manifest}
+            page={askingMistake.page}
+            verseKey={askingMistake.key}
+            word={askingMistake.word}
+            label={t.ayahLabel(askingMistake.key) ?? askingMistake.key}
+            anchor={() => askingMistake.rect}
+            mode="mistake"
+            onPick={(mark, name) => answerMistake(mark, name)}
+            onAnother={answerAnother}
+            onClose={() => setAskingMistake(null)}
           />
         </Suspense>
       )}

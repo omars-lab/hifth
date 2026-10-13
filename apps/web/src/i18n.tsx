@@ -771,6 +771,8 @@ export interface Strings {
   /** The sign picker, named by its verse. */
   mistakePicker(label: string): string;
   mistakeWholeWord: string;
+  /** The third kind of mistake: the verse went into another one. */
+  mistakeAnother: string;
   /** Said when a sign is picked, named by the sign ("fatha"). */
   mistakeSignPicked(name: string): string;
   mistakeWordPicked: string;
@@ -926,6 +928,10 @@ export interface Strings {
   markToolsThree: string;
   markToolsOne: string;
   markToolsNote: string;
+  mistakeTapTitle: string;
+  mistakeTapAsk: string;
+  mistakeTapQuiet: string;
+  mistakeTapNote: string;
   markAimsLabel: string;
   railHomeTitle: string;
   railHomeBar: string;
@@ -950,8 +956,6 @@ export interface Strings {
   vdJump: string;
   vdJumpAria(label: string): string;
   /** A slip: the wrong turn a look-alike pulls you into (docs/PLAN.md, item 103). */
-  vdSlip: string;
-  vdSlipAria(label: string): string;
   verseMore(label: string): string;
   playToPick: string;
   playToPickClick: string;
@@ -1589,6 +1593,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mistakeMarked: (label) => m.mistakeMarked({ label }),
     mistakePicker: (label) => m.mistakePicker({ label }),
     mistakeWholeWord: m.mistakeWholeWord,
+    mistakeAnother: m.mistakeAnother,
     mistakeSignPicked: (name) => m.mistakeSignPicked({ name }),
     mistakeWordPicked: m.mistakeWordPicked,
     mistakeNoSigns: m.mistakeNoSigns,
@@ -1736,6 +1741,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     markToolsThree: m.markToolsThree,
     markToolsOne: m.markToolsOne,
     markToolsNote: m.markToolsNote,
+    mistakeTapTitle: m.mistakeTapTitle,
+    mistakeTapAsk: m.mistakeTapAsk,
+    mistakeTapQuiet: m.mistakeTapQuiet,
+    mistakeTapNote: m.mistakeTapNote,
     markAimsLabel: m.markAimsLabel,
     railHomeTitle: m.railHomeTitle,
     railHomeBar: m.railHomeBar,
@@ -1759,8 +1768,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     vdCopyAria: (label) => m.vdCopyAria({ label }),
     vdJump: m.vdJump,
     vdJumpAria: (label) => m.vdJumpAria({ label }),
-    vdSlip: m.vdSlip,
-    vdSlipAria: (label) => m.vdSlipAria({ label }),
     verseMore: (label) => m.verseMore({ label }),
     playToPick: m.playToPick,
     playToPickClick: m.playToPickClick,

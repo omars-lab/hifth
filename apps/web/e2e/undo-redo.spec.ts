@@ -29,16 +29,17 @@ test.describe("Hifth · undo and redo for marks", () => {
 
     const at = await ayahTarget(page, "#verse-46");
     await page.mouse.click(at.x, at.y);
+    await page.getByRole("dialog", { name: /^What went wrong in / }).getByRole("button", { name: "The whole word" }).click();
     await expect(washes(page)).toHaveCount(1);
     await expect(undo(page)).toBeEnabled();
 
     await undo(page).click();
     await expect(washes(page)).toHaveCount(0);
-    await expect(said(page)).toHaveText(/^Undone: Slip marked on /);
+    await expect(said(page)).toHaveText(/^Undone: Wrong word marked on /);
     await expect(undo(page)).toBeDisabled();
     await redo(page).click();
     await expect(washes(page)).toHaveCount(1);
-    await expect(said(page)).toHaveText(/^Redone: Slip marked on /);
+    await expect(said(page)).toHaveText(/^Redone: Wrong word marked on /);
 
     await page.keyboard.press("ControlOrMeta+KeyZ");
     await expect(washes(page)).toHaveCount(0);

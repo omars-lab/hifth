@@ -22,6 +22,7 @@ export function WordPartsHost({
   onPickMany,
   onPickLetter,
   onClear,
+  onAnother,
   onClose,
 }: {
   manifest: AssetManifest;
@@ -41,6 +42,8 @@ export function WordPartsHost({
   /** One letter picked, by its place from the right; the note is pinned over its top. */
   onPickLetter?: (letter: number, at: { x: number; y: number }) => void;
   onClear?: () => void;
+  /** Mistake mode: the verse went into another one. */
+  onAnother?: () => void;
   onClose: () => void;
 }): JSX.Element | null {
   const data = useWordParts(manifest.edition, page, verseKey, word);
@@ -74,6 +77,7 @@ export function WordPartsHost({
       }
       onPickLetter={onPickLetter && ((letter) => onPickLetter(letter, pinOverLetter(letter)))}
       onClear={onClear}
+      onAnother={onAnother}
       onClose={onClose}
     />
   );

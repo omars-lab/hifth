@@ -256,6 +256,7 @@ export interface Catalog {
   readonly markUndoneBare: string;
   readonly matchLoose: string;
   readonly matchRepeat: string;
+  readonly mistakeAnother: string;
   readonly mistakeClear: string;
   readonly mistakeCleared: string;
   readonly mistakeMarked: (d: { readonly label: string | number }) => string;
@@ -263,6 +264,10 @@ export interface Catalog {
   readonly mistakePicker: (d: { readonly label: string | number }) => string;
   readonly mistakeRestored: string;
   readonly mistakeSignPicked: (d: { readonly name: string | number }) => string;
+  readonly mistakeTapAsk: string;
+  readonly mistakeTapNote: string;
+  readonly mistakeTapQuiet: string;
+  readonly mistakeTapTitle: string;
   readonly mistakeWholeWord: string;
   readonly mistakeWordPicked: string;
   readonly mushaf: string;
@@ -616,8 +621,6 @@ export interface Catalog {
   readonly vdQul: string;
   readonly vdRoots: string;
   readonly vdShare: string;
-  readonly vdSlip: string;
-  readonly vdSlipAria: (d: { readonly label: string | number }) => string;
   readonly verseGesturesA: string;
   readonly verseGesturesB: string;
   readonly verseGesturesC: string;

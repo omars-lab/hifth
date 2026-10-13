@@ -57,7 +57,10 @@ async function ayahPoint(page: Page, selector: string): Promise<{ x: number; y: 
       error:
         `box ${JSON.stringify({ x: r.x, y: r.y, w: r.width, h: r.height })} in ` +
         `${window.innerWidth}×${window.innerHeight}; its centre hits ` +
-        `<${hit?.tagName.toLowerCase() ?? "nothing"}#${hit?.id ?? ""}>`,
+        `<${hit?.tagName.toLowerCase() ?? "nothing"}#${hit?.id ?? ""}>` +
+        // Which control is in the way, by what a reader would call it.
+        (hit?.getAttribute("aria-label") ? ` "${hit.getAttribute("aria-label")}"` : "") +
+        (hit?.className && typeof hit.className === "string" ? ` .${hit.className}` : ""),
     };
   }, handle!);
 

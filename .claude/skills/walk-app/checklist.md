@@ -162,10 +162,15 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   manual-testing list, item 16
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
-- [ ] Hold a verse and choose "I slipped here…": the sheet asks where it *pulled* you, the bar
-  says a slip was marked, and the row in the verse's list has "A slip" pressed; the menu's lines
-  all fit on a phone. · phone, iPad · test: e2e/confusions.spec.ts ("I slipped here… marks a
-  slip")
+- [ ] Tap a word with the Mistake pen: it asks what went wrong, with three kinds (a harakat sign,
+  the whole word, "Went into another verse…") and nothing pressed; closing it marks nothing.
+  "Went into another verse…" asks where it *pulled* you, leaves no red mark, and the row in the
+  verse's list has "A mistake" pressed. No word on screen says "slip". · phone, iPad, desktop ·
+  test: e2e/mistakes.spec.ts, e2e/confusions.spec.ts, src/messages/plain-words.test.ts
+- [ ] Every tap-and-hold menu, with all its lines, stays beside the verse and inside the screen.
+  · phone, iPad · test: e2e/confusions.spec.ts
+- [ ] A test that checks "none of these are on screen" can pass before a list has even opened:
+  wait for the list first, then check. · tests · found 2026-10-13 in the jump list's Go test
 - [ ] Every design page's status line matches what is built: a page saying "nothing is built"
   when part of it is sent the owner a question about something already done. · docs · found
   2026-10-13 on the confusion-points page

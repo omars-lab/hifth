@@ -1981,6 +1981,17 @@
       "note": "Across many readers the same look-alike verses would cluster — there are places the whole tradition slips on. OWNER DIRECTION 2026-08-29: the owner asked whether the app could do data analysis on where MOST people slip, pooling many readers' maps to find common slip points. The value is real: it could seed a new reader's warnings before they slip once, and show which verses the resemblance model most needs to cover. But it is a sharp turn away from everything else this feature is — every other part keeps one reader's map on one reader's phone and lets nothing leave without a deliberate act; this asks to gather many readers' maps in one place, close to the opposite of the private design, and the heaviest privacy question the project has yet raised (an intimate record, pooled, off-device, by default). What would answer it: a decision that weighs the pooling itself — whether it can use only data a reader knowingly contributes, whether what is pooled can be stripped of anything identifying and still be useful, and whether a server is needed at all or the common slip points are already knowable from the corpus without touching anyone's map. Named so it is not lost; built by nobody until that decision is made. Distinct from should-a-student-share-a-map-with-a-teacher (one-to-one sharing) and confusion-map-export (a reader's own backup)."
     },
     {
+      "id": "mistake-question-fits-on-ipad",
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "The Mistake pen's question (PLAN 103) has only been seen on a phone-sized picture in English; the pitch is shown on the iPad app. Answered by a walk of the real iPad app, upright and sideways, in English and Arabic, tapping words near each page edge: the question stays beside the word, every button is reachable, nothing covers the verse. Next after PLAN 103 merges."
+    },
+    {
       "id": "is-the-privacy-rule-nothing-leaves-or-nothing-that-doesnt-serve",
       "source": {
         "file": "docs/design/revision-record.md",
@@ -4572,7 +4583,7 @@
       "severity": "question",
       "owner": "agent",
       "closedBy": "apps/web/e2e/confusions.spec.ts",
-      "note": "Owner chose 2026-10-13 to build a small first version of the slip half of the confusion-points design. Built the same day: \"I slipped here…\" in a verse's menu marks a slip, a switch on each list row says whether it was one, and the page map's list shows it; records saved before stay jumps. Unit tests (packages/core/src/confusions.test.ts) and the browser test watched failing first."
+      "note": "Owner chose 2026-10-13 to build a small first version of the slip half of the confusion-points design, then reshaped it the same day: one way in, the Mistake pen, and each kind named by what went wrong. Built the same day: a tap with the pen asks what went wrong (a harakat sign, the whole word, or \"Went into another verse…\", which asks where); Jump… stays a link in the verse menu; a switch on each list row says \"A mistake\"; \"slip\" is gone from the app's words; the old mark-at-once tap is an info-panel setting; records saved before stay jumps. Unit tests (packages/core/src/confusions.test.ts, apps/web/src/mistake-tap.test.ts, apps/web/src/messages/plain-words.test.ts) and the browser tests watched failing first."
     }
   ]
 }

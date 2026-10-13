@@ -442,9 +442,10 @@ interface PageStageProps {
   onJump?: (jump: { from: { key: string; word?: number }; to: string | null; at: { top: number; bottom: number; x: number } }) => void;
   /**
    * Under the mistake tool (step 3), a tap on a word. Whether that marks it or
-   * opens its signs is App's business; the stage only says which word.
+   * asks what went wrong is App's business; the stage only says which word,
+   * and where it is on screen for the question to open beside.
    */
-  onMarkWord?: (at: { page: number; key: string; word: number; x: number; y: number }) => void;
+  onMarkWord?: (at: { page: number; key: string; word: number; x: number; y: number; rect: WordRect | null }) => void;
   /**
    * Under the harakat tool (harakah-pick = D), a click takes the vowel-sign the
    * magnifier rings. The stage says which sign; App pins a note on it.
@@ -472,6 +473,15 @@ interface PageStageProps {
 export type Corner = "surah" | "juz" | "page";
 
 /** A word's box on screen, in window pixels. */
+/** A box in the page's own units, where it is on screen now; null before the page is laid out. */
+function screenRect(svg: SVGSVGElement, box: { x: number; y: number; width: number; height: number }): WordRect | null {
+  const m = svg.getScreenCTM();
+  if (!m) return null;
+  const a = new DOMPoint(box.x, box.y).matrixTransform(m);
+  const b = new DOMPoint(box.x + box.width, box.y + box.height).matrixTransform(m);
+  return { left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), right: Math.max(a.x, b.x), bottom: Math.max(a.y, b.y) };
+}
+
 export interface WordRect {
   readonly left: number;
   readonly top: number;
@@ -1368,7 +1378,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const placeNoteRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
   const onMarkWordRef = useRef(onMarkWord);
   onMarkWordRef.current = onMarkWord;
-  const markWordRef = useRef<(page: number, key: string, x: number, y: number) => void>(() => {});
+  const markWordRef = useRef<(page: number, svg: SVGSVGElement, key: string, x: number, y: number) => void>(() => {});
   const onPickSignRef = useRef(onPickSign);
   onPickSignRef.current = onPickSign;
   const onOpenWordRef = useRef(onOpenWord);
@@ -2070,7 +2080,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const key = hl.pressedKey;
       if (!key) return;
       if (using === "word") openWordRef.current(targetPage, svg, key, at.x, at.y);
-      else (using === "note" ? placeNoteRef : markWordRef).current(targetPage, key, at.x, at.y);
+      else if (using === "note") placeNoteRef.current(targetPage, key, at.x, at.y);
+      else markWordRef.current(targetPage, svg, key, at.x, at.y);
     });
     // The harakat tool's magnifier follows the pointer with no press first:
     // the tool being on is what says a touch means "take a sign".
@@ -3648,10 +3659,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
 
   // The mistake tool's tap: the word under it, or its nearest neighbour. A tap
   // that finds no word (a page with no word data) marks nothing.
-  markWordRef.current = (targetPage, key, x, y) => {
+  markWordRef.current = (targetPage, svg, key, x, y) => {
     void ensureWords(resolver.edition, targetPage).then((idx) => {
       const word = idx?.wordAt(key, x, y) ?? null;
-      if (word !== null) onMarkWordRef.current?.({ page: targetPage, key, word, x, y });
+      if (word === null) return;
+      const box = idx?.boxOf(key, word);
+      onMarkWordRef.current?.({ page: targetPage, key, word, x, y, rect: box ? screenRect(svg, box) : null });
     });
   };
 
@@ -3700,16 +3713,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     void ensureWords(resolver.edition, targetPage).then((idx) => {
       const word = idx?.wordAt(key, x, y) ?? null;
       const box = word === null ? null : idx?.boxOf(key, word);
-      const m = svg.getScreenCTM();
-      if (word === null || !box || !m) return;
-      const a = new DOMPoint(box.x, box.y).matrixTransform(m);
-      const b = new DOMPoint(box.x + box.width, box.y + box.height).matrixTransform(m);
-      onOpenWordRef.current?.({
-        page: targetPage,
-        key,
-        word,
-        rect: { left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), right: Math.max(a.x, b.x), bottom: Math.max(a.y, b.y) },
-      });
+      const rect = box ? screenRect(svg, box) : null;
+      if (word === null || !rect) return;
+      onOpenWordRef.current?.({ page: targetPage, key, word, rect });
     });
   };
 

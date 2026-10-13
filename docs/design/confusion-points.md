@@ -2,9 +2,12 @@
 
 **Status:** partly built. Jumps are built as the Jump tool (plan item 31, the
 [wavy-arrow design](confusion-jumps.md)): the record, its list, the page map's list and the
-saved file. Slips are built as a small first version (plan item 103): "I slipped here…" in a
-verse's menu marks one, and a switch on each list row says whether it was a slip. The rest of
-this page (a slip's warning when the verse is selected, the hop rail) is still design.
+saved file. Slips are built as a small first version (plan item 103), through the Mistake pen:
+tap a word and it asks what went wrong, and "Went into another verse…" asks where it pulled you.
+A switch on each list row says whether it was a mistake. The app never says "slip": the owner
+chose (2026-10-13) to name each kind by what went wrong, so the reader sees "went into another
+verse" and "a mistake", and "slip" stays a word of this page only. The rest of this page (a
+slip's warning when the verse is selected, the hop rail) is still design.
 
 `docs/design/` holds the document you read *before* touching a feature.
 `docs/decisions/loop-*.md` are the retrospective records of what a finished loop settled.
@@ -570,6 +573,17 @@ pooled can be stripped of anything identifying and still be useful, and whether 
 server at all to get the benefit, or whether the common slip points are already knowable from
 the corpus without touching anyone's map. Named here so it is not lost; built by nobody until
 that decision is made.
+
+### ⑧ Does the question the Mistake pen asks fit on the iPad page, in English and in Arabic? · **open**
+
+The pen's question ("What went wrong in …?", with the harakat signs, the whole word and "Went
+into another verse…") has only been looked at on a phone-sized picture, in English. The pitch is
+shown on the iPad app, where the question sits beside the word on a page held upright or on two
+pages side by side, and the Arabic wording reads right to left. Nobody has yet seen it there.
+**What would answer it:** a walk of the real iPad app, upright and sideways, in English and in
+Arabic, tapping a word near each edge of the page: the question stays beside the word, every
+button can be reached, and nothing covers the verse it asks about. Each fault found gets its fix
+and its test, and a line in the walk checklist.
 
 ---
 

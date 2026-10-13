@@ -2017,7 +2017,7 @@ test.describe("Hifth · the page tools bar", () => {
     for (const [key, words] of [
       ["KeyB", "Click a page to drop a bookmark"],
       ["KeyN", "Click a word to pin a note"],
-      ["KeyM", "Click a word to mark a slip"],
+      ["KeyM", "Click a word to mark a mistake"],
       ["KeyW", "Click a word to open it into its parts"],
       ["KeyK", "Point at a vowel-sign, click to note it"],
     ] as const) {
