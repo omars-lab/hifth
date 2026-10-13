@@ -234,9 +234,9 @@ export function EdgeGrabRails({
 }: {
   driver?: EdgeTurnDriver;
   /**
-   * Stand aside and let the pointer through to the page: the harakat and word
-   * tools point at single signs, and the first word of every line sits under
-   * the strip's corners. The arrows and keys still turn the page meanwhile.
+   * Stand aside and let the pointer through to the page: the harakat, word and
+   * mistake tools point at single words and signs, and the first word of every
+   * line sits under the strip's corners. The arrows and keys still turn the page meanwhile.
    */
   aside?: boolean;
   /**

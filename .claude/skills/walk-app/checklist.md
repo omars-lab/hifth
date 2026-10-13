@@ -174,6 +174,17 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   "Went into another verse…" asks where it *pulled* you, leaves no red mark, and the row in the
   verse's list has "A mistake" pressed. No word on screen says "slip". · phone, iPad, desktop ·
   test: e2e/mistakes.spec.ts, e2e/confusions.spec.ts, src/messages/plain-words.test.ts
+- [ ] On an open book, with the Mistake pen, tap the first word of a line on the right-hand page
+  and the last word of a line on the left-hand page: each asks, past the strip that turns the
+  page. · iPad on its side, desktop · test: e2e/mistakes.spec.ts ("a word at the outer edge of an
+  open book asks too") · found 2026-10-13
+- [ ] The Mistake pen's question, tapped near each corner and the middle of every page in sight,
+  stands just below or above the word, whole on the screen, every button free to press: the
+  13-inch iPad and the mini, both ways up, English and Arabic. On the mini on its side, drag the
+  page up to reach its last lines. · `make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en
+  ROUTE=/hafs-kfqc/p7 EVALFILE=.claude/skills/walk-app/scripts/mistake-ask-walk.js DELAY_MS=2500
+  PROBE_TIMEOUT_S=200` · test: e2e/ipad.spec.ts ("a drag brings the page's foot into sight") ·
+  found 2026-10-13
 - [ ] Every tap-and-hold menu, with all its lines, stays beside the verse and inside the screen.
   · phone, iPad · test: e2e/confusions.spec.ts
 - [ ] A test that checks "none of these are on screen" can pass before a list has even opened:

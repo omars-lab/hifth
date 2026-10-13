@@ -2223,6 +2223,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     a place the reader picks always stays. Built 2026-10-13: a unit test that tells a chosen
     place from none, and a browser test that turns on touch after the app starts, both watched
     failing first.
+106. ~~**The Mistake pen asks about the words at the outer edges of an open book.**~~ Found
+    2026-10-13 on a walk of the iPad on its side, not asked: the first word of each line on the
+    right-hand page, and the last on the left-hand page, sit under the strip that turns the page
+    by its outer edge, so a tap there with the Mistake pen asked nothing. The strip and the
+    bookmark corner already stepped aside for the sign and word pens; now they step aside for the
+    Mistake pen too. Built 2026-10-13: a browser test that taps the outer word of both pages,
+    watched failing first, and the walk repeated in the iPad app in both languages.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

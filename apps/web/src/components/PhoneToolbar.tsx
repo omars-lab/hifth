@@ -60,6 +60,7 @@ function ToolButtons({
           className={styles.tool}
           aria-checked={tool === x}
           aria-label={toolName(t, x)}
+          data-pen={x}
           data-locked={(locked && tool === x) || undefined}
           {...press(x)}
         >

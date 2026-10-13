@@ -2486,6 +2486,9 @@ export function App(): JSX.Element {
   };
   const noteLabel = useCallback((n: Note) => t.notePin(t.ayahLabel(n.key) ?? n.key), [t]);
 
+  // The pens that point at one word or one sign: the bookmark corner and the strip that
+  // turns the page step aside for them, since the first word of every line sits under them.
+  const pointsAtWords = tool === "sign" || tool === "word" || tool === "mistake";
   const ribbonsFor = (p: number) => (
     <BookmarkRibbons
       bookmarks={bookmarksOnPage(bookmarks, p)}
@@ -2494,7 +2497,7 @@ export function App(): JSX.Element {
       onOpen={tool === "erase" ? liftRibbon : setDrawerId}
       freshId={freshId}
       seam={seamPage === p}
-      aside={tool === "sign" || tool === "word"}
+      aside={pointsAtWords}
     />
   );
 
@@ -4025,7 +4028,7 @@ export function App(): JSX.Element {
                 desktop ? (
                   <EdgeGrabRails
                     driver={edgeTurn}
-                    aside={tool === "sign" || tool === "word"}
+                    aside={pointsAtWords}
                     peel={manifest ? peelPagesOf(manifest.edition, page, totalPages, pageTurns.pages) : undefined}
                     turnStyle={turnStyle}
                     opening={page}

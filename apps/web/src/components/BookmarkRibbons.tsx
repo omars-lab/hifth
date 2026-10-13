@@ -18,8 +18,9 @@ interface BookmarkRibbonsProps {
   /** The red seam — where the reader left off — lies on this page. */
   seam?: boolean;
   /**
-   * Stand aside and let the pointer through to the page: the harakat and word
-   * tools point at single signs, and the corner sits over the first line's.
+   * Stand aside and let the pointer through to the page: the harakat, word and
+   * mistake tools point at single words and signs, and the corner sits over the
+   * first line's.
    */
   aside?: boolean;
 }
