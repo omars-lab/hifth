@@ -1986,10 +1986,11 @@
         "file": "docs/design/confusion-points.md",
         "item": "⑧"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "risk",
       "owner": "agent",
-      "note": "The Mistake pen's question (PLAN 103) has only been seen on a phone-sized picture in English; the pitch is shown on the iPad app. Answered by a walk of the real iPad app, upright and sideways, in English and Arabic, tapping words near each page edge: the question stays beside the word, every button is reachable, nothing covers the verse. Next after PLAN 103 merges."
+      "note": "The Mistake pen's question (PLAN 103) has only been seen on a phone-sized picture in English; the pitch is shown on the iPad app. Answered by a walk of the real iPad app, upright and sideways, in English and Arabic, tapping words near each page edge: the question stays beside the word, every button is reachable, nothing covers the verse. Next after PLAN 103 merges. ANSWERED 2026-10-13 by the walk: on both iPad sizes, both ways up, in English and Arabic, the question stood beside the word, whole on the screen, every button free to press. The walk found the outer-edge words of an open book asking nothing (PLAN 106, fixed). On the mini on its side the page's last lines are reached by dragging; the browser test \"a drag brings the page's foot into sight\" covers it.",
+      "closedBy": "apps/web/e2e/ipad.spec.ts"
     },
     {
       "id": "is-the-privacy-rule-nothing-leaves-or-nothing-that-doesnt-serve",
@@ -4608,6 +4609,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pen-homes.spec.ts",
       "note": "With no place chosen, the pens' place was fixed when the app started, so a screen found to be touched after that kept the desk's place. Now an unset place follows the screen; a chosen one stays. Unit test in pen-home.test.ts and the browser test \"nobody has set it\", both watched failing first."
+    },
+    {
+      "id": "mistake-pen-outer-edge-words",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "106"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/mistakes.spec.ts",
+      "note": "On an open book the outer-edge words sat under the strip that turns the page, so the Mistake pen asked nothing there. The strip and the bookmark corner now step aside for the Mistake pen as for the sign and word pens. Browser test \"a word at the outer edge of an open book asks too\", watched failing first."
     }
   ]
 }

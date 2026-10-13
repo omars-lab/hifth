@@ -535,6 +535,64 @@ for (const [locale, roots, group] of [
   });
 }
 
+// Walked for confusion-points item 8, 2026-10-13: on an iPad mini on its side a
+// page opens bigger than the room, its last lines under the bars at the foot of
+// the screen, so the Mistake pen's question could only be asked of them once the
+// page is dragged up. With the pen picked, a drag still moves the page and asks
+// nothing; the foot then in sight, a tap on its last line asks, and the question
+// stands on the screen whole with every one of its buttons on top.
+test.describe("Hifth · the Mistake pen on an iPad mini on its side", () => {
+  test.use({ viewport: { width: 1133, height: 744 }, locale: "en-US" });
+
+  test("a drag brings the page's foot into sight, and a word on its last line asks", async ({ page }) => {
+    await page.addInitScript((key) => localStorage.setItem(key, "1"), COACH_STORAGE_KEY);
+    await page.goto("/#/hafs-kfqc/p7?tool=mistake");
+    await shown(page, 7);
+    const ask = page.getByRole("dialog", { name: /^What went wrong in / });
+    // The lowest line's tap spot, and whether it is the page that a finger there touches.
+    const foot = () =>
+      page.evaluate(() => {
+        const svg = [...document.querySelectorAll<SVGSVGElement>('svg[aria-labelledby="page-label-7"]')].find((e) => getComputedStyle(e).visibility === "visible")!;
+        const lines = [...svg.querySelectorAll(".ayahPolygon")].map((e) => e.getBoundingClientRect());
+        const bottom = Math.max(...lines.map((b) => b.bottom));
+        const last = lines.find((b) => Math.abs(b.bottom - bottom) < 1)!;
+        const at = { x: last.right - 40, y: bottom - 14 };
+        return { ...at, onPage: svg.contains(document.elementFromPoint(at.x, at.y)) };
+      });
+    expect((await foot()).onPage, "the page opens with its last line out of sight").toBe(false);
+
+    const paper = (await leaf(page, 7).boundingBox())!;
+    const x = paper.x + paper.width / 2;
+    await page.mouse.move(x, 560);
+    await page.mouse.down();
+    for (let i = 1; i <= 30; i += 1) await page.mouse.move(x, 560 - i * 15);
+    await page.mouse.up();
+    await expect.poll(async () => (await foot()).onPage, { message: "the last line dragged into sight" }).toBe(true);
+    await expect(ask, "a drag with the pen asks nothing").toHaveCount(0);
+
+    const at = await foot();
+    await page.mouse.click(at.x, at.y);
+    await expect(ask).toBeVisible();
+    const placed = await ask.evaluate((el, tap) => {
+      const b = el.getBoundingClientRect();
+      const buttons = [...el.querySelectorAll("button")];
+      return {
+        whole: b.left >= 0 && b.top >= 0 && b.right <= innerWidth && b.bottom <= innerHeight,
+        buttons: buttons.length,
+        onTop: buttons.filter((x) => { const r = x.getBoundingClientRect(); return x.contains(document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2)); }).length,
+        coversTap: tap.x >= b.left && tap.x <= b.right && tap.y >= b.top && tap.y <= b.bottom,
+      };
+    }, at);
+    expect(placed.whole, "the question is on the screen whole").toBe(true);
+    expect(placed.buttons).toBeGreaterThan(2);
+    expect(placed.onTop, "every button can be pressed").toBe(placed.buttons);
+    expect(placed.coversTap, "the question leaves the word clear").toBe(false);
+    await page.keyboard.press("Escape");
+    await expect(ask).toHaveCount(0);
+    await expect(page.locator("[data-mistake-word]:visible")).toHaveCount(0);
+  });
+});
+
 // Walked for item 60 on the open book: a surah played from its corner on the
 // iPad held sideways turns the book from opening to opening with the
 // recitation, and its end leaves the last verse lit with Play on it, as it

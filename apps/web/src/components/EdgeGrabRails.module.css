@@ -54,8 +54,9 @@
   opacity: 1;
 }
 
-/* Out of the way while a tool points at single signs (the harakat and word
-   tools): the first word of every line sits under the strip's corners. */
+/* Out of the way while a tool points at single words or signs (the harakat,
+   word and mistake tools): the first word of every line sits under the strip's
+   corners. */
 .rail[data-aside="true"] {
   pointer-events: none;
   opacity: 0;

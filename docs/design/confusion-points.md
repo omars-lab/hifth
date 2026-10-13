@@ -574,7 +574,7 @@ server at all to get the benefit, or whether the common slip points are already 
 the corpus without touching anyone's map. Named here so it is not lost; built by nobody until
 that decision is made.
 
-### ⑧ Does the question the Mistake pen asks fit on the iPad page, in English and in Arabic? · **open**
+### ⑧ Does the question the Mistake pen asks fit on the iPad page, in English and in Arabic? · **answered**
 
 The pen's question ("What went wrong in …?", with the harakat signs, the whole word and "Went
 into another verse…") has only been looked at on a phone-sized picture, in English. The pitch is
@@ -584,6 +584,17 @@ pages side by side, and the Arabic wording reads right to left. Nobody has yet s
 Arabic, tapping a word near each edge of the page: the question stays beside the word, every
 button can be reached, and nothing covers the verse it asks about. Each fault found gets its fix
 and its test, and a line in the walk checklist.
+
+**Answered 2026-10-13, by that walk.** On the 13-inch iPad and the iPad mini, upright and on its
+side, in English and in Arabic, a word was tapped near each corner and the middle of every page in
+sight. Each time the question stood just below or just above the word without covering it, all of
+it on the screen, with every button free to press. One fault was found and fixed: on two pages
+side by side, the first and last words of each line sit under the strip that turns the page at
+the book's outer edge, and the pen asked nothing there. The strip now steps aside for the Mistake
+pen, as it already did for the sign and word pens (PLAN item 106). On the iPad mini on its side
+the page opens bigger than the screen, so its last lines are reached by dragging the page up; the
+pen leaves that drag alone, and a browser test at that size drags to the foot and taps the last
+line. A script repeats the walk, and the walk checklist has a line for each.
 
 ---
 

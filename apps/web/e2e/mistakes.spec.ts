@@ -160,6 +160,37 @@ test.describe("Hifth · the mistake tool", () => {
     await expect(said(page)).toHaveText("Mark put back");
   });
 
+  test("a word at the outer edge of an open book asks too, past the strip that turns the page", async ({ page }) => {
+    // The first word of each line on the right-hand page, and the last on the left, sit under
+    // the outer strip a reader grabs to turn. It steps aside for the harakat and word pens; a
+    // walk of the iPad app on its side (2026-10-13) found it did not for the Mistake pen, so a
+    // tap there turned nothing and asked nothing.
+    await page.goto("/#/hafs-kfqc/p7?tool=mistake");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await expect(toolBtn(page, "Mistake")).toHaveAttribute("aria-checked", "true");
+    const spots = await page.evaluate(() => {
+      const shown = [...document.querySelectorAll<SVGSVGElement>("svg[aria-labelledby^='page-label-']")].filter(
+        (e) => e.getBoundingClientRect().width > 0 && getComputedStyle(e).visibility === "visible",
+      );
+      const mid = innerWidth / 2;
+      return shown.map((svg) => {
+        const lines = [...svg.querySelectorAll(".ayahPolygon")].map((e) => e.getBoundingClientRect()).filter((b) => b.width > 0);
+        const outer = svg.getBoundingClientRect().left + svg.getBoundingClientRect().width / 2 > mid ? "right" : "left";
+        const x = outer === "right" ? Math.max(...lines.map((b) => b.right)) - 24 : Math.min(...lines.map((b) => b.left)) + 24;
+        const y = Math.max(...lines.map((b) => b.bottom)) - 14;
+        return { outer, x, y };
+      });
+    });
+    expect(spots.map((s) => s.outer).sort()).toEqual(["left", "right"]);
+    for (const at of spots) {
+      await page.mouse.click(at.x, at.y);
+      await expect(picker(page), `the ${at.outer} page's outer word`).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(picker(page)).toHaveCount(0);
+    }
+    await expect(washes(page)).toHaveCount(0);
+  });
+
   test("set to mark at once, a tap marks the word and a second tap asks what went wrong", async ({ page }) => {
     // The plan's first way (page-toolbar-plan step 3), kept as a setting.
     await page.addInitScript((k) => {
