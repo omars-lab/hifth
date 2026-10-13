@@ -4127,10 +4127,11 @@
         "file": "docs/PLAN.md",
         "item": "67"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Zoomed in on the open book, each page grows outward from the fold, so on the right-hand page the starts of the Arabic lines go off the screen's right edge while the ends stay in sight. Should the right-hand page keep the starts of its lines in sight instead? Upright on one page, past 155%, both ends of a full line go off the screen by about the same amount, so the question holds upright too."
+      "note": "Owner, 2026-10-13: keep the starts of the lines in sight, on the open book's right-hand page and upright past 155%; growing evenly from the fold stays as a setting. The build is item 100.",
+      "closedBy": "docs/PLAN.md"
     },
     {
       "id": "turn-back-upright-loses-opening-zoom",
@@ -4510,6 +4511,17 @@
       "severity": "defect",
       "owner": "agent",
       "note": "Build the owner's answer to item 69: turned back upright, the page comes back at its opening size, not 100%; staying at 100% stays as a setting."
+    },
+    {
+      "id": "zoom-keeps-line-starts-in-sight",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "100"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Build the owner's answer to item 67: the zoom buttons grow the page across from where its lines begin, so the line starts stay on screen; growing evenly from the fold stays as a setting."
     }
   ]
 }

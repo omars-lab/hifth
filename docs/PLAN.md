@@ -1758,6 +1758,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     should the right-hand page keep the starts of its lines in sight instead? Upright on one page
     the same thing happens past 155%, evenly: at 200% both ends of a full line are off the screen
     by about the same amount, so the question holds upright too.
+
+    Chosen 2026-10-13 by the owner: keep the starts of the lines in sight. The build is item
+    100. The question named the right-hand page of the open book and, past 155%, the upright
+    page, so both get it. Growing evenly from the fold (or the middle) stays as a setting.
 68. ~~**Upright, with a note open, the zoom buttons slip the verse's last line under the note.**~~
     Found 2026-10-11 checking item 66's fix the other way up: on an iPad held upright the note lies
     across the page's foot, and growing from the verse's middle carried its last line under the
@@ -2134,6 +2138,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     100%. A page the reader zoomed in on before turning keeps what they chose. Staying at 100%
     stays as a setting in the info panel. Its test: a browser test that turns an iPad on its
     side and back and finds the page at its opening size.
+100. **Zooming in keeps the starts of the lines in sight.** Chosen 2026-10-13 by the owner (item
+    67). With the zoom buttons or keys, the page grows across from where its lines begin, the
+    right-hand edge, so a hafiz reads each line from its first word without sliding. On the open
+    book that is the right-hand page's outer edge; upright, the page's right edge. A pinch still
+    grows from the fingers. Growing evenly from the fold, as before, stays as a setting in the
+    info panel beside "Zooming with the buttons". Its test: a browser test that zooms to 200% on
+    an iPad on its side and upright, and finds the line starts on the screen.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
