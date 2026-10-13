@@ -10,6 +10,7 @@ import { LOOKALIKE_ARROWS_KEY } from "../lookalike-arrows";
 import { TURN_LANDING_KEY } from "../turn-landing";
 import { OPEN_SIZE_KEY } from "../open-size";
 import { UPRIGHT_AGAIN_KEY } from "../upright-again";
+import { ZOOM_ACROSS_KEY } from "../zoom-across";
 import { RIBBON_LENGTH_KEY } from "../ribbon-length";
 import { RUN_FOLLOW_KEY } from "../run-follow";
 import { RUN_AHEAD_KEY } from "../run-ahead";
@@ -309,5 +310,19 @@ describe("how big the page is when the iPad comes back upright, in settings", ()
     expect(way("whole")).toHaveAttribute("aria-checked", "true");
     expect(localStorage.getItem(UPRIGHT_AGAIN_KEY)).toBe("whole");
     localStorage.removeItem(UPRIGHT_AGAIN_KEY);
+  });
+});
+
+describe("what zooming in keeps on the screen, in settings", () => {
+  it("offers both, the line starts checked, and keeps the one picked", () => {
+    localStorage.removeItem(ZOOM_ACROSS_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-zoom-across="${c}"]`)!;
+    expect(way("starts")).toHaveAttribute("aria-checked", "true");
+    expect(way("fold")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("fold"));
+    expect(way("fold")).toHaveAttribute("aria-checked", "true");
+    expect(localStorage.getItem(ZOOM_ACROSS_KEY)).toBe("fold");
+    localStorage.removeItem(ZOOM_ACROSS_KEY);
   });
 });

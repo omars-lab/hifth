@@ -731,10 +731,18 @@ upright and on its side, English and Arabic, iPad and Mac.
   ACT='press=ArrowLeft'` · issues: `upright-turn-lands-at-top-build`,
   `upright-opening-size-setting` · test: `e2e/ipad.spec.ts` ("opened bigger than the screen")
 - [ ] Open a verse on an upright iPad, turn it on its side (two whole pages), then upright again:
-  the page comes back at the size it opened at, not whole. With the info panel's "Turning the
-  iPad back upright" set to "The whole page" it stays whole. · `make app-walk SIDEWAYS=1` for the
+  the page comes back at the size it opened at, not whole. On an 11-inch iPad that holds even
+  after zooming on its side, since the page is put whole as it turns back. With the info panel's "Turning the iPad
+  back upright" set to "The whole page" it stays whole. · `make app-walk SIDEWAYS=1` for the
   side; the browser test turns it both ways · issue: `upright-again-brings-back-opening-size` ·
   test: `e2e/ipad.spec.ts` ("on its side and back upright")
+- [ ] On an iPad on its side, press + to 200% and 300% on the open book: the right-hand page's
+  lines still begin on the screen (the book slides over, the left-hand page runs off the left),
+  and the next opening does the same; back at 100% the book is where it was. With one page
+  shown, + to 400% keeps its right edge on the screen. With the info panel's "Zooming in on the
+  page" set to "Grow from the fold", the right-hand page runs off the right as before.
+  · `make drive DEVICE=ipad-side` · issue: `zoom-keeps-line-starts-in-sight` · test:
+  `e2e/ipad.spec.ts` ("keeps the starts of the lines in sight")
 - [ ] In a note, every verse number the prose names is a link: a reference left as plain words, or a
   number with a letter in it, is a word the capture misread; read it off the page picture and add it
   to the hand-read misreads. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/28:88'` · test:

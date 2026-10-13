@@ -1614,6 +1614,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     the setting's module. Known edge: a run that carries on onto a page that is not showing
     draws its mark nowhere until the reader turns there. Four tests on the computer, the two
     marks' tests and the setting's watched failing first, and both looked at in Firefox.
+    The owner kept the moving light as the default on 2026-10-13; the ring stays the setting.
 58. ~~**A run that goes past the page leaves the page behind, and a note can hide the verse being
     recited.**~~ Found 2026-10-10 asking what happens in the room when a presenter plays a
     whole surah from the corner menu: the recitation carried on past the page, but the page
@@ -2143,13 +2144,24 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     is now told by the page as it lands rather than asked for afterwards. On an 11-inch iPad,
     turning back resets the page to whole first, so there a size zoomed to on its side gives way
     to the opening size. A settings test and the browser test (both ways) watched failing first.
-100. **Zooming in keeps the starts of the lines in sight.** Chosen 2026-10-13 by the owner (item
+100. ~~**Zooming in keeps the starts of the lines in sight.**~~ Chosen 2026-10-13 by the owner (item
     67). With the zoom buttons or keys, the page grows across from where its lines begin, the
     right-hand edge, so a hafiz reads each line from its first word without sliding. On the open
     book that is the right-hand page's outer edge; upright, the page's right edge. A pinch still
     grows from the fingers. Growing evenly from the fold, as before, stays as a setting in the
     info panel beside "Zooming with the buttons". Its test: a browser test that zooms to 200% on
-    an iPad on its side and upright, and finds the line starts on the screen.
+    an iPad on its side and upright, and finds the line starts on the screen. Built 2026-10-13:
+    "Zooming in on the page" in the info panel, "Keep the line starts in sight" by default or
+    "Grow from the fold". The open book keeps its two pages meeting at the fold, so the right-hand
+    page cannot grow from its outer edge without the two drawing over each other; instead, once
+    that page grows past the screen's edge, the whole book slides over so its lines still begin
+    on the screen, and slides back as it shrinks. A page on its own grows from its right edge.
+    A pinch on the open book slides the book the same way; a pinch on a page on its own still
+    grows from the fingers. There are no zoom keys, and an upright iPad has no zoom buttons, so
+    upright the rule only reaches the sizes the app sets itself (the opening size and turning
+    back upright), which were measured to fit the width on the 11- and 13-inch iPads; the test is on an iPad on its side, both pages
+    at 200% and 300%, the next opening, back at 100%, a page on its own at 400%, and the fold
+    setting. The settings test and the browser tests watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

@@ -734,3 +734,111 @@ test.describe("Hifth · turning an iPad on its side and back upright", () => {
     expect(back / opened, "back upright, the whole page").toBeLessThan(0.7);
   });
 });
+
+/*
+ * Zooming in with the buttons keeps the starts of the lines in sight (docs/PLAN.md,
+ * item 100). A line of the mus'haf begins at its right-hand edge, and the open
+ * book grew from its fold, so at 200% the right-hand page's line starts went off
+ * the screen and a hafiz had to slide back for the first word of every line
+ * (item 67). Each page now grows from its own right-hand edge: the right-hand
+ * page from its outer edge, the left-hand page from the fold, and a page on its
+ * own from its right. Growing from the fold stays a setting.
+ */
+test.describe("Hifth · zooming in on an iPad keeps the starts of the lines in sight", () => {
+  /** A page's right-hand edge, where its lines begin, once it has stopped moving. */
+  async function rightEdge(page: Page, n: number): Promise<number> {
+    let last = Number.NaN;
+    let right = 0;
+    await expect
+      .poll(async () => {
+        const b = (await leaf(page, n).boundingBox())!;
+        right = b.x + b.width;
+        const same = Math.abs(right - last) < 0.5;
+        last = right;
+        return same;
+      }, { intervals: [400], timeout: 10_000 })
+      .toBe(true);
+    return right;
+  }
+
+  async function openBook(page: Page, settings: Record<string, string> = {}) {
+    await page.addInitScript((pairs) => {
+      for (const [k, v] of Object.entries(pairs)) localStorage.setItem(k, v);
+    }, { [COACH_STORAGE_KEY]: "1", ...settings });
+    await page.setViewportSize(LANDSCAPE);
+    await page.goto("/#/hafs-kfqc/p8");
+    await shown(page, 7);
+    await shown(page, 8);
+  }
+
+  /** Press the zoom-in button until the readout says this much (in Arabic digits). */
+  async function zoomTo(page: Page, readout: string) {
+    const zoom = page.getByRole("group", { name: "التكبير" });
+    for (let i = 0; i < 8 && (await zoom.getByText(readout).count()) === 0; i++) {
+      await zoom.getByRole("button", { name: "تكبير" }).click();
+    }
+    await expect(zoom.getByText(readout)).toBeVisible();
+  }
+
+  test("on its side, both pages keep their line starts on the screen at 200% and 300%", async ({ page }) => {
+    // Page 7 is the right-hand page, 8 the left. A right-hand page's lines
+    // begin at its outer edge; a left-hand page's at the fold.
+    await openBook(page);
+    for (const readout of ["٢٠٠٪", "٣٠٠٪"]) {
+      await zoomTo(page, readout);
+      const outer = await rightEdge(page, 7);
+      expect(outer, `at ${readout}, the right-hand page's outer edge, on the screen`).toBeLessThanOrEqual(LANDSCAPE.width + 1);
+      // Slid only as far as it has to: the edge is at the screen's.
+      expect(outer, `at ${readout}, and not pulled in from the screen's edge`).toBeGreaterThan(LANDSCAPE.width - 3);
+      const fold = await rightEdge(page, 8);
+      expect(fold, `at ${readout}, the left-hand page's edge at the fold, on the screen`).toBeGreaterThan(0);
+      await shown(page, 7);
+      await shown(page, 8);
+    }
+  });
+
+  test("zoomed in, the next opening keeps its line starts on the screen too", async ({ page }) => {
+    await openBook(page);
+    await zoomTo(page, "٢٠٠٪");
+    await page.getByRole("button", { name: "الصفحة التالية", exact: true }).first().click();
+    // Pages 9 and 10: 9 on the right.
+    await shown(page, 9);
+    await shown(page, 10);
+    await expect(page.getByRole("group", { name: "التكبير" }).getByText("٢٠٠٪")).toBeVisible();
+    const outer = await rightEdge(page, 9);
+    expect(outer, "the right-hand page's outer edge, on the screen").toBeLessThanOrEqual(LANDSCAPE.width + 1);
+    expect(outer, "and at the screen's edge").toBeGreaterThan(LANDSCAPE.width - 3);
+  });
+
+  test("back at the whole page, the open book is where it was", async ({ page }) => {
+    await openBook(page);
+    const before = await rightEdge(page, 7);
+    await zoomTo(page, "٢٠٠٪");
+    const zoom = page.getByRole("group", { name: "التكبير" });
+    for (let i = 0; i < 8 && (await zoom.getByText("١٠٠٪").count()) === 0; i++) {
+      await zoom.getByRole("button", { name: "تصغير" }).click();
+    }
+    expect(Math.abs((await rightEdge(page, 7)) - before), "the right-hand page, back where it stood").toBeLessThan(1);
+  });
+
+  test("one page on its own keeps its line starts on the screen at 400%", async ({ page }) => {
+    await openBook(page);
+    await page.getByRole("radio", { name: "صفحة واحدة" }).click();
+    const n = (await leaf(page, 8).count()) > 0 ? 8 : 7;
+    const before = await rightEdge(page, n);
+    await zoomTo(page, "٤٠٠٪");
+    const stage = (await page.locator("main").boundingBox())!;
+    const screenRight = Math.min(stage.x + stage.width, LANDSCAPE.width);
+    const after = await rightEdge(page, n);
+    // It fits the screen up to about 375%; four times as wide runs past it,
+    // and its right edge stays on the screen.
+    expect(after, "the page's right edge, on the screen").toBeLessThanOrEqual(screenRight + 1);
+    expect(after, "and not pulled in from where it stood").toBeGreaterThanOrEqual(Math.min(before, screenRight) - 3);
+  });
+
+  test("set to grow from the fold, the right-hand page runs past the screen, as before", async ({ page }) => {
+    await openBook(page, { "hifth.zoom.across.v1": "fold" });
+    await zoomTo(page, "٢٠٠٪");
+    expect(await rightEdge(page, 7), "the right-hand page's outer edge, past the screen").toBeGreaterThan(LANDSCAPE.width + 20);
+  });
+});

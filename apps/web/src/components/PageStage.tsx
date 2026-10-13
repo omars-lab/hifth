@@ -80,6 +80,7 @@ import { pageSlack } from "../rail-home";
 import { sideCoverOf, type CardSpan } from "./short-band";
 import type { TurnStyle } from "../turn-style";
 import type { RunMark } from "../run-mark";
+import { bookShift, growFromX, savedZoomAcross, useZoomAcross } from "../zoom-across";
 import { zoomAnchorY, type VerseSpan } from "../zoom-anchor";
 import { savedTurnLanding, turnLandsAt } from "../turn-landing";
 import styles from "./PageStage.module.css";
@@ -1593,6 +1594,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * for the frames in between.
    */
   const fitRef = useRef<StageFit | null>(null);
+  /** The open book's measures for its slide (`measureFit` writes, `applyTransform` reads). */
+  const bookRestRef = useRef<{ left: number; paper: number; room: number } | null>(null);
 
   /**
    * Measure the stage box and the current page's laid-out box.
@@ -1624,6 +1627,22 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       ...sideCoverOf(coverSideRef.current, box),
     };
     fitRef.current = fit;
+    // Where the open book's right-hand page would stand with the book unslid,
+    // for `applyTransform` to slide it by without measuring every frame: the
+    // layer's left with the book's slide added back, the printed page's right
+    // edge inside the host at full size (the host also carries the leaf's
+    // drawn fore-edge, which is not where the lines begin), and the right of
+    // the room the book lies in.
+    const book = stageRef.current?.closest<HTMLElement>("[data-book]") ?? null;
+    const svgBox = cur.svg.getBoundingClientRect();
+    const hostBox = cur.host.getBoundingClientRect();
+    bookRestRef.current = book
+      ? {
+          left: box.left + Number(book.dataset.shift ?? 0),
+          paper: (svgBox.right - hostBox.left) / (view.current.z || 1),
+          room: book.parentElement?.getBoundingClientRect().right ?? window.innerWidth,
+        }
+      : null;
     return fit;
   }, []);
 
@@ -1645,6 +1664,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
     const over = fit && edge ? fit.contentWidth * view.current.z - fit.stageWidth : 0;
     if (over > 0) view.current = { ...view.current, x: edge === "left" ? 0 : -over };
+    // The whole book then slides left as far as the right-hand page runs past
+    // the room it has, so the starts of its lines, at its outer edge, stay on
+    // the screen (docs/PLAN.md, item 100; `zoom-across.ts`). Written here, in
+    // the same frame as the page, by the right-hand leaf alone, from what
+    // `measureFit` measured; a leaf on its own puts the book back.
+    const book = stageRef.current?.closest<HTMLElement>("[data-book]") ?? null;
+    const rest = bookRestRef.current;
+    if (book && edge !== "right") {
+      const was = Number(book.dataset.shift ?? 0);
+      const shift =
+        edge === "left" && rest
+          ? bookShift(savedZoomAcross(), rest.left + view.current.x + rest.paper * view.current.z, rest.room)
+          : 0;
+      if (Math.abs(shift - was) > 0.25) {
+        book.style.transform = shift > 0 ? `translateX(${-shift}px)` : "";
+        if (shift > 0) book.dataset.shift = String(shift);
+        else delete book.dataset.shift;
+      }
+    }
     // And says so, because the stage and the book both clip to their own box and
     // have to stop doing so on the outer side while a page hangs over the desk.
     const stageEl = stageRef.current;
@@ -1672,6 +1710,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       frame.style.setProperty("--leaf-z", String(z));
     }
   }, []);
+
+  // Switched between the line starts and the fold in the info panel, the book
+  // slides there, or back, on the spot rather than at the next press.
+  const zoomAcross = useZoomAcross();
+  useEffect(() => {
+    applyTransform();
+  }, [zoomAcross, applyTransform]);
 
   /*
    * The cached fit is only as true as the box it was measured from.
@@ -3108,16 +3153,19 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     const rect = layer.getBoundingClientRect();
     const base = { z: view.current.z, x: view.current.x, y: view.current.y };
     // A button has no pointer to anchor to, so the stage picks the point.
-    // The lone leaf grows from its own centre; an open book pins each leaf at
-    // its gutter edge (`foldEdgeOf`) so the fold stays put and the opening
-    // grows outward as one sheet. Vertically, the height the caller hands in
+    // The lone leaf grows from its right edge, where its lines begin, so the
+    // first words stay in sight (docs/PLAN.md, item 100), or set to the fold,
+    // from its centre (`zoom-across.ts`). An open book pins each leaf at its
+    // gutter edge (`foldEdgeOf`) so the opening grows outward as one sheet,
+    // and `applyTransform` slides the book to keep the right-hand page's line
+    // starts on the screen. Vertically, the height the caller hands in
     // (`zoomAnchorFor`, from the chosen verse), or the middle without one:
     // growing from the middle carried a verse low on the page off the screen
     // (docs/PLAN.md, item 66). Through
     // `zoomAbout` rather than writing `view` directly: the anchor arithmetic
     // §7 ⑨ fixed has one implementation and this is not a second.
     const edge = boundRef.current ? foldEdgeOf(currentPageRef.current, totalRef.current) : null;
-    const ox = edge === "left" ? rect.left : edge === "right" ? rect.right : rect.left + rect.width / 2;
+    const ox = edge === "left" ? rect.left : edge === "right" ? rect.right : growFromX(savedZoomAcross(), rect);
     const oy = at ?? (rect.top + rect.bottom) / 2;
     zoomAbout(clampZoom(z, MIN_ZOOM, MAX_ZOOM), ox, oy, base);
     // The rail sits beside the selected ayah and has just been moved.

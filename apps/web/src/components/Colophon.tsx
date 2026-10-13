@@ -28,6 +28,7 @@ import { MARK_TOOLS, type MarkTools } from "../mark-tools";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { RAIL_HOMES, type RailHome } from "../rail-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
+import { ZOOM_ACROSSES, rememberZoomAcross, useZoomAcross } from "../zoom-across";
 import { ZOOM_ANCHORS, rememberZoomAnchor, useZoomAnchor } from "../zoom-anchor";
 import { NOTE_LEAVES, rememberNoteLeave, useNoteLeave } from "../note-leave";
 import { UsageReadout } from "./UsageReadout";
@@ -271,6 +272,7 @@ export function Colophon({
   const runFollow = useRunFollow();
   const runAhead = useRunAhead();
   const zoomAnchor = useZoomAnchor();
+  const zoomAcross = useZoomAcross();
   const noteLeave = useNoteLeave();
   const lookalikePreview = useLookalikePreview();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -529,6 +531,30 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.zoomAnchorNote}</p>
+        </section>
+
+        {/* What zooming in keeps on the screen (docs/PLAN.md, item 100): the
+            starts of the lines are the default; growing from the fold stays. */}
+        <section className={styles.block} aria-labelledby="colophon-zoom-across">
+          <h3 className={styles.subhead} id="colophon-zoom-across">
+            {t.zoomAcrossTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-zoom-across">
+            {ZOOM_ACROSSES.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={zoomAcross === choice}
+                data-zoom-across={choice}
+                onClick={() => rememberZoomAcross(choice)}
+              >
+                {choice === "starts" ? t.zoomAcrossStarts : t.zoomAcrossFold}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.zoomAcrossNote}</p>
         </section>
 
         {/* How a note across the page's foot leaves (docs/PLAN.md, item 72):
