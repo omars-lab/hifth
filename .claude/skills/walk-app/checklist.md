@@ -39,6 +39,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Flick four pages quickly, each flick starting before the last page has settled: four pages
   turn, none is lost or undone. · phone, phone-side · issue: `quick-second-flick-lost` · tests:
   page-turn spec, "a second flick made"
+- [ ] Flick twice fast on a page you have not opened before (the next page still on its way):
+  two pages turn. Let a second flick go just as the first lands: it still counts. · phone,
+  iphone · issue: `quick-flick-after-slow-page-or-landing` · tests: page-turn spec, "before the
+  first flick's page has even arrived"; page-destination unit test
+- [ ] With no place chosen for the pens, they sit where the screen puts them (the foot on a
+  touch screen, the strip at a desk), even if touch is only found after the app starts. · ipad,
+  desktop · issue: `unset-pen-home-follows-screen` · test: pen-homes spec, "nobody has set it"
 - [ ] A large iPad on one page turns under a finger. · ipad-big-side with `?view=one` · issue:
   `large-ipad-one-page-no-swipe`
 - [ ] Zoom in, then turn: the zoom carries to the next page. · desktop, ipad-side · test: desktop spec

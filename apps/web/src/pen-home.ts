@@ -36,19 +36,29 @@ function isPenHome(value: unknown): value is PenHome {
 }
 
 /**
+ * The home the reader chose on this device, or null when they never chose.
+ * Null is kept apart from the default so the default can follow the screen:
+ * whether the pointer is a finger is not always known the moment the app
+ * starts, and an unset home asked only then could stay a computer's strip on
+ * an iPad.
+ */
+export function chosenPenHome(): PenHome | null {
+  try {
+    const stored = localStorage.getItem(PEN_HOME_KEY);
+    return isPenHome(stored) ? stored : null;
+  } catch {
+    // Safari private mode throws on localStorage; a device we cannot remember
+    // gets the default.
+    return null;
+  }
+}
+
+/**
  * The home this device chose, or, when it never chose, the strip on a
  * computer and the Mark up button where the pointer is a finger.
  */
 export function savedPenHome({ touch = false }: { touch?: boolean } = {}): PenHome {
-  const fallback: PenHome = touch ? "bottom" : "strip";
-  try {
-    const stored = localStorage.getItem(PEN_HOME_KEY);
-    return isPenHome(stored) ? stored : fallback;
-  } catch {
-    // Safari private mode throws on localStorage; a device we cannot remember
-    // gets the default.
-    return fallback;
-  }
+  return chosenPenHome() ?? (touch ? "bottom" : "strip");
 }
 
 export function rememberPenHome(choice: PenHome): void {

@@ -250,7 +250,8 @@ import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from ".
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { useRunFollow } from "./run-follow";
 import { useRunAhead } from "./run-ahead";
-import { rememberPenHome, savedPenHome, type PenHome } from "./pen-home";
+import { chosenPenHome, rememberPenHome, type PenHome } from "./pen-home";
+import { usePageDestination } from "./page-destination";
 import { isMarkAim, rememberMarkTools, savedMarkTools, toolsFor, type MarkAim, type MarkTools } from "./mark-tools";
 import { rememberMistakeTap, savedMistakeTap, type MistakeTap } from "./mistake-tap";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
@@ -862,27 +863,8 @@ export function App(): JSX.Element {
     arrivedByHop.current = false;
   }, [selectedKey]);
 
-  /*
-   * Where the reader is, and where they are *going*.
-   *
-   * `page` is a committed fact — it changes when a page has actually landed on
-   * the stage. A turn takes 240 ms, and during those 240 ms a second arrow press
-   * must step from the page being turned to, not from the one still on screen:
-   * otherwise holding ArrowLeft oscillates between two pages instead of walking
-   * the book. `pendingPageRef` is that destination, and it is the number every
-   * page-stepping decision is made against.
-   *
-   * Both are synced from `page` rather than written at each of the seven places
-   * that call `setPage` — a deep link, a hop, a trail rewind and a scrub all
-   * settle the reader somewhere, and any of them arriving mid-turn should reset
-   * the destination to wherever they put us.
-   */
-  const pageRef = useRef(page);
-  const pendingPageRef = useRef(page);
-  useEffect(() => {
-    pageRef.current = page;
-    pendingPageRef.current = page;
-  }, [page]);
+  // Where the reader is, and where they are going (`page-destination.ts`).
+  const { pageRef, pendingPageRef, turnLanded } = usePageDestination(page);
 
   useEffect(() => {
     loadManifest()
@@ -1337,12 +1319,13 @@ export function App(): JSX.Element {
   // ①; every home a setting since 2026-10-05; unset, the strip on a computer
   // and the Mark up button on a large iPad, the owner's pick of 2026-10-11).
   // Down the side only where the margin holds it, else the bottom row's button.
-  const [penHome, setPenHome] = useState<PenHome>(() =>
-    savedPenHome({ touch: typeof matchMedia === "function" && matchMedia(TOUCH_QUERY).matches }),
-  );
+  // Unset, it follows the screen as it is now, not as it was the moment the
+  // app started: on an iPad the answer to "is this a finger?" can come in late.
+  const [chosenHome, setChosenHome] = useState<PenHome | null>(() => chosenPenHome());
+  const penHome: PenHome = chosenHome ?? (touchScreen ? "bottom" : "strip");
   const choosePenHome = useCallback((home: PenHome) => {
     rememberPenHome(home);
-    setPenHome(home);
+    setChosenHome(home);
   }, []);
   const sideRoom = useSideRoom(desktop && penHome === "side");
   // While the margin is still unmeasured nothing is drawn, so the rail never
@@ -1602,6 +1585,7 @@ export function App(): JSX.Element {
         void stage.turnTo(next).then((landed) => {
           if (pendingPageRef.current !== next) return; // a newer turn owns it
           if (landed) {
+            turnLanded(next);
             setPage(next);
             // The place you were holding was on the page you just left. Drop it
             // as the leaf lands — atomically with the header — so the highlight,
@@ -1619,7 +1603,7 @@ export function App(): JSX.Element {
       // because nothing here was selected.
       void stage.navigateTo(anchor, { pulse: false, zoom: 1 });
     },
-    [pageTurns, announce, t],
+    [pageTurns, announce, t, turnLanded],
   );
 
   // Bookmarks (docs/decisions/bookmark-fold.md, bookmark-admin.md): ribbons on

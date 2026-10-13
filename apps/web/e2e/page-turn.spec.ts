@@ -101,13 +101,12 @@ test.describe("Hifth · the fold", () => {
       const before = (await foldWords(page)).length;
       await page.getByRole("button", { name: to > from ? NEXT : PREV }).tap();
 
-      // The band is up for 240 ms. Read the attribute off it while it crosses.
-      const band = page.locator("[data-fold]");
-      await expect(band).toHaveAttribute("data-fold", foldBetween(from, to, TOTAL));
-
       await expect(page.locator(NUM)).toHaveText(pageNumber(to));
-      // One band per turn, not one per frame or one per re-render.
-      expect((await foldWords(page)).length - before).toBe(1);
+      // What the band said, as the recorder saw it go on (`./fold`). Read off
+      // the band itself while it crossed, a band that is up for 240 ms was
+      // missed on a busy machine. One band per turn, not one per frame or one
+      // per re-render.
+      expect((await foldWords(page)).slice(before)).toEqual([foldBetween(from, to, TOTAL)]);
     }
   });
 
@@ -485,6 +484,30 @@ test.describe("Hifth · the fold", () => {
     for (let i = 1; i <= 8; i += 1) await page.mouse.move(first.x + first.width * (0.3 + i * 0.05), y);
     await page.mouse.up();
     await expect(page.locator(NUM)).toHaveText(pageNumber(9));
+  });
+
+  test("a second flick made before the first flick's page has even arrived still turns the page again", async ({ browser }) => {
+    // The same two flicks, on a phone whose next page is slow to come: under a
+    // busy machine the page the first flick asked for was not there yet when
+    // the second began, so the first turn was dropped and the two flicks
+    // turned one page between them.
+    const context = await browser.newContext({ serviceWorkers: "block" });
+    const page = await context.newPage();
+    await context.route("**/assets/pages/hafs-kfqc/8.svg", async (route) => {
+      await new Promise((r) => setTimeout(r, 800));
+      await route.continue();
+    });
+    await open(page);
+    const stage = await stageBox(page);
+    const y = stage.y + stage.height / 2;
+    for (let n = 0; n < 2; n += 1) {
+      await page.mouse.move(stage.x + stage.width * 0.3, y);
+      await page.mouse.down();
+      for (let i = 1; i <= 8; i += 1) await page.mouse.move(stage.x + stage.width * (0.3 + i * 0.05), y);
+      await page.mouse.up();
+    }
+    await expect(page.locator(NUM)).toHaveText(pageNumber(9));
+    await context.close();
   });
 
   test("a short drag springs back and turns nothing", async ({ page }) => {

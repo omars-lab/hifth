@@ -4584,6 +4584,30 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/confusions.spec.ts",
       "note": "Owner chose 2026-10-13 to build a small first version of the slip half of the confusion-points design, then reshaped it the same day: one way in, the Mistake pen, and each kind named by what went wrong. Built the same day: a tap with the pen asks what went wrong (a harakat sign, the whole word, or \"Went into another verse…\", which asks where); Jump… stays a link in the verse menu; a switch on each list row says \"A mistake\"; \"slip\" is gone from the app's words; the old mark-at-once tap is an info-panel setting; records saved before stay jumps. Unit tests (packages/core/src/confusions.test.ts, apps/web/src/mistake-tap.test.ts, apps/web/src/messages/plain-words.test.ts) and the browser tests watched failing first."
+    },
+    {
+      "id": "quick-flick-after-slow-page-or-landing",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "104"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/page-turn.spec.ts",
+      "note": "Two quick flicks turned one page when the next page had not arrived yet, or when the second flick was let go just as the first landed. The turn now waits for the page it was heading to, and a turn's own landing no longer resets where the reader is going (apps/web/src/page-destination.ts). Unit test page-destination.test.ts and the browser test \"a second flick made before the first flick's page has even arrived\", both watched failing first."
+    },
+    {
+      "id": "unset-pen-home-follows-screen",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "105"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pen-homes.spec.ts",
+      "note": "With no place chosen, the pens' place was fixed when the app started, so a screen found to be touched after that kept the desk's place. Now an unset place follows the screen; a chosen one stays. Unit test in pen-home.test.ts and the browser test \"nobody has set it\", both watched failing first."
     }
   ]
 }
