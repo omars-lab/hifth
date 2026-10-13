@@ -77,7 +77,9 @@ final class PencilListener: NSObject, UIPencilInteractionDelegate {
         )
     }
 
-    /// Before iOS 17.5 the double-tap came with no tip.
+    /// Before iOS 17.5 the double-tap came with no tip. Where both tap methods
+    /// exist UIKit calls only `didReceiveTap` (UIPencilInteraction.h), so a
+    /// double-tap is never handed on twice.
     @available(iOS, deprecated: 17.5)
     func pencilInteractionDidTap(_ interaction: UIPencilInteraction) {
         model?.pencil(.doubleTap, preference: Self.name(of: UIPencilInteraction.preferredTapAction), tip: nil)
