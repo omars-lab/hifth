@@ -2087,6 +2087,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     before. While it covers the bar, the look-alike buttons ride its head, as on the iPad mini,
     instead of hiding under it. An iPad test at both sizes in both languages, watched failing
     first (a bar button cut, then no look-alike button a tap could reach).
+95. **Let the reader move the pens and Mark up to the left.** Chosen 2026-10-12 by the owner
+    ([notes-style-toolbar ④](design/notes-style-toolbar.md)): on an iPad held sideways the pens
+    down the side and the Mark up button stay on the right by default, in both languages,
+    because most readers mark with the right hand. A setting in the info panel puts both on the
+    left instead, mirrored, so a hafiz reading in Arabic can try the screen fully mirrored. Its
+    test: each side in both languages, the pens and Mark up wholly on that side and clear of the
+    page.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

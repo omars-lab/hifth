@@ -20,7 +20,11 @@
 
 ## Open questions, and what would answer each
 
-### ① May the reader for the last 38 notes two taps from the demo open the private note files? · **open**
+### ① May the reader for the last 38 notes two taps from the demo open the private note files? · **answered**
+
+**Answered, 2026-10-12:** yes, by the owner. The reader may open the note files in the private
+build; the batch runs as the other twelve did, and its rows are checked against the notes before
+they go in.
 
 **What it changes for a hafiz:** a reader who follows two links out from a demo note to one of
 these 38 sees it with every slanted word upright, where the 398 around it slant as the book
