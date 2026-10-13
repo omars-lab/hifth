@@ -1758,6 +1758,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     should the right-hand page keep the starts of its lines in sight instead? Upright on one page
     the same thing happens past 155%, evenly: at 200% both ends of a full line are off the screen
     by about the same amount, so the question holds upright too.
+
+    Chosen 2026-10-13 by the owner: keep the starts of the lines in sight. The build is item
+    100. The question named the right-hand page of the open book and, past 155%, the upright
+    page, so both get it. Growing evenly from the fold (or the middle) stays as a setting.
 68. ~~**Upright, with a note open, the zoom buttons slip the verse's last line under the note.**~~
     Found 2026-10-11 checking item 66's fix the other way up: on an iPad held upright the note lies
     across the page's foot, and growing from the verse's middle carried its last line under the
@@ -2128,12 +2132,24 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     page at its own size, and a unit test for the saved choice. Built 2026-10-13: "How big a
     verse's page opens" in the info panel, "A little closer" by default or "The whole page". It
     also governs a phone, which opens a verse the same way. Both tests watched failing first.
-99. **Turned back upright, the iPad brings back the size the page opened at.** Chosen 2026-10-13
+99. ~~**Turned back upright, the iPad brings back the size the page opened at.**~~ Chosen 2026-10-13
     by the owner (item 69). Turned on its side the open book shows both pages whole; turned back
     upright, the page comes back at the size set under "How big a verse's page opens", not at
-    100%. A page the reader zoomed in on before turning keeps what they chose. Staying at 100%
-    stays as a setting in the info panel. Its test: a browser test that turns an iPad on its
-    side and back and finds the page at its opening size.
+    100%. A size the reader zoomed to while it was on its side stands. Staying at 100% stays as a
+    setting in the info panel. Its test: a browser test that turns an iPad on its side and back
+    and finds the page at its opening size. Built 2026-10-13: "Turning the iPad back upright" in
+    the info panel, "The size it opened at" by default or "The whole page". Building it found the
+    open book replacing the page a moment before the app hears the iPad has turned, so the size
+    is now told by the page as it lands rather than asked for afterwards. On an 11-inch iPad,
+    turning back resets the page to whole first, so there a size zoomed to on its side gives way
+    to the opening size. A settings test and the browser test (both ways) watched failing first.
+100. **Zooming in keeps the starts of the lines in sight.** Chosen 2026-10-13 by the owner (item
+    67). With the zoom buttons or keys, the page grows across from where its lines begin, the
+    right-hand edge, so a hafiz reads each line from its first word without sliding. On the open
+    book that is the right-hand page's outer edge; upright, the page's right edge. A pinch still
+    grows from the fingers. Growing evenly from the fold, as before, stays as a setting in the
+    info panel beside "Zooming with the buttons". Its test: a browser test that zooms to 200% on
+    an iPad on its side and upright, and finds the line starts on the screen.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

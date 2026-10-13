@@ -9,6 +9,7 @@ import { PASSAGE_HOP_KEY } from "../passage-hop";
 import { LOOKALIKE_ARROWS_KEY } from "../lookalike-arrows";
 import { TURN_LANDING_KEY } from "../turn-landing";
 import { OPEN_SIZE_KEY } from "../open-size";
+import { UPRIGHT_AGAIN_KEY } from "../upright-again";
 import { RIBBON_LENGTH_KEY } from "../ribbon-length";
 import { RUN_FOLLOW_KEY } from "../run-follow";
 import { RUN_AHEAD_KEY } from "../run-ahead";
@@ -294,5 +295,19 @@ describe("how big a verse's page opens, in settings", () => {
     expect(way("whole")).toHaveAttribute("aria-checked", "true");
     expect(localStorage.getItem(OPEN_SIZE_KEY)).toBe("whole");
     localStorage.removeItem(OPEN_SIZE_KEY);
+  });
+});
+
+describe("how big the page is when the iPad comes back upright, in settings", () => {
+  it("offers both, its opening size checked, and keeps the one picked", () => {
+    localStorage.removeItem(UPRIGHT_AGAIN_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-upright-again="${c}"]`)!;
+    expect(way("opening")).toHaveAttribute("aria-checked", "true");
+    expect(way("whole")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("whole"));
+    expect(way("whole")).toHaveAttribute("aria-checked", "true");
+    expect(localStorage.getItem(UPRIGHT_AGAIN_KEY)).toBe("whole");
+    localStorage.removeItem(UPRIGHT_AGAIN_KEY);
   });
 });

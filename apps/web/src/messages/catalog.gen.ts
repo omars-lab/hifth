@@ -551,6 +551,10 @@ export interface Catalog {
   readonly turnStyleNote: string;
   readonly turnStyleSeam: string;
   readonly twin: string;
+  readonly uprightAgainNote: string;
+  readonly uprightAgainOpening: string;
+  readonly uprightAgainTitle: string;
+  readonly uprightAgainWhole: string;
   readonly useCommentary: string;
   readonly useEdition: string;
   readonly useEmpty: string;
