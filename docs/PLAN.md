@@ -2076,6 +2076,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     once nothing covers the page, unless the reader has zoomed since. A desktop test in both
     languages, watched failing first (the page stayed at 87% of the reader's size); measured
     again in Firefox, back to 250%.
+94. ~~**On a large iPad held upright, the verse's drawer slid over the verse's name in the bar.**~~
+    Found walking the demo, 2026-10-12. From 900 pixels wide the drawer stands as a card in the
+    middle of the bottom bar, with the bar's ends meant to show either side. Upright on a large
+    iPad (1024 to 1112 wide), the bar's far end holds the verse's name, the look-alike buttons
+    and Mark up, wider than the room beside the card, so the verse's name sat under the card
+    with only its top edge showing. A short window 1024 wide did the same in English, whose
+    words are longer. Now the drawer works out where it would stand, and covers the whole bar,
+    as on a phone, whenever a bar button would be cut; where there is room it stays a card, as
+    before. While it covers the bar, the look-alike buttons ride its head, as on the iPad mini,
+    instead of hiding under it. An iPad test at both sizes in both languages, watched failing
+    first (a bar button cut, then no look-alike button a tap could reach).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

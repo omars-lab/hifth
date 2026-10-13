@@ -2098,7 +2098,11 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
       if (visit === "after a reload") await page.reload();
       else {
         // Away and back, so the verse's note opens afresh in the same visit.
+        // Back only once the app has left the verse: sent back before page 1
+        // landed, it never let go of the verse, so its note had no reason to
+        // open again, and the test failed now and then.
         await page.goto("/#/hafs-kfqc/p1");
+        await expect(page.getByRole("region", { name: /2:255/ })).toHaveCount(0);
         await page.goto("/#/hafs-kfqc/2:255");
       }
       await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });

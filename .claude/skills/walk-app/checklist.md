@@ -410,13 +410,21 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   look-alike buttons ride the note card's top row, never the page. · `VIEWPORT=1133x744`, the iPad
   app on its side (`make app-probe TARGET=ipad SIDEWAYS=1 "IPAD=iPad mini (A17 Pro)"` with the
   corner-cards script) · issue: `mini-side-long-verse-under-note` · walked 2026-10-12 in the
-  browser and the app, both languages, none under either card
+  browser and the app, both languages, none under either card. Close the note again: the page
+  comes back to the size it opened the verse at (the app, both languages, 2026-10-12)
 - [ ] On the laptop closed to one page, zoom in a step or two past the room the roots list leaves
   (2:45), open the roots list, then close it: open, the page is drawn a little smaller and the
   whole verse stands clear of the list; closed, the page and the zoom readout are back at the
   size you chose. Zoomed in a lot, the list leaves the size alone and keeps the verse's start in
   sight. · `VIEWPORT=1280x800`, `BROWSER=firefox` and Chrome, both languages · issue:
-  `closing-a-card-keeps-the-page-smaller` · walked 2026-10-12 in Firefox, both languages
+  `closing-a-card-keeps-the-page-smaller` · walked 2026-10-12 in Firefox, both languages; the
+  laptop with both pages showing, the three demo verses (2:255, 2:48, 3:84) with each card open,
+  none under a card, walked the same day in Firefox
+- [ ] On a large iPad held upright, open a look-alike verse (2:48, 3:84) with the note closed: the
+  verse's drawer cuts no button in the bar (it covers the whole bar if one would be cut), and the
+  look-alike buttons ride its head, a tap away. · `VIEWPORT=1032x1376`, also `1024x700`, both
+  languages, and the iPad app on the 13-inch upright · issue:
+  `verse-drawer-cuts-bar-large-ipad-upright`
 - [ ] On an iPad mini held upright, no card open, the look-alike buttons stand clear of the page's
   top lines (2:48). · `VIEWPORT=744x1133`, the iPad app on the mini · issue:
   `lookalike-buttons-on-top-lines-ipad-mini-upright`

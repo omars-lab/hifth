@@ -361,6 +361,60 @@ for (const [lang, group, close] of [
   });
 }
 
+// Walking the demo on a large iPad held upright, 2026-10-12: the screen is
+// wider than the width where the verse's drawer stays a card in the middle of
+// the bar, but the bar's far end (the verse's name, the look-alike buttons and
+// Mark up) is wider than the room beside the card, and the verse's name slid
+// under it, only its top edge showing above. A short window as wide did the
+// same in English, whose words are longer (plan item 94). The drawer covers
+// the whole bar whenever a button would be cut, whatever the width; and the
+// look-alike buttons, whose home there is the bar, ride the drawer's head
+// while it covers the bar, as on the iPad mini, rather than vanish under it.
+for (const [lang, group, close] of [
+  ["en", "Links from this ayah", "Close"],
+  ["ar", "روابط الآية", "إغلاق"],
+] as const) {
+  for (const size of [
+    { width: 1032, height: 1376 },
+    { width: 1024, height: 700 },
+  ]) {
+    test.describe(`Hifth · the verse's drawer on a ${size.width} by ${size.height} screen (${lang})`, () => {
+      test.use({ viewport: size });
+
+      test("the drawer cuts no button in the bar, and hides no look-alike button", async ({ page }) => {
+        await page.goto(`/?lang=${lang}#/hafs-kfqc/2:48`);
+        await shown(page, 7);
+        const drawer = page.locator("section").filter({ has: page.locator("header") }).filter({ has: page.getByRole("button", { name: close }) }).last();
+        await expect(drawer).toBeVisible();
+        await page.waitForTimeout(600);
+        const meets = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
+          a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+        const inside = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
+          a.x >= b.x - 0.5 && a.x + a.width <= b.x + b.width + 0.5 && a.y >= b.y - 0.5 && a.y + a.height <= b.y + b.height + 0.5;
+        const d = (await drawer.boundingBox())!;
+        const bar = page.locator("footer[data-keep-clear]").locator("button, a");
+        expect(await bar.count()).toBeGreaterThan(0);
+        for (const b of await bar.all()) {
+          const r = await b.boundingBox();
+          if (!r || r.width === 0) continue;
+          expect(!meets(r, d) || inside(r, d), `a bar button at ${JSON.stringify(r)} cut by the drawer at ${JSON.stringify(d)}`).toBe(true);
+        }
+        // Each look-alike button is on top where it stands: a tap there reaches it.
+        const chips = await page.getByRole("group", { name: group }).locator("button[data-direction]").all();
+        expect(chips.length).toBeGreaterThan(0);
+        for (const chip of chips) {
+          const reached = await chip.evaluate((b) => {
+            const r = b.getBoundingClientRect();
+            const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            return r.width > 0 && hit !== null && b.contains(hit);
+          });
+          expect(reached, "a look-alike button a tap can reach").toBe(true);
+        }
+      });
+    });
+  }
+}
+
 // Checking the corner cards on the iPad mini held sideways, 2026-10-12, after
 // the note (plan item 89): the screen is wide enough for the roots list to
 // stand as a card in a corner but too short for the laptop layout, and the

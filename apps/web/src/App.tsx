@@ -3599,6 +3599,7 @@ export function App(): JSX.Element {
   // A run keeps it up, with its Pause, once the page has followed the run away
   // from the verse it started on; it is then named for the verse being recited.
   const drawerKey = selectedKey ?? audio.runKey;
+  const [drawerWhole, setDrawerWhole] = useState(false);
   const drawerUp =
     drawerKey !== null &&
     !drawerAway &&
@@ -3635,6 +3636,10 @@ export function App(): JSX.Element {
       : drawerUp
         ? "tools"
         : "bar";
+  // At a desk the bar is the buttons' home, but on a large iPad upright the
+  // drawer can cover the whole bar (plan item 94); while it does they ride its
+  // head, as on the iPad mini, rather than vanish under it.
+  const railOnDrawer = desktop && drawerUp && drawerWhole && railAt === "bar";
 
   // The owner's own count of what gets used (docs/design/feature-usage.md):
   // one use each time a thing opens, by name only, kept on this device.
@@ -4328,7 +4333,7 @@ export function App(): JSX.Element {
         {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
         {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
-        {railAt === "bar" && hopRail(undefined, "bar")}
+        {railAt === "bar" && !railOnDrawer && hopRail(undefined, "bar")}
         <TrailBeads
           trail={trail}
           currentKey={selectedKey}
@@ -4380,7 +4385,8 @@ export function App(): JSX.Element {
         label={drawerKey ? (t.ayahLabel(drawerKey) ?? drawerKey) : null}
         open={drawerUp}
         onClose={putDrawerAway}
-        end={!desktop && railAt === "tools" ? hopRail(undefined, "tools") : undefined}
+        end={(!desktop && railAt === "tools") || railOnDrawer ? hopRail(undefined, "tools") : undefined}
+        onWhole={setDrawerWhole}
       >
         {/* While a "Play to" run lasts, the button speaks for the verse being
             recited, not the one the run started from. */}
