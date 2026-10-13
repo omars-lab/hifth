@@ -1,6 +1,8 @@
-import { test, expect, type Locator, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Locator, type Page } from "@playwright/test";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { PEN_HOME_KEY } from "../src/pen-home";
+import { PEN_SIDE_KEY } from "../src/pen-side";
+import { LANG_STORAGE_KEY } from "../src/lang";
 
 /*
  * Where the page tools sit on a computer, or an iPad held sideways
@@ -209,5 +211,100 @@ test.describe("where the pens sit", () => {
     await page.keyboard.press("Escape");
     await expect(home(page, "strip")).toHaveCount(0);
     await expect(home(page, "bottom").getByRole("button", { name: "Mark up" })).toBeVisible();
+  });
+});
+
+/*
+ * Which side the pens stand on (docs/PLAN.md, 95). The owner chose on
+ * 2026-10-12 (notes-style-toolbar ④): the right by default, in both
+ * languages; a setting in the info panel puts the pens down the side and the
+ * Mark up button on the left, mirrored. On an iPad held sideways, in both
+ * languages, each side: wholly on its half of the screen, at that edge, and
+ * clear of the page.
+ */
+test.describe("which side the pens stand on", () => {
+  async function openOn(browser: Browser, opts: { lang: string; side: string | null; home: string }) {
+    const context = await browser.newContext({ hasTouch: true, isMobile: true, viewport: IPAD, locale: "en-US" });
+    const page = await context.newPage();
+    await page.addInitScript(
+      ([coach, langKey, lang, homeKey, home, sideKey, side]) => {
+        try {
+          if (localStorage.getItem("pen-side-seeded")) return;
+          localStorage.setItem(coach, "1");
+          localStorage.setItem(langKey, lang);
+          localStorage.setItem(homeKey, home);
+          if (side) localStorage.setItem(sideKey, side);
+          localStorage.setItem("pen-side-seeded", "1");
+        } catch {
+          /* private mode */
+        }
+      },
+      [COACH_STORAGE_KEY, LANG_STORAGE_KEY, opts.lang, PEN_HOME_KEY, opts.home, PEN_SIDE_KEY, opts.side] as const,
+    );
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(page.locator("svg[aria-labelledby='page-label-7']:visible")).toBeVisible();
+    return { page, context };
+  }
+
+  /** Wholly on that side's half of the screen, and against that edge of the window. */
+  function onSide(box: Box, side: string, edge: number): void {
+    if (side === "left") {
+      expect(box.x + box.width, "reaches past the middle").toBeLessThan(IPAD.width / 2);
+      expect(box.x, "away from the left edge").toBeLessThan(edge);
+    } else {
+      expect(box.x, "reaches past the middle").toBeGreaterThan(IPAD.width / 2);
+      expect(box.x + box.width, "away from the right edge").toBeGreaterThan(IPAD.width - edge);
+    }
+  }
+
+  for (const lang of ["en", "ar"])
+    for (const [side, seeded] of [["right", null], ["left", "left"]] as const) {
+      test(`${lang} · ${side}${seeded ? "" : " (the default)"}: the pens down the side stand on the ${side}, mirrored, covering no line`, async ({ browser }) => {
+        const { page, context } = await openOn(browser, { lang, side: seeded, home: "side" });
+        const rail = home(page, "side");
+        await expect(rail.getByRole("radio")).toHaveCount(10);
+        onSide((await rail.boundingBox())!, side, 20);
+        await coversNoLine(page, rail);
+        // With the highlighter's pens out, they stand on the book's side of
+        // the tools, so the tools keep to the window's edge on either side.
+        await rail.locator("[role=radio][aria-keyshortcuts=H]").click();
+        await expect(rail).toHaveAttribute("data-tool", "highlight");
+        const groups = rail.getByRole("radiogroup");
+        const tools = (await groups.filter({ has: page.locator("[aria-keyshortcuts=H]") }).boundingBox())!;
+        const pens = (await groups.filter({ hasNot: page.locator("[aria-keyshortcuts=H]") }).first().boundingBox())!;
+        if (side === "left") expect(pens.x, "the pens are on the book's side of the tools").toBeGreaterThan(tools.x);
+        else expect(pens.x, "the pens are on the book's side of the tools").toBeLessThan(tools.x);
+        onSide((await rail.boundingBox())!, side, 20);
+        await coversNoLine(page, rail);
+        await insideReadingArea(page, rail);
+        await context.close();
+      });
+
+      test(`${lang} · ${side}${seeded ? "" : " (the default)"}: the Mark up button stands at the ${side} end of the bottom row, on top of nothing`, async ({ browser }) => {
+        const { page, context } = await openOn(browser, { lang, side: seeded, home: "bottom" });
+        const button = home(page, "bottom").locator("button[aria-expanded]");
+        await expect(button).toBeVisible();
+        onSide((await button.boundingBox())!, side, 40);
+        expect(await bottomRowUnder(page, button)).toEqual([]);
+        await coversNoLine(page, button);
+        await context.close();
+      });
+    }
+
+  test("the setting moves them at once, and is remembered", async ({ browser }) => {
+    const { page, context } = await openOn(browser, { lang: "en", side: null, home: "side" });
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    const choices = page.getByRole("dialog").locator('[aria-labelledby="colophon-pen-side"]').getByRole("radio");
+    await expect(choices).toHaveCount(2);
+    await expect(choices.and(page.locator('[data-pen-side-choice="right"]'))).toHaveAttribute("aria-checked", "true");
+    await choices.and(page.locator('[data-pen-side-choice="left"]')).click();
+    await expect(choices.and(page.locator('[data-pen-side-choice="left"]'))).toHaveAttribute("aria-checked", "true");
+    expect(await page.evaluate((k) => localStorage.getItem(k), PEN_SIDE_KEY)).toBe("left");
+    await page.keyboard.press("Escape");
+    onSide((await home(page, "side").boundingBox())!, "left", 20);
+    await page.reload();
+    await expect(home(page, "side").getByRole("radio")).toHaveCount(10);
+    onSide((await home(page, "side").boundingBox())!, "left", 20);
+    await context.close();
   });
 });

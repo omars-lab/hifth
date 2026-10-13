@@ -27,6 +27,7 @@ import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-l
 import { MARK_TOOLS, type MarkTools } from "../mark-tools";
 import { MISTAKE_TAPS, type MistakeTap } from "../mistake-tap";
 import { PEN_HOMES, type PenHome } from "../pen-home";
+import { PEN_SIDES, type PenSide } from "../pen-side";
 import { RAIL_HOMES, type RailHome } from "../rail-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
 import { ZOOM_ACROSSES, rememberZoomAcross, useZoomAcross } from "../zoom-across";
@@ -70,6 +71,8 @@ interface ColophonProps {
   penHome?: PenHome | undefined;
   onPenHome?: ((home: PenHome) => void) | undefined;
   /** Where the look-alike chips go when a magnified page leaves no desk; remembered on this device. */
+  penSide?: PenSide | undefined;
+  onPenSide?: ((side: PenSide) => void) | undefined;
   railHome?: RailHome | undefined;
   onRailHome?: ((home: RailHome) => void) | undefined;
   /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
@@ -237,6 +240,11 @@ const PEN_HOME_NAME: Record<PenHome, (t: ReturnType<typeof useT>["t"]) => string
   side: (t) => t.penHomeSide,
 };
 
+const PEN_SIDE_NAME: Record<PenSide, (t: ReturnType<typeof useT>["t"]) => string> = {
+  right: (t) => t.penSideRight,
+  left: (t) => t.penSideLeft,
+};
+
 const RAIL_HOME_NAME: Record<RailHome, (t: ReturnType<typeof useT>["t"]) => string> = {
   bar: (t) => t.railHomeBar,
   tools: (t) => t.railHomeTools,
@@ -263,6 +271,8 @@ export function Colophon({
   onMistakeTap,
   penHome,
   onPenHome,
+  penSide,
+  onPenSide,
   railHome,
   onRailHome,
   onShowTips,
@@ -1083,6 +1093,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.penHomeNote}</p>
+          </section>
+        )}
+        {/* Which side the pens down the side and the Mark up button stand on
+            (docs/PLAN.md, 95): the right by default, the left mirrored, the
+            owner's pick of 2026-10-12. Only on the layout that has them. */}
+        {penSide && onPenSide && (
+          <section className={styles.block} aria-labelledby="colophon-pen-side">
+            <h3 className={styles.subhead} id="colophon-pen-side">
+              {t.penSideTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-pen-side">
+              {PEN_SIDES.map((side) => (
+                <button
+                  key={side}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={penSide === side}
+                  data-pen-side-choice={side}
+                  onClick={() => onPenSide(side)}
+                >
+                  {PEN_SIDE_NAME[side](t)}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.penSideNote}</p>
           </section>
         )}
         {/* Where the look-alike chips go when a magnified page leaves no desk

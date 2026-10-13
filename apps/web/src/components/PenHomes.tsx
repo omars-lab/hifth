@@ -3,6 +3,7 @@ import { useT } from "../i18n";
 import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import { isMarkAim, type MarkAim } from "../mark-tools";
 import type { Pen } from "../pen";
+import type { PenSide } from "../pen-side";
 import { rememberPenFloat, savedPenFloat, sideFits, snapToEdge, type FloatSpot } from "../pen-home";
 import type { PageTool } from "./PageStage";
 import { AimPicker, LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress, type ToolEntry } from "./PageToolbar";
@@ -35,6 +36,8 @@ export interface PenHomeProps {
   /** Note, Harakat and Word as one button, when the reader set it (mark-tools.ts). */
   tools?: readonly ToolEntry[] | undefined;
   aim?: MarkAim | undefined;
+  /** Which side the side rail and the Mark up button stand on (docs/PLAN.md, 95); the right unset. */
+  side?: PenSide | undefined;
 }
 
 /** Beside the tools, what the tool on offers: the highlighter's colours, or the three the one button stands for. */
@@ -119,7 +122,7 @@ export function PenHomeBottom(props: PenHomeProps): JSX.Element {
   const [open, setOpen] = useState(false);
   return (
     <div className={styles.bottomHost} data-pen-home="bottom" data-tool={tool}>
-      <button type="button" className={styles.markUp} dir={dir} aria-expanded={open} onClick={() => setOpen(true)}>
+      <button type="button" className={styles.markUp} dir={dir} aria-expanded={open} data-pen-side={props.side ?? "right"} onClick={() => setOpen(true)}>
         <ToolIcon tool="highlight" />
         <span>{t.penMarkUp}</span>
       </button>
@@ -290,7 +293,8 @@ export function useSideRoom(on: boolean): boolean | null {
 
 /**
  * C · the tools standing in the margin beside the book, on the right, the
- * side the reader's hand holds an iPad by. App shows B instead where
+ * side the reader's hand holds an iPad by, or on the left, mirrored, where the
+ * reader set it (docs/PLAN.md, 95). App shows B instead where
  * `useSideRoom` says the margin is too narrow.
  */
 export function PenHomeSide(props: PenHomeProps): JSX.Element {
@@ -300,7 +304,7 @@ export function PenHomeSide(props: PenHomeProps): JSX.Element {
   return (
     // Laid out left to right in both languages, so the tools keep to the
     // window's edge and the pens to the book's side; the buttons are icons.
-    <div className={styles.side} role="toolbar" aria-label={t.toolbarLabel} dir="ltr" data-pen-home="side" data-tool={tool} data-keep-clear="">
+    <div className={styles.side} role="toolbar" aria-label={t.toolbarLabel} dir="ltr" data-pen-home="side" data-pen-side={props.side ?? "right"} data-tool={tool} data-keep-clear="">
       {/* Undo and redo stand at the foot of the pens' side, in the room the
           pens leave under them, so the rail grows no taller than the tools. */}
       <div className={styles.sideNear}>
