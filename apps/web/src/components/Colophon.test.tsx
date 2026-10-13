@@ -7,6 +7,8 @@ import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
 import { PASSAGE_HOP_KEY } from "../passage-hop";
 import { LOOKALIKE_ARROWS_KEY } from "../lookalike-arrows";
+import { TURN_LANDING_KEY } from "../turn-landing";
+import { OPEN_SIZE_KEY } from "../open-size";
 import { RIBBON_LENGTH_KEY } from "../ribbon-length";
 import { RUN_FOLLOW_KEY } from "../run-follow";
 import { RUN_AHEAD_KEY } from "../run-ahead";
@@ -264,5 +266,33 @@ describe("which way the look-alike arrows point, in settings", () => {
     expect(way("reading")).toHaveAttribute("aria-checked", "true");
     expect(localStorage.getItem(LOOKALIKE_ARROWS_KEY)).toBe("reading");
     localStorage.removeItem(LOOKALIKE_ARROWS_KEY);
+  });
+});
+
+describe("where a turn lands on a page bigger than the screen, in settings", () => {
+  it("offers both, the top checked, and keeps the one picked", () => {
+    localStorage.removeItem(TURN_LANDING_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-turn-landing="${c}"]`)!;
+    expect(way("top")).toHaveAttribute("aria-checked", "true");
+    expect(way("same")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("same"));
+    expect(way("same")).toHaveAttribute("aria-checked", "true");
+    expect(localStorage.getItem(TURN_LANDING_KEY)).toBe("same");
+    localStorage.removeItem(TURN_LANDING_KEY);
+  });
+});
+
+describe("how big a verse's page opens, in settings", () => {
+  it("offers both, a little closer checked, and keeps the one picked", () => {
+    localStorage.removeItem(OPEN_SIZE_KEY);
+    const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const way = (c: string) => container.querySelector(`[data-open-size="${c}"]`)!;
+    expect(way("closer")).toHaveAttribute("aria-checked", "true");
+    expect(way("whole")).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(way("whole"));
+    expect(way("whole")).toHaveAttribute("aria-checked", "true");
+    expect(localStorage.getItem(OPEN_SIZE_KEY)).toBe("whole");
+    localStorage.removeItem(OPEN_SIZE_KEY);
   });
 });

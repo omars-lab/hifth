@@ -884,6 +884,14 @@ export interface Strings {
   lookalikeArrowsBook: string;
   lookalikeArrowsReading: string;
   lookalikeArrowsNote: string;
+  turnLandingTitle: string;
+  turnLandingTop: string;
+  turnLandingSame: string;
+  turnLandingNote: string;
+  openSizeTitle: string;
+  openSizeCloser: string;
+  openSizeWhole: string;
+  openSizeNote: string;
   ribbonLengthTitle: string;
   ribbonLengthShort: string;
   ribbonLengthLong: string;
@@ -1655,6 +1663,14 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     lookalikeArrowsBook: m.lookalikeArrowsBook,
     lookalikeArrowsReading: m.lookalikeArrowsReading,
     lookalikeArrowsNote: m.lookalikeArrowsNote,
+    turnLandingTitle: m.turnLandingTitle,
+    turnLandingTop: m.turnLandingTop,
+    turnLandingSame: m.turnLandingSame,
+    turnLandingNote: m.turnLandingNote,
+    openSizeTitle: m.openSizeTitle,
+    openSizeCloser: m.openSizeCloser,
+    openSizeWhole: m.openSizeWhole,
+    openSizeNote: m.openSizeNote,
     ribbonLengthTitle: m.ribbonLengthTitle,
     ribbonLengthShort: m.ribbonLengthShort,
     ribbonLengthLong: m.ribbonLengthLong,

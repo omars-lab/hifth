@@ -18,6 +18,8 @@ import { LOOKALIKE_COMPARES, rememberLookalikeCompare, useLookalikeCompare } fro
 import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-rows";
 import { PASSAGE_HOPS, rememberPassageHop, usePassageHop } from "../passage-hop";
 import { LOOKALIKE_ARROWS, rememberLookalikeArrows, useLookalikeArrows } from "../lookalike-arrows";
+import { TURN_LANDINGS, rememberTurnLanding, useTurnLanding } from "../turn-landing";
+import { OPEN_SIZES, rememberOpenSize, useOpenSize } from "../open-size";
 import { RIBBON_LENGTHS, rememberRibbonLength, useRibbonLength } from "../ribbon-length";
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
@@ -261,6 +263,8 @@ export function Colophon({
   const passageRows = usePassageRows();
   const passageHop = usePassageHop();
   const lookalikeArrows = useLookalikeArrows();
+  const turnLanding = useTurnLanding();
+  const openSize = useOpenSize();
   const ribbonLength = useRibbonLength();
   const runFollow = useRunFollow();
   const runAhead = useRunAhead();
@@ -807,6 +811,54 @@ export function Colophon({
             ))}
           </div>
           <p className={styles.note}>{t.lookalikeArrowsNote}</p>
+        </section>
+
+        {/* Where a turn lands when the page opened bigger than the screen
+            (docs/PLAN.md, item 97): the owner picked the top, 2026-10-13; the old way stays. */}
+        <section className={styles.block} aria-labelledby="colophon-turn-landing">
+          <h3 className={styles.subhead} id="colophon-turn-landing">
+            {t.turnLandingTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-turn-landing">
+            {TURN_LANDINGS.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={turnLanding === choice}
+                data-turn-landing={choice}
+                onClick={() => rememberTurnLanding(choice)}
+              >
+                {choice === "top" ? t.turnLandingTop : t.turnLandingSame}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.turnLandingNote}</p>
+        </section>
+
+        {/* How big a verse's page opens on an upright screen (docs/PLAN.md, item 98):
+            a little closer is the default; the whole page is the other way. */}
+        <section className={styles.block} aria-labelledby="colophon-open-size">
+          <h3 className={styles.subhead} id="colophon-open-size">
+            {t.openSizeTitle}
+          </h3>
+          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-open-size">
+            {OPEN_SIZES.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                role="radio"
+                className={styles.lang}
+                aria-checked={openSize === choice}
+                data-open-size={choice}
+                onClick={() => rememberOpenSize(choice)}
+              >
+                {choice === "closer" ? t.openSizeCloser : t.openSizeWhole}
+              </button>
+            ))}
+          </div>
+          <p className={styles.note}>{t.openSizeNote}</p>
         </section>
 
         {/* How long a bookmark's ribbon hangs (docs/PLAN.md, item 49): short,

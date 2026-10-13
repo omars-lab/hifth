@@ -321,6 +321,10 @@ export interface Catalog {
   readonly "notices.pack-gone.title": string;
   readonly openOnQul: string;
   readonly openOnQulAria: (d: { readonly label: string | number }) => string;
+  readonly openSizeCloser: string;
+  readonly openSizeNote: string;
+  readonly openSizeTitle: string;
+  readonly openSizeWhole: string;
   readonly openingTextEven: string;
   readonly openingTextLarge: string;
   readonly openingTextNote: string;
@@ -537,6 +541,10 @@ export interface Catalog {
   readonly toolWordHintClick: string;
   readonly toolbarLabel: string;
   readonly trail: string;
+  readonly turnLandingNote: string;
+  readonly turnLandingSame: string;
+  readonly turnLandingTitle: string;
+  readonly turnLandingTop: string;
   readonly turnSectionTitle: string;
   readonly turnStyleCurl: string;
   readonly turnStyleLift: string;

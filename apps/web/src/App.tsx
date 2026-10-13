@@ -244,6 +244,7 @@ import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look"
 import { applyPen, applyWordPen, rememberPen, savedPen, savedWordPen, type Pen } from "./pen";
 import { usePassageRows } from "./passage-rows";
 import { passageLanding, usePassageHop } from "./passage-hop";
+import { openZoom, savedOpenSize } from "./open-size";
 import styles from "./App.module.css";
 
 // The app opens on page 7 (the mock's first curated page). Full page routing is
@@ -593,15 +594,17 @@ export function App(): JSX.Element {
        * which is the shape of the original complaint, arrived at down a different
        * path. The hop still *lands* on the ayah: `frameBboxToView` centres it
        * either way, and only the magnification is withheld.
+       *
+       * With one page, the reader can ask for the whole page too (docs/PLAN.md,
+       * item 98), so nothing slides on an upright iPad.
        */
-      navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number }) =>
-        settle(
-          stageRef.current?.navigateTo(key, {
-            ...opts,
-            ...(bookOpenRef.current && opts?.zoom === undefined ? { zoom: 1 } : {}),
-          }),
+      navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number }) => {
+        const zoom = opts?.zoom ?? (bookOpenRef.current ? 1 : openZoom(savedOpenSize()));
+        return settle(
+          stageRef.current?.navigateTo(key, { ...opts, ...(zoom === undefined ? {} : { zoom }) }),
           undefined,
-        ),
+        );
+      },
       showPage: (next: number) => settle(stageRef.current?.showPage(next), undefined),
       turnTo: (next: number) => settle(stageRef.current?.turnTo(next), false),
       // Synchronous, because this one *is* the gesture: the stepper presses and

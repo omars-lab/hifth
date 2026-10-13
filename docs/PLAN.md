@@ -2108,17 +2108,21 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     browser test that the message opens the pens at the point it names. The feel on a real iPad
     with a real pencil goes on the manual testing list, because the simulator cannot send these
     gestures.
-97. **Upright on an iPad, a turn from the page's foot opens the next page at its top.** Chosen
+97. ~~**Upright on an iPad, a turn from the page's foot opens the next page at its top.**~~ Chosen
     2026-10-13 by the owner (item 75). Only at the size the page opened at: a turn forward lands
     at the top of the next page, a turn back at the foot of the one before. A page the reader
     zoomed in on keeps the same lines in view, as before. Keeping the same height on every turn
     stays as a setting in the info panel. Its test: a browser test on an upright iPad that turns
-    from the foot of a page and finds the next one's top at the screen's top.
-98. **Let the reader choose how big the page opens on an upright iPad.** Asked 2026-10-13 by the
+    from the foot of a page and finds the next one's top at the screen's top. Built 2026-10-13: the
+    setting is "Turning a page bigger than the screen" in the info panel, and the browser test
+    (watched failing first) also checks that the same-height way still lands at the same height.
+98. ~~**Let the reader choose how big the page opens on an upright iPad.**~~ Asked 2026-10-13 by the
     owner while answering item 75. Today it opens a little bigger than the screen (155%), so the
     letters are larger and the page slides. A setting in the info panel offers that, and the
     whole page at once (100%), at least. Its test: a browser test that each choice opens the
-    page at its own size, and a unit test for the saved choice.
+    page at its own size, and a unit test for the saved choice. Built 2026-10-13: "How big a
+    verse's page opens" in the info panel, "A little closer" by default or "The whole page". It
+    also governs a phone, which opens a verse the same way. Both tests watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
