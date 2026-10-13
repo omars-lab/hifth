@@ -1907,10 +1907,11 @@
         "file": "docs/design/confusion-points.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "The confusion-points design (Tier C1) proposes a personal log of where a hafiz's own memory slips between ayahs. Following the revision-record pattern gives IndexedDB plus a `since` stamp — enough to stop an emptied log lying about itself, not enough to stop it emptying, and iOS silently wipes script storage after 7 idle days. For a glance log that is an accepted cost; a confusion map is the distilled product of months of revision, so losing it silently harms the exact reliance the feature exists to earn. What would answer it: a human's call on whether `since` + a Home-Screen install is sufficient defence, or whether this is the feature that finally justifies an export/backup path (see should-a-confusion-map-leave-the-device). The design's own sharpest open question, worth settling before code. OWNER DIRECTION 2026-08-29: reviewing the Where-You-Slip walkthrough the owner asked for durable web storage that survives a cache flush, WITH a downloaded-file backup you can re-upload, and iCloud once there is a mobile app — a clear lean toward 'yes, this justifies a backup path'. The file-backup half is now being opened as a full decision (should-a-confusion-map-leave-the-device); the iCloud/sync half rides on the mobile track, gated on gpl-and-the-app-store."
+      "note": "The confusion-points design (Tier C1) proposes a personal log of where a hafiz's own memory slips between ayahs. Following the revision-record pattern gives IndexedDB plus a `since` stamp — enough to stop an emptied log lying about itself, not enough to stop it emptying, and iOS silently wipes script storage after 7 idle days. For a glance log that is an accepted cost; a confusion map is the distilled product of months of revision, so losing it silently harms the exact reliance the feature exists to earn. What would answer it: a human's call on whether `since` + a Home-Screen install is sufficient defence, or whether this is the feature that finally justifies an export/backup path (see should-a-confusion-map-leave-the-device). The design's own sharpest open question, worth settling before code. OWNER DIRECTION 2026-08-29: reviewing the Where-You-Slip walkthrough the owner asked for durable web storage that survives a cache flush, WITH a downloaded-file backup you can re-upload, and iCloud once there is a mobile app — a clear lean toward 'yes, this justifies a backup path'. The file-backup half is now being opened as a full decision (should-a-confusion-map-leave-the-device); the iCloud/sync half rides on the mobile track, gated on gpl-and-the-app-store. ANSWERED: the owner decided confusion-map-export = B on 2026-09-02 (a file the reader saves and restores), and it is built as the saved file; sync waits for the native apps.",
+      "closedBy": "docs/decisions/confusion-map-export.md"
     },
     {
       "id": "should-a-confusion-map-leave-the-device",
@@ -1918,10 +1919,11 @@
         "file": "docs/design/confusion-points.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Revision-record's settled stance is that anything leaving the device is a deliberate, gated act — no export, no sync. Two real pulls argue the other way for a confusion map: a hafiz wants to back up something this precious (see how-durable-must-a-confusion-map-be), and a teacher wants to see a student's map to drill them on it, a genuinely valuable use the app's navigation nature does not otherwise serve. Against both: a record of where a person's memory of the Qur'an fails is intimate, and export is the first step of every privacy erosion. What would answer it: a decision, and because it is a genuine either/or with a privacy cost, the design recommends it become a full decisions.json record with a published options page drawn on a real mus'haf — which the decisions gate requires before an open decision row is allowed, so opening it is real work, not a line. OWNER DIRECTION 2026-08-29: the owner leans toward letting the map leave the device and named two distinct mechanisms this question must keep apart. (1) A user-controlled file backup — export to a downloaded file, re-upload to restore; nothing leaves unless the reader saves the file, and only where they put it. The lighter-cost mechanism and the leading option. (2) Automatic cloud/iCloud sync — the map copies itself to a third-party cloud continuously; materially heavier privacy cost, not reachable from a web app at all, needs the native mobile wrap (roadmap Track B, gated on gpl-and-the-app-store), so not a near-term option. Teacher-sharing is a third mechanism and stays in scope. NOW BEING OPENED as a full decision (confusion-map-export) covering the file-backup option first, with sync and sharing named as the heavier options it deliberately does not take yet."
+      "note": "Revision-record's settled stance is that anything leaving the device is a deliberate, gated act — no export, no sync. Two real pulls argue the other way for a confusion map: a hafiz wants to back up something this precious (see how-durable-must-a-confusion-map-be), and a teacher wants to see a student's map to drill them on it, a genuinely valuable use the app's navigation nature does not otherwise serve. Against both: a record of where a person's memory of the Qur'an fails is intimate, and export is the first step of every privacy erosion. What would answer it: a decision, and because it is a genuine either/or with a privacy cost, the design recommends it become a full decisions.json record with a published options page drawn on a real mus'haf — which the decisions gate requires before an open decision row is allowed, so opening it is real work, not a line. OWNER DIRECTION 2026-08-29: the owner leans toward letting the map leave the device and named two distinct mechanisms this question must keep apart. (1) A user-controlled file backup — export to a downloaded file, re-upload to restore; nothing leaves unless the reader saves the file, and only where they put it. The lighter-cost mechanism and the leading option. (2) Automatic cloud/iCloud sync — the map copies itself to a third-party cloud continuously; materially heavier privacy cost, not reachable from a web app at all, needs the native mobile wrap (roadmap Track B, gated on gpl-and-the-app-store), so not a near-term option. Teacher-sharing is a third mechanism and stays in scope. NOW BEING OPENED as a full decision (confusion-map-export) covering the file-backup option first, with sync and sharing named as the heavier options it deliberately does not take yet. ANSWERED: confusion-map-export = B (owner, 2026-09-02), built. Teacher sharing stays open as should-a-student-share-a-map-with-a-teacher.",
+      "closedBy": "docs/decisions/confusion-map-export.md"
     },
     {
       "id": "how-are-slip-candidates-ranked",
@@ -1943,7 +1945,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "Should a hafiz's own captured confusion points appear in the hop rail as a fourth kind of link — their edges, alongside the corpus's sourced ones — so the app they navigate is shaped by their own history? Appealing, and a privacy/provenance question: it mixes a private log into the surface that draws public, sourced links, and the store's whole privacy gate is built to keep those apart. What would answer it: a decision on whether the warning-at-selection surface (which keeps the log private) already delivers this value without merging the two, which is the current design's bet."
+      "note": "Should a hafiz's own captured confusion points appear in the hop rail as a fourth kind of link — their edges, alongside the corpus's sourced ones — so the app they navigate is shaped by their own history? Appealing, and a privacy/provenance question: it mixes a private log into the surface that draws public, sourced links, and the store's whole privacy gate is built to keep those apart. What would answer it: a decision on whether the warning-at-selection surface (which keeps the log private) already delivers this value without merging the two, which is the current design's bet. Where it stands 2026-10-13: a jump's list row already has Go to the verse it went to; only the hop rail is still open."
     },
     {
       "id": "who-sets-a-confusion-seams-state",
@@ -1954,7 +1956,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "Each confusion point carries a state — every-pass, sometimes, used-to, dismissed — that drives warning weight, list grouping and map colour. The question is who writes it. The design's bet is the reader owns it, because the store sees captures, not recitation: silence at a seam could mean 'I beat it' or 'I stopped logging', and a state the app computed would be the very score this feature refused. The counter-pull is friction — a reader who never marks a seam beaten leaves conquered seams warning forever. What would answer it: a human's call on how strong the nudge may be, whether the app may suggest a state change from count + recency (and how loudly) while the write stays an explicit act, or whether even a suggestion leans too far toward measuring worship. Leaning reader-owned-with-a-quiet-nudge; the line between nudge and assertion is the thing to settle."
+      "note": "Each confusion point carries a state — every-pass, sometimes, used-to, dismissed — that drives warning weight, list grouping and map colour. The question is who writes it. The design's bet is the reader owns it, because the store sees captures, not recitation: silence at a seam could mean 'I beat it' or 'I stopped logging', and a state the app computed would be the very score this feature refused. The counter-pull is friction — a reader who never marks a seam beaten leaves conquered seams warning forever. What would answer it: a human's call on how strong the nudge may be, whether the app may suggest a state change from count + recency (and how loudly) while the write stays an explicit act, or whether even a suggestion leans too far toward measuring worship. Leaning reader-owned-with-a-quiet-nudge; the line between nudge and assertion is the thing to settle. Where it stands 2026-10-13: reader-owned is built (Beaten, Dismissed); only whether the app may suggest a change, and how loudly, is open."
     },
     {
       "id": "should-a-student-share-a-map-with-a-teacher",
@@ -4559,6 +4561,18 @@
       "owner": "agent",
       "closedBy": "apps/web/src/components/VerseMenu.keys.test.tsx",
       "note": "Found building PLAN 101 (2026-10-13): the menu on the surah's name is a row, and once it gained the long line for keeping the recitation, on a phone the row ran past the screen's edge and Play could not be pressed. A row menu wider than the window now stands as a column, measured again whenever its words change. Tests: VerseMenu.keys.test.tsx (failed first), and e2e/recitation-keep.spec.ts checks every line is on the screen on the phone projects."
+    },
+    {
+      "id": "mark-a-slip-apart-from-a-jump",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "103"
+      },
+      "status": "fixed",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/confusions.spec.ts",
+      "note": "Owner chose 2026-10-13 to build a small first version of the slip half of the confusion-points design. Built the same day: \"I slipped here…\" in a verse's menu marks a slip, a switch on each list row says whether it was one, and the page map's list shows it; records saved before stay jumps. Unit tests (packages/core/src/confusions.test.ts) and the browser test watched failing first."
     }
   ]
 }

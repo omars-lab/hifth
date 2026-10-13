@@ -1,7 +1,10 @@
 # The confusion points a hafiz keeps for themselves
 
-**Status:** design only. Nothing here is built. This document is what a later session reads
-before turning it into an action plan; it is expected to change as the feature does.
+**Status:** partly built. Jumps are built as the Jump tool (plan item 31, the
+[wavy-arrow design](confusion-jumps.md)): the record, its list, the page map's list and the
+saved file. Slips are built as a small first version (plan item 103): "I slipped here…" in a
+verse's menu marks one, and a switch on each list row says whether it was a slip. The rest of
+this page (a slip's warning when the verse is selected, the hop rail) is still design.
 
 `docs/design/` holds the document you read *before* touching a feature.
 `docs/decisions/loop-*.md` are the retrospective records of what a finished loop settled.
@@ -426,7 +429,7 @@ Every design doc in this repo ends under this heading, and each item is an
 `### ⓝ … · **status**` row so the issues gate can read it. The status vocabulary is defined in
 `docs/issues.json`.
 
-### ① How durable must a confusion map be, given iOS wipes it? · **open**
+### ① How durable must a confusion map be, given iOS wipes it? · **answered**
 
 Following revision-record's pattern gives IndexedDB plus a `since` stamp — enough to keep an
 emptied log from lying about itself, not enough to keep it from emptying. For a glance log that
@@ -445,7 +448,12 @@ and hands the privacy question in ② its leading option. Captured, not yet sett
 half is now being opened as a full decision (see ②), and the iCloud/sync half rides on the mobile
 track, which is gated elsewhere.
 
-### ② Should a confusion map ever leave the device? · **open**
+**Answered (2026-09-02, the owner):** the
+[confusion-map-export decision](../decisions/confusion-map-export.md) chose B, a file the reader
+saves and restores, and it is built: the jumps and slips go into the same saved file as the
+bookmarks and notes. Sync waits for the Mac and iPad apps.
+
+### ② Should a confusion map ever leave the device? · **answered**
 
 Revision-record's settled stance is that anything off the device is a *deliberate* act, guarded
 by a gate — no export, no sync. Two real pulls argue the other way here: a hafiz wants to back
@@ -476,6 +484,10 @@ The teacher-sharing pull above is a *third* mechanism again and stays part of th
 decision being opened covers the file-backup option first; sync and sharing are named in it as the
 heavier options it is deliberately not taking yet.
 
+**Answered (2026-09-02, the owner):** yes, but only when the reader saves the file themselves
+(the [confusion-map-export decision](../decisions/confusion-map-export.md), B), and that is built.
+Handing a map to a teacher is still open, as ⑥.
+
 ### ③ How are slip-candidates ranked, and is the opening-word signal worth building? · **open**
 
 Phase 1 can ship with corpus edges ranked `twin` → shared-run and the jumper as the fallback
@@ -504,7 +516,14 @@ the reader's memory takes, which is a far more natural thing to make navigable. 
 form of this question is *whether jumps — not all confusion points — become edges*, and slips
 stay warnings regardless.
 
+**Where it stands (2026-10-13):** a jump's row in its list already has Go, which opens the verse
+it went to; the hop rail does not show your own jumps. So the question is now only the rail.
+
 ### ⑤ Who sets a seam's state — the reader, or the app's guess from the data? · **open**
+
+**Where it stands (2026-10-13):** the reader owns it, and that is built: a row can be marked
+Beaten or Dismissed, and nothing changes it but the reader. What is still open is only whether
+the app may *suggest* a change, and how loudly.
 
 Each confusion point carries a state — *every pass*, *sometimes*, *used to*, *dismissed* — and
 the question is who writes it. The design's bet is **the reader owns it**, because the store sees

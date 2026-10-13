@@ -34,6 +34,9 @@ import {
   removeLastTime,
   againConfusion,
   setConfusionState,
+  setConfusionKind,
+  kindOf,
+  type ConfusionKind,
   removeConfusion,
   restoreConfusion,
   setDestination,
@@ -1823,9 +1826,14 @@ export function App(): JSX.Element {
   // asks where it went (`jumpAsking`), and "Another verse…" in that list hands
   // the question to the go-to box (`jumpNaming`). A jump just marked waits in
   // `jumpUndo` for its Undo, which takes back only that change: a time added,
-  // a record deleted, a destination said.
-  const [jumpAsking, setJumpAsking] = useState<{ from: JumpEnd; at: { top: number; bottom: number; x: number } } | null>(null);
-  const [jumpNaming, setJumpNaming] = useState<JumpEnd | null>(null);
+  // a record deleted, a destination said. Both carry the kind the reader
+  // asked for: "I slipped here…" marks a slip, everything else a jump.
+  const [jumpAsking, setJumpAsking] = useState<{
+    from: JumpEnd;
+    at: { top: number; bottom: number; x: number };
+    kind: ConfusionKind;
+  } | null>(null);
+  const [jumpNaming, setJumpNaming] = useState<{ from: JumpEnd; kind: ConfusionKind } | null>(null);
   // `kept` marks a dismissal, which the page map's Bring back can also take back.
   const [jumpUndo, setJumpUndo] = useState<{
     said: string;
@@ -1836,7 +1844,7 @@ export function App(): JSX.Element {
   // destination picked fills it in rather than marking a new jump.
   const [jumpRenaming, setJumpRenaming] = useState<string | null>(null);
   const saveJump = useCallback(
-    (from: JumpEnd, to: string | null) => {
+    (from: JumpEnd, to: string | null, kind: ConfusionKind = "jump") => {
       setJumpAsking(null);
       setJumpNaming(null);
       setJumpRenaming(null);
@@ -1852,12 +1860,15 @@ export function App(): JSX.Element {
         setJumpUndo({ said, undo: (s) => [...s.filter((c) => !before.some((b) => b.id === c.id)), ...before] });
         return;
       }
-      const next = markConfusion(confusions, from, to ? { key: to } : null, now, device?.id ?? "");
+      const next = markConfusion(confusions, from, to ? { key: to } : null, now, device?.id ?? "", kind);
       const mine = to
         ? next.find((c) => c.from.key === from.key && c.to?.key === to)
         : next.find((c) => !confusions.some((x) => x.id === c.id));
       if (!mine) return;
-      const said = to ? t.jumpMarked(from.key, to, mine.times.length) : t.jumpMarkedUnsure(from.key);
+      const slip = kindOf(mine) === "slip";
+      const said = to
+        ? (slip ? t.slipMarked : t.jumpMarked)(from.key, to, mine.times.length)
+        : (slip ? t.slipMarkedUnsure : t.jumpMarkedUnsure)(from.key);
       commitConfusions(next, said);
       setJumpUndo({ said, undo: (s) => removeLastTime(s, mine.id, Date.now()) });
     },
@@ -1878,7 +1889,7 @@ export function App(): JSX.Element {
   const onJump = useCallback(
     (jump: { from: JumpEnd; to: string | null; at: { top: number; bottom: number; x: number } }) => {
       if (jump.to) saveJump(jump.from, jump.to);
-      else setJumpAsking({ from: jump.from, at: jump.at });
+      else setJumpAsking({ from: jump.from, at: jump.at, kind: "jump" });
     },
     [saveJump],
   );
@@ -1888,7 +1899,7 @@ export function App(): JSX.Element {
   }, []);
   // A jump said from a verse's menu rather than drawn: the list opens by the
   // verse (or by the menu that was round it), with no seam word to keep.
-  const askJumpFrom = useCallback((key: string, around?: DOMRect) => {
+  const askJumpFrom = useCallback((key: string, around?: DOMRect, kind: ConfusionKind = "jump") => {
     const p = parseAyahKey(key);
     const box =
       around ??
@@ -1900,7 +1911,7 @@ export function App(): JSX.Element {
     const at = box
       ? { top: box.top, bottom: box.bottom, x: box.left + box.width / 2 }
       : { top: window.innerHeight / 3, bottom: window.innerHeight / 3, x: window.innerWidth / 2 };
-    setJumpAsking({ from: { key }, at });
+    setJumpAsking({ from: { key }, at, kind });
   }, []);
   // The list a tap on a jump mark opens (confusion-jumps, step 6).
   const [jumpsAt, setJumpsAt] = useState<{ key: string; anchor: { top: number; bottom: number; x: number } } | null>(null);
@@ -1931,6 +1942,7 @@ export function App(): JSX.Element {
       times: c.times.length,
       lastAt: c.times[c.times.length - 1]!.at,
       beaten: c.state === "beaten",
+      slip: kindOf(c) === "slip",
     });
     return [allConfusions(confusions).map(item), dismissedConfusions(confusions).map(item)];
   }, [confusions]);
@@ -1951,6 +1963,7 @@ export function App(): JSX.Element {
                 times: c.times.length,
                 lastAt: c.times[c.times.length - 1]!.at,
                 beaten: c.state === "beaten",
+                slip: kindOf(c) === "slip",
                 ...(edge ? { edge } : {}),
               };
             })
@@ -1961,12 +1974,14 @@ export function App(): JSX.Element {
     const c = confusions.find((x) => x.id === id);
     if (!c?.to) return;
     const next = againConfusion(confusions, id, Date.now(), device?.id ?? "");
-    const said = t.jumpMarked(c.from.key, c.to.key, c.times.length + 1);
+    const said = (kindOf(c) === "slip" ? t.slipMarked : t.jumpMarked)(c.from.key, c.to.key, c.times.length + 1);
     commitConfusions(next, said);
     setJumpUndo({ said, undo: (s) => removeLastTime(s, id, Date.now()) });
   };
   const beatJump = (id: string, beaten: boolean) =>
     commitConfusions(setConfusionState(confusions, id, beaten ? "beaten" : "sometimes", Date.now()), "");
+  const slipJump = (id: string, slip: boolean) =>
+    commitConfusions(setConfusionKind(confusions, id, slip ? "slip" : "jump", Date.now()), "");
   const dismissJump = (id: string) => {
     const c = confusions.find((x) => x.id === id);
     if (!c) return;
@@ -4261,7 +4276,7 @@ export function App(): JSX.Element {
         onJump={(target) => {
           if (!jumpNaming) return handleJump(target);
           if (!resolver) return;
-          saveJump(jumpNaming, formatAyahKey(resolver.edition, target.surah, target.ayah));
+          saveJump(jumpNaming.from, formatAyahKey(resolver.edition, target.surah, target.ayah), jumpNaming.kind);
         }}
         onClose={() => {
           setJumperOpen(false);
@@ -4271,15 +4286,15 @@ export function App(): JSX.Element {
       />
       {jumpAsking && (
         <JumpPicker
-          head={t.jumpWhere(jumpAsking.from.key)}
+          head={(jumpAsking.kind === "slip" ? t.slipWhere : t.jumpWhere)(jumpAsking.from.key)}
           anchor={jumpAsking.at}
           choices={jumpChoices(adjacency?.hopsForKey(jumpAsking.from.key) ?? [], jumpAsking.from.key, t)}
           notSure={t.jumpNotSure}
           another={t.jumpAnother}
-          onPick={(to) => saveJump(jumpAsking.from, to)}
-          onNotSure={() => saveJump(jumpAsking.from, null)}
+          onPick={(to) => saveJump(jumpAsking.from, to, jumpAsking.kind)}
+          onNotSure={() => saveJump(jumpAsking.from, null, jumpAsking.kind)}
           onAnother={() => {
-            setJumpNaming(jumpAsking.from);
+            setJumpNaming({ from: jumpAsking.from, kind: jumpAsking.kind });
             setJumpAsking(null);
           }}
           onClose={closeJumpAsking}
@@ -4545,6 +4560,7 @@ export function App(): JSX.Element {
             <DrawerTool glyph={"✍\uFE0E"} caption={t.vdNote} label={t.vdNoteAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => noteOnVerse(selectedKey)} />
             <DrawerTool glyph="⧉" caption={t.vdCopy} label={t.vdCopyAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => copyVerse(selectedKey)} />
             <DrawerTool glyph="↝" caption={t.vdJump} label={t.vdJumpAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => askJumpFrom(selectedKey)} />
+            <DrawerTool glyph="≈" caption={t.vdSlip} label={t.vdSlipAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => askJumpFrom(selectedKey, undefined, "slip")} />
           </>
         )}
       </VerseDrawer>
@@ -4563,6 +4579,12 @@ export function App(): JSX.Element {
             // Straight to "where did it take you?", with no arrow to draw: the
             // phone's way in, where a finger is already resting on the verse.
             { caption: t.vdJump, onPick: () => askJumpFrom(verseMenu.key, heldVerseBox(verseMenu.key) ?? verseMenu.around) },
+            // A slip, said the same way: the look-alikes it likely pulled you
+            // toward come first in the list, as for a jump.
+            {
+              caption: t.vdSlip,
+              onPick: () => askJumpFrom(verseMenu.key, heldVerseBox(verseMenu.key) ?? verseMenu.around, "slip"),
+            },
           ]}
         />
       )}
@@ -4640,6 +4662,7 @@ export function App(): JSX.Element {
             }}
             onAgain={againJump}
             onBeaten={beatJump}
+            onSlip={slipJump}
             onDismiss={dismissJump}
             onDelete={deleteJump}
             onSayWhere={(id) => {

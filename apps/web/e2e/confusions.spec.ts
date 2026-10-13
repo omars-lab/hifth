@@ -584,6 +584,53 @@ test.describe("Hifth · the list behind a jump mark", () => {
     await expect(page).toHaveURL(/7:160/);
   });
 
+  test("I slipped here… marks a slip, the list and the page map say so, and the row takes it back", async ({ page }) => {
+    // A slip is the wrong turn a look-alike pulls you into (docs/PLAN.md, item
+    // 103). It is asked the same way as a jump, in its own words, and the
+    // look-alikes it likely pulled you toward come first.
+    const at = await ayahTarget(page, verse(65)); // 2:58
+    await page.mouse.move(at.x, at.y);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    const menu = page.getByRole("menu", { name: /^More for / });
+    // Every line can be pressed, on a phone too, with one more line in the menu.
+    const view = page.viewportSize()!;
+    for (const line of await menu.getByRole("menuitem").all()) {
+      const b = (await line.boundingBox())!;
+      expect(b.x, await line.innerText()).toBeGreaterThanOrEqual(0);
+      expect(b.x + b.width, await line.innerText()).toBeLessThanOrEqual(view.width);
+    }
+    await menu.getByRole("menuitem", { name: "I slipped here…" }).click();
+    const where = page.getByRole("dialog", { name: "Where did 2:58 pull you?" });
+    await expect(where).toBeVisible();
+    await where.getByRole("button", { name: /7:161/ }).click();
+    await expect(undoBar(page)).toContainText("Slip from 2:58 to 7:161 marked");
+    // A slip is counted on the verse's mark like any jump.
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+
+    await mark(page, "2:58").click();
+    const r = row(jumps(page, "2:58"), "7:161");
+    await expect(r.getByRole("button", { name: "A slip" })).toHaveAttribute("aria-pressed", "true");
+    // Marked again from the Jump line, it stays a slip: only the switch takes the word back.
+    await page.keyboard.press("Escape");
+    await jumpFrom(page, 65, "2:58", (l) => l.getByRole("button", { name: /7:161/ }).click());
+    await expect(undoBar(page)).toContainText("Slip from 2:58 to 7:161 marked, 2 times now");
+
+    await page.getByRole("button", { name: /what you have opened/ }).click();
+    const sheet = page.getByRole("dialog", { name: "What you have opened" });
+    await expect(sheet.getByRole("list", { name: "Your jumps" }).getByRole("button")).toHaveText([
+      /^From 2:58 to 7:161.*2 times.*A slip/,
+    ]);
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+
+    await mark(page, "2:58").click();
+    const again = row(jumps(page, "2:58"), "7:161");
+    await again.getByRole("button", { name: "A slip" }).click();
+    await expect(again.getByRole("button", { name: "A slip" })).toHaveAttribute("aria-pressed", "false");
+  });
+
   test("a jump not named yet is named from its row", async ({ page }) => {
     await jumpFrom(page, 66, "2:59", (l) => l.getByRole("button", { name: "Not sure yet" }).click());
     await expect(mark(page, "2:59")).toContainText("?");

@@ -166,6 +166,7 @@ export interface Catalog {
   readonly jumpShelfDismissed: (d: { readonly nText: string | number }) => string;
   readonly jumpShelfEmpty: string;
   readonly jumpShelfHead: string;
+  readonly jumpSlip: string;
   readonly jumpStartsAt: (d: { readonly label: string | number }) => string;
   readonly jumpTimes: (d: { readonly n: number; readonly nText: string | number; readonly whenText: string | number }) => string;
   readonly jumpToday: string;
@@ -492,6 +493,9 @@ export interface Catalog {
   readonly sharesWords: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly showBars: string;
   readonly skinGroup: string;
+  readonly slipMarked: (d: { readonly fromText: string | number; readonly toText: string | number; readonly n: number; readonly nText: string | number }) => string;
+  readonly slipMarkedUnsure: (d: { readonly fromText: string | number }) => string;
+  readonly slipWhere: (d: { readonly fromText: string | number }) => string;
   readonly sourceLink: string;
   readonly sourcesHead: string;
   readonly spreadOne: string;
@@ -612,6 +616,8 @@ export interface Catalog {
   readonly vdQul: string;
   readonly vdRoots: string;
   readonly vdShare: string;
+  readonly vdSlip: string;
+  readonly vdSlipAria: (d: { readonly label: string | number }) => string;
   readonly verseGesturesA: string;
   readonly verseGesturesB: string;
   readonly verseGesturesC: string;

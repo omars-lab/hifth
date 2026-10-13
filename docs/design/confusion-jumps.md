@@ -2,7 +2,7 @@
 
 > Asked by the owner on 2026-10-03: *"design a new tool that is a squicky arrow that we can use to mark our confusion jumps ... and that adds same icon to end of ayah with counts to different ayas we jump to from this ayah. This icon can also appear on the next wasl too"*
 
-**Status:** design only, nothing built. It is plan item 31. Five questions need the owner, listed in [What needs the owner's call?](#what-needs-the-owners-call). Two of them are about how something feels in the hand, so the next step is a rough throwaway build to try them, not a choice made from these pictures.
+**Status:** built, as plan item 31: the Jump tool, its list, the mark by a verse's number, the saved arrows and the page map's list. The owner's choices are recorded under [What needs the owner's call?](#what-needs-the-owners-call). Marking a slip apart from a jump came later, as plan item 103.
 
 ## The short version
 

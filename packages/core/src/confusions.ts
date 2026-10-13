@@ -25,6 +25,16 @@ export interface JumpTime {
 
 export type ConfusionState = "sometimes" | "every-pass" | "beaten" | "dismissed";
 
+/**
+ * A slip is the wrong turn a look-alike verse pulls you into; a jump is any
+ * leap to another place, which may be a mistake or only a link you noticed
+ * (docs/design/confusion-points.md, "A few words, defined once"). The reader
+ * says which. A jump is written as no kind at all, so every record saved
+ * before there was a choice reads as one, and an older copy of the app still
+ * reads a file that holds slips.
+ */
+export type ConfusionKind = "jump" | "slip";
+
 export interface Confusion {
   readonly id: string;
   readonly from: JumpEnd;
@@ -33,11 +43,24 @@ export interface Confusion {
   /** Every time it happened, oldest first; never empty. "How many times" is its length. */
   readonly times: readonly JumpTime[];
   readonly state: ConfusionState;
+  /** Only a slip says so; a record with no kind is a jump. */
+  readonly kind?: "slip";
   readonly createdAt: number;
   readonly updatedAt: number;
 }
 
 const STATES: readonly ConfusionState[] = ["sometimes", "every-pass", "beaten", "dismissed"];
+
+/** Whether a record is a slip or a jump. */
+export function kindOf(c: Confusion): ConfusionKind {
+  return c.kind === "slip" ? "slip" : "jump";
+}
+
+function withKind(c: Confusion, kind: ConfusionKind): Confusion {
+  if (kind === "slip") return { ...c, kind: "slip" };
+  const { kind: _drop, ...jump } = c;
+  return jump;
+}
 
 function freshId(now: number, set: readonly { id: string }[]): string {
   const base = `j${now.toString(36)}`;
@@ -60,9 +83,12 @@ function end(e: JumpEnd): JumpEnd {
 }
 
 /**
- * Mark a jump. The same pair again adds a time to its record, and the seam
- * word becomes the latest one; a jump whose destination is not known yet
- * (`to` null) is always a record of its own until it is filled in.
+ * Mark a jump, or a slip. The same pair again adds a time to its record, and
+ * the seam word becomes the latest one; a jump whose destination is not known
+ * yet (`to` null) is always a record of its own until it is filled in. Marked
+ * as a slip, a record becomes one; marked again as a plain jump it keeps what
+ * the reader said, since a slip is also a jump and only the list's own switch
+ * takes the word back.
  */
 export function markConfusion(
   set: readonly Confusion[],
@@ -70,15 +96,16 @@ export function markConfusion(
   to: JumpEnd | null,
   now: number,
   device: string,
+  kind: ConfusionKind = "jump",
 ): Confusion[] {
   const time = { at: now, device };
   const mine = to ? set.find((c) => samePair(c, from.key, to.key)) : undefined;
   if (mine) {
-    return set.map((c) =>
-      c === mine
-        ? { ...c, from: from.word === undefined ? c.from : end(from), times: joinTimes(c.times, [time]), updatedAt: now }
-        : c,
-    );
+    return set.map((c) => {
+      if (c !== mine) return c;
+      const more = { ...c, from: from.word === undefined ? c.from : end(from), times: joinTimes(c.times, [time]), updatedAt: now };
+      return kind === "slip" ? withKind(more, "slip") : more;
+    });
   }
   const made: Confusion = {
     id: freshId(now, set),
@@ -89,7 +116,7 @@ export function markConfusion(
     createdAt: now,
     updatedAt: now,
   };
-  return [...set, made];
+  return [...set, withKind(made, kind)];
 }
 
 /** One more time for a record, without drawing it again. */
@@ -113,6 +140,11 @@ export function setDestination(set: readonly Confusion[], id: string, to: JumpEn
 
 export function setConfusionState(set: readonly Confusion[], id: string, state: ConfusionState, now: number): Confusion[] {
   return set.map((c) => (c.id === id ? { ...c, state, updatedAt: now } : c));
+}
+
+/** The reader's own word on whether a record was a slip or a jump. */
+export function setConfusionKind(set: readonly Confusion[], id: string, kind: ConfusionKind, now: number): Confusion[] {
+  return set.map((c) => (c.id === id ? withKind({ ...c, updatedAt: now }, kind) : c));
 }
 
 export function removeConfusion(set: readonly Confusion[], id: string): Confusion[] {
@@ -382,6 +414,7 @@ export function isConfusion(v: unknown): v is Confusion {
         typeof t === "object" && t !== null && typeof (t as JumpTime).at === "number" && typeof (t as JumpTime).device === "string",
     ) &&
     STATES.includes(c.state as ConfusionState) &&
+    (c.kind === undefined || c.kind === "slip") &&
     typeof c.createdAt === "number" &&
     typeof c.updatedAt === "number"
   );

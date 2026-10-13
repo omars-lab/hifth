@@ -2192,6 +2192,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     space it has used shown beside it; and a run usually starts mid-surah, so "heard it through"
     needs saying exactly before it is built. Its test: a browser test that runs a short surah to
     its end with the setting on and finds it listed in the info panel.
+103. ~~**A slip is marked apart from a jump.**~~ Chosen 2026-10-13 by the owner, asked whether
+    to build the slip half of the confusion-points design: a small first version. A slip is the
+    wrong turn a look-alike verse pulls you into; a jump is any leap. A verse's menu gains
+    "I slipped here…", which asks where it pulled you the same way Jump… does; each row in a
+    verse's list of jumps gains a switch, "A slip", and the page map's list says so too. A slip
+    is still counted on the verse's mark like any jump. Everything saved before stays a jump,
+    and an older copy of the app still reads a file that holds slips. Built 2026-10-13: unit
+    tests for the record and the saved file, and a browser test on the menu, the list and the
+    page map, all watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

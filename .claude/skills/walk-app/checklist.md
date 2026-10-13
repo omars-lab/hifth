@@ -162,6 +162,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   manual-testing list, item 16
 - [ ] The "later surahs" arrow's direction. · any · **open, the owner's call** — issue:
   `later-arrow-direction` (do not change it on a walk)
+- [ ] Hold a verse and choose "I slipped here…": the sheet asks where it *pulled* you, the bar
+  says a slip was marked, and the row in the verse's list has "A slip" pressed; the menu's lines
+  all fit on a phone. · phone, iPad · test: e2e/confusions.spec.ts ("I slipped here… marks a
+  slip")
+- [ ] Every design page's status line matches what is built: a page saying "nothing is built"
+  when part of it is sent the owner a question about something already done. · docs · found
+  2026-10-13 on the confusion-points page
 
 ## The note (pitch)
 

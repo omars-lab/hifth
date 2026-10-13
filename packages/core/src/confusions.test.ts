@@ -16,6 +16,8 @@ import {
   removeLastTime,
   restoreConfusion,
   setConfusionState,
+  setConfusionKind,
+  kindOf,
   setDestination,
   squiggle,
   waslMarks,
@@ -92,6 +94,63 @@ describe("marking where your memory jumped", () => {
     expect(beaten[0]!.updatedAt).toBe(2_000);
     // Marking it again does not change what the reader said.
     expect(markConfusion(beaten, { key: K("2:58") }, { key: K("7:161") }, 3_000, PHONE)[0]!.state).toBe("beaten");
+  });
+});
+
+describe("a slip, told apart from a jump", () => {
+  // A slip is the wrong turn a look-alike pulls you into; a jump is any leap
+  // to another place. The reader says which, and every record saved before
+  // there was a choice stays a jump.
+  it("a record says nothing of its kind until it is a slip, so older records read as jumps", () => {
+    const set = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE);
+    expect("kind" in set[0]!).toBe(false);
+    expect(kindOf(set[0]!)).toBe("jump");
+  });
+
+  it("marked as a slip, it is one; marked again as a jump, it stays one", () => {
+    let set = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE, "slip");
+    expect(kindOf(set[0]!)).toBe("slip");
+    set = markConfusion(set, { key: K("2:58"), word: 4 }, { key: K("7:161") }, 2_000, PHONE);
+    expect(set).toHaveLength(1);
+    expect(kindOf(set[0]!)).toBe("slip");
+  });
+
+  it("a jump marked again as a slip becomes one, with its times kept", () => {
+    let set = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE);
+    set = markConfusion(set, { key: K("2:58") }, { key: K("7:161") }, 2_000, PHONE, "slip");
+    expect(set).toHaveLength(1);
+    expect(kindOf(set[0]!)).toBe("slip");
+    expect(set[0]!.times).toHaveLength(2);
+  });
+
+  it("a slip with no destination yet is a slip too", () => {
+    const set = markConfusion([], { key: K("2:58") }, null, 1_000, PHONE, "slip");
+    expect(kindOf(set[0]!)).toBe("slip");
+  });
+
+  it("the reader can change their mind either way", () => {
+    let set = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE);
+    const id = set[0]!.id;
+    set = setConfusionKind(set, id, "slip", 2_000);
+    expect(kindOf(set[0]!)).toBe("slip");
+    expect(set[0]!.updatedAt).toBe(2_000);
+    set = setConfusionKind(set, id, "jump", 3_000);
+    expect(kindOf(set[0]!)).toBe("jump");
+    expect("kind" in set[0]!).toBe(false);
+  });
+
+  it("a saved file keeps the slip, and an unknown kind refuses the record", () => {
+    const set = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE, "slip");
+    const file = toBookmarkFile([], 5_000, [], [], set);
+    expect(file.version).toBe(3);
+    expect(parseBookmarkFile(JSON.stringify(file))?.confusions).toEqual(set);
+    expect(isConfusion({ ...set[0], kind: "wobble" })).toBe(false);
+  });
+
+  it("loading a file, the kind changed last wins", () => {
+    const held = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE);
+    const loaded = setConfusionKind(held, held[0]!.id, "slip", 2_000);
+    expect(kindOf(mergeConfusions(held, loaded)[0]!)).toBe("slip");
   });
 });
 

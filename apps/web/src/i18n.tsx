@@ -949,6 +949,9 @@ export interface Strings {
   vdCopyAria(label: string): string;
   vdJump: string;
   vdJumpAria(label: string): string;
+  /** A slip: the wrong turn a look-alike pulls you into (docs/PLAN.md, item 103). */
+  vdSlip: string;
+  vdSlipAria(label: string): string;
   verseMore(label: string): string;
   playToPick: string;
   playToPickClick: string;
@@ -1004,6 +1007,11 @@ export interface Strings {
   /** "Jump from 2:58 to 7:161 marked", with ", 2 times now" once it has happened before. */
   jumpMarked(from: string, to: string, times: number): string;
   jumpMarkedUnsure(from: string): string;
+  slipWhere(from: string): string;
+  slipMarked(from: string, to: string, times: number): string;
+  slipMarkedUnsure(from: string): string;
+  /** The switch on a list row that says the jump was a slip. */
+  jumpSlip: string;
   jumpList(from: string): string;
   jumpTimes(times: number, when: string): string;
   jumpToday: string;
@@ -1751,6 +1759,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     vdCopyAria: (label) => m.vdCopyAria({ label }),
     vdJump: m.vdJump,
     vdJumpAria: (label) => m.vdJumpAria({ label }),
+    vdSlip: m.vdSlip,
+    vdSlipAria: (label) => m.vdSlipAria({ label }),
     verseMore: (label) => m.verseMore({ label }),
     playToPick: m.playToPick,
     playToPickClick: m.playToPickClick,
@@ -1803,6 +1813,16 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         nText: n(times),
       }),
     jumpMarkedUnsure: (from) => m.jumpMarkedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
+    slipWhere: (from) => m.slipWhere({ fromText: fmtAyahRef(from, lang) ?? from }),
+    slipMarked: (from, to, times) =>
+      m.slipMarked({
+        fromText: fmtAyahRef(from, lang) ?? from,
+        toText: fmtAyahRef(to, lang) ?? to,
+        n: times,
+        nText: n(times),
+      }),
+    slipMarkedUnsure: (from) => m.slipMarkedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
+    jumpSlip: m.jumpSlip,
     jumpList: (from) => m.jumpList({ fromText: fmtAyahRef(from, lang) ?? from }),
     jumpTimes: (times, when) => m.jumpTimes({ n: times, nText: n(times), whenText: when }),
     jumpToday: m.jumpToday,
