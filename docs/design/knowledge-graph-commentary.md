@@ -475,12 +475,12 @@ just facts."
 
 ## Open questions, and what would answer each
 
-### ① Where does the commentary the pitch shows still differ from the printed book? · **blocked**
+### ① Where does the commentary the pitch shows still differ from the printed book? · **open**
 
-**Where it stands, 2026-10-11:** within two taps of a demo note, the only difference left that
-anyone has found is the slant of the words in the last 38 notes two taps out, and reading those
-waits on the owner's yes ([commentary lettering ①](commentary-lettering.md)). Notes further out
-than that still show slanted words upright; nobody in the room reaches them from the demo.
+**Where it stands, 2026-10-13:** within two taps of a demo note, no difference from the book is
+left that anyone has found. The last 38 notes two taps out were read once the owner said yes on
+2026-10-12 ([commentary lettering ①](commentary-lettering.md)). Notes further out than that
+still show slanted words upright; nobody in the room reaches them from the demo.
 
 The private pitch reads The Study Quran's commentary from a capture of the book, page by page.
 Walking the pitch on 2026-10-05 found that where a paragraph ran over the foot of a printed
@@ -584,8 +584,10 @@ reference is a link again. Of the other 436 notes two taps out, 398 were read th
 2026-10-10, in twelve batches: 2,127 rows, each checked to match its note's text before it went
 in, and twelve more words the capture misread, put right off the page pictures. The pitch test
 opens four more of the densest, watched failing first with their rows taken out. The last 38
-wait on the owner: the reader for that batch was refused the note files it reads
-([commentary lettering ①](commentary-lettering.md)).
+waited on the owner, since the reader for that batch was refused the note files it reads
+([commentary lettering ①](commentary-lettering.md)). The owner said yes on 2026-10-12, and they
+were read on 2026-10-13: 212 rows and three more misread words, put right off the page pictures.
+The pitch test opens two of the densest of them, watched failing first with their rows taken out.
 Reading them also showed the capture often gave straight quote marks where the book prints curly
 ones, and a hyphen where it prints a dash between two numbers (about one note in fifty, all
 through the book). One rule now sets them back in every note and every verse's translation, so no
@@ -1007,7 +1009,8 @@ highlight's menu), so they all behave the same. What having a hand on each showe
   page edge cannot be seen under the note, so the reader has to know it is there.
 
 To choose, open settings on a two-page spread, try each with a note open, then record the choice
-here and make it the default; the others stay as settings.
+here and make it the default; the others stay as settings. Asked on 2026-10-12, the owner had not
+tried them yet; it waits until they have.
 
 ### ㉗ With two pages open, where does a surah's introduction open? · **fixed**
 

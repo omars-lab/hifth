@@ -272,7 +272,7 @@ one before it was thrown away along with it, so a slip marked and then rubbed ou
 undo. That rule was meant only for a note's pin opened and closed empty, which has its own path;
 any other pair of changes now stays as two steps.
 
-### ④ With the app in Arabic, should the pens stay on the right edge, or move to the left? · **open**
+### ④ With the app in Arabic, should the pens stay on the right edge, or move to the left? · **answered**
 
 Walked in the iPad app on 2026-10-11: with the app in Arabic, the pens down the side still stand
 in the right-hand margin, and the Mark up button still sits at the right end of the bottom row,
@@ -281,3 +281,7 @@ can be right. The pens are held in the hand that marks, and most hands are right
 language the buttons are in, so the pens might rightly stay on the right. Or a reader who
 switched to Arabic expects the whole screen to mirror, and the pens look forgotten. What would
 answer it: a hafiz who reads the app in Arabic trying both, on a real iPad held sideways.
+
+Chosen 2026-10-12 by the owner: the pens stay on the right by default, in both languages, and
+the mirrored layout, with the pens and Mark up on the left, is built beside it as a setting in
+the info panel, so a hafiz reading in Arabic can try both. The build is plan item 95.
