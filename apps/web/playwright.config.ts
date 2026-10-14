@@ -242,6 +242,8 @@ export default defineConfig({
           // docs page the build stages beside the app.
           // `pen-colours` is the highlighter's colours, picked from the tools
           // bar; it runs on the phones too, from their own bar.
+          // `card-foot` tells Chromium there is a home bar and checks a wide
+          // screen's cards keep no room for it; the phones are not wide.
           testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows|recitation-keep|pencil|card-foot)\.spec\.ts/,
           use: {
             browserName: "chromium",
@@ -287,12 +289,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot)\.spec\.ts/,
         },
         {
           // The iPad, the same WebKit the native shell hosts (native/). One
