@@ -376,7 +376,7 @@ default; or leave the slide as the only way and close this.
 
 **Seen again, 2026-10-10:** on an iPad mini on its side the share card leaves a page only a few
 percent too wide for the room, so the start of the verse's second line sits under it. That smaller
-case is ⑯, and it waits on this one.
+case is ⑯, which plan item 92 settled.
 
 **Built 2026-10-13, as a setting.** The info panel now asks where the page goes when a list opens
 beside it: "Page moves aside" (the default, ⑩'s slide) or "Page stays in the middle". In the
@@ -493,7 +493,7 @@ note shows the key whole and no look-alike button above it. Tests: a pitch phone
 six panels that the look-alike buttons are not the top thing where they stand, which failed first for
 all six.
 
-### ⑯ On an iPad mini on its side, when the page is a little wider than the room beside the share card, what should give? · **open**
+### ⑯ On an iPad mini on its side, when the page is a little wider than the room beside the share card, what should give? · **answered**
 
 **What it changes for a hafiz:** a link lands with the page magnified, and on a window the size of an
 iPad mini on its side (1133 by 744) the page is then about 715 pixels wide. Open Share and the page
@@ -532,6 +532,18 @@ Was blocked on ⑪, which is now built (2026-10-13). It does not answer this one
 the middle, which on the mini would draw it at a quarter of its width, so there it slides aside
 whatever the setting says. The first way above is different: the page still slides aside, and is
 drawn only the 9% smaller it needs. That is still open.
+
+**Answered 2026-10-13: the first way, and it was already built.** Plan item 92 (2026-10-12) draws a
+verse a little smaller, never more than a fifth, when it is only a little wider than the room a card
+beside the page leaves. It was built for 2:255 beside the roots list, but it works for every card
+that moves the page aside, the share card included. Measured again on 2:48 with Share open: the
+second line now ends about 37 pixels short of the card in English, and in Arabic it ends about 50
+pixels inside the screen. In the iPad mini app on its side, in both languages, none of the verse is
+under the share card, the roots list, the note or either look-alike list, and no line runs off the
+screen. The browser test was first green for the wrong reason: it measured while the page was still
+sliding aside, when the verse passes through clear places on its way. It now waits for the page to
+stop, and with item 92 switched off it fails as the walk did (2% under in English, a line past the
+edge in Arabic). The other three ways stay unbuilt: nothing is left for them to fix.
 
 ### ⑰ When a passage row says which verse inside it is most alike, where should its arrow take you? · **fixed**
 
@@ -586,4 +598,4 @@ starts a row lower so its close button is clear, the same as on the share card. 
 mini's size and at the app's shorter room, in English and Arabic, watched failing first; a walk script
 opens each corner card in turn and reports how much of the verse is under it and whether a button meets
 the page or a close button (plan item 90). Measured again in the iPad app: 2% under in English, none in
-Arabic. The leftover is ⑯'s.
+Arabic. The leftover was ⑯'s, which plan item 92 settled (2026-10-13).
