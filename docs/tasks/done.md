@@ -9,6 +9,16 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #214 — Rehearse the pitch in the iPad app from a fresh install
+
+**Done:** 2026-10-13, the pull request "A note closed after the recitation moved the page lets its
+verse go".
+
+The app was taken off the simulator and opened fresh on both iPad sizes on their side, in English,
+then walked through one whole sitting: clean, with a first picture in about an eighth of a second
+and the first Play in 1.1 seconds. One fault: a note kept up over a recitation, then closed, left
+its verse chosen off the page shown. Fixed (docs/design/native-shell.md, items ㉝ and ㉞).
+
 ## #200 — Small iPad on its side: 2:255's note covers the end of its verse
 
 **Done:** 2026-10-12, pull request #476 "Keep 2:255 whole beside its note and the roots list on a

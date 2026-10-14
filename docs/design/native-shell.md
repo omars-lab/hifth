@@ -815,3 +815,52 @@ Tests: `apps/web/e2e/card-foot.spec.ts` (five cards on a wide screen, and a phon
 check that the made-up home bar reaches the page) and the note's check in the pitch tests, both
 seen failing first. Measured in the iPad app on its side: the look-alike card ends 24 points below
 its last row, and the note's fade is on its edge.
+
+### ㉝ Does the pitch run cleanly in the iPad app from a fresh install, in one sitting? · **answered**
+
+What happens in the room: the app is opened for the first time on an iPad on its side, in English,
+and a scholar is walked through the demo verses in one go. Every walk this month checked one
+feature at a time on an install that had already been used, and each found the app clean. Nobody
+has yet shown the first thirty seconds of a fresh install on today's build, then one whole sitting
+on that same install: a note opened and read, a reference followed and come back from, a surah
+played, the pause between verses timed.
+
+**What it changes for a hafiz:** nothing new; this is the pitch's first impression. A slow first
+paint, a hint over the page, or a stall between verses is what the room would remember.
+
+**What would answer it:** take the app off the simulator, then the fresh-look, visit and gap walks
+on that install, on both iPad sizes on their side, in English. Each fault found gets its own item
+and test.
+
+**Answered 2026-10-13: yes, with one small fault, now fixed (item ㉞).** On both iPad sizes on
+their side, in English, from a fresh install:
+
+- The first picture is up in about an eighth of a second, nothing lies over the page, and nothing
+  is stored yet. The large iPad opens on pages 1 and 2. The mini opens on page 1 alone, as it
+  should: two facing pages need a screen at least 775 points tall, and the mini on its side has 744.
+- The note on 2:48 opens beside its verse and reads to its end; the reference to 2:123 goes and
+  comes back; the surah played from its corner with the note open sounds verse after verse, and
+  Pause stops it.
+- The first Play sounds in 1.1 seconds on both sizes, from the copy asked for early.
+
+The one fault: closing the note after the recitation had carried the page on left the note's
+verse chosen, off the page shown (item ㉞).
+
+### ㉞ A note kept up over a recitation, then closed, left its verse chosen off the page · **fixed**
+
+Found 2026-10-13 in the fresh-install rehearsal (item ㉝), in the iPad app on its side. A presenter
+has the note on a verse open, and a surah played from its corner takes the page to the surah's
+start. The note stays up, as the owner chose (PLAN 78). When the presenter then closes it, its
+verse stayed chosen though it was not on the page shown. The app went on saying the reader was at
+that verse, and the Mac app's window title says so too, while the room watched another page.
+
+**What it changes for a hafiz:** little you see at once; the recitation's light is on the right
+verse. But the app's idea of where you are is wrong: on the Mac the window title names a verse
+several pages away from the one being recited.
+
+**The fix:** a note closed while its verse is off the page shown lets the verse go, as a turn by
+hand does, and the recitation plays on.
+
+Test: the pitch test "a note kept up over a recitation, closed once the page has moved on, lets its
+verse go", seen failing first. Walked again in the iPad app on its side: after the note closes, the
+app names the page being recited.
