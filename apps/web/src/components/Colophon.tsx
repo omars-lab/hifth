@@ -14,6 +14,7 @@ import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PITCH } from "../pitch/pitch";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
+import { CARD_ROOMS, rememberCardRoom, useCardRoom } from "../card-room";
 import { LOOKALIKE_COMPARES, rememberLookalikeCompare, useLookalikeCompare } from "../lookalike-compare";
 import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-rows";
 import { PASSAGE_HOPS, rememberPassageHop, usePassageHop } from "../passage-hop";
@@ -283,6 +284,7 @@ export function Colophon({
   const openingText = useOpeningText();
   const relatedList = useRelatedList();
   const longVerse = useLongVerse();
+  const cardRoom = useCardRoom();
   const lookalikeCompare = useLookalikeCompare();
   const passageRows = usePassageRows();
   const passageHop = usePassageHop();
@@ -1145,6 +1147,33 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.railHomeNote}</p>
+          </section>
+        )}
+        {/* Where one page goes when a card opens beside it, the roots list or
+            the share card (docs/design/lookalike-rows.md, ⑩ and ⑪): into the
+            room the card leaves by default, or kept in the window's middle
+            and drawn smaller. Only on the layout with a desk. */}
+        {railHome && onRailHome && (
+          <section className={styles.block} aria-labelledby="colophon-card-room">
+            <h3 className={styles.subhead} id="colophon-card-room">
+              {t.cardRoomTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-card-room">
+              {CARD_ROOMS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={cardRoom === choice}
+                  data-card-room={choice}
+                  onClick={() => rememberCardRoom(choice)}
+                >
+                  {choice === "aside" ? t.cardRoomAside : t.cardRoomSmaller}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.cardRoomNote}</p>
           </section>
         )}
 

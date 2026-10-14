@@ -169,3 +169,25 @@ export function sideCoverOf(
     ? { coverRight: Math.max(0, stage.right - card.left) }
     : { coverLeft: Math.max(0, card.right - stage.left) };
 }
+
+/**
+ * The reader's other way of clearing a card beside one page (card-room.ts):
+ * the page stays in the middle of the stage, so it is held clear of as much
+ * on the card's far side as the card covers on its own.
+ */
+export function evenSides(cover: { coverLeft?: number; coverRight?: number }): {
+  coverLeft?: number;
+  coverRight?: number;
+} {
+  const reach = Math.max(cover.coverLeft ?? 0, cover.coverRight ?? 0);
+  return reach > 0 ? { coverLeft: reach, coverRight: reach } : {};
+}
+
+/**
+ * The zoom that draws a page `width` px wide at zoom 1 just small enough to
+ * fit `room` px across, or null when it already fits (or is not laid out).
+ */
+export function roomZoom(width: number, room: number, z: number): number | null {
+  if (!(width > 0) || !(room > 0) || width * z <= room) return null;
+  return room / width;
+}

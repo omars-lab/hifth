@@ -427,6 +427,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   that room, the verse's first word still stands clear of the list (2:45). · laptop, desktop, desktop in
   Firefox · issue:
   `roots-list-hides-line-starts-one-page`
+- [ ] With "Page stays in the middle" set in the info panel, open the roots list, Share and the tajweed
+  key closed to one page (2:48 `?view=one`): on a laptop and an iPad 13-inch on its side the page keeps to the
+  window's middle, drawn smaller and clear of the card, and the look-alike buttons stand on the side
+  away from it; on an iPad mini on its side it slides aside instead, never tiny; it comes back to its
+  own size on close. Put the setting back afterwards. · laptop, desktop in Firefox, iPad app both
+  sizes, both languages · issue: `roots-list-smaller-page-setting` · walked 2026-10-13, nothing wrong
 - [ ] With Share open on a laptop, the card covers none of the verse being shared and stands above
   the row of tools, every tool in sight: on one page the page stands clear of it, on two pages it lies
   over the facing page (2:48 and 2:49, `?view=one` and two pages, in English and in Arabic). · laptop,

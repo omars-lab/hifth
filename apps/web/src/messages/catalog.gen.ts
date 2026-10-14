@@ -63,6 +63,10 @@ export interface Catalog {
   readonly cardEdgeNote: string;
   readonly cardEdgeTitle: string;
   readonly cardEdgeTurns: string;
+  readonly cardRoomAside: string;
+  readonly cardRoomNote: string;
+  readonly cardRoomSmaller: string;
+  readonly cardRoomTitle: string;
   readonly chipAria: (d: { readonly direction: string | number; readonly countText: string | number }) => string;
   readonly clearSelection: string;
   readonly clickForNote: (d: { readonly source: string | number }) => string;

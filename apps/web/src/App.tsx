@@ -1353,16 +1353,20 @@ export function App(): JSX.Element {
   // how much the page leaves each time it draws the paper (every frame of a
   // pinch), so the width goes straight onto the book for the chips' box, and
   // only a change in whether the chips fit there re-renders anything.
-  const [slackRoom, setSlackRoom] = useState(true);
-  const slackRoomRef = useRef<boolean | null>(null);
-  const reportSlack = useCallback((px: number, cover: { left: number; right: number }) => {
+  // Each side on its own: kept in the window's middle beside a card, the page
+  // leaves room on the side away from it and little on the card's (⑪).
+  const [slackRoom, setSlackRoom] = useState({ left: true, right: true });
+  const slackRoomRef = useRef<{ left: boolean; right: boolean } | null>(null);
+  const reportSlack = useCallback((slack: { left: number; right: number }, cover: { left: number; right: number }) => {
     const book = bookRef.current?.style;
-    book?.setProperty("--page-slack", `${px}px`);
+    book?.setProperty("--page-slack-left", `${slack.left}px`);
+    book?.setProperty("--page-slack-right", `${slack.right}px`);
     // The chips' box starts where a card beside the page stops.
     book?.setProperty("--slack-cover-left", `${cover.left}px`);
     book?.setProperty("--slack-cover-right", `${cover.right}px`);
-    const holds = deskHoldsRail(px);
-    if (holds === slackRoomRef.current) return;
+    const holds = { left: deskHoldsRail(slack.left), right: deskHoldsRail(slack.right) };
+    const was = slackRoomRef.current;
+    if (was && was.left === holds.left && was.right === holds.right) return;
     slackRoomRef.current = holds;
     setSlackRoom(holds);
   }, []);
@@ -3769,7 +3773,6 @@ export function App(): JSX.Element {
   // No desk beside a page magnified to fill the window: the chips go to a bar,
   // never over the paper (docs/design/lookalike-rows.md, ⑧). Closed to one
   // page, the room is what the page leaves inside the book, not the desk (⑨).
-  const roomBeside = pageMode === "one" ? slackRoom : deskRoom;
   // Closed to one page there is no facing leaf for a tall list to rise over:
   // the roots list, or a note too tall for its corner, stands at the chrome's
   // end, on the chips beside a page on that side. They cross to the page's
@@ -3778,6 +3781,10 @@ export function App(): JSX.Element {
     desktop && pageMode === "one" && (rootsOpen || (noteTall && commentaryOpen))
       ? dir === "rtl" ? "right" : "left"
       : undefined;
+  // By the chosen verse's page, the side its note does not cover.
+  const besideSide = sheetSide === "left" ? "right" : sheetSide === "right" ? "left" : soloAside;
+  const liveSide = page === spreadOf(page, totalPages).right ? "right" : "left";
+  const roomBeside = pageMode === "one" ? slackRoom[besideSide ?? liveSide] : deskRoom;
   // A list or the note in the corner beside one page, on a window wide enough
   // to stand it there; held upright, it lies across the page's foot instead,
   // and covers that (⑩). The share card opens over either, in the same corner
@@ -4090,8 +4097,7 @@ export function App(): JSX.Element {
                  outer edge rather than out at the window's corner. */
               beside={roomBeside ? (side) => hopRail(side) : undefined}
               onDeskRoom={setDeskRoom}
-              // By the chosen verse's page, the side its note does not cover.
-              besideSide={sheetSide === "left" ? "right" : sheetSide === "right" ? "left" : soloAside}
+              besideSide={besideSide}
               edgeRails={
                 desktop ? (
                   <EdgeGrabRails

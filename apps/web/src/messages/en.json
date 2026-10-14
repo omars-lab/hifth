@@ -648,5 +648,9 @@
   "railHomeTitle": "Where the look-alike buttons go when the page fills the screen",
   "railHomeBar": "Bottom row",
   "railHomeTools": "Tool row",
-  "railHomeNote": "On a computer or an iPad. The buttons for similar verses stand beside the page; when the page is magnified to fill the screen there is no room beside it, so they leave the page. Bottom row: beside the trail of verses you came from. Tool row: at the end of the row of tools above the page, or in the bottom row when the tools are somewhere else."
+  "railHomeNote": "On a computer or an iPad. The buttons for similar verses stand beside the page; when the page is magnified to fill the screen there is no room beside it, so they leave the page. Bottom row: beside the trail of verses you came from. Tool row: at the end of the row of tools above the page, or in the bottom row when the tools are somewhere else.",
+  "cardRoomTitle": "Where the page goes when a list opens beside it",
+  "cardRoomAside": "Page moves aside",
+  "cardRoomSmaller": "Page stays in the middle",
+  "cardRoomNote": "With the book closed to one page, the roots list, the share card and the tajweed key open beside the page. Page moves aside: the page slides into the room the card leaves and keeps its size. Page stays in the middle: the page stays in the middle of the window and is drawn smaller, so the card does not cover it; where that would draw it under half its size, it moves aside instead. Either way it goes back to its own size and place when the card closes."
 }

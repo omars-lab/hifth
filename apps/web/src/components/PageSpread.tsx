@@ -326,7 +326,7 @@ export function PageSpread({
         {!solo && <Fragment key="rails">{edgeRails}</Fragment>}
         {/* Closed to one page, the book runs the window's width and the desks
             are empty boxes; the room beside the page is inside the book, as
-            wide as the stage says the page leaves (`--page-slack`, written
+            wide as the stage says the page leaves (`--page-slack-left` and `-right`, written
             by the app each time the paper is drawn). There is no facing page
             to pick a verse on, so the chips stand beside the live one —
             on its other side while a tall list stands on theirs. */}

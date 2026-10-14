@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sideCoverOf, spanOfAll } from "./short-band";
+import { evenSides, roomZoom, sideCoverOf, spanOfAll } from "./short-band";
 
 // A laptop window closed to one page: the stage runs 0–1280 across, and the
 // corner card is 460px wide with 24px to spare at the window's edge.
@@ -24,6 +24,33 @@ describe("sideCoverOf", () => {
 
   it("never covers less than nothing, for a card clear of the stage", () => {
     expect(sideCoverOf({ left: 1300, right: 1500 }, STAGE)).toEqual({ coverRight: 0 });
+  });
+});
+
+describe("evenSides", () => {
+  it("covers both sides as far as the card reaches in on its own, so the page stays in the middle", () => {
+    expect(evenSides({ coverRight: 460 })).toEqual({ coverLeft: 460, coverRight: 460 });
+    expect(evenSides({ coverLeft: 300 })).toEqual({ coverLeft: 300, coverRight: 300 });
+  });
+
+  it("covers nothing when no card stands beside the page", () => {
+    expect(evenSides({})).toEqual({});
+  });
+});
+
+describe("roomZoom", () => {
+  it("draws a page wider than the room just small enough to fit it", () => {
+    expect(roomZoom(400, 300, 1.3)).toBeCloseTo(0.75);
+  });
+
+  it("leaves a page that already fits at its own size", () => {
+    expect(roomZoom(400, 600, 1.3)).toBeNull();
+    expect(roomZoom(400, 520, 1.3)).toBeNull();
+  });
+
+  it("leaves the page alone before it is laid out or with no room to fit", () => {
+    expect(roomZoom(0, 300, 1.3)).toBeNull();
+    expect(roomZoom(400, 0, 1.3)).toBeNull();
   });
 });
 
