@@ -616,6 +616,11 @@ upright and on its side, English and Arabic, iPad and Mac.
 
 ## The Mac and iPad apps
 
+- [ ] Open the note and a look-alike list **in the iPad app on its side**, both sizes, and
+  upright on the large one: each card ends about 24 points below its last row, not 44, and the
+  note's fade sits on its edge (native-shell ㉜). · `make app-probe TARGET=ipad SIDEWAYS=1
+  "ROUTE=/hafs-kfqc/10:15?open=lookalikes" EVAL=…` reading the card's bottom against its list's
+  · test: `apps/web/e2e/card-foot.spec.ts` · walked 2026-10-13 on both sizes on its side, fixed
 - [ ] Hand the page a pencil squeeze and double-tap **in the iPad app**, both ways up, both
   sizes, both languages: the pens open beside the tip and whole on the screen (the highlighter's
   two rows wrap when upright), Escape and a pick put them away, and a double-tap swaps the last

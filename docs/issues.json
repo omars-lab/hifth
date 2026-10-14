@@ -4620,6 +4620,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/mistakes.spec.ts",
       "note": "On an open book the outer-edge words sat under the strip that turns the page, so the Mistake pen asked nothing there. The strip and the bookmark corner now step aside for the Mistake pen as for the sign and word pens. Browser test \"a word at the outer edge of an open book asks too\", watched failing first."
+    },
+    {
+      "id": "cards-keep-home-bar-room",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉜"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/card-foot.spec.ts",
+      "note": "Found 2026-10-13 walking the look-alike lists in the iPad app on its side: the card ended 44 points under its last row, not 24. Cards that stand clear of the screen's foot at 900 wide or more kept the room a sheet across the foot keeps for the home bar. No browser test saw it because a laptop's browser reports that room as zero; the new tests make Chromium report a home bar. Fixed in the seven floating cards' style (the share card already did it); the bookmarks drawer and revision record stay across the foot and keep the room. Pitch test for the note and its fade too; measured in the iPad app."
     }
   ]
 }
