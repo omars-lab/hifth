@@ -359,7 +359,7 @@ sight top to bottom but its first word is under the list, which failed first wit
 switched off (77 pixels under); unit tests of centring in the room left, panning inside it, framing
 a verse inside it, and of which side a card covers.
 
-### ⑪ Should a reader be able to keep the page in the middle, drawn smaller, instead of having it slide aside for the list? · **open**
+### ⑪ Should a reader be able to keep the page in the middle, drawn smaller, instead of having it slide aside for the list? · **fixed**
 
 **What it changes for a hafiz:** with ⑩ the page slides about 240 pixels when the roots list opens beside
 one page, and slides back when it closes. A reader who keeps their eye on a line may find the slide
@@ -377,6 +377,34 @@ default; or leave the slide as the only way and close this.
 **Seen again, 2026-10-10:** on an iPad mini on its side the share card leaves a page only a few
 percent too wide for the room, so the start of the verse's second line sits under it. That smaller
 case is ⑯, and it waits on this one.
+
+**Built 2026-10-13, as a setting.** The info panel now asks where the page goes when a list opens
+beside it: "Page moves aside" (the default, ⑩'s slide) or "Page stays in the middle". In the
+second, the page keeps to the window's middle and is drawn small enough to clear the card on both
+sides, then goes back to the reader's own size when the card closes. It covers the roots list, the
+share card and the tajweed key, with the book closed to one page. The look-alike buttons stand in the wider gap,
+on the side away from the card.
+
+What building it taught, which no list made beforehand had a row for:
+
+- Keeping the page in the middle costs twice the card's width, not once, because the page has to
+  clear the card's reach on both sides. On a laptop (1280 by 800) the page came out at about 60% of
+  its slid-aside width (288 pixels against 483), still readable at 93%.
+- On an iPad mini on its side the list takes 460 of the window's 1133 pixels, and the page came out
+  a quarter of its width (152 pixels in English, 121 in Arabic). Nobody can read that. So the page
+  is never drawn below half the reader's own size; where it would be, it slides aside as in ⑩.
+- The same floor reaches the laptop once the reader zooms in. One step larger than a link lands,
+  which is the size the pitch opens at, the room left in the middle beside the share card is under
+  half the page, so there the page slides aside whatever the setting says. The tajweed key is
+  narrower and keeps the page in the middle a step further.
+- Walked in the real iPad app on its side: on the 13-inch the page stays in the middle in both
+  languages, clear of the card; on the mini it slides aside in both.
+
+Tests: `apps/web/e2e/desktop.spec.ts` (the middle on a laptop in both languages beside the roots
+list, the share card and the tajweed key, which fail with the setting on the slide; and the fall-back
+on the mini's window, which failed before the half-size floor was added). They run in Chrome; Firefox
+was checked by hand and agreed. Also
+`apps/web/src/card-room.test.ts` and `short-band.test.ts`.
 
 ### ⑫ On a laptop, does the share card cover the verse it shares, or the row of tools it opens from? · **fixed**
 
@@ -465,7 +493,7 @@ note shows the key whole and no look-alike button above it. Tests: a pitch phone
 six panels that the look-alike buttons are not the top thing where they stand, which failed first for
 all six.
 
-### ⑯ On an iPad mini on its side, when the page is a little wider than the room beside the share card, what should give? · **blocked**
+### ⑯ On an iPad mini on its side, when the page is a little wider than the room beside the share card, what should give? · **open**
 
 **What it changes for a hafiz:** a link lands with the page magnified, and on a window the size of an
 iPad mini on its side (1133 by 744) the page is then about 715 pixels wide. Open Share and the page
@@ -500,7 +528,10 @@ of its second line sits under the card until the reader pans or closes it.
   the roots list's width beside the page.
 - Leave it as it is, ⑩'s limit, and close this.
 
-Blocked on ⑪: whichever way ⑪ goes for drawing the page smaller decides most of this.
+Was blocked on ⑪, which is now built (2026-10-13). It does not answer this one. ⑪ keeps the page in
+the middle, which on the mini would draw it at a quarter of its width, so there it slides aside
+whatever the setting says. The first way above is different: the page still slides aside, and is
+drawn only the 9% smaller it needs. That is still open.
 
 ### ⑰ When a passage row says which verse inside it is most alike, where should its arrow take you? · **fixed**
 

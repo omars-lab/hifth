@@ -3636,10 +3636,11 @@
         "file": "docs/design/lookalike-rows.md",
         "item": "⑪"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "The page slides aside for the roots list beside one page; the other way, keeping it in the middle and drawing it smaller, was set aside on paper and never tried by hand. Closes when that way is built as an info-panel setting with the slide as the default, or closed with a stated reason."
+      "note": "The page slides aside for the roots list beside one page; the other way, keeping it in the middle and drawing it smaller, was set aside on paper and never tried by hand. Closes when that way is built as an info-panel setting with the slide as the default, or closed with a stated reason. Built 2026-10-13 as an info-panel setting, the slide still the default: the page keeps to the window's middle and is drawn small enough to clear the card on both sides, for the roots list, the share card and the tajweed key. Never below half the reader's own size; on an iPad mini on its side that would be a quarter, and on a laptop one zoom step in beside the share card it is just under half, so there it slides aside. Browser tests in Chrome on a laptop in both languages, which fail with the setting on the slide, and on the mini's window, which failed before the floor; Firefox checked by hand.",
+      "closedBy": "apps/web/e2e/desktop.spec.ts"
     },
     {
       "id": "share-card-covers-page-laptop",
@@ -3721,13 +3722,10 @@
         "file": "docs/design/lookalike-rows.md",
         "item": "⑯"
       },
-      "status": "blocked",
+      "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": [
-        "roots-list-smaller-page-setting"
-      ],
-      "note": "When a page is only a few percent wider than the room beside the share card (an iPad mini on its side), should it be drawn that little smaller while the card is up, run past the far edge instead, have the card narrowed, or stay as it is? Waits on item 11, which asks whether drawing the page smaller is wanted at all."
+      "note": "When a page is only a few percent wider than the room beside the share card (an iPad mini on its side), should it be drawn that little smaller while the card is up, run past the far edge instead, have the card narrowed, or stay as it is? Item 11 is built (2026-10-13) and does not settle it: keeping the page in the middle there would draw it at a quarter of its width, so it slides aside whatever that setting says."
     },
     {
       "id": "lookalike-passage-hop-lands-before-match",

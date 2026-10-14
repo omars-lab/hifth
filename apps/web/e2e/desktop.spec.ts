@@ -1,5 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { boxOf, stillBoxOf } from "./box";
+import { CARD_ROOM_KEY } from "../src/card-room";
+import { LANG_STORAGE_KEY } from "../src/lang";
 import { watchFolds, foldsSeen } from "./fold";
 import { contextWithout } from "./inventory";
 import { ayahTarget } from "./ayah";
@@ -2312,6 +2314,89 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
         .toBeLessThan(2);
     });
 
+    for (const lang of ["en", "ar"])
+      test(`closed to one page, in ${lang}, the reader's other way keeps a ${side}-hand page in the middle, drawn smaller, clear of the roots list, and back to its own size once it closes`, async ({ page }) => {
+        // The slide aside of ⑩ moves the page some 240px each way. The other
+        // way, kept as a setting, leaves the page where the eye already is and
+        // draws it smaller until it clears the list (look-alike rows ⑪).
+        await page.addInitScript(
+          ([roomKey, langKey, l]) => {
+            localStorage.setItem(roomKey, "smaller");
+            localStorage.setItem(langKey, l);
+          },
+          [CARD_ROOM_KEY, LANG_STORAGE_KEY, lang] as const,
+        );
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await page.goto(`/#/hafs-kfqc/${at}?view=one`);
+        const leaf = page.locator(`[data-live="true"] [data-host-page="${pageNo}"]`);
+        await expect(pageSvg(page, pageNo)).toBeVisible({ timeout: 20_000 });
+        const own = (await stillBoxOf(leaf)).width;
+        // A link opened afresh, as the first one was, so it lands at the same
+        // size. Not a change of the address's end and a reload: the app tidies
+        // the list's word out of the address once it opens it, so the reload
+        // could land without it.
+        await page.goto("about:blank");
+        await page.goto(`/#/hafs-kfqc/${at}?view=one&open=roots`);
+        const list = page.getByRole("dialog");
+        await expect(list).toBeVisible({ timeout: 20_000 });
+        await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        const card = await boxOf(list);
+        await expect
+          .poll(async () => {
+            const open = await boxOf(leaf);
+            return Math.abs(open.x + open.width / 2 - 640);
+          }, { message: "how far the page's middle is from the window's, with the list up" })
+          .toBeLessThan(2);
+        await expect
+          .poll(async () => {
+            const open = await boxOf(pageSvg(page, pageNo));
+            return Math.min(open.x + open.width, card.x + card.width) - Math.max(open.x, card.x);
+          }, { message: "how far the list stands over the page, across" })
+          .toBeLessThanOrEqual(0);
+        expect((await stillBoxOf(leaf)).width, "drawn smaller than the reader's own size").toBeLessThan(own - 50);
+        // The chips still stand just outside the page, out from under the list.
+        const chips = await stillBoxOf(rail(page));
+        const open = await stillBoxOf(pageSvg(page, pageNo));
+        const under = chips.x < card.x + card.width && card.x < chips.x + chips.width;
+        expect(under, `the chips ${JSON.stringify(chips)} under the list ${JSON.stringify(card)}`).toBe(false);
+        const gap = Math.max(chips.x - (open.x + open.width), open.x - (chips.x + chips.width));
+        expect(gap, "the chips still stand just outside the page").toBeGreaterThanOrEqual(4);
+        expect(gap).toBeLessThanOrEqual(32);
+        await page.keyboard.press("Escape");
+        await expect(list).toBeHidden();
+        await expect
+          .poll(async () => Math.abs((await boxOf(leaf)).width - own), { message: "how far the page is from the reader's own size" })
+          .toBeLessThan(2);
+        await expect
+          .poll(async () => {
+            const back = await boxOf(leaf);
+            return Math.abs(back.x + back.width / 2 - 640);
+          }, { message: "how far the page's middle is from the window's, once the list is gone" })
+          .toBeLessThan(2);
+      });
+
+    test(`on a window where keeping a ${side}-hand page in the middle would draw it tiny, the reader's other way slides it aside instead`, async ({ page }) => {
+      // An iPad mini on its side: the list takes 460 of 1133 pixels, and
+      // kept in the middle clear of it the page came out a quarter of its
+      // width, too small to read (look-alike rows ⑪). Below half its size the
+      // page slides aside as the default does.
+      await page.setViewportSize({ width: 1133, height: 744 });
+      const svg = pageSvg(page, pageNo);
+      const widthBeside = async (room: string): Promise<number> => {
+        await page.evaluate(([key, r]) => localStorage.setItem(key, r), [CARD_ROOM_KEY, room] as const);
+        await page.goto("about:blank");
+        await page.goto(`/#/hafs-kfqc/${at}?view=one&open=roots`);
+        const list = page.getByRole("dialog");
+        await expect(list).toBeVisible({ timeout: 20_000 });
+        await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        return (await stillBoxOf(svg)).width;
+      };
+      await page.goto(`/#/hafs-kfqc/${at}?view=one`);
+      await expect(svg).toBeVisible({ timeout: 20_000 });
+      const aside = await widthBeside("aside");
+      expect(Math.abs((await widthBeside("smaller")) - aside), "the page's width beside the list, against the default's").toBeLessThan(2);
+    });
+
     test(`closed to one page, the share card stands clear of a ${side}-hand page`, async ({ page }) => {
       // The share card opens in the same corner as the roots list, but only
       // said where its top stood, for a phone: the page did not move aside for
@@ -2341,6 +2426,48 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
         }, { message: "how far the share card stands over the page, across" })
         .toBeLessThanOrEqual(0);
     });
+
+    for (const [what, tool, named] of [
+      ["share card", /^(شارك هذه الآية كرابط|Share this ayah as a link)$/, undefined],
+      ["tajweed key", /^(مفتاح ألوان التجويد|Tajweed colour key)$/, /^(مفتاح ألوان التجويد|Tajweed colour key)$/],
+    ] as const) {
+      test(`closed to one page, the reader's other way keeps a ${side}-hand page in the middle beside the ${what}, opened from its button`, async ({ page }) => {
+        // The roots list is not the only card docked beside one page: the
+        // setting keeps the page in the middle for each (look-alike rows ⑪).
+        // At the size a link lands; a step larger, the room left in the middle
+        // beside the share card is under half the page, and it slides aside.
+        await page.addInitScript(([key]) => localStorage.setItem(key, "smaller"), [CARD_ROOM_KEY] as const);
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await page.goto(`/#/hafs-kfqc/${at}?view=one`);
+        const paper = pageSvg(page, pageNo);
+        const leaf = page.locator(`[data-live="true"] [data-host-page="${pageNo}"]`);
+        await expect(paper).toBeVisible({ timeout: 20_000 });
+        const own = (await stillBoxOf(leaf)).width;
+        await page.getByRole("button", { name: tool }).click();
+        const card = named ? page.getByRole("dialog", { name: named }) : page.getByRole("dialog");
+        await expect(card).toBeVisible();
+        await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        const at2 = await boxOf(card);
+        await expect
+          .poll(async () => {
+            const open = await boxOf(leaf);
+            return Math.abs(open.x + open.width / 2 - 640);
+          }, { message: `how far the page's middle is from the window's, with the ${what} up` })
+          .toBeLessThan(2);
+        await expect
+          .poll(async () => {
+            const open = await boxOf(paper);
+            return Math.min(open.x + open.width, at2.x + at2.width) - Math.max(open.x, at2.x);
+          }, { message: `how far the ${what} stands over the page, across` })
+          .toBeLessThanOrEqual(0);
+        expect((await stillBoxOf(leaf)).width, "drawn smaller than the reader's own size").toBeLessThan(own - 50);
+        await page.keyboard.press("Escape");
+        await expect(card).toBeHidden();
+        await expect
+          .poll(async () => Math.abs((await boxOf(leaf)).width - own), { message: "how far the page is from the reader's own size" })
+          .toBeLessThan(2);
+      });
+    }
 
     test(`closed to one page, the tajweed key stands clear of a ${side}-hand page`, async ({ page }) => {
       // The key counts the colours on this page, so a reader holds it up

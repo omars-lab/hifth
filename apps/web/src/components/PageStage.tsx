@@ -76,8 +76,8 @@ import { loadMarkShard, loadPageSvg, loadWordShard, pageUrl } from "../assets";
 import { useT, type Strings } from "../i18n";
 import { giveNoteRoom, noteRoom, useLongVerse } from "../long-verse";
 import { useOpeningText, type OpeningText } from "../opening-text";
-import { pageSlack } from "../rail-home";
-import { sideCoverOf, type CardSpan } from "./short-band";
+import { evenSides, roomZoom, sideCoverOf, type CardSpan } from "./short-band";
+import { useCardRoom } from "../card-room";
 import type { TurnStyle } from "../turn-style";
 import type { RunMark } from "../run-mark";
 import { bookShift, growFromX, savedZoomAcross, useZoomAcross } from "../zoom-across";
@@ -213,11 +213,13 @@ interface PageStageProps {
    * pixels, each time the paper is drawn — every frame of a pinch, so whatever
    * listens must not re-render on it. With the book closed to one page this,
    * not the desk, is the room the look-alike buttons stand in (rail-home.ts).
-   * Measured in the part a card beside the page leaves showing, with how much
-   * of each side that card stands over, so the buttons stand by the page and
-   * not out under the card.
+   * Measured on each side, between the page and a card beside it or the
+   * stage's edge, with how much of each side that card stands over, so the
+   * buttons stand by the page and not out under the card. The two sides
+   * differ when the page keeps to the window's middle beside a card
+   * (card-room.ts).
    */
-  onSlack?: (px: number, cover: { left: number; right: number }) => void;
+  onSlack?: (slack: { left: number; right: number }, cover: { left: number; right: number }) => void;
   /**
    * A page has landed, at this size, before the reader zoomed it: what
    * `openedZoom` reads. Told to the app as it happens, since turning an iPad
@@ -546,6 +548,11 @@ const RAIL_CLEARANCE = 8;
 
 /** Room kept free below a verse drawn smaller to fit above a note: its wash runs a little past its letters. */
 const LIFT_SLACK = 12;
+/**
+ * The least a page kept in the window's middle beside a card is drawn at, as a
+ * share of the reader's own size; below it the page slides aside (card-room.ts).
+ */
+const MIDDLE_LEAST = 0.5;
 
 /** A surah name button's box in the page's own units: its wash, or its ⓘ where it stands. */
 function nameBoxOf(badge: SVGGElement) {
@@ -1462,6 +1469,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   const longVerse = useLongVerse();
   const longVerseRef = useRef(longVerse);
   longVerseRef.current = longVerse;
+  // Where the page goes beside a card docked over one side: into the room the
+  // card leaves, or kept in the window's middle and drawn smaller (⑪).
+  const cardRoom = useCardRoom();
+  const cardRoomRef = useRef(cardRoom);
+  cardRoomRef.current = cardRoom;
+  // How far that card really reaches in from each side, when the page is
+  // measured as if both sides were covered to keep it in the middle.
+  const realCoverRef = useRef<{ left: number; right: number } | null>(null);
   // And the same reason again, for the one mark that is owed to a page the
   // reader is not on. See the breadcrumb effect below for what went wrong.
   const breadcrumbRef = useRef(breadcrumbKey);
@@ -1634,13 +1649,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     const cur = pagesRef.current.get(currentPageRef.current);
     if (!layer || !cur) return null;
     const box = layer.getBoundingClientRect();
+    // Kept in the window's middle, the page is held clear of the card's reach
+    // on both sides; the buttons beside it still stand by the real card.
+    // Not where that would draw the page at under half the reader's own size:
+    // on an iPad mini on its side the list takes 460 of 1133 pixels, and the
+    // page came out a quarter of its width. There it slides aside instead.
+    const side = sideCoverOf(coverSideRef.current, box);
+    const reach = Math.max(side.coverLeft ?? 0, side.coverRight ?? 0);
+    const own = ownZoomRef.current?.from ?? view.current.z;
+    const room = box.width - 2 * reach - 2 * LIFT_SLACK;
+    const even =
+      cardRoomRef.current === "smaller" && !boundRef.current && reach > 0 && room >= MIDDLE_LEAST * cur.host.offsetWidth * own;
+    realCoverRef.current = even ? { left: side.coverLeft ?? 0, right: side.coverRight ?? 0 } : null;
     const fit: StageFit = {
       contentWidth: cur.host.offsetWidth,
       contentHeight: cur.host.offsetHeight,
       stageWidth: box.width,
       stageHeight: box.height,
       coverBottom: coverTopRef.current === null ? 0 : Math.max(0, box.bottom - coverTopRef.current),
-      ...sideCoverOf(coverSideRef.current, box),
+      ...(even ? evenSides(side) : side),
     };
     fitRef.current = fit;
     // Where the open book's right-hand page would stand with the book unslid,
@@ -1704,9 +1731,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     const stageEl = stageRef.current;
     if (stageEl) stageEl.toggleAttribute("data-spills", over > 0.5);
     if (fit) {
-      const cover = { left: fit.coverLeft ?? 0, right: fit.coverRight ?? 0 };
-      const shown = fit.stageWidth - cover.left - cover.right;
-      onSlackRef.current?.(pageSlack(shown, fit.contentWidth, view.current.z), cover);
+      const cover = realCoverRef.current ?? { left: fit.coverLeft ?? 0, right: fit.coverRight ?? 0 };
+      // From where the page stands: centred in what the card leaves, the two
+      // sides are the same; kept in the window's middle, the side away from
+      // the card has all of its room.
+      const width = fit.contentWidth * view.current.z;
+      const left = Math.max(0, view.current.x - cover.left);
+      const right = Math.max(0, fit.stageWidth - cover.right - view.current.x - width);
+      onSlackRef.current?.({ left, right }, cover);
     }
     const { x, y, z } = view.current;
     cur.host.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`;
@@ -2423,7 +2455,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const from = fit.coverLeft ?? 0;
       const to = fit.stageWidth - (fit.coverRight ?? 0);
       const across = at.x < from || at.x + at.width > to;
-      if (!(at.y < head || at.y + at.height > shown) && !across) return start;
+      // Kept in the window's middle beside a card (⑪), the whole page is
+      // drawn small enough to stand clear of it, not only the verse.
+      const room = to - from - 2 * LIFT_SLACK;
+      const page = realCoverRef.current && (from > 0 || to < fit.stageWidth) ? roomZoom(fit.contentWidth, room, start.z) : null;
+      if (!(at.y < head || at.y + at.height > shown) && !across && page === null) return start;
       let target = frameBboxToView(bbox, ctx, start.z, lead);
       // A verse only a little taller than that is drawn a little smaller
       // and shown whole, rather than lose its last line under the note. Not
@@ -2435,7 +2471,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // its side kept the ends of its lines under the card (plan item 92).
       const wide = bboxToScreen(bbox, target, ctx).width;
       const narrower = boundRef.current || !(from > 0 || to < fit.stageWidth) ? null : nearFitZoom(wide, to - from - 2 * LIFT_SLACK, target.z);
-      const least = narrower === null ? smaller : smaller === null ? narrower : Math.min(smaller, narrower);
+      const least = [smaller, narrower, page].reduce<number | null>((a, b) => (b === null ? a : a === null ? b : Math.min(a, b)), null);
       if (least !== null) {
         target = frameBboxToView(bbox, ctx, least, lead);
         const own = ownZoomRef.current;
@@ -2503,7 +2539,20 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(cur.svg), text: textBoxOf(cur.host, cur.svg) };
         const lead = firstLineOf(cur.svg, ids ?? []);
         target = back && own ? clampView(frameBboxToView(bbox, ctx, own.from, lead), fit) : aboveCover(bbox, ctx, fit, target, lead);
-      } else giveNoteRoom(0);
+      } else {
+        giveNoteRoom(0);
+        // No verse to frame: the page alone is drawn to fit beside the card
+        // kept in the window's middle (⑪), and given back about its middle.
+        const room = fit.stageWidth - (fit.coverLeft ?? 0) - (fit.coverRight ?? 0) - 2 * LIFT_SLACK;
+        const page = realCoverRef.current && covered ? roomZoom(fit.contentWidth, room, target.z) : null;
+        const z = back && own ? own.from : page;
+        if (z !== null) {
+          if (page !== null) ownZoomRef.current = { from: own && own.to === target.z ? own.from : target.z, to: page };
+          const scale = z / target.z;
+          const mid = { x: fit.stageWidth / 2, y: fit.stageHeight / 2 };
+          target = clampView({ z, x: mid.x - (mid.x - target.x) * scale, y: mid.y - (mid.y - target.y) * scale }, fit);
+        }
+      }
       const before = view.current.z;
       void tweenTo(target).then(() => {
         // The readout says the level the page is drawn at, as after a pinch.
@@ -2536,6 +2585,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     sideSeen.current = coverSide;
     lift();
   }, [coverSide, lift]);
+  // The reader choosing the other way while a card stands beside the page.
+  const roomSeen = useRef(cardRoom);
+  useEffect(() => {
+    if (roomSeen.current === cardRoom) return;
+    roomSeen.current = cardRoom;
+    if (coverSideRef.current !== null) lift();
+  }, [cardRoom, lift]);
   // The chips move when a list opens: from their column at the stage's side
   // onto the list's top row. The page was placed while they still stood in
   // the column, kept below where it ended, and a phone held sideways has too

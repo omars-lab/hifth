@@ -153,7 +153,6 @@
 .slack {
   position: absolute;
   inset-block: 0;
-  inline-size: var(--page-slack, 0px);
   z-index: var(--z-chrome);
   pointer-events: none;
 }
@@ -161,9 +160,11 @@
    edge, so the buttons stand by the page and not out under the card (⑩). */
 .slack[data-slack="right"] {
   right: var(--slack-cover-right, 0px);
+  inline-size: var(--page-slack-right, 0px);
 }
 .slack[data-slack="left"] {
   left: var(--slack-cover-left, 0px);
+  inline-size: var(--page-slack-left, 0px);
 }
 
 /* Except while a magnified leaf hangs over the desk (#148): then the book is
