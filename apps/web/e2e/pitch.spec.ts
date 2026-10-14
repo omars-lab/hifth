@@ -439,6 +439,34 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(note.locator("footer")).toBeInViewport();
   });
 
+  // A wide screen's note is a card clear of the screen's foot, so it keeps no
+  // room for an iPad's home bar under its last line, and its fade still sits on
+  // the card's edge (walked in the iPad app on its side, 2026-10-13). Chromium
+  // can be told there is a home bar; the other engines report none.
+  test("on a wide screen the note keeps no home-bar room under its last line, and fades at its edge", async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== "chromium", "only Chromium can be told there is a home bar");
+    await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+    const note = sheet(page);
+    await expect(note).toBeVisible({ timeout: 20_000 });
+    await expect(note).toHaveAttribute("data-more", "below");
+    await settle(note);
+    const foot = () =>
+      note.evaluate((el): [number, number] => [
+        parseFloat(getComputedStyle(el).paddingBlockEnd),
+        parseFloat(getComputedStyle(el, "::after").insetBlockEnd),
+      ]);
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { bottom: 0, bottomMax: 0 } });
+    const [none] = await foot();
+    await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { bottom: 20, bottomMax: 20 } });
+    const [bar, fade] = await foot();
+    expect(bar, "the note's room under its last line grew by the home bar's").toBe(none);
+    expect(fade, "the fade sits on the card's edge, below the room").toBe(-bar);
+  });
+
   test("on a phone the short note fades too, and still does once it has grown", async ({ browser }) => {
     // Scrolling the short note grows it to the full height, which moves its
     // foot: the fade has to follow the card's new size, not the one it opened at.

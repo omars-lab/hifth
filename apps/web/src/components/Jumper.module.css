@@ -175,6 +175,8 @@
 
 @media (min-width: 900px) {
   .sheet {
+    /* A card clear of the screen's foot keeps no room for the home bar. */
+    padding-block-end: var(--space-5);
     inset-inline: 0;
     inset-block: 12vh auto;
     inline-size: min(440px, 92vw);

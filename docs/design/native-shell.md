@@ -789,3 +789,29 @@ Tests: the shell's unit tests for which addresses become downloads, for the name
 the iPad's free file name, written first and seen failing against the old rule. Seen in the iPad
 app: a made-up file saved from the page was written, and the save window opened offering iCloud
 Drive and the iPad itself.
+
+### ㉜ On an iPad, the cards beside the page end with a blank strip under their last row · **fixed**
+
+Found 2026-10-13 walking the look-alike lists of 10:15 and 15:30 in the iPad app on its side: the
+card ended 44 points below its last row, where every other gap in it is about 24. On a phone a
+sheet lies across the foot of the screen, so it keeps room under its last row for the iPad's and
+iPhone's home bar, the thin line you swipe up on. On a screen 900 points wide or more the note, the
+lists and the small sheets stand as cards clear of the screen's foot, but they kept that room, so
+it showed as a blank strip. The share card already dropped it (PLAN 41); seven others did not.
+
+**What it changes for a hafiz:** a card that ends in empty space looks unfinished, and on the
+short look-alike lists the blank is almost a third of a row. It is the first thing the eye lands on
+under the list.
+
+**Why no browser test saw it:** a browser on a laptop reports the home bar's room as nothing, so
+the room was always zero there. Chromium can be told to report a home bar, and the new tests do.
+
+**The fix:** each card that stands clear of the foot (the note, the look-alike and roots lists, the
+go-to sheet, the about page, the choice of mus'haf, the highlighter's menu) ends with the same 24
+points at every screen, and the note's fade still sits on the card's edge. The bookmarks drawer
+and the revision record stay across the foot on every screen, so they keep the room.
+
+Tests: `apps/web/e2e/card-foot.spec.ts` (five cards on a wide screen, and a phone's sheet as the
+check that the made-up home bar reaches the page) and the note's check in the pitch tests, both
+seen failing first. Measured in the iPad app on its side: the look-alike card ends 24 points below
+its last row, and the note's fade is on its edge.
