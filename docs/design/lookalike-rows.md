@@ -543,7 +543,8 @@ under the share card, the roots list, the note or either look-alike list, and no
 screen. The browser test was first green for the wrong reason: it measured while the page was still
 sliding aside, when the verse passes through clear places on its way. It now waits for the page to
 stop, and with item 92 switched off it fails as the walk did (2% under in English, a line past the
-edge in Arabic). The other three ways stay unbuilt: nothing is left for them to fix.
+edge in Arabic). The other card tests shared the same measure, and it now waits for the page to stop
+for all of them. The other three ways stay unbuilt: nothing is left for them to fix.
 
 ### ⑰ When a passage row says which verse inside it is most alike, where should its arrow take you? · **fixed**
 

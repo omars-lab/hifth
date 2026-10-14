@@ -684,7 +684,8 @@ upright and on its side, English and Arabic, iPad and Mac.
   in both languages: every card 0%. Walked 2026-10-13 on the mini in the app and the browser, the
   share card added to the script: every card 0%, no line off the screen (look-alike rows ⑯).
   Measure only once the page has stopped: on its way aside the verse passes through clear places,
-  and a check taken then passes when the end state is wrong.
+  and a check taken then passes when the end state is wrong. The browser tests' shared measure
+  waits for the page to stop, for every corner card.
   Run it in the app as well as the browser: the app's own bars leave the page about 40 pixels less
 - [ ] **Take the iPad app off the simulator and open it fresh**, as on a borrowed iPad in the
   room: it opens on the first two pages with nothing over them and nothing stored, the first
