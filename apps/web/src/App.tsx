@@ -2615,6 +2615,28 @@ export function App(): JSX.Element {
     followedRunRef.current = runNo;
   }, [runKey, runNo, resolver, pageTurns, goToPage, runFollow]);
 
+  // A note kept up while the recitation took the page along (item 78) is the
+  // one way a verse stays chosen off the page shown. Once that note is closed,
+  // nothing holds the verse there, so it is let go as a turn by hand lets it
+  // go: the app then says the reader is on the page the room is watching, and
+  // the recitation plays on (native-shell.md, item 34).
+  const noteWasUpRef = useRef(false);
+  useEffect(() => {
+    const was = noteWasUpRef.current;
+    noteWasUpRef.current = commentaryOpen;
+    if (!was || commentaryOpen) return;
+    const chosen = selectedKeyRef.current;
+    const at = chosen === null ? undefined : resolver?.resolve(chosen)?.page;
+    if (at === undefined) return;
+    const book = bookOpenRef.current;
+    const openingOf = (p: number) => (book && p % 2 === 0 ? p - 1 : p);
+    if (openingOf(at) === openingOf(pendingPageRef.current)) return;
+    if (runKeyRef.current !== null) keepRunRef.current = true;
+    setSelectedKey(null);
+    setSelectedRange(null);
+    setTrail([]);
+  }, [commentaryOpen, resolver]);
+
   // A run that took the page along left nothing lit behind it, so when it ends
   // by itself the verse it ended on is lit, with its tools, rather than the
   // page going dark under the room (docs/PLAN.md, item 60). Only while that

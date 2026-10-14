@@ -695,12 +695,18 @@ upright and on its side, English and Arabic, iPad and Mac.
   waits for the page to stop, for every corner card.
   Run it in the app as well as the browser: the app's own bars leave the page about 40 pixels less
 - [ ] **Take the iPad app off the simulator and open it fresh**, as on a borrowed iPad in the
-  room: it opens on the first two pages with nothing over them and nothing stored, the first
+  room: it opens on the first two pages (the iPad mini on its side: the first page alone) with
+  nothing over them and nothing stored, the first
   note opens beside its verse, a reference goes and comes back, and the first Play sounds in
   about a second from the copy asked for early. · `xcrun simctl uninstall`, then
   `scripts/fresh-look.js`, `visit-walk.js` and `gap-walk.js` (`__gapCount = 0`) on the same fresh
-  install · walked 2026-10-11, nothing wrong; the real iPad's first sound is parked (manual
-  testing 12)
+  install · walked 2026-10-11, nothing wrong; 2026-10-13 on both iPad sizes on their side: one
+  fault, the next line (native-shell ㉝); the real iPad's first sound is parked (manual testing 12)
+- [ ] With a note kept up while a surah played from its corner has taken the page to the surah's
+  start, **close the note**: the recitation plays on, and the app names the page shown, not the
+  note's verse (the visit walk's `F closed:` line has `hash=` on the page). · the visit walk, step
+  F, in the iPad app on its side · test: the pitch test "closed once the page has moved on" ·
+  native-shell ㉞, fixed 2026-10-13
 - [ ] Start a "Play to" run **in the iPad app**, with the moving light and again with the ring
   picked: the mark moves with each verse recited, and the light comes back to the first at the
   end. · `make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en ROUTE=/hafs-kfqc/p7 EVALFILE=.claude/skills/walk-app/scripts/playto-walk.js`;

@@ -1139,6 +1139,56 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  test("a note kept up over a recitation, closed once the page has moved on, lets its verse go", async ({
+    browser,
+  }) => {
+    // Rehearsing the pitch in the iPad app from a fresh install, 2026-10-13: a
+    // note kept up as the recitation took the page along (item 78), then
+    // closed, left its verse chosen though it was off the page shown, so the
+    // app went on saying the reader was at that verse (the Mac's window title
+    // reads it) while the room watched another page, and the next move had
+    // nothing chosen on the page to act from. Closed there, the note lets its
+    // verse go, as a turn by hand does.
+    const context = await browser.newContext({ viewport: { width: 1024, height: 1366 }, hasTouch: true });
+    await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    const page = await context.newPage();
+    const player = await fakePlayer(page);
+    const playing = () => page.evaluate(() => !(window as unknown as { __player: HTMLMediaElement }).__player.paused);
+    await page.goto("/#/hafs-kfqc/p2?view=one");
+    await expect(pageSvg(page, 2)).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
+    const head = (await page.locator('[data-host-page="2"] [data-running-head="surah"]').boundingBox())!;
+    await page.mouse.move(head.x + head.width / 2, head.y + head.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    await page.getByRole("menu").getByRole("menuitem", { name: "Play", exact: true }).click();
+    await expect.poll(player.files).toEqual(["002001.mp3"]);
+    for (let n = 2; n <= 3; n++) await player.end();
+    await expect.poll(async () => (await player.files()).at(-1)).toBe("002003.mp3");
+    const number = pageSvg(page, 2).locator('[data-verse-number][data-verse-key="quran/hafs-kfqc/2:3"]');
+    await settle(number);
+    const at = (await number.boundingBox())!;
+    await page.mouse.click(at.x + at.width / 2, at.y + at.height / 2);
+    await page.getByRole("menu", { name: /2:3/ }).getByRole("menuitem", { name: /Commentary/ }).click();
+    await expect(sheet(page)).toHaveAttribute("aria-label", /2:3\b/);
+    for (let n = 4; n <= 6; n++) await player.end();
+    await expect.poll(async () => (await player.files()).at(-1)).toBe("002006.mp3");
+    await expect(pageSvg(page, 3)).toBeVisible();
+    await expect(sheet(page), "the note is kept up over the turn").toBeVisible();
+    await expect.poll(() => page.evaluate(() => location.hash)).toMatch(/\/2:3\b/);
+
+    await sheet(page).getByRole("button", { name: "Close" }).click();
+    await expect(sheet(page)).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => location.hash), { message: "the app says where the reader is: the page shown" })
+      .toMatch(/\/p3\b/);
+    expect(await playing(), "the recitation plays on").toBe(true);
+    // Nothing of the closed note's verse is left in hand on a page it is not on.
+    await expect(page.getByRole("region", { name: /^Tools for .*2:3$/ })).toHaveCount(0);
+    await context.close();
+  });
+
   for (const locale of ["en-US", "ar"]) {
     test(`the first screen's hint stands clear of the Mark up button on an iPad on its side (${locale})`, async ({ browser }) => {
       // In English the hint ran into the button with no space between them:

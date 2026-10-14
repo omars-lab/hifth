@@ -4632,6 +4632,30 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/card-foot.spec.ts",
       "note": "Found 2026-10-13 walking the look-alike lists in the iPad app on its side: the card ended 44 points under its last row, not 24. Cards that stand clear of the screen's foot at 900 wide or more kept the room a sheet across the foot keeps for the home bar. No browser test saw it because a laptop's browser reports that room as zero; the new tests make Chromium report a home bar. Fixed in the seven floating cards' style (the share card already did it); the bookmarks drawer and revision record stay across the foot and keep the room. Pitch test for the note and its fade too; measured in the iPad app."
+    },
+    {
+      "id": "pitch-rehearsal-fresh-install",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉝"
+      },
+      "status": "answered",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Walked 2026-10-13 on both iPad sizes on their side, in English, from a fresh install: first picture in about an eighth of a second, nothing over the page or stored, the note, a reference and back, a surah run with the note open and paused, the first Play in 1.1 s from the early copy. One fault, fixed as native-shell item 34 (note-closed-verse-kept-off-page).",
+      "closedBy": ".claude/skills/walk-app/scripts/visit-walk.js"
+    },
+    {
+      "id": "note-closed-verse-kept-off-page",
+      "source": {
+        "file": "docs/design/native-shell.md",
+        "item": "㉞"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Found 2026-10-13 in the fresh-install rehearsal in the iPad app: a note kept up while a recitation took the page along (PLAN 78), then closed, left its verse chosen off the page shown, so the app (and the Mac window title) named that verse while another page was shown. Fixed: closing a note whose verse is off the page shown lets the verse go, as a turn by hand does; the recitation plays on. Pitch test seen failing first."
     }
   ]
 }
