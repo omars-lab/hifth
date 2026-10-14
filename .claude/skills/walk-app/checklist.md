@@ -670,17 +670,22 @@ upright and on its side, English and Arabic, iPad and Mac.
   · walked 2026-10-11, nothing wrong but the loading label (`loading-says-play`). Walk it on the
   **iPad mini on its side** too (`"IPAD=iPad mini (A17 Pro)" SIDEWAYS=1`), in both languages: there
   the note read to its end grew over its verse (plan item 89). Walked 2026-10-12 on the mini,
-  nothing wrong now but the share card's own leftover (look-alike rows ⑯)
+  nothing wrong now but the share card's own leftover (look-alike rows ⑯, settled 2026-10-13 by
+  plan item 92)
 - [ ] On an **iPad mini on its side**, open each corner card in turn on 2:48 — the note, read to its
-  end, the roots list, read to its end, and each look-alike list — in English and in Arabic. No card
-  covers its verse (beyond ⑯'s few pixels), and the look-alike buttons never sit on the page or on a
+  end, the roots list, read to its end, each look-alike list, and the share card — in English and in
+  Arabic. No card covers its verse, and the look-alike buttons never sit on the page or on a
   list's close button, and never stick out past the card. · `make drive … DEVICE=ipad-side
   VIEWPORT=1133x744 "ACT=settle=2500;evalfile=.claude/skills/walk-app/scripts/corner-cards.js"`, or
   the same script through `make app-probe` on the mini · walked 2026-10-12: the roots list covered
   its verse, the buttons sat on the lists' close buttons, and in the app a look-alike list
   covered part of its verse too (plan item 90, look-alike rows ⑱); now 2% in the app and the browser.
   Walked again 2026-10-12 on the 13-inch iPad, in the app and the browser, upright and on its side,
-  in both languages: every card 0%.
+  in both languages: every card 0%. Walked 2026-10-13 on the mini in the app and the browser, the
+  share card added to the script: every card 0%, no line off the screen (look-alike rows ⑯).
+  Measure only once the page has stopped: on its way aside the verse passes through clear places,
+  and a check taken then passes when the end state is wrong. The browser tests' shared measure
+  waits for the page to stop, for every corner card.
   Run it in the app as well as the browser: the app's own bars leave the page about 40 pixels less
 - [ ] **Take the iPad app off the simulator and open it fresh**, as on a borrowed iPad in the
   room: it opens on the first two pages with nothing over them and nothing stored, the first

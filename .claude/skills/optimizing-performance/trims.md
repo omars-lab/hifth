@@ -14,6 +14,10 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Checked again 2026-10-13, nothing taken.** 190.3 KB against the 200 KB cap, after the setting
+that keeps the page in the middle beside a card (+1.1 KB). Since the 2026-10-11 sweep 18.6 KB of
+its ~75 KB of real room is used, so the two candidates below still wait.
+
 **Checked again 2026-10-11, cap raised, nothing taken.** 171.7 KB against the 175 KB cap, so a fresh
 sweep was run: ~75 KB of real room, and the cap went to 200 KB by the skill's rule. The two next
 candidates named below (moving the desktop-only page-edge grab code, 3 KB, out of the phone's

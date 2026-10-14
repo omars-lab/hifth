@@ -3708,13 +3708,11 @@
         "file": "docs/PLAN.md",
         "item": "39"
       },
-      "status": "blocked",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "blockedBy": [
-        "share-card-page-slightly-too-wide-ipad-mini-side"
-      ],
-      "note": "On a 1133 by 744 window (an iPad mini on its side) the page does move about 200 pixels aside for the share card, but at the size a link lands it is about 715 pixels wide and the room beside the card about 650, so the verse's first word stays clear and about 27 pixels of its second line's first letters sit under the card. What should give is lookalike-rows item 16."
+      "note": "On a 1133 by 744 window (an iPad mini on its side) the page does move about 200 pixels aside for the share card, but at the size a link lands it is about 715 pixels wide and the room beside the card about 650, so the verse's first word stays clear and about 27 pixels of its second line's first letters sit under the card. What should give is lookalike-rows item 16. Fixed 2026-10-13 by PLAN item 92 (lookalike-rows item 16 answered): the whole verse now shows beside the card, checked by a browser test and walked in the iPad mini app.",
+      "closedBy": "apps/web/e2e/ipad.spec.ts"
     },
     {
       "id": "share-card-page-slightly-too-wide-ipad-mini-side",
@@ -3722,10 +3720,11 @@
         "file": "docs/design/lookalike-rows.md",
         "item": "⑯"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "When a page is only a few percent wider than the room beside the share card (an iPad mini on its side), should it be drawn that little smaller while the card is up, run past the far edge instead, have the card narrowed, or stay as it is? Item 11 is built (2026-10-13) and does not settle it: keeping the page in the middle there would draw it at a quarter of its width, so it slides aside whatever that setting says."
+      "note": "When a page is only a few percent wider than the room beside the share card (an iPad mini on its side), should it be drawn that little smaller while the card is up, run past the far edge instead, have the card narrowed, or stay as it is? Item 11 is built (2026-10-13) and does not settle it: keeping the page in the middle there would draw it at a quarter of its width, so it slides aside whatever that setting says. Answered 2026-10-13: the first way, already built by PLAN item 92, which draws a verse a little smaller when it is only a little wider than the room beside a card. The whole verse shows beside the share card in English and Arabic, in the browser and in the iPad mini app; the browser test waits for the page to stop and fails with item 92 switched off.",
+      "closedBy": "apps/web/e2e/ipad.spec.ts"
     },
     {
       "id": "lookalike-passage-hop-lands-before-match",

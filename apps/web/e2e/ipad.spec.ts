@@ -425,9 +425,19 @@ for (const [lang, group, close] of [
 // Moved aside, the page stood in Arabic under the look-alike buttons' corner,
 // and they sat on its top line; they cross to the list's side, as they do for
 // the share card there.
-/** Whether the lit verse shows beside an open corner card: its start clear, at most `most` of it under (a tenth unless asked). */
+/** Whether the lit verse shows beside an open corner card, once the page has stopped: its start clear, at most `most` of it under (a tenth unless asked). */
 async function verseInSight(page: Page, list: Locator, most = 0.1) {
   const wash = page.locator("#hifth-overlay [data-hl-group='selection']");
+  // On its way aside the page passes through places where the verse is clear,
+  // and a reading taken then passed with the page at rest under the card
+  // (look-alike rows ⑯), so read it only once it has stopped.
+  const where = () => wash.evaluateAll((els) => els.map((el) => { const r = el.getBoundingClientRect(); return `${Math.round(r.left)},${Math.round(r.right)},${Math.round(r.top)}`; }).join(" "));
+  for (let last = await where(), i = 0; i < 32; i++) {
+    await page.waitForTimeout(250);
+    const now = await where();
+    if (now === last) break;
+    last = now;
+  }
   const card = (await list.boundingBox())!;
   const lit = (await wash.evaluateAll((els) =>
     els.map((el) => { const r = el.getBoundingClientRect(); return { x: r.left, y: r.top, width: r.width, height: r.height }; }),
@@ -443,6 +453,25 @@ async function verseInSight(page: Page, list: Locator, most = 0.1) {
   const y = top[0]!.y + top[0]!.height / 2;
   const startUnder = start - 1 > card.x && start - 1 < card.x + card.width && y > card.y && y < card.y + card.height;
   return !startUnder && share <= most ? "in sight" : `start under=${startUnder} share=${Math.round(share * 100)}%`;
+}
+
+// Walking the pitch on this window, 2026-10-10: with Share open the page moved
+// aside, but at the size a link lands it was a few percent wider than the room
+// beside the card, and about 27 pixels of the second line's first letters sat
+// under it, or in Arabic past the screen's edge (look-alike rows ⑯).
+async function shareLeavesVerseWhole(page: Page) {
+  await page.addInitScript((key) => localStorage.setItem(key, "1"), COACH_STORAGE_KEY);
+  await page.goto("/#/hafs-kfqc/2:48");
+  await shown(page, 7);
+  await page.getByRole("button", { name: /^(شارك هذه الآية كرابط|Share this ayah as a link)$/ }).click();
+  const card = page.getByRole("dialog");
+  await expect(card).toBeVisible();
+  await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+  expect(await verseInSight(page, card, 0), "how much of the verse the share card covers").toBe("in sight");
+  const off = await page.locator("#hifth-overlay [data-hl-group='selection']").evaluateAll((els) =>
+    els.map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0 && (r.left < -0.5 || r.right > innerWidth + 0.5)).length,
+  );
+  expect(off, "lit lines that run past the screen's edge").toBe(0);
 }
 
 for (const [locale, roots, group] of [
@@ -491,6 +520,10 @@ for (const [locale, roots, group] of [
       await expect.poll(() => verseInSight(page, list, 0), { message: "how much of the verse the roots list covers", timeout: 8_000 }).toBe("in sight");
     });
 
+    test("the share card leaves the whole verse in sight, on the screen", async ({ page }) => {
+      await shareLeavesVerseWhole(page);
+    });
+
     test("a look-alike list's buttons ride its top row, clear of its Close and inside the card", async ({ page }) => {
       // The same walk: with a look-alike list open in English, its two buttons
       // sat on the list's Close, the second half past the card's edge.
@@ -530,6 +563,10 @@ for (const [locale, roots, group] of [
         await expect(list).toBeVisible();
         await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
         await expect.poll(() => verseInSight(page, list), { message: "how much of the verse the look-alike list covers", timeout: 8_000 }).toBe("in sight");
+      });
+
+      test("the share card leaves the whole verse in sight, on the screen", async ({ page }) => {
+        await shareLeavesVerseWhole(page);
       });
     });
   });

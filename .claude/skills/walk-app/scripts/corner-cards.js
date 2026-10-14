@@ -1,6 +1,6 @@
 (async () => {
   // Each card that stands in a corner, opened on its own over the lit verse: the note, the
-  // roots list (also scrolled to its end), and the first two look-alike lists. For each: the
+  // roots list (also scrolled to its end), the first two look-alike lists, and the share card. For each: the
   // cards' boxes, the page's box, how much of the lit verse is under a card, how many lit lines
   // run past the screen's edge, and whether a look-alike button sits on the page or on a
   // card's Close. Boxes and numbers only, never words, so it is safe on the private build.
@@ -50,5 +50,7 @@
   const chips = [...document.querySelectorAll("button[data-direction]")];
   out.push(`chips=${chips.length}`);
   for (const chip of chips.slice(0, 2)) { chip.click(); await wait(1800); out.push(look(`chip-${chip.dataset.direction}`)); chip.click(); await wait(900); }
+  const share = [...document.querySelectorAll("button")].find((b) => /^(Share this ayah as a link|شارك هذه الآية كرابط)$/.test((b.getAttribute("aria-label") || "").trim()));
+  if (share) { share.click(); await wait(2500); out.push(look("share")); await closeTop(); } else out.push("no share button");
   return out.join(" ; ");
 })()
