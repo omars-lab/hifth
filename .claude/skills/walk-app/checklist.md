@@ -652,16 +652,18 @@ upright and on its side, English and Arabic, iPad and Mac.
   its paper look, and the clock and battery above it stay dark and readable on the cream bar.
   The app's own picture leaves the clock out, so grab the whole screen. · `xcrun simctl ui
   <iPad> appearance dark`, launch, `xcrun simctl io <iPad> screenshot …`, then set it back to
-  light · walked 2026-10-10, nothing wrong
+  light · walked 2026-10-10 and 2026-10-13 (the 13-inch iPad on its side), nothing wrong
 - [ ] Press Listen **in the iPad app**: the recitation plays inside the app, and the button
   turns to Pause. On the pitch build a tapped verse opens its note first; close the note to reach
-  Listen. · `make app-probe TARGET=ipad EVALFILE=…` with a script that taps the verse, closes the
-  note and presses Listen · walked 2026-10-10, nothing wrong
+  Listen. · `make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en ROUTE=/hafs-kfqc/p7 EVALFILE=.claude/skills/walk-app/scripts/playto-walk.js`
+  with `window.__mode = "listen";` on a line ahead of it · walked 2026-10-10, and 2026-10-13 on both
+  iPad sizes on their side, in both languages: nothing wrong
 - [ ] Start a "Play to" run **in the Mac app**: each next verse starts on its own when the last
   one ends, with no click per verse. The Mac's web view lets sound start without a click even
-  though only the iPad sets that up by name. · `make app-probe TARGET=mac EVALFILE=…` with a
-  script that plays two recitations back to back, with the sound above zero (the web view lets a
-  silent one start anyway, so a silent check proves nothing) · walked 2026-10-10, nothing wrong
+  though only the iPad sets that up by name. · `make app-probe TARGET=mac LOCALE=en
+  ROUTE=/hafs-kfqc/p7 EVALFILE=.claude/skills/walk-app/scripts/playto-walk.js`, which plays the sound quietly, never silent (the web
+  view lets a silent one start anyway, so a silent check proves nothing) · walked 2026-10-10, and
+  2026-10-13 with both marks, in both languages: nothing wrong
 - [ ] Make one whole visit **in the iPad app on its side**, in English and in Arabic, as a reader
   in the room would: open a note, read it to its end, follow a reference in it and come back,
   play the surah from its corner with the note still open, then pause. Nothing lit sits under the
@@ -696,8 +698,12 @@ upright and on its side, English and Arabic, iPad and Mac.
   testing 12)
 - [ ] Start a "Play to" run **in the iPad app**, with the moving light and again with the ring
   picked: the mark moves with each verse recited, and the light comes back to the first at the
-  end. · `make app-probe TARGET=ipad LOCALE=en EVALFILE=…` with a script that holds a verse,
-  picks Play to and taps the last verse · walked 2026-10-10 (both marks), nothing wrong
+  end. · `make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en ROUTE=/hafs-kfqc/p7 EVALFILE=.claude/skills/walk-app/scripts/playto-walk.js`;
+  for the ring, save the run-mark setting as "ring" in a launch of its own first (the app reads it
+  as it starts) and take it off after · walked 2026-10-10 (both marks), and 2026-10-13 on both iPad
+  sizes, both marks, both languages: nothing wrong. The press has to land on the verse's own
+  words: the middle of a verse's box can be its neighbour's, and the first try of the walk started
+  a verse early for that reason alone
 - [ ] Walk the Mac app in Arabic too, not only the iPad: the look-alike list and a note open,
   mirrored, nothing cut off. · `make app-shot TARGET=mac LOCALE=ar ROUTE=…` (shows that language
   for the one launch, even where another is picked with the app's own button) · tests:
