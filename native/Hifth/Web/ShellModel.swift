@@ -262,18 +262,30 @@ final class ShellModel {
     }
 
     private func probe(_ extra: String) {
-        let path = ProcessInfo.processInfo.environment["HIFTH_PROBE_PATH"]
+        let environment = ProcessInfo.processInfo.environment
+        let path = environment["HIFTH_PROBE_PATH"]
+        let shot = environment["HIFTH_PROBE_SHOT"] ?? ""
         webView.callAsyncJavaScript(Self.probeScript, arguments: ["extra": extra], in: nil, in: .page) { result in
             switch result {
             case .success(let value):
                 print("probe \(value)")
-                do {
-                    try Self.keepProbeAnswer("\(value)", at: path)
-                } catch {
-                    print("probe failed to keep its answer \(error)")
-                    exit(1)
+                Task {
+                    do {
+                        // The picture before the answer: the sideways walk stops
+                        // waiting once the answer is there, and the app with it.
+                        if !shot.isEmpty {
+                            let page = await Self.pageState(of: self.webView)
+                            let (png, _) = await Self.snapshotPNG(of: self.webView, page: page.size)
+                            try Self.keepProbePicture(png, at: shot)
+                            print("probe picture written \(shot)")
+                        }
+                        try Self.keepProbeAnswer("\(value)", at: path)
+                    } catch {
+                        print("probe failed to keep its answer \(error)")
+                        exit(1)
+                    }
+                    exit(0)
                 }
-                exit(0)
             case .failure(let error):
                 print("probe failed \(error)")
                 exit(1)
@@ -287,14 +299,30 @@ final class ShellModel {
     /// the test work from different folders, so only an absolute path names
     /// the same file for both; anything else is refused.
     static func keepProbeAnswer(_ answer: String, at path: String?) throws {
+        try keepProbeFile(Data(answer.utf8), at: path)
+    }
+
+    /// With `HIFTH_PROBE_SHOT` (make app-probe PROBE_SHOT=…) the page is also
+    /// photographed as the question left it, since the app quits once it has
+    /// answered. Same path rule as the answer; a snapshot that came back with
+    /// no bytes is refused rather than kept as a file nobody can open.
+    static func keepProbePicture(_ png: Data, at path: String?) throws {
+        guard let path, !path.isEmpty else { return }
+        guard !png.isEmpty else { throw ProbePictureEmpty() }
+        try keepProbeFile(png, at: path)
+    }
+
+    private static func keepProbeFile(_ data: Data, at path: String?) throws {
         guard let path, !path.isEmpty else { return }
         guard path.hasPrefix("/") else { throw ProbePathNotAbsolute(path: path) }
-        try Data(answer.utf8).write(to: URL(fileURLWithPath: path))
+        try data.write(to: URL(fileURLWithPath: path))
     }
 
     struct ProbePathNotAbsolute: Error {
         let path: String
     }
+
+    struct ProbePictureEmpty: Error {}
 
     static let probeScript = """
     const out = {

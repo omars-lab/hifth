@@ -54,6 +54,11 @@ EVALFILE     ?=
 PROBE_EVAL    = $(if $(EVALFILE),"$$(cat '$(EVALFILE)')",'$(value EVAL)')
 # app-probe SIDEWAYS=1: where the app keeps its answer for the UI test to read.
 PROBE_OUT    ?= $(SHOTS)/probe-side.json
+# app-probe PROBE_SHOT=file.png: also keep a picture of the page as the question
+# left it (the app quits once it answers, so a screenshot taken after is of the
+# home screen). Kept outside the repository when the page may show a note.
+PROBE_SHOT   ?=
+PROBE_SHOT_AT = $(if $(PROBE_SHOT),$(abspath $(PROBE_SHOT)))
 # app-test: some XCUITests instead of the whole run, space-separated, e.g. ONLY=SmokeTests/testOpensAtAVerse
 ONLY         ?=
 # app-walk: the routes to open, space-separated, and whether to hold it sideways.
@@ -183,38 +188,42 @@ endif
 	@sips -g pixelWidth $(SHOT_OUT) | awk '/pixelWidth/ { exit !($$2 > 0) }' || { echo "  ✗ $(SHOT_OUT) has no pixels"; exit 1; }
 	@echo "  ✓ $(SHOT_OUT)"
 
-app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1, iPad only]
+app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1, iPad only] [PROBE_SHOT=file.png]
 ifeq ($(TARGET)$(SIDEWAYS),ipad1)
 	@# The app may not turn itself on an iPad, so a UI test turns the
 	@# simulator and starts the probe; the app keeps its answer in a file,
 	@# named by its absolute path (the app and the test start in different folders).
 	@# A restart first, as for a sideways walk: a stuck simulator stays upright.
 	$(MAKE) app-generate
-	@rm -rf $(SHOTS)/ipad-probe.xcresult $(PROBE_OUT)
+	@rm -rf $(SHOTS)/ipad-probe.xcresult $(PROBE_OUT) $(PROBE_SHOT_AT)
 	-xcrun simctl shutdown $(IPAD_UDID)
 	xcrun simctl boot $(IPAD_UDID)
 	xcrun simctl bootstatus $(IPAD_UDID) -b > /dev/null
 	set -o pipefail; TEST_RUNNER_PROBE_OUT='$(abspath $(PROBE_OUT))' TEST_RUNNER_PROBE_ROUTE='$(ROUTE)' TEST_RUNNER_PROBE_EVAL=$(PROBE_EVAL) \
 	  TEST_RUNNER_PROBE_DELAY_MS='$(DELAY_MS)' TEST_RUNNER_PROBE_LOCALE='$(LOCALE)' TEST_RUNNER_PROBE_TIMEOUT_S='$(PROBE_TIMEOUT_S)' \
+	  TEST_RUNNER_PROBE_SHOT='$(PROBE_SHOT_AT)' \
 	  $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
 	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-probe.xcresult \
 	  -only-testing:HifthUITests-iOS/WalkTests/testProbeOnItsSide test | $(XCPRETTY)
 	@python3 -m json.tool $(PROBE_OUT)
+	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
 else ifeq ($(TARGET),ipad)
 	$(MAKE) app-build-ipad
 	xcrun simctl bootstatus $(IPAD_UDID) -b
 	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
 	SIMCTL_CHILD_HIFTH_PROBE=1 SIMCTL_CHILD_HIFTH_ROUTE='$(ROUTE)' SIMCTL_CHILD_HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
-	  SIMCTL_CHILD_HIFTH_PROBE_DELAY_MS=$(DELAY_MS) \
+	  SIMCTL_CHILD_HIFTH_PROBE_DELAY_MS=$(DELAY_MS) SIMCTL_CHILD_HIFTH_PROBE_SHOT='$(PROBE_SHOT_AT)' \
 	  xcrun simctl launch --console-pty --terminate-running-process $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS) \
-	  | grep '^probe' | sed 's/^probe //' | python3 -m json.tool
+	  | grep '^probe {' | sed 's/^probe //' | python3 -m json.tool
+	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
 else
 	$(MAKE) app-build-mac
 	@: > $(MAC_LOG)
 	$(MAC_OPEN) --env HIFTH_PROBE=1 --env HIFTH_ROUTE='$(ROUTE)' --env HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
-	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) $(MAC_APP) $(MAC_ARGS)
-	@grep '^probe' $(MAC_LOG) | sed 's/^probe //' | python3 -m json.tool
+	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) --env HIFTH_PROBE_SHOT='$(PROBE_SHOT_AT)' $(MAC_APP) $(MAC_ARGS)
+	@grep '^probe {' $(MAC_LOG) | sed 's/^probe //' | python3 -m json.tool
+	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
 endif
 
 app-open: ## Turn the running app to ROUTE (TARGET=ipad|mac)

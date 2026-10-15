@@ -70,4 +70,33 @@ struct ProbeTests {
         #expect(!files.fileExists(atPath: strayed))
         try? files.removeItem(atPath: strayed)
     }
+
+    // make app-probe PROBE_SHOT=… keeps a picture of the page as the question
+    // left it: the app quits once it answers, so a picture taken after is of
+    // the home screen.
+    @Test("the picture is kept in the file asked for")
+    func pictureKept() throws {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("probe-\(UUID().uuidString).png").path
+        try ShellModel.keepProbePicture(Data([0x89, 0x50, 0x4E, 0x47]), at: path)
+        #expect(FileManager.default.contents(atPath: path) == Data([0x89, 0x50, 0x4E, 0x47]))
+        try FileManager.default.removeItem(atPath: path)
+    }
+
+    @Test("a picture path that is not absolute is refused")
+    func relativePicturePathRefused() {
+        #expect(throws: ShellModel.ProbePathNotAbsolute.self) {
+            try ShellModel.keepProbePicture(Data([1]), at: "probe-\(UUID().uuidString).png")
+        }
+    }
+
+    // A snapshot that failed hands back no bytes; an empty file where the
+    // picture should be would read as a picture nobody could open.
+    @Test("an empty picture is refused, not written")
+    func emptyPictureRefused() {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("probe-\(UUID().uuidString).png").path
+        #expect(throws: ShellModel.ProbePictureEmpty.self) {
+            try ShellModel.keepProbePicture(Data(), at: path)
+        }
+        #expect(!FileManager.default.fileExists(atPath: path))
+    }
 }
