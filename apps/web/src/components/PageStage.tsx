@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -1689,6 +1690,25 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     return fit;
   }, []);
 
+  // Tell the overlay where the paper is, so a thing that belongs *to* the
+  // paper — the folded corner, the red seam — can sit on it while the ribbons
+  // stay put. Written on the overlay's own small frame, not the stage, so a
+  // pinch does not restyle every glyph on the page each frame. The transform
+  // origin is the host's top-left and the host is laid out at the layer's
+  // top-left, so the layer's offset plus the translate is the leaf's corner.
+  const writeLeaf = useCallback(() => {
+    const cur = pagesRef.current.get(currentPageRef.current);
+    const frame = overlayRef.current;
+    const layer = layerRef.current;
+    if (!cur || !frame || !layer) return;
+    const { x, y, z } = view.current;
+    frame.style.setProperty("--leaf-x", `${layer.offsetLeft + x}px`);
+    frame.style.setProperty("--leaf-y", `${layer.offsetTop + y}px`);
+    frame.style.setProperty("--leaf-w", `${cur.host.offsetWidth * z}px`);
+    frame.style.setProperty("--leaf-h", `${cur.host.offsetHeight * z}px`);
+    frame.style.setProperty("--leaf-z", String(z));
+  }, []);
+
   const applyTransform = useCallback(() => {
     const cur = pagesRef.current.get(currentPageRef.current);
     if (!cur) return;
@@ -1742,22 +1762,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     }
     const { x, y, z } = view.current;
     cur.host.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`;
-    // Tell the overlay where the paper is, so a thing that belongs *to* the
-    // paper — the folded corner — can sit on its corner while the ribbons stay
-    // put. Written on the overlay's own small frame, not the stage, so a pinch
-    // does not restyle every glyph on the page each frame. The transform origin
-    // is the host's top-left and the host is laid out at the layer's top-left,
-    // so the layer's offset plus the translate is the leaf's corner.
-    const frame = overlayRef.current;
-    const layer = layerRef.current;
-    if (frame && layer) {
-      frame.style.setProperty("--leaf-x", `${layer.offsetLeft + x}px`);
-      frame.style.setProperty("--leaf-y", `${layer.offsetTop + y}px`);
-      frame.style.setProperty("--leaf-w", `${cur.host.offsetWidth * z}px`);
-      frame.style.setProperty("--leaf-h", `${cur.host.offsetHeight * z}px`);
-      frame.style.setProperty("--leaf-z", String(z));
-    }
-  }, []);
+    writeLeaf();
+  }, [writeLeaf]);
 
   // Switched between the line starts and the fold in the info panel, the book
   // slides there, or back, on the spot rather than at the next press.
@@ -1765,6 +1771,18 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useEffect(() => {
     applyTransform();
   }, [zoomAcross, applyTransform]);
+
+  // The stage's margin sits on the page's free side, so it moves across when a
+  // turn lands on a page of the other side, and the layer with it. A turn can
+  // write its last frame before the margin has moved, so where the overlay was
+  // told the paper is gets written again once the page is on the screen:
+  // without this the red seam came back about sixteen points inside the paper
+  // after a turn forward and back, over the ends of the lines (2026-10-15,
+  // walking an upright iPad mini). Only the overlay's: the page and the book's
+  // slide are the turn's to place.
+  useLayoutEffect(() => {
+    writeLeaf();
+  }, [page, writeLeaf]);
 
   /*
    * The cached fit is only as true as the box it was measured from.

@@ -9,6 +9,12 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #227 — The red ribbon comes back on the paper's edge after a turn back on an upright iPad
+
+**Done:** 2026-10-15, the pull request "The red ribbon comes back on the paper's edge after a turn"
+(docs/PLAN.md, item 108). Found walking the upright iPad mini app; the walk scripts for turning
+upright and zooming on its side were committed with it.
+
 ## #226 — An iPad mini handed upright and back on its side keeps its opening size
 
 **Done:** 2026-10-15, the pull request "An iPad mini turned upright and back keeps its page's size"
