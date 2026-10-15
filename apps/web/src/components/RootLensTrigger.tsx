@@ -1,5 +1,6 @@
 import { useT } from "../i18n";
 import styles from "./RootLens.module.css";
+import { spokenName } from "../spoken-name";
 
 /*
  * The button lives apart from the lens itself: the button is on screen with
@@ -52,7 +53,7 @@ export function RootLensTrigger({
       type="button"
       className={styles.trigger}
       aria-expanded={open}
-      aria-label={t.rootsTrigger(count, curated)}
+      aria-label={spokenName(t.rootsTrigger(count, curated), caption, t.sep)}
       onClick={onToggle}
     >
       <span aria-hidden="true">⬡</span>

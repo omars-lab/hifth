@@ -21,6 +21,7 @@ import { leafStyle, useOverLeaf } from "./over-leaf";
 import { useSideCover, watchCover, type CardSpan } from "./short-band";
 import { LookalikeReason } from "./SharedPreview";
 import { acrossTheFoot, leaveBehind, leaveMs, useNoteLeave } from "../note-leave";
+import { spokenName } from "../spoken-name";
 
 export { overLeaf } from "./over-leaf";
 
@@ -51,7 +52,7 @@ export function CommentaryTrigger({
       type="button"
       className={styles.trigger}
       aria-expanded={open}
-      aria-label={t.commentaryBy(source)}
+      aria-label={spokenName(t.commentaryBy(source), caption, t.sep)}
       onClick={onToggle}
     >
       <span aria-hidden="true">✎</span>

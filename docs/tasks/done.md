@@ -9,6 +9,13 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #231 — Buttons on a verse's tools say aloud the words they show
+
+**Done:** 2026-10-15, the pull request "Buttons on a verse's tools say aloud the words they show"
+(PLAN 110). Listen, the roots button and, in Arabic, the note button were named aloud with words
+other than the ones under their signs, so a reader could not tap them by voice; each name now
+holds its word.
+
 ## #230 — The page slider stays clear of a verse's tools on a wide screen
 
 **Done:** 2026-10-15, the pull request "The page slider steps out of sight under a verse's tools"

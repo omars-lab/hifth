@@ -526,7 +526,7 @@ test.describe("Hifth · holding the page's corners", () => {
     await page.waitForTimeout(400);
     expect(await marked(page, "selection")).toEqual(["67:30"]);
     await expect(page).toHaveURL(/#\/hafs-kfqc\/67:30(\?|$)/);
-    await expect(drawer(page).getByRole("button", { name: /^Play .*67:30$/ })).toBeVisible();
+    await expect(drawer(page).getByRole("button", { name: /^Listen to .*67:30$/ })).toBeVisible();
     await expect(page.locator("svg[aria-labelledby='page-label-564']:visible")).toBeVisible();
     // The last verse sits at the foot of its page, where a phone's tools card
     // rises: the light is only worth having if the card leaves it in sight.
@@ -738,9 +738,9 @@ test.describe("Hifth · the four new verse buttons", () => {
     await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3"]);
     // The button speaks for the verse being recited, and pauses it.
     await drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:40" }).click();
-    await expect(drawer(page).getByRole("button", { name: "Play Al-Baqarah · 2:40" })).toBeVisible();
+    await expect(drawer(page).getByRole("button", { name: "Listen to Al-Baqarah · 2:40" })).toBeVisible();
     // The next press resumes that verse, not the run's first, and the run goes on.
-    await drawer(page).getByRole("button", { name: "Play Al-Baqarah · 2:40" }).click();
+    await drawer(page).getByRole("button", { name: "Listen to Al-Baqarah · 2:40" }).click();
     await expect(drawer(page).getByRole("button", { name: "Pause Al-Baqarah · 2:40" })).toBeVisible();
     expect(await player.files()).toEqual(["002039.mp3", "002040.mp3"]);
     await player.end();
@@ -756,7 +756,7 @@ test.describe("Hifth · the four new verse buttons", () => {
     await player.end();
     await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3"]);
     await player.fail();
-    const retry = drawer(page).getByRole("button", { name: "Play Al-Baqarah · 2:40" });
+    const retry = drawer(page).getByRole("button", { name: "Listen to Al-Baqarah · 2:40" });
     await expect(retry).toHaveAttribute("data-phase", "error");
     await retry.click();
     await expect.poll(player.files).toEqual(["002039.mp3", "002040.mp3", "002040.mp3"]);

@@ -678,7 +678,7 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await sheet(page).getByRole("button", { name: "Close" }).click();
     const tools = page.getByRole("region", { name: "Tools for Fatir · 35:44" });
     await expect(tools).toBeVisible();
-    await tools.getByRole("button", { name: /^Roots/ }).click();
+    await tools.getByRole("button", { name: /^Same roots/ }).click();
     await expect(sheet(page)).toHaveCount(1);
     await settle(sheet(page));
     await across("the roots list");
@@ -733,7 +733,7 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
       await settle(paper);
     }
     expect((await paper.boundingBox())!.width, "the page grown wider than the room").toBeGreaterThan(820);
-    await page.getByRole("button", { name: /^Roots · / }).click();
+    await page.getByRole("button", { name: /^Same roots · / }).click();
     await expect(sheet(page)).toBeVisible();
     await settle(sheet(page));
     const card = (await sheet(page).boundingBox())!;
@@ -1042,7 +1042,7 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
       )
       .toEqual(["67:30"]);
     const tools = page.getByRole("region", { name: /^Tools for / });
-    await expect(tools.getByRole("button", { name: /^Play .*67:30$/ })).toBeVisible();
+    await expect(tools.getByRole("button", { name: /^Listen to .*67:30$/ })).toBeVisible();
     await expect(sheet(page)).toHaveCount(0);
     // Shut, but a press away: its button is on the verse's tools.
     const note = tools.getByRole("button", { name: / commentary$/ });
@@ -1142,7 +1142,7 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(sheet(page)).toBeVisible();
     await expect(sheet(page)).toHaveAttribute("aria-label", /2:2\b/);
     // And it picks the run up again from where it stopped.
-    await sheet(page).getByRole("button", { name: /^Play .*2:3$/ }).click();
+    await sheet(page).getByRole("button", { name: /^Listen to .*2:3$/ }).click();
     await expect.poll(playing).toBe(true);
     await player.end();
     await expect.poll(async () => (await player.files()).at(-1)).toBe("002004.mp3");
@@ -3092,7 +3092,7 @@ test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
         await page.mouse.move(at.x + at.width / 2, at.y + 40, { steps: 8 });
         await page.mouse.up();
         await settle(lines.first());
-        if (open === "roots") await tools.getByRole("button", { name: /^Roots/ }).click();
+        if (open === "roots") await tools.getByRole("button", { name: /^Same roots/ }).click();
         else await page.getByRole("button", { name: /^Similar verses in later surahs/ }).click();
         const list = page.getByRole("dialog");
         await expect(list).toHaveCount(1);

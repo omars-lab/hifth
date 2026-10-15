@@ -80,6 +80,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   page slider does not run in under the card and out the other side, and the arrows at its two
   ends stay; close the card and the slider is back. · desktop · laptop · ipad-side · issue:
   `verse-tools-cut-page-slider-wide` (2026-10-15)
+- [ ] Tap a verse and read each button's spoken name against the word under its sign: every
+  name says that word, so a reader can tap it by voice. · any, both languages, and the demo
+  build's note button · issue: `verse-tools-spoken-names` (2026-10-15)
 - [ ] Press a verse's number: one list of tools, not two. · any · issue:
   `number-menu-and-toolbar-together`
 - [ ] Open a verse's number menu with the keyboard and press Down at once, while its lines are

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { useT } from "../i18n";
+import { spokenName } from "../spoken-name";
 import styles from "./VerseDrawer.module.css";
 
 /**
@@ -138,8 +139,9 @@ export function DrawerTool({
   label: string;
   onClick: () => void;
 }): JSX.Element {
+  const { t } = useT();
   return (
-    <button type="button" aria-label={label} onClick={onClick}>
+    <button type="button" aria-label={spokenName(label, caption, t.sep)} onClick={onClick}>
       <span aria-hidden="true">{glyph}</span>
       <span data-caption="">{caption}</span>
     </button>

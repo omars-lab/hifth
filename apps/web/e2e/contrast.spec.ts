@@ -140,7 +140,7 @@ const SURFACES: readonly Surface[] = [
       await settled(page);
       await page.goto("/");
       await selectAyah(page);
-      await page.getByRole("button", { name: /الجذور، / }).tap();
+      await page.getByRole("button", { name: /الجذور نفسها، / }).tap();
       await expect(page.getByRole("dialog", { name: /الجذور/ })).toBeVisible();
     },
   },

@@ -1,6 +1,7 @@
 import { useT, type Strings } from "../i18n";
 import type { AudioPhase } from "../audio";
 import styles from "./PlayTrigger.module.css";
+import { spokenName } from "../spoken-name";
 
 /**
  * PlayTrigger — the ▶ in the trail bar that recites the selected verse.
@@ -65,7 +66,7 @@ export function PlayTrigger({
       type="button"
       className={styles.trigger}
       data-phase={phase}
-      aria-label={playing ? t.pauseAyah(label) : t.playAyah(label)}
+      aria-label={spokenName(playing ? t.pauseAyah(label) : t.playAyah(label), caption, t.sep)}
       aria-pressed={playing}
       aria-busy={loading || undefined}
       onClick={() => onToggle(selectedKey)}

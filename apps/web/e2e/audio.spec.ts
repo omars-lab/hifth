@@ -44,11 +44,11 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
 
     // Nothing selected → no play control at all (it renders null without a verse).
-    await expect(page.getByRole("button", { name: /تشغيل/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /استمع إلى/ })).toHaveCount(0);
 
     // Select 2:48 (verse-55 on page 7, vendored).
     await tapAyah(page, "#verse-55");
-    const play = page.getByRole("button", { name: /تشغيل .*٢:٤٨/ });
+    const play = page.getByRole("button", { name: /استمع إلى .*٢:٤٨/ });
     await expect(play).toBeVisible();
 
     // Tapping it reaches for exactly this verse's file — surah 002, ayah 048,
@@ -80,7 +80,7 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
     await tapAyah(page, "#verse-55");
-    const play = page.getByRole("button", { name: /تشغيل .*٢:٤٨/ });
+    const play = page.getByRole("button", { name: /استمع إلى .*٢:٤٨/ });
     await expect(play).toBeVisible();
     const before = await play.evaluate((el) => getComputedStyle(el).color);
 
@@ -109,7 +109,7 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
     await tapAyah(page, "#verse-55");
-    const play = page.getByRole("button", { name: /تشغيل .*٢:٤٨/ });
+    const play = page.getByRole("button", { name: /استمع إلى .*٢:٤٨/ });
     await play.tap();
     await expect(play).toHaveAttribute("data-phase", "error");
     expect(await page.evaluate(() => navigator.onLine)).toBe(true);
@@ -141,7 +141,7 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
     await tapAyah(page, "#verse-55");
-    const play = page.getByRole("button", { name: /تشغيل .*٢:٤٨/ });
+    const play = page.getByRole("button", { name: /استمع إلى .*٢:٤٨/ });
     await context.setOffline(true);
     await play.tap();
     await expect(play).toHaveAttribute("data-phase", "error");
