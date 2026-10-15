@@ -679,6 +679,13 @@ upright and on its side, English and Arabic, iPad and Mac.
   ROUTE=/hafs-kfqc/p7 EVALFILE=.claude/skills/walk-app/scripts/playto-walk.js`, which plays the sound quietly, never silent (the web
   view lets a silent one start anyway, so a silent check proves nothing) · walked 2026-10-10, and
   2026-10-13 with both marks, in both languages: nothing wrong
+- [ ] Follow a thread **in the iPad app on its side**, as a scholar would: from a demo note, a
+  reference whose own note names verses, then a second reference from there, then Back twice.
+  Each step lights the verse it reached, with none of it under the note; the note stays where it
+  stood; Back returns the way it came, and at the start there is no Back. · `make app-probe
+  TARGET=ipad SIDEWAYS=1 LOCALE=en "ROUTE=/hafs-kfqc/2:48?open=commentary"
+  EVALFILE=.claude/skills/walk-app/scripts/thread-walk.js …` · walked 2026-10-15 from 2:48 in
+  both languages and on the iPad mini on its side, and from 2:255: nothing wrong
 - [ ] Make one whole visit **in the iPad app on its side**, in English and in Arabic, as a reader
   in the room would: open a note, read it to its end, follow a reference in it and come back,
   play the surah from its corner with the note still open, then pause. Nothing lit sits under the

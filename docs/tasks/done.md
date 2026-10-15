@@ -9,6 +9,14 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #218 — Walk the first screen and page turns in the iPad app
+
+**Done:** 2026-10-15, no fault found, so no pull request of its own.
+
+In the iPad app: upright opens one page; pages 1 and 3 keep the same paper; zoom carries across
+page turns both ways up, and the two pages meet at the fold; the visit walk on 35:32 holds; far
+notes show their slant in italics.
+
 ## #219 — Close up the stray spaces the capture left in notes
 
 **Done:** 2026-10-15, the pull request "Notes lose the stray spaces the capture left".
