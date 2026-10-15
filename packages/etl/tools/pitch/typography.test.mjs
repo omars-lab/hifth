@@ -46,6 +46,25 @@ describe("setTypography", () => {
     expect(setTypography("rain . . . , and wind … , then . . . .")).toBe("rain . . . , and wind … , then . . . .");
   });
 
+  it("reads a lone chapter and verse the capture wrote with a semicolon as the colon the book prints", () => {
+    expect(setTypography("see 12;30; and (40;8) or 9;4.")).toBe("see 12:30; and (40:8) or 9:4.");
+  });
+
+  it("leaves a semicolon in a list of verses, or after a number that is not a surah, alone", () => {
+    expect(setTypography("see 2:10; 20; 30 and 4:5;6")).toBe("see 2:10; 20; 30 and 4:5;6");
+    expect(setTypography("in 1200;30 and 115;2")).toBe("in 1200;30 and 115;2");
+  });
+
+  it("puts back the space the capture lost after a semicolon before the next citation", () => {
+    expect(setTypography("see 3:12;40:7 and 5:6")).toBe("see 3:12; 40:7 and 5:6");
+  });
+
+  it("closes up a space the capture put after a colon, in a reference listed after another", () => {
+    expect(setTypography("see 4:1–2; 9:3; 12: 30, and")).toBe("see 4:1–2; 9:3; 12:30, and");
+    // Not in prose, where a number and a colon start a list.
+    expect(setTypography("in 12: 30 men")).toBe("in 12: 30 men");
+  });
+
   it("leaves text with nothing to set unchanged", () => {
     expect(setTypography("“Already” curly, 4:2–5.")).toBe("“Already” curly, 4:2–5.");
   });

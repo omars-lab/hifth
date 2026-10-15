@@ -4680,6 +4680,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "364 references to the Bible, or to a page of another book, were buttons that opened the Qur'an verse with the same numbers, and the related-verse lists held 323 such verses. A reference after a Bible book's name, within that book's chapters, and the list it begins, now stay words, and the related lists drop the verses a note names only that way; tested on made-up sentences and by two pitch tests on notes citing both books."
+    },
+    {
+      "id": "note-semicolon-refs",
+      "source": {
+        "file": "docs/design/commentary-lettering.md",
+        "item": "④"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Six notes had a reference the capture wrote with a semicolon for its colon, run into the next reference with no space, or with a space after its colon, so four were not links. The typography rule now gives a lone chapter and verse its colon back, the run-on reference its space, and closes the space after a colon in a listed reference; tested on made-up sentences and by a pitch test on five of the notes."
     }
   ]
 }

@@ -7,7 +7,7 @@
  * Run first of the three last touches (lettering.mjs), before the misreads are
  * mended and the slant is laid on, so both kinds of hand-read row are written
  * against the text as a reader sees it, curly quotes and all. Each mark is swapped for one mark, so a row written against
- * the text before this rule moves to it by position alone, except where a stray space is closed up (below). The slant's marks,
+ * the text before this rule moves to it by position alone, except where a stray space is closed up or a lost one put back (below). The slant's marks,
  * where a note already carries them, count as part of the line: a quote
  * straight after a run opens is an opening quote.
  *
@@ -16,7 +16,14 @@
  *
  * A space the capture left doubled, or before a comma, semicolon or closing
  * stop, is closed up (three notes in the whole book). The book's own space
- * between an ellipsis and the mark after it stays.
+ * between an ellipsis and the mark after it stays. *
+ * A chapter and verse standing alone that the capture wrote with a semicolon
+ * for its colon ("12;30") gets its colon back, so it reads and links as the
+ * book prints it, and a semicolon the capture ran into the next citation
+ * ("3:12;40:7") gets its space back (five notes in the whole book). A semicolon
+ * after a verse already cited, or after a number no surah has, stays. So does
+ * a space after a colon, except in a reference listed after another ("9:3;
+ * 12: 30,"), where the capture put it (one note).
  */
 
 const OPENS_AFTER = /[\s([{—–“‘]/;
@@ -39,7 +46,12 @@ export function setTypography(text) {
   return out
     .replace(/(?<=\S) {2,}(?=\S)/gu, " ")
     .replace(/(?<=[^\s.…]) +(?=[,;])/gu, "")
-    .replace(/(?<=[^\s.…]) +\.$/u, ".");
+    .replace(/(?<=[^\s.…]) +\.$/u, ".")
+    .replace(/(?<=^|[\s([])(\d{1,3});(\d{1,3})(?![\d:])/gu, (cite, surah, ayah) =>
+      Number(surah) >= 1 && Number(surah) <= 114 ? `${surah}:${ayah}` : cite,
+    )
+    .replace(/(?<=\d:\d{1,3});(?=\d{1,3}:\d)/gu, "; ")
+    .replace(/(?<=\d:\d{1,3}(?:–\d{1,3})?; \d{1,3}): (?=\d{1,3}[,;)])/gu, ":");
 }
 
 /** Set the typography of every note and translation in one surah, in place. */
