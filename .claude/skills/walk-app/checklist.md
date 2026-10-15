@@ -842,6 +842,10 @@ upright and on its side, English and Arabic, iPad and Mac.
   have set it. A straight quote between two letters is a misread letter for the hand-read
   misreads. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/28:88'` · test: `e2e/pitch.spec.ts`
   ("prints the book's curly quotes")
+- [ ] A note has no space before a comma, semicolon or its last full stop, and none doubled: one is
+  the capture's, and the typography rule should have closed it up. A space between an ellipsis and
+  the mark after it is the book's own. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/5:75'` · issue:
+  `note-stray-spaces` · test: `e2e/pitch.spec.ts` ("closes up a space the capture left")
 - [ ] A note shared by a run of verses shows whole under every one of them, and a verse's own note
   shows under that verse alone: a paragraph that opens on a verse number mid-note, or a note that
   stops short under one verse of the run, is the capture filing it in the wrong place; read it off

@@ -4656,6 +4656,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Found 2026-10-13 in the fresh-install rehearsal in the iPad app: a note kept up while a recitation took the page along (PLAN 78), then closed, left its verse chosen off the page shown, so the app (and the Mac window title) named that verse while another page was shown. Fixed: closing a note whose verse is off the page shown lets the verse go, as a turn by hand does; the recitation plays on. Pitch test seen failing first."
+    },
+    {
+      "id": "note-stray-spaces",
+      "source": {
+        "file": "docs/design/commentary-lettering.md",
+        "item": "②"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Three notes carried a space the capture left: doubled between two words, before a semicolon, and before a note's last full stop. The typography rule now closes them up across the book, keeping the book's own space after an ellipsis; tested on made-up words and by the pitch test that opens two of the notes."
     }
   ]
 }

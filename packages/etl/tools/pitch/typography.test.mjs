@@ -36,6 +36,16 @@ describe("setTypography", () => {
     expect(setTypography('the word abc"n here')).toBe('the word abc"n here');
   });
 
+  it("closes up a space the capture left doubled, or before a comma, semicolon or closing stop", () => {
+    expect(setTypography("the old  road")).toBe("the old road");
+    expect(setTypography("the hills ; the plain , the sea")).toBe("the hills; the plain, the sea");
+    expect(setTypography("as the river (Ab) .")).toBe("as the river (Ab).");
+  });
+
+  it("keeps the book's own space between an ellipsis and the mark after it", () => {
+    expect(setTypography("rain . . . , and wind … , then . . . .")).toBe("rain . . . , and wind … , then . . . .");
+  });
+
   it("leaves text with nothing to set unchanged", () => {
     expect(setTypography("“Already” curly, 4:2–5.")).toBe("“Already” curly, 4:2–5.");
   });
