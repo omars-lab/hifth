@@ -69,6 +69,7 @@ final class WalkTests: XCTestCase {
             "HIFTH_PROBE_EVAL": env["PROBE_EVAL"] ?? "",
             "HIFTH_PROBE_DELAY_MS": env["PROBE_DELAY_MS"] ?? "2000",
             "HIFTH_PROBE_PATH": out,
+            "HIFTH_PROBE_SHOT": env["PROBE_SHOT"] ?? "",
         ]
         app.launch()
         let timeout = TimeInterval(env["PROBE_TIMEOUT_S"] ?? "") ?? 180

@@ -20,7 +20,7 @@ by hand: `make app-generate` rewrites it.
 | run in the iPad simulator | `make app-run-ipad ROUTE=/hafs-kfqc/p45` |
 | turn a running app to a route | `make app-open ROUTE=/hafs-kfqc/2:255 TARGET=ipad` (or `TARGET=mac`) |
 | screenshot the page | `make app-shot ROUTE='/hafs-kfqc/p45?field=dark' TARGET=ipad` → `native/shots/` |
-| what the page can see inside the shell | `make app-probe` (Mac) · `make app-probe TARGET=ipad ROUTE=… EVAL='js'` · on its side: add `SIDEWAYS=1` |
+| what the page can see inside the shell | `make app-probe` (Mac) · `make app-probe TARGET=ipad ROUTE=… EVAL='js'` · on its side: add `SIDEWAYS=1` · a picture of the page as the question left it: add `PROBE_SHOT=file.png` |
 | a picture of each of many routes, upright or sideways | `make app-walk ROUTES='/hafs-kfqc/2:48?open=lookalikes /hafs-kfqc/p45' SIDEWAYS=1` → `native/shots/walk/side/` (upright runs go to `walk/upright/`) |
 | walk the app held sideways, by eye | see "Walking the app in the simulator" below |
 | tests, fast | `make app-unit-test` (route, bundle paths, bridge; Mac, seconds) |
@@ -132,6 +132,11 @@ so a UI test turns the simulator, starts the app with the probe and reads the an
 simulator first and takes about a minute plus the question's own time; give a long question
 `PROBE_TIMEOUT_S=…` (180 by default). Why it is built this way:
 `docs/issues/ipad-app-cannot-turn-itself.md`.
+
+To see the page as the question left it, add `PROBE_SHOT=<file>.png`: the app photographs its own
+page after the question answers and before it quits, upright, on its side and on the Mac. A
+screenshot of the simulator taken afterwards shows only the home screen, since the app has
+already gone. Keep the file in scratch when the page may show a note.
 
 ## Walking the app in the simulator
 

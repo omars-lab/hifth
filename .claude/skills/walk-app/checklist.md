@@ -187,7 +187,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   verse's list has "A mistake" pressed. No word on screen says "slip". · phone, iPad, desktop ·
   test: e2e/mistakes.spec.ts, e2e/confusions.spec.ts, src/messages/plain-words.test.ts · then
   the iPad app with `scripts/another-walk.js` (walked 2026-10-15 on both iPad sizes, both ways up,
-  English and Arabic: the picker whole on screen, no red mark, no "slip")
+  English and Arabic: the picker whole on screen, no red mark, no "slip"; seen in a picture
+  upright in English and on its side in Arabic, with `window.__leaveUp = true;` and `PROBE_SHOT=`)
 - [ ] On an open book, with the Mistake pen, tap the first word of a line on the right-hand page
   and the last word of a line on the left-hand page: each asks, past the strip that turns the
   page. · iPad on its side, desktop · test: e2e/mistakes.spec.ts ("a word at the outer edge of an
