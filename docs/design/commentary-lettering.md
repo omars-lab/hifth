@@ -90,3 +90,22 @@ reference from the next. A reference after a year closing a bracket is a page of
 The pitch tests "a Bible reference in a note is not a link to the Qur'an verse of the same numbers"
 and "a note's related verses do not send the reader to a verse the note names only as the Bible's"
 open notes that cite both books; each was watched failing on the build without its fix.
+
+### ④ Does a reference the capture wrote with a semicolon for its colon still open its verse? · **fixed**
+
+It did not. Five notes in the whole book had a reference the capture got wrong around a semicolon.
+In three, a lone chapter and verse came out with a semicolon where the book prints a colon (under
+17:36, 33:33 and 40:23), so it read as two bare numbers and was not a button. In two more (86:15 and
+86:16, which share a note), a semicolon ran straight into the next reference with no space after it.
+
+**What it changes for a hafiz:** each of those references now reads as the book prints it and opens
+the verse it names.
+
+**How it is mended:** one rule for the whole book, with the quotes and dashes, so no hand-read row is
+spent on it. A chapter and verse standing alone with a semicolon between them gets its colon back
+when the first number is a surah's. A semicolon after a verse already cited, as in a list of verses
+of one surah, stays. A semicolon run into the next full reference gets its space back.
+
+**The tests:** the rule's own tests use made-up sentences. The pitch test "a reference the capture
+wrote with a semicolon for its colon is a link again" opens four of the notes; it was watched
+failing on the build without the fix.

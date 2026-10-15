@@ -419,6 +419,21 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     }
   });
 
+  test("a reference the capture wrote with a semicolon for its colon is a link again", async ({ page }) => {
+    // Found scanning every note, 2026-10-15: five notes had "24;24" for 24:24,
+    // or a semicolon run into the next reference with no space after it.
+    const cites: [string, string][] = [["17:36", "24:24"], ["33:33", "24:56"], ["40:23", "51:38"], ["86:15", "77:"]];
+    for (const [verse, cited] of cites) {
+      await page.goto(`/#/hafs-kfqc/${verse}`);
+      const notes = page.getByRole("region", { name: "Commentary" });
+      await expect(notes).toBeVisible({ timeout: 20_000 });
+      await expect(notes.getByRole("button", { name: new RegExp(`Go to.*\\b${cited}`) }).first()).toBeVisible();
+      // Counts, so a failure never prints the note's words.
+      const text = await notes.innerText();
+      expect(text.match(/\d;\d/g)?.length ?? 0, `semicolons between two numbers in ${verse}'s note`).toBe(0);
+    }
+  });
+
   test("a Bible reference in a note is not a link to the Qur'an verse of the same numbers", async ({ page }) => {
     // Found scanning every note, 2026-10-15: "Genesis 2:7" was a button that
     // opened the Qur'an's 2:7, in 364 places. These two notes cite the Bible
