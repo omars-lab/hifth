@@ -99,7 +99,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   device": the line stays open and counts the verses as they save, then offers to remove them
   with their size. Turn the wifi off and play the surah: it recites, and its first verse starts
   at once. The info panel lists it with its size and a Remove button. · any, then the iPad app
-  with the wifi off · issue: `keep-surah-recitation-on-device` · test:
+  with `scripts/kept-play-walk.js`, which cuts the recitation off in the page (walked 2026-10-15
+  upright: every verse of 112 played from the kept copy) · issue: `keep-surah-recitation-on-device` · test:
   e2e/recitation-keep.spec.ts, recitation-keep.test.ts
 - [ ] In the info panel, under the kept surahs, pick "Also once I have heard it all", then play a
   short surah from its corner to its end: it is listed as kept, with its size, and "Kept so
@@ -184,7 +185,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the whole word, "Went into another verse…") and nothing pressed; closing it marks nothing.
   "Went into another verse…" asks where it *pulled* you, leaves no red mark, and the row in the
   verse's list has "A mistake" pressed. No word on screen says "slip". · phone, iPad, desktop ·
-  test: e2e/mistakes.spec.ts, e2e/confusions.spec.ts, src/messages/plain-words.test.ts
+  test: e2e/mistakes.spec.ts, e2e/confusions.spec.ts, src/messages/plain-words.test.ts · then
+  the iPad app with `scripts/another-walk.js` (walked 2026-10-15 on both iPad sizes, both ways up,
+  English and Arabic: the picker whole on screen, no red mark, no "slip")
 - [ ] On an open book, with the Mistake pen, tap the first word of a line on the right-hand page
   and the last word of a line on the left-hand page: each asks, past the strip that turns the
   page. · iPad on its side, desktop · test: e2e/mistakes.spec.ts ("a word at the outer edge of an
@@ -879,7 +882,9 @@ upright and on its side, English and Arabic, iPad and Mac.
   after it")
 - [ ] A reference in a note opens the verse it names, and every reference the book's own page shows
   in blue is a button: a "v." before a full reference is that reference, not a verse of this
-  surah. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/4:94'` · issue: `note-v-before-full-ref` ·
+  surah. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/4:94'`, then the iPad app with
+  `scripts/ref-walk.js` (walked 2026-10-15 on its side in English and upright in Arabic: 4:86 opened
+  and Back came home; 2:37 and 2:54 link no Bible reference) · issue: `note-v-before-full-ref` ·
   test: `e2e/pitch.spec.ts` ("a reference written after v. opens the verse it names")
 - [ ] A note shared by a run of verses shows whole under every one of them, and a verse's own note
   shows under that verse alone: a paragraph that opens on a verse number mid-note, or a note that
