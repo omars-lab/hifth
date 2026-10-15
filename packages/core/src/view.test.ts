@@ -10,9 +10,12 @@ import {
   hopZoomFor,
   hopZoomOnLargeType,
   lerpView,
+  isShortScreen,
   nearFitRoom,
+  nearFitShare,
   nearFitZoom,
   outsideClamp,
+  shortNoteGive,
   viewFitsAcross,
   type FrameContext,
   type View,
@@ -154,6 +157,42 @@ describe("nearFitRoom: the other way, the note opens a little shorter", () => {
 
   it("leaves a long passage to be read from its first line, as the smaller page does", () => {
     expect(nearFitRoom(1000, 570, 5000)).toBeNull();
+  });
+});
+
+describe("nearFitShare: on a screen as short as a phone held sideways, each way may go further", () => {
+  // 2:255 on a phone on its side: the note left room for four of its six lines,
+  // further from fitting than a fifth (knowledge-graph-commentary item 44).
+  it("is a fifth on an iPad, upright or on its side, and on a phone held upright", () => {
+    expect(nearFitShare(1366)).toBeCloseTo(0.2, 6);
+    expect(nearFitShare(744)).toBeCloseTo(0.2, 6);
+    expect(nearFitShare(844)).toBeCloseTo(0.2, 6);
+  });
+
+  it("is a third on a phone held sideways", () => {
+    expect(nearFitShare(390)).toBeCloseTo(1 / 3, 6);
+    expect(nearFitShare(430)).toBeCloseTo(1 / 3, 6);
+  });
+
+  it("calls a screen short only when it is as short as a phone on its side", () => {
+    expect(isShortScreen(390)).toBe(true);
+    expect(isShortScreen(744)).toBe(false);
+  });
+
+  it("lets the page come down by up to that share", () => {
+    expect(nearFitZoom(224, 160, 1.75)).toBeNull();
+    const z = nearFitZoom(224, 160, 1.75, nearFitShare(390));
+    expect(z).not.toBeNull();
+    expect((224 / 1.75) * z!).toBeCloseTo(160, 6);
+    expect(nearFitZoom(224, 140, 1.75, nearFitShare(390))).toBeNull();
+  });
+
+  it("lets the note on a phone on its side give no more than the strip above the page's foot", () => {
+    expect(shortNoteGive(224, 160, 12)).toBe(12);
+    expect(shortNoteGive(224, 220, 12)).toBe(4);
+    expect(shortNoteGive(224, 230, 12)).toBe(0);
+    expect(shortNoteGive(224, 160, 0)).toBe(0);
+    expect(shortNoteGive(224, 160, -3)).toBe(0);
   });
 });
 

@@ -9,6 +9,23 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #228 — A phone on its side shows a long verse whole beside its note
+
+**Done:** 2026-10-15, the pull request "A phone on its side shows a long verse whole above its note"
+(knowledge-graph-commentary ㊹). The room above the note was measured against the page's own box
+rather than what the reader sees, and a shorter note there only uncovers the bar at the foot; now
+both settings show 2:255 whole on a phone on its side.
+
+## #225 — Walk the pitch in the iPad app as a scholar would, after this week's features
+
+**Done:** 2026-10-15. Walked a whole visit, a reference followed with the iPad turned upright and
+back, page turns upright and on its side, and zoom, on both iPad sizes in both languages and dark
+mode. It found the two faults fixed as #226 and #227, and left a new walk script with its
+checklist line (the pull request "Walk a reference followed, the iPad turned, then Back").
+Still open after it: the phone on its side hiding a long verse under its note
+(knowledge-graph-commentary ㊹), and the slant on notes far from the demo, stopped on purpose
+(about 6 slanted words in 100 still upright).
+
 ## #227 — The red ribbon comes back on the paper's edge after a turn back on an upright iPad
 
 **Done:** 2026-10-15, the pull request "The red ribbon comes back on the paper's edge after a turn"

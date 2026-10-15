@@ -2957,6 +2957,37 @@ test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
     for (const bottom of boxes) expect(bottom, "a line of the verse is under the note").toBeLessThanOrEqual(top);
   });
 
+  for (const way of ["smaller", "shorter"] as const) {
+    test(`on a phone held sideways, a six-line verse shows whole above its note, ${way === "smaller" ? "the page drawn smaller" : "set to open the note shorter"}`, async ({ page }) => {
+      // Knowledge-graph-commentary item 44. The screen is short this way up, and
+      // the note left room for four of 2:255's six lines. The room was measured
+      // against the page's own box, short of the margin above it and the strip
+      // down to the note, and was further from fitting than a fifth. Here the
+      // note lies over the page bar too, so a shorter note gives only the strip
+      // above the bar, and the page drawn smaller makes up the rest: either way
+      // the verse arrives whole, its number included, below the header.
+      if (way === "shorter") await page.addInitScript((key) => localStorage.setItem(key, "shorter"), LONG_VERSE_KEY);
+      await page.goto("/#/hafs-kfqc/p1");
+      await page.goto("/#/hafs-kfqc/2:255");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const lines = page.locator("#hifth-overlay .hl-sel");
+      await settle(lines.first());
+      await settle(lines.last());
+      await page.waitForTimeout(600);
+      const top = (await sheet(page).boundingBox())!.y;
+      const boxes = await litLineBoxes(page);
+      expect(boxes.length).toBeGreaterThan(4);
+      for (const b of boxes) expect(b.y + b.height, "a line of the verse is under the note").toBeLessThanOrEqual(top + 1);
+      const header = (await page.locator("header").first().boundingBox())!;
+      expect(boxes[0]!.y, "the verse's first line is below the header").toBeGreaterThanOrEqual(header.y + header.height - 1);
+      const close = (await sheet(page).getByRole("button", { name: "Close" }).boundingBox())!;
+      expect(close.y + close.height, "the note's title row is still on the screen").toBeLessThanOrEqual(390);
+      if (way === "shorter") expect(top, "the note opened shorter").toBeGreaterThan(246);
+      else expect(top, "the note kept its height").toBeLessThan(246);
+    });
+  }
+
   test("on a phone held sideways, sharing a verse once its note is closed shows every line of it", async ({ page }) => {
     // The share card stands in the corner and the page moves aside for it; the
     // look-alike chips leave their column for the card's top row, and the page

@@ -226,9 +226,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   (Firefox) · `make drive BROWSER=firefox DEVICE=desktop` · test: the `pitch-firefox` run,
   `docs/issues/firefox-pitch-run-laptop-only.md`
 - [ ] Open a verse's note: it never covers its own verse, also after turning the phone. · phone,
-  phone-side · issue: `note-covers-verse-after-turn`. Sideways, a verse too long for the room
-  above the note (2:255) starts at its first line with the rest under the note; that is known
-  and open, not a new fault · issue: `sideways-phone-long-verse-under-note`
+  phone-side · issue: `note-covers-verse-after-turn`
+- [ ] On a phone on its side in the pitch build, open 2:255's note: all six of its lines and its
+  number show between the header and the note, the page drawn smaller; then set the info panel
+  to "Note a little shorter" and open it again: the note comes down to the foot of the page and
+  the verse still shows whole. Browser only: the apps do not run on a phone. · phone-side ·
+  `make drive DEVICE=phone-side HASH='#/hafs-kfqc/2:255?open=commentary'` · issue:
+  `sideways-phone-long-verse-under-note` · test: `e2e/pitch.spec.ts`
 - [ ] Tap a verse that is not on the demo path, as a visitor will: its note opens like any
   other, never an empty panel or a wait that does not end. · any, pitch · checked 2026-10-11
   by counting the private notes: every one of the 6236 verses has one
