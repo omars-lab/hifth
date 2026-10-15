@@ -7,8 +7,11 @@ import {
   isKeptUrl,
   keepSurah,
   keptCopy,
+  heardVerse,
   keptSurahs,
+  startKeeping,
 } from "./recitation-keep.js";
+import { rememberKeepWhen, savedKeepWhen } from "./keep-when.js";
 
 /*
  * A surah's recitation kept on the reader's own device (docs/PLAN.md, item
@@ -167,5 +170,69 @@ describe("keeping a surah's recitation on the device", () => {
     localStorage.setItem("hifth.recitation.kept.v1", "{not json");
     expect(keptSurahs()).toEqual([]);
     expect(isKeptUrl(FATIHAH[0]!)).toBe(false);
+  });
+});
+
+/*
+ * A surah kept by itself once the reader has heard all of it (docs/PLAN.md,
+ * item 102): a setting, off by default, beside the button. "Heard through"
+ * means every verse played to its end on this device, in one sitting or many,
+ * counted from when the setting was turned on.
+ */
+describe("keeping a surah once it has been heard through", () => {
+  const hear = async (urls: readonly string[]) => {
+    for (const u of urls) await heardVerse(u);
+  };
+
+  it("is off unless the reader turns it on", () => {
+    expect(savedKeepWhen()).toBe("asked");
+    localStorage.setItem("hifth.recitation.keep-when.v1", "sometimes");
+    expect(savedKeepWhen()).toBe("asked");
+  });
+
+  it("with it off, hearing every verse keeps nothing", async () => {
+    await hear(FATIHAH);
+    expect(keptSurahs()).toEqual([]);
+    // Turned on afterwards, what was heard before does not count.
+    rememberKeepWhen("heard");
+    await hear(FATIHAH.slice(0, 6));
+    expect(keptSurahs()).toEqual([]);
+  });
+
+  it("with it on, the last verse heard keeps the surah, across sittings", async () => {
+    rememberKeepWhen("heard");
+    await hear(FATIHAH.slice(0, 3));
+    // Heard again, a verse counts once; the rest come another day, out of order.
+    await hear([FATIHAH[1]!, FATIHAH[6]!, FATIHAH[5]!, FATIHAH[3]!]);
+    expect(keptSurahs()).toEqual([]);
+    const kept = await heardVerse(FATIHAH[4]!);
+    expect(kept).toMatchObject({ surah: 1, total: 7, bytes: 7000 });
+    expect(keptSurahs().map((k) => k.surah)).toEqual([1]);
+  });
+
+  it("removed afterwards, the surah stays removed until it is heard through again", async () => {
+    rememberKeepWhen("heard");
+    await hear(FATIHAH);
+    await forgetSurah(1);
+    await hear(FATIHAH.slice(0, 6));
+    expect(keptSurahs()).toEqual([]);
+    await hear(FATIHAH.slice(6));
+    expect(keptSurahs().map((k) => k.surah)).toEqual([1]);
+  });
+
+  it("waits for a keep the reader asked for, rather than stopping it", async () => {
+    rememberKeepWhen("heard");
+    const asked = startKeeping(114);
+    await hear(FATIHAH);
+    expect(await asked).toMatchObject({ surah: 114 });
+    expect(keptSurahs().map((k) => k.surah)).toEqual([1, 114]);
+  });
+
+  it("a verse of a surah already kept asks for nothing", async () => {
+    await keepSurah(1);
+    const before = fetched.mock.calls.length;
+    rememberKeepWhen("heard");
+    await hear(FATIHAH);
+    expect(fetched.mock.calls.length).toBe(before);
   });
 });

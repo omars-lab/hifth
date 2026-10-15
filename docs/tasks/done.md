@@ -9,6 +9,13 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #224 — Build PLAN 102: a setting that keeps a surah once it has been heard through
+
+**Done:** 2026-10-15, the pull request "A surah heard through can be kept by itself".
+
+A setting in the info panel, off by default, keeps a surah once every verse has played to its
+end on the device. See docs/PLAN.md item 102.
+
 ## #222 — Check every note's reference links against the book's own blue links
 
 **Done:** 2026-10-15, the commit "A reference written after v. opens the verse it names", in the same pull request as #223.

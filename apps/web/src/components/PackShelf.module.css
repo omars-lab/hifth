@@ -127,3 +127,8 @@
 .row[data-health="gone"] .label {
   color: var(--danger);
 }
+
+/* The setting for keeping a surah once heard through, set apart from the list above it. */
+.keepWhen {
+  margin-top: var(--space-4);
+}

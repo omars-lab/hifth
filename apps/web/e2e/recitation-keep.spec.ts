@@ -83,3 +83,64 @@ test("a surah kept from its menu plays from the device, and the info panel lists
   await expect(shelf.getByRole("listitem")).toHaveCount(0);
   await expect(shelf).toContainText("No surah's recitation is kept here yet.");
 });
+
+/*
+ * A surah kept by itself once it has been heard through (docs/PLAN.md, item
+ * 102): a setting in the info panel, off by default, beside the button. Al-
+ * Ikhlas, the first surah on the last page, has four verses; each file is
+ * 100,000 made-up bytes, so the four come to 0.4 MB.
+ */
+test("with the setting on, a surah played to its end is kept and listed in the info panel", async ({ page }) => {
+  const player = await fakePlayer(page, { recitation: "x".repeat(100_000) });
+  await page.addInitScript((coach) => {
+    try {
+      localStorage.setItem(coach, "1");
+    } catch {
+      /* private mode */
+    }
+  }, COACH_STORAGE_KEY);
+  await page.goto("/#/hafs-kfqc/p604");
+  await expect(page.locator("svg[aria-labelledby='page-label-604']:visible")).toBeVisible();
+  const head = page.locator('[data-host-page="604"] [data-running-head="surah"]');
+  const surahMenu = page.getByRole("menu", { name: "More for Al-Ikhlas" });
+  const shelf = page.getByRole("region", { name: "Recitations kept on this device" });
+
+  // Play the surah from its name, and let every verse play to its end.
+  const hearItAll = async (): Promise<void> => {
+    const b = (await head.boundingBox())!;
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(600);
+    await page.mouse.up();
+    // Each verse plays from a copy made ready ahead, so it is counted, not named.
+    let started = (await player.files()).length;
+    await surahMenu.getByRole("menuitem", { name: "Play" }).click();
+    for (let ayah = 1; ayah <= 4; ayah++) {
+      await expect.poll(async () => (await player.files()).length).toBeGreaterThan(started);
+      started = (await player.files()).length;
+      await player.end();
+    }
+    await expect(page.getByRole("button", { name: "Pause" })).toHaveCount(0);
+  };
+  const openPanel = async (): Promise<void> => {
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    await expect(shelf).toBeVisible();
+  };
+
+  // Off, as it starts: heard through, the surah is not kept.
+  await hearItAll();
+  await openPanel();
+  await expect(shelf).toContainText("No surah's recitation is kept here yet.");
+  const when = shelf.getByRole("radiogroup", { name: "When a surah is kept" });
+  await expect(when.getByRole("radio", { name: "Only when I ask" })).toHaveAttribute("aria-checked", "true");
+  await expect(shelf).toContainText("Kept so far: 0.0 MB.");
+
+  // On: heard through again, it is kept, and the space it takes is shown.
+  await when.getByRole("radio", { name: "Also once I have heard it all" }).click();
+  await page.keyboard.press("Escape");
+  await expect(shelf).toBeHidden();
+  await hearItAll();
+  await openPanel();
+  await expect(shelf.getByRole("listitem")).toHaveText([/^Al-Ikhlas · 0\.4 MB/], { timeout: 20_000 });
+  await expect(shelf).toContainText("Kept so far: 0.4 MB.");
+});

@@ -184,6 +184,10 @@ export interface Catalog {
   readonly juzEdge: (d: { readonly juzText: string | number }) => string;
   readonly juzGroup: string;
   readonly juzN: (d: { readonly juzText: string | number }) => string;
+  readonly keepWhenAsked: string;
+  readonly keepWhenHeard: string;
+  readonly keepWhenNote: (d: { readonly sizeText: string | number }) => string;
+  readonly keepWhenTitle: string;
   readonly keyAlso: (d: { readonly name: string | number }) => string;
   readonly keyFrom: string;
   readonly keyJump: string;

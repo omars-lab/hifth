@@ -4556,10 +4556,11 @@
         "file": "docs/PLAN.md",
         "item": "102"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "The second way to keep a surah's recitation on the device, beside the button: a setting that keeps a surah once it has been recited through. Waits on showing the space used beside it and on saying what 'heard through' means for a run that starts mid-surah."
+      "note": "Built 2026-10-15 as a setting, off by default, beside the list of kept surahs, with the space kept shown in its note. Heard through means every verse played to its end on this device, in any number of sittings, counted from when the setting was turned on.",
+      "closedBy": "apps/web/e2e/recitation-keep.spec.ts"
     },
     {
       "id": "surah-menu-ran-off-phone",
