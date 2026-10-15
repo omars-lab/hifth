@@ -64,7 +64,10 @@
     item = buttons().find((e) => /^(Play|تشغيل) /.test(e.getAttribute("aria-label") || ""));
     if (!item) return "no Play on the tools";
   } else {
-    const head = [...document.querySelectorAll("[data-running-head='surah']")].find((h) => box(h) && box(h).left > 0 && box(h).right < innerWidth);
+    // The neighbouring page stays mounted beside the screen, under another layer, so a
+    // name counts only when it is what a finger on its middle would touch.
+    const touchable = (h) => { const r = box(h); if (!r || r.left < 0 || r.right > innerWidth) return false; const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!e && h.contains(e); };
+    const head = [...document.querySelectorAll("[data-running-head='surah']")].find(touchable);
     if (!head) return "no corner";
     const r = box(head); const at = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     const hit = document.elementFromPoint(at.x, at.y) || head;
