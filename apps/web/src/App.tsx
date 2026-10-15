@@ -1,4 +1,5 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { spokenName } from "./spoken-name";
 import {
   Adjacency,
   Concordance,
@@ -3919,7 +3920,7 @@ export function App(): JSX.Element {
         <button
           type="button"
           className={styles.brand}
-          aria-label={t.about}
+          aria-label={spokenName(t.about, t.tagline, t.sep)}
           aria-haspopup="dialog"
           onClick={() => setColophonOpen(true)}
         >

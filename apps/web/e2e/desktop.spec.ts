@@ -96,7 +96,7 @@ const scaleOf = (page: Page, pageNo: number): Promise<number> =>
 
 /** The chrome's page-mode radios. Desktop only — that is where the second leaf is. */
 const modeBtn = (page: Page, which: "one" | "two"): Locator =>
-  page.getByRole("radio", { name: which === "one" ? "صفحة واحدة" : "صفحتان" });
+  page.getByRole("radio", { name: which === "one" ? "صفحة واحدة" : "صفحتان اثنتان" });
 
 /** The stepper's two buttons. */
 const zoomBtn = (page: Page, dir: "in" | "out"): Locator =>

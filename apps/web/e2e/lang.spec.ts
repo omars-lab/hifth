@@ -135,7 +135,7 @@ test.describe("Hifth · language", () => {
     // "Sideways" and "Pyramid" ran out past their buttons' edges.
     for (const lang of ["en", "ar"]) {
       await page.goto(`/?lang=${lang}#/hafs-kfqc/p9`);
-      await page.getByRole("button", { name: /^(About Hifth · |عن حِفظ، )/ }).tap();
+      await page.getByRole("button", { name: /(About Hifth · |عن حِفظ، )/ }).tap();
       const sheet = page.getByRole("dialog", { name: /About Hifth|عن حِفظ/ });
       await expect(sheet.getByRole("radio").first()).toBeVisible();
       const spills = await sheet.getByRole("radio").evaluateAll((els) =>

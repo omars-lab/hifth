@@ -525,7 +525,7 @@ const messages: Catalog = {
   spreadOneAria: "صفحة واحدة",
   spreadSectionTitle: "الصفحات المعروضة",
   spreadTwo: "اثنتان",
-  spreadTwoAria: "صفحتان",
+  spreadTwoAria: "صفحتان اثنتان",
   stageFailed: (d) => "تعذّر تحميل صفحة " + d.pageText + ". أعد المحاولة.",
   stageLoading: "…جاري التحميل",
   stateOff: "مُعطَّل",

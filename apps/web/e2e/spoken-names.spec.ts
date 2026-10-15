@@ -64,5 +64,33 @@ for (const locale of ["en-US", "ar"] as const) {
         "each button's spoken name holds the word it shows",
       ).toEqual([]);
     });
+
+    test("every named button on the screen says the words it shows", async ({ page }) => {
+      // The bars around the page too: the switch for one or two pages showed a
+      // word its Arabic name never said, and the app's name in the corner was
+      // named without the line it shows (plan item 111). A sign with no letters
+      // (+, −, ⌖) is not a word anyone says.
+      await openTools(page);
+      const pairs = await page
+        .locator("button[aria-label], a[aria-label], [role=button][aria-label], [role=menuitem][aria-label]")
+        .evaluateAll((els) => {
+          const seen = (n: Node): string => {
+            if (n.nodeType === Node.TEXT_NODE) return n.textContent ?? "";
+            if (!(n instanceof Element) || n.getAttribute("aria-hidden") === "true") return "";
+            if (getComputedStyle(n).display === "none") return "";
+            return [...n.childNodes].map(seen).join(" ");
+          };
+          return els
+            .filter((e) => e.getBoundingClientRect().width > 0 && !e.closest("[aria-hidden=true]"))
+            .map((e) => ({ shown: seen(e), name: e.getAttribute("aria-label") ?? "" }))
+            .filter((p) => /\p{L}/u.test(p.shown));
+        });
+      expect(pairs.length, "the screen shows named buttons with words").toBeGreaterThan(5);
+      const missing = pairs.filter((p) => !words(p.name).includes(words(p.shown)));
+      expect(
+        missing.map((p) => `"${words(p.shown)}" is named "${p.name}"`),
+        "each button's spoken name holds the words it shows",
+      ).toEqual([]);
+    });
   });
 }
