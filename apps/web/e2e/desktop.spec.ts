@@ -1603,7 +1603,7 @@ test.describe("Hifth · the ayah's sheets rise over the facing leaf", () => {
       );
     const opens: Array<[string, () => Promise<void>]> = [
       ["the look-alike list", () => chip(page).click()],
-      ["the roots", () => page.getByRole("button", { name: /الجذور، / }).click()],
+      ["the roots", () => page.getByRole("button", { name: /الجذور نفسها، / }).click()],
     ];
     for (const [name, open] of opens) {
       await open();
@@ -2098,12 +2098,12 @@ test.describe("Hifth · the page tools bar", () => {
 
     const drawer = page.getByRole("region", { name: /2:48/ });
     await expect(drawer).toBeVisible();
-    await expect(drawer.getByRole("button", { name: /^Play / })).toContainText("Listen");
+    await expect(drawer.getByRole("button", { name: /^Listen to / })).toContainText("Listen");
     await expect(drawer.getByRole("button", { name: /Share/ })).toBeVisible();
     await expect(drawer.getByRole("button", { name: /Bookmark/ })).toBeVisible();
     await expect(drawer.getByRole("link", { name: /on QUL/ })).toBeVisible();
     // The tools live in the drawer, not also in the bar under the page.
-    await expect(page.locator("footer").getByRole("button", { name: /^Play / })).toHaveCount(0);
+    await expect(page.locator("footer").getByRole("button", { name: /^Listen to / })).toHaveCount(0);
 
     const box = (await drawer.boundingBox())!;
     const lit = await page.locator("#hifth-overlay .hl-sel").evaluateAll((els) =>
@@ -2601,7 +2601,7 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       }
       const zoomed = (await boxOf(paper)).width;
       expect(zoomed, "the page grown wider than the room").toBeGreaterThan(past);
-      await page.getByRole("button", { name: /^(الجذور، |Roots · )/ }).click();
+      await page.getByRole("button", { name: /^(الجذور نفسها، |Same roots · )/ }).click();
       const list = page.getByRole("dialog");
       await expect(list).toBeVisible();
       await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));

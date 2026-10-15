@@ -475,8 +475,8 @@ async function shareLeavesVerseWhole(page: Page) {
 }
 
 for (const [locale, roots, group] of [
-  ["en-US", /^Roots · /, "Links from this ayah"],
-  ["ar", /^الجذور، /, "روابط الآية"],
+  ["en-US", /^Same roots · /, "Links from this ayah"],
+  ["ar", /^الجذور نفسها، /, "روابط الآية"],
 ] as const) {
   test.describe(`Hifth · the corner lists on an iPad mini on its side (${locale})`, () => {
     test.use({ viewport: { width: 1133, height: 744 }, locale });
@@ -693,7 +693,7 @@ test.describe("Hifth · a recitation on the iPad held sideways", () => {
       .evaluateAll((els) => [...new Set(els.map((el) => (el.getAttribute("data-hl-key") ?? "?").split("/").pop()))]);
     expect(lit).toEqual(["67:30"]);
     await expect(page).toHaveURL(/#\/hafs-kfqc\/67:30(\?|$)/);
-    await expect(page.getByRole("region", { name: /^Tools for / }).getByRole("button", { name: /^Play .*67:30$/ })).toBeVisible();
+    await expect(page.getByRole("region", { name: /^Tools for / }).getByRole("button", { name: /^Listen to .*67:30$/ })).toBeVisible();
     await shown(page, 564);
     await shown(page, 563);
   });

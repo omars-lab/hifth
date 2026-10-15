@@ -133,9 +133,10 @@ export default defineConfig({
           // The pitch commentary project. Chromium at a spread width, no touch:
           // the note is a floating card here (not a phone bottom sheet), so it
           // can land on a leaf and the placement (Option D) is testable. It runs
-          // pitch.spec.ts alone, against the pitch bundle the webServer builds.
+          // pitch.spec.ts, against the pitch bundle the webServer builds, and
+          // spoken-names.spec.ts, for the buttons only the pitch build shows.
           name: "pitch",
-          testMatch: /pitch\.spec\.ts/,
+          testMatch: /(pitch|spoken-names)\.spec\.ts/,
           use: {
             // HIFTH_PITCH_BROWSER=webkit runs the same tests in the engine the
             // iPad and Mac apps are built on, for a fault only the app shows.
@@ -244,7 +245,7 @@ export default defineConfig({
           // bar; it runs on the phones too, from their own bar.
           // `card-foot` tells Chromium there is a home bar and checks a wide
           // screen's cards keep no room for it; the phones are not wide.
-          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows|recitation-keep|pencil|card-foot)\.spec\.ts/,
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows|recitation-keep|pencil|card-foot|spoken-names)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },

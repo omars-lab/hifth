@@ -1,6 +1,7 @@
 import { useT } from "../i18n";
 import { qulVerseUrl } from "../qul";
 import styles from "./QulTrigger.module.css";
+import { spokenName } from "../spoken-name";
 
 /**
  * QulTrigger — the ↗ in the trail bar that opens the selected verse's page in
@@ -35,7 +36,7 @@ export function QulTrigger({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={t.qulVerse(label)}
+      aria-label={spokenName(t.qulVerse(label), caption, t.sep)}
       title={t.qulVerse(label)}
     >
       <span aria-hidden="true">{"↗\uFE0E"}</span>

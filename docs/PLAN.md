@@ -2282,6 +2282,18 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     ways of working. Built 2026-10-15: a browser test on three screen sizes in both languages,
     Chrome and Firefox, watched failing first, and the walk repeated at a desk and on an iPad
     on its side.
+110. ~~**The buttons on a verse's tools say aloud the words they show.**~~ Found 2026-10-15
+    walking the demo at a desk, not asked: the tools card shows a word under each sign, and
+    four buttons were named aloud with other words. Listen was named "Play" and the roots
+    button "Roots" under its word "Same roots", in English and in Arabic, and in Arabic the
+    note button too. A reader driving an iPad by voice says the word they see ("tap Same
+    roots"), and nothing answered; a screen reader read a different word from the one on
+    screen. Each name now starts with, or holds, the word under its sign, and a button whose
+    name never says its word (Listen, while its surah is saved for offline use, shows
+    "Offline") has the word put first. No setting for this one: it mends a fault. Built
+    2026-10-15: a browser test over every worded button on the tools, in both languages, at
+    a desk and on both phones, and in the demo build with its note button, watched failing
+    first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

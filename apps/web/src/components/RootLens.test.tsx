@@ -265,7 +265,7 @@ describe("RootLensTrigger", () => {
   it("shows the root count in Arabic-Indic digits and reports its state", () => {
     const onToggle = vi.fn();
     render(<RootLensTrigger count={5} open onToggle={onToggle} />);
-    const button = screen.getByRole("button", { name: "الجذور، ٥" });
+    const button = screen.getByRole("button", { name: "الجذور نفسها، ٥" });
     expect(button).toHaveAttribute("aria-expanded", "true");
     fireEvent.click(button);
     expect(onToggle).toHaveBeenCalled();
@@ -275,11 +275,11 @@ describe("RootLensTrigger", () => {
     // ⬡ is now the app's only ⬡ (Loop 6a): one glyph, one place, and a label
     // that keeps the two numbers distinguishable instead of conflating them.
     render(<RootLensTrigger count={5} curated={2} open={false} onToggle={noop} />);
-    expect(screen.getByRole("button", { name: "الجذور، ٥، ٢ مختارة" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "الجذور نفسها، ٥، ٢ مختارة" })).toBeInTheDocument();
 
     // A hand-verified pair on an ayah the corpus has no roots for must still
     // be reachable, so the trigger appears at count 0.
     render(<RootLensTrigger count={0} curated={1} open={false} onToggle={noop} />);
-    expect(screen.getByRole("button", { name: "الجذور، ٠، ١ مختارة" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "الجذور نفسها، ٠، ١ مختارة" })).toBeInTheDocument();
   });
 });

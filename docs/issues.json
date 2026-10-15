@@ -4754,6 +4754,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/slider-arrows.spec.ts",
       "note": "Found walking the demo at a desk (2026-10-15): where a verse's tools rise as a card in the middle of the bar (a desk, a laptop, an iPad on its side), the page slider ran in under one side of the card and out of the other, its page marker hidden under it. The phone fix (verse-tools-leave-bar-scraps) made the card cover the whole bar only on narrow or short screens. Now the track and the page count step out of sight while the card is up, keeping their room so nothing moves, and the end arrows stay. Test on three screen sizes in both languages, Chrome and Firefox, watched failing first."
+    },
+    {
+      "id": "verse-tools-spoken-names",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "110"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/spoken-names.spec.ts",
+      "note": "Found walking the demo at a desk (2026-10-15): the verse's tools show a word under each sign, and Listen, the roots button and (in Arabic) the note button were named aloud with other words, so a reader driving the iPad by voice could not tap them by the word on screen. Names now hold the word they show, and a button whose name never says it has the word put first. Test over every worded button on the tools in both languages, desktop and both phones, and the demo build, watched failing first."
     }
   ]
 }
