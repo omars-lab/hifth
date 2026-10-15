@@ -62,9 +62,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 ## The page bar
 
 - [ ] With one page open and a note up, the page bar is still in reach. · laptop, ipad · issue:
-  `one-page-note-covers-page-bar`
+  `one-page-note-covers-page-bar` · in the iPad app (walked 2026-10-15 upright on 2:255, with a
+  picture from `PROBE_SHOT=`): on the 13-inch the note ends above the full-screen row and the bar
+  is clear; the mini held upright opens the note as the phone's sheet, which covers the bar as it
+  does on a phone (close the note or swipe to turn), and that is the phone's design, not this fault
 - [ ] With one page open, a link straight to a verse leaves it in sight beside its note — open it
-  a few times, it was one in four. · laptop · issue: `one-page-link-note-covers-verse`
+  a few times, it was one in four. · laptop · issue: `one-page-link-note-covers-verse` · the
+  iPad app upright, both sizes: 2:255 lit above its note (walked 2026-10-15)
 - [ ] The bar grows under the finger and settles on a page, both ways up. · phone, ipad-side ·
   tests: pagebar, pagebar-detents, pagebar-fisheye specs
 
