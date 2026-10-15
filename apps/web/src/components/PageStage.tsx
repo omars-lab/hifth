@@ -26,9 +26,12 @@ import {
   hopZoomFor,
   hopZoomOnLargeType,
   nearFitRoom,
+  nearFitShare,
+  shortNoteGive,
   nearFitZoom,
   isMarkShard,
   isMistake,
+  isShortScreen,
   isViewportIntent,
   isWordShard,
   leafSideOf,
@@ -549,6 +552,8 @@ const RAIL_CLEARANCE = 8;
 
 /** Room kept free below a verse drawn smaller to fit above a note: its wash runs a little past its letters. */
 const LIFT_SLACK = 12;
+/** How far the wash on a lit verse reaches above the verse's own box. */
+const WASH_REACH = 8;
 /**
  * The least a page kept in the window's middle beside a card is drawn at, as a
  * share of the reader's own size; below it the page slides aside (card-room.ts).
@@ -2456,12 +2461,36 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const head =
         railBottomRef.current === null ? 0 : Math.max(0, railBottomRef.current - layerTop + RAIL_CLEARANCE);
       const at = bboxToScreen(bbox, start, ctx);
+      // On a phone held on its side the note stands below the page's own box,
+      // over the page bar, so it covers none of that box; but the stage's
+      // margin above the page and the strip down to the note's top are seen
+      // too, and a long verse needs them (item 44). Its first line may go up
+      // into the margin, short of the wash's own reach above the verse.
+      const stage = stageRef.current?.getBoundingClientRect();
+      const coverTop = coverTopRef.current;
+      const low =
+        isShortScreen(window.innerHeight) && stage && coverTop !== null && !boundRef.current && !(fit.coverBottom ?? 0)
+          ? { stage, coverTop }
+          : null;
+      const top = low && head === 0 ? -Math.max(0, layerTop - low.stage.top - WASH_REACH) : head;
       // The reader's other way (item 43): the note opens a little shorter and
       // the page keeps its zoom. Worked out from the note's full height, the
       // room it already gave added back, so the run its own shrinking sets
       // off gives the same answer.
-      const shorter = longVerseRef.current === "shorter" && !boundRef.current && (fit.coverBottom ?? 0) > 0;
-      if (shorter) {
+      const shorter = longVerseRef.current === "shorter" && !boundRef.current && ((fit.coverBottom ?? 0) > 0 || low !== null);
+      // On a phone held on its side the screen is short, and the page may come
+      // down by a third (item 44).
+      const share = nearFitShare(window.innerHeight);
+      if (low) {
+        // There a shorter note uncovers the page bar, not the verse, past the
+        // page's foot: it gives what it can, and the page drawn smaller makes
+        // up the rest.
+        const rest = low.coverTop - (shorter ? noteRoom() : 0);
+        const seen = Math.min(low.stage.bottom, rest) - layerTop;
+        const give = shorter ? shortNoteGive(at.height, seen - top - LIFT_SLACK, low.stage.bottom - rest) : 0;
+        giveNoteRoom(give);
+        shown = seen + give;
+      } else if (shorter) {
         const full = (fit.coverBottom ?? 0) + noteRoom();
         const roomy = fit.stageHeight - full;
         const give = nearFitRoom(at.height, roomy - head - LIFT_SLACK, full) ?? 0;
@@ -2477,13 +2506,13 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // drawn small enough to stand clear of it, not only the verse.
       const room = to - from - 2 * LIFT_SLACK;
       const page = realCoverRef.current && (from > 0 || to < fit.stageWidth) ? roomZoom(fit.contentWidth, room, start.z) : null;
-      if (!(at.y < head || at.y + at.height > shown) && !across && page === null) return start;
+      if (!(at.y < top || at.y + at.height > shown) && !across && page === null) return start;
       let target = frameBboxToView(bbox, ctx, start.z, lead);
       // A verse only a little taller than that is drawn a little smaller
       // and shown whole, rather than lose its last line under the note. Not
       // with the book open: its two pages keep one zoom between them.
       const tall = bboxToScreen(bbox, target, ctx).height;
-      const smaller = boundRef.current || shorter ? null : nearFitZoom(tall, shown - head - LIFT_SLACK, target.z);
+      const smaller = boundRef.current || (shorter && !low) ? null : nearFitZoom(tall, shown - top - LIFT_SLACK, target.z, share);
       // And one only a little wider than the room a card beside the page
       // leaves, the same way: 2:255 beside the roots list on a small iPad on
       // its side kept the ends of its lines under the card (plan item 92).
@@ -2499,10 +2528,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // first line, just under them; one that fits is kept out from under
       // them too.
       const framed = bboxToScreen(bbox, target, ctx);
-      if (framed.height > shown - head || framed.y < head) {
-        target = clampView({ ...target, y: target.y - framed.y + head }, fit);
+      if (framed.height > shown - top || framed.y < top) {
+        target = clampView({ ...target, y: target.y - framed.y + top }, fit);
       }
-      if ((fit.coverBottom ?? 0) > 0 && framed.height > shown - head) onLiftShortRef.current?.();
+      if (((fit.coverBottom ?? 0) > 0 || low) && framed.height > shown - top) onLiftShortRef.current?.();
       return target;
     },
     [],
@@ -2550,7 +2579,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // Nothing covers the page any more: a page a card had drawn smaller
       // goes back to the reader's own size, the verse framed as it was.
       const own = ownZoomRef.current;
-      const covered = (fit.coverBottom ?? 0) > 0 || (fit.coverLeft ?? 0) > 0 || (fit.coverRight ?? 0) > 0;
+      // A note on a phone held on its side stands below the page's box, and
+      // still counts (item 44).
+      const below = isShortScreen(window.innerHeight) && coverTopRef.current !== null;
+      const covered = (fit.coverBottom ?? 0) > 0 || (fit.coverLeft ?? 0) > 0 || (fit.coverRight ?? 0) > 0 || below;
       if (own && !covered) ownZoomRef.current = null;
       const back = own !== null && !covered && own.to === view.current.z;
       if (bbox) {
@@ -3404,7 +3436,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           );
           // With a note already up, land where the lift would move the verse
           // to, rather than zoom in and then have the lift zoom back out.
-          if (fit.coverBottom) target = aboveCover(bbox, ctx, fit, target, lead);
+          if (fit.coverBottom || (isShortScreen(window.innerHeight) && coverTopRef.current !== null))
+            target = aboveCover(bbox, ctx, fit, target, lead);
           // A note that rises once the glide has begun bends it (the lift, below).
           // Cleared only if still ours: this glide cut short by a newer hop's
           // resumes here after that hop has put its own glide there.

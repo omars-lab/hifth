@@ -2987,10 +2987,11 @@
         "file": "docs/design/knowledge-graph-commentary.md",
         "item": "㊹"
       },
-      "status": "open",
-      "severity": "question",
+      "status": "fixed",
+      "severity": "defect",
       "owner": "agent",
-      "note": "On a phone held sideways, a seven-line verse (2:255) with its note open shows about four lines; the rest is under the note until the page is dragged. Too tall for either way of making room within a fifth (㊷ smaller page, ㊸ shorter note), so it starts at its first line by design. Upright, and for short verses sideways (⑬), the whole verse shows. Low priority: the demo is for an iPad."
+      "note": "On a phone held sideways, 2:255 with its note open showed four of its six lines. The room was measured against the page's own box, which the note sits just below, so the margin and strip the reader sees were not counted; and a shorter note there only uncovers the bar at the foot. Now, on a screen that short, the room is what is seen between the header and the note and the page may come down by a third (never below the whole page); the shorter-note setting gives up the strip above the bar and the page makes up the rest. Both settings show the verse whole; two pitch tests on a phone on its side, one per setting.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
       "id": "note-covers-turn-edge",

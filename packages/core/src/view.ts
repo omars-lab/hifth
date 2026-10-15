@@ -273,20 +273,41 @@ export function hopZoomOnLargeType(z: number, larger: number): number {
 }
 
 /** The most a page is drawn smaller so a verse shows whole: a fifth. */
-const NEAR_FIT = 0.8;
+const NEAR_SHARE = 0.2;
+const NEAR_FIT = 1 - NEAR_SHARE;
+
+/** A screen no taller than this is a phone held on its side. */
+const SHORT_SCREEN = 500;
+
+/**
+ * The most of a verse's height either way of showing it whole may make up, on
+ * a screen `screenHeight` px tall: a fifth, or a third on a phone held on its
+ * side. That way up the screen is short, and the note left room for four of
+ * 2:255's six lines, further from fitting than a fifth would reach
+ * (knowledge-graph-commentary item 44).
+ */
+export function nearFitShare(screenHeight: number): number {
+  return isShortScreen(screenHeight) ? 1 / 3 : NEAR_SHARE;
+}
+
+/** Whether a screen `screenHeight` px tall is a phone held on its side. */
+export function isShortScreen(screenHeight: number): boolean {
+  return screenHeight <= SHORT_SCREEN;
+}
 
 /**
  * The zoom at which a verse `height` px tall at zoom `z` just fills `room`, or
  * null to keep `z`. A verse that is only a little taller than the room above a
  * note is shown whole, the page drawn a little smaller: Ayat al-Kursi on an
  * upright iPad lost its last line, with the verse's number, under the note. One
- * that would need the page shrunk by more than a fifth, or below the whole page,
- * keeps its zoom and is read from its first line, as before.
+ * that would need the page shrunk by more than `share` (a fifth, see
+ * `nearFitShare`), or below the whole page, keeps its zoom and is read from its
+ * first line, as before.
  */
-export function nearFitZoom(height: number, room: number, z: number): number | null {
+export function nearFitZoom(height: number, room: number, z: number, share = NEAR_SHARE): number | null {
   if (!(height > room) || !(room > 0)) return null;
   const fitted = (z * room) / height;
-  if (fitted < z * NEAR_FIT || z <= 1) return null;
+  if (fitted < z * (1 - share) || z <= 1) return null;
   return Math.max(1, fitted);
 }
 
@@ -302,6 +323,19 @@ export function nearFitRoom(height: number, room: number, cover: number): number
   const need = Math.ceil(height - room);
   if (room < height * NEAR_FIT || need > cover - cover * NEAR_FIT) return null;
   return need;
+}
+
+/**
+ * The same way on a phone held on its side, where the note lies over the page
+ * bar as well as the page: the px it gives up for a verse `height` px tall in
+ * `room` is what the verse is short of, but never more than `gap`, the strip
+ * between the note's top and the foot of the page. Shorter than that, it would
+ * only uncover the bar. Whatever is still short is made up by drawing the page
+ * smaller (knowledge-graph-commentary item 44).
+ */
+export function shortNoteGive(height: number, room: number, gap: number): number {
+  if (!(height > room) || !(gap > 0)) return 0;
+  return Math.min(Math.ceil(height - room), Math.floor(gap));
 }
 
 /**

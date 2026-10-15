@@ -1334,21 +1334,33 @@ test (the default, the choice kept, an unknown value), and a browser test on an 
 picks the way in the info panel, opens 2:255, and checks the whole verse is above the note with the
 page never zooming out. All three failed first.
 
-### ㊹ On a phone held sideways, can a long verse be shown whole beside its open note? · **open**
+### ㊹ On a phone held sideways, can a long verse be shown whole beside its open note? · **fixed**
 
 Found walking 2:255 on a phone on its side (2026-10-09). The screen is short that way, and the note
-leaves room for about four of the verse's seven lines. Neither way of making room (㊷, ㊸) can do
-it within its limit of a fifth, so the page starts the verse at its first line and the rest sits
-under the note until the reader drags the page. A short verse, such as 35:44 in ⑬, still shows
-whole. Upright, the same phone shows all of 2:255 above the note.
+left room for four of the six lines the verse takes on its page. Neither way of making room (㊷, ㊸)
+reached, so the page started the verse at its first line and the rest sat under the note until the
+reader dragged the page. A short verse, such as 35:44 in ⑬, still showed whole. Upright, the same
+phone shows all of 2:255 above the note.
 
-**What it changes for a hafiz:** reading a long verse's note with the phone on its side, they see
-the verse's opening lines and have to drag the page to check its end.
+**What it changes for a hafiz:** reading a long verse's note with the phone on its side, they now
+see the whole verse, its end and its number, above the note, without dragging the page.
 
-**What would answer it:** build the ways that could carry it and walk them on 2:255 sideways. For
-example, the page drawn smaller past the usual limit only when held sideways, or the note opening
-as just its title row until it is pulled up. Today's way stays until then. It is low on the list,
-since the demo is meant for an iPad.
+**What the rough build found:** two things no list of options had a row for.
+
+- The room was measured wrong. That way up, the note does not lie over the page's own box but just
+  below it, so the app counted the room as the box alone. The margin above the page and the strip
+  down to the note are on the screen too, about a seventh more room. Measured against what the
+  reader actually sees, the verse is a third too tall rather than nearly half.
+- A shorter note cannot help much there. The note also lies over the bar at the screen's foot, so
+  opening it shorter uncovers the bar, not the verse, past a strip about a finger's width tall.
+
+**The fix:** on a screen as short as a phone on its side, the room is what the reader sees between
+the header and the note, and the page may come down by up to a third, never below the whole page.
+With the default way (㊷) the page is drawn smaller until the verse fits. With the other way (㊸) the
+note gives up the strip above the bar, and the page drawn a little smaller makes up the rest, so
+both settings show the verse whole. An iPad, and a phone held upright, keep the limit of a fifth. Two
+browser tests on a phone on its side, one for each setting, failed first; the shorter one also
+checks that its note really did come down.
 
 ### ㊺ When a note runs past the bottom of its card, can the reader tell there is more? · **fixed**
 
