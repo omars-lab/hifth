@@ -61,3 +61,25 @@ places). That is how the book prints it.
 **The tests:** the typography rule's own tests use made-up words. The pitch test "the commentary
 closes up a space the capture left before a semicolon or a closing stop" opens two of the notes;
 it was watched failing on the notes built without the rule.
+
+### ③ Does a note's Bible reference open a verse of the Qur'an? · **fixed**
+
+**Fixed, 2026-10-15.** The notes cite the Bible by book, chapter and verse, as in "Genesis 2:7".
+The app read every pair of numbers with a colon between them as a surah and verse, so 329 Bible
+references were buttons that opened the Qur'an verse with the same numbers. So were 33 more that
+carry a Bible list on after a semicolon or a comma without naming the book again, and 4 volume and
+page numbers of another book, written after the year of its printing. That is 364 wrong links in
+about 230 notes, some of them on the demo's own pages.
+
+**What it changes for a hafiz:** a reference opens the verse it names, or nothing. A scholar who
+taps a Bible reference is no longer sent to an unrelated verse of the Qur'an.
+
+**How it tells them apart:** a reference straight after a Bible book's name stays words when that
+book has a chapter of that number. The chapter count keeps a prophet apart from the book named for
+him: after "Jonah", a reference to chapter 37 is the Qur'an's telling, since the book of Jonah has
+four chapters. A list goes on as the book's while only a comma, a semicolon or an "and" parts one
+reference from the next. A reference after a year closing a bracket is a page of that work.
+
+**The tests:** the reference reader's own tests use made-up sentences. The pitch test "a Bible
+reference in a note is not a link to the Qur'an verse of the same numbers" opens two notes that
+cite both books; it was watched failing on the build without the fix.

@@ -419,6 +419,35 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     }
   });
 
+  test("a Bible reference in a note is not a link to the Qur'an verse of the same numbers", async ({ page }) => {
+    // Found scanning every note, 2026-10-15: "Genesis 2:7" was a button that
+    // opened the Qur'an's 2:7, in 364 places. These two notes cite the Bible
+    // and the Qur'an both, so the Qur'an's own references must still link.
+    for (const verse of ["2:37", "2:54"]) {
+      await page.goto(`/#/hafs-kfqc/${verse}`);
+      const notes = page.getByRole("region", { name: "Commentary" });
+      await expect(notes).toBeVisible({ timeout: 20_000 });
+      // Counts, so a failure never prints the note's words.
+      const found = await notes.evaluate((el) => {
+        const book = /\b(?:Genesis|Exodus|Leviticus|Numbers|Deuteronomy|Luke|Matthew|Mark|John)\s+$/;
+        let bible = 0;
+        let quran = 0;
+        for (const go of el.querySelectorAll('button[aria-label^="Go to"]')) {
+          const before = document.createRange();
+          before.setStart(el, 0);
+          before.setEndBefore(go);
+          if (book.test(before.toString().slice(-20))) bible++;
+          else quran++;
+        }
+        const named = el.textContent?.match(/\b(?:Genesis|Exodus|Luke) \d{1,2}:\d/g)?.length ?? 0;
+        return { bible, quran, named };
+      });
+      expect(found.named, `Bible references written in ${verse}'s note`).toBeGreaterThan(0);
+      expect(found.bible, `Bible references drawn as links in ${verse}'s note`).toBe(0);
+      expect(found.quran, `Qur'an references drawn as links in ${verse}'s note`).toBeGreaterThan(0);
+    }
+  });
+
   test("in English the drawer reads left to right, though it lies on the right-to-left page", async ({ page }) => {
     // It inherited the mus'haf's direction, so the line under the credit read
     // ".Shown privately, …" — its full stop in front — and sat against the

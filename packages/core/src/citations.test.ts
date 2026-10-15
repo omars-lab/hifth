@@ -110,6 +110,29 @@ describe("verse citations in the commentary prose", () => {
     });
   });
 
+  describe("a verse of another book", () => {
+    it("leaves a Bible reference as text, with the ones its list goes on to name", () => {
+      expect(cited("as in Genesis 2:7; 3:19, 21 and Luke 1:26–38, then 2:30")).toEqual([
+        { text: "2:30", surah: 2, ayah: 30 },
+      ]);
+      expect(cited("cf. 1 Kings 19:8 and 2 Samuel 7:12")).toEqual([]);
+    });
+
+    it("still links a verse after a prophet's name when the book named for him has no such chapter", () => {
+      // The book of Jonah has four chapters; Qur'an 37:139 tells his story.
+      expect(cited("the tale of Jonah 37:139–48")).toEqual([{ text: "37:139–48", surah: 37, ayah: 139 }]);
+    });
+
+    it("leaves a volume and page after a dated work as text", () => {
+      expect(cited("(Smith, Tales [1999], 2:45); see 2:45")).toEqual([{ text: "2:45", surah: 2, ayah: 45 }]);
+    });
+
+    it("keeps every word, in order", () => {
+      const text = "Exodus 3:14; 4:2 and then 4:2";
+      expect(splitCitations(text).map((p) => (typeof p === "string" ? p : p.text)).join("")).toBe(text);
+    });
+  });
+
   it("returns the text whole when nothing is cited", () => {
     expect(splitCitations("no verses here")).toEqual(["no verses here"]);
   });

@@ -4668,6 +4668,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Three notes carried a space the capture left: doubled between two words, before a semicolon, and before a note's last full stop. The typography rule now closes them up across the book, keeping the book's own space after an ellipsis; tested on made-up words and by the pitch test that opens two of the notes."
+    },
+    {
+      "id": "note-bible-refs-linked",
+      "source": {
+        "file": "docs/design/commentary-lettering.md",
+        "item": "③"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "364 references to the Bible, or to a page of another book, were buttons that opened the Qur'an verse with the same numbers. A reference after a Bible book's name, within that book's chapters, and the list it begins, now stay words; tested on made-up sentences and by the pitch test that opens two notes citing both books."
     }
   ]
 }
