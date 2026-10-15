@@ -38,7 +38,6 @@
   const heads = [...document.querySelectorAll(window.__page ? `[data-host-page="${window.__page}"] [data-running-head='surah']` : "[data-running-head='surah']")];
   const host = heads.find((h) => on(box(h)) && h.contains(mid(box(h))));
   if (!host) return `A: no reachable surah corner; heads=${heads.map((h) => f(box(h)) + ":" + (box(h) ? mid(box(h))?.tagName : "-")).join(",")}`;
-  if (!host) return "A: no surah corner on screen";
   const r = box(host); const at = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   const hit = document.elementFromPoint(at.x, at.y) || host;
   const fire = (type) => hit.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, composed: true, pointerId: 9, pointerType: "touch", isPrimary: true, clientX: at.x, clientY: at.y, button: 0, buttons: type === "pointerup" ? 0 : 1 }));

@@ -14,6 +14,12 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Checked again 2026-10-15, nothing taken.** 191.3 KB against the 200 KB cap, after the setting
+that keeps a surah once it has been heard through (+1.0 KB). 19.6 KB of the ~75 KB of real room
+the 2026-10-11 sweep found is now used, so about 55 KB is left; the two candidates below still
+move code between files rather than out of the count, so they still wait. Run a fresh
+`make perf-sweep` before the cap is next raised.
+
 **Checked again 2026-10-13, nothing taken.** 190.3 KB against the 200 KB cap, after the setting
 that keeps the page in the middle beside a card (+1.1 KB). Since the 2026-10-11 sweep 18.6 KB of
 its ~75 KB of real room is used, so the two candidates below still wait.
