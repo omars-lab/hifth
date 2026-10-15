@@ -133,3 +133,22 @@ buttons, the same as on the book's own page.
 **The tests:** the citation reader's test "leaves a number that is not a verse as text" already
 holds a verse past a surah's end as text. Nothing was changed, so there was no failing test to
 write first.
+
+### ⑥ Does every reference the book links open the same verse in the app? · **fixed**
+
+Yes, now. The book's own pages show each reference it links in blue, so the page pictures the notes
+were read from are a second witness to which references should be buttons.
+Every word starting with a number was sorted by colour on all 114 surahs' pictures, and the
+references the book draws in blue were compared with the ones the app makes buttons.
+Almost all of the difference was noise: a surah's last picture taken twice over, the next surah's
+introduction at the foot of a picture, a note naming its own verse, or a number the word reader cut
+short. Each was checked by eye on the picture.
+One was real. A note under 4:94 writes "v." before a full reference to 4:86, and the app read the
+"v." as a verse of this surah, so the button opened 4:4. It was the only reference written that way
+in the whole book. The app now reads a "v." before a full reference as that reference.
+
+**What it changes for a hafiz:** the reference under 4:94 opens the verse the book means, not one
+four verses into the surah.
+
+**The tests:** the citation reader's test "reads v. before a full citation as that citation", and
+the pitch test "a reference written after v. opens the verse it names", each watched failing first.

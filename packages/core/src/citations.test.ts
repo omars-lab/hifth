@@ -97,6 +97,14 @@ describe("verse citations in the commentary prose", () => {
       expect(cited("see v. 9")).toEqual([]);
     });
 
+    it("reads v. before a full citation as that citation, not a verse of this surah", () => {
+      // The book links only the chapter and verse; "v. 4" would open the wrong verse.
+      expect(here("see v. 4:86 and vv. 12:30–31", 4)).toEqual([
+        { text: "4:86", surah: 4, ayah: 86 },
+        { text: "12:30–31", surah: 12, ayah: 30 },
+      ]);
+    });
+
     it("still reads a full citation as its own surah", () => {
       expect(here("v. 3, unlike 9:4", 44)).toEqual([
         { text: "v. 3", surah: 44, ayah: 3 },

@@ -10,7 +10,8 @@ export interface Citation {
 
 // surah:ayah, then an optional range end, then an optional note letter; or a
 // verse of the surah the prose is in, which the book writes "v. 5" or "vv. 4–7".
-const CITE = /\b(\d{1,3}):(\d{1,3})(?:[–-]\d{1,3})?[a-z]?\b|\bvv?\.\s*(\d{1,3})(?:[–-]\d{1,3})?[a-z]?\b/g;
+// A "v." before a full citation ("v. 4:86") is that citation, not verse 4.
+const CITE = /\b(\d{1,3}):(\d{1,3})(?:[–-]\d{1,3})?[a-z]?\b|\bvv?\.\s*(\d{1,3})(?![:\d])(?:[–-]\d{1,3})?[a-z]?\b/g;
 
 // A bare verse number continuing a list — "2:42, 140, and 146" — which the book
 // writes without repeating the surah, after a comma. It must end where a list
