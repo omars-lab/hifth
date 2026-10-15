@@ -32,11 +32,15 @@ import { useEffect, useState } from "react";
 import { AYAH_COUNTS } from "@hifth/core";
 import { verseAudioUrl, type KeptRecitation } from "./audio";
 import { requestPersistentStorage } from "./storage";
+import { savedKeepWhen } from "./keep-when";
 
 /** Where kept recitations live. Never shared with the page caches. */
 export const KEEP_CACHE = "hifth-recitation-v1";
 
 const CLAIM_KEY = "hifth.recitation.kept.v1";
+
+/** Which verses of each surah have played to their end, while that counts. */
+const HEARD_KEY = "hifth.recitation.heard.v1";
 
 /** How many files are fetched at once while keeping a surah. */
 const CONCURRENCY = 3;
@@ -110,10 +114,62 @@ export function keptSurahs(): KeptSurah[] {
     .sort((a, b) => a.surah - b.surah);
 }
 
-/** The surah a verse file belongs to, read off its address. */
-function surahOfUrl(url: string): number | null {
+/** The surah and verse a verse file belongs to, read off its address. */
+function verseOfUrl(url: string): [number, number] | null {
   const m = /\/(\d{3})(\d{3})\.mp3$/.exec(url);
-  return m ? Number(m[1]) : null;
+  return m ? [Number(m[1]), Number(m[2])] : null;
+}
+
+function surahOfUrl(url: string): number | null {
+  return verseOfUrl(url)?.[0] ?? null;
+}
+
+function readHeard(): Record<string, number[]> {
+  try {
+    const raw = localStorage.getItem(HEARD_KEY);
+    if (!raw) return {};
+    const parsed: unknown = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, number[]>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeHeard(heard: Record<string, number[]>): void {
+  try {
+    localStorage.setItem(HEARD_KEY, JSON.stringify(heard));
+  } catch {
+    // Not remembered, so not kept by itself; the button still keeps it.
+  }
+}
+
+/**
+ * A verse's file played to its end (docs/PLAN.md, item 102). With the setting
+ * for keeping a surah once heard through on, the verse is counted, and the one
+ * that completes its surah keeps it, after any keep already under way. The
+ * count starts again once the surah is kept, so a surah the reader then removes
+ * stays removed until they hear it all again. Resolves to what it kept, if any.
+ */
+export async function heardVerse(url: string): Promise<KeptSurah | null> {
+  if (savedKeepWhen() !== "heard" || !keepSupported()) return null;
+  const verse = verseOfUrl(url);
+  if (!verse) return null;
+  const [surah, ayah] = verse;
+  const total = AYAH_COUNTS[surah - 1] ?? 0;
+  if (ayah < 1 || ayah > total || readClaims()[String(surah)] !== undefined) return null;
+  const heard = readHeard();
+  const verses = new Set(heard[String(surah)] ?? []);
+  verses.add(ayah);
+  if (verses.size < total) {
+    writeHeard({ ...heard, [String(surah)]: [...verses].sort((a, b) => a - b) });
+    return null;
+  }
+  delete heard[String(surah)];
+  writeHeard(heard);
+  // The reader's own keep goes first: starting another would stop it.
+  while (underway) await underway;
+  if (readClaims()[String(surah)] !== undefined) return null;
+  return startKeeping(surah);
 }
 
 /**
@@ -207,6 +263,11 @@ export async function forgetSurah(surah: number): Promise<void> {
   const claims = readClaims();
   delete claims[String(surah)];
   writeClaims(claims);
+  const heard = readHeard();
+  if (heard[String(surah)] !== undefined) {
+    delete heard[String(surah)];
+    writeHeard(heard);
+  }
   if (!keepSupported()) return;
   try {
     const cache = await caches.open(KEEP_CACHE);
@@ -237,6 +298,8 @@ export async function checkKept(kept: KeptSurah): Promise<KeptStatus> {
 
 let saving: KeepProgress | null = null;
 let stopper: AbortController | null = null;
+/** The keep in progress, for one that must wait its turn. */
+let underway: Promise<KeptSurah | null> | null = null;
 let version = 0;
 const listeners = new Set<() => void>();
 
@@ -271,7 +334,7 @@ export async function startKeeping(surah: number): Promise<KeptSurah | null> {
   stopper = stop;
   saving = { surah, done: 0, total: surahAudioUrls(surah).length, bytes: 0 };
   notify();
-  const kept = await keepSurah(surah, {
+  const keeping = keepSurah(surah, {
     signal: stop.signal,
     onProgress: (p) => {
       if (stopper !== stop) return;
@@ -279,6 +342,9 @@ export async function startKeeping(surah: number): Promise<KeptSurah | null> {
       notify();
     },
   });
+  underway = keeping;
+  const kept = await keeping;
+  if (underway === keeping) underway = null;
   if (stopper === stop) {
     stopper = null;
     saving = null;
@@ -295,7 +361,11 @@ export function useKeptChanges(): number {
 }
 
 /** What the player reads kept verses from. */
-export const DEVICE_RECITATION: KeptRecitation = { has: isKeptUrl, copy: keptCopy };
+export const DEVICE_RECITATION: KeptRecitation = {
+  has: isKeptUrl,
+  copy: keptCopy,
+  heard: (url) => void heardVerse(url),
+};
 
 /** Stop the keep in progress; what it saved is let go. */
 export function stopKeeping(): void {

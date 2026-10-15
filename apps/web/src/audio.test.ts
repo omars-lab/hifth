@@ -649,6 +649,24 @@ describe("useVerseAudio's verse kept on the device", () => {
     expect(failed).toEqual([v(5)]);
   });
 
+  // A surah can be kept once the reader has heard all of it (docs/PLAN.md,
+  // item 102), so the device is told of each verse that played to its end.
+  it("tells the device of each verse that played to its end, and of no other", () => {
+    line();
+    const heard: string[] = [];
+    const source = { ...kept().source, heard: (u: string) => heard.push(u) };
+    const { result } = renderHook(() => useVerseAudio(undefined, undefined, "off", source));
+    act(() => result.current.playRun([v(1), v(2), v(3)]));
+    act(() => FakePlayer.last!.finish());
+    expect(heard).toEqual([url(1)]);
+    // Stopped partway: the verse it was on was not heard through.
+    act(() => result.current.stop());
+    expect(heard).toEqual([url(1)]);
+    act(() => result.current.toggle(v(5)));
+    act(() => FakePlayer.last!.finish());
+    expect(heard).toEqual([url(1), url(5)]);
+  });
+
   it("a verse not kept, with the setting off, plays from the network as before", async () => {
     const fetched = line();
     const k = kept();

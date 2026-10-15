@@ -101,6 +101,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   at once. The info panel lists it with its size and a Remove button. · any, then the iPad app
   with the wifi off · issue: `keep-surah-recitation-on-device` · test:
   e2e/recitation-keep.spec.ts, recitation-keep.test.ts
+- [ ] In the info panel, under the kept surahs, pick "Also once I have heard it all", then play a
+  short surah from its corner to its end: it is listed as kept, with its size, and "Kept so
+  far" in the setting's note grows. Stop a verse early and it is not counted. Remove it, and it
+  stays removed until heard through again. · any, both languages · issue:
+  `keep-surah-once-heard-through` · test: e2e/recitation-keep.spec.ts, recitation-keep.test.ts,
+  audio.test.ts
 - [ ] On a phone, hold the surah's name and the juz's name at the top of the page: every line
   of the menu is on the screen and can be pressed. A row too wide for the screen stands as a
   column; the surah's row once ran Play off the edge. · phone · issue: `surah-menu-ran-off-phone`

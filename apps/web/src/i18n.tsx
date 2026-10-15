@@ -990,6 +990,10 @@ export interface Strings {
   recGone(name: string): string;
   recRemoveSurah(name: string): string;
   recKeptSaid(name: string): string;
+  keepWhenTitle: string;
+  keepWhenAsked: string;
+  keepWhenHeard: string;
+  keepWhenNote(mb: number): string;
   fullScreen: string;
   showBars: string;
   fullScreenOn: string;
@@ -1808,6 +1812,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     recGone: (name) => m.recGone({ name }),
     recRemoveSurah: (name) => m.recRemoveSurah({ name }),
     recKeptSaid: (name) => m.recKeptSaid({ name }),
+    keepWhenTitle: m.keepWhenTitle,
+    keepWhenAsked: m.keepWhenAsked,
+    keepWhenHeard: m.keepWhenHeard,
+    keepWhenNote: (mb) => m.keepWhenNote({ sizeText: tenths(mb, lang) }),
     fullScreen: m.fullScreen,
     showBars: m.showBars,
     fullScreenOn: m.fullScreenOn,

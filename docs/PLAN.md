@@ -2197,7 +2197,7 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     keeps Al-Baqarah, cuts the connection, and plays it, and nothing more is asked of the
     recording server; with the copy unhooked from the player it went red. A long surah on a real
     iPad on a slow line is parked for the owner as manual item 18.
-102. **A second way to keep a surah: kept once the reader has heard it through.** The one button
+102. ~~**A second way to keep a surah: kept once the reader has heard it through.**~~ The one button
     of item 101 is the way the owner asked for. The other way the build showed is a setting in the
     info panel: a surah recited from its first verse to its last is kept without being asked, so a
     hafiz who revises the same surahs every week has them offline without thinking of it. The
@@ -2206,6 +2206,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     space it has used shown beside it; and a run usually starts mid-surah, so "heard it through"
     needs saying exactly before it is built. Its test: a browser test that runs a short surah to
     its end with the setting on and finds it listed in the info panel.
+    Built 2026-10-15, off by default, in the info panel under the list of kept surahs, with the
+    space already kept shown in its note. "Heard through" means every verse of the surah has
+    played to its end on this device, in one sitting or across several and in any order, counted
+    from when the setting was turned on; a verse stopped before its end does not count, so a run
+    started mid-surah keeps the surah once its opening verses are heard another day. Once a
+    surah is kept its count starts again, so a surah the reader removes stays removed until it is
+    heard through once more. A keep the reader asked for is waited for, not stopped. The browser
+    test plays Al-Ikhlas through with the setting off and finds nothing kept, turns it on, plays
+    it again, and finds it listed with its size.
 103. ~~**The Mistake pen asks what went wrong.**~~ Chosen 2026-10-13 by the owner, asked whether
     to build the slip half of the confusion-points design: a small first version. Then, the same
     day, reshaped by the owner: there is one way in, the Mistake pen, and each kind of mistake is

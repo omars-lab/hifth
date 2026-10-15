@@ -67,6 +67,8 @@ interface Ready {
 export interface KeptRecitation {
   has(url: string): boolean;
   copy(url: string): Promise<Blob | undefined>;
+  /** A verse's file played to its end (docs/PLAN.md, item 102). */
+  heard?(url: string): void;
 }
 
 /** Nothing kept: every verse streams. */
@@ -302,6 +304,8 @@ export function useVerseAudio(
       el.addEventListener("waiting", () => setPhase("loading"));
       el.addEventListener("pause", () => setPhase((p) => (p === "error" ? p : "idle")));
       el.addEventListener("ended", () => {
+        const done = keyRef.current ? verseAudioUrl(keyRef.current) : null;
+        if (done) keptRef.current.heard?.(done);
         const next = queueRef.current.shift();
         if (next) start(elRef.current!, next);
         else {

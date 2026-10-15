@@ -11,7 +11,9 @@ import {
   useKeptChanges,
   type KeptStatus,
 } from "../recitation-keep";
+import { KEEP_WHENS, rememberKeepWhen, useKeepWhen } from "../keep-when";
 import styles from "./PackShelf.module.css";
+import choices from "./Colophon.module.css";
 
 /**
  * The surahs whose recitation is kept on this device (docs/PLAN.md, item 101),
@@ -26,6 +28,10 @@ import styles from "./PackShelf.module.css";
  * It says what the files are, not what the claim says: a claimed surah whose
  * files are partly gone is named "incomplete" (the juz shelf's rule, for the
  * same reason: that is the state most likely to pass for working).
+ *
+ * Under the list, the setting for keeping a surah by itself once the reader has
+ * heard all of it (docs/PLAN.md, item 102), with the space kept so far beside
+ * it, since that is what saying yes to it costs.
  */
 
 /** Bytes as the phone's storage settings count them: 10^6 to the MB. */
@@ -57,6 +63,8 @@ export function RecitationShelf(): JSX.Element {
 
   const saving = keepInProgress();
   const kept = statuses ?? [];
+  const when = useKeepWhen();
+  const held = kept.reduce((sum, s) => sum + (s.health === "gone" ? 0 : s.bytes), 0);
 
   return (
     <section className={styles.shelf} aria-labelledby="colophon-recitations">
@@ -117,6 +125,27 @@ export function RecitationShelf(): JSX.Element {
               })}
             </ul>
           )}
+          <div className={styles.keepWhen}>
+            <h4 className={choices.subhead} id="colophon-keep-when">
+              {t.keepWhenTitle}
+            </h4>
+            <div className={choices.langRow} role="radiogroup" aria-labelledby="colophon-keep-when">
+              {KEEP_WHENS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={choices.lang}
+                  aria-checked={when === choice}
+                  data-keep-when={choice}
+                  onClick={() => rememberKeepWhen(choice)}
+                >
+                  {choice === "asked" ? t.keepWhenAsked : t.keepWhenHeard}
+                </button>
+              ))}
+            </div>
+            <p className={choices.note}>{t.keepWhenNote(megabytes(held))}</p>
+          </div>
         </>
       )}
     </section>
