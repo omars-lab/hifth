@@ -7,12 +7,16 @@
  * Run first of the three last touches (lettering.mjs), before the misreads are
  * mended and the slant is laid on, so both kinds of hand-read row are written
  * against the text as a reader sees it, curly quotes and all. Each mark is swapped for one mark, so a row written against
- * the text before this rule moves to it by position alone. The slant's marks,
+ * the text before this rule moves to it by position alone, except where a stray space is closed up (below). The slant's marks,
  * where a note already carries them, count as part of the line: a quote
  * straight after a run opens is an opening quote.
  *
  * A quote mark between two letters is left alone: there it is a letter the
  * capture misread, not a quotation, and belongs to the hand-read misreads.
+ *
+ * A space the capture left doubled, or before a comma, semicolon or closing
+ * stop, is closed up (three notes in the whole book). The book's own space
+ * between an ellipsis and the mark after it stays.
  */
 
 const OPENS_AFTER = /[\s([{—–“‘]/;
@@ -32,7 +36,10 @@ export function setTypography(text) {
     } else if (ch === "'") out += before === undefined || OPENS_AFTER.test(before) ? "‘" : "’";
     else out += ch;
   }
-  return out;
+  return out
+    .replace(/(?<=\S) {2,}(?=\S)/gu, " ")
+    .replace(/(?<=[^\s.…]) +(?=[,;])/gu, "")
+    .replace(/(?<=[^\s.…]) +\.$/u, ".");
 }
 
 /** Set the typography of every note and translation in one surah, in place. */

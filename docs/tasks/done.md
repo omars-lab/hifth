@@ -9,6 +9,25 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #219 — Close up the stray spaces the capture left in notes
+
+**Done:** 2026-10-15, the pull request "Notes lose the stray spaces the capture left".
+
+A scan of every note for signs of a capture slip found three stray spaces: one doubled, one
+before a semicolon and one before a last full stop. The typography rule now closes them up,
+keeping the book's own space after an ellipsis (docs/design/commentary-lettering.md ②).
+
+## #217 — Mend the edges of slanted runs read off the page pictures
+
+**Done:** 2026-10-15, the pull request "Write down why the slant read off the pages stops where it
+does".
+
+The runs that start a word late mostly begin on a capital W or a word of v, w and y, whose italic
+and upright forms lean about alike. Five other ways of measuring the lean each gained under 2 runs
+in 100, so the tuning stopped; one slip in the hand reading was mended in the private books
+repository (docs/issues/italics-from-page-pictures.md, "Tried after shipping"). Looked at in the
+iPad app afterwards: a far note shows its slanted runs in italics.
+
 ## #216 — Read the slant off the page pictures for every note nobody read by hand
 
 **Done:** 2026-10-14, the pull request "Notes nobody read by hand take their slant from the page

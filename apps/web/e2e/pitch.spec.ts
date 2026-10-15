@@ -399,8 +399,24 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(notes).toBeVisible({ timeout: 20_000 });
     const text = await notes.innerText();
     expect(text.length).toBeGreaterThan(200);
-    expect(text).not.toMatch(/["']/);
-    expect(text).not.toMatch(/\d-\d/);
+    // Counts, so a failure never prints the note's words.
+    expect(text.match(/["']/g)?.length ?? 0, "straight quotes").toBe(0);
+    expect(text.match(/\d-\d/g)?.length ?? 0, "hyphens between numbers").toBe(0);
+  });
+
+  test("the commentary closes up a space the capture left before a semicolon or a closing stop", async ({ page }) => {
+    // Found scanning every note, 2026-10-15: a space before a semicolon, and one
+    // before a note's last full stop. The book's own space after an ellipsis stays.
+    for (const verse of ["4:176", "5:75"]) {
+      await page.goto(`/#/hafs-kfqc/${verse}`);
+      const notes = page.getByRole("region", { name: "Commentary" });
+      await expect(notes).toBeVisible({ timeout: 20_000 });
+      const text = await notes.innerText();
+      expect(text.length).toBeGreaterThan(100);
+      // Counts, so a failure never prints the note's words.
+      expect(text.match(/[^\s.…] +[,;]/gu)?.length ?? 0, `spaces before a comma or semicolon in ${verse}`).toBe(0);
+      expect(text.match(/[^\s.…] +\.\s*$/gmu)?.length ?? 0, `spaces before a closing stop in ${verse}`).toBe(0);
+    }
   });
 
   test("in English the drawer reads left to right, though it lies on the right-to-left page", async ({ page }) => {

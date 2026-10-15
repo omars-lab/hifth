@@ -43,3 +43,21 @@ in the private build (they hold the book's text, and stay on this laptop). On a 
 runs as the others did and its rows are checked against the notes before they go in.
 
 **What this is not settling:** whether to read the slant for notes further out than two taps.
+
+### ② Does a note ever show a space where the book has none, before a semicolon or its last full stop? · **fixed**
+
+**Fixed, 2026-10-15.** A scan of every note found three spaces the capture left: one doubled
+between two words (in a note three verses share), one before a semicolon, and one before a
+note's last full stop. The page pictures show no word missing at the doubled space, so each is a
+stray space and nothing more. The step that sets the book's curly quotes now closes them up,
+across the whole book, so no hand-read row is spent on them.
+
+**What it changes for a hafiz:** nothing in the recitation. A scholar reading the note sees the
+book's punctuation, not a capture's slip.
+
+**What it keeps:** the book's own space between an ellipsis and the comma or stop after it (five
+places). That is how the book prints it.
+
+**The tests:** the typography rule's own tests use made-up words. The pitch test "the commentary
+closes up a space the capture left before a semicolon or a closing stop" opens two of the notes;
+it was watched failing on the notes built without the rule.
