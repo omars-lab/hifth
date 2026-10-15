@@ -477,14 +477,16 @@ just facts."
 
 ### ① Where does the commentary the pitch shows still differ from the printed book? · **open**
 
-**Where it stands, 2026-10-13:** within two taps of a demo note, no difference from the book is
+**Where it stands, 2026-10-14:** within two taps of a demo note, no difference from the book is
 left that anyone has found. The last 38 notes two taps out were read once the owner said yes on
-2026-10-12 ([commentary lettering ①](commentary-lettering.md)). Notes further out than that
-slant the Arabic terms the book writes with long-vowel and dotted letters, by a rule that is
-right 99 times in 100 on the notes read by hand (since 2026-10-14,
-[slanting the transliterated terms](../issues/italics-from-transliteration-marks.md)). Their other
-slanted words, about three runs in four, still show upright: quoted verse words, English
-glosses and titles.
+2026-10-12 ([commentary lettering ①](commentary-lettering.md)). Every note further out now takes
+its slant from the page picture it was captured from: measured on the notes read by hand, that
+slants 94 in 100 of the words the book slants, and 99 in 100 of the words it slants are slanted
+in the book ([reading the italics off the page pictures](../issues/italics-from-page-pictures.md)).
+The Arabic terms the pictures miss are still found by their long-vowel and dotted letters
+([slanting the transliterated terms](../issues/italics-from-transliteration-marks.md)). What is
+left: about 6 slanted words in 100 show upright, and about one run in three has an edge a word
+off or is broken in two.
 
 The private pitch reads The Study Quran's commentary from a capture of the book, page by page.
 Walking the pitch on 2026-10-05 found that where a paragraph ran over the foot of a printed

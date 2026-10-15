@@ -53,6 +53,7 @@ import { readKey } from "./key.mjs";
 import { noteRange, settleTranslation } from "./translation.mjs";
 import { finishNote } from "./finish.mjs";
 import { letterSurah } from "./lettering.mjs";
+import { picturesOf } from "./picture-slant.mjs";
 import { refileSurah } from "./refile.mjs";
 import { opensOnStray, suspects } from "./suspects.mjs";
 import { paragraphStarts, placeStarts } from "./indents.mjs";
@@ -394,6 +395,19 @@ const LIST_SUSPECTS = process.argv.includes("--suspects");
 const LIST_INDENTS = process.argv.includes("--indents");
 const LIST_ALL = process.argv.includes("--all");
 const READINGS = resolve(SRC_DIR, "../.work/pages");
+// The words read off each page picture, with how far each leans (page-words.mjs).
+const SLANT_DIR = resolve(SRC_DIR, "../.work/slant");
+const unreadPictures = new Set();
+function pictureWordsOf(src) {
+  return picturesOf(src).flatMap((png) => {
+    const path = resolve(SLANT_DIR, png.replace(/\.png$/, ".json"));
+    if (!existsSync(path)) {
+      unreadPictures.add(png);
+      return [];
+    }
+    return JSON.parse(readFileSync(path, "utf8")).map((w) => ({ ...w, pic: png }));
+  });
+}
 const NOTES = [];
 const HOLDING = new Map();
 
@@ -485,7 +499,7 @@ function buildSurah(surah) {
     for (const v of Object.values(verses))
       v.commentary.forEach((text, i) => console.log(`${v.ref} ${i} ${orphanPrint(text)} …${text.slice(0, 30)}…`));
   for (const i of refileSurah(surah, verses, REFILES)) usedRefiles.add(i);
-  const lettered = letterSurah(surah, verses, { misreads: MISREADS, italics: ITALICS });
+  const lettered = letterSurah(surah, verses, { misreads: MISREADS, italics: ITALICS, pictureWords: pictureWordsOf(src) });
   for (const i of lettered.misreads) usedMisreads.add(i);
   for (const i of lettered.italics) usedItalics.add(i);
 
@@ -654,6 +668,8 @@ if (existsSync(KEY_SRC)) {
 
 console.log(`wrote ${wrote} surah file(s) to ${OUT_DIR}`);
 if (skipped) console.log(`  skipped ${skipped} (no source file)`);
+if (unreadPictures.size)
+  console.log(`  ${unreadPictures.size} page picture(s) not yet read for the slant: run page-words.mjs`);
 console.log(
   `  verses: ${totalVerses}, with commentary: ${totalCommentary}, cross-reference edges: ${totalEdges}`,
 );
