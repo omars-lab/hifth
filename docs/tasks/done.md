@@ -14,7 +14,8 @@ commit or design-doc item for the actual reasoning.
 **Done:** 2026-10-15, the pull request "A note's Bible references stay words, not links to the Qur'an".
 
 A scan of every note's references found 364 that belong to another book, mostly the Bible's
-chapter and verse, drawn as buttons to the Qur'an verse with the same numbers. They now stay words
+chapter and verse, drawn as buttons to the Qur'an verse with the same numbers. They now stay words,
+and the notes' related-verse lists drop the 323 such verses they held
 (docs/design/commentary-lettering.md ③).
 
 ## #218 — Walk the first screen and page turns in the iPad app

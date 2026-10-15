@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { splitCitations } from "./citations.js";
+import { otherBookCitations, splitCitations } from "./citations.js";
 
 const cited = (text: string) =>
   splitCitations(text).flatMap((part) => (typeof part === "string" ? [] : [part]));
@@ -125,6 +125,16 @@ describe("verse citations in the commentary prose", () => {
 
     it("leaves a volume and page after a dated work as text", () => {
       expect(cited("(Smith, Tales [1999], 2:45); see 2:45")).toEqual([{ text: "2:45", surah: 2, ayah: 45 }]);
+    });
+
+    it("names the chapters and verses it read as another book's, a range to its end", () => {
+      expect(otherBookCitations("as in Genesis 2:7–9; 3:19 and Luke 1:26, then 2:30 and [1999], 4:16")).toEqual([
+        [2, 7, 9],
+        [3, 19, 19],
+        [1, 26, 26],
+        [4, 16, 16],
+      ]);
+      expect(otherBookCitations("the tale of Jonah 37:139–48")).toEqual([]);
     });
 
     it("keeps every word, in order", () => {

@@ -65,23 +65,39 @@ const isVerse = (surah: number, ayah: number): boolean => {
  * a "v. 5" means; without it, those stay text.
  */
 export function splitCitations(text: string, here?: number): (string | Citation)[] {
+  return readCitations(text, here).parts;
+}
+
+/**
+ * The chapters and verses a paragraph cites of another book (the Bible, or a
+ * volume and page), as `[chapter, first verse, last verse]`, in order. A list
+ * of references read by numbers alone takes these for the Qur'an's.
+ */
+export function otherBookCitations(text: string): [number, number, number][] {
+  return readCitations(text).other;
+}
+
+function readCitations(text: string, here?: number) {
   const parts: (string | Citation)[] = [];
+  const books: [number, number, number][] = [];
   let last = 0;
   // Where the last reference to another book ended, and how many chapters
   // that book has, so the list it begins can be followed.
-  let other = { end: -1, chapters: 0 };
+  let list = { end: -1, chapters: 0 };
   for (const m of text.matchAll(CITE)) {
     const same = m[3] !== undefined;
     if (same && here === undefined) continue;
     if (!same) {
-      const listed = other.end >= 0 && SAME_LIST.test(text.slice(other.end, m.index));
-      const chapters = listed ? other.chapters : anotherBook(text.slice(Math.max(last, m.index - 40), m.index));
+      const listed = list.end >= 0 && SAME_LIST.test(text.slice(list.end, m.index));
+      const chapters = listed ? list.chapters : anotherBook(text.slice(Math.max(last, m.index - 40), m.index));
       if (Number(m[1]) <= chapters) {
-        other = { end: m.index + m[0].length, chapters };
+        list = { end: m.index + m[0].length, chapters };
+        const end = /[–-](\d{1,3})/.exec(m[0]);
+        books.push([Number(m[1]), Number(m[2]), end ? Number(end[1]) : Number(m[2])]);
         continue;
       }
     }
-    other = { end: -1, chapters: 0 };
+    list = { end: -1, chapters: 0 };
     const surah = same ? here! : Number(m[1]);
     const ayah = Number(same ? m[3] : m[2]);
     if (!isVerse(surah, ayah)) continue;
@@ -100,5 +116,5 @@ export function splitCitations(text: string, here?: number): (string | Citation)
     }
   }
   if (last < text.length) parts.push(text.slice(last));
-  return parts;
+  return { parts, other: books };
 }

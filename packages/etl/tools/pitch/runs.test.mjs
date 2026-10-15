@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addCited, citedIn, foldRuns } from "./runs.mjs";
+import { addCited, citedIn, foldRuns, otherBooksOnly } from "./runs.mjs";
 
 // Made-up cross-reference lists, in the shape the capture gives them: a range
 // the note cites ("vv. 4–7") arrives as every verse in it, one after another.
@@ -48,6 +48,13 @@ describe("citedIn", () => {
 
   it("reads through the marks that set a run in italics", () => {
     expect(citedIn(["\uE000a word\uE001 (9:4, 6)"], 44)).toEqual([[9, 4], [9, 6]]);
+  });
+});
+
+describe("otherBooksOnly", () => {
+  it("names the verses a note cites only as another book's chapter and verse, a range's every verse", () => {
+    const notes = ["As in Genesis 2:7–9; 3:19, and so 9:4.", "\uE000Exodus\uE001 9:4 and 31:7; see 3:19."];
+    expect([...otherBooksOnly(notes, 44)].sort()).toEqual(["2:7", "2:8", "2:9", "31:7"]);
   });
 });
 

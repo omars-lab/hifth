@@ -856,8 +856,10 @@ upright and on its side, English and Arabic, iPad and Mac.
 - [ ] A reference in a note links only when it is the Qur'an's: a Bible book's chapter and verse
   (and the list it goes on to name), or a volume and page after a work's year, stays words. A
   reference that opens a verse unrelated to what the note is saying is another book's, read as a
-  surah and verse. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/2:37'` · issue:
-  `note-bible-refs-linked` · test: `e2e/pitch.spec.ts` ("a Bible reference in a note is not a link")
+  surah and verse. The note's related verses offer none of those either. ·
+  `make drive DEVICE=laptop HASH='#/hafs-kfqc/2:60?open=commentary'` · issue:
+  `note-bible-refs-linked` · tests: `e2e/pitch.spec.ts` ("a Bible reference in a note is not a
+  link", "related verses do not send the reader to a verse the note names only as the Bible's")
 - [ ] A note shared by a run of verses shows whole under every one of them, and a verse's own note
   shows under that verse alone: a paragraph that opens on a verse number mid-note, or a note that
   stops short under one verse of the run, is the capture filing it in the wrong place; read it off

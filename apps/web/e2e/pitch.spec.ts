@@ -448,6 +448,36 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     }
   });
 
+  test("a note's related verses do not send the reader to a verse the note names only as the Bible's", async ({ page }) => {
+    // The book's own list read "Genesis 2:7" as the Qur'an's 2:7, so 323 rows
+    // across the book opened a verse the note never cites; 2:60 had seven.
+    for (const verse of ["2:37", "2:60"]) {
+      await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
+      const list = sheet(page).getByRole("region", { name: "Related verses" });
+      await expect(list.getByRole("listitem").first()).toBeVisible({ timeout: 20_000 });
+      // Verse numbers and counts only, never the note's words.
+      const found = await sheet(page).evaluate((el) => {
+        const text = el.querySelector('[aria-label="Commentary"]')?.textContent ?? "";
+        const books = "Genesis|Exodus|Leviticus|Numbers|Deuteronomy|Judges|Samuel|Kings|Isaiah|Jeremiah|Matthew|Mark|Luke|John";
+        const list = new RegExp(`\\b(?:${books})\\s+\\d{1,3}:\\d{1,3}(?:[–-]\\d{1,3})?(?:\\s*[,;]\\s*(?:and\\s+)?\\d{1,3}:\\d{1,3}(?:[–-]\\d{1,3})?)*`, "g");
+        const bible = new Set<string>();
+        for (const m of text.matchAll(list))
+          for (const [, c, a, b] of m[0].matchAll(/(\d{1,3}):(\d{1,3})(?:[–-](\d{1,3}))?/g))
+            for (let v = Number(a); v <= Number(b ?? a); v++) bible.add(`${c}:${v}`);
+        const quran = new Set(
+          [...el.querySelectorAll('button[aria-label^="Go to"]')].map((b) => /(\d+:\d+)\s*$/.exec(b.getAttribute("aria-label") ?? "")?.[1]),
+        );
+        const rows = [...el.querySelectorAll('[aria-label="Related verses"] button[aria-label^="Hop to"]')].map(
+          (b) => /(\d+:\d+)/.exec(b.getAttribute("aria-label") ?? "")?.[1] ?? "",
+        );
+        return { bible: bible.size, rows: rows.length, wrong: rows.filter((k) => bible.has(k) && !quran.has(k)).length };
+      });
+      expect(found.bible, `Bible verses named in ${verse}'s note`).toBeGreaterThan(0);
+      expect(found.rows, `related verses under ${verse}'s note`).toBeGreaterThan(0);
+      expect(found.wrong, `related verses under ${verse}'s note that are the Bible's numbers`).toBe(0);
+    }
+  });
+
   test("in English the drawer reads left to right, though it lies on the right-to-left page", async ({ page }) => {
     // It inherited the mus'haf's direction, so the line under the credit read
     // ".Shown privately, …" — its full stop in front — and sat against the

@@ -65,14 +65,20 @@ it was watched failing on the notes built without the rule.
 ### ③ Does a note's Bible reference open a verse of the Qur'an? · **fixed**
 
 **Fixed, 2026-10-15.** The notes cite the Bible by book, chapter and verse, as in "Genesis 2:7".
-The app read every pair of numbers with a colon between them as a surah and verse, so 329 Bible
+The app read every pair of numbers with a colon between them as a surah and verse, so 327 Bible
 references were buttons that opened the Qur'an verse with the same numbers. So were 33 more that
 carry a Bible list on after a semicolon or a comma without naming the book again, and 4 volume and
 page numbers of another book, written after the year of its printing. That is 364 wrong links in
 about 230 notes, some of them on the demo's own pages.
 
+The book's own list of related verses under each note had read the numbers the same way. It sent
+the reader to the Qur'an verse with a Bible reference's numbers 323 times: under 2:60, seven rows
+opened the Qur'an verses that share their numbers with one passage of the Bible. Those rows are
+dropped now, unless the note also cites that verse as the Qur'an's.
+
 **What it changes for a hafiz:** a reference opens the verse it names, or nothing. A scholar who
-taps a Bible reference is no longer sent to an unrelated verse of the Qur'an.
+taps a Bible reference is no longer sent to an unrelated verse of the Qur'an. Nor does the list of related verses
+offer one the note never cites.
 
 **How it tells them apart:** a reference straight after a Bible book's name stays words when that
 book has a chapter of that number. The chapter count keeps a prophet apart from the book named for
@@ -80,6 +86,7 @@ him: after "Jonah", a reference to chapter 37 is the Qur'an's telling, since the
 four chapters. A list goes on as the book's while only a comma, a semicolon or an "and" parts one
 reference from the next. A reference after a year closing a bracket is a page of that work.
 
-**The tests:** the reference reader's own tests use made-up sentences. The pitch test "a Bible
-reference in a note is not a link to the Qur'an verse of the same numbers" opens two notes that
-cite both books; it was watched failing on the build without the fix.
+**The tests:** the reference reader's own tests, and the related list's, use made-up sentences.
+The pitch tests "a Bible reference in a note is not a link to the Qur'an verse of the same numbers"
+and "a note's related verses do not send the reader to a verse the note names only as the Bible's"
+open notes that cite both books; each was watched failing on the build without its fix.

@@ -57,7 +57,7 @@ import { picturesOf } from "./picture-slant.mjs";
 import { refileSurah } from "./refile.mjs";
 import { opensOnStray, suspects } from "./suspects.mjs";
 import { paragraphStarts, placeStarts } from "./indents.mjs";
-import { addCited, citedIn, foldRuns } from "./runs.mjs";
+import { addCited, citedIn, foldRuns, otherBooksOnly } from "./runs.mjs";
 import { endPrint, endUnread } from "./ends.mjs";
 import { orphanPrint, rescueOrphans } from "./orphans.mjs";
 import { wordsOf } from "./splits.mjs";
@@ -263,6 +263,8 @@ function refShard(surah, entries, verses) {
     const [, sourceAyah] = from;
     const refs = Array.isArray(entry.refs) ? entry.refs : [];
 
+    const notes = verses[`${surah}:${sourceAyah}`]?.commentary ?? [];
+    const otherBooks = otherBooksOnly(notes, surah);
     const seen = new Set();
     const picked = refs
       // Keep well-formed, in-range targets that are not this verse itself.
@@ -270,6 +272,8 @@ function refShard(surah, entries, verses) {
       .filter(({ to }) => to && to[0] >= 1 && to[0] <= 114 && to[1] >= 1)
       .filter(({ to }) => to[1] <= AYAH_COUNTS[to[0] - 1])
       .filter(({ to }) => !(to[0] === surah && to[1] === sourceAyah))
+      // Not a verse the note names only as the Bible's, or another book's.
+      .filter(({ to }) => !otherBooks.has(`${to[0]}:${to[1]}`))
       .filter(({ to }) => {
         const key = `${to[0]}:${to[1]}`;
         if (seen.has(key)) return false;
@@ -286,7 +290,6 @@ function refShard(surah, entries, verses) {
 
     // Then the verses the note cites that the list left out ("9:4, 7, 12" keeps
     // only 9:4), after the book's own, so they fill places and push none out.
-    const notes = verses[`${surah}:${sourceAyah}`]?.commentary ?? [];
     const cited = citedIn(notes, surah).filter(([s, a]) => !(s === surah && a === sourceAyah));
     const all = addCited(roads, cited);
 
