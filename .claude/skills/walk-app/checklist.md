@@ -715,6 +715,14 @@ upright and on its side, English and Arabic, iPad and Mac.
   TARGET=ipad SIDEWAYS=1 LOCALE=en "ROUTE=/hafs-kfqc/2:48?open=commentary"
   EVALFILE=.claude/skills/walk-app/scripts/thread-walk.js …` · walked 2026-10-15 from 2:48 in
   both languages and on the iPad mini on its side, and from 2:255: nothing wrong
+- [ ] Follow a reference in a note, turn the iPad, then press Back **in the iPad app**: on its
+  side, follow the note's first reference; turn the iPad upright, as when handing it across; press
+  Back; turn it on its side again. Each step lights the verse it is on, with none of it under the
+  note or off the screen; Back comes home with the note still up; the dark surround, when chosen,
+  stays through all of it. · `make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en
+  "ROUTE=/hafs-kfqc/2:48?open=commentary" EVALFILE=.claude/skills/walk-app/scripts/ref-turn-walk.js
+  DELAY_MS=2500 TURNS=14,30 PROBE_TIMEOUT_S=200` · walked 2026-10-15 on the 13-inch in English,
+  the iPad mini in Arabic, and the 13-inch with `field=dark`: nothing wrong
 - [ ] Make one whole visit **in the iPad app on its side**, in English and in Arabic, as a reader
   in the room would: open a note, read it to its end, follow a reference in it and come back,
   play the surah from its corner with the note still open, then pause. Nothing lit sits under the
