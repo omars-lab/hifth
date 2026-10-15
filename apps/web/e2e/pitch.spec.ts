@@ -1945,11 +1945,21 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     // 5:64 and 35:32 are far from the demo; no hand-read row slants them, and
     // the transliteration rule slants single words. The slant read off the page
     // pictures each block was captured from sets whole phrases apart, as the
-    // print does (docs/issues/italics-from-page-pictures.md).
+    // print does (docs/issues/italics-from-page-pictures.md). Each goto only
+    // changes the hash, so the last note is still up while the next loads:
+    // wait for it to have changed before counting.
+    let was = "";
     for (const verse of ["5:64", "35:32"]) {
       await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
       const note = sheet(page).getByRole("region", { name: "Commentary" });
       await expect(note).toBeVisible({ timeout: 20_000 });
+      await expect
+        .poll(async () => {
+          const now = (await note.textContent()) ?? "";
+          return now !== "" && now !== was;
+        }, { message: `${verse}'s note in place of the last one`, timeout: 20_000 })
+        .toBe(true);
+      was = (await note.textContent()) ?? "";
       await expect
         .poll(
           () => note.locator("em").evaluateAll((ems) => ems.filter((em) => (em.textContent ?? "").trim().split(/\s+/).length >= 2).length),
