@@ -2253,6 +2253,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     bookmark corner already stepped aside for the sign and word pens; now they step aside for the
     Mistake pen too. Built 2026-10-13: a browser test that taps the outer word of both pages,
     watched failing first, and the walk repeated in the iPad app in both languages.
+107. ~~**An iPad mini turned upright and back on its side brings its page back at the size it
+    opened at.**~~ Found 2026-10-15 on a walk that turns the iPad app by hand, not asked: on its
+    side the mini shows one page, a little bigger than the room beside the note; turned upright
+    and back, the page came back whole and smaller, its top line cut by the edge. Item 99 kept
+    only the upright size, and a page already on screen at the turn was never told the size it
+    should come back to. Now the size a page opened at is kept for each way the iPad is held,
+    and the same setting in the info panel governs both. Built 2026-10-15: a browser test that
+    turns a mini-sized screen upright and back, watched failing first, and the walk repeated in
+    the iPad app on both sizes.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

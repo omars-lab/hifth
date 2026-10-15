@@ -59,6 +59,10 @@ PROBE_OUT    ?= $(SHOTS)/probe-side.json
 # home screen). Kept outside the repository when the page may show a note.
 PROBE_SHOT   ?=
 PROBE_SHOT_AT = $(if $(PROBE_SHOT),$(abspath $(PROBE_SHOT)))
+# app-probe SIDEWAYS=1 TURNS=12,24: seconds after launch at which the UI test
+# turns the iPad upright, then back on its side (an even count, so it ends on
+# its side), while the question watches. Only a UI test can turn the simulator.
+TURNS        ?=
 # app-test: some XCUITests instead of the whole run, space-separated, e.g. ONLY=SmokeTests/testOpensAtAVerse
 ONLY         ?=
 # app-walk: the routes to open, space-separated, and whether to hold it sideways.
@@ -188,7 +192,12 @@ endif
 	@sips -g pixelWidth $(SHOT_OUT) | awk '/pixelWidth/ { exit !($$2 > 0) }' || { echo "  ✗ $(SHOT_OUT) has no pixels"; exit 1; }
 	@echo "  ✓ $(SHOT_OUT)"
 
-app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1, iPad only] [PROBE_SHOT=file.png]
+app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1 [TURNS=12,24], iPad only] [PROBE_SHOT=file.png]
+ifneq ($(TURNS),)
+ifneq ($(TARGET)$(SIDEWAYS),ipad1)
+	@echo "  ✗ TURNS needs TARGET=ipad SIDEWAYS=1: only the sideways UI test can turn the iPad"; exit 1
+endif
+endif
 ifeq ($(TARGET)$(SIDEWAYS),ipad1)
 	@# The app may not turn itself on an iPad, so a UI test turns the
 	@# simulator and starts the probe; the app keeps its answer in a file,
@@ -201,7 +210,7 @@ ifeq ($(TARGET)$(SIDEWAYS),ipad1)
 	xcrun simctl bootstatus $(IPAD_UDID) -b > /dev/null
 	set -o pipefail; TEST_RUNNER_PROBE_OUT='$(abspath $(PROBE_OUT))' TEST_RUNNER_PROBE_ROUTE='$(ROUTE)' TEST_RUNNER_PROBE_EVAL=$(PROBE_EVAL) \
 	  TEST_RUNNER_PROBE_DELAY_MS='$(DELAY_MS)' TEST_RUNNER_PROBE_LOCALE='$(LOCALE)' TEST_RUNNER_PROBE_TIMEOUT_S='$(PROBE_TIMEOUT_S)' \
-	  TEST_RUNNER_PROBE_SHOT='$(PROBE_SHOT_AT)' \
+	  TEST_RUNNER_PROBE_SHOT='$(PROBE_SHOT_AT)' TEST_RUNNER_PROBE_TURNS='$(TURNS)' \
 	  $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
 	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-probe.xcresult \
 	  -only-testing:HifthUITests-iOS/WalkTests/testProbeOnItsSide test | $(XCPRETTY)

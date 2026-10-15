@@ -9,6 +9,11 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #226 — An iPad mini handed upright and back on its side keeps its opening size
+
+**Done:** 2026-10-15, the pull request "An iPad mini turned upright and back keeps its page's size"
+(docs/PLAN.md, item 107). Found by the new walk that turns the iPad app while it watches.
+
 ## #224 — Build PLAN 102: a setting that keeps a surah once it has been heard through
 
 **Done:** 2026-10-15, the pull request "A surah heard through can be kept by itself".

@@ -592,7 +592,7 @@ const messages: Catalog = {
   turnStyleNote: "How a turn looks. Flat seam: a band passes over the page. Curl: the leaf curls over with grey lines, and the words appear once it lies flat. Shadow: a shadow lifts off the edge and the page changes under it. In every one, the words never move while the page turns.",
   turnStyleSeam: "Flat seam",
   twin: "twin",
-  uprightAgainNote: "On its side the iPad shows two whole pages. Turned back upright, the page comes back at the size it opened at. The other way keeps it whole, edge to edge.",
+  uprightAgainNote: "On its side the iPad shows two whole pages. Turned back upright, the page comes back at the size it opened at. A small iPad, which shows one page on its side, brings that page back at its opening size when it is turned on its side again. The other way keeps the page whole, edge to edge.",
   uprightAgainOpening: "The size it opened at",
   uprightAgainTitle: "Turning the iPad back upright",
   uprightAgainWhole: "The whole page",

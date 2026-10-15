@@ -62,9 +62,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 ## The page bar
 
 - [ ] With one page open and a note up, the page bar is still in reach. · laptop, ipad · issue:
-  `one-page-note-covers-page-bar`
+  `one-page-note-covers-page-bar` · in the iPad app (walked 2026-10-15 upright on 2:255, with a
+  picture from `PROBE_SHOT=`): on the 13-inch the note ends above the full-screen row and the bar
+  is clear; the mini held upright opens the note as the phone's sheet, which covers the bar as it
+  does on a phone (close the note or swipe to turn), and that is the phone's design, not this fault
 - [ ] With one page open, a link straight to a verse leaves it in sight beside its note — open it
-  a few times, it was one in four. · laptop · issue: `one-page-link-note-covers-verse`
+  a few times, it was one in four. · laptop · issue: `one-page-link-note-covers-verse` · the
+  iPad app upright, both sizes: 2:255 lit above its note (walked 2026-10-15)
 - [ ] The bar grows under the finger and settles on a page, both ways up. · phone, ipad-side ·
   tests: pagebar, pagebar-detents, pagebar-fisheye specs
 
@@ -302,8 +306,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Open a note with the iPad on its side, turn it upright, then back, as when it is handed
   across a table: the note stays open each way up and every line of its verse stays in sight and
   clear of it. Then zoom in to 150% and turn it upright again: the same. · ipad-side, ipad, private
-  build · checked 2026-10-11 in Chromium and WebKit, clean, zoomed in too; the real iPad's turn is
-  parked (manual testing 13)
+  build · checked 2026-10-11 in Chromium and WebKit, clean, zoomed in too; 2026-10-15 in the iPad
+  app turned by its UI test (`scripts/hand-turn-walk.js`): the 13-inch in English and Arabic clean
+  at 100% and 150%; the real iPad's turn is parked (manual testing 13)
+- [ ] On an iPad mini on its side, open a verse's page, turn it upright, then back on its side: the
+  page comes back at the size it opened at, its top line in sight, not whole and smaller. · ipad
+  (1133×744), the iPad app on the mini, private build · issue:
+  `mini-side-again-brings-back-opening-size`
 - [ ] With a verse chosen low on the page and its note open, press + until 200%: every line of the
   verse stays on the screen, and with the book open both pages stay level at the fold, and still
   level pressed back down to 100%; set "Grow from the middle" and the verse goes down as before. ·

@@ -59,6 +59,9 @@ final class WalkTests: XCTestCase {
         try XCTSkipIf(out.isEmpty, "no PROBE_OUT: run it with make app-probe TARGET=ipad SIDEWAYS=1")
         try? FileManager.default.removeItem(atPath: out)
         let locale = env["PROBE_LOCALE"] ?? ""
+        let turns = try XCTUnwrap(
+            Self.turnTimes(env["PROBE_TURNS"] ?? ""),
+            "TURNS must be an even count of rising seconds, so the walk ends on its side")
         XCUIDevice.shared.orientation = .landscapeLeft
         defer { XCUIDevice.shared.orientation = .portrait }
         let app = XCUIApplication()
@@ -74,7 +77,12 @@ final class WalkTests: XCTestCase {
         app.launch()
         let timeout = TimeInterval(env["PROBE_TIMEOUT_S"] ?? "") ?? 180
         let start = Date()
+        var turned = 0
         while !FileManager.default.fileExists(atPath: out), Date().timeIntervalSince(start) < timeout {
+            if turned < turns.count, Date().timeIntervalSince(start) >= turns[turned] {
+                XCUIDevice.shared.orientation = turned.isMultiple(of: 2) ? .portrait : .landscapeLeft
+                turned += 1
+            }
             Thread.sleep(forTimeInterval: 0.5)
         }
         if !FileManager.default.fileExists(atPath: out) {
@@ -91,6 +99,30 @@ final class WalkTests: XCTestCase {
         // it had: the simulator sometimes says it turned and stays upright.
         let viewport = try XCTUnwrap(answer["viewport"] as? [Double])
         XCTAssertGreaterThan(viewport[0], viewport[1], "asked for sideways, the page was \(viewport[0]) x \(viewport[1])")
+    }
+
+    /// The seconds at which to turn, read from "12,24"; nil for anything else
+    /// than an even count of rising numbers.
+    static func turnTimes(_ text: String) -> [TimeInterval]? {
+        let parts = text.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        let times = parts.compactMap(TimeInterval.init)
+        guard times.count == parts.count, times.count.isMultiple(of: 2),
+              zip(times, times.dropFirst()).allSatisfy({ $0 < $1 }) else { return nil }
+        return times
+    }
+
+    // make app-probe TURNS=12,24: the seconds after launch at which the probe
+    // turns the iPad upright and back, as when it is handed across a table.
+    @MainActor
+    func testTurnTimesAreRead() {
+        XCTAssertEqual(Self.turnTimes(""), [])
+        XCTAssertEqual(Self.turnTimes("12,24"), [12, 24])
+        XCTAssertEqual(Self.turnTimes(" 12, 24.5 ,30,40"), [12, 24.5, 30, 40])
+        // An odd count would leave it upright, and the answer would be checked
+        // as if it came from its side.
+        XCTAssertNil(Self.turnTimes("12"))
+        XCTAssertNil(Self.turnTimes("12,soon"))
+        XCTAssertNil(Self.turnTimes("24,12"))
     }
 }
 #endif

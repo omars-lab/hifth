@@ -4717,6 +4717,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Checking the notes' links against the blue links on the book's own pages found one wrong button: a note writing \"v.\" before a full reference opened verse 4 of the surah instead of the verse named. The citation reader now reads it as the full reference; tested on a made-up sentence and by a pitch test on the note under 4:94."
+    },
+    {
+      "id": "mini-side-again-brings-back-opening-size",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "107"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/ipad.spec.ts",
+      "note": "On an iPad mini on its side the page opens a little bigger than its room; turned upright and back it came back whole and smaller. The opening size is now kept for each way the iPad is held, and a page already on screen at the turn is told it. Browser test \"an iPad mini turned upright and back on its side comes back at the size it opened at\", watched failing first (447 wide against 693); walked again in the iPad app on both sizes."
     }
   ]
 }

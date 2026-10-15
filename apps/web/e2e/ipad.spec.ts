@@ -828,6 +828,28 @@ test.describe("Hifth · turning an iPad on its side and back upright", () => {
     // It opened at 155%; whole is 100%, about two thirds as wide.
     expect(back / opened, "back upright, the whole page").toBeLessThan(0.7);
   });
+
+  // An iPad mini on its side is too short for the open book, so it shows one
+  // page, opened a little bigger than the room, as upright. Handed across a
+  // table, upright and back on its side, it came back smaller than it opened
+  // (walked in the iPad app, 2026-10-15): only the turn back upright brought
+  // the opening size back.
+  test("an iPad mini turned upright and back on its side comes back at the size it opened at", async ({ page }) => {
+    const MINI_SIDE = { width: 1133, height: 744 } as const;
+    await page.addInitScript((key) => localStorage.setItem(key, "1"), COACH_STORAGE_KEY);
+    await page.setViewportSize(MINI_SIDE);
+    await page.goto("/#/hafs-kfqc/2:255");
+    await shown(page, 42);
+    await expect(leaf(page, 41)).toHaveCount(0);
+    const opened = await settledWidth(page, 42);
+    await page.setViewportSize({ width: MINI_SIDE.height, height: MINI_SIDE.width });
+    await shown(page, 42);
+    await settledWidth(page, 42);
+    await page.setViewportSize(MINI_SIDE);
+    await shown(page, 42);
+    const back = await settledWidth(page, 42);
+    expect(Math.abs(back - opened), `back on its side, ${Math.round(back)} wide; it opened ${Math.round(opened)} wide`).toBeLessThan(2);
+  });
 });
 
 /*
