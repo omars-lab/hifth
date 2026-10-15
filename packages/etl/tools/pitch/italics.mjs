@@ -11,6 +11,13 @@
  * nothing, or finds two places, is refused rather than guessed: the context is
  * there to make it one place. A row marked `every` slants each whole word it
  * finds in the verse's notes, and must find at least one.
+ *
+ * One kind can be found from the words after all: a transliterated term. A
+ * word with a long-vowel or dotted letter, or an ʿayn or hamzah, and no capital
+ * anywhere in it is slanted in 983 of the 997 places it stands in the notes read
+ * by hand; a capital marks a name, which the print sets upright. So the notes
+ * nobody read take that rule, and the read ones keep their rows alone
+ * (docs/issues/italics-from-transliteration-marks.md).
  */
 
 /** Opens a slanted run. The reader's panel has the same pair. */
@@ -109,4 +116,25 @@ export function slantSurah(surah, verses, rows) {
   for (const entry of Object.values(verses))
     entry.commentary = entry.commentary.map((note) => slanted.get(note) ?? note);
   return used;
+}
+
+/** A word, with any hyphens or apostrophes inside it. */
+const WORD = /[\p{L}\p{M}]+(?:[-'\u2019\u02bc][\p{L}\p{M}]+)*/gu;
+/** The letters only a transliteration has. */
+const MARKED = /[\u0101\u012b\u016b\u0100\u012a\u016a\u1e25\u1e24\u1e63\u1e62\u1e6d\u1e6c\u1e93\u1e92\u1e0d\u1e0c\u02bf\u02be]/u;
+const CAPITAL = /\p{Lu}/u;
+
+/**
+ * Slant every transliterated term (a marked word with no capital) in the notes
+ * not in `read`, the note texts of the verses read by hand. Run it after
+ * slantSurah, so a hand-read note under any verse that shares it is left alone.
+ */
+export function slantMarkedTerms(verses, read) {
+  for (const entry of Object.values(verses))
+    entry.commentary = entry.commentary.map((note) => {
+      if (read.has(note) || note.includes(SLANT_START)) return note;
+      const nfc = note.normalize("NFC");
+      const out = nfc.replace(WORD, (w) => (MARKED.test(w) && !CAPITAL.test(w) ? SLANT_START + w + SLANT_END : w));
+      return out === nfc ? note : out;
+    });
 }

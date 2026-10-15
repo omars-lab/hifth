@@ -480,7 +480,11 @@ just facts."
 **Where it stands, 2026-10-13:** within two taps of a demo note, no difference from the book is
 left that anyone has found. The last 38 notes two taps out were read once the owner said yes on
 2026-10-12 ([commentary lettering ①](commentary-lettering.md)). Notes further out than that
-still show slanted words upright; nobody in the room reaches them from the demo.
+slant the Arabic terms the book writes with long-vowel and dotted letters, by a rule that is
+right 99 times in 100 on the notes read by hand (since 2026-10-14,
+[slanting the transliterated terms](../issues/italics-from-transliteration-marks.md)). Their other
+slanted words, about three runs in four, still show upright: quoted verse words, English
+glosses and titles.
 
 The private pitch reads The Study Quran's commentary from a capture of the book, page by page.
 Walking the pitch on 2026-10-05 found that where a paragraph ran over the foot of a printed

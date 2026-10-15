@@ -214,8 +214,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   other, never an empty panel or a wait that does not end. · any, pitch · checked 2026-10-11
   by counting the private notes: every one of the 6236 verses has one
 - [ ] Read a note to the end: it ends above the page bar, and reads like the printed book. · any ·
-  **open** — issue: `pitch-commentary-differs-from-print` (outside the demo notes, italic words
-  still show upright)
+  **open** — issue: `pitch-commentary-differs-from-print` (outside the demo notes, quoted verse
+  words, English glosses and titles still show upright)
+- [ ] Open a note well beyond two taps of the demo (2:37 is one) and set it beside its page picture:
+  each Arabic word the book writes with a line or dot under a letter, and no capital, is slanted,
+  and a name with a capital stays upright. · desktop, and the iPad app after `make app-web` · test:
+  `e2e/pitch.spec.ts` ("a note nobody read by hand slants the Arabic terms the book writes with
+  marks") · docs/issues/italics-from-transliteration-marks.md
 - [ ] In every demo note (2:255, 2:48, 15:30–31, 18:10–14, and the long note 18:60–82 shares), the
   words the book slants are slanted — open each demo verse, not only the first few: a transliterated word, a quoted verse phrase. No stray box or mark shows
   where a slant starts or ends, and a slanted run next to a cited verse keeps the verse a link.

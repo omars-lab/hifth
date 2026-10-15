@@ -24,4 +24,13 @@ describe("letterSurah", () => {
     expect(v["9:1"].commentary[0]).toBe("1 The well “of the town” ran dry, at 4:2–3.");
     expect(used.italics).toEqual(new Set([0]));
   });
+
+  it("slants the marked terms of a note nobody read by hand, and only there", () => {
+    const v = verses();
+    v["9:1"].commentary = ["1 The fūzan of the town ran dry."];
+    v["9:2"].commentary = ["2 The fūzan rested."];
+    letterSurah(9, v, { misreads: [], italics: [{ verse: "9:1", at: "the _town_ ran" }] });
+    expect(v["9:1"].commentary[0]).toBe("1 The fūzan of the \uE000town\uE001 ran dry.");
+    expect(v["9:2"].commentary[0]).toBe("2 The \uE000fūzan\uE001 rested.");
+  });
 });
