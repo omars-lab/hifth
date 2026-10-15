@@ -4742,6 +4742,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/ipad.spec.ts",
       "note": "Found walking the iPad mini app upright (2026-10-15): after a turn forward and back the red ribbon marking where you left off came back about sixteen points inside the paper, over the ends of the lines, because the turn told it where the paper was before the page's margin had moved to its new side. Where the paper is is now told again once the page is on the screen. Test on an 11-inch iPad and an iPad mini, watched failing first by sixteen points; walked again in the mini app."
+    },
+    {
+      "id": "verse-tools-cut-page-slider-wide",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "109"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/slider-arrows.spec.ts",
+      "note": "Found walking the demo at a desk (2026-10-15): where a verse's tools rise as a card in the middle of the bar (a desk, a laptop, an iPad on its side), the page slider ran in under one side of the card and out of the other, its page marker hidden under it. The phone fix (verse-tools-leave-bar-scraps) made the card cover the whole bar only on narrow or short screens. Now the track and the page count step out of sight while the card is up, keeping their room so nothing moves, and the end arrows stay. Test on three screen sizes in both languages, Chrome and Firefox, watched failing first."
     }
   ]
 }

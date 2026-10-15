@@ -2271,6 +2271,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     gets told again once the page is on the screen, and only that: the page and the book's slide
     stay as the turn placed them. Built 2026-10-15: a browser test on an 11-inch iPad and an iPad
     mini, watched failing first by sixteen points, and the walk repeated in the mini app.
+109. ~~**The page slider stays clear of a verse's tools at a desk, on a laptop and on an iPad on
+    its side.**~~ Found 2026-10-15 walking the demo at a desk, not asked: on a screen wide enough
+    for the verse's tools to rise as a card in the middle of the bar, the slider ran in under one
+    side of the card and out of the other, and its marker for the page sat hidden under it. A
+    phone already covers the whole bar, and the card in the middle stays (the bar's ends are
+    clear beside it), so the track and the page count under it now step out of sight while the
+    card is up, and come back when it goes; the arrows at the slider's two ends stay, clear
+    beside the card. No setting for this one: it mends a fault, it does not choose between two
+    ways of working. Built 2026-10-15: a browser test on three screen sizes in both languages,
+    Chrome and Firefox, watched failing first, and the walk repeated at a desk and on an iPad
+    on its side.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

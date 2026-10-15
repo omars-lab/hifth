@@ -9,6 +9,20 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #230 — The page slider stays clear of a verse's tools on a wide screen
+
+**Done:** 2026-10-15, the pull request "The page slider steps out of sight under a verse's tools"
+(PLAN 109). At a desk, on a laptop and on an iPad on its side, the slider's track ran in under the
+tools card and out the other side with its page marker hidden; now the track and the page count
+step out of sight while the card is up, and the end arrows stay.
+
+## #229 — Walk the desktop pitch as a scholar would
+
+**Done:** 2026-10-15. Walked at a desk: the first screen, a note opened by a click, a reference
+followed and Back, the look-alike list, the roots list, Listen, and the surah introduction in
+English and Arabic. One fault found, the slider under the tools card (#230); everything else
+looked right.
+
 ## #228 — A phone on its side shows a long verse whole beside its note
 
 **Done:** 2026-10-15, the pull request "A phone on its side shows a long verse whole above its note"

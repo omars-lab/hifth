@@ -4767,6 +4767,7 @@ export function App(): JSX.Element {
         hizbStarts={hizbStarts}
         pageContext={pageContext}
         fisheye={fisheye}
+        behind={drawerUp}
       />
 
       {PITCH && verseMenuAt && verseMenuItems.length > 0 && (
