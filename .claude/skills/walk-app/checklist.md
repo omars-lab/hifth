@@ -866,6 +866,10 @@ upright and on its side, English and Arabic, iPad and Mac.
   `make drive DEVICE=laptop HASH='#/hafs-kfqc/17:36'` · issue: `note-semicolon-refs` · test:
   `e2e/pitch.spec.ts` ("a reference the capture wrote with a semicolon for its colon, or a space
   after it")
+- [ ] A reference in a note opens the verse it names, and every reference the book's own page shows
+  in blue is a button: a "v." before a full reference is that reference, not a verse of this
+  surah. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/4:94'` · issue: `note-v-before-full-ref` ·
+  test: `e2e/pitch.spec.ts` ("a reference written after v. opens the verse it names")
 - [ ] A note shared by a run of verses shows whole under every one of them, and a verse's own note
   shows under that verse alone: a paragraph that opens on a verse number mid-note, or a note that
   stops short under one verse of the run, is the capture filing it in the wrong place; read it off

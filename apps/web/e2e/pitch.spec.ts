@@ -435,6 +435,16 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     }
   });
 
+  test("a reference written after v. opens the verse it names, not that verse of this surah", async ({ page }) => {
+    // Found checking the notes' links against the book's own, 2026-10-15: 4:94's
+    // note writes "v." before a full reference, and the app opened 4:4 for 4:86.
+    await page.goto("/#/hafs-kfqc/4:94");
+    const notes = page.getByRole("region", { name: "Commentary" });
+    await expect(notes).toBeVisible({ timeout: 20_000 });
+    await expect(notes.getByRole("button", { name: /Go to.*\b4:86\b/ }).first()).toBeVisible();
+    expect(await notes.getByRole("button", { name: /Go to.*\b4:4\b/ }).count(), "links to 4:4 in 4:94's note").toBe(0);
+  });
+
   test("a Bible reference in a note is not a link to the Qur'an verse of the same numbers", async ({ page }) => {
     // Found scanning every note, 2026-10-15: "Genesis 2:7" was a button that
     // opened the Qur'an's 2:7, in 364 places. These two notes cite the Bible

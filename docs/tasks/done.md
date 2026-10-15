@@ -9,6 +9,22 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #222 — Check every note's reference links against the book's own blue links
+
+**Done:** 2026-10-15, the commit "A reference written after v. opens the verse it names", in the same pull request as #223.
+
+The blue references on the book's pages were compared with the app's buttons across all 114
+surahs; one real fault, a "v." before a full reference under 4:94, is fixed. See
+commentary-lettering ⑥.
+
+## #223 — Check the references to a verse past the end of its surah
+
+**Done:** 2026-10-15, the pull request "Six references past a surah's end are the book's own slips".
+
+Six notes cite a verse past the end of its surah. Read off the page pictures, the book prints
+each one that way and does not link it, so the app leaves them as text, as the book does, and
+nothing was changed (docs/design/commentary-lettering.md ⑤).
+
 ## #221 — Mend references the capture wrote with a semicolon for a colon
 
 **Done:** 2026-10-15, the pull request "A reference written with a semicolon for its colon links again".

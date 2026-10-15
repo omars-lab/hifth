@@ -4692,6 +4692,30 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "Six notes had a reference the capture wrote with a semicolon for its colon, run into the next reference with no space, or with a space after its colon, so four were not links. The typography rule now gives a lone chapter and verse its colon back, the run-on reference its space, and closes the space after a colon in a listed reference; tested on made-up sentences and by a pitch test on five of the notes."
+    },
+    {
+      "id": "note-refs-past-surah-end",
+      "source": {
+        "file": "docs/design/commentary-lettering.md",
+        "item": "⑤"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": "packages/core/src/citations.test.ts",
+      "note": "Six notes cite a verse past the end of its surah. Read off the page pictures, the book prints each that way and leaves it unlinked, so they are slips in the book, not the capture; the app leaves them as text, as the book does, and nothing was changed."
+    },
+    {
+      "id": "note-v-before-full-ref",
+      "source": {
+        "file": "docs/design/commentary-lettering.md",
+        "item": "⑥"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "Checking the notes' links against the blue links on the book's own pages found one wrong button: a note writing \"v.\" before a full reference opened verse 4 of the surah instead of the verse named. The citation reader now reads it as the full reference; tested on a made-up sentence and by a pitch test on the note under 4:94."
     }
   ]
 }
