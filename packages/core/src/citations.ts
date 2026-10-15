@@ -22,6 +22,37 @@ const CITE = /\b(\d{1,3}):(\d{1,3})(?:[–-]\d{1,3})?[a-z]?\b|\bvv?\.\s*(\d{1,3}
 const FOLLOW =
   /,\s*(?:and\s+)?(\d{1,3})(?:[–-]\d{1,3})?[a-z]?(?=[,;.)\]]|:(?!\s*\d)|\s+(?:and|of\s+this)\b|\s+\(|$)/y;
 
+// The Bible's books by name, each with its number of chapters (the most of a
+// numbered set: 2 Kings has 25). The commentary cites them as "Genesis 2:7",
+// and a chapter and verse there is not the surah and verse of the same numbers.
+// The count keeps a prophet apart from the book named for him: "Jonah 37:139"
+// is the Qur'an's tale, since the book of Jonah has four chapters.
+const BIBLE: Readonly<Record<string, number>> = {
+  Genesis: 50, Exodus: 40, Leviticus: 27, Numbers: 36, Deuteronomy: 34, Joshua: 24, Judges: 21,
+  Ruth: 4, Samuel: 31, Kings: 25, Chronicles: 36, Ezra: 10, Nehemiah: 13, Esther: 10, Job: 42,
+  Psalm: 150, Psalms: 150, Proverbs: 31, Ecclesiastes: 12, Songs: 8, Isaiah: 66, Jeremiah: 52,
+  Lamentations: 5, Ezekiel: 48, Daniel: 12, Hosea: 14, Joel: 3, Amos: 9, Obadiah: 1, Jonah: 4,
+  Micah: 7, Nahum: 3, Habakkuk: 3, Zephaniah: 3, Haggai: 2, Zechariah: 14, Malachi: 4,
+  Matthew: 28, Mark: 16, Luke: 24, John: 21, Acts: 28, Romans: 16, Corinthians: 16,
+  Galatians: 6, Ephesians: 6, Philippians: 4, Colossians: 4, Thessalonians: 5, Timothy: 6,
+  Titus: 3, Philemon: 1, Hebrews: 13, James: 5, Peter: 5, Jude: 1, Revelation: 22,
+};
+
+// What stands before a chapter and verse of another book: a Bible book's name,
+// or a dated work's year closing its bracket, which a volume and page follow
+// ("[1999], 2:45"). Returns the chapters that book has, Infinity for a page.
+const ANOTHER = /(?:\b([A-Z][a-z]+)\s+|\d{4}\]\s*,\s*)$/;
+const anotherBook = (before: string): number => {
+  const m = ANOTHER.exec(before);
+  if (!m) return 0;
+  return m[1] === undefined ? Infinity : (BIBLE[m[1]] ?? 0);
+};
+
+// A list of another book's verses goes on past a semicolon or a comma without
+// naming the book again ("Genesis 2:7; 3:19"), so a reference that only a mark
+// or an "and" parts from the last one is of the same book.
+const SAME_LIST = /^[\s,;]*(?:and\s+)?$/;
+
 const isVerse = (surah: number, ayah: number): boolean => {
   const count = AYAH_COUNTS[surah - 1];
   return count !== undefined && ayah >= 1 && ayah <= count;
@@ -34,11 +65,39 @@ const isVerse = (surah: number, ayah: number): boolean => {
  * a "v. 5" means; without it, those stay text.
  */
 export function splitCitations(text: string, here?: number): (string | Citation)[] {
+  return readCitations(text, here).parts;
+}
+
+/**
+ * The chapters and verses a paragraph cites of another book (the Bible, or a
+ * volume and page), as `[chapter, first verse, last verse]`, in order. A list
+ * of references read by numbers alone takes these for the Qur'an's.
+ */
+export function otherBookCitations(text: string): [number, number, number][] {
+  return readCitations(text).other;
+}
+
+function readCitations(text: string, here?: number) {
   const parts: (string | Citation)[] = [];
+  const books: [number, number, number][] = [];
   let last = 0;
+  // Where the last reference to another book ended, and how many chapters
+  // that book has, so the list it begins can be followed.
+  let list = { end: -1, chapters: 0 };
   for (const m of text.matchAll(CITE)) {
     const same = m[3] !== undefined;
     if (same && here === undefined) continue;
+    if (!same) {
+      const listed = list.end >= 0 && SAME_LIST.test(text.slice(list.end, m.index));
+      const chapters = listed ? list.chapters : anotherBook(text.slice(Math.max(last, m.index - 40), m.index));
+      if (Number(m[1]) <= chapters) {
+        list = { end: m.index + m[0].length, chapters };
+        const end = /[–-](\d{1,3})/.exec(m[0]);
+        books.push([Number(m[1]), Number(m[2]), end ? Number(end[1]) : Number(m[2])]);
+        continue;
+      }
+    }
+    list = { end: -1, chapters: 0 };
     const surah = same ? here! : Number(m[1]);
     const ayah = Number(same ? m[3] : m[2]);
     if (!isVerse(surah, ayah)) continue;
@@ -57,5 +116,5 @@ export function splitCitations(text: string, here?: number): (string | Citation)
     }
   }
   if (last < text.length) parts.push(text.slice(last));
-  return parts;
+  return { parts, other: books };
 }

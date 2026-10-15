@@ -13,7 +13,7 @@
  * places it left empty and never push one of its references out.
  */
 
-import { splitCitations } from "@hifth/core";
+import { otherBookCitations, splitCitations } from "@hifth/core";
 
 /**
  * Fold runs of consecutive verses into ranges. Each item is
@@ -51,6 +51,25 @@ export function citedIn(notes, surah) {
       seen.add(key);
       out.push([part.surah, part.ayah]);
     }
+  return out;
+}
+
+/**
+ * The verses a note names only as another book's chapter and verse ("Genesis
+ * 2:7–9" is the Bible's), as "surah:ayah" keys, every verse of a range. The
+ * capture's list reads every pair of numbers as the Qur'an's, so it sends a
+ * reader to 2:7 for the Bible's Genesis 2:7; a verse the note also cites as the
+ * Qur'an's stays.
+ */
+export function otherBooksOnly(notes, surah) {
+  const quran = new Set(citedIn(notes, surah).map(([s, a]) => `${s}:${a}`));
+  const out = new Set();
+  for (const note of notes)
+    for (const [chapter, first, last] of otherBookCitations(note.replace(SLANTS, "")))
+      for (let verse = first; verse <= last; verse++) {
+        const key = `${chapter}:${verse}`;
+        if (!quran.has(key)) out.add(key);
+      }
   return out;
 }
 
