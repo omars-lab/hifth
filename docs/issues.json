@@ -4691,7 +4691,7 @@
       "severity": "defect",
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
-      "note": "Five notes had a reference the capture wrote with a semicolon for its colon, or run into the next reference with no space, so three were not links. The typography rule now gives a lone chapter and verse its colon back and the run-on reference its space; tested on made-up sentences and by a pitch test on four of the notes."
+      "note": "Six notes had a reference the capture wrote with a semicolon for its colon, run into the next reference with no space, or with a space after its colon, so four were not links. The typography rule now gives a lone chapter and verse its colon back, the run-on reference its space, and closes the space after a colon in a listed reference; tested on made-up sentences and by a pitch test on five of the notes."
     }
   ]
 }

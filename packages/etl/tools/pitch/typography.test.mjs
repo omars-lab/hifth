@@ -59,6 +59,12 @@ describe("setTypography", () => {
     expect(setTypography("see 3:12;40:7 and 5:6")).toBe("see 3:12; 40:7 and 5:6");
   });
 
+  it("closes up a space the capture put after a colon, in a reference listed after another", () => {
+    expect(setTypography("see 4:1–2; 9:3; 12: 30, and")).toBe("see 4:1–2; 9:3; 12:30, and");
+    // Not in prose, where a number and a colon start a list.
+    expect(setTypography("in 12: 30 men")).toBe("in 12: 30 men");
+  });
+
   it("leaves text with nothing to set unchanged", () => {
     expect(setTypography("“Already” curly, 4:2–5.")).toBe("“Already” curly, 4:2–5.");
   });

@@ -93,10 +93,13 @@ open notes that cite both books; each was watched failing on the build without i
 
 ### ④ Does a reference the capture wrote with a semicolon for its colon still open its verse? · **fixed**
 
-It did not. Five notes in the whole book had a reference the capture got wrong around a semicolon.
+It did not. Six notes in the whole book had a reference the capture got wrong around a semicolon
+or a colon.
 In three, a lone chapter and verse came out with a semicolon where the book prints a colon (under
 17:36, 33:33 and 40:23), so it read as two bare numbers and was not a button. In two more (86:15 and
 86:16, which share a note), a semicolon ran straight into the next reference with no space after it.
+In one more, under 54:24, a reference listed after another had a space after its colon, so it was
+not a button either.
 
 **What it changes for a hafiz:** each of those references now reads as the book prints it and opens
 the verse it names.
@@ -104,8 +107,10 @@ the verse it names.
 **How it is mended:** one rule for the whole book, with the quotes and dashes, so no hand-read row is
 spent on it. A chapter and verse standing alone with a semicolon between them gets its colon back
 when the first number is a surah's. A semicolon after a verse already cited, as in a list of verses
-of one surah, stays. A semicolon run into the next full reference gets its space back.
+of one surah, stays. A semicolon run into the next full reference gets its space back. A space
+after a colon is closed up only in a reference listed after another, followed by a comma, a
+semicolon or a bracket; in prose a number and a colon start a list, and stay.
 
 **The tests:** the rule's own tests use made-up sentences. The pitch test "a reference the capture
-wrote with a semicolon for its colon is a link again" opens four of the notes; it was watched
-failing on the build without the fix.
+wrote with a semicolon for its colon, or a space after it, is a link again" opens five of the
+notes, in Chromium and Firefox; it was watched failing on the build without the fix.

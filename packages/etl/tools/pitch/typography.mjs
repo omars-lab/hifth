@@ -21,7 +21,9 @@
  * for its colon ("12;30") gets its colon back, so it reads and links as the
  * book prints it, and a semicolon the capture ran into the next citation
  * ("3:12;40:7") gets its space back (five notes in the whole book). A semicolon
- * after a verse already cited, or after a number no surah has, stays.
+ * after a verse already cited, or after a number no surah has, stays. So does
+ * a space after a colon, except in a reference listed after another ("9:3;
+ * 12: 30,"), where the capture put it (one note).
  */
 
 const OPENS_AFTER = /[\s([{—–“‘]/;
@@ -48,7 +50,8 @@ export function setTypography(text) {
     .replace(/(?<=^|[\s([])(\d{1,3});(\d{1,3})(?![\d:])/gu, (cite, surah, ayah) =>
       Number(surah) >= 1 && Number(surah) <= 114 ? `${surah}:${ayah}` : cite,
     )
-    .replace(/(?<=\d:\d{1,3});(?=\d{1,3}:\d)/gu, "; ");
+    .replace(/(?<=\d:\d{1,3});(?=\d{1,3}:\d)/gu, "; ")
+    .replace(/(?<=\d:\d{1,3}(?:–\d{1,3})?; \d{1,3}): (?=\d{1,3}[,;)])/gu, ":");
 }
 
 /** Set the typography of every note and translation in one surah, in place. */

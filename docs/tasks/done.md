@@ -13,8 +13,9 @@ commit or design-doc item for the actual reasoning.
 
 **Done:** 2026-10-15, the pull request "A reference written with a semicolon for its colon links again".
 
-Five notes had a reference the capture wrote with a semicolon where the book prints a colon, or ran
-into the next reference with no space. One rule now mends them across the book
+Six notes had a reference the capture wrote with a semicolon where the book prints a colon, ran
+into the next reference with no space, or with a space after its colon. One rule now mends them
+across the book
 (docs/design/commentary-lettering.md ④).
 
 ## #220 — Stop Bible references in notes linking to Qur'an verses

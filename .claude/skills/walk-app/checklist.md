@@ -864,7 +864,8 @@ upright and on its side, English and Arabic, iPad and Mac.
   space after a semicolon, and opens its verse: two numbers with a semicolon between them, or a
   reference run into the next, is the capture's misreading. ·
   `make drive DEVICE=laptop HASH='#/hafs-kfqc/17:36'` · issue: `note-semicolon-refs` · test:
-  `e2e/pitch.spec.ts` ("a reference the capture wrote with a semicolon for its colon")
+  `e2e/pitch.spec.ts` ("a reference the capture wrote with a semicolon for its colon, or a space
+  after it")
 - [ ] A note shared by a run of verses shows whole under every one of them, and a verse's own note
   shows under that verse alone: a paragraph that opens on a verse number mid-note, or a note that
   stops short under one verse of the run, is the capture filing it in the wrong place; read it off
