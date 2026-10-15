@@ -2262,6 +2262,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     and the same setting in the info panel governs both. Built 2026-10-15: a browser test that
     turns a mini-sized screen upright and back, watched failing first, and the walk repeated in
     the iPad app on both sizes.
+108. ~~**The red ribbon marking where you left off comes back on the paper's bound edge after a
+    turn forward and back on an upright iPad.**~~ Found 2026-10-15 walking the iPad mini app
+    upright, not asked: turned forward and back, the ribbon came back about sixteen points inside
+    the paper, over the ends of the lines, and stayed there. The margin round the page sits on its
+    free side and moves across when a turn lands on a page of the other side; the turn's last
+    frame told the ribbon where the paper was before the margin had moved. Now where the paper is
+    gets told again once the page is on the screen, and only that: the page and the book's slide
+    stay as the turn placed them. Built 2026-10-15: a browser test on an 11-inch iPad and an iPad
+    mini, watched failing first by sixteen points, and the walk repeated in the mini app.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

@@ -602,6 +602,11 @@ upright and on its side, English and Arabic, iPad and Mac.
 - [ ] Stay on a page for a few seconds until the red ribbon appears down its bound edge: it covers
   none of the writing, on a page bound on the left and one bound on the right. · phone · test:
   bookmarks spec · issue: `seam-covers-line-ends-phone`
+- [ ] On an upright iPad, wait for the red ribbon, turn forward and back: it is back across the
+  paper's bound edge, where it stood before the turn, not over the ends of the lines. · iPad
+  mini app upright (turn-top-walk.js: the start and back lines agree), `DEVICE=ipad` ·
+  test: `e2e/ipad.spec.ts` ("the red ribbon is back on the paper's edge") · issue:
+  `seam-back-on-edge-after-turn`
 - [ ] With the tools open, highlight a passage: its card opens whole over the tools, title and
   all, and the same for the word tool's card. · phone · test: phone-toolbar spec · issue:
   `highlight-card-under-tools-phone`
@@ -851,12 +856,16 @@ upright and on its side, English and Arabic, iPad and Mac.
   whole page" a verse's page opens whole. · `make drive DEVICE=ipad HASH='#/hafs-kfqc/2:46'
   ACT='press=ArrowLeft'` · issues: `upright-turn-lands-at-top-build`,
   `upright-opening-size-setting` · test: `e2e/ipad.spec.ts` ("opened bigger than the screen")
+  2026-10-15 in the iPad app upright (turn-top-walk.js): the 13-inch in English and Arabic and
+  the mini in English land at the next page's top and come back to the foot.
 - [ ] Open a verse on an upright iPad, turn it on its side (two whole pages), then upright again:
   the page comes back at the size it opened at, not whole. On an 11-inch iPad that holds even
   after zooming on its side, since the page is put whole as it turns back. With the info panel's "Turning the iPad
   back upright" set to "The whole page" it stays whole. · `make app-walk SIDEWAYS=1` for the
   side; the browser test turns it both ways · issue: `upright-again-brings-back-opening-size` ·
   test: `e2e/ipad.spec.ts` ("on its side and back upright")
+  2026-10-15 in the iPad app turned by its UI test (hand-turn-walk.js with `__hop`): the 13-inch
+  in English and the mini in Arabic come back upright at the size they opened at.
 - [ ] On an iPad on its side, press + to 200% and 300% on the open book: the right-hand page's
   lines still begin on the screen (the book slides over, the left-hand page runs off the left),
   and the next opening does the same; back at 100% the book is where it was. With one page
@@ -864,6 +873,8 @@ upright and on its side, English and Arabic, iPad and Mac.
   page" set to "Grow from the fold", the right-hand page runs off the right as before.
   · `make drive DEVICE=ipad-side` · issue: `zoom-keeps-line-starts-in-sight` · test:
   `e2e/ipad.spec.ts` ("keeps the starts of the lines in sight")
+  2026-10-15 in the iPad app on its side (zoom-starts-walk.js): the 13-inch in English and
+  Arabic clean at 200%, 300%, the next opening, back at 100%, and one page at 400%.
 - [ ] In a note, every verse number the prose names is a link: a reference left as plain words, or a
   number with a letter in it, is a word the capture misread; read it off the page picture and add it
   to the hand-read misreads. · `make drive DEVICE=laptop HASH='#/hafs-kfqc/28:88'` · test:

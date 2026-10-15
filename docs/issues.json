@@ -4729,6 +4729,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/ipad.spec.ts",
       "note": "On an iPad mini on its side the page opens a little bigger than its room; turned upright and back it came back whole and smaller. The opening size is now kept for each way the iPad is held, and a page already on screen at the turn is told it. Browser test \"an iPad mini turned upright and back on its side comes back at the size it opened at\", watched failing first (447 wide against 693); walked again in the iPad app on both sizes."
+    },
+    {
+      "id": "seam-back-on-edge-after-turn",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "108"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/ipad.spec.ts",
+      "note": "Found walking the iPad mini app upright (2026-10-15): after a turn forward and back the red ribbon marking where you left off came back about sixteen points inside the paper, over the ends of the lines, because the turn told it where the paper was before the page's margin had moved to its new side. Where the paper is is now told again once the page is on the screen. Test on an 11-inch iPad and an iPad mini, watched failing first by sixteen points; walked again in the mini app."
     }
   ]
 }

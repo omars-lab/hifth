@@ -759,6 +759,37 @@ test.describe("Hifth · turning an upright iPad's page that opened bigger than t
     expect(back.top + back.height, "its foot is in sight").toBeLessThanOrEqual(PORTRAIT.height + 2);
   });
 
+  // 2026-10-15, walking the iPad mini app upright: turned forward and back, the
+  // red ribbon marking where the reader left off came back about sixteen points
+  // inside the paper's bound edge, over the ends of the lines, and stayed there.
+  for (const [name, size] of [["an 11-inch iPad", PORTRAIT], ["an iPad mini", { width: 744, height: 1133 }]] as const) {
+    test(`on ${name}, the red ribbon is back on the paper's edge after a turn forward and back`, async ({ page }) => {
+      await open(page);
+      await page.setViewportSize(size);
+      await page.goto("/#/hafs-kfqc/2:46");
+      await shown(page, 7);
+      const seam = page.locator("[data-bookmark-seam]");
+      // It moves to a page once the page has been open six seconds.
+      await expect(seam).toHaveCount(1, { timeout: 9000 });
+      const offEdge = () =>
+        page.evaluate(() => {
+          const s = document.querySelector("[data-bookmark-seam]")!.getBoundingClientRect();
+          const h = document.querySelector('[data-host-page="7"]')!.getBoundingClientRect();
+          // Page 7 is bound on its left: the ribbon lies across that edge.
+          return Math.round(Math.abs((s.left + s.right) / 2 - h.left));
+        });
+      expect(await offEdge(), "the ribbon lies across the bound edge as the page opens").toBeLessThan(3);
+
+      await turn(page, "forward");
+      await shown(page, 8);
+      await settledTop(page, 8);
+      await turn(page, "back");
+      await shown(page, 7);
+      await settledTop(page, 7);
+      await expect.poll(offEdge, { message: "the ribbon lies across the bound edge after the turn back" }).toBeLessThan(3);
+    });
+  }
+
   test("set to keep the same height, the next page opens where the last one was", async ({ page }) => {
     await open(page, { "hifth.turn-landing.v1": "same" });
     const opened = await settledTop(page, 7);

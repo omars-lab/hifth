@@ -11,7 +11,13 @@
  * side) it presses Zoom in up to `window.__zoom` percent (150 unless set; 0
  * skips it), so the third and fourth turns are walked zoomed in. It ends at the
  * fourth turn or after `window.__watch` ms (60000 unless set), and says how many
- * turns it saw: a walk that saw none checked nothing.
+ * turns it saw: a walk that saw none checked nothing. The page's width is
+ * printed too, since the iPad mini has no zoom readout.
+ *
+ * To walk a page opened upright (the iPad starts on its side), set
+ * `window.__hop = "/hafs-kfqc/2:46";` on a line ahead of it: after the first
+ * turn it opens that link and looks again, so the third turn (upright again)
+ * should show the page as it was then. Set `window.__zoom = 0;` with it.
  * Runs in the iPad app, on its side, opened on a verse's note:
  *   make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en "ROUTE=/hafs-kfqc/2:255?open=commentary" EVALFILE=.claude/skills/walk-app/scripts/hand-turn-walk.js DELAY_MS=2500 TURNS=12,22,34,44 PROBE_TIMEOUT_S=200
  * Boxes, counts and the zoom only, never note words.
@@ -37,7 +43,8 @@
     const whole = lit.filter(inside).length;
     const under = note ? lit.filter((b) => meets(b, note)).length : 0;
     const span = lit.length ? { left: Math.min(...lit.map((b) => b.left)), top: Math.min(...lit.map((b) => b.top)), right: Math.max(...lit.map((b) => b.right)), bottom: Math.max(...lit.map((b) => b.bottom)) } : null;
-    return `${label} view=${innerWidth}x${innerHeight} note=${note ? f(note) : "none"} lines=${lit.length} verse=${f(span)} wholeOnScreen=${whole} underNote=${under} zoom=${zoomNow() ?? "?"}`;
+    const page = [...document.querySelectorAll("svg[aria-labelledby^='page-label-']")].map(box).filter(on).sort((a, b) => b.width - a.width)[0];
+    return `${label} view=${innerWidth}x${innerHeight} page=${page ? Math.round(page.width) : "none"} top=${page ? Math.round(page.top) : "-"} note=${note ? f(note) : "none"} lines=${lit.length} verse=${f(span)} wholeOnScreen=${whole} underNote=${under} zoom=${zoomNow() ?? "?"}`;
   };
   const out = [];
   await wait(1500);
@@ -53,6 +60,11 @@
     turns += 1;
     await wait(1800);
     out.push(look(`turn${turns}@${Math.round((Date.now() - t0) / 1000)}s`));
+    if (turns === 1 && window.__hop) {
+      location.hash = `#${window.__hop}`;
+      await wait(2500);
+      out.push(look("opened"));
+    }
     if (turns === 2 && target > 0) {
       const plus = [...document.querySelectorAll("button")].find((e) => on(box(e)) && !e.closest("[inert]") && e.getAttribute("aria-label") === (isAr ? "تكبير" : "Zoom in"));
       for (let i = 0; plus && i < 6 && (zoomNow() ?? 0) < target; i++) { plus.click(); await wait(500); }
