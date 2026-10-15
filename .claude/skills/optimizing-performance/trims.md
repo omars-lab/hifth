@@ -14,6 +14,10 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Checked again 2026-10-15 (later), nothing taken.** 191.6 KB against the 200 KB cap, after
+fixes to where the cards stand on a phone on its side and the slider stepping out of sight under a
+verse's tools; about 54 KB of real room is left, so the two candidates below still wait.
+
 **Checked again 2026-10-15, nothing taken.** 191.3 KB against the 200 KB cap, after the setting
 that keeps a surah once it has been heard through (+1.0 KB). 19.6 KB of the ~75 KB of real room
 the 2026-10-11 sweep found is now used, so about 55 KB is left; the two candidates below still

@@ -76,6 +76,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 
 - [ ] Tap a verse: its tools sit in one even row with no scraps of the bar behind them. · phone ·
   issues: `phone-tool-icons-out-of-line`, `verse-tools-leave-bar-scraps`
+- [ ] Tap a verse on a wide screen, where its tools rise as a card in the middle of the bar: the
+  page slider does not run in under the card and out the other side, and the arrows at its two
+  ends stay; close the card and the slider is back. · desktop · laptop · ipad-side · issue:
+  `verse-tools-cut-page-slider-wide` (2026-10-15)
 - [ ] Press a verse's number: one list of tools, not two. · any · issue:
   `number-menu-and-toolbar-together`
 - [ ] Open a verse's number menu with the keyboard and press Down at once, while its lines are

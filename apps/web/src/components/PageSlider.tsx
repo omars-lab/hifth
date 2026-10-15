@@ -116,6 +116,14 @@ interface PageSliderProps {
    * behaviour the decision chose; the settings sheet is where it is turned off.
    */
   fisheye?: boolean;
+  /**
+   * A verse's tools are up as a card in the middle of the bar. The track and
+   * the page count under it step out of sight until the card goes, so the
+   * slider is not seen running in under one side of the card and out of the
+   * other with its marker hidden (plan item 109); the arrows at the two ends,
+   * clear beside the card, stay.
+   */
+  behind?: boolean;
 }
 
 /**
@@ -179,6 +187,7 @@ export function PageSlider({
   pageContext,
   onJuzTap,
   fisheye = true,
+  behind = false,
 }: PageSliderProps): JSX.Element {
   const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -671,7 +680,7 @@ export function PageSlider({
     /* Pinned RTL in both languages — see the direction note above. `nav` rather
        than a bare div so a screen-reader user can jump to it as a landmark; it
        is the app's second way of moving through the book, after the jumper. */
-    <nav className={styles.bar} aria-label={t.pageBar} dir="rtl">
+    <nav className={styles.bar} aria-label={t.pageBar} dir="rtl" data-behind={behind || undefined}>
       <button
         type="button"
         className={styles.edge}

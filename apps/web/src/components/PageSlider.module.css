@@ -585,6 +585,14 @@
  * numbers meet, because a line that appears only when the news is bad is a line
  * a reader has no reason to trust when it is absent (`e2e/pagebar.spec.ts`).
  */
+/* Under a verse's tools (plan item 109): the track and the page count go
+   out of sight, out of the tab order and out of a screen reader's way, and
+   keep their room, so nothing moves; the end arrows stay. */
+.bar[data-behind] > .track,
+.bar[data-behind] > .inventory {
+  visibility: hidden;
+}
+
 .inventory {
   grid-column: 1 / -1;
   text-align: center;
