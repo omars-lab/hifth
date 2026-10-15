@@ -33,4 +33,17 @@ describe("letterSurah", () => {
     expect(v["9:1"].commentary[0]).toBe("1 The fūzan of the \uE000town\uE001 ran dry.");
     expect(v["9:2"].commentary[0]).toBe("2 The \uE000fūzan\uE001 rested.");
   });
+
+  it("slants from the pictures, then the marked terms the pictures did not reach, in the notes nobody read", () => {
+    const v = verses();
+    v["9:1"].commentary = ["1 The well of the town ran dry."];
+    v["9:2"].commentary = ["2 The traveller saw the old stone well, then a zārib."];
+    // The words of the picture, the second note's "stone well" leaning; its last word unread.
+    const pictureWords = "1 the well of the town ran dry 2 the traveller saw the old stone well then a"
+      .split(" ")
+      .map((text, i) => ({ text, slant: i === 14 || i === 15 ? 10 : 0, line: 1, pic: "chapter-9_p01.png" }));
+    letterSurah(9, v, { misreads: [], italics: [{ verse: "9:1", at: "the _town_ ran" }], pictureWords });
+    expect(v["9:1"].commentary[0]).toBe("1 The well of the \uE000town\uE001 ran dry.");
+    expect(v["9:2"].commentary[0]).toBe("2 The traveller saw the old \uE000stone well\uE001, then a \uE000zārib\uE001.");
+  });
 });

@@ -91,6 +91,12 @@ describe("slantMarkedTerms", () => {
     expect(v["9:4"].commentary[0]).toBe("4 Fūzan and al-Ḍarqil said the zarib is near.");
   });
 
+  it("slants a marked term beside a run the pictures slanted, and leaves the run as it is", () => {
+    const v = { "9:7": { commentary: [`7 The ${S}well of fūzan${E} and the zārib.`] } };
+    slantMarkedTerms(v, new Set());
+    expect(v["9:7"].commentary[0]).toBe(`7 The ${S}well of fūzan${E} and the ${S}zārib${E}.`);
+  });
+
   it("leaves alone a note read by hand, under every verse that shares it", () => {
     const shared = "5–6 The fūzan ran dry.";
     const v = { "9:5": { commentary: [shared] }, "9:6": { commentary: [shared, "6 A zārib passed."] } };

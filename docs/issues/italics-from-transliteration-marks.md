@@ -58,3 +58,7 @@ test opens one note well beyond two taps and checks that its marked terms slant.
 Beyond two taps of the demo, quoted verse words, English glosses, titles and unmarked
 transliterations still show upright: about three slanted runs in four. Reading the slant off
 the page pictures themselves is still what would bring those back.
+
+**Later the same day, 2026-10-14:** the slant is now read off the page pictures, and this rule
+runs after that, for the marked terms the pictures missed. Together they slant 94 in 100 of the
+words the book slants ([reading the italics off the page pictures](italics-from-page-pictures.md)).

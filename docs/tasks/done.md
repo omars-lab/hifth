@@ -9,6 +9,16 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #216 — Read the slant off the page pictures for every note nobody read by hand
+
+**Done:** 2026-10-14, the pull request "Notes nobody read by hand take their slant from the page
+pictures".
+
+The 890 page pictures the notes were captured from are read word by word with how far each word
+leans, and each note nobody read takes its slant from its picture. Measured on the read notes,
+94 in 100 of the book's slanted words are found and 99 in 100 of those slanted are right; notes
+showing any slant went from 1,967 to 5,087 of 5,716 (docs/issues/italics-from-page-pictures.md).
+
 ## #215 — Slant the book's transliterated terms in notes nobody read by hand
 
 **Done:** 2026-10-14, the pull request "Notes nobody read by hand slant the Arabic terms the book
