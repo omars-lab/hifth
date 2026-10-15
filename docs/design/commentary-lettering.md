@@ -114,3 +114,22 @@ semicolon or a bracket; in prose a number and a colon start a list, and stay.
 **The tests:** the rule's own tests use made-up sentences. The pitch test "a reference the capture
 wrote with a semicolon for its colon, or a space after it, is a link again" opens five of the
 notes, in Chromium and Firefox; it was watched failing on the build without the fix.
+
+### ⑤ Should a reference to a verse past the end of its surah open anything? · **answered**
+
+No, and the app already leaves it as plain text. A scan of every note found twelve references
+whose verse number is past the end of the surah they name.
+Six are not the Qur'an's at all: a chapter and verse of the book of Jonah in brackets, and a volume
+and page of a hadith collection. They were already plain text.
+The other six (under 4:86, 6:70, 20:86, 35:9, 37:156 and 40:17) looked like capture misreads.
+Read off the page pictures, each is printed in the book exactly as the capture has it, and the
+book's own page leaves it unlinked while the references around it are links.
+So they are slips in the printed book, not in the capture. Correcting them would put words in the
+book's mouth, and a guessed verse could send a hafiz to the wrong place.
+
+**What it changes for a hafiz:** nothing. Those six read as the book prints them and are not
+buttons, the same as on the book's own page.
+
+**The tests:** the citation reader's test "leaves a number that is not a verse as text" already
+holds a verse past a surah's end as text. Nothing was changed, so there was no failing test to
+write first.
