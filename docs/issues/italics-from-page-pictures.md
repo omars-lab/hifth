@@ -92,6 +92,34 @@ the word after it read as leaning about 4 degrees, so the run stopped for them. 
 above came out of that look. A two-word gap like that one still breaks a run: the measurement
 says letting two through costs more than it gives.
 
+## Tried after shipping, 2026-10-15
+
+The runs that start a word late were looked at one by one, to see why the edge word reads
+upright. Most often it is a capital W, or a word built of v, w and y. Those letters are made of
+diagonal strokes, so their italic and upright forms lean about alike, and the measure calls the
+word upright or leaning back even when it is slanted. That is a property of the letters, not of
+how the lean is measured, and every way of measuring tried below runs into it.
+
+Each was scored against the read notes as in the table above (pictures, then the marks: 2,959
+runs whole, 17,291 slanted words found, 204 upright words wrongly slanted):
+
+| tried | runs whole | slanted words found | upright words wrongly slanted | kept? |
+| --- | --- | --- | --- | --- |
+| a narrower margin around each word | 3,021 | 17,432 | 218 | no |
+| ignoring the faintest ink | 3,023 | 17,430 | 218 | no |
+| measuring two neighbouring words together | 2,972 | 17,353 | 193 | no |
+| counting any word with w, v or y as slanted next to a run | | 327 more | 252 more | no |
+
+Taking in one more word at a run's edge is the rule tried in the measurements above, and it was
+not kept. None of these made more than 2 in 100 runs whole, and the first two also slanted more
+upright words wrongly. The method has levelled off, so the tuning stopped there.
+
+Looking at the worst cases turned up one more thing: a few of the "edges a word off" are slips in
+the hand reading, not in the pictures. In one 2:143 note, the hand-read run began on the last
+letter of a word the print sets upright. That row was mended in the private books repository.
+The others were not hunted for: the measurement above counts whole words, so slips like this
+one barely move it.
+
 ## What was tried before this
 
 - A list of the words the hand-read notes always slant (24 words, each seen at least three
