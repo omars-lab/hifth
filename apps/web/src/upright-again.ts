@@ -13,6 +13,10 @@ import { useEffect, useState } from "react";
  *   opening  back at the size the page opened at (the default)
  *   whole    the whole page, as the open book left it
  *
+ * An iPad mini shows one page on its side, a little bigger than its room; it
+ * came back on its side whole after a turn upright (item 107), so the same
+ * choice brings back the size a page opened at whichever way up it is held.
+ *
  * Its own module, free of CSS, as `open-size.ts` is.
  */
 export type UprightAgain = "opening" | "whole";

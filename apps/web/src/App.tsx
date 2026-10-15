@@ -769,31 +769,36 @@ export function App(): JSX.Element {
     if (mode === "two") stage.setZoom(1);
   }, [upright, desktop, stage]);
   /*
-   * Upright again, the page comes back at the size it opened at (docs/PLAN.md,
-   * item 99). On its side the open book shows both pages whole, and crossing
-   * the breakpoint puts the paper at fit, so without this the page stayed whole
-   * once the iPad was upright again. The stage says each size a page opens at
-   * as it lands, and only an upright one is kept: turning the iPad swaps the
-   * stage for the open book's before this hears the turn, so asking the stage
-   * then would ask the wrong one. Back upright, the new stage may not have
-   * landed yet; the size waits for it. A size the reader zoomed to on its side
-   * stands, and the reader can set the page to stay whole.
+   * Turned back, the page comes back at the size it opened at that way up
+   * (docs/PLAN.md, items 99 and 107). On its side the open book shows both
+   * pages whole, and crossing the breakpoint puts the paper at fit, so without
+   * this the page stayed whole once the iPad was upright again; an iPad mini
+   * shows one page on its side, filling the room beside the note, and came back
+   * on its side whole and smaller. The stage says each size a page opens at as
+   * it lands, kept for the way the iPad is held: turning the iPad swaps the
+   * stage before this hears the turn, so asking the stage then would ask the
+   * wrong one. Turned back, the new stage may not have landed yet; the size
+   * waits for it. A size the reader zoomed to after the turn stands, and the
+   * reader can set the page to stay whole.
    */
-  const uprightOpenedRef = useRef<number | null>(null);
-  const sidewaysFromRef = useRef<number | null>(null);
+  const openedRef = useRef<{ up: number | null; side: number | null }>({ up: null, side: null });
+  const awayRef = useRef<{ up: number | null; side: number | null }>({ up: null, side: null });
   const restoreRef = useRef<number | null>(null);
   const wasUprightRef = useRef(upright);
-  if (wasUprightRef.current && !upright) sidewaysFromRef.current = uprightOpenedRef.current;
+  if (wasUprightRef.current !== upright) {
+    const left = wasUprightRef.current ? "up" : "side";
+    awayRef.current[left] = openedRef.current[left];
+  }
   const pageOpened = useCallback(
     (z: number) => {
-      if (typeof window.matchMedia === "function" && !window.matchMedia(UPRIGHT_QUERY).matches) return;
+      const way = typeof window.matchMedia !== "function" || window.matchMedia(UPRIGHT_QUERY).matches ? "up" : "side";
       const back = restoreRef.current;
       restoreRef.current = null;
       if (back === null) {
-        uprightOpenedRef.current = z;
+        openedRef.current[way] = z;
         return;
       }
-      uprightOpenedRef.current = back;
+      openedRef.current[way] = back;
       // After the landing that called this has finished framing the page.
       requestAnimationFrame(() => stage.setZoom(back));
     },
@@ -803,11 +808,13 @@ export function App(): JSX.Element {
     const was = wasUprightRef.current;
     wasUprightRef.current = upright;
     restoreRef.current = null;
-    if (was === upright || !upright) return;
-    const z = uprightAgainZoom(stageRef.current?.zoomNow() ?? 1, sidewaysFromRef.current, savedUprightAgain());
+    if (was === upright) return;
+    const z = uprightAgainZoom(stageRef.current?.zoomNow() ?? 1, awayRef.current[upright ? "up" : "side"], savedUprightAgain());
     if (z === null) return;
-    if (stageRef.current?.openedZoom() == null) restoreRef.current = z;
-    else pageOpened(z);
+    // A stage that has already landed (an iPad mini keeps its one page both
+    // ways) is told now; it used to be told nothing, and stayed whole.
+    restoreRef.current = z;
+    if (stageRef.current?.openedZoom() != null) pageOpened(z);
   }, [upright, stage, pageOpened]);
   const { t, dir } = useT();
   const { message, announce } = useAnnouncer();

@@ -306,8 +306,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Open a note with the iPad on its side, turn it upright, then back, as when it is handed
   across a table: the note stays open each way up and every line of its verse stays in sight and
   clear of it. Then zoom in to 150% and turn it upright again: the same. · ipad-side, ipad, private
-  build · checked 2026-10-11 in Chromium and WebKit, clean, zoomed in too; the real iPad's turn is
-  parked (manual testing 13)
+  build · checked 2026-10-11 in Chromium and WebKit, clean, zoomed in too; 2026-10-15 in the iPad
+  app turned by its UI test (`scripts/hand-turn-walk.js`): the 13-inch in English and Arabic clean
+  at 100% and 150%; the real iPad's turn is parked (manual testing 13)
+- [ ] On an iPad mini on its side, open a verse's page, turn it upright, then back on its side: the
+  page comes back at the size it opened at, its top line in sight, not whole and smaller. · ipad
+  (1133×744), the iPad app on the mini, private build · issue:
+  `mini-side-again-brings-back-opening-size`
 - [ ] With a verse chosen low on the page and its note open, press + until 200%: every line of the
   verse stays on the screen, and with the book open both pages stay level at the fold, and still
   level pressed back down to 100%; set "Grow from the middle" and the verse goes down as before. ·

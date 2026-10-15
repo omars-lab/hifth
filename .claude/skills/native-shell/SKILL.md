@@ -138,6 +138,13 @@ page after the question answers and before it quits, upright, on its side and on
 screenshot of the simulator taken afterwards shows only the home screen, since the app has
 already gone. Keep the file in scratch when the page may show a note.
 
+To turn the iPad while a question is still watching, add `TURNS=12,24` (seconds after the app
+starts, rising, an even count, so the walk ends on its side): the UI test turns it upright at the
+first, back on its side at the second, and so on. Only the sideways probe can turn the iPad, so
+`TURNS` without `TARGET=ipad SIDEWAYS=1` is refused. A question that waits for the turns — the
+walk-app skill's `hand-turn-walk.js` — reads the page after each one; give it a
+`PROBE_TIMEOUT_S` past the last turn.
+
 ## Walking the app in the simulator
 
 The browsers Playwright drives are not the iPad's own WebKit. A layout can be right in every
