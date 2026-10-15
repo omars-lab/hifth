@@ -22,6 +22,8 @@ about three times in four. The misses fell into three kinds:
 
 Some pictures could not be matched to the right line, which is a fault of the search, not of
 the rule. And the other italics (terms, Arabic words, titles) cannot be found from the words.
+(Corrected 2026-10-14: the Arabic terms the book writes with long-vowel and dotted letters can
+be, 99 times in 100; see [slanting the transliterated terms](italics-from-transliteration-marks.md).)
 
 ## What replaced it
 

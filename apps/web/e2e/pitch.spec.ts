@@ -1178,6 +1178,9 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(sheet(page), "the note is kept up over the turn").toBeVisible();
     await expect.poll(() => page.evaluate(() => location.hash)).toMatch(/\/2:3\b/);
 
+    // The note may still be finding its place after the turn; a press while it
+    // moves can miss its Close (once in Firefox, under the full suite's load).
+    await settle(sheet(page));
     await sheet(page).getByRole("button", { name: "Close" }).click();
     await expect(sheet(page)).toHaveCount(0);
     await expect
@@ -1924,6 +1927,18 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
       expect(await sheet(page).locator("em").count(), verse).toBeGreaterThan(least);
       expect(await sheet(page).textContent()).not.toMatch(/[\uE000\uE001]/);
     }
+  });
+
+  test("a note nobody read by hand slants the Arabic terms the book writes with marks", async ({ page }) => {
+    // 2:37's note is far from the demo, so no hand-read row slants it. Its two
+    // transliterated words, written with long-vowel marks, are slanted on its
+    // printed page, and a rule now finds them by their marks
+    // (docs/issues/italics-from-transliteration-marks.md).
+    await page.goto("/#/hafs-kfqc/2:37?open=commentary");
+    const note = sheet(page).getByRole("region", { name: "Commentary" });
+    await expect(note).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => note.locator("em").count(), { timeout: 20_000 }).toBeGreaterThanOrEqual(2);
+    expect(await note.textContent()).not.toMatch(/[\uE000\uE001]/);
   });
 
   test("a note the book prints upright, one tap from a demo note, stays upright", async ({ page }) => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SLANT_END, SLANT_START, slantSurah } from "./italics.mjs";
+import { SLANT_END, SLANT_START, slantMarkedTerms, slantSurah } from "./italics.mjs";
 
 // Made-up notes: the shape of the commentary, none of its words.
 const S = SLANT_START;
@@ -75,5 +75,27 @@ describe("slantSurah", () => {
     const v = verses();
     expect(slantSurah(9, v, [{ verse: "10:1", at: "_qarya_" }])).toEqual(new Set());
     expect(v).toEqual(verses());
+  });
+});
+
+describe("slantMarkedTerms", () => {
+  it("slants each word that carries a transliteration mark and no capital", () => {
+    const v = { "9:4": { commentary: ["4 The fūzan, or ʿimlat-ḍarqil, is “zārib” here."] } };
+    slantMarkedTerms(v, new Set());
+    expect(v["9:4"].commentary[0]).toBe(`4 The ${S}fūzan${E}, or ${S}ʿimlat-ḍarqil${E}, is “${S}zārib${E}” here.`);
+  });
+
+  it("leaves a name upright: a capital anywhere in the word, or a word with no mark", () => {
+    const v = { "9:4": { commentary: ["4 Fūzan and al-Ḍarqil said the zarib is near."] } };
+    slantMarkedTerms(v, new Set());
+    expect(v["9:4"].commentary[0]).toBe("4 Fūzan and al-Ḍarqil said the zarib is near.");
+  });
+
+  it("leaves alone a note read by hand, under every verse that shares it", () => {
+    const shared = "5–6 The fūzan ran dry.";
+    const v = { "9:5": { commentary: [shared] }, "9:6": { commentary: [shared, "6 A zārib passed."] } };
+    slantMarkedTerms(v, new Set([shared]));
+    expect(v["9:5"].commentary).toEqual([shared]);
+    expect(v["9:6"].commentary).toEqual([shared, `6 A ${S}zārib${E} passed.`]);
   });
 });

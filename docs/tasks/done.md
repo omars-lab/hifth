@@ -9,6 +9,16 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #215 — Slant the book's transliterated terms in notes nobody read by hand
+
+**Done:** 2026-10-14, the pull request "Notes nobody read by hand slant the Arabic terms the book
+writes with marks".
+
+An Arabic word the book writes in English letters with a long-vowel line, a dot under a letter or
+an ʿayn sign, and no capital, is now slanted in every note nobody read by hand. Measured against
+the read notes it is right 99 times in 100, and finds a quarter of the slanted words; the rest
+stay upright (docs/issues/italics-from-transliteration-marks.md).
+
 ## #214 — Rehearse the pitch in the iPad app from a fresh install
 
 **Done:** 2026-10-13, the pull request "A note closed after the recitation moved the page lets its
