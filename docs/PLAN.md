@@ -2314,6 +2314,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     internet. Nothing needed mending. A surah saved for offline use still plays; that is the
     saved-recitation test's. Built 2026-10-15: a test in the demo build's suite, in Chrome and
     Firefox, checked by letting the internet through once, which made it fail.
+113. **Keep a second copy of the hand-made fixes to the demo's notes.** Owner's to do.
+    Every correction made by hand to the notes the demo shows (the italics read off the page
+    pictures, the slant on transliterated terms, the mended references and spaces) lives in
+    one file in the private books folder, `books/study-quran/raw/note-fixes.hand.json`. Git
+    ignores that file on purpose, since it holds the book's words, so it is in no commit, and
+    the only other copies were in a scratch folder that gets emptied. If the laptop's disk is
+    lost, the demo's notes lose every one of those corrections, and they took days to make.
+    The copy has to go somewhere private that the owner chooses (an encrypted drive, a
+    private backup), never this repository or any public host, so it is the owner's step,
+    not the agent's. Asked 2026-10-09; still open 2026-10-16.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
