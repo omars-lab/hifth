@@ -9,6 +9,11 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #236 — Try the demo in a room with no internet
+
+**Done:** 2026-10-15 — PLAN.md item 112: with everything past the laptop refused, the note opens
+and Listen says Offline, in Chrome and Firefox; a demo-build test now holds it.
+
 ## #235 — Walk scripts match the full spoken name, including words put in front
 
 **Done:** 2026-10-15. The settings walk could not find the settings button, because the app's name in the corner is spoken with its tagline first. The walk-name test now builds each name the way the app does, and the settings walk allows the words in front. Settings walked again on a laptop in Firefox: they open and scroll to the end with nothing cut off. Issue row `walk-names-shown-words-first`.

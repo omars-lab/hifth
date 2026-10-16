@@ -4802,6 +4802,18 @@
       "owner": "agent",
       "closedBy": "scripts/walk-names.test.mjs",
       "note": "Found walking the demo on a laptop in Firefox (2026-10-15): the settings walk said there was no settings button, because the app's name in the corner is now spoken with its tagline in front, and the walk searched for a name starting with About. The walk-name test checked the bare message, so it passed. It now builds each name the way the app does, with the words a button shows put first, and the settings walk allows them; watched failing first on the settings walk."
+    },
+    {
+      "id": "pitch-room-with-no-internet",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "112"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "The demo build had never been tried with no internet, and the room it is shown in may have none. Tried 2026-10-15 with everything past the laptop refused, in Chrome and Firefox: the note opens from the build, Listen turns red and says Offline, and only the recitation was asked of the internet. Nothing needed mending; the test fails when the internet is let through."
     }
   ]
 }

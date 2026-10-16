@@ -104,6 +104,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   "Offline" (try a wifi with no internet behind it too); turn the wifi back on and press it again: the verse plays. A pitch room may have
   no wifi, and the recitation is the one thing the app fetches from outside. · phone · issue:
   `listen-offline-looked-untouched` · test: e2e/audio.spec.ts
+- [ ] In the demo build, cut the internet (or join a wifi with nothing behind it) and open a
+  verse's note: it opens with all its words; press Listen on the verse's tools: it turns red
+  and says Offline. The room the demo is shown in may have no internet. · pitch, desktop,
+  Firefox · issue: `pitch-room-with-no-internet` · test: e2e/pitch.spec.ts
 - [ ] Press Listen on a slow connection and look at the button before the verse sounds: it
   already says Pause and turns, in the bar and in the verse's menu, since a press then stops the
   sound. A Play still showing there invites a second tap that silences the verse before it

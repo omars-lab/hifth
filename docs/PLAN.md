@@ -2304,6 +2304,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     centring mark) is left alone, since nobody says it aloud. No setting: it mends a fault.
     Built 2026-10-15: the same browser test now reads every named button on the screen, in
     both languages, at a desk, on both phones and in the demo build, watched failing first.
+112. ~~**The demo works in a room with no internet: the notes open, and Listen says it is offline.**~~
+    Asked 2026-10-15 as the next most important thing for the pitch: the room it is shown in
+    may have no wifi, or a wifi with no internet behind it, and the demo build had never been
+    tried that way. The notes ship inside the build, so they should open; the recitation comes
+    from the internet, so pressing Listen should give up and say "Offline" rather than spin.
+    Tried with everything past the laptop refused: the note opens with its words, Listen turns
+    red, says Offline and is named "Offline · Listen to …", and nothing else is asked of the
+    internet. Nothing needed mending. A surah saved for offline use still plays; that is the
+    saved-recitation test's. Built 2026-10-15: a test in the demo build's suite, in Chrome and
+    Firefox, checked by letting the internet through once, which made it fail.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
