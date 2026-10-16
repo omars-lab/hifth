@@ -61,7 +61,7 @@
     const close = buttons().find((e) => e.closest("[role=dialog]") && /^(Close|إغلاق)$/.test((e.getAttribute("aria-label") || e.textContent).trim()));
     if (close) close.click();
     await wait(pauseMs);
-    item = buttons().find((e) => /^(Play|تشغيل) /.test(e.getAttribute("aria-label") || ""));
+    item = buttons().find((e) => /^(Listen to|استمع إلى) /.test(e.getAttribute("aria-label") || ""));
     if (!item) return "no Play on the tools";
   } else {
     // The neighbouring page stays mounted beside the screen, under another layer, so a

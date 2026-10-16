@@ -4778,6 +4778,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/spoken-names.spec.ts",
       "note": "Found widening the spoken-names check to the whole screen (2026-10-15): the Arabic one-or-two-pages switch showed a word its name never said, and the app's name in the corner was named without the line it shows, in both languages, so a reader driving the iPad by voice could not tap them by the words on screen. Names now hold the words. Test over every named button with letters on the screen, both languages, desktop, both phones and the demo build, watched failing first."
+    },
+    {
+      "id": "walk-scripts-stale-button-names",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "110"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "scripts/walk-names.test.mjs",
+      "note": "Found walking the demo in Firefox (2026-10-15): renaming the verse's Play to Listen, and Roots to Same roots, so their spoken names hold the shown words, left five walk scripts searching for the old names, so the corner-cards walk said there was no roots button and the gap and Play-to walks could not find Listen. The scripts now search for the current names, and a test checks every named-button search a walk makes against the message it means, in English and Arabic, watched failing first on the five."
     }
   ]
 }

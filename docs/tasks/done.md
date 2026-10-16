@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #234 — Walk scripts find buttons by the names the app gives them now
+
+**Done:** 2026-10-15. The Play-to-Listen and Roots-to-Same-roots renames had left five walk scripts blind; they search for the current names now, and `scripts/walk-names.test.mjs` checks every named-button search against its message. Corner cards walked again in Firefox on the iPad on its side and both phones: clean. Issue row `walk-scripts-stale-button-names`.
+
 ## #233 — Every named button on the screen says the words it shows
 
 **Done:** 2026-10-15, the pull request "Every named button on the screen says the words it shows"
