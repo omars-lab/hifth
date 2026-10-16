@@ -78,7 +78,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] With one page open on a window the size of an iPad mini on its side, open a verse with the
   roots list already up, a few times over (on a slow connection if you can): the page lands at
   the same size each time, and closing the list gives it back the same size. · laptop, ipad-side ·
-  issue: `card-first-page-lands-off-size` · test: e2e/desktop.spec.ts
+  issue: `card-first-page-lands-off-size` · test: e2e/desktop.spec.ts · the iPad mini app on its
+  side: 625 wide with the list first or second, 693 back on close (walked 2026-10-16)
 - [ ] The bar grows under the finger and settles on a page, both ways up. · phone, ipad-side ·
   tests: pagebar, pagebar-detents, pagebar-fisheye specs
 

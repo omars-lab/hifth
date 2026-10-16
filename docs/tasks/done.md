@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #239 — Check the page-size fix by eye in the real iPad mini app on its side
+
+**Done:** 2026-10-16. In the iPad mini app on its side, the page rests 625 wide whether the roots list comes first or second, and 693 after closing; look-alike rows ⑲ records the walk and the approach given up. New walk script `card-size-walk.js`.
+
 ## #238 — Fix the flaky look-alike page-width test
 
 **Done:** 2026-10-16 — look-alike rows item ⑲: it was the app, not the test. A page coming in

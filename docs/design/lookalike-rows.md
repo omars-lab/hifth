@@ -622,3 +622,15 @@ land in the same place and the size given back is the link's own. A browser test
 until the list has opened, on both sides of the book, and compares it with the page on time; it failed
 first by 8 pixels on each side. The test that had failed now and then passed 120 times out of 120 under
 the same load that had made it fail 2 to 7 times in 80.
+
+**Tried first and given up:** making the lift start again from the size the link asked for, instead
+of from where the glide had got to. That put both orders in the same place too, but the setting that
+keeps the page in the middle then came back about 170 pixels off the reader's own size when the card
+closed, because the size it remembered was the shrunk one. So the glide changed and the lift did not.
+
+**Checked in the real iPad mini app on its side, 2026-10-16:** the roots list opened first and the
+roots list opened over a page already there both left the page 625 pixels wide, and closing the list
+gave back 693 both times. Closing the list when the link had opened it brings back the verse's note,
+and the page stays where it was beside the note rather than gliding to where a freshly opened note
+would put it; the verse is clear of the card either way, and a page that keeps still when one card
+gives way to another is the calmer of the two, so it is left as it is.
