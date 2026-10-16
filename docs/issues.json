@@ -4790,6 +4790,18 @@
       "owner": "agent",
       "closedBy": "scripts/walk-names.test.mjs",
       "note": "Found walking the demo in Firefox (2026-10-15): renaming the verse's Play to Listen, and Roots to Same roots, so their spoken names hold the shown words, left five walk scripts searching for the old names, so the corner-cards walk said there was no roots button and the gap and Play-to walks could not find Listen. The scripts now search for the current names, and a test checks every named-button search a walk makes against the message it means, in English and Arabic, watched failing first on the five."
+    },
+    {
+      "id": "walk-names-shown-words-first",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "110"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "scripts/walk-names.test.mjs",
+      "note": "Found walking the demo on a laptop in Firefox (2026-10-15): the settings walk said there was no settings button, because the app's name in the corner is now spoken with its tagline in front, and the walk searched for a name starting with About. The walk-name test checked the bare message, so it passed. It now builds each name the way the app does, with the words a button shows put first, and the settings walk allows them; watched failing first on the settings walk."
     }
   ]
 }

@@ -13,6 +13,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Before a walk that follows a rename of any button, run the walk-name test: a walk that
   searches for an old name reports "no button" about a screen that has one. · any · issue:
   `walk-scripts-stale-button-names`
+- [ ] A walk search for a button whose name starts with the words it shows (the app's name in the
+  corner, opening settings) names those words in the walk-name test's table, so the test checks
+  the name the app really builds. · any · issue: `walk-names-shown-words-first`
 - [ ] Open the app cold, hint not yet seen. · any · The hint says the right thing for the hand:
   "click" at a desk, "tap" on a phone. · issue: `desktop-hint-says-tap`
 - [ ] At a desk, read every line that tells the hand what to do (under the page, each tool's line on
