@@ -182,7 +182,7 @@ export function briefProblems(check) {
 // instead of quietly misleading a person.
 
 export const LIVE_APP = "https://blog.bytesofpurpose.com/hifth/";
-export const LAPTOP_APP = "http://localhost:5173/";
+export const LAPTOP_APP = "http://localhost:7122/";
 const ONLY = new Set(["live", "laptop"]);
 
 /** Does the app open this address? `?a=b#/…` — the part after `#` is the router's. */

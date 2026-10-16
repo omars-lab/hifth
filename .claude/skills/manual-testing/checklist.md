@@ -5,7 +5,7 @@ says what to look at, what right looks like, and what test it becomes once it ha
 The phone-and-device checks keep their full steps in the validation ledger
 (`make validate CHECK=<id>`, or `make guide` to open them on the phone); this list only names them.
 
-Two ways to open the app: this laptop, `make pitch` then `http://localhost:5173/#/hafs-kfqc/...`
+Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/#/hafs-kfqc/...`
 (the private demo build, with the Study Quran notes); or the public site,
 `https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/...` (no notes).
 

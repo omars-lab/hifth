@@ -20,7 +20,7 @@
  *
  * Usage:
  *   node apps/web/perf/pan-zoom-trace.mjs                 # emulated baseline, 4x CPU throttle
- *   node apps/web/perf/pan-zoom-trace.mjs --url http://<lan-ip>:4173 --throttle 1
+ *   node apps/web/perf/pan-zoom-trace.mjs --url http://<lan-ip>:7123 --throttle 1
  *   node apps/web/perf/pan-zoom-trace.mjs --headed        # watch it run
  *
  * Requires a running preview (pnpm --filter @hifth/web preview) unless --url is
@@ -36,7 +36,7 @@ const flag = (name, fallback) => {
 };
 const has = (name) => args.includes(`--${name}`);
 
-const URL = flag("url", "http://localhost:4173/");
+const URL = flag("url", "http://localhost:7123/");
 const THROTTLE = Number(flag("throttle", "4")); // CDP CPU slowdown multiplier
 const HEADED = has("headed");
 const POLY = flag("poly", "verse-45"); // a real polygon on page 7 to toggle
@@ -121,8 +121,8 @@ async function run() {
   console.log(`  Frames > 16.7ms: ${over16} (${((100 * over16) / frames.length).toFixed(0)}% — jank budget)`);
   console.log("\n  NOTE: emulated baseline only. The architecture verdict needs");
   console.log("  real-device fps. To capture on your phone:");
-  console.log("    1) pnpm build && pnpm -C apps/web exec vite preview --host --port 4173");
-  console.log("    2) open http://<your-mac-LAN-IP>:4173 on the phone, pinch/pan page 7");
+  console.log("    1) pnpm build && pnpm -C apps/web exec vite preview --host --port 7123");
+  console.log("    2) open http://<your-mac-LAN-IP>:7123 on the phone, pinch/pan page 7");
   console.log("    3) record with Safari Web Inspector (iOS) or Chrome DevTools remote (Android)\n");
 }
 

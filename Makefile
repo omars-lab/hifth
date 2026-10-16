@@ -26,7 +26,10 @@ ETL   := $(PNPM) -C packages/etl
 
 # LAN IP so the phone-preview target can print a URL you can open on a device.
 LAN_IP := $(shell ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo "<your-lan-ip>")
-PORT   := 4173
+# The built app's port (preview, phone, phone-perf): 7123 in the hubs port plan,
+# the same as apps/web/vite.config.ts. The browser tests pick their own
+# (scripts/lib/e2e-port.mjs), so this never collides with a test run.
+PORT   := 7123
 
 .DEFAULT_GOAL := help
 
@@ -152,7 +155,7 @@ report: ## Open the last e2e run's report — traces, image diffs, the failing s
 #   make drive HASH='#/hafs-kfqc/1:1'
 #   make drive HASH='#/hafs-kfqc/1:1' ACT='clickrole=button|commentary; settle=400' \
 #     EXPECT='div[role="dialog"]' OUT=fatiha-commentary.png LOCALE=en-US
-#   make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # the pitch server, desktop spread
+#   make drive BASE=http://localhost:7122 VIEWPORT=1440x900   # the pitch server, desktop spread
 #   make drive HASH='#/hafs-kfqc/2:255' DEVICE=ipad-side SEEN_COACH=1 BROWSER=firefox
 #     # a reader's hand by name (desktop, laptop, ipad, ipad-side, ipad-big-side,
 #     # phone, phone-side), the first-run hint already seen — the walk-app skill
@@ -683,7 +686,7 @@ session: ## Work one check with the answers banked as you go:  make session CHEC
 	@#
 	@# Resumes an unbanked transcript by default; NEW=1 starts a fresh one.
 	@test -n "$(CHECK)" || { echo "usage: make session CHECK=<id>   (ids: make validate)"; exit 2; }
-	@# `$(origin PORT)`, not `$(PORT)`. This file already defines PORT := 4173 for
+	@# `$(origin PORT)`, not `$(PORT)`. This file already defines PORT := 7123 for
 	@# the preview server, so a plain `$(if $(PORT),…)` is always true and pins
 	@# every session to the app's own port. That is not just a clash: macOS `open`
 	@# reuses an existing tab pointed at the same URL without reloading it, so a

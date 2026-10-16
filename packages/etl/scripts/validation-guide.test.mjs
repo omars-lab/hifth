@@ -122,7 +122,7 @@ describe("a step that happens in the app carries its link", () => {
     const html = card(withStep({ open: { path: "#/hafs-kfqc/2:48", look: "The verse is lit." } }), { diagrams: {} });
     const visible = html.split("<details")[0];
     expect(visible).toContain('href="https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/2:48"');
-    expect(visible).toContain('href="http://localhost:5173/#/hafs-kfqc/2:48"');
+    expect(visible).toContain('href="http://localhost:7122/#/hafs-kfqc/2:48"');
     expect(visible).toContain("The verse is lit.");
   });
 
@@ -132,7 +132,7 @@ describe("a step that happens in the app carries its link", () => {
       { diagrams: {} },
     );
     expect(html).toContain('href="https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/p1"');
-    expect(html).not.toContain("localhost:5173/#/hafs-kfqc/p1");
+    expect(html).not.toContain("localhost:7122/#/hafs-kfqc/p1");
     expect(html).toContain("Safari clears the real site.");
   });
 
@@ -140,11 +140,11 @@ describe("a step that happens in the app carries its link", () => {
     // "localhost" on the phone is the phone. The page script swaps in the host
     // the guide itself came from; run it against a stand-in page to prove it.
     const script = guidePage([pending()], "h", {}).match(/<script>([\s\S]*)<\/script>/)[1];
-    const link = { attr: "http://localhost:5173/#/hafs-kfqc/2:48", href: "", getAttribute() { return this.attr; } };
+    const link = { attr: "http://localhost:7122/#/hafs-kfqc/2:48", href: "", getAttribute() { return this.attr; } };
     const document = { querySelectorAll: (sel) => (sel === "a.laptop" ? [link] : []) };
     const location = { protocol: "http:", hostname: "192.168.1.20" };
     new Function("document", "location", "localStorage", script)(document, location, {});
-    expect(link.href).toBe("http://192.168.1.20:5173/#/hafs-kfqc/2:48");
+    expect(link.href).toBe("http://192.168.1.20:7122/#/hafs-kfqc/2:48");
   });
 
   it("says plainly when there is no link yet, why, and what would add one", () => {

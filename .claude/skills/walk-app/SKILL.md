@@ -37,8 +37,8 @@ writes down what it found.
 
 | flavour | how to open it |
 | --- | --- |
-| private pitch build (the Study Quran notes) | `make pitch`, then `BASE=http://localhost:5173` |
-| public site build | `make dev` (5173), or the live site `https://blog.bytesofpurpose.com/hifth` |
+| private pitch build (the Study Quran notes) | `make pitch`, then `BASE=http://localhost:7122` |
+| public site build | `make dev` (7122), or the live site `https://blog.bytesofpurpose.com/hifth` |
 | two pages at a desk | `DEVICE=desktop` (1440×900, mouse) |
 | a laptop | `DEVICE=laptop` (1280×800, mouse); one page with `?view=one` in the hash |
 | an iPad upright / on its side / a big one on its side | `DEVICE=ipad`, `ipad-side`, `ipad-big-side` (finger) |
