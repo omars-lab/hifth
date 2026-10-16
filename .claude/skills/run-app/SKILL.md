@@ -9,7 +9,7 @@ The app is a Vite dev server. It is **served**, not a file you open.
 
 ```
 pnpm dev          # serves the web app
-open http://localhost:5173/
+open http://localhost:7122/
 ```
 
 Leave `pnpm dev` running in the background; it hot-reloads.
@@ -33,7 +33,7 @@ Do not open a file from `docs/design/*.html` when someone asks for "the app" or
 "the UI". Those pages are **decision mocks** — a drawing of one question, on a real
 mus'haf page, so a reader can answer it. They are indexed in `docs/decisions.json`
 (and, once published, `docs/artifacts.json`), not served by the app. The app is
-`localhost:5173`. `packages/etl/out/*.html` are generated sitting outputs, not the
+`localhost:7122`. `packages/etl/out/*.html` are generated sitting outputs, not the
 app either.
 
 If the ask is genuinely "open that design page", `open docs/design/<name>.html` —
@@ -46,11 +46,11 @@ but confirm which, because "desktop UI" reads both ways.
    force a real reload (`location.reload()`, or another path and back) before
    reading the DOM. The served source can be new while the page is still old; two
    sessions have lost turns to this.
-2. **Two servers, two truths.** `pnpm dev` (5173) wraps the tree in StrictMode and
-   double-mounts everything; `vite preview` (4173) is the built app, which strips it.
+2. **Two servers, two truths.** `pnpm dev` (7122) wraps the tree in StrictMode and
+   double-mounts everything; `vite preview` (7123) is the built app, which strips it.
    A fault seen on one and not the other is a dev-only artefact — say so, and do not
    ship a fix for the built app that only the dev server needed.
-3. **e2e runs the build.** `pnpm --filter @hifth/web build` first, and free 4173
+3. **e2e runs the build.** `pnpm --filter @hifth/web build` first, and free 4173, the tests' own port in the main checkout,
    (`lsof -ti:4173 | xargs kill`) or Playwright refuses to start its own.
 
 ## Screenshotting the app when there is no browser window — `make drive`
@@ -64,7 +64,7 @@ up and read the PNG it writes:
 make drive HASH='#/hafs-kfqc/1:1'
 make drive HASH='#/hafs-kfqc/1:1' ACT='clickrole=button|commentary; settle=400' \
   EXPECT='div[role="dialog"]' OUT=fatiha-commentary.png LOCALE=en-US
-make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # pitch server, desktop spread
+make drive BASE=http://localhost:7122 VIEWPORT=1440x900   # pitch server, desktop spread
 ```
 
 - A **deep-link `HASH`** reaches most states with no clicks: `#/hafs-kfqc/2:48`
@@ -74,7 +74,7 @@ make drive BASE=http://localhost:5173 VIEWPORT=1440x900   # pitch server, deskto
 - `EXPECT` is a CSS selector that must be visible or the run exits non-zero — so a
   flow that silently landed on the wrong screen fails loudly instead of handing
   back a misleading picture.
-- `BASE` defaults to the dev server (5173); point it at 4173 for the built app or
+- `BASE` defaults to the dev server (7122); point it at 7123 for the built app or
   at the pitch server. `OUT` is under `apps/web/` and the run prints the path.
 - `MOUSE=1` drives a desktop with a real pointer (hover styles, the page-edge grab);
   `drag=x,y>x,y` in `ACT` presses, glides and lets go — a page turn by its edge.

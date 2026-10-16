@@ -19,7 +19,7 @@
  * simple command, not a compound one"):
  *
  *   node apps/web/e2e/tools/drive.mjs \
- *     --base http://localhost:5173 \      # dev (5173) or preview (4173); default dev
+ *     --base http://localhost:7122 \      # dev (7122) or preview (7123); default dev
  *     --hash '#/hafs-kfqc/1:1' \          # deep-link a verse/page — no polygon math
  *     --act 'clickrole=button|Study Quran commentary; settle=400' \
  *     --expect 'div[role="dialog"]' \     # fail loudly if the flow didn't land
@@ -114,7 +114,7 @@ function parseArgs(argv) {
 
 const args = parseArgs(process.argv.slice(2));
 
-const base = String(args.base ?? "http://localhost:5173").replace(/\/$/, "");
+const base = String(args.base ?? "http://localhost:7122").replace(/\/$/, "");
 const hash = args.hash ? String(args.hash) : "";
 const url = base + "/" + (hash.startsWith("#") ? hash : hash ? "#" + hash : "");
 // The default lands in the app's own test-results wherever the tool is run

@@ -77,11 +77,11 @@ pnpm -C apps/web exec playwright test desktop.spec.ts --project=desktop -g "hold
 
 By default Playwright builds `dist/` and serves it on **:4173** (a clean production
 build — this is what a real run asserts). For a fast inner loop against a `vite dev`
-you already have open on **:5173**, point the run at it instead — this skips the build
+you already have open on **:7122**, point the run at it instead — this skips the build
 and the `--strictPort` preview server entirely:
 
 ```
-HIFTH_BASE_URL=http://localhost:5173 pnpm -C apps/web exec playwright test --project=desktop
+HIFTH_BASE_URL=http://localhost:7122 pnpm -C apps/web exec playwright test --project=desktop
 ```
 
 Use `HIFTH_BASE_URL` for iterating; let the default preview build run before you

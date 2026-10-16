@@ -6,7 +6,8 @@
  * could fail for a reason unrelated to the change. The main checkout keeps its
  * ports; a worktree (whose `.git` is a file, not a folder) gets its own, steady
  * across runs, picked from its path, in a range nothing else here uses
- * (5173 is the dev server, 4174 the guide). `HIFTH_E2E_PORT` overrides both.
+ * (7122 is the dev server, 7123 `make preview`, 4174 the guide).
+ * `HIFTH_E2E_PORT` overrides both.
  */
 import { statSync } from "node:fs";
 import { join } from "node:path";

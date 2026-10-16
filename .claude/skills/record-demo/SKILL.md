@@ -12,7 +12,7 @@ decision whose options differ in timing or gesture, it is the evidence.
 
 ## The short version
 
-1. Have a server up: `pnpm dev` (5173) or the built app on 4173 (the `run-app`
+1. Have a server up: `pnpm dev` (7122) or the built app on 7123 (the `run-app`
    skill has the details and the PATH gotcha).
 2. **A clip for a note, on a phone** (a finger, step labels, sharp screenshots):
 

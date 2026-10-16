@@ -328,6 +328,14 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
+  // Each server keeps one fixed port from the hubs port plan
+  // (~/Workspace/git/hubs/design.md, "Port plan"): Vite's own 5173 and 4173 are
+  // the defaults every other Vite repo here starts on too, so two apps clashed.
+  // `strictPort` makes a taken port a loud failure instead of a quiet move to
+  // the next one, which the hubs router would not find. The browser tests and
+  // `make phone` pass their own `--port` / `--host`, which win over these.
+  server: { port: 7122, strictPort: true, host: "127.0.0.1" },
+  preview: { port: 7123, strictPort: true },
   build: {
     target: "es2022",
     sourcemap: true,

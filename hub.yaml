@@ -1,0 +1,32 @@
+# How this repo shows on the local launcher (~/Workspace/git/hubs).
+# Check it with `uv run ~/Workspace/git/hubs/launcher/check.py --repo .`
+
+runners:
+  - id: hifth
+    port: 7122                    # apps/web/vite.config.ts, strictPort
+    health: /
+    start: make dev               # `make pitch` and `make dev-qul` use this port too
+  - id: hifth-preview
+    port: 7123                    # apps/web/vite.config.ts and the Makefile's PORT, strictPort
+    health: /
+    start: make preview           # builds first, then serves the production bundle
+
+hubs:
+  - id: hifth
+    name: Hifth
+    description: Mushaf pages for huffaz; tap a verse to jump to similar verses and shared roots. Installable on a phone.
+    visibility: public
+    use: published
+    fallback: local
+    local: { runner: hifth }
+    published:
+      url: https://blog.bytesofpurpose.com/hifth/
+      host: github-pages          # deployed by the GitHub Actions workflow on each push to main
+  - id: hifth-docs
+    name: Hifth design pages
+    description: The design notes, option comparisons and review sheets behind Hifth.
+    visibility: public
+    use: published
+    published:
+      url: https://blog.bytesofpurpose.com/hifth/docs/
+      host: github-pages
