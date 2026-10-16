@@ -9,6 +9,17 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #238 — Fix the flaky look-alike page-width test
+
+**Done:** 2026-10-16 — look-alike rows item ⑲: it was the app, not the test. A page coming in
+after the roots list had opened landed 8 pixels off; both orders now land the same, held by a test
+that holds the page back on purpose.
+
+## #237 — Put the italics-fixes backup in the backlog as the owner's top item
+
+**Done:** 2026-10-15 — PLAN.md item 113 and its issue row name the one copy of the hand-made note
+fixes as the owner's to back up (PR #518).
+
 ## #236 — Try the demo in a room with no internet
 
 **Done:** 2026-10-15 — PLAN.md item 112: with everything past the laptop refused, the note opens

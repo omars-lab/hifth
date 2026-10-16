@@ -75,6 +75,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] With one page open, a link straight to a verse leaves it in sight beside its note — open it
   a few times, it was one in four. · laptop · issue: `one-page-link-note-covers-verse` · the
   iPad app upright, both sizes: 2:255 lit above its note (walked 2026-10-15)
+- [ ] With one page open on a window the size of an iPad mini on its side, open a verse with the
+  roots list already up, a few times over (on a slow connection if you can): the page lands at
+  the same size each time, and closing the list gives it back the same size. · laptop, ipad-side ·
+  issue: `card-first-page-lands-off-size` · test: e2e/desktop.spec.ts
 - [ ] The bar grows under the finger and settles on a page, both ways up. · phone, ipad-side ·
   tests: pagebar, pagebar-detents, pagebar-fisheye specs
 

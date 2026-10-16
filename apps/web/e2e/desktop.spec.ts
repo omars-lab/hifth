@@ -2397,6 +2397,34 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       expect(Math.abs((await widthBeside("smaller")) - aside), "the page's width beside the list, against the default's").toBeLessThan(2);
     });
 
+    test(`a ${side}-hand page that comes in after the roots list has opened lands where it would have`, async ({ browser }) => {
+      // On a busy machine the list could open and say how much room it takes
+      // before its page had come in. The page's glide to the verse then made
+      // room only for a note below it, never for a card beside it, and landed
+      // 8 pixels off the size it has when the list arrives mid-glide — one
+      // push in many, and never alone. Here the page is held back on purpose.
+      const widthAt = async (late: boolean): Promise<number> => {
+        const context = await browser.newContext({ viewport: { width: 1133, height: 744 }, serviceWorkers: "block" });
+        const page = await context.newPage();
+        if (late)
+          await page.route(`**/assets/pages/hafs-kfqc/${pageNo}.svg`, async (route) => {
+            await new Promise((r) => setTimeout(r, 1500));
+            await route.continue();
+          });
+        await page.goto(`/#/hafs-kfqc/${at}?view=one&open=roots`);
+        const list = page.getByRole("dialog");
+        await expect(list).toBeVisible({ timeout: 20_000 });
+        const svg = pageSvg(page, pageNo);
+        await expect(svg).toBeVisible({ timeout: 20_000 });
+        await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        const width = (await stillBoxOf(svg)).width;
+        await context.close();
+        return width;
+      };
+      const onTime = await widthAt(false);
+      expect(Math.abs((await widthAt(true)) - onTime), "the page's width beside the list, late against on time").toBeLessThan(2);
+    });
+
     test(`closed to one page, the share card stands clear of a ${side}-hand page`, async ({ page }) => {
       // The share card opens in the same corner as the roots list, but only
       // said where its top stood, for a phone: the page did not move aside for
