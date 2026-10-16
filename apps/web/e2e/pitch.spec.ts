@@ -4255,3 +4255,42 @@ test.describe("Hifth · the commentary drawer with the app in Arabic", () => {
     expect(shown).not.toMatch(/[A-Za-z]/);
   });
 });
+
+test.describe("Hifth · the pitch build in a room with no internet", () => {
+  test("with nothing reachable past this machine, the note still opens and Listen says it is offline", async ({ browser }) => {
+    // The room may have no wifi, or a wifi with no internet behind it. The
+    // notes ship inside the build, so they must open; the recitation is the one
+    // thing fetched from outside, so pressing Listen must say Offline rather
+    // than spin. Everything not served from this machine is refused here, the
+    // way a dead connection refuses it (plan item 112).
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, serviceWorkers: "block" });
+    const outside: string[] = [];
+    await context.route("**/*", (route) => {
+      const host = new URL(route.request().url()).hostname;
+      if (host === "localhost" || host === "127.0.0.1") return route.continue();
+      outside.push(host);
+      return route.abort("internetdisconnected");
+    });
+    const page = await context.newPage();
+    await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+    await expect(pageSvg(page, 42)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page)).toBeVisible();
+    const words = await sheet(page).evaluate((el) => (el.textContent ?? "").trim().length);
+    expect(words, "the note's words are there with no connection").toBeGreaterThan(200);
+
+    // Listen sits on the verse's tools, under the note.
+    await page.keyboard.press("Escape");
+    await expect(sheet(page)).toHaveCount(0);
+    const tools = page.getByRole("region", { name: /^Tools for / });
+    const listen = tools.getByRole("button", { name: /^Listen to .*2:255$/ });
+    await listen.click();
+    // Its name then starts with the word it shows, so it is found again by that.
+    const offline = tools.getByRole("button", { name: /^Offline · Listen to .*2:255$/ });
+    await expect(offline, "Listen gives up and says why").toHaveAttribute("data-phase", "error", { timeout: 10_000 });
+    await expect(offline).toContainText("Offline");
+    expect(outside.length, "the only thing asked of the internet was the recitation").toBe(
+      outside.filter((h) => h === "verses.quran.com").length,
+    );
+    await context.close();
+  });
+});
