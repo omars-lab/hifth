@@ -4814,6 +4814,17 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/pitch.spec.ts",
       "note": "The demo build had never been tried with no internet, and the room it is shown in may have none. Tried 2026-10-15 with everything past the laptop refused, in Chrome and Firefox: the note opens from the build, Listen turns red and says Offline, and only the recitation was asked of the internet. Nothing needed mending; the test fails when the internet is let through."
+    },
+    {
+      "id": "note-fixes-have-no-second-copy",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "113"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "note": "The hand-made fixes to the demo's notes sit in one file that git ignores on purpose, with no other copy. The owner keeps a copy somewhere private of their choosing; the agent does not move the book's words anywhere."
     }
   ]
 }
