@@ -11,7 +11,7 @@
   // The next leaf waits behind, hidden but laid out where it will slide in: not a page in sight.
   const pages = [...document.querySelectorAll("svg[aria-labelledby^='page-label-']")].filter((e) => on(box(e)) && getComputedStyle(e).visibility === "visible");
   out.push(`pages=${pages.length}`);
-  const open = [...document.querySelectorAll("button")].find((b) => /^(About Hifth|عن حِفظ)/.test(b.getAttribute("aria-label") || "") && on(box(b)));
+  const open = [...document.querySelectorAll("button")].find((b) => /^(.*[·،] )?(About Hifth|عن حِفظ)/.test(b.getAttribute("aria-label") || "") && on(box(b)));
   if (!open) return out.concat("no settings button").join(" ; ");
   open.click();
   await wait(1200);

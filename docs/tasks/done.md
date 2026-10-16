@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #235 — Walk scripts match the full spoken name, including words put in front
+
+**Done:** 2026-10-15. The settings walk could not find the settings button, because the app's name in the corner is spoken with its tagline first. The walk-name test now builds each name the way the app does, and the settings walk allows the words in front. Settings walked again on a laptop in Firefox: they open and scroll to the end with nothing cut off. Issue row `walk-names-shown-words-first`.
+
 ## #234 — Walk scripts find buttons by the names the app gives them now
 
 **Done:** 2026-10-15. The Play-to-Listen and Roots-to-Same-roots renames had left five walk scripts blind; they search for the current names now, and `scripts/walk-names.test.mjs` checks every named-button search against its message. Corner cards walked again in Firefox on the iPad on its side and both phones: clean. Issue row `walk-scripts-stale-button-names`.

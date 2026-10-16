@@ -93,7 +93,9 @@ A useful hash: `#/hafs-kfqc/2:255` (a verse), `#/hafs-kfqc/p42` (a page), `?view
 
 The walk scripts find buttons by their names, so a button renamed in the messages leaves a walk
 searching for the old name; `node --test scripts/walk-names.test.mjs` checks each search against
-the message it means, and a new search for a named button gets a row there.
+the message it means, and a new search for a named button gets a row there. Where the app puts
+the words a button shows in front of its name (the app's name in the corner), the row names
+those words too, so the test checks the name the app really builds.
 
 The step words `ACT=` takes are listed at the top of drive.mjs. `EXPECT='<css>'` makes a step that
 silently missed fail instead of handing back a picture of the wrong screen. Inside `make`, a `$`

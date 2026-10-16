@@ -11,12 +11,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { spokenName } from "../apps/web/src/spoken-name.ts";
 
 const dir = new URL("../.claude/skills/walk-app/scripts/", import.meta.url);
 const messages = (lang) =>
   JSON.parse(readFileSync(new URL(`../apps/web/src/messages/${lang}.json`, import.meta.url), "utf8"));
 const en = messages("en");
 const ar = messages("ar");
+// The mark the app puts between the words a button shows and the rest of its name (lang.ts).
+const SEP = { en: " · ", ar: "، " };
 
 /** Every way a message can read, its placeholders filled with a verse's name. */
 function variants(message) {
@@ -40,7 +43,9 @@ function searches(script, anchor) {
   return /isAr \?/.test(line) && found.length >= 2 ? { ar: [found[0]], en: [found[1]] } : { ar: found, en: found };
 }
 
-// script · a piece of the line that makes the search · the message it means to find
+// script · a piece of the line that makes the search · the message it means to find ·
+// the message for the words the button shows, where the app puts them in front of its name
+// (the corner's tagline came first, and the settings walk's search for "About" found nothing)
 const SEARCHES = [
   ["corner-cards.js", "const roots =", "rootsTrigger"],
   ["corner-cards.js", "const share =", "shareAriaAyah"],
@@ -61,15 +66,15 @@ const SEARCHES = [
   ["thread-walk.js", "const refs =", "goToVerse"],
   ["ref-turn-walk.js", "const cite =", "goToVerse"],
   ["ref-walk.js", "const back =", "beadBack"],
-  ["settings-walk.js", "const open =", "about"],
+  ["settings-walk.js", "const open =", "about", "tagline"],
 ];
 
-for (const [script, anchor, key] of SEARCHES) {
+for (const [script, anchor, key, shown] of SEARCHES) {
   test(`${script} finds the ${key} button by the name the app gives it`, () => {
     const found = searches(script, anchor);
     for (const [lang, book] of [["en", en], ["ar", ar]]) {
       assert.ok(book[key], `${lang} has no message ${key}`);
-      const names = variants(book[key]);
+      const names = variants(book[key]).map((n) => spokenName(n, shown && book[shown], SEP[lang]));
       assert.ok(
         found[lang].some((re) => names.some((n) => re.test(n))),
         `${script} (${anchor}) looks for ${found[lang].join(" or ")}, but the ${lang} button is named "${names[0]}"`,
