@@ -14,6 +14,10 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Checked again 2026-10-16, nothing taken.** 191.9 KB against the 200 KB cap, after the page
+beside a card landing at one size whichever came in first; about 54 KB of real room is left, so the
+two candidates below still wait.
+
 **Checked again 2026-10-15 (later), nothing taken.** 191.6 KB against the 200 KB cap, after
 fixes to where the cards stand on a phone on its side and the slider stepping out of sight under a
 verse's tools; about 54 KB of real room is left, so the two candidates below still wait.

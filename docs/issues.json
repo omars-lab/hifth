@@ -4825,6 +4825,18 @@
       "severity": "risk",
       "owner": "user",
       "note": "The hand-made fixes to the demo's notes sit in one file that git ignores on purpose, with no other copy. The owner keeps a copy somewhere private of their choosing; the agent does not move the book's words anywhere."
+    },
+    {
+      "id": "card-first-page-lands-off-size",
+      "source": {
+        "file": "docs/design/lookalike-rows.md",
+        "item": "⑲"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "Found as a flaky desktop check (2026-10-16, 2 to 7 in 80 under load, never alone): with the roots list open before a slow page came in, the glide to the verse fitted it beside the list by its own 16-pixel rule, while a list arriving mid-glide moved the page by the lift's 12-pixel rule, so the page landed 8 pixels off and gave back the smaller size on close. Fixed in PageStage.tsx: the glide frames as if no card stood there, then moves out from under it as the lift does. Test: 'a left/right-hand page that comes in after the roots list has opened lands where it would have', failed first by 8 px on both sides."
     }
   ]
 }

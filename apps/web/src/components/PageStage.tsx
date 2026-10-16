@@ -3419,12 +3419,20 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
         if (bbox && fit) {
           const ctx = { ...fit, viewBoxWidth: viewBoxWidthOf(mp.svg), text: textBoxOf(mp.host, mp.svg) };
           const lead = firstLineOf(mp.svg, loc.elementIds);
+          // Framed as if no card stood beside the page, and then moved out from
+          // under one the way the lift does, below. The lift bends the glide
+          // when the card comes in after it has begun, and a card already there
+          // had been fitted across by the hop's own rule instead: a slow page
+          // coming in after the roots list had opened landed 8 pixels off the
+          // size it had when the list came second, and the reader's own size,
+          // given back when the list closed, was the smaller one.
+          const bare = { ...ctx, coverLeft: 0, coverRight: 0 };
           let target = frameBboxToView(
             bbox,
-            ctx,
+            bare,
             hopZoomFor(
               bbox,
-              ctx,
+              bare,
               // On the first two pages the type is already drawn larger, so
               // the closer look is that much less (plan item 37).
               hopZoomOnLargeType(
@@ -3434,9 +3442,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
             ),
             lead,
           );
-          // With a note already up, land where the lift would move the verse
-          // to, rather than zoom in and then have the lift zoom back out.
-          if (fit.coverBottom || (isShortScreen(window.innerHeight) && coverTopRef.current !== null))
+          // With a note already up, or a card beside the page, land where the
+          // lift would move the verse to, rather than zoom in and then have the
+          // lift zoom back out.
+          const side = (fit.coverLeft ?? 0) > 0 || (fit.coverRight ?? 0) > 0;
+          if (side) target = clampView(target, fit);
+          if (fit.coverBottom || side || (isShortScreen(window.innerHeight) && coverTopRef.current !== null))
             target = aboveCover(bbox, ctx, fit, target, lead);
           // A note that rises once the glide has begun bends it (the lift, below).
           // Cleared only if still ours: this glide cut short by a newer hop's

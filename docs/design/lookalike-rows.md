@@ -600,3 +600,25 @@ mini's size and at the app's shorter room, in English and Arabic, watched failin
 opens each corner card in turn and reports how much of the verse is under it and whether a button meets
 the page or a close button (plan item 90). Measured again in the iPad app: 2% under in English, none in
 Arabic. The leftover was ⑯'s, which plan item 92 settled (2026-10-13).
+
+### ⑲ Does the page land at the same size beside the roots list whether the list or the page comes in first? · **fixed**
+
+**What it changes for a hafiz:** on a window the size of an iPad mini on its side, a verse opened with
+the roots list already up should land at one size every time, so the verse's lines sit the same way
+beside the list from one visit to the next. It did not quite. When the page came in after the list,
+which happens on a slow connection or a busy machine, the page landed 8 pixels narrower than when the
+list came in after the page; and closing the list then gave back that narrower size, not the size the
+link opens at. Found 2026-10-16, when a browser test of the setting that keeps the page in the middle
+failed one push in many and never on its own.
+
+There were two rules for how far to shrink a verse to fit beside a card. The glide to a verse fitted
+it across the room the card leaves, 16 pixels clear each side. When the card came in after the glide
+had begun, the page was moved out from under it instead, 12 pixels clear each side. Which rule ran
+depended only on which arrived first.
+
+**Fixed, 2026-10-16:** the glide to a verse now picks its size as if no card stood beside the page,
+and then moves out from under the card the way it does when the card comes second, so both orders
+land in the same place and the size given back is the link's own. A browser test holds the page back
+until the list has opened, on both sides of the book, and compares it with the page on time; it failed
+first by 8 pixels on each side. The test that had failed now and then passed 120 times out of 120 under
+the same load that had made it fail 2 to 7 times in 80.
