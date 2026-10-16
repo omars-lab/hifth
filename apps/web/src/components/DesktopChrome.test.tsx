@@ -203,7 +203,7 @@ describe("DesktopChrome · one page or two", () => {
     expect([one!.textContent, two!.textContent]).toEqual(["واحدة", "اثنتان"]);
     expect([one!.getAttribute("aria-label"), two!.getAttribute("aria-label")]).toEqual([
       "صفحة واحدة",
-      "صفحتان",
+      "صفحتان اثنتان",
     ]);
   });
 

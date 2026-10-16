@@ -83,6 +83,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Tap a verse and read each button's spoken name against the word under its sign: every
   name says that word, so a reader can tap it by voice. · any, both languages, and the demo
   build's note button · issue: `verse-tools-spoken-names` (2026-10-15)
+- [ ] Read every named button on the screen, the bars round the page too, against the words it
+  shows: each name holds those words (a sign with no letters is exempt). · any, both languages ·
+  issue: `screen-buttons-spoken-names` (2026-10-15)
 - [ ] Press a verse's number: one list of tools, not two. · any · issue:
   `number-menu-and-toolbar-together`
 - [ ] Open a verse's number menu with the keyboard and press Down at once, while its lines are

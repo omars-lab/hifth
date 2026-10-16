@@ -4766,6 +4766,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/spoken-names.spec.ts",
       "note": "Found walking the demo at a desk (2026-10-15): the verse's tools show a word under each sign, and Listen, the roots button and (in Arabic) the note button were named aloud with other words, so a reader driving the iPad by voice could not tap them by the word on screen. Names now hold the word they show, and a button whose name never says it has the word put first. Test over every worded button on the tools in both languages, desktop and both phones, and the demo build, watched failing first."
+    },
+    {
+      "id": "screen-buttons-spoken-names",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "111"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/spoken-names.spec.ts",
+      "note": "Found widening the spoken-names check to the whole screen (2026-10-15): the Arabic one-or-two-pages switch showed a word its name never said, and the app's name in the corner was named without the line it shows, in both languages, so a reader driving the iPad by voice could not tap them by the words on screen. Names now hold the words. Test over every named button with letters on the screen, both languages, desktop, both phones and the demo build, watched failing first."
     }
   ]
 }

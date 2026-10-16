@@ -2294,6 +2294,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     2026-10-15: a browser test over every worded button on the tools, in both languages, at
     a desk and on both phones, and in the demo build with its note button, watched failing
     first.
+111. ~~**Every named button on the screen says the words it shows, not only the verse's tools.**~~
+    Found 2026-10-15, by widening item 110's check to the whole screen: two more buttons were
+    named aloud without the words they show. In Arabic the switch between one page and two
+    showed one word for "two" and was named with another, and the app's name in the corner
+    showed its line about what the app is for but was named only "About Hifth, licence and
+    sources", in both languages. The switch's Arabic name now holds its word, and the corner
+    button's name starts with the line it shows. A sign with no letters (plus, minus, the
+    centring mark) is left alone, since nobody says it aloud. No setting: it mends a fault.
+    Built 2026-10-15: the same browser test now reads every named button on the screen, in
+    both languages, at a desk, on both phones and in the demo build, watched failing first.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

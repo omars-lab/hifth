@@ -9,6 +9,18 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #233 — Every named button on the screen says the words it shows
+
+**Done:** 2026-10-15, the pull request "Every named button on the screen says the words it shows"
+(PLAN 111). The Arabic one-or-two-pages switch and the app's name in the corner were named aloud
+without the words they show; both names now hold them.
+
+## #232 — Check the verse tools' spoken names inside the real iPad app
+
+**Done:** 2026-10-15, after the pull request for PLAN 110 merged. Inside the iPad app (the 13-inch
+on its side in English and Arabic, the 13-inch upright and the mini on its side in English), all
+five worded buttons on a verse's tools were named with the word under their signs.
+
 ## #231 — Buttons on a verse's tools say aloud the words they show
 
 **Done:** 2026-10-15, the pull request "Buttons on a verse's tools say aloud the words they show"
