@@ -23,7 +23,7 @@
   const sel = () => [...new Set([...document.querySelectorAll("#hifth-overlay [data-hl-group='selection']")].filter((e) => on(box(e))).map((e) => (e.getAttribute("data-hl-key") || "?").split("/").pop()))].join("+");
   const note = () => [...document.querySelectorAll("[role=dialog]")].find((e) => box(e));
   // The copy of a closing note that slides away is inert: nobody can press it, so it is not counted.
-  const runBtns = () => [...document.querySelectorAll("button")].filter((e) => on(box(e)) && !e.closest("[inert]")).map((e) => e.getAttribute("aria-label") || "").filter((s) => (isAr ? /^(تشغيل|إيقاف)/ : /^(Play|Pause|Stop)/).test(s)).map((s) => s.split(" ")[0]).join("/");
+  const runBtns = () => [...document.querySelectorAll("button")].filter((e) => on(box(e)) && !e.closest("[inert]")).map((e) => e.getAttribute("aria-label") || "").filter((s) => (isAr ? /^(استمع|تشغيل|إيقاف)/ : /^(Listen|Play|Pause|Stop)/).test(s)).map((s) => s.split(" ")[0]).join("/");
   const look = () => {
     const nb = box(note());
     const lit = litBoxes();

@@ -40,7 +40,7 @@
   await closeTop();
   out.push(look("closed"));
   // The roots button is in the verse's drawer, which is up only with nothing else open.
-  const roots = [...document.querySelectorAll("button")].find((b) => /^(Roots ·|الجذور)/.test((b.getAttribute("aria-label") || b.textContent || "").trim()));
+  const roots = [...document.querySelectorAll("button")].find((b) => /^(Same roots ·|الجذور)/.test((b.getAttribute("aria-label") || b.textContent || "").trim()));
   if (roots) {
     roots.click(); await wait(1800); out.push(look("roots"));
     const sc = cards().map(([e]) => e).find((e) => e.scrollHeight > e.clientHeight + 4);

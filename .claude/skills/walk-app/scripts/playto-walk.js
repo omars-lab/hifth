@@ -43,7 +43,7 @@
     const close = note && [...note.querySelectorAll("button")].find((b) => b.getAttribute("aria-label") === (isAr ? "إغلاق" : "Close"));
     out.push(`tapped: lit=${lit} note=${note ? "open" : "none"}`);
     if (close) { close.click(); await wait(900); }
-    const tools = [...document.querySelectorAll("button")].filter((e) => on(box(e)) && !e.closest("[inert]") && (isAr ? /^تشغيل/ : /^Play /).test(e.getAttribute("aria-label") || "") && (e.getAttribute("aria-label") || "").replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).endsWith(lit));
+    const tools = [...document.querySelectorAll("button")].filter((e) => on(box(e)) && !e.closest("[inert]") && (isAr ? /^استمع إلى/ : /^Listen to /).test(e.getAttribute("aria-label") || "") && (e.getAttribute("aria-label") || "").replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).endsWith(lit));
     out.push(`after close: note=${document.querySelector("[role=dialog]") ? "open" : "none"} listen=${tools.length}`);
     if (!tools.length) return out.join(" ; ");
     tools[0].click();
