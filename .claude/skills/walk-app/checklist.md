@@ -229,6 +229,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   ROUTE=/hafs-kfqc/p7 EVALFILE=.claude/skills/walk-app/scripts/mistake-ask-walk.js DELAY_MS=2500
   PROBE_TIMEOUT_S=200` · test: e2e/ipad.spec.ts ("a drag brings the page's foot into sight") ·
   found 2026-10-13
+- [ ] On a phone, with the Mistake pen, tap a long word in the middle and at the foot of the
+  page, upright and on its side with a note open: the question stays off the word's whole line,
+  all of it on the screen, every choice reachable (a row scrolls sideways), none under the
+  look-alike buttons; a choice reached by keyboard keeps its label readable. · phone, phone on its
+  side · `make drive DEVICE=phone-side HASH=/hafs-kfqc/2:48 "ACT=settle=2500;evalfile=.claude/skills/walk-app/scripts/mistake-ask-walk.js"` ·
+  test: e2e/phone-toolbar.spec.ts ("the Mistake pen's question stays on the screen") · found 2026-10-16
 - [ ] With the pens set to the left in the info panel ("Which side the pens stand on"), on an
   iPad held sideways in English and Arabic: the pens down the side stand at the left edge, the
   colours on the book's side of them, clear of the page; Mark up sits at the left end of the
@@ -761,7 +767,9 @@ upright and on its side, English and Arabic, iPad and Mac.
   **iPad mini on its side** too (`"IPAD=iPad mini (A17 Pro)" SIDEWAYS=1`), in both languages: there
   the note read to its end grew over its verse (plan item 89). Walked 2026-10-12 on the mini,
   nothing wrong now but the share card's own leftover (look-alike rows ⑯, settled 2026-10-13 by
-  plan item 92)
+  plan item 92). Walked 2026-10-16 on a phone, upright and on its side, in English and Arabic
+  (`make drive DEVICE=phone|phone-side LOCALE=ar … evalfile=…/visit-walk.js`): nothing wrong. On a
+  phone the note is a sheet, and read to its end it grows over its verse by design
 - [ ] On an **iPad mini on its side**, open each corner card in turn on 2:48 — the note, read to its
   end, the roots list, read to its end, each look-alike list, and the share card — in English and in
   Arabic. No card covers its verse, and the look-alike buttons never sit on the page or on a

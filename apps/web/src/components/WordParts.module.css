@@ -4,7 +4,7 @@
 
 .box {
   position: fixed;
-  z-index: var(--z-sheet);
+  z-index: var(--z-ask);
   max-inline-size: min(36rem, calc(100vw - 24px));
   max-block-size: calc(100vh - 24px);
   overflow: auto;
@@ -146,7 +146,6 @@
   box-shadow: inset 0 0 0 1px var(--danger);
 }
 
-.part:focus-visible,
 .many {
   min-block-size: var(--touch-min);
   padding: 0 var(--space-3);
@@ -158,6 +157,7 @@
   cursor: pointer;
 }
 
+.part:focus-visible,
 .many:focus-visible,
 .another:focus-visible,
 .clear:focus-visible {

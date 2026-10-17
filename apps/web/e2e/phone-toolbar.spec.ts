@@ -200,6 +200,99 @@ test.describe("Hifth · the page tools on a phone", () => {
     await fits("A, the strip");
   });
 
+  test("the Mistake pen's question stays on the screen, off its word and over the look-alike buttons, upright and on its side", async ({
+    page,
+  }) => {
+    // Walking the phone (2026-10-16): a long word's question stood one choice to a row down the
+    // whole screen, two of its buttons below the foot and two under the look-alike buttons, over
+    // the word it asked about; on its side, tapped low on the page, it covered the word too.
+    // And on its side with little page left (a note open under it), the drawer it docks into
+    // stood half over the tapped word's line.
+    await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
+    await page.goto("/#/hafs-kfqc/2:48?tool=mistake");
+    await expect(page.locator("[data-direction]:visible").first()).toBeVisible();
+    const ask = page.getByRole("dialog", { name: /^What went wrong in / });
+    for (const size of [null, { width: 844, height: 390 }, { width: 844, height: 300 }]) {
+      if (size) await page.setViewportSize(size);
+      await page.waitForTimeout(800);
+      // The middle of the verses in sight and the foot of the page at either side, as the walk taps.
+      const spots = await page.evaluate(() => {
+        const svg = [...document.querySelectorAll<SVGSVGElement>("svg[aria-labelledby^='page-label-']")].find(
+          (e) => e.getBoundingClientRect().width > 0 && getComputedStyle(e).visibility === "visible",
+        )!;
+        const lines = [...svg.querySelectorAll(".ayahPolygon")]
+          .map((e) => e.getBoundingClientRect())
+          .filter((b) => b.width > 0 && b.bottom > 0 && b.top < innerHeight);
+        const top = Math.max(0, Math.min(...lines.map((b) => b.top)));
+        const bottom = Math.min(innerHeight - 30, Math.max(...lines.map((b) => b.bottom)));
+        const left = Math.min(...lines.map((b) => b.left));
+        const right = Math.max(...lines.map((b) => b.right));
+        const all = [
+          { name: "middle", x: (left + right) / 2, y: (top + bottom) / 2 },
+          { name: "foot-right", x: right - 24, y: bottom - 14 },
+          { name: "foot-left", x: left + 24, y: bottom - 14 },
+        ];
+        return all.filter((p) => svg.contains(document.elementFromPoint(p.x, p.y)) && document.elementFromPoint(p.x, p.y)?.tagName !== "circle");
+      });
+      expect(spots.length, "spots on the page to tap").toBeGreaterThan(0);
+      for (const at of spots) {
+        const where = `${size ? `on its side ${size.height} tall` : "upright"}, ${at.name}`;
+        await page.mouse.click(at.x, at.y);
+        await expect(ask, where).toBeVisible();
+        await ask.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((x) => x.finished)));
+        const seen = await ask.evaluate((el, p) => {
+          const r = el.getBoundingClientRect();
+          const buttons = [...el.querySelectorAll("button")];
+          return {
+            marked: el.dataset.wordTop !== undefined,
+            inside: r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight,
+            // Over the word it asks about, which it says it stands off; or over the tap.
+            onWord:
+              (p.x > r.left && p.x < r.right && p.y > r.top && p.y < r.bottom) ||
+              (Number(el.dataset.wordBottom) > r.top && Number(el.dataset.wordTop) < r.bottom),
+            // A button is reachable if, scrolled to, it is the thing a finger lands on.
+            covered: buttons.filter((b) => {
+              b.scrollIntoView({ block: "nearest", inline: "nearest" });
+              const q = b.getBoundingClientRect();
+              return !b.contains(document.elementFromPoint((q.left + q.right) / 2, (q.top + q.bottom) / 2));
+            }).length,
+          };
+        }, at);
+        expect(seen, where).toEqual({ marked: true, inside: true, onWord: false, covered: 0 });
+        await page.keyboard.press("Escape");
+        await expect(ask).toHaveCount(0);
+      }
+    }
+  });
+
+  test("a focused choice in the Mistake pen's question keeps its label readable", async ({ page }) => {
+    // The first choice is focused as the question opens; a focus outline, not the solid fill of
+    // the button that marks many signs, which left its label dark on dark.
+    await page.goto("/#/hafs-kfqc/p7?tool=mistake");
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    const whole = page.getByRole("dialog", { name: /^What went wrong in / }).getByRole("button", { name: "The whole word" });
+    await expect(whole).toBeVisible();
+    // Read off the style sheet, since Safari's engine does not move the keyboard's focus to a
+    // button: the choice's own focus rule draws an outline and leaves the fill alone.
+    const fills = await whole.evaluate((b) => {
+      const own = [...b.classList].map((c) => `.${c}:focus-visible`);
+      const rules = [...document.styleSheets].flatMap((sheet) => {
+        try {
+          return [...sheet.cssRules];
+        } catch {
+          return [];
+        }
+      });
+      return rules
+        .filter((r): r is CSSStyleRule => r instanceof CSSStyleRule)
+        .filter((r) => r.selectorText.split(",").some((sel) => own.includes(sel.trim())))
+        .map((r) => `${r.style.background || r.style.backgroundColor || "none"}|${r.style.outline ? "outline" : "-"}`);
+    });
+    expect(fills.length, "the choice has a focus rule").toBeGreaterThan(0);
+    for (const f of fills) expect(f).toBe("none|outline");
+  });
+
   test("A: a strip under the top bar, one tap to a tool", async ({ page }) => {
     await page.goto("/?phonebar=a#/hafs-kfqc/p7");
     await expect(bar(page, "a").getByRole("radio")).toHaveCount(10);

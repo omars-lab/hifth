@@ -67,7 +67,8 @@ interface WordPartsProps {
   /**
    * Stand in the verse drawer's place — on the bottom of the window, over the
    * bar under the page — rather than beside the word (selection-drawer = D).
-   * The word tool's row does; the mistake picker still opens on its word.
+   * The word tool's row does; the mistake picker opens on its word, and docks
+   * only where it fits neither under nor over it (a phone).
    */
   docked?: boolean | undefined;
   /**
@@ -92,6 +93,13 @@ interface WordPartsProps {
 
 /** Room kept between the row and the window's edge, and below the word. */
 const MARGIN = 12;
+
+/** Where its word stands, top and bottom, on the box: what a test checks it stays off. */
+function markWord(box: HTMLElement, r: { top: number; bottom: number } | null) {
+  if (!r) return;
+  box.dataset.wordTop = String(Math.round(r.top));
+  box.dataset.wordBottom = String(Math.round(r.bottom));
+}
 /** Page units of paper kept round the word in each copy. */
 const PAD = 2.5;
 /**
@@ -126,7 +134,7 @@ export function WordParts({
   pageSize,
   anchor,
   mode,
-  docked = false,
+  docked: dockedAsked = false,
   chosen,
   onPick,
   onPickMany,
@@ -136,6 +144,10 @@ export function WordParts({
   onClose,
 }: WordPartsProps): JSX.Element {
   const { t } = useT();
+  // Beside its word, it docks when it fits neither under nor over it: on a phone a long word's
+  // question stood the whole screen tall over the word it asked about (2026-10-16).
+  const [noRoom, setNoRoom] = useState(false);
+  const docked = dockedAsked || noRoom;
   // Signs gathered for one note. A plain click with none gathered still picks
   // at once, so the one-part case stays one click; Shift or ⌘ starts a
   // gathering, and once one is under way every click on a sign toggles it.
@@ -158,22 +170,40 @@ export function WordParts({
   // Docked: where its top edge stands when the word is low (undefined until
   // measured, null for the bottom of the window).
   const [dockTop, setDockTop] = useState<number | null | undefined>(undefined);
+  // Docked where it fits on neither side of the word whole: as tall as the room on the side
+  // with more, its rows scrolling, so it never stands over the word (undefined when it fits).
+  const [dockRoom, setDockRoom] = useState<number | undefined>(undefined);
 
   // Docked, it stands on the bottom of the window, unless that would cover the
   // word: then at the top, just under the tool bar (word-drawer-placement = B).
+  // Where it fits whole on neither side, it takes the side with more room and
+  // shrinks to it (a phone on its side with a note open, 2026-10-16).
   useEffect(() => {
     if (!docked) return;
     const frame = requestAnimationFrame(() => {
       const box = boxRef.current;
       if (!box) return;
       const r = anchorRef.current();
-      if (!r || r.bottom + MARGIN <= window.innerHeight - box.offsetHeight) {
+      markWord(box, r);
+      // Its full height, held to half the window as its style holds it, whatever room the last word left.
+      const h = Math.min(box.scrollHeight, window.innerHeight / 2);
+      setDockRoom(undefined);
+      if (!r || r.bottom + MARGIN <= window.innerHeight - h) {
         setDockTop(null);
         return;
       }
       const tools = document.querySelector<HTMLElement>('[role="toolbar"][data-tool]:not([data-phone-bar])');
-      const under = tools?.getBoundingClientRect().bottom ?? 0;
-      setDockTop(under < window.innerHeight / 2 ? under : 0);
+      const toolsFoot = tools?.getBoundingClientRect().bottom ?? 0;
+      const under = toolsFoot < window.innerHeight / 2 ? toolsFoot : 0;
+      const roomAbove = r.top - MARGIN - under;
+      const roomBelow = window.innerHeight - r.bottom - MARGIN;
+      if (h > roomAbove && roomBelow > roomAbove) {
+        setDockTop(null);
+        setDockRoom(roomBelow);
+        return;
+      }
+      setDockTop(under);
+      if (h > roomAbove) setDockRoom(roomAbove);
     });
     return () => cancelAnimationFrame(frame);
   }, [data, docked]);
@@ -186,10 +216,15 @@ export function WordParts({
       const box = boxRef.current;
       if (!box) return;
       const r = anchorRef.current();
+      markWord(box, r);
       const w = box.offsetWidth;
       const h = box.offsetHeight;
       const cx = r ? (r.left + r.right) / 2 : window.innerWidth / 2;
       const below = r ? r.bottom + MARGIN : window.innerHeight / 2 - h / 2;
+      if (r && below + h + MARGIN > window.innerHeight && r.top - h - MARGIN < MARGIN) {
+        setNoRoom(true);
+        return;
+      }
       const top = !r || below + h + MARGIN <= window.innerHeight ? below : Math.max(MARGIN, r.top - h - MARGIN);
       const left = Math.min(Math.max(MARGIN, cx - w / 2), window.innerWidth - w - MARGIN);
       setAt({ left, top });
@@ -258,9 +293,7 @@ export function WordParts({
         docked
           ? dockTop === undefined
             ? { visibility: "hidden" }
-            : dockTop !== null
-              ? { top: dockTop }
-              : undefined
+            : { ...(dockTop !== null && { top: dockTop }), ...(dockRoom !== undefined && { maxBlockSize: dockRoom }) }
           : at
             ? { left: at.left, top: at.top }
             : { visibility: "hidden" }

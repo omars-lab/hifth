@@ -167,6 +167,11 @@ app-run-ipad: app-build-ipad ## Boot the simulator, install and launch at ROUTE
 	SIMCTL_CHILD_HIFTH_ROUTE=$(ROUTE) SIMCTL_CHILD_HIFTH_APPEARANCE=$(APPEARANCE) xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS)
 
 app-shot: ## Screenshot the app at ROUTE on TARGET=ipad|mac (APPEARANCE=light|dark) into native/shots/
+# The app takes this picture of itself as it starts, before a UI test could turn it, so it is
+# always upright; SIDEWAYS was once passed here and quietly ignored.
+ifneq ($(SIDEWAYS),)
+	@echo "  ✗ app-shot is upright only: on its side use app-walk SIDEWAYS=1, or app-probe SIDEWAYS=1 PROBE_SHOT=file.png"; exit 1
+endif
 	@mkdir -p $(SHOTS)
 ifeq ($(TARGET),mac)
 	$(MAKE) app-build-mac

@@ -3,10 +3,13 @@
   // page in sight: where it stands, whether all of it is on the screen, whether every button can
   // be reached, and how far it stands from the word it asks about. The question is closed each time,
   // so nothing is marked. Boxes, counts and button kinds only, never a word of the page.
+  // Set window.__keep = "middle" (or another spot's name) on a line ahead of it to leave that
+  // spot's question open and stop there, so the walk's picture shows it.
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const box = (e) => e?.getBoundingClientRect() ?? null;
   const on = (r) => r && r.width > 0 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
-  const inside = (r) => r && r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight;
+  // Give or take a point: a choice scrolled flush to the screen's foot ends a fraction past it.
+  const inside = (r) => r && r.left >= -1 && r.top >= -1 && r.right <= innerWidth + 1 && r.bottom <= innerHeight + 1;
   const f = (b) => (b ? `${Math.round(b.left)},${Math.round(b.top)}-${Math.round(b.right)},${Math.round(b.bottom)}` : "none");
   const hit = (a, b) => a && b && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   const out = [`view=${innerWidth}x${innerHeight} lang=${document.documentElement.lang}`];
@@ -56,14 +59,17 @@
       if (!ask) { const el = document.elementFromPoint(p.x, p.y); out.push(`p${n} ${name}: no question (under the tap: ${el?.tagName.toLowerCase()}${el?.classList.length ? "." + [...el.classList].join(".") : ""}, in a verse=${lines.some((b) => p.x >= b.left && p.x <= b.right && p.y >= b.top && p.y <= b.bottom) ? "yes" : "no"})`); continue; }
       const ab = box(ask);
       const buttons = [...ask.querySelectorAll("button")];
-      const cut = buttons.filter((b) => !inside(box(b))).length;
+      // A choice in a row that scrolls sideways is judged scrolled to, as a finger would bring it.
+      const cut = buttons.filter((b) => { b.scrollIntoView({ block: "nearest", inline: "nearest" }); return !inside(box(b)); }).length;
       const kinds = buttons.map((b) => b.dataset.part || (b.getAttribute("aria-label") ? "close" : "other"));
       // How far the question stands from the tapped point, below it or above it; below zero it
       // covers the tap. And a button drawn over by something else (the page bar) cannot be pressed.
-      const word = { left: p.x - 6, right: p.x + 6, top: p.y - 6, bottom: p.y + 6 };
+      // The word's own edges, as the question says it measured them; the tap's spot where it does not.
+      const word = ask.dataset.wordTop ? { left: p.x - 6, right: p.x + 6, top: +ask.dataset.wordTop, bottom: +ask.dataset.wordBottom } : { left: p.x - 6, right: p.x + 6, top: p.y - 6, bottom: p.y + 6 };
       const gap = Math.round(ab.top >= p.y ? ab.top - p.y : p.y - ab.bottom);
-      const under = buttons.filter((b) => { const r = box(b); return !b.contains(document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2)); }).length;
+      const under = buttons.filter((b) => { b.scrollIntoView({ block: "nearest", inline: "nearest" }); const r = box(b); return !b.contains(document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2)); }).length;
       out.push(`p${n} ${name}: box=${f(ab)} docked=${ask.dataset.docked || "no"} whole=${inside(ab) ? "yes" : "no"} buttons=${buttons.length} cutOff=${cut} drawnOver=${under} coversWord=${hit(ab, word) ? "yes" : "no"} gap=${gap} ${ab.top >= p.y ? "below" : "above"} kinds=${[...new Set(kinds)].join("|")}`);
+      if (window.__keep === name) return out.join(" ; ");
       // Away from the screen's foot it has no close button; Escape closes it either way.
       ask.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       await wait(600);

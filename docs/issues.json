@@ -4837,6 +4837,18 @@
       "owner": "agent",
       "closedBy": "apps/web/e2e/desktop.spec.ts",
       "note": "Found as a flaky desktop check (2026-10-16, 2 to 7 in 80 under load, never alone): with the roots list open before a slow page came in, the glide to the verse fitted it beside the list by its own 16-pixel rule, while a list arriving mid-glide moved the page by the lift's 12-pixel rule, so the page landed 8 pixels off and gave back the smaller size on close. Fixed in PageStage.tsx: the glide frames as if no card stood there, then moves out from under it as the lift does. Test: 'a left/right-hand page that comes in after the roots list has opened lands where it would have', failed first by 8 px on both sides."
+    },
+    {
+      "id": "phone-mistake-question-covers-word",
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "⑨"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/phone-toolbar.spec.ts",
+      "note": "Found walking the demo on a phone (2026-10-16): upright, a long word's question stood the whole screen tall over its word, with choices off the screen and under the look-alike buttons; on its side with a note open it hung over half the word's line; a focused choice filled in solid over its label. Fixed in WordParts.tsx and its styles: it docks where it fits neither under nor over the word, takes the side with more room and shrinks to it when even the strip would cover the word, stands over the look-alike buttons, and rings a focused choice. Tests: 'the Mistake pen's question stays on the screen, off its word and over the look-alike buttons, upright and on its side' (failed first upright and on its side) and 'a focused choice in the Mistake pen's question keeps its label readable' (failed first on the old fill)."
     }
   ]
 }
