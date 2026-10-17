@@ -142,6 +142,7 @@ test.describe("Hifth · per-verse recitation (task #67)", () => {
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
     await tapAyah(page, "#verse-55");
     const play = page.getByRole("button", { name: /استمع إلى .*٢:٤٨/ });
+    await expect(play).toBeVisible();
     await context.setOffline(true);
     await play.tap();
     await expect(play).toHaveAttribute("data-phase", "error");
