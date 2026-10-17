@@ -9,6 +9,14 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #240 — Use the demo on a phone as a scholar would, upright and on its side
+
+**Done:** 2026-10-16. Corner cards, a whole visit and Play to, in English and Arabic, both ways up: one fault, the Mistake pen's question (#241, confusion-points ⑨). The visit line in the walk checklist records the walk.
+
+## #241 — On a phone, keep the Mistake pen's question on the screen and off its word
+
+**Done:** 2026-10-16. Upright it docks as a strip with one scrolling row; on its side with a note open it takes the side with more room and shrinks to it; it stands over the look-alike buttons; a focused choice is ringed, not filled. Confusion-points ⑨; tests in e2e/phone-toolbar.spec.ts.
+
 ## #239 — Check the page-size fix by eye in the real iPad mini app on its side
 
 **Done:** 2026-10-16. In the iPad mini app on its side, the page rests 625 wide whether the roots list comes first or second, and 693 after closing; look-alike rows ⑲ records the walk and the approach given up. New walk script `card-size-walk.js`.

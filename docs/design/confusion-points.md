@@ -596,6 +596,23 @@ the page opens bigger than the screen, so its last lines are reached by dragging
 pen leaves that drag alone, and a browser test at that size drags to the foot and taps the last
 line. A script repeats the walk, and the walk checklist has a line for each.
 
+### ⑨ On a phone, does the Mistake pen's question stay off the word it asks about, with every choice in reach? · **fixed**
+
+Walking the demo on a phone (2026-10-16) found three faults in the same question. Upright, a long
+word's question stacked one choice to a row and stood the whole screen tall: it covered the word
+it asked about, two choices ran off the foot of the screen, and two more sat under the look-alike
+buttons. On its side with a note open, the page has only a strip of room left, and the question
+hung from the top of the screen over half the tapped word's line. And a choice picked by keyboard
+filled in solid, so its own label could not be read.
+
+**Fixed 2026-10-16.** When the question fits neither under nor over its word, it now becomes a
+strip at the bottom or top of the screen, its choices in one row that scrolls sideways. When even
+that strip would cover the word, it takes the side with more room and shrinks to it, scrolling
+inside. It stands over the look-alike buttons, and under a panel that dims the page. A focused
+choice is ringed instead of filled. Two phone tests hold this, upright and on its side at two
+heights, and the walk script now measures the word's own edges and scrolls each choice into view
+before it calls one cut off.
+
 ---
 
 ## A rough plan, in order — not yet costed
