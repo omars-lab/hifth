@@ -235,6 +235,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   look-alike buttons; a choice reached by keyboard keeps its label readable. · phone, phone on its
   side · `make drive DEVICE=phone-side HASH=/hafs-kfqc/2:48 "ACT=settle=2500;evalfile=.claude/skills/walk-app/scripts/mistake-ask-walk.js"` ·
   test: e2e/phone-toolbar.spec.ts ("the Mistake pen's question stays on the screen") · found 2026-10-16
+  · walked 2026-10-16 in the real iPhone app too, upright only (the iPhone app does not turn):
+  `make app-probe TARGET=ipad IPAD="iPhone 17" LOCALE=en ROUTE=/hafs-kfqc/2:48 EVALFILE=…/mistake-ask-walk.js`.
+  The question docks at the foot, whole, clear of its word. A tap near the top of an enlarged page
+  lands on the title bar, not a word, so the walk asks nothing there.
 - [ ] With the pens set to the left in the info panel ("Which side the pens stand on"), on an
   iPad held sideways in English and Arabic: the pens down the side stand at the left edge, the
   colours on the book's side of them, clear of the page; Mark up sits at the left end of the
@@ -785,6 +789,9 @@ upright and on its side, English and Arabic, iPad and Mac.
   and a check taken then passes when the end state is wrong. The browser tests' shared measure
   waits for the page to stop, for every corner card.
   Run it in the app as well as the browser: the app's own bars leave the page about 40 pixels less
+  room than the browser's, so a card that clears its verse in the browser can still cover it in the
+  app. Walked 2026-10-16 on a phone, upright and on its side, in Arabic: no card covers its verse
+  and nothing runs off the screen.
 - [ ] **Take the iPad app off the simulator and open it fresh**, as on a borrowed iPad in the
   room: it opens on the first two pages (the iPad mini on its side: the first page alone) with
   nothing over them and nothing stored, the first
