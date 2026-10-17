@@ -2324,6 +2324,15 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     The copy has to go somewhere private that the owner chooses (an encrypted drive, a
     private backup), never this repository or any public host, so it is the owner's step,
     not the agent's. Asked 2026-10-09; still open 2026-10-16.
+114. **One iPhone recitation test stalled once in a full run.** Watching, not mending.
+    In the full run before a push on 2026-10-16, the phone test that cuts the connection, taps
+    Listen and taps again once it is back failed its first try and passed its second. Its page
+    nearly stopped drawing for a minute while other phone tests ran normally. It would not
+    happen again in 111 tries, including ones that cut the connection mid-fetch on purpose, so
+    the likeliest cause is the phone browser stalling, not the app or the test. The one way it
+    started differently from its neighbour is mended. The next few full runs are the real test;
+    if it fails again, keep its trace before running anything else. The record is
+    [docs/issues/iphone-listen-test-stalls-once.md](issues/iphone-listen-test-stalls-once.md).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
