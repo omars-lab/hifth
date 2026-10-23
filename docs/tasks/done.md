@@ -1541,3 +1541,23 @@ Still open in the task list: #51 (fix the faults found, worst first: the walk go
 - 2026-10-13: on an iPad mini on its side, the share card no longer covers the start of the verse's second line (PLAN 39, look-alike rows ⑯). Plan item 92's slightly smaller drawing, built for the roots list, already did it; a browser test now waits for the page to stop before it measures (the first version passed mid-slide), and fails with item 92 switched off. Walked in the iPad mini app in both languages: no card covers its verse.
 - 2026-10-13: walked the oldest lines in the apps again: Play to with the moving light and with the ring, on both iPad sizes and the Mac, in both languages; Listen on both iPad sizes; the iPad in dark mode. Nothing wrong. The walk is now one script (walk-app's playto-walk.js), which aims its press at the verse's own words; its first try started a verse early because it pressed the middle of the verse's box.
 - 2026-10-13: on an iPad, the note and the lists that stand beside the page no longer end with a blank strip under their last row (native-shell ㉜). They kept the room a sheet along the screen's foot keeps for the home bar; seven cards now drop it on wide screens, as the share card did. Browser tests that make Chromium report a home bar, seen failing first; measured in the iPad app on its side.
+
+## #162, #201–#208, #211–#213 — Archived 2026-10-23: the owner's picks built, the italics read, the oldest walk lines again
+
+**Done:** 2026-10-10 to 2026-10-13, through PRs up to #531. The dated one-line summaries above (and the
+design items they name) carry the substance; this is the task-number index back to them. These
+numbers were used again by a later session, so an older task of the same number may appear in an
+earlier block; match by title. #209, #210 and #214–#250 have their own entries at the top.
+
+- #162 — Read the italics for the other 436 notes two taps from the demo
+- #201 — Build the owner's three look-alike picks
+- #202 — Build upright turn-to-top (PLAN 97) and upright opening size setting (PLAN 98)
+- #203 — Build PLAN 99: back upright brings back the opening size
+- #204 — Build PLAN 100: zooming keeps the line starts in sight
+- #205 — Build PLAN 101: save a surah's recitation on the device with one button
+- #206 — Build PLAN 103: the Mistake pen asks what went wrong
+- #207 — Walk confusion-points ⑧: does the Mistake pen's question fit on the iPad page
+- #208 — Build PLAN 95: a setting that moves the pens and Mark up to the left
+- #211 — Look-alike rows ⑯: share card on the iPad mini on its side
+- #212 — Walk Listen, Play to (light and ring), iPad dark mode and Mac Play to in the apps
+- #213 — Floating cards keep the home-bar room under their last row on an iPad
