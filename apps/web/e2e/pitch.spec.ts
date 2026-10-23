@@ -212,9 +212,10 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
 
   // ㉖: the note covered the page's outer edge, the strip a hand grabs to turn
   // the page, so on a spread only the arrows and keys turned it with a note
-  // open. Two ways round it are built as a setting, today's way the default.
-  const withEdge = async (page: Page, choice: string): Promise<void> => {
-    await page.addInitScript((c) => localStorage.setItem("hifth.cards.edge.v1", c), choice);
+  // open. Two ways round it are built as a setting; the owner chose grabbing
+  // through the card as the default on 2026-10-23, and no choice means that one.
+  const withEdge = async (page: Page, choice: string | null): Promise<void> => {
+    if (choice) await page.addInitScript((c) => localStorage.setItem("hifth.cards.edge.v1", c), choice);
     await page.goto("/#/hafs-kfqc/2:255");
     await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
     expect(await sheet(page).getAttribute("data-side")).toBe("right");
@@ -242,7 +243,7 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(await onTop(page, await edgeFoot(page)), "the edge, not the card, is under the hand").toBe("edge-grab-right");
   });
 
-  test("by default the note still covers the edge, and a drag there does not turn", async ({ page }) => {
+  test("set to arrows and keys, the note covers the edge, and a drag there does not turn", async ({ page }) => {
     await withEdge(page, "covers");
     const at = await edgeFoot(page);
     expect(await onTop(page, at)).toBe("card");
@@ -253,8 +254,8 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(pageSvg(page, 42), "still on page 42").toBeVisible();
   });
 
-  test("set to grab through, a drag at the edge closes the note and turns the page", async ({ page }) => {
-    await withEdge(page, "turns");
+  test("by default, a drag at the edge through the note closes it and turns the page", async ({ page }) => {
+    await withEdge(page, null);
     const at = await edgeFoot(page);
     expect(await onTop(page, at), "the card is still drawn over the edge").toBe("card");
     await page.mouse.move(at.x, at.y);

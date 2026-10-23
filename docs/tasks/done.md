@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #247 — Grabbing the page's edge through a note is the default turn
+
+**Done:** 2026-10-23. The owner picked it from the three built ways; the other two stay in settings (knowledge-graph-commentary ㉖, test in pitch.spec.ts).
+
 ## #246 — The short-window change inside the Mac and iPad apps
 
 **Done:** 2026-10-23. Asked from inside each app: the Mac app counts as a mouse, so a short Mac window keeps two pages; the iPad mini app counts as touch (PLAN 117).
