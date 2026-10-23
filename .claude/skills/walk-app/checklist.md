@@ -554,8 +554,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   comes back to the size it opened the verse at (the app, both languages, 2026-10-12) · walked
   again 2026-10-23 in the app, both languages, 2:255, 2:48 and 3:84: every card, the roots list
   read to its end and Share, none of the verse under a card, no button on the page or a Close ·
-  the same on the iPad Pro 13-inch on its side, and upright on both sizes with the cards across
-  the full width (the corner-cards script's wide setting), both languages, 2026-10-23
+  the same on the iPad Pro 13-inch on its side at all three verses, and upright on both sizes at
+  2:255 only, with the cards across the full width (the corner-cards script's wide setting), both
+  languages, 2026-10-23
 - [ ] On the laptop closed to one page, zoom in a step or two past the room the roots list leaves
   (2:45), open the roots list, then close it: open, the page is drawn a little smaller and the
   whole verse stands clear of the list; closed, the page and the zoom readout are back at the
