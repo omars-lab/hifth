@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #250 — Walk the pitch in the iPad app after a week of changes, look-alikes first (PLAN 119)
+
+**Done:** 2026-10-23. Both iPad sizes, upright and on their side, English and Arabic, in the real app: the look-alike lists open with a reason on every row, an opened row stays in sight, the passage row hops to the right verse, Share and the tajweed key are whole, the roots list and every corner card leave the verse clear, and a note's reference thread goes out and comes back. No faults. The walk script was mended where it could mislead: the key found by its credit line, a missing Share explained, and each button under the Share card named.
+
 ## #249 — Grabbing the page's edge through a note turns the page in the real iPad app
 
 **Done:** 2026-10-23. A new UI test in the iPad app, on its side, opens the note at 2:255 and
