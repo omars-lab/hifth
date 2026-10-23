@@ -4929,10 +4929,11 @@
         "file": "docs/PLAN.md",
         "item": "120"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "The short-window change (115) made a short laptop window open two smaller pages; only the roots list's setting has been walked there. Walk the three demo verses with every card at 1366 by 660 and 1280 by 610, both browsers, both languages."
+      "note": "Walked 2026-10-23 at 1366x660 and 1280x610, Firefox and Chrome, English and Arabic, 2:255, 2:48 and 3:84: nothing wrong; a checklist line keeps it walked.",
+      "closedBy": ".claude/skills/walk-app/checklist.md"
     }
   ]
 }

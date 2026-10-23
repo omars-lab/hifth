@@ -2405,6 +2405,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     610, in Firefox and Chrome, English and Arabic: the note, the roots list, the look-alike
     lists, Share and the tajweed key, each with the verse in sight and nothing cut off. Each fault
     found gets its fix, its test and a checklist line.
+    **Walked 2026-10-23: nothing wrong.** All three verses at both sizes, in Firefox and Chrome,
+    English and Arabic (24 runs): two pages open, the note, the roots list read to its end, the
+    look-alike lists and Share each leave the whole verse clear, nothing runs off the screen, and
+    no look-alike button sits on the page or on a card's close button. The tajweed key stands
+    beside the book at both sizes, both browsers and both languages, and scrolls to its end with
+    its close button and title in sight. Checked by eye too: the note on 2:255 and a look-alike
+    list on 2:48, in Arabic in Firefox at the smaller size. Not walked here: a note's reference
+    thread out and back.
     Both sizes, both ways up, both languages: every look-alike row has its reason, an opened row
     stays in sight, Share and the tajweed key are whole, the roots list and the other corner cards
     leave the verse clear, and a note's reference thread goes out and back. The walk script was
