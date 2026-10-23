@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #243 — Watch the iPhone recitation test over the next few full runs
+
+**Done:** 2026-10-23. Three full runs since the tidy-up passed with no retry; PLAN 114 and docs/issues/iphone-listen-test-stalls-once.md record it, with what to keep if it ever comes back.
+
 ## #244 — Keep the open book on a short laptop window
 
 **Done:** 2026-10-23. Owner chose both, as a setting (PLAN 115). With a mouse or trackpad, two pages now hold down to 600 pixels tall, their feet in sight; one page is the other choice in the bar; a touch screen keeps the old floor. Before and after clips in docs/design/screen-shapes/; the pivot in docs/issues/short-screen-keeps-the-book.md.

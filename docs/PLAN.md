@@ -2333,6 +2333,8 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     started differently from its neighbour is mended. The next few full runs are the real test;
     if it fails again, keep its trace before running anything else. The record is
     [docs/issues/iphone-listen-test-stalls-once.md](issues/iphone-listen-test-stalls-once.md).
+    **Closed 2026-10-23:** three full runs since the mend (2026-10-16, two on 2026-10-23), every
+    phone test passing on its first try. If it comes back, the record says what to keep.
 115. **On a short screen the open book shuts to one page, and that page is cut off at its foot.**
     Asked 2026-10-23 as the next thing to try for the pitch: the demo may be shown on a
     laptop with a 768-pixel screen, on a projector, or in a window shrunk to share in a call,
