@@ -1662,7 +1662,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     // page came out a quarter of its width. There it slides aside instead.
     const side = sideCoverOf(coverSideRef.current, box);
     const reach = Math.max(side.coverLeft ?? 0, side.coverRight ?? 0);
-    const own = ownZoomRef.current?.from ?? view.current.z;
+    // A link's glide still under way is going to the reader's own size, not
+    // leaving from it: read at its start, a short laptop window with one page
+    // passed the check and drew the page a third of its size (PLAN 116).
+    const own = ownZoomRef.current?.from ?? hopRef.current?.target.z ?? view.current.z;
     const room = box.width - 2 * reach - 2 * LIFT_SLACK;
     const even =
       cardRoomRef.current === "smaller" && !boundRef.current && reach > 0 && room >= MIDDLE_LEAST * cur.host.offsetWidth * own;

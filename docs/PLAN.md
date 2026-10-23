@@ -2360,6 +2360,19 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     [After](design/screen-shapes/four-windows.gif), [before](design/screen-shapes/four-windows-before.gif),
     [one page picked](design/screen-shapes/one-page.gif); why the rule moved:
     [issues/short-screen-keeps-the-book.md](issues/short-screen-keeps-the-book.md).
+116. **On a short laptop window, the "keep the page in the middle" setting for the roots list
+    may draw the pages too small.** Noticed 2026-10-23 while building 115: at 1133 by 744 with a
+    mouse, which now opens two pages, the page comes out 276 pixels narrower in that setting than
+    in the default, where it slides aside. On an iPad mini on its side (touch) the setting already
+    slides the page aside once it would fall below half its size; nobody has checked whether that
+    rescue also works on the two-page book. Walk it at 1280 by 610 and 1366 by 660 with the list
+    open; if the pages are too small to read, let the same rescue apply.
+    **Fixed 2026-10-23.** With two pages the setting changes nothing: the list stands over the
+    facing page. With one page picked at 1133 by 744 it drew the page 134 pixels wide, a third of
+    its size. The size check read the page while the jump to the verse was still leaving the whole
+    page, not arriving at the verse's size, so it judged against the wrong size. It now reads where
+    the jump is going, and the page slides aside as the default does. At 1280 by 610, 1366 by 660
+    and 1280 by 800 the page stays in the middle as before.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

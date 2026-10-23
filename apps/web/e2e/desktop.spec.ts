@@ -2433,6 +2433,31 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       await context.close();
     });
 
+    test(`with a mouse, on a short window closed to one page, a ${side}-hand page kept in the middle that would come out tiny slides aside`, async ({ page }) => {
+      // A laptop window this short opens the book since PLAN 115, and picked
+      // down to one page the list took 484 of its 1133 pixels. The check read
+      // the page's size while the link's glide was leaving from the whole
+      // page, not arriving at the verse, and let the page be drawn a third of
+      // its width (PLAN 116).
+      await page.setViewportSize({ width: 1133, height: 744 });
+      const svg = pageSvg(page, pageNo);
+      const widthBeside = async (room: string): Promise<number> => {
+        await page.evaluate(([key, r]) => localStorage.setItem(key, r), [CARD_ROOM_KEY, room] as const);
+        await page.goto("about:blank");
+        await page.goto(`/#/hafs-kfqc/${at}?view=one`);
+        await expect(svg).toBeVisible({ timeout: 20_000 });
+        await page.goto(`/#/hafs-kfqc/${at}?view=one&open=roots`);
+        const list = page.getByRole("dialog");
+        await expect(list).toBeVisible({ timeout: 20_000 });
+        await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        return (await stillBoxOf(svg)).width;
+      };
+      await page.goto(`/#/hafs-kfqc/${at}?view=one`);
+      await expect(svg).toBeVisible({ timeout: 20_000 });
+      const aside = await widthBeside("aside");
+      expect(Math.abs((await widthBeside("smaller")) - aside), "the page's width beside the list, against the default's").toBeLessThan(2);
+    });
+
     test(`a ${side}-hand page that comes in after the roots list has opened lands where it would have`, async ({ browser }) => {
       // On a busy machine the list could open and say how much room it takes
       // before its page had come in. The page's glide to the verse then made
