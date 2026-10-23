@@ -255,6 +255,11 @@ app-test: $(if $(ONLY),app-generate,app-unit-test) ## Unit tests plus the XCUITe
 	set -o pipefail; $(XCB) -scheme Hifth-iOS -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' \
 	  CODE_SIGNING_ALLOWED=NO -resultBundlePath $(SHOTS)/ipad-smoke.xcresult \
 	  $(foreach t,$(ONLY),-only-testing:HifthUITests-iOS/$(t)) test | $(XCPRETTY)
+	@# A name xcodebuild does not know selects nothing, and "0 tests, 0
+	@# failures" is a pass: ONLY=HifthUITests/SmokeTests/… once ran nothing, green.
+	$(if $(ONLY),@ran=$$(xcrun xcresulttool get test-results summary --path $(SHOTS)/ipad-smoke.xcresult \
+	  | sed -n 's/.*"totalTestCount" : \([0-9]*\).*/\1/p'); \
+	  [ "$${ran:-0}" -ge $(words $(ONLY)) ] || { echo "  ✗ ONLY named $(words $(ONLY)) test(s) and $${ran:-0} ran: write them as SmokeTests/testName"; exit 1; })
 
 app-walk: app-generate ## Open each of ROUTES in the iPad app (SIDEWAYS=1 to turn it) and save a picture of each to native/shots/walk/upright or side/
 	@rm -rf $(SHOTS)/ipad-walk.xcresult $(WALK_OUT)

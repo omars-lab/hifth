@@ -140,6 +140,13 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     little buzz feels right; with Scribble on no stroke on the page is lost; an older pencil and
     a finger break nothing. Why not a machine: the simulator cannot send either gesture, so the
     tests play the app's side by hand (docs/PLAN.md, item 96; docs/design/pencil-gestures.md).
+20. **Grabbing the page's edge through a note with a mouse, in the real Mac app.** On the pitch
+    build, `make app-run-mac ROUTE=/hafs-kfqc/2:255`: the note lies over the right page. Put the
+    pointer low on that page's outer edge (the hand cursor shows), press and drag towards the
+    middle. Right: the note closes and the opening turns back a page; a drag that starts on the
+    note's words, away from the edge, scrolls or selects and turns nothing. Why not a machine: a
+    drag in the Mac app needs a permission to control it, and the browsers already prove the same
+    drag with a mouse (docs/PLAN.md, item 118).
 
 ## Done
 

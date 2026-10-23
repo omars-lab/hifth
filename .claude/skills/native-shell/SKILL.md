@@ -308,7 +308,7 @@ edition goes in `Route.editions` and the contract's `Edition` schema (`x-edition
 | new route ignored on `simctl launch` | app already running; launch ignores env | `xcrun simctl terminate <udid> com.bytesofpurpose.hifth` first |
 | "open in Hifth?" alert in the simulator | `simctl openurl` | expected once per install; use the env var in scripts |
 | clang module errors from Homebrew paths | stale `CPATH` | the Makefile does `unexport CPATH`; if you call `xcodebuild` yourself, `unset CPATH` — or use `make app-test ONLY=…` instead of `xcodebuild -only-testing` |
-| `-only-testing:HifthUITests/…` runs nothing | the iPad UI test target is `HifthUITests-iOS` | `make app-test ONLY=SmokeTests/<name>` adds the right prefix |
+| `-only-testing:HifthUITests/…` runs nothing | the iPad UI test target is `HifthUITests-iOS` | `make app-test ONLY=SmokeTests/<name>` adds the right prefix, and fails ("0 ran") when a name selects nothing instead of passing green |
 | right in Playwright, wrong in the app | the iPad's own WebKit is not Playwright's | walk it in the simulator (above); `HIFTH_PITCH_BROWSER=webkit` runs the pitch e2e in Playwright's WebKit, which is closer but still not the app |
 | build works, app dark but desk still light | `APPEARANCE` only colours chrome | use `ROUTE='…?field=dark'` |
 
