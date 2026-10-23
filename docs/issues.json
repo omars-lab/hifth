@@ -2999,10 +2999,11 @@
         "file": "docs/design/knowledge-graph-commentary.md",
         "item": "㉖"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "With two pages open (a computer, or an iPad on its side) a note opens over the facing page and covers that page's outer edge, so grabbing the edge to turn selects note text instead. Keys and the arrows under the page still turn, and a turn closes the note. Options in the design note: leave it, a narrower note, or a press on the note's outer margin that closes it and turns. All three are built as a setting (2026-10-08, 'Turning with a card open'); leaving it is the default until the owner picks one. Asked on 2026-10-12: the owner has not tried them yet."
+      "note": "With two pages open a note covers the facing page's outer edge, the strip a hand grabs to turn. Three ways were built as a setting on 2026-10-08. On 2026-10-23 the owner picked 'grab the edge through the card' as the default: a drag from the edge, through the note, closes it and turns the page. 'Card stops short of the edge' and 'Arrows and keys' stay as settings.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
       "id": "intro-on-spread-opens-as-phone-card",

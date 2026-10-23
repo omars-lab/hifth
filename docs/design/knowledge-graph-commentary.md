@@ -995,7 +995,7 @@ with a bar on the side its entry starts from, the left even in the Arabic app, s
 are in English. Each initial also takes taps over the comma beside it and a little above and below
 its line, without moving a word of the prose.
 
-### ㉖ With two pages open and a note beside them, can the reader turn the page by its edge? · **open**
+### ㉖ With two pages open and a note beside them, can the reader turn the page by its edge? · **answered**
 
 On a computer or an iPad on its side, the book turns when the reader grabs a page's outer edge and drags it. A note opens
 on the facing page, so its verse stays in sight, and the note is wider than that page: it covers
@@ -1032,6 +1032,11 @@ highlight's menu), so they all behave the same. What having a hand on each showe
 To choose, open settings on a two-page spread, try each with a note open, then record the choice
 here and make it the default; the others stay as settings. Asked on 2026-10-12, the owner had not
 tried them yet; it waits until they have.
+
+**Answered 2026-10-23: grab the edge through the card.** Shown the three side by side, the owner
+picked it, so it is now the default: a drag from the page's outer edge, through the note, closes
+the note and turns the page. The note keeps its full width, and the other two ways stay in
+settings, listed after it. Held by the pitch test that drags the edge with no choice saved.
 
 ### ㉗ With two pages open, where does a surah's introduction open? · **fixed**
 

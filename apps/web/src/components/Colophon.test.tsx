@@ -116,13 +116,13 @@ describe("what a card does at the page's edge, in settings", () => {
     localStorage.removeItem(CARD_EDGE_KEY);
     const { container } = render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} spread />);
     const way = (c: string) => container.querySelector(`[data-card-edge="${c}"]`)!;
-    expect(way("covers")).toHaveAttribute("aria-checked", "true");
-    expect(way("clear")).toHaveAttribute("aria-checked", "false");
-    expect(way("turns")).toHaveAttribute("aria-checked", "false");
-    fireEvent.click(way("turns"));
     expect(way("turns")).toHaveAttribute("aria-checked", "true");
+    expect(way("clear")).toHaveAttribute("aria-checked", "false");
     expect(way("covers")).toHaveAttribute("aria-checked", "false");
-    expect(localStorage.getItem(CARD_EDGE_KEY)).toBe("turns");
+    fireEvent.click(way("covers"));
+    expect(way("covers")).toHaveAttribute("aria-checked", "true");
+    expect(way("turns")).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem(CARD_EDGE_KEY)).toBe("covers");
     localStorage.removeItem(CARD_EDGE_KEY);
   });
 

@@ -66,7 +66,7 @@ const messages: Catalog = {
   bmUnfolded: (d) => "Corner unfolded: " + plural(LC, d.count, { one: d.countText + " bookmark", other: d.countText + " bookmarks" }) + " lifted",
   cardEdgeClear: "Card stops short of the edge",
   cardEdgeCovers: "Arrows and keys",
-  cardEdgeNote: "On a two-page spread, a note or a list lies over the facing page. Arrows and keys: the card covers the page's outer edge, so the arrows and the keys turn the page while it is open. Card stops short of the edge: the card leaves the outer edge uncovered, so you can grab it and turn the page as usual. Grab the edge through the card: the card covers the edge, and a drag from the edge closes the card and turns the page.",
+  cardEdgeNote: "On a two-page spread, a note or a list lies over the facing page. Grab the edge through the card: the card covers the edge, and a drag from the edge closes the card and turns the page. Card stops short of the edge: the card leaves the outer edge uncovered, so you can grab it and turn the page as usual. Arrows and keys: the card covers the page's outer edge, so the arrows and the keys turn the page while it is open.",
   cardEdgeTitle: "Turning with a card open",
   cardEdgeTurns: "Grab the edge through the card",
   cardRoomAside: "Page moves aside",

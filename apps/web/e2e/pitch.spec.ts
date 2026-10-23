@@ -68,6 +68,19 @@ async function settle(target: Locator): Promise<void> {
     .toBe(true);
 }
 
+/**
+ * Press a link inside the note. Playwright scrolls a button into view before it
+ * presses it, and a scroll inside a short note grows it to the full height, so
+ * the press could go down on the link and come up on the words that slid under
+ * it (docs/issues/note-link-press-lost-mid-grow.md). Scroll first, wait for the
+ * note to stop moving, then press, as a reader taps a link that is still.
+ */
+async function pressInNote(target: Locator): Promise<void> {
+  await target.scrollIntoViewIfNeeded();
+  await settle(target);
+  await target.click();
+}
+
 type Box = { x: number; y: number; width: number; height: number };
 
 /**
@@ -212,9 +225,10 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
 
   // ㉖: the note covered the page's outer edge, the strip a hand grabs to turn
   // the page, so on a spread only the arrows and keys turned it with a note
-  // open. Two ways round it are built as a setting, today's way the default.
-  const withEdge = async (page: Page, choice: string): Promise<void> => {
-    await page.addInitScript((c) => localStorage.setItem("hifth.cards.edge.v1", c), choice);
+  // open. Two ways round it are built as a setting; the owner chose grabbing
+  // through the card as the default on 2026-10-23, and no choice means that one.
+  const withEdge = async (page: Page, choice: string | null): Promise<void> => {
+    if (choice) await page.addInitScript((c) => localStorage.setItem("hifth.cards.edge.v1", c), choice);
     await page.goto("/#/hafs-kfqc/2:255");
     await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
     expect(await sheet(page).getAttribute("data-side")).toBe("right");
@@ -242,7 +256,7 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     expect(await onTop(page, await edgeFoot(page)), "the edge, not the card, is under the hand").toBe("edge-grab-right");
   });
 
-  test("by default the note still covers the edge, and a drag there does not turn", async ({ page }) => {
+  test("set to arrows and keys, the note covers the edge, and a drag there does not turn", async ({ page }) => {
     await withEdge(page, "covers");
     const at = await edgeFoot(page);
     expect(await onTop(page, at)).toBe("card");
@@ -253,8 +267,8 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect(pageSvg(page, 42), "still on page 42").toBeVisible();
   });
 
-  test("set to grab through, a drag at the edge closes the note and turns the page", async ({ page }) => {
-    await withEdge(page, "turns");
+  test("by default, a drag at the edge through the note closes it and turns the page", async ({ page }) => {
+    await withEdge(page, null);
     const at = await edgeFoot(page);
     expect(await onTop(page, at), "the card is still drawn over the edge").toBe("card");
     await page.mouse.move(at.x, at.y);
@@ -1596,8 +1610,10 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await expect.poll(playing).toBe(true);
 
     const hop = sheet(page).getByRole("button", { name: /^(Go to|Hop to) / }).first();
-    await hop.click();
-    await expect.poll(() => page.evaluate(() => location.hash)).not.toContain("/p2");
+    await pressInNote(hop);
+    // The hop names the verse it came from; the address already left page 2
+    // when 2:3 was chosen, so that alone would not show the hop happened.
+    await expect.poll(() => page.evaluate(() => location.hash)).toContain("via=2:3");
     await expect.poll(playing).toBe(false);
     await context.close();
   });
@@ -2232,7 +2248,7 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
 
     // Tap the road to al-Anʿām 6:153 (a reachable, vendored page). The label is
     // the target's own ayah label, the button its "Hop to …" name.
-    await sheet(page).getByRole("button", { name: /Hop to .*6:153/ }).click();
+    await pressInNote(sheet(page).getByRole("button", { name: /Hop to .*6:153/ }));
 
     // The hop landed and the arrived verse's own note opened in turn: the same
     // dialog now names 6:153 (App re-opens the note on the new selection).
@@ -2344,7 +2360,7 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     // they had not started.
     await page.goto("/#/hafs-kfqc/2:258");
     await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
-    await sheet(page).getByRole("button", { name: /Hop to .*2:28/ }).click();
+    await pressInNote(sheet(page).getByRole("button", { name: /Hop to .*2:28/ }));
     await expect(page.getByRole("dialog", { name: /2:28/ })).toBeVisible();
     await expect.poll(() => sheet(page).evaluate((el) => el.scrollTop)).toBe(0);
   });
@@ -2401,7 +2417,7 @@ test.describe("Hifth · the way back from a note on a phone", () => {
     // Nothing to go back to yet: this is where the reading started.
     await expect(sheet(page).getByRole("button", { name: /^Back to/ })).toHaveCount(0);
 
-    await sheet(page).getByRole("button", { name: /Hop to .*6:153/ }).click();
+    await pressInNote(sheet(page).getByRole("button", { name: /Hop to .*6:153/ }));
     await expect(page.getByRole("dialog", { name: /6:153/ })).toBeVisible();
 
     // A thumb has to be able to hit it: as tall as every other control.
@@ -2417,7 +2433,7 @@ test.describe("Hifth · the way back from a note on a phone", () => {
     // row, which the row drops, so the arrow sat glued to the first word.
     await page.goto("/#/hafs-kfqc/1:6");
     await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
-    await sheet(page).getByRole("button", { name: /Hop to .*6:153/ }).click();
+    await pressInNote(sheet(page).getByRole("button", { name: /Hop to .*6:153/ }));
     const back = sheet(page).getByRole("button", { name: /^Back to .*1:6/ });
     await expect(back).toBeVisible();
     const gap = await back.evaluate((el) => {
@@ -2434,7 +2450,7 @@ test.describe("Hifth · the way back from a note on a phone", () => {
     // away from the start of the line it sat at, and was glued to it there too.
     await page.goto("/?lang=ar#/hafs-kfqc/1:6");
     await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
-    await sheet(page).getByRole("button", { name: /^انتقل إلى .*(6:153|٦:١٥٣)/ }).click();
+    await pressInNote(sheet(page).getByRole("button", { name: /^انتقل إلى .*(6:153|٦:١٥٣)/ }));
     const back = sheet(page).getByRole("button", { name: /^ارجع إلى / });
     await expect(back).toBeVisible();
     await expect(back.locator("[aria-hidden]")).toHaveText("↪\uFE0E");
