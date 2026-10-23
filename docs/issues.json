@@ -4885,6 +4885,18 @@
       "owner": "agent",
       "note": "At 1133x744 with a mouse and one page picked, the roots list's keep-in-the-middle setting drew the page 134 px wide (a third of its size): the size check read the page's zoom at the start of the link's glide, not where it was going. It now reads the glide's end, and the page slides aside. Two pages are unaffected (the list stands over the facing page). Test: desktop.spec.ts, 'with a mouse, on a short window closed to one page'.",
       "closedBy": "apps/web/e2e/desktop.spec.ts"
+    },
+    {
+      "id": "short-window-change-inside-the-apps",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "117"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": "docs/issues/short-screen-keeps-the-book.md",
+      "note": "Asked from inside each app on 2026-10-23: the Mac app's page reports a mouse (hover), so a short Mac window keeps two pages as a browser does; the iPad mini app's page reports touch, so on its side it still opens on one page. Nothing to change."
     }
   ]
 }

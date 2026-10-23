@@ -2373,6 +2373,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     page, not arriving at the verse's size, so it judged against the wrong size. It now reads where
     the jump is going, and the page slides aside as the default does. At 1280 by 610, 1366 by 660
     and 1280 by 800 the page stays in the middle as before.
+117. **Does the short-window change (115) hold inside the Mac and iPad apps?** It keeps two pages
+    down to 600 tall only for a mouse, and the apps' web view could answer that differently from a
+    browser. **Checked 2026-10-23:** asked from inside each app, the Mac app says it has a mouse,
+    so a short Mac window keeps the two pages as a browser does; the iPad mini app says it is
+    touch, so on its side it still opens on one page. The Mac window was not dragged short, since
+    that needs a permission to control the app; the answer the rule reads is the same either way.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
