@@ -2381,14 +2381,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     that needs a permission to control the app; the answer the rule reads is the same either way.
 118. **Does grabbing the page's edge through a note turn the page in the real iPad app?** The
     owner made it the default on 2026-10-23 (knowledge-graph ㉖), proved in the browsers with a
-    mouse. **Checked 2026-10-23,** freshly installed so no old choice was kept, iPad Pro 13-inch
-    on its side, pitch build: the note at 2:255 lies over the right page and its edge strip; a
+    mouse. **Checked 2026-10-23,** iPad Pro 13-inch on its side, pitch build; read from inside the
+    app, its storage held no saved choice, so the default was the one in play: the note at 2:255 lies over the right page and its edge strip; a
     real finger, driven by the app's own UI test, pressed low on that edge and drew left; the
     note closed and the opening turned back from 41–42 to 39–40, as a book read right to left
     should from its right edge. The test went red with the old "arrows and keys" way as the
     default, so it is wired to the real behaviour. The settings panel in the app offers all three
     ways with grab-through picked. Found on the way: naming a UI test wrongly ran nothing and
-    still passed; the app test now fails when fewer tests ran than were named. The Mac app with
+    still passed; the app test now fails when fewer tests ran than were named. And the whole
+    set in the app showed the pinch-with-the-Note-pen test had gone stale when the pens moved
+    behind Mark up: it now opens Mark up first, and passes. The Mac app with
     a real mouse is parked for a person (manual-testing item 20).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups

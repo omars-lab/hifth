@@ -14,7 +14,8 @@ commit or design-doc item for the actual reasoning.
 **Done:** 2026-10-23. A new UI test in the iPad app, on its side, opens the note at 2:255 and
 drags a real finger from the right page's outer edge through it: the note closes and the
 opening turns. It went red with the old default first. The settings panel shows all three ways,
-grab-through picked. Naming a UI test wrongly no longer passes with nothing run. The Mac app
+grab-through picked. Naming a UI test wrongly no longer passes with nothing run, and the app's
+pinch-with-the-Note-pen test opens Mark up first, where the pens now are. The Mac app
 with a mouse is parked (manual-testing item 20). See `docs/PLAN.md`, item 118.
 
 ## #248 — A press on a link in the note is no longer lost in the pitch tests

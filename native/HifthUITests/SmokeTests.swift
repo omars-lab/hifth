@@ -94,8 +94,13 @@ final class SmokeTests: XCTestCase {
         waitForRoute("#/hafs-kfqc/p45", in: app)
         sleep(2)
         let web = app.webViews.firstMatch
+        // The pens sit behind Mark up; this test looked for them in the bar
+        // and, once they moved, failed before it ever pinched (2026-10-23).
+        let markUp = web.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Mark up")).firstMatch
+        XCTAssertTrue(markUp.waitForExistence(timeout: 5), "no Mark up button")
+        markUp.tap()
         let note = web.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Note")).firstMatch
-        XCTAssertTrue(note.waitForExistence(timeout: 5), "no Note tool in the tools row")
+        XCTAssertTrue(note.waitForExistence(timeout: 5), "no Note tool under Mark up")
         note.tap()
         sleep(1)
         XCTAssertEqual(web.textViews.count, 0, "a note box was open before the pinch")
@@ -193,7 +198,9 @@ final class SmokeTests: XCTestCase {
         let grab = origin.withOffset(CGVector(dx: 1138, dy: 856))
         grab.press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: 738, dy: 856)))
         let label = app.staticTexts["hifth.route"]
-        expectation(for: NSPredicate(format: "label != %@", "#/hafs-kfqc/2:255"), evaluatedWith: label)
+        // A page, not a verse: a press that hopped along one of the note's links
+        // would change the address too.
+        expectation(for: NSPredicate(format: "label BEGINSWITH %@", "#/hafs-kfqc/p"), evaluatedWith: label)
         waitForExpectations(timeout: 10)
         sleep(1)
         attach(app, named: "after-the-grab")
