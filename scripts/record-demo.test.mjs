@@ -15,11 +15,11 @@ const have = (cmd, arg) => spawnSync(cmd, [arg]).status === 0;
 const skip = !(have("ffmpeg", "-version") && have("magick", "-version")) && "needs ffmpeg and ImageMagick";
 
 /** Frames the way the drive tool's --frames mode writes them: PNGs plus a timed list. */
-function frames(dir, colours, secsEach = 0.2) {
+function frames(dir, colours, secsEach = 0.2, size = "780x1688") {
   const lines = [];
   colours.forEach((c, i) => {
     const f = `f${String(i).padStart(4, "0")}.png`;
-    execFileSync("magick", ["-size", "780x1688", `xc:${c}`, join(dir, f)]);
+    execFileSync("magick", ["-size", size, `xc:${c}`, join(dir, f)]);
     lines.push(`file '${f}'`, `duration ${secsEach}`);
   });
   lines.push(`file 'f${String(colours.length - 1).padStart(4, "0")}.png'`);
@@ -173,6 +173,28 @@ test("frame-strip lays the chosen moments side by side, one per label", { skip }
     // The second still was taken at 0.6 s, inside the amber frame.
     const px = execFileSync("magick", [out, "-format", `%[pixel:p{${Math.round(w / 2)},${Math.round(h / 2)}}]`, "info:"]).toString();
     assert.match(px, /srgb\(22[0-9],1[56][0-9],[3-5][0-9]\)|#E0A030/i, `middle still should be amber, got ${px}`);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("side-by-side joins clips of different shapes, the shorter one padded at its foot", { skip }, () => {
+  // Recordings of one screen at several window sizes come out at different heights
+  // once narrowed to one width; ffmpeg refuses to set those side by side unpadded.
+  const dir = mkdtempSync(join(tmpdir(), "side-by-side-shapes-"));
+  try {
+    const a = join(dir, "a"), b = join(dir, "b");
+    execFileSync("mkdir", [a, b]);
+    execFileSync("bash", [`${S}/make-gif.sh`, "--in", frames(a, ["#faf7f0", "#e0a030"], 0.2, "1920x970"), "--out", join(dir, "a.gif"), "--width", "300"], { stdio: "pipe" });
+    execFileSync("bash", [`${S}/make-gif.sh`, "--in", frames(b, ["#faf7f0", "#3070c0"], 0.2, "1280x610"), "--out", join(dir, "b.gif"), "--width", "300"], { stdio: "pipe" });
+    const ha = readFileSync(join(dir, "a.gif")).readUInt16LE(8), hb = readFileSync(join(dir, "b.gif")).readUInt16LE(8);
+    assert.notEqual(ha, hb, "the two clips really are different heights");
+    const out = join(dir, "ab.gif");
+    execFileSync("bash", [`${S}/side-by-side.sh`, "--out", out, `A=${join(dir, "a.gif")}`, `B=${join(dir, "b.gif")}`], { stdio: "pipe" });
+    const buf = readFileSync(out);
+    assert.equal(buf.subarray(0, 6).toString("latin1"), "GIF89a");
+    assert.ok(buf.readUInt16LE(6) >= 600, "two 300-wide clips side by side");
+    assert.ok(buf.readUInt16LE(8) > Math.max(ha, hb), "as tall as the taller clip, plus its letter");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

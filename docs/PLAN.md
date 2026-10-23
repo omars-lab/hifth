@@ -2333,6 +2333,18 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     started differently from its neighbour is mended. The next few full runs are the real test;
     if it fails again, keep its trace before running anything else. The record is
     [docs/issues/iphone-listen-test-stalls-once.md](issues/iphone-listen-test-stalls-once.md).
+115. **On a short screen the open book shuts to one page, and that page is cut off at its foot.**
+    Asked 2026-10-23 as the next thing to try for the pitch: the demo may be shown on a
+    laptop with a 768-pixel screen, on a projector, or in a window shrunk to share in a call,
+    and it had only been tried on tall screens. The two-page spread needs a window at least
+    775 pixels tall inside the browser. Below that, the app falls back to the phone layout: one
+    page, in the middle of a wide empty table, with its last lines hidden under the bars. The
+    owner asked to see it as a moving picture across screen shapes first;
+    [four windows side by side](design/screen-shapes/four-windows.gif) (1920 by 970 and 1440 by
+    790 keep the spread; 1366 by 660 and 1280 by 610 do not), remade by
+    [its script](design/screen-shapes/record.sh) from the public app. What to do about it
+    (let the spread shrink to fit a short window, fit the one page to the height, or both as a
+    setting) is the owner's to choose from the picture.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

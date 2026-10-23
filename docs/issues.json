@@ -4860,6 +4860,17 @@
       "severity": "risk",
       "owner": "agent",
       "note": "One phone recitation test failed once in a full push run (2026-10-16) and passed on retry: its page barely drew for a minute. 111 tries could not bring it back, including cutting the connection mid-fetch. The one way it started differently from its neighbour is mended; the next few full pushes are the real test. Record: docs/issues/iphone-listen-test-stalls-once.md."
+    },
+    {
+      "id": "short-screen-loses-the-spread",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "115"
+      },
+      "status": "confirmed",
+      "severity": "defect",
+      "owner": "user",
+      "note": "A browser window under 775 px tall (a 768-pixel laptop, a 720 projector, a window shrunk to share in a call) gets the phone layout: one page, cut off at its foot, in a wide empty table. Seen 2026-10-23 at 1366x660 and 1280x610 in the public app; docs/design/screen-shapes/four-windows.gif. The owner picks the mend from the picture, then it is built with its test."
     }
   ]
 }

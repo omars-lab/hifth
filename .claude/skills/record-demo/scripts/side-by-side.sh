@@ -7,7 +7,8 @@
 #   side-by-side.sh --out <options.gif> A=<a.gif> B=<b.gif> [C=<c.gif>] [D=<d.gif>]
 #                   [--width <each clip>] [--max-bytes 1000000]
 #
-# A shorter clip rests on its last frame until the longest one ends. --width
+# A shorter clip rests on its last frame until the longest one ends, and a
+# clip less tall than the others is padded at its foot. --width
 # narrows every clip to that many pixels, to bring three or four under the limit.
 #
 # The clips are make-gif clips, already at the docs' one pace (each frame 0.2 s),
@@ -41,6 +42,16 @@ for c in "${clips[@]}"; do
   longest=$(awk -v a="$longest" -v b="$d" 'BEGIN { print (b > a ? b : a) }')
 done
 
+# Clips of one screen at several window sizes come out at different heights once
+# narrowed to one width, and hstack refuses those; each is padded at its foot to
+# the tallest. scale=-2 rounds to an even height, so this does too.
+tallest=0
+for c in "${clips[@]}"; do
+  cw=$(probe stream=width "$c") ch=$(probe stream=height "$c")
+  h=$(awk -v w="${WIDTH:-$cw}" -v cw="$cw" -v ch="$ch" 'BEGIN { h = int(ch * w / cw / 2 + 0.5) * 2; print h }')
+  [ "$h" -gt "$tallest" ] && tallest=$h
+done
+
 inputs=() graph="" stacked=""
 for i in "${!clips[@]}"; do
   w=${WIDTH:-$(probe stream=width "${clips[$i]}")}
@@ -50,7 +61,7 @@ for i in "${!clips[@]}"; do
   rest=$(awk -v a="$longest" -v b="$d" 'BEGIN { printf "%.2f", a - b }')
   gap=$([ "$i" -lt $((n - 1)) ] && echo 12 || echo 0)
   inputs+=(-loop 1 -i "$work/h$i.png" -i "${clips[$i]}")
-  graph+="[$((2 * i + 1)):v]format=rgb24,fps=10,scale=${w}:-2:flags=lanczos,tpad=stop_mode=clone:stop_duration=${rest}[g$i];"
+  graph+="[$((2 * i + 1)):v]format=rgb24,fps=10,scale=${w}:-2:flags=lanczos,pad=iw:${tallest}:0:0:color=#faf7f0,tpad=stop_mode=clone:stop_duration=${rest}[g$i];"
   graph+="[$((2 * i)):v]format=rgb24,fps=10[h$i];"
   graph+="[h$i][g$i]vstack=shortest=1,pad=iw+${gap}:ih:0:0:color=#faf7f0[c$i];"
   stacked+="[c$i]"
