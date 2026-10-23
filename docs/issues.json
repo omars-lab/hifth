@@ -4856,10 +4856,11 @@
         "file": "docs/PLAN.md",
         "item": "114"
       },
-      "status": "suspected",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "One phone recitation test failed once in a full push run (2026-10-16) and passed on retry: its page barely drew for a minute. 111 tries could not bring it back, including cutting the connection mid-fetch. The one way it started differently from its neighbour is mended; the next few full pushes are the real test. Record: docs/issues/iphone-listen-test-stalls-once.md."
+      "note": "One phone recitation test failed once in a full push run (2026-10-16) and passed on retry: its page barely drew for a minute. 111 tries could not bring it back. The one way it started differently from its neighbour was mended, and three full pushes since (to 2026-10-23) passed with no retry. Record: docs/issues/iphone-listen-test-stalls-once.md.",
+      "closedBy": "apps/web/e2e/audio.spec.ts"
     },
     {
       "id": "short-screen-loses-the-spread",

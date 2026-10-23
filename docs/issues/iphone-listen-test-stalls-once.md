@@ -39,6 +39,11 @@ removed, so the two now start the same way. That is a tidy-up, not a proven caus
 not watched failing first because the failure cannot be made to happen. No retries were added and
 no waits were lengthened.
 
+## Watched since
+
+Three full push runs after the mend (one on 2026-10-16, two on 2026-10-23: 1188 desktop and 290
+phone tests the last time) passed with no test needing a second try. The watch is closed.
+
 ## What to grab if it comes back
 
 Before running anything else, copy the failed test's folder
