@@ -47,7 +47,9 @@ describe("DESKTOP_QUERY", () => {
     // leaf less page than a 320px phone gives. The arithmetic is in
     // docs/design/desktop.md §3; this test is here so that dropping the second
     // axis cannot be a silent edit.
-    expect(DESKTOP_QUERY).toBe("(min-width: 1024px) and (min-height: 775px)");
+    expect(DESKTOP_QUERY).toBe(
+      "(min-width: 1024px) and (min-height: 775px), (min-width: 1024px) and (min-height: 600px) and (hover: hover)",
+    );
   });
 
   it("is the same string DesktopChrome's media query is written with", () => {

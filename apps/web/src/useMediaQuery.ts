@@ -41,12 +41,25 @@ import { useEffect, useState } from "react";
  * (owner, 2026-09-30, option A of the choice it forced): the bands take height,
  * so at 740 the corner fell to 273px. Measured at 1024×775, 293px.
  *
+ * **Down to 600, where the screen has a mouse or a trackpad** (owner,
+ * 2026-10-23, PLAN 115). A 768-pixel laptop, a 720 projector and a window
+ * shrunk to share in a call leave 610 to 700 pixels inside the browser, and
+ * there the phone's layout put one page in a wide empty table with its foot
+ * under the bars. The owner chose the open book there, smaller than the floor
+ * above, with one page fitted to the height as the reader's other choice (the
+ * page-mode switch in the bar). So the floor above now holds only for a screen
+ * driven by a finger: an iPad mini on its side (1133×744) keeps the one page it
+ * was walked with. `hover: hover` reads the main pointer, so an iPad with a
+ * trackpad attached still counts as a finger. Under 600 two leaves are too
+ * small to read. docs/issues/short-screen-keeps-the-book.md has the measures.
+ *
  * Repeated as a literal in DesktopChrome.module.css, because a CSS custom
  * property cannot appear inside a media query. The two must agree; this string is
  * the copy of record, and `useMediaQuery.test.ts` pins it so a change here is at
  * least loud enough that the CSS gets changed with it.
  */
-export const DESKTOP_QUERY = "(min-width: 1024px) and (min-height: 775px)";
+export const DESKTOP_QUERY =
+  "(min-width: 1024px) and (min-height: 775px), (min-width: 1024px) and (min-height: 600px) and (hover: hover)";
 
 /**
  * A phone's width, where the look-alike buttons lie in a row above the page's

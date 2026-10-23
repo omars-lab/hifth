@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #244 — Keep the open book on a short laptop window
+
+**Done:** 2026-10-23. Owner chose both, as a setting (PLAN 115). With a mouse or trackpad, two pages now hold down to 600 pixels tall, their feet in sight; one page is the other choice in the bar; a touch screen keeps the old floor. Before and after clips in docs/design/screen-shapes/; the pivot in docs/issues/short-screen-keeps-the-book.md.
+
 ## #242 — Check the Mistake pen's question fix in the real iPhone app
 
 **Done:** 2026-10-16. In the iPhone 17 simulator app, upright (the iPhone app does not turn), the question docks at the foot, whole, every choice in reach, clear of its word; nothing was marked. The walk checklist's phone line for the Mistake pen records it, and the corner-cards line now finishes its cut-off sentence and records the Arabic phone walk.

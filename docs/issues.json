@@ -4867,10 +4867,11 @@
         "file": "docs/PLAN.md",
         "item": "115"
       },
-      "status": "confirmed",
+      "status": "fixed",
       "severity": "defect",
-      "owner": "user",
-      "note": "A browser window under 775 px tall (a 768-pixel laptop, a 720 projector, a window shrunk to share in a call) gets the phone layout: one page, cut off at its foot, in a wide empty table. Seen 2026-10-23 at 1366x660 and 1280x610 in the public app; docs/design/screen-shapes/four-windows.gif. The owner picks the mend from the picture, then it is built with its test."
+      "owner": "agent",
+      "note": "A browser window under 775 px tall got the phone layout: one page, cut off at its foot, in a wide empty table. Owner chose 2026-10-23: both, as a setting. Fixed: where the screen has a mouse or trackpad the open book holds down to 600 px tall (each page 197 px wide at 1280x610, about a third smaller than a phone's 290); the one/two page choice above the book gives one page with its foot in sight; Full screen gives 340 px. A touch-only screen keeps the 775 floor. Tests: e2e/desktop.spec.ts (short windows keep both pages, feet in sight; one page picked fills the height; a short touch screen keeps one page) and useMediaQuery.test.ts. docs/issues/short-screen-keeps-the-book.md.",
+      "closedBy": "apps/web/e2e/desktop.spec.ts"
     }
   ]
 }

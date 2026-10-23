@@ -22,6 +22,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the tools bar, the first tips, the empty notes list, the related verses' line): none says tap, in
   English or Arabic. On an iPad on its side, the same lines say tap, not click. · desktop, laptop,
   ipad-side · issue: `desk-lines-say-tap`
+- [ ] A short laptop window (1280 by 610, 1366 by 660) with a mouse opens the book on two pages,
+  both feet in sight above the bars; pick one page and its foot stays in sight; press F and each
+  page grows past a phone's. An iPad mini on its side still opens on one page. · laptop, ipad-side
+  · issue: `short-screen-loses-the-spread`
 - [ ] An upright iPad opens on one page you can read, not two small ones. · ipad · issue:
   `upright-ipad-opens-two-small-pages`
 - [ ] A deep link to a verse lands on its page with the verse marked; turn the phone the moment it

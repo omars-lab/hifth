@@ -6,6 +6,9 @@
 #   docs/design/screen-shapes/record.sh [http://localhost:7123]
 # The sizes are the inside of a browser window, with its own bars taken off:
 # a 1080 screen, a 900 one, a 768 laptop, and a 720 projector or shared window.
+# Then one more clip: the 720 window with one page picked, the reader's other
+# choice there. four-windows-before.gif is the same four windows before the fix
+# (PLAN 115), recorded by this script from the app as it was on 2026-10-23.
 # The record-demo skill explains the tools.
 set -euo pipefail
 BASE="${1:-http://localhost:7123}"
@@ -24,3 +27,7 @@ done
   A="$RAW/shape-1920x970.gif" B="$RAW/shape-1440x790.gif" C="$RAW/shape-1366x660.gif" D="$RAW/shape-1280x610.gif"
 "$TOOLS/frame-strip.sh" --in "$HERE/four-windows.gif" --at "1.0,8.0" --labels "page 8|page 9, 2:59 picked" \
   --out "$HERE/four-windows-strip.png"
+make drive BASE="$BASE" HASH='#/hafs-kfqc/p8' VIEWPORT=1280x610 MOUSE=1 SEEN_COACH=1 LOCALE=en-US MARKS=1 \
+  FRAMES="test-results/drive/shape-one-page" \
+  ACT="settle=800; step=1|Two pages at 1280 x 610; settle=900; clickrole=radio|One page; step=2|One page picked; settle=1400"
+"$TOOLS/make-gif.sh" --in "$RAW/shape-one-page/frames.txt" --width 480 --out "$HERE/one-page.gif"
