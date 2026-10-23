@@ -528,7 +528,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   ipad, `VIEWPORT=744x1133`, the iPad app on both sizes (`make app-probe IPAD='iPad mini (A17 Pro)'`)
   · issues: `share-card-covers-verse-ipad-upright`,
   `share-card-covers-tool-row-ipad-mini-upright` · walked 2026-10-12 in the app, both sizes, both
-  languages, nothing wrong
+  languages, nothing wrong · the mini again 2026-10-23 in Arabic: no line under the card, no
+  button under it
 - [ ] On a phone on its side with Share open, in the private build (where the card is a row taller),
   the card stands below the top bar with every one of its own buttons whole; it lies over half the
   verse's tool row, on purpose (2:48, English and Arabic). · phone-side · issue:
@@ -539,7 +540,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `share-card-covers-line-start-ipad-mini-side` · walked 2026-10-23 in the app on both iPad sizes on
   their side, English and Arabic: no line under the card; the look-alike buttons ride the card's
   own top row, clear of its close button, as on a phone (the walk script names each button it
-  counts under the card, so a button on the card's top row is not mistaken for one it covers)
+  counts under the card, so a button on the card's top row is not mistaken for one it covers).
+  On the 13-inch the card stands over the top of the facing page and covers that page's corner
+  bookmark button; that is harmless, since the shared verse is on the other page and the
+  bookmark comes back once the card closes
 - [ ] On an iPad mini on its side, open the note on a long verse (2:255) and then the roots list: the
   page moves aside for each card and the whole verse shows beside it, drawn a little smaller if
   need be; a short verse (2:48) still opens lifted above the note. On a look-alike verse (3:84) the
@@ -549,7 +553,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   browser and the app, both languages, none under either card. Close the note again: the page
   comes back to the size it opened the verse at (the app, both languages, 2026-10-12) · walked
   again 2026-10-23 in the app, both languages, 2:255, 2:48 and 3:84: every card, the roots list
-  read to its end and Share, none of the verse under a card, no button on the page or a Close
+  read to its end and Share, none of the verse under a card, no button on the page or a Close ·
+  the same on the iPad Pro 13-inch on its side, and upright on both sizes with the cards across
+  the full width (the corner-cards script's wide setting), both languages, 2026-10-23
 - [ ] On the laptop closed to one page, zoom in a step or two past the room the roots list leaves
   (2:45), open the roots list, then close it: open, the page is drawn a little smaller and the
   whole verse stands clear of the list; closed, the page and the zoom readout are back at the
@@ -619,7 +625,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 
 The `lookalike-walk` script walks this section's app lines (the link, the rows' reasons, the first
 and last rows opened, the passage rows, Share and the bars on both iPad sizes, the tajweed key),
-upright and on its side, English and Arabic, iPad and Mac.
+upright and on its side, English and Arabic, iPad and Mac. Walked 2026-10-23 in the iPad app,
+including the setups an earlier walk had skipped (the list, its first row opened and the bars on
+the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
 
 ## Pens, bookmarks, the interface language
 
