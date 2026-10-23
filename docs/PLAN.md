@@ -2392,6 +2392,17 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     set in the app showed the pinch-with-the-Note-pen test had gone stale when the pens moved
     behind Mark up: it now opens Mark up first, and passes. The Mac app with
     a real mouse is parked for a person (manual-testing item 20).
+119. **After a week of changes, does the pitch still read right in the iPad app, look-alikes
+    first?** The last whole walk there was 2026-10-15; since then the short-window fit (115),
+    the grab-through turn (118) and the roots list's setting (116) have landed, and the
+    look-alike and roots lists were last walked in the app on 2026-10-13. Walk them first on
+    both iPad sizes, both ways up, in English and Arabic, then the note's lines; each fault
+    found gets its fix, its test and a checklist line. **Walked 2026-10-23: nothing wrong.**
+    Both sizes, both ways up, both languages: every look-alike row has its reason, an opened row
+    stays in sight, Share and the tajweed key are whole, the roots list and the other corner cards
+    leave the verse clear, and a note's reference thread goes out and back. The walk script was
+    mended where it could mislead: it once measured the note as if it were the tajweed key, and
+    counted the look-alike buttons on the Share card's own top row as buttons the card covers.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

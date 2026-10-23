@@ -4910,6 +4910,18 @@
       "owner": "agent",
       "closedBy": "native/HifthUITests/SmokeTests.swift",
       "note": "Checked in the iPad app on its side on 2026-10-23 with a real finger driven by the app's UI test: a drag from the right page's outer edge through the note closes the note and turns the opening back a page. The test fails with the old arrows-and-keys default. The settings panel offers all three ways with grab-through picked. The Mac app with a mouse is parked as manual-testing item 20."
+    },
+    {
+      "id": "walk-ipad-pitch-after-week-of-changes",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "119"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Walked 2026-10-23 in the iPad app, pitch build, both sizes, upright and on their side, English and Arabic: the look-alike lists, the roots list read to its end, Share, the tajweed key and a note's reference thread there and back. Nothing wrong. The walk script itself was mended: it now finds the tajweed key by its credit line rather than the first card, says why Share is missing when the list covers it, and names each button it counts under the Share card, so the look-alike buttons on the card's own top row are not taken for buttons it covers.",
+      "closedBy": ".claude/skills/walk-app/checklist.md"
     }
   ]
 }

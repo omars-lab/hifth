@@ -87,14 +87,14 @@
       if (note) { [...note.querySelectorAll("button")].find((b) => /^(Close|إغلاق)$/.test(b.getAttribute("aria-label") || ""))?.click(); await wait(1200); out.push(`note closed=${dialogs().length === 0 ? "yes" : "no"}`); }
       const name = document.documentElement.lang === "ar" ? "شارك" : "Share this ayah as a link";
       const btn = [...document.querySelectorAll("button")].find((b) => (b.getAttribute("aria-label") || "").includes(name) && !b.closest("[role=dialog]") && on(box(b)));
-      if (!btn) return out.concat("no Share button").join(" ; ");
+      if (!btn) return out.concat(sheet() ? "no Share button: the route opened the look-alike list over it; walk Share on the verse's own route" : "no Share button").join(" ; ");
       btn.click();
       for (const ms of [1500, 2300]) {
         await wait(ms === 1500 ? 1500 : 800);
         const card = dialogs().find((d) => (d.getAttribute("aria-label") || "").includes(name));
         const cb = box(card);
         const ls = lines();
-        out.push(`S+${ms} card=${f(cb)} lines=${ls.length} linesUnderCard=${ls.filter((l) => hit(l, cb)).length} buttonsUnderCard=${buttons(card).filter(([, r]) => hit(r, cb)).length} cardButtonsCut=${[...(card?.querySelectorAll("button") || [])].map(box).filter((r) => r && (r.top < 0 || r.bottom > innerHeight || r.left < 0 || r.right > innerWidth)).length}`);
+        out.push(`S+${ms} card=${f(cb)} lines=${ls.length} linesUnderCard=${ls.filter((l) => hit(l, cb)).length} buttonsUnderCard=${buttons(card).filter(([, r]) => hit(r, cb)).length}[${buttons(card).filter(([, r]) => hit(r, cb)).map(([b, r]) => `${b.dataset.direction || (b.getAttribute("aria-label") || "?").slice(0, 18)}@${f(r)}`).join(" ")}] cardButtonsCut=${[...(card?.querySelectorAll("button") || [])].map(box).filter((r) => r && (r.top < 0 || r.bottom > innerHeight || r.left < 0 || r.right > innerWidth)).length}`);
       }
     } else {
       // Up, then put away with Escape twice, as the checklist walks it.
@@ -105,8 +105,10 @@
   } else if (step === "key") {
     // The tajweed key a `?open=key` route opens: scrolled to its end, are its title and close
     // button still on top, and is the credit's web address on one line inside the card?
-    const key = dialogs()[0];
-    if (!key) return out.concat("no key open").join(" ; ");
+    // The key by its credit line: on a verse the private build opens the note too, and the
+    // first card on the screen was once the note, measured as if it were the key (2026-10-23).
+    const key = dialogs().find((d) => d.querySelector("a[href*='quran-tajweed']"));
+    if (!key) return out.concat(`no key open (cards=${dialogs().length})`).join(" ; ");
     const flags = () => Object.keys(key.dataset).join(",") || "-";
     out.push(`K card=${f(box(key))} more=${key.scrollHeight - key.clientHeight} flags=${flags()} numbers=${nums(key.textContent)}`);
     key.scrollTo({ top: key.scrollHeight });
