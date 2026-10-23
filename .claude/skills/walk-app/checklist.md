@@ -557,6 +557,12 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the same on the iPad Pro 13-inch on its side at all three verses, and upright on both sizes at
   2:255 only, with the cards across the full width (the corner-cards script's wide setting), both
   languages, 2026-10-23
+- [ ] On a short laptop window (`VIEWPORT=1366x660` and `1280x610`, `MOUSE=1`), two smaller pages
+  open; at 2:255, 2:48 and 3:84 the note, the roots list read to its end, the look-alike lists
+  and Share leave the whole verse clear, nothing runs off the screen, and the tajweed key stands
+  beside the book and scrolls to its end · the corner-cards script, and the key walk at
+  `#/hafs-kfqc/p45?open=key` · walked 2026-10-23 in Firefox and Chrome, English and Arabic,
+  nothing wrong (PLAN 120)
 - [ ] On the laptop closed to one page, zoom in a step or two past the room the roots list leaves
   (2:45), open the roots list, then close it: open, the page is drawn a little smaller and the
   whole verse stands clear of the list; closed, the page and the zoom readout are back at the

@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #251 — Walk the demo on a short laptop screen (PLAN 120)
+
+**Done:** 2026-10-23. The three demo verses at 1366 by 660 and 1280 by 610, in Firefox and Chrome, English and Arabic: the note, the roots list, the look-alike lists, Share and the tajweed key all leave the verse clear and stay on the screen. No faults.
+
 ## #250 — Walk the pitch in the iPad app after a week of changes, look-alikes first (PLAN 119)
 
 **Done:** 2026-10-23. Both iPad sizes, upright and on their side, English and Arabic, in the real app: the look-alike lists open with a reason on every row, an opened row stays in sight, the passage row hops to the right verse, Share and the tajweed key are whole, the roots list and every corner card leave the verse clear, and a note's reference thread goes out and comes back. No faults. The walk script was mended where it could mislead: the key found by its credit line, a missing Share explained, and each button under the Share card named.

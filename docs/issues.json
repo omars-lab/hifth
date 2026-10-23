@@ -4922,6 +4922,18 @@
       "owner": "agent",
       "note": "Walked 2026-10-23 in the iPad app, pitch build, both sizes, upright and on their side, English and Arabic: the look-alike lists, the roots list read to its end, Share, the tajweed key and a note's reference thread there and back. Nothing wrong. The walk script itself was mended: it now finds the tajweed key by its credit line rather than the first card, says why Share is missing when the list covers it, and names each button it counts under the Share card, so the look-alike buttons on the card's own top row are not taken for buttons it covers.",
       "closedBy": ".claude/skills/walk-app/checklist.md"
+    },
+    {
+      "id": "walk-short-laptop-pitch",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "120"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Walked 2026-10-23 at 1366x660 and 1280x610, Firefox and Chrome, English and Arabic, 2:255, 2:48 and 3:84: nothing wrong; a checklist line keeps it walked.",
+      "closedBy": ".claude/skills/walk-app/checklist.md"
     }
   ]
 }
