@@ -9,6 +9,13 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #248 — A press on a link in the note is no longer lost in the pitch tests
+
+**Done:** 2026-10-23. A pitch test that failed now and then (about 1 run in 15 in Firefox) had
+pressed a link in the note while the note was still growing from the test's own scroll; a
+helper now scrolls, waits for the note to stand still, then presses, for every hop link in the
+note. 60 of 60 runs after. See `docs/issues/note-link-press-lost-mid-grow.md`.
+
 ## #247 — Grabbing the page's edge through a note is the default turn
 
 **Done:** 2026-10-23. The owner picked it from the three built ways; the other two stay in settings (knowledge-graph-commentary ㉖, test in pitch.spec.ts).
