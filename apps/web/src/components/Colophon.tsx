@@ -660,8 +660,8 @@ export function Colophon({
         )}
 
         {/* What a card over the facing page does at the page's outer edge
-            (docs/design/knowledge-graph-commentary.md, item 26): still open, so
-            every way is built and today's is the default. Only where two pages
+            (docs/design/knowledge-graph-commentary.md, item 26): the owner chose
+            grabbing through on 2026-10-23, and the other two stay choosable. Only where two pages
             can face each other: on a phone there is no facing page to cover. */}
         {spread && (
         <section className={styles.block} aria-labelledby="colophon-card-edge">

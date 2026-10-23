@@ -4898,6 +4898,18 @@
       "owner": "agent",
       "closedBy": "docs/issues/short-screen-keeps-the-book.md",
       "note": "Asked from inside each app on 2026-10-23: the Mac app's page reports a mouse (hover), so a short Mac window keeps two pages as a browser does; the iPad mini app's page reports touch, so on its side it still opens on one page. Nothing to change."
+    },
+    {
+      "id": "grab-through-turn-inside-the-ipad-app",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "118"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": "native/HifthUITests/SmokeTests.swift",
+      "note": "Checked in the iPad app on its side on 2026-10-23 with a real finger driven by the app's UI test: a drag from the right page's outer edge through the note closes the note and turns the opening back a page. The test fails with the old arrows-and-keys default. The settings panel offers all three ways with grab-through picked. The Mac app with a mouse is parked as manual-testing item 20."
     }
   ]
 }

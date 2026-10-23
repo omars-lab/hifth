@@ -94,8 +94,13 @@ final class SmokeTests: XCTestCase {
         waitForRoute("#/hafs-kfqc/p45", in: app)
         sleep(2)
         let web = app.webViews.firstMatch
+        // The pens sit behind Mark up; this test looked for them in the bar
+        // and, once they moved, failed before it ever pinched (2026-10-23).
+        let markUp = web.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Mark up")).firstMatch
+        XCTAssertTrue(markUp.waitForExistence(timeout: 5), "no Mark up button")
+        markUp.tap()
         let note = web.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Note")).firstMatch
-        XCTAssertTrue(note.waitForExistence(timeout: 5), "no Note tool in the tools row")
+        XCTAssertTrue(note.waitForExistence(timeout: 5), "no Note tool under Mark up")
         note.tap()
         sleep(1)
         XCTAssertEqual(web.textViews.count, 0, "a note box was open before the pinch")
@@ -170,6 +175,35 @@ final class SmokeTests: XCTestCase {
         add(picture)
         let book = Self.bookShareAcrossTheMiddle(of: upright)
         XCTAssertGreaterThan(book, 0.4, "the two pages cover \(Int(book * 100))% of the screen's width")
+    }
+
+    /// Sideways with a note open over the right page, a finger that grabs the
+    /// page's outer edge through the note closes it and turns: the default
+    /// since the owner chose it on 2026-10-23 (knowledge-graph ㉖). The browsers
+    /// prove it with a mouse; this is a real touch in the iPad's own WebKit.
+    /// Opening at a verse opens its note only in the pitch build (`make
+    /// app-web`); in the public one the drag turns a page with no note on it.
+    func testGrabbingTheEdgeThroughANoteTurnsThePage() {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let app = launch(route: "/hafs-kfqc/2:255")
+        waitForRoute("#/hafs-kfqc/2:255", in: app)
+        sleep(3)
+        attach(app, named: "note-over-the-edge")
+        // Low on the right page's outer edge, where the grab strip is widest:
+        // measured in the app on an iPad Pro 13-inch on its side (strip at
+        // 1090–1146 across, 91–880 down; the note covers it, 692–1152).
+        let web = app.webViews.firstMatch
+        let origin = web.coordinate(withNormalizedOffset: .zero)
+        let grab = origin.withOffset(CGVector(dx: 1138, dy: 856))
+        grab.press(forDuration: 0.05, thenDragTo: origin.withOffset(CGVector(dx: 738, dy: 856)))
+        let label = app.staticTexts["hifth.route"]
+        // A page, not a verse: a press that hopped along one of the note's links
+        // would change the address too.
+        expectation(for: NSPredicate(format: "label BEGINSWITH %@", "#/hafs-kfqc/p"), evaluatedWith: label)
+        waitForExpectations(timeout: 10)
+        sleep(1)
+        attach(app, named: "after-the-grab")
     }
 
     /// The share of the screen's middle row that is not desk. The desk is a
