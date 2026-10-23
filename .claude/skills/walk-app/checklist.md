@@ -26,6 +26,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   both feet in sight above the bars; pick one page and its foot stays in sight; press F and each
   page grows past a phone's. An iPad mini on its side still opens on one page. · laptop, ipad-side
   · issue: `short-screen-loses-the-spread`
+- [ ] On a 1133 by 744 laptop window with one page picked, set "Page stays in the middle" and open
+  the roots list: the page slides aside at its own size, never drawn tiny beside the list. · laptop
+  · issue: `short-window-roots-list-middle-too-small`
 - [ ] An upright iPad opens on one page you can read, not two small ones. · ipad · issue:
   `upright-ipad-opens-two-small-pages`
 - [ ] A deep link to a verse lands on its page with the verse marked; turn the phone the moment it

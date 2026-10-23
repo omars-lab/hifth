@@ -4873,6 +4873,18 @@
       "owner": "agent",
       "note": "A browser window under 775 px tall got the phone layout: one page, cut off at its foot, in a wide empty table. Owner chose 2026-10-23: both, as a setting. Fixed: where the screen has a mouse or trackpad the open book holds down to 600 px tall (each page 197 px wide at 1280x610, about a third smaller than a phone's 290); the one/two page choice above the book gives one page with its foot in sight; Full screen gives 340 px. A touch-only screen keeps the 775 floor. Tests: e2e/desktop.spec.ts (short windows keep both pages, feet in sight; one page picked fills the height; a short touch screen keeps one page) and useMediaQuery.test.ts. docs/issues/short-screen-keeps-the-book.md.",
       "closedBy": "apps/web/e2e/desktop.spec.ts"
+    },
+    {
+      "id": "short-window-roots-list-middle-too-small",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "116"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "At 1133x744 with a mouse and one page picked, the roots list's keep-in-the-middle setting drew the page 134 px wide (a third of its size): the size check read the page's zoom at the start of the link's glide, not where it was going. It now reads the glide's end, and the page slides aside. Two pages are unaffected (the list stands over the facing page). Test: desktop.spec.ts, 'with a mouse, on a short window closed to one page'.",
+      "closedBy": "apps/web/e2e/desktop.spec.ts"
     }
   ]
 }

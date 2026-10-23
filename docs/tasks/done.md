@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #245 — The roots list's keep-in-the-middle setting on short laptop windows
+
+**Done:** 2026-10-23. On a 1133 by 744 laptop window with one page picked, the setting drew the page a third of its size; it now slides aside as the default does (PLAN 116, test in desktop.spec.ts).
+
 ## #243 — Watch the iPhone recitation test over the next few full runs
 
 **Done:** 2026-10-23. Three full runs since the tidy-up passed with no retry; PLAN 114 and docs/issues/iphone-listen-test-stalls-once.md record it, with what to keep if it ever comes back.
