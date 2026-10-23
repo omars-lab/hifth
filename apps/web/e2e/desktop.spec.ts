@@ -109,13 +109,11 @@ test.describe("Hifth · the desktop spread", () => {
     await expect(spread(page)).toBeVisible();
 
     // Below on the *height* axis alone, at a width that still qualifies. This is
-    // the case a width-only breakpoint would have got wrong, and it is the one
-    // that matters: a mus'haf leaf is portrait, so in a 1440×720 window each
-    // leaf would be handed less page than a 320px phone gives (the arithmetic is
-    // in docs/design/desktop.md §3, and the row below measures it rather than
-    // trusting it). 720 rather than some obviously-small number: it is the
-    // height this breakpoint used to be, and the one an eye reads as tall enough.
-    await page.setViewportSize({ width: 1440, height: 720 });
+    // the case a width-only breakpoint would have got wrong: a mus'haf leaf is
+    // portrait, so under 600 pixels tall two leaves would be too small to read
+    // (docs/design/desktop.md §3). From 600 up a window with a mouse keeps the
+    // book open (PLAN 115); the tests below hold that.
+    await page.setViewportSize({ width: 1440, height: 590 });
     await expect(spread(page)).toHaveCount(0);
     // The reader keeps their page. Falling back to one leaf is a layout change,
     // not a navigation.
@@ -138,39 +136,73 @@ test.describe("Hifth · the desktop spread", () => {
     await expect(spread(page)).toBeVisible();
   });
 
-  test("never gives a leaf less scripture than the narrowest phone does", async ({ page }) => {
-    // The criterion the breakpoint exists for (docs/design/desktop.md §3): a
-    // spread that shrinks the scripture to fit two pages on screen has traded
-    // away the only thing the reader came for.
-    //
-    // Both sides measured, and both sides the *SVG* — not the leaf's box and not
-    // the stage's. The page host takes its border and its fore-edge stack out of
-    // whatever box it is given before the scripture is laid out, so comparing a
-    // leaf's box against a phone's page is comparing 14 px of furniture against
-    // none. The old derivation did exactly that and came out 33 px optimistic,
-    // which is how the corner ended up under the floor while the arithmetic in
-    // the doc said it was over it.
+  /*
+   * A short window keeps the open book (PLAN 115, the owner's pick of
+   * 2026-10-23). A 768-pixel laptop, a 720 projector and a window shrunk to
+   * share in a call all leave less than 775 pixels inside the browser, and there
+   * the app used to drop to the phone's layout: one page, its last lines under
+   * the bars, in a wide empty table. Now the two pages shrink to fit, even though
+   * each then gives less scripture than the narrowest phone does (the rule the
+   * breakpoint used to be derived from), and one page fitted to the height is
+   * the reader's other choice.
+   */
+  const SHORT_WINDOWS = [
+    { width: 1366, height: 660 },
+    { width: 1280, height: 610 },
+    { width: 1024, height: 600 },
+  ];
+
+  /** Whether the last line of a page is on screen and under nothing: no bar, no edge of the window. */
+  const footClear = (svg: Locator): Promise<string> =>
+    svg.evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      if (box.bottom > window.innerHeight + 0.5) return `runs ${Math.round(box.bottom - window.innerHeight)}px past the window`;
+      for (const x of [box.left + box.width * 0.25, box.left + box.width / 2, box.left + box.width * 0.75]) {
+        const hit = document.elementFromPoint(x, box.bottom - 3);
+        const bar = hit?.closest("header, footer, nav, [role=toolbar], [role=dialog]");
+        if (bar) return `covered by a ${bar.tagName.toLowerCase()}${bar.getAttribute("role") ? ` (${bar.getAttribute("role")})` : ""}`;
+      }
+      return "clear";
+    });
+
+  for (const size of SHORT_WINDOWS) {
+    test(`a ${size.width} by ${size.height} window keeps both pages open, their feet in sight`, async ({ page }) => {
+      await page.setViewportSize(size);
+      await page.goto("/#/hafs-kfqc/p7");
+      await expect(spread(page)).toBeVisible();
+      for (const n of [7, 8]) {
+        await expect(pageSvg(page, n)).toBeVisible();
+        await expect.poll(() => footClear(pageSvg(page, n)), { message: `the foot of page ${n}` }).toBe("clear");
+      }
+    });
+  }
+
+  test("in a short window, one page picked fills the height and its foot stays in sight", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 610 });
     await page.goto("/#/hafs-kfqc/p7");
-    await expect(pageSvg(page, 7)).toBeVisible();
-
-    // The floor. 320 px is the narrowest window `e2e/chrome-fit.spec.ts` holds
-    // the chrome inside, so it is the narrowest page this app promises.
-    await page.setViewportSize({ width: 320, height: 568 });
-    await expect(spread(page)).toHaveCount(0);
-    const phone = await boxOf(pageSvg(page, 7));
-
-    // The tightest window the spread will claim. Nothing between here and the
-    // breakpoint is worth testing — every larger window gives a taller stage and
-    // therefore a wider leaf, so the corner is the whole of the risk.
-    await page.setViewportSize({ width: 1024, height: 775 });
     await expect(spread(page)).toBeVisible();
-    const corner = await boxOf(pageSvg(page, 7));
+    const two = await boxOf(pageSvg(page, 7));
+    await modeBtn(page, "one").click();
+    await expect(pageSvg(page, 8)).toHaveCount(0);
+    await expect.poll(() => footClear(pageSvg(page, 7)), { message: "the foot of the one page" }).toBe("clear");
+    // One page is the choice for a reader who wants the words bigger: it must
+    // not come out the same size as each of the two.
+    const one = await boxOf(pageSvg(page, 7));
+    expect(one.height, "the one page's height against each of the two's").toBeGreaterThanOrEqual(two.height - 1);
+  });
 
-    expect(
-      corner.width,
-      `a leaf at the breakpoint corner gives ${Math.round(corner.width)}px of scripture, ` +
-        `less than the ${Math.round(phone.width)}px a 320px phone gives`,
-    ).toBeGreaterThanOrEqual(phone.width);
+  test("a touch screen as short as an iPad mini on its side keeps its one page", async ({ browser, browserName }) => {
+    // The iPad mini held on its side is 1133 by 744 and shows one page beside
+    // the note (look-alike rows ⑪, PLAN 99 and 107). The short-window book is
+    // for a laptop or a projector, which have a mouse or a trackpad; a screen
+    // driven only by a finger keeps the layout it was walked in.
+    test.skip(browserName !== "chromium", "only Chromium can stand in for a touch screen");
+    const context = await browser.newContext({ viewport: { width: 1133, height: 744 }, hasTouch: true, isMobile: true });
+    const touch = await context.newPage();
+    await touch.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(touch, 7)).toBeVisible();
+    await expect(spread(touch)).toHaveCount(0);
+    await context.close();
   });
 
   test("puts the lower page number on the right", async ({ page }) => {
@@ -2375,12 +2407,15 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
           .toBeLessThan(2);
       });
 
-    test(`on a window where keeping a ${side}-hand page in the middle would draw it tiny, the reader's other way slides it aside instead`, async ({ page }) => {
+    test(`on a window where keeping a ${side}-hand page in the middle would draw it tiny, the reader's other way slides it aside instead`, async ({ browser, browserName }) => {
       // An iPad mini on its side: the list takes 460 of 1133 pixels, and
       // kept in the middle clear of it the page came out a quarter of its
       // width, too small to read (look-alike rows ⑪). Below half its size the
-      // page slides aside as the default does.
-      await page.setViewportSize({ width: 1133, height: 744 });
+      // page slides aside as the default does. A touch screen, as the iPad
+      // is: with a mouse, a window this short opens the book (PLAN 115).
+      test.skip(browserName !== "chromium", "only Chromium can stand in for a touch screen");
+      const context = await browser.newContext({ viewport: { width: 1133, height: 744 }, hasTouch: true, isMobile: true });
+      const page = await context.newPage();
       const svg = pageSvg(page, pageNo);
       const widthBeside = async (room: string): Promise<number> => {
         await page.evaluate(([key, r]) => localStorage.setItem(key, r), [CARD_ROOM_KEY, room] as const);
@@ -2395,6 +2430,7 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       await expect(svg).toBeVisible({ timeout: 20_000 });
       const aside = await widthBeside("aside");
       expect(Math.abs((await widthBeside("smaller")) - aside), "the page's width beside the list, against the default's").toBeLessThan(2);
+      await context.close();
     });
 
     test(`a ${side}-hand page that comes in after the roots list has opened lands where it would have`, async ({ browser }) => {

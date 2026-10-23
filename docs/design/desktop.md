@@ -130,6 +130,16 @@ pure helper rather than a library.
 `apps/web/src/useMediaQuery.ts` as `DESKTOP_QUERY` and repeated as a literal in
 `DesktopChrome.module.css`, because a CSS custom property cannot appear inside a media query.
 
+**Since 2026-10-23 there is a second, lower floor (PLAN 115).** The query now also takes
+`(min-width: 1024px) and (min-height: 600px) and (hover: hover)`: a window with a mouse or
+trackpad keeps two pages down to 600 px tall, below the 290 px phone floor this section sets
+(197 px at 1280×610). The owner chose that trade after seeing four short windows side by side:
+two smaller pages with their feet in sight beat one page cut off in an empty table, and the
+one/two page choice and Full screen remain for a reader who wants size back. A touch-only screen
+keeps the 775 floor, so an iPad mini on its side still gets its one page. The criterion below
+still holds for touch screens and is the reasoning behind 775; the reasons for the move are in
+`docs/issues/short-screen-keeps-the-book.md`.
+
 ### The finding: the constraint is *height*, not width
 
 This is the one thing writing the arithmetic down changed. A mus'haf leaf is **portrait** —

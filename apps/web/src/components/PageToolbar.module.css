@@ -15,12 +15,11 @@
    hint beside them change width with the tool, and a bar centred as one piece
    slid every button by up to 100px when a tool was picked, so the second click
    of a double-click, or the click that puts a tool down, missed. */
-@media (min-width: 1024px) and (min-height: 775px) {
+@media (min-width: 1024px) and (min-height: 775px), (min-width: 1024px) and (min-height: 600px) and (hover: hover) {
   .bar {
     align-self: stretch;
     /* Kept thin: at the smallest desktop window every pixel of this row comes
-       out of the page, and a page there must never be smaller than the
-       narrowest phone's (the desktop spread tests hold that line). */
+       out of the page (the desktop spread tests hold both pages whole there). */
     margin-block: 4px 2px;
     padding-inline: var(--space-3);
     display: grid;

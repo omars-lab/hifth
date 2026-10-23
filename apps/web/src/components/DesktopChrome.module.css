@@ -18,7 +18,7 @@
   display: none;
 }
 
-@media (min-width: 1024px) and (min-height: 775px) {
+@media (min-width: 1024px) and (min-height: 775px), (min-width: 1024px) and (min-height: 600px) and (hover: hover) {
   .extras {
     display: flex;
     align-items: center;

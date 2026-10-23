@@ -2345,6 +2345,19 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     [its script](design/screen-shapes/record.sh) from the public app. What to do about it
     (let the spread shrink to fit a short window, fit the one page to the height, or both as a
     setting) is the owner's to choose from the picture.
+    **Owner, 2026-10-23: both, as a setting.** By default the two pages shrink to fit a short
+    window, even though each page then gives less scripture than the smallest phone does. In the
+    info panel, a reader can switch to one page sized to the height, so its foot is never cut off.
+    **Built 2026-10-23.** Where the screen has a mouse or a trackpad, the open book now holds down
+    to 600 pixels tall; a touch screen (an iPad mini on its side) keeps its one page. The switch
+    is the one/two page choice in the bar above the book, not the info panel. Measured: each page
+    is 197 pixels wide at 1280 by 610 and 226 at 1366 by 660, against 290 on the smallest phone,
+    so about a third smaller. One page picked is the same size as each of the two, since the
+    height sets it, but its foot is in sight. Full screen (the F key) hides the bars and makes
+    each page 340 pixels wide at 1280 by 610, bigger than a phone's: the answer for a projector.
+    [After](design/screen-shapes/four-windows.gif), [before](design/screen-shapes/four-windows-before.gif),
+    [one page picked](design/screen-shapes/one-page.gif); why the rule moved:
+    [issues/short-screen-keeps-the-book.md](issues/short-screen-keeps-the-book.md).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
