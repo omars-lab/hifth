@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #246 — The short-window change inside the Mac and iPad apps
+
+**Done:** 2026-10-23. Asked from inside each app: the Mac app counts as a mouse, so a short Mac window keeps two pages; the iPad mini app counts as touch (PLAN 117).
+
 ## #245 — The roots list's keep-in-the-middle setting on short laptop windows
 
 **Done:** 2026-10-23. On a 1133 by 744 laptop window with one page picked, the setting drew the page a third of its size; it now slides aside as the default does (PLAN 116, test in desktop.spec.ts).

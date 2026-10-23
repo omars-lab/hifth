@@ -34,7 +34,7 @@ The owner chose both, as a setting. With a mouse or a trackpad, two pages now ho
 600 pixels tall, their feet in sight; the one/two page choice in the bar above the book gives one
 page, also with its foot in sight. A touch-only screen keeps 775, because an iPad mini on its
 side (1133 by 744) would otherwise lose its one page for two smaller ones; that is what the
-"hover" part of the rule tells apart. An iPad with a trackpad attached should still count as touch, since the rule reads the main pointer, but that has not been checked on a real iPad.
+"hover" part of the rule tells apart. An iPad with a trackpad attached should still count as touch, since the rule reads the main pointer, but that has not been checked on a real iPad. Inside the apps it was checked on 2026-10-23: the Mac app's page says it has a mouse, so it keeps two pages on a short window, and the iPad mini app's page says it is touch.
 
 Two look-alike tests had stood in for an iPad mini with a desktop browser at 1133 by 744; they
 now use a touch browser, as the real device is.
