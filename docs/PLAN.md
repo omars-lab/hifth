@@ -2398,6 +2398,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     look-alike and roots lists were last walked in the app on 2026-10-13. Walk them first on
     both iPad sizes, both ways up, in English and Arabic, then the note's lines; each fault
     found gets its fix, its test and a checklist line. **Walked 2026-10-23: nothing wrong.**
+120. **On a short laptop screen, does the whole demo still read right?** The pitch may be shown on
+    a laptop with a 768-pixel screen or in a window shrunk to share in a call, and since 115 that
+    window now opens two smaller pages instead of one. Only the roots list's setting (116) has
+    been walked there. Walk the three demo verses (2:255, 2:48, 3:84) at 1366 by 660 and 1280 by
+    610, in Firefox and Chrome, English and Arabic: the note, the roots list, the look-alike
+    lists, Share and the tajweed key, each with the verse in sight and nothing cut off. Each fault
+    found gets its fix, its test and a checklist line.
     Both sizes, both ways up, both languages: every look-alike row has its reason, an opened row
     stays in sight, Share and the tajweed key are whole, the roots list and the other corner cards
     leave the verse clear, and a note's reference thread goes out and back. The walk script was
