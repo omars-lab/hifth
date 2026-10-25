@@ -24,7 +24,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   ipad-side · issue: `desk-lines-say-tap`
 - [ ] A short laptop window (1280 by 610, 1366 by 660) with a mouse opens the book on two pages,
   both feet in sight above the bars; pick one page and its foot stays in sight; press F and each
-  page grows past a phone's. An iPad mini on its side still opens on one page. · laptop, ipad-side
+  page grows past a small phone's. An iPad mini on its side still opens on one page. · laptop, ipad-side
   · issue: `short-screen-loses-the-spread` · in the apps (2026-10-23, asked from inside): the Mac
   app says mouse, the iPad mini app says touch, as the rule needs · in a browser (2026-10-25, page
   45, Firefox and Chrome, by picture): two pages 197 and 226 wide with their feet 144 and 146

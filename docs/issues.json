@@ -3134,7 +3134,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "The owner settled the TestFlight question on own devices only (2026-10-11) and plans to move to sending the whole build to named testers once they have used the app themselves. Owed first: a licence reading by someone qualified, and the paid Apple membership. The upload steps open only when the decision record says A or B."
+      "note": "The owner settled the TestFlight question on own devices only (2026-10-11) and plans to move to sending the whole build to named testers once they have used the app themselves. Owed first: a licence reading by someone qualified, and the paid Apple membership. The upload steps open only when the decision record says A or B. As of 2026-10-25 every walk of the demo the agent can run is done, so this is the next step between the demo and The Study Quran team."
     },
     {
       "id": "usage-across-devices",
