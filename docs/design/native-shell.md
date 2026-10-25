@@ -751,6 +751,8 @@ are read, so a reader never sees it.
 Asked 2026-10-11. The owner settled the TestFlight question on C for now (own devices only,
 shown in the room) and said the plan is to move to A, the whole build to a few named testers,
 once they have used the app themselves.
+As of 2026-10-25 every walk of the demo the agent can run is done, so this is now the next step
+between the demo and The Study Quran team.
 
 **What it changes for a hafiz:** a hafiz on The Study Quran team could keep the app on their own
 iPad and open it the next morning, instead of holding the owner's iPad for ten minutes in a
