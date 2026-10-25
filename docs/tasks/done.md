@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)
+
+**Done:** 2026-10-25. The recitation-with-a-note walk read no verse in Arabic; it now reads Arabic digits, and a test checks every walk script for the same slip. The short laptop window's first screen walked in both browsers at both sizes: two pages, feet in sight, Full screen past a small phone's page.
+
 ## #252 — Follow a note's references on a short laptop screen (PLAN 120)
 
 **Done:** 2026-10-25. From 2:48 and 2:255 at 1366 by 660 and 1280 by 610, in Firefox and Chrome, English and Arabic: each reference lights its verse clear of the note, and Back comes home. No faults in the app. The walk script was mended: in Arabic it took a link back to its own start for a second reference; a test now holds it.

@@ -26,7 +26,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   both feet in sight above the bars; pick one page and its foot stays in sight; press F and each
   page grows past a phone's. An iPad mini on its side still opens on one page. · laptop, ipad-side
   · issue: `short-screen-loses-the-spread` · in the apps (2026-10-23, asked from inside): the Mac
-  app says mouse, the iPad mini app says touch, as the rule needs
+  app says mouse, the iPad mini app says touch, as the rule needs · in a browser (2026-10-25, page
+  45, Firefox and Chrome, by picture): two pages 197 and 226 wide with their feet 144 and 146
+  above the bottom and the bars below them; one page keeps its foot in sight; F gives 340 and 369,
+  past the 290 a small phone gives, a little under the 360 of a 390-wide phone at 1280 by 610
 - [ ] On a 1133 by 744 laptop window with one page picked, set "Page stays in the middle" and open
   the roots list: the page slides aside at its own size, never drawn tiny beside the list. · laptop
   · issue: `short-window-roots-list-middle-too-small`
@@ -415,7 +418,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] With a note up while a surah plays, the note's title row has a Pause named for the verse
   being heard; pressing it stops the sound and leaves the same note open, and it turns to Play,
   which picks the run up again. The `run-note` script presses it last. · ipad, phone, Firefox,
-  Arabic, the iPad app, the Mac app, private build · issue: `no-pause-with-note-up`
+  Arabic, the iPad app, the Mac app, private build · issue: `no-pause-with-note-up` · before
+  2026-10-25 the script read no verse from the note in Arabic (Arabic digits); re-walked that day
+  on 109:3 in Firefox and Chrome, English and Arabic: the Pause names the verse heard
 - [ ] With a note up while a surah plays, let the run reach the next page (or the next pair of
   pages on its side): the page turns and the run plays on with Pause in reach; each verse recited
   before the turn stays clear of the note. The note on the earlier verse stays up through the
