@@ -2417,7 +2417,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     back; each step lights its verse with none of it under the note, the note stays where it
     stood, and back at the start there is no Back. The walk script was mended on the way: in
     Arabic it read a link back to its own start as a second reference, because the links write
-    their verses in Arabic digits.
+    their verses in Arabic digits; the same slip in the recitation-with-a-note script was mended
+    too, and a test now refuses any walk script that reads a verse in Western digits only. The
+    first screen, walked 2026-10-25 on page 45 in both browsers: two pages with their feet in
+    sight above the bars, one page picked keeps its foot in sight, and Full screen grows a page to
+    340 (1280 by 610) and 369 (1366 by 660) wide, past a small phone's 290 though at the smaller
+    size a little under a 390-wide phone's 360.
     Both sizes, both ways up, both languages: every look-alike row has its reason, an opened row
     stays in sight, Share and the tajweed key are whole, the roots list and the other corner cards
     leave the verse clear, and a note's reference thread goes out and back. The walk script was

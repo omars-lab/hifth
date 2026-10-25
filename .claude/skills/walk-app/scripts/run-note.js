@@ -116,7 +116,8 @@
     return `view=${innerWidth}x${innerHeight} ; ` + out.join(" ; ");
   }
   // E: the note's own Pause (item 77): the sound stops and the same note stays up.
-  const noteFor = () => (note()?.getAttribute("aria-label") || "").match(/\d+:\d+/)?.[0] || "none";
+  // In Arabic the note names its verse in Arabic digits; read them as Western ones.
+  const noteFor = () => (note()?.getAttribute("aria-label") || "").replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).match(/\d+:\d+/)?.[0] || "none";
   const before = noteFor();
   const pause = [...(note()?.querySelectorAll("button") || [])].find((e) => on(box(e)) && (isAr ? /^إيقاف/ : /^Pause/).test(e.getAttribute("aria-label") || ""))
     || [...document.querySelectorAll("button")].find((e) => on(box(e)) && (isAr ? /^إيقاف/ : /^Pause/).test(e.getAttribute("aria-label") || ""));
