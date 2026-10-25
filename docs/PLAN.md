@@ -2411,8 +2411,13 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     no look-alike button sits on the page or on a card's close button. The tajweed key stands
     beside the book at both sizes, both browsers and both languages, and scrolls to its end with
     its close button and title in sight. Checked by eye too: the note on 2:255 and a look-alike
-    list on 2:48, in Arabic in Firefox at the smaller size. Not walked here: a note's reference
-    thread out and back.
+    list on 2:48, in Arabic in Firefox at the smaller size. A note's references, walked
+    2026-10-25 at both sizes, both browsers and both languages: from 2:48 two references deep
+    (2:123, then 2:47) and back twice, from 2:255 one (3:2, whose note names no further verse) and
+    back; each step lights its verse with none of it under the note, the note stays where it
+    stood, and back at the start there is no Back. The walk script was mended on the way: in
+    Arabic it read a link back to its own start as a second reference, because the links write
+    their verses in Arabic digits.
     Both sizes, both ways up, both languages: every look-alike row has its reason, an opened row
     stays in sight, Share and the tajweed key are whole, the roots list and the other corner cards
     leave the verse clear, and a note's reference thread goes out and back. The walk script was

@@ -562,7 +562,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   and Share leave the whole verse clear, nothing runs off the screen, and the tajweed key stands
   beside the book and scrolls to its end · the corner-cards script, and the key walk at
   `#/hafs-kfqc/p45?open=key` · walked 2026-10-23 in Firefox and Chrome, English and Arabic,
-  nothing wrong (PLAN 120)
+  nothing wrong (PLAN 120) · a note's references followed out and back (the thread-walk
+  script, `HASH='#/hafs-kfqc/2:48?open=commentary'` and 2:255) walked 2026-10-25 the same ways,
+  nothing wrong
 - [ ] On the laptop closed to one page, zoom in a step or two past the room the roots list leaves
   (2:45), open the roots list, then close it: open, the page is drawn a little smaller and the
   whole verse stands clear of the list; closed, the page and the zoom readout are back at the
@@ -784,6 +786,9 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   EVALFILE=.claude/skills/walk-app/scripts/thread-walk.js …` · walked 2026-10-15 from 2:48 in
   both languages and on the iPad mini on its side, and from 2:255: nothing wrong; again
   2026-10-23 from 2:48 on both sizes, both languages, after the grab-through turn: nothing wrong
+  · until 2026-10-25 the script, in Arabic, could take a link back to the verse it started from
+  as its second reference (the links write verses in Arabic digits); an Arabic walk from before
+  then may have gone one reference deep, not two
 - [ ] Follow a reference in a note, turn the iPad, then press Back **in the iPad app**: on its
   side, follow the note's first reference; turn the iPad upright, as when handing it across; press
   Back; turn it on its side again. Each step lights the verse it is on, with none of it under the

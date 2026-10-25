@@ -9,6 +9,10 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## #252 — Follow a note's references on a short laptop screen (PLAN 120)
+
+**Done:** 2026-10-25. From 2:48 and 2:255 at 1366 by 660 and 1280 by 610, in Firefox and Chrome, English and Arabic: each reference lights its verse clear of the note, and Back comes home. No faults in the app. The walk script was mended: in Arabic it took a link back to its own start for a second reference; a test now holds it.
+
 ## #251 — Walk the demo on a short laptop screen (PLAN 120)
 
 **Done:** 2026-10-23. The three demo verses at 1366 by 660 and 1280 by 610, in Firefox and Chrome, English and Arabic: the note, the roots list, the look-alike lists, Share and the tajweed key all leave the verse clear and stay on the screen. No faults.
