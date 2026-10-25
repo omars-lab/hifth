@@ -5,6 +5,8 @@
 //   make app-probe TARGET=ipad SIDEWAYS=1 LOCALE=en "ROUTE=/hafs-kfqc/2:48?open=commentary" \
 //     EVALFILE=.claude/skills/walk-app/scripts/thread-walk.js DELAY_MS=2500 PROBE_TIMEOUT_S=240
 // "F: no back button" is expected: back at the start there is nothing to go back to.
+// The verse a link names, in Western digits: Arabic links write theirs in Arabic digits.
+const verseOf = (l) => ((l || "").replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x660)).match(/\d+:\d+/) || [""])[0];
 (async () => {
   // Two references deep from a note, then back twice: verse numbers, boxes and button names only.
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -44,7 +46,7 @@
     b.click(); await wait(2500);
   }
   const cur = here();
-  const r2 = refs().find((b) => { const l = b.getAttribute("aria-label") || ""; return !l.includes(cur) && !l.includes(start); });
+  const r2 = refs().find((b) => { const l = b.getAttribute("aria-label") || ""; const v = verseOf(l); return v !== cur && v !== start; });
   if (r2) { out.push(`C follow=${r2.getAttribute("aria-label")} (of ${refs().length})`); r2.click(); await wait(3000); look("C after"); }
   else out.push("C: no second reference");
   for (const step of ["D", "E", "F"]) {
