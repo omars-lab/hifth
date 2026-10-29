@@ -26,8 +26,8 @@ function projectNames(source) {
 }
 
 function prePushProjects(source) {
-  const start = source.indexOf("\npre-push:");
-  assert.ok(start >= 0, "the Makefile has a pre-push target");
+  const start = source.indexOf("\npre-push-checks:");
+  assert.ok(start >= 0, "the Makefile has a pre-push-checks target (what pre-push runs for a push that sends code)");
   const end = source.indexOf("\n.PHONY", start + 1);
   const body = source.slice(start, end < 0 ? undefined : end);
   return new Set([...body.matchAll(/--project=([a-z-]+)/g)].map((m) => m[1]));

@@ -352,7 +352,16 @@ pre-commit: secrets-staged checks-fast ## Everything checked before each commit 
 	fi
 
 .PHONY: pre-push
-pre-push: secrets-history checks-fast ## Everything checked before each push — the pre-push hook runs exactly this
+pre-push: ## Everything checked before each push — the pre-push hook runs exactly this
+	@# A push that only deletes branches on GitHub sends no code, so there is
+	@# nothing to check, and clearing 352 old branches cost 5 minutes each
+	@# (2026-10-29). The script reads the refs git hands the hook and says yes
+	@# only when every one is a delete; anything else, or no refs at all (a
+	@# hand-run `make pre-push`), runs every check below.
+	@node scripts/push-deletes-only.mjs || $(MAKE) -s pre-push-checks
+
+.PHONY: pre-push-checks
+pre-push-checks: secrets-history checks-fast ## The checks a push that sends code must pass
 	$(MAKE) etl-check
 	$(PNPM) audit:corpus
 	$(PNPM) gate:assets
