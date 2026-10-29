@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: c8c77742-fa0c-48ea-9c25-4e720245832a
-  modified: 2026-09-04T14:18:49.464Z
+  modified: 2026-10-12T12:11:40.970Z
 ---
 
 The owner extended the repo's plain-language tenet to cover conversation, not only options
@@ -25,3 +25,12 @@ there twice ("we should have one at the project level"; "its that claude.md we s
 to"). So repo-specific working rules belong in the repo's own CLAUDE.md. Related: the [[decide]]
 skill and the CLAUDE.md "Decisions are explained in plain language" tenet are the checked-in-page
 half of the same rule.
+
+**AskUserQuestion wording counts too (2026-10-12).** I asked the word-colour question as "should
+a run of words get the pens over the amber verse, past the readability check" and the owner
+answered only "why all the jargon". Re-asked as "When you hold on a few words to highlight them,
+they always come out blue… should they get those four colours too?" and got an answer at once.
+"Run of words", "passage", "pen", "amber verse", "floor" are design-page words, not the owner's;
+describe what the hand does and what the eye sees. Also check the claim in a recommended option
+is true: I said held words could mark "a word you got wrong", but a held run is a passing
+selection, not a kept mark, and that had to be corrected afterwards.

@@ -49,3 +49,12 @@
 - [Obsidian callouts and folds worked](obsidian-callouts-and-folds-worked.md) — owner liked tip-callout recommendation + folded picture callouts in waiting-on-you.md; skill /note-manager:write-obsidian-note (oeid marketplace)
 - [review-md vault by ID](review-md-vault-by-id.md) — reply with `--vault hifth0docs0vault01`; "docs" also names the 3d-models vault, so replies miss
 - [Options as Obsidian notes](options-as-obsidian-notes.md) — owner wants options as Markdown notes in the docs vault, not HTML; one line per paragraph; merge + ff main checkout so the vault sees it; timing differences get a looping GIF per option (record-demo scripts)
+- [Option GIFs at one pace](option-gifs-half-speed.md) — all docs GIFs half speed (0.2 s frames), gifsicle-packed, under 1 MB; gate:gifs enforces it (owner 2026-10-02)
+- [Losing option becomes a setting](losing-option-becomes-setting.md) — owner keeps built runner-up options as an info-panel setting (winner default) instead of deleting them; seen for tap-and-hold and jump arrows
+- [Simulator walk approach confirmed](simulator-walk-approach-confirmed.md) — owner liked walking the pitch in the real iPad app (launch, turn, screenshot, app-probe EVAL, app-test ONLY); iPad WebKit ≠ Playwright's; keep it in skills
+- [Walk-app growing checklist](walk-app-growing-checklist.md) — walk every flavour with make drive DEVICE=…; every new fault adds a checklist line (owner 2026-10-07)
+- [Held-text history rewrite](held-text-history-rewrite.md) — 2026-10-08 scrub of two held-text pictures: strip by blob id (same file names reused); merged branches + PR refs still hold it until the owner deletes them and GitHub Support purges
+- [Mac UI test presses real keys](mac-ui-test-presses-real-keys.md) — testPageMenuTurnsThePage / app-test-mac-ui types on the laptop's real keyboard; check the Mac app by picture, run it only when the owner is away
+- [XCUITest finds web tools by label](xcuitest-web-tools-by-label.md) — tool radios aren't radioButtons in the iPad app's UI tests; notes persist across launches, uninstall for a clean run
+- [Name mistakes by what went wrong](name-mistakes-by-what-went-wrong.md) — one entry (Mistake pen) then the kind; app never says "slip"/uses design terms on buttons (owner 2026-10-13)
+- [Pitch test failures print notes](pitch-test-failures-print-notes.md) — assert on counts, never toMatch on a note's text; grep logs without "Received string"
