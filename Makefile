@@ -357,7 +357,8 @@ pre-push: ## Everything checked before each push — the pre-push hook runs exac
 	@# nothing to check, and clearing 352 old branches cost 5 minutes each
 	@# (2026-10-29). The script reads the refs git hands the hook and says yes
 	@# only when every one is a delete; anything else, or no refs at all (a
-	@# hand-run `make pre-push`), runs every check below.
+	@# hand-run `make pre-push`), runs every check below. A new check goes in
+	@# pre-push-checks, not here: added here it would also run on delete pushes.
 	@node scripts/push-deletes-only.mjs || $(MAKE) -s pre-push-checks
 
 .PHONY: pre-push-checks
