@@ -2044,6 +2044,30 @@ test.describe("Hifth · the page tools bar", () => {
     await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
   });
 
+  // A box drawn inside a shadow root (the local page-comment box is one) looked to
+  // the app like a plain div, so every letter typed into it switched the tool and
+  // F went full screen. Found on 2026-11-07, typing a comment on the page.
+  test("letters typed into a box inside a shadow root stay in the box", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await page.evaluate(() => {
+      const host = document.createElement("div");
+      host.id = "shadow-box-host";
+      document.body.append(host);
+      const box = document.createElement("textarea");
+      host.attachShadow({ mode: "open" }).append(box);
+      box.focus();
+    });
+    await page.keyboard.type("hbfv");
+    expect(
+      await page.evaluate(
+        () => document.getElementById("shadow-box-host")?.shadowRoot?.querySelector("textarea")?.value,
+      ),
+    ).toBe("hbfv");
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+    await expect(page.locator("[data-full]")).toHaveCount(0);
+  });
+
   test("each tool's line on the bar tells a mouse to click, never to tap", async ({ page }) => {
     // The bar said "Tap a page to drop a bookmark" to a visitor holding a mouse.
     await page.goto("/#/hafs-kfqc/p8");

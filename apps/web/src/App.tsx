@@ -3590,11 +3590,7 @@ export function App(): JSX.Element {
         key: e.key,
         modified: e.altKey || e.ctrlKey || e.metaKey,
         defaultPrevented: e.defaultPrevented,
-        inTextField:
-          el instanceof HTMLInputElement ||
-          el instanceof HTMLTextAreaElement ||
-          el instanceof HTMLSelectElement ||
-          el?.isContentEditable === true,
+        inTextField: typingIn(el),
         // Any open sheet owns the keyboard while it is up — it is modal, and its
         // own Escape/Tab handling is the contract. Asking the DOM instead of
         // OR-ing this loop's flags keeps that true for sheets other loops add.
@@ -3635,15 +3631,7 @@ export function App(): JSX.Element {
     if (!desktop) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      const el = document.activeElement as HTMLElement | null;
-      if (
-        el instanceof HTMLInputElement ||
-        el instanceof HTMLTextAreaElement ||
-        el instanceof HTMLSelectElement ||
-        el?.isContentEditable === true ||
-        document.querySelector('[role="dialog"]') !== null
-      )
-        return;
+      if (typingIn(document.activeElement) || document.querySelector('[role="dialog"]') !== null) return;
       if (e.key === "Escape") {
         if (toolRef.current !== "select") chooseTool("select");
         return;
@@ -3669,15 +3657,7 @@ export function App(): JSX.Element {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      const el = document.activeElement as HTMLElement | null;
-      if (
-        el instanceof HTMLInputElement ||
-        el instanceof HTMLTextAreaElement ||
-        el instanceof HTMLSelectElement ||
-        el?.isContentEditable === true ||
-        document.querySelector('[role="dialog"]') !== null
-      )
-        return;
+      if (typingIn(document.activeElement) || document.querySelector('[role="dialog"]') !== null) return;
       if (e.code === "KeyF") {
         e.preventDefault();
         setFull((f) => !f);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HISTORY_DEPTH, NO_HISTORY, recordStep, redoStep, undoStep, type MarkStep } from "./mark-history";
+import { HISTORY_DEPTH, NO_HISTORY, recordStep, redoStep, typingIn, undoStep, type MarkStep } from "./mark-history";
 
 const step = (before: number[], after: number[], store: MarkStep["store"] = "notes"): MarkStep => ({ store, before, after, said: "" });
 
@@ -69,5 +69,36 @@ describe("undo and redo for kept marks", () => {
     for (let i = 0; i < HISTORY_DEPTH + 5; i++) h = recordStep(h, step([i], [i + 1]));
     expect(h.past).toHaveLength(HISTORY_DEPTH);
     expect(h.past[0]!.before).toEqual([5]);
+  });
+});
+
+describe("typingIn", () => {
+  it("is true for a box inside a shadow root, such as the page-comment box", () => {
+    // A box drawn inside a shadow root shows up to the page as its host, a plain div.
+    // Every letter typed into it used to switch the drawing tool.
+    const host = document.createElement("div");
+    document.body.append(host);
+    const box = document.createElement("textarea");
+    host.attachShadow({ mode: "open" }).append(box);
+    box.focus();
+    try {
+      expect(document.activeElement).toBe(host);
+      expect(typingIn(document.activeElement)).toBe(true);
+    } finally {
+      host.remove();
+    }
+  });
+
+  it("is false for a shadow host whose focus is on a button", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    const button = document.createElement("button");
+    host.attachShadow({ mode: "open" }).append(button);
+    button.focus();
+    try {
+      expect(typingIn(document.activeElement)).toBe(false);
+    } finally {
+      host.remove();
+    }
   });
 });
