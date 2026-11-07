@@ -295,3 +295,29 @@ they stopped, and not mistake it for a page they bookmarked on purpose, or the o
 
 **If nobody decides:** both stay ribbons, and the reader has to learn that red means "where you
 left off".
+
+### ② Should a reader be able to pull a ribbon down, or push it back up? · **open**
+
+**What would answer it:** a rough build of a pull-down and a push-up on the laptop and on the
+iPad, tried by the owner beside today's clicks.
+
+**Asked by the owner, in a comment left on the app's page (2026-11-07):** *"how do I interact
+with the bookmark? how do I pull it down? pull it up?"* Today nothing is pulled. A click on the
+page's top outer corner folds it and drops a ribbon, and opens a box to name it. A click on a
+ribbon opens that box again, to rename it or lift it. A click on the folded corner unfolds it and
+lifts that page's bookmarks, and Undo puts them back. The same holds in full screen. The owner
+expected the ribbon to move by hand, the way a silk marker does.
+
+**What it changes for a hafiz:** marking a place to come back to should feel like marking a real
+mus'haf, with no instructions needed. A ribbon you can pull is one you would try without being
+told.
+
+**Options to build and try, each a setting if it loses:**
+- pull a ribbon down from the head of the page to drop a bookmark, and push it back up to lift
+  it, beside today's clicks;
+- keep the clicks, and make the folded corner easier to find: it is small and faint in full
+  screen;
+- both.
+
+**If nobody decides:** bookmarks stay click-only, and a reader who tries to pull one finds
+nothing happens.

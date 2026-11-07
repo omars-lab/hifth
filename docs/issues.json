@@ -4967,6 +4967,28 @@
       "severity": "question",
       "owner": "agent",
       "note": "Owner's page comment of 2026-11-07: the navy bookmark tabs and the red 'where you left off' ribbon look alike, so it is not clear which is which. Next step is a rough build of the three options in the bookmark-fold record, to try on the laptop."
+    },
+    {
+      "id": "bookmark-pull-by-hand",
+      "source": {
+        "file": "docs/decisions/bookmark-fold.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: asked how to pull a bookmark down or push it up, in full screen or not. Today bookmarks are clicks only. Next step is a rough build of a pull-down and push-up beside the clicks, and a more findable folded corner."
+    },
+    {
+      "id": "full-screen-keeps-tools",
+      "source": {
+        "file": "docs/decisions/verse-tap-and-hold.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: 'Where is the side tool bar?' Full screen hides every bar, the tools too, so marking means leaving it. Next step is a rough build of full screen with the tools kept down the side, and one where they come back near the side."
     }
   ]
 }
