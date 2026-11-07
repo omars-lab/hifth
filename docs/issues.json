@@ -4988,7 +4988,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner's page comment of 2026-11-07: 'Where is the side tool bar?' Full screen hides every bar, the tools too, so marking means leaving it. Next step is a rough build of full screen with the tools kept down the side, and one where they come back near the side."
+      "note": "Owner's page comment of 2026-11-07: 'Where is the side tool bar?' Full screen hides every bar, the tools too, so marking means leaving it. Next step is a rough build of full screen with the tools kept down the side, and one where they come back near the side. Second comment, same day: a small dock of tool icons that opens out under the pointer on a computer; a phone equivalent still to be found. Added as a third option to build."
     },
     {
       "id": "word-drawer-stacks-on-verse",
@@ -5022,6 +5022,28 @@
       "severity": "question",
       "owner": "agent",
       "note": "Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets. Next step is a rough build of the drawer growing to hold them, kept clear of the verse it is about."
+    },
+    {
+      "id": "app-pages-settings-and-developer",
+      "source": {
+        "file": "docs/design/app-pages.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: settings should be a page of their own, reached from page icons along the bottom like a Mac app, with the mushaf as the default page. Today every setting lives in the info panel (the ⓘ in the header). Next step is a rough build of a bottom row of page icons with the mushaf and a settings page."
+    },
+    {
+      "id": "app-pages-developer-page",
+      "source": {
+        "file": "docs/design/app-pages.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: a developer page that shows only when the app runs on this laptop (localhost). Today the developer views are separate: the side-by-side library comparison page and build-time flags. Next step is to list what a developer page should hold, then build it as one of the bottom pages, absent from a real build."
     }
   ]
 }

@@ -62,6 +62,11 @@ look-alike without leaving it, which breaks the reading they went full screen fo
 **Options to build and try, each a setting if it loses:**
 - full screen keeps the tools down the side, where the page does not reach;
 - the tools come back while the pointer rests near the side, and go again after;
+- a small dock of tool icons stays in full screen and opens out while the pointer is over it,
+  like the Dock on a Mac (the owner's second comment, 2026-11-07: *"a small minimal icon dock
+  that expands when we hover over it in desktop mode"*); a phone has no pointer to hover, so
+  its equivalent is still to be found — a candidate is a small handle at the edge that a tap
+  opens;
 - full screen stays as it is, for reading only.
 
 **If nobody decides:** full screen stays for reading only, and marking means leaving it.
