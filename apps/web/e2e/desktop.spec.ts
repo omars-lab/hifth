@@ -1262,6 +1262,38 @@ test.describe("Hifth · one page or two, and how big", () => {
     });
   }
 
+  // Owner's report of 2026-11-07, "on zoom, page animation glitchy": the turn
+  // that peels the corner over is drawn for the book at its normal size, so on
+  // a magnified book it crossed as a small page over the big ones, its back
+  // blank. Magnified, the turn now goes without the peel and keeps the zoom.
+  test("on a magnified open book, a turn draws no normal-size peel over the big pages", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await page.evaluate(() => {
+      const w = window as unknown as { peeled: number };
+      w.peeled = 0;
+      new MutationObserver(() => {
+        if (document.querySelector('[data-testid="edge-peel"]')) w.peeled += 1;
+      }).observe(document.body, { childList: true, subtree: true });
+    });
+    const peeled = () => page.evaluate(() => (window as unknown as { peeled: number }).peeled);
+    const next = page.getByRole("button", { name: "الصفحة التالية" }).first();
+
+    // At its normal size the turn peels, as it always has.
+    await next.click();
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await expect.poll(peeled, "at normal size the corner peels over").toBeGreaterThan(0);
+
+    await zoomBtn(page, "in").click();
+    await expect.poll(() => scaleOf(page, 9)).toBeCloseTo(1.25, 2);
+    await page.evaluate(() => ((window as unknown as { peeled: number }).peeled = 0));
+    await next.click();
+    await expect(pageSvg(page, 11)).toBeVisible();
+    await expect.poll(() => scaleOf(page, 11), "the turn kept the zoom").toBeCloseTo(1.25, 2);
+    expect(await peeled(), "a normal-size peel crossed the magnified book").toBe(0);
+  });
+
   /*
    * #148: at 150% the two pages of an opening were drawn over each other. The
    * row above only ever opened at page 7, where the live leaf is the right-hand

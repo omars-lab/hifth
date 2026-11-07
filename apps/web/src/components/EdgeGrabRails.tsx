@@ -85,6 +85,23 @@ interface PaperLook {
 }
 
 /**
+ * Whether the reader has magnified the book. The peel is drawn for leaves that
+ * each fill half the book at their normal size; on a magnified book the pages
+ * run past that, and a peel drawn there crossed as a small page over the big
+ * ones (owner's report, 2026-11-07, "on zoom, page animation glitchy"). So a
+ * magnified book turns without the peel, and keeps its zoom.
+ */
+function magnified(book: HTMLElement): boolean {
+  for (const svg of book.querySelectorAll("[data-live] svg[aria-labelledby]")) {
+    const host = svg.parentElement;
+    if (!host || svg.getBoundingClientRect().width === 0) continue;
+    const t = getComputedStyle(host).transform;
+    if (t && t !== "none" && new DOMMatrix(t).a > 1.01) return true;
+  }
+  return false;
+}
+
+/**
  * Where the paper and each side's page drawing sit in the book. The paper
  * stands a little inside the book, top and foot, so the peel is drawn on it and
  * the corner in the hand is the paper's (owner, 2026-09-28: a corner that
@@ -388,7 +405,7 @@ export function EdgeGrabRails({
     const side: PeelSide = step > 0 ? "left" : "right";
     const pages = peel?.[side];
     const el = railsEl.current?.parentElement;
-    if (!driver || !pages || !el || reduced() || grab.current) return false;
+    if (!driver || !pages || !el || reduced() || grab.current || magnified(el)) return false;
     const now = liftedRef.current;
     // Already on its way over: the press is spent on that turn, not a second.
     if (now && !now.landed) return true;
@@ -477,7 +494,7 @@ export function EdgeGrabRails({
           const el = e.currentTarget.parentElement;
           const book = el?.getBoundingClientRect();
           const pages = peel?.[side];
-          if (el && pages && book && book.width > 0 && !reduced()) {
+          if (el && pages && book && book.width > 0 && !reduced() && !magnified(el)) {
             cancelAnimationFrame(anim.current);
             bookEl.current = el;
             const leafW = book.width / 2;
