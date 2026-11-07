@@ -20,6 +20,13 @@ export interface MarkUndo {
  */
 export const MarkUndoContext = createContext<MarkUndo | null>(null);
 
+/**
+ * Set by App where full screen belongs in the tool bar (a desktop): the way to
+ * put the bars away. Unset, the row has no full-screen button, and the bottom
+ * line keeps its own.
+ */
+export const FullScreenContext = createContext<(() => void) | null>(null);
+
 const MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
 /**
@@ -33,6 +40,7 @@ const MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator
 export function UndoRedo({ upright = false }: { upright?: boolean }): JSX.Element | null {
   const { t } = useT();
   const u = useContext(MarkUndoContext);
+  const goFull = useContext(FullScreenContext);
   if (!u) return null;
   const key = MAC ? "⌘" : "Ctrl+";
   return (
@@ -70,6 +78,18 @@ export function UndoRedo({ upright = false }: { upright?: boolean }): JSX.Elemen
       >
         <Arrow redo />
       </button>
+      {goFull && (
+        <button
+          type="button"
+          className={styles.button}
+          aria-label={t.fullScreen}
+          aria-keyshortcuts="F"
+          title={`${t.fullScreen} (F)`}
+          onClick={goFull}
+        >
+          <Corners />
+        </button>
+      )}
     </div>
   );
 }
@@ -113,6 +133,25 @@ function Arrow({ redo = false }: { redo?: boolean }): JSX.Element {
     >
       <path d="M9 14 4 9l5-5" />
       <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+    </svg>
+  );
+}
+
+/** Four corners pushed out to the window's edges: the page takes the whole screen. */
+function Corners(): JSX.Element {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
     </svg>
   );
 }

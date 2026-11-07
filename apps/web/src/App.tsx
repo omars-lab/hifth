@@ -190,7 +190,7 @@ import {
   type MarkStore,
   type Recorder,
 } from "./mark-history";
-import { MarkUndoContext } from "./components/UndoRedo";
+import { FullScreenContext, MarkUndoContext } from "./components/UndoRedo";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger, listenCaption, listenGlyph } from "./components/PlayTrigger";
@@ -3666,6 +3666,11 @@ export function App(): JSX.Element {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+  // On a desktop, full screen is an icon at the end of the tool bar, beside
+  // undo and redo (owner's page comment, 2026-11-07); a phone keeps the word in
+  // the bottom line. Gesture option A has no button either way.
+  const goFull = useCallback(() => setFull(true), []);
+  const fullInBar = desktop && verseGestures !== "a" ? goFull : null;
   const fullSaid = useRef(false);
   useEffect(() => {
     if (full === fullSaid.current) return;
@@ -3889,6 +3894,7 @@ export function App(): JSX.Element {
     // does *not* flip is below: the stage, the rail and the trail are pinned
     // RTL because they are furniture around a mus'haf, not around a sentence.
     <MarkUndoContext.Provider value={markUndo}>
+    <FullScreenContext.Provider value={fullInBar}>
     <div className={styles.app} dir={dir} data-full={full || undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
@@ -4609,7 +4615,7 @@ export function App(): JSX.Element {
                   : t.clickHint
           }
         />
-        {verseGestures !== "a" && (
+        {verseGestures !== "a" && !desktop && (
           <button type="button" className={styles.fullBtn} onClick={() => setFull(true)}>
             {t.fullScreen}
           </button>
@@ -4929,6 +4935,7 @@ export function App(): JSX.Element {
       )}
       <LiveAnnouncer message={message} />
     </div>
+    </FullScreenContext.Provider>
     </MarkUndoContext.Provider>
   );
 }

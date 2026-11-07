@@ -646,10 +646,12 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
       await expect.poll(() => book(page).getAttribute("data-solo")).toBe("true");
       await settle(sheet(page));
       const card = (await sheet(page).boundingBox())!;
-      const full = (await page.getByRole("button", { name: "Full screen" }).boundingBox())!;
       const bar = (await page.getByRole("navigation", { name: "Page bar" }).boundingBox())!;
-      expect(card.y + card.height).toBeLessThanOrEqual(full.y);
       expect(card.y + card.height).toBeLessThanOrEqual(bar.y);
+      // On a desktop full screen is an icon in the tool bar at the top; where it
+      // is still a word in the bottom line, the note ends above it too.
+      const footFull = page.locator("footer").getByRole("button", { name: "Full screen" });
+      if (await footFull.count()) expect(card.y + card.height).toBeLessThanOrEqual((await footFull.boundingBox())!.y);
       // And it is still a card worth reading, not squeezed to a strip.
       expect(card.height).toBeGreaterThan(screen.height / 4);
       // Standing higher, it must still leave the verse it is about in sight.
