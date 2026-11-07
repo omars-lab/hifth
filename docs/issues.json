@@ -5011,6 +5011,17 @@
       "severity": "question",
       "owner": "agent",
       "note": "Owner's page comment of 2026-11-07 asked for the lit verse to glow while the pointer rests on its drawer. Next step is a rough build of a brighter wash and a ring, looked at on the laptop."
+    },
+    {
+      "id": "drawer-holds-its-tools",
+      "source": {
+        "file": "docs/decisions/selection-drawer.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets. Next step is a rough build of the drawer growing to hold them, kept clear of the verse it is about."
     }
   ]
 }

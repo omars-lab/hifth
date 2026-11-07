@@ -208,6 +208,26 @@ the verse number in the drawer's head.
 **If nobody decides:** the verse stays lit as it is. A phone has no pointer to rest, so this is for
 the laptop and iPad with a mouse.
 
+### ③ Should a tool open inside the drawer, instead of in its own sheet? · **open**
+
+**What would answer it:** a rough build where Share, Same roots and the commentary each open as a
+section of the drawer itself, tried by the owner beside today's separate sheets.
+
+**Asked by the owner, in a comment left on the app's page (2026-11-07):** *"isntead of these buttons
+popping up popups, can they not not make the drawer expand and add the sections to the drawer
+instead?"* Today those three each open their own sheet, and the drawer steps aside until it closes.
+
+**What it changes for a hafiz:** the verse's tools and what one of them opened stay in one place,
+so going from the words that share a root back to Listen is one tap, not close-then-tap.
+
+**Options to build and try, each a setting if it loses:**
+- the drawer grows upward and the tool's contents open as a section under its buttons;
+- the drawer grows, and each opened tool is a tab along its top;
+- each tool keeps its own sheet, as today.
+
+**If nobody decides:** each tool keeps its own sheet. The drawer must still never cover the verse
+it is about, so how tall it may grow is part of what the build has to find out.
+
 ## What is this not settling?
 
 - What the verse tools finally hold. Recite, translate, open commentary, bookmark and the four notes
