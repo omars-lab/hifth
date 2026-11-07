@@ -1230,6 +1230,38 @@ test.describe("Hifth · one page or two, and how big", () => {
     await expect(readout(page)).toHaveText("١٠٠٪");
   });
 
+  // Owner's page comment of 2026-11-07: dragging one page of a magnified open
+  // book moved that page alone, so the two pages slid out of line with each
+  // other. Both pages are one sheet; a drag on either moves both.
+  for (const grab of [7, 8]) {
+    test(`a drag on one page of a magnified spread moves the facing page with it (grabbing page ${grab})`, async ({
+      page,
+    }) => {
+      await page.goto("/#/hafs-kfqc/p7");
+      await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+      await expect(pageSvg(page, 8)).toBeVisible();
+      await zoomBtn(page, "in").click();
+      await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
+      await expect.poll(() => scaleOf(page, 8)).toBeCloseTo(1.25, 2);
+
+      const live0 = await restingBox(page, 7);
+      const face0 = await restingBox(page, 8);
+      const from = grab === 7 ? live0 : face0;
+      const x = from.x + from.width / 2;
+      const y = Math.max(from.y, 0) + 150;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x, y + 60, { steps: 10 });
+      await page.mouse.up();
+
+      const live1 = await restingBox(page, 7);
+      const face1 = await restingBox(page, 8);
+      const moved = grab === 7 ? live1.y - live0.y : face1.y - face0.y;
+      expect(Math.abs(moved), "the grabbed page moved").toBeGreaterThan(20);
+      expect(Math.abs(live1.y - face1.y), "the two pages are still level").toBeLessThan(2);
+    });
+  }
+
   /*
    * #148: at 150% the two pages of an opening were drawn over each other. The
    * row above only ever opened at page 7, where the live leaf is the right-hand
