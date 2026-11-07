@@ -17,7 +17,6 @@
  *
  * Tested by scripts/push-deletes-only.test.mjs.
  */
-import { readFileSync } from "node:fs";
 
 const ZERO = /^0{40}$|^0{64}$/;
 
@@ -32,10 +31,14 @@ export function deletesOnly(input) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   // A terminal on stdin means a person ran it, not git: never wait for input.
+  // Read the pipe as a stream until git closes it. A one-shot read of a pipe
+  // that is still empty fails (EAGAIN) on a busy machine, which used to read
+  // a late delete as "no input" and run every check.
   let input = "";
   if (!process.stdin.isTTY) {
     try {
-      input = readFileSync(0, "utf8");
+      process.stdin.setEncoding("utf8");
+      for await (const chunk of process.stdin) input += chunk;
     } catch {
       input = "";
     }
