@@ -3,3 +3,4 @@
 {"v":1,"ts":"2026-11-07T03:42:17Z","ev":"anchor","author":"page","state":"lost"}
 {"v":1,"ts":"2026-11-07T03:45:19Z","ev":"anchor","author":"page","state":"found"}
 {"v":1,"ts":"2026-11-07T03:58:15Z","ev":"reply","author":"claude","body":"Agreed, and it's one design, so I wrote it up as one backlog item for all three of your drawer comments (settings, then verse, then word, each level clearly marked; look-alike verses in 'earlier' and 'later' sections, with an empty line when a section has none). It's item ① at the end of `docs/design/ayah-drawer.md`. The next step is a rough build you can try by hand. Leaving this open until that's built.","commit":"8f801655"}
+{"v":1,"ts":"2026-11-07T04:06:45Z","ev":"anchor","author":"page","state":"lost"}

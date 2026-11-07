@@ -152,12 +152,14 @@
   cursor: pointer;
 }
 
-/* On the left (docs/PLAN.md, 95): last in the right-to-left row, past the
-   full-screen button, with the hint now to its right, so the space is too. */
+/* On the left (docs/PLAN.md, 95): last in the right-to-left row, with the
+   hint now to its right. The row's spare room goes between them, so the button
+   reaches the left end; full screen has moved up into the tool bar on a
+   desktop, and no longer pushes it there. */
 .markUp[data-pen-side="left"] {
   order: 1;
   margin-left: 0;
-  margin-right: var(--space-3);
+  margin-right: auto;
 }
 
 .markUp:hover {
@@ -222,6 +224,19 @@
 
 .sideUndo {
   margin-block-start: auto;
+}
+
+/* With the pens out, undo, redo and full screen keep to the pens' width and
+   wrap under them, so the rail grows no wider than it was before full screen
+   joined the row (owner's page comment, 2026-11-07). */
+.sideNear[data-pens] .sideUndo {
+  contain: inline-size;
+  inline-size: 100%;
+}
+
+.sideNear[data-pens] .sideUndo > * {
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* Down the side, each row of pens stands up, the two side by side. */

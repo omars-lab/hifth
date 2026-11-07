@@ -38,6 +38,15 @@
   cursor: default;
 }
 
+/* With a mouse, these few buttons need less than a finger's room. Full screen
+   joining them on a desktop would otherwise push the narrowest window's tool
+   row past its edge. */
+@media (pointer: fine) {
+  .button {
+    min-inline-size: 36px;
+  }
+}
+
 .redo {
   transform: scaleX(-1);
 }

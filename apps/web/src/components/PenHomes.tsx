@@ -353,7 +353,7 @@ export function PenHomeSide(props: PenHomeProps): JSX.Element {
     <div className={styles.side} role="toolbar" aria-label={t.toolbarLabel} dir="ltr" data-pen-home="side" data-pen-side={props.side ?? "right"} data-tool={tool} data-keep-clear="">
       {/* Undo and redo stand at the foot of the pens' side, in the room the
           pens leave under them, so the rail grows no taller than the tools. */}
-      <div className={styles.sideNear}>
+      <div className={styles.sideNear} data-pens={pens || undefined}>
         {pens && (
           <div className={styles.sidePens}>
             <Offered {...props} />
