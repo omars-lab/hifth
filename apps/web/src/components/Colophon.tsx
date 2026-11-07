@@ -26,6 +26,7 @@ import { RIBBON_LENGTHS, rememberRibbonLength, useRibbonLength } from "../ribbon
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { MARK_TOOLS, type MarkTools } from "../mark-tools";
+import { ERASER_PLACES, type EraserPlace } from "../eraser-place";
 import { MISTAKE_TAPS, type MistakeTap } from "../mistake-tap";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { PEN_SIDES, type PenSide } from "../pen-side";
@@ -65,6 +66,9 @@ interface ColophonProps {
   /** Note, Harakat and Word as three buttons or one; remembered on this device. */
   markTools?: MarkTools | undefined;
   onMarkTools?: ((shape: MarkTools) => void) | undefined;
+  /** Where the eraser sits on a computer's bar; remembered on this device. */
+  eraserPlace?: EraserPlace | undefined;
+  onEraserPlace?: ((choice: EraserPlace) => void) | undefined;
   /** What a tap with the Mistake pen does; remembered on this device. */
   mistakeTap?: MistakeTap | undefined;
   onMistakeTap?: ((choice: MistakeTap) => void) | undefined;
@@ -229,6 +233,11 @@ const MARK_TOOLS_NAME: Record<MarkTools, (t: ReturnType<typeof useT>["t"]) => st
   one: (t) => t.markToolsOne,
 };
 
+const ERASER_PLACE_NAME: Record<EraserPlace, (t: ReturnType<typeof useT>["t"]) => string> = {
+  tools: (t) => t.eraserPlaceTools,
+  undo: (t) => t.eraserPlaceUndo,
+};
+
 const MISTAKE_TAP_NAME: Record<MistakeTap, (t: ReturnType<typeof useT>["t"]) => string> = {
   ask: (t) => t.mistakeTapAsk,
   quiet: (t) => t.mistakeTapQuiet,
@@ -268,6 +277,8 @@ export function Colophon({
   onScopeLook,
   markTools,
   onMarkTools,
+  eraserPlace,
+  onEraserPlace,
   mistakeTap,
   onMistakeTap,
   penHome,
@@ -1043,6 +1054,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.markToolsNote}</p>
+          </section>
+        )}
+        {/* Where the eraser sits on a computer: last of the tools, the default
+            since the owner's page comment of 2026-11-07, or beside Undo, where
+            it was first built. A phone keeps it beside Undo. */}
+        {eraserPlace && onEraserPlace && (
+          <section className={styles.block} aria-labelledby="colophon-eraser-place">
+            <h3 className={styles.subhead} id="colophon-eraser-place">
+              {t.eraserPlaceTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-eraser-place">
+              {ERASER_PLACES.map((place) => (
+                <button
+                  key={place}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={eraserPlace === place}
+                  data-eraser-place-choice={place}
+                  onClick={() => onEraserPlace(place)}
+                >
+                  {ERASER_PLACE_NAME[place](t)}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.eraserPlaceNote}</p>
           </section>
         )}
         {/* What a tap with the Mistake pen does (docs/PLAN.md, item 103): ask

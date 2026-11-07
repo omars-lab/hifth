@@ -12,6 +12,8 @@ export interface MarkUndo {
   erasing: boolean;
   /** Put the eraser on, or down again. */
   onErase: () => void;
+  /** The eraser is one of the tools in their row, so this pair leaves it out. */
+  eraserInTools?: boolean;
 }
 
 /**
@@ -45,6 +47,7 @@ export function UndoRedo({ upright = false }: { upright?: boolean }): JSX.Elemen
   const key = MAC ? "⌘" : "Ctrl+";
   return (
     <div className={upright ? `${styles.pair} ${styles.upright}` : styles.pair} data-mark-undo="">
+      {!u.eraserInTools && (
       <button
         type="button"
         className={styles.button}
@@ -56,6 +59,7 @@ export function UndoRedo({ upright = false }: { upright?: boolean }): JSX.Elemen
       >
         <Eraser />
       </button>
+      )}
       <button
         type="button"
         className={styles.button}
@@ -94,6 +98,15 @@ export function UndoRedo({ upright = false }: { upright?: boolean }): JSX.Elemen
   );
 }
 
+/** The eraser's drawing, shared with its button among the tools. */
+export const ERASER_PATHS = (
+  <>
+    <path d="m7 20-3.6-3.6a2 2 0 0 1 0-2.8L13.6 3.4a2 2 0 0 1 2.8 0l4.2 4.2a2 2 0 0 1 0 2.8L10.4 20" />
+    <path d="M7 20h13" />
+    <path d="m8.5 8.5 7 7" />
+  </>
+);
+
 /** An eraser's block, tipped over the line it rubs out. */
 function Eraser(): JSX.Element {
   return (
@@ -109,9 +122,7 @@ function Eraser(): JSX.Element {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="m7 20-3.6-3.6a2 2 0 0 1 0-2.8L13.6 3.4a2 2 0 0 1 2.8 0l4.2 4.2a2 2 0 0 1 0 2.8L10.4 20" />
-      <path d="M7 20h13" />
-      <path d="m8.5 8.5 7 7" />
+      {ERASER_PATHS}
     </svg>
   );
 }

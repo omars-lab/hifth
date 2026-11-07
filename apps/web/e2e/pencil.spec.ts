@@ -76,7 +76,8 @@ for (const [held, view] of [["sideways", SIDEWAYS], ["upright", UPRIGHT]] as con
         for (const at of [{ x: 200, y: 300 }, { x: view.width - 60, y: view.height - 120 }]) {
           await pencil(page, { kind: "squeeze", pref: "palette", ...at });
           await expect(palette(page)).toBeVisible();
-          await expect(palette(page).getByRole("radio")).toHaveCount(10);
+          // Held sideways the iPad counts as a computer, so the eraser joins the pens.
+          await expect(palette(page).getByRole("radio")).toHaveCount(held === "sideways" ? 11 : 10);
           const box = await wholeOnScreen(page, palette(page));
           // Beside the tip, not over it, and close to it.
           const covers = at.x >= box.x && at.x <= box.x + box.width && at.y >= box.y && at.y <= box.y + box.height;

@@ -43,12 +43,14 @@ async function showTools(page: Page, isMobile: boolean): Promise<void> {
 const bar = (page: Page): Locator => page.getByRole("radiogroup", { name: "Page tools" });
 const aims = (page: Page): Locator => page.getByRole("radiogroup", { name: "Note, Harakat or Word" });
 const ONE = { [MARK_TOOLS_KEY]: "one" };
+// A computer counts one more tool than a phone: the eraser sits with the tools
+// there, and beside Undo on a phone (src/eraser-place.ts).
 
 test.describe("Hifth · Note, Harakat and Word as three buttons or one", () => {
   test("three buttons by default, each its own, and nothing waits beside them", async ({ page, isMobile }) => {
     await openWith(page, {});
     await showTools(page, !!isMobile);
-    await expect(bar(page).getByRole("radio")).toHaveCount(10);
+    await expect(bar(page).getByRole("radio")).toHaveCount(isMobile ? 10 : 11);
     for (const name of ["Note", "Harakat", "Word"]) await expect(bar(page).getByRole("radio", { name, exact: true })).toHaveCount(1);
     await bar(page).getByRole("radio", { name: "Note", exact: true }).click();
     await expect(aims(page)).toHaveCount(0);
@@ -57,7 +59,7 @@ test.describe("Hifth · Note, Harakat and Word as three buttons or one", () => {
   test("one button stands for the three, offers them while it is on, and keeps the one last used", async ({ page, isMobile }) => {
     await openWith(page, ONE);
     await showTools(page, !!isMobile);
-    await expect(bar(page).getByRole("radio")).toHaveCount(8);
+    await expect(bar(page).getByRole("radio")).toHaveCount(isMobile ? 8 : 9);
     for (const name of ["Harakat", "Word"]) await expect(bar(page).getByRole("radio", { name, exact: true })).toHaveCount(0);
     await expect(aims(page)).toHaveCount(0);
 
@@ -99,7 +101,7 @@ test.describe("Hifth · Note, Harakat and Word as three buttons or one", () => {
     test.skip(!!isMobile, "a phone has its own tray");
     await openWith(page, { ...ONE, [PEN_HOME_KEY]: "bottom" }, { width: 1180, height: 820 });
     await showTools(page, false);
-    await expect(bar(page).getByRole("radio")).toHaveCount(8);
+    await expect(bar(page).getByRole("radio")).toHaveCount(isMobile ? 8 : 9);
     await bar(page).getByRole("radio", { name: "Note", exact: true }).click();
     await expect(page.locator('[data-pen-home="bottom"]').getByRole("radiogroup", { name: "Note, Harakat or Word" })).toBeVisible();
   });
@@ -117,6 +119,6 @@ test.describe("Hifth · Note, Harakat and Word as three buttons or one", () => {
     expect(await page.evaluate((k) => localStorage.getItem(k), MARK_TOOLS_KEY)).toBe("one");
     await page.keyboard.press("Escape");
     await showTools(page, !!isMobile);
-    await expect(bar(page).getByRole("radio")).toHaveCount(8);
+    await expect(bar(page).getByRole("radio")).toHaveCount(isMobile ? 8 : 9);
   });
 });
