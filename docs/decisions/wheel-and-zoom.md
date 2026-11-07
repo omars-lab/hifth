@@ -170,3 +170,21 @@ looking at a phone while a desktop control was being built.
 - [`page-turning.md` §7 ③](../design/page-turning.md) — the calibrated `ctrl`+wheel curve, why
   the calibration was right, and why it is gone anyway
 - [`desktop-vs-mobile.md`](desktop-vs-mobile.md) rows **23, 25, 26, 27**
+
+## Update, 2026-11-07: a trackpad pinch zooms again
+
+The owner asked on the page, *"why doesn't pinch zooming zoom?"*. Two things changed since
+the pinch was switched off:
+
+- **Both pages now zoom as one.** The pinch was switched off because it zoomed one page of
+  the open book on its own. Now it only says how much to grow. The app grows both pages
+  through the same path the zoom buttons use, so they cannot come apart.
+- **A pinch can be told from a mouse wheel after all.** Both still arrive as ctrl plus a
+  wheel, but they step differently. A pinch sends many small pixel steps, a few pixels or
+  less each. A mouse wheel notch is a whole line in Firefox, or 100 pixels or more in
+  Chrome and Safari.
+
+So a pinch magnifies, and ctrl with a mouse wheel still does nothing. That keeps this
+record's answer: scrolling does not zoom. The check lives in `apps/web/src/pinch-wheel.ts`.
+Its tests are `pinch-wheel.test.ts` and two rows in `e2e/desktop.spec.ts`: one for each
+page of the open book. The old "ctrl+wheel does nothing" row still guards the notch.

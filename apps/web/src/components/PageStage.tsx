@@ -1,3 +1,4 @@
+import { pinchFactor } from "../pinch-wheel";
 import {
   forwardRef,
   useCallback,
@@ -218,6 +219,13 @@ interface PageStageProps {
    * (owner's page comment of 2026-11-07).
    */
   onPan?: (y: number) => void;
+  /**
+   * A trackpad pinch, as the factor to magnify by. The page does not grow
+   * itself: App grows both pages of an open book together through the same
+   * path the zoom buttons take, so a pinch on one page cannot leave the other
+   * behind (owner's page comment of 2026-11-07, "why doesn't pinch zoom?").
+   */
+  onPinchWheel?: (factor: number) => void;
   /**
    * The empty space either side of the page at its present magnification, in
    * pixels, each time the paper is drawn — every frame of a pinch, so whatever
@@ -1211,6 +1219,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onTurn,
     onPinchZoom,
     onPan,
+    onPinchWheel,
     onSlack,
     onOpened,
     turnTargetOf,
@@ -1342,6 +1351,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onPinchZoomRef.current = onPinchZoom;
   const onPanRef = useRef(onPan);
   onPanRef.current = onPan;
+  const onPinchWheelRef = useRef(onPinchWheel);
+  onPinchWheelRef.current = onPinchWheel;
   const onSlackRef = useRef(onSlack);
   onSlackRef.current = onSlack;
   const onOpenedRef = useRef(onOpened);
@@ -4484,7 +4495,11 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // where we then do nothing — see the header on why ctrl is swallowed.
       e.preventDefault();
 
-      if (e.ctrlKey || e.metaKey) return;
+      if (e.ctrlKey || e.metaKey) {
+        const factor = pinchFactor(e);
+        if (factor !== null) onPinchWheelRef.current?.(factor);
+        return;
+      }
 
       if (e.shiftKey) {
         /*

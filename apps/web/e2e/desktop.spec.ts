@@ -997,6 +997,44 @@ test.describe("Hifth · the wheel", () => {
     await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
+  // Owner's page comment of 2026-11-07: "why doesn't pinch zooming zoom?" A
+  // trackpad pinch reaches the page as a stream of small, fractional ctrl+wheel
+  // steps; a mouse wheel with ctrl held sends whole notches of 100. The pinch
+  // magnifies both pages of the open book together; the notch (the row above)
+  // still does nothing. Dispatched in the page so the steps arrive as a pinch
+  // does, many and close together.
+  for (const on of [7, 8]) {
+    test(`a trackpad pinch magnifies both pages of the open book together (pinching page ${on})`, async ({
+      page,
+    }) => {
+      await overTheLeaf(page);
+      await expect(pageSvg(page, 8)).toBeVisible();
+      const pinch = (dy: number) =>
+        page.evaluate(
+          ([n, d]) => {
+            const leaf = document.querySelector(`svg[aria-labelledby="page-label-${n}"]`)?.closest("[data-leaf]");
+            if (!leaf) throw new Error("no leaf under the page");
+            for (let i = 0; i < 25; i += 1) {
+              leaf.dispatchEvent(
+                new WheelEvent("wheel", { deltaY: d, ctrlKey: true, bubbles: true, cancelable: true }),
+              );
+            }
+          },
+          [on, dy] as const,
+        );
+
+      await pinch(-2.5);
+      await expect.poll(() => scaleOf(page, 7), "the pinch magnified the page").toBeGreaterThan(1.2);
+      await expect.poll(async () => Math.abs((await scaleOf(page, 7)) - (await scaleOf(page, 8)))).toBeLessThan(0.01);
+      await expect(page.locator(NUM), "a pinch is not a turn").toHaveText(pageNumber(7));
+
+      // And pinching in brings it back down, both pages together.
+      await pinch(4);
+      await expect.poll(() => scaleOf(page, 7), "the pinch made the page smaller").toBeLessThan(1);
+      await expect.poll(async () => Math.abs((await scaleOf(page, 7)) - (await scaleOf(page, 8)))).toBeLessThan(0.01);
+    });
+  }
+
   test("shift+wheel jumps a juz, and says which one", async ({ page }) => {
     // The modifier a wheel *does* answer to. Asked in pages rather than in juz
     // numbers — the nearest juz *opening* strictly past the current page in the

@@ -673,6 +673,24 @@ export function App(): JSX.Element {
   // so the two pages stay level as one sheet (owner's page comment, 2026-11-07).
   const pannedLive = useCallback((y: number) => facingStageRef.current?.followPan(y), []);
   const pannedFacing = useCallback((y: number) => stageRef.current?.followPan(y), []);
+  // A trackpad pinch on either page grows both together, through the same path
+  // the zoom buttons take (owner's page comment, 2026-11-07). The steps of one
+  // pinch arrive many to a frame, so they are gathered and applied once a frame.
+  const pinchWheel = useRef({ factor: 1, frame: 0 });
+  const pinchedWheel = useCallback(
+    (factor: number) => {
+      const p = pinchWheel.current;
+      p.factor *= factor;
+      if (p.frame) return;
+      p.frame = requestAnimationFrame(() => {
+        const f = p.factor;
+        p.factor = 1;
+        p.frame = 0;
+        stage.setZoom((stageRef.current?.zoomNow() ?? 1) * f);
+      });
+    },
+    [stage],
+  );
   /*
    * A pinch across the fold of the open book. Each page is its own surface and
    * hears only the finger on it, so neither page can see the pinch; this looks
@@ -4181,6 +4199,7 @@ export function App(): JSX.Element {
                   onTurn={stepPage}
                   onPinchZoom={pinchedFacing}
                   onPan={pannedFacing}
+                  onPinchWheel={pinchedWheel}
                   startZoom={facingStartZoom}
                   /* Both leaves, for the same reason `onTurn` is on both: a
                      wheel over the facing page that did nothing would read as a
@@ -4270,6 +4289,7 @@ export function App(): JSX.Element {
                 onTurn={stepPage}
                 onPinchZoom={pinchedLive}
                 onPan={pannedLive}
+                onPinchWheel={pinchedWheel}
                 onJuzTurn={stepJuz}
                 /* And the drag needs to know where it *would* land before it
                    lands, so the fold under the finger is drawn for the pair the
