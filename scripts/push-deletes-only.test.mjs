@@ -7,7 +7,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const SCRIPT = fileURLToPath(new URL("push-deletes-only.mjs", import.meta.url));
@@ -24,6 +24,15 @@ test("a push that only deletes one branch skips the checks", () => {
 
 test("a push that deletes several branches skips the checks", () => {
   assert.equal(skips(del("a") + del("b") + del("c")), true);
+});
+
+test("a delete whose input arrives late still skips the checks", async () => {
+  // A busy machine can hand the script its input after it has started
+  // reading; the read must wait for it, not take the empty pipe as "no input".
+  const child = spawn("node", [SCRIPT], { stdio: ["pipe", "ignore", "ignore"] });
+  setTimeout(() => child.stdin.end(del("old")), 300);
+  const status = await new Promise((done) => child.on("exit", done));
+  assert.equal(status, 0);
 });
 
 test("a push that sends code runs the checks", () => {

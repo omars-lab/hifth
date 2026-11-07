@@ -26,6 +26,28 @@ async function openMap(page: Page) {
 }
 
 test.describe("Hifth · bookmarks", () => {
+  test("the page under the folded corner is a light shade of the page's own paper", async ({ page }) => {
+    // The owner, 2026-11-07: the patch under the fold read as a grey square
+    // that did not blend with the page. It is the same sheet as the page, so
+    // every shade of it stays close to the page's paper. (How much darker it
+    // must stay, so it still reads as a fold, is the test in edge-peel.spec.ts.)
+    await ready(page);
+    const under = page.locator("[class*='foldUnder']").first();
+    await expect(under).toBeAttached();
+    const { stops, paper } = await under.evaluate((el) => {
+      const lum = (c: number[]) => 0.2126 * c[0]! + 0.7152 * c[1]! + 0.0722 * c[2]!;
+      const leaf = document.querySelector("[class*='host'][data-leaf]");
+      const bg = getComputedStyle(el).backgroundImage;
+      const shade = bg.slice(bg.lastIndexOf("linear-gradient"));
+      const stops = [...shade.matchAll(/rgb\((\d+), (\d+), (\d+)\)/g)].map((m) => lum(m.slice(1, 4).map(Number)));
+      return { stops, paper: lum(getComputedStyle(leaf as Element).backgroundColor.match(/\d+/g)!.map(Number)) };
+    });
+    expect(stops.length).toBeGreaterThan(1);
+    // The old grey sat 58 below the page at the crease and 30 at the corner.
+    for (const s of stops) expect(paper - s, "a shade of the page stays within 22 of it").toBeLessThanOrEqual(22);
+    expect(paper - stops[stops.length - 1]!, "the corner end is all but the page").toBeLessThanOrEqual(12);
+  });
+
   test("a folded corner drops a named ribbon that is still there after a reload", async ({ page }) => {
     await ready(page);
     await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();

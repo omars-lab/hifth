@@ -116,6 +116,10 @@ export interface Catalog {
   readonly editionMapsTo: (d: { readonly ref: string | number }) => string;
   readonly editionNoCounterpart: string;
   readonly editionNoTable: string;
+  readonly eraserPlaceNote: string;
+  readonly eraserPlaceTitle: string;
+  readonly eraserPlaceTools: string;
+  readonly eraserPlaceUndo: string;
   readonly facingAbsent: (d: { readonly page: string | number }) => string;
   readonly facingPage: string;
   readonly firstPage: (d: { readonly page: string | number }) => string;

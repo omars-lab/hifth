@@ -4967,6 +4967,83 @@
       "severity": "question",
       "owner": "agent",
       "note": "Owner's page comment of 2026-11-07: the navy bookmark tabs and the red 'where you left off' ribbon look alike, so it is not clear which is which. Next step is a rough build of the three options in the bookmark-fold record, to try on the laptop."
+    },
+    {
+      "id": "bookmark-pull-by-hand",
+      "source": {
+        "file": "docs/decisions/bookmark-fold.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: asked how to pull a bookmark down or push it up, in full screen or not. Today bookmarks are clicks only. Next step is a rough build of a pull-down and push-up beside the clicks, and a more findable folded corner."
+    },
+    {
+      "id": "full-screen-keeps-tools",
+      "source": {
+        "file": "docs/decisions/verse-tap-and-hold.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: 'Where is the side tool bar?' Full screen hides every bar, the tools too, so marking means leaving it. Next step is a rough build of full screen with the tools kept down the side, and one where they come back near the side. Second comment, same day: a small dock of tool icons that opens out under the pointer on a computer; a phone equivalent still to be found. Added as a third option to build."
+    },
+    {
+      "id": "word-drawer-stacks-on-verse",
+      "source": {
+        "file": "docs/decisions/selection-drawer.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07 asked whether a tap on a word opens a word drawer stacked on the verse drawer. Today the Verse tool lights the verse and only the Word tool opens the word's drawer, in the same place. Next step is a rough build of the stacked drawers."
+    },
+    {
+      "id": "verse-glows-on-drawer-hover",
+      "source": {
+        "file": "docs/decisions/selection-drawer.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07 asked for the lit verse to glow while the pointer rests on its drawer. Next step is a rough build of a brighter wash and a ring, looked at on the laptop."
+    },
+    {
+      "id": "drawer-holds-its-tools",
+      "source": {
+        "file": "docs/decisions/selection-drawer.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets. Next step is a rough build of the drawer growing to hold them, kept clear of the verse it is about."
+    },
+    {
+      "id": "app-pages-settings-and-developer",
+      "source": {
+        "file": "docs/design/app-pages.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: settings should be a page of their own, reached from page icons along the bottom like a Mac app, with the mushaf as the default page. Today every setting lives in the info panel (the ⓘ in the header). Next step is a rough build of a bottom row of page icons with the mushaf and a settings page."
+    },
+    {
+      "id": "app-pages-developer-page",
+      "source": {
+        "file": "docs/design/app-pages.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: a developer page that shows only when the app runs on this laptop (localhost). Today the developer views are separate: the side-by-side library comparison page and build-time flags. Next step is to list what a developer page should hold, then build it as one of the bottom pages, absent from a real build."
     }
   ]
 }

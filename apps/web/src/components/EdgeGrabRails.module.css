@@ -30,15 +30,34 @@
   background: linear-gradient(to left, transparent, var(--gutter-shadow, rgba(0, 0, 0, 0.08)));
   /* Full reach at the bottom corner, pinched to ~30% at the midline. The top
      corner is the bookmark's: a reader dog-ears the top and turns from the
-     foot, so the strip starts below the fold's button (#201 — it used to sit
-     over it, and a mouse could not fold the corner at all). */
-  clip-path: polygon(0% var(--touch-min), 100% var(--touch-min), 30% 50%, 100% 100%, 0% 100%);
+     foot, so beside the fold's button the strip keeps to the page edges drawn
+     outside it, and only widens below it (#201 — it used to sit over the
+     button, and a mouse could not fold the corner at all). It runs up the page
+     edges to the head of the book, and the component sets its top, height and
+     rounded corners to the paper's (owner, 2026-11-07). */
+  clip-path: polygon(
+    0% 0%,
+    var(--fore-edge-stack) 0%,
+    var(--fore-edge-stack) var(--touch-min),
+    100% var(--touch-min),
+    30% 50%,
+    100% 100%,
+    0% 100%
+  );
 }
 
 .rail[data-side="right"] {
   right: 0;
   background: linear-gradient(to right, transparent, var(--gutter-shadow, rgba(0, 0, 0, 0.08)));
-  clip-path: polygon(100% var(--touch-min), 0% var(--touch-min), 70% 50%, 0% 100%, 100% 100%);
+  clip-path: polygon(
+    100% 0%,
+    calc(100% - var(--fore-edge-stack)) 0%,
+    calc(100% - var(--fore-edge-stack)) var(--touch-min),
+    0% var(--touch-min),
+    70% 50%,
+    0% 100%,
+    100% 100%
+  );
 }
 
 .rail:hover {

@@ -335,6 +335,40 @@ export function EdgeGrabRails({
   useEffect(() => () => cancelAnimationFrame(anim.current), []);
   const railsEl = useRef<HTMLDivElement | null>(null);
   const edge = useCardEdge();
+  // Where the paper stands in the book, so each strip runs the paper's height
+  // with its rounded corners, not the book's (owner, 2026-11-07: the shading
+  // began below the head of the book and ran on under the pages). Measured
+  // again whenever the book or a leaf changes size.
+  const [paperBox, setPaperBox] = useState<{ top: number; h: number; look: Partial<Record<PeelSide, PaperLook>> } | null>(null);
+  useEffect(() => {
+    const book = railsEl.current?.parentElement;
+    if (!book) return;
+    const measure = (): void => {
+      const p = measurePaper(book);
+      setPaperBox((was) =>
+        was && was.top === p.top && was.h === p.h && JSON.stringify(was.look) === JSON.stringify(p.look)
+          ? was
+          : { top: p.top, h: p.h, look: p.look },
+      );
+    };
+    // The page drawings arrive a moment after the book, one side at a time:
+    // until both have, a side's paper cannot be found, so look again each
+    // frame for a little while (a single page alone stops after two seconds).
+    let tries = 0;
+    let raf = 0;
+    const until = (): void => {
+      measure();
+      if (Object.keys(measurePaper(book).look).length < 2 && tries++ < 120) raf = requestAnimationFrame(until);
+    };
+    until();
+    const ro = new ResizeObserver(measure);
+    ro.observe(book);
+    for (const leaf of book.querySelectorAll("[data-leaf]")) ro.observe(leaf);
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [opening, driver]);
 
   /** Take hold of an edge: the drag is this rail's from here to the release. */
   const takeHold = (
@@ -472,6 +506,7 @@ export function EdgeGrabRails({
       data-grabbing={held === side ? "true" : undefined}
       data-aside={aside ? "true" : undefined}
       aria-hidden="true"
+      style={railStyle(side, paperBox)}
       onPointerDown={(e) => {
         // Left button only, and take the pointer so the whole drag arrives here
         // even when it leaves the strip — a page turn crosses the book.
@@ -583,6 +618,28 @@ export function EdgeGrabRails({
       )}
     </>
   );
+}
+
+/**
+ * A strip stands on its own leaf's paper: from the paper's head to its foot,
+ * rounded on its outer corners as the paper is. Before the paper is measured it
+ * falls back to the whole book.
+ */
+function railStyle(
+  side: "left" | "right",
+  box: { top: number; h: number; look: Partial<Record<PeelSide, PaperLook>> } | null,
+): CSSProperties | undefined {
+  if (!box) return undefined;
+  const r = (box.look[side]?.borderRadius ?? "0px").split(" ");
+  // The paper's radius on its free side: top-right and bottom-right of a
+  // right-hand leaf, top-left and bottom-left of a left-hand one.
+  const radius = side === "left" ? (r[0] ?? "0px") : (r[1] ?? r[0] ?? "0px");
+  return {
+    top: box.top,
+    height: box.h,
+    bottom: "auto",
+    borderRadius: side === "left" ? `${radius} 0 0 ${radius}` : `0 ${radius} ${radius} 0`,
+  };
 }
 
 /** A leaf's corner rounding seen from the facing leaf: left and right swapped. */

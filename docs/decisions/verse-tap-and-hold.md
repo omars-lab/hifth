@@ -44,3 +44,29 @@ verse's name and a link on the clipboard, never its words.
 - Holding the page number, the surah name or the juz: its own question (plan item 27).
 - The thin blue box a finger's tap draws around a verse (plan item 30).
 - Translation in the small menu: it stays in the menu a tap opens.
+
+## Open questions, and what would answer each
+
+### ① In full screen, should the tools stay within reach? · **open**
+
+**What would answer it:** a rough build of full screen with the tools kept, tried by the owner
+on the laptop beside today's full screen.
+
+**Asked by the owner, in a comment left on the app's page (2026-11-07):** *"Where is the side
+tool bar?"* Full screen hides every bar, the tools included, so the page takes all the room.
+To mark the page you have to leave full screen first (F, or the small button in the corner).
+
+**What it changes for a hafiz:** revising in full screen, they cannot mark a mistake or a
+look-alike without leaving it, which breaks the reading they went full screen for.
+
+**Options to build and try, each a setting if it loses:**
+- full screen keeps the tools down the side, where the page does not reach;
+- the tools come back while the pointer rests near the side, and go again after;
+- a small dock of tool icons stays in full screen and opens out while the pointer is over it,
+  like the Dock on a Mac (the owner's second comment, 2026-11-07: *"a small minimal icon dock
+  that expands when we hover over it in desktop mode"*); a phone has no pointer to hover, so
+  its equivalent is still to be found — a candidate is a small handle at the edge that a tap
+  opens;
+- full screen stays as it is, for reading only.
+
+**If nobody decides:** full screen stays for reading only, and marking means leaving it.

@@ -6,7 +6,7 @@ import type { Pen } from "../pen";
 import aimStyles from "./AimPicker.module.css";
 import type { PageTool } from "./PageStage";
 import styles from "./PageToolbar.module.css";
-import { UndoRedo } from "./UndoRedo";
+import { ERASER_PATHS, UndoRedo } from "./UndoRedo";
 import { PenPicker } from "./PenPicker";
 
 /**
@@ -399,6 +399,7 @@ export function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
         <path d="M6 2v16h16M2 6h16v16" />
       </svg>
     );
+  if (tool === "erase") return <svg {...common}>{ERASER_PATHS}</svg>;
   if (tool === "jump")
     return (
       <svg {...common}>

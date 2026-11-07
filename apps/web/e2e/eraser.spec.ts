@@ -8,6 +8,10 @@ import { ayahTarget } from "./ayah";
  * stays on for the next mark, and E or a second press puts it down.
  * Run on a computer: every bar carries the same button, and the taps reach
  * the page the same way.
+ *
+ * Since the owner's page comment of 2026-11-07 it is one of the tools on a
+ * computer, at the end of their row, picked like the others; its first place,
+ * beside Undo, stays as a setting.
  */
 test.use({ locale: "en-US" });
 
@@ -15,7 +19,8 @@ const KEY = (v: string) => `quran/hafs-kfqc/${v}`;
 const pageSvg = (page: Page, pageNo: number): Locator =>
   page.locator(`svg[aria-labelledby="page-label-${pageNo}"]:visible`);
 const bar = (page: Page): Locator => page.getByRole("toolbar", { name: "Page tools" });
-const eraser = (page: Page): Locator => bar(page).getByRole("button", { name: "Eraser", exact: true });
+const eraser = (page: Page): Locator => bar(page).getByRole("radio", { name: "Eraser", exact: true });
+const nextToUndo = (page: Page): Locator => bar(page).locator("[data-mark-undo]");
 const undo = (page: Page): Locator => bar(page).getByRole("button", { name: "Undo", exact: true });
 const washes = (page: Page): Locator => page.locator("[data-mistake-word]:visible");
 const pins = (page: Page): Locator => page.locator("[data-note-pin]:visible");
@@ -58,6 +63,32 @@ async function notePin(page: Page, verse: string, words: string): Promise<void> 
 }
 
 test.describe("Hifth · the eraser", () => {
+  test("on a computer the eraser is the last of the tools, not beside Undo", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const tools = bar(page).getByRole("radiogroup").getByRole("radio");
+    await expect(tools.last()).toHaveAccessibleName("Eraser");
+    await expect(nextToUndo(page).getByRole("button", { name: "Eraser", exact: true })).toHaveCount(0);
+    await expect(nextToUndo(page).getByRole("button", { name: "Undo", exact: true })).toBeVisible();
+  });
+
+  test("the setting puts the eraser back beside Undo, where it still works", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("hifth.tools.eraser.v1", "undo"));
+    await page.goto("/#/hafs-kfqc/p7?tool=mistake");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await expect(eraser(page)).toHaveCount(0);
+    const beside = nextToUndo(page).getByRole("button", { name: "Eraser", exact: true });
+    await expect(beside).toHaveAttribute("aria-pressed", "false");
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    await page.getByRole("dialog", { name: /^What went wrong in / }).getByRole("button", { name: "The whole word" }).click();
+    await expect(washes(page)).toHaveCount(1);
+    await beside.click();
+    await expect(beside).toHaveAttribute("aria-pressed", "true");
+    await page.mouse.click(at.x, at.y);
+    await expect(washes(page)).toHaveCount(0);
+  });
+
   test("a tap takes a mistake off, the eraser stays on, and Undo puts it back", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7?tool=mistake");
     await expect(pageSvg(page, 7)).toBeVisible();
@@ -66,9 +97,9 @@ test.describe("Hifth · the eraser", () => {
     await page.getByRole("dialog", { name: /^What went wrong in / }).getByRole("button", { name: "The whole word" }).click();
     await expect(washes(page)).toHaveCount(1);
 
-    await expect(eraser(page)).toHaveAttribute("aria-pressed", "false");
+    await expect(eraser(page)).toHaveAttribute("aria-checked", "false");
     await eraser(page).click();
-    await expect(eraser(page)).toHaveAttribute("aria-pressed", "true");
+    await expect(eraser(page)).toHaveAttribute("aria-checked", "true");
     await page.mouse.click(at.x, at.y);
     await expect(washes(page)).toHaveCount(0);
     await expect(said(page)).toHaveText("Mark cleared");
@@ -78,16 +109,16 @@ test.describe("Hifth · the eraser", () => {
     await undo(page).click();
     await expect(washes(page)).toHaveCount(1);
     // Still on: a tap on a word with no mark takes nothing off and marks nothing.
-    await expect(eraser(page)).toHaveAttribute("aria-pressed", "true");
+    await expect(eraser(page)).toHaveAttribute("aria-checked", "true");
     const plain = await ayahTarget(page, "#verse-50");
     await page.mouse.click(plain.x, plain.y);
     await expect(washes(page)).toHaveCount(1);
 
     // E puts it down again.
     await page.keyboard.press("KeyE");
-    await expect(eraser(page)).toHaveAttribute("aria-pressed", "false");
+    await expect(eraser(page)).toHaveAttribute("aria-checked", "false");
     await page.keyboard.press("KeyE");
-    await expect(eraser(page)).toHaveAttribute("aria-pressed", "true");
+    await expect(eraser(page)).toHaveAttribute("aria-checked", "true");
   });
 
   test("a tap on a note's pin takes the note off without opening it", async ({ page }) => {

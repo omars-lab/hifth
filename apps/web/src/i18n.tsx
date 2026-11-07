@@ -932,6 +932,10 @@ export interface Strings {
   markToolsThree: string;
   markToolsOne: string;
   markToolsNote: string;
+  eraserPlaceTitle: string;
+  eraserPlaceTools: string;
+  eraserPlaceUndo: string;
+  eraserPlaceNote: string;
   mistakeTapTitle: string;
   mistakeTapAsk: string;
   mistakeTapQuiet: string;
@@ -1757,6 +1761,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     markToolsThree: m.markToolsThree,
     markToolsOne: m.markToolsOne,
     markToolsNote: m.markToolsNote,
+    eraserPlaceTitle: m.eraserPlaceTitle,
+    eraserPlaceTools: m.eraserPlaceTools,
+    eraserPlaceUndo: m.eraserPlaceUndo,
+    eraserPlaceNote: m.eraserPlaceNote,
     mistakeTapTitle: m.mistakeTapTitle,
     mistakeTapAsk: m.mistakeTapAsk,
     mistakeTapQuiet: m.mistakeTapQuiet,

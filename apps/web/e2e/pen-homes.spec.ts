@@ -87,11 +87,13 @@ async function insideReadingArea(page: Page, target: Locator): Promise<void> {
   expect(box.y + box.height, "drops into the bar below").toBeLessThanOrEqual(area.y + area.height);
 }
 
+// Eleven tools: the ten pens and the eraser, which sits with them on a computer
+// and an iPad (src/eraser-place.ts).
 test.describe("where the pens sit", () => {
   test("today's strip above the book is the default, and nothing else shows", async ({ page }) => {
     await openWith(page, null);
     await expect(home(page, "strip")).toBeVisible();
-    await expect(home(page, "strip").getByRole("radio")).toHaveCount(10);
+    await expect(home(page, "strip").getByRole("radio")).toHaveCount(11);
     for (const other of ["float", "bottom", "side"]) await expect(home(page, other)).toHaveCount(0);
   });
 
@@ -132,7 +134,7 @@ test.describe("where the pens sit", () => {
     expect((await page.locator("footer").boundingBox())!.height).toBeLessThanOrEqual(45);
     await bar.getByRole("button", { name: "Mark up" }).click();
     const pens = bar.getByRole("toolbar", { name: "Page tools" });
-    await expect(pens.getByRole("radio")).toHaveCount(10);
+    await expect(pens.getByRole("radio")).toHaveCount(11);
     await coversNoLine(page, pens);
     await pens.getByRole("radio", { name: "Mistake" }).click();
     await expect(pens.getByRole("radio", { name: "Mistake" })).toHaveAttribute("aria-checked", "true");
@@ -146,7 +148,7 @@ test.describe("where the pens sit", () => {
   test("A · the floating palette comes to rest on the edge it is dragged to, and stays there", async ({ page }) => {
     await openWith(page, "float");
     const palette = home(page, "float");
-    await expect(palette.getByRole("radio")).toHaveCount(10);
+    await expect(palette.getByRole("radio")).toHaveCount(11);
     // It starts along the bottom, lying flat.
     let box = (await palette.boundingBox())!;
     expect(box.width).toBeGreaterThan(box.height);
@@ -166,7 +168,7 @@ test.describe("where the pens sit", () => {
     expect(box.height).toBeGreaterThan(box.width);
 
     await page.reload();
-    await expect(palette.getByRole("radio")).toHaveCount(10);
+    await expect(palette.getByRole("radio")).toHaveCount(11);
     box = (await palette.boundingBox())!;
     expect(box.x).toBeLessThan(20);
     expect(box.height).toBeGreaterThan(box.width);
@@ -176,7 +178,7 @@ test.describe("where the pens sit", () => {
     for (const size of [IPAD, { width: 1440, height: 900 }]) {
       await openWith(page, "side", size);
       const rail = home(page, "side");
-      await expect(rail.getByRole("radio")).toHaveCount(10);
+      await expect(rail.getByRole("radio")).toHaveCount(11);
       const box = (await rail.boundingBox())!;
       expect(box.height).toBeGreaterThan(box.width);
       expect(box.x + box.width).toBeLessThanOrEqual(size.width);
@@ -262,7 +264,7 @@ test.describe("which side the pens stand on", () => {
       test(`${lang} · ${side}${seeded ? "" : " (the default)"}: the pens down the side stand on the ${side}, mirrored, covering no line`, async ({ browser }) => {
         const { page, context } = await openOn(browser, { lang, side: seeded, home: "side" });
         const rail = home(page, "side");
-        await expect(rail.getByRole("radio")).toHaveCount(10);
+        await expect(rail.getByRole("radio")).toHaveCount(11);
         onSide((await rail.boundingBox())!, side, 20);
         await coversNoLine(page, rail);
         // With the highlighter's pens out, they stand on the book's side of
@@ -303,7 +305,7 @@ test.describe("which side the pens stand on", () => {
     await page.keyboard.press("Escape");
     onSide((await home(page, "side").boundingBox())!, "left", 20);
     await page.reload();
-    await expect(home(page, "side").getByRole("radio")).toHaveCount(10);
+    await expect(home(page, "side").getByRole("radio")).toHaveCount(11);
     onSide((await home(page, "side").boundingBox())!, "left", 20);
     await context.close();
   });

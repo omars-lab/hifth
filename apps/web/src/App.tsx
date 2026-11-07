@@ -255,6 +255,7 @@ import { useRunAhead } from "./run-ahead";
 import { chosenPenHome, rememberPenHome, type PenHome } from "./pen-home";
 import { usePageDestination } from "./page-destination";
 import { isMarkAim, rememberMarkTools, savedMarkTools, toolsFor, type MarkAim, type MarkTools } from "./mark-tools";
+import { rememberEraserPlace, savedEraserPlace, type EraserPlace } from "./eraser-place";
 import { rememberMistakeTap, savedMistakeTap, type MistakeTap } from "./mistake-tap";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberPenSide, savedPenSide, type PenSide } from "./pen-side";
@@ -1744,7 +1745,19 @@ export function App(): JSX.Element {
   // The last tool other than plain selecting, for the pencil's double-tap swap.
   const lastToolRef = useRef<PageTool | null>(null);
   const markAim = markTools === "one" ? (isMarkAim(tool) ? tool : lastAim) : undefined;
-  const barTools = toolsFor(TOOLS, markTools, markAim ?? "note");
+  // Where the eraser sits on a computer (eraser-place.ts): last of the tools,
+  // the default since the owner's page comment of 2026-11-07, or beside Undo.
+  const [eraserPlace, setEraserPlace] = useState<EraserPlace>(() => savedEraserPlace());
+  const chooseEraserPlace = useCallback((choice: EraserPlace) => {
+    rememberEraserPlace(choice);
+    setEraserPlace(choice);
+  }, []);
+  const eraserInTools = desktop && eraserPlace === "tools";
+  const marksTools = toolsFor(TOOLS, markTools, markAim ?? "note");
+  const barTools = useMemo(
+    () => (eraserInTools ? [...marksTools, { tool: "erase" as const, letter: "E" }] : marksTools),
+    [eraserInTools, marksTools],
+  );
   const chooseTool = useCallback(
     (next: PageTool, lock = false) => {
       const keep = lock && next !== "select";
@@ -2404,8 +2417,9 @@ export function App(): JSX.Element {
       onRedo: () => stepMarks(false),
       erasing: tool === "erase",
       onErase: () => chooseTool(toolRef.current === "erase" ? "select" : "erase"),
+      eraserInTools,
     }),
-    [undoable, stepMarks, tool, chooseTool],
+    [undoable, stepMarks, tool, chooseTool, eraserInTools],
   );
   // The eraser (notes-style-toolbar ③): one mark off per tap, no question
   // asked, since Undo puts it back. A mistake comes off through `markWord`.
@@ -4511,6 +4525,8 @@ export function App(): JSX.Element {
             onScopeLook={chooseScopeLook}
             markTools={markTools}
             onMarkTools={chooseMarkTools}
+            eraserPlace={desktop ? eraserPlace : undefined}
+            onEraserPlace={desktop ? chooseEraserPlace : undefined}
             mistakeTap={mistakeTap}
             onMistakeTap={chooseMistakeTap}
             penHome={desktop ? penHome : undefined}

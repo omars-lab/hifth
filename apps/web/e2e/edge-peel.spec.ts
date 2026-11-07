@@ -34,6 +34,34 @@ async function openAt8(page: Page): Promise<void> {
 }
 
 test.describe("Hifth · lifting a page by its corner", () => {
+  test("each grab strip runs the paper's height, not the window's, with the paper's rounded corners", async ({
+    page,
+  }) => {
+    // The owner, 2026-11-07: the shading on hover started below the top of the
+    // book and ran on under the pages, with square corners.
+    await openAt8(page);
+    for (const side of ["left", "right"] as const) {
+      const got = await page.getByTestId(`edge-grab-${side}`).evaluate((rail, side) => {
+        const book = rail.parentElement!.getBoundingClientRect();
+        const papers = [...rail.parentElement!.querySelectorAll("[data-live] svg[aria-labelledby]")]
+          .map((svg) => svg.parentElement!)
+          .filter((p) => p.getBoundingClientRect().width > 0);
+        const paper = papers.find((p) => {
+          const r = p.getBoundingClientRect();
+          return side === "left" ? r.left + r.width / 2 < book.left + book.width / 2 : r.left + r.width / 2 >= book.left + book.width / 2;
+        })!;
+        const r = rail.getBoundingClientRect();
+        const pr = paper.getBoundingClientRect();
+        const cs = getComputedStyle(rail);
+        const outer = side === "left" ? [cs.borderTopLeftRadius, cs.borderBottomLeftRadius] : [cs.borderTopRightRadius, cs.borderBottomRightRadius];
+        return { top: r.top - pr.top, bottom: r.bottom - pr.bottom, outer };
+      }, side);
+      expect(Math.abs(got.top), `${side} strip starts at the paper's head`).toBeLessThan(1.5);
+      expect(Math.abs(got.bottom), `${side} strip ends at the paper's foot`).toBeLessThan(1.5);
+      for (const r of got.outer) expect(parseFloat(r), `${side} strip's outer corner is rounded`).toBeGreaterThan(0);
+    }
+  });
+
   test("mid-grab the corner lifts with the hand and the next pages show beneath", async ({
     page,
   }) => {

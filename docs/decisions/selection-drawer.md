@@ -167,6 +167,67 @@ different cursors ... word selection mode, ayah mode, etc".
 - A device with no press-and-hold, or a reader whose hand cannot hold steady, changes which option
   is comfortable and may want the visible handle.
 
+## Open questions, and what would answer each
+
+### ① Should a word's drawer open on top of the verse's, so both stay in reach? · **open**
+
+**What would answer it:** a rough build where a tap on a word, with the verse drawer open, stacks
+the word's drawer on top of it, tried by the owner beside today's two separate modes.
+
+**Asked by the owner, in a comment left on the app's page (2026-11-07):** *"if I click on a word do
+i get a word drawer stacked on top of it"*. Today the two never meet. With the Verse tool a tap on a
+word lights its whole verse; the word's own drawer (its letters and vowel-signs) opens only with the
+Word tool, and in the verse drawer's place, not above it.
+
+**What it changes for a hafiz:** marking a slip on one vowel-sign and then listening to the verse
+around it means switching tools between the two today.
+
+**Options to build and try, each a setting if it loses:**
+- the word's drawer stacks on the verse's, and closing it leaves the verse's open;
+- the verse drawer gains a row of the verse's words, and a tap there opens the word below;
+- the two stay separate, one per tool, as today.
+
+**If nobody decides:** they stay separate.
+
+### ② While the pointer is on the drawer, should its verse glow on the page? · **open**
+
+**What would answer it:** a rough build of the glow, looked at on the laptop with two verses lit
+near each other.
+
+**Asked by the owner, in the same comment:** *"when i hover overe the drawer, can the relevant
+highlight glow?"* Today the verse stays lit the same way whether or not the pointer is on its drawer.
+
+**What it changes for a hafiz:** a quick check of which verse the tools are about, without reading
+the verse number in the drawer's head.
+
+**Options to build and try, each a setting if it loses:**
+- the lit verse brightens while the pointer is on the drawer;
+- a soft glow rings the verse while the pointer is on the drawer;
+- no change, as today.
+
+**If nobody decides:** the verse stays lit as it is. A phone has no pointer to rest, so this is for
+the laptop and iPad with a mouse.
+
+### ③ Should a tool open inside the drawer, instead of in its own sheet? · **open**
+
+**What would answer it:** a rough build where Share, Same roots and the commentary each open as a
+section of the drawer itself, tried by the owner beside today's separate sheets.
+
+**Asked by the owner, in a comment left on the app's page (2026-11-07):** *"isntead of these buttons
+popping up popups, can they not not make the drawer expand and add the sections to the drawer
+instead?"* Today those three each open their own sheet, and the drawer steps aside until it closes.
+
+**What it changes for a hafiz:** the verse's tools and what one of them opened stay in one place,
+so going from the words that share a root back to Listen is one tap, not close-then-tap.
+
+**Options to build and try, each a setting if it loses:**
+- the drawer grows upward and the tool's contents open as a section under its buttons;
+- the drawer grows, and each opened tool is a tab along its top;
+- each tool keeps its own sheet, as today.
+
+**If nobody decides:** each tool keeps its own sheet. The drawer must still never cover the verse
+it is about, so how tall it may grow is part of what the build has to find out.
+
 ## What is this not settling?
 
 - What the verse tools finally hold. Recite, translate, open commentary, bookmark and the four notes
