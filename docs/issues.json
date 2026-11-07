@@ -4989,6 +4989,28 @@
       "severity": "question",
       "owner": "agent",
       "note": "Owner's page comment of 2026-11-07: 'Where is the side tool bar?' Full screen hides every bar, the tools too, so marking means leaving it. Next step is a rough build of full screen with the tools kept down the side, and one where they come back near the side."
+    },
+    {
+      "id": "word-drawer-stacks-on-verse",
+      "source": {
+        "file": "docs/decisions/selection-drawer.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07 asked whether a tap on a word opens a word drawer stacked on the verse drawer. Today the Verse tool lights the verse and only the Word tool opens the word's drawer, in the same place. Next step is a rough build of the stacked drawers."
+    },
+    {
+      "id": "verse-glows-on-drawer-hover",
+      "source": {
+        "file": "docs/decisions/selection-drawer.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07 asked for the lit verse to glow while the pointer rests on its drawer. Next step is a rough build of a brighter wash and a ring, looked at on the laptop."
     }
   ]
 }
