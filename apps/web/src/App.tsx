@@ -190,7 +190,7 @@ import {
   type MarkStore,
   type Recorder,
 } from "./mark-history";
-import { MarkUndoContext } from "./components/UndoRedo";
+import { FullScreenContext, MarkUndoContext } from "./components/UndoRedo";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger, listenCaption, listenGlyph } from "./components/PlayTrigger";
@@ -669,6 +669,28 @@ export function App(): JSX.Element {
   // live leaf's level rather than its normal size.
   const facingStartZoom = useCallback(() => stageRef.current?.zoomNow() ?? 1, []);
   const pinchedFacing = useCallback((z: number) => stage.pinched(z, true), [stage]);
+  // A drag on either page of a magnified open book moves the other with it,
+  // so the two pages stay level as one sheet (owner's page comment, 2026-11-07).
+  const pannedLive = useCallback((y: number) => facingStageRef.current?.followPan(y), []);
+  const pannedFacing = useCallback((y: number) => stageRef.current?.followPan(y), []);
+  // A trackpad pinch on either page grows both together, through the same path
+  // the zoom buttons take (owner's page comment, 2026-11-07). The steps of one
+  // pinch arrive many to a frame, so they are gathered and applied once a frame.
+  const pinchWheel = useRef({ factor: 1, frame: 0 });
+  const pinchedWheel = useCallback(
+    (factor: number) => {
+      const p = pinchWheel.current;
+      p.factor *= factor;
+      if (p.frame) return;
+      p.frame = requestAnimationFrame(() => {
+        const f = p.factor;
+        p.factor = 1;
+        p.frame = 0;
+        stage.setZoom((stageRef.current?.zoomNow() ?? 1) * f);
+      });
+    },
+    [stage],
+  );
   /*
    * A pinch across the fold of the open book. Each page is its own surface and
    * hears only the finger on it, so neither page can see the pinch; this looks
@@ -3590,11 +3612,7 @@ export function App(): JSX.Element {
         key: e.key,
         modified: e.altKey || e.ctrlKey || e.metaKey,
         defaultPrevented: e.defaultPrevented,
-        inTextField:
-          el instanceof HTMLInputElement ||
-          el instanceof HTMLTextAreaElement ||
-          el instanceof HTMLSelectElement ||
-          el?.isContentEditable === true,
+        inTextField: typingIn(el),
         // Any open sheet owns the keyboard while it is up — it is modal, and its
         // own Escape/Tab handling is the contract. Asking the DOM instead of
         // OR-ing this loop's flags keeps that true for sheets other loops add.
@@ -3635,15 +3653,7 @@ export function App(): JSX.Element {
     if (!desktop) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      const el = document.activeElement as HTMLElement | null;
-      if (
-        el instanceof HTMLInputElement ||
-        el instanceof HTMLTextAreaElement ||
-        el instanceof HTMLSelectElement ||
-        el?.isContentEditable === true ||
-        document.querySelector('[role="dialog"]') !== null
-      )
-        return;
+      if (typingIn(document.activeElement) || document.querySelector('[role="dialog"]') !== null) return;
       if (e.key === "Escape") {
         if (toolRef.current !== "select") chooseTool("select");
         return;
@@ -3669,15 +3679,7 @@ export function App(): JSX.Element {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      const el = document.activeElement as HTMLElement | null;
-      if (
-        el instanceof HTMLInputElement ||
-        el instanceof HTMLTextAreaElement ||
-        el instanceof HTMLSelectElement ||
-        el?.isContentEditable === true ||
-        document.querySelector('[role="dialog"]') !== null
-      )
-        return;
+      if (typingIn(document.activeElement) || document.querySelector('[role="dialog"]') !== null) return;
       if (e.code === "KeyF") {
         e.preventDefault();
         setFull((f) => !f);
@@ -3686,6 +3688,11 @@ export function App(): JSX.Element {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+  // On a desktop, full screen is an icon at the end of the tool bar, beside
+  // undo and redo (owner's page comment, 2026-11-07); a phone keeps the word in
+  // the bottom line. Gesture option A has no button either way.
+  const goFull = useCallback(() => setFull(true), []);
+  const fullInBar = desktop && verseGestures !== "a" ? goFull : null;
   const fullSaid = useRef(false);
   useEffect(() => {
     if (full === fullSaid.current) return;
@@ -3909,6 +3916,7 @@ export function App(): JSX.Element {
     // does *not* flip is below: the stage, the rail and the trail are pinned
     // RTL because they are furniture around a mus'haf, not around a sentence.
     <MarkUndoContext.Provider value={markUndo}>
+    <FullScreenContext.Provider value={fullInBar}>
     <div className={styles.app} dir={dir} data-full={full || undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
@@ -4190,6 +4198,8 @@ export function App(): JSX.Element {
                   onSelectWords={handleSelectWords}
                   onTurn={stepPage}
                   onPinchZoom={pinchedFacing}
+                  onPan={pannedFacing}
+                  onPinchWheel={pinchedWheel}
                   startZoom={facingStartZoom}
                   /* Both leaves, for the same reason `onTurn` is on both: a
                      wheel over the facing page that did nothing would read as a
@@ -4278,6 +4288,8 @@ export function App(): JSX.Element {
                    nothing would read as a dead half of the page. */
                 onTurn={stepPage}
                 onPinchZoom={pinchedLive}
+                onPan={pannedLive}
+                onPinchWheel={pinchedWheel}
                 onJuzTurn={stepJuz}
                 /* And the drag needs to know where it *would* land before it
                    lands, so the fold under the finger is drawn for the pair the
@@ -4629,7 +4641,7 @@ export function App(): JSX.Element {
                   : t.clickHint
           }
         />
-        {verseGestures !== "a" && (
+        {verseGestures !== "a" && !desktop && (
           <button type="button" className={styles.fullBtn} onClick={() => setFull(true)}>
             {t.fullScreen}
           </button>
@@ -4949,6 +4961,7 @@ export function App(): JSX.Element {
       )}
       <LiveAnnouncer message={message} />
     </div>
+    </FullScreenContext.Provider>
     </MarkUndoContext.Provider>
   );
 }

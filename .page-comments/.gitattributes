@@ -1,0 +1,2 @@
+# Each thread file only ever grows, so git can keep both sides' lines.
+threads/*.jsonl merge=union

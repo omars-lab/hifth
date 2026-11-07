@@ -329,3 +329,42 @@ script-built option pages, it is hand-authored with its geometry inlined, so it 
 here rather than carried as the register row's `artifact`/`page` (those require a `builtBy`
 generator, and a decided decision does not need them). Writing that generator is a small follow-on
 only if this is ever reopened.
+
+---
+
+## Open questions, and what would answer each
+
+### ① Should every tool live in a drawer, one level above the next? · **open**
+
+**Asked, 2026-11-07, by the owner, in four comments left on the app's page.** Pressing a verse
+today still spreads its tools in three places: a row of chips beside the verse (the look-alike
+verses, with arrows for earlier and later surahs), a pop-up list when a chip is pressed, and a
+strip of buttons along the bottom (listen, shared roots, share, bookmark, open on QUL). The
+reading settings (one or two pages, size, tajweed, language) sit in the top bar, and a line of
+help text under the tool bar changes with the tool picked. The owner asks for one shape instead:
+
+- **A settings drawer**, opened from one button in the top bar, holding the reading settings
+  the top bar carries today.
+- **A verse drawer**, opened by pressing a verse, holding everything about that verse in
+  sections: the look-alike verses split into "earlier surahs" and "later surahs", the shared
+  roots, and the verse's own buttons. A section with nothing in it shows a short empty line
+  rather than disappearing, so the drawer has the same layout on every verse.
+- **A word drawer**, opened by pressing a word inside the verse, laid over the verse drawer.
+- **It is always clear which drawer is open**, and which one sits on which: settings, then the
+  verse, then the word.
+- **The tool help moves to a hover label** on each tool's button, instead of a line under the bar.
+
+**What it changes for a hafiz:** the look-alike verses, which are what a hafiz opens the app
+for, sit in one place in the same order every time, so a reader learns where to look once.
+Today they hunt for a chip beside the verse, then a pop-up beside the chip.
+
+**Why it is asked now:** the owner met it while reading on a wide screen, the setting the pitch
+is shown in. It reshapes the moment a scholar first presses a verse, so it is a candidate to
+move to the top of the pitch work.
+
+**If nobody decides:** the tools stay where they are today. Nothing is broken.
+
+**What would answer it:** a rough build of the three drawers in the app, on the al-Fatiha
+spread and on a verse with many look-alikes, tried by the owner by hand. This record already
+settled where the verse drawer sits (option D, the facing leaf on a spread); this question is
+about what goes in it and what stacks on it, so D stays.

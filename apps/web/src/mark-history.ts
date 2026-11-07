@@ -77,6 +77,11 @@ export function redoStep(h: MarkHistory): { step: MarkStep; history: MarkHistory
 
 /** Whether a key press is meant for the box being typed in, not for the page's Undo. */
 export function typingIn(target: EventTarget | null): boolean {
+  // A box inside a shadow root (the page-comment box is one) shows up as its host,
+  // a plain div, so step inside to the element that actually holds the focus.
+  while (target instanceof HTMLElement && target.shadowRoot?.activeElement) {
+    target = target.shadowRoot.activeElement;
+  }
   if (!(target instanceof HTMLElement)) return false;
   return target.isContentEditable || target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT";
 }

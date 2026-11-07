@@ -32,6 +32,9 @@ export default tseslint.config(
       // contain and cannot fix — and passes again when the worktree is removed,
       // which is the least useful shape a CI failure can have.
       ".claude/worktrees/**",
+      // The page-comments plugin copies its own loader in here; it is the plugin's
+      // code, refreshed by the plugin, and not ours to lint.
+      ".page-comments/**",
     ],
   },
   js.configs.recommended,

@@ -409,9 +409,11 @@ export function ToolIcon({ tool }: { tool: PageTool }): JSX.Element {
     );
   if (tool === "note")
     return (
+      // A sticky note: a square sheet, its bottom corner turned down, two lines of writing.
       <svg {...common}>
-        <path d="M12 21s-6-5.6-6-10.5a6 6 0 0 1 12 0C18 15.4 12 21 12 21z" />
-        <circle cx="12" cy="10.5" r="2" />
+        <path d="M4 4h16v10l-6 6H4z" />
+        <path data-part="fold" d="M14 20v-6h6" />
+        <path d="M8 8.5h8M8 12h5" />
       </svg>
     );
   return (

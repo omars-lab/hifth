@@ -4934,6 +4934,39 @@
       "owner": "agent",
       "note": "Walked 2026-10-23 at 1366x660 and 1280x610, Firefox and Chrome, English and Arabic, 2:255, 2:48 and 3:84: nothing wrong; a checklist line keeps it walked.",
       "closedBy": ".claude/skills/walk-app/checklist.md"
+    },
+    {
+      "id": "drawers-for-every-tool",
+      "source": {
+        "file": "docs/design/ayah-drawer.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comments of 2026-11-07: settings, verse and word drawers stacked one above the next, look-alike verses as sections with empty placeholders, verse buttons moved into the verse drawer, tool help as hover labels. Next step is a rough build to try by hand; a candidate for the top of the pitch work."
+    },
+    {
+      "id": "full-screen-side-tool-bar",
+      "source": {
+        "file": "docs/design/notes-style-toolbar.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: in full screen, keep the tool bar down the left or right edge, with a switch to hide and show it like the Mac Dock. The side bar and the left/right setting already exist; new is keeping it in full screen, and the hide switch. Next step is a rough build to try on the laptop."
+    },
+    {
+      "id": "bookmark-vs-left-off-ribbon",
+      "source": {
+        "file": "docs/decisions/bookmark-fold.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: the navy bookmark tabs and the red 'where you left off' ribbon look alike, so it is not clear which is which. Next step is a rough build of the three options in the bookmark-fold record, to try on the laptop."
     }
   ]
 }

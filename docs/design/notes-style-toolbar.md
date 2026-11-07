@@ -290,3 +290,24 @@ Built 2026-10-13: the info panel's "Which side the pens stand on" offers Right (
 and Left. Left puts the pens down the side at the window's left edge, mirrored so the
 highlighter's colours still stand on the book's side of the tools, and the Mark up button at
 the left end of the bottom row.
+
+### ⑤ In full screen, should the tool bar stay on screen down one side, with a way to hide it? · **open**
+
+**Asked, 2026-11-07, by the owner, in a comment left on the app's page.** Full screen today puts
+every bar away: the tools, the page bar and the reading settings all go, and a small button
+brings them back. The owner expected the tool bar to stay in full screen, standing down the left
+or right edge of the window, with a switch to hide and show it, the way the Mac lets the Dock
+hide itself and choose which edge it sits on.
+
+**What it changes for a hafiz:** marking a mistake or a look-alike while reading in full screen
+would take one press, not three (leave full screen, pick the tool, go back).
+
+**What the app has already:** option C above, the pens down the side in the empty margin, is
+built as a desktop setting, and "Which side the pens stand on" (④) already picks left or right.
+So the side bar exists; what is new is keeping it in full screen, and the hide switch.
+
+**If nobody decides:** full screen keeps hiding every bar, and the F key and the small button
+still bring them back.
+
+**What would answer it:** a rough build where full screen keeps the side tool bar on the chosen
+edge, with a hide switch, tried by the owner on the laptop.

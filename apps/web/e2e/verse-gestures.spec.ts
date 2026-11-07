@@ -5,6 +5,7 @@ import { VERSE_GESTURES_KEY } from "../src/verse-gestures";
 import { RUN_MARK_KEY } from "../src/run-mark";
 import { RUN_FOLLOW_KEY } from "../src/run-follow";
 import { fakePlayer } from "./player";
+import { DESKTOP_QUERY } from "../src/useMediaQuery";
 
 /*
  * What a tap and a hold on a verse do (docs/design/verse-tap-and-hold.md). The
@@ -167,9 +168,16 @@ test.describe("Hifth · tap and hold on a verse", () => {
     await expect(small(page)).toHaveCount(0);
   });
 
-  test("C: full screen is a button in the bottom line, and a small button brings the bars back", async ({ page }) => {
+  test("C: full screen is a button, and a small button brings the bars back", async ({ page }) => {
     await openWith(page, null);
-    await page.getByRole("button", { name: "Full screen" }).click();
+    const desktop = await page.evaluate((q) => matchMedia(q).matches, DESKTOP_QUERY);
+    // A desktop has it as an icon at the end of the tool bar, beside undo and
+    // redo; a phone keeps the word in the bottom line (owner's page comment,
+    // 2026-11-07).
+    const full = page.getByRole("button", { name: "Full screen" });
+    await expect(page.locator("footer").getByRole("button", { name: "Full screen" })).toHaveCount(desktop ? 0 : 1);
+    if (desktop) await expect(page.locator("[data-mark-undo]").getByRole("button", { name: "Full screen" })).toBeVisible();
+    await full.click();
     await expect(topBar(page)).toBeHidden();
     await page.screenshot({ path: test.info().outputPath("c-full.png") });
     await page.getByRole("button", { name: "Show the bars" }).click();

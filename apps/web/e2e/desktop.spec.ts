@@ -997,6 +997,44 @@ test.describe("Hifth · the wheel", () => {
     await expect(page.locator(NUM)).toHaveText(pageNumber(7));
   });
 
+  // Owner's page comment of 2026-11-07: "why doesn't pinch zooming zoom?" A
+  // trackpad pinch reaches the page as a stream of small, fractional ctrl+wheel
+  // steps; a mouse wheel with ctrl held sends whole notches of 100. The pinch
+  // magnifies both pages of the open book together; the notch (the row above)
+  // still does nothing. Dispatched in the page so the steps arrive as a pinch
+  // does, many and close together.
+  for (const on of [7, 8]) {
+    test(`a trackpad pinch magnifies both pages of the open book together (pinching page ${on})`, async ({
+      page,
+    }) => {
+      await overTheLeaf(page);
+      await expect(pageSvg(page, 8)).toBeVisible();
+      const pinch = (dy: number) =>
+        page.evaluate(
+          ([n, d]) => {
+            const leaf = document.querySelector(`svg[aria-labelledby="page-label-${n}"]`)?.closest("[data-leaf]");
+            if (!leaf) throw new Error("no leaf under the page");
+            for (let i = 0; i < 25; i += 1) {
+              leaf.dispatchEvent(
+                new WheelEvent("wheel", { deltaY: d, ctrlKey: true, bubbles: true, cancelable: true }),
+              );
+            }
+          },
+          [on, dy] as const,
+        );
+
+      await pinch(-2.5);
+      await expect.poll(() => scaleOf(page, 7), "the pinch magnified the page").toBeGreaterThan(1.2);
+      await expect.poll(async () => Math.abs((await scaleOf(page, 7)) - (await scaleOf(page, 8)))).toBeLessThan(0.01);
+      await expect(page.locator(NUM), "a pinch is not a turn").toHaveText(pageNumber(7));
+
+      // And pinching in brings it back down, both pages together.
+      await pinch(4);
+      await expect.poll(() => scaleOf(page, 7), "the pinch made the page smaller").toBeLessThan(1);
+      await expect.poll(async () => Math.abs((await scaleOf(page, 7)) - (await scaleOf(page, 8)))).toBeLessThan(0.01);
+    });
+  }
+
   test("shift+wheel jumps a juz, and says which one", async ({ page }) => {
     // The modifier a wheel *does* answer to. Asked in pages rather than in juz
     // numbers — the nearest juz *opening* strictly past the current page in the
@@ -1228,6 +1266,70 @@ test.describe("Hifth · one page or two, and how big", () => {
     await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1, 2);
     await expect.poll(() => scaleOf(page, 8)).toBeCloseTo(1, 2);
     await expect(readout(page)).toHaveText("١٠٠٪");
+  });
+
+  // Owner's page comment of 2026-11-07: dragging one page of a magnified open
+  // book moved that page alone, so the two pages slid out of line with each
+  // other. Both pages are one sheet; a drag on either moves both.
+  for (const grab of [7, 8]) {
+    test(`a drag on one page of a magnified spread moves the facing page with it (grabbing page ${grab})`, async ({
+      page,
+    }) => {
+      await page.goto("/#/hafs-kfqc/p7");
+      await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+      await expect(pageSvg(page, 8)).toBeVisible();
+      await zoomBtn(page, "in").click();
+      await expect.poll(() => scaleOf(page, 7)).toBeCloseTo(1.25, 2);
+      await expect.poll(() => scaleOf(page, 8)).toBeCloseTo(1.25, 2);
+
+      const live0 = await restingBox(page, 7);
+      const face0 = await restingBox(page, 8);
+      const from = grab === 7 ? live0 : face0;
+      const x = from.x + from.width / 2;
+      const y = Math.max(from.y, 0) + 150;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x, y + 60, { steps: 10 });
+      await page.mouse.up();
+
+      const live1 = await restingBox(page, 7);
+      const face1 = await restingBox(page, 8);
+      const moved = grab === 7 ? live1.y - live0.y : face1.y - face0.y;
+      expect(Math.abs(moved), "the grabbed page moved").toBeGreaterThan(20);
+      expect(Math.abs(live1.y - face1.y), "the two pages are still level").toBeLessThan(2);
+    });
+  }
+
+  // Owner's report of 2026-11-07, "on zoom, page animation glitchy": the turn
+  // that peels the corner over is drawn for the book at its normal size, so on
+  // a magnified book it crossed as a small page over the big ones, its back
+  // blank. Magnified, the turn now goes without the peel and keeps the zoom.
+  test("on a magnified open book, a turn draws no normal-size peel over the big pages", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await page.evaluate(() => {
+      const w = window as unknown as { peeled: number };
+      w.peeled = 0;
+      new MutationObserver(() => {
+        if (document.querySelector('[data-testid="edge-peel"]')) w.peeled += 1;
+      }).observe(document.body, { childList: true, subtree: true });
+    });
+    const peeled = () => page.evaluate(() => (window as unknown as { peeled: number }).peeled);
+    const next = page.getByRole("button", { name: "الصفحة التالية" }).first();
+
+    // At its normal size the turn peels, as it always has.
+    await next.click();
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await expect.poll(peeled, "at normal size the corner peels over").toBeGreaterThan(0);
+
+    await zoomBtn(page, "in").click();
+    await expect.poll(() => scaleOf(page, 9)).toBeCloseTo(1.25, 2);
+    await page.evaluate(() => ((window as unknown as { peeled: number }).peeled = 0));
+    await next.click();
+    await expect(pageSvg(page, 11)).toBeVisible();
+    await expect.poll(() => scaleOf(page, 11), "the turn kept the zoom").toBeCloseTo(1.25, 2);
+    expect(await peeled(), "a normal-size peel crossed the magnified book").toBe(0);
   });
 
   /*
@@ -2042,6 +2144,30 @@ test.describe("Hifth · the page tools bar", () => {
     await toolBtn(page, "Highlight").click();
     await toolBtn(page, "Highlight").click();
     await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+  });
+
+  // A box drawn inside a shadow root (the local page-comment box is one) looked to
+  // the app like a plain div, so every letter typed into it switched the tool and
+  // F went full screen. Found on 2026-11-07, typing a comment on the page.
+  test("letters typed into a box inside a shadow root stay in the box", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(pageSvg(page, 8)).toBeVisible();
+    await page.evaluate(() => {
+      const host = document.createElement("div");
+      host.id = "shadow-box-host";
+      document.body.append(host);
+      const box = document.createElement("textarea");
+      host.attachShadow({ mode: "open" }).append(box);
+      box.focus();
+    });
+    await page.keyboard.type("hbfv");
+    expect(
+      await page.evaluate(
+        () => document.getElementById("shadow-box-host")?.shadowRoot?.querySelector("textarea")?.value,
+      ),
+    ).toBe("hbfv");
+    await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
+    await expect(page.locator("[data-full]")).toHaveCount(0);
   });
 
   test("each tool's line on the bar tells a mouse to click, never to tap", async ({ page }) => {

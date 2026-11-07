@@ -1,0 +1,39 @@
+{
+  "v": 1,
+  "plugin": "development-manager",
+  "changes": [
+    {
+      "kind": "make",
+      "file": "Makefile",
+      "begin": "# page-comments:begin",
+      "end": "# page-comments:end",
+      "target": "comments"
+    },
+    {
+      "kind": "settings",
+      "file": ".claude/settings.json",
+      "key": "enabledPlugins.development-manager@oeid-claude-plugins",
+      "pluginId": "development-manager@oeid-claude-plugins",
+      "createdDir": false,
+      "createdFile": false,
+      "createdObject": false,
+      "keyWasThere": false
+    },
+    {
+      "kind": "claude-md",
+      "file": "CLAUDE.md",
+      "begin": "<!-- page-comments:begin -->",
+      "end": "<!-- page-comments:end -->",
+      "createdFile": false
+    },
+    {
+      "kind": "vite-config",
+      "file": "apps/web/vite.config.ts",
+      "importLine": "import pageComments from \"../../.page-comments/vite.mjs\"; // page-comments",
+      "call": "pageComments(), ",
+      "createdFile": false
+    }
+  ],
+  "updated": "2026-11-07T00:55:42Z",
+  "version": "1.19.0"
+}

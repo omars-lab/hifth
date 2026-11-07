@@ -1,7 +1,8 @@
 {
   "plansDirectory": ".claude/plans",
   "enabledPlugins": {
-    "frontend-design@claude-plugins-official": true
+    "frontend-design@claude-plugins-official": true,
+    "development-manager@oeid-claude-plugins": true
   },
   "hooks": {
     "Stop": [
