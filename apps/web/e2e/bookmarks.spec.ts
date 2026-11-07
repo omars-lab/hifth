@@ -26,6 +26,28 @@ async function openMap(page: Page) {
 }
 
 test.describe("Hifth · bookmarks", () => {
+  test("the page under the folded corner is the page's own paper, shaded only at the crease", async ({ page }) => {
+    // The owner, 2026-11-07: the patch under the fold read as a grey square
+    // that did not blend with the page. Its far corner is the same sheet of
+    // paper as the page, so it must end in the page's colour exactly, and its
+    // crease may only be a light shade of it, never grey.
+    await ready(page);
+    const under = page.locator("[class*='foldUnder']").first();
+    await expect(under).toBeAttached();
+    const { stops, paper } = await under.evaluate((el) => {
+      const leaf = document.querySelector("[class*='host'][data-leaf]");
+      const bg = getComputedStyle(el).backgroundImage;
+      const shade = bg.slice(bg.lastIndexOf("linear-gradient"));
+      const stops = [...shade.matchAll(/rgb\((\d+), (\d+), (\d+)\)/g)].map((m) => m.slice(1, 4).map(Number));
+      const p = getComputedStyle(leaf as Element).backgroundColor.match(/\d+/g)!.map(Number);
+      return { stops, paper: p.slice(0, 3) };
+    });
+    const far = stops[stops.length - 1];
+    expect(far).toEqual(paper);
+    // The crease: no channel more than 30 below the paper (the old grey was 73 below).
+    for (const s of stops) for (let i = 0; i < 3; i++) expect(paper[i]! - s[i]!).toBeLessThanOrEqual(30);
+  });
+
   test("a folded corner drops a named ribbon that is still there after a reload", async ({ page }) => {
     await ready(page);
     await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
