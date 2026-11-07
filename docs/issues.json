@@ -4945,6 +4945,14 @@
       "severity": "question",
       "owner": "agent",
       "note": "Owner's page comments of 2026-11-07: settings, verse and word drawers stacked one above the next, look-alike verses as sections with empty placeholders, verse buttons moved into the verse drawer, tool help as hover labels. Next step is a rough build to try by hand; a candidate for the top of the pitch work."
+    },
+    {
+      "id": "full-screen-side-tool-bar",
+      "source": { "file": "docs/design/notes-style-toolbar.md", "item": "⑤" },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's page comment of 2026-11-07: in full screen, keep the tool bar down the left or right edge, with a switch to hide and show it like the Mac Dock. The side bar and the left/right setting already exist; new is keeping it in full screen, and the hide switch. Next step is a rough build to try on the laptop."
     }
   ]
 }
