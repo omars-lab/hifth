@@ -38,6 +38,16 @@
   }
 }
 
+/* With a mouse the tools can be narrower than a fingertip needs. Eleven tools
+   at full touch width (the eraser joined them on 2026-11-07) left the pens
+   too little room at the narrowest computer window, and picking the
+   highlighter slid every tool 16px. A touch screen keeps the full width. */
+@media (min-width: 1024px) and (min-height: 600px) and (hover: hover) and (pointer: fine) {
+  .tools .tool {
+    min-inline-size: 40px;
+  }
+}
+
 .tools {
   display: flex;
   gap: 2px;
