@@ -1,0 +1,3 @@
+# Per-machine state and screenshots never go in git.
+.state/
+shots/

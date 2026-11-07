@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "author": "omar",
+  "resolve": "when-fixed",
+  "serve": {
+    "target": "http://127.0.0.1:7122",
+    "port": 8767
+  },
+  "shotsDir": "~/Library/Mobile Documents/com~apple~CloudDocs/CloudDesktop/data"
+}

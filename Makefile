@@ -890,3 +890,9 @@ help: ## List targets (this)
 # The Mac / iPad shell: every `app-*` target. Kept in its own file so this one
 # stays about the web app; `make help` lists both.
 include native/Makefile.native
+
+# page-comments:begin
+.PHONY: comments
+comments:  ## Serve the pages with the comment button (development-manager)
+	@.page-comments/run serve --target http://127.0.0.1:7122 --port 8767
+# page-comments:end

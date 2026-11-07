@@ -1,3 +1,4 @@
+import pageComments from "../../.page-comments/vite.mjs"; // page-comments
 import { execFileSync } from "node:child_process";
 import { readFileSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -190,7 +191,7 @@ export default defineConfig({
       Boolean(process.env.VITE_TAFSIR_QF_BASE && process.env.VITE_TAFSIR_QF_ID),
     ),
   },
-  plugins: [
+  plugins: [pageComments(), 
     dropPrivateUnlessPitch(),
     preloadReaderLanguage(),
     qulFixturesDev(),
