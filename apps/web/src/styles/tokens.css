@@ -17,13 +17,14 @@
   --paper-raised: #fbf8f2;
   --paper-sunk: #ece4d6;
   /* The page showing under a folded corner, in the flap's shadow: a light
-     shade at the crease, and the page's own paper at the corner. It is the
-     same sheet as the page around it, so it ends in the page's colour; the
-     grey-beige it once was read as a patch pasted on (owner, 2026-11-07). The
-     flap's drop shadow is what makes it read as a fold, not this colour. */
+     shade of the page's own paper, deepest at the crease. Two reports pull
+     against each other here, and both hold: drawn the page's colour it read as
+     a flat square pasted on (#202), and drawn grey-beige it read as a patch
+     that did not belong (owner, 2026-11-07). So it is only just darker than
+     the page, about 10 in brightness at its lightest. */
   --fold-shade: var(--paper-sunk);
-  --fold-shade-mid: #f3eee5;
-  --fold-shade-far: var(--paper-raised);
+  --fold-shade-mid: #f0eadf;
+  --fold-shade-far: #f3eee5;
   --ink: #26201a;
   --ink-soft: #5c5347;
   /* The quietest ink that is still ink. It shipped at #9c9284 for six loops —
