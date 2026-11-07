@@ -2,3 +2,6 @@
 {"v":1,"ts":"2026-11-07T04:08:51Z","ev":"shot","role":"comment","author":"omar","icloud":"CloudDesktop/data/page-comments/hifth/t_def847/comment.png","sha":"416e8a5325ce"}
 {"v":1,"ts":"2026-11-07T04:10:26Z","ev":"anchor","author":"page","state":"lost"}
 {"v":1,"ts":"2026-11-07T04:12:00Z","ev":"anchor","author":"page","state":"found"}
+{"v":1,"ts":"2026-11-07T04:43:43Z","ev":"shot","role":"after","author":"claude","icloud":"CloudDesktop/data/page-comments/hifth/t_def847/after-0c824a1b.png","sha":"0fc2f69f04c8","commit":"0c824a1b"}
+{"v":1,"ts":"2026-11-07T04:43:43Z","ev":"reply","author":"claude","body":"A trackpad pinch now zooms. It had been switched off on purpose, because it used to grow one page of the open book on its own. Now a pinch on either page grows both together, the same way the − and + buttons do. Turning a mouse wheel with ctrl held still does nothing, so scrolling never zooms. The change is in `PageStage.tsx` and `pinch-wheel.ts`, with tests, and there is a short update in the wheel-and-zoom decision record. The after picture in this thread is Firefox after a pinch: both pages at 187%. Ready to check.","commit":"0c824a1b"}
+{"v":1,"ts":"2026-11-07T04:43:43Z","ev":"status","author":"claude","status":"resolved","note":"Pinch zooms both pages together in 0c824a1b; tested in Chrome and Firefox."}

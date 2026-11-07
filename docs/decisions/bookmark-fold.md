@@ -270,3 +270,28 @@ Assumptions made while building it, to be corrected on sight:
   names on the page.
 - **It still covers the small juz label** in the head margin. The page bar shows the juz too, so
   that is accepted.
+
+## Open questions, and what would answer each
+
+### ① Can a reader tell a bookmark from the red "where you left off" ribbon? · **open**
+
+**What would answer it:** a rough build of the options below, tried on the laptop by the owner.
+
+**Asked by the owner, in a comment left on the app's page:** *"these bookmarks are confusing
+with the red one"*. On an open book, each page that holds a bookmark shows a short navy tab at
+its head. A red ribbon also runs down the middle of the book where the reader left off. Both are
+drawn as ribbons, and nothing on the page says which is which, so the red one reads as one more
+bookmark.
+
+**What it changes for a hafiz:** coming back to the mus'haf, they should see at a glance where
+they stopped, and not mistake it for a page they bookmarked on purpose, or the other way round.
+
+**Options to build and try, each a setting if it loses:**
+- the red one stops looking like a ribbon, for example a small "you left off here" mark at the
+  edge of the page;
+- the red one says what it is, as a short label on hover and a first-time hint;
+- the bookmarks change shape instead, for example tabs with their name, so only the red one is
+  a ribbon.
+
+**If nobody decides:** both stay ribbons, and the reader has to learn that red means "where you
+left off".
