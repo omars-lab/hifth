@@ -217,6 +217,13 @@ section of the drawer itself, tried by the owner beside today's separate sheets.
 popping up popups, can they not not make the drawer expand and add the sections to the drawer
 instead?"* Today those three each open their own sheet, and the drawer steps aside until it closes.
 
+**Asked again, three more times on 2026-11-07,** once per tool: Same roots (*"why is this button
+still popping up pop up and the content not having the drawer come up instead?"*), Listen
+(*"clicking play should expand drawer as well with additional play options"*) and Share
+(*"pressing this should expand drawer with share this ayah as a link options as well instead of a
+popup"*). So Listen belongs in the build too: opened in the drawer, it shows the play options
+(play on to a verse, repeat, speed) under its button.
+
 **What it changes for a hafiz:** the verse's tools and what one of them opened stay in one place,
 so going from the words that share a root back to Listen is one tap, not close-then-tap.
 

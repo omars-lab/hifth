@@ -12,6 +12,9 @@ import { spokenName } from "../spoken-name";
  * of QUL's into the app, so the honest element is an anchor the reader — or their
  * browser's own "open in new tab" — can follow, with the arrow saying it leaves
  * the app. See `qul.ts` for the address.
+ *
+ * It is a developer's tool, shown only while the app runs in dev mode on this
+ * laptop: a reader of a real build never sees it (owner, 2026-11-07).
  */
 export function QulTrigger({
   selectedKey,
@@ -26,6 +29,7 @@ export function QulTrigger({
   caption?: string;
 }): JSX.Element | null {
   const { t } = useT();
+  if (!import.meta.env.DEV) return null;
   if (!selectedKey || !label) return null;
   const href = qulVerseUrl(selectedKey);
   if (!href) return null;

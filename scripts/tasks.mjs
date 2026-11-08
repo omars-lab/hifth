@@ -80,6 +80,18 @@ export function loops() {
   return out;
 }
 
+const STATUS_ORDER = ["confirmed", "suspected", "open", "blocked"];
+
+/**
+ * The order items are listed in: one the owner has marked `next` first (the
+ * next most important thing to build, said in a word on its row), then by how
+ * sure we are something is wrong, then by name.
+ */
+export const worstFirst = (a, b) =>
+  Number(b.next === true) - Number(a.next === true) ||
+  STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status) ||
+  a.id.localeCompare(b.id);
+
 /** Everything the page renders, in the order it renders it. */
 export function payload() {
   const issues = readIssues();
@@ -117,6 +129,7 @@ export function payload() {
       source: i.source,
       status: i.status,
       severity: i.severity,
+      ...(i.next === true ? { next: true } : {}),
       owner: i.owner,
       blockedBy: i.blockedBy ?? [],
       note: i.note ?? "",

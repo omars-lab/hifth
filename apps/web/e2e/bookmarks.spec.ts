@@ -48,6 +48,20 @@ test.describe("Hifth · bookmarks", () => {
     expect(paper - stops[stops.length - 1]!, "the corner end is all but the page").toBeLessThanOrEqual(12);
   });
 
+  test("the folded-over corner keeps the page's rounded corner at its tip", async ({ page }) => {
+    // The owner, 2026-11-08: "top left corner not rounded like page". The flap
+    // is the page's own corner turned over, so its tip is rounded like the
+    // page's, not a sharp point: the flap's outline carries more than the
+    // three points of a plain triangle, on both pages of the spread.
+    await ready(page);
+    const flaps = page.locator("[class*='foldFlap']");
+    await expect(flaps.first()).toBeAttached();
+    for (const flap of await flaps.all()) {
+      const points = await flap.evaluate((el) => getComputedStyle(el).clipPath.split(",").length);
+      expect(points, "a rounded tip, not a triangle's sharp point").toBeGreaterThan(3);
+    }
+  });
+
   test("a folded corner drops a named ribbon that is still there after a reload", async ({ page }) => {
     await ready(page);
     await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();

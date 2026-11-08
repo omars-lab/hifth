@@ -5019,9 +5019,10 @@
         "item": "③"
       },
       "status": "open",
+      "next": true,
       "severity": "question",
       "owner": "agent",
-      "note": "Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets. Next step is a rough build of the drawer growing to hold them, kept clear of the verse it is about."
+      "note": "Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets. Asked again three times the same day, once each for Same roots, Listen (open the play options in the drawer) and Share (the share-as-a-link options in the drawer). Next up (2026-11-07): it is what the owner asked for most today, and the drawer is where The Study Quran's commentary would sit beside its verse in the pitch. Next step is a rough build of the drawer growing to hold them, kept clear of the verse it is about."
     },
     {
       "id": "app-pages-settings-and-developer",

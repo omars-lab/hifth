@@ -97,3 +97,16 @@ test("a follow-up whose bold title wraps onto the next line keeps all of it", as
   );
   assert.equal(planTitleAt(lines, 2), "Plain first clause");
 });
+
+test("an item marked next is listed first, ahead of worse-sounding ones", async () => {
+  const { worstFirst } = await import("./tasks.mjs");
+  const items = [
+    { id: "a-confirmed", status: "confirmed" },
+    { id: "b-open", status: "open" },
+    { id: "z-open-next", status: "open", next: true },
+  ];
+  assert.deepEqual(
+    items.sort(worstFirst).map((i) => i.id),
+    ["z-open-next", "a-confirmed", "b-open"],
+  );
+});

@@ -24,7 +24,7 @@
 import { writeFileSync } from "node:fs";
 import { readIssues, linker } from "./issues.mjs";
 import { readLedger } from "./validation-ledger.mjs";
-import { DOC_PATH, payload, tasksHash } from "./tasks.mjs";
+import { DOC_PATH, payload, tasksHash, worstFirst } from "./tasks.mjs";
 
 const p = payload();
 const ledgerById = new Map((readLedger().checks ?? []).map((c) => [c.id, c]));
@@ -37,9 +37,6 @@ const n = (c, one, many) => `${c} ${c === 1 ? one : many}`;
 const out = [];
 const w = (s = "") => out.push(s);
 
-const order = ["confirmed", "suspected", "open", "blocked"];
-const worstFirst = (a, b) =>
-  order.indexOf(a.status) - order.indexOf(b.status) || a.id.localeCompare(b.id);
 const mine = p.issues.filter((i) => i.owner === "user").sort(worstFirst);
 const theirs = p.issues.filter((i) => i.owner !== "user").sort(worstFirst);
 const titled = (i) => link(byId.get(i.id) ?? i);
@@ -74,7 +71,8 @@ w("| --- | --- | --- |");
 for (const d of p.decisions) w(`| [${cell(d.question)}](#${d.id}) | a decision | open |`);
 for (const c of p.checks) w(`| [${cell(c.title)}](#check-${c.id}) | a person, by hand | pending |`);
 for (const i of mine) w(`| [${cell(titled(i)[0])}](#${i.id}) | you | ${i.status} |`);
-for (const i of theirs) w(`| [${cell(titled(i)[0])}](#${i.id}) | whoever picks it up | ${i.status} |`);
+for (const i of theirs)
+  w(`| [${cell(titled(i)[0])}](#${i.id}) | whoever picks it up | ${i.next ? "**next up** · " : ""}${i.status} |`);
 w();
 w("**The words.** `confirmed` — reproduced, with numbers. `suspected` — read from the code, never");
 w("reproduced. `open` — undecided, nothing blocking it. `blocked` — the next step is known and not");
@@ -144,7 +142,7 @@ const item = (i) => {
   w();
   w(`### ${title}`);
   w();
-  const meta = [`**${i.status}**`, i.severity];
+  const meta = [...(i.next ? ["**next up**"] : []), `**${i.status}**`, i.severity];
   if (i.blockedBy.length) meta.push(`waiting on ${i.blockedBy.join(", ")}`);
   meta.push(`lives in [${href.split("#")[0]}](${href})`);
   w(meta.join(" · "));
