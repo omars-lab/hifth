@@ -52,12 +52,11 @@
 /* The page beneath, where the corner was: the same paper with its own top
    edge, and none of the top page's ink, lying in the flap's shadow — darkest
    at the crease. Drawn the same colour as the page, the fold read as a flat
-   square pasted on (#202). Its outer tip follows the leaf's
-   rounded corner, so it never shows past the paper onto the desk: the curve
-   is 20px round (--radius-leaf) and starts 12px outside the fold (the page
-   edges and their border), which puts it 1.67px down at the fold's outer side
-   and back at the top 8px in. Four straight steps along it, each just inside
-   the curve. The numbers follow those three tokens; change them together. */
+   square pasted on (#202). Its outer corner, the one on the page's own
+   corner, is rounded 6px like the flap's tip: following only the board's
+   20px curve left a 1.8px dip nobody could see, and the owner read the corner
+   as square (2026-11-08). Four straight steps along a quarter circle, each
+   on the curve, so it never shows past the paper onto the desk. */
 .foldUnder {
   --u: calc(var(--leaf-z, 1) * 1px);
   position: absolute;
@@ -66,11 +65,11 @@
   inline-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
   block-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
   clip-path: polygon(
-    0 calc(1.8 * var(--u)),
-    calc(2 * var(--u)) calc(1 * var(--u)),
-    calc(4 * var(--u)) calc(0.5 * var(--u)),
-    calc(6 * var(--u)) calc(0.2 * var(--u)),
-    calc(8 * var(--u)) 0,
+    0 calc(6 * var(--u)),
+    calc(0.46 * var(--u)) calc(3.7 * var(--u)),
+    calc(1.76 * var(--u)) calc(1.76 * var(--u)),
+    calc(3.7 * var(--u)) calc(0.46 * var(--u)),
+    calc(6 * var(--u)) 0,
     100% 0,
     0 100%
   );
@@ -88,11 +87,11 @@
   left: auto;
   right: 0;
   clip-path: polygon(
-    100% calc(1.8 * var(--u)),
-    calc(100% - 2 * var(--u)) calc(1 * var(--u)),
-    calc(100% - 4 * var(--u)) calc(0.5 * var(--u)),
-    calc(100% - 6 * var(--u)) calc(0.2 * var(--u)),
-    calc(100% - 8 * var(--u)) 0,
+    100% calc(6 * var(--u)),
+    calc(100% - 0.46 * var(--u)) calc(3.7 * var(--u)),
+    calc(100% - 1.76 * var(--u)) calc(1.76 * var(--u)),
+    calc(100% - 3.7 * var(--u)) calc(0.46 * var(--u)),
+    calc(100% - 6 * var(--u)) 0,
     0 0,
     100% 100%
   );

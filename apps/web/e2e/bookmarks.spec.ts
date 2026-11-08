@@ -62,6 +62,23 @@ test.describe("Hifth · bookmarks", () => {
     }
   });
 
+  test("the page under the fold is rounded where it meets the page's own corner", async ({ page }) => {
+    // The owner, 2026-11-08: the fold's tip was rounded, but the corner that
+    // sits on the page's own corner was still square. The page under the fold
+    // starts that corner at least 5px down its outer side, a visible round,
+    // on both pages of the spread.
+    await ready(page);
+    const unders = page.locator("[class*='foldUnder']");
+    await expect(unders.first()).toBeAttached();
+    for (const under of await unders.all()) {
+      const firstY = await under.evaluate((el) => {
+        const first = getComputedStyle(el).clipPath.replace(/^polygon\(/, "").split(",")[0] ?? "";
+        return parseFloat(first.trim().split(/\s+/)[1] ?? "");
+      });
+      expect(firstY, "a visible round at the page's corner").toBeGreaterThanOrEqual(5);
+    }
+  });
+
   test("a folded corner drops a named ribbon that is still there after a reload", async ({ page }) => {
     await ready(page);
     await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
