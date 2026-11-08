@@ -127,13 +127,34 @@
   display: block;
   inline-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
   block-size: calc(var(--dog-ear, 16px) * var(--leaf-z, 1));
-  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  /* The flap is the page's own top corner turned over, so its tip, the
+     right angle, is rounded like the page's corners (owner, 2026-11-08: "top
+     left corner not rounded like page"): a quarter circle of 6px, in four
+     straight steps. */
+  --u: calc(var(--leaf-z, 1) * 1px);
+  clip-path: polygon(
+    100% 0,
+    100% calc(100% - 6 * var(--u)),
+    calc(100% - 0.46 * var(--u)) calc(100% - 3.7 * var(--u)),
+    calc(100% - 1.76 * var(--u)) calc(100% - 1.76 * var(--u)),
+    calc(100% - 3.7 * var(--u)) calc(100% - 0.46 * var(--u)),
+    calc(100% - 6 * var(--u)) 100%,
+    0 100%
+  );
   background: linear-gradient(135deg, var(--paper-sunk) 45%, var(--paper-raised) 100%);
   transition: inline-size var(--dur-fast) ease, block-size var(--dur-fast) ease;
 }
 
 :global([data-free-side="right"]) .foldFlap {
-  clip-path: polygon(0 0, 100% 100%, 0 100%);
+  clip-path: polygon(
+    0 0,
+    0 calc(100% - 6 * var(--u)),
+    calc(0.46 * var(--u)) calc(100% - 3.7 * var(--u)),
+    calc(1.76 * var(--u)) calc(100% - 1.76 * var(--u)),
+    calc(3.7 * var(--u)) calc(100% - 0.46 * var(--u)),
+    calc(6 * var(--u)) 100%,
+    100% 100%
+  );
   background: linear-gradient(225deg, var(--paper-sunk) 45%, var(--paper-raised) 100%);
 }
 
