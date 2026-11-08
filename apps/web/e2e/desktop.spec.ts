@@ -2259,7 +2259,8 @@ test.describe("Hifth · the page tools bar", () => {
     await expect(drawer.getByRole("button", { name: /^Listen to / })).toContainText("Listen");
     await expect(drawer.getByRole("button", { name: /Share/ })).toBeVisible();
     await expect(drawer.getByRole("button", { name: /Bookmark/ })).toBeVisible();
-    await expect(drawer.getByRole("link", { name: /on QUL/ })).toBeVisible();
+    // The QUL link is a developer's tool, so a real build has none (qul.spec.ts).
+    await expect(drawer.getByRole("link", { name: /on QUL/ })).toHaveCount(0);
     // The tools live in the drawer, not also in the bar under the page.
     await expect(page.locator("footer").getByRole("button", { name: /^Listen to / })).toHaveCount(0);
 
