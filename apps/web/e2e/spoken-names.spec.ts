@@ -49,6 +49,13 @@ for (const locale of ["en-US", "ar"] as const) {
     test("every button on the verse's tools is named with the word under its sign", async ({ page }) => {
       await openTools(page);
       const tools = page.getByRole("region", { name: /^(Tools for |أدوات )/ });
+      // The drawer is still rising when it first shows, and its buttons take
+      // their width as it does; counted too early, only two had any (flaky
+      // pre-push, 2026-11-08). Wait for the row to settle before reading it.
+      const shown = tools.locator("button:has([data-caption]), a:has([data-caption])");
+      await expect
+        .poll(() => shown.evaluateAll((els) => els.filter((e) => e.getBoundingClientRect().width > 0).length))
+        .toBeGreaterThan(2);
       const pairs = await tools.locator("button:has([data-caption]), a:has([data-caption])").evaluateAll((els) =>
         els
           .filter((e) => e.getBoundingClientRect().width > 0)
