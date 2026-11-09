@@ -3363,6 +3363,139 @@
       "note": "Apple's purchase system in the iPad and Mac app, and one switch the web app reads per paid feature, with the free path tested on its own."
     },
     {
+      "id": "sharing-a-consent",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "May a student's mistakes and slips be sent to another person at all, and what must the student see before saying yes? A new decision, because records shared between people start their own (storage model); feeds should-a-student-share-a-map-with-a-teacher."
+    },
+    {
+      "id": "sharing-a-revision-record",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "The paid-features page plans sharing a revision record, but the privacy check refuses it on purpose. Only the owner can reopen that; until then sharing carries marks, not times."
+    },
+    {
+      "id": "sharing-a-road",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Pick the road for sending marks: a file, a link with the marks inside, iCloud sharing, a live locked link with no accounts (researcher A's pick), or accounts. Build the link-with-marks-inside first as a throwaway so the teacher's view is judged by hand."
+    },
+    {
+      "id": "sharing-a-expiry",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Should a shared link end by itself after a while, and does the teacher see new marks as they are made or only on reopening? Ending by itself is the main defence against a forwarded link or a lost phone."
+    },
+    {
+      "id": "sharing-a-store",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Where shared copies live: the Supabase project that holds the held copy, a new one, or Cloudflare; and whether 25 US dollars a month is worth it, since the free plan pauses after a quiet week and would kill a teacher's link."
+    },
+    {
+      "id": "sharing-a-cloudflare-price",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Read Cloudflare's own pages for what its small database and file storage cost and whether they ever sleep, so the store can be chosen with both prices side by side."
+    },
+    {
+      "id": "sharing-a-address",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Name the address for the signed-in part, such as hifth.bytesofpurpose.com, rather than the blog's path, which shares one browser store with every blog page and cannot hold the file that lets links open the app."
+    },
+    {
+      "id": "sharing-a-sign-in",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑧"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "sharing-a-road"
+      ],
+      "note": "If accounts come: Sign in with Apple and an email link first, Google later through the system browser (Google refuses sign-in inside the apps' built-in web view), passkeys once Supabase's support settles."
+    },
+    {
+      "id": "sharing-a-paid",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑨"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "paid-features-which"
+      ],
+      "note": "Is sending marks to a teacher a paid extra, and how would a browser-only reader pay, given Apple's purchase works only in the App Store app? Keeping your own marks safe stays free."
+    },
+    {
+      "id": "sharing-a-own-icloud",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑩"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "usage-sync-own-icloud"
+      ],
+      "note": "Extend the usage counts' own-iCloud build to mistakes, notes and bookmarks, so a mark made on the iPad is on the Mac; Firefox and the phone keep the saved file."
+    },
+    {
+      "id": "sharing-a-cloudkit-web-trial",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑪"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "sharing-a-road"
+      ],
+      "note": "A one-hour throwaway trial of Apple's web library in Firefox with a test container; only worth doing if iCloud sharing is picked."
+    },
+    {
       "id": "usage-across-devices",
       "source": {
         "file": "docs/design/feature-usage.md",
