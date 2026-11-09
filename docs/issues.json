@@ -3153,11 +3153,10 @@
         "file": "docs/design/testflight-plan.md",
         "item": "②"
       },
-      "status": "open",
-      "next": true,
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the app record in App Store Connect with both iOS and macOS ticked, which covers iPhone, iPad and Mac (iphone-app.md ①). No store listing. The links are in the app-setup skill. The ID was registered on 2026-11-09, with Push Notifications and Sign in with Apple also on; the App Store Connect record is not confirmed yet. Next up for the owner (2026-11-08): it is the one step between the pitch and the app on the owner's own iPad for a year, signed with the paid team, which is how the Study Quran team will see it in the room; nothing after it in the TestFlight plan can start until it is done."
+      "note": "Done 2026-11-09. The ID com.bytesofpurpose.hifth is registered with iCloud, Associated Domains, Siri, Push Notifications and Sign in with Apple. The App Store Connect record is named \"Hifth - The Huffaz Toolkit\" (Apple ID 6832642191) and covers iOS and macOS. The agent confirms iCloud and Associated Domains are on when it first signs (testflight-sign-with-paid-team)."
     },
     {
       "id": "iphone-record-covers-iphone",
@@ -3165,11 +3164,10 @@
         "file": "docs/design/iphone-app.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["testflight-register-app"],
-      "note": "Done as part of registering the app: pick platform iOS in App Store Connect so the record covers iPhone and iPad. Not checked: whether Apple lets a later build drop the iPhone once a build that runs on it has gone to testers, so settle the iPhone before the first upload."
+      "note": "Done 2026-11-09: the record covers iOS (iPhone and iPad) and macOS. Not checked: whether Apple lets a later build drop the iPhone once a build that runs on it has gone to testers, so settle the iPhone before the first upload."
     },
     {
       "id": "iphone-walk-pitch",
@@ -3240,15 +3238,52 @@
       "note": "Show the verse and reciter on the lock screen and answer its play, pause and next buttons, and AirPods presses."
     },
     {
+      "id": "recitation-airplay",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["recitation-plays-in-background"],
+      "note": "An AirPlay button so recitation plays on a HomePod or other speaker. Needs nothing from Apple."
+    },
+    {
+      "id": "siri-play-recitation",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["recitation-plays-in-background"],
+      "note": "Answer \"Hey Siri, play al-Kahf in Hifth\" on the iPhone and iPad. The Siri box on the app's ID allows it."
+    },
+    {
+      "id": "homepod-siri-request",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑩"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["siri-play-recitation"],
+      "note": "Ask Apple, signed in, to let a HomePod pass Siri play requests to Hifth: https://developer.apple.com/contact/request/sirikit-media-intent-for-homepod/ . A separate approval from the Siri box; send it once Siri plays recitation on the phone. The agent drafts the answers."
+    },
+    {
       "id": "testflight-sign-with-paid-team",
       "source": {
         "file": "docs/design/testflight-plan.md",
         "item": "③"
       },
       "status": "open",
+      "next": true,
       "severity": "question",
       "owner": "agent",
-      "note": "Set the team (76NHKA839A) in the project settings and reinstall on the owner's iPad and Mac; installs then last a year."
+      "note": "Set the team (76NHKA839A) in the project settings and reinstall on the owner's iPad and Mac; installs then last a year. Next up (2026-11-09): the ID and the App Store Connect record are done, so this is what puts the pitch on the owner's own iPad for a year."
     },
     {
       "id": "testflight-archive-builds",
@@ -3292,7 +3327,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "Make the App Store Connect API key under Users and Access, Integrations; it goes in the keychain, never the repo."
+      "note": "Make the App Store Connect API key under Users and Access, Integrations; the key file goes in ~/.appstoreconnect/private_keys/ (where the upload tools look), never the repo; the agent needs only the key ID and issuer ID."
     },
     {
       "id": "testflight-upload-step",

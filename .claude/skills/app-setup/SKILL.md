@@ -19,7 +19,8 @@ Who: **you** = the owner, Omar, signed in to the account. **agent** = Claude, fr
 | Apple team ID | `76NHKA839A` (individual account, Omar Eid) | `native/project.yml`, `TEAM=` on the make targets |
 | The app's ID (bundle ID) | `com.bytesofpurpose.hifth` | `native/project.yml` |
 | Its test IDs (not registered; local only) | `com.bytesofpurpose.hifth.tests`, `com.bytesofpurpose.hifth.uitests` | `native/project.yml` |
-| The name shown to testers | Hifth, published by Omar Eid | App Store Connect record |
+| The name shown to testers | "Hifth - The Huffaz Toolkit", published by Omar Eid | App Store Connect record |
+| The App Store Connect record (iOS and macOS) | Apple ID `6832642191`, made 2026-11-09 | <https://appstoreconnect.apple.com/apps/6832642191> |
 | iCloud container (proposed, not made yet) | `iCloud.com.bytesofpurpose.hifth` | made in ④ below; [icloud-sync.md](../../../docs/design/icloud-sync.md) |
 | The reading site | `blog.bytesofpurpose.com/hifth/` | the build |
 | The share page (for now) | `hifth.bytesofpurpose.com/share` | Cloudflare, ⑥ below |
@@ -41,10 +42,10 @@ flowchart LR
 | step | who | what to do | link | tracked as |
 |---|---|---|---|---|
 | ① Membership and team ID | you | done 2026-11-08: team `76NHKA839A` | <https://developer.apple.com/account#MembershipDetailsCard> | `testflight-membership-active` (answered) |
-| ② Register the app ID | you | **Identifiers → +** → *App IDs* → *App*. Description "Hifth", **Explicit** bundle ID `com.bytesofpurpose.hifth`. Tick **iCloud** (with CloudKit) and **Associated Domains**. Continue, Register. | <https://developer.apple.com/account/resources/identifiers/add/bundleId> | `testflight-register-app` (**next**) |
-| ③ App Store Connect record | you | **Apps → + → New App**. Platforms **iOS and macOS** both ticked (one record for iPhone, iPad and Mac, since the Mac build uses the same ID), name "Hifth", language English, bundle ID `com.bytesofpurpose.hifth` (it appears in the list once ② is done), SKU `hifth`, access Full. No store listing is needed for TestFlight. | <https://appstoreconnect.apple.com/apps> | `testflight-register-app` |
+| ② Register the app ID | you | **Identifiers → +** → *App IDs* → *App*. Description "Hifth", **Explicit** bundle ID `com.bytesofpurpose.hifth`. Tick **iCloud** (with CloudKit), **Associated Domains** and **Siri**; **Push Notifications** and **Sign in with Apple** are optional (the table below says why each is there). Continue, Register. | <https://developer.apple.com/account/resources/identifiers/add/bundleId> | `testflight-register-app` (**next**) |
+| ③ App Store Connect record | you | **Apps → + → New App**. Platforms **iOS and macOS** both ticked (one record for iPhone, iPad and Mac, since the Mac build uses the same ID), name "Hifth - The Huffaz Toolkit" (the name is 30 characters at most and must not be taken by another app), language English, bundle ID `com.bytesofpurpose.hifth` (it appears in the list once ② is done), SKU `hifth`, access Full. No store listing is needed for TestFlight. | <https://appstoreconnect.apple.com/apps> | `testflight-register-app` |
 | ④ iCloud container | agent, or you | **Identifiers → +** → *iCloud Containers*, ID `iCloud.com.bytesofpurpose.hifth`; then on the app ID from ②, *iCloud → Configure* and tick it. Xcode can also make it the first time the agent signs with the team. | <https://developer.apple.com/account/resources/identifiers/list/cloudContainer> | `icloud-sync-try-signed` |
-| ⑤ Upload key | you | **Users and Access → Integrations → App Store Connect API → +**, access *App Manager*. Download the `.p8` once; it goes in the keychain, **never in the repo or a chat**. Note the key ID and issuer ID. | <https://appstoreconnect.apple.com/access/integrations/api> | `testflight-upload-key` |
+| ⑤ Upload key | you | **Users and Access → Integrations → App Store Connect API → +**, access *App Manager*. Download the `.p8` once (Apple never offers it again) and move it to `~/.appstoreconnect/private_keys/AuthKey_<key ID>.p8`, readable only by you (`chmod 600`). Apple's upload tools look for it there by name. **Never in the repo or a chat.** Tell the agent the key ID and the issuer ID; neither is secret. | <https://appstoreconnect.apple.com/access/integrations/api> | `testflight-upload-key` |
 | Devices (only for a cable install) | you | Xcode registers a plugged-in iPhone or iPad by itself when the agent installs; add one by hand only if asked. | <https://developer.apple.com/account/resources/devices/list> | — |
 
 ### What the app's ID allows, and why
@@ -57,6 +58,7 @@ the same page.
 |---|---|---|
 | iCloud (with CloudKit) | a reader's marks and counts follow them between iPad, iPhone and Mac | not yet (`icloud-sync-try-signed`) |
 | Associated Domains | a link to the reading site opens the app | not yet |
+| Siri | "Hey Siri, play al-Kahf in Hifth"; on a HomePod only after Apple's separate approval, below | not yet (`siri-play-recitation`) |
 | Push Notifications | room for a reminder to revise, if one is ever built; it would also need its own key | no |
 | Sign in with Apple | the simplest sign-in if readers ever need an account to share copies; Apple requires it if any other sign-in (Google and the like) is offered | no |
 
@@ -71,12 +73,39 @@ the same page.
 - **Only if a home-screen widget is built:** an App Group, which *is* a box on the ID page.
 - **Paid features:** in-app purchase is on for every ID already.
 
+### Siri on a HomePod: its own approval
+
+Ticking Siri on the ID is not enough for a HomePod. Apple has to approve the app separately
+before a HomePod will pass "Hey Siri, play …" to Hifth. In order:
+
+| step | who | what | link | tracked as |
+|---|---|---|---|---|
+| AirPlay to a HomePod | agent | an AirPlay button; no approval needed | — | `recitation-airplay` |
+| Siri plays recitation on the iPhone and iPad | agent | the app answers Siri's play requests | — | `siri-play-recitation` |
+| Ask Apple for HomePod | you, signed in | the request form; send it only once the step above works | <https://developer.apple.com/contact/request/sirikit-media-intent-for-homepod/> | `homepod-siri-request` |
+
 Then the agent: set the team in `native/project.yml`, sign, and install on your devices
 (`testflight-sign-with-paid-team`), then the archive (`testflight-archive-builds`). The upload
 stays locked until the TestFlight licence decision moves to A
 ([native-testflight-licence.md](../../../docs/decisions/native-testflight-licence.md)). The whole
 road is [testflight-plan.md](../../../docs/design/testflight-plan.md); the iPhone's own questions
 are [iphone-app.md](../../../docs/design/iphone-app.md).
+
+### The tools for signing, archiving and uploading
+
+Nothing to install beyond Xcode. Checked 2026-11-09 on this laptop.
+
+| tool | what it does here | how to check it |
+|---|---|---|
+| Xcode (26.6) | builds, signs, archives | `xcodebuild -version` |
+| Xcode signed in to your Apple account | lets the build make and renew certificates and profiles by itself (`-allowProvisioningUpdates`) | Xcode → Settings → Accounts shows the team `76NHKA839A` |
+| XcodeGen | makes the Xcode project from `native/project.yml` | `xcodegen --version` (`brew install xcodegen` if missing) |
+| `xcodebuild -exportArchive` with the upload key | sends the archive to App Store Connect | needs the key file from ⑤ |
+| `xcrun devicectl` | installs on a plugged-in iPhone or iPad | `xcrun devicectl list devices` |
+
+Not used: fastlane (a third-party tool that wraps the same Apple commands) and Apple's
+Transporter app. The first certificate for uploads ("Apple Distribution") is made by Xcode the
+first time it archives; nothing to do by hand.
 
 ## Cloudflare: the share page
 

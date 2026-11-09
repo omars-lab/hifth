@@ -109,6 +109,15 @@ The full terms of every source, quoted from the source itself, are in the
    an Apple reviewer sees it too?
 5. **Later, could the app be sold on the App Store with in-app purchases,** with the GPL data
    inside it? If not, which of the materials above would have to go first?
+6. **A smaller first step: may the owner send the build through TestFlight to no one but
+   the owner?** It would go to the owner's own devices only, as an "internal" test, which Apple does not
+   review first. But the copy still sits on Apple's servers, and Apple's developer agreement
+   (section 6.6, version of 29 October 2026) lets Apple use any TestFlight build for its own
+   compatibility, bug and security testing. Is that a distribution of the GPL data, or of The
+   Study Quran's text? If not, this step could start before any outside tester. Our research
+   is in [the TestFlight research note](../research/2026-11-09-testflight-own-devices.md). We
+   did not read Apple's separate TestFlight terms or the App Store Connect terms; please check
+   those too.
 
 ## What is this not asking?
 

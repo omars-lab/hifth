@@ -51,7 +51,7 @@ flowchart LR
   *Associated Domains* (site links open the app) and *iCloud* (the usage counts sync), since both
   are already waiting on this membership.
 - In App Store Connect: create the app record for platforms iOS and macOS, which covers iPhone, iPad and Mac, with that ID. The name shown to
-  testers is "Hifth". No store listing is made; TestFlight needs the record, not a listing.
+  testers is "Hifth - The Huffaz Toolkit". No store listing is made; TestFlight needs the record, not a listing.
 - The agent sets the team ID in the project settings, which are empty today, and installs the app
   on your iPad and Mac with the paid team. The install then lasts a year, not seven days.
 
@@ -94,7 +94,8 @@ record already names.
 <details><summary>④ Upload and processing (agent)</summary>
 
 One command uploads the archive with an App Store Connect key (made once by you in App Store
-Connect, under Users and Access, Integrations; kept in the keychain, never in the repo). Apple
+Connect, under Users and Access, Integrations; kept as a file in your home folder, where
+Apple's upload tools look for it, never in the repo). Apple
 then processes the build, usually in under an hour, and emails when it is ready.
 
 </details>
@@ -148,7 +149,7 @@ Yes. The membership is active (2026-11-08) and the team ID is `76NHKA839A`. It i
 individual account in the owner's own name; publishing under Bytes of Purpose instead is a
 separate question, and testing does not wait for it.
 
-### ② Register the app's ID and make its App Store Connect record · **open**
+### ② Register the app's ID and make its App Store Connect record · **answered**
 
 Yours, in the Apple Developer site and App Store Connect: the ID `com.bytesofpurpose.hifth`
 with Associated Domains and iCloud turned on, and an app record for iOS and macOS (iPhone, iPad and Mac) named Hifth. No store
@@ -158,18 +159,26 @@ that was decided on purpose ([publisher-account.md](publisher-account.md)).
 
 The ID was registered on 2026-11-09, with Push Notifications and Sign in with Apple also
 turned on. Neither does anything until the app asks for it. The agent confirms that iCloud and
-Associated Domains are on when it first signs (③). The App Store Connect record is not
-confirmed yet.
+Associated Domains are on when it first signs (③). The App Store Connect record was made the
+same day for iOS and macOS, named "Hifth - The Huffaz Toolkit".
 
 ### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **open**
 
 The agent's, now that the team ID is known (①). Installs then last a year instead of seven days.
 
+**No cable needed after the first time, and nothing uploaded.** Xcode installs over Wi-Fi when the
+laptop and the device share a network. On iOS or iPadOS 27 and later it pairs with no cable at
+all; on older versions, one cable pairing first. TestFlight would also install without a cable,
+but it uploads the build to Apple, which the licence decision does not allow yet
+([research note](../research/2026-11-09-testflight-own-devices.md); the licence brief now asks
+about that narrower step as question 6).
+
 ### ④ Make the archive build on the laptop, with the upload still locked · **open**
 
 The agent's. Archive and export settings, the privacy manifest, the encryption answer, a build
-number that counts up, the sandbox Apple requires of every Mac build sent through TestFlight
-(the Mac build has none today), and the archive gate opened while the upload gate stays shut. Noted in
+number that counts up, the Mac sandbox (the Mac build has none today; Apple's own pages require it
+only for the Mac App Store, and developer forums say TestFlight for Mac needs it too, see
+[the research note](../research/2026-11-09-testflight-own-devices.md)), and the archive gate opened while the upload gate stays shut. Noted in
 the decision record when the gate changes.
 
 ### ⑤ Write the brief for the licence reader · **answered**
@@ -186,8 +195,9 @@ moves to A with who read it and when; on a no, B is the fallback.
 
 ### ⑦ Make the App Store Connect key the upload uses · **open**
 
-Yours, in App Store Connect under Users and Access, Integrations. It goes in the keychain,
-never in the repo.
+Yours, in App Store Connect under Users and Access, Integrations. The key file goes in your
+home folder, where Apple's upload tools look for it (the app-setup skill gives the exact
+place), never in the repo.
 
 ### ⑧ Write the upload step · **blocked**
 

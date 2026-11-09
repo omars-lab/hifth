@@ -35,9 +35,9 @@ made then decides whether the iPhone is in from the start.
 
 ## Open questions, and what would answer each
 
-### ① Make the App Store Connect record for iPhone and iPad, not iPad only · **open**
+### ① Make the App Store Connect record for iPhone and iPad, not iPad only · **answered**
 
-Yours, when doing TestFlight step ②: tick both platforms, **iOS** (iPhone and iPad) and **macOS** (the Mac build uses the same ID, so one record covers all three). The build
+Done 2026-11-09, as "Hifth - The Huffaz Toolkit". Yours, when doing TestFlight step ②: tick both platforms, **iOS** (iPhone and iPad) and **macOS** (the Mac build uses the same ID, so one record covers all three). The build
 already says which devices it runs on. **I did not check** whether Apple lets a later version
 drop the iPhone once a build that runs on it has gone to testers; it is known to refuse that
 for apps in the store, so settle the iPhone before the first upload, not after.
@@ -59,7 +59,7 @@ the best as the default and the others as a setting.
 
 ### ④ Install it on the owner's own iPhone with the paid team · **blocked**
 
-The agent's, once the app ID is registered (TestFlight ②) and the app is signed with the paid
+The agent's, now that the app ID is registered (TestFlight ②), once the app is signed with the paid
 team (TestFlight ③). Same install as the iPad: plug in, `make app-device-install DEVICE=…`.
 
 **Recitation on the phone and the iPad (⑤–⑦).** The app already plays each verse's recitation, streamed from Quran.com's public audio site.
@@ -81,9 +81,30 @@ the background. If it does, playback moves to the native side of the app.
 The agent's, after ⑥. Tell the lock screen which verse and reciter are playing, and answer its
 play, pause and next buttons.
 
+**Recitation on a HomePod (⑧–⑩).** There are two ways, and the second needs Apple's approval,
+which is a separate step of its own.
+
+### ⑧ An AirPlay button, so recitation plays on a HomePod or other speaker · **open**
+
+The agent's, after ⑥. AirPlay needs nothing from Apple. Add the button, and tell iOS the
+recitation is long listening so the HomePod plays it smoothly.
+
+### ⑨ Answer "Hey Siri, play al-Kahf in Hifth" on the iPhone and iPad · **open**
+
+The agent's, after ⑥. The Siri box on the app's ID allows it; the app then has to answer
+Siri's request to play, naming a surah or a page. Built and tried on the phone before ⑩.
+
+### ⑩ Ask Apple to let a HomePod pass those requests to Hifth · **blocked**
+
+Yours, once ⑨ works. A separate approval: a form at
+<https://developer.apple.com/contact/request/sirikit-media-intent-for-homepod/>, signed in. The
+form is behind Apple's sign-in, so I did not read what it asks; Apple's general rule is that it
+is granted to an app that already answers Siri's play requests, so asking before ⑨ works would
+likely be turned down. The agent drafts the answers when the time comes.
+
 ## What the app's ID allows, and what else may be needed
 
-The ID was registered 2026-11-09 with iCloud, Associated Domains, Push Notifications and Sign
-in with Apple; the app-setup skill lists why each is there. A microphone line is needed only if
+The ID was registered 2026-11-09 with iCloud, Associated Domains, Siri, Push Notifications and
+Sign in with Apple; the app-setup skill lists why each is there. A microphone line is needed only if
 the voice coach ships ([maqam-voice-coach.md](maqam-voice-coach.md)). A shared app group is
 needed only if a home-screen widget is ever built.

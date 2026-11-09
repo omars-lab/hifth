@@ -222,7 +222,8 @@ make app-device-install DEVICE='<name>' ROUTE=/hafs-kfqc/p45
 The target builds for a real device (which needs a signing team), installs with `devicectl`
 and launches at the route. `TEAM` is read from the one "Apple Development" identity in the
 keychain; pass `TEAM=<id>` if there is more than one. A free team signs for 7 days and cannot
-send to TestFlight. Do not guess a team id; ask the owner.
+send to TestFlight. The paid team is `76NHKA839A` (since 2026-11-08; the app-setup skill
+holds every ID); its installs last a year.
 
 `devicectl` passes env vars through a `DEVICECTL_CHILD_` prefix, the way `simctl` uses
 `SIMCTL_CHILD_`, which is how the route reaches the app.
