@@ -152,7 +152,8 @@ separate question, and testing does not wait for it.
 
 Yours, in the Apple Developer site and App Store Connect: the ID `com.bytesofpurpose.hifth`
 with Associated Domains and iCloud turned on, and an iPad app record named Hifth. No store
-listing.
+listing. Both tie Hifth, and the name shown under it ("Omar Eid"), to this membership for good;
+that was decided on purpose ([publisher-account.md](publisher-account.md)).
 
 ### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **open**
 

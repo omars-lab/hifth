@@ -3246,6 +3246,72 @@
       "note": "External tester group, email invites only, no public link; the agent drafts a short note for testers."
     },
     {
+      "id": "publisher-account-is-company",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "①"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Not yet (owner, 2026-11-08), so Hifth is published under 'Omar Eid' (option A)."
+    },
+    {
+      "id": "publisher-account-name-matters",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "②"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Nothing to wait for without a registered company; testers see 'Hifth, by Omar Eid'."
+    },
+    {
+      "id": "publisher-account-hold-permanent-steps",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "③"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "No hold: the App Store Connect record, first upload and iCloud box are all made under team 76NHKA839A."
+    },
+    {
+      "id": "publisher-account-prayer-buddy",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "④"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Stays as it is, under the owner's name (2026-11-08); rules out converting the membership."
+    },
+    {
+      "id": "publisher-account-enrol-company",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "⑤"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Not now: Bytes of Purpose is not a registered company. Hifth could move to a company membership only after an App Store release."
+    },
+    {
+      "id": "publisher-account-move-plan",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "⑥"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Not needed: the TestFlight plan stays on team 76NHKA839A."
+    },
+    {
       "id": "paid-features-which",
       "source": {
         "file": "docs/design/paid-features.md",
