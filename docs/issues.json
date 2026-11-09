@@ -3750,10 +3750,10 @@
         "file": "docs/design/sharing-between-readers.md",
         "item": "⑥"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Choose where shared copies live: Cloudflare's free database (suggested; no pausing stated, keeps shares apart from the held copy) or a new Supabase project at 25 US dollars a month so it never pauses."
+      "note": "Choose where shared copies live: Cloudflare's free database (suggested; no pausing stated, keeps shares apart from the held copy) or a new Supabase project at 25 US dollars a month so it never pauses. Answered by Omar on 2026-11-09: Cloudflare's free database."
     },
     {
       "id": "sharing-cloudflare-price",
@@ -3772,10 +3772,21 @@
         "file": "docs/design/sharing-between-readers.md",
         "item": "⑧"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Pick the sub-address for the share page (such as hifth.bytesofpurpose.com or share.bytesofpurpose.com) and add its address entry; the reading app stays on the blog's address."
+      "note": "Pick the sub-address for the share page (such as hifth.bytesofpurpose.com or share.bytesofpurpose.com) and add its address entry; the reading app stays on the blog's address. Answered by Omar on 2026-11-09: hifth.bytesofpurpose.com/share, for now."
+    },
+    {
+      "id": "sharing-cloudflare-setup",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑬"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Set up hifth.bytesofpurpose.com/share on Cloudflare with its free database behind it: the address entry, a small server at /share, a placeholder page with no Qur'an text. What it shows waits on ③ and ⑫; nothing goes live before ②; re-ask whether the name is for good before a passkey or app link is tied to it."
     },
     {
       "id": "sharing-sign-in",
