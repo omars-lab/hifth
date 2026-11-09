@@ -89,9 +89,10 @@ GOLDEN_ROUTES ?= /hafs-kfqc/2:255 /hafs-kfqc/p45 /hafs-kfqc/p45?field=dark
 # 2026-09-29 (native-shell.md ③) and this row is what notices if it changes.
 IPHONE        ?= iPhone 17
 GOLDEN_IPHONE_ROUTES ?= /hafs-kfqc/2:255
-# The Apple Development team, read from the signing identity in the keychain.
+# The Apple Development team, read from the signing certificate's "OU" field
+# (the bracketed id in its name is the certificate's own, not the team's).
 # Only device builds and archives need it; simulator and Mac builds do not.
-TEAM         ?= $(shell security find-identity -v -p codesigning 2>/dev/null | sed -n 's/.*Apple Development: .*(\([A-Z0-9]\{10\}\)).*/\1/p' | head -1)
+TEAM         ?= $(shell sh native/scripts/signing-team.sh)
 # The plugged-in iPad, by the name `xcrun devicectl list devices` prints.
 DEVICE       ?=
 SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(patsubst /%,%,$(ROUTE))))))$(if $(filter-out light,$(APPEARANCE)),-$(APPEARANCE),)$(if $(LOCALE),-$(LOCALE)).png
