@@ -114,6 +114,13 @@ export function plan(cards, existing) {
 
 // ---------------------------------------------------------------- GitHub side
 
+// GitHub answers a large batch with 502 now and then, or cuts the reply off
+// part-way (gh then says "unexpected end of JSON input"). One wait and a retry
+// is usually enough for either. Anything else is a real failure.
+export function worthRetrying(stderr) {
+  return /HTTP 50[234]|unexpected end of JSON input/.test(String(stderr));
+}
+
 function gql(query, vars = {}) {
   const args = ["api", "graphql", "-f", `query=${query}`];
   for (const [k, v] of Object.entries(vars)) args.push(typeof v === "number" ? "-F" : "-f", `${k}=${v}`);
@@ -123,9 +130,7 @@ function gql(query, vars = {}) {
       raw = execFileSync("gh", args, { encoding: "utf8", maxBuffer: 64 << 20, stdio: ["ignore", "pipe", "pipe"] });
       break;
     } catch (e) {
-      // GitHub answers a large batch with 502 now and then; one wait and a retry
-      // is usually enough. Anything else is a real failure.
-      if (attempt >= 3 || !/HTTP 50[234]/.test(String(e.stderr))) throw e;
+      if (attempt >= 3 || !worthRetrying(`${e.stderr}${e.message}`)) throw e;
       console.log(`ev=retry attempt=${attempt} msg="GitHub server error, trying again"`);
       execFileSync("sleep", [String(5 * attempt)]);
     }
