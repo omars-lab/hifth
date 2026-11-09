@@ -3327,7 +3327,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "Make the App Store Connect API key under Users and Access, Integrations; it goes in the keychain, never the repo."
+      "note": "Make the App Store Connect API key under Users and Access, Integrations; the key file goes in ~/.appstoreconnect/private_keys/ (where the upload tools look), never the repo; the agent needs only the key ID and issuer ID."
     },
     {
       "id": "testflight-upload-step",

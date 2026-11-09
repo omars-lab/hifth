@@ -45,7 +45,7 @@ flowchart LR
 | ② Register the app ID | you | **Identifiers → +** → *App IDs* → *App*. Description "Hifth", **Explicit** bundle ID `com.bytesofpurpose.hifth`. Tick **iCloud** (with CloudKit), **Associated Domains** and **Siri**; **Push Notifications** and **Sign in with Apple** are optional (the table below says why each is there). Continue, Register. | <https://developer.apple.com/account/resources/identifiers/add/bundleId> | `testflight-register-app` (**next**) |
 | ③ App Store Connect record | you | **Apps → + → New App**. Platforms **iOS and macOS** both ticked (one record for iPhone, iPad and Mac, since the Mac build uses the same ID), name "Hifth - The Huffaz Toolkit" (the name is 30 characters at most and must not be taken by another app), language English, bundle ID `com.bytesofpurpose.hifth` (it appears in the list once ② is done), SKU `hifth`, access Full. No store listing is needed for TestFlight. | <https://appstoreconnect.apple.com/apps> | `testflight-register-app` |
 | ④ iCloud container | agent, or you | **Identifiers → +** → *iCloud Containers*, ID `iCloud.com.bytesofpurpose.hifth`; then on the app ID from ②, *iCloud → Configure* and tick it. Xcode can also make it the first time the agent signs with the team. | <https://developer.apple.com/account/resources/identifiers/list/cloudContainer> | `icloud-sync-try-signed` |
-| ⑤ Upload key | you | **Users and Access → Integrations → App Store Connect API → +**, access *App Manager*. Download the `.p8` once; it goes in the keychain, **never in the repo or a chat**. Note the key ID and issuer ID. | <https://appstoreconnect.apple.com/access/integrations/api> | `testflight-upload-key` |
+| ⑤ Upload key | you | **Users and Access → Integrations → App Store Connect API → +**, access *App Manager*. Download the `.p8` once (Apple never offers it again) and move it to `~/.appstoreconnect/private_keys/AuthKey_<key ID>.p8`, readable only by you (`chmod 600`). Apple's upload tools look for it there by name. **Never in the repo or a chat.** Tell the agent the key ID and the issuer ID; neither is secret. | <https://appstoreconnect.apple.com/access/integrations/api> | `testflight-upload-key` |
 | Devices (only for a cable install) | you | Xcode registers a plugged-in iPhone or iPad by itself when the agent installs; add one by hand only if asked. | <https://developer.apple.com/account/resources/devices/list> | — |
 
 ### What the app's ID allows, and why
@@ -90,6 +90,22 @@ stays locked until the TestFlight licence decision moves to A
 ([native-testflight-licence.md](../../../docs/decisions/native-testflight-licence.md)). The whole
 road is [testflight-plan.md](../../../docs/design/testflight-plan.md); the iPhone's own questions
 are [iphone-app.md](../../../docs/design/iphone-app.md).
+
+### The tools for signing, archiving and uploading
+
+Nothing to install beyond Xcode. Checked 2026-11-09 on this laptop.
+
+| tool | what it does here | how to check it |
+|---|---|---|
+| Xcode (26.6) | builds, signs, archives | `xcodebuild -version` |
+| Xcode signed in to your Apple account | lets the build make and renew certificates and profiles by itself (`-allowProvisioningUpdates`) | Xcode → Settings → Accounts shows the team `76NHKA839A` |
+| XcodeGen | makes the Xcode project from `native/project.yml` | `xcodegen --version` (`brew install xcodegen` if missing) |
+| `xcodebuild -exportArchive` with the upload key | sends the archive to App Store Connect | needs the key file from ⑤ |
+| `xcrun devicectl` | installs on a plugged-in iPhone or iPad | `xcrun devicectl list devices` |
+
+Not used: fastlane (a third-party tool that wraps the same Apple commands) and Apple's
+Transporter app. The first certificate for uploads ("Apple Distribution") is made by Xcode the
+first time it archives; nothing to do by hand.
 
 ## Cloudflare: the share page
 

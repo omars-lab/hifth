@@ -94,7 +94,8 @@ record already names.
 <details><summary>④ Upload and processing (agent)</summary>
 
 One command uploads the archive with an App Store Connect key (made once by you in App Store
-Connect, under Users and Access, Integrations; kept in the keychain, never in the repo). Apple
+Connect, under Users and Access, Integrations; kept as a file in your home folder, where
+Apple's upload tools look for it, never in the repo). Apple
 then processes the build, usually in under an hour, and emails when it is ready.
 
 </details>
@@ -186,8 +187,9 @@ moves to A with who read it and when; on a no, B is the fallback.
 
 ### ⑦ Make the App Store Connect key the upload uses · **open**
 
-Yours, in App Store Connect under Users and Access, Integrations. It goes in the keychain,
-never in the repo.
+Yours, in App Store Connect under Users and Access, Integrations. The key file goes in your
+home folder, where Apple's upload tools look for it (the app-setup skill gives the exact
+place), never in the repo.
 
 ### ⑧ Write the upload step · **blocked**
 
