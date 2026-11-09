@@ -201,7 +201,7 @@ export function VerseDrawer({
 
   if (!shown) return null;
   return (
-    <section ref={ref} className={styles.drawer} aria-label={t.verseTools(label)}>
+    <section ref={ref} className={styles.drawer} aria-label={t.verseTools(label)} data-verse-drawer>
       <header className={styles.head}>
         <span className={styles.title}>{label}</span>
         {end}
