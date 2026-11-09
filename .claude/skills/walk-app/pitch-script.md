@@ -64,6 +64,16 @@ and pages must still be there; only recitation may need the internet (unless the
 on the device). This is a by-hand check, parked on the manual-testing list as
 `check-offline-survival`.
 
+## The iPad walk, one command
+
+`make pitch-walk` walks every step a machine can check in the iPad simulator, held sideways,
+in one start of the app: it builds the pitch version, hands the app the list of steps, and
+prints a tick or a cross for each, then "N of M steps pass" and the folder of pictures. Add
+`STEP=15` to walk one step, `NO_BUILD=1` to skip the build. The pictures show the book's text:
+look at them, never commit them. The per-step commands in the table above still work, one
+start of the app each. Faults the walk turns up go in
+[docs/design/pitch-walk.md](../../../docs/design/pitch-walk.md).
+
 ## The browser check, one command
 
 `make pitch-script` runs one browser test per step (`apps/web/e2e/pitch-script.spec.ts`), at
