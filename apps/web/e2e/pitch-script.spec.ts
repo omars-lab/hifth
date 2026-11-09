@@ -113,7 +113,7 @@ test.describe("The pitch demo, step by step", () => {
     await page.goto("/#/hafs-kfqc/2:255?open=commentary");
     await expect(card(page)).toContainText("Related verses", { timeout: 20_000 });
     const cards = card(page).getByRole("button", { name: /^Hop to / });
-    await expect(cards).toHaveCount(8);
+    await expect(cards).toHaveCount(6);
     await expect(card(page).getByRole("button", { name: /^Show \d+ more related verses?$/ })).toBeVisible();
     const target = (await cards.first().getAttribute("aria-label"))?.match(/\d+:\d+/)?.[0] ?? "";
     expect(target).not.toBe("");
@@ -204,6 +204,10 @@ test.describe("The pitch demo, step by step", () => {
   test("13 · 18:60's note covers the whole story, and its link lands on 18:65", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/18:60?open=commentary");
     await expect(note(page)).toBeVisible({ timeout: 20_000 });
+    // The note names six places past itself, and each is one card: 18:65, the
+    // runs 18:9–26 and 18:83–98, and 25:53, 27:61 and 55:19–20 (its mention of
+    // verse 93 falls inside 83–98). The script once said eight (2026-11-09).
+    await expect(card(page).getByRole("button", { name: /^Hop to / })).toHaveCount(6);
     const hop = card(page).getByRole("button", { name: /Hop to .*18:65\b/ }).first();
     await hop.scrollIntoViewIfNeeded();
     await settle(hop);
