@@ -419,6 +419,47 @@ test.describe("Hifth · the folded bookmark corner on the open book", () => {
     expect(m.outside, "the page under the fold pokes past the rounded corner").toBe(0);
   });
 
+  // Owner, Firefox, 2026-11-08 ("still issues with corners"): the fold was laid
+  // from the paper's outer top, so its flap and the page beneath sat over the
+  // paper's dark frame and read as a card pasted on the page. A fold turns the
+  // paper down, not its frame: the frame runs whole across the top, and the
+  // fold starts below it, at rest and with the pointer on it.
+  test("a folded corner starts below the paper's frame, which runs whole across the top", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p8");
+    await expect(page.locator('svg[aria-labelledby="page-label-8"]')).toBeVisible();
+    await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
+    const drawer = page.getByRole("dialog", { name: "Bookmark" });
+    await drawer.getByRole("button", { name: "Save name" }).click();
+    await expect(drawer).toBeHidden();
+    const unfold = page.getByRole("button", { name: /Unfold this corner/ });
+    await expect(unfold).toHaveAttribute("data-folded", "");
+    const measure = () =>
+      unfold.evaluate((btn) => {
+        const b = btn.getBoundingClientRect();
+        const paper = [...document.querySelectorAll<HTMLElement>("svg[aria-labelledby]")]
+          .map((s) => s.parentElement!)
+          .find((p) => {
+            const r = p.getBoundingClientRect();
+            return r.width > 0 && b.left >= r.left - 1 && b.right <= r.right + 1;
+          })!;
+        const r = paper.getBoundingClientRect();
+        const z = r.width / paper.offsetWidth;
+        const under = btn.querySelector(":scope > span:first-child")!.getBoundingClientRect();
+        const flap = btn.querySelector("span > span")!.getBoundingClientRect();
+        return { frameBottom: r.top + parseFloat(getComputedStyle(paper).borderTopWidth) * z, under: under.top, flap: flap.top };
+      });
+    await page.mouse.move(5, 5);
+    await page.waitForTimeout(400); // the fold opens with a short ease
+    const rest = await measure();
+    expect(rest.under, "the page under the fold covers the paper's frame").toBeGreaterThanOrEqual(rest.frameBottom - 0.25);
+    expect(rest.flap, "the flap covers the paper's frame").toBeGreaterThanOrEqual(rest.frameBottom - 0.25);
+    await unfold.hover();
+    await page.waitForTimeout(400);
+    const hover = await measure();
+    expect(hover.under, "with the pointer on it, the fold covers the frame").toBeGreaterThanOrEqual(hover.frameBottom - 0.25);
+    expect(hover.flap, "with the pointer on it, the flap covers the frame").toBeGreaterThanOrEqual(hover.frameBottom - 0.25);
+  });
+
   // Owner, Firefox (#202): with one page on the desk the ribbon hung out on the
   // desk beside the book, and zoomed in it lay across the folded corner. A
   // ribbon hangs from its own page, toward the spine, clear of the fold.

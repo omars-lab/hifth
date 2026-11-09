@@ -34,7 +34,10 @@
 .fold {
   --fold-inset: calc((var(--fore-edge-stack) + var(--leaf-edge-width)) * var(--leaf-z, 1));
   position: absolute;
-  inset-block-start: var(--leaf-y, 0px);
+  /* Below the paper's dark frame, not over it: the fold turns the paper down,
+     and the frame runs whole across the top (owner, 2026-11-08, "still issues
+     with corners": laid over the frame, the fold read as a card pasted on). */
+  inset-block-start: calc(var(--leaf-y, 0px) + var(--leaf-edge-width) * var(--leaf-z, 1));
   left: calc(var(--leaf-x, 0px) + var(--fold-inset));
   inline-size: var(--touch-min);
   block-size: var(--touch-min);
@@ -49,8 +52,8 @@
   left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) - var(--touch-min) - var(--fold-inset));
 }
 
-/* The page beneath, where the corner was: the same paper with its own top
-   edge, and none of the top page's ink, lying in the flap's shadow — darkest
+/* The page beneath, where the corner was: the same paper, with none of the
+   top page's ink, lying in the flap's shadow — darkest
    at the crease. Drawn the same colour as the page, the fold read as a flat
    square pasted on (#202). Its outer corner, the one on the page's own
    corner, is rounded 6px like the flap's tip: following only the board's
@@ -74,11 +77,6 @@
     0 100%
   );
   background:
-    linear-gradient(
-      to bottom,
-      var(--leaf-edge) 0 calc(var(--leaf-edge-width) * var(--leaf-z, 1)),
-      transparent 0
-    ),
     linear-gradient(to top left, var(--fold-shade) 50%, var(--fold-shade-mid) 62%, var(--fold-shade-far) 100%);
   transition: inline-size var(--dur-fast) ease, block-size var(--dur-fast) ease;
 }
@@ -96,11 +94,6 @@
     100% 100%
   );
   background:
-    linear-gradient(
-      to bottom,
-      var(--leaf-edge) 0 calc(var(--leaf-edge-width) * var(--leaf-z, 1)),
-      transparent 0
-    ),
     linear-gradient(to top right, var(--fold-shade) 50%, var(--fold-shade-mid) 62%, var(--fold-shade-far) 100%);
 }
 
