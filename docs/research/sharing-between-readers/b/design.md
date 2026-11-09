@@ -23,7 +23,7 @@ The sources are in [the raw findings](research.md). Researcher A worked on the s
 ## What does it change for a hafiz?
 
 - **For the student:** nothing while reciting. Once in a while, one tap to send their marks to a teacher, and one tap to stop.
-- **For the teacher:** the thing a teacher now does by memory or a margin note: "you keep going from this verse into that one." The teacher opens the link, sees the student's slips on the page, and drills them. A download button lets the teacher keep a copy (owner, 2026-11-08).
+- **For the teacher:** the thing a teacher now does by memory or a margin note: "you keep going from this verse into that one." The teacher opens the link, sees the student's mistakes on the page, and drills them. A download button lets the teacher keep a copy (owner, 2026-11-08).
 - **What it must never do:** let anyone other than the person the student chose see where that student's memory fails, or let the time-of-night record travel without the student meaning it.
 
 ## Why is this being asked now?
@@ -45,7 +45,7 @@ Nothing breaks. A student can already save their marks to a file and send it; th
 
 Looked, on the web, 2026-11-08 (details and how each was seen are in [the findings](research.md)):
 
-- **Anki** (flashcards): one account syncs your own cards. To give cards to someone else you export a file, and when you do, Anki strips your review history by default: "Anki will assume that you are sharing the deck with other people." Fetched. That is the model for "send the slips, not the times".
+- **Anki** (flashcards): one account syncs your own cards. To give cards to someone else you export a file, and when you do, Anki strips your review history by default: "Anki will assume that you are sharing the deck with other people." Fetched. That is the model for "send the mistakes, not the times".
 - **Quran.com**: one account (Google, Facebook, Apple or email) syncs your own notes, progress and collections; sharing with others is only for public reflections. Fetched. A user report says the iOS app synced through iCloud and the website through the account, and they did not meet. Snippet.
 - **Tarteel**: public links to a recitation session "to get feedback from your instructor or peers" (2021). Fetched. No private send-to-teacher feature found in the app itself. Snippet.
 - **Mofassal** and classroom apps (Maktab, Hifz Tracker): teacher groups, each student's plan, mistake counts, roles of owner, editor and viewer, share a plan by link or invite. All behind accounts. Mofassal fetched; the rest snippets.
@@ -72,13 +72,13 @@ The pattern: your own devices sync through an account or your own cloud; **givin
 | Reaches | everyone, today | Apple accounts only; nothing found shows a browser or Android person can open one | everyone with a browser | everyone with a browser |
 | Live, and can be switched off? | no: a copy, out of the student's hands once sent | yes, both | yes, both | yes, both |
 | Who can see it on the way | whatever carries the file (Apple for AirDrop, the mail provider for email) | Apple, inside the two accounts; counts against the student's iCloud space | our server holds only locked bytes it cannot read; anyone the link is forwarded to can read it | our server, readable by us, protected by per-person rules in the database |
-| Pros | almost nothing to build: the saved file exists; no server, no account, no money; fits the existing decision; Anki's model | Apple runs everything; real accounts on both sides; Apple's screen handles invite, stop and permissions; the student can see who has it | does exactly what the owner described; no account for anyone; our server cannot read a student's slips; the teacher needs nothing but the link; the same server can later hold the "where most readers slip" pool | a teacher can see all their students on one page; a teacher could write back (a note, a set task); the reader's own devices could ride the same accounts |
-| Cons | not live; no way to take it back; a teacher must know to open it as "a student's file", not merge it | needs the paid team's signing (not done yet); leaves out Firefox, Android and anyone without an Apple account; the browsers can't start a share | a forwarded link is a forwarded copy; if the student loses the device that holds the "stop" key, they cannot switch it off unless that key also follows them; needs a small server and a page on an address we fully control (whoever serves the page could read the key) | accounts, a sign-in screen, password-free email, account deletion, a privacy notice; our server can read every student's slips; Google sign-in cannot run inside the Apple apps' web view and must open the system browser; the most work by far |
+| Pros | almost nothing to build: the saved file exists; no server, no account, no money; fits the existing decision; Anki's model | Apple runs everything; real accounts on both sides; Apple's screen handles invite, stop and permissions; the student can see who has it | does exactly what the owner described; no account for anyone; our server cannot read a student's mistakes; the teacher needs nothing but the link; the same server can later hold the "where most readers slip" pool | a teacher can see all their students on one page; a teacher could write back (a note, a set task); the reader's own devices could ride the same accounts |
+| Cons | not live; no way to take it back; a teacher must know to open it as "a student's file", not merge it | needs the paid team's signing (not done yet); leaves out Firefox, Android and anyone without an Apple account; the browsers can't start a share | a forwarded link is a forwarded copy; if the student loses the device that holds the "stop" key, they cannot switch it off unless that key also follows them; needs a small server and a page on an address we fully control (whoever serves the page could read the key) | accounts, a sign-in screen, password-free email, account deletion, a privacy notice; our server can read every student's mistakes; Google sign-in cannot run inside the Apple apps' web view and must open the system browser; the most work by far |
 | Implications | adds "copy for my teacher" to what the saved-file part may do; no new door | a new name on the privacy check's list for the Apple apps' bridge; shared records' shape can only grow once live; does not help the browsers, so C or D is still needed for them | the privacy check gains the locked-link sender as a named way out; forces the sub-address question (④); a server with a little upkeep; keeps D possible later | reopens "nothing readable leaves" outright; the sign-in decision (storage-model's "not this year") is made here; the passkey site name, once picked, cannot change |
 | Next decision it forces | none | whether non-Apple teachers matter (they do: the owner uses Firefox) | the address (④), and whether the stop key follows the student between devices | which sign-in ways, and the privacy notice |
 
 **Recommended: A now, C for the live teacher link, D only when a teacher needs all their students in one place.**
-Why C over D first: it is everything the owner asked for, with no accounts and a server that cannot read anyone's slips. Why not B: it does not reach a teacher on Firefox or Android, and the owner's own browser is Firefox.
+Why C over D first: it is everything the owner asked for, with no accounts and a server that cannot read anyone's mistakes. Why not B: it does not reach a teacher on Firefox or Android, and the owner's own browser is Firefox.
 
 ### How does a locked link work, end to end?
 
@@ -93,7 +93,7 @@ sequenceDiagram
     S->>T: link = share address / id # key (by message, AirDrop, email)
     T->>V: fetch the locked copy for id (the key after # is never sent)
     V-->>T: locked bytes
-    T->>T: unlock with the key, show the slips on the page, offer "Download"
+    T->>T: unlock with the key, show the mistakes on the page, offer "Download"
     S->>V: marks changed: replace the copy (using the stop code)
     S->>V: Stop sharing: delete the copy (using the stop code)
     T->>V: fetch again
@@ -141,7 +141,7 @@ Option D's accounts could later carry the same thing to the browsers too; that i
 
 ## What else could be considered, and why is it not an option here?
 
-- **A plain link with the marks written into it** (no server at all). A full map may be too long for a link, the student cannot switch it off, and anyone who sees the link sees the slips. It is a smaller A, not a live link.
+- **A plain link with the marks written into it** (no server at all). A full map may be too long for a link, the student cannot switch it off, and anyone who sees the link sees the mistakes. It is a smaller A, not a live link.
 - **Apple's iCloud web library in the browser**, so browsers could join option B. Not shown to work in Firefox; the recent forum reports of failure have no answers (from the usage-count research).
 - **A shared folder in iCloud Drive, Dropbox or Google Drive.** Works for the student's own devices; for a teacher it means both use the same company's drive. A file (A) is simpler.
 - **An email sent from the app.** That is A with a different carrier.
@@ -179,7 +179,7 @@ The time-of-night record is the most private thing the app keeps. Anki strips re
 
 ### ⑤ Is sending a share a paid extra, and is opening one always free? · **blocked**
 
-Paid features wait on the list of what is paid. A teacher who has to pay to see a student's slips would mostly not look. **What would answer it:** the paid-features list; a purchase on the web would not need the App Store, which is worth putting on that list.
+Paid features wait on the list of what is paid. A teacher who has to pay to see a student's mistakes would mostly not look. **What would answer it:** the paid-features list; a purchase on the web would not need the App Store, which is worth putting on that list.
 
 ### ⑥ Can a teacher with no Apple device open an iCloud share at all? · **blocked**
 
@@ -189,6 +189,6 @@ Nothing found says yes; one report of a browser attempt failed. **What would ans
 
 Google blocks sign-in inside an app's web view; Apple has its own sheet, but how its answer reaches the page inside the app was not checked. Only needed if D is built. **What would answer it:** a throwaway sign-in on a test Supabase project, tried in both apps.
 
-### ⑧ What does the teacher see when they open the link: the student's slips on the real page, or a list? · **open**
+### ⑧ What does the teacher see when they open the link: the student's mistakes on the real page, or a list? · **open**
 
 The page is the stronger picture for the pitch; a list is quicker to scan across a whole juz. **What would answer it:** build both roughly, open them on an iPad, and keep the loser as a setting.
