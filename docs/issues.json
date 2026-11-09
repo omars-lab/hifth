@@ -3192,7 +3192,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "One page for the licence reader: what the build carries, who gets it, how, that an Apple reviewer sees it, and the questions to answer."
+      "note": "One page for the licence reader: what the build carries, who gets it, how, that an Apple reviewer sees it, and the questions to answer. Next for the pitch (2026-11-08), alongside the drawer build that is next up for huffaz: it starts the outside reader's clock, and nothing after it (upload, testers, a Study Quran hafiz keeping the app overnight) moves until it is sent."
     },
     {
       "id": "testflight-licence-reading",
