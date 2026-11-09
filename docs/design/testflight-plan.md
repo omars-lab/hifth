@@ -142,10 +142,11 @@ answer is the last thing between the demo and a tester's iPad.
 
 Each step above as a piece of work, so the backlog tracks it.
 
-### ① Is the Apple membership active, and what is the team ID? · **open**
+### ① Is the Apple membership active, and what is the team ID? · **answered**
 
-Yours. Apple emails when the enrolment is approved. The 10-character team ID is on the
-membership page of the Apple Developer site; tell the agent.
+Yes. The membership is active (2026-11-08) and the team ID is `76NHKA839A`. It is an
+individual account in the owner's own name; publishing under Bytes of Purpose instead is a
+separate question, and testing does not wait for it.
 
 ### ② Register the app's ID and make its App Store Connect record · **open**
 
@@ -154,9 +155,9 @@ with Associated Domains and iCloud turned on, and an iPad app record named Hifth
 listing. Both tie Hifth, and the name shown under it ("Omar Eid"), to this membership for good;
 that was decided on purpose ([publisher-account.md](publisher-account.md)).
 
-### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **blocked**
+### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **open**
 
-The agent's, once the team ID is known (①). Installs then last a year instead of seven days.
+The agent's, now that the team ID is known (①). Installs then last a year instead of seven days.
 
 ### ④ Make the archive build on the laptop, with the upload still locked · **open**
 
