@@ -59,3 +59,9 @@ plan and the [backlog](backlog.md).
 
 **Next for the pitch:** step 5, the licence brief, because it unlocks both the testers and the
 App Store question at once.
+
+## What follows the reader between devices?
+
+Which of your own records (bookmarks, notes, mistake marks, where you left off, reading choices)
+should follow you between your iPad and Mac through your own iCloud, and how:
+[What should follow a reader between their iPad and Mac](design/icloud-sync.md).
