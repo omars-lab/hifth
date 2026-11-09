@@ -50,7 +50,7 @@ flowchart LR
 - In the Apple Developer site: register the app ID `com.bytesofpurpose.hifth`. Turn on
   *Associated Domains* (site links open the app) and *iCloud* (the usage counts sync), since both
   are already waiting on this membership.
-- In App Store Connect: create the app record, iPad first, with that ID. The name shown to
+- In App Store Connect: create the app record for platform iOS, which covers iPhone and iPad, with that ID. The name shown to
   testers is "Hifth". No store listing is made; TestFlight needs the record, not a listing.
 - The agent sets the team ID in the project settings, which are empty today, and installs the app
   on your iPad and Mac with the paid team. The install then lasts a year, not seven days.
@@ -151,8 +151,9 @@ separate question, and testing does not wait for it.
 ### ② Register the app's ID and make its App Store Connect record · **open**
 
 Yours, in the Apple Developer site and App Store Connect: the ID `com.bytesofpurpose.hifth`
-with Associated Domains and iCloud turned on, and an iPad app record named Hifth. No store
-listing. Both tie Hifth, and the name shown under it ("Omar Eid"), to this membership for good;
+with Associated Domains and iCloud turned on, and an iOS app record (iPhone and iPad) named Hifth. No store
+listing. The step-by-step links are in the app-setup skill; the iPhone's own questions are in
+[iphone-app.md](iphone-app.md). Both tie Hifth, and the name shown under it ("Omar Eid"), to this membership for good;
 that was decided on purpose ([publisher-account.md](publisher-account.md)).
 
 ### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **open**
