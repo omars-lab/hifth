@@ -9,6 +9,7 @@ import {
   plan,
   idInBody,
   COLUMNS,
+  worthRetrying,
 } from "../.claude/skills/issues/scripts/sync-project-board.mjs";
 
 const item = (over = {}) => ({ id: "made-up", status: "open", severity: "defect", owner: "agent", blockedBy: [], note: "", text: "", ...over });
@@ -74,4 +75,12 @@ test("a run adds the new, changes the moved, finishes the closed, and leaves the
   assert.deepEqual(p.change.map((c) => c.id), ["moved"]);
   assert.equal(p.change[0].textChanged, false);
   assert.deepEqual(p.done.map((c) => c.id), ["gone"]);
+});
+
+test("a GitHub server error or a cut-off reply is tried again; a real error is not", () => {
+  assert.equal(worthRetrying("gh: HTTP 502: Bad Gateway"), true);
+  assert.equal(worthRetrying("gh: HTTP 504"), true);
+  assert.equal(worthRetrying("unexpected end of JSON input"), true);
+  assert.equal(worthRetrying("gh: Could not resolve to a ProjectV2 (NOT_FOUND)"), false);
+  assert.equal(worthRetrying("HTTP 401: Bad credentials"), false);
 });
