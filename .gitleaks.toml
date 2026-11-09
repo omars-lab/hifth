@@ -5,9 +5,13 @@
 # SVG geometry — long strings of numbers in polygon/path coordinates — is not
 # flagged as a high-entropy secret. Everything else stays on the default rules.
 #
-# Run locally:   gitleaks detect --redact        (scans git history)
-#                gitleaks protect --staged        (scans what's about to commit)
-# The pre-commit hook runs the second form; CI runs a full history scan.
+# Run locally:   make secrets-staged    (what is about to be committed)
+#                make secrets-history   (every commit in history)
+#                make secrets           (history plus the files on disk)
+# The pre-commit hook runs the first, the pre-push hook the second; a missing
+# gitleaks fails both. scripts/secrets-staged.test.mjs proves a staged private
+# key is refused. GitHub's own secret scanning and push blocking are also on
+# for the repo (turned on 2026-11-09), as a second net behind these.
 
 title = "Hifth gitleaks config"
 
