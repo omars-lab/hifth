@@ -3254,10 +3254,10 @@
         "file": "docs/design/publisher-account.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Apple shows a company name only for a registered company with its own membership; a trading name or sole trader shows the person's legal name. Is Bytes of Purpose registered, and under what exact legal name?"
+      "note": "Not yet (owner, 2026-11-08), so Hifth is published under 'Omar Eid' (option A)."
     },
     {
       "id": "publisher-account-name-matters",
@@ -3265,10 +3265,10 @@
         "file": "docs/design/publisher-account.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Testers see 'Hifth, by Omar Eid' under the personal membership. Is 'by Bytes of Purpose' worth days to weeks of waiting for a company membership?"
+      "note": "Nothing to wait for without a registered company; testers see 'Hifth, by Omar Eid'."
     },
     {
       "id": "publisher-account-hold-permanent-steps",
@@ -3276,10 +3276,10 @@
         "file": "docs/design/publisher-account.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "Do not make Hifth's App Store Connect record, upload a build or make the iCloud box under the personal membership until the company question is answered; all three tie Hifth to that membership for good. Signing for the owner's own devices goes ahead."
+      "note": "No hold: the App Store Connect record, first upload and iCloud box are all made under team 76NHKA839A."
     },
     {
       "id": "publisher-account-prayer-buddy",
@@ -3287,10 +3287,10 @@
         "file": "docs/design/publisher-account.md",
         "item": "④"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Changing this membership into a company one moves Prayer Buddy too. Is it in the App Store, and should it stay under the owner's name?"
+      "note": "Stays as it is, under the owner's name (2026-11-08); rules out converting the membership."
     },
     {
       "id": "publisher-account-enrol-company",
@@ -3298,14 +3298,10 @@
         "file": "docs/design/publisher-account.md",
         "item": "⑤"
       },
-      "status": "blocked",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "blockedBy": [
-        "whether Bytes of Purpose is a registered company (publisher-account ①)",
-        "whether the name matters enough to wait (publisher-account ②)"
-      ],
-      "note": "Free D-U-N-S number (up to 5 working days, then 2 for Apple), the bytesofpurpose.com website and an email on it, then enrol as a company for 99 US dollars a year."
+      "note": "Not now: Bytes of Purpose is not a registered company. Hifth could move to a company membership only after an App Store release."
     },
     {
       "id": "publisher-account-move-plan",
@@ -3313,13 +3309,10 @@
         "file": "docs/design/publisher-account.md",
         "item": "⑥"
       },
-      "status": "blocked",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": [
-        "the company membership being approved (publisher-account ⑤)"
-      ],
-      "note": "Do the TestFlight plan's app ID and App Store Connect record in the company membership, and set its team ID in the signing settings."
+      "note": "Not needed: the TestFlight plan stays on team 76NHKA839A."
     },
     {
       "id": "paid-features-which",

@@ -151,9 +151,8 @@ membership page of the Apple Developer site; tell the agent.
 
 Yours, in the Apple Developer site and App Store Connect: the ID `com.bytesofpurpose.hifth`
 with Associated Domains and iCloud turned on, and an iPad app record named Hifth. No store
-listing. **Hold the App Store Connect record and the iCloud box** until the publisher question
-is answered ([publisher-account.md](publisher-account.md)): both tie Hifth, and the name shown
-under it, to the membership that makes them.
+listing. Both tie Hifth, and the name shown under it ("Omar Eid"), to this membership for good;
+that was decided on purpose ([publisher-account.md](publisher-account.md)).
 
 ### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **blocked**
 

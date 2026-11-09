@@ -9,28 +9,26 @@ start page for testers and paid extras: [design.md](../design.md). The plan this
 
 ## The short version
 
-**The answer:** a membership for a person always shows the person's legal name. Apple shows
-"Bytes of Purpose" only if Bytes of Purpose is a registered company (an LLC or similar, not a
-trading name) with its own membership. So the first question is yours: **is Bytes of Purpose a
-registered company?**
+**Decided (owner, 2026-11-08): Hifth is published under "Omar Eid", the membership we already
+have (option A).** Bytes of Purpose is not a registered company yet, and only a registered
+company can be the name Apple shows. Prayer Buddy stays as it is. So the TestFlight plan goes
+ahead on team 76NHKA839A with nothing held back, and testers will see "Hifth, by Omar Eid".
 
-**What not to do yet:** three steps in the TestFlight plan cannot be undone, and each one ties
-Hifth to whichever membership does it first:
+**What this rules out:** the name shown under Hifth is fixed when its App Store Connect record is
+made, so if Bytes of Purpose is registered later, Hifth may keep showing "Omar Eid". Apple can
+move an app to another membership only after it has been released in the App Store once, so a
+move is still possible after a release, just not before.
+
+**How the answer was reached:** a membership for a person always shows the person's legal name.
+Three steps in the TestFlight plan tie Hifth for good to whichever membership does them first:
 
 1. making Hifth's record in App Store Connect (the name shown under it is fixed when the record
    is made);
 2. uploading the first build (after that, the app's ID can never be used by another record);
 3. making the iCloud storage box for the usage-count sync (it can never be deleted).
 
-The upload is already waiting on the licence reading, so holding these three costs nothing today.
-
-**What can go ahead now:** signing the app with the paid membership, so installs on your own
-iPad and Mac last a year, and site links open the app. Both can be redone under another
-membership later.
-
-**Recommendation:** hold the three steps until you say whether Bytes of Purpose is a registered
-company. If it is, give Hifth its own company membership and make its record there (option D);
-if it is not, go ahead under your own name (option A).
+So the question that decided it was the owner's: is Bytes of Purpose a registered company? It is
+not, so all three are done in the personal membership.
 
 ```mermaid
 flowchart TD
@@ -186,34 +184,33 @@ the App Store question; those stay in the TestFlight plan and the backlog.
 
 ## Open questions, and what would answer each
 
-### ① Is Bytes of Purpose a registered company (an LLC or similar), or a name you trade under? · **open**
+### ① Is Bytes of Purpose a registered company (an LLC or similar), or a name you trade under? · **answered**
 
-Yours. Only a registered company can be the name Apple shows; a trading name or a sole trader
-cannot. If it is registered, note its exact legal name and the state it is registered in.
+Not yet (owner, 2026-11-08). So Apple cannot show it as the seller, and Hifth goes out under
+"Omar Eid" (option A).
 
-### ② Does the name testers see matter enough to wait for a company membership? · **open**
+### ② Does the name testers see matter enough to wait for a company membership? · **answered**
 
-Yours. "Hifth, by Omar Eid" against "Hifth, by Bytes of Purpose" on the invite The Study Quran
-team gets. Waiting costs days to weeks, and only matters if the licence reading comes back
-sooner than that.
+No wait: with no registered company there is nothing to wait for. Testers will see "Hifth, by
+Omar Eid".
 
-### ③ Hold the App Store Connect record, the first upload and the iCloud box until ① and ② are answered · **open**
+### ③ Hold the App Store Connect record, the first upload and the iCloud box until ① and ② are answered · **answered**
 
-The agent's. These are the three steps that cannot be undone. Signing the app for your own
-iPad and Mac goes ahead under the personal membership, since that can be redone.
+No hold. With ① answered, all three are done in the personal membership, team 76NHKA839A, as
+the TestFlight plan already says.
 
-### ④ Is Prayer Buddy in the App Store, and should it stay under your name? · **open**
+### ④ Is Prayer Buddy in the App Store, and should it stay under your name? · **answered**
 
-Yours. It decides whether changing this membership (option B) is acceptable, since a change
-moves Prayer Buddy too.
+It stays as it is, under the owner's name (2026-11-08). That rules out changing this membership
+into a company one (option B).
 
-### ⑤ Get a D-U-N-S number and enrol Bytes of Purpose as a company · **blocked**
+### ⑤ Get a D-U-N-S number and enrol Bytes of Purpose as a company · **answered**
 
-Yours, once ① says it is a registered company and ② says the name matters. Needs the D-U-N-S
-number (free, up to 5 working days, then 2 for Apple), the website on bytesofpurpose.com, an
-email on that address, and you as the person who can sign for it. Then 99 US dollars.
+Not now: Bytes of Purpose is not a registered company (①). If it is registered one day, this is
+the path, and Hifth could move to it only after an App Store release. It needs the D-U-N-S number
+(free, up to 5 working days, then 2 for Apple), the website on bytesofpurpose.com, an email on
+that address, and 99 US dollars a year.
 
-### ⑥ Move the TestFlight plan to the company membership's team ID · **blocked**
+### ⑥ Move the TestFlight plan to the company membership's team ID · **answered**
 
-The agent's, once the company membership is approved (⑤): the TestFlight plan's ① and ② are done
-in the new membership, and the signing settings take its team ID.
+Not needed: the TestFlight plan stays on team 76NHKA839A.

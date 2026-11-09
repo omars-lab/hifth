@@ -31,11 +31,10 @@ flowchart LR
 |---|---|---|
 | [TestFlight plan](design/testflight-plan.md) | How do we get the app onto a tester's iPad? | nine |
 | [Paid features](design/paid-features.md) | Which parts of the app could be paid for, and which stay free? | four |
-| [Publisher name](design/publisher-account.md) | How do we get Hifth shown as published by Bytes of Purpose, not "Omar Eid"? | six |
+| [Publisher name](design/publisher-account.md) | Who does the App Store show as Hifth's publisher? | none: decided |
 
-**Before TestFlight ②:** the publisher page asks to hold Hifth's App Store Connect record, the
-first upload and the iCloud box until you say whether Bytes of Purpose is a registered company,
-because each one ties Hifth to the membership that makes it.
+**Decided (2026-11-08):** Hifth is published under "Omar Eid", the membership we already have.
+Bytes of Purpose is not a registered company yet, and only a registered company can be shown.
 
 ## What is the one rule already settled?
 
