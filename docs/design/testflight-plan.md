@@ -50,7 +50,7 @@ flowchart LR
 - In the Apple Developer site: register the app ID `com.bytesofpurpose.hifth`. Turn on
   *Associated Domains* (site links open the app) and *iCloud* (the usage counts sync), since both
   are already waiting on this membership.
-- In App Store Connect: create the app record for platform iOS, which covers iPhone and iPad, with that ID. The name shown to
+- In App Store Connect: create the app record for platforms iOS and macOS, which covers iPhone, iPad and Mac, with that ID. The name shown to
   testers is "Hifth". No store listing is made; TestFlight needs the record, not a listing.
 - The agent sets the team ID in the project settings, which are empty today, and installs the app
   on your iPad and Mac with the paid team. The install then lasts a year, not seven days.
@@ -151,7 +151,7 @@ separate question, and testing does not wait for it.
 ### ② Register the app's ID and make its App Store Connect record · **open**
 
 Yours, in the Apple Developer site and App Store Connect: the ID `com.bytesofpurpose.hifth`
-with Associated Domains and iCloud turned on, and an iOS app record (iPhone and iPad) named Hifth. No store
+with Associated Domains and iCloud turned on, and an app record for iOS and macOS (iPhone, iPad and Mac) named Hifth. No store
 listing. The step-by-step links are in the app-setup skill; the iPhone's own questions are in
 [iphone-app.md](iphone-app.md). Both tie Hifth, and the name shown under it ("Omar Eid"), to this membership for good;
 that was decided on purpose ([publisher-account.md](publisher-account.md)).
@@ -168,7 +168,8 @@ The agent's, now that the team ID is known (①). Installs then last a year inst
 ### ④ Make the archive build on the laptop, with the upload still locked · **open**
 
 The agent's. Archive and export settings, the privacy manifest, the encryption answer, a build
-number that counts up, and the archive gate opened while the upload gate stays shut. Noted in
+number that counts up, the sandbox Apple requires of every Mac build sent through TestFlight
+(the Mac build has none today), and the archive gate opened while the upload gate stays shut. Noted in
 the decision record when the gate changes.
 
 ### ⑤ Write the brief for the licence reader · **answered**

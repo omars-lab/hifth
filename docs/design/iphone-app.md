@@ -8,7 +8,7 @@
   one ID (`com.bytesofpurpose.hifth`), one App Store Connect record for both. The iPhone
   simulator already runs it, and screenshot tests already check a few iPhone pages.
 - **So nothing new needs registering.** Step ② of the TestFlight plan (register the ID, make
-  the record) covers the iPhone as long as the record is made for iOS, not iPad only. The
+  the record) covers the iPhone as long as the record is made for iOS and macOS, not iPad only. The
   links and IDs are in the `app-setup` skill.
 - **What is not known yet** is whether a page of the mus'haf, the tools and The Study Quran's
   notes work on a screen that small. That is the open work below, and it is the agent's.
@@ -37,7 +37,7 @@ made then decides whether the iPhone is in from the start.
 
 ### ① Make the App Store Connect record for iPhone and iPad, not iPad only · **open**
 
-Yours, when doing TestFlight step ②: choose platform **iOS**, which covers both. The build
+Yours, when doing TestFlight step ②: tick both platforms, **iOS** (iPhone and iPad) and **macOS** (the Mac build uses the same ID, so one record covers all three). The build
 already says which devices it runs on. **I did not check** whether Apple lets a later version
 drop the iPhone once a build that runs on it has gone to testers; it is known to refuse that
 for apps in the store, so settle the iPhone before the first upload, not after.

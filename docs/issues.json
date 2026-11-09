@@ -3157,7 +3157,7 @@
       "next": true,
       "severity": "question",
       "owner": "user",
-      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the app record in App Store Connect for platform iOS, which covers iPhone and iPad (iphone-app.md ①). No store listing. The links are in the app-setup skill. The ID was registered on 2026-11-09, with Push Notifications and Sign in with Apple also on; the App Store Connect record is not confirmed yet. Next up for the owner (2026-11-08): it is the one step between the pitch and the app on the owner's own iPad for a year, signed with the paid team, which is how the Study Quran team will see it in the room; nothing after it in the TestFlight plan can start until it is done."
+      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the app record in App Store Connect with both iOS and macOS ticked, which covers iPhone, iPad and Mac (iphone-app.md ①). No store listing. The links are in the app-setup skill. The ID was registered on 2026-11-09, with Push Notifications and Sign in with Apple also on; the App Store Connect record is not confirmed yet. Next up for the owner (2026-11-08): it is the one step between the pitch and the app on the owner's own iPad for a year, signed with the paid team, which is how the Study Quran team will see it in the room; nothing after it in the TestFlight plan can start until it is done."
     },
     {
       "id": "iphone-record-covers-iphone",
@@ -3259,7 +3259,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Archive and export settings, privacy manifest, encryption answer, a build number that counts up; open the archive gate, keep the upload gate shut."
+      "note": "Archive and export settings, privacy manifest, encryption answer, a build number that counts up, and the sandbox Apple requires of a Mac build sent through TestFlight (none today); open the archive gate, keep the upload gate shut."
     },
     {
       "id": "testflight-licence-brief",
