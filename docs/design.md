@@ -34,6 +34,9 @@ flowchart LR
 | [Publisher name](design/publisher-account.md) | Who does the App Store show as Hifth's publisher? | none: decided |
 | [Sharing between readers](design/sharing-between-readers.md) | How could a student send their mistakes to a teacher, and could your marks follow you from iPad to Mac? | eleven |
 
+The sharing page's questions are not steps in the list below. The owner put the teacher link
+after the Study Quran demo, so its questions live on that page and in the backlog.
+
 **Decided (2026-11-08):** Hifth is published under "Omar Eid", the membership we already have.
 Bytes of Purpose is not a registered company yet, and only a registered company can be shown.
 
