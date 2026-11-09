@@ -152,3 +152,17 @@
     animation: none;
   }
 }
+
+/*
+ * A tool opened inside the drawer (selection-drawer ③, a setting): its list
+ * sits under the row of tools and scrolls inside, so the drawer grows to at
+ * most a little over a third of the window. The page lifts the verse above
+ * the grown drawer, as it does above a card.
+ */
+.panel {
+  max-block-size: min(40vh, 22rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-block-start: var(--space-2);
+  border-block-start: 1px solid var(--hairline);
+}

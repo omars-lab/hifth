@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { useT } from "../i18n";
 import { spokenName } from "../spoken-name";
+import { watchCover } from "./short-band";
 import styles from "./VerseDrawer.module.css";
 
 /**
@@ -20,6 +21,8 @@ import styles from "./VerseDrawer.module.css";
  */
 /** The widest the drawer stands as a card, as its stylesheet's max-inline-size. */
 const CARD_REM = 40;
+/** The gap kept between the lit verse's last line and the drawer's top, in px. */
+const CLEARANCE = 12;
 
 export function VerseDrawer({
   label,
@@ -27,6 +30,11 @@ export function VerseDrawer({
   onClose,
   end,
   onWhole,
+  panel,
+  onPanelClose,
+  onCover,
+  keepClear,
+  clearKey,
   children,
 }: {
   /** The verse's own name, "Al-Baqarah 2:48"; null when no verse is lit. */
@@ -37,6 +45,23 @@ export function VerseDrawer({
   end?: ReactNode;
   /** Told whether the drawer covers the whole bar, so what lives in the bar can ride its head instead. */
   onWhole?: (whole: boolean) => void;
+  /**
+   * A tool opened inside the drawer, under the row of tools (selection-drawer
+   * ③, a setting): today, the roots list. Null or absent when none is open.
+   */
+  panel?: ReactNode;
+  /** Folds the open tool away; Escape calls it before it puts the drawer away. */
+  onPanelClose?: () => void;
+  /** While a tool is open inside it, where the drawer starts, so the page can lift the verse above it. */
+  onCover?: (top: number | null) => void;
+  /**
+   * The boxes the drawer must stay below, in window pixels: the lit verse's
+   * lines. A tool open inside it is cut to the room under them, since on a
+   * spread the page cannot move up out of its way. Asked again whenever that
+   * room may have changed; `clearKey` changing (another verse lit) is one.
+   */
+  keepClear?: () => DOMRect[];
+  clearKey?: string | null;
   /** The tool buttons, each with its caption. */
   children: ReactNode;
 }): JSX.Element | null {
@@ -100,12 +125,74 @@ export function VerseDrawer({
     };
   }, [shown]);
 
+  // Grown by a tool opened inside it, the drawer reaches up over the page, so
+  // it says where it starts, the way a sheet does, and the page lifts the verse
+  // clear of it. Without a tool open it stands over the bar alone and says
+  // nothing: the page already keeps clear of the bar.
+  const hasPanel = panel !== undefined && panel !== null && panel !== false;
+  const coverTo = useRef(onCover);
+  coverTo.current = onCover;
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const tell = coverTo.current;
+    if (!shown || !hasPanel || !el || !tell) return;
+    const stop = watchCover(el, () => el.offsetHeight, (top) => coverTo.current?.(top));
+    return () => {
+      stop();
+      tell(null);
+    };
+  }, [shown, hasPanel]);
+
+  // The tool's list is cut to the room under the lit verse, never below a
+  // floor a few rows tall: under that the list would be a slot, and the page
+  // is asked to lift instead (above). On a phone the page can move; on a
+  // spread both pages keep their place, so the cut is what keeps the verse in
+  // sight (2026-11-09, found by building it).
+  const panelRef = useRef<HTMLDivElement>(null);
+  const clear = useRef(keepClear);
+  clear.current = keepClear;
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const box = panelRef.current;
+    if (!shown || !hasPanel || !el || !box) return;
+    const fit = () => {
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const most = Math.min(window.innerHeight * 0.4, 22 * rem);
+      const floor = Math.min(most, 10 * rem);
+      const drawer = el.getBoundingClientRect();
+      const rest = el.offsetHeight - box.offsetHeight;
+      // Only lines the drawer could reach across count: a verse on the other
+      // page, wholly beside the card, is in no danger from it.
+      const lines = (clear.current?.() ?? []).filter((r) => r.right > drawer.left && r.left < drawer.right);
+      const lowest = lines.length ? Math.max(...lines.map((r) => r.bottom)) : null;
+      const room = lowest === null ? most : window.innerHeight - lowest - CLEARANCE - rest;
+      box.style.maxBlockSize = `${Math.round(Math.max(floor, Math.min(most, room)))}px`;
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    // The wash lands a moment after the drawer on a fresh verse.
+    const late = window.setTimeout(fit, 400);
+    return () => {
+      window.clearTimeout(late);
+      window.removeEventListener("resize", fit);
+    };
+  }, [shown, hasPanel, clearKey]);
+
+  const panelOpen = useRef(hasPanel);
+  panelOpen.current = hasPanel;
+  const foldPanel = useRef(onPanelClose);
+  foldPanel.current = onPanelClose;
   useEffect(() => {
     if (!shown) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       // A sheet opened from the drawer answers its own Escape first.
       if (document.querySelector('[role="dialog"]')) return;
+      // A tool open inside the drawer folds away first; the drawer stays.
+      if (panelOpen.current && foldPanel.current) {
+        foldPanel.current();
+        return;
+      }
       onClose();
     };
     window.addEventListener("keydown", onKey);
@@ -123,6 +210,11 @@ export function VerseDrawer({
         </button>
       </header>
       <div className={styles.tools}>{children}</div>
+      {hasPanel && (
+        <div ref={panelRef} className={styles.panel}>
+          {panel}
+        </div>
+      )}
     </section>
   );
 }

@@ -420,3 +420,15 @@
 .sheet:focus {
   outline: none;
 }
+
+/* Inside the verse's drawer (selection-drawer ③, a setting): no card of its
+   own. The drawer gives it its paper, its place and its scroll. */
+.inline {
+  padding: var(--space-2) var(--space-1) 0;
+  font-family: var(--font-chrome);
+  text-align: start;
+}
+
+.inline:focus {
+  outline: none;
+}

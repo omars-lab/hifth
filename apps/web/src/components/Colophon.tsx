@@ -6,6 +6,7 @@ import { LOCALE_IDS } from "../messages/locales.gen";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
+import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
 import { RUN_MARKS, type RunMark } from "../run-mark";
 import { RUN_FOLLOWS, rememberRunFollow, useRunFollow } from "../run-follow";
 import { RUN_AHEADS, rememberRunAhead, useRunAhead } from "../run-ahead";
@@ -54,6 +55,9 @@ interface ColophonProps {
   /** What a tap and a hold on a verse do; remembered on this device. */
   verseGestures?: VerseGestures;
   onVerseGestures?: (choice: VerseGestures) => void;
+  /** Where a verse's tools open, a card or inside its drawer; remembered on this device. */
+  drawerTools?: DrawerTools;
+  onDrawerTools?: (choice: DrawerTools) => void;
   /** How the page shows the verse a "Play to" run is reciting; remembered on this device. */
   runMark?: RunMark;
   onRunMark?: (choice: RunMark) => void;
@@ -269,6 +273,8 @@ export function Colophon({
   onTurnStyle,
   verseGestures,
   onVerseGestures,
+  drawerTools,
+  onDrawerTools,
   runMark,
   onRunMark,
   arrowShowing,
@@ -491,6 +497,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.verseGesturesNote}</p>
+          </section>
+        )}
+
+        {/* Where a verse's tools open (selection-drawer ③): both built, the
+            card by default until the owner has tried the drawer by hand. */}
+        {drawerTools && onDrawerTools && (
+          <section className={styles.block} aria-labelledby="colophon-drawer-tools">
+            <h3 className={styles.subhead} id="colophon-drawer-tools">
+              {t.drawerToolsTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-drawer-tools">
+              {DRAWER_TOOLS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={drawerTools === choice}
+                  data-drawer-tools={choice}
+                  onClick={() => onDrawerTools(choice)}
+                >
+                  {choice === "sheet" ? t.drawerToolsSheet : t.drawerToolsDrawer}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.drawerToolsNote}</p>
           </section>
         )}
 

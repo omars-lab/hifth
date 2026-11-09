@@ -40,6 +40,13 @@ interface RootLensProps {
    * spread, so a page alone in a wide window can move clear of it.
    */
   onSide?: (span: CardSpan | null) => void;
+  /**
+   * Drawn inside the verse's drawer, under its tools, instead of as a card of
+   * its own (selection-drawer ③, a setting). Then it is a plain part of the
+   * drawer: not a dialog, placed by the drawer, and it leaves the keyboard
+   * where the reader had it.
+   */
+  inline?: boolean;
 }
 
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
@@ -83,14 +90,17 @@ export function RootLens({
   side = null,
   onCover,
   onSide,
+  inline = false,
 }: RootLensProps): JSX.Element | null {
   const { t, dir } = useT();
   // Beside the verse on a spread: no dimming, no trapped Tab (see HopPopover).
   const beside = side !== null;
-  const place = useOverLeaf(families !== null, side);
+  // Inside the drawer, the drawer places itself and says what it covers.
+  const asCard = families !== null && !inline;
+  const place = useOverLeaf(asCard, side);
   const sheetRef = useRef<HTMLDivElement>(null);
-  const band = useShortBand(families !== null, beside, sheetRef, onCover);
-  useSideCover(families !== null, beside, sheetRef, onSide);
+  const band = useShortBand(asCard, beside, sheetRef, onCover);
+  useSideCover(asCard, beside, sheetRef, onSide);
   // The element focused before the sheet opened, restored on close.
   const restoreRef = useRef<HTMLElement | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -102,6 +112,12 @@ export function RootLens({
   // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
   useLayoutEffect(() => {
     if (!open) return;
+    if (inline) {
+      return () => {
+        setExpanded(null);
+        chosen.current = false;
+      };
+    }
     const opener = document.activeElement as HTMLElement | null;
     restoreRef.current = opener;
     const sheet = sheetRef.current;
@@ -114,7 +130,7 @@ export function RootLens({
       setExpanded(null);
       chosen.current = false;
     };
-  }, [open]);
+  }, [open, inline]);
 
   // Open the nearest family by default — the lens should say something useful
   // before the first tap. Once per opening, and only when every family is in:
@@ -176,20 +192,21 @@ export function RootLens({
     <>
       <div
         ref={sheetRef}
-        className={styles.sheet}
-        style={leafStyle(place, "content")}
-        data-over-leaf={place ? "" : undefined}
-        role="dialog"
-        aria-modal={false}
-        data-band={band ? "" : undefined}
+        className={inline ? styles.inline : styles.sheet}
+        style={inline ? undefined : leafStyle(place, "content")}
+        data-over-leaf={place && !inline ? "" : undefined}
+        role={inline ? "region" : "dialog"}
+        aria-modal={inline ? undefined : false}
+        data-band={band && !inline ? "" : undefined}
         aria-label={t.rootsAria(families.length)}
         dir={dir}
-        data-side={side ?? undefined}
+        data-side={inline ? undefined : (side ?? undefined)}
         tabIndex={-1}
         onKeyDown={onKeyDown}
       >
-        {/* Beside a page nothing drags, so it has no handle — as the note. */}
-        {side ? null : <div className={styles.grip} aria-hidden="true" />}
+        {/* Beside a page nothing drags, so it has no handle — as the note.
+            Inside the drawer it has none either: the drawer is what moves. */}
+        {side || inline ? null : <div className={styles.grip} aria-hidden="true" />}
         <header className={styles.head}>
           <span className={styles.glyph} aria-hidden="true">
             ⬡
