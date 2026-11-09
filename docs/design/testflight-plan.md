@@ -51,7 +51,7 @@ flowchart LR
   *Associated Domains* (site links open the app) and *iCloud* (the usage counts sync), since both
   are already waiting on this membership.
 - In App Store Connect: create the app record for platforms iOS and macOS, which covers iPhone, iPad and Mac, with that ID. The name shown to
-  testers is "Hifth". No store listing is made; TestFlight needs the record, not a listing.
+  testers is "Hifth - The Huffaz Toolkit". No store listing is made; TestFlight needs the record, not a listing.
 - The agent sets the team ID in the project settings, which are empty today, and installs the app
   on your iPad and Mac with the paid team. The install then lasts a year, not seven days.
 
@@ -148,7 +148,7 @@ Yes. The membership is active (2026-11-08) and the team ID is `76NHKA839A`. It i
 individual account in the owner's own name; publishing under Bytes of Purpose instead is a
 separate question, and testing does not wait for it.
 
-### ② Register the app's ID and make its App Store Connect record · **open**
+### ② Register the app's ID and make its App Store Connect record · **answered**
 
 Yours, in the Apple Developer site and App Store Connect: the ID `com.bytesofpurpose.hifth`
 with Associated Domains and iCloud turned on, and an app record for iOS and macOS (iPhone, iPad and Mac) named Hifth. No store
@@ -158,8 +158,8 @@ that was decided on purpose ([publisher-account.md](publisher-account.md)).
 
 The ID was registered on 2026-11-09, with Push Notifications and Sign in with Apple also
 turned on. Neither does anything until the app asks for it. The agent confirms that iCloud and
-Associated Domains are on when it first signs (③). The App Store Connect record is not
-confirmed yet.
+Associated Domains are on when it first signs (③). The App Store Connect record was made the
+same day for iOS and macOS, named "Hifth - The Huffaz Toolkit".
 
 ### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **open**
 

@@ -35,9 +35,9 @@ made then decides whether the iPhone is in from the start.
 
 ## Open questions, and what would answer each
 
-### ① Make the App Store Connect record for iPhone and iPad, not iPad only · **open**
+### ① Make the App Store Connect record for iPhone and iPad, not iPad only · **answered**
 
-Yours, when doing TestFlight step ②: tick both platforms, **iOS** (iPhone and iPad) and **macOS** (the Mac build uses the same ID, so one record covers all three). The build
+Done 2026-11-09, as "Hifth - The Huffaz Toolkit". Yours, when doing TestFlight step ②: tick both platforms, **iOS** (iPhone and iPad) and **macOS** (the Mac build uses the same ID, so one record covers all three). The build
 already says which devices it runs on. **I did not check** whether Apple lets a later version
 drop the iPhone once a build that runs on it has gone to testers; it is known to refuse that
 for apps in the store, so settle the iPhone before the first upload, not after.
@@ -59,7 +59,7 @@ the best as the default and the others as a setting.
 
 ### ④ Install it on the owner's own iPhone with the paid team · **blocked**
 
-The agent's, once the app ID is registered (TestFlight ②) and the app is signed with the paid
+The agent's, now that the app ID is registered (TestFlight ②), once the app is signed with the paid
 team (TestFlight ③). Same install as the iPad: plug in, `make app-device-install DEVICE=…`.
 
 **Recitation on the phone and the iPad (⑤–⑦).** The app already plays each verse's recitation, streamed from Quran.com's public audio site.

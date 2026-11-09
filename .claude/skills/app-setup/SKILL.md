@@ -19,7 +19,8 @@ Who: **you** = the owner, Omar, signed in to the account. **agent** = Claude, fr
 | Apple team ID | `76NHKA839A` (individual account, Omar Eid) | `native/project.yml`, `TEAM=` on the make targets |
 | The app's ID (bundle ID) | `com.bytesofpurpose.hifth` | `native/project.yml` |
 | Its test IDs (not registered; local only) | `com.bytesofpurpose.hifth.tests`, `com.bytesofpurpose.hifth.uitests` | `native/project.yml` |
-| The name shown to testers | Hifth, published by Omar Eid | App Store Connect record |
+| The name shown to testers | "Hifth - The Huffaz Toolkit", published by Omar Eid | App Store Connect record |
+| The App Store Connect record (iOS and macOS) | Apple ID `6832642191`, made 2026-11-09 | <https://appstoreconnect.apple.com/apps/6832642191> |
 | iCloud container (proposed, not made yet) | `iCloud.com.bytesofpurpose.hifth` | made in ④ below; [icloud-sync.md](../../../docs/design/icloud-sync.md) |
 | The reading site | `blog.bytesofpurpose.com/hifth/` | the build |
 | The share page (for now) | `hifth.bytesofpurpose.com/share` | Cloudflare, ⑥ below |
@@ -42,7 +43,7 @@ flowchart LR
 |---|---|---|---|---|
 | ① Membership and team ID | you | done 2026-11-08: team `76NHKA839A` | <https://developer.apple.com/account#MembershipDetailsCard> | `testflight-membership-active` (answered) |
 | ② Register the app ID | you | **Identifiers → +** → *App IDs* → *App*. Description "Hifth", **Explicit** bundle ID `com.bytesofpurpose.hifth`. Tick **iCloud** (with CloudKit), **Associated Domains** and **Siri**; **Push Notifications** and **Sign in with Apple** are optional (the table below says why each is there). Continue, Register. | <https://developer.apple.com/account/resources/identifiers/add/bundleId> | `testflight-register-app` (**next**) |
-| ③ App Store Connect record | you | **Apps → + → New App**. Platforms **iOS and macOS** both ticked (one record for iPhone, iPad and Mac, since the Mac build uses the same ID), name "Hifth", language English, bundle ID `com.bytesofpurpose.hifth` (it appears in the list once ② is done), SKU `hifth`, access Full. No store listing is needed for TestFlight. | <https://appstoreconnect.apple.com/apps> | `testflight-register-app` |
+| ③ App Store Connect record | you | **Apps → + → New App**. Platforms **iOS and macOS** both ticked (one record for iPhone, iPad and Mac, since the Mac build uses the same ID), name "Hifth - The Huffaz Toolkit" (the name is 30 characters at most and must not be taken by another app), language English, bundle ID `com.bytesofpurpose.hifth` (it appears in the list once ② is done), SKU `hifth`, access Full. No store listing is needed for TestFlight. | <https://appstoreconnect.apple.com/apps> | `testflight-register-app` |
 | ④ iCloud container | agent, or you | **Identifiers → +** → *iCloud Containers*, ID `iCloud.com.bytesofpurpose.hifth`; then on the app ID from ②, *iCloud → Configure* and tick it. Xcode can also make it the first time the agent signs with the team. | <https://developer.apple.com/account/resources/identifiers/list/cloudContainer> | `icloud-sync-try-signed` |
 | ⑤ Upload key | you | **Users and Access → Integrations → App Store Connect API → +**, access *App Manager*. Download the `.p8` once; it goes in the keychain, **never in the repo or a chat**. Note the key ID and issuer ID. | <https://appstoreconnect.apple.com/access/integrations/api> | `testflight-upload-key` |
 | Devices (only for a cable install) | you | Xcode registers a plugged-in iPhone or iPad by itself when the agent installs; add one by hand only if asked. | <https://developer.apple.com/account/resources/devices/list> | — |
