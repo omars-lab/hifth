@@ -150,7 +150,7 @@ trusted and not dropped.
 
 **Yes, for the share page, from the first live link. No, for the reading app.**
 
-- **Put the share page on a sub-address of its own**, such as `hifth.bytesofpurpose.com` or `share.bytesofpurpose.com`, served from the Cloudflare setup the project already keeps ready. The server part sits at its own address either way.
+- **Put the share page on a sub-address of its own**: `hifth.bytesofpurpose.com/share`, chosen by Omar on 2026-11-09 (⑧), served from the Cloudflare setup the project already keeps ready. The server part sits at its own address either way.
 - **Keep the reading app at `blog.bytesofpurpose.com/hifth/`.** Moving it would leave every reader's stored marks behind, because the browser's store belongs to the address. A move is its own later step, with a one-time file carry and a forwarding page.
 - **Why not a folder of the blog:** every page of the blog shares one store with the app; Apple's link file cannot go at the blog's root; and once anyone signs in, the blog's host forbids it and Sign in with Apple needs a server to answer to.
 - **Pick the name once.** A passkey, and the links that open the app, are tied to it for good.
@@ -210,17 +210,21 @@ Asked by both. Suggested: never by default; if ever, a separate tick the student
 
 Asked by A. A link that ends by itself is the main guard against a forwarded link and against a lost "stop" code. **What would answer it:** your call.
 
-### ⑥ Where should the shared copies live: Cloudflare's free database, or a new Supabase project of their own at 25 US dollars a month so it never pauses? · **open**
+### ⑥ Where should the shared copies live: Cloudflare's free database, or a new Supabase project of their own at 25 US dollars a month so it never pauses? · **answered**
 
-Asked by A. Suggested: Cloudflare, since its free tier does not say it pauses, the project already keeps a Cloudflare setup ready, and it keeps readers' shares away from the held copy. **What would answer it:** your call on the money and the host.
+Asked by A. Suggested: Cloudflare, since its free tier does not say it pauses, the project already keeps a Cloudflare setup ready, and it keeps readers' shares away from the held copy. **Answered by Omar on 2026-11-09: Cloudflare.** Shared copies live in Cloudflare's free database, apart from the Supabase project that holds the outside library; no new Supabase project and no monthly fee.
 
 ### ⑦ What do Cloudflare's small database and key store cost, and do they ever pause? · **answered**
 
 Asked by A, answered by the checker from Cloudflare's own pricing pages: free covers 5 million rows read and 100,000 written a day with 5 GB, or 100,000 reads and 1,000 writes a day with 1 GB; neither page says an unused store pauses. The paid plan's base monthly fee was not on those pages.
 
-### ⑧ Which web address should the share page live on? · **open**
+### ⑧ Which web address should the share page live on? · **answered**
 
-Asked by both. A sub-address such as `hifth.bytesofpurpose.com` or `share.bytesofpurpose.com`; the reading app stays where it is. The name is a one-way choice once links that open the app, or passkeys, depend on it. **What would answer it:** your choice of name and the address entry you add; the agent then writes up the setup.
+Asked by both. A sub-address such as `hifth.bytesofpurpose.com` or `share.bytesofpurpose.com`; the reading app stays where it is. The name is a one-way choice once links that open the app, or passkeys, depend on it. **Answered by Omar on 2026-11-09: `hifth.bytesofpurpose.com/share`, "for now".** The share page sits under `/share` on a new `hifth` sub-address, served from Cloudflare; the reading app stays at `blog.bytesofpurpose.com/hifth/`. "For now" is honest only until a passkey or a link that opens the app is tied to the name, so that step re-asks whether this is the name for good (⑬).
+
+### ⑬ Set up `hifth.bytesofpurpose.com/share` on Cloudflare, with its free database behind it · **open**
+
+Follows from ⑥ and ⑧. Needs: the `hifth` address entry under bytesofpurpose.com in Cloudflare, a small Cloudflare server answering at `/share` with the free database behind it, and a placeholder page there that carries no Qur'an text and no held commentary. What the page shows waits on ③ (which way) and ⑫ (page or list); nothing a reader sends goes live before ② (may a student's mistakes be sent at all) is answered. Before any passkey or link that opens the app is tied to the name, ask once more whether `hifth.bytesofpurpose.com` is the name for good.
 
 ### ⑨ If accounts come, which ways of signing in, and do they work inside the iPad and Mac apps? · **blocked**
 
