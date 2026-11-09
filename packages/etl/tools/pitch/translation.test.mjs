@@ -38,6 +38,16 @@ describe("settleTranslation", () => {
     );
   });
 
+  it("puts right a letter the capture set in the wrong case, without moving the verse into its note", () => {
+    // Found 2026-11-09: a capital the print does not have, corrected by hand,
+    // pushed the whole captured verse into the note as a paragraph of its own.
+    expect(settleTranslation("The Lamp was lit.", "The lamp was lit.")).toEqual({ translation: "The lamp was lit.", note: "" });
+    expect(settleTranslation("The Lamp was lit. 4–6 These verses tell of the hall.", "The lamp was lit.")).toEqual({
+      translation: "The lamp was lit.",
+      note: "4–6 These verses tell of the hall.",
+    });
+  });
+
   it("keeps a captured verse that already matches", () => {
     expect(settleTranslation("The lamp was lit.", "The lamp was lit.")).toEqual({ translation: "The lamp was lit.", note: "" });
   });

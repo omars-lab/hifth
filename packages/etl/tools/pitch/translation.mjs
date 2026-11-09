@@ -8,15 +8,20 @@
  * - A verse that runs over a page was cut at the page's foot, sometimes part way
  *   through a word.
  *
+ * - A letter the capture set in the wrong case ("His Leave" where the print has
+ *   "His leave"). The verse read again matches the capture but for the case, so
+ *   the capture is the verse, not a note in its place.
+ *
  * Given what was captured and what was read again, returns the verse and any
  * note the capture had filed under it. With nothing read again, the capture
  * stands as it is.
  */
 export function settleTranslation(captured, fixed) {
   if (!fixed) return { translation: captured, note: "" };
+  const same = (a, b) => a.toLowerCase() === b.toLowerCase();
   const cut = captured.trimEnd();
-  if (fixed.startsWith(cut)) return { translation: fixed, note: "" };
-  const note = captured.startsWith(fixed) ? captured.slice(fixed.length) : captured;
+  if (same(fixed.slice(0, cut.length), cut)) return { translation: fixed, note: "" };
+  const note = same(captured.slice(0, fixed.length), fixed) ? captured.slice(fixed.length) : captured;
   return { translation: fixed, note: note.replace(/\s*\*\s*\*\s*\*\s*$/, "").trim() };
 }
 

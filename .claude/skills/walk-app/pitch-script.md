@@ -25,7 +25,7 @@ polished on the iPad. Fill in the last two columns after each walk.
 
 | Passage | Why it is in the demo | Ready? | Last walked |
 |---|---|---|---|
-| 2:255 (page 42) | The verse everyone knows; a long note in 10 paragraphs; 25 related places | not checked | — |
+| 2:255 (page 42) | The verse everyone knows; a long note in 10 paragraphs; 25 related places | **ready**: the note read against the printed pages paragraph by paragraph (breaks, slanted words, all 27 references); one difference found and fixed, a capital letter in the verse the print does not have; its look-alike 3:2 is reached from the related places | 2026-11-09, iPad simulator |
 | 2:48 | Look-alikes a hafiz mixes up: 2:122–2:123 and 2:123 | not checked | — |
 | 10:15 → 19:73 | A side-by-side comparison with the shared words marked | not checked | — |
 | 15:30–31 | Look-alikes in a later surah (surah 38) | not checked | — |
