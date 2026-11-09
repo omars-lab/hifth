@@ -505,7 +505,7 @@ reader marks the seam word, they hand the app the opening-word signal directly, 
 opening-word / rasm index is needed only for ayahs captured at the *whole-verse* level — which
 shrinks, but does not remove, the case for building it.
 
-### ④ Does a captured slip become navigable like a corpus edge? · **open**
+### ④ Does a captured slip become navigable like a corpus edge? · **answered**
 
 Should your own confusion points appear in the hop rail as a fourth kind of link — *your*
 edges, alongside the corpus's — so the app you navigate is shaped by your own history? It is
@@ -521,6 +521,9 @@ stay warnings regardless.
 
 **Where it stands (2026-10-13):** a jump's row in its list already has Go, which opens the verse
 it went to; the hop rail does not show your own jumps. So the question is now only the rail.
+
+**Owner, 2026-11-08: no.** Your jumps stay in the list, with Go; the side strip of links keeps
+only the book's own sourced links.
 
 ### ⑤ Who sets a seam's state — the reader, or the app's guess from the data? · **open**
 
@@ -540,6 +543,10 @@ explicit act — or whether even a suggestion leans too far toward measuring wor
 reader-owned-with-a-quiet-nudge, but the line between *nudge* and *assertion* is the thing to
 settle, and it echoes the durability and score stances above.
 
+**Owner, 2026-11-08: a quiet suggestion, yours to accept.** A row not hit in a long while may
+carry one quiet line offering to mark it Beaten. Never a pop-up, and nothing changes until the
+reader taps it. Not built yet; on the backlog.
+
 ### ⑥ Should a student be able to hand their confusion map to a teacher? · **open**
 
 A hafiz revises with a teacher, and the teacher's whole job is to drill the student exactly
@@ -554,6 +561,12 @@ undo it, whether the teacher sees a live map or a snapshot the student chose, an
 rides on the file-backup mechanism (a student sends a teacher the file they already can save)
 or wants something built for it. It should not borrow the export decision's answer; that
 decision deliberately does not settle this.
+
+**Owner, 2026-11-08: a live link the student can switch off, and the page it opens has a
+download button** so the teacher can keep a copy. The student starts the share and can end it
+at any time. This needs somewhere online to hold the map while it is shared, which the app
+has never had, so where that lives and who runs it is the first thing to settle when it is
+built. Not before the Study Quran demo; on the backlog.
 
 ### ⑦ Should the app learn where *most* readers slip, not just where you do? · **open**
 
@@ -573,6 +586,13 @@ pooled can be stripped of anything identifying and still be useful, and whether 
 server at all to get the benefit, or whether the common slip points are already knowable from
 the corpus without touching anyone's map. Named here so it is not lost; built by nobody until
 that decision is made.
+
+**Owner, 2026-11-08: a feature the reader turns on, and turning it on means you share yours too.**
+Off until the reader switches it on. Switched on, the reader gets the slip places many readers
+share, and their own slips are added to the pool in return; switched off, nothing of theirs is
+sent and they see only their own. Still to settle when it is built: what is sent (stripped of
+who sent it), and where the pool lives, which is the same online store the teacher link needs.
+After the Study Quran demo.
 
 ### ⑧ Does the question the Mistake pen asks fit on the iPad page, in English and in Arabic? · **answered**
 

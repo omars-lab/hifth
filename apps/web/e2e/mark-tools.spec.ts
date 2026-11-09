@@ -6,9 +6,10 @@ import { PEN_HOME_KEY } from "../src/pen-home";
 /*
  * Note, Harakat and Word as three buttons or as one
  * (docs/design/notes-style-toolbar.md, ②). The owner asked on 2026-10-12 for
- * the one button to be built as a setting and the three kept as the default:
- * one button stands where Note stood, showing the one last used, and while it
- * is on the three wait beside the tools, where the highlighter's colours do.
+ * the one button to be built as a setting, and on 2026-11-08 made it the
+ * default: one button stands where Note stood, showing the one last used, and
+ * while it is on the three wait beside the tools, where the highlighter's
+ * colours do. Three buttons stay as a setting.
  *
  * Runs on a computer and on both phones: each has its own toolbar.
  */
@@ -43,12 +44,13 @@ async function showTools(page: Page, isMobile: boolean): Promise<void> {
 const bar = (page: Page): Locator => page.getByRole("radiogroup", { name: "Page tools" });
 const aims = (page: Page): Locator => page.getByRole("radiogroup", { name: "Note, Harakat or Word" });
 const ONE = { [MARK_TOOLS_KEY]: "one" };
+const THREE = { [MARK_TOOLS_KEY]: "three" };
 // A computer counts one more tool than a phone: the eraser sits with the tools
 // there, and beside Undo on a phone (src/eraser-place.ts).
 
 test.describe("Hifth · Note, Harakat and Word as three buttons or one", () => {
-  test("three buttons by default, each its own, and nothing waits beside them", async ({ page, isMobile }) => {
-    await openWith(page, {});
+  test("three buttons when set, each its own, and nothing waits beside them", async ({ page, isMobile }) => {
+    await openWith(page, THREE);
     await showTools(page, !!isMobile);
     await expect(bar(page).getByRole("radio")).toHaveCount(isMobile ? 10 : 11);
     for (const name of ["Note", "Harakat", "Word"]) await expect(bar(page).getByRole("radio", { name, exact: true })).toHaveCount(1);
@@ -56,8 +58,8 @@ test.describe("Hifth · Note, Harakat and Word as three buttons or one", () => {
     await expect(aims(page)).toHaveCount(0);
   });
 
-  test("one button stands for the three, offers them while it is on, and keeps the one last used", async ({ page, isMobile }) => {
-    await openWith(page, ONE);
+  test("one button by default stands for the three, offers them while it is on, and keeps the one last used", async ({ page, isMobile }) => {
+    await openWith(page, {});
     await showTools(page, !!isMobile);
     await expect(bar(page).getByRole("radio")).toHaveCount(isMobile ? 8 : 9);
     for (const name of ["Harakat", "Word"]) await expect(bar(page).getByRole("radio", { name, exact: true })).toHaveCount(0);
@@ -114,11 +116,12 @@ test.describe("Hifth · Note, Harakat and Word as three buttons or one", () => {
     const choices = page.getByRole("dialog").locator('[aria-labelledby="colophon-mark-tools"]').getByRole("radio");
     await expect(choices).toHaveCount(2);
     await expect(choices.first()).toHaveAttribute("aria-checked", "true");
+    await expect(choices.first()).toHaveAccessibleName(/One button/);
     await choices.nth(1).click();
     await expect(choices.nth(1)).toHaveAttribute("aria-checked", "true");
-    expect(await page.evaluate((k) => localStorage.getItem(k), MARK_TOOLS_KEY)).toBe("one");
+    expect(await page.evaluate((k) => localStorage.getItem(k), MARK_TOOLS_KEY)).toBe("three");
     await page.keyboard.press("Escape");
     await showTools(page, !!isMobile);
-    await expect(bar(page).getByRole("radio")).toHaveCount(isMobile ? 8 : 9);
+    await expect(bar(page).getByRole("radio")).toHaveCount(isMobile ? 10 : 11);
   });
 });

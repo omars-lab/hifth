@@ -1,6 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
 import { midSign } from "./signs";
+import { threeButtons } from "./three-buttons";
 
 /*
  * The page tools on a phone, step 5 of docs/design/page-toolbar-plan.md: three
@@ -9,6 +10,8 @@ import { midSign } from "./signs";
  * page by a tap: here the word tool opens a word into its parts.
  */
 test.use({ locale: "en-US" });
+// Tests about Harakat and Word on their own, so the three-button layout (see three-buttons.ts).
+test.beforeEach(async ({ page }) => threeButtons(page));
 test.skip(({ isMobile }) => !isMobile, "the phone's own bars");
 
 const parts = (page: Page): Locator => page.getByRole("dialog", { name: /^The parts of a word in / });

@@ -1,6 +1,7 @@
 import { test, expect, type Browser, type Locator, type Page } from "@playwright/test";
 import { COACH_STORAGE_KEY } from "../src/coach";
 import { LANG_STORAGE_KEY } from "../src/lang";
+import { threeButtons } from "./three-buttons";
 
 /*
  * The Apple Pencil's double-tap and squeeze (docs/PLAN.md, 96; docs/design/
@@ -24,6 +25,7 @@ type Gesture = { kind: string; pref: string; x?: number; y?: number };
 
 async function openOn(browser: Browser, view: { width: number; height: number }, lang: string, inApp = true) {
   const context = await browser.newContext({ hasTouch: true, isMobile: true, viewport: view, locale: "en-US" });
+  await threeButtons(context);
   const page = await context.newPage();
   await page.addInitScript(
     ([coach, langKey, l, app]) => {

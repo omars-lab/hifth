@@ -10,8 +10,8 @@ const BAR = ["read", "select", "highlight", "bookmark", "note", "sign", "word", 
 describe("Note, Harakat and Word as three buttons or one, as the reader set it", () => {
   afterEach(() => localStorage.clear());
 
-  it("is three buttons when nobody chose, and keeps the choice made", () => {
-    expect(savedMarkTools()).toBe("three");
+  it("is one button when nobody chose, and keeps the choice made", () => {
+    expect(savedMarkTools()).toBe("one");
     rememberMarkTools("one");
     expect(localStorage.getItem(MARK_TOOLS_KEY)).toBe("one");
     expect(savedMarkTools()).toBe("one");
@@ -19,9 +19,9 @@ describe("Note, Harakat and Word as three buttons or one, as the reader set it",
     expect(savedMarkTools()).toBe("three");
   });
 
-  it("a value it does not know falls back to three buttons", () => {
+  it("a value it does not know falls back to one button", () => {
     localStorage.setItem(MARK_TOOLS_KEY, "nonsense");
-    expect(savedMarkTools()).toBe("three");
+    expect(savedMarkTools()).toBe("one");
   });
 
   it("three buttons leave the bar as it is", () => {

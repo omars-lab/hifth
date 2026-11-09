@@ -108,7 +108,8 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     and the shelf shows the bookmarks it held. Anything else becomes a backlog item and a test
     (docs/design/native-shell.md, item ㉛).
 
-16. **Watching the note move as a recitation crosses the open book.** On the pitch build, lay
+16. ~~**Watching the note move as a recitation crosses the open book.**~~ **Checked by the owner
+    2026-11-08: it reads as getting out of the way.** Nothing left to do. On the pitch build, lay
     the iPad on its side, tap a demo verse so its note opens, then play the surah from its corner
     and let it run across two openings. The note moves to the other page each time the recitation
     reaches the page it is over, about once a page. The walk measured where it stands but cannot

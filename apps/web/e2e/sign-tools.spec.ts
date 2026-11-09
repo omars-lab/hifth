@@ -1,6 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
 import { midSign } from "./signs";
+import { threeButtons } from "./three-buttons";
 
 /*
  * The two tools the harakah-pick decision chose (D): the harakat tool, where a
@@ -9,6 +10,8 @@ import { midSign } from "./signs";
  * one drops a note on it. Desktop only, like the bar they sit on.
  */
 test.use({ locale: "en-US" });
+// Tests about Harakat and Word on their own, so the three-button layout (see three-buttons.ts).
+test.beforeEach(async ({ page }) => threeButtons(page));
 
 const pageSvg = (page: Page, pageNo: number): Locator =>
   page.locator(`svg[aria-labelledby="page-label-${pageNo}"]:visible`);
