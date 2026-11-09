@@ -583,6 +583,14 @@ tasks-doc: ## Re-render docs/backlog.md, every open item in full, and docs/waiti
 	@node scripts/build-tasks-doc.mjs
 	@node scripts/build-waiting-doc.mjs
 
+.PHONY: board
+board: ## Copy the backlog onto the GitHub project board (github.com/users/omars-lab/projects/2), one way
+	@node .claude/skills/issues/scripts/sync-project-board.mjs
+
+.PHONY: board-dry
+board-dry: ## Say what `make board` would add, change or move to Done, without touching the board
+	@node .claude/skills/issues/scripts/sync-project-board.mjs --dry-run
+
 .PHONY: waiting-shots
 waiting-shots: build ## Photograph each open decision's options page for docs/waiting-on-you.md, then rebuild the note
 	@# The public build, never the pitch one: the pictures are checked in and
