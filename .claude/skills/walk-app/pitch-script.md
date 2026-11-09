@@ -26,11 +26,11 @@ polished on the iPad. Fill in the last two columns after each walk.
 | Passage | Why it is in the demo | Ready? | Last walked |
 |---|---|---|---|
 | 2:255 (page 42) | The verse everyone knows; a long note in 10 paragraphs; 25 related places | **ready**: the note read against the printed pages paragraph by paragraph (breaks, slanted words, all 27 references); one difference found and fixed, a capital letter in the verse the print does not have; its look-alike 3:2 is reached from the related places | 2026-11-09, iPad simulator |
-| 2:48 | Look-alikes a hafiz mixes up: 2:122–2:123 and 2:123 | not checked | — |
-| 10:15 → 19:73 | A side-by-side comparison with the shared words marked | not checked | — |
-| 15:30–31 | Look-alikes in a later surah (surah 38) | not checked | — |
-| 18:10–14 | The cave sleepers; slanted Arabic terms in the note | not checked | — |
-| 18:60–82 | One long note shared across a whole story, with its own links | not checked | — |
+| 2:48 | Look-alikes a hafiz mixes up: 2:122–2:123 and 2:123 | **ready**: the note read against the printed page (7 paragraphs, all 20 slanted words, all 27 references); 2:122 and 2:123 point back to it as the print does; the look-alike rows and the 2:123 comparison look right | 2026-11-09, iPad simulator |
+| 10:15 → 19:73 | A side-by-side comparison with the shared words marked | **ready**: 19:73 opens beside 10:15 with the shared opening marked; there is no note to read against the print here, so it is checked by picture only | 2026-11-09, iPad simulator |
+| 15:30–31 | Look-alikes in a later surah (surah 38) | **ready**: the shared note read against the printed page (1 paragraph, 4 slanted words, 8 references); the passage in surah 38 opens with its name in sight | 2026-11-09, iPad simulator |
+| 18:10–14 | The cave sleepers; slanted Arabic terms in the note | **ready**: every note from 18:10 to 18:14 read against the printed pages, paragraph by paragraph (breaks, slanted words, references); the slanted words show slanted | 2026-11-09, iPad simulator |
+| 18:60–82 | One long note shared across a whole story, with its own links | **ready** on the demo's path: the shared note and the notes for 18:60, 18:61 and 18:65 read against the printed pages; the link from 18:60 lands on 18:65 with a way back. The own notes of 18:62–82 apart from 18:65 are not yet read against the print | 2026-11-09, iPad simulator |
 
 3:84 is a candidate seventh passage; the owner decides whether it is in.
 
