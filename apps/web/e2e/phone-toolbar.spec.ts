@@ -184,11 +184,14 @@ test.describe("Hifth · the page tools on a phone", () => {
         expect(left, `${what}: every button starts on the screen`).toBeGreaterThanOrEqual(0);
         expect(right, `${what}: every button ends on the screen`).toBeLessThanOrEqual(m.screen);
       }
-      // Still a thumb's height, even where the row is tight across.
+      // Still a thumb's height, even where the row is tight across. Measured to a hundredth of
+      // a pixel: WebKit reports a 44px button as 43.99997 with the pen tray open (push of
+      // 2026-11-08), a rounding gap no thumb can feel, while a button really cut short is
+      // whole pixels shy.
       for (const h of await page.locator('[role="radio"]:visible').evaluateAll((els) =>
         els.map((el) => el.getBoundingClientRect().height),
       ))
-        expect(h, `${what}: every button is a thumb's height`).toBeGreaterThanOrEqual(44);
+        expect(Math.round(h * 100) / 100, `${what}: every button is a thumb's height`).toBeGreaterThanOrEqual(44);
     };
 
     await page.goto("/#/hafs-kfqc/p7");

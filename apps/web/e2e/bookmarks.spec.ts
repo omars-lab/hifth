@@ -225,6 +225,66 @@ test.describe("Hifth · bookmarks", () => {
     });
   }
 
+  // Hung 14% in from the spine, the ribbon lay over the start of the surah's
+  // name in the page's head ("Al-" of Al-Baqarah on page 10), wide or narrow
+  // (found checking the owner's "really wide bookmark", 2026-11-08). The head
+  // prints the surah at one end and the juz at the other; the ribbon hangs in
+  // the empty middle, on either page of the opening.
+  for (const at of [9, 10, 42, 43, 549, 556]) {
+    test(`a ribbon on page ${at} covers none of the page's heading`, async ({ page }) => {
+      await page.setViewportSize({ width: 1260, height: 628 });
+      await page.goto(`/#/hafs-kfqc/p${at}`);
+      await expect(page.locator(`svg[aria-labelledby="page-label-${at}"]`)).toBeVisible();
+      await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
+      const drawer = page.getByRole("dialog", { name: "Bookmark" });
+      await drawer.getByRole("button", { name: "Close" }).click();
+      await expect(drawer).toBeHidden();
+      await page.waitForTimeout(400);
+      const m = await page.evaluate(() => {
+        const el = document.querySelector<HTMLElement>("[data-bookmark-overlay] [data-bookmark]")!;
+        const r = el.getBoundingClientRect();
+        const silk = parseFloat(getComputedStyle(el, "::before").width) || r.width;
+        const mid = r.left + r.width / 2;
+        const ribbon = { left: mid - silk / 2, right: mid + silk / 2 };
+        const hits: string[] = [];
+        for (const s of document.querySelectorAll<HTMLElement>('[data-running-head="surah"], [data-running-head="juz"]')) {
+          const b = s.getBoundingClientRect();
+          if (b.width === 0) continue;
+          const sameBand = b.bottom > r.top && b.top < r.bottom;
+          if (sameBand && b.right > ribbon.left && b.left < ribbon.right) hits.push(`"${s.textContent}" ${b.left | 0}..${b.right | 0}`);
+        }
+        return { ribbon: `${ribbon.left | 0}..${ribbon.right | 0}`, hits };
+      });
+      expect(m.hits, `the ribbon (${m.ribbon}) covers the heading`).toEqual([]);
+    });
+  }
+
+  // The owner, 2026-11-08: "really wide bookmark". The short ribbon was painted
+  // the full 44px of its press target, a flag across the page's head rather
+  // than a silk marker. It is now drawn narrow, and still pressed over 44px.
+  test("the short ribbon is drawn as narrow as a silk marker, and is still easy to press", async ({ page }) => {
+    await page.setViewportSize({ width: 1260, height: 628 });
+    await page.goto("/#/hafs-kfqc/p9");
+    await expect(page.locator(`svg[aria-labelledby="page-label-9"]`)).toBeVisible();
+    await page.getByRole("button", { name: "Drop a bookmark on this page" }).first().click();
+    const drawer = page.getByRole("dialog", { name: "Bookmark" });
+    await drawer.getByRole("button", { name: "Close" }).click();
+    await expect(drawer).toBeHidden();
+    const ribbon = page.locator("[data-bookmark-overlay] [data-bookmark]");
+    await expect(ribbon).toHaveCount(1);
+    await page.waitForTimeout(400);
+    const m = await ribbon.evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      const silk = parseFloat(getComputedStyle(el, "::before").width) || box.width;
+      // The press target's own corner still belongs to the button.
+      const hit = document.elementFromPoint(box.left + 2, box.top + 2);
+      return { press: box.width, silk, pressedAtEdge: hit === el || el.contains(hit) };
+    });
+    expect(m.press, "the press target stays 44px wide").toBeGreaterThanOrEqual(44);
+    expect(m.silk, `the painted ribbon is ${m.silk}px wide`).toBeLessThanOrEqual(18);
+    expect(m.pressedAtEdge, "a press at the target's edge still lands on the ribbon").toBe(true);
+  });
+
   test("the long ribbon stays as a setting, and hangs down with its name on it", async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("hifth.ribbon-length.v1", "long"));
     await page.goto("/#/hafs-kfqc/p42");
