@@ -2290,9 +2290,9 @@
       "severity": "question",
       "owner": "user",
       "blockedBy": [
-        "a paid Apple Developer membership"
+        "the paid team signing the app (testflight-plan ③)"
       ],
-      "note": "A tapped site link opens Safari, not the shell. Universal Links need the associated-domains entitlement, which needs a paid team. Same membership the TestFlight decision waits on."
+      "note": "A tapped site link opens Safari, not the shell. Universal Links need the associated-domains entitlement, which needs a paid team. Same membership the TestFlight decision waits on. Membership bought 2026-11-08; waits now on the app being signed with the paid team."
     },
     {
       "id": "swap-to-apple-webview",
@@ -3134,7 +3134,119 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "The owner settled the TestFlight question on own devices only (2026-10-11) and plans to move to sending the whole build to named testers once they have used the app themselves. Owed first: a licence reading by someone qualified, and the paid Apple membership. The upload steps open only when the decision record says A or B. As of 2026-10-25 every walk of the demo the agent can run is done, so this is the next step between the demo and The Study Quran team. Owner, 2026-11-08: get ready to send to testers; next are a brief for the licence reader and the owner's Apple membership."
+      "note": "The owner settled the TestFlight question on own devices only (2026-10-11) and plans to move to sending the whole build to named testers once they have used the app themselves. Owed first: a licence reading by someone qualified, and the paid Apple membership. The upload steps open only when the decision record says A or B. As of 2026-10-25 every walk of the demo the agent can run is done, so this is the next step between the demo and The Study Quran team. Owner, 2026-11-08: get ready to send to testers; next are a brief for the licence reader and the owner's Apple membership. Membership bought 2026-11-08; the steps to a tester's iPad are tracked in docs/design/testflight-plan.md."
+    },
+    {
+      "id": "testflight-membership-active",
+      "source": {
+        "file": "docs/design/testflight-plan.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Bought 2026-11-08 (one year). Waiting on Apple's approval email; then tell the agent the 10-character team ID."
+    },
+    {
+      "id": "testflight-register-app",
+      "source": {
+        "file": "docs/design/testflight-plan.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the iPad app record in App Store Connect. No store listing."
+    },
+    {
+      "id": "testflight-sign-with-paid-team",
+      "source": {
+        "file": "docs/design/testflight-plan.md",
+        "item": "③"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "the team ID (testflight-plan ①)"
+      ],
+      "note": "Set the team in the project settings and reinstall on the owner's iPad and Mac; installs then last a year."
+    },
+    {
+      "id": "testflight-archive-builds",
+      "source": {
+        "file": "docs/design/testflight-plan.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Archive and export settings, privacy manifest, encryption answer, a build number that counts up; open the archive gate, keep the upload gate shut."
+    },
+    {
+      "id": "testflight-licence-brief",
+      "source": {
+        "file": "docs/design/testflight-plan.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "One page for the licence reader: what the build carries, who gets it, how, that an Apple reviewer sees it, and the questions to answer."
+    },
+    {
+      "id": "testflight-licence-reading",
+      "source": {
+        "file": "docs/design/testflight-plan.md",
+        "item": "⑥"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "the licence brief (testflight-plan ⑤)"
+      ],
+      "note": "Send the brief to a qualified reader; a yes moves native-testflight-licence to A, a no leaves B as the fallback."
+    },
+    {
+      "id": "testflight-upload-key",
+      "source": {
+        "file": "docs/design/testflight-plan.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Make the App Store Connect API key under Users and Access, Integrations; it goes in the keychain, never the repo."
+    },
+    {
+      "id": "testflight-upload-step",
+      "source": {
+        "file": "docs/design/testflight-plan.md",
+        "item": "⑧"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "the licence reading (testflight-plan ⑥)",
+        "the upload key (testflight-plan ⑦)"
+      ],
+      "note": "Write the one-command upload once the decision says A and the key exists."
+    },
+    {
+      "id": "testflight-invite-testers",
+      "source": {
+        "file": "docs/design/testflight-plan.md",
+        "item": "⑨"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "the first upload (testflight-plan ⑧)"
+      ],
+      "note": "External tester group, email invites only, no public link; the agent drafts a short note for testers."
     },
     {
       "id": "usage-across-devices",
@@ -3158,7 +3270,7 @@
       "severity": "question",
       "owner": "user",
       "blockedBy": [
-        "the paid Apple membership and proper signing"
+        "the paid team signing the app (testflight-plan ③, membership bought 2026-11-08)"
       ],
       "note": "Build the owner's pick for the usage counts: per-device names and keep-the-larger merging first, then the iPad and Mac apps syncing through the owner's private iCloud database, Firefox and the phone by file, a named exception in the privacy check for the app's bridge, and each device on its own kept as a setting. The iCloud database will not open under today's signing, so nothing can be tried for real until the membership is bought, which the TestFlight move needs too."
     },
