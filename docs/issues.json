@@ -3157,7 +3157,53 @@
       "next": true,
       "severity": "question",
       "owner": "user",
-      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the iPad app record in App Store Connect. No store listing. Next up for the owner (2026-11-08): it is the one step between the pitch and the app on the owner's own iPad for a year, signed with the paid team, which is how the Study Quran team will see it in the room; nothing after it in the TestFlight plan can start until it is done."
+      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the app record in App Store Connect for platform iOS, which covers iPhone and iPad (iphone-app.md ①). No store listing. The links are in the app-setup skill. Next up for the owner (2026-11-08): it is the one step between the pitch and the app on the owner's own iPad for a year, signed with the paid team, which is how the Study Quran team will see it in the room; nothing after it in the TestFlight plan can start until it is done."
+    },
+    {
+      "id": "iphone-record-covers-iphone",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["testflight-register-app"],
+      "note": "Done as part of registering the app: pick platform iOS in App Store Connect so the record covers iPhone and iPad. Not checked: whether Apple lets a later build drop the iPhone once a build that runs on it has gone to testers, so settle the iPhone before the first upload."
+    },
+    {
+      "id": "iphone-walk-pitch",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Walk the pitch build in the iPhone simulator app, upright and on its side, as a reader would; every fault found gets a test and a walk-checklist line."
+    },
+    {
+      "id": "iphone-commentary-shape",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "A phone has no room beside the verse for the commentary. Build the main shapes (a sheet from the bottom, a full-screen note, the page shrinking above it) as switchable options, try them in the simulator, keep the best as the default."
+    },
+    {
+      "id": "iphone-own-device-install",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "④"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["testflight-register-app", "testflight-sign-with-paid-team"],
+      "note": "Install on the owner's own iPhone with the paid team, the same way as the iPad."
     },
     {
       "id": "testflight-sign-with-paid-team",
