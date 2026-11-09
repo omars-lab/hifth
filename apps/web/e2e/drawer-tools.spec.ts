@@ -110,3 +110,67 @@ test("the setting is in the info panel, the separate card chosen until the reade
   await group.getByRole("radio", { name: "Inside the verse's drawer" }).click();
   expect(await page.evaluate((key) => localStorage.getItem(key), DRAWER_TOOLS_KEY)).toBe("drawer");
 });
+
+/*
+ * Share is the second tool moved (2026-11-09). With the setting on, its two
+ * links open as a section of the drawer, as Same roots does, and only one tool
+ * is open inside the drawer at a time.
+ *
+ * Written before the build and watched failing: Share opened its own card.
+ */
+test.describe("Share inside the drawer", () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test("with the setting on, Share opens its links inside the drawer, not as its own card", async ({ page }) => {
+    await page.addInitScript((key) => localStorage.setItem(key, "drawer"), DRAWER_TOOLS_KEY);
+    await page.goto("/#/hafs-kfqc/2:45");
+    await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+    const share = drawer(page).getByRole("button", { name: "Share this ayah as a link" });
+    await share.click();
+
+    const links = drawer(page).getByRole("region", { name: "Share this ayah as a link" });
+    await expect(links).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(links.getByRole("button", { name: "Share the website link" })).toBeVisible();
+    await expect(links.getByRole("button", { name: "Copy the app link" })).toBeVisible();
+    await expect(share).toHaveAttribute("aria-expanded", "true");
+
+    // No line of the lit verse is under the grown drawer.
+    await settle(drawer(page));
+    const box = (await drawer(page).boundingBox())!;
+    expect((await litLines(page)).filter((line) => overlaps(line, box)), "lines of the verse under the drawer").toEqual([]);
+
+
+    // Share again folds the links away and leaves the drawer.
+    await share.click();
+    await expect(links).toBeHidden();
+    await expect(drawer(page)).toBeVisible();
+  });
+
+  test("only one tool is open inside the drawer: Share folds the roots list, and Escape folds Share before the drawer", async ({ page }) => {
+    await page.addInitScript((key) => localStorage.setItem(key, "drawer"), DRAWER_TOOLS_KEY);
+    await page.goto("/#/hafs-kfqc/2:45");
+    await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+    await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
+    const roots = drawer(page).getByRole("region", { name: /^Roots · / });
+    await expect(roots).toBeVisible();
+
+    await drawer(page).getByRole("button", { name: "Share this ayah as a link" }).click();
+    const links = drawer(page).getByRole("region", { name: "Share this ayah as a link" });
+    await expect(links).toBeVisible();
+    await expect(roots).toBeHidden();
+
+    await page.keyboard.press("Escape");
+    await expect(links).toBeHidden();
+    await expect(drawer(page)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(drawer(page)).toBeHidden();
+  });
+
+  test("with the setting off, Share still opens its own card", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/2:45");
+    await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+    await drawer(page).getByRole("button", { name: "Share this ayah as a link" }).click();
+    await expect(page.getByRole("dialog", { name: "Share this ayah as a link" })).toBeVisible();
+  });
+});

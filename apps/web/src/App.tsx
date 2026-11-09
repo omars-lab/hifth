@@ -172,7 +172,7 @@ import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
 import { HighlightMenu } from "./components/HighlightMenu";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
-import { ShareSheet } from "./components/ShareSheet";
+import { ShareInDrawer, ShareSheet } from "./components/ShareSheet";
 import { OfflineNotice } from "./components/OfflineNotice";
 import { Jumper } from "./components/Jumper";
 import { CoachMarks } from "./components/CoachMarks";
@@ -432,9 +432,15 @@ export function App(): JSX.Element {
     new Map(),
   );
   const [rootsOpen, setRootsOpen] = useState(false);
+  // The share links, when the drawer holds the verse's tools (a setting):
+  // one section shows at a time, so opening one folds the other.
+  const [shareInDrawer, setShareInDrawer] = useState(false);
   // The verse drawer's ×: put away until another verse is lit (selection = D).
   const [drawerAway, setDrawerAway] = useState(false);
-  const putDrawerAway = useCallback(() => setDrawerAway(true), []);
+  const putDrawerAway = useCallback(() => {
+    setDrawerAway(true);
+    setShareInDrawer(false);
+  }, []);
   const drawerAwayRef = useRef(drawerAway);
   drawerAwayRef.current = drawerAway;
   // Loop 6a wayfinding sheets: "go to" (`/` or the ⌖ button) and the mushaf
@@ -1063,7 +1069,10 @@ export function App(): JSX.Element {
   // The lens is about one ayah: moving the selection closes it (this covers
   // taps, hops, bead-backs and deep links in one line, without every handler
   // having to remember).
-  useEffect(() => setRootsOpen(false), [selectedKey]);
+  useEffect(() => {
+    setRootsOpen(false);
+    setShareInDrawer(false);
+  }, [selectedKey]);
   // Moving the selection also stops any recitation: the ▶ belongs to the verse
   // you are on, so a hop or a fresh tap should not leave the last one sounding.
   // `stopAudio` is stable, so this fires only when the selection actually moves.
@@ -4707,7 +4716,9 @@ export function App(): JSX.Element {
         end={(!desktop && railAt === "tools") || railOnDrawer ? hopRail(undefined, "tools") : undefined}
         onWhole={setDrawerWhole}
         panel={
-          toolsInDrawer && rootFamilies !== null ? (
+          toolsInDrawer && shareInDrawer ? (
+            <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
+          ) : toolsInDrawer && rootFamilies !== null ? (
             <Suspense fallback={null}>
               <RootLens
                 inline
@@ -4722,7 +4733,10 @@ export function App(): JSX.Element {
             </Suspense>
           ) : null
         }
-        onPanelClose={() => setRootsOpen(false)}
+        onPanelClose={() => {
+          setRootsOpen(false);
+          setShareInDrawer(false);
+        }}
         onCover={setDrawerTop}
         keepClear={litVerseLines}
         clearKey={selectedKey}
@@ -4749,7 +4763,10 @@ export function App(): JSX.Element {
           count={rootCount}
           curated={curatedRoots.length}
           open={rootsOpen}
-          onToggle={() => setRootsOpen((o) => !o)}
+          onToggle={() => {
+            setShareInDrawer(false);
+            setRootsOpen((o) => !o);
+          }}
           caption={t.vdRoots}
         />
         <ShareSheet
@@ -4760,6 +4777,17 @@ export function App(): JSX.Element {
           onTop={setShareCardTop}
           onSide={setShareSide}
           side={sheetSide}
+          inDrawer={
+            toolsInDrawer
+              ? {
+                  open: shareInDrawer,
+                  onToggle: () => {
+                    setRootsOpen(false);
+                    setShareInDrawer((o) => !o);
+                  },
+                }
+              : undefined
+          }
         />
         {selectedKey && (
           <DrawerTool
