@@ -93,12 +93,13 @@ are [iphone-app.md](../../../docs/design/iphone-app.md).
 
 ### The tools for signing, archiving and uploading
 
-Nothing to install beyond Xcode. Checked 2026-11-09 on this laptop.
+Nothing to install beyond Xcode. Checked 2026-11-09 on this laptop; that day Xcode had no
+account signed in, so the first signed build stopped (`testflight-sign-with-paid-team`).
 
 | tool | what it does here | how to check it |
 |---|---|---|
 | Xcode (26.6) | builds, signs, archives | `xcodebuild -version` |
-| Xcode signed in to your Apple account | lets the build make and renew certificates and profiles by itself (`-allowProvisioningUpdates`) | Xcode → Settings → Accounts shows the team `76NHKA839A` |
+| Xcode signed in to your Apple account (**you**; it needs your password) | lets the build make and renew certificates and profiles by itself (`-allowProvisioningUpdates`); without it the build fails with "No Accounts" | Xcode → Settings → Accounts shows the team `76NHKA839A`; `sh native/scripts/xcode-account.sh` says so from the terminal, and `make app-device-install` runs it first |
 | XcodeGen | makes the Xcode project from `native/project.yml` | `xcodegen --version` (`brew install xcodegen` if missing) |
 | `xcodebuild -exportArchive` with the upload key | sends the archive to App Store Connect | needs the key file from ⑤ |
 | `xcrun devicectl` | installs on a plugged-in iPhone or iPad | `xcrun devicectl list devices` |

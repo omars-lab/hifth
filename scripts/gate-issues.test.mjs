@@ -159,3 +159,25 @@ test("gate:issues refuses an index page built from an older index", () => {
   };
   refuses(files(entries()), /docs\/issues\.md was built from [0-9a-f]+, the source is now [0-9a-f]+/, { after: edit });
 });
+
+const listPitch = (root) => {
+  const r = spawnSync(process.execPath, [new URL("gate-issues.mjs", import.meta.url).pathname, "--list", "--pitch"], {
+    encoding: "utf8",
+    env: { ...fixtureEnv(), HIFTH_GATE_ROOT: root },
+  });
+  return { status: r.status, out: `${r.stdout}${r.stderr}` };
+};
+
+test("make issues PITCH=1 lists only the open items on the demo path, and counts them", () => {
+  withTree(files(patched("late-turn", { pitch: true }).map((i) => (i.id === "fade-in" ? { ...i, pitch: true } : i))), (root) => {
+    const r = listPitch(root);
+    assert.equal(r.status, 0, r.out);
+    assert.match(r.out, /On the pitch path — 1 still open/);
+    assert.match(r.out, /late-turn/);
+    assert.doesNotMatch(r.out, /fade-in|plan-licence|on-device/);
+  });
+});
+
+test("gate:issues refuses a pitch tag that is anything but true", () => {
+  refuses(files(patched("late-turn", { pitch: "yes" })), /late-turn: "pitch" is true or left out, not "yes"/);
+});

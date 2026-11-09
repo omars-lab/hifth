@@ -162,9 +162,15 @@ turned on. Neither does anything until the app asks for it. The agent confirms t
 Associated Domains are on when it first signs (③). The App Store Connect record was made the
 same day for iOS and macOS, named "Hifth - The Huffaz Toolkit".
 
-### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **open**
+### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **blocked**
 
 The agent's, now that the team ID is known (①). Installs then last a year instead of seven days.
+
+**Waiting on you: sign in to Xcode.** The first try (2026-11-09) stopped before building,
+because no Apple account is signed in to Xcode on the laptop, and only a signed-in account can
+ask Apple for the app's signing profile. In Xcode: Settings, Accounts, +, Apple ID, and sign in
+with the account that holds the paid membership. The install command now checks this first and
+says the same thing.
 
 **No cable needed after the first time, and nothing uploaded.** Xcode installs over Wi-Fi when the
 laptop and the device share a network. On iOS or iPadOS 27 and later it pairs with no cable at

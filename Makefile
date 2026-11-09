@@ -127,6 +127,16 @@ pitch-e2e: core ## Playwright check of the PRIVATE pitch commentary (local only 
 	}
 	HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch --project=pitch-firefox
 
+.PHONY: pitch-script
+pitch-script: core ## The pitch demo, one test per step: prints how many of its steps pass (local only — needs the note file)
+	@# The steps are .claude/skills/walk-app/pitch-script.md. Not part of the push
+	@# check: a failing step is a fault on the demo path still to fix. The count
+	@# goes into .claude/goals/study-quran-pitch.md. In WebKit, the iPad's engine;
+	@# HIFTH_PITCH_BROWSER=chromium to compare.
+	@test -f $(PITCH_DATA) || { echo "  No private pitch data — $(PITCH_DATA)"; exit 1; }
+	@HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch-script --reporter=list; \
+	  echo ""; echo "  Steps written in .claude/skills/walk-app/pitch-script.md; count the ✓ lines above."
+
 .PHONY: report
 report: ## Open the last e2e run's report — traces, image diffs, the failing screen
 	@# Playwright's own report, not a hand-rolled one. It answers "did the
@@ -549,6 +559,8 @@ issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id
 	@# owning document at the moment you run it.
 	@if [ -n "$(ID)" ]; then \
 	  node scripts/gate-issues.mjs --id "$(ID)"; \
+	elif [ -n "$(PITCH)" ]; then \
+	  node scripts/gate-issues.mjs --list --pitch; \
 	else \
 	  node scripts/gate-issues.mjs --list; \
 	fi

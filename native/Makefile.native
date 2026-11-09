@@ -319,6 +319,7 @@ app-golden-shots: app-golden-public
 app-device-install: app-generate ## Build for a plugged-in iPad, install and launch at ROUTE (DEVICE=<name from `xcrun devicectl list devices`>)
 	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
 	@test -n "$(TEAM)" || { echo "  no Apple Development identity in the keychain (TEAM= to override)"; exit 1; }
+	@sh native/scripts/xcode-account.sh
 	set -o pipefail; $(XCB) -scheme Hifth-iOS -destination 'generic/platform=iOS' -allowProvisioningUpdates \
 	  DEVELOPMENT_TEAM=$(TEAM) build | $(XCPRETTY)
 	xcrun devicectl device install app --device "$(DEVICE)" $(DERIVED)/Build/Products/Debug-iphoneos/Hifth.app

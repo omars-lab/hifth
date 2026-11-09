@@ -56,6 +56,16 @@ only from the outer edge, and so does a finger.
 
 A useful hash: `#/hafs-kfqc/2:255` (a verse), `#/hafs-kfqc/p42` (a page), `?view=one` / `?view=two`.
 
+## The pitch demo, step by step
+
+[pitch-script.md](pitch-script.md) is the fixed demo: the passages and the 16 taps, each with what
+"right" looks like and the command that walks it. Walk it before the meeting, count the passes, and
+write the count into `.claude/goals/study-quran-pitch.md`. A failing step gets a backlog row with
+`"pitch": true`.
+
+`make pitch-script` checks the same steps in a browser first, one test per step, in about 15
+seconds. Run it before the slower iPad walk; it is not a substitute for it.
+
 ## Scripts — when to use each
 
 | script | what it does | reach for it when | command |
