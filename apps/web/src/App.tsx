@@ -249,6 +249,7 @@ import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import { savedZoomAnchor, verseToGrowFrom } from "./zoom-anchor";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
+import { rememberDrawerTools, savedDrawerTools, type DrawerTools } from "./drawer-tools";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { useRunFollow } from "./run-follow";
 import { useRunAhead } from "./run-ahead";
@@ -275,6 +276,13 @@ const START_PAGE = PITCH ? 1 : 7;
 
 /** `quran/…/2:47` → its spec-§7 ref, or null if it is not a bare ayah key. */
 /** Whichever sheet over the foot of a phone reaches highest, or null when none does. */
+/** The lit verse's lines on the page in view, as window boxes; none drawn, none. */
+function litVerseLines(): DOMRect[] {
+  return [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")]
+    .map((el) => el.getBoundingClientRect())
+    .filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth);
+}
+
 function highestTop(...tops: readonly (number | null)[]): number | null {
   const open = tops.filter((top): top is number => top !== null);
   return open.length === 0 ? null : Math.min(...open);
@@ -1334,6 +1342,17 @@ export function App(): JSX.Element {
     rememberVerseGestures(choice);
     setVerseGestures(choice);
   }, []);
+  // Where a verse's tools open: a card of their own, or inside the verse's
+  // drawer (selection-drawer ③; a setting since 2026-11-09, the card unless
+  // this device picked the drawer). Same roots is the first tool it moves.
+  const [drawerTools, setDrawerTools] = useState<DrawerTools>(() => savedDrawerTools());
+  const chooseDrawerTools = useCallback((choice: DrawerTools) => {
+    rememberDrawerTools(choice);
+    setDrawerTools(choice);
+  }, []);
+  const toolsInDrawer = drawerTools === "drawer";
+  // While a tool is open inside the drawer, where the grown drawer starts.
+  const [drawerTop, setDrawerTop] = useState<number | null>(null);
   // How the page shows the verse a "Play to" run is reciting (docs/PLAN.md,
   // item 57): the light moves with it unless this device picked the ring.
   const [runMark, setRunMark] = useState<RunMark>(() => savedRunMark());
@@ -3872,7 +3891,7 @@ export function App(): JSX.Element {
     !drawerAway &&
     !full &&
     (tool === "select" || tool === "highlight") &&
-    !rootsOpen &&
+    (!rootsOpen || toolsInDrawer) &&
     !commentaryOpen &&
     !introSheet &&
     openDirection === null &&
@@ -4271,7 +4290,7 @@ export function App(): JSX.Element {
                 coverTop={
                   desktop && sideCard
                     ? null
-                    : highestTop(noteCorner ? null : coverTop, shareTop ?? (upright ? shareCardTop : null), listCorner ? null : listTop)
+                    : highestTop(noteCorner ? null : coverTop, shareTop ?? (upright ? shareCardTop : null), listCorner ? null : listTop, drawerTop)
                 }
                 coverSide={sideCard}
                 onLiftShort={liftShort}
@@ -4382,7 +4401,7 @@ export function App(): JSX.Element {
               // menu would be a dead end (nothing re-opens it but a fresh drag).
               onClose={() => setSelectedRange(null)}
             />
-            {rootsMounted && (
+            {rootsMounted && !toolsInDrawer && (
               <Suspense fallback={null}>
                 <RootLens
                   families={rootFamilies}
@@ -4517,6 +4536,8 @@ export function App(): JSX.Element {
             onTurnStyle={chooseTurnStyle}
             verseGestures={verseGestures}
             onVerseGestures={chooseVerseGestures}
+            drawerTools={drawerTools}
+            onDrawerTools={chooseDrawerTools}
             runMark={runMark}
             onRunMark={chooseRunMark}
             arrowShowing={arrowShowing}
@@ -4685,6 +4706,26 @@ export function App(): JSX.Element {
         onClose={putDrawerAway}
         end={(!desktop && railAt === "tools") || railOnDrawer ? hopRail(undefined, "tools") : undefined}
         onWhole={setDrawerWhole}
+        panel={
+          toolsInDrawer && rootFamilies !== null ? (
+            <Suspense fallback={null}>
+              <RootLens
+                inline
+                families={rootFamilies}
+                loading={rootsLoading}
+                curated={curatedRoots}
+                canHop={canHop}
+                onHop={handleRootHop}
+                onHopEdge={handleHop}
+                onClose={() => setRootsOpen(false)}
+              />
+            </Suspense>
+          ) : null
+        }
+        onPanelClose={() => setRootsOpen(false)}
+        onCover={setDrawerTop}
+        keepClear={litVerseLines}
+        clearKey={selectedKey}
       >
         {/* While a "Play to" run lasts, the button speaks for the verse being
             recited, not the one the run started from. */}

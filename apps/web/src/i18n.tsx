@@ -802,6 +802,10 @@ export interface Strings {
   verseGesturesB: string;
   verseGesturesC: string;
   verseGesturesNote: string;
+  drawerToolsTitle: string;
+  drawerToolsSheet: string;
+  drawerToolsDrawer: string;
+  drawerToolsNote: string;
   /** Settings: how the page shows the verse a "Play to" run is reciting. */
   runMarkTitle: string;
   runMarkLight: string;
@@ -1636,6 +1640,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     verseGesturesB: m.verseGesturesB,
     verseGesturesC: m.verseGesturesC,
     verseGesturesNote: m.verseGesturesNote,
+    drawerToolsTitle: m.drawerToolsTitle,
+    drawerToolsSheet: m.drawerToolsSheet,
+    drawerToolsDrawer: m.drawerToolsDrawer,
+    drawerToolsNote: m.drawerToolsNote,
     runMarkTitle: m.runMarkTitle,
     runMarkLight: m.runMarkLight,
     runMarkRing: m.runMarkRing,
