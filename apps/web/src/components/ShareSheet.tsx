@@ -45,6 +45,12 @@ interface ShareSheetProps {
    * the corner the card covered the very verse being shared (look-alike rows ⑫).
    */
   side?: LeafSide | null;
+  /**
+   * Opened inside the verse's drawer instead of as a card of its own
+   * (selection-drawer ③, a setting). The button only says whether the drawer
+   * holds the links; `ShareInDrawer` draws them there. Absent: today's card.
+   */
+  inDrawer?: { open: boolean; onToggle: () => void } | undefined;
 }
 
 /** Wider than this, the tray is a small card in the corner, not a band across the page. */
@@ -56,40 +62,15 @@ type Feedback = { kind: "copied" | "shared" | "error"; text: string } | null;
 const SHAPE = shareShapeFromUrl(window.location.search);
 
 /**
- * ShareSheet (spec §7) — the "send this view" affordance, and since the
- * share-sheet-builder decision also where a link to the app is built.
- *
- * Shape A is the sheet as it was: one tap, the website link, to the OS share
- * sheet when there is one (`navigator.share`), else the clipboard. Shapes B
- * and C open a small sheet at the bottom with the two links side by side; C
- * first asks what the link should open on arrival. Either way the recipient
- * lands *exactly here* — ayah, breadcrumb, trail, and the panel asked for —
- * because open = parse → restore is the same code path as a live hop.
- *
- * The app link is `hifth://…`, which a browser's share sheet may refuse, so it
- * is always copied; inside the shell the shell's own sheet takes it.
- *
- * Every path is user-initiated (a button tap): we never auto-share.
+ * What sharing a view needs, in a card or in the drawer: its name, its two
+ * links (with the panel the sender picked written in), and the three ways out
+ * (the shell's sheet, the browser's, the clipboard), with what happened.
  */
-export function ShareSheet({
-  state,
-  hasTrail,
-  variant = "ayah",
-  shape = SHAPE,
-  pitch = false,
-  onCover,
-  onTop,
-  onSide,
-  side = null,
-}: ShareSheetProps): JSX.Element | null {
+function useShare(state: AppState | null, hasTrail: boolean, variant: "ayah" | "range") {
   const { t } = useT();
   const [feedback, setFeedback] = useState<Feedback>(null);
-  const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<SharePanel>("");
   const isRange = variant === "range";
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const legendId = useId();
 
   const ariaLabel = hasTrail ? t.shareAriaTrail : isRange ? t.shareAriaRange : t.shareAriaAyah;
   // The share payload speaks the sender's UI language: it is a sentence in
@@ -138,9 +119,50 @@ export function ShareSheet({
   // else could open.
   const links = state ? linksFor(state, isRange ? "" : panel, shareBase()) : null;
 
+  return { ariaLabel, links, panel, setPanel, isRange, feedback, setFeedback, shareSite, shareApp };
+}
+
+type Share = ReturnType<typeof useShare>;
+
+/**
+ * ShareSheet (spec §7) — the "send this view" affordance, and since the
+ * share-sheet-builder decision also where a link to the app is built.
+ *
+ * Shape A is the sheet as it was: one tap, the website link, to the OS share
+ * sheet when there is one (`navigator.share`), else the clipboard. Shapes B
+ * and C open a small sheet at the bottom with the two links side by side; C
+ * first asks what the link should open on arrival. Either way the recipient
+ * lands *exactly here* — ayah, breadcrumb, trail, and the panel asked for —
+ * because open = parse → restore is the same code path as a live hop.
+ *
+ * The app link is `hifth://…`, which a browser's share sheet may refuse, so it
+ * is always copied; inside the shell the shell's own sheet takes it.
+ *
+ * Every path is user-initiated (a button tap): we never auto-share.
+ */
+export function ShareSheet({
+  state,
+  hasTrail,
+  variant = "ayah",
+  shape = SHAPE,
+  pitch = false,
+  onCover,
+  onTop,
+  onSide,
+  side = null,
+  inDrawer,
+}: ShareSheetProps): JSX.Element | null {
+  const { t } = useT();
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const share = useShare(state, hasTrail, variant);
+  const { ariaLabel, links, feedback, setFeedback, shareSite } = share;
+
   function onTrigger(): void {
     if (!links) return;
     if (shape === "a") void shareSite(links.site);
+    else if (inDrawer) inDrawer.onToggle();
     else {
       setFeedback(null);
       setOpen((o) => !o);
@@ -204,15 +226,9 @@ export function ShareSheet({
 
   if (!state || !links) return null;
 
-  const panels: { id: SharePanel; label: string }[] = [
-    { id: "", label: t.shareAsIs },
-    { id: "lookalikes", label: t.shareLookalikes },
-    { id: "roots", label: t.shareRoots },
-    ...(pitch ? [{ id: "commentary" as const, label: t.shareCommentary }] : []),
-  ];
-
   const sheet =
     open &&
+    !inDrawer &&
     createPortal(
       <div
         ref={sheetRef}
@@ -228,52 +244,7 @@ export function ShareSheet({
             ×
           </button>
         </div>
-        {shape === "c" && !isRange && (
-          <div className={styles.panels} role="radiogroup" aria-labelledby={legendId}>
-            <span id={legendId} className={styles.legend}>
-              {t.shareOpenWith}
-            </span>
-            {panels.map((p) => (
-              <label key={p.id} className={styles.panel}>
-                <input
-                  type="radio"
-                  name="share-panel"
-                  value={p.id}
-                  checked={panel === p.id}
-                  onChange={() => setPanel(p.id)}
-                />
-                <span>{p.label}</span>
-              </label>
-            ))}
-          </div>
-        )}
-        <div className={styles.links}>
-          <button
-            type="button"
-            className={styles.link}
-            onClick={() => void shareSite(links.site)}
-            aria-label={t.shareSiteAria}
-          >
-            <span className={styles.glyph} aria-hidden="true">
-              ⇪
-            </span>
-            <span>{t.shareSite}</span>
-          </button>
-          <button
-            type="button"
-            className={styles.link}
-            onClick={() => void shareApp(links.app)}
-            aria-label={t.shareAppAria}
-          >
-            <span className={styles.glyph} aria-hidden="true">
-              ⧉
-            </span>
-            <span>{t.shareApp}</span>
-          </button>
-        </div>
-        <span className={styles.feedback} role="status" data-kind={feedback?.kind}>
-          {feedback?.text}
-        </span>
+        <ShareBody share={share} shape={shape} pitch={pitch} />
       </div>,
       document.body,
     );
@@ -286,7 +257,7 @@ export function ShareSheet({
         className={styles.share}
         onClick={onTrigger}
         aria-label={ariaLabel}
-        aria-expanded={shape === "a" ? undefined : open}
+        aria-expanded={shape === "a" ? undefined : inDrawer ? inDrawer.open : open}
       >
         <span className={styles.glyph} aria-hidden="true">
           ⇪
@@ -300,5 +271,93 @@ export function ShareSheet({
       )}
       {sheet}
     </div>
+  );
+}
+
+/**
+ * What the sheet holds below its title: what the link should open, the two
+ * links, and what happened. The same in the card and in the drawer.
+ */
+function ShareBody({ share, shape, pitch }: { share: Share; shape: ShareShape; pitch: boolean }): JSX.Element | null {
+  const { t } = useT();
+  const legendId = useId();
+  const { links, panel, setPanel, isRange, feedback, shareSite, shareApp } = share;
+  if (!links) return null;
+  const panels: { id: SharePanel; label: string }[] = [
+    { id: "", label: t.shareAsIs },
+    { id: "lookalikes", label: t.shareLookalikes },
+    { id: "roots", label: t.shareRoots },
+    ...(pitch ? [{ id: "commentary" as const, label: t.shareCommentary }] : []),
+  ];
+  return (
+    <>
+      {shape === "c" && !isRange && (
+        <div className={styles.panels} role="radiogroup" aria-labelledby={legendId}>
+          <span id={legendId} className={styles.legend}>
+            {t.shareOpenWith}
+          </span>
+          {panels.map((p) => (
+            <label key={p.id} className={styles.panel}>
+              <input
+                type="radio"
+                name={`share-panel-${legendId}`}
+                value={p.id}
+                checked={panel === p.id}
+                onChange={() => setPanel(p.id)}
+              />
+              <span>{p.label}</span>
+            </label>
+          ))}
+        </div>
+      )}
+      <div className={styles.links}>
+        <button
+          type="button"
+          className={styles.link}
+          onClick={() => void shareSite(links.site)}
+          aria-label={t.shareSiteAria}
+        >
+          <span className={styles.glyph} aria-hidden="true">
+            ⇪
+          </span>
+          <span>{t.shareSite}</span>
+        </button>
+        <button
+          type="button"
+          className={styles.link}
+          onClick={() => void shareApp(links.app)}
+          aria-label={t.shareAppAria}
+        >
+          <span className={styles.glyph} aria-hidden="true">
+            ⧉
+          </span>
+          <span>{t.shareApp}</span>
+        </button>
+      </div>
+      <span className={styles.feedback} role="status" data-kind={feedback?.kind}>
+        {feedback?.text}
+      </span>
+    </>
+  );
+}
+
+/**
+ * The share links drawn inside the verse's drawer (selection-drawer ③, a
+ * setting): the same body as the card, under the drawer's own heading, so the
+ * verse stays in sight and one Escape folds it.
+ */
+export function ShareInDrawer({
+  state,
+  hasTrail,
+  variant = "ayah",
+  shape = SHAPE,
+  pitch = false,
+}: Pick<ShareSheetProps, "state" | "hasTrail" | "variant" | "shape" | "pitch">): JSX.Element | null {
+  const share = useShare(state, hasTrail, variant);
+  if (!state || !share.links) return null;
+  return (
+    <section className={styles.inDrawer} role="region" aria-label={share.ariaLabel}>
+      <ShareBody share={share} shape={shape} pitch={pitch} />
+    </section>
   );
 }
