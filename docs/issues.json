@@ -3192,7 +3192,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "One page for the licence reader: what the build carries, who gets it, how, that an Apple reviewer sees it, and the questions to answer. Next for the pitch (2026-11-08), alongside the drawer build that is next up for huffaz: it starts the outside reader's clock, and nothing after it (upload, testers, a Study Quran hafiz keeping the app overnight) moves until it is sent."
+      "note": "One page for the licence reader: what the build carries, who gets it, how, that an Apple reviewer sees it, and the questions to answer. Next for the pitch (2026-11-08), alongside the drawer build that is next up for huffaz: it starts the outside reader's clock, and nothing after it (upload, testers, a Study Quran hafiz keeping the app overnight) moves until it is sent. Also ask whether the app may be sold with in-app purchases on the App Store (paid-features ③)."
     },
     {
       "id": "testflight-licence-reading",
@@ -3247,6 +3247,57 @@
         "the first upload (testflight-plan ⑧)"
       ],
       "note": "External tester group, email invites only, no public link; the agent drafts a short note for testers."
+    },
+    {
+      "id": "paid-features-which",
+      "source": {
+        "file": "docs/design/paid-features.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-08: paid features behind an in-app purchase, a lot of the sharing first; the Qur'an itself (reading, pages, search, recitation) is never gated. Agent drafts the free-or-paid list for the owner to pick."
+    },
+    {
+      "id": "paid-features-sell-a-text",
+      "source": {
+        "file": "docs/design/paid-features.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Owner, 2026-11-08: maybe an in-app purchase for a specific text, such as a commentary. Turns on the text's owner agreeing; for The Study Quran it is part of the collaboration pitch."
+    },
+    {
+      "id": "paid-features-app-store",
+      "source": {
+        "file": "docs/design/paid-features.md",
+        "item": "③"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "the licence reading (testflight-plan ⑥)"
+      ],
+      "note": "In-app purchases need an App Store release, which the licence question holds (app-store-not-a-target). Add this question to the TestFlight licence brief so one reading answers both."
+    },
+    {
+      "id": "paid-features-build",
+      "source": {
+        "file": "docs/design/paid-features.md",
+        "item": "④"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "the free-or-paid list (paid-features ①)",
+        "the App Store question (paid-features ③)"
+      ],
+      "note": "Apple's purchase system in the iPad and Mac app, and one switch the web app reads per paid feature, with the free path tested on its own."
     },
     {
       "id": "usage-across-devices",
