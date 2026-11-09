@@ -303,12 +303,12 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot|word-stack)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot|word-stack)\.spec\.ts/,
         },
         {
           // The iPad, the same WebKit the native shell hosts (native/). One
