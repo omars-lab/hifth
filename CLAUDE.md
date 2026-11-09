@@ -25,6 +25,11 @@ Two consequences to hold onto:
 If a task does not move the pitch forward, it is not urgent right now. When in doubt, build
 the thing that will make a scholar lean in.
 
+Each goal has its own file in `.claude/goals/`, listed in its `README.md`. The current one,
+`.claude/goals/study-quran-pitch.md`, says how we measure progress, the current numbers, what
+comes next and the skills and commands that do each step. Read it before picking work, and
+update its numbers when a walk runs.
+
 ## How we work, in one line each
 
 The sections below give the reasons at length; these are the habits, short enough to hold in

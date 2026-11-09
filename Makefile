@@ -549,6 +549,8 @@ issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id
 	@# owning document at the moment you run it.
 	@if [ -n "$(ID)" ]; then \
 	  node scripts/gate-issues.mjs --id "$(ID)"; \
+	elif [ -n "$(PITCH)" ]; then \
+	  node scripts/gate-issues.mjs --list --pitch; \
 	else \
 	  node scripts/gate-issues.mjs --list; \
 	fi

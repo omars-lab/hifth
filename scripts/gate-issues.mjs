@@ -42,6 +42,8 @@
  *   node scripts/gate-issues.mjs --list         the open items, worst first
  *   node scripts/gate-issues.mjs --all          every item, including closed
  *   node scripts/gate-issues.mjs --id <id>      one item's full picture
+ *   node scripts/gate-issues.mjs --list --pitch only the open items a scholar would hit
+ *                                               in the pitch demo (rows tagged "pitch": true)
  */
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -127,12 +129,17 @@ if (flag("--id") !== null) {
 
 if (argv.includes("--list") || argv.includes("--all")) {
   const all = argv.includes("--all");
-  const shown = all ? issues : issues.filter((i) => !["answered", "fixed", "done"].includes(statusOf(i)));
+  const pitch = argv.includes("--pitch");
+  const open = issues.filter((i) => !["answered", "fixed", "done"].includes(statusOf(i)));
+  const shown = all ? issues : pitch ? open.filter((i) => i.pitch === true) : open;
   console.log(
     all
       ? `\nEvery item this repo has written down — ${issues.length} of them.\n`
-      : `\nWhat is still open — ${shown.length} of ${issues.length}. \`make issues ID=<id>\` for one.\n`,
+      : pitch
+        ? `\nOn the pitch path — ${shown.length} still open (.claude/goals/study-quran-pitch.md).\n`
+        : `\nWhat is still open — ${shown.length} of ${issues.length}. \`make issues ID=<id>\` for one.\n`,
   );
+  if (!shown.length) process.exit(0);
   const width = Math.max(...shown.map((i) => i.id.length));
   for (const st of STATUS_ORDER.concat(["pending", "done"])) {
     const mine = shown.filter((i) => statusOf(i) === st);
@@ -159,6 +166,9 @@ for (const i of issues) {
   if (!/^[a-z0-9-]+$/.test(i.id)) problems.push(`${where}: ids are kebab-case.`);
   if (!SEVERITIES.includes(i.severity)) {
     problems.push(`${where}: severity "${i.severity}" is not one of ${SEVERITIES.join(", ")}.`);
+  }
+  if ("pitch" in i && i.pitch !== true) {
+    problems.push(`${where}: "pitch" is true or left out, not ${JSON.stringify(i.pitch)}.`);
   }
   if (!["agent", "user"].includes(i.owner)) {
     problems.push(`${where}: owner is "agent" or "user", not "${i.owner}".`);

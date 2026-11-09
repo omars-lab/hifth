@@ -58,3 +58,4 @@
 - [XCUITest finds web tools by label](xcuitest-web-tools-by-label.md) — tool radios aren't radioButtons in the iPad app's UI tests; notes persist across launches, uninstall for a clean run
 - [Name mistakes by what went wrong](name-mistakes-by-what-went-wrong.md) — one entry (Mistake pen) then the kind; app never says "slip"/uses design terms on buttons (owner 2026-10-13)
 - [Pitch test failures print notes](pitch-test-failures-print-notes.md) — assert on counts, never toMatch on a note's text; grep logs without "Received string"
+- [Goals: one file each](goals-one-file-each.md) — .claude/goals/<name>.md + README; each names measures, current numbers and the skills/hooks that make it repeatable; current = study-quran-pitch

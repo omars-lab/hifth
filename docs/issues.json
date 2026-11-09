@@ -970,6 +970,7 @@
     },
     {
       "id": "check-offline-survival",
+      "pitch": true,
       "source": {
         "ledger": "offline-survival-8-day"
       },
@@ -2443,6 +2444,7 @@
     },
     {
       "id": "mark-reveal-in-safari",
+      "pitch": true,
       "source": {
         "file": "docs/design/highlight-texture-options.md",
         "item": "④"
@@ -2613,6 +2615,7 @@
     },
     {
       "id": "pitch-commentary-differs-from-print",
+      "pitch": true,
       "source": {
         "file": "docs/design/knowledge-graph-commentary.md",
         "item": "①"
@@ -3275,6 +3278,7 @@
     },
     {
       "id": "testflight-sign-with-paid-team",
+      "pitch": true,
       "source": {
         "file": "docs/design/testflight-plan.md",
         "item": "③"
@@ -5745,6 +5749,7 @@
     },
     {
       "id": "drawers-for-every-tool",
+      "pitch": true,
       "source": {
         "file": "docs/design/ayah-drawer.md",
         "item": "①"
@@ -5800,6 +5805,7 @@
     },
     {
       "id": "word-drawer-stacks-on-verse",
+      "pitch": true,
       "source": {
         "file": "docs/decisions/selection-drawer.md",
         "item": "①"
@@ -5822,6 +5828,7 @@
     },
     {
       "id": "drawer-holds-its-tools",
+      "pitch": true,
       "source": {
         "file": "docs/decisions/selection-drawer.md",
         "item": "③"
