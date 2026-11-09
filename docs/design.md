@@ -1,6 +1,6 @@
 # Getting the app to people: testers first, then paid extras
 
-*Started 2026-11-08. This page is the one place to start. It points at the two plans below and
+*Started 2026-11-08. This page is the one place to start. It points at the three plans below and
 lists every step in order. The steps themselves are tracked in the backlog, so this page never
 holds a second copy of their status.*
 
@@ -25,12 +25,17 @@ flowchart LR
   F[Free or paid list<br/>picked by the owner] --> P
 ```
 
-## The two plans
+## The three plans
 
 | Plan | The question it answers | Open steps |
 |---|---|---|
 | [TestFlight plan](design/testflight-plan.md) | How do we get the app onto a tester's iPad? | nine |
 | [Paid features](design/paid-features.md) | Which parts of the app could be paid for, and which stay free? | four |
+| [Publisher name](design/publisher-account.md) | How do we get Hifth shown as published by Bytes of Purpose, not "Omar Eid"? | six |
+
+**Before TestFlight ②:** the publisher page asks to hold Hifth's App Store Connect record, the
+first upload and the iCloud box until you say whether Bytes of Purpose is a registered company,
+because each one ties Hifth to the membership that makes it.
 
 ## What is the one rule already settled?
 

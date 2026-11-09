@@ -3249,6 +3249,79 @@
       "note": "External tester group, email invites only, no public link; the agent drafts a short note for testers."
     },
     {
+      "id": "publisher-account-is-company",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Apple shows a company name only for a registered company with its own membership; a trading name or sole trader shows the person's legal name. Is Bytes of Purpose registered, and under what exact legal name?"
+    },
+    {
+      "id": "publisher-account-name-matters",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Testers see 'Hifth, by Omar Eid' under the personal membership. Is 'by Bytes of Purpose' worth days to weeks of waiting for a company membership?"
+    },
+    {
+      "id": "publisher-account-hold-permanent-steps",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Do not make Hifth's App Store Connect record, upload a build or make the iCloud box under the personal membership until the company question is answered; all three tie Hifth to that membership for good. Signing for the owner's own devices goes ahead."
+    },
+    {
+      "id": "publisher-account-prayer-buddy",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Changing this membership into a company one moves Prayer Buddy too. Is it in the App Store, and should it stay under the owner's name?"
+    },
+    {
+      "id": "publisher-account-enrol-company",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "⑤"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "whether Bytes of Purpose is a registered company (publisher-account ①)",
+        "whether the name matters enough to wait (publisher-account ②)"
+      ],
+      "note": "Free D-U-N-S number (up to 5 working days, then 2 for Apple), the bytesofpurpose.com website and an email on it, then enrol as a company for 99 US dollars a year."
+    },
+    {
+      "id": "publisher-account-move-plan",
+      "source": {
+        "file": "docs/design/publisher-account.md",
+        "item": "⑥"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "the company membership being approved (publisher-account ⑤)"
+      ],
+      "note": "Do the TestFlight plan's app ID and App Store Connect record in the company membership, and set its team ID in the signing settings."
+    },
+    {
       "id": "paid-features-which",
       "source": {
         "file": "docs/design/paid-features.md",
