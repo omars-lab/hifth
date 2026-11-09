@@ -3389,6 +3389,100 @@
       "note": "Build the owner's pick for the usage counts: per-device names and keep-the-larger merging first, then the iPad and Mac apps syncing through the owner's private iCloud database, Firefox and the phone by file, a named exception in the privacy check for the app's bridge, and each device on its own kept as a setting. The iCloud database will not open under today's signing, so nothing can be tried for real until the membership is bought, which the TestFlight move needs too."
     },
     {
+      "id": "icloud-sync-revision-record",
+      "source": {
+        "file": "docs/design/icloud-sync.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Should the record of what you have opened follow you to your other Apple device through your own iCloud? A copy there would bring it back if the phone's system clears it after a week unopened, but it is a log of when you read, and Apple can read it unless Advanced Data Protection is on. Recommended: yes, off until you turn it on, in an encrypted field."
+    },
+    {
+      "id": "icloud-sync-deletions",
+      "source": {
+        "file": "docs/design/icloud-sync.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "When you delete a bookmark or note on one device, should it go from the other too? Today loading a file never deletes, so under sync a removed bookmark would come back. Recommended: a small removal mark kept for 400 days. The same answer decides what happens to a note edited on both devices while offline."
+    },
+    {
+      "id": "icloud-sync-where-left-off",
+      "source": {
+        "file": "docs/design/icloud-sync.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "When you open the Mac, should it offer the page where the iPad left off? Recommended: offer it one tap away, rather than jumping there or keeping each device's own."
+    },
+    {
+      "id": "icloud-sync-settings",
+      "source": {
+        "file": "docs/design/icloud-sync.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Which settings should follow you between iPad and Mac? Recommended: reading choices only (language, pens, tools, how the page turns); where the pens and rail sit and the sizes stay per device. The page has a first sort to check."
+    },
+    {
+      "id": "icloud-sync-road",
+      "source": {
+        "file": "docs/design/icloud-sync.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Should every record take the same road the usage counts take: Apple's ready-made sync loop, one copy per device per kind, carrying the same text the saved file uses? Recommended: yes. It keeps one road to build and a small database layout, and Apple's database mirror is already out for the iCloud space the usage counts use."
+    },
+    {
+      "id": "icloud-sync-build-unsigned",
+      "source": {
+        "file": "docs/design/icloud-sync.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Build the parts that do not touch Apple, each with its test: the fold-in rules with removal marks, the record each device hands over, the two new bridge messages, a stand-in iCloud on the app side, the info-panel setting, and the privacy check's named exception. Can start now for the usage counts; the other records follow as questions ② to ⑤ are answered."
+    },
+    {
+      "id": "icloud-sync-try-signed",
+      "source": {
+        "file": "docs/design/icloud-sync.md",
+        "item": "⑦"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "the paid team signing the app (testflight-plan ③)"
+      ],
+      "note": "Turn on iCloud for the iPad and Mac apps and try sync on the owner's own devices: make the app's iCloud container, add the iCloud and push-notice permissions, move the Mac app to the team's signature, then run against the test copy of the database."
+    },
+    {
+      "id": "icloud-sync-publish-layout",
+      "source": {
+        "file": "docs/design/icloud-sync.md",
+        "item": "⑧"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "icloud-sync ⑦, sync working on the owner's own iPad and Mac"
+      ],
+      "note": "Publish the database's layout in Apple's CloudKit console before the first TestFlight upload, because testers use the live database. A one-way step: published fields can be added to but never removed."
+    },
+    {
       "id": "note-left-open-stays-empty",
       "source": {
         "file": "docs/design/native-shell.md",
