@@ -173,6 +173,8 @@ import { HopPopover } from "./components/HopPopover";
 import { HighlightMenu } from "./components/HighlightMenu";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareInDrawer, ShareSheet } from "./components/ShareSheet";
+import { ListenOptions } from "./components/ListenOptions";
+import { rememberListenWay, savedListenWay } from "./listen-way";
 import { OfflineNotice } from "./components/OfflineNotice";
 import { Jumper } from "./components/Jumper";
 import { CoachMarks } from "./components/CoachMarks";
@@ -435,11 +437,14 @@ export function App(): JSX.Element {
   // The share links, when the drawer holds the verse's tools (a setting):
   // one section shows at a time, so opening one folds the other.
   const [shareInDrawer, setShareInDrawer] = useState(false);
+  // Listen's play options, the same way.
+  const [listenInDrawer, setListenInDrawer] = useState(false);
   // The verse drawer's ×: put away until another verse is lit (selection = D).
   const [drawerAway, setDrawerAway] = useState(false);
   const putDrawerAway = useCallback(() => {
     setDrawerAway(true);
     setShareInDrawer(false);
+    setListenInDrawer(false);
   }, []);
   const drawerAwayRef = useRef(drawerAway);
   drawerAwayRef.current = drawerAway;
@@ -865,11 +870,15 @@ export function App(): JSX.Element {
   const runEndRef = useRef<((key: string, run: number) => void) | null>(null);
   // How a run makes its next verse ready while one sounds (docs/PLAN.md, item 63).
   const runAhead = useRunAhead();
+  // How many times each verse plays and how fast, from the play options
+  // under Listen in the drawer (selection-drawer ③), kept on this device.
+  const [listenWay, setListenWay] = useState(() => savedListenWay());
   const audio = useVerseAudio(
     (k) => announce(`${t.ayahLabel(k) ?? k} — ${t.audioUnavailable}`),
     (k, n) => runEndRef.current?.(k, n),
     runAhead,
     DEVICE_RECITATION,
+    listenWay,
   );
   // The surah menu's line for keeping its recitation counts as it saves, so the
   // app hears every step (docs/PLAN.md, item 101).
@@ -1072,6 +1081,7 @@ export function App(): JSX.Element {
   useEffect(() => {
     setRootsOpen(false);
     setShareInDrawer(false);
+    setListenInDrawer(false);
   }, [selectedKey]);
   // Moving the selection also stops any recitation: the ▶ belongs to the verse
   // you are on, so a hop or a fresh tap should not leave the last one sounding.
@@ -4716,7 +4726,17 @@ export function App(): JSX.Element {
         end={(!desktop && railAt === "tools") || railOnDrawer ? hopRail(undefined, "tools") : undefined}
         onWhole={setDrawerWhole}
         panel={
-          toolsInDrawer && shareInDrawer ? (
+          toolsInDrawer && listenInDrawer && selectedKey ? (
+            <ListenOptions
+              label={t.ayahLabel(selectedKey) ?? selectedKey}
+              way={listenWay}
+              onWay={(way) => {
+                setListenWay(way);
+                rememberListenWay(way);
+              }}
+              onPlayTo={() => startPlayTo(selectedKey)}
+            />
+          ) : toolsInDrawer && shareInDrawer ? (
             <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
           ) : toolsInDrawer && rootFamilies !== null ? (
             <Suspense fallback={null}>
@@ -4736,6 +4756,7 @@ export function App(): JSX.Element {
         onPanelClose={() => {
           setRootsOpen(false);
           setShareInDrawer(false);
+          setListenInDrawer(false);
         }}
         onCover={setDrawerTop}
         keepClear={litVerseLines}
@@ -4747,7 +4768,17 @@ export function App(): JSX.Element {
           selectedKey={listenKey}
           label={listenKey ? (t.ayahLabel(listenKey) ?? listenKey) : null}
           phase={audio.phaseFor(listenKey)}
-          onToggle={audio.toggle}
+          onToggle={(k) => {
+            audio.toggle(k);
+            // With the setting on, the press also opens the play options
+            // under the drawer's buttons, folding any other tool open there.
+            if (toolsInDrawer && !listenInDrawer) {
+              setRootsOpen(false);
+              setShareInDrawer(false);
+              setListenInDrawer(true);
+            }
+          }}
+          expanded={toolsInDrawer ? listenInDrawer : undefined}
           caption={listenCaption(audio.phaseFor(listenKey), t)}
         />
         {COMMENTARY && (
@@ -4765,6 +4796,7 @@ export function App(): JSX.Element {
           open={rootsOpen}
           onToggle={() => {
             setShareInDrawer(false);
+            setListenInDrawer(false);
             setRootsOpen((o) => !o);
           }}
           caption={t.vdRoots}
@@ -4783,6 +4815,7 @@ export function App(): JSX.Element {
                   open: shareInDrawer,
                   onToggle: () => {
                     setRootsOpen(false);
+                    setListenInDrawer(false);
                     setShareInDrawer((o) => !o);
                   },
                 }

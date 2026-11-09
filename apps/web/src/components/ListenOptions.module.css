@@ -1,0 +1,61 @@
+/* The play options under Listen, inside the verse's drawer (a setting). The
+   chips are the share choices' chips, so the two sections read as one family. */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.legend {
+  min-inline-size: 7rem;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--paper-sunk);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.chip:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+}
+.chip:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.chip input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.playTo {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--accent-tint);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--accent-strong);
+  font-family: var(--font-chrome);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}

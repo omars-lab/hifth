@@ -216,6 +216,15 @@ export interface Catalog {
   readonly licenceBody: string;
   readonly licenceHead: string;
   readonly likeVerse: (d: { readonly ref: string | number }) => string;
+  readonly listenAsRecited: string;
+  readonly listenFaster: string;
+  readonly listenOnce: string;
+  readonly listenOptionsAria: (d: { readonly label: string | number }) => string;
+  readonly listenRepeatTitle: string;
+  readonly listenSlower: string;
+  readonly listenSpeedTitle: string;
+  readonly listenTimes: (d: { readonly n: string | number }) => string;
+  readonly listenUntilStop: string;
   readonly longVerseNote: string;
   readonly longVerseShorter: string;
   readonly longVerseSmaller: string;

@@ -664,5 +664,14 @@
   "cardRoomTitle": "Where the page goes when a list opens beside it",
   "cardRoomAside": "Page moves aside",
   "cardRoomSmaller": "Page stays in the middle",
-  "cardRoomNote": "With the book closed to one page, the roots list, the share card and the tajweed key open beside the page. Page moves aside: the page slides into the room the card leaves and keeps its size. Page stays in the middle: the page stays in the middle of the window and is drawn smaller, so the card does not cover it; where that would draw it under half its size, it moves aside instead. Either way it goes back to its own size and place when the card closes."
+  "cardRoomNote": "With the book closed to one page, the roots list, the share card and the tajweed key open beside the page. Page moves aside: the page slides into the room the card leaves and keeps its size. Page stays in the middle: the page stays in the middle of the window and is drawn smaller, so the card does not cover it; where that would draw it under half its size, it moves aside instead. Either way it goes back to its own size and place when the card closes.",
+  "listenOptionsAria": "Play options for {label}",
+  "listenRepeatTitle": "Repeat each verse",
+  "listenOnce": "Once",
+  "listenTimes": "{n} times",
+  "listenUntilStop": "Until I stop",
+  "listenSpeedTitle": "Speed",
+  "listenSlower": "Slower",
+  "listenAsRecited": "As recited",
+  "listenFaster": "Faster"
 }

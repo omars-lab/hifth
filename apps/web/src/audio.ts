@@ -77,6 +77,19 @@ const NOTHING_KEPT: KeptRecitation = {
   copy: () => Promise.resolve(undefined),
 };
 
+/**
+ * How each verse is played: how many times in a row (Infinity: until
+ * stopped) and how fast (1 is as recited). The play options under Listen in
+ * the verse drawer set them (selection-drawer ③).
+ */
+export interface ListenWay {
+  repeat: number;
+  speed: number;
+}
+
+/** Once, as recited. */
+export const ONCE_AS_RECITED: ListenWay = { repeat: 1, speed: 1 };
+
 /** What the play control is doing right now. */
 export type AudioPhase = "idle" | "loading" | "playing" | "error";
 
@@ -127,6 +140,7 @@ export function useVerseAudio(
   onRunEnd?: (key: string, run: number) => void,
   ahead: RunAhead = "off",
   kept: KeptRecitation = NOTHING_KEPT,
+  listen: ListenWay = ONCE_AS_RECITED,
 ): VerseAudio {
   const elRef = useRef<HTMLAudioElement | null>(null);
   const keyRef = useRef<string | null>(null);
@@ -154,6 +168,10 @@ export function useVerseAudio(
   aheadRef.current = ahead;
   const keptRef = useRef(kept);
   keptRef.current = kept;
+  const listenRef = useRef(listen);
+  listenRef.current = listen;
+  // How many more times the verse sounding now plays before the next.
+  const againRef = useRef(0);
   // A kept verse is made ready from its copy whatever the setting says: the
   // reader kept the surah to hear it from the device.
   const isKept = useCallback((k: string): boolean => {
@@ -286,6 +304,10 @@ export function useVerseAudio(
       readyRef.current.delete(next);
     }
     forget(next);
+    againRef.current = Math.max(0, listenRef.current.repeat - 1);
+    // A new file takes the default rate, so both are set.
+    el.defaultPlaybackRate = listenRef.current.speed;
+    el.playbackRate = listenRef.current.speed;
     el.src = readyRef.current.get(next)?.copy ?? url;
     el.currentTime = 0;
     el.play().catch(() => failed(el, next));
@@ -304,6 +326,14 @@ export function useVerseAudio(
       el.addEventListener("waiting", () => setPhase("loading"));
       el.addEventListener("pause", () => setPhase((p) => (p === "error" ? p : "idle")));
       el.addEventListener("ended", () => {
+        // The same verse again, before anything counts it heard or moves on.
+        if (againRef.current > 0 && keyRef.current) {
+          againRef.current -= 1;
+          const k = keyRef.current;
+          elRef.current!.currentTime = 0;
+          elRef.current!.play().catch(() => failed(elRef.current!, k));
+          return;
+        }
         const done = keyRef.current ? verseAudioUrl(keyRef.current) : null;
         if (done) keptRef.current.heard?.(done);
         const next = queueRef.current.shift();
@@ -326,7 +356,16 @@ export function useVerseAudio(
     return el;
   }, [start, setInRun, askAhead, failed]);
 
+  // A new speed takes effect on the verse sounding now, not only the next.
+  useEffect(() => {
+    const el = elRef.current;
+    if (!el) return;
+    el.defaultPlaybackRate = listen.speed;
+    el.playbackRate = listen.speed;
+  }, [listen.speed]);
+
   const stop = useCallback(() => {
+    againRef.current = 0;
     queueRef.current = [];
     wantedRef.current = null;
     setInRun(false);

@@ -42,6 +42,7 @@ export function PlayTrigger({
   phase,
   onToggle,
   caption,
+  expanded,
 }: {
   /** The selected ayah key, or null (nothing selected, or a word/range). */
   selectedKey: string | null;
@@ -53,6 +54,11 @@ export function PlayTrigger({
   onToggle: (key: string) => void;
   /** A word under the glyph, shown when the button sits in the verse drawer. */
   caption?: string;
+  /**
+   * Whether the play options are open under the drawer's buttons, when the
+   * setting puts them there (selection-drawer ③); absent otherwise.
+   */
+  expanded?: boolean | undefined;
 }): JSX.Element | null {
   const { t } = useT();
   if (!selectedKey || !label) return null;
@@ -69,6 +75,7 @@ export function PlayTrigger({
       aria-label={spokenName(playing ? t.pauseAyah(label) : t.playAyah(label), caption, t.sep)}
       aria-pressed={playing}
       aria-busy={loading || undefined}
+      aria-expanded={expanded}
       onClick={() => onToggle(selectedKey)}
     >
       <span aria-hidden="true" className={loading ? styles.spinning : undefined}>
