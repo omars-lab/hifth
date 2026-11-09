@@ -3323,6 +3323,100 @@
       "note": "Build the owner's pick for the usage counts: per-device names and keep-the-larger merging first, then the iPad and Mac apps syncing through the owner's private iCloud database, Firefox and the phone by file, a named exception in the privacy check for the app's bridge, and each device on its own kept as a setting. The iCloud database will not open under today's signing, so nothing can be tried for real until the membership is bought, which the TestFlight move needs too."
     },
     {
+      "id": "sharing-b-own-icloud",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Say yes or no to mistakes, notes and bookmarks following you between your own iPad and Mac through your own private iCloud, on the same road as the usage counts; a yes adds a named way out to the privacy check and is built with the usage-count sync once the apps are signed by the paid team."
+    },
+    {
+      "id": "sharing-b-which-way",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Pick how a student's mistakes first reach a teacher: a file sent by hand, a locked link with no account that the student can update and switch off, or signed-in accounts; researcher B recommends the file now and the locked link for the live teacher link, written as a new decision record with a rough build of the teacher's view."
+    },
+    {
+      "id": "sharing-b-times-travel",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Decide whether the record of when you read ever goes with a share, or only mistakes and notes; the suggestion is never by default, and only as a separate tick the student sees each time."
+    },
+    {
+      "id": "sharing-b-address",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Choose the web address for the sharing pages (a sub-address such as share.bytesofpurpose.com, or move the whole app to hifth.bytesofpurpose.com) and add its DNS entry; a folder of the blog shares the blog's storage and cookies, and its host forbids handling sign-ins."
+    },
+    {
+      "id": "sharing-b-paid",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "⑤"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "paid-features-which"
+      ],
+      "note": "Whether sending a share is a paid extra and opening one always free waits on the list of paid features; a purchase on the web would not need the App Store."
+    },
+    {
+      "id": "sharing-b-icloud-non-apple",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "⑥"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "testflight-sign-with-paid-team"
+      ],
+      "note": "Try whether a teacher with no Apple device can open an iCloud share, by opening a test share from the Apple app in Firefox and on an Android phone, once the apps are signed by the paid team."
+    },
+    {
+      "id": "sharing-b-sign-in-in-apps",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Try Sign in with Apple and an email link inside the iPad and Mac apps on a throwaway test project; only needed if signed-in accounts are built, since Google blocks sign-in inside an app's web view."
+    },
+    {
+      "id": "sharing-b-teacher-view",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Build the teacher's view two rough ways, the student's slips on the real page and as a list, open both on an iPad, and keep the loser as a setting."
+    },
+    {
       "id": "note-left-open-stays-empty",
       "source": {
         "file": "docs/design/native-shell.md",
