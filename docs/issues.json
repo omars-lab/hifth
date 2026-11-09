@@ -3378,7 +3378,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "Should every record take the same road the usage counts take: Apple's ready-made sync loop, one copy per device per kind, carrying the same text the saved file uses? Recommended: yes. It keeps one road to build and a small database layout, and rules out Apple's database mirror for the same container."
+      "note": "Should every record take the same road the usage counts take: Apple's ready-made sync loop, one copy per device per kind, carrying the same text the saved file uses? Recommended: yes. It keeps one road to build and a small database layout, and Apple's database mirror is already out for the iCloud space the usage counts use."
     },
     {
       "id": "icloud-sync-build-unsigned",
