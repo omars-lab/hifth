@@ -2,7 +2,7 @@
 
 *Started 2026-11-08 from the owner's words: put paid features behind an in-app purchase, a lot
 of the sharing for a start; none of the Qur'an itself is gated; maybe a purchase for a specific
-text. Nothing is built. This page holds the questions until they are answered.*
+text. Nothing is built. This page holds the questions until they are answered. The start page for testers and paid extras together: [design.md](../design.md).*
 
 ## The short version
 

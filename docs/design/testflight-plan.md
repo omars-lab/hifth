@@ -3,7 +3,7 @@
 *Started 2026-11-08, the day the owner bought the paid Apple Developer membership (one year).
 Worked backwards from the end: a hafiz on The Study Quran team opens Hifth on their own iPad the
 next morning. Backlog item: [testflight-after-own-use](../backlog.md#testflight-after-own-use).
-Decision it hangs on: [native-testflight-licence](../decisions/native-testflight-licence.md).*
+Decision it hangs on: [native-testflight-licence](../decisions/native-testflight-licence.md). The start page for testers and paid extras together: [design.md](../design.md).*
 
 ## The short version
 
