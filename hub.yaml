@@ -10,6 +10,11 @@ runners:
     port: 7123                    # apps/web/vite.config.ts and the Makefile's PORT, strictPort
     health: /
     start: make preview           # builds first, then serves the production bundle
+  - id: hifth-comments
+    comments_for: hifth           # the Comment button in front of the app on 7122
+    port: 8767                    # .page-comments/config.json and the Makefile's comments target
+    health: /
+    start: make comments
 
 hubs:
   - id: hifth

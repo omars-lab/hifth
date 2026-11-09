@@ -2614,6 +2614,18 @@
       "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
+      "id": "pitch-first-passage-ready",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/knowledge-graph-commentary.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "The next most important thing for the pitch (2026-11-09): none of the six chosen passages is demo-ready yet. Take the first, 2:255, and walk it on the iPad against the printed book: its page, its marks, its look-alikes, and above all its note reading as the print does (paragraphs, headings, which note goes with which verse). This is the one thing the Study Quran team will check against their own book. Fix what differs, each with a test that uses made-up text, mark the row ready in the pitch script (.claude/skills/walk-app/pitch-script.md), then the next passage."
+    },
+    {
       "id": "pitch-commentary-differs-from-print",
       "pitch": true,
       "source": {
@@ -5813,7 +5825,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner's page comment of 2026-11-07 asked whether a tap on a word opens a word drawer stacked on the verse drawer. Today the Verse tool lights the verse and only the Word tool opens the word's drawer, in the same place. Built 2026-11-09 as a setting in the info panel (putting the verse out stays the default): a second tap on a word of the lit verse opens its letters and signs in a drawer on top of the verse's, both stay, and the page lifts the verse clear of the two. Left: the owner tries the setting and says whether it becomes the default."
+      "note": "Owner's page comment of 2026-11-07 asked whether a tap on a word opens a word drawer stacked on the verse drawer. Today the Verse tool lights the verse and only the Word tool opens the word's drawer, in the same place. Built 2026-11-09 as a setting in the info panel (putting the verse out stays the default): a second tap on a word of the lit verse opens its letters and signs in a drawer on top of the verse's, both stay, and the page lifts the verse clear of the two. Left: the owner tries the setting and says whether it becomes the default. Not yet checked: what the word's drawer does if the verse's drawer goes away under it (full screen, or another tool picked); it may be left floating with a gap below."
     },
     {
       "id": "verse-glows-on-drawer-hover",
