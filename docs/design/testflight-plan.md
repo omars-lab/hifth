@@ -165,12 +165,14 @@ The agent's. Archive and export settings, the privacy manifest, the encryption a
 number that counts up, and the archive gate opened while the upload gate stays shut. Noted in
 the decision record when the gate changes.
 
-### ⑤ Write the brief for the licence reader · **open**
+### ⑤ Write the brief for the licence reader · **answered**
 
-The agent's. One page: what the build carries, who receives it, how, that an Apple reviewer
-sees it too, and the questions the reader must answer.
+Written 2026-11-08: [testflight-licence-brief.md](testflight-licence-brief.md). One page: what
+the build carries and under whose terms, who receives it and how, that an Apple reviewer sees
+it too, our own reading for the reader to check, and five questions, the last one about
+selling the app later with in-app purchases.
 
-### ⑥ Get the licence reading and move the decision to A · **blocked**
+### ⑥ Get the licence reading and move the decision to A · **open**
 
 Yours, once the brief exists (⑤): send it to a qualified reader. On a yes, the decision record
 moves to A with who read it and when; on a no, B is the fallback.

@@ -105,7 +105,10 @@ the iPad.
 
 ## What would change the answer?
 
-A licensing opinion that reads an internal TestFlight test as private sharing makes A
+The brief for that opinion, written 2026-11-08, is
+[testflight-licence-brief.md](../design/testflight-licence-brief.md). It asks about an
+outside-tester test (invited by email, one Apple reviewer first), since that is the kind the
+TestFlight plan recommends. A licensing opinion that reads an internal TestFlight test as private sharing makes A
 plain; one that reads it as distribution makes B the only upload. Rederiving the verse links
 from a permissively licensed corpus would dissolve the GPL half and leave only the
 commentary, which is the owners' own.
