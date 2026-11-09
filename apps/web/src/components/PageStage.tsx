@@ -477,6 +477,12 @@ interface PageStageProps {
    */
   onOpenWord?: (at: { page: number; key: string; word: number; rect: WordRect }) => void;
   /**
+   * The lit verse whose words a tap opens, under the reading tool: set when the
+   * reader chose that a second tap on the lit verse opens the word above its
+   * drawer (selection-drawer ①). Null when that is off or no drawer is up.
+   */
+  openWordsOf?: string | null;
+  /**
    * Under the crop tool (step 4), a box was dragged over the page: its corner
    * and size in page units, on the page shown. What becomes of it is App's.
    */
@@ -1261,6 +1267,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onMarkWord,
     onPickSign,
     onOpenWord,
+    openWordsOf = null,
     onCrop,
     onCornerHold,
   },
@@ -1418,6 +1425,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onPickSignRef.current = onPickSign;
   const onOpenWordRef = useRef(onOpenWord);
   onOpenWordRef.current = onOpenWord;
+  const openWordsOfRef = useRef(openWordsOf);
+  openWordsOfRef.current = openWordsOf;
   const onCropRef = useRef(onCrop);
   onCropRef.current = onCrop;
   const onCornerHoldRef = useRef(onCornerHold);
@@ -2138,9 +2147,12 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       const from = manyFingers || fingersOnGlass.crowded ? null : press;
       press = null;
       const using = toolRef.current;
+      // A second tap on the lit verse, when the reader chose it, opens the word
+      // under the finger above the verse's drawer (selection-drawer ①).
+      const wordOfLit = using === "select" && openWordsOfRef.current !== null;
       if (
         using === "read" ||
-        using === "select" ||
+        (using === "select" && !wordOfLit) ||
         using === "highlight" ||
         using === "bookmark" ||
         using === "crop" ||
@@ -2165,6 +2177,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       }
       const key = hl.pressedKey;
       if (!key) return;
+      if (wordOfLit) {
+        if (key === openWordsOfRef.current) openWordRef.current(targetPage, svg, key, at.x, at.y);
+        return;
+      }
       if (using === "word") openWordRef.current(targetPage, svg, key, at.x, at.y);
       else if (using === "note") placeNoteRef.current(targetPage, key, at.x, at.y);
       else markWordRef.current(targetPage, svg, key, at.x, at.y);

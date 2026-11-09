@@ -7,6 +7,7 @@ import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
+import { WORD_TAPS, type WordTap } from "../word-tap";
 import { RUN_MARKS, type RunMark } from "../run-mark";
 import { RUN_FOLLOWS, rememberRunFollow, useRunFollow } from "../run-follow";
 import { RUN_AHEADS, rememberRunAhead, useRunAhead } from "../run-ahead";
@@ -58,6 +59,8 @@ interface ColophonProps {
   /** Where a verse's tools open, a card or inside its drawer; remembered on this device. */
   drawerTools?: DrawerTools;
   onDrawerTools?: (choice: DrawerTools) => void;
+  wordTap?: WordTap;
+  onWordTap?: (choice: WordTap) => void;
   /** How the page shows the verse a "Play to" run is reciting; remembered on this device. */
   runMark?: RunMark;
   onRunMark?: (choice: RunMark) => void;
@@ -275,6 +278,8 @@ export function Colophon({
   onVerseGestures,
   drawerTools,
   onDrawerTools,
+  wordTap,
+  onWordTap,
   runMark,
   onRunMark,
   arrowShowing,
@@ -523,6 +528,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.drawerToolsNote}</p>
+          </section>
+        )}
+
+        {/* What a second tap on the lit verse does (selection-drawer ①): both
+            built, putting it out by default until the owner has tried the other. */}
+        {wordTap && onWordTap && (
+          <section className={styles.block} aria-labelledby="colophon-word-tap">
+            <h3 className={styles.subhead} id="colophon-word-tap">
+              {t.wordTapTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-word-tap">
+              {WORD_TAPS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={wordTap === choice}
+                  data-word-tap={choice}
+                  onClick={() => onWordTap(choice)}
+                >
+                  {choice === "off" ? t.wordTapOff : t.wordTapWord}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.wordTapNote}</p>
           </section>
         )}
 

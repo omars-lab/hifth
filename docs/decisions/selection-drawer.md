@@ -189,6 +189,25 @@ around it means switching tools between the two today.
 
 **If nobody decides:** they stay separate.
 
+**Built 2026-11-09, the first option, as a setting** (info panel, *Tapping the lit verse again*;
+*Puts the verse out* stays the default until the owner has tried the other by hand). With *Opens
+the word you tapped* chosen, a second tap on a word of the lit verse opens that word's letters and
+signs in a drawer standing on top of the verse's drawer. The verse stays lit and its drawer stays;
+Escape or a tap elsewhere closes only the word's drawer. A tap on another verse still lights that
+verse, as before.
+
+**What the rough build found, which no list had a row for:**
+- The two drawers together are tall. On a laptop the word's drawer stood right over the verse it
+  was about, so the page now lifts the verse clear of both, as it already does for the verse's
+  drawer alone.
+- The word's drawer was placed once, while the verse's drawer was still sliding in, and one time
+  in thirty it overlapped it. It now follows the verse's drawer as it moves or changes size.
+- It needs no new tool: it rides on the Verse tool, so marking one sign and then listening to the
+  verse no longer means switching tools.
+
+**Left:** the owner tries the setting on the laptop and the iPad and says whether it becomes the
+default. The second option (a row of the verse's words in the drawer) is not built.
+
 ### ② While the pointer is on the drawer, should its verse glow on the page? · **open**
 
 **What would answer it:** a rough build of the glow, looked at on the laptop with two verses lit

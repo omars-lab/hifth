@@ -72,6 +72,15 @@ interface WordPartsProps {
    */
   docked?: boolean | undefined;
   /**
+   * Docked, stand on top of this box instead of the window's foot: the verse
+   * drawer, when a tap on a word of the lit verse opens the word above it
+   * (selection-drawer ①, a setting). Null when that box is not on screen.
+   * It follows that box as it slides in or changes size.
+   */
+  stackAbove?: (() => Element | null) | undefined;
+  /** Stacked, where its top stands, so the page lifts the verse clear of it; null once it closes. */
+  onCover?: ((top: number | null) => void) | undefined;
+  /**
    * The sign picked so far (mistake mode); null for the whole word. Left out
    * when nothing is marked yet, so nothing is shown pressed.
    */
@@ -135,6 +144,8 @@ export function WordParts({
   anchor,
   mode,
   docked: dockedAsked = false,
+  stackAbove,
+  onCover,
   chosen,
   onPick,
   onPickMany,
@@ -173,6 +184,14 @@ export function WordParts({
   // Docked where it fits on neither side of the word whole: as tall as the room on the side
   // with more, its rows scrolling, so it never stands over the word (undefined when it fits).
   const [dockRoom, setDockRoom] = useState<number | undefined>(undefined);
+  // Stacked: how far its foot stands above the window's foot (the verse
+  // drawer's height), or undefined when it stands on the window's foot.
+  const [dockLift, setDockLift] = useState<number | undefined>(undefined);
+  const stackAboveRef = useRef(stackAbove);
+  stackAboveRef.current = stackAbove;
+  const onCoverRef = useRef(onCover);
+  onCoverRef.current = onCover;
+  useEffect(() => () => onCoverRef.current?.(null), []);
 
   // Docked, it stands on the bottom of the window, unless that would cover the
   // word: then at the top, just under the tool bar (word-drawer-placement = B).
@@ -180,6 +199,7 @@ export function WordParts({
   // shrinks to it (a phone on its side with a note open, 2026-10-16).
   useEffect(() => {
     if (!docked) return;
+    let stopFollowing = () => {};
     const frame = requestAnimationFrame(() => {
       const box = boxRef.current;
       if (!box) return;
@@ -188,6 +208,35 @@ export function WordParts({
       // Its full height, held to half the window as its style holds it, whatever room the last word left.
       const h = Math.min(box.scrollHeight, window.innerHeight / 2);
       setDockRoom(undefined);
+      setDockLift(undefined);
+      // Stacked on the verse drawer: its foot on the drawer's top, as tall as
+      // the room above it allows, whatever word it is.
+      // It measures again while that drawer is still sliding in or growing,
+      // which left it overlapping the drawer one time in thirty (2026-11-09).
+      const drawerBelow = stackAboveRef.current?.() ?? null;
+      if (drawerBelow) {
+        const place = () => {
+          const below = drawerBelow.getBoundingClientRect();
+          setDockTop(null);
+          setDockLift(Math.max(0, window.innerHeight - below.top));
+          setDockRoom(h > below.top ? below.top : undefined);
+          onCoverRef.current?.(below.top - Math.min(h, below.top));
+        };
+        place();
+        const watch = new ResizeObserver(place);
+        watch.observe(drawerBelow);
+        window.addEventListener("resize", place);
+        let live = true;
+        void Promise.all(drawerBelow.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => undefined))).then(
+          () => live && place(),
+        );
+        stopFollowing = () => {
+          live = false;
+          watch.disconnect();
+          window.removeEventListener("resize", place);
+        };
+        return;
+      }
       if (!r || r.bottom + MARGIN <= window.innerHeight - h) {
         setDockTop(null);
         return;
@@ -205,7 +254,10 @@ export function WordParts({
       setDockTop(under);
       if (h > roomAbove) setDockRoom(roomAbove);
     });
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      stopFollowing();
+    };
   }, [data, docked]);
 
   // Stand below the word, or above it when there is no room; measured a frame
@@ -293,7 +345,11 @@ export function WordParts({
         docked
           ? dockTop === undefined
             ? { visibility: "hidden" }
-            : { ...(dockTop !== null && { top: dockTop }), ...(dockRoom !== undefined && { maxBlockSize: dockRoom }) }
+            : {
+                ...(dockTop !== null && { top: dockTop }),
+                ...(dockRoom !== undefined && { maxBlockSize: dockRoom }),
+                ...(dockLift !== undefined && { insetBlockEnd: dockLift }),
+              }
           : at
             ? { left: at.left, top: at.top }
             : { visibility: "hidden" }

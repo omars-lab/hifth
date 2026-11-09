@@ -5813,7 +5813,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner's page comment of 2026-11-07 asked whether a tap on a word opens a word drawer stacked on the verse drawer. Today the Verse tool lights the verse and only the Word tool opens the word's drawer, in the same place. Next step is a rough build of the stacked drawers."
+      "note": "Owner's page comment of 2026-11-07 asked whether a tap on a word opens a word drawer stacked on the verse drawer. Today the Verse tool lights the verse and only the Word tool opens the word's drawer, in the same place. Built 2026-11-09 as a setting in the info panel (putting the verse out stays the default): a second tap on a word of the lit verse opens its letters and signs in a drawer on top of the verse's, both stay, and the page lifts the verse clear of the two. Left: the owner tries the setting and says whether it becomes the default."
     },
     {
       "id": "verse-glows-on-drawer-hover",

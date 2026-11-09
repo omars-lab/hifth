@@ -252,6 +252,7 @@ import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style"
 import { savedZoomAnchor, verseToGrowFrom } from "./zoom-anchor";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberDrawerTools, savedDrawerTools, type DrawerTools } from "./drawer-tools";
+import { rememberWordTap, savedWordTap, type WordTap } from "./word-tap";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { useRunFollow } from "./run-follow";
 import { useRunAhead } from "./run-ahead";
@@ -291,6 +292,11 @@ function highestTop(...tops: readonly (number | null)[]): number | null {
 }
 
 /** Where a held verse's first line is on screen now, or undefined when it is out of sight. */
+/** The verse's drawer on screen, for a word's drawer to stand on; null when it is down. */
+function verseDrawerBox(): Element | null {
+  return document.querySelector("[data-verse-drawer]");
+}
+
 function heldVerseBox(key: string): DOMRect | undefined {
   const p = parseAyahKey(key);
   if (!p) return undefined;
@@ -1370,8 +1376,19 @@ export function App(): JSX.Element {
     setDrawerTools(choice);
   }, []);
   const toolsInDrawer = drawerTools === "drawer";
+  // What a second tap on the lit verse does: put it out (today), or open the
+  // word under the finger above the verse's drawer (selection-drawer ①, a
+  // setting since 2026-11-09). handleVerse reads it before the drawer is known.
+  const [wordTap, setWordTap] = useState<WordTap>(() => savedWordTap());
+  const chooseWordTap = useCallback((choice: WordTap) => {
+    rememberWordTap(choice);
+    setWordTap(choice);
+  }, []);
+  const openWordsOfRef = useRef<string | null>(null);
   // While a tool is open inside the drawer, where the grown drawer starts.
   const [drawerTop, setDrawerTop] = useState<number | null>(null);
+  // The top of a word's drawer stacked on the verse's, so the verse lifts clear of both.
+  const [wordTop, setWordTop] = useState<number | null>(null);
   // How the page shows the verse a "Play to" run is reciting (docs/PLAN.md,
   // item 57): the light moves with it unless this device picked the ring.
   const [runMark, setRunMark] = useState<RunMark>(() => savedRunMark());
@@ -3281,6 +3298,8 @@ export function App(): JSX.Element {
         } else lightVerse(key, true);
         return;
       }
+      // The page opens the word instead; the verse stays lit.
+      if (openWordsOfRef.current === key) return;
       if (verseGestures === "a" && !desktop) {
         setFull((f) => !f);
         return;
@@ -3915,6 +3934,8 @@ export function App(): JSX.Element {
     !introSheet &&
     openDirection === null &&
     verseMenuAt === null;
+  const openWordsOf = wordTap === "word" && drawerUp ? selectedKey : null;
+  openWordsOfRef.current = openWordsOf;
   // The drawer's Play, the Listen in a verse number's menu and the Play to in
   // a held verse's menu have their verse asked for as they come into reach
   // (docs/PLAN.md, item 65). Declared after the effect that stops a recitation
@@ -4287,6 +4308,7 @@ export function App(): JSX.Element {
                   onMarkWord={markWord}
                 onPickSign={pickSignNote}
                 onOpenWord={setWordOpen}
+                openWordsOf={openWordsOf}
                 onCrop={setCrop}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
                   skin={skin}
@@ -4309,7 +4331,7 @@ export function App(): JSX.Element {
                 coverTop={
                   desktop && sideCard
                     ? null
-                    : highestTop(noteCorner ? null : coverTop, shareTop ?? (upright ? shareCardTop : null), listCorner ? null : listTop, drawerTop)
+                    : highestTop(noteCorner ? null : coverTop, shareTop ?? (upright ? shareCardTop : null), listCorner ? null : listTop, drawerTop, wordTop)
                 }
                 coverSide={sideCard}
                 onLiftShort={liftShort}
@@ -4391,6 +4413,7 @@ export function App(): JSX.Element {
                 onMarkWord={markWord}
                 onPickSign={pickSignNote}
                 onOpenWord={setWordOpen}
+                openWordsOf={openWordsOf}
                 onCrop={setCrop}
               />
             </PageSpread>
@@ -4557,6 +4580,8 @@ export function App(): JSX.Element {
             onVerseGestures={chooseVerseGestures}
             drawerTools={drawerTools}
             onDrawerTools={chooseDrawerTools}
+            wordTap={wordTap}
+            onWordTap={chooseWordTap}
             runMark={runMark}
             onRunMark={chooseRunMark}
             arrowShowing={arrowShowing}
@@ -5022,6 +5047,8 @@ export function App(): JSX.Element {
             anchor={() => wordOpen.rect}
             mode="note"
             docked
+            stackAbove={verseDrawerBox}
+            onCover={setWordTop}
             onPick={(mark, _name, at) => pickWordPart({ ...at, mark })}
             onPickMany={(marks, at) => pickWordPart({ ...at, marks })}
             onPickLetter={(letter, at) => pickWordPart({ ...at, letter })}

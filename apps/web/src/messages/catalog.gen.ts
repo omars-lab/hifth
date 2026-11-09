@@ -666,6 +666,10 @@ export interface Catalog {
   readonly wordPartsHintMany: string;
   readonly wordPartsLetter: (d: { readonly nText: string | number }) => string;
   readonly wordPartsMany: (d: { readonly n: number; readonly nText: string | number }) => string;
+  readonly wordTapNote: string;
+  readonly wordTapOff: string;
+  readonly wordTapTitle: string;
+  readonly wordTapWord: string;
   readonly wordmark: string;
   readonly zoomAcrossFold: string;
   readonly zoomAcrossNote: string;

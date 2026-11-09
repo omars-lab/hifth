@@ -806,6 +806,11 @@ export interface Strings {
   drawerToolsSheet: string;
   drawerToolsDrawer: string;
   drawerToolsNote: string;
+  /** Settings: what a second tap on the lit verse does (selection-drawer ①). */
+  wordTapTitle: string;
+  wordTapOff: string;
+  wordTapWord: string;
+  wordTapNote: string;
   /** Settings: how the page shows the verse a "Play to" run is reciting. */
   runMarkTitle: string;
   runMarkLight: string;
@@ -1653,6 +1658,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     drawerToolsSheet: m.drawerToolsSheet,
     drawerToolsDrawer: m.drawerToolsDrawer,
     drawerToolsNote: m.drawerToolsNote,
+    wordTapTitle: m.wordTapTitle,
+    wordTapOff: m.wordTapOff,
+    wordTapWord: m.wordTapWord,
+    wordTapNote: m.wordTapNote,
     runMarkTitle: m.runMarkTitle,
     runMarkLight: m.runMarkLight,
     runMarkRing: m.runMarkRing,
