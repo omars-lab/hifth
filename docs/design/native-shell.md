@@ -764,6 +764,10 @@ about (the record names this under what would change the answer), and the paid A
 The upload steps stay locked until the decision record says A or B. Record:
 `docs/decisions/native-testflight-licence.md`.
 
+**Owner, 2026-11-08: get ready to send to testers.** The next steps are a short brief of what the
+licence reader must check, and the owner signing up for the paid Apple membership. The upload
+steps stay locked until the licence reading comes back and the decision record says A.
+
 ### ㉛ In the iPad and Mac apps, saving a file did nothing, and on the Mac so did choosing one · **fixed**
 
 Found 2026-10-11 by the check on the usage-count research, which read the apps' own code: every

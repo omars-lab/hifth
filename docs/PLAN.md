@@ -2324,6 +2324,10 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     The copy has to go somewhere private that the owner chooses (an encrypted drive, a
     private backup), never this repository or any public host, so it is the owner's step,
     not the agent's. Asked 2026-10-09; still open 2026-10-16.
+    **Owner, 2026-11-08: a private iCloud folder.** `make backup-note-fixes` copies the file,
+    dated, to `Private/hifth/note-fixes` in the owner's iCloud Drive (first copy made that day).
+    Run it after each round of fixes. Apple holds that copy and can read it unless Advanced
+    Data Protection is on.
 114. **One iPhone recitation test stalled once in a full run.** Watching, not mending.
     In the full run before a push on 2026-10-16, the phone test that cuts the connection, taps
     Listen and taps again once it is back failed its first try and passed its second. Its page
