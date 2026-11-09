@@ -45,13 +45,15 @@ docs/design/*.artifact.html
 # eslint.config.js `ignores`).
 .claude/worktrees/
 
-# Secrets — never commit. Enforced by gitleaks (see .gitleaks.toml + CI).
+# Secrets — never commit. Enforced by gitleaks before each commit and push (see .gitleaks.toml).
 .env
 .env.*
 !.env.example
 *.pem
 *.key
 *.p12
+# Apple signing keys (App Store Connect API keys come as AuthKey_*.p8).
+*.p8
 id_rsa*
 **/credentials.json
 
