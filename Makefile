@@ -891,6 +891,20 @@ help: ## List targets (this)
 # stays about the web app; `make help` lists both.
 include native/Makefile.native
 
+# The hand-made fixes to the pitch's notes hold the book's words, so git
+# ignores them and they live only in the private books folder. This keeps a
+# dated copy in a private iCloud folder (owner's choice, 2026-11-08), and
+# never anywhere in this repository. Run it after each round of fixes.
+NOTE_FIXES ?= $(HOME)/Workspace/git/books/books/study-quran/raw/note-fixes.hand.json
+NOTE_FIXES_BACKUP ?= $(HOME)/Library/Mobile Documents/com~apple~CloudDocs/Private/hifth/note-fixes
+.PHONY: backup-note-fixes
+backup-note-fixes:  ## Copy the pitch's hand-made note fixes to a private iCloud folder, dated
+	@test -f "$(NOTE_FIXES)" || { echo "no note fixes at $(NOTE_FIXES)"; exit 1; }
+	@mkdir -p "$(NOTE_FIXES_BACKUP)"
+	@cp -p "$(NOTE_FIXES)" "$(NOTE_FIXES_BACKUP)/note-fixes.hand.$$(date -u +%Y-%m-%dT%H%M%SZ).json"
+	@cp -p "$(NOTE_FIXES)" "$(NOTE_FIXES_BACKUP)/note-fixes.hand.latest.json"
+	@echo "backed up to $(NOTE_FIXES_BACKUP)"
+
 # page-comments:begin
 .PHONY: comments
 comments:  ## Serve the pages with the comment button (development-manager)
