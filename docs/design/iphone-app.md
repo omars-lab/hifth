@@ -61,3 +61,29 @@ the best as the default and the others as a setting.
 
 The agent's, once the app ID is registered (TestFlight ②) and the app is signed with the paid
 team (TestFlight ③). Same install as the iPad: plug in, `make app-device-install DEVICE=…`.
+
+**Recitation on the phone and the iPad (⑤–⑦).** The app already plays each verse's recitation, streamed from Quran.com's public audio site.
+Nothing on Apple's ID page is needed for that. What is missing is in the app itself.
+
+### ⑤ Keep recitation playing when the iPhone's ring switch is on silent · **open**
+
+The agent's. Tell iOS the app is for listening, the way a music app is, so the silent switch
+does not mute it. A test checks that the setting is made when the app starts.
+
+### ⑥ Keep recitation playing when the screen locks or the reader switches apps · **open**
+
+The agent's. Turn on audio in the background in the app's project settings, then try it on
+the simulator. The recitation plays inside the app's web view, and iOS may still pause that in
+the background. If it does, playback moves to the native side of the app.
+
+### ⑦ Show play and pause on the lock screen and on AirPods · **open**
+
+The agent's, after ⑥. Tell the lock screen which verse and reciter are playing, and answer its
+play, pause and next buttons.
+
+## What the app's ID allows, and what else may be needed
+
+The ID was registered 2026-11-09 with iCloud, Associated Domains, Push Notifications and Sign
+in with Apple; the app-setup skill lists why each is there. A microphone line is needed only if
+the voice coach ships ([maqam-voice-coach.md](maqam-voice-coach.md)). A shared app group is
+needed only if a home-screen widget is ever built.
