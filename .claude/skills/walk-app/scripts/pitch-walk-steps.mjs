@@ -286,9 +286,12 @@ export const STEPS = [
       const note = await h.until(() => h.dialogs().map((d) => h.region(d, "Commentary")).find(Boolean), 20000);
       if (!h.check("the note is open", note)) return;
       const card = h.dialogs().find((d) => d.contains(note));
-      // The script once said eight cited places; the browser test does not count
-      // them, so the walk reports the number for someone with the book to confirm.
-      h.check("places the note cites (counted, not judged)", true, h.buttons(card, /^Hop to /).length);
+      // The note names six places past itself, each one card: 18:65, the runs
+      // 18:9–26 and 18:83–98, and 25:53, 27:61 and 55:19–20 (its verse 93 sits
+      // inside 83–98). Counted against the book's note on 2026-11-09; the script
+      // had said eight. The browser test checks the same six.
+      const places = h.buttons(card, /^Hop to /).length;
+      h.check("the note links to its six places", places === 6, places);
       const hop = h.buttons(card, /Hop to .*18:65\b/)[0];
       if (!h.check("the note links to 18:65", hop)) return;
       hop.scrollIntoView({ block: "nearest" });

@@ -174,3 +174,83 @@ test.describe("Share inside the drawer", () => {
     await expect(page.getByRole("dialog", { name: "Share this ayah as a link" })).toBeVisible();
   });
 });
+
+/*
+ * Listen, the third tool moved (owner, 2026-11-07: "clicking play should
+ * expand drawer as well with additional play options"). With the setting on, a
+ * press plays the verse and opens its play options under the drawer's buttons:
+ * play on to a verse, repeat, speed.
+ *
+ * Written before the build and watched failing: Listen only played.
+ */
+test.describe("Listen inside the drawer", () => {
+  test.use({ viewport: { width: 1440, height: 900 }, serviceWorkers: "block" });
+
+  test.beforeEach(async ({ page }) => {
+    // No recitation over the network: an empty file is enough to press Play.
+    await page.route("https://verses.quran.com/**", (route) =>
+      route.fulfill({ status: 200, contentType: "audio/mpeg", body: "" }),
+    );
+  });
+
+  test("with the setting on, Listen opens its play options inside the drawer, and the choice is kept", async ({ page }) => {
+    await page.addInitScript((key) => localStorage.setItem(key, "drawer"), DRAWER_TOOLS_KEY);
+    await page.goto("/#/hafs-kfqc/2:45");
+    await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+    const listen = drawer(page).getByRole("button", { name: /^Listen to .*2:45/ });
+    await listen.click();
+
+    const options = drawer(page).getByRole("region", { name: /^Play options/ });
+    await expect(options).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(options.getByRole("button", { name: /^Play to a verse you pick/ })).toBeVisible();
+    const repeat = options.getByRole("radiogroup", { name: "Repeat each verse" });
+    const speed = options.getByRole("radiogroup", { name: "Speed" });
+    await expect(repeat.getByRole("radio", { name: "Once" })).toBeChecked();
+    await expect(speed.getByRole("radio", { name: "As recited" })).toBeChecked();
+
+    await repeat.getByRole("radio", { name: "3 times" }).check();
+    await speed.getByRole("radio", { name: "Slower" }).check();
+
+    // No line of the lit verse is under the grown drawer.
+    await settle(drawer(page));
+    const box = (await drawer(page).boundingBox())!;
+    expect((await litLines(page)).filter((line) => overlaps(line, box)), "lines of the verse under the drawer").toEqual([]);
+
+    // Kept on this device: after a reload the same choice is ticked.
+    await page.reload();
+    await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+    await drawer(page).getByRole("button", { name: /^Listen to .*2:45/ }).click();
+    const again = drawer(page).getByRole("region", { name: /^Play options/ });
+    await expect(again.getByRole("radio", { name: "3 times" })).toBeChecked();
+    await expect(again.getByRole("radio", { name: "Slower" })).toBeChecked();
+  });
+
+  test("one tool at a time: Share folds the play options, and Escape folds them before the drawer", async ({ page }) => {
+    await page.addInitScript((key) => localStorage.setItem(key, "drawer"), DRAWER_TOOLS_KEY);
+    await page.goto("/#/hafs-kfqc/2:45");
+    await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+    await drawer(page).getByRole("button", { name: /^Listen to .*2:45/ }).click();
+    const options = drawer(page).getByRole("region", { name: /^Play options/ });
+    await expect(options).toBeVisible();
+
+    await drawer(page).getByRole("button", { name: "Share this ayah as a link" }).click();
+    await expect(options).toBeHidden();
+    await expect(drawer(page).getByRole("region", { name: "Share this ayah as a link" })).toBeVisible();
+
+    await drawer(page).getByRole("button", { name: /(Listen to|Pause) .*2:45/ }).click();
+    await expect(options).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(options).toBeHidden();
+    await expect(drawer(page)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(drawer(page)).toBeHidden();
+  });
+
+  test("with the setting off, Listen only plays", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/2:45");
+    await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+    await drawer(page).getByRole("button", { name: /^Listen to .*2:45/ }).click();
+    await expect(page.getByRole("region", { name: /^Play options/ })).toHaveCount(0);
+  });
+});

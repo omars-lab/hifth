@@ -963,6 +963,15 @@ export interface Strings {
   scopeLookNote: string;
   vdPlayTo: string;
   vdPlayToAria(label: string): string;
+  listenOptionsAria(label: string): string;
+  listenRepeatTitle: string;
+  listenOnce: string;
+  listenTimes(count: number): string;
+  listenUntilStop: string;
+  listenSpeedTitle: string;
+  listenSlower: string;
+  listenAsRecited: string;
+  listenFaster: string;
   vdMark: string;
   vdMarkAria(label: string): string;
   vdNote: string;
@@ -1796,6 +1805,15 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     scopeLookNote: m.scopeLookNote,
     vdPlayTo: m.vdPlayTo,
     vdPlayToAria: (label) => m.vdPlayToAria({ label }),
+    listenOptionsAria: (label) => m.listenOptionsAria({ label }),
+    listenRepeatTitle: m.listenRepeatTitle,
+    listenOnce: m.listenOnce,
+    listenTimes: (count) => m.listenTimes({ n: n(count) }),
+    listenUntilStop: m.listenUntilStop,
+    listenSpeedTitle: m.listenSpeedTitle,
+    listenSlower: m.listenSlower,
+    listenAsRecited: m.listenAsRecited,
+    listenFaster: m.listenFaster,
     vdMark: m.vdMark,
     vdMarkAria: (label) => m.vdMarkAria({ label }),
     vdNote: m.vdNote,

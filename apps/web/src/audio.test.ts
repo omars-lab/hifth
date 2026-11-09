@@ -77,12 +77,16 @@ class FakePlayer extends EventTarget {
   preload = "";
   paused = true;
   error = null;
+  playbackRate = 1;
+  defaultPlaybackRate = 1;
+  plays = 0;
   constructor() {
     super();
     FakePlayer.last = this;
   }
   play(): Promise<void> {
     this.paused = false;
+    this.plays += 1;
     return Promise.resolve();
   }
   pause(): void {
@@ -678,5 +682,78 @@ describe("useVerseAudio's verse kept on the device", () => {
     expect(fetched).not.toHaveBeenCalled();
     act(() => { FakePlayer.last!.dispatchEvent(new Event("error")); });
     expect(failed).toEqual(["quran/hafs-kfqc/2:5"]);
+  });
+});
+
+/*
+ * Repeat and speed, the play options the verse drawer shows under Listen
+ * (selection-drawer ③). A hafiz repeats a verse to fix it, and slows it to
+ * hear each letter: both are what the player does, whatever opened them.
+ */
+describe("useVerseAudio's repeat and speed", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    FakePlayer.last = null;
+  });
+
+  it("plays one verse the number of times asked, then stops", () => {
+    vi.stubGlobal("Audio", FakePlayer);
+    const { result } = renderHook(() =>
+      useVerseAudio(undefined, undefined, "off", undefined, { repeat: 3, speed: 1 }),
+    );
+    act(() => result.current.toggle(v(1)));
+    const el = FakePlayer.last!;
+    act(() => el.finish());
+    act(() => el.finish());
+    expect(el.plays).toBe(3);
+    expect(el.currentTime).toBe(0);
+    act(() => el.finish());
+    expect(el.plays).toBe(3);
+    expect(result.current.phaseFor(v(1))).toBe("idle");
+  });
+
+  it("repeats each verse of a run before going on to the next", () => {
+    vi.stubGlobal("Audio", FakePlayer);
+    const ended = vi.fn();
+    const { result } = renderHook(() =>
+      useVerseAudio(undefined, ended, "off", undefined, { repeat: 2, speed: 1 }),
+    );
+    act(() => result.current.playRun([v(1), v(2)]));
+    const el = FakePlayer.last!;
+    act(() => el.finish());
+    expect(result.current.runKey).toBe(v(1));
+    act(() => el.finish());
+    expect(result.current.runKey).toBe(v(2));
+    act(() => el.finish());
+    act(() => el.finish());
+    expect(ended).toHaveBeenCalledWith(v(2), 1);
+  });
+
+  it("keeps going round until stopped, when asked to", () => {
+    vi.stubGlobal("Audio", FakePlayer);
+    const { result } = renderHook(() =>
+      useVerseAudio(undefined, undefined, "off", undefined, { repeat: Infinity, speed: 1 }),
+    );
+    act(() => result.current.toggle(v(1)));
+    const el = FakePlayer.last!;
+    for (let i = 0; i < 12; i++) act(() => el.finish());
+    expect(el.plays).toBe(13);
+    act(() => result.current.stop());
+    expect(el.paused).toBe(true);
+  });
+
+  it("plays at the speed asked, and a change of speed takes effect mid-verse", () => {
+    vi.stubGlobal("Audio", FakePlayer);
+    let listen = { repeat: 1, speed: 0.75 };
+    const { result, rerender } = renderHook(() =>
+      useVerseAudio(undefined, undefined, "off", undefined, listen),
+    );
+    act(() => result.current.toggle(v(1)));
+    const el = FakePlayer.last!;
+    expect(el.playbackRate).toBe(0.75);
+    expect(el.defaultPlaybackRate).toBe(0.75);
+    listen = { repeat: 1, speed: 1.25 };
+    rerender();
+    expect(el.playbackRate).toBe(1.25);
   });
 });

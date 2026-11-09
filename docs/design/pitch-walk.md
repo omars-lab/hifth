@@ -24,7 +24,7 @@ in the backlog.
 
 ## Open questions, and what would answer each
 
-### ① How many places should 18:60's note link to? · **open**
+### ① How many places should 18:60's note link to? · **fixed**
 
 Step 13 opens the note on 18:60, the start of the story of Moses and his companion, and follows
 its link to 18:65. The pitch script says the note links to 8 other places. The walk on
@@ -35,3 +35,12 @@ without judging it, because nobody has checked which is right.
 with the app's links on that note. If the app shows fewer, find which references it missed and
 why; if the script's 8 was wrong, correct the script. Either way, make the walk check the right
 number from then on.
+
+**Answered, 2026-11-09: six, and the app has all six.** The note names six places past itself:
+18:65, the runs 18:9–26 and 18:83–98 earlier and later in the surah, and 25:53, 27:61 and
+55:19–20 in other surahs. The app shows one card for each, all six from the book's own
+cross-references; the app adds no look-alikes of its own to 18:60. The note also mentions verse
+93, which sits inside the run 83–98, so a count that took it as a place of its own gets seven,
+which is likely where the hand count came from. The script's eight was wrong and now says six. The
+walk and the browser test for step 13 both check for exactly six cards, so a lost or extra link
+fails the step instead of being written down.
