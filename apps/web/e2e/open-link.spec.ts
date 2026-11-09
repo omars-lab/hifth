@@ -178,7 +178,8 @@ test.describe("Hifth · a link that opens a panel", () => {
     const toolOn = (page: Page, isMobile: boolean, name: string): Locator =>
       isMobile
         ? page.locator('[data-phone-bar="c"]').getByRole("button", { name: `Page tools · ${name} is on` })
-        : page.getByRole("toolbar", { name: "Page tools" }).getByRole("radio", { name, exact: true, checked: true });
+        : // The bar's own button, not the row of Note, Harakat and Word that waits beside the one button.
+          page.getByRole("toolbar", { name: "Page tools" }).getByRole("radio", { name, exact: true, checked: true }).and(page.locator(":not([data-aim])"));
 
     test("puts the tool in hand on arrival, named by its button's word", async ({ page, isMobile }) => {
       await page.goto("/#/hafs-kfqc/2:48?tool=harakat");

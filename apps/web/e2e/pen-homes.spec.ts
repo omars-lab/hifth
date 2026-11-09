@@ -3,6 +3,7 @@ import { COACH_STORAGE_KEY } from "../src/coach";
 import { PEN_HOME_KEY } from "../src/pen-home";
 import { PEN_SIDE_KEY } from "../src/pen-side";
 import { LANG_STORAGE_KEY } from "../src/lang";
+import { threeButtons } from "./three-buttons";
 
 /*
  * Where the page tools sit on a computer, or an iPad held sideways
@@ -19,6 +20,8 @@ import { LANG_STORAGE_KEY } from "../src/lang";
  * line of either page, and A comes to rest on an edge and stays there.
  */
 test.use({ locale: "en-US" });
+// Counts the bar's buttons with Note, Harakat and Word as three (see three-buttons.ts).
+test.beforeEach(async ({ page }) => threeButtons(page));
 
 const IPAD = { width: 1180, height: 820 };
 
@@ -100,6 +103,7 @@ test.describe("where the pens sit", () => {
   test("on a large iPad nobody has set, the pens wait behind the Mark up button", async ({ browser }) => {
     // The owner's pick, 2026-10-11 (notes-style-toolbar ①): a finger, not a mouse.
     const context = await browser.newContext({ hasTouch: true, isMobile: true, viewport: IPAD, locale: "en-US" });
+    await threeButtons(context);
     const page = await context.newPage();
     expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
     await openWith(page, null);
@@ -227,6 +231,7 @@ test.describe("where the pens sit", () => {
 test.describe("which side the pens stand on", () => {
   async function openOn(browser: Browser, opts: { lang: string; side: string | null; home: string }) {
     const context = await browser.newContext({ hasTouch: true, isMobile: true, viewport: IPAD, locale: "en-US" });
+    await threeButtons(context);
     const page = await context.newPage();
     await page.addInitScript(
       ([coach, langKey, lang, homeKey, home, sideKey, side]) => {

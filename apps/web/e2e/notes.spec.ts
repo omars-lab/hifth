@@ -1,5 +1,6 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
+import { threeButtons } from "./three-buttons";
 
 /*
  * The note tool, step 2 of docs/design/page-toolbar-plan.md: N picks it, a tap
@@ -9,6 +10,8 @@ import { ayahTarget } from "./ayah";
  * read as the plan writes them.
  */
 test.use({ locale: "en-US" });
+// Tests about Harakat and Word on their own, so the three-button layout (see three-buttons.ts).
+test.beforeEach(async ({ page }) => threeButtons(page));
 
 const pageSvg = (page: Page, pageNo: number): Locator =>
   page.locator(`svg[aria-labelledby="page-label-${pageNo}"]:visible`);

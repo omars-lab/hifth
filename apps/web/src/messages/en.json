@@ -643,7 +643,7 @@
   "markToolsTitle": "Note, Harakat and Word",
   "markToolsThree": "Three buttons",
   "markToolsOne": "One button",
-  "markToolsNote": "Three buttons: each has its own button on the bar. One button: a single button stands for all three and shows the one you used last; while it is on, the three wait beside the tools for you to switch between them. N, K and W still pick each one from the keyboard.",
+  "markToolsNote": "One button: a single button stands for all three and shows the one you used last; while it is on, the three wait beside the tools for you to switch between them. Three buttons: each has its own button on the bar. N, K and W still pick each one from the keyboard.",
   "eraserPlaceTitle": "Where the eraser sits",
   "eraserPlaceTools": "With the tools",
   "eraserPlaceUndo": "Beside Undo",

@@ -212,8 +212,10 @@ depend on how many times something was opened, only on when it last was.
 - **Any goal, target or completion percentage.** The record cannot see recitation,
   so a progress bar over it would be a number about worship that the data does not
   support.
-- **Export or sync.** Both are ways off the device, and `gate:revision-privacy`
-  exists to make adding one a deliberate act rather than a convenient one.
+- **Export or sync, unless it serves the reader.** The rule is that nothing leaves the
+  device unless it is in the reader's interest and under their control (owner,
+  2026-11-08). Both are ways off the device, and `gate:revision-privacy` exists to make
+  adding one a deliberate act rather than a convenient one.
 
 ## Open questions, and what would answer each
 
@@ -338,7 +340,7 @@ the `scope !== "page"` guard so it filters everywhere fails only the juz one. Th
 uses `quran/hafs-indopak/2:30` on purpose — an ayah inside hizb 1 and juz 1, divisions this
 build does hold paper for, so `absent` cannot answer for either assertion.
 
-### ④ Is the rule "nothing leaves the device," or "nothing leaves unless it serves the reader"? · **open**
+### ④ Is the rule "nothing leaves the device," or "nothing leaves unless it serves the reader"? · **answered**
 
 The privacy invariant and the *Export or sync* line under **Deliberately out of scope** both
 state the stance as an absolute: nothing leaves the device. Reviewing the confusion-map export
@@ -355,3 +357,7 @@ it serves the reader rather than refused by reflex. The confusion-map export dec
 (`confusion-map-export`, and open question ② in the confusion-points design) is the first place
 this is being applied; this item exists so the revision-record framing is revisited against it
 rather than left standing as an absolute the app no longer holds.
+
+**Owner, 2026-11-08: the second.** Nothing leaves unless it is in the reader's interest and under
+their control. The wording is now used above and in the check's own description; the check
+itself is unchanged, so anything leaving is still a deliberate act.

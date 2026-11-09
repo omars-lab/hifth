@@ -265,7 +265,7 @@ const messages: Catalog = {
   markRedo: "Redo",
   markRedone: (d) => "Redone: " + d.said,
   markRedoneBare: "Redone",
-  markToolsNote: "Three buttons: each has its own button on the bar. One button: a single button stands for all three and shows the one you used last; while it is on, the three wait beside the tools for you to switch between them. N, K and W still pick each one from the keyboard.",
+  markToolsNote: "One button: a single button stands for all three and shows the one you used last; while it is on, the three wait beside the tools for you to switch between them. Three buttons: each has its own button on the bar. N, K and W still pick each one from the keyboard.",
   markToolsOne: "One button",
   markToolsThree: "Three buttons",
   markToolsTitle: "Note, Harakat and Word",

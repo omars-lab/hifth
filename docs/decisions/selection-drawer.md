@@ -224,6 +224,9 @@ still popping up pop up and the content not having the drawer come up instead?"*
 popup"*). So Listen belongs in the build too: opened in the drawer, it shows the play options
 (play on to a verse, repeat, speed) under its button.
 
+**And again on 2026-11-08,** on Same roots at a computer's width: *"why is this popping up popup
+and not expanding the same drawer instead with new section"*. Same request; the build is next up.
+
 **What it changes for a hafiz:** the verse's tools and what one of them opened stay in one place,
 so going from the words that share a root back to Listen is one tap, not close-then-tap.
 

@@ -222,7 +222,7 @@ Each one, at an iPad held sideways (1180 by 820):
 
 ![C: the tools down the right margin, the pens in a second column](notes-style-toolbar/built-c-side.png)
 
-### ② Should Note, Harakat and Word become one pen with three ways to aim it? · **open**
+### ② Should Note, Harakat and Word become one pen with three ways to aim it? · **answered**
 
 It takes three buttons off the bar, the way Notes keeps its two erasers behind one pen. What
 would answer it: whether a hafiz uses the three often enough that a second tap to switch
@@ -238,6 +238,10 @@ that away from one button would make it behave unlike its neighbours. N, K and W
 each one from the keyboard, and a tool locked on stays locked when another of the three is
 picked. The phone's two older bars, which only open from the address, keep three buttons.
 Still open: which should be the default. Watching a hafiz revise with each would answer it.
+
+Chosen 2026-11-08 by the owner: the one button is the default, for a shorter bar. Three
+buttons stay as a setting in the info panel, and a reader who already picked three keeps it.
+The info panel now lists the one button first.
 
 ### ③ Should marking gain an eraser, and undo and redo? · **answered**
 

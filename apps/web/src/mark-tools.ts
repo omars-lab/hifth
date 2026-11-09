@@ -7,10 +7,11 @@
  * a setting, with the three buttons kept as the default until use shows which
  * is better:
  *
- *   three  Note, Harakat and Word each have a button (the default);
+ *   three  Note, Harakat and Word each have a button;
  *   one    one button stands for all three, showing the one last used, and
  *          while it is on the three are offered beside it, where the
- *          highlighter offers its colours.
+ *          highlighter offers its colours (the default since 2026-11-08,
+ *          the owner's choice: a shorter bar).
  *
  * Their keys (N, K, W) pick each one directly in both.
  *
@@ -21,7 +22,7 @@
 export type MarkTools = "three" | "one";
 
 /** In settings order. */
-export const MARK_TOOLS: readonly MarkTools[] = ["three", "one"];
+export const MARK_TOOLS: readonly MarkTools[] = ["one", "three"];
 
 /** Versioned: a shape that later changes what it does gets a new key. */
 export const MARK_TOOLS_KEY = "hifth.tools.marks.v1";
@@ -36,11 +37,11 @@ export function isMarkAim(tool: string): tool is MarkAim {
 
 export function savedMarkTools(): MarkTools {
   try {
-    return localStorage.getItem(MARK_TOOLS_KEY) === "one" ? "one" : "three";
+    return localStorage.getItem(MARK_TOOLS_KEY) === "three" ? "three" : "one";
   } catch {
     // Safari private mode throws on localStorage; a device we cannot remember
     // gets the default.
-    return "three";
+    return "one";
   }
 }
 

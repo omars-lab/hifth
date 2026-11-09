@@ -1942,10 +1942,10 @@
         "file": "docs/design/confusion-points.md",
         "item": "④"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Should a hafiz's own captured confusion points appear in the hop rail as a fourth kind of link — their edges, alongside the corpus's sourced ones — so the app they navigate is shaped by their own history? Appealing, and a privacy/provenance question: it mixes a private log into the surface that draws public, sourced links, and the store's whole privacy gate is built to keep those apart. What would answer it: a decision on whether the warning-at-selection surface (which keeps the log private) already delivers this value without merging the two, which is the current design's bet. Where it stands 2026-10-13: a jump's list row already has Go to the verse it went to; only the hop rail is still open."
+      "note": "Should a hafiz's own captured confusion points appear in the hop rail as a fourth kind of link — their edges, alongside the corpus's sourced ones — so the app they navigate is shaped by their own history? Appealing, and a privacy/provenance question: it mixes a private log into the surface that draws public, sourced links, and the store's whole privacy gate is built to keep those apart. What would answer it: a decision on whether the warning-at-selection surface (which keeps the log private) already delivers this value without merging the two, which is the current design's bet. Where it stands 2026-10-13: a jump's list row already has Go to the verse it went to; only the hop rail is still open. Owner, 2026-11-08: no; jumps stay in the list with Go, the side strip keeps only sourced links."
     },
     {
       "id": "who-sets-a-confusion-seams-state",
@@ -1955,8 +1955,8 @@
       },
       "status": "open",
       "severity": "question",
-      "owner": "user",
-      "note": "Each confusion point carries a state — every-pass, sometimes, used-to, dismissed — that drives warning weight, list grouping and map colour. The question is who writes it. The design's bet is the reader owns it, because the store sees captures, not recitation: silence at a seam could mean 'I beat it' or 'I stopped logging', and a state the app computed would be the very score this feature refused. The counter-pull is friction — a reader who never marks a seam beaten leaves conquered seams warning forever. What would answer it: a human's call on how strong the nudge may be, whether the app may suggest a state change from count + recency (and how loudly) while the write stays an explicit act, or whether even a suggestion leans too far toward measuring worship. Leaning reader-owned-with-a-quiet-nudge; the line between nudge and assertion is the thing to settle. Where it stands 2026-10-13: reader-owned is built (Beaten, Dismissed); only whether the app may suggest a change, and how loudly, is open."
+      "owner": "agent",
+      "note": "Each confusion point carries a state — every-pass, sometimes, used-to, dismissed — that drives warning weight, list grouping and map colour. The question is who writes it. The design's bet is the reader owns it, because the store sees captures, not recitation: silence at a seam could mean 'I beat it' or 'I stopped logging', and a state the app computed would be the very score this feature refused. The counter-pull is friction — a reader who never marks a seam beaten leaves conquered seams warning forever. What would answer it: a human's call on how strong the nudge may be, whether the app may suggest a state change from count + recency (and how loudly) while the write stays an explicit act, or whether even a suggestion leans too far toward measuring worship. Leaning reader-owned-with-a-quiet-nudge; the line between nudge and assertion is the thing to settle. Where it stands 2026-10-13: reader-owned is built (Beaten, Dismissed); only whether the app may suggest a change, and how loudly, is open. Owner, 2026-11-08: a quiet suggestion, the reader's to accept: one line on a row not hit in a long while, offering Beaten; never a pop-up. To build."
     },
     {
       "id": "should-a-student-share-a-map-with-a-teacher",
@@ -1966,8 +1966,8 @@
       },
       "status": "open",
       "severity": "question",
-      "owner": "user",
-      "note": "A hafiz revises with a teacher whose job is to drill them exactly where they are weak — which is what the confusion map records — so there is a real pull to let a student share their map with a teacher. OWNER DIRECTION 2026-08-29: the owner said yes, students should be able to share with teachers, and asked that it be its OWN feature (a dedicated capability), not folded into anything else. Kept apart from the backup question (should-a-confusion-map-leave-the-device / decision confusion-map-export) on purpose: a backup is a reader keeping their own copy safe, while sharing sends an intimate record to another person — a larger privacy step and a different consent. That export decision deliberately does NOT settle this and names it as its own future page. What would answer it: its own drawn decision — who initiates and who can undo the share, live map versus a snapshot the student chose, and whether it rides on the file-backup mechanism (a student sends the teacher the file they can already save) or wants something built for it. Not to borrow the export decision's answer."
+      "owner": "agent",
+      "note": "A hafiz revises with a teacher whose job is to drill them exactly where they are weak — which is what the confusion map records — so there is a real pull to let a student share their map with a teacher. OWNER DIRECTION 2026-08-29: the owner said yes, students should be able to share with teachers, and asked that it be its OWN feature (a dedicated capability), not folded into anything else. Kept apart from the backup question (should-a-confusion-map-leave-the-device / decision confusion-map-export) on purpose: a backup is a reader keeping their own copy safe, while sharing sends an intimate record to another person — a larger privacy step and a different consent. That export decision deliberately does NOT settle this and names it as its own future page. What would answer it: its own drawn decision — who initiates and who can undo the share, live map versus a snapshot the student chose, and whether it rides on the file-backup mechanism (a student sends the teacher the file they can already save) or wants something built for it. Not to borrow the export decision's answer. Owner, 2026-11-08: a live link the student starts and can switch off, and the page it opens has a download button so the teacher can keep a copy. Needs somewhere online to hold the shared map; settle where first. After the Study Quran demo."
     },
     {
       "id": "should-the-app-learn-where-most-readers-slip",
@@ -1977,8 +1977,8 @@
       },
       "status": "open",
       "severity": "question",
-      "owner": "user",
-      "note": "Across many readers the same look-alike verses would cluster — there are places the whole tradition slips on. OWNER DIRECTION 2026-08-29: the owner asked whether the app could do data analysis on where MOST people slip, pooling many readers' maps to find common slip points. The value is real: it could seed a new reader's warnings before they slip once, and show which verses the resemblance model most needs to cover. But it is a sharp turn away from everything else this feature is — every other part keeps one reader's map on one reader's phone and lets nothing leave without a deliberate act; this asks to gather many readers' maps in one place, close to the opposite of the private design, and the heaviest privacy question the project has yet raised (an intimate record, pooled, off-device, by default). What would answer it: a decision that weighs the pooling itself — whether it can use only data a reader knowingly contributes, whether what is pooled can be stripped of anything identifying and still be useful, and whether a server is needed at all or the common slip points are already knowable from the corpus without touching anyone's map. Named so it is not lost; built by nobody until that decision is made. Distinct from should-a-student-share-a-map-with-a-teacher (one-to-one sharing) and confusion-map-export (a reader's own backup)."
+      "owner": "agent",
+      "note": "Across many readers the same look-alike verses would cluster — there are places the whole tradition slips on. OWNER DIRECTION 2026-08-29: the owner asked whether the app could do data analysis on where MOST people slip, pooling many readers' maps to find common slip points. The value is real: it could seed a new reader's warnings before they slip once, and show which verses the resemblance model most needs to cover. But it is a sharp turn away from everything else this feature is — every other part keeps one reader's map on one reader's phone and lets nothing leave without a deliberate act; this asks to gather many readers' maps in one place, close to the opposite of the private design, and the heaviest privacy question the project has yet raised (an intimate record, pooled, off-device, by default). What would answer it: a decision that weighs the pooling itself — whether it can use only data a reader knowingly contributes, whether what is pooled can be stripped of anything identifying and still be useful, and whether a server is needed at all or the common slip points are already knowable from the corpus without touching anyone's map. Named so it is not lost; built by nobody until that decision is made. Distinct from should-a-student-share-a-map-with-a-teacher (one-to-one sharing) and confusion-map-export (a reader's own backup). Owner, 2026-11-08: build it as a feature the reader turns on; turning it on means sharing your own slips in return. Settle what is sent and where the pool lives first; after the Study Quran demo."
     },
     {
       "id": "mistake-question-fits-on-ipad",
@@ -1998,10 +1998,10 @@
         "file": "docs/design/revision-record.md",
         "item": "④"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "The app's privacy stance is written in two places as an absolute — the revision-record 'Export or sync' out-of-scope line and the gate:revision-privacy invariant both read as 'nothing leaves the device'. OWNER DIRECTION 2026-08-31 (on the confusion-map-export decision page): 'nothing leaves the phone' is the wrong stance; 'nothing leaves unless it is in the user's interest, and under their control' is the right one. A flat 'nothing leaves' breaks the first time the reader's own interest points outward (wanting a hard-won record to survive a lost phone) and then reads as a promise abandoned; naming the test keeps the promise. This does NOT loosen gate:revision-privacy — the gate makes leaving a deliberate act, and 'in the reader's interest, under their control' is the shape of a deliberate act; the gate stays, the sentence it defends gets the truer wording. What would answer it: adopting the sharper wording in this doc and the invariant's prose so a future export/sync question is weighed by whether it serves the reader rather than refused by reflex. Already applied in decision confusion-map-export; this row exists so the app-wide framing (revision-record especially) is revisited against it. Related: should-a-confusion-map-leave-the-device."
+      "note": "The app's privacy stance is written in two places as an absolute — the revision-record 'Export or sync' out-of-scope line and the gate:revision-privacy invariant both read as 'nothing leaves the device'. OWNER DIRECTION 2026-08-31 (on the confusion-map-export decision page): 'nothing leaves the phone' is the wrong stance; 'nothing leaves unless it is in the user's interest, and under their control' is the right one. A flat 'nothing leaves' breaks the first time the reader's own interest points outward (wanting a hard-won record to survive a lost phone) and then reads as a promise abandoned; naming the test keeps the promise. This does NOT loosen gate:revision-privacy — the gate makes leaving a deliberate act, and 'in the reader's interest, under their control' is the shape of a deliberate act; the gate stays, the sentence it defends gets the truer wording. What would answer it: adopting the sharper wording in this doc and the invariant's prose so a future export/sync question is weighed by whether it serves the reader rather than refused by reflex. Already applied in decision confusion-map-export; this row exists so the app-wide framing (revision-record especially) is revisited against it. Related: should-a-confusion-map-leave-the-device. Owner, 2026-11-08: the second wording, now in the record and the check's description."
     },
     {
       "id": "plan-graduate-page-bar-winners",
@@ -2243,7 +2243,7 @@
       "blockedBy": [
         "a Mac with a trackpad"
       ],
-      "note": "WebKit forwards the pinch as gesture events the web app already handles, so no code was written and nothing has felt it. On the manual-testing checklist; any fault becomes a test."
+      "note": "WebKit forwards the pinch as gesture events the web app already handles, so no code was written and nothing has felt it. On the manual-testing checklist; any fault becomes a test. Owner, 2026-11-08: not tried yet; stays parked."
     },
     {
       "id": "iphone-shell-unseen",
@@ -2856,10 +2856,10 @@
         "file": "docs/design/notes-style-toolbar.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Owner chose 2026-10-12 to build the one button as a setting and keep three buttons as the default. Built: the info panel switches between them, and the three choices wait beside the tools while the one button is on. Still open: which should be the default, judged by watching a hafiz revise with each."
+      "note": "Owner chose 2026-10-12 to build the one button as a setting and keep three buttons as the default. Built: the info panel switches between them, and the three choices wait beside the tools while the one button is on. Still open: which should be the default, judged by watching a hafiz revise with each. Owner, 2026-11-08: the one button is the default; three buttons stay a setting."
     },
     {
       "id": "marking-eraser-and-undo",
@@ -4344,9 +4344,10 @@
         "file": "docs/PLAN.md",
         "item": "85"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
-      "owner": "user"
+      "owner": "user",
+      "note": "Owner, 2026-11-08: the card changing sides reads as getting out of the way. Kept as built."
     },
     {
       "id": "quick-second-flick-lost",

@@ -1993,6 +1993,9 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     the manual-testing list as item 16. If it does read as restless, the next thing to try is a
     different way of keeping out of the way, such as a smaller card while the recitation plays,
     not a stickier side.
+
+    **Owner, 2026-11-08: it reads as getting out of the way.** Closed; the card keeps moving
+    to the page opposite the verse being recited.
 86. ~~**A second quick flick, made while the first turn is still landing, was lost.**~~ Found
     fixing a flaky browser test, 2026-10-12: on a phone, after a flick is let go the page
     takes about a fifth of a second to land, with the arriving page already in sight beside

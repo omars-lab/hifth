@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 /**
- * CI gate: the revision record never leaves the device, and neither does the
- * confusion-jump record, which is the same kind of thing (see RECORDS below).
+ * CI gate: the revision record does not leave the device unless it is in the
+ * reader's interest and under their control (owner, 2026-11-08), and neither
+ * does the confusion-jump record, which is the same kind of thing (see RECORDS
+ * below). In code that means it never leaves by accident: every way off the
+ * device is a deliberate act this gate has to be told about.
  *
  * Every other thing this app stores is a preference — a language, a skin, a
  * dismissed notice. The revision record is different in kind: it is a log of
