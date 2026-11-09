@@ -156,6 +156,11 @@ listing. The step-by-step links are in the app-setup skill; the iPhone's own que
 [iphone-app.md](iphone-app.md). Both tie Hifth, and the name shown under it ("Omar Eid"), to this membership for good;
 that was decided on purpose ([publisher-account.md](publisher-account.md)).
 
+The ID was registered on 2026-11-09, with Push Notifications and Sign in with Apple also
+turned on. Neither does anything until the app asks for it. The agent confirms that iCloud and
+Associated Domains are on when it first signs (③). The App Store Connect record is not
+confirmed yet.
+
 ### ③ Sign the app with the paid team and reinstall it on the owner's iPad and Mac · **open**
 
 The agent's, now that the team ID is known (①). Installs then last a year instead of seven days.

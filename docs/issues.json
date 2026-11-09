@@ -3157,7 +3157,7 @@
       "next": true,
       "severity": "question",
       "owner": "user",
-      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the app record in App Store Connect for platform iOS, which covers iPhone and iPad (iphone-app.md ①). No store listing. The links are in the app-setup skill. Next up for the owner (2026-11-08): it is the one step between the pitch and the app on the owner's own iPad for a year, signed with the paid team, which is how the Study Quran team will see it in the room; nothing after it in the TestFlight plan can start until it is done."
+      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the app record in App Store Connect for platform iOS, which covers iPhone and iPad (iphone-app.md ①). No store listing. The links are in the app-setup skill. The ID was registered on 2026-11-09, with Push Notifications and Sign in with Apple also on; the App Store Connect record is not confirmed yet. Next up for the owner (2026-11-08): it is the one step between the pitch and the app on the owner's own iPad for a year, signed with the paid team, which is how the Study Quran team will see it in the room; nothing after it in the TestFlight plan can start until it is done."
     },
     {
       "id": "iphone-record-covers-iphone",
@@ -3204,6 +3204,40 @@
       "owner": "agent",
       "blockedBy": ["testflight-register-app", "testflight-sign-with-paid-team"],
       "note": "Install on the owner's own iPhone with the paid team, the same way as the iPad."
+    },
+    {
+      "id": "recitation-plays-on-silent",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "On an iPhone with the ring switch on silent, the verse recitation may not be heard. Tell iOS the app is for listening, as a music app does."
+    },
+    {
+      "id": "recitation-plays-in-background",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Recitation stops when the screen locks or the reader switches apps. Turn on background audio and try it; if the web view still pauses, move playback to the native side."
+    },
+    {
+      "id": "recitation-lock-screen-controls",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["recitation-plays-in-background"],
+      "note": "Show the verse and reciter on the lock screen and answer its play, pause and next buttons, and AirPods presses."
     },
     {
       "id": "testflight-sign-with-paid-team",
