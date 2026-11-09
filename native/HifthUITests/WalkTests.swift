@@ -73,9 +73,13 @@ final class WalkTests: XCTestCase {
             "HIFTH_PROBE_DELAY_MS": env["PROBE_DELAY_MS"] ?? "2000",
             "HIFTH_PROBE_PATH": out,
             "HIFTH_PROBE_SHOT": env["PROBE_SHOT"] ?? "",
+            // A list of steps (make pitch-walk): the app walks them all, then answers.
+            "HIFTH_PROBE_STEPS": env["PROBE_STEPS"] ?? "",
         ]
         app.launch()
-        let timeout = TimeInterval(env["PROBE_TIMEOUT_S"] ?? "") ?? 180
+        // A walk of steps takes far longer than one question: about 15 s a step.
+        let walking = !(env["PROBE_STEPS"] ?? "").isEmpty
+        let timeout = TimeInterval(env["PROBE_TIMEOUT_S"] ?? "") ?? (walking ? 900 : 180)
         let start = Date()
         var turned = 0
         while !FileManager.default.fileExists(atPath: out), Date().timeIntervalSince(start) < timeout {

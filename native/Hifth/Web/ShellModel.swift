@@ -28,6 +28,11 @@ final class ShellModel {
     private let navigation = NavigationPolicy()
     private var pendingHash: String?
     private var snapshotTaken = false
+    /// The probe runs once, though the page says it is ready after every reload.
+    private var probeStarted = false
+    /// How many times the page has said it is ready: a walk of steps reloads
+    /// the page for each one and waits for this to go up.
+    private var readyCount = 0
     #if os(iOS)
     /// Kept here because the pencil interaction holds it only weakly.
     @ObservationIgnored private let pencilListener = PencilListener()
@@ -221,6 +226,7 @@ final class ShellModel {
         switch message {
         case .ready:
             ready = true
+            readyCount += 1
             if let pendingHash { show(pendingHash) }
             probeIfAsked()
             scheduleSnapshotIfAsked()
@@ -252,7 +258,12 @@ final class ShellModel {
     /// wait, say for a redraw after a tap, answers with a promise; it is awaited.
     private func probeIfAsked() {
         let environment = ProcessInfo.processInfo.environment
-        guard environment["HIFTH_PROBE"] == "1" else { return }
+        guard environment["HIFTH_PROBE"] == "1", !probeStarted else { return }
+        probeStarted = true
+        if let steps = environment["HIFTH_PROBE_STEPS"], !steps.isEmpty {
+            walkSteps(steps)
+            return
+        }
         let delayMs = Int(environment["HIFTH_PROBE_DELAY_MS"] ?? "") ?? 0
         let extra = environment["HIFTH_PROBE_EVAL"] ?? ""
         Task {
@@ -323,6 +334,163 @@ final class ShellModel {
     }
 
     struct ProbePictureEmpty: Error {}
+
+    // MARK: - A walk of steps (make pitch-walk)
+
+    /// With `HIFTH_PROBE_STEPS` naming a list of steps (an absolute path), the
+    /// probe walks them all in one start of the app, instead of one start per
+    /// step: for each, the page is reloaded at the step's passage, waits, is
+    /// asked the step's question, and is photographed. Each answer and picture
+    /// is written beside the list, as `<id>.json` and `<id>.png`, and the walk
+    /// logs to `walk.log` there. A step that fails is written down and the walk
+    /// goes on. Once every step is done the app writes a short summary to
+    /// `HIFTH_PROBE_PATH`, which is what the sideways UI test waits for.
+    struct ProbeStep: Decodable, Equatable {
+        let id: String
+        let route: String
+        let delayMs: Int
+        let eval: String
+
+        private enum CodingKeys: String, CodingKey { case id, route, delayMs, eval }
+
+        init(from decoder: any Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            id = try c.decode(String.self, forKey: .id)
+            route = try c.decode(String.self, forKey: .route)
+            delayMs = try c.decodeIfPresent(Int.self, forKey: .delayMs) ?? 2000
+            eval = try c.decodeIfPresent(String.self, forKey: .eval) ?? ""
+        }
+    }
+
+    /// A step's name becomes its files' names, so it must be a plain one, and
+    /// no two steps may share it.
+    struct ProbeStepNameNotPlain: Error {
+        let id: String
+    }
+
+    static func probeSteps(at path: String) throws -> [ProbeStep] {
+        guard path.hasPrefix("/") else { throw ProbePathNotAbsolute(path: path) }
+        let steps = try JSONDecoder().decode([ProbeStep].self, from: Data(contentsOf: URL(fileURLWithPath: path)))
+        var seen = Set<String>()
+        for step in steps {
+            let plain = !step.id.isEmpty && !step.id.hasPrefix(".") && !step.id.contains("/")
+            guard plain, seen.insert(step.id).inserted else { throw ProbeStepNameNotPlain(id: step.id) }
+        }
+        return steps
+    }
+
+    static func probeStepFile(_ listPath: String, id: String, ext: String) -> String {
+        let folder = (listPath as NSString).deletingLastPathComponent
+        return (folder as NSString).appendingPathComponent("\(id).\(ext)")
+    }
+
+    /// One line of the walk's log: the time in UTC, the app's process, the
+    /// event, then its fields in the order of their names.
+    /// Reloads, then waits up to `wait` for the page to say it is ready; if it never
+    /// does, reloads again, up to `tries` times. Answers which try worked, or nil.
+    @MainActor
+    static func reloadUntilReady(tries: Int, wait: Duration, poll: Duration,
+                                 isReady: () -> Bool, reload: () -> Void) async -> Int? {
+        for attempt in 1...max(1, tries) {
+            reload()
+            let deadline = ContinuousClock.now + wait
+            while !isReady(), ContinuousClock.now < deadline {
+                try? await Task.sleep(for: poll)
+            }
+            if isReady() { return attempt }
+        }
+        return nil
+    }
+
+    static func walkLogLine(_ event: String, _ fields: [String: String], at: Date, pid: Int32) -> String {
+        let time = ISO8601DateFormatter().string(from: at)
+        let rest = fields.keys.sorted().map { "\($0)=\(fields[$0]!)" }
+        return ([time, "pid=\(pid)", "ev=\(event)"] + rest).joined(separator: " ")
+    }
+
+    private static func appendLog(_ line: String, to path: String) {
+        let data = Data((line + "\n").utf8)
+        if let handle = FileHandle(forWritingAtPath: path) {
+            handle.seekToEndOfFile()
+            handle.write(data)
+            try? handle.close()
+        } else {
+            try? data.write(to: URL(fileURLWithPath: path))
+        }
+        print(line)
+    }
+
+    private func walkSteps(_ listPath: String) {
+        let done = ProcessInfo.processInfo.environment["HIFTH_PROBE_PATH"]
+        let logPath = Self.probeStepFile(listPath, id: "walk", ext: "log")
+        let log = { (event: String, fields: [String: String]) in
+            Self.appendLog(Self.walkLogLine(event, fields, at: Date(), pid: getpid()), to: logPath)
+        }
+        Task { @MainActor in
+            let steps: [ProbeStep]
+            do {
+                steps = try Self.probeSteps(at: listPath)
+            } catch {
+                log("steps_unreadable", ["msg": "\"\(error)\""])
+                try? Self.keepProbeAnswer("{\"error\":\"the list of steps could not be read\"}", at: done)
+                exit(1)
+            }
+            log("walk_start", ["steps": "\(steps.count)"])
+            var answered = 0
+            var viewport: Any = NSNull()
+            for step in steps {
+                log("step_start", ["id": step.id])
+                let before = readyCount
+                // A reload, not only a new hash: each step starts on a fresh page,
+                // as each browser test does, with nothing left open by the last.
+                // A reload has once gone unanswered, so an unanswered one is tried again.
+                let attempt = await Self.reloadUntilReady(tries: 2, wait: .seconds(20), poll: .milliseconds(100),
+                                                          isReady: { self.readyCount > before }, reload: {
+                    self.runScript("location.hash = route; location.reload();", ["route": step.route])
+                })
+                if let attempt, attempt > 1 { log("step_retried", ["id": step.id, "tries": "\(attempt)"]) }
+                guard attempt != nil else {
+                    log("step_timeout", ["id": step.id, "waited": "page_ready"])
+                    try? Self.keepProbeAnswer("{\"error\":\"the page never said it was ready\"}", at: Self.probeStepFile(listPath, id: step.id, ext: "json"))
+                    continue
+                }
+                try? await Task.sleep(for: .milliseconds(step.delayMs))
+                log("eval_start", ["id": step.id])
+                let text: String
+                do {
+                    let value = try await webView.callAsyncJavaScript(Self.probeScript, arguments: ["extra": step.eval], in: nil, contentWorld: .page)
+                    text = (value as? String) ?? "{}"
+                } catch {
+                    log("eval_failed", ["id": step.id, "msg": "\"\(error.localizedDescription)\""])
+                    try? Self.keepProbeAnswer("{\"error\":\"the question failed in the page\"}", at: Self.probeStepFile(listPath, id: step.id, ext: "json"))
+                    continue
+                }
+                log("eval_done", ["id": step.id])
+                if let answer = try? JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any], let seen = answer["viewport"] {
+                    viewport = seen
+                }
+                let page = await Self.pageState(of: webView)
+                let (png, _) = await Self.snapshotPNG(of: webView, page: page.size)
+                do {
+                    try Self.keepProbePicture(png, at: Self.probeStepFile(listPath, id: step.id, ext: "png"))
+                    try Self.keepProbeAnswer(text, at: Self.probeStepFile(listPath, id: step.id, ext: "json"))
+                    answered += 1
+                    log("step_done", ["id": step.id])
+                } catch {
+                    log("step_unkept", ["id": step.id, "msg": "\"\(error)\""])
+                }
+            }
+            log("walk_done", ["steps": "\(steps.count)", "answered": "\(answered)"])
+            let summary: [String: Any] = ["steps": steps.count, "answered": answered, "viewport": viewport]
+            let data = (try? JSONSerialization.data(withJSONObject: summary)) ?? Data("{}".utf8)
+            do {
+                try Self.keepProbeAnswer(String(decoding: data, as: UTF8.self), at: done)
+            } catch {
+                exit(1)
+            }
+            exit(0)
+        }
+    }
 
     static let probeScript = """
     const out = {
