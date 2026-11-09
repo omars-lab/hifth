@@ -161,34 +161,50 @@ Option D's accounts could later carry the same thing to the browsers too; that i
 
 ## Open questions, and what would answer each
 
-### ① May my mistakes and notes follow me between my own iPad and Mac through my own iCloud? · **open**
+### ① May my mistakes and notes follow me between my own iPad and Mac through my own iCloud? · **answered**
+
+Merged into question ① on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The same road you picked for the usage counts, carrying more personal records. It means the mistake marks leave the device for your own iCloud, which the privacy check must be told about. **What would answer it:** your yes or no; then it is built with the usage-count sync once the apps are signed by the paid team.
 
-### ② Which way should a student's mistakes first reach a teacher: a file, a locked link, or a signed-in account? · **open**
+### ② Which way should a student's mistakes first reach a teacher: a file, a locked link, or a signed-in account? · **answered**
+
+Merged into question ③ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The table above; recommended A now and C for the live link. Each one adds a named way out to the privacy check, which only you can allow. **What would answer it:** your pick, written as a new decision record (sharing between two people starts its own record), with a rough build of the teacher's view so the choice is made by hand.
 
-### ③ Does the record of when I read ever go with a share, or only my mistakes and notes? · **open**
+### ③ Does the record of when I read ever go with a share, or only my mistakes and notes? · **answered**
+
+Merged into question ④ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The time-of-night record is the most private thing the app keeps. Anki strips review history when sharing with someone else. **What would answer it:** your call; the suggestion is never by default, and only as a separate tick the student sees each time.
 
-### ④ Which web address would the sharing pages live on, and should the app itself move off the blog's address? · **open**
+### ④ Which web address would the sharing pages live on, and should the app itself move off the blog's address? · **answered**
+
+Merged into question ⑧ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 `share.bytesofpurpose.com` for the sharing pages only, or `hifth.bytesofpurpose.com` for the whole app. Moving the whole app would leave readers' stored marks behind at the old address unless they carry a file across. **What would answer it:** your choice of name and a DNS entry you add; the agent then writes up the move.
 
-### ⑤ Is sending a share a paid extra, and is opening one always free? · **blocked**
+### ⑤ Is sending a share a paid extra, and is opening one always free? · **answered**
+
+Merged into question ⑩ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 Paid features wait on the list of what is paid. A teacher who has to pay to see a student's mistakes would mostly not look. **What would answer it:** the paid-features list; a purchase on the web would not need the App Store, which is worth putting on that list.
 
-### ⑥ Can a teacher with no Apple device open an iCloud share at all? · **blocked**
+### ⑥ Can a teacher with no Apple device open an iCloud share at all? · **answered**
+
+Merged into question ⑪ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 Nothing found says yes; one report of a browser attempt failed. **What would answer it:** a test share from the Apple app opened in Firefox and on an Android phone, once the apps are signed by the paid team.
 
-### ⑦ Can Sign in with Apple and an email link work inside the iPad and Mac apps? · **open**
+### ⑦ Can Sign in with Apple and an email link work inside the iPad and Mac apps? · **answered**
+
+Merged into question ⑨ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 Google blocks sign-in inside an app's web view; Apple has its own sheet, but how its answer reaches the page inside the app was not checked. Only needed if D is built. **What would answer it:** a throwaway sign-in on a test Supabase project, tried in both apps.
 
-### ⑧ What does the teacher see when they open the link: the student's mistakes on the real page, or a list? · **open**
+### ⑧ What does the teacher see when they open the link: the student's mistakes on the real page, or a list? · **answered**
+
+Merged into question ⑫ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The page is the stronger picture for the pitch; a list is quicker to scan across a whole juz. **What would answer it:** build both roughly, open them on an iPad, and keep the loser as a setting.

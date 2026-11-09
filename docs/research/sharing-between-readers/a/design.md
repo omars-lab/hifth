@@ -175,46 +175,68 @@ Record by record:
 
 ## Open questions, and what would answer each
 
-### ① May a student's mistakes and slips be sent to another person at all, and what must the student see before saying yes? · **open**
+### ① May a student's mistakes and slips be sent to another person at all, and what must the student see before saying yes? · **answered**
+
+Merged into question ② on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 A new decision, as the rule on where records live asks for anything shared between people. It is answered by the owner, from a drawn decision page that shows the share screen and what the teacher would see. It feeds the existing teacher-sharing question rather than replacing it.
 
-### ② May the revision record (when and what someone revised) ever be sent to another person, as the paid-features page plans? · **open**
+### ② May the revision record (when and what someone revised) ever be sent to another person, as the paid-features page plans? · **answered**
+
+Merged into question ④ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 It collides with the privacy check, which today refuses it on purpose. Only the owner can reopen that. Until then, sharing carries marks, not times.
 
-### ③ Which road for sending marks: a file, a link with the marks inside, iCloud sharing, a live locked link, or accounts? · **open**
+### ③ Which road for sending marks: a file, a link with the marks inside, iCloud sharing, a live locked link, or accounts? · **answered**
+
+Merged into question ③ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The owner picks from the table above, with B built first as a throwaway, so the teacher's view can be judged by hand rather than from a picture.
 
-### ④ Should a shared link end by itself after a while, and should the teacher see new marks as they are made or only on reopening? · **open**
+### ④ Should a shared link end by itself after a while, and should the teacher see new marks as they are made or only on reopening? · **answered**
+
+Merged into question ⑤ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The owner's call. A link that ends by itself is the main defence against a forwarded link, and against a lost phone in D.
 
-### ⑤ Where should the shared copies live: the Supabase project that holds the held copy, a new project of their own, or the Cloudflare host we already keep ready, and is 25 US dollars a month worth it so a link never goes dark? · **open**
+### ⑤ Where should the shared copies live: the Supabase project that holds the held copy, a new project of their own, or the Cloudflare host we already keep ready, and is 25 US dollars a month worth it so a link never goes dark? · **answered**
+
+Merged into question ⑥ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The free Supabase plan pauses a project after a quiet week, which would kill a teacher's link. The owner decides on the money and on keeping reader data apart from the held copy.
 
-### ⑥ What do Cloudflare's small database and file storage cost, and do they ever sleep? · **open**
+### ⑥ What do Cloudflare's small database and file storage cost, and do they ever sleep? · **answered**
+
+Merged into question ⑦ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The agent reads Cloudflare's own pages and writes the answer here, so ⑤ can be chosen with both prices side by side.
 
-### ⑦ Which address should the signed-in part live on: a sub-address such as hifth.bytesofpurpose.com, or a site of its own? · **open**
+### ⑦ Which address should the signed-in part live on: a sub-address such as hifth.bytesofpurpose.com, or a site of its own? · **answered**
+
+Merged into question ⑧ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The owner picks the name. The reasons for not using the blog's path are above. The choice is one-way once passkeys or app links depend on it.
 
-### ⑧ Which sign-ins to offer, if accounts come at all? · **blocked**
+### ⑧ Which sign-ins to offer, if accounts come at all? · **answered**
+
+Merged into question ⑨ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The suggestion is Sign in with Apple and an email link first, then Google through the system browser, then passkeys. It waits on the road (③): D needs none.
 
-### ⑨ Is sending marks to a teacher a paid extra, and how would a browser-only teacher or student pay? · **blocked**
+### ⑨ Is sending marks to a teacher a paid extra, and how would a browser-only teacher or student pay? · **answered**
+
+Merged into question ⑩ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 Waits on the free-or-paid list (paid-features ①).
 
-### ⑩ Keep mistakes, notes and bookmarks in step between the iPad and Mac through the reader's own iCloud · **blocked**
+### ⑩ Keep mistakes, notes and bookmarks in step between the iPad and Mac through the reader's own iCloud · **answered**
+
+Merged into question ① on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 The same build as the usage counts, extended to the marks. Waits on that build, which itself waits only on signing the apps with the paid team.
 
-### ⑪ Does Apple's web library work in Firefox today? · **blocked**
+### ⑪ Does Apple's web library work in Firefox today? · **answered**
+
+Merged into question ⑪ on [the consolidated page](../../../design/sharing-between-readers.md#open-questions-and-what-would-answer-each), which is the one to act on; the text below is kept as the record.
 
 A one-hour throwaway trial with a test container. It is only worth doing if the owner picks iCloud sharing (③).
