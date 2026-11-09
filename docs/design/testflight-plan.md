@@ -166,11 +166,19 @@ same day for iOS and macOS, named "Hifth - The Huffaz Toolkit".
 
 The agent's, now that the team ID is known (①). Installs then last a year instead of seven days.
 
+**No cable needed after the first time, and nothing uploaded.** Xcode installs over Wi-Fi when the
+laptop and the device share a network. On iOS or iPadOS 27 and later it pairs with no cable at
+all; on older versions, one cable pairing first. TestFlight would also install without a cable,
+but it uploads the build to Apple, which the licence decision does not allow yet
+([research note](../research/2026-11-09-testflight-own-devices.md); the licence brief now asks
+about that narrower step as question 6).
+
 ### ④ Make the archive build on the laptop, with the upload still locked · **open**
 
 The agent's. Archive and export settings, the privacy manifest, the encryption answer, a build
-number that counts up, the sandbox Apple requires of every Mac build sent through TestFlight
-(the Mac build has none today), and the archive gate opened while the upload gate stays shut. Noted in
+number that counts up, the Mac sandbox (the Mac build has none today; Apple's own pages require it
+only for the Mac App Store, and developer forums say TestFlight for Mac needs it too, see
+[the research note](../research/2026-11-09-testflight-own-devices.md)), and the archive gate opened while the upload gate stays shut. Noted in
 the decision record when the gate changes.
 
 ### ⑤ Write the brief for the licence reader · **answered**
