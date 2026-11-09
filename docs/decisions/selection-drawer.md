@@ -227,6 +227,23 @@ popup"*). So Listen belongs in the build too: opened in the drawer, it shows the
 **And again on 2026-11-08,** on Same roots at a computer's width: *"why is this popping up popup
 and not expanding the same drawer instead with new section"*. Same request; the build is next up.
 
+**Built so far (2026-11-09), Same roots only, as a setting.** In the info panel, *Where a verse's
+tools open* has two choices: *In a card of their own* (today's way, still the default until the
+owner has tried the other by hand) and *Inside the verse's drawer*. With the second, Same roots
+opens its list under the drawer's buttons and the drawer stays up; pressing Same roots again, or
+Escape, folds the list away, and a second Escape puts the drawer away.
+
+The build found one thing no list of pros and cons had: on a two-page spread the page cannot move
+up, so a drawer that simply grew covered the very verse it was about. The list is now cut to the
+room left under the lit verse's lines, and never shorter than about five rows; on a phone the page
+lifts the verse instead. Share and Listen (with its play options) are next. The commentary stays a
+card of its own for now: it is long reading, and the pitch shows it beside the verse.
+
+How it is checked: the browser test `apps/web/e2e/drawer-tools.spec.ts` (a laptop and an iPad on
+its side; it failed first with the roots card opening beside the drawer), and the setting's own
+test `apps/web/src/drawer-tools.test.ts`. The code is `VerseDrawer.tsx` (the `panel` it holds and
+the cut), `RootLens.tsx` (its `inline` form) and `drawer-tools.ts` (the setting).
+
 **What it changes for a hafiz:** the verse's tools and what one of them opened stay in one place,
 so going from the words that share a root back to Listen is one tap, not close-then-tap.
 

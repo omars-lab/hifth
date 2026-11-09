@@ -111,6 +111,10 @@ export interface Catalog {
   readonly distancePages: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly distanceRelative: (d: { readonly dir: "later" | "other"; readonly pages: string | number }) => string;
   readonly distanceSame: string;
+  readonly drawerToolsDrawer: string;
+  readonly drawerToolsNote: string;
+  readonly drawerToolsSheet: string;
+  readonly drawerToolsTitle: string;
   readonly editionCurrent: string;
   readonly editionFoot: string;
   readonly editionMapsTo: (d: { readonly ref: string | number }) => string;
