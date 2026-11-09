@@ -41,7 +41,7 @@ flowchart LR
 | step | who | what to do | link | tracked as |
 |---|---|---|---|---|
 | ① Membership and team ID | you | done 2026-11-08: team `76NHKA839A` | <https://developer.apple.com/account#MembershipDetailsCard> | `testflight-membership-active` (answered) |
-| ② Register the app ID | you | **Identifiers → +** → *App IDs* → *App*. Description "Hifth", **Explicit** bundle ID `com.bytesofpurpose.hifth`. Tick **iCloud** (with CloudKit) and **Associated Domains**. Continue, Register. | <https://developer.apple.com/account/resources/identifiers/add/bundleId> | `testflight-register-app` (**next**) |
+| ② Register the app ID | you | **Identifiers → +** → *App IDs* → *App*. Description "Hifth", **Explicit** bundle ID `com.bytesofpurpose.hifth`. Tick **iCloud** (with CloudKit), **Associated Domains** and **Siri**; **Push Notifications** and **Sign in with Apple** are optional (the table below says why each is there). Continue, Register. | <https://developer.apple.com/account/resources/identifiers/add/bundleId> | `testflight-register-app` (**next**) |
 | ③ App Store Connect record | you | **Apps → + → New App**. Platforms **iOS and macOS** both ticked (one record for iPhone, iPad and Mac, since the Mac build uses the same ID), name "Hifth", language English, bundle ID `com.bytesofpurpose.hifth` (it appears in the list once ② is done), SKU `hifth`, access Full. No store listing is needed for TestFlight. | <https://appstoreconnect.apple.com/apps> | `testflight-register-app` |
 | ④ iCloud container | agent, or you | **Identifiers → +** → *iCloud Containers*, ID `iCloud.com.bytesofpurpose.hifth`; then on the app ID from ②, *iCloud → Configure* and tick it. Xcode can also make it the first time the agent signs with the team. | <https://developer.apple.com/account/resources/identifiers/list/cloudContainer> | `icloud-sync-try-signed` |
 | ⑤ Upload key | you | **Users and Access → Integrations → App Store Connect API → +**, access *App Manager*. Download the `.p8` once; it goes in the keychain, **never in the repo or a chat**. Note the key ID and issuer ID. | <https://appstoreconnect.apple.com/access/integrations/api> | `testflight-upload-key` |
@@ -57,6 +57,7 @@ the same page.
 |---|---|---|
 | iCloud (with CloudKit) | a reader's marks and counts follow them between iPad, iPhone and Mac | not yet (`icloud-sync-try-signed`) |
 | Associated Domains | a link to the reading site opens the app | not yet |
+| Siri | "Hey Siri, play al-Kahf in Hifth"; on a HomePod only after Apple's separate approval, below | not yet (`siri-play-recitation`) |
 | Push Notifications | room for a reminder to revise, if one is ever built; it would also need its own key | no |
 | Sign in with Apple | the simplest sign-in if readers ever need an account to share copies; Apple requires it if any other sign-in (Google and the like) is offered | no |
 
@@ -70,6 +71,17 @@ the same page.
 - **Only if the voice coach ships:** a line saying why the app uses the microphone.
 - **Only if a home-screen widget is built:** an App Group, which *is* a box on the ID page.
 - **Paid features:** in-app purchase is on for every ID already.
+
+### Siri on a HomePod: its own approval
+
+Ticking Siri on the ID is not enough for a HomePod. Apple has to approve the app separately
+before a HomePod will pass "Hey Siri, play …" to Hifth. In order:
+
+| step | who | what | link | tracked as |
+|---|---|---|---|---|
+| AirPlay to a HomePod | agent | an AirPlay button; no approval needed | — | `recitation-airplay` |
+| Siri plays recitation on the iPhone and iPad | agent | the app answers Siri's play requests | — | `siri-play-recitation` |
+| Ask Apple for HomePod | you, signed in | the request form; send it only once the step above works | <https://developer.apple.com/contact/request/sirikit-media-intent-for-homepod/> | `homepod-siri-request` |
 
 Then the agent: set the team in `native/project.yml`, sign, and install on your devices
 (`testflight-sign-with-paid-team`), then the archive (`testflight-archive-builds`). The upload

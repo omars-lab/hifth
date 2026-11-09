@@ -81,9 +81,30 @@ the background. If it does, playback moves to the native side of the app.
 The agent's, after ⑥. Tell the lock screen which verse and reciter are playing, and answer its
 play, pause and next buttons.
 
+**Recitation on a HomePod (⑧–⑩).** There are two ways, and the second needs Apple's approval,
+which is a separate step of its own.
+
+### ⑧ An AirPlay button, so recitation plays on a HomePod or other speaker · **open**
+
+The agent's, after ⑥. AirPlay needs nothing from Apple. Add the button, and tell iOS the
+recitation is long listening so the HomePod plays it smoothly.
+
+### ⑨ Answer "Hey Siri, play al-Kahf in Hifth" on the iPhone and iPad · **open**
+
+The agent's, after ⑥. The Siri box on the app's ID allows it; the app then has to answer
+Siri's request to play, naming a surah or a page. Built and tried on the phone before ⑩.
+
+### ⑩ Ask Apple to let a HomePod pass those requests to Hifth · **blocked**
+
+Yours, once ⑨ works. A separate approval: a form at
+<https://developer.apple.com/contact/request/sirikit-media-intent-for-homepod/>, signed in. The
+form is behind Apple's sign-in, so I did not read what it asks; Apple's general rule is that it
+is granted to an app that already answers Siri's play requests, so asking before ⑨ works would
+likely be turned down. The agent drafts the answers when the time comes.
+
 ## What the app's ID allows, and what else may be needed
 
-The ID was registered 2026-11-09 with iCloud, Associated Domains, Push Notifications and Sign
-in with Apple; the app-setup skill lists why each is there. A microphone line is needed only if
+The ID was registered 2026-11-09 with iCloud, Associated Domains, Siri, Push Notifications and
+Sign in with Apple; the app-setup skill lists why each is there. A microphone line is needed only if
 the voice coach ships ([maqam-voice-coach.md](maqam-voice-coach.md)). A shared app group is
 needed only if a home-screen widget is ever built.

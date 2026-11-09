@@ -3240,6 +3240,42 @@
       "note": "Show the verse and reciter on the lock screen and answer its play, pause and next buttons, and AirPods presses."
     },
     {
+      "id": "recitation-airplay",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["recitation-plays-in-background"],
+      "note": "An AirPlay button so recitation plays on a HomePod or other speaker. Needs nothing from Apple."
+    },
+    {
+      "id": "siri-play-recitation",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": ["recitation-plays-in-background"],
+      "note": "Answer \"Hey Siri, play al-Kahf in Hifth\" on the iPhone and iPad. The Siri box on the app's ID allows it."
+    },
+    {
+      "id": "homepod-siri-request",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑩"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": ["siri-play-recitation"],
+      "note": "Ask Apple, signed in, to let a HomePod pass Siri play requests to Hifth: https://developer.apple.com/contact/request/sirikit-media-intent-for-homepod/ . A separate approval from the Siri box; send it once Siri plays recitation on the phone. The agent drafts the answers."
+    },
+    {
       "id": "testflight-sign-with-paid-team",
       "source": {
         "file": "docs/design/testflight-plan.md",
