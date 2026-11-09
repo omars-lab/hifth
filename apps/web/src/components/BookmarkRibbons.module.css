@@ -217,6 +217,19 @@
   left: clamp(8px, calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) * 0.14), calc(100% - 40px));
 }
 
+/* The short ribbon hangs from the middle of the page's head. The head prints
+   the surah's name at one end and the juz at the other, and 14% in from the
+   spine lay over one of them on every page (2026-11-08, checking the owner's
+   "really wide bookmark"); the middle is empty on every page, and well clear
+   of the folded corner and the seam at the spine. The long ribbon keeps its
+   place in from the spine. */
+[data-ribbon="short"] .ribbons,
+:global([data-free-side="right"]) [data-ribbon="short"] .ribbons {
+  right: auto;
+  left: clamp(8px, calc(var(--leaf-x, 0px) + var(--leaf-w, 100%) * 0.5), calc(100% - 40px));
+  transform: translateX(-50%);
+}
+
 .slot {
   display: block;
 }
@@ -268,7 +281,33 @@
   block-size: 26px;
   min-block-size: 0;
   padding: 0;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 7px), 0 100%);
+  background: none;
+  box-shadow: none;
+  clip-path: none;
+}
+
+/* The silk itself, narrow like a mus'haf's marker: about a twentieth of the
+   page's width, in paper units so it zooms with the page. Painted 44px wide,
+   the whole press target, it read as a flag across the page's head (owner,
+   2026-11-08: "really wide bookmark"). The button keeps its 44px, unpainted
+   and unclipped, so a thumb still finds it. */
+[data-ribbon="short"] .ribbon::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  inline-size: clamp(10px, calc(14px * var(--leaf-z, 1)), 18px);
+  transform: translateX(-50%);
+  background: var(--rib-1);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 5px), 0 100%);
+}
+
+[data-ribbon="short"] .ribbon[data-tone="2"]::before {
+  background: var(--rib-2);
+}
+
+[data-ribbon="short"] .ribbon[data-tone="3"]::before {
+  background: var(--rib-3);
 }
 
 [data-ribbon="short"] .name {
