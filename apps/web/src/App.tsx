@@ -3934,7 +3934,8 @@ export function App(): JSX.Element {
     !introSheet &&
     openDirection === null &&
     verseMenuAt === null;
-  const openWordsOf = wordTap === "word" && drawerUp ? selectedKey : null;
+  // Only under the plain pointer: the highlighter keeps its own second tap.
+  const openWordsOf = wordTap === "word" && drawerUp && tool === "select" ? selectedKey : null;
   openWordsOfRef.current = openWordsOf;
   // The drawer's Play, the Listen in a verse number's menu and the Play to in
   // a held verse's menu have their verse asked for as they come into reach

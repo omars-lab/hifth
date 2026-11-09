@@ -80,6 +80,36 @@ for (const size of [
       await expect(drawer(page)).toBeVisible();
     });
 
+    test("with the setting on and the highlighter in hand, a second tap still puts the verse out", async ({
+      page,
+    }) => {
+      // The page opens words only under the plain pointer; under the
+      // highlighter the second tap went nowhere at all (found 2026-11-09).
+      await page.addInitScript((key) => localStorage.setItem(key, "word"), WORD_TAP_KEY);
+      await page.goto("/#/hafs-kfqc/2:45");
+      await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+      await page.getByRole("toolbar", { name: "Page tools" }).getByRole("radio", { name: "Highlight", exact: true }).click();
+      const at = await inLitVerse(page);
+      await page.mouse.click(at.x, at.y);
+      await expect(drawer(page)).toHaveCount(0);
+      await expect(parts(page)).toHaveCount(0);
+    });
+
+    test("with the setting on, holding the lit verse does not also open the word", async ({ page }) => {
+      // A hold has its own meaning; the word's drawer opened on the release
+      // as well, on top of it (found 2026-11-09).
+      await page.addInitScript((key) => localStorage.setItem(key, "word"), WORD_TAP_KEY);
+      await page.goto("/#/hafs-kfqc/2:45");
+      await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+      const at = await inLitVerse(page);
+      await page.mouse.move(at.x, at.y);
+      await page.mouse.down();
+      await page.waitForTimeout(600);
+      await page.mouse.up();
+      await page.waitForTimeout(400);
+      await expect(parts(page)).toHaveCount(0);
+    });
+
     test("by default, a second tap on the lit verse still puts it out", async ({ page }) => {
       await page.goto("/#/hafs-kfqc/2:45");
       await expect(drawer(page)).toBeVisible({ timeout: 20_000 });

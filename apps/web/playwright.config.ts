@@ -280,7 +280,7 @@ export default defineConfig({
           // And `slider-arrows`: Firefox drew the slider's two end arrows from
           // different fonts, one a third the size of the other (2026-10-12).
           name: "desktop-firefox",
-          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows)\.spec\.ts/,
+          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },
