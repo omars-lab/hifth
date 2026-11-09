@@ -3363,6 +3363,127 @@
       "note": "Apple's purchase system in the iPad and Mac app, and one switch the web app reads per paid feature, with the free path tested on its own."
     },
     {
+      "id": "sharing-a-consent",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "①"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ②, which merges both researchers' questions. May a student's mistakes and slips be sent to another person at all, and what must the student see before saying yes? A new decision, because records shared between people start their own (storage model); feeds should-a-student-share-a-map-with-a-teacher."
+    },
+    {
+      "id": "sharing-a-revision-record",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "②"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ④, which merges both researchers' questions. The paid-features page plans sharing a revision record, but the privacy check refuses it on purpose. Only the owner can reopen that; until then sharing carries marks, not times."
+    },
+    {
+      "id": "sharing-a-road",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "③"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ③, which merges both researchers' questions. Pick the road for sending marks: a file, a link with the marks inside, iCloud sharing, a live locked link with no accounts (researcher A's pick), or accounts. Build the link-with-marks-inside first as a throwaway so the teacher's view is judged by hand."
+    },
+    {
+      "id": "sharing-a-expiry",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "④"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑤, which merges both researchers' questions. Should a shared link end by itself after a while, and does the teacher see new marks as they are made or only on reopening? Ending by itself is the main defence against a forwarded link or a lost phone."
+    },
+    {
+      "id": "sharing-a-store",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑤"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑥, which merges both researchers' questions. Where shared copies live: the Supabase project that holds the held copy, a new one, or Cloudflare; and whether 25 US dollars a month is worth it, since the free plan pauses after a quiet week and would kill a teacher's link."
+    },
+    {
+      "id": "sharing-a-cloudflare-price",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑥"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑦, which merges both researchers' questions. Read Cloudflare's own pages for what its small database and file storage cost and whether they ever sleep, so the store can be chosen with both prices side by side."
+    },
+    {
+      "id": "sharing-a-address",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑦"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑧, which merges both researchers' questions. Name the address for the signed-in part, such as hifth.bytesofpurpose.com, rather than the blog's path, which shares one browser store with every blog page and cannot hold the file that lets links open the app."
+    },
+    {
+      "id": "sharing-a-sign-in",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑧"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑨, which merges both researchers' questions. If accounts come: Sign in with Apple and an email link first, Google later through the system browser (Google refuses sign-in inside the apps' built-in web view), passkeys once Supabase's support settles."
+    },
+    {
+      "id": "sharing-a-paid",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑨"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑩, which merges both researchers' questions. Is sending marks to a teacher a paid extra, and how would a browser-only reader pay, given Apple's purchase works only in the App Store app? Keeping your own marks safe stays free."
+    },
+    {
+      "id": "sharing-a-own-icloud",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑩"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ①, which merges both researchers' questions. Extend the usage counts' own-iCloud build to mistakes, notes and bookmarks, so a mark made on the iPad is on the Mac; Firefox and the phone keep the saved file."
+    },
+    {
+      "id": "sharing-a-cloudkit-web-trial",
+      "source": {
+        "file": "docs/research/sharing-between-readers/a/design.md",
+        "item": "⑪"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑪, which merges both researchers' questions. A one-hour throwaway trial of Apple's web library in Firefox with a test container; only worth doing if iCloud sharing is picked."
+    },
+    {
       "id": "usage-across-devices",
       "source": {
         "file": "docs/design/feature-usage.md",
@@ -3481,6 +3602,235 @@
         "icloud-sync ⑦, sync working on the owner's own iPad and Mac"
       ],
       "note": "Publish the database's layout in Apple's CloudKit console before the first TestFlight upload, because testers use the live database. A one-way step: published fields can be added to but never removed."
+    },
+    {
+      "id": "sharing-b-own-icloud",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "①"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ①, which merges both researchers' questions. Say yes or no to mistakes, notes and bookmarks following you between your own iPad and Mac through your own private iCloud, on the same road as the usage counts; a yes adds a named way out to the privacy check and is built with the usage-count sync once the apps are signed by the paid team."
+    },
+    {
+      "id": "sharing-b-which-way",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "②"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ③, which merges both researchers' questions. Pick how a student's mistakes first reach a teacher: a file sent by hand, a locked link with no account that the student can update and switch off, or signed-in accounts; researcher B recommends the file now and the locked link for the live teacher link, written as a new decision record with a rough build of the teacher's view."
+    },
+    {
+      "id": "sharing-b-times-travel",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "③"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ④, which merges both researchers' questions. Decide whether the record of when you read ever goes with a share, or only mistakes and notes; the suggestion is never by default, and only as a separate tick the student sees each time."
+    },
+    {
+      "id": "sharing-b-address",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "④"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑧, which merges both researchers' questions. Choose the web address for the sharing pages (a sub-address such as share.bytesofpurpose.com, or move the whole app to hifth.bytesofpurpose.com) and add its DNS entry; a folder of the blog shares the blog's storage and cookies, and its host forbids handling sign-ins."
+    },
+    {
+      "id": "sharing-b-paid",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "⑤"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "user",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑩, which merges both researchers' questions. Whether sending a share is a paid extra and opening one always free waits on the list of paid features; a purchase on the web would not need the App Store."
+    },
+    {
+      "id": "sharing-b-icloud-non-apple",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "⑥"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑪, which merges both researchers' questions. Try whether a teacher with no Apple device can open an iCloud share, by opening a test share from the Apple app in Firefox and on an Android phone, once the apps are signed by the paid team."
+    },
+    {
+      "id": "sharing-b-sign-in-in-apps",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "⑦"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑨, which merges both researchers' questions. Try Sign in with Apple and an email link inside the iPad and Mac apps on a throwaway test project; only needed if signed-in accounts are built, since Google blocks sign-in inside an app's web view."
+    },
+    {
+      "id": "sharing-b-teacher-view",
+      "source": {
+        "file": "docs/research/sharing-between-readers/b/design.md",
+        "item": "⑧"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Superseded by the consolidated sharing page (docs/design/sharing-between-readers.md), item ⑫, which merges both researchers' questions. Build the teacher's view two rough ways, the student's mistakes on the real page and as a list, open both on an iPad, and keep the loser as a setting."
+    },
+    {
+      "id": "sharing-own-icloud",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Say yes or no to your mistakes, notes and bookmarks following you between your own iPad and Mac through your own private iCloud; the build rides on the usage-count sync (usage-sync-own-icloud) once the apps are signed with the paid team."
+    },
+    {
+      "id": "sharing-consent",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Decide whether a student's mistakes may be sent to another person at all, and what the student sees before saying yes; a new decision record, since sharing between two people starts its own; feeds should-a-student-share-a-map-with-a-teacher."
+    },
+    {
+      "id": "sharing-which-way",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Pick how mistakes first reach a teacher; recommended: the teacher's view fed by the saved file first, then the live locked link with no accounts, accounts only when a teacher needs all their students; choose from a rough build."
+    },
+    {
+      "id": "sharing-reading-times",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Decide whether the record of when you read ever goes with a share; suggested never by default, and only as a separate tick each time, which means naming one more way out in the privacy check."
+    },
+    {
+      "id": "sharing-link-ending",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Decide whether a shared link stops working by itself after a while, and whether the teacher sees new mistakes live or on reopening."
+    },
+    {
+      "id": "sharing-store",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Choose where shared copies live: Cloudflare's free database (suggested; no pausing stated, keeps shares apart from the held copy) or a new Supabase project at 25 US dollars a month so it never pauses."
+    },
+    {
+      "id": "sharing-cloudflare-price",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑦"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Answered from Cloudflare's own pricing pages: the free small database and key store have daily limits well above our use and neither page says an unused store pauses."
+    },
+    {
+      "id": "sharing-address",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Pick the sub-address for the share page (such as hifth.bytesofpurpose.com or share.bytesofpurpose.com) and add its address entry; the reading app stays on the blog's address."
+    },
+    {
+      "id": "sharing-sign-in",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑨"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "sharing-which-way"
+      ],
+      "note": "If accounts come: try Sign in with Apple and an email link inside the iPad and Mac apps on a throwaway test project; Google later through the system browser. The live locked link needs no sign-in."
+    },
+    {
+      "id": "sharing-paid",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑩"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "paid-features-which"
+      ],
+      "note": "Whether sending a share is a paid extra and opening one always free waits on the list of what is paid."
+    },
+    {
+      "id": "sharing-icloud-non-apple",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑪"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "blockedBy": [
+        "testflight-sign-with-paid-team"
+      ],
+      "note": "Test whether a teacher with no Apple device can open an iCloud share, and whether Apple's web library works in Firefox; only worth doing if iCloud sharing is picked."
+    },
+    {
+      "id": "sharing-teacher-view",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑫"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Build the teacher's view two rough ways, mistakes on the real page and as a list, open both on an iPad, and keep the loser as a setting."
     },
     {
       "id": "note-left-open-stays-empty",
