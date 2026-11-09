@@ -3200,7 +3200,7 @@
       "status": "blocked",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["testflight-register-app", "testflight-sign-with-paid-team"],
+      "blockedBy": ["testflight-sign-with-paid-team"],
       "note": "Install on the owner's own iPhone with the paid team, the same way as the iPad."
     },
     {
@@ -3279,11 +3279,13 @@
         "file": "docs/design/testflight-plan.md",
         "item": "③"
       },
-      "status": "open",
-      "next": true,
+      "status": "blocked",
       "severity": "question",
       "owner": "agent",
-      "note": "Set the team (76NHKA839A) in the project settings and reinstall on the owner's iPad and Mac; installs then last a year. Next up (2026-11-09): the ID and the App Store Connect record are done, so this is what puts the pitch on the owner's own iPad for a year."
+      "blockedBy": [
+        "the owner signs in to Xcode with the paid account (Xcode, Settings, Accounts)"
+      ],
+      "note": "Set the team (76NHKA839A) in the project settings and reinstall on the owner's iPad and Mac; installs then last a year. Tried 2026-11-09: the build stopped with Xcode's \"No Accounts\", because no Apple account is signed in to Xcode, so it cannot ask Apple for the app's signing profile. The install command now says so before building."
     },
     {
       "id": "testflight-archive-builds",
