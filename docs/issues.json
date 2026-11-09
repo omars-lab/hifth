@@ -3154,9 +3154,10 @@
         "item": "②"
       },
       "status": "open",
+      "next": true,
       "severity": "question",
       "owner": "user",
-      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the iPad app record in App Store Connect. No store listing."
+      "note": "Register com.bytesofpurpose.hifth with Associated Domains and iCloud on, and make the iPad app record in App Store Connect. No store listing. Next up for the owner (2026-11-08): it is the one step between the pitch and the app on the owner's own iPad for a year, signed with the paid team, which is how the Study Quran team will see it in the room; nothing after it in the TestFlight plan can start until it is done."
     },
     {
       "id": "testflight-sign-with-paid-team",
