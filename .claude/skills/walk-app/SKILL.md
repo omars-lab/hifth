@@ -63,6 +63,9 @@ A useful hash: `#/hafs-kfqc/2:255` (a verse), `#/hafs-kfqc/p42` (a page), `?view
 write the count into `.claude/goals/study-quran-pitch.md`. A failing step gets a backlog row with
 `"pitch": true`.
 
+`make pitch-script` checks the same steps in a browser first, one test per step, in about 15
+seconds. Run it before the slower iPad walk; it is not a substitute for it.
+
 ## Scripts — when to use each
 
 | script | what it does | reach for it when | command |

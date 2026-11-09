@@ -155,6 +155,19 @@ export default defineConfig({
           grepInvert: /phone|iPad/i,
           use: { browserName: "firefox", viewport: { width: 1440, height: 900 } },
         },
+        {
+          // The pitch demo, one test per step of the walk-app skill's
+          // pitch-script.md. Kept apart from the push check on purpose: these
+          // were written before the fixes, and a step that fails is a fault on
+          // the demo path still to fix, not a broken push. `make pitch-script`
+          // runs it and prints how many steps pass. WebKit, the iPad's engine,
+          // unless HIFTH_PITCH_BROWSER says otherwise; the spec sets the size.
+          name: "pitch-script",
+          testMatch: /pitch-script\.spec\.ts/,
+          use: {
+            browserName: (process.env.HIFTH_PITCH_BROWSER as "chromium" | "webkit" | undefined) ?? "webkit",
+          },
+        },
       ]
     : shots
     ? [

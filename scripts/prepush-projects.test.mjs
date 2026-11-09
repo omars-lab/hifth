@@ -19,6 +19,7 @@ const elsewhere = {
   pitch: "make pitch-e2e, which the push runs when the private notes are here",
   "pitch-firefox": "make pitch-e2e, the same",
   shots: "make shots, pictures for the docs, not a check",
+  "pitch-script": "make pitch-script, one test per demo step; a step not right yet fails on purpose, so it must not block a push",
 };
 
 function projectNames(source) {

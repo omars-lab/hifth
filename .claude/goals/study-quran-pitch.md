@@ -42,6 +42,7 @@ The first one is the main measure. The other three explain why it passes or fail
 | Measure | Value | As of |
 |---|---|---|
 | Pitch walk steps passing on the iPad | not counted yet: the script is written (16 steps), not walked | 2026-11-09 |
+| Pitch steps passing in the browser (`make pitch-script`) | **14 of 14** a browser can check, in Safari's and Chrome's engines; 2 steps are by hand | 2026-11-09 |
 | Open faults on the pitch path | **7** (`make issues PITCH=1`): 4 the agent's, 2 waiting on a device or the Xcode sign-in, 1 by-hand check | 2026-11-09 |
 | Demo-ready passages | 0 of 6 checked: passages chosen, not walked | 2026-11-09 |
 | Date to show it | not set | 2026-11-09 |
@@ -85,7 +86,7 @@ already; some still have to be built, and building them is part of the goal.
 | What | Tool to make or change | Why |
 |---|---|---|
 | ~~**The pitch script**~~ done | `.claude/skills/walk-app/pitch-script.md`: the passages, then each tap in order, each with what "right" looks like | The first measure needs a fixed list of steps, or each walk counts something different |
-| **A one-command pitch walk** | A script in `.claude/skills/walk-app/scripts/` (with a row in that skill's scripts table) and a make target, which walks the pitch script in the iPad simulator and prints "N of M steps pass" plus the pictures | Turns the main measure into one command anyone can run |
+| **A one-command pitch walk** (browser half done: `make pitch-script`, one test per step) | A script in `.claude/skills/walk-app/scripts/` (with a row in that skill's scripts table) and a make target, which walks the pitch script in the iPad simulator and prints "N of M steps pass" plus the pictures | Turns the main measure into one command anyone can run |
 | ~~**A "pitch" tag on backlog rows**~~ done | `"pitch": true` on `docs/issues.json` rows; `make issues PITCH=1` lists and counts them; the backlog check refuses any other value | The second measure, without re-reading 119 rows |
 | **The numbers kept up to date** | A step at the end of the pitch walk that rewrites "The current numbers" table above | The trend is the point; a table nobody updates is worse than none |
 | **A reminder at the start of a session** | A SessionStart hook that prints this goal's current numbers and asks, with AskUserQuestion, if the session's planned work is on the pitch path | Stops the drift into setup work that this page was written to catch |

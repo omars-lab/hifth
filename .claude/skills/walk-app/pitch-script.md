@@ -64,6 +64,15 @@ and pages must still be there; only recitation may need the internet (unless the
 on the device). This is a by-hand check, parked on the manual-testing list as
 `check-offline-survival`.
 
+## The browser check, one command
+
+`make pitch-script` runs one browser test per step (`apps/web/e2e/pitch-script.spec.ts`), at
+the iPad-on-its-side size, in Safari's engine (`HIFTH_PITCH_BROWSER=chromium` for Chrome's).
+Each test is named for its step and checks what "right looks like" says: boxes, counts and
+labels, never the note's words. Steps 2 and 14 are by hand and show as skipped. It is kept out
+of the push check on purpose: a test for a step that is not right yet should fail, and that
+must not block a push. A browser pass is not a demo pass; the iPad walk still decides.
+
 ## Counting
 
 After a walk, write the count into the goal page's "current numbers" table: steps passing out of
