@@ -133,7 +133,13 @@ function measurePaper(book: HTMLElement): {
     top = p.top - b.top;
     h = p.height;
     const cs = getComputedStyle(paper);
-    look[side] = { borderRadius: cs.borderRadius, border: `${cs.borderTopWidth} ${cs.borderTopStyle} ${cs.borderTopColor}` };
+    // Read the four corners one by one: Firefox gives an empty string for the
+    // combined border-radius, which left the grab strip with square corners.
+    const corner = (v: string): string => v.split(" ")[0] || "0px";
+    const borderRadius = [cs.borderTopLeftRadius, cs.borderTopRightRadius, cs.borderBottomRightRadius, cs.borderBottomLeftRadius]
+      .map(corner)
+      .join(" ");
+    look[side] = { borderRadius, border: `${cs.borderTopWidth} ${cs.borderTopStyle} ${cs.borderTopColor}` };
     found.push({ side, r });
   }
   for (const { side, r } of found) drawings[side] = { x: r.left - b.left, y: r.top - b.top - top, w: r.width, h: r.height };

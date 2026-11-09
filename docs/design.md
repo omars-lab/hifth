@@ -29,7 +29,7 @@ flowchart LR
 
 | Plan | The question it answers | Open steps |
 |---|---|---|
-| [TestFlight plan](design/testflight-plan.md) | How do we get the app onto a tester's iPad? | nine |
+| [TestFlight plan](design/testflight-plan.md) | How do we get the app onto a tester's iPad? | seven |
 | [Paid features](design/paid-features.md) | Which parts of the app could be paid for, and which stay free? | four |
 | [Publisher name](design/publisher-account.md) | Who does the App Store show as Hifth's publisher? | none: decided |
 | [Sharing between readers](design/sharing-between-readers.md) | How could a student send their mistakes to a teacher, and could your marks follow you from iPad to Mac? | eleven |
@@ -56,7 +56,7 @@ plan and the [backlog](backlog.md).
 2. Register the app's name and ID with Apple: TestFlight ②
 3. Sign the app with the paid account: TestFlight ③
 4. Build an archive ready to upload, with the upload still locked: TestFlight ④
-5. Write the licence brief, asking about testers **and** about selling in the App Store: TestFlight ⑤, Paid features ③
+5. Write the licence brief, asking about testers **and** about selling in the App Store: TestFlight ⑤, Paid features ③. Done 2026-11-08: [the brief](design/testflight-licence-brief.md)
 6. A qualified reader answers it, and the decision record moves to "a test with named people is fine": TestFlight ⑥
 7. Make the key that lets this laptop upload to Apple: TestFlight ⑦
 8. Add the upload step: TestFlight ⑧

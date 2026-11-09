@@ -3186,10 +3186,10 @@
         "file": "docs/design/testflight-plan.md",
         "item": "⑤"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
-      "note": "One page for the licence reader: what the build carries, who gets it, how, that an Apple reviewer sees it, and the questions to answer. Next for the pitch (2026-11-08), alongside the drawer build that is next up for huffaz: it starts the outside reader's clock, and nothing after it (upload, testers, a Study Quran hafiz keeping the app overnight) moves until it is sent. Also ask whether the app may be sold with in-app purchases on the App Store (paid-features ③)."
+      "note": "Written 2026-11-08: docs/design/testflight-licence-brief.md. Five questions for the reader, the last on selling the app later with in-app purchases (paid-features ③)."
     },
     {
       "id": "testflight-licence-reading",
@@ -3197,13 +3197,10 @@
         "file": "docs/design/testflight-plan.md",
         "item": "⑥"
       },
-      "status": "blocked",
+      "status": "open",
       "severity": "question",
       "owner": "user",
-      "blockedBy": [
-        "the licence brief (testflight-plan ⑤)"
-      ],
-      "note": "Send the brief to a qualified reader; a yes moves native-testflight-licence to A, a no leaves B as the fallback."
+      "note": "Send docs/design/testflight-licence-brief.md (written 2026-11-08) to a qualified reader; a yes moves native-testflight-licence to A, a no leaves B as the fallback."
     },
     {
       "id": "testflight-upload-key",
