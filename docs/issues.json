@@ -3789,6 +3789,17 @@
       "note": "Set up hifth.bytesofpurpose.com/share on Cloudflare with its free database behind it: the address entry, a small server at /share, a placeholder page with no Qur'an text. What it shows waits on ③ and ⑫; nothing goes live before ②; re-ask whether the name is for good before a passkey or app link is tied to it."
     },
     {
+      "id": "kanban-board-for-users",
+      "source": {
+        "file": "docs/design/project-board.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Give the people who use Hifth (the Study Quran team, testers, later huffaz) a kanban board to manage it and review it, beside the project's own GitHub board. Asked by Omar on 2026-11-09."
+    },
+    {
       "id": "sharing-sign-in",
       "source": {
         "file": "docs/design/sharing-between-readers.md",

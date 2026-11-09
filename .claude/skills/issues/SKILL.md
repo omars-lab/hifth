@@ -160,6 +160,21 @@ eleven markers were wrong when the catalog was first built — three items had b
 silently fixed loops earlier and still said `confirmed`. Check the code, then
 check the test.
 
+## The board — the backlog on GitHub, at a glance
+
+<https://github.com/users/omars-lab/projects/2> shows every open item and every check by
+hand as a card, in a column by whose turn it is (Waiting on Omar, Next up, To do, Blocked,
+Done). It is copied **one way** from the registers; a card dragged by hand goes back on the
+next copy. After opening, closing or moving items, run `make board`. Why it is built this
+way is [docs/design/project-board.md](../../../docs/design/project-board.md).
+
+## Scripts — when to use each
+
+| script | what it does | when to reach for it | command |
+|---|---|---|---|
+| `scripts/sync-project-board.mjs` | Adds a card for each new open item, updates changed ones, moves closed ones to Done | After the backlog changes, so the board matches | `make board` |
+| `scripts/sync-project-board.mjs --dry-run` | Says what a copy would add, change or finish, touching nothing | Before the first copy in a session, or when unsure | `make board-dry` |
+
 ## What this skill will not do
 
 - **Restate an item.** Ask `make issues ID=<id>`; it reads the title out of the
