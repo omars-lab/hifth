@@ -23,7 +23,14 @@ final class ShellModel {
     /// Set when the web build is missing from the bundle (`make app-web`).
     private(set) var missingBundle = false
 
-    let webView: WKWebView
+    /// The one web view, built the first time the screen asks for it, never
+    /// when the model is made. The model is made while iPadOS is still
+    /// starting the app; a web view built then closed the app on the first
+    /// touch of a verse on iPadOS 18.5 (docs/issues/ipad-crash-on-verse-touch.md).
+    @ObservationIgnored private(set) lazy var webView: WKWebView = makeWebView()
+    /// Whether the web view exists yet: the tests read it.
+    @ObservationIgnored private(set) var webViewBuilt = false
+    @ObservationIgnored private let launchRoute: String?
     private let bridge = Bridge()
     private let navigation = NavigationPolicy()
     private var pendingHash: String?
@@ -71,6 +78,23 @@ final class ShellModel {
         callbackTimeout: Duration = .seconds(8)
     ) {
         self.callbackTimeout = callbackTimeout
+        self.launchRoute = launchRoute
+        missingBundle = BundleFiles.root == nil
+
+        bridge.onMessage = { [weak self] message in self?.receive(message) }
+        navigation.onLoaded = { [weak self] in self?.loaded() }
+        runScript = { [weak self] source, arguments in
+            self?.webView.callAsyncJavaScript(source, arguments: arguments, in: nil, in: .page) { _ in }
+        }
+        #if os(iOS)
+        pencilListener.model = self
+        #endif
+    }
+
+    /// Builds the web view, sets it up and starts the page loading. Runs once,
+    /// on the first read of `webView`.
+    private func makeWebView() -> WKWebView {
+        webViewBuilt = true
         #if os(iOS)
         let platform = "ios"
         #else
@@ -92,7 +116,7 @@ final class ShellModel {
         configuration.ignoresViewportScaleLimits = false
         #endif
 
-        webView = WKWebView(frame: .zero, configuration: configuration)
+        let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.isInspectable = true
         webView.allowsBackForwardNavigationGestures = false
         webView.allowsLinkPreview = false
@@ -103,35 +127,26 @@ final class ShellModel {
         // zoom. Off, it forwards the pinch as gesture events the web app's own
         // stage already binds.
         webView.allowsMagnification = false
-        keepDrawingWhileBehindIfAsked()
+        keepDrawingWhileBehindIfAsked(webView)
         #else
         webView.scrollView.bounces = false
         webView.scrollView.isScrollEnabled = false
         webView.scrollView.contentInsetAdjustmentBehavior = .never
-        #endif
-
-        bridge.onMessage = { [weak self] message in self?.receive(message) }
-        navigation.onLoaded = { [weak self] in self?.loaded() }
-        runScript = { [weak self] source, arguments in
-            self?.webView.callAsyncJavaScript(source, arguments: arguments, in: nil, in: .page) { _ in }
-        }
-        #if os(iOS)
-        pencilListener.model = self
         let pencil = UIPencilInteraction()
         pencil.delegate = pencilListener
         webView.addInteraction(pencil)
         #endif
 
-        applyAppearanceOverride()
+        applyAppearanceOverride(webView)
 
         guard root != nil else {
-            missingBundle = true
             webView.loadHTMLString(Self.missingBundlePage, baseURL: nil)
-            return
+            return webView
         }
         // A launch route (and language) rides in the first URL: no timing, no
         // race, the page simply opens there.
         webView.load(URLRequest(url: Route.startURL(route: launchRoute, language: Route.language())))
+        return webView
     }
 
     // MARK: - Routes in
@@ -240,10 +255,11 @@ final class ShellModel {
 
     private func loaded() {
         #if os(iOS)
-        // The viewport meta already forbids zoom in this build; this is the belt
-        // to that brace, for the double-tap and the pinch WebKit would otherwise
-        // still answer with a page zoom.
-        webView.scrollView.pinchGestureRecognizer?.isEnabled = false
+        // The viewport meta already forbids zoom in this build; pinning the zoom
+        // scale is the belt to that brace. The web view's own touch handlers
+        // are left switched on (docs/issues/ipad-crash-on-verse-touch.md).
+        webView.scrollView.minimumZoomScale = 1
+        webView.scrollView.maximumZoomScale = 1
         #endif
     }
 
@@ -561,7 +577,7 @@ final class ShellModel {
     /// has no public switch for this; the private one is asked for by name and
     /// skipped if it is not there, so a WebKit without it fails the picture's
     /// own visibility check instead of crashing.
-    private func keepDrawingWhileBehindIfAsked() {
+    private func keepDrawingWhileBehindIfAsked(_ webView: WKWebView) {
         #if DEBUG
         let environment = ProcessInfo.processInfo.environment
         let photographing = !(environment["HIFTH_SNAPSHOT_PATH"] ?? "").isEmpty || environment["HIFTH_PROBE"] == "1"
@@ -609,7 +625,7 @@ final class ShellModel {
 
     // MARK: - Appearance (HIFTH_APPEARANCE=dark|light)
 
-    private func applyAppearanceOverride() {
+    private func applyAppearanceOverride(_ webView: WKWebView) {
         guard let wanted = ProcessInfo.processInfo.environment["HIFTH_APPEARANCE"] else { return }
         #if os(iOS)
         switch wanted {
