@@ -18,14 +18,14 @@ const script = join(root, "native/scripts/profile-lasts.sh");
 
 // The check counts from today, so a profile Xcode reuses months later is
 // judged by what it has left. PROFILE_NOW stands in for today in the tests.
-const run = (input, now) =>
-  spawnSync("sh", [script, "-"], {
+const run = (input, now, device) =>
+  spawnSync("sh", [script, "-", ...(device ? [device] : [])], {
     input,
     encoding: "utf8",
     env: { ...process.env, PROFILE_NOW: now },
   });
 
-const profile = (made, ends) => `<?xml version="1.0" encoding="UTF-8"?>
+const profile = (made, ends, devices = []) => `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -33,6 +33,8 @@ const profile = (made, ends) => `<?xml version="1.0" encoding="UTF-8"?>
   <date>${made}</date>
   <key>ExpirationDate</key>
   <date>${ends}</date>
+  <key>ProvisionedDevices</key>
+  <array>${devices.map((d) => `<string>${d}</string>`).join("")}</array>
   <key>Name</key>
   <string>Made-up profile</string>
 </dict>
@@ -56,6 +58,28 @@ test("a paid team's profile made long ago, with under 30 days left, stops the in
   assert.equal(out.status, 1);
   assert.match(out.stdout, /22 days/);
   assert.doesNotMatch(out.stdout, /Personal Team/);
+});
+
+// On 2026-11-10 the install built for "any iPad", so Xcode never added the
+// plugged-in iPad to the profile, and the iPad refused it ("This provisioning
+// profile cannot be installed on this device") only after a full build.
+test("a profile that does not list the plugged-in iPad stops the install, naming the fix", () => {
+  const out = run(
+    profile("2026-11-10T12:00:00Z", "2027-11-10T12:00:00Z", ["MADE-UP-OTHER-1", "MADE-UP-OTHER-2"]),
+    "2026-11-10T12:00:00Z",
+    "MADE-UP-THIS-IPAD",
+  );
+  assert.equal(out.status, 1);
+  assert.match(out.stdout, /does not list this iPad/);
+});
+
+test("a profile that lists the plugged-in iPad lets the install go on", () => {
+  const out = run(
+    profile("2026-11-10T12:00:00Z", "2027-11-10T12:00:00Z", ["MADE-UP-OTHER-1", "MADE-UP-THIS-IPAD"]),
+    "2026-11-10T12:00:00Z",
+    "MADE-UP-THIS-IPAD",
+  );
+  assert.equal(out.status, 0, out.stdout);
 });
 
 test("an app with no readable profile stops the install", () => {

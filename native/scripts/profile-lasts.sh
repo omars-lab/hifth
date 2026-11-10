@@ -10,6 +10,8 @@
 #
 #   profile-lasts.sh <path/to/Hifth.app>   read the profile inside the built app
 #   profile-lasts.sh -                     read the profile's text from standard input (tests)
+#   profile-lasts.sh <app or -> <udid>     also stop when the profile does not list that iPad
+#                                          (device-udid.mjs finds the id from the iPad's name)
 #
 # Counts from today, not from when the profile was made: Xcode can reuse a
 # profile months later, and what matters is whether it outlasts the pitch.
@@ -37,6 +39,19 @@ if [ -z "$made" ] || [ -z "$ends" ]; then
   echo "  The built app has no signing profile this can read, so there is no telling"
   echo "  how long it would keep opening on the iPad. Build it again for a real device"
   echo "  (not the simulator) and run this again."
+  echo ""
+  exit 1
+fi
+
+# The plugged-in iPad must be in the profile, or the iPad refuses the app
+# ("This provisioning profile cannot be installed on this device"), and only
+# after a full build and copy (seen 2026-11-10).
+if [ -n "$2" ] && ! printf '%s\n' "$plist" | plutil -extract ProvisionedDevices json -o - - 2>/dev/null | grep -q "\"$2\""; then
+  echo ""
+  echo "  The signing profile does not list this iPad, so the iPad would refuse the app."
+  echo "  Register it with: make app-device-register DEVICE=\"<name>\" (it uses one of the"
+  echo "  account's 100 iPad slots for the year; ask the owner first: add-device skill),"
+  echo "  then run this again. Nothing was installed."
   echo ""
   exit 1
 fi

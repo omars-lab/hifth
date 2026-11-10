@@ -217,6 +217,10 @@ flowchart LR
 
 ## A plugged-in iPad
 
+A device that is not registered with Apple yet goes through the add-device skill first
+(`make app-devices`, ask the owner, `make app-device-register`): it takes one of Apple's
+100 yearly slots for its kind, and the install stops if the device is missing.
+
 ```
 xcrun devicectl list devices                      # the device name
 make app-release-ipad DEVICE='<name>'              # the way to put a build on the owner's iPad
@@ -395,7 +399,8 @@ skills share them.
 | script | what it does | when to reach for it | command |
 |---|---|---|---|
 | `release-watch.mjs` | Opens the installed app on the iPad with its output saved, watches it, then checks for new crash reports. Says "could not open" for a locked iPad, "closed by itself" for an early exit, and fails on an uncaught error or a new report | The last step of every release to the iPad | `make app-release-ipad DEVICE=<name>` |
-| `profile-lasts.sh` | Reads the signing profile inside the built app and stops if it has under 30 days left | Run by every device install | `make app-device-install` |
+| `profile-lasts.sh` | Reads the signing profile inside the built app and stops if it has under 30 days left, or if it does not list the plugged-in iPad (the iPad would refuse the app) | Run by every device install | `make app-device-install` |
+| `device-udid.mjs` | Turns a connected device's name into the hardware id the signing profile lists it by | Run by every device install, before the profile check | `node native/scripts/device-udid.mjs --device "<name>"` |
 | `xcode-account.sh` | Says whether Xcode has an account signed in | Run by every device install | `sh native/scripts/xcode-account.sh` |
 | `simulator-udid.sh` | Turns a simulator name into its id | Picking `IPAD="…"` for a test | used by the Makefile |
 
