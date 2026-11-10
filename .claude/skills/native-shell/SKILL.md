@@ -1,6 +1,6 @@
 ---
 name: native-shell
-description: Build, run, deep-link and screenshot hifth's native shell from the command line: use when asked to run the app in an iPad simulator or on the Mac, open it at a hifth:// route or with a launch env var, capture a screenshot of the shell, install on a plugged-in iPad, or run the XCUITest smoke tests. Not for the web dev server (use run-app).
+description: Build, run, deep-link and screenshot hifth's native shell from the command line: use when asked to run the app in an iPad simulator or on the Mac, open it at a hifth:// route or with a launch env var, capture a screenshot of the shell, install on a plugged-in iPad, run the XCUITest smoke tests (including on the owner's iPadOS 18.5), or when the app crashes and the cause may be in how the shell starts. Not for the web dev server (use run-app); for pulling and reading a crash file, use crash-logs.
 ---
 
 # The native shell, from the command line
@@ -28,6 +28,8 @@ by hand: `make app-generate` rewrites it.
 | one simulator test | `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize` |
 | Mac smoke | `make app-test-mac-ui` (needs Accessibility permission, see below) |
 | console output | `make app-logs` · `make app-run-mac-stdout` |
+| tests on the owner's iPad's iOS (18.5) | `make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>` |
+| the app closed on a device | "Crashes" below, and the `crash-logs` skill |
 | start over | `make app-clean` |
 
 Without `make app-web` the app boots to a page that says "No web build in this app". The
@@ -296,6 +298,57 @@ JavaScript copy of the parser the contract page's builder runs: `link-builder.te
 same examples through it, so a rule changed in Swift and not there fails on the example. A new
 edition goes in `Route.editions` and the contract's `Edition` schema (`x-editions`), with
 `shipped` true only once its pages are in the build.
+
+## Crashes
+
+When the app closes by itself on a device, the steps to get and read the crash are the
+`crash-logs` skill. In short:
+
+- **Where the reports live.** On the iPad: Settings › Privacy & Security › Analytics &
+  Improvements › Analytics Data. From the laptop:
+  `xcrun devicectl device info files --device <device-id> --domain-type systemCrashLogs`, then
+  `xcrun devicectl device copy from … --source <file>.ips`. The simulator's go to
+  `~/Library/Logs/DiagnosticReports/` on the Mac.
+- **The reason is often not in the report.** Apple leaves the exception's message out on
+  purpose for some errors. Launch with the console attached and repeat the touch:
+  `xcrun devicectl device process launch --console --terminate-existing --device <device-id> com.bytesofpurpose.hifth`.
+  Or copy the device log right after the crash (`/usr/bin/log collect --device --last 30m`).
+- **Never write a device's real id in the repo.** Use its name or `<device-id>`.
+
+### The trap: building the web view too early
+
+**Do not create the `WKWebView` (or any view that takes touches) before the app has finished
+starting**: not in the `App` struct's stored properties, not in a model's `init` that runs at
+app start. Build it when the screen first asks for it (`makeUIView`) or later.
+
+Two outside reports show UIKit's touch code crashing with "Invalid parameter not satisfying:
+targetNode" when a web view was built too early (Apple forum threads 61432 and 784931), and
+both stopped when it was built later. Our app hit the same error on 2026-11-10, on iPadOS 18.5,
+when a verse was touched; at that time `ShellModel.init` built the web view and `HifthApp` held
+the model as state. The research and the plan:
+[docs/research/2026-11-10-ios-crash-troubleshooting.md](../../../docs/research/2026-11-10-ios-crash-troubleshooting.md).
+
+### Test on the iPadOS the owner's iPad runs
+
+The default test iPad (`iPad Pro 13-inch (M5)`) runs iOS 26.5. The owner's iPad runs **18.5**,
+and the crash above slipped past every test partly because none ran on 18.5 (and none touched
+a verse). A fault in iPadOS 18's touch code can pass every 26.5 test. Any change to how the shell starts, the web view, or touches also runs
+on an 18.5 simulator:
+
+```
+make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>
+```
+
+`IPAD=` is the simulator's name. `ONLY=` takes `SmokeTests/<test>`; the Makefile adds the
+`HifthUITests-iOS/` part, so do not write it. If the simulator is missing, make it once:
+
+```
+xcrun simctl create "Hifth iPad 18.5" com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M4-8GB com.apple.CoreSimulator.SimRuntime.iOS-18-5
+```
+
+Only one test run at a time may drive a simulator; if another session has it booted and is
+testing, wait. A pass on the simulator is a good sign, not proof: Pencil, squeeze and hover
+exist only on the real iPad, so the last check is a finger (and the Pencil) on the device.
 
 ## Troubleshooting
 

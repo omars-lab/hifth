@@ -104,6 +104,11 @@ account signed in, so the first signed build stopped (`testflight-sign-with-paid
 | `xcodebuild -exportArchive` with the upload key | sends the archive to App Store Connect | needs the key file from ⑤ |
 | `xcrun devicectl` | installs on a plugged-in iPhone or iPad | `xcrun devicectl list devices` |
 
+**After an install, if the app closes by itself on the device:** the `crash-logs` skill has
+the steps: list and copy the crash file with `xcrun devicectl`, then get the reason Apple
+leaves out of it by relaunching with `--console`. Use the device's name, never its id, in
+anything written down.
+
 Not used: fastlane (a third-party tool that wraps the same Apple commands) and Apple's
 Transporter app. The first certificate for uploads ("Apple Distribution") is made by Xcode the
 first time it archives; nothing to do by hand.
