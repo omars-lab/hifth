@@ -28,7 +28,7 @@ by hand: `make app-generate` rewrites it.
 | one simulator test | `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize` |
 | Mac smoke | `make app-test-mac-ui` (needs Accessibility permission, see below) |
 | console output | `make app-logs` · `make app-run-mac-stdout` |
-| tests on the owner's iPad's iOS (18.5) | `make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>` |
+| tests on the owner's iPad's iOS (18.5) | `make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>` (does not run yet: the app cannot start there, see below) |
 | the app closed on a device | "Crashes" below, and the `crash-logs` skill |
 | start over | `make app-clean` |
 
@@ -325,7 +325,9 @@ Two outside reports show UIKit's touch code crashing with "Invalid parameter not
 targetNode" when a web view was built too early (Apple forum threads 61432 and 784931), and
 both stopped when it was built later. Our app hit the same error on 2026-11-10, on iPadOS 18.5,
 when a verse was touched; at that time `ShellModel.init` built the web view and `HifthApp` held
-the model as state. The research and the plan:
+the model as state. **Building it lazily fixed it, checked on the owner's iPad the same day**;
+`HifthTests/WebViewTimingTests.swift` keeps it that way, and the trail is in
+`docs/issues/ipad-crash-on-verse-touch.md`. The research and the plan:
 [docs/research/2026-11-10-ios-crash-troubleshooting.md](../../../docs/research/2026-11-10-ios-crash-troubleshooting.md).
 
 ### Test on the iPadOS the owner's iPad runs
@@ -338,6 +340,13 @@ on an 18.5 simulator:
 ```
 make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>
 ```
+
+**Not working yet (2026-11-10): the app does not start on the 18.5 simulator**, so this
+command waits forever (the output stops after "no debugger version"). The app links a Swift
+library for the web view (`libswiftWebKit`) as required, and the 18.5 simulator does not have
+it; its crash report says "Library missing". The real iPad has it, so installs work. The fix
+is to stop needing that library (use the older form of the four `callAsyncJavaScript` calls in
+`ShellModel.swift`); until then, check 18.5 on the real iPad. Stop a hung run rather than wait.
 
 `IPAD=` is the simulator's name. `ONLY=` takes `SmokeTests/<test>`; the Makefile adds the
 `HifthUITests-iOS/` part, so do not write it. If the simulator is missing, make it once:

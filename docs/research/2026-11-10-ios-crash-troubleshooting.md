@@ -14,10 +14,15 @@ from:
 - **What happens.** On the owner's iPad (iPadOS 18.5), touching a verse with a finger closes
   the app. Apple's own touch-handling code finds a link between two gestures with nothing on
   one end, and stops the app on purpose. Turning the pinch handler back on did not help.
-- **Best guess, not yet proven.** Our app builds its web view at the very first moment the
-  program starts, before iPadOS has finished starting the app. Two other developers hit this
+- **The cause, now proven.** Our app built its web view at the very first moment the
+  program started, before iPadOS had finished starting the app. Two other developers hit this
   exact error on a web view, and both fixed it by building the web view later. Both
-  researchers found this on their own; the checker re-read both threads.
+  researchers found this on their own; the checker re-read both threads. **Update, same day:**
+  building the web view when the screen first asks for it fixed the crash on the owner's iPad
+  (no crash, no new crash report). The trail is in `docs/issues/ipad-crash-on-verse-touch.md`.
+- **The 18.5 simulator cannot run the app yet.** The app links a Swift web-view library the
+  18.5 simulator lacks, so the touch test there waits forever. Until that is fixed, the
+  touch test's real check is the iPad itself.
 - **Why our tests missed it.** Every simulator test runs on iPadOS 26.5; the owner's iPad runs
   18.5. And no test touches a verse.
 - **Do first:** a test that touches a verse on an 18.5 simulator, watched failing. Then move
