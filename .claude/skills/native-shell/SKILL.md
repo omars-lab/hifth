@@ -28,7 +28,7 @@ by hand: `make app-generate` rewrites it.
 | one simulator test | `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize` |
 | Mac smoke | `make app-test-mac-ui` (needs Accessibility permission, see below) |
 | console output | `make app-logs` · `make app-run-mac-stdout` |
-| tests on the owner's iPad's iOS (18.5) | `make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>` (does not run yet: the app cannot start there, see below) |
+| tests on the owner's iPad's iOS (18.5) | `make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>` |
 | the app closed on a device | "Crashes" below, and the `crash-logs` skill |
 | start over | `make app-clean` |
 
@@ -341,12 +341,13 @@ on an 18.5 simulator:
 make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>
 ```
 
-**Not working yet (2026-11-10): the app does not start on the 18.5 simulator**, so this
-command waits forever (the output stops after "no debugger version"). The app links a Swift
-library for the web view (`libswiftWebKit`) as required, and the 18.5 simulator does not have
-it; its crash report says "Library missing". The real iPad has it, so installs work. The fix
-is to stop needing that library (use the older form of the four `callAsyncJavaScript` calls in
-`ShellModel.swift`); until then, check 18.5 on the real iPad. Stop a hung run rather than wait.
+**Run page scripts only through `runPageScript`** (`native/Hifth/Web/PageScript.swift`). The
+Swift form of WebKit's script call (`callAsyncJavaScript(...)` / `evaluateJavaScript(...)` with
+a Swift result) pulls in a library (`libswiftWebKit`) that iPadOS 18 lacks. Then the app will
+not start on the 18.5 simulator ("Library missing" in its crash report), and this command
+waits forever after "no debugger version". That happened on 2026-11-10;
+`scripts/native-no-swift-only-webkit.test.mjs` now refuses the Swift form. If a run hangs
+there anyway, stop it and check `otool -L` on the built app for `libswiftWebKit`.
 
 `IPAD=` is the simulator's name. `ONLY=` takes `SmokeTests/<test>`; the Makefile adds the
 `HifthUITests-iOS/` part, so do not write it. If the simulator is missing, make it once:

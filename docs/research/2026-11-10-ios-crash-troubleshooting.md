@@ -20,9 +20,9 @@ from:
   researchers found this on their own; the checker re-read both threads. **Update, same day:**
   building the web view when the screen first asks for it fixed the crash on the owner's iPad
   (no crash, no new crash report). The trail is in `docs/issues/ipad-crash-on-verse-touch.md`.
-- **The 18.5 simulator cannot run the app yet.** The app links a Swift web-view library the
-  18.5 simulator lacks, so the touch test there waits forever. Until that is fixed, the
-  touch test's real check is the iPad itself.
+- **The 18.5 simulator now runs the app.** At first the app would not start there, because it
+  needed a Swift web-view library the 18.5 simulator lacks. Running page scripts through
+  WebKit's own call fixed that, and the verse-touch test passes on 18.5 (same day).
 - **Why our tests missed it.** Every simulator test runs on iPadOS 26.5; the owner's iPad runs
   18.5. And no test touches a verse.
 - **Do first:** a test that touches a verse on an 18.5 simulator, watched failing. Then move
