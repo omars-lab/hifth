@@ -16,6 +16,15 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const script = join(root, "native/scripts/profile-lasts.sh");
 
+// The check counts from today, so a profile Xcode reuses months later is
+// judged by what it has left. PROFILE_NOW stands in for today in the tests.
+const run = (input, now) =>
+  spawnSync("sh", [script, "-"], {
+    input,
+    encoding: "utf8",
+    env: { ...process.env, PROFILE_NOW: now },
+  });
+
 const profile = (made, ends) => `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -30,22 +39,23 @@ const profile = (made, ends) => `<?xml version="1.0" encoding="UTF-8"?>
 </plist>`;
 
 test("a profile that lasts a year lets the install go on, and says how long", () => {
-  const out = spawnSync("sh", [script, "-"], {
-    input: profile("2026-11-09T12:00:00Z", "2027-11-09T12:00:00Z"),
-    encoding: "utf8",
-  });
+  const out = run(profile("2026-11-09T12:00:00Z", "2027-11-09T12:00:00Z"), "2026-11-09T12:00:00Z");
   assert.equal(out.status, 0, out.stdout);
   assert.match(out.stdout, /365 days/);
 });
 
 test("a profile that lasts 7 days stops the install, saying a free team signed it", () => {
-  const out = spawnSync("sh", [script, "-"], {
-    input: profile("2026-11-09T12:00:00Z", "2026-11-16T12:00:00Z"),
-    encoding: "utf8",
-  });
+  const out = run(profile("2026-11-09T12:00:00Z", "2026-11-16T12:00:00Z"), "2026-11-09T12:00:00Z");
   assert.equal(out.status, 1);
   assert.match(out.stdout, /7 days/);
   assert.match(out.stdout, /Personal Team/);
+});
+
+test("a paid team's profile made long ago, with under 30 days left, stops the install", () => {
+  const out = run(profile("2025-12-01T12:00:00Z", "2026-12-01T12:00:00Z"), "2026-11-09T12:00:00Z");
+  assert.equal(out.status, 1);
+  assert.match(out.stdout, /22 days/);
+  assert.doesNotMatch(out.stdout, /Personal Team/);
 });
 
 test("an app with no readable profile stops the install", () => {

@@ -11,8 +11,12 @@
 #   profile-lasts.sh <path/to/Hifth.app>   read the profile inside the built app
 #   profile-lasts.sh -                     read the profile's text from standard input (tests)
 #
-# Prints how many days the profile lasts and exits 0 when it is 30 days or
-# more; a plain message and exit 1 otherwise.
+# Counts from today, not from when the profile was made: Xcode can reuse a
+# profile months later, and what matters is whether it outlasts the pitch.
+# PROFILE_NOW (like 2026-11-09T12:00:00Z) stands in for today in the tests.
+#
+# Prints how many days the profile has left and exits 0 when it is 30 days
+# or more; a plain message and exit 1 otherwise.
 if [ "$1" = "-" ]; then
   plist=$(cat)
 else
@@ -37,14 +41,26 @@ if [ -z "$made" ] || [ -z "$ends" ]; then
   exit 1
 fi
 
-days=$(( (ends - made) / 86400 ))
+if [ -n "$PROFILE_NOW" ]; then now=$(seconds "$PROFILE_NOW"); else now=$(date +%s); fi
+lasts=$(( (ends - made) / 86400 ))
+days=$(( (ends - now) / 86400 ))
 if [ "$days" -ge 30 ]; then
-  echo "  The signing profile lasts $days days, so a paid team signed it."
+  echo "  The signing profile has $days days left, so the app keeps opening on the iPad until then."
   exit 0
 fi
 
+if [ "$lasts" -ge 30 ]; then
+  echo ""
+  echo "  The signing profile has only $days days left, so the app would stop opening"
+  echo "  on the iPad soon. Xcode reused an old profile. Delete it from"
+  echo "  ~/Library/Developer/Xcode/UserData/Provisioning Profiles and build again, so"
+  echo "  Xcode asks Apple for a new one. Nothing was installed."
+  echo ""
+  exit 1
+fi
+
 echo ""
-echo "  The signing profile lasts only $days days: a free \"Personal Team\" signed it,"
+echo "  The signing profile lasts only $lasts days: a free \"Personal Team\" signed it,"
 echo "  so the app would stop opening on the iPad after that. The paid team's lasts"
 echo "  a year. In Xcode → Settings → Accounts, check the team reads \"Developer Team\","
 echo "  then build again. Nothing was installed."
