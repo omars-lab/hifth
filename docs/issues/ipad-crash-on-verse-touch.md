@@ -37,13 +37,21 @@ one. It failed before the change and passes after it.
 no longer closes the app (the owner: "its good now"), the recorded output shows no error, and
 no new crash report was written.
 
+## The app would not start on the 18.5 simulator
+
+The touch test could not run on iPadOS 18.5 in the simulator at first: the app did not even
+start there ("Library missing: libswiftWebKit.dylib"), so the test waited forever. The app had
+pulled in that Swift-only part of WebKit just by calling the Swift form of the web view's "run
+this script" call; the 18.5 simulator does not have it, the real iPad does.
+
+Every script now goes through one helper (`native/Hifth/Web/PageScript.swift`) that uses
+WebKit's own form of the call, and the built app no longer lists that library.
+`scripts/native-no-swift-only-webkit.test.mjs` fails if the Swift form comes back (it failed
+on the five old calls first). **`SmokeTests/testTouchingAVerseKeepsTheAppOpen` now passes on
+the "Hifth iPad 18.5" simulator** (2026-11-10, 12 seconds).
+
 ## Still owed
 
-- **The touch test cannot run on iPadOS 18.5 in the simulator yet.** The app does not even
-  start there: it needs a Swift library for the web view (`libswiftWebKit`) that the 18.5
-  simulator does not have, and it links it as required. The real iPad has it. So
-  `SmokeTests/testTouchingAVerseKeepsTheAppOpen` waits forever on that simulator. Fix: stop
-  depending on that library (use the older form of the four script calls), then run the test.
 - **No native test runs before a push.** The pre-push checks cover the web app only. A
   release command should run the iPad checks, install, open the app with its output captured
   and fail on any new crash report, so the next one is caught before anyone holds the iPad.
