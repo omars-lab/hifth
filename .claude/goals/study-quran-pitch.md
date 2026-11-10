@@ -44,7 +44,7 @@ The first one is the main measure. The other three explain why it passes or fail
 | Pitch walk steps passing on the iPad | **14 of 14** a machine can check, in the iPad simulator on its side, in one run (`make pitch-walk`, 45 seconds); 2 steps are by hand; not yet walked on the owner's own iPad | 2026-11-09 |
 | Pitch steps passing in the browser (`make pitch-script`) | **14 of 14** a browser can check, in Safari's and Chrome's engines; 2 steps are by hand | 2026-11-09 |
 | Open faults on the pitch path | **8** (`make issues PITCH=1`): 5 the agent's, 2 waiting on a device or the Xcode sign-in, 1 by-hand check | 2026-11-09 |
-| Demo-ready passages | **1 of 6** (2:255, read against the printed pages; one wrong capital fixed); the other 5 not walked yet | 2026-11-09 |
+| Demo-ready passages | **6 of 6** in the iPad simulator, each note read against the printed pages (one wrong capital fixed, in 2:255). Two gaps: 10:15 → 19:73 has no note, so it is checked by picture only; the own notes of 18:62–82 beyond 18:65 are off the demo's path and not yet read against the print. Not yet walked on the owner's own iPad | 2026-11-09 |
 | Date to show it | not set | 2026-11-09 |
 
 Update this table whenever a walk is run or the backlog is tagged, so it shows the trend.
