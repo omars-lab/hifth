@@ -84,7 +84,7 @@ final class ShellModel {
         bridge.onMessage = { [weak self] message in self?.receive(message) }
         navigation.onLoaded = { [weak self] in self?.loaded() }
         runScript = { [weak self] source, arguments in
-            self?.webView.callAsyncJavaScript(source, arguments: arguments, in: nil, in: .page) { _ in }
+            self?.webView.runPageScript(source, arguments: arguments) { _ in }
         }
         #if os(iOS)
         pencilListener.model = self
@@ -292,7 +292,7 @@ final class ShellModel {
         let environment = ProcessInfo.processInfo.environment
         let path = environment["HIFTH_PROBE_PATH"]
         let shot = environment["HIFTH_PROBE_SHOT"] ?? ""
-        webView.callAsyncJavaScript(Self.probeScript, arguments: ["extra": extra], in: nil, in: .page) { result in
+        webView.runPageScript(Self.probeScript, arguments: ["extra": extra]) { result in
             switch result {
             case .success(let value):
                 print("probe \(value)")
@@ -474,7 +474,7 @@ final class ShellModel {
                 log("eval_start", ["id": step.id])
                 let text: String
                 do {
-                    let value = try await webView.callAsyncJavaScript(Self.probeScript, arguments: ["extra": step.eval], in: nil, contentWorld: .page)
+                    let value = try await webView.runPageScript(Self.probeScript, arguments: ["extra": step.eval])
                     text = (value as? String) ?? "{}"
                 } catch {
                     log("eval_failed", ["id": step.id, "msg": "\"\(error.localizedDescription)\""])
@@ -592,7 +592,7 @@ final class ShellModel {
 
     private static func pageState(of webView: WKWebView) async -> (visibility: String, size: CGSize) {
         await withCheckedContinuation { continuation in
-            webView.callAsyncJavaScript("return [document.visibilityState, innerWidth, innerHeight]", arguments: [:], in: nil, in: .page) { result in
+            webView.runPageScript("return [document.visibilityState, innerWidth, innerHeight]") { result in
                 let values = (try? result.get()) as? [Any] ?? []
                 let visibility = values.first as? String ?? "unknown"
                 let width = (values.count > 1 ? values[1] as? NSNumber : nil)?.doubleValue ?? 0

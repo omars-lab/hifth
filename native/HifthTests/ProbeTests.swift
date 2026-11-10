@@ -10,8 +10,8 @@ import WebKit
 struct ProbeTests {
     private func ask(_ extra: String) async throws -> [String: Any] {
         let webView = WKWebView()
-        let value = try await webView.callAsyncJavaScript(
-            ShellModel.probeScript, arguments: ["extra": extra], in: nil, contentWorld: .page)
+        let value = try await webView.runPageScript(
+            ShellModel.probeScript, arguments: ["extra": extra])
         let text = try #require(value as? String)
         return try #require(try JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any])
     }
