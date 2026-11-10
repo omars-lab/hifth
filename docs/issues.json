@@ -3299,9 +3299,9 @@
       "severity": "question",
       "owner": "agent",
       "blockedBy": [
-        "the owner signs in to Xcode with the paid account (Xcode, Settings, Accounts)"
+        "the owner plugs in the iPad, unlocks it and taps Trust"
       ],
-      "note": "Set the team (76NHKA839A) in the project settings and reinstall on the owner's iPad and Mac; installs then last a year. Tried 2026-11-09: the build stopped with Xcode's \"No Accounts\", because no Apple account is signed in to Xcode, so it cannot ask Apple for the app's signing profile. The install command now says so before building."
+      "note": "The next most important thing for the pitch (2026-11-09): the demo passes in the iPad simulator but is not on a real iPad yet. Xcode is signed in and shows the paid Developer Team. Once the iPad is plugged in, run the install; it reads the signing profile inside the built app and goes on only when it has 30 or more days left (a year from the paid team), so a free team's 7-day install or an old reused profile stops before reaching the iPad. Then the Mac."
     },
     {
       "id": "testflight-archive-builds",

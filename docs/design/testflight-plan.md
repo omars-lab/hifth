@@ -166,11 +166,18 @@ same day for iOS and macOS, named "Hifth - The Huffaz Toolkit".
 
 The agent's, now that the team ID is known (①). Installs then last a year instead of seven days.
 
-**Waiting on you: sign in to Xcode.** The first try (2026-11-09) stopped before building,
-because no Apple account is signed in to Xcode on the laptop, and only a signed-in account can
-ask Apple for the app's signing profile. In Xcode: Settings, Accounts, +, Apple ID, and sign in
-with the account that holds the paid membership. The install command now checks this first and
-says the same thing.
+**Waiting on you: plug in the iPad.** This is the next most important thing for the pitch: the
+demo passes in the iPad simulator but is not yet on a real iPad anyone can hold. Plug the iPad in,
+unlock it, and tap Trust; the laptop does not see it yet. Xcode is signed in since 2026-11-09, and
+its Accounts screen shows the paid Developer Team. (The first try that day stopped because no
+account was signed in; the install command now checks for one first.)
+
+**How the install proves the year.** After the build, the install command reads the signing
+profile inside the app and counts the days it has left. A year means the paid team signed it and
+the install goes on. A few days means a free team did, and it stops before anything reaches the
+iPad. It also stops if Xcode reused an old profile with under a month left, so the app cannot run
+out the week of the meeting. Xcode's own saved settings are not trusted for this: that day they
+still said "Personal Team" while the Accounts screen showed the paid team.
 
 **No cable needed after the first time, and nothing uploaded.** Xcode installs over Wi-Fi when the
 laptop and the device share a network. On iOS or iPadOS 27 and later it pairs with no cable at
