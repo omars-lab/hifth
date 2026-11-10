@@ -60,6 +60,9 @@ Update this table whenever a walk is run or the backlog is tagged, so it shows t
 4. **Pause the work that is not on the path** until after the meeting: TestFlight to outside
    testers, HomePod and Siri, paid features, sharing between readers. Nothing is deleted; the
    rows stay in the backlog.
+5. **Walk the six passages on the owner's real iPad** (next, 2026-11-10). The app is on it and
+   no longer closes on a touch, but every walk so far ran in the simulator, which missed that
+   crash. Install with `make app-release-ipad DEVICE=…`, then walk the pitch script on the iPad.
 
 ## The tools that make this repeatable
 
@@ -73,7 +76,7 @@ already; some still have to be built, and building them is part of the goal.
 |---|---|---|
 | Walk the demo | `walk-app` skill, `make drive` | Walks the app page by page in each device and saves a picture of each step; its checklist grows with every fault found |
 | Run the pitch build | `run-app` skill (web), `native-shell` skill (`make app-run-ipad`, `make app-shot`) | Opens the real app, in the browser or the iPad simulator, at a given page |
-| Put it on the iPad | `make app-device-install DEVICE=…` (`native-shell`, `app-setup` skills) | Signs with the paid team and installs; it now stops early if Xcode is not signed in |
+| Put it on the iPad | `make app-release-ipad DEVICE=…` (`native-shell`, `crash-logs`, `app-setup` skills) | Runs the verse-touch test on the iPad's own OS in the simulator, signs with the paid team, installs, then opens the app watched and fails on a new crash report. `make app-crash-logs DEVICE=…` says what stopped the app if it closes |
 | Track the faults | `issues` skill, `docs/issues.json`, `make issues`, `make backlog`, `make board` | One row per fault, rendered into the backlog page and the project board |
 | Fix with a test | `testing` skill | Every fault found on the walk gets a test that would catch it coming back |
 | Checks only a person can do | `manual-testing` skill | Parks the by-hand checks for the owner; each answer becomes a test |

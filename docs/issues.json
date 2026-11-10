@@ -3299,9 +3299,9 @@
       "severity": "question",
       "owner": "agent",
       "blockedBy": [
-        "the owner plugs in the iPad, unlocks it and taps Trust"
+        "the Mac install is still to do"
       ],
-      "note": "The next most important thing for the pitch (2026-11-09): the demo passes in the iPad simulator but is not on a real iPad yet. Xcode is signed in and shows the paid Developer Team. Once the iPad is plugged in, run the install; it reads the signing profile inside the built app and goes on only when it has 30 or more days left (a year from the paid team), so a free team's 7-day install or an old reused profile stops before reaching the iPad. Then the Mac."
+      "note": "2026-11-10: the iPad is done. The paid team signed it (364 days left) and `make app-release-ipad` puts it on with the verse-touch test first and a crash-report check after; the touch crash its first install showed is fixed (docs/issues/ipad-crash-on-verse-touch.md). Next for the pitch: walk the six passages on the real iPad, since the simulator missed that crash. Left on this row: the Mac. Earlier (2026-11-09): the demo passes in the iPad simulator but is not on a real iPad yet. Xcode is signed in and shows the paid Developer Team. Once the iPad is plugged in, run the install; it reads the signing profile inside the built app and goes on only when it has 30 or more days left (a year from the paid team), so a free team's 7-day install or an old reused profile stops before reaching the iPad. Then the Mac."
     },
     {
       "id": "testflight-archive-builds",

@@ -16,6 +16,7 @@ or `<device-id>` in anything checked in.
 
 | step | command |
 |---|---|
+| **after installing, fail if a new crash report appears** | `make app-release-ipad DEVICE=<device-id>` (native-shell skill) |
 | **copy every Hifth crash report and say what stopped the app, in one go** | `make app-crash-logs DEVICE=<device-id> [SINCE=<ISO time>]` |
 | name of the plugged-in iPad | `xcrun devicectl list devices` |
 | list crash files on it | `xcrun devicectl device info files --device <device-id> --domain-type systemCrashLogs` |
@@ -139,7 +140,6 @@ had finished starting the app; it is now built on first use (fixed 2026-11-10, n
 None of these exist today. Do not run them; they are what the research page recommends.
 
 - Collecting the recent device log in the same command as the crash reports.
-- A `CONSOLE=1` option on `make app-device-install` that launches with `--console`.
 - The app saving Apple's crash summary (MetricKit) as a file on the next launch, to copy with
   `--domain-type appDataContainer --domain-identifier com.bytesofpurpose.hifth`.
 - The app logging through the system log (one subsystem, `com.bytesofpurpose.hifth`) instead

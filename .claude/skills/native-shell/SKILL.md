@@ -29,6 +29,7 @@ by hand: `make app-generate` rewrites it.
 | Mac smoke | `make app-test-mac-ui` (needs Accessibility permission, see below) |
 | console output | `make app-logs` · `make app-run-mac-stdout` |
 | tests on the owner's iPad's iOS (18.5) | `make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>` |
+| **put a new build on the owner's iPad** | `make app-release-ipad DEVICE=<name>`: the checks, the install, then the app opened and watched; fails on a new crash report |
 | the app closed on a device | "Crashes" below, and the `crash-logs` skill |
 | start over | `make app-clean` |
 
@@ -218,8 +219,18 @@ flowchart LR
 
 ```
 xcrun devicectl list devices                      # the device name
-make app-device-install DEVICE='<name>' ROUTE=/hafs-kfqc/p45
+make app-release-ipad DEVICE='<name>'              # the way to put a build on the owner's iPad
+make app-device-install DEVICE='<name>' ROUTE=/hafs-kfqc/p45   # install only, no checks
 ```
+
+**Use `app-release-ipad` for anything the owner will hold.** It runs the unit tests and the
+verse-touch test on the "Hifth iPad 18.5" simulator (the iPad's own OS), then builds and
+installs, then opens the app with its output saved to `native/build/release-console.log` and
+watches it for `WATCH` seconds (60). It fails if the app closes by itself, prints an error
+nobody caught, or leaves a new crash report (it reads them with the crash-logs skill's
+`pull-crashes.mjs`). The watch catches a crash on opening; a crash that needs a touch is what
+the simulator test before it is for. `native/scripts/release-watch.mjs` does the watching,
+tested in `scripts/native-release-watch.test.mjs`.
 
 The target builds for a real device (which needs a signing team), installs with `devicectl`
 and launches at the route. `TEAM` is read from the one "Apple Development" identity in the
@@ -375,6 +386,18 @@ exist only on the real iPad, so the last check is a finger (and the Pencil) on t
 | `-only-testing:HifthUITests/…` runs nothing | the iPad UI test target is `HifthUITests-iOS` | `make app-test ONLY=SmokeTests/<name>` adds the right prefix, and fails ("0 ran") when a name selects nothing instead of passing green |
 | right in Playwright, wrong in the app | the iPad's own WebKit is not Playwright's | walk it in the simulator (above); `HIFTH_PITCH_BROWSER=webkit` runs the pitch e2e in Playwright's WebKit, which is closer but still not the app |
 | build works, app dark but desk still light | `APPEARANCE` only colours chrome | use `ROUTE='…?field=dark'` |
+
+## Scripts — when to use each
+
+The make targets call these; they live in `native/scripts/` because the Makefile and several
+skills share them.
+
+| script | what it does | when to reach for it | command |
+|---|---|---|---|
+| `release-watch.mjs` | Opens the installed app on the iPad with its output saved, watches it, then checks for new crash reports. Says "could not open" for a locked iPad, "closed by itself" for an early exit, and fails on an uncaught error or a new report | The last step of every release to the iPad | `make app-release-ipad DEVICE=<name>` |
+| `profile-lasts.sh` | Reads the signing profile inside the built app and stops if it has under 30 days left | Run by every device install | `make app-device-install` |
+| `xcode-account.sh` | Says whether Xcode has an account signed in | Run by every device install | `sh native/scripts/xcode-account.sh` |
+| `simulator-udid.sh` | Turns a simulator name into its id | Picking `IPAD="…"` for a test | used by the Makefile |
 
 NOTICE: Reworked from rshankras/claude-code-apple-skills — `ios/run-simulator`,
 `generators/deep-linking`, `testing/flow-walkthrough` (MIT, Ravi Shankar, 2025).

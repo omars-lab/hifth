@@ -166,9 +166,13 @@ same day for iOS and macOS, named "Hifth - The Huffaz Toolkit".
 
 The agent's, now that the team ID is known (①). Installs then last a year instead of seven days.
 
-**Waiting on you: plug in the iPad.** This is the next most important thing for the pitch: the
-demo passes in the iPad simulator but is not yet on a real iPad anyone can hold. Plug the iPad in,
-unlock it, and tap Trust; the laptop does not see it yet. Xcode is signed in since 2026-11-09, and
+**The iPad is done (2026-11-10).** The paid team signed it, the install has 364 days left, and
+it goes on with `make app-release-ipad DEVICE=…`, which runs the verse-touch test on the iPad's
+own OS first and fails on a new crash report after. Its first install closed on a touch; that
+was fixed the same day (`docs/issues/ipad-crash-on-verse-touch.md`). **Left: the Mac.**
+
+**Next for the pitch: walk the six passages on the real iPad.** Every walk so far ran in the
+simulator, and the simulator missed the touch crash. Unlock the iPad and leave it plugged in. Xcode is signed in since 2026-11-09, and
 its Accounts screen shows the paid Developer Team. (The first try that day stopped because no
 account was signed in; the install command now checks for one first.)
 

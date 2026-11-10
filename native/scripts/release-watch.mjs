@@ -1,0 +1,105 @@
+#!/usr/bin/env node
+// The last step of `make app-release-ipad`: open the freshly installed app on
+// the plugged-in iPad with its output saved, watch it, and fail when
+//   - the app closes by itself during the watch,
+//   - its output shows an error nobody caught ("Terminating app due to …"),
+//   - or a new Hifth crash report appears on the iPad (crash-logs skill).
+// The crash that reached the owner's hands (docs/issues/ipad-crash-on-verse-touch.md)
+// printed the second and left the third.
+//
+//   release-watch.mjs --device <id> --route <route> --log <file> --out <crash dir> [--watch <seconds>]
+//
+// Exit 0 pass · 1 the app closed, threw, or the iPad could not be reached · 3 new crash report.
+// HIFTH_DEVICECTL swaps Apple's device tool for a stand-in (the tests use one).
+import { spawn, spawnSync } from "node:child_process";
+import { createWriteStream, readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const BUNDLE_ID = "com.bytesofpurpose.hifth";
+const args = process.argv.slice(2);
+const opt = (k, d) => (args.includes(k) ? args[args.indexOf(k) + 1] : d);
+const device = opt("--device");
+const route = opt("--route", "");
+const logFile = opt("--log");
+const out = opt("--out");
+const watchSeconds = Number(opt("--watch", "60"));
+if (!device || !logFile || !out || !(watchSeconds > 0)) {
+  console.error("usage: release-watch.mjs --device <id> --route <route> --log <file> --out <crash dir> [--watch <seconds>]");
+  process.exit(2);
+}
+
+const log = (ev, fields = {}) =>
+  console.log(`${new Date().toISOString()} pid=${process.pid} ev=${ev} ${Object.entries(fields).map(([k, v]) => `${k}=${v}`).join(" ")}`.trimEnd());
+
+const devicectl = process.env.HIFTH_DEVICECTL;
+const cmd = devicectl ? devicectl : "xcrun";
+const launchArgs = ["device", "process", "launch", "--console", "--terminate-existing", "--device", device, BUNDLE_ID];
+
+// A little before the launch, so a crash in the first second still counts.
+const since = new Date(Date.now() - 2000).toISOString();
+const sink = createWriteStream(logFile);
+log("launch_start", { route: route || "none", watch: watchSeconds, log: JSON.stringify(logFile) });
+const child = spawn(cmd, devicectl ? launchArgs : ["devicectl", ...launchArgs], {
+  env: { ...process.env, DEVICECTL_CHILD_HIFTH_ROUTE: route },
+  stdio: ["ignore", "pipe", "pipe"],
+});
+child.stdout.pipe(sink, { end: false });
+child.stderr.pipe(sink, { end: false });
+
+let closedEarly = false;
+const exited = new Promise((resolve) => child.on("exit", (code) => resolve(code)));
+const finished = await Promise.race([
+  exited.then((code) => ({ code })),
+  new Promise((resolve) => setTimeout(() => resolve(null), watchSeconds * 1000)),
+]);
+if (finished) {
+  closedEarly = true;
+  log("launch_exit", { code: finished.code, after: "early" });
+} else {
+  child.kill("SIGINT");
+  await Promise.race([exited, new Promise((r) => setTimeout(r, 3000))]);
+  if (child.exitCode === null) child.kill("SIGKILL");
+}
+await new Promise((r) => sink.end(r));
+
+const text = readFileSync(logFile, "utf8");
+let failed = false;
+if (/Terminating app due to uncaught exception|uncaught exception of type/i.test(text)) {
+  const line = text.split("\n").find((l) => /uncaught exception/i.test(l));
+  log("fail", { why: "uncaught", msg: JSON.stringify(line.trim().slice(0, 300)) });
+  console.error(`The app's output shows an uncaught error: ${line.trim()}`);
+  failed = true;
+}
+// devicectl gave up before the app ever opened: say that, not "it closed".
+const neverOpened = closedEarly && /failed to launch|Unable to launch/i.test(text);
+if (neverOpened) {
+  const locked = /unlocked|Locked/.test(text);
+  log("fail", { why: "not_opened", locked });
+  console.error(
+    locked
+      ? `Could not open the app: the iPad is locked. Unlock it and run again (installed already). Output in ${logFile}.`
+      : `Could not open the app on the iPad. Devicectl's reason is in ${logFile}.`,
+  );
+  failed = true;
+} else if (closedEarly) {
+  log("fail", { why: "closed", msg: JSON.stringify(`the app closed by itself before the ${watchSeconds}s watch ended`) });
+  console.error(`The app closed by itself before the ${watchSeconds}-second watch ended. Its output is in ${logFile}.`);
+  failed = true;
+}
+
+const pull = spawnSync(
+  process.execPath,
+  [join(new URL("../..", import.meta.url).pathname, ".claude/skills/crash-logs/scripts/pull-crashes.mjs"),
+    "--device", device, "--out", out, "--since", since, "--fail-on-new"],
+  { encoding: "utf8", env: process.env, timeout: 120_000 },
+);
+process.stdout.write(pull.stdout ?? "");
+process.stderr.write(pull.stderr ?? "");
+
+if (pull.status === 3) {
+  log("watch_done", { result: "fail", why: "new_crash_report" });
+  process.exit(3);
+}
+if (pull.status !== 0) failed = true;
+log("watch_done", { result: failed ? "fail" : "pass" });
+process.exit(failed ? 1 : 0);

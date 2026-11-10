@@ -13,6 +13,7 @@
 #   make app-walk ROUTES='/hafs-kfqc/2:255?open=commentary …' [SIDEWAYS=1] [LOCALE=ar|en]   a picture per route, to look at
 #   make app-golden         the real app's screenshots against native/shots/baseline/
 #   make app-device-install build for a plugged-in iPad, install and launch (DEVICE=…)
+#   make app-release-ipad DEVICE=…   the iPad checks, install, open it watched; fails on a new crash report
 #   make app-crash-logs DEVICE=… [SINCE=<ISO time>]   copy the app's crash reports off the iPad, one line each
 # ---------------------------------------------------------------------------
 
@@ -103,7 +104,7 @@ SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(pats
 
 .PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
         app-run-ipad app-shot app-probe app-open app-test app-walk app-test-mac-ui app-unit-test app-logs app-clean \
-        app-golden app-golden-update app-device-install app-crash-logs app-archive app-testflight
+        app-golden app-golden-update app-device-install app-release-ipad app-crash-logs app-archive app-testflight
 
 app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
 	python3 $(NATIVE)/scripts/make-appicon.py
@@ -331,7 +332,25 @@ app-device-install: app-generate ## Build for a plugged-in iPad, install and lau
 	  DEVELOPMENT_TEAM=$(TEAM) build | $(XCPRETTY)
 	@sh native/scripts/profile-lasts.sh $(DERIVED)/Build/Products/Debug-iphoneos/Hifth.app
 	xcrun devicectl device install app --device "$(DEVICE)" $(DERIVED)/Build/Products/Debug-iphoneos/Hifth.app
-	DEVICECTL_CHILD_HIFTH_ROUTE=$(ROUTE) xcrun devicectl device process launch --device "$(DEVICE)" $(BUNDLE_ID)
+	$(if $(filter watch,$(LAUNCH)),node native/scripts/release-watch.mjs --device "$(DEVICE)" --route "$(ROUTE)" \
+	  --log $(RELEASE_LOG) --out $(CRASH_DIR) --watch $(WATCH),DEVICECTL_CHILD_HIFTH_ROUTE=$(ROUTE) xcrun devicectl device process launch --device "$(DEVICE)" $(BUNDLE_ID))
+
+# ---- release to the plugged-in iPad, with the checks that would have caught the
+# touch crash (docs/issues/ipad-crash-on-verse-touch.md): the unit tests, the
+# verse-touch test on the iPad's own OS in the simulator, then the install, then
+# the app opened with its output saved and watched for WATCH seconds. Fails if
+# the app closes by itself, prints an uncaught error, or leaves a new crash report.
+RELEASE_IPAD  ?= Hifth iPad 18.5
+RELEASE_TESTS ?= SmokeTests/testTouchingAVerseKeepsTheAppOpen
+WATCH         ?= 60
+RELEASE_LOG   ?= $(DERIVED)/release-console.log
+LAUNCH        ?=
+app-release-ipad: ## The iPad checks, then install on the plugged-in iPad and open it watched; fails on a new crash report (DEVICE=…, WATCH=60)
+	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
+	$(MAKE) --no-print-directory app-unit-test
+	$(MAKE) --no-print-directory app-test IPAD="$(RELEASE_IPAD)" ONLY="$(RELEASE_TESTS)"
+	$(MAKE) --no-print-directory app-device-install DEVICE="$(DEVICE)" LAUNCH=watch
+	@echo "  ✓ released to the iPad: checks passed, no crash in $(WATCH)s. Its output: $(RELEASE_LOG)"
 
 # Where the iPad's crash reports land (gitignored: native/build/).
 CRASH_DIR    ?= $(DERIVED)/crashes
