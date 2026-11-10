@@ -50,8 +50,12 @@ WebKit's own form of the call, and the built app no longer lists that library.
 on the five old calls first). **`SmokeTests/testTouchingAVerseKeepsTheAppOpen` now passes on
 the "Hifth iPad 18.5" simulator** (2026-11-10, 12 seconds).
 
-## Still owed
+## So the next one is caught before anyone holds the iPad
 
-- **No native test runs before a push.** The pre-push checks cover the web app only. A
-  release command should run the iPad checks, install, open the app with its output captured
-  and fail on any new crash report, so the next one is caught before anyone holds the iPad.
+`make app-release-ipad DEVICE=<name>` is now the way a build goes on the iPad. It runs the unit
+tests and the verse-touch test on the 18.5 simulator, installs, opens the app with its output
+saved, and fails if the app closes by itself, prints an error nobody caught, or leaves a new
+crash report. `make app-crash-logs DEVICE=<name>` copies the crash reports off the iPad and
+says in one line each what stopped the app.
+
+Still owed: the pre-push checks cover the web app only, so a push alone runs no iPad test.

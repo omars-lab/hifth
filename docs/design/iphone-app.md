@@ -61,7 +61,7 @@ the best as the default and the others as a setting.
 
 The agent's, now that the app ID is registered (TestFlight ②), once the app is signed with the paid
 team (TestFlight ③, which waits on Xcode being signed in). Same install as the iPad:
-`make app-device-install DEVICE=…`, over Wi-Fi once the phone is paired.
+`make app-release-ipad DEVICE=…` (or `make app-device-install` to skip the checks), over Wi-Fi once the phone is paired.
 
 **Recitation on the phone and the iPad (⑤–⑦).** The app already plays each verse's recitation, streamed from Quran.com's public audio site.
 Nothing on Apple's ID page is needed for that. What is missing is in the app itself.

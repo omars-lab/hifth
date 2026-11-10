@@ -22,7 +22,7 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
    of that flow.
 
 3. **The demo on the real iPad, in the app, with the network off.** Plug the iPad in, run
-   `make app-web FLAVOUR=pitch`, then `make app-device-install DEVICE=<its name> ROUTE=/hafs-kfqc/2:255`,
+   `make app-web FLAVOUR=pitch`, then `make app-release-ipad DEVICE=<its name>`,
    turn Wi-Fi off, hold it sideways and walk the demo: 2:255's note, 2:48's look-alikes, 18:60's
    note and its link to 18:65 and back. Right: it opens on the page quickly, with no long blank
    screen; the note reads sharp, in the book's typeface; a page turn follows your finger; nothing
