@@ -49,9 +49,9 @@ fi
 if [ -n "$2" ] && ! printf '%s\n' "$plist" | plutil -extract ProvisionedDevices json -o - - 2>/dev/null | grep -q "\"$2\""; then
   echo ""
   echo "  The signing profile does not list this iPad, so the iPad would refuse the app."
-  echo "  Register it in Xcode → Window → Devices and Simulators (it uses one of the"
-  echo "  account's 100 iPad slots for the year), or let Xcode add it by building with"
-  echo "  the iPad picked as the destination, then run this again. Nothing was installed."
+  echo "  Register it with: make app-device-register DEVICE=\"<name>\" (it uses one of the"
+  echo "  account's 100 iPad slots for the year; ask the owner first: add-device skill),"
+  echo "  then run this again. Nothing was installed."
   echo ""
   exit 1
 fi

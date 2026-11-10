@@ -15,6 +15,8 @@
 #   make app-device-install build for a plugged-in iPad, install and launch (DEVICE=…)
 #   make app-release-ipad DEVICE=…   the iPad checks, install, open it watched; fails on a new crash report
 #   make app-crash-logs DEVICE=… [SINCE=<ISO time>]   copy the app's crash reports off the iPad, one line each
+#   make app-devices [CSV=1]   the registered devices, and the slots of each kind left this year
+#   make app-device-register DEVICE=…   register a new device with Apple (uses a slot), then install
 # ---------------------------------------------------------------------------
 
 # A stale CPATH from Homebrew breaks Xcode's clang module search.
@@ -104,7 +106,7 @@ SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(pats
 
 .PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
         app-run-ipad app-shot app-probe app-open app-test app-walk app-test-mac-ui app-unit-test app-logs app-clean \
-        app-golden app-golden-update app-device-install app-release-ipad app-crash-logs app-archive app-testflight
+        app-golden app-golden-update app-device-install app-release-ipad app-crash-logs app-devices app-device-register app-archive app-testflight
 
 app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
 	python3 $(NATIVE)/scripts/make-appicon.py
@@ -323,6 +325,19 @@ app-golden-shots: app-golden-public
 	  magick mogrify -resize 50% $(SHOTS)/current/iphone-$$name.png; \
 	done
 
+# ---- register a new plugged-in device with Apple, then install as usual. This
+# uses one of the account's 100 slots for that kind of device until the
+# membership year ends, even if the device is removed later, so ask the owner
+# first (the add-device skill). A device already registered uses no new slot.
+app-device-register: app-generate ## Register a new plugged-in device with Apple (one of the year's 100 slots for its kind), then install (DEVICE=…)
+	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@test -n "$(TEAM)" || { echo "  no Apple Development identity in the keychain (TEAM= to override)"; exit 1; }
+	@sh native/scripts/xcode-account.sh
+	@udid=$$(node native/scripts/device-udid.mjs --device "$(DEVICE)") || exit 1; \
+	  set -o pipefail; $(XCB) -scheme Hifth-iOS -destination "id=$$udid" -allowProvisioningUpdates \
+	  -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=$(TEAM) build | $(XCPRETTY)
+	@$(MAKE) --no-print-directory app-device-install DEVICE="$(DEVICE)"
+
 # ---- a real iPad over USB
 app-device-install: app-generate ## Build for a plugged-in iPad, install and launch at ROUTE (DEVICE=<name from `xcrun devicectl list devices`>)
 	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
@@ -359,6 +374,12 @@ SINCE        ?=
 app-crash-logs: ## Copy the app's crash reports off a plugged-in iPad and say what stopped it (DEVICE=…, SINCE=<ISO time>)
 	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
 	node .claude/skills/crash-logs/scripts/pull-crashes.mjs --device "$(DEVICE)" --out $(CRASH_DIR) $(if $(SINCE),--since $(SINCE))
+
+# ---- which devices Apple has registered for us, and the slots left (100 of each
+# kind a year). CSV=1 prints a row per device with its full id: keep it off the repo.
+CSV          ?=
+app-devices: ## List the registered devices and how many slots of each kind are left this year (CSV=1 for a spreadsheet)
+	@node .claude/skills/add-device/scripts/device-list.mjs $(if $(CSV),--csv)
 
 # ---- TestFlight: gated on the licence decision, not on the build
 # Both refuse until docs/decisions.json settles `native-testflight-licence` on

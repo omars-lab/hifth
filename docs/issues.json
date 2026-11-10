@@ -3289,6 +3289,17 @@
       "note": "Ask Apple, signed in, to let a HomePod pass Siri play requests to Hifth: https://developer.apple.com/contact/request/sirikit-media-intent-for-homepod/ . A separate approval from the Siri box; send it once Siri plays recitation on the phone. The agent drafts the answers."
     },
     {
+      "id": "device-list-from-apple",
+      "source": {
+        "file": ".claude/skills/add-device/SKILL.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "2026-11-10: `make app-devices` counts the devices on this laptop's signing profiles, so the slots-left number is only the most that could be left. It can't see devices removed earlier this year, which still hold a slot. Once the App Store Connect key is on this laptop (app-setup ⑤), ask Apple's device list directly for the exact count, and keep the profile count as the fallback when there is no key."
+    },
+    {
       "id": "testflight-sign-with-paid-team",
       "pitch": true,
       "source": {

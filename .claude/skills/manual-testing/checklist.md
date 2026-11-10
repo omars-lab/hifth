@@ -149,6 +149,13 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     drag in the Mac app needs a permission to control it, and the browsers already prove the same
     drag with a mouse (docs/PLAN.md, item 118).
 
+21. **Registering a new device with one command.** Next time a device is added (the add-device
+    skill, after you say yes to the slot), run `make app-device-register DEVICE="<its name>"`
+    with it plugged in, unlocked and in Developer Mode. Right: the build registers it, `make
+    app-devices` then lists it with one fewer slot of its kind, and the app installs and opens.
+    Why not a machine: it uses one of Apple's 100 yearly slots, so it runs only for a device you
+    actually want added. When it passes, remove the "not yet run" note in the add-device skill.
+
 ## Done
 
 (Items move here with the date and where their test or ledger record is.)

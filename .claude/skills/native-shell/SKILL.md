@@ -217,6 +217,10 @@ flowchart LR
 
 ## A plugged-in iPad
 
+A device that is not registered with Apple yet goes through the add-device skill first
+(`make app-devices`, ask the owner, `make app-device-register`): it takes one of Apple's
+100 yearly slots for its kind, and the install stops if the device is missing.
+
 ```
 xcrun devicectl list devices                      # the device name
 make app-release-ipad DEVICE='<name>'              # the way to put a build on the owner's iPad
