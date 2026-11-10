@@ -328,6 +328,7 @@ app-device-install: app-generate ## Build for a plugged-in iPad, install and lau
 	@sh native/scripts/xcode-account.sh
 	set -o pipefail; $(XCB) -scheme Hifth-iOS -destination 'generic/platform=iOS' -allowProvisioningUpdates \
 	  DEVELOPMENT_TEAM=$(TEAM) build | $(XCPRETTY)
+	@sh native/scripts/profile-lasts.sh $(DERIVED)/Build/Products/Debug-iphoneos/Hifth.app
 	xcrun devicectl device install app --device "$(DEVICE)" $(DERIVED)/Build/Products/Debug-iphoneos/Hifth.app
 	DEVICECTL_CHILD_HIFTH_ROUTE=$(ROUTE) xcrun devicectl device process launch --device "$(DEVICE)" $(BUNDLE_ID)
 

@@ -40,46 +40,8 @@ test("nothing from Xcode at all counts as no account", () => {
   assert.equal(out.status, 1);
 });
 
-// What \`defaults read com.apple.dt.Xcode IDEProvisioningTeamByIdentifier\`
-// prints. On 2026-11-09 the owner signed in after the paid membership was
-// bought, and Xcode still listed the team as a free "Personal Team": an
-// install from a free team stops opening after 7 days, so the iPad shown in
-// the pitch could expire the week of the meeting. Made-up team ids.
-const freeTeam = `{
-    "00000000-0000-0000-0000-000000000000" =     (
-                {
-            isFreeProvisioningTeam = 1;
-            teamID = AAAAAAAAAA;
-            teamName = "Someone (Personal Team)";
-            teamType = "Personal Team";
-        }
-    );
-}`;
-const paidTeam = `{
-    "00000000-0000-0000-0000-000000000000" =     (
-                {
-            isFreeProvisioningTeam = 0;
-            teamID = AAAAAAAAAA;
-            teamName = "Someone";
-            teamType = Individual;
-        }
-    );
-}`;
-
-test("an Apple account with a paid team lets the install go on, quietly", () => {
-  const out = spawnSync("sh", [script, "-"], { input: one + paidTeam, encoding: "utf8" });
+test("an Apple account in Xcode lets the install go on, quietly", () => {
+  const out = spawnSync("sh", [script, "-"], { input: one, encoding: "utf8" });
   assert.equal(out.status, 0, out.stdout);
   assert.equal(out.stdout, "");
-});
-
-test("an Apple account with only a free team stops the install, saying a free install expires", () => {
-  const out = spawnSync("sh", [script, "-"], { input: one + freeTeam, encoding: "utf8" });
-  assert.equal(out.status, 1);
-  assert.match(out.stdout, /7 days/);
-  assert.match(out.stdout, /Personal Team/);
-});
-
-test("an Apple account whose teams Xcode has not listed yet stops the install", () => {
-  const out = spawnSync("sh", [script, "-"], { input: one, encoding: "utf8" });
-  assert.equal(out.status, 1);
 });
