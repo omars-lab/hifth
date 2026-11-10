@@ -16,6 +16,7 @@ or `<device-id>` in anything checked in.
 
 | step | command |
 |---|---|
+| **copy every Hifth crash report and say what stopped the app, in one go** | `make app-crash-logs DEVICE=<device-id> [SINCE=<ISO time>]` |
 | name of the plugged-in iPad | `xcrun devicectl list devices` |
 | list crash files on it | `xcrun devicectl device info files --device <device-id> --domain-type systemCrashLogs` |
 | copy one to the laptop | `xcrun devicectl device copy from --device <device-id> --domain-type systemCrashLogs --source <file>.ips --destination <path>` |
@@ -47,7 +48,13 @@ xcrun devicectl device info files --device <device-id> --domain-type systemCrash
 ```
 
 `<device-id>` can be the name `list devices` prints. Hifth's files start with `Hifth-` and
-carry the date and time. Copy the newest:
+carry the date and time.
+
+`make app-crash-logs DEVICE=<device-id>` copies all of them to `native/build/crashes/` (git
+ignores it) and prints one line per report: when, which build, the kind of stop, Apple's last
+words, and the first call past Apple's throwing code (`frame=`), which is usually the one that
+names the cause. Add `SINCE=2026-11-10T20:11:00Z` to see only the reports written after a fix
+went on. By hand, copy the newest:
 
 ```
 xcrun devicectl device copy from --device <device-id> --domain-type systemCrashLogs \
@@ -123,15 +130,15 @@ them when that build is still on the laptop. By hand, one address at a time:
 ## Known crash: touching a verse closes the app (2026-11-10)
 
 Reason: `NSInternalInconsistencyException`, "Invalid parameter not satisfying: targetNode",
-thrown in UIKit's gesture code on a touch. Best guess: the web view is built before iPadOS
-has finished starting the app. See the research page above and the native-shell skill's
+thrown in UIKit's gesture code on a touch. Cause, proven: the web view was built before iPadOS
+had finished starting the app; it is now built on first use (fixed 2026-11-10, no crash since). See the research page above and the native-shell skill's
 "Crashes" section.
 
 ## Planned, not built yet
 
 None of these exist today. Do not run them; they are what the research page recommends.
 
-- A make target that pulls the newest crash files and the recent device log in one command.
+- Collecting the recent device log in the same command as the crash reports.
 - A `CONSOLE=1` option on `make app-device-install` that launches with `--console`.
 - The app saving Apple's crash summary (MetricKit) as a file on the next launch, to copy with
   `--domain-type appDataContainer --domain-identifier com.bytesofpurpose.hifth`.
@@ -144,6 +151,6 @@ None of these exist today. Do not run them; they are what the research page reco
 
 ## Scripts — when to use each
 
-This skill has no scripts of its own yet; every step above is an Apple command. When the
-"pull everything" command is built, it goes in `.claude/skills/crash-logs/scripts/` with a row
-here and the make target that calls it.
+| script | what it does | when to reach for it | command |
+|---|---|---|---|
+| `scripts/pull-crashes.mjs` | Copies the app's crash reports off a plugged-in iPad (only ones not already copied), and prints one `ev=crash` line each with the kind of stop, Apple's last words and the first call past the throw, then `ev=done new=N`. `--since` keeps only newer reports; `--fail-on-new` exits 3 when there is one. Exits 1 when the iPad cannot be reached, never an empty pass. Tested with a stand-in device tool in `scripts/crash-logs-pull.test.mjs` | The app closed on the iPad; or after installing, to prove no new crash (the release command does this) | `make app-crash-logs DEVICE=<device-id> [SINCE=<ISO time>]` |
