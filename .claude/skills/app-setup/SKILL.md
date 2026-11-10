@@ -99,7 +99,7 @@ account signed in, so the first signed build stopped (`testflight-sign-with-paid
 | tool | what it does here | how to check it |
 |---|---|---|
 | Xcode (26.6) | builds, signs, archives | `xcodebuild -version` |
-| Xcode signed in to your Apple account (**you**; it needs your password) | lets the build make and renew certificates and profiles by itself (`-allowProvisioningUpdates`); without it the build fails with "No Accounts" | Xcode → Settings → Accounts shows the team `76NHKA839A`; `sh native/scripts/xcode-account.sh` says so from the terminal, and `make app-device-install` runs it first |
+| Xcode signed in to your Apple account (**you**; it needs your password) | lets the build make and renew certificates and profiles by itself (`-allowProvisioningUpdates`); without it the build fails with "No Accounts" | Xcode → Settings → Accounts shows the team `76NHKA839A` under your name with **no "(Personal Team)"** after it. A free Personal Team still installs, but the install stops opening after 7 days instead of a year. From the terminal, `sh native/scripts/xcode-account.sh` is quiet only when Xcode has an account **and** a paid team, and says which is missing otherwise; `make app-device-install` runs it first. If it says Personal Team just after you bought the membership, click the account in Accounts so Xcode asks Apple again (seen 2026-11-09) |
 | XcodeGen | makes the Xcode project from `native/project.yml` | `xcodegen --version` (`brew install xcodegen` if missing) |
 | `xcodebuild -exportArchive` with the upload key | sends the archive to App Store Connect | needs the key file from ⑤ |
 | `xcrun devicectl` | installs on a plugged-in iPhone or iPad | `xcrun devicectl list devices` |
