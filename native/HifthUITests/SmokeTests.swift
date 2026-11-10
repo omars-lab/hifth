@@ -72,6 +72,21 @@ final class SmokeTests: XCTestCase {
         waitForRoute("#/hafs-kfqc/p45", in: app)
     }
 
+    /// Touching a verse keeps the app open. On the owner's iPad (iPadOS 18.5,
+    /// 2026-11-10) the first touch on a verse closed the app with "Invalid
+    /// parameter not satisfying: targetNode"; the laptop's simulators then ran
+    /// only iOS 17.4 and 26.5, so no test saw it. Run on an 18.5 simulator:
+    /// make app-test IPAD="Hifth iPad 18.5" (docs/issues/ipad-crash-on-verse-touch.md).
+    func testTouchingAVerseKeepsTheAppOpen() {
+        let app = launch(route: "/hafs-kfqc/2:255")
+        waitForRoute("#/hafs-kfqc/2:255", in: app)
+        sleep(2)
+        app.webViews.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        sleep(3)
+        XCTAssertEqual(app.state, .runningForeground, "the app closed when a verse was touched")
+        XCTAssertTrue(app.staticTexts["hifth.route"].exists)
+    }
+
     /// A pinch only magnifies: it selects no verse and opens no menu. A pinch
     /// that ended on a verse once selected it, because the second finger's lift
     /// counted as a tap, so the page jumped to that verse and its hold menu
