@@ -9,6 +9,70 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## Sessions of 2026-11-09 and 2026-11-10
+
+These sessions' task numbers started again from 1, so they would clash with the numbers below.
+They are listed here by date instead. What is still open from them is in
+`.claude/plans/open-work-2026-11.md`. Pushes and merges are folded into the work they shipped.
+
+### 2026-11-09 — Installing on our own devices through TestFlight
+
+**Done:** The research page on putting the app on our own devices was written
+(`docs/research/2026-11-09-testflight-own-devices.md`). Signing now uses the paid team, and the
+licence reader brief was written. The owner made the App Store Connect record (the app's ID was
+registered on 2026-11-09). Publisher decided: Omar Eid (PR #547). The archive build and the upload
+are still open.
+
+### 2026-11-09 — Devices and crashes on the iPad
+
+**Done:**
+- The iPad crash on first touch is fixed: a loop between two of the iPad's touch rules.
+- There is a command and skill that pulls the app's crash reports from a plugged-in device.
+- A release command checks, builds, installs and opens the app on the iPad. It fails when new
+  crash reports appear, and waits for the iPad to be unlocked instead of giving up.
+- A device list command shows each registered device and how many slots are left, per kind. An
+  add-a-device skill uses it, and an install stops when the profile doesn't list the plugged-in
+  device.
+- The app starts on the iPadOS 18.5 simulator, and the verse-touch test runs there.
+
+### 2026-11-09 — The pitch walk, run by a program
+
+**Done:** The pitch walk is one check per step, with the same checks the browser test makes, a
+runner and a make target. It was run and checked by eye, and the goal page and pitch script were
+updated. Two snags were settled: 18:60's link count, and a step that never said it was ready.
+
+### 2026-11-09 — Demo verses read against the printed pages
+
+**Done:** 2:255's note, and passages 2 to 6, were read against the printed pages and match.
+Walking steps 7 to 13 ran in the iPad app.
+
+### 2026-11-09 — Page fixes from the owner's comments
+
+**Done:** The folded page corner was fixed. The very wide bookmark was answered (comment
+t_29ebee). The narrow ribbon merged.
+
+### 2026-11-09 — Sharing, the board, the iCloud page
+
+**Done:**
+- Sharing between readers: two researchers, then a checker, merged into
+  `docs/design/sharing-between-readers.md`.
+- A GitHub Projects board for Hifth was filled from the backlog. A backlog item asks to give
+  readers one too.
+- The iCloud sync design page merged, and the comment server's runner was added to the hub (owner
+  OK, 2026-11-09).
+
+### 2026-11-09 to 11-10 — Drawers for every tool
+
+**Done:** Each built as a setting, with today's way kept as the other choice:
+- Share, Same roots, the commentary and Listen open as sections inside the verse drawer.
+- The look-alike verses open there too.
+- The word's drawer stacks on the verse's drawer, and what happens when the verse's drawer goes
+  away under it was settled.
+- Each page tool's help shows as a label when the pointer rests on it (PR #584).
+- The reading settings sit behind one top-bar button, in a drawer (PR #585).
+
+Which drawer sits on which (drawer levels) was still being pushed when this was written.
+
 ## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)
 
 **Done:** 2026-10-25. The recitation-with-a-note walk read no verse in Arabic; it now reads Arabic digits, and a test checks every walk script for the same slip. The short laptop window's first screen walked in both browsers at both sizes: two pages, feet in sight, Full screen past a small phone's page.
