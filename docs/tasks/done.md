@@ -71,7 +71,8 @@ t_29ebee). The narrow ribbon merged.
 - Each page tool's help shows as a label when the pointer rests on it (PR #584).
 - The reading settings sit behind one top-bar button, in a drawer (PR #585).
 
-Which drawer sits on which (drawer levels) was still being pushed when this was written.
+- Which drawer sits on which: the word's drawer names the verse's drawer under it, or each
+  drawer carries a tag naming its level, as a setting (PR #586, 2026-11-10).
 
 ## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)
 
