@@ -170,6 +170,7 @@ import { EdgeGrabRails, type EdgeTurnDriver, type PeelPages } from "./components
 import { DesktopChrome } from "./components/DesktopChrome";
 import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
+import { LookalikeSections } from "./components/LookalikeSections";
 import { HighlightMenu } from "./components/HighlightMenu";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareInDrawer, ShareSheet } from "./components/ShareSheet";
@@ -445,6 +446,25 @@ export function App(): JSX.Element {
   const [shareInDrawer, setShareInDrawer] = useState(false);
   // Listen's play options, the same way.
   const [listenInDrawer, setListenInDrawer] = useState(false);
+  // The look-alikes, when the drawer holds the verse's tools: shown whenever no
+  // other tool is open there, until their ✕ folds them for this verse.
+  const [looksFolded, setLooksFolded] = useState(false);
+  // Where a verse's tools open: a card of their own, or inside the verse's
+  // drawer (selection-drawer ③; a setting since 2026-11-09, the card unless
+  // this device picked the drawer). Same roots is the first tool it moves.
+  const [drawerTools, setDrawerTools] = useState<DrawerTools>(() => savedDrawerTools());
+  const chooseDrawerTools = useCallback((choice: DrawerTools) => {
+    rememberDrawerTools(choice);
+    setDrawerTools(choice);
+  }, []);
+  const toolsInDrawer = drawerTools === "drawer";
+  // Show the look-alikes in the drawer: fold whatever other tool is open there.
+  const showLooksInDrawer = useCallback(() => {
+    setRootsOpen(false);
+    setShareInDrawer(false);
+    setListenInDrawer(false);
+    setLooksFolded(false);
+  }, []);
   // The verse drawer's ×: put away until another verse is lit (selection = D).
   const [drawerAway, setDrawerAway] = useState(false);
   const putDrawerAway = useCallback(() => {
@@ -1088,6 +1108,7 @@ export function App(): JSX.Element {
     setRootsOpen(false);
     setShareInDrawer(false);
     setListenInDrawer(false);
+    setLooksFolded(false);
   }, [selectedKey]);
   // Moving the selection also stops any recitation: the ▶ belongs to the verse
   // you are on, so a hop or a fresh tap should not leave the last one sounding.
@@ -1215,6 +1236,18 @@ export function App(): JSX.Element {
   // the curated edges are pinned above the corpus families, marked as
   // hand-verified. One glyph, one place, one count. (See `RootLensTrigger`.)
   const railChips = useMemo(() => chips.filter((c) => c.direction !== "root"), [chips]);
+  // The drawer shows the look-alikes when it holds the verse's tools and no
+  // other tool is open in it, once the verse's surah has loaded (so a section
+  // never says "None" only because its list has not arrived yet).
+  const looksInDrawer =
+    toolsInDrawer &&
+    !looksFolded &&
+    !listenInDrawer &&
+    !shareInDrawer &&
+    rootFamilies === null &&
+    selectedKey !== null &&
+    settledShards.has(parseAyahKey(selectedKey)?.surah ?? 0);
+  const looksShowing = looksInDrawer;
   // A link's `?open=lookalikes` or `?open=roots`, held until the verse it names
   // is selected and its data has arrived. It is placed after the effect above
   // that closes the roots on every new selection, so on the render that
@@ -1241,10 +1274,12 @@ export function App(): JSX.Element {
       // look-alikes yet, so the note opened in the list's place.
       if (!settledShards.has(surah) || (PITCH && !settledPitch.has(surah))) return;
       const first = railChips[0];
-      if (first) setOpenDirection(first.direction);
+      // With the verse's tools in its drawer, the look-alikes open there.
+      if (first && toolsInDrawer) showLooksInDrawer();
+      else if (first) setOpenDirection(first.direction);
     }
     setPendingSheet(null);
-  }, [pendingSheet, selectedKey, rootAyahShards, settledShards, settledPitch, railChips]);
+  }, [pendingSheet, selectedKey, rootAyahShards, settledShards, settledPitch, railChips, toolsInDrawer, showLooksInDrawer]);
   const curatedRoots = useMemo(
     () => chips.find((c) => c.direction === "root")?.edges ?? [],
     [chips],
@@ -1367,15 +1402,6 @@ export function App(): JSX.Element {
     rememberVerseGestures(choice);
     setVerseGestures(choice);
   }, []);
-  // Where a verse's tools open: a card of their own, or inside the verse's
-  // drawer (selection-drawer ③; a setting since 2026-11-09, the card unless
-  // this device picked the drawer). Same roots is the first tool it moves.
-  const [drawerTools, setDrawerTools] = useState<DrawerTools>(() => savedDrawerTools());
-  const chooseDrawerTools = useCallback((choice: DrawerTools) => {
-    rememberDrawerTools(choice);
-    setDrawerTools(choice);
-  }, []);
-  const toolsInDrawer = drawerTools === "drawer";
   // What a second tap on the lit verse does: put it out (today), or open the
   // word under the finger above the verse's drawer (selection-drawer ①, a
   // setting since 2026-11-09). handleVerse reads it before the drawer is known.
@@ -2978,7 +3004,7 @@ export function App(): JSX.Element {
         caption: `${t.railDirection[chip.direction]}${t.sep}${t.num(chip.count)}`,
         // The rail's own sign: "looks like" with a small mark for which way.
         glyph: chip.glyph,
-        onPick: () => setOpenDirection(chip.direction),
+        onPick: () => (toolsInDrawer ? showLooksInDrawer() : setOpenDirection(chip.direction)),
       });
     if (rootCount > 0)
       items.push({
@@ -3850,7 +3876,8 @@ export function App(): JSX.Element {
 
   /* The look-alike chips. One rail, placed by whoever renders it: the stage's
      corner on a phone, the desk beside the live page above the breakpoint. */
-  const hopRail = (beside?: "left" | "right", home?: "bar" | "tools") => (
+  // With the verse's tools in its drawer, the look-alikes are listed there, so no chips.
+  const hopRail = (beside?: "left" | "right", home?: "bar" | "tools") => toolsInDrawer ? null : (
     <HopRail
       chips={railChips}
       openDirection={openDirection}
@@ -4794,9 +4821,19 @@ export function App(): JSX.Element {
                 onClose={() => setRootsOpen(false)}
               />
             </Suspense>
+          ) : looksInDrawer && selectedKey ? (
+            <LookalikeSections
+              chips={railChips}
+              fromKey={selectedKey}
+              canHop={canHop}
+              onHop={handleHop}
+              onClose={() => setLooksFolded(true)}
+            />
           ) : null
         }
         onPanelClose={() => {
+          // Escape folds the tool on show: another tool first, then the look-alikes.
+          if (looksShowing) setLooksFolded(true);
           setRootsOpen(false);
           setShareInDrawer(false);
           setListenInDrawer(false);

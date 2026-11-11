@@ -47,6 +47,7 @@ Each is parked on the by-hand list because the simulator cannot show it. Do any 
 Both are built and sit in the info panel (the "About Hifth" button). Today's way is still the default for each. Try the other way on the iPad, then say which should be the default.
 
 - [ ] **Where a verse's tools open.** Pick "Inside the verse's drawer", tap a verse, and press Share, Same roots and Listen in turn. Each opens under the drawer's buttons instead of on a card of its own, and the verse stays in sight above. Which feels better in the hand?
+- [ ] **Look-alikes in the drawer.** With the same setting on, tap 2:48. Its look-alikes are listed in the drawer under three headings (this surah, earlier surahs, later surahs), each saying "None" when it has none, and there are no look-alike chips beside the page. Is that easier to read than the chips?
 - [ ] **Tapping the lit verse again.** Pick "Opens the word you tapped", tap a verse, then tap one of its words. The word's letters and signs open in a drawer on top of the verse's, and the verse stays lit. A tap elsewhere closes the word's drawer. Should this replace putting the verse out?
 
 ## What you saw

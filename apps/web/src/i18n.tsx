@@ -284,6 +284,10 @@ export interface Strings {
   chipAria(direction: string, count: number): string;
   /** The hop sheet's own accessible name: its title and how many rows. */
   hopSheetAria(title: string, count: number): string;
+  /** The look-alikes inside the verse's drawer: its heading, its accessible name, and a section with none. */
+  lookalikesTitle: string;
+  lookalikesAria(count: number): string;
+  lookalikesNone: string;
   hopTo(label: string): string;
   commentaryOn(label: string): string;
   commentaryBy(source: string): string;
@@ -1219,6 +1223,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     },
     chipAria: (direction, count) => m.chipAria({ direction, countText: n(count) }),
     hopSheetAria: (title, count) => m.hopSheetAria({ title, count }),
+    lookalikesTitle: m.lookalikesTitle,
+    lookalikesAria: (count) => m.lookalikesAria({ count: n(count) }),
+    lookalikesNone: m.lookalikesNone,
     hopTo: (label) => m.hopTo({ label }),
     commentaryOn: (label) => m.commentaryOn({ label }),
     commentaryBy: (source) => m.commentaryBy({ source }),
