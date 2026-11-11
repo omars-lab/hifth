@@ -3,7 +3,7 @@
  * probe hands to eval, and its answer must never carry the words of a note: it
  * reads text only from a note's verse number, its buttons and the menu items.
  *
- * Run with the other script tests: node --test scripts/
+ * Run with the other script tests: pnpm -s test:scripts
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";

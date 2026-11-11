@@ -6,7 +6,7 @@
  * makes for a named button is checked here against the message it means, in
  * English and in Arabic.
  *
- * Run with the other script tests: node --test scripts/
+ * Run with the other script tests: pnpm -s test:scripts
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";

@@ -4,7 +4,7 @@
  * record. So it must compile as the program the probe hands to eval and read
  * no words at all: only times, page numbers, counts and stored-setting names.
  *
- * Run with the other script tests: node --test scripts/
+ * Run with the other script tests: pnpm -s test:scripts
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";

@@ -5,7 +5,7 @@
  * and the walk once took a link back to its own start for a second reference
  * (found walking the short laptop window, 2026-10-25).
  *
- * Run with the other script tests: node --test scripts/
+ * Run with the other script tests: pnpm -s test:scripts
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";

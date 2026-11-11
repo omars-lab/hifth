@@ -4,7 +4,7 @@
  * text but the menu items. Its Chromium runner sets the reader's choice of how
  * the next verse is made ready by the setting's own key, so the two must agree.
  *
- * Run with the other script tests: node --test scripts/
+ * Run with the other script tests: pnpm -s test:scripts
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
