@@ -31,7 +31,8 @@ day-by-day count, which load with the record sheet and not at start-up, 0.3 KB i
 start-up script (the switch's words and keeping what kind of mistake was marked), and 0.3 KB is
 their words in the two languages. The trim: the day-by-day count first sat in the same core file
 as the code that records a look, so it loaded at start-up though only the record sheet reads it.
-In a file of its own it moved out, 0.4 KB off start-up; the total is the same. Worth copying
+In a file of its own it moved out, 0.4 KB off start-up; the total is the same. The load-later
+browser test now fails if that file is found in the start-up script again. Worth copying
 whenever a function only a late-loading screen uses is added to a core file start-up reads.
 3.4 KB of room is left, and the page icons along the bottom are still to come, so the next
 feature that adds to start-up needs a trim first. The open item `startup-slowed-in-a-month` is

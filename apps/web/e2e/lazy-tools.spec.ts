@@ -20,6 +20,7 @@ const LATER = [
   "components/Colophon.tsx",
   "components/PenGuide.tsx",
   "components/RevisionMap.tsx",
+  "components/RevisionDays.tsx",
   "components/PackShelf.tsx",
   "components/BookmarkShelf.tsx",
   "components/EditionPicker.tsx",
@@ -31,6 +32,14 @@ const LATER = [
   "components/BookmarkDrawer.tsx",
   "components/DiffView.tsx",
 ];
+
+/**
+ * Files of the core package that must stay out of it too. The build reads the
+ * core package's built output, so its map names them by that path. The
+ * day-by-day count is here because only the record sheet reads it: in the file
+ * that records a look, it loaded at start-up.
+ */
+const LATER_CORE = ["revision-days.js"];
 
 /** The one file they share. */
 const TOOLS_FILE = /\/assets\/rarely-used-[^/]+\.js$/;
@@ -54,6 +63,10 @@ test.describe("Hifth · rarely used tools load when first opened", () => {
     expect(sources.some((s) => s.endsWith("src/App.tsx"))).toBe(true);
     const inside = LATER.filter((f) => sources.some((s) => s.endsWith(`src/${f}`)));
     expect(inside, "tools still in the start-up script").toEqual([]);
+    // The same guard for the core package: its files are named as this expects.
+    expect(sources.some((s) => s.endsWith("packages/core/dist/revision.js"))).toBe(true);
+    const core = LATER_CORE.filter((f) => sources.some((s) => s.endsWith(`packages/core/dist/${f}`)));
+    expect(core, "core files still in the start-up script").toEqual([]);
   });
 
   // Each opened by its own button, with the tools' file held back for a moment,
