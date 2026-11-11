@@ -423,6 +423,13 @@ commit-labels: ## Which commits on this branch say what they were for, and do th
 	@# Without the tool it says so and passes: a silent skip looks like a pass.
 	@if command -v intent >/dev/null 2>&1; then intent check; else echo "  commit labels not checked: the intent tool is not installed (the intent-manager plugin puts it on the path)"; fi
 
+.PHONY: intent
+intent: ## Draw what each commit was for (use case, feature, plan, task, commits) as one page, and open it
+	@# Written to .intent/picture/, a folder that ignores itself: the page is
+	@# out of date after the next commit, so it is never checked in. It holds
+	@# names, task notes and commit subjects, and none of the book's text.
+	@if command -v intent >/dev/null 2>&1; then intent draw --open; else echo "  no picture drawn: the intent tool is not installed (the intent-manager plugin puts it on the path)"; fi
+
 .PHONY: site
 site: build ## Build the public site and check it the way the deploy does (the deploy job runs this)
 	@# The deploy job runs this on a fresh clone, which is the one build that

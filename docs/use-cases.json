@@ -1260,6 +1260,32 @@
       ]
     },
     {
+      "id": "see-what-each-change-was-for",
+      "actor": "maintainer",
+      "goal": "For any commit, see which task it did, which use case and feature that task serves and which plan it came from, without reading a chat log.",
+      "feature": "ci-and-gates",
+      "code": [
+        {
+          "file": "Makefile",
+          "symbol": "commit-labels:"
+        },
+        {
+          "file": ".intent/config.json",
+          "symbol": "kinds"
+        }
+      ],
+      "proof": [
+        {
+          "file": "scripts/gate-gates.test.mjs",
+          "test": "gate:gates passes a third hook that hands what git gave it to its own target"
+        },
+        {
+          "file": "scripts/gate-issues.test.mjs",
+          "test": "gate:issues passes a row naming a use case and a feature that exist"
+        }
+      ]
+    },
+    {
       "id": "know-what-we-promise-and-what-proves-it",
       "actor": "maintainer",
       "goal": "See every promise this app makes, whose promise it is, and which test would fail if I broke it.",
