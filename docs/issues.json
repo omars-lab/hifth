@@ -3947,7 +3947,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "hifth.app, bought at Namecheap on 2026-11-10: a new Cloudflare account, the domain added, its nameservers moved now (cloudflare-onboarding skill); the registration moved after about 2027-01-09 when the 60-day lock lifts. Then re-ask whether the share page lives on hifth.app, and point the site's Cloudflare setup at the new account."
+      "note": "hifth.app, bought at Namecheap on 2026-11-10: a new Cloudflare account, the domain added, its nameservers moved now (cloudflare-onboarding skill); the registration moved after about 2027-01-09 when the 60-day lock lifts. Then re-ask whether the share page lives on hifth.app, and point the site's Cloudflare setup at the new account. 2026-11-11: Cloudflare says the domain is active; a read-only token is saved encrypted and its key is backed up in LastPass. Next: the owner makes one token that can edit DNS on hifth.app and publish a static page (Pages) on the new account, saved as CLOUDFLARE_API_TOKEN, with the account ID saved beside it, neither ever shown."
     },
     {
       "id": "kanban-board-for-users",
