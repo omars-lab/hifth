@@ -694,6 +694,18 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
 - [ ] Open the record of what you have opened and try Page, Hizb and Juz: every square sits in its
   own place with a gap round it, and none runs past the sheet's edge. · phone, desktop · tests:
   revision spec, desktop spec ("stays a map") · issue: `map-squares-overlap`
+- [ ] Open the record and pick Month: the whole month fits the sheet with no square past its
+  edge; days before the record began and days still to come have a dashed edge and do nothing
+  when pressed; a day with mistakes carries their number; pressing it lists them underneath, and
+  pressing one closes the sheet on that verse. Then Days: the same numbers, newest day first.
+  In the apps, `scripts/record-days-walk.js` makes up three days and takes them out again.
+  · phone, desktop, Firefox, iPad both ways · test: record-days spec · issue:
+  `calendar-of-each-days-work`
+- [ ] The same in Arabic: the week starts on Saturday at the right, the numbers are Arabic-Indic,
+  the arrow for the earlier month is on the right and points right, and a day with no verse the
+  book can place shows no "0 pages" line. · phone, iPad · test: record-days spec ("in Arabic the
+  arrow…", "a day whose only look the book cannot place…"); which way the arrow's shape points
+  is by eye · issue: `calendar-of-each-days-work`
 - [ ] With any sheet or card open, look along its bottom edge: no line of text shows half its
   letters under it. · desktop, laptop, Firefox · test: desktop spec ("never half a line") ·
   issue: `record-sheet-slices-bar-line`
