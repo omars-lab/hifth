@@ -21,6 +21,15 @@ folded: no
   lines. It is hand-edited; change it with a plain edit.
 - `scripts/perf-sweep.mjs`: the middle of five readings hid that one build reads two values
   400 ms apart. `make perf-compare` keeps every run; read them all.
+- Moving test files into a skill's folder (branch `stale-skills`): a search-and-replace for
+  quoted paths missed one written between backticks, and `walk-digits.test.mjs`, which reads
+  every script in its folder, began reading the tests too. After a move, run the moved tests
+  and search for the old path in every quoting style.
+- `scripts/e2e-port-free.test.mjs`: it asked for one free port and assumed the one 1000 above
+  was free. Another program held it and an unrelated commit was refused. A test that needs two
+  ports opens both, and picks the numbers itself: the first fix let the system pick, which gives
+  ports so high that the second does not exist, and it failed five runs in eight. Repeat a fix
+  for a now-and-then failure 25 times before committing it.
 
 ## Worth copying
 - `.claude/skills/testing/SKILL.md` "A test that fails now and then": repeat it 25 times with

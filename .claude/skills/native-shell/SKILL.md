@@ -68,7 +68,9 @@ Cold start puts the route into the first URL's fragment, so there is no race. A 
 arrives while running is queued until the page says `ready`, then applied. Quote any route
 with `?` or `&` on the make line.
 
-**The shell asks the page for two things: a page turn and a pencil gesture.** The Mac's Page
+**The shell asks the page for three things: to go to an address, a page turn and a pencil
+gesture.** Going to an address is the oldest: a link opened from outside the app sets the page's
+own address (`location.hash`, in `native/Hifth/Web/ShellModel.swift`). The Mac's Page
 menu (Next Page ⌘←, Previous Page ⌘→) calls `ShellModel.stepPage`, which runs the page's own
 turn lent under `window.__HIFTH_PAGE__` (`exposeToShell` in `apps/web/src/native-bridge.ts`,
 in-shell only). On the iPad, a double-tap or squeeze of the pencil goes the same way:

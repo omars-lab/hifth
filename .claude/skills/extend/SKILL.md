@@ -131,7 +131,8 @@ The English words are part of the start-up download, which has its own size limi
   `gh pr merge <branch> --repo omars-lab/hifth --merge --delete-branch`.
 - **Then tidy, in the same step:** in the working copy, `git fetch -q origin`, start the next
   branch with `git switch -c <next> origin/main` and delete the merged one; bring the main
-  checkout up with `git -C <main checkout> merge --ff-only origin/main`.
+  checkout up with `git -C <main checkout> merge --ff-only origin/main`. Then
+  `make -C <working copy> board`, so the project board on GitHub matches the backlog.
 - **One pull request per finished feature.** Small fixes and doc changes ride on the next
   feature's branch, one commit per task. A merge that changes only Markdown or the agent
   folder publishes nothing.
