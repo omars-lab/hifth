@@ -229,6 +229,7 @@ Same rule in each: they index, they do not restate.
 | `docs/validation/ledger.json` | what can only a human check? | `make validate` |
 | `docs/artifacts.json` | what have we published, and can anyone still see it? | `pnpm artifacts` |
 | the `Intent-` lines at the end of each commit message | which task, use case, feature and plan was this change for? | `intent start` · `make commit-labels` |
+| `.intent/asks.jsonl` (no words in it; what was typed stays on the laptop) | what did the owner ask for, at what level, and what did it turn into? | `make intent` · the plugin's `sort-asks` skill |
 
 `docs/map.json` and every other JSON register is **hand-edited, never generated**.
 
