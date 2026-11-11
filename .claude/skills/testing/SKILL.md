@@ -149,7 +149,8 @@ app is wrong before touching either.** Three steps, each a few minutes:
    stays wrong, which a reader would see.
 3. For an app fault, have the code write down what it saw each time it ran (a list on
    `window`, printed in the test's failure message), read one failing run, then take the
-   record out.
+   record out. The browser tests serve the built app, so run `make -s build` after each
+   change to the app's code, or the record never shows up.
 
 The page-edge strip was found this way on 2026-11-11
 (`docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md`).

@@ -36,7 +36,13 @@ page's drawing back for three seconds but the first and waits for both strips to
 new one failed in Chrome and Firefox before the change. After it, both ran 25 times each in
 Firefox with no failure. The app's size did not change.
 
-## Left alone
+## Checked, and nothing to fix
 
-For those few milliseconds the left page itself has the right page's corners. Nobody can see
-that, so it was not chased.
+For a moment the left page itself carries the right page's side. If a frame were drawn in that
+moment the page would jump sideways. It was looked for on 2026-11-11: a page of the app that
+noted every drawn frame in which both pages said the same side found none, in eight loads
+across Chrome and Firefox. The side is put right before anything is drawn.
+
+The watcher was also counted, since it now never stops: six firings while the pages load, one
+during a forty-step drag of the edge, six over a turn, none on a tap. It does not run every
+frame.

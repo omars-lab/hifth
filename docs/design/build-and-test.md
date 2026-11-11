@@ -58,8 +58,10 @@ dev server's pages, and on a narrow window it covers a bottom row of icons
 ([app-pages.md](app-pages.md) ②). The comment tool is not ours to restyle from here; it comes
 from the owner's plugin collection.
 
-**Half done, 2026-11-11:** the run-app skill now says to press Hide before a phone-width
-look, or to use the preview, which never has the bar. So a session is no longer caught out.
+**Half done, 2026-11-11:** measured at 390 wide, the bar lies over the slider and all three
+page icons, and after Hide the small tab it leaves still lies over the last icon and the end
+of the slider. So the run-app skill now says to use the preview, which never has the bar, or
+to take the bar off the page for the look. A session is no longer caught out.
 
 **What would close it:** the bar moves, shrinks or folds at phone width, and remembers being
 hidden across a reload. Both are changes in the plugin.

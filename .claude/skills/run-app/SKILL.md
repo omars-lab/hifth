@@ -60,8 +60,10 @@ but confirm which, because "desktop UI" reads both ways.
 5. **At phone width the dev server's comment bar covers the bottom of the app.** The bar for
    leaving comments on a page sits in the bottom corner of every dev-server page, and on a
    narrow window it lies over the slider or a bottom row of icons, so a press there lands on
-   the bar. Press its **Hide** button first (a small Comments tab stays in the corner, and
-   Hide is forgotten on reload), or look at the preview, which never has the bar.
+   the bar. Its **Hide** button is not enough: the small Comments tab it leaves still lies
+   over the last icon of the row and the end of the slider (measured at 390 wide, 2026-11-11),
+   and Hide is forgotten on reload. Look at the preview, which never has the bar, or take the
+   bar off the page for the look: `document.getElementById("__page-comments")?.remove()`.
 
 ## Screenshotting the app when there is no browser window — `make drive`
 
