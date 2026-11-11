@@ -43,6 +43,8 @@ interface DesktopChromeProps {
    * drew a page landed at 155% smaller. A press steps from this when given.
    */
   zoomNow?: (() => number) | undefined;
+  /** In a column, for the settings drawer, rather than along the bar. */
+  stacked?: boolean;
 }
 
 /**
@@ -68,6 +70,7 @@ export function DesktopChrome({
   zoom,
   onZoom,
   zoomNow,
+  stacked,
 }: DesktopChromeProps): JSX.Element {
   const { t, lang, setLang } = useT();
   // The stepper works whether the book is open or closed: a spread magnifies
@@ -83,7 +86,7 @@ export function DesktopChrome({
   };
 
   return (
-    <div className={styles.extras}>
+    <div className={stacked ? `${styles.extras} ${styles.stacked}` : styles.extras}>
       {/*
        * One leaf or two — the control the whole desktop spread now hangs on.
        *

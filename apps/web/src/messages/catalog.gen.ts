@@ -508,6 +508,11 @@ export interface Catalog {
   readonly scrubSpeed: (d: { readonly speed: "half" | "quarter" | "tenth" | "other" }) => string;
   readonly selected: (d: { readonly label: string | number }) => string;
   readonly selectionCleared: string;
+  readonly settingsAtBar: string;
+  readonly settingsAtDrawer: string;
+  readonly settingsAtNote: string;
+  readonly settingsAtTitle: string;
+  readonly settingsDrawer: string;
   readonly shareApp: string;
   readonly shareAppAria: string;
   readonly shareAriaAyah: string;

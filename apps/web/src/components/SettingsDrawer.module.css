@@ -1,0 +1,55 @@
+/*
+ * SettingsDrawer — the reading settings dropped from under the top bar, at the
+ * bar's end where the button sits. Logical properties only, so the Arabic bar
+ * puts it at the left with nothing else changed.
+ */
+.at {
+  position: relative;
+  margin-inline-start: auto;
+}
+
+.open {
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-lg);
+  cursor: pointer;
+}
+
+.open:hover,
+.open[aria-expanded="true"] {
+  color: var(--accent-strong);
+  background: var(--accent-tint);
+}
+
+.open:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.drawer {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-3));
+  inset-inline-end: 0;
+  z-index: 40;
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding: var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.14);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+}

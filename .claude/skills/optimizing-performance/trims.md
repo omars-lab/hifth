@@ -14,6 +14,15 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Checked again 2026-11-10, sweep run, cap kept.** 198.4 KB against the 200 KB cap, after the
+reading settings behind one button (+1.5 KB). A fresh `make perf-sweep` gave 2553 ms with nothing
+added, 2443 ms with 25 KB and 50 KB added, and 2745 ms with 100 KB added. It was run with the dev
+server and a preview server also running, so the readings are noisy (adding code came out faster
+than adding none). They do not show the clear room the skill asks for before raising, so the cap
+stays at 200 KB. Before the next raise, rerun the sweep with nothing else running, or take one of
+the two candidates below. Only 1.6 KB of room is left, so the next feature over that size needs
+one or the other.
+
 **Checked again 2026-10-16, nothing taken.** 191.9 KB against the 200 KB cap, after the page
 beside a card landing at one size whichever came in first; about 54 KB of real room is left, so the
 two candidates below still wait.

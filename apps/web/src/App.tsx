@@ -254,6 +254,8 @@ import { savedZoomAnchor, verseToGrowFrom } from "./zoom-anchor";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberDrawerTools, savedDrawerTools, type DrawerTools } from "./drawer-tools";
 import { rememberToolHelp, savedToolHelp, type ToolHelp } from "./tool-help";
+import { rememberSettingsAt, savedSettingsAt, type SettingsAt } from "./settings-at";
+import { SettingsDrawer } from "./components/SettingsDrawer";
 import { rememberWordTap, savedWordTap, type WordTap } from "./word-tap";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { useRunFollow } from "./run-follow";
@@ -465,6 +467,15 @@ export function App(): JSX.Element {
   const chooseToolHelp = useCallback((choice: ToolHelp) => {
     rememberToolHelp(choice);
     setToolHelp(choice);
+  }, []);
+  // Where the reading settings sit: each in the bar, or behind one button in a
+  // drawer (ayah-drawer ①; a setting since 2026-11-10, the bar unless chosen).
+  const [settingsAt, setSettingsAt] = useState<SettingsAt>(() => savedSettingsAt());
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const chooseSettingsAt = useCallback((choice: SettingsAt) => {
+    rememberSettingsAt(choice);
+    setSettingsAt(choice);
+    setSettingsOpen(false);
   }, []);
   // Show the look-alikes in the drawer: fold whatever other tool is open there.
   const showLooksInDrawer = useCallback(() => {
@@ -4115,11 +4126,27 @@ export function App(): JSX.Element {
         {/* The skin switch sits in the chrome, next to the other always-on
             controls: it is a way of *reading* the page, not a per-selection
             action, and its beta badge has to be visible before it is used. */}
-        <SkinToggle
-          skin={skin}
-          onChange={setSkin}
-          onOpenLegend={() => setLegendOpen(true)}
-        />
+        {settingsAt === "drawer" ? (
+          // The same two controls, behind one button (ayah-drawer ①). Stacked,
+          // since a drawer is a column, not a row.
+          <SettingsDrawer open={settingsOpen} onOpen={setSettingsOpen}>
+            <SkinToggle skin={skin} onChange={setSkin} onOpenLegend={() => setLegendOpen(true)} />
+            <DesktopChrome
+              pageMode={pageMode}
+              onPageMode={handlePageMode}
+              zoom={zoom}
+              onZoom={handleZoom}
+              zoomNow={zoomNow}
+              stacked
+            />
+          </SettingsDrawer>
+        ) : (
+          <SkinToggle
+            skin={skin}
+            onChange={setSkin}
+            onOpenLegend={() => setLegendOpen(true)}
+          />
+        )}
         {/* The controls a phone had no room for — the language switch (buried in
             the colophon sheet because the header has seventeen pixels of slack
             at 320px) and the keyboard map (which a phone cannot reach at all).
@@ -4127,13 +4154,15 @@ export function App(): JSX.Element {
             `display: none` keeps it out of both the intrinsic width and the
             accessibility tree, which is what chrome-fit and the aria snapshots
             measure. See docs/decisions/desktop-vs-mobile.md rows 3 and 13. */}
-        <DesktopChrome
-          pageMode={pageMode}
-          onPageMode={handlePageMode}
-          zoom={zoom}
-          onZoom={handleZoom}
-          zoomNow={zoomNow}
-        />
+        {settingsAt === "bar" && (
+          <DesktopChrome
+            pageMode={pageMode}
+            onPageMode={handlePageMode}
+            zoom={zoom}
+            onZoom={handleZoom}
+            zoomNow={zoomNow}
+          />
+        )}
         {/* No install button here. There used to be one, and it was a ~126px
             text pill in a row that could not afford 126px on any phone — on
             Android, the one platform where it ever rendered, it was the single
@@ -4636,6 +4665,8 @@ export function App(): JSX.Element {
             onDrawerTools={chooseDrawerTools}
             toolHelp={toolHelp}
             onToolHelp={chooseToolHelp}
+            settingsAt={settingsAt}
+            onSettingsAt={chooseSettingsAt}
             wordTap={wordTap}
             onWordTap={chooseWordTap}
             runMark={runMark}

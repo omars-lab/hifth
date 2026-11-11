@@ -4,103 +4,71 @@
     "scripts/perf-report.mjs. startupMs is Lighthouse's time-to-interactive, median",
     "of `runs`, on the phone pinned in .lighthouserc.json. The goal is 2500."
   ],
-  "measuredAt": "2026-10-11T08:57:27.690Z",
+  "measuredAt": "2026-11-11T04:01:27.819Z",
   "goalMs": 2500,
   "points": [
     {
       "addedKb": 0,
-      "scriptGzKb": 118.4,
-      "appScriptGzKb": 118.4,
+      "scriptGzKb": 134.3,
+      "appScriptGzKb": 134.3,
       "runs": 5,
-      "startupMs": 2138,
-      "largestPaintMs": 2138,
+      "startupMs": 2553,
+      "largestPaintMs": 2553,
       "blockingMs": 0,
       "allStartupMs": [
-        2143,
-        2143,
-        2137,
-        2135,
-        2138
+        2557,
+        2553,
+        2553,
+        2147,
+        2301
       ]
     },
     {
       "addedKb": 25,
-      "scriptGzKb": 144.3,
-      "appScriptGzKb": 118.4,
+      "scriptGzKb": 159.6,
+      "appScriptGzKb": 134.3,
       "runs": 5,
-      "startupMs": 2287,
-      "largestPaintMs": 2287,
+      "startupMs": 2443,
+      "largestPaintMs": 2443,
       "blockingMs": 0,
       "allStartupMs": [
-        2287,
-        2288,
-        2286,
-        2287,
-        2287
+        2442,
+        2446,
+        2445,
+        2296,
+        2443
       ]
     },
     {
       "addedKb": 50,
-      "scriptGzKb": 169.3,
-      "appScriptGzKb": 118.4,
+      "scriptGzKb": 184.6,
+      "appScriptGzKb": 134.3,
       "runs": 5,
-      "startupMs": 2436,
-      "largestPaintMs": 2436,
+      "startupMs": 2443,
+      "largestPaintMs": 2443,
       "blockingMs": 0,
       "allStartupMs": [
-        2291,
-        2436,
-        2439,
-        2436,
-        2436
-      ]
-    },
-    {
-      "addedKb": 75,
-      "scriptGzKb": 194.3,
-      "appScriptGzKb": 118.4,
-      "runs": 5,
-      "startupMs": 2437,
-      "largestPaintMs": 2437,
-      "blockingMs": 0,
-      "allStartupMs": [
-        2438,
-        2437,
-        2437,
-        2435,
-        2436
+        2446,
+        2443,
+        2445,
+        2443,
+        2442
       ]
     },
     {
       "addedKb": 100,
-      "scriptGzKb": 219.3,
-      "appScriptGzKb": 118.4,
+      "scriptGzKb": 234.6,
+      "appScriptGzKb": 134.3,
       "runs": 5,
-      "startupMs": 2586,
-      "largestPaintMs": 2586,
+      "startupMs": 2745,
+      "largestPaintMs": 2745,
       "blockingMs": 0,
       "allStartupMs": [
-        2588,
-        2586,
-        2585,
-        2586,
-        2585
-      ]
-    },
-    {
-      "addedKb": 125,
-      "scriptGzKb": 244.2,
-      "appScriptGzKb": 118.4,
-      "runs": 5,
-      "startupMs": 2737,
-      "largestPaintMs": 2737,
-      "blockingMs": 0,
-      "allStartupMs": [
-        2738,
-        2736,
-        2737,
-        2738,
-        2735
+        2748,
+        2745,
+        2745,
+        3153,
+        2745
       ]
     }
   ]
