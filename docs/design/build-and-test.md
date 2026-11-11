@@ -51,8 +51,11 @@ dev server's pages, and on a narrow window it covers a bottom row of icons
 ([app-pages.md](app-pages.md) ②). The comment tool is not ours to restyle from here; it comes
 from the owner's plugin collection.
 
-**What would close it:** the bar moves, shrinks or folds at phone width (a change in the
-plugin), or our skills say to press Hide before a phone-width look.
+**Half done, 2026-11-11:** the run-app skill now says to press Hide before a phone-width
+look, or to use the preview, which never has the bar. So a session is no longer caught out.
+
+**What would close it:** the bar moves, shrinks or folds at phone width, and remembers being
+hidden across a reload. Both are changes in the plugin.
 
 ### ⑤ Do the skills say the three things that each cost a wrong turn? · **answered**
 

@@ -39,7 +39,7 @@ app either.
 If the ask is genuinely "open that design page", `open docs/design/<name>.html` —
 but confirm which, because "desktop UI" reads both ways.
 
-## Seeing a change — four ways a fix gets checked where it cannot fail
+## Seeing a change — five ways a fix gets checked where it cannot fail
 
 1. **A hash-only navigation is not a reload.** The app routes on `#/…`, so pointing
    the tab at a new `#` address keeps the old module graph running. After an edit,
@@ -57,6 +57,11 @@ but confirm which, because "desktop UI" reads both ways.
    saved copy. A change then looks as if it did not land. Clear it in the tab, then reload:
    `navigator.serviceWorker.getRegistrations().then((rs) => Promise.all(rs.map((r) => r.unregister()))).then(() => location.reload())`.
    The dev server (7122) saves nothing, so it never does this.
+5. **At phone width the dev server's comment bar covers the bottom of the app.** The bar for
+   leaving comments on a page sits in the bottom corner of every dev-server page, and on a
+   narrow window it lies over the slider or a bottom row of icons, so a press there lands on
+   the bar. Press its **Hide** button first (a small Comments tab stays in the corner, and
+   Hide is forgotten on reload), or look at the preview, which never has the bar.
 
 ## Screenshotting the app when there is no browser window — `make drive`
 

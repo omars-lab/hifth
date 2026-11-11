@@ -6009,7 +6009,7 @@
       "status": "open",
       "severity": "defect",
       "owner": "agent",
-      "note": "On the dev server at phone width the comment tool's bar covers a bottom row of icons until Hide is pressed (found 2026-11-11 while checking the developer page). The bar comes from the owner's plugin collection. Next step: move or fold the bar at phone width in the plugin, or say in our skills to press Hide before a phone-width look."
+      "note": "On the dev server at phone width the comment tool's bar lies over the bottom of the app, so a bottom row of icons cannot be pressed until the bar is hidden. Since 2026-11-11 the run-app skill says to press Hide first or use the preview, which never has the bar. Next step, in the owner's plugin collection and not here: the bar folds or moves at phone width, and remembers being hidden across a reload."
     },
     {
       "id": "skills-miss-three-known-wrong-turns",
