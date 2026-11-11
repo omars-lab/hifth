@@ -48,6 +48,12 @@ folded: no
 - intent-manager's `intent backfill merge`: a reader who agreed with a link a rule had already
   made had the answer dropped as a repeat, so four commits were handed out on every run. Only
   the run on real history showed it; the made-up test repo had no rule and reader agreeing.
+- intent-manager's `intent changelog` (1.5.0, before release): the first draft on this repo
+  listed one task under three headings, because where a change is filed was worked out per
+  commit. A task is now filed once, by its own row first. The made-up test repo had one commit
+  per task, so only the real run showed it.
+- `docs/issues.json`: 117 of the 127 open rows name no `useCase` and no `feature`, so
+  `intent roadmap` can only heap them. New rows should name one when they are written.
 
 ## Worth copying
 - intent-manager's `intent draw`, before release: the page was looked at in its rare states

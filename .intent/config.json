@@ -8,13 +8,18 @@
       "id": "id",
       "says": "note",
       "done": { "field": "status", "values": ["fixed", "answered", "confirmed"] },
-      "links": { "use-case": "useCase", "feature": "feature" }
+      "links": { "use-case": "useCase", "feature": "feature" },
+      "bands": {
+        "now": [{ "field": "next" }, { "field": "pitch" }],
+        "later": [{ "field": "status", "values": ["blocked"] }, { "field": "blockedBy" }]
+      }
     },
     "use-case": {
       "file": "docs/use-cases.json",
       "list": "useCases",
       "id": "id",
       "says": "goal",
+      "reader": { "field": "actor", "values": ["hafiz"] },
       "links": { "feature": "feature" }
     },
     "feature": { "file": "docs/map.json", "list": "features", "id": "id", "files": { "field": "entry", "key": "file" } },
