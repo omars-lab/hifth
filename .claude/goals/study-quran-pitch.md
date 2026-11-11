@@ -4,6 +4,9 @@
 we measure progress?" Status: **current goal**. Read this at the start of a session, before
 picking work. The list of all goals is [README.md](README.md).*
 
+*Name: `study-quran-pitch`. Plans that serve it: `open-work-2026-11`. Use cases it is measured
+by: the ones the six-passage walk covers, under "How we measure progress" below.*
+
 ## The goal
 
 **A demo good enough to show The Study Quran's team, so that they want to work with us.**

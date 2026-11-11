@@ -22,7 +22,8 @@ so it is not counted on. The cap went up by 10 KB, under half of the 25, which l
 the pencil rings, the pens page and the calendar. Two things to carry forward: start-up as built
 has crept from 2138 ms (2026-10-11) to 2306 ms, and the room is now thin enough that the next
 raise should not happen without a trim or a faster start first. The two candidates below still
-only move code between files.
+only move code between files, so they free no room; finding what does, and what slowed start-up,
+is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
 **Checked again 2026-11-10 (later), nothing taken.** 199.3 KB against the 200 KB cap, after
 the setting for showing which drawer sits on which (+0.9 KB). 0.7 KB of room is left. The two

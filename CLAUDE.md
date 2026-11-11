@@ -53,6 +53,12 @@ your head.
   tests use made-up text.
 - **Checks run on this laptop, before the push.** Hosted CI runs are scarce; only what cannot
   run here goes there.
+- **Few merges, detailed commits.** Each merge to main makes GitHub publish the site, which
+  uses paid minutes. So one pull request per finished feature; small fixes, doc changes and
+  leftovers ride on the next feature's branch. The detail lives in the commits: one per task,
+  each with its own label lines. Don't hold a finished feature back to batch it, and a fix
+  someone is waiting on still merges alone. A merge that only changes Markdown or the agent
+  folder publishes nothing, so it is free. (Owner, 2026-11-11.)
 - **Say what the branch is for before the first commit.** `intent start <backlog row's name>`
   once per branch; a hook then ends each commit message with the task, its use case, its
   feature and its plan. `intent status` shows what is set.
