@@ -2,11 +2,17 @@
 
 *This is a draft, written by `intent roadmap` on 2026-11-11. Running the command again writes over it.*
 
-127 open tasks: 6 now, 68 next, 53 later. 4 name a use case, 6 name only a part of the product, 117 are tied to nothing yet.
+127 open tasks: 6 now, 68 next, 53 later. 5 name a use case, 6 name only a part of the product, 116 are tied to nothing yet.
 
-123 of 127 open tasks name nobody they are for.
+122 of 127 open tasks name nobody they are for.
 
 ## Now
+
+### revise-with-no-network
+
+Open it in a masjid basement, on a plane, a week after I last used it, and have it just work.
+
+- **check-offline-survival**
 
 ### Part of the product: settings
 
@@ -20,9 +26,8 @@ The visual gate: highlight geometry the DOM cannot describe, pinned as images.
 
 - **word-drawer-stacks-on-verse**: Owner's page comment of 2026-11-07 asked whether a tap on a word opens a word drawer stacked on the verse drawer.
 
-### Tied to nothing yet (4)
+### Tied to nothing yet (3)
 
-- **check-offline-survival**
 - **pitch-first-passage-ready**: The next most important thing for the pitch (2026-11-09): none of the six chosen passages is demo-ready yet.
 - **pitch-commentary-differs-from-print**: Found walking the desktop pitch: 125 notes repeated a passage where the capture took a paragraph twice across a page break; joined in…
 - **drawer-holds-its-tools**: Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets.
