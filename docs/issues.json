@@ -6034,7 +6034,7 @@
       "owner": "agent",
       "feature": "performance",
       "closedBy": "scripts/gate-budget.test.mjs",
-      "note": "Start-up on a modelled slow phone went from about 2140 ms (2026-10-11) to about 2290 ms. Measured side by side on 2026-11-11: features added about 22 KB to what is downloaded at start-up, over nineteen merges, and start-up time goes up one 150 ms step at about 160 KB. Nothing at start-up got slower. The size check now also limits the start-up download to 185 KB, under the next step. Winning the 150 ms back is its own row."
+      "note": "Start-up on a modelled slow phone went from about 2140 ms (2026-10-11) to about 2290 ms. Measured side by side on 2026-11-11: features added about 22 KB to what is downloaded at start-up, over twenty-two merges, and start-up time goes up one 150 ms step at about 160 KB. Nothing at start-up got slower. The size check now also limits the start-up download to 185 KB, under the next step. Winning the 150 ms back is its own row."
     },
     {
       "id": "move-12-kb-out-of-startup",

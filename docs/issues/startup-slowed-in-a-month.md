@@ -55,6 +55,17 @@ both, in the same order.
 The step is between 10 and 15 KB, and 15 is right on the edge. That build's start-up download
 (main script, English words, style sheet) was 148 KB, so the step is near 160 KB.
 
+**The October build with 12 KB of padding in its style sheet instead**, beside the plain one,
+in turns:
+
+| build | readings (ms) |
+| --- | --- |
+| plain | 2149, 2554, 2141, 2141, 2142 |
+| style sheet padded | 2291, 2291, 2141, 2294, 2289 |
+
+It steps the same way. So it is the whole start-up download that counts, not the main script
+alone, and the step sits between 158 and 160 KB.
+
 **Today's build with padding:** 2292 ms at 0, 5, 10, 15 and 20 KB added (one stray 2703 in
 twenty-five runs). Today's start-up download is 171 KB, so the next step is past 190.
 
@@ -63,22 +74,21 @@ twenty-five runs). Today's start-up download is 171 KB, so the next step is past
 
 ## Which changes
 
-No single one. The size record changed in 24 merges between 2026-10-11 and 2026-11-11. The
-main script grew 18.5 KB and the English words 4.4 KB. The larger ones, by what each added to
-the main script:
+No single one. Between the two builds measured, 22 merges changed the size record. The main
+script grew 16.4 KB, the English words 3.9 KB and the style sheet 1.7 KB, which is the 22 KB.
+The larger ones, by what each added to the main script:
 
 | pull request | date | added |
 | --- | --- | --- |
 | #484 | 13 Oct | 1.6 KB |
 | #465 | 12 Oct | 1.4 KB |
-| #459 | 11 Oct | 1.4 KB |
 | #464 | 12 Oct | 1.1 KB |
 | #569 | 9 Nov | 1.1 KB |
 | #489 | 13 Oct | 1.1 KB |
 | #541 | 7 Nov | 1.0 KB |
 | #476 | 12 Oct | 1.0 KB |
 | #590 | 11 Nov | 0.9 KB |
-| eleven more | | 0.5 to 0.9 KB each |
+| the rest | | under 0.9 KB each |
 
 The history of `scripts/budget-baseline.json` has every one.
 
@@ -94,7 +104,7 @@ The history of `scripts/budget-baseline.json` has every one.
 
 ## What is not known
 
-- Where exactly the step is between 158 and 163 KB.
+- Where exactly the step is between 158 and 160 KB.
 - Why today's build never reads the slow value while October's does. In today's five runs the
   drawing was seen 6 to 20 thousandths of a second before the image was asked for, so it is
   steadier, but not by a wide margin, and the night of 10 November had one reading of five at

@@ -557,8 +557,11 @@ with every run, is in [issues/startup-slowed-in-a-month.md](issues/startup-slowe
 - **Today's build is one step up.** It downloads 170 KB at start-up where the October build
   downloaded 148, so it sits about 10 KB past that step. The October build with 25 KB of
   padding read 2287 ms; today's reads 2294.
-- **No single change did it.** Nineteen merges each added between 0.5 and 1.6 KB to the
-  start-up script, and the English words grew 4.4 KB.
+- **No single change did it.** Twenty-two merges changed the size, none adding more than
+  1.6 KB to the main script. In all it grew 16.4 KB, the English words 3.9 and the style
+  sheet 1.7.
+- **It is the whole start-up download that counts.** Padding the style sheet instead of the
+  main script crossed the same step.
 - **No extra work.** Measured side by side today, the two builds spend the same time running
   script at start-up (about 100 ms on the modelled phone) and neither has a long pause.
 - **The earlier note here was wrong twice.** It said the app grew about 10 KB (it was 22), and
@@ -580,7 +583,7 @@ comparing two times, because a time flips between groups and a size does not.
 ### ㉑ Moving about 12 KB out of start-up would make the app usable 150 ms sooner · **open**
 
 **Where it stands (2026-11-11).** The start-up download is 171 KB and the step down is near
-160 KB (somewhere between 158 and 163). So about 12 KB has to load later, not at start-up, and
+160 KB (somewhere between 158 and 160). So about 12 KB has to load later, not at start-up, and
 then stay out. The two candidates already on the trims list are the page-edge strips for the
 laptop (about 3 KB, which a phone never uses) and the zoom and edge-turn parts of the page
 stage (part of 15 KB). They do not lower the total the size cap counts, which is why they were
