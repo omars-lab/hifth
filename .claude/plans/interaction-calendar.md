@@ -2,6 +2,12 @@
 
 > "how do we add an interaction calendar per page, hizb, juz based on clicks on ayahs?"
 
+**Status (2026-11-11): built, and partly out of date.** The revision record and its calendar
+exist, with a by-day layout and mistakes per day added on 2026-11-11. Finding ① below is no
+longer true: the hizb boundaries are in our own data now (`HIZB_STARTS` and `hizbOf` in
+`packages/core/src/quran-meta.ts`). Read the rest as the reasoning of its day, and
+`.claude/plans/open-work-2026-11.md` item 4 for what was built since.
+
 Task #88. This plan was written after three attempts to delegate it to a planning
 subagent died in the harness; the research below was done directly against the code.
 

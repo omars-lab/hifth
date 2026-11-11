@@ -2286,12 +2286,12 @@
           "note": "The promise itself: usable within 2500 ms, median of 5 runs, on a pinned slow phone. When it and the cap disagree, this wins."
         },
         {
-          "file": "scripts/perf-sweep.mjs",
+          "file": ".claude/skills/optimizing-performance/scripts/perf-sweep.mjs",
           "symbol": "padding",
           "note": "Adds code that cannot be compressed to a copy of the built app and times start-up at each amount; writes docs/performance/sweep.json."
         },
         {
-          "file": "scripts/perf-report.mjs",
+          "file": ".claude/skills/optimizing-performance/scripts/perf-report.mjs",
           "symbol": "attribute",
           "note": "Draws growth over time, what takes up the room (from the source map), and the sweep, into docs/performance/bundle-report.html."
         }

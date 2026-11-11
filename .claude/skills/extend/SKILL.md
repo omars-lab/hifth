@@ -104,6 +104,39 @@ to read it as a newcomer would.
   takes the lock: `make lock L=build CMD="…"`. Protocol in
   `docs/PARALLEL-AGENTS.md`.
 
+## Adding a setting
+
+A feature built more than one way keeps the other ways as a setting, so this comes up often.
+Every setting follows one pattern; `apps/web/src/drawer-marks.ts` is a small one to copy.
+
+1. A small module of its own: the choices, the key it is saved under, and a `saved…()` and a
+   `remember…()` function.
+2. `App.tsx` keeps the choice in state, with a `choose…` callback.
+3. The info panel (`apps/web/src/components/Colophon.tsx`) shows it as a radio group.
+4. Its words go in `en.json`, `ar.json` and `i18n.tsx`, then `pnpm -s i18n:build`.
+5. A test that picks the other choice and sees the app change, and one that it is still
+   picked after a reload.
+
+The English words are part of the start-up download, which has its own size limit
+(`pnpm -s gate:budget` prints it).
+
+## Pushing and merging
+
+- **Push in the background, output to a log file.** The push runs every local check, about
+  13 minutes. Don't edit that working copy until it ends. Another working copy is fine: each
+  serves the app on its own port.
+- **A pull request shows no hosted checks**, so the green signal is that push's own run. Read
+  the end of the log before merging.
+- **Merge your own green pull request** (standing approval, this repo):
+  `gh pr merge <branch> --repo omars-lab/hifth --merge --delete-branch`.
+- **Then tidy, in the same step:** in the working copy, `git fetch -q origin`, start the next
+  branch with `git switch -c <next> origin/main` and delete the merged one; bring the main
+  checkout up with `git -C <main checkout> merge --ff-only origin/main`. Then
+  `make -C <working copy> board`, so the project board on GitHub matches the backlog.
+- **One pull request per finished feature.** Small fixes and doc changes ride on the next
+  feature's branch, one commit per task. A merge that changes only Markdown or the agent
+  folder publishes nothing.
+
 ## Where the other answers live
 
 | Question | Go to |

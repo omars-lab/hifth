@@ -135,9 +135,9 @@ each finding. It only reads files and the command's own output; it never builds 
 
 | command | does | file |
 | --- | --- | --- |
-| `make perf-report` | draws the charts into `docs/performance/bundle-report.html` | `scripts/perf-report.mjs` |
-| `make perf-sweep` | measures start-up at +0/+25/+50/+100 KB (`ADD=0,50` to choose) and writes `docs/performance/sweep.json` | `scripts/perf-sweep.mjs` |
-| `make perf-compare COPIES=old=<folder>,new=<folder> OUT=<file>` | measures built copies of the app in turns (`ROUNDS=5`), keeps every run and, with `KEEP=<folder>`, every full report. Use it to tell whether a change made start-up slower: build each side, copy `apps/web/dist` to a folder outside the repo, and compare the lower group of readings, not the middle, since one build can read two values 400 ms apart | `scripts/perf-sweep.mjs` |
+| `make perf-report` | draws the charts into `docs/performance/bundle-report.html` | `.claude/skills/optimizing-performance/scripts/perf-report.mjs` |
+| `make perf-sweep` | measures start-up at +0/+25/+50/+100 KB (`ADD=0,50` to choose) and writes `docs/performance/sweep.json` | `.claude/skills/optimizing-performance/scripts/perf-sweep.mjs` |
+| `make perf-compare COPIES=old=<folder>,new=<folder> OUT=<file>` | measures built copies of the app in turns (`ROUNDS=5`), keeps every run and, with `KEEP=<folder>`, every full report. Use it to tell whether a change made start-up slower: build each side, copy `apps/web/dist` to a folder outside the repo, and compare the lower group of readings, not the middle, since one build can read two values 400 ms apart | `.claude/skills/optimizing-performance/scripts/perf-sweep.mjs` |
 | `make lighthouse` | the start-up check itself | `.lighthouserc.json` |
 | `pnpm gate:budget` / `make budget-update` | the size cap / accept a new size | `scripts/gate-budget.mjs`, `scripts/budget-baseline.json` |
 

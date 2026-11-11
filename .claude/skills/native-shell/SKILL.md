@@ -68,9 +68,15 @@ Cold start puts the route into the first URL's fragment, so there is no race. A 
 arrives while running is queued until the page says `ready`, then applied. Quote any route
 with `?` or `&` on the make line.
 
-**The shell asks the page for one thing: a page turn.** The Mac's Page menu (Next Page ⌘←,
-Previous Page ⌘→) calls `ShellModel.stepPage`, which runs the page's own turn lent under
-`window.__HIFTH_PAGE__` (`exposeToShell` in `apps/web/src/native-bridge.ts`, in-shell only).
+**The shell asks the page for three things: to go to an address, a page turn and a pencil
+gesture.** Going to an address is the oldest: a link opened from outside the app sets the page's
+own address (`location.hash`, in `native/Hifth/Web/ShellModel.swift`). The Mac's Page
+menu (Next Page ⌘←, Previous Page ⌘→) calls `ShellModel.stepPage`, which runs the page's own
+turn lent under `window.__HIFTH_PAGE__` (`exposeToShell` in `apps/web/src/native-bridge.ts`,
+in-shell only). On the iPad, a double-tap or squeeze of the pencil goes the same way:
+`ShellModel.pencil` in `native/Hifth/Web/Pencil.swift` hands the page the gesture, the reader's
+own choice from the iPad's pencil settings and where the tip hovered, and
+`apps/web/src/pencil.ts` decides what it does.
 It cannot send a key: the web app drops any key held with ⌘, ctrl or alt on purpose. A press
 before `ready` is dropped. Everything the shell runs in the page goes through `model.runScript`,
 which the unit tests replace with a collector (`ShellMenuTests.swift`). After changing the web

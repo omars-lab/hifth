@@ -145,6 +145,15 @@ map. Each day shows verses, pages and juz opened, mistakes by kind and the pages
 each mistake opens its verse. Design: `docs/design/revision-record.md` ⑤, which stays open for the
 owner to say which layout the sheet should favour. PR #592.
 
+### 2026-11-11 — startup-slowed-in-a-month: what made start-up about 150 ms slower
+
+**Done:** Start-up read about 2140 ms a month ago and about 2290 ms now. The October build and
+today's, measured side by side, do the same work at start-up; today's has about 22 KB more to
+download first, added a little at a time over nineteen merges. The size check now also limits the
+start-up download (185 KB; it stands at 171 KB) and prints it on every run. A new open item says
+what would win the 150 ms back. Account: `docs/issues/`, and item ⑳ of `docs/performance.md`.
+PR #595.
+
 ## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)
 
 **Done:** 2026-10-25. The recitation-with-a-note walk read no verse in Arabic; it now reads Arabic digits, and a test checks every walk script for the same slip. The short laptop window's first screen walked in both browsers at both sizes: two pages, feet in sight, Full screen past a small phone's page.

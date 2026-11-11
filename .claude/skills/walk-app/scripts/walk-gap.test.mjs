@@ -4,17 +4,17 @@
  * text but the menu items. Its Chromium runner sets the reader's choice of how
  * the next verse is made ready by the setting's own key, so the two must agree.
  *
- * Run with the other script tests: node --test scripts/
+ * Run with the other script tests: pnpm -s test:scripts
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const dir = new URL("../.claude/skills/walk-app/scripts/", import.meta.url);
+const dir = new URL("./", import.meta.url);
 const walk = readFileSync(new URL("gap-walk.js", dir), "utf8");
 const runner = readFileSync(new URL("gap-throttle.mjs", dir), "utf8");
-const setting = readFileSync(new URL("../apps/web/src/run-ahead.ts", import.meta.url), "utf8");
+const setting = readFileSync(new URL("../../../../apps/web/src/run-ahead.ts", import.meta.url), "utf8");
 
 test("the gap walk compiles as one program for the probe", () => {
   assert.doesNotThrow(() => new vm.Script(walk));

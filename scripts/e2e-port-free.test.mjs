@@ -25,13 +25,48 @@ const hold = (host) =>
     s.listen(0, host, () => done(s));
   });
 
-/** A port nothing holds: open one, note its number, close it. */
-async function freePort() {
-  const s = await hold("127.0.0.1");
-  const { port } = s.address();
-  await new Promise((r) => s.close(r));
-  return port;
+/** A server on one named port, or null when something else already holds it. */
+const holdPort = (port) =>
+  new Promise((done) => {
+    const s = createServer();
+    s.once("error", () => done(null));
+    s.listen(port, "127.0.0.1", () => done(s));
+  });
+
+/**
+ * A port nothing holds, whose partner 1000 up nothing holds either: the script
+ * looks at both. Open the pair, note the number, close them. On a laptop with
+ * many servers running, a stranger's server sat on the partner port and failed
+ * the first test below (2026-11-11), so the pair is tried until both open.
+ *
+ * The port is picked here, between 20000 and 40000, not by the system: the
+ * system hands out ports near the top of the range, where 1000 up does not
+ * exist (the first version of this did that and found no pair in 50 tries).
+ */
+async function freePort(open = holdPort) {
+  for (let tries = 0; tries < 50; tries++) {
+    const port = 20000 + Math.floor(Math.random() * 20000);
+    const s = await open(port);
+    if (!s) continue;
+    const partner = await open(port + 1000);
+    await new Promise((r) => s.close(r));
+    if (!partner) continue;
+    await new Promise((r) => partner.close(r));
+    return port;
+  }
+  throw new Error("no pair of free ports found in 50 tries");
 }
+
+test("the free port's partner 1000 up is free too, even when the first one tried is taken", async () => {
+  // A stand-in for a stranger's server: the first partner asked for is refused.
+  let asked = 0;
+  const port = await freePort((p) => (++asked === 2 ? Promise.resolve(null) : holdPort(p)));
+  assert.equal(asked, 4, "it tried a second pair after the taken partner");
+  assert.ok(port >= 20000 && port + 1000 < 65536, `port ${port}`);
+  const partner = await holdPort(port + 1000);
+  assert.ok(partner, `port ${port + 1000} should be free`);
+  await new Promise((r) => partner.close(r));
+});
 
 /** Run the script told to look at `port` (and so port + 1000 for the pitch build). */
 const run = (port, env = {}) =>

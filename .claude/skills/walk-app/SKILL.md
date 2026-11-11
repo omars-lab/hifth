@@ -16,7 +16,7 @@ the public site). **How long:** a full walk is an hour or two; a walk of one are
 3. Off the checklist too: use the app as a scholar would for ten minutes per flavour. The list only
    knows the faults already found.
 4. Each fault: write it down, then fix it worst first (the loop below).
-5. End by moving finished tasks to `docs/tasks/done.md` and saying what is still open.
+5. End by moving finished tasks to `docs/tasks/done.md`, each entry led by its backlog row's name so it can be tied to its commits, and saying what is still open.
 
 ```mermaid
 flowchart LR
@@ -71,6 +71,7 @@ seconds. Run it before the slower iPad walk; it is not a substitute for it.
 | script | what it does | reach for it when | command |
 | --- | --- | --- | --- |
 | `make drive` (apps/web/e2e/tools/drive.mjs) | opens the running app at a link in a named device, does steps (tap, hold, drag, press, eval), saves a picture | every checklist line; a `setPointerCapture` page error in its log comes from a walk script's own made-up finger, not the app | `make drive HASH='#/hafs-kfqc/2:255' DEVICE=phone SEEN_COACH=1 ACT='tap=[data-verse-key="quran/hafs-kfqc/2:255"]; settle=600' OUT=test-results/walk/phone-255.png` |
+| `scripts/walk-*.test.mjs` | six tests of the walk scripts below, kept beside them: each script still finds its buttons by the names the app gives them in both languages, reads verse numbers in either digits, and compiles as one program | after changing a walk script, or a button's name in the app; the commit check runs them too | `pnpm -s test:scripts`, or one alone: `node --test .claude/skills/walk-app/scripts/walk-names.test.mjs` |
 | `make pitch-e2e` | runs the pitch suite, where most walk faults' tests live; the push check runs it too whenever the private notes are on the machine | after a pitch fix, before pushing | `make pitch-e2e` |
 | `make pitch-walk` (scripts/pitch-walk.mjs, its steps in scripts/pitch-walk-steps.mjs) | walks the pitch demo in the real iPad app on its side, in one start of the app: builds the private bundle in, hands the app the list of steps, and the app opens each step's link fresh, asks the same questions as the browser's one-test-per-step suite, and keeps a picture and an answer per step in a dated folder under `native/shots/`; prints one line per step and "N of M steps pass"; steps 2 and 14 are walked by hand; counts, boxes and yes or no only | before showing the pitch, after a fix on the demo path, and to set the iPad number on the goal page; look at the pictures yourself, never commit them (they show the book's text); when a step changes in the browser suite, change it in the steps file too | `make pitch-walk` (or `STEP=3,4`, `NO_BUILD=1`) |
 | `make app-shot` | a picture of the real Mac or iPad app at a route | the native-shell flavours | `make app-shot ROUTE=/hafs-kfqc/p45 TARGET=ipad` |
@@ -111,7 +112,7 @@ close a pen's question. Close the panel with its own close button, as
 `scripts/app-pages-walk.js` does (`header button` inside the panel).
 
 The walk scripts find buttons by their names, so a button renamed in the messages leaves a walk
-searching for the old name; `node --test scripts/walk-names.test.mjs` checks each search against
+searching for the old name; `node --test .claude/skills/walk-app/scripts/walk-names.test.mjs` checks each search against
 the message it means, and a new search for a named button gets a row there. Where the app puts
 the words a button shows in front of its name (the app's name in the corner), the row names
 those words too, so the test checks the name the app really builds.
@@ -128,7 +129,7 @@ Each fault gets, in the same change as its fix:
   numbered, its heading a question a stranger could answer, marked **open** or **fixed**);
 - **a row** in `docs/issues.json` with its `closedBy` test, then `make -s tasks-doc issues-doc` and
   `pnpm gate:issues`;
-- **a task** while it is open, moved to `docs/tasks/done.md` when merged;
+- **a task** while it is open, moved to `docs/tasks/done.md` when merged, led by its backlog row's name;
 - **a test written first and watched failing** — a Playwright test when a reader would see it;
 - **a line in [checklist.md](checklist.md)** under its surface, naming the flavours and the issue.
   If the fault is a new *kind* (a new surface, a new flavour), add the heading or the flavour too.

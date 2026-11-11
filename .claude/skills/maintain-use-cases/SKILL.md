@@ -50,7 +50,9 @@ the proof each claim rests on, which the code does not.
 2. Write `goal` in the actor's voice, first person, as the thing they want —
    not the mechanism. *"Show me the ayahs I keep confusing this one with"*, not
    *"render the hop rail"*. The mechanism is `code`; the map has the rest.
-3. `feature` — the `docs/map.json` id where someone would change it.
+3. `feature` — the `docs/map.json` id where someone would change it. A backlog row for
+   work on this promise names it in its `useCase` field; that is how a commit made after
+   `intent start <row>` says what it was for.
 4. `code[]` — two or three `{file, symbol}`. Symbols, never line numbers.
 5. `proof[]` — the test that would fail if this broke. If the honest answer is
    "nothing end to end", write the thin proof you do have **and** a `gap`

@@ -6,16 +6,16 @@
  * makes for a named button is checked here against the message it means, in
  * English and in Arabic.
  *
- * Run with the other script tests: node --test scripts/
+ * Run with the other script tests: pnpm -s test:scripts
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { spokenName } from "../apps/web/src/spoken-name.ts";
+import { spokenName } from "../../../../apps/web/src/spoken-name.ts";
 
-const dir = new URL("../.claude/skills/walk-app/scripts/", import.meta.url);
+const dir = new URL("./", import.meta.url);
 const messages = (lang) =>
-  JSON.parse(readFileSync(new URL(`../apps/web/src/messages/${lang}.json`, import.meta.url), "utf8"));
+  JSON.parse(readFileSync(new URL(`../../../../apps/web/src/messages/${lang}.json`, import.meta.url), "utf8"));
 const en = messages("en");
 const ar = messages("ar");
 // The mark the app puts between the words a button shows and the rest of its name (lang.ts).

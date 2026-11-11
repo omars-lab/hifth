@@ -5,14 +5,21 @@
  * Arabic it reads no verse at all, or takes a link back to its own start for a
  * new one (the thread walk, found 2026-10-25).
  *
- * Run with the other script tests: node --test scripts/
+ * Run with the other script tests: pnpm -s test:scripts
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 
-const dir = new URL("../.claude/skills/walk-app/scripts/", import.meta.url);
-const scripts = readdirSync(dir).filter((f) => /\.(m?js)$/.test(f));
+// The tests live beside the walk scripts they check, and are not walk scripts
+// themselves: this one names the very pattern it looks for.
+const dir = new URL("./", import.meta.url);
+const scripts = readdirSync(dir).filter((f) => /\.(m?js)$/.test(f) && !/\.test\.mjs$/.test(f));
+
+test("the tests beside the walk scripts are not read as walk scripts", () => {
+  assert.ok(scripts.length > 10, `only ${scripts.length} walk scripts found`);
+  assert.deepEqual(scripts.filter((f) => f.includes(".test.")), []);
+});
 
 test("every walk script reads a verse from a spoken name in either digits", () => {
   const bad = [];
