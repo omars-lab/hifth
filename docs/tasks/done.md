@@ -94,6 +94,13 @@ highlighter's colours in an outer ring. The row that was there before stays as a
 **Done:** Settings has a button, "See what each pen does". Its page says how to open the pens,
 shows them working in the layout the reader chose, and gives one line per pen. PR #591.
 
+### 2026-11-11 — skills-miss-three-known-wrong-turns: three wrong turns written into the skills
+
+**Done:** The run-app skill says the preview keeps the old build after a rebuild and gives the
+line that clears it. The walk-app skill says a made-up Escape does not close the info panel.
+The speed skill names the setting that switches the speed probe on for the laptop's dev
+server. Design: `docs/design/build-and-test.md` ⑤.
+
 ### 2026-11-11 — browser-test-skipped-unnoticed: a new browser test cannot miss a run unseen
 
 **Done:** A checked-in record says which runs pick up each browser test file. A check before

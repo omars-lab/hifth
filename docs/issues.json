@@ -6017,10 +6017,10 @@
         "file": "docs/design/build-and-test.md",
         "item": "⑤"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "defect",
       "owner": "agent",
-      "note": "Three things each cost a wrong turn and are written only in session notes: the local preview serving the old build until its saved copy is cleared, a made-up Escape not closing the info panel in a walk script, and the speed probe's dev-server setting that no command or skill names. Next step: one line each in the skill a session would be reading at the time."
+      "note": "Answered 2026-11-11: each of the three now has a line in the skill a session would be reading at the time: the preview serving the old build until its saved copy is cleared (run-app, with the line that clears it), a made-up Escape not closing the info panel in a walk script (walk-app), and the setting that switches the speed probe on for the laptop's dev server (optimizing-performance)."
     },
     {
       "id": "startup-slowed-in-a-month",

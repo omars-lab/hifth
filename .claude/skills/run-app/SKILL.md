@@ -39,7 +39,7 @@ app either.
 If the ask is genuinely "open that design page", `open docs/design/<name>.html` —
 but confirm which, because "desktop UI" reads both ways.
 
-## Seeing a change — three ways a fix gets checked where it cannot fail
+## Seeing a change — four ways a fix gets checked where it cannot fail
 
 1. **A hash-only navigation is not a reload.** The app routes on `#/…`, so pointing
    the tab at a new `#` address keeps the old module graph running. After an edit,
@@ -52,6 +52,11 @@ but confirm which, because "desktop UI" reads both ways.
    ship a fix for the built app that only the dev server needed.
 3. **e2e runs the build.** `pnpm --filter @hifth/web build` first, and free 4173, the tests' own port in the main checkout,
    (`lsof -ti:4173 | xargs kill`) or Playwright refuses to start its own.
+4. **The preview keeps the old build after a rebuild.** The built app saves itself in the
+   browser so it works offline, and a tab that has opened it once goes on being served that
+   saved copy. A change then looks as if it did not land. Clear it in the tab, then reload:
+   `navigator.serviceWorker.getRegistrations().then((rs) => Promise.all(rs.map((r) => r.unregister()))).then(() => location.reload())`.
+   The dev server (7122) saves nothing, so it never does this.
 
 ## Screenshotting the app when there is no browser window — `make drive`
 

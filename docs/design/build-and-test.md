@@ -54,16 +54,14 @@ from the owner's plugin collection.
 **What would close it:** the bar moves, shrinks or folds at phone width (a change in the
 plugin), or our skills say to press Hide before a phone-width look.
 
-### ⑤ Do the skills say the three things that each cost a wrong turn? · **open**
+### ⑤ Do the skills say the three things that each cost a wrong turn? · **answered**
 
-No. Each is known now and written only in a session note:
+Yes, since 2026-11-11. Each has a line in the skill a session would be reading at the time:
 
 - The local preview keeps serving the old build after a rebuild until its saved copy is
-  cleared, so a change looks like it did not land.
+  cleared, so a change looks like it did not land. Now in the run-app skill, with the line
+  that clears it.
 - In a walk script, a made-up Escape key does not close the info panel. Its own close button
-  does.
-- The speed probe is switched on for the laptop's dev server with a setting no command or
-  skill names; the only named command builds it for a phone.
-
-**What would close it:** one line each in the skill a session would be reading at the time
-(running the app, walking the app, measuring speed).
+  does. Now in the walk-app skill.
+- The speed probe is switched on for the laptop's dev server with a setting no command named;
+  the only named command builds it for a phone. Now in the optimizing-performance skill.
