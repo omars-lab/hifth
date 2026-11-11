@@ -430,7 +430,7 @@ no pen on the tip itself, the highlighter's eight pens in the outer ring.
 stays the default. Only a real pencil answers it; the check is on
 [the iPad walk](../ipad-walk.md).
 
-### ③ How does a reader with no pencil find out what the pens are? · **open**
+### ③ How does a reader with no pencil find out what the pens are? · **answered**
 
 **Asked by the owner, 2026-11-10:** a page among the settings that draws the pens a reader
 would see at the pencil's tip and explains each button.
@@ -442,3 +442,31 @@ learns what is there. The page shows it to everyone, on a laptop too.
 **What would answer it:** the page built with the same working pens the iPad opens, one plain
 line beside each, and how to open them for real at the top. What to build and how to test it:
 [the open-work list, item 3b](../../.claude/plans/open-work-2026-11.md).
+
+**Built 2026-11-11.** The info panel has a button, "See what each pen does", on every device.
+It opens a page inside the panel, with Back (or Escape) to return. The page says first how to
+open the pens for real: a squeeze or a double-tap, and the iPad setting that decides what each
+does. Then it stands the same pens the iPad opens, in the layout the reader picked (rings or a
+row), and they work: pressing the highlighter brings out its eight pens, and the Mark button its
+three aims. They are for trying only. Nothing lands on the mus'haf page, and the reader's own
+tool and pen colours stay as they were. Under the pens, a box names the pen just pressed and
+what it does; under that is a list of every pen with one line on what it does and when a hafiz
+would reach for it.
+
+What a pen does is the same line its hover label and the toolbar's help line say, from one
+list, so the three cannot disagree. Building it showed two pens had no such line: Select and
+Highlight only said "Select tool" and "Highlight tool". They now say what they do, on the
+toolbar too.
+
+Tests: `apps/web/e2e/pen-guide.spec.ts`, seen failing first, in Chrome, Firefox, Safari's engine
+and at two phone sizes, with both layouts. The iPad was checked in the real iPad app in the
+simulator the same day (the walk-app skill's pens-page walk): rings on its side in English, the
+row upright in Arabic and on its side in English. Each time: eight tools, sixteen pens with the
+highlighter on, none cut off, the reader's page and settings untouched, and Back returning to
+the button that opened the page.
+
+**Not built, on purpose:** a right-click on a computer opening the pens where the pointer is.
+The page already shows a laptop reader every pen, and the toolbar holds the same tools there.
+
+**Still open:** whether the lines on how to open the pens match what a real pencil does on the
+owner's iPad. The check is on [the iPad walk](../ipad-walk.md).

@@ -117,6 +117,8 @@ are at the top of the trims list in the optimizing-performance skill).
   - The arrow keys go round the ring.
   - On a computer, a right-click could open the pens where the pointer is. Nothing in the
     app uses right-click today. But item 3b may make this unnecessary, so decide after 3b.
+    Decided 2026-11-11, after 3b: not built. The pens' page shows a laptop reader every pen,
+    and the toolbar holds the same tools there.
 - **Tests:**
   - `apps/web/e2e/pencil.spec.ts` and `pen-homes.spec.ts` must pass with both layouts;
   - new tests: the inner ring, the outer ring opening for the highlighter and for Mark, and
@@ -156,6 +158,10 @@ are at the top of the trims list in the optimizing-performance skill).
   - it checks that nothing landed on the mushaf page;
   - it runs again with the row layout picked;
   - seen failing first.
+- **Done 2026-11-11.** `apps/web/src/components/PenGuide.tsx`, opened from the info panel;
+  tests in `apps/web/e2e/pen-guide.spec.ts`; the write-up is in
+  `docs/design/pencil-gestures.md`, ③. The highlighter shows eight pens there, not four
+  (four for a passage, four for held words), as at the tip.
 
 ## 4 · A calendar of each day's work (owner, 2026-11-10)
 

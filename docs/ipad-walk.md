@@ -42,6 +42,7 @@ Each is parked on the by-hand list because the simulator cannot show it. Do any 
 - [ ] **Keep a long surah on ordinary Wi-Fi** (Wi-Fi back on for this one). Hold Al-Baqarah's name at the top of the page and keep its recitation, about 131 MB. Right: the count keeps moving, Stop stops it, and once done it plays with Wi-Fi off.
 - [ ] **Apple Pencil double-tap and squeeze**, if a pencil is at hand. Try each pencil setting in the iPad's Settings → Apple Pencil. Right: the tool palette setting opens Hifth's pens; eraser or last-tool swaps between the last pen and plain selecting; nothing on the page is lost.
 - [ ] **The pens as rings round the pencil's tip**, if a pencil is at hand. Squeeze over a verse in the middle of the page, then near each edge. Pick the highlighter and one of its pens from the outer ring. Right: your hand covers no pen you need, every pen is on the screen, and a touch in the middle of the ring puts the pens away. Then open the info panel, choose "A row" under "The pens at the pencil's tip", and do the same. Say which should be the default.
+- [ ] **The page that explains the pens.** Open the info panel and press "See what each pen does". Read "Opening the pens" at its top, then do what it says with a real pencil, if one is at hand. Right: a squeeze and a double-tap do what the page says under each iPad setting, the pens on the page look like the ones at the tip, and each pen's line says what you would expect of it.
 
 ## Two drawer settings waiting for your choice
 

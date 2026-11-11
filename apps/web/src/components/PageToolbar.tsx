@@ -121,11 +121,14 @@ export function AimPicker({
   aim,
   onAim,
   spots,
+  explained,
 }: {
   aim: MarkAim;
   onAim: (aim: MarkAim) => void;
   /** Where each of the three stands, when a home places them itself (the rings at the pencil's tip). */
   spots?: readonly React.CSSProperties[] | undefined;
+  /** The id of the line that explains each of the three, where a page has them (PenGuide.tsx). */
+  explained?: ((aim: MarkAim) => string) | undefined;
 }): JSX.Element {
   const { t } = useT();
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
@@ -154,6 +157,7 @@ export function AimPicker({
           className={aimStyles.aim}
           aria-checked={aim === x}
           aria-label={toolName(t, x)}
+          aria-describedby={explained?.(x)}
           title={toolName(t, x)}
           tabIndex={aim === x ? 0 : -1}
           data-aim={x}
@@ -338,6 +342,10 @@ export function toolHint(t: ReturnType<typeof useT>["t"], x: PageTool, touch: bo
   // A finger is told to tap, a mouse to click: the bar said tap at a desk.
   return x === "read"
     ? touch ? t.toolReadHint : t.toolReadHintClick
+    : x === "select"
+    ? touch ? t.toolSelectHint : t.toolSelectHintClick
+    : x === "highlight"
+    ? t.toolHighlightHint
     : x === "bookmark"
     ? touch ? t.toolBookmarkHint : t.toolBookmarkHintClick
     : x === "note"

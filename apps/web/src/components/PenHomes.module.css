@@ -142,6 +142,25 @@
     var(--paper-raised, var(--paper));
 }
 
+/* The same pens standing in a page, for the page that explains them
+   (PenGuide.tsx): in the page's own flow, not over it. */
+.ringsHere {
+  composes: rings;
+  position: relative;
+  z-index: auto;
+  left: auto;
+  top: auto;
+  flex: none;
+}
+
+.rowHere {
+  composes: card;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-inline-size: 100%;
+  box-shadow: none;
+}
+
 .grip {
   display: inline-grid;
   place-items: center;

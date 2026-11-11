@@ -5931,12 +5931,13 @@
         "file": "docs/design/pencil-gestures.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
+      "closedBy": "apps/web/e2e/pen-guide.spec.ts",
       "useCase": "pick-a-pen-without-leaving-the-verse",
       "feature": "settings",
-      "note": "Owner, 2026-11-10: a page among the settings that draws the working pens a reader would see at the pencil's tip and explains each button, so a reader with no pencil, or on a laptop, can see what is there. Comes after the rings. What to build and how to test it: .claude/plans/open-work-2026-11.md, item 3b."
+      "note": "Owner, 2026-11-10: a page among the settings that draws the working pens a reader would see at the pencil's tip and explains each button, so a reader with no pencil, or on a laptop, can see what is there. Built 2026-11-11: the info panel's \"See what each pen does\" opens a page with how to open the pens for real, the same working pens in the reader's layout (for trying only: nothing lands on the page or is remembered), and one line per pen on what it does and when to reach for it. Select and Highlight gained a line of their own, on the toolbar too. Left for the owner: whether the how-to-open lines match a real pencil, on docs/ipad-walk.md."
     },
     {
       "id": "calendar-of-each-days-work",

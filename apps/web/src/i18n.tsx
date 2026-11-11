@@ -961,6 +961,33 @@ export interface Strings {
   tipPensRings: string;
   tipPensRow: string;
   tipPensNote: string;
+  /* The page that explains the pencil's pens (PenGuide.tsx). */
+  toolSelectHint: string;
+  toolSelectHintClick: string;
+  toolHighlightHint: string;
+  penGuideSection: string;
+  penGuideOpen: string;
+  penGuideNote: string;
+  penGuideBack: string;
+  penGuideHowTitle: string;
+  penGuideHowSqueeze: string;
+  penGuideHowDoubleTap: string;
+  penGuideHowSettings: string;
+  penGuideTryTitle: string;
+  penGuideTry: string;
+  penGuideListTitle: string;
+  penGuideWhenRead: string;
+  penGuideWhenSelect: string;
+  penGuideWhenHighlight: string;
+  penGuideWhenBookmark: string;
+  penGuideWhenNote: string;
+  penGuideWhenSign: string;
+  penGuideWhenWord: string;
+  penGuideWhenMistake: string;
+  penGuideWhenCrop: string;
+  penGuideWhenJump: string;
+  penGuidePens: string;
+  penGuideWordPens: string;
   penSideTitle: string;
   penSideRight: string;
   penSideLeft: string;
@@ -1832,6 +1859,32 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     tipPensRings: m.tipPensRings,
     tipPensRow: m.tipPensRow,
     tipPensNote: m.tipPensNote,
+    toolSelectHint: m.toolSelectHint,
+    toolSelectHintClick: m.toolSelectHintClick,
+    toolHighlightHint: m.toolHighlightHint,
+    penGuideSection: m.penGuideSection,
+    penGuideOpen: m.penGuideOpen,
+    penGuideNote: m.penGuideNote,
+    penGuideBack: m.penGuideBack,
+    penGuideHowTitle: m.penGuideHowTitle,
+    penGuideHowSqueeze: m.penGuideHowSqueeze,
+    penGuideHowDoubleTap: m.penGuideHowDoubleTap,
+    penGuideHowSettings: m.penGuideHowSettings,
+    penGuideTryTitle: m.penGuideTryTitle,
+    penGuideTry: m.penGuideTry,
+    penGuideListTitle: m.penGuideListTitle,
+    penGuideWhenRead: m.penGuideWhenRead,
+    penGuideWhenSelect: m.penGuideWhenSelect,
+    penGuideWhenHighlight: m.penGuideWhenHighlight,
+    penGuideWhenBookmark: m.penGuideWhenBookmark,
+    penGuideWhenNote: m.penGuideWhenNote,
+    penGuideWhenSign: m.penGuideWhenSign,
+    penGuideWhenWord: m.penGuideWhenWord,
+    penGuideWhenMistake: m.penGuideWhenMistake,
+    penGuideWhenCrop: m.penGuideWhenCrop,
+    penGuideWhenJump: m.penGuideWhenJump,
+    penGuidePens: m.penGuidePens,
+    penGuideWordPens: m.penGuideWordPens,
     penSideTitle: m.penSideTitle,
     penSideRight: m.penSideRight,
     penSideLeft: m.penSideLeft,
