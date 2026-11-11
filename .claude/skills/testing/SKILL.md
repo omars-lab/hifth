@@ -138,6 +138,22 @@ make report    # opens the last run's traces, DOM snapshots, console, network,
                # and the three-way image diff for a golden failure
 ```
 
+**A test that fails now and then and passes on the retry: find out whether the test or the
+app is wrong before touching either.** Three steps, each a few minutes:
+
+1. Run only that test many times with no retries:
+   `pnpm exec playwright test e2e/<file> --project=desktop-firefox -g "<name>" --repeat-each 25 --retries 0`
+   (from `apps/web`). Now it fails on demand.
+2. Make the test keep looking (`expect(async () => { … }).toPass({ timeout: 10_000 })`). If it
+   now always passes, the test was looking too soon. If it still fails, the app is wrong and
+   stays wrong, which a reader would see.
+3. For an app fault, have the code write down what it saw each time it ran (a list on
+   `window`, printed in the test's failure message), read one failing run, then take the
+   record out.
+
+The page-edge strip was found this way on 2026-11-11
+(`docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md`).
+
 ## The golden pictures
 
 `golden` photographs one page per shot at phone size, and `ipad-golden` at iPad size. Only the

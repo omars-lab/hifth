@@ -5995,10 +5995,11 @@
         "file": "docs/design/build-and-test.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "defect",
       "owner": "agent",
-      "note": "The Firefox test of grabbing the page's edge fails now and then with no change to the code it tests, and each rerun of a push costs about 13 minutes. Next step: find what it waits on that is not always ready, fix the wait, run it twenty times clean."
+      "note": "Answered 2026-11-11: it was a fault in the app. The strip you grab to turn the page copies its rounded corners from the paper, and sometimes measured a moment before the left page had been told which side it was on, then stopped looking and kept a square corner. It now measures again whenever a page is added or changes side, which also fixes a strip staying square when a page draws more than two seconds late. Both tests ran 25 times each in Firefox with no failure (docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md).",
+      "closedBy": "apps/web/e2e/edge-peel.spec.ts"
     },
     {
       "id": "comment-bar-covers-bottom-row-on-phone-width",

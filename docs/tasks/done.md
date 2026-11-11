@@ -94,6 +94,14 @@ highlighter's colours in an outer ring. The row that was there before stays as a
 **Done:** Settings has a button, "See what each pen does". Its page says how to open the pens,
 shows them working in the layout the reader chose, and gives one line per pen. PR #591.
 
+### 2026-11-11 — edge-grab-firefox-test-fails-on-its-own: the page-edge strip keeps its rounded corners
+
+**Done:** The strip you grab to turn the page sometimes measured the paper before the left
+page knew which side it was on, and kept a square corner. It now measures again whenever a
+page is added or changes side. A page drawn more than two seconds late no longer keeps a
+square strip either. Two browser tests hold it, run 25 times each in Firefox. Design:
+`docs/design/build-and-test.md` ③; account: `docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md`.
+
 ### 2026-11-11 — skills-miss-three-known-wrong-turns: three wrong turns written into the skills
 
 **Done:** The run-app skill says the preview keeps the old build after a rebuild and gives the

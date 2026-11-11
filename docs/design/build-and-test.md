@@ -36,13 +36,20 @@ a way that read like a broken test.
 Tried for real: with a preview server left on the port, the push checks stopped at once with
 the message; with it stopped, they went on.
 
-### ③ Does the Firefox test of grabbing the page's edge fail on its own some of the time? · **open**
+### ③ Does the Firefox test of grabbing the page's edge fail on its own some of the time? · **answered**
 
-Yes, now and then, with no change to the code it tests. A push then has to be run again, which
-costs about 13 minutes.
+Not since 2026-11-11. It was a real fault in the app, not only an impatient test. The strip
+you grab copies its rounded corners from the paper, and it sometimes measured the paper a
+moment before the left page had been told it was the left page. It then kept the wrong, square
+corner until the next turn.
 
-**What would close it:** find what it waits on that is not always ready, fix the wait, and run
-it twenty times in a row clean.
+The strip now measures again whenever a page is added or changes side. That also fixed a
+second fault found on the way: a page whose drawing arrived more than two seconds late kept a
+square strip.
+
+Tried for real: the test and a new one for the late page ran 25 times each in Firefox with no
+failure. The full account is in
+[the issue note](../issues/edge-strip-measured-before-the-leaf-knew-its-side.md).
 
 ### ④ Can the bottom of the app be pressed on the dev server at phone width? · **open**
 

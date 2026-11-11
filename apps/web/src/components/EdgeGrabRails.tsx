@@ -357,21 +357,27 @@ export function EdgeGrabRails({
           : { top: p.top, h: p.h, look: p.look },
       );
     };
-    // The page drawings arrive a moment after the book, one side at a time:
-    // until both have, a side's paper cannot be found, so look again each
-    // frame for a little while (a single page alone stops after two seconds).
-    let tries = 0;
+    // The page drawings arrive a moment after the book, one side at a time,
+    // and on a slow connection that moment can be long. A leaf is also told
+    // which side it is on a moment after it is drawn, and until then it has
+    // the other side's corners. So measure again each time something is added
+    // to the book or a leaf changes side, at most once a frame. (This used to
+    // look each frame until both sides were found, for two seconds at most:
+    // a late page kept a square strip, and a strip measured before its leaf
+    // knew its side kept the wrong corners, both until the next turn.)
+    measure();
     let raf = 0;
-    const until = (): void => {
-      measure();
-      if (Object.keys(measurePaper(book).look).length < 2 && tries++ < 120) raf = requestAnimationFrame(until);
-    };
-    until();
+    const mo = new MutationObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
+    });
+    mo.observe(book, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-leaf", "data-live"] });
     const ro = new ResizeObserver(measure);
     ro.observe(book);
     for (const leaf of book.querySelectorAll("[data-leaf]")) ro.observe(leaf);
     return () => {
       ro.disconnect();
+      mo.disconnect();
       cancelAnimationFrame(raf);
     };
   }, [opening, driver]);
