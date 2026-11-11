@@ -2627,12 +2627,12 @@ export function App(): JSX.Element {
     const made = mistakeOn(next, a.page, a.key, a.word);
     if (made && mark !== null) next = pickMistakeSign(next, made.id, mark, now);
     commitNotes(next, name ? t.mistakeSignPicked(name) : t.mistakeMarked(t.ayahLabel(a.key) ?? a.key));
-    void recordLook({ key: a.key, page: a.page, slip: true });
+    void recordLook({ key: a.key, page: a.page, slip: true, ...(mark !== null ? { what: "sign" as const } : {}) });
   };
   // "Went into another verse…": no red on the word, which was read right;
   // the mistake is the turn, said the way a jump is, look-alikes first.
   const mistakeIntoAnother = (key: string, page: number, word: number, first: boolean) => {
-    if (first) void recordLook({ key, page, slip: true });
+    if (first) void recordLook({ key, page, slip: true, what: "verse" });
     askJumpFrom(key, heldVerseBox(key), "slip", word);
   };
   const answerAnother = () => {
@@ -4726,6 +4726,7 @@ export function App(): JSX.Element {
             page={page}
             onGoToPage={goToPage}
             openAt={revisionAt}
+          onGoToVerse={goToJumpFrom}
           >
             <BookmarkShelf
               bookmarks={bookmarks}

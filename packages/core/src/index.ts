@@ -520,9 +520,11 @@ export {
   scopesOf,
   slipsIn,
   type DayStamp,
+  type MistakeWhat,
   type RevisionEvent,
   type RevisionScope,
 } from "./revision.js";
+export { daysOf, type DayCount } from "./revision-days.js";
 
 // Open decisions, built as interchangeable components (the "felt, so built"
 // tenet). Each option is a real, self-contained strategy the decision page mounts

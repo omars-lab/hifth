@@ -266,3 +266,17 @@ export function rangeLabel(fromKey: string, toKey: string, lang: Lang): string |
   const span = `${ayahRef(fromKey, lang)}–${ayahRef(toKey, lang)}`;
   return name ? `${name}${LOCALES[lang].sep}${span}` : span;
 }
+
+/**
+ * The week as this language lays a calendar out: its first day (0 is Sunday) and
+ * the seven short day names from that day on. Saturday first in Arabic, Sunday
+ * first in English, said here and not asked of the browser, because Firefox
+ * does not answer that question. The names do come from the browser.
+ */
+export function weekOf(lang: Lang): { weekStart: number; weekdays: readonly string[] } {
+  const weekStart = LOCALES[lang].digits === "latin" ? 0 : 6;
+  const name = new Intl.DateTimeFormat(lang, { weekday: "short", timeZone: "UTC" });
+  // 2023-01-01 was a Sunday.
+  const weekdays = Array.from({ length: 7 }, (_, i) => name.format(Date.UTC(2023, 0, 1 + ((weekStart + i) % 7))));
+  return { weekStart, weekdays };
+}

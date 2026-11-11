@@ -50,6 +50,16 @@ describe("recordLook", () => {
     expect(event!.tz).toBe(-new Date(at("2026-03-09T12:00:00Z")).getTimezoneOffset());
   });
 
+  it("keeps what kind of mistake was marked, and only on a mistake", async () => {
+    await recordLook({ key: KEY, page: 7, slip: true, what: "sign" }, at("2026-03-09T12:00:00Z"));
+    await recordLook({ key: KEY, page: 7, slip: true }, at("2026-03-09T12:01:00Z"));
+    // A kind with no mistake means nothing, so it is not written.
+    await recordLook({ key: KEY, page: 7, what: "verse" }, at("2026-03-09T12:02:00Z"));
+    const { events } = await read();
+    expect(events.map((e) => e.what)).toEqual(["sign", undefined, undefined]);
+    expect(events.map((e) => e.slip)).toEqual([true, true, undefined]);
+  });
+
   it("records a passage as one look with both ends, not as one look per ayah", async () => {
     await recordLook(
       { key: "quran/hafs-kfqc/2:141", endKey: "quran/hafs-kfqc/2:142", page: 7 },

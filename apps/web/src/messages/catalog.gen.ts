@@ -103,6 +103,12 @@ export interface Catalog {
   readonly cropShare: string;
   readonly cropShared: string;
   readonly cropTitle: (d: { readonly page: string | number }) => string;
+  readonly dayKindVerse: string;
+  readonly dayNothing: (d: { readonly dayText: string | number }) => string;
+  readonly dayOpened: (d: { readonly dayText: string | number }) => string;
+  readonly dayOutside: (d: { readonly dayText: string | number }) => string;
+  readonly dayPick: string;
+  readonly daysNone: string;
   readonly designsLink: string;
   readonly devBuild: string;
   readonly devBuildNote: string;
@@ -277,6 +283,10 @@ export interface Catalog {
   readonly mapSince: (d: { readonly dayText: string | number }) => string;
   readonly mapSlips: string;
   readonly mapTitle: string;
+  readonly mapViewDays: string;
+  readonly mapViewGroup: string;
+  readonly mapViewMap: string;
+  readonly mapViewMonth: string;
   readonly mapWentTo: (d: { readonly label: string | number; readonly page: string | number }) => string;
   readonly markAimsLabel: string;
   readonly markNothingToRedo: string;
@@ -307,6 +317,8 @@ export interface Catalog {
   readonly mistakeTapTitle: string;
   readonly mistakeWholeWord: string;
   readonly mistakeWordPicked: string;
+  readonly monthEarlier: string;
+  readonly monthLater: string;
   readonly mushaf: string;
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
   readonly nextPage: string;
