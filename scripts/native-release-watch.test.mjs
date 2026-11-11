@@ -41,15 +41,18 @@ if (a.includes("launch") && stillLocked) {
   console.log("ERROR: The application failed to launch. Unable to launch com.bytesofpurpose.hifth because the device was not, or could not be, unlocked.");
   process.exit(1);
 } else if (a.includes("launch")) {
-  console.log("Launched application with com.bytesofpurpose.hifth bundle identifier.");
-  console.log("route=" + process.env.DEVICECTL_CHILD_HIFTH_ROUTE + " console=" + a.includes("--console"));
   const b = ${JSON.stringify(behaviour)};
-  if (b === "quits") process.exit(0);
-  if (b === "throws") console.log("*** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: 'made up'");
-  if (b === "crash-file") {
-    fs.writeFileSync(dir + "/store/Hifth-made-up.ips", ${JSON.stringify(CRASH)});
-    fs.writeFileSync(dir + "/list.json", JSON.stringify({ result: { files: [{ name: "Hifth-made-up.ips", metadata: { lastModDate: new Date(Date.now() + 1000).toISOString() } }] } }));
-  }
+  const open = () => {
+    console.log("Launched application with com.bytesofpurpose.hifth bundle identifier.");
+    console.log("route=" + process.env.DEVICECTL_CHILD_HIFTH_ROUTE + " console=" + a.includes("--console"));
+    if (b === "quits") process.exit(0);
+    if (b === "throws" || b === "slow-throws") console.log("*** Terminating app due to uncaught exception 'NSInternalInconsistencyException', reason: 'made up'");
+    if (b === "crash-file") {
+      fs.writeFileSync(dir + "/store/Hifth-made-up.ips", ${JSON.stringify(CRASH)});
+      fs.writeFileSync(dir + "/list.json", JSON.stringify({ result: { files: [{ name: "Hifth-made-up.ips", metadata: { lastModDate: new Date(Date.now() + 1000).toISOString() } }] } }));
+    }
+  };
+  if (b === "slow-throws") setTimeout(open, 3000); else open();
   setInterval(() => {}, 1000);
 } else if (a.includes("info")) fs.copyFileSync(dir + "/list.json", at("--json-output"));
 else if (a.includes("copy")) fs.copyFileSync(dir + "/store/" + at("--source"), at("--destination"));
@@ -80,6 +83,15 @@ test("a calm launch passes, with the app's output saved and the route passed on"
 test("an error nobody caught in the app's output fails it", () => {
   const r = run("throws");
   assert.notEqual(r.status, 0);
+  assert.match(r.stdout + r.stderr, /uncaught/);
+});
+
+// On a busy laptop the device tool took longer to start than the whole watch,
+// so the error was never seen and the release passed (2026-11-11). The watch
+// counts from the first line of output, not from the moment the tool is started.
+test("an error is still caught when the device tool is slower to start than the watch is long", () => {
+  const r = run("slow-throws");
+  assert.notEqual(r.status, 0, r.stdout + r.stderr);
   assert.match(r.stdout + r.stderr, /uncaught/);
 });
 

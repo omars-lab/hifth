@@ -19,7 +19,7 @@ The wrapper hears each gesture from the system and hands it to the page with a f
 - it passes them to the page;
 - the page draws its own small palette of Hifth's tools right next to the pencil tip.
 
-Respect what the reader picked in the iPad's pencil settings. Where a setting has no match in Hifth, map it to the nearest one: Hifth has no eraser, so "switch to eraser" becomes "swap back to the last tool". Keep the tool bar and the keyboard letters as the way in for everyone else.
+Respect what the reader picked in the iPad's pencil settings. Where a setting has no match in Hifth, map it to the nearest one: Hifth had no eraser when this was written, so "switch to eraser" becomes "swap back to the last tool" (an eraser was added on 2026-10-12, and the swap was kept as it is). Keep the tool bar and the keyboard letters as the way in for everyone else.
 
 **What it changes for a hafiz:** a reader marking mistakes with the pencil while revising stops reaching up to the tool bar. A double-tap flips between Mistake and the last tool they used, so the hand never leaves the page. With a Pencil Pro, a squeeze opens all ten tools under the tip.
 
@@ -214,7 +214,7 @@ Hifth's tool switch already goes through one place, `chooseTool(next, lock)` in 
 
 | Reader's setting | What Hifth does | Why |
 |---|---|---|
-| Switch to eraser (the default for double-tap) | Swap with the last tool used | Hifth has no eraser. Apple's guidelines allow an app-specific mode change when the system meaning does not fit. |
+| Switch to eraser (the default for double-tap) | Swap with the last tool used | Hifth had no eraser then (one was added on 2026-10-12; the swap stayed). Apple's guidelines allow an app-specific mode change when the system meaning does not fit. |
 | Switch to last used tool | Swap with the last tool used | Same thing, as named |
 | Show colour palette / ink attributes | Open the highlighter's four pens | The nearest match to "colours" |
 | Show tool palette (the default for squeeze) | Open Hifth's own palette at the tip | What the reader asked for |
@@ -410,6 +410,25 @@ the hand holding the pencil covering part of the ring.
 the info panel, and trying both on the iPad with a pencil. Rings start as the default because
 the owner asked for them; the row stays as the other choice. What to build and how to test it:
 [the open-work list, item 3](../../.claude/plans/open-work-2026-11.md).
+
+**Built 2026-11-11, both ways.** Rings are the default. The tools stand in a ring round the tip,
+the first at the top and the rest in the way the language reads. A tool with choices of its own
+(the highlighter's eight pens, four for a passage and four for held words; the three ways to aim a mark) adds them as an outer ring, centred
+on that tool. The middle of the ring is left to the page: a touch there puts the pens away. Near
+a screen edge the ring moves in so every pen stays on the screen. The row beside the tip is the
+other choice, under "The pens at the pencil's tip" in the info panel of the iPad app.
+
+Two things only a build showed. Picking a tool with no choices of its own now puts the pens away
+at once, on both layouts; before, they stayed until a touch elsewhere. And the test's Firefox
+sends no pointer event for a click on a pretend iPad, so the tests touch the screen as an iPad
+does. Tests: `apps/web/src/pen-ring.test.ts` and `apps/web/e2e/pencil.spec.ts`, in Chrome,
+Firefox and Safari's engine. Walked in the real iPad app in the simulator the same day (the
+walk-app skill's pencil walk): nine tools, whole on the screen in the middle and near a corner,
+no pen on the tip itself, the highlighter's eight pens in the outer ring.
+
+**Still open:** whether the hand holding the pencil covers part of the ring, and which layout
+stays the default. Only a real pencil answers it; the check is on
+[the iPad walk](../ipad-walk.md).
 
 ### ③ How does a reader with no pencil find out what the pens are? · **open**
 

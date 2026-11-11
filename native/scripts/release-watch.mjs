@@ -14,6 +14,10 @@
 //
 // Exit 0 pass · 1 the app closed, threw, or the iPad could not be reached · 3 new crash report.
 // HIFTH_DEVICECTL swaps Apple's device tool for a stand-in (the tests use one).
+// The watch counts from the app's first line of output, not from when the device tool was
+// started, so a tool that is slow to start cannot use the watch up before the app has said
+// anything (docs/issues/release-watch-counted-from-the-wrong-moment.md). A tool that prints
+// nothing is waited for 30 seconds first; HIFTH_START_WAIT_MS shortens that in tests.
 import { spawn, spawnSync } from "node:child_process";
 import { createWriteStream, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -28,6 +32,8 @@ const out = opt("--out");
 const watchSeconds = Number(opt("--watch", "60"));
 const unlockWait = Number(opt("--unlock-wait", "180"));
 const retryMs = Number(process.env.HIFTH_UNLOCK_RETRY_MS || 5000);
+// How long a device tool that prints nothing is waited for before the watch starts.
+const startWaitMs = Number(process.env.HIFTH_START_WAIT_MS || 30_000);
 if (!device || !logFile || !out || !(watchSeconds > 0)) {
   console.error("usage: release-watch.mjs --device <id> --route <route> --log <file> --out <crash dir> [--watch <seconds>]");
   process.exit(2);
@@ -53,9 +59,18 @@ async function launchOnce() {
   child.stdout.pipe(sink, { end: false });
   child.stderr.pipe(sink, { end: false });
   const exited = new Promise((resolve) => child.on("exit", (code) => resolve(code)));
+  // The watch counts from the first line of output, not from the moment the
+  // device tool is started: on a busy laptop the tool took longer to start than
+  // a short watch lasted, and an error it then printed was never seen
+  // (2026-11-11). A tool that prints nothing is watched from startWaitMs on.
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const spoke = new Promise((resolve) => {
+    child.stdout.once("data", resolve);
+    child.stderr.once("data", resolve);
+  });
   const finished = await Promise.race([
     exited.then((code) => ({ code })),
-    new Promise((resolve) => setTimeout(() => resolve(null), watchSeconds * 1000)),
+    Promise.race([spoke, sleep(startWaitMs)]).then(() => sleep(watchSeconds * 1000)).then(() => null),
   ]);
   if (finished) log("launch_exit", { code: finished.code, after: "early" });
   else {

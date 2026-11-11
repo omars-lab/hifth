@@ -957,6 +957,10 @@ export interface Strings {
   penHomeBottom: string;
   penHomeSide: string;
   penHomeNote: string;
+  tipPensTitle: string;
+  tipPensRings: string;
+  tipPensRow: string;
+  tipPensNote: string;
   penSideTitle: string;
   penSideRight: string;
   penSideLeft: string;
@@ -1824,6 +1828,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     penHomeBottom: m.penHomeBottom,
     penHomeSide: m.penHomeSide,
     penHomeNote: m.penHomeNote,
+    tipPensTitle: m.tipPensTitle,
+    tipPensRings: m.tipPensRings,
+    tipPensRow: m.tipPensRow,
+    tipPensNote: m.tipPensNote,
     penSideTitle: m.penSideTitle,
     penSideRight: m.penSideRight,
     penSideLeft: m.penSideLeft,

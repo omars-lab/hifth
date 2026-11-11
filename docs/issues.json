@@ -5923,7 +5923,7 @@
       "owner": "agent",
       "useCase": "pick-a-pen-without-leaving-the-verse",
       "feature": "pens-and-pencil",
-      "note": "Owner, 2026-11-10: the pens at the Apple Pencil's tip laid out as rings around it, with an outer ring for a tool's own choices (the highlighter's four pens; Note, Harakat and Word). Built as a second layout beside today's row, picked in the info panel, rings the default. What to build and how to test it: .claude/plans/open-work-2026-11.md, item 3."
+      "note": "Owner, 2026-11-10: the pens at the Apple Pencil's tip laid out as rings around it, with an outer ring for a tool's own choices (the highlighter's four pens; Note, Harakat and Word). Built as a second layout beside today's row, picked in the info panel, rings the default. What to build and how to test it: .claude/plans/open-work-2026-11.md, item 3. Built 2026-11-11, both ways: rings the default, the row the other choice in the iPad app's info panel; the ring's middle is left to the page, and the ring moves in near a screen edge. Tests in Chrome and Firefox (apps/web/e2e/pencil.spec.ts). Left: the owner tries both with a real pencil and says which stays the default, and whether the hand holding the pencil covers the ring; the check is on docs/ipad-walk.md."
     },
     {
       "id": "pencil-pens-settings-page",

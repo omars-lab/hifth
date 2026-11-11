@@ -8,10 +8,13 @@
  * was hovering, where its tip was. The page decides what that setting means in
  * Hifth, here, so every setting Apple offers has one stated answer:
  *
- *   switch to eraser, switch to last used   swap the pen in hand (no eraser in Hifth)
- *   show tool palette                       Hifth's own pens, beside the tip
- *   show colour palette, ink attributes     the highlighter's four pens, beside the tip
+ *   switch to eraser, switch to last used   swap the pen in hand (Hifth's eraser is a pen like the rest)
+ *   show tool palette                       Hifth's own pens, at the tip
+ *   show colour palette, ink attributes     the highlighter's pens, at the tip
  *   off, run shortcut, anything new         nothing (a shortcut never reaches us)
+ *
+ * How the pens stand at the tip, rings round it or a row beside it, is the
+ * reader's choice (pen-ring.ts).
  *
  * Its own module, free of React, as `pen-side.ts` is.
  */

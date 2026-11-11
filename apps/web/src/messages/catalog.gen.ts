@@ -574,6 +574,10 @@ export interface Catalog {
   readonly tajweedCredit: string;
   readonly tapForNote: (d: { readonly source: string | number }) => string;
   readonly tapHint: string;
+  readonly tipPensNote: string;
+  readonly tipPensRings: string;
+  readonly tipPensRow: string;
+  readonly tipPensTitle: string;
   readonly tipsNote: string;
   readonly tipsSectionTitle: string;
   readonly tipsShow: string;

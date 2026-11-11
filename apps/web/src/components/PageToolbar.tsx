@@ -117,7 +117,16 @@ export function LockMark(): JSX.Element {
  * One tab stop and arrow keys along it, like the pens; its own arrows stop
  * there, so they do not also move along the tools bar it sits in.
  */
-export function AimPicker({ aim, onAim }: { aim: MarkAim; onAim: (aim: MarkAim) => void }): JSX.Element {
+export function AimPicker({
+  aim,
+  onAim,
+  spots,
+}: {
+  aim: MarkAim;
+  onAim: (aim: MarkAim) => void;
+  /** Where each of the three stands, when a home places them itself (the rings at the pencil's tip). */
+  spots?: readonly React.CSSProperties[] | undefined;
+}): JSX.Element {
   const { t } = useT();
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -148,6 +157,7 @@ export function AimPicker({ aim, onAim }: { aim: MarkAim; onAim: (aim: MarkAim) 
           title={toolName(t, x)}
           tabIndex={aim === x ? 0 : -1}
           data-aim={x}
+          style={spots?.[i]}
           onClick={() => onAim(x)}
         >
           <ToolIcon tool={x} />

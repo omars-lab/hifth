@@ -17,7 +17,9 @@
     const r = el.getBoundingClientRect();
     const whole = r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight;
     const covers = tip && tip.x >= r.left && tip.x <= r.right && tip.y >= r.top && tip.y <= r.bottom;
-    out.push(`${name}: box=${f(r)} whole=${whole ? "yes" : "no"} coversTip=${covers ? "yes" : "no"} radios=${el.querySelectorAll("[role=radio]").length} tool=${tool()}`);
+    // In rings the box goes round the tip, so what matters is that no pen sits on the tip itself.
+    const penAtTip = tip && document.elementFromPoint(tip.x, tip.y)?.closest("[role=radio]");
+    out.push(`${name}: box=${f(r)} whole=${whole ? "yes" : "no"} coversTip=${covers ? "yes" : "no"} penAtTip=${penAtTip ? "yes" : "no"} radios=${el.querySelectorAll("[role=radio]").length} tool=${tool()}`);
   };
   for (const tip of [{ x: 200, y: 300 }, { x: innerWidth - 60, y: innerHeight - 120 }]) {
     pen({ kind: "squeeze", pref: "palette", ...tip });

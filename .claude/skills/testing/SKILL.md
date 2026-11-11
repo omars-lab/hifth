@@ -1,6 +1,6 @@
 ---
 name: testing
-description: How Hifth is tested — the unit, end-to-end, and golden-image layers, how to run each, and the current policy that only NON-MOBILE tests are exercised until the mobile app is implemented. Use when writing or running tests, adding a regression, deciding which suite a change belongs in, or when a mobile (iPhone/Android/golden) test will not run in this environment.
+description: How Hifth is tested — the unit, end-to-end, and golden-image layers, how to run each, and which browser runs a push checks (desktop Chrome and Firefox, Android, iPhone on WebKit, iPad, the golden pictures, the pitch). Use when writing or running tests, adding a regression, deciding which suite a change belongs in, or when a phone, Firefox or golden test will not run or finds no tests.
 ---
 
 # Testing Hifth
@@ -25,36 +25,42 @@ and asserts nothing (its one optional `--expect` only stops a silently-wrong flo
 from handing back a misleading picture). Look first, then, once you know what to
 hold still, add the claim in the lowest layer above that can hold it.
 
-## The current policy: non-mobile only
+## What runs, and when
 
-**Until the mobile app is implemented, we run the non-mobile tests only.** That means:
+**Every layer runs on this laptop before a push** (`make pre-push-checks`): the unit tests, then
+these browser runs, then the pitch suite when the private notes are on the machine.
 
-- **Unit tests** (all of them — they are jsdom, viewport-independent).
-- **The `desktop` Playwright project** — chromium at 1440×900, the two-leaf spread.
+| run | what it is | which files |
+|---|---|---|
+| `desktop` | Chrome at 1440×900, the two-leaf spread | a fixed list in `playwright.config.ts` |
+| `desktop-firefox`, `desktop-firefox-runs` | Firefox, the owner's browser | a fixed list (see below) |
+| `iphone` | WebKit, the engine Safari and the iPad app use, at iPhone size | every spec not on its ignore list |
+| `android` | Chrome at Pixel size | the same |
+| `ipad` | the iPad's size, with touch | `ipad.spec.ts` only |
+| `golden`, `ipad-golden` | pictures of the page compared with saved ones | the golden specs |
 
-We do **not** currently gate on the **mobile** e2e projects — `iphone` (WebKit),
-`android` (Chromium mobile), or `golden` (mobile-viewport screenshots). They are not
-deleted and their specs are not wrong; they are waiting on two things this repo does
-not yet have stood up: the mobile implementation they assert against, and a matching
-browser toolchain in the working environment (WebKit in particular tends to lag the
-Playwright CLI version — the "Playwright was just installed or updated" nag is that
-mismatch, not a real gap).
+This section used to say only the desktop run counted and the phone runs were switched off.
+That stopped being true when WebKit was installed here and the phone runs joined the push
+checks. A phone run that fails is a real failure.
 
-**So when you add a regression for a change that is visible in both layouts, its
-runnable home is a unit test or the `desktop` project.** The mobile e2e is still the
-right place to *also* state the claim for the future — write it there too when it
-belongs there (e.g. the English wordmark's natural home is `lang.spec.ts`) — but do
-not treat a green mobile run as a precondition for landing, and do not treat a mobile
-project that will not launch here as a failure of your change. Verify on desktop +
-jsdom, say which you ran, and note the mobile assertion is deferred.
+**So a regression for something a reader sees goes in the spec for that feature**, and you run it
+in the browsers that matter before the push, not only in Chrome:
+
+```
+pnpm -C apps/web exec playwright test pencil --project desktop --project desktop-firefox --project iphone
+```
+
+Say which runs you ran. If WebKit will not start, install it once:
+`pnpm -C apps/web exec playwright install webkit`.
 
 ## Running them
 
 Everything runs from the **repo root**, and the PATH gotcha from the `run-app` skill
-applies — a non-login shell here has node 18, which has no `pnpm`:
+applies — a non-login shell here has node 18, which has no `pnpm`. Use the version
+`.nvmrc` names (22 today):
 
 ```
-export PATH="/Users/omareid/.nvm/versions/node/v20.20.2/bin:$PATH"
+export PATH="/Users/omareid/.nvm/versions/node/v22.22.3/bin:$PATH"
 ```
 
 ### Unit tests
@@ -68,26 +74,50 @@ pnpm -r test                                     # every package (core, etl, web
 `@hifth/core` must be built before the packages that import it (`make core`, or
 `make test` which does it for you) — the Loop 0 lesson.
 
-### End-to-end — the non-mobile project
+### End-to-end, in a browser
 
 ```
 pnpm -C apps/web exec playwright test --project=desktop
 pnpm -C apps/web exec playwright test desktop.spec.ts --project=desktop -g "holds the slider"
 ```
 
-By default Playwright builds `dist/` and serves it on **:4173** (a clean production
-build — this is what a real run asserts). For a fast inner loop against a `vite dev`
-you already have open on **:7122**, point the run at it instead — this skips the build
-and the `--strictPort` preview server entirely:
+**Playwright does not build the app.** It serves whatever is already in `apps/web/dist`,
+so build first or the run tests the old app:
+
+```
+pnpm -C apps/web exec vite build --logLevel error
+```
+
+The main checkout serves on **:4173**; every other working copy gets its own port
+(`scripts/lib/e2e-port.mjs`), so two copies' runs cannot collide. For a fast inner loop
+against a `vite dev` you already have open on **:7122**, point the run at it instead:
 
 ```
 HIFTH_BASE_URL=http://localhost:7122 pnpm -C apps/web exec playwright test --project=desktop
 ```
 
-Use `HIFTH_BASE_URL` for iterating; let the default preview build run before you
-believe a pass. (`HIFTH_REUSE_SERVER=1` is a different, narrower escape hatch — it
-lets the built-in server adopt whatever is on :4173; opt-in because it will happily
-test the wrong build.)
+`HIFTH_REUSE_SERVER=1` lets a run use a preview server left running on the copy's port.
+It serves `dist` as it is on disk, so a rebuild is picked up; it is opt-in because it
+will happily test a build you forgot to redo.
+
+### Firefox runs a fixed list of test files
+
+The owner reads in Firefox, but the `desktop-firefox` project runs **only the files named
+in its `testMatch` in `apps/web/playwright.config.ts`**. A new spec file that is not on
+that list is never run in Firefox, and `--project desktop-firefox` on it reports "no
+tests found" or passes on nothing. When a feature is something a reader sees or touches,
+add its spec to the list in the same change.
+
+```
+pnpm -C apps/web exec playwright test pencil --project desktop --project desktop-firefox
+```
+
+Firefox on a pretend iPad (`hasTouch`) sends a mouse click with **no pointer event**, so
+code that listens for `pointerdown` never hears `page.mouse.click`. Use
+`page.touchscreen.tap` for a touch (found 2026-11-11, the pencil's rings).
+
+The other projects: `pitch` and `pitch-firefox` (the private pitch build, its own port),
+`pitch-script` (the six demo passages), `iphone`, `ipad`, and the golden pictures.
 
 ### Reading a failure
 
@@ -96,33 +126,20 @@ make report    # opens the last run's traces, DOM snapshots, console, network,
                # and the three-way image diff for a golden failure
 ```
 
-## What mobile testing will be, once it is stood up
+## The golden pictures
 
-Recorded here so the plan is not lost while the projects are dark:
-
-- **`iphone`** — WebKit, iPhone viewport, `hasTouch`. The acceptance device (PLAN §8):
-  the smoke tour and the phone-specific chrome (the colophon sheet, the collapsed
-  language switch, the page-turn band on a single leaf) live here.
-- **`android`** — Chromium, Pixel viewport. The second mobile engine.
-- **`golden`** — chromium at the phone viewport with `deviceScaleFactor: 2`,
-  `isMobile`, photographing one SVG per shot. Platform-split baselines under
-  `__screenshots__/{platform}/`; only the darwin set is committed (`make golden`),
-  checked by the pre-push hook. The linux set the GitHub job used was retired on
-  2026-09-27.
-- **Bringing them back**: install the matching browsers (`pnpm -C apps/web exec
-  playwright install`), stand up the mobile layout the specs assert against, then run
-  `make e2e` (iphone + android + golden) and reconcile. At that point the deferred
-  assertions written into `lang.spec.ts` and the other phone specs start earning their
-  keep, and this policy section gets rewritten to "all layers run".
+`golden` photographs one page per shot at phone size, and `ipad-golden` at iPad size. Only the
+set made on this Mac is committed (`__screenshots__/darwin/`); the push checks compare against
+it. `make golden` runs them, and `make golden-update` rewrites the saved pictures: show the
+owner the difference and ask before doing that.
 
 ## Adding a regression (the rule of thumb)
 
 1. **Can jsdom see it?** (logic, wiring, a rendered string, DOM order) → unit test,
    co-located `*.test.tsx`. Runs now, runs everywhere.
 2. **Does it need a real layout engine?** (geometry, computed direction, a native
-   control's greed, real key/wheel events) → `desktop` project e2e. Runs now.
+   control's greed, real key/wheel events) → a browser test in the feature's spec.
 3. **Is it inherently a phone claim?** (single-leaf band, collapsed chrome, a mobile
-   viewport's arithmetic) → write it in the phone spec for the future, and find a
-   desktop-or-jsdom stand-in to guard it **now** if the change ships now.
-4. **Is it a pixel?** (colour, wash, exact placement) → golden — deferred with the
-   rest of mobile until the golden project runs here.
+   viewport's arithmetic) → the phone spec; the `iphone` and `android` runs check it on
+   every push.
+4. **Is it a pixel?** (colour, wash, exact placement) → a golden picture.

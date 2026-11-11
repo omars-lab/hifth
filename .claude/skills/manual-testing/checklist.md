@@ -140,7 +140,12 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     selecting; colour palette opens the highlighter's pens; off and run shortcut do nothing. It
     still works after typing in a note or text box, and after the share sheet. The squeeze's
     little buzz feels right; with Scribble on no stroke on the page is lost; an older pencil and
-    a finger break nothing. Why not a machine: the simulator cannot send either gesture, so the
+    a finger break nothing. **The two layouts (added 2026-11-11):** the pens open as rings round
+    the tip. Squeeze over a verse in the middle of the page, then near each edge, and pick the
+    highlighter and one of its pens from the outer ring. Right: your hand covers no pen you
+    need, every pen is on the screen, and a touch in the middle of the ring puts the pens away.
+    Then choose "A row" under "The pens at the pencil's tip" in the info panel, do the same, and
+    say which should be the default (the open question `pencil-pens-as-rings`). Why not a machine: the simulator cannot send either gesture, so the
     tests play the app's side by hand (docs/PLAN.md, item 96; docs/design/pencil-gestures.md).
 20. **Grabbing the page's edge through a note with a mouse, in the real Mac app.** On the pitch
     build, `make app-run-mac ROUTE=/hafs-kfqc/2:255`: the note lies over the right page. Put the

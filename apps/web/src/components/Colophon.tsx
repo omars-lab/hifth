@@ -34,6 +34,7 @@ import { MARK_TOOLS, type MarkTools } from "../mark-tools";
 import { ERASER_PLACES, type EraserPlace } from "../eraser-place";
 import { MISTAKE_TAPS, type MistakeTap } from "../mistake-tap";
 import { PEN_HOMES, type PenHome } from "../pen-home";
+import { TIP_PENS, type TipPens } from "../pen-ring";
 import { PEN_SIDES, type PenSide } from "../pen-side";
 import { RAIL_HOMES, type RailHome } from "../rail-home";
 import { SCOPE_LOOKS, type ScopeLook } from "../scope-look";
@@ -94,6 +95,9 @@ interface ColophonProps {
   /** Where the page tools sit on a computer or an iPad held sideways; remembered on this device. */
   penHome?: PenHome | undefined;
   onPenHome?: ((home: PenHome) => void) | undefined;
+  /** How the pens open at the pencil's tip; left out where there is no pencil. */
+  tipPens?: TipPens | undefined;
+  onTipPens?: ((choice: TipPens) => void) | undefined;
   /** Where the look-alike chips go when a magnified page leaves no desk; remembered on this device. */
   penSide?: PenSide | undefined;
   onPenSide?: ((side: PenSide) => void) | undefined;
@@ -312,6 +316,8 @@ export function Colophon({
   onMistakeTap,
   penHome,
   onPenHome,
+  tipPens,
+  onTipPens,
   penSide,
   onPenSide,
   railHome,
@@ -1289,6 +1295,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.penHomeNote}</p>
+          </section>
+        )}
+        {/* How the pens open at the Apple Pencil's tip (pen-ring.ts): rings
+            round it, or the row first built, kept as the other way. Only in
+            the iPad app, the one place with a pencil to squeeze. */}
+        {tipPens && onTipPens && (
+          <section className={styles.block} aria-labelledby="colophon-tip-pens">
+            <h3 className={styles.subhead} id="colophon-tip-pens">
+              {t.tipPensTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-tip-pens">
+              {TIP_PENS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={tipPens === choice}
+                  data-tip-pens-choice={choice}
+                  onClick={() => onTipPens(choice)}
+                >
+                  {choice === "rings" ? t.tipPensRings : t.tipPensRow}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.tipPensNote}</p>
           </section>
         )}
         {/* Which side the pens down the side and the Mark up button stand on

@@ -704,7 +704,11 @@
       "proof": [
         {
           "file": "apps/web/e2e/pencil.spec.ts",
-          "test": "a squeeze opens the pens beside the tip, whole on the screen, and a pick puts that pen in hand"
+          "test": "a squeeze opens the pens at the tip, whole on the screen, and a pick puts that pen in hand"
+        },
+        {
+          "file": "apps/web/e2e/pencil.spec.ts",
+          "test": "the tools stand in a ring round the tip, in the way the language reads, and a touch in the hole lands on the page"
         },
         {
           "file": "apps/web/e2e/pencil.spec.ts",

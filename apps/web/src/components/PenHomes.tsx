@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "../i18n";
 import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
-import { isMarkAim, type MarkAim } from "../mark-tools";
-import type { Pen } from "../pen";
+import { isMarkAim, MARK_AIMS, type MarkAim } from "../mark-tools";
+import { PENS, type Pen } from "../pen";
 import type { PenSide } from "../pen-side";
 import { besideTip } from "../pencil";
+import { innerSpot, outerSpots, ringCentre, RING_REACH, spotStyle, type TipPens } from "../pen-ring";
 import { rememberPenFloat, savedPenFloat, sideFits, snapToEdge, type FloatSpot } from "../pen-home";
 import type { PageTool } from "./PageStage";
 import { AimPicker, LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress, type ToolEntry } from "./PageToolbar";
@@ -49,8 +50,16 @@ function Offered({ tool, locked, onTool, pen, onPen, aim }: PenHomeProps): JSX.E
 }
 
 /** The tools, standing in a row or a column, with arrow keys along them. */
-function ToolRow({ tool, locked, onTool, upright, tools = TOOLS }: PenHomeProps & { upright?: boolean }): JSX.Element {
-  const { t } = useT();
+function ToolRow({
+  tool,
+  locked,
+  onTool,
+  upright,
+  tools = TOOLS,
+  ring,
+  onMove = onTool,
+}: PenHomeProps & { upright?: boolean; ring?: boolean; onMove?: (tool: PageTool) => void }): JSX.Element {
+  const { t, dir } = useT();
   const press = useToolPress(tool, onTool);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -63,12 +72,13 @@ function ToolRow({ tool, locked, onTool, upright, tools = TOOLS }: PenHomeProps 
     else if (e.key === "End") to = tools.length - 1;
     if (to === null) return;
     e.preventDefault();
-    onTool(tools[to]!.tool);
+    onMove(tools[to]!.tool);
     buttons.current[to]?.focus();
   };
   return (
     <div
       className={styles.tools}
+      data-ring={ring || undefined}
       data-upright={upright || undefined}
       role="radiogroup"
       aria-label={t.toolbarLabel}
@@ -90,6 +100,7 @@ function ToolRow({ tool, locked, onTool, upright, tools = TOOLS }: PenHomeProps 
           title={`${toolName(t, x)} (${letter})`}
           tabIndex={tool === x ? 0 : -1}
           data-locked={(locked && tool === x) || undefined}
+          style={ring ? spotStyle(innerSpot(i, tools.length, dir === "rtl")) : undefined}
           {...press(x)}
         >
           <ToolIcon tool={x} />
@@ -257,21 +268,47 @@ export function PenHomeFloat(props: PenHomeProps): JSX.Element {
 /**
  * The pens beside the Apple Pencil's tip, opened by a squeeze or a double-tap
  * in the iPad app (docs/PLAN.md, 96). Over the page on any layout, upright or
- * sideways, beside the tip and never under it, whole inside the window. What
- * a pick does is the caller's (App.tsx puts the pens away after one); Escape
- * or a touch anywhere else puts them away too.
+ * sideways, never under the tip, whole inside the window: as rings round the
+ * tip, or as a row beside it (pen-ring.ts; the reader's setting). A pick puts
+ * the pens away, unless the tool picked has choices of its own to offer;
+ * Escape or a touch anywhere else puts them away too. On the rings the hole
+ * and the gaps between buttons are the page's, so a touch there is "anywhere
+ * else".
  */
-export function PenHomeAt(props: PenHomeProps & { at: { x: number; y: number }; onClose: () => void }): JSX.Element {
-  const { at, onClose } = props;
+export function PenHomeAt(props: PenHomeProps & { at: { x: number; y: number }; onClose: () => void; layout: TipPens }): JSX.Element {
+  const { at, onClose, layout, tool, locked, onTool, onPen, aim, tools = TOOLS } = props;
   const { t, dir } = useT();
   const box = useRef<HTMLDivElement>(null);
+  const rings = layout === "rings";
   useLayoutEffect(() => {
     const el = box.current;
     if (!el) return;
-    const p = besideTip(at, { w: el.offsetWidth, h: el.offsetHeight }, { w: window.innerWidth, h: window.innerHeight });
+    const view = { w: window.innerWidth, h: window.innerHeight };
+    const mid = ringCentre(at, view);
+    const p = rings ? { left: mid.x - RING_REACH, top: mid.y - RING_REACH } : besideTip(at, { w: el.offsetWidth, h: el.offsetHeight }, view);
     el.style.left = `${p.left}px`;
     el.style.top = `${p.top}px`;
   });
+  // The arrow keys start from the tool in hand, with nothing tapped first.
+  useLayoutEffect(() => {
+    box.current?.querySelector<HTMLElement>('[aria-keyshortcuts][aria-checked="true"]')?.focus({ preventScroll: true });
+  }, []);
+  // A tool with choices of its own keeps the pens out for them; any other
+  // pick, and a pick among the choices, puts the pens away. The arrow keys
+  // only move along the tools.
+  const offers = (x: PageTool) => x === "highlight" || (!!aim && isMarkAim(x));
+  const pick = (next: PageTool, lock?: boolean) => {
+    onTool(next, lock);
+    if (!offers(next)) onClose();
+  };
+  const pickPen = (next: Pen) => {
+    onPen(next);
+    onClose();
+  };
+  const pickAim = (next: MarkAim) => {
+    onTool(next, locked);
+    onClose();
+  };
   // Heard from the moment the pens are drawn, not a beat later: a key pressed
   // as they appeared did nothing.
   useLayoutEffect(() => {
@@ -291,10 +328,17 @@ export function PenHomeAt(props: PenHomeProps & { at: { x: number; y: number }; 
       window.removeEventListener("pointerdown", onDown, true);
     };
   }, [onClose]);
+  // On the rings a tool's choices stand outside it, centred on it.
+  const rtl = dir === "rtl";
+  const spots = (groups: readonly number[]) =>
+    rings
+      ? outerSpots(innerSpot(Math.max(0, tools.findIndex((x) => x.tool === tool)), tools.length, rtl).angle, groups, rtl).map(spotStyle)
+      : undefined;
   return (
-    <div ref={box} className={styles.atTip} role="toolbar" aria-label={t.toolbarLabel} dir={dir} data-pencil-pens="" data-tool={props.tool}>
-      <ToolRow {...props} />
-      <Offered {...props} />
+    <div ref={box} className={rings ? styles.rings : styles.atTip} role="toolbar" aria-label={t.toolbarLabel} dir={dir} data-pencil-pens={layout} data-tool={tool}>
+      <ToolRow {...props} onTool={pick} onMove={onTool} ring={rings} />
+      {tool === "highlight" && <PenPicker pen={props.pen} onPen={pickPen} spots={spots([PENS.length, PENS.length])} />}
+      {aim && isMarkAim(tool) && <AimPicker aim={aim} onAim={pickAim} spots={spots([MARK_AIMS.length])} />}
     </div>
   );
 }

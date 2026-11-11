@@ -186,7 +186,7 @@ answerable by the person it is for.
       released, a line that tilts as it corrects, a wash that only reads under a moving thumb —
       is **built live** as an interchangeable component (`OptionA` … `OptionN` behind one
       interface) and mounted on the decision page, not only drawn. A reader decides it by doing
-      it. The winner graduates into the app; the losers are deleted. Purely structural or
+      it. The winner graduates into the app as the default; the others stay as a setting the reader can switch to. Purely structural or
       policy options — which label a page carries — may stay drawn. The `design-iterate` skill is
       this build-render-look-iterate loop in full: reach for it whenever the options are felt.
 - [ ] It is drawn on real data from this project, not a mock. A mock cannot surprise you, and
