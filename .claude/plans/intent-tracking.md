@@ -152,7 +152,10 @@ This is the tightest part, so it is decided first.
 
   The names all start with `Intent-` on purpose: ordinary body lines in old commits already
   get read by git as labels (`Notes:`, `Design:`), and these must never be confused with
-  them. They are read back with git's own parser, not a home-made one.
+  them. They are read back as any line of the message that starts `Intent-<Name>:`. Git's own
+  parser was the first choice and was dropped on 2026-11-11: it reads only the last paragraph
+  of a message, so six commits whose label was typed one paragraph above the credit lines
+  looked unlabelled to it while the hook counted them as labelled.
 - **When the hook cannot run** (the tool is not installed, the settings file is broken), it
   prints a line that says so and lets the commit through unlabelled. A silent hook looks the
   same as a working one. The push check then lists unlabelled commits.

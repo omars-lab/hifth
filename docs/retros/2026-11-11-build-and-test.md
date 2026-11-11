@@ -19,6 +19,13 @@ folded: no
   the built files before reasoning from it.
 - `docs/issues.json`: rewriting it with a script to change two rows reformatted five other
   lines. It is hand-edited; change it with a plain edit.
+- Commit labels typed by hand (branch `stale-skills`): an `Intent-None:` line written one
+  paragraph above the credit lines was invisible to git's label reader, so six commits looked
+  unlabelled. Use `intent start --none "<reason>"` and let the hook write the line; the tool
+  (intent-manager 1.2.1) now also reads a label wherever it sits.
+- `intent why` on a merge commit (intent-manager 1.2.0, before release): it explained the next
+  ordinary commit instead. Found in review, not by the tests; a merge is the newest commit on
+  main most days, so try a new reading command on `HEAD` of main first.
 - `scripts/perf-sweep.mjs`: the middle of five readings hid that one build reads two values
   400 ms apart. `make perf-compare` keeps every run; read them all.
 - Moving test files into a skill's folder (branch `stale-skills`): a search-and-replace for
