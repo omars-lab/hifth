@@ -258,6 +258,8 @@ import { rememberToolHelp, savedToolHelp, type ToolHelp } from "./tool-help";
 import { rememberSettingsAt, savedSettingsAt, type SettingsAt } from "./settings-at";
 import { rememberDrawerMarks, savedDrawerMarks, type DrawerMarks } from "./drawer-marks";
 import { SettingsDrawer } from "./components/SettingsDrawer";
+import { PageRow } from "./components/PageRow";
+import { rememberAppPages, savedAppPages, type AppPage, type AppPages } from "./app-pages";
 import { rememberWordTap, savedWordTap, type WordTap } from "./word-tap";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { useRunFollow } from "./run-follow";
@@ -474,6 +476,15 @@ export function App(): JSX.Element {
   // drawer (ayah-drawer ①; a setting since 2026-11-10, the bar unless chosen).
   const [settingsAt, setSettingsAt] = useState<SettingsAt>(() => savedSettingsAt());
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Page icons along the bottom (app-pages ①). The mushaf is never taken down
+  // for another page: the other page stands over it, so it comes back as left.
+  const [appPages, setAppPages] = useState<AppPages>(() => savedAppPages());
+  const [appPage, setAppPage] = useState<AppPage>("mushaf");
+  const chooseAppPages = useCallback((choice: AppPages) => {
+    rememberAppPages(choice);
+    setAppPages(choice);
+    if (choice === "off") setAppPage("mushaf");
+  }, []);
   const chooseSettingsAt = useCallback((choice: SettingsAt) => {
     rememberSettingsAt(choice);
     setSettingsAt(choice);
@@ -3904,7 +3915,8 @@ export function App(): JSX.Element {
   // state between openings still does (see components/later.tsx).
   const rootsMounted = useOpenedOnce(rootFamilies !== null);
   const editionMounted = useOpenedOnce(editionOpen);
-  const colophonMounted = useOpenedOnce(colophonOpen);
+  const settingsPage = appPages === "row" && appPage === "settings";
+  const colophonMounted = useOpenedOnce(colophonOpen || settingsPage);
   const revisionMounted = useOpenedOnce(revisionOpen);
   const drawerMounted = useOpenedOnce(drawerBookmark !== null);
 
@@ -4069,7 +4081,7 @@ export function App(): JSX.Element {
     // RTL because they are furniture around a mus'haf, not around a sentence.
     <MarkUndoContext.Provider value={markUndo}>
     <FullScreenContext.Provider value={fullInBar}>
-    <div className={styles.app} dir={dir} data-full={full || undefined}>
+    <div className={styles.app} dir={dir} data-full={full || undefined} data-pages={appPages === "row" ? "" : undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to
@@ -4662,8 +4674,14 @@ export function App(): JSX.Element {
       {colophonMounted && (
         <Suspense fallback={null}>
           <Colophon
-            open={colophonOpen}
-            onClose={() => setColophonOpen(false)}
+            open={colophonOpen || settingsPage}
+            asPage={settingsPage && !colophonOpen}
+            onClose={() => {
+              setColophonOpen(false);
+              setAppPage("mushaf");
+            }}
+            appPages={appPages}
+            onAppPages={chooseAppPages}
             fisheye={fisheye}
             onToggleFisheye={toggleFisheye}
             turnStyle={turnStyle}
@@ -5219,6 +5237,7 @@ export function App(): JSX.Element {
       ) : (
         deletedNote && <UndoBar said={deletedNote.said} onUndo={undoDelete} onDone={endNoteUndo} />
       )}
+      {appPages === "row" && <PageRow page={appPage} onPage={setAppPage} />}
       <LiveAnnouncer message={message} />
     </div>
     </FullScreenContext.Provider>

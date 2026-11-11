@@ -740,9 +740,13 @@
         {
           "file": "apps/web/e2e/pen-homes.spec.ts",
           "test": "the setting switches the home at once, and is remembered"
+        },
+        {
+          "file": "apps/web/e2e/app-pages.spec.ts",
+          "test": "settings open as a page of their own, with the switches and not the licence"
         }
       ],
-      "gap": "Each setting is proven by its own test; nothing checks that every choice in the info panel is remembered. The choices are still one long list in the info panel, with no page of their own: docs/design/app-pages.md ①."
+      "gap": "Each setting is proven by its own test; nothing checks that every choice in the info panel is remembered. The settings have a page of their own only when the row of page icons is switched on, which is off until the owner has tried it: docs/design/app-pages.md ①."
     },
     {
       "id": "read-with-tajweed-colouring",

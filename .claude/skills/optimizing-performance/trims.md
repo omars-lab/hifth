@@ -25,6 +25,16 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Checked again 2026-11-11 (evening), nothing taken.** 207.5 KB against the 210 KB cap, after
+the row of page icons along the bottom and settings as a page (+0.9 KB). 0.6 KB of that is in
+the start-up script: the row, its style, the switch that turns it on and the wiring. 0.3 KB is
+the words in the two languages and the settings page's style. The row could load later, since
+it is off by default, but that would save about 0.3 KB of start-up, add nothing to the room,
+and make the page jump when the row arrives, so it was left; the list above says under 2 KB is
+rarely worth a new loading path. 2.5 KB of room is left. If the owner makes the row the
+default, the info panel loses its switches and that is the time to look again. The open item
+`startup-slowed-in-a-month` is still the one that could free room.
+
 **Checked again 2026-11-11 (later), one small trim taken.** 206.6 KB against the 210 KB cap,
 after the record's two by-day layouts (+2.4 KB). Of that, 1.8 KB is the two layouts and their
 day-by-day count, which load with the record sheet and not at start-up, 0.3 KB is in the

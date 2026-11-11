@@ -5883,10 +5883,10 @@
       },
       "status": "open",
       "severity": "question",
-      "owner": "agent",
+      "owner": "user",
       "useCase": "have-it-my-way-and-keep-it",
       "feature": "settings",
-      "note": "Owner's page comment of 2026-11-07: settings should be a page of their own, reached from page icons along the bottom like a Mac app, with the mushaf as the default page. Today every setting lives in the info panel (the ⓘ in the header). Next step is a rough build of a bottom row of page icons with the mushaf and a settings page."
+      "note": "Owner's page comment of 2026-11-07: settings should be a page of their own, reached from page icons along the bottom like a Mac app, with the mushaf as the default page. Built 2026-11-11 as a setting, off by default: a row of two icons under everything else, and settings filling the screen down to the row, with the mushaf left as it was behind them (apps/web/e2e/app-pages.spec.ts). To try it: open the info panel from the app's name, find \"Page icons along the bottom\" and press On. The question left is the owner's: does the row earn the 52 points of height it takes? If yes it becomes the default and the info panel keeps only the app's notes about itself; if no it stays a setting."
     },
     {
       "id": "app-pages-developer-page",

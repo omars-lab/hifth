@@ -3,11 +3,16 @@
 **Short version:** the owner asked (2026-11-07) for the app to have pages of its own,
 switched by a row of icons along the bottom the way a Mac app switches its views. The
 mushaf is the default page, settings get a page of their own, and a developer page shows
-only on this laptop. Nothing is built yet; both questions below are open.
+only on this laptop. A rough build of the row and the settings page is in the app since
+2026-11-11, switched off until the owner has tried it.
 
-**Today:** there is one page, the mushaf. Every setting lives in the info panel, opened from
-the ⓘ in the header. The developer views are scattered: a separate side-by-side comparison
-page and flags set when the app is built.
+**To try it:** open the info panel (the app's name, top corner), find "Page icons along the
+bottom" and press On. Press Off there to go back.
+
+**Today, with the row off:** there is one page, the mushaf. The reading settings sit behind
+the ⚙ button in a drawer, and every other setting lives in the info panel, opened from the
+app's name. The developer views are scattered: a separate side-by-side comparison page and
+flags set when the app is built.
 
 ## Open questions, and what would answer each
 
@@ -21,9 +26,30 @@ button that shows a settings tab ... we should have page icons on the bottom lik
 itself, so a reader looking for one switch finds it on a page made for switches. The cost
 is one more row along the bottom, which takes height from the page.
 
-**What would answer it:** a rough build of the bottom row with two pages (the mushaf and
-settings), tried on the laptop and the iPad beside today's info panel. If it loses, the
-info panel stays and the row becomes a setting.
+**What is built (2026-11-11), as a setting, off by default:** a row under everything else
+with two icons, each with its name: the mus'haf and settings. Settings fill the screen down
+to the row. They are the same switches the info panel has, without the app's notes about
+itself, its licence and its sources, which stay in the info panel. The mus'haf is not taken
+down while settings show, so the page, its magnification and a selected verse are as they
+were left. Escape, or the mus'haf icon, goes back.
+
+**What the rough build showed, that the question did not say:**
+
+- **The row costs 52 points of height on every screen**, plus the home bar's strip on an
+  iPad or iPhone. On a phone held upright that is about one line of the page.
+- **The row has to be the lowest bar**, under the page slider, or two bars each keep room
+  for the home bar. The slider gives its room up when the row is on.
+- **On a wide screen the info panel is a narrow card at the side; a page is not.** The first
+  build kept the card's width, which a picture showed and no test did. The switches now
+  keep a column 640 points wide in the middle of the page.
+- **Keys had to be thought about.** While settings show, the arrow keys must not turn the
+  page behind them. A test holds that.
+- **There are now three ways to reach a setting** when the row is on: the row, the ⚙ drawer
+  for the reading settings, and the info panel. That is one too many to keep. If the row
+  wins, the info panel should lose its switches and keep only the app's notes about itself.
+
+**Still to answer, by the owner trying it:** does the row earn its height? If yes, it becomes
+the default and the info panel keeps only the notes. If no, it stays a setting, as built.
 
 ### ② What should a developer page hold, shown only on this laptop? · **open**
 

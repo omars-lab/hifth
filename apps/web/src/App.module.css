@@ -288,6 +288,13 @@
   font-size: var(--text-sm);
 }
 
+/* Page icons along the bottom (app-pages ①). The row is the lowest bar, so it
+   clears the home bar and the page slider above it no longer has to. */
+.app[data-pages] {
+  --page-row-h: calc(52px + env(safe-area-inset-bottom));
+  --safe-bottom: 0px;
+}
+
 /* Full screen (docs/design/verse-tap-and-hold.md): every bar goes, and the
    page takes the room they leave. */
 .app[data-full] > :is(header, footer, nav, [role="toolbar"]) {
