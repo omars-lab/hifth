@@ -1,0 +1,147 @@
+{"commit": "57526c74a0ecd8662f5778da515f1508e1ca3606", "kind": "task", "name": "testflight-licence-brief", "by": "rule:name-in-branch", "sure": false, "words": "Merge pull request #555 from omars-lab/testflight-licence-brief"}
+{"commit": "92f0515e94e5b22d0cd43ed181ac60178a5ef0e3", "kind": "task", "name": "testflight-licence-brief", "by": "rule:name-in-branch", "sure": false, "words": "Merge pull request #555 from omars-lab/testflight-licence-brief"}
+{"commit": "7fbc9a116cb3565f6b0ef17949424c15492e8f31", "kind": "task", "name": "drawer-holds-its-tools", "by": "rule:name-in-branch", "sure": false, "words": "Merge pull request #565 from omars-lab/drawer-holds-its-tools"}
+{"commit": "f2bae4bee49b85c1bc792d63c6d3d4cab3086566", "kind": "task", "name": "drawer-holds-its-tools", "by": "rule:name-in-branch", "sure": false, "words": "Merge pull request #565 from omars-lab/drawer-holds-its-tools"}
+{"commit": "5447223a8fd06aa062f6e4f1260e2c96546a8035", "kind": "feature", "name": "desktop-spread", "by": "rule:files-of-one-feature", "sure": false, "words": "apps/web/e2e/desktop.spec.ts"}
+{"commit": "c53d1b83aa9c3938dabdc982a3507189fe78b377", "kind": "feature", "name": "pens-and-pencil", "by": "rule:files-of-one-feature", "sure": false, "words": "apps/web/src/components/PenHomes.tsx"}
+{"commit": "a10b5a80b44dc834b704b81e87dc0712dfc51216", "kind": "feature", "name": "desktop-spread", "by": "rule:files-of-one-feature", "sure": false, "words": "apps/web/e2e/desktop.spec.ts"}
+{"commit": "2e08a86550e8cf86a1fc3a3362533b87da68db0e", "kind": "feature", "name": "native-shell", "by": "rule:files-of-one-feature", "sure": false, "words": "native/Makefile.native"}
+{"commit": "f3f2c53b44e3866427c938d291f9e6655f4346c7", "kind": "feature", "name": "native-shell", "by": "rule:files-of-one-feature", "sure": false, "words": "native/Makefile.native"}
+{"commit": "de3413bd757c2434f6f09e9e01ae37802a97d4e8", "kind": "feature", "name": "encoding-inspector", "by": "rule:files-of-one-feature", "sure": false, "words": ".gitignore"}
+{"commit": "b133facb46cc6ef000e92a30fabe6d773399ff7c", "kind": "feature", "name": "golden-images", "by": "rule:files-of-one-feature", "sure": false, "words": "apps/web/playwright.config.ts"}
+{"commit": "474ce716ff4399ed5a76ce8ac28a4a9bbf46593e", "kind": "feature", "name": "native-shell", "by": "rule:files-of-one-feature", "sure": false, "words": "native/Makefile.native"}
+{"commit": "17cdcf7053b20356f915372aeea1f091d56f35b4", "kind": "feature", "name": "native-shell", "by": "rule:files-of-one-feature", "sure": false, "words": "native/Hifth/Web/ShellModel.swift"}
+{"commit": "82371403be7b9689f7b0bee3fddfd0c5a669dc8e", "kind": "feature", "name": "native-shell", "by": "rule:files-of-one-feature", "sure": false, "words": "native/Hifth/Web/ShellModel.swift"}
+{"commit": "bc762b038e861993e7ef44def082161962da6dec", "kind": "feature", "name": "native-shell", "by": "rule:files-of-one-feature", "sure": false, "words": "native/Makefile.native"}
+{"commit": "41db394371c2458ac9d9f1070e1fadb98077adb5", "kind": "feature", "name": "native-shell", "by": "rule:files-of-one-feature", "sure": false, "words": "native/Makefile.native"}
+{"commit": "dc73bf3fe071fcaef89824293250ed1810eb7f98", "kind": "feature", "name": "native-shell", "by": "rule:files-of-one-feature", "sure": false, "words": "native/Makefile.native"}
+{"commit": "8a3166e7e2fd33bad58749b9449596a2592af307", "kind": "feature", "name": "native-shell", "by": "rule:files-of-one-feature", "sure": false, "words": "native/Makefile.native"}
+{"commit": "8f801655187dbad6bae268d34269bfe3a4a09193", "kind": "task", "name": "drawers-for-every-tool", "by": "agent", "sure": true, "words": "ask to put every tool in a drawer, one above the next"}
+{"commit": "31c542cdbcc20b06658ca57dcb2d51c1765f5795", "kind": "feature", "name": "pens-and-pencil", "by": "agent", "sure": false, "words": "The owner's page comment asked for the Note button to look like a post-it."}
+{"commit": "19a1d408d919e16a50b3036a7591351d8652d7df", "kind": "feature", "name": "pens-and-pencil", "by": "agent", "sure": false, "words": "full screen is an icon in the tool bar"}
+{"commit": "1090ba9c67f3bc3653530ba8cc21faea404d47d7", "kind": "task", "name": "full-screen-side-tool-bar", "by": "agent", "sure": true, "words": "keep the tool bar down one side in full screen, with a hide switch"}
+{"commit": "e8e079a3af89be4e9f15beaa89d85f7d80692e9f", "kind": "use-case", "name": "read-a-spread-on-a-big-screen", "by": "agent", "sure": false, "words": "Dragging one page of a magnified open book moves the other page with it"}
+{"commit": "e8e079a3af89be4e9f15beaa89d85f7d80692e9f", "kind": "feature", "name": "desktop-spread", "by": "agent", "sure": false, "words": "The two pages slid out of line when one was dragged up or down."}
+{"commit": "0c824a1bc1b4238ffdb6829136220e5b5a6b6654", "kind": "task", "name": "plain-wheel-does-nothing", "by": "agent", "sure": false, "words": "A trackpad pinch magnifies both pages of the open book together"}
+{"commit": "0c824a1bc1b4238ffdb6829136220e5b5a6b6654", "kind": "feature", "name": "desktop-spread", "by": "agent", "sure": false, "words": "The pinch grows both pages"}
+{"commit": "a7b2a087d347bdb2ee1af43b67a379c689924df9", "kind": "task", "name": "bookmark-vs-left-off-ribbon", "by": "agent", "sure": true, "words": "tell a bookmark from the red 'where you left off' ribbon"}
+{"commit": "fb8d5cd0ddd964e25e8db3cb6c5276c1a9beff2e", "kind": "feature", "name": "desktop-spread", "by": "agent", "sure": false, "words": "The page-turn strip runs the page's height, with its rounded corners"}
+{"commit": "172b0de0cd7822a808b05f23d4ae0b60e75e4165", "kind": "feature", "name": "performance", "by": "agent", "sure": false, "words": "Record the app's size after the page-edge strip fix"}
+{"commit": "931c0ab7563d1e6375c34dcb442566e1d1bed7ea", "kind": "task", "name": "bookmark-pull-by-hand", "by": "agent", "sure": true, "words": "pulling a bookmark by hand"}
+{"commit": "931c0ab7563d1e6375c34dcb442566e1d1bed7ea", "kind": "task", "name": "full-screen-keeps-tools", "by": "agent", "sure": true, "words": "keeping the tools in full screen"}
+{"commit": "2b835700858a185c60f4dc01bf308c8e39b52841", "kind": "task", "name": "word-drawer-stacks-on-verse", "by": "agent", "sure": true, "words": "a word drawer on top of the verse's"}
+{"commit": "2b835700858a185c60f4dc01bf308c8e39b52841", "kind": "task", "name": "verse-glows-on-drawer-hover", "by": "agent", "sure": true, "words": "the verse glowing under the pointer"}
+{"commit": "7eac2aa77e593733da5c5668625ea73d435cf7c1", "kind": "task", "name": "drawer-holds-its-tools", "by": "agent", "sure": true, "words": "the verse drawer holding its tools instead of opening sheets"}
+{"commit": "b20860a33684077996f995f7d68c3197dc8a2661", "kind": "feature", "name": "pens-and-pencil", "by": "agent", "sure": false, "words": "Eraser: one of the tools on a computer"}
+{"commit": "13696e47e4cf3cb5b737e1321f221a32d6e0a342", "kind": "task", "name": "full-screen-keeps-tools", "by": "agent", "sure": true, "words": "a tool dock in full screen"}
+{"commit": "13696e47e4cf3cb5b737e1321f221a32d6e0a342", "kind": "task", "name": "app-pages-settings-and-developer", "by": "agent", "sure": true, "words": "settings and developer pages"}
+{"commit": "f07beadc756ca276d3250878f75d36ac0c33bc6a", "kind": "feature", "name": "pens-and-pencil", "by": "agent", "sure": false, "words": "so the pens fit beside eleven of them"}
+{"commit": "a10b5a80b44dc834b704b81e87dc0712dfc51216", "kind": "feature", "name": "qul-page-diff", "by": "agent", "sure": false, "words": "QUL link: shown only in dev mode"}
+{"commit": "14cb1eb90db7167d16214ce0c94c9d3d0f71f2b1", "kind": "task", "name": "drawer-holds-its-tools", "by": "agent", "sure": true, "words": "Listen, Share and Same roots should open inside the verse drawer"}
+{"commit": "2d5f6b6cd0fc8c8a38f2c43a1a5f766f27ac2581", "kind": "task", "name": "note-fixes-have-no-second-copy", "by": "agent", "sure": true, "words": "back up the note fixes to iCloud"}
+{"commit": "26cd1acaca39802abeb7f459e842535f54c24127", "kind": "task", "name": "note-harakat-word-one-pen", "by": "agent", "sure": true, "words": "one button for Note, Harakat and Word by default"}
+{"commit": "26cd1acaca39802abeb7f459e842535f54c24127", "kind": "task", "name": "kept-note-hops-sides", "by": "agent", "sure": true, "words": "The note card changing sides during a recitation reads as getting"}
+{"commit": "26cd1acaca39802abeb7f459e842535f54c24127", "kind": "task", "name": "is-the-privacy-rule-nothing-leaves-or-nothing-that-doesnt-serve", "by": "agent", "sure": true, "words": "The privacy rule now reads"}
+{"commit": "e74438d60762b79a7a171894329808ce537c9cc3", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "TestFlight plan, worked backwards from a tester's iPad"}
+{"commit": "88f044039db5831c3e6912ab56c8693e2c5f0abe", "kind": "task", "name": "testflight-licence-brief", "by": "agent", "sure": false, "words": "the licence brief is next for the pitch"}
+{"commit": "6deaa79337d39adffa9846a5f4ab239f1ba0fa09", "kind": "task", "name": "paid-features-which", "by": "agent", "sure": true, "words": "paid features behind an in-app purchase, sharing first"}
+{"commit": "6deaa79337d39adffa9846a5f4ab239f1ba0fa09", "kind": "task", "name": "paid-features-sell-a-text", "by": "agent", "sure": true, "words": "for a specific text"}
+{"commit": "6deaa79337d39adffa9846a5f4ab239f1ba0fa09", "kind": "task", "name": "paid-features-app-store", "by": "agent", "sure": true, "words": "in-app purchases need an App Store"}
+{"commit": "7bb402af47e7a3f965b02a36e312eda3a34a1539", "kind": "task", "name": "verse-tools-spoken-names", "by": "agent", "sure": false, "words": "wait for the verse's tools to finish rising before counting their buttons"}
+{"commit": "114deb8e6fe6ab349883059bdff8fe5b5860ba64", "kind": "task", "name": "publisher-account-name-matters", "by": "agent", "sure": true, "words": "how Hifth could show Bytes of Purpose instead of Omar Eid"}
+{"commit": "114deb8e6fe6ab349883059bdff8fe5b5860ba64", "kind": "task", "name": "publisher-account-is-company", "by": "agent", "sure": false, "words": "whether Bytes of Purpose is a registered company"}
+{"commit": "73ac39097569f3ff0358658caf48943071c55955", "kind": "task", "name": "testflight-membership-active", "by": "agent", "sure": true, "words": "the membership is active, team 76NHKA839A"}
+{"commit": "bfa36af97a6e21698ea24ec2a8fcd5ee88bbbff2", "kind": "task", "name": "icloud-sync-road", "by": "agent", "sure": false, "words": "Recommends the usage counts' road for all"}
+{"commit": "7601107ac02b4c66e775ecb49ad010ca4a0ad1f7", "kind": "task", "name": "publisher-account-is-company", "by": "agent", "sure": true, "words": "Bytes of Purpose is not a registered company yet"}
+{"commit": "3da642757d39251227db9e1932339b4ed4928165", "kind": "task", "name": "icloud-sync-road", "by": "agent", "sure": false, "words": "The usage counts already go through the sync loop"}
+{"commit": "8e90df30a59d66db220859af29a65da7c2a39250", "kind": "task", "name": "sharing-which-way", "by": "agent", "sure": false, "words": "a file sent by hand, iCloud sharing, a locked link with no account"}
+{"commit": "37b9fc444dc128504a1782be08b31833720610ea", "kind": "task", "name": "sharing-store", "by": "agent", "sure": false, "words": "where shared copies could live"}
+{"commit": "2e08a86550e8cf86a1fc3a3362533b87da68db0e", "kind": "task", "name": "testflight-sign-with-paid-team", "by": "agent", "sure": false, "words": "with the paid membership the two differ"}
+{"commit": "40e1bb548531be14606254ca224ae3ed96fccc0b", "kind": "task", "name": "sharing-which-way", "by": "agent", "sure": false, "words": "recommends an order:"}
+{"commit": "24cceb39aff4ceddf3288636f421e2bfd84742de", "kind": "task", "name": "testflight-register-app", "by": "agent", "sure": true, "words": "registering the app's ID is next for the owner"}
+{"commit": "2c25ad9498647458157c5c7b66c85586630eedd9", "kind": "task", "name": "sharing-cloudflare-setup", "by": "agent", "sure": true, "words": "Adds the setup as a new item"}
+{"commit": "2c25ad9498647458157c5c7b66c85586630eedd9", "kind": "task", "name": "sharing-store", "by": "agent", "sure": false, "words": "Cloudflare's free database for the shared copies"}
+{"commit": "07e5ae30286a5c92a0d891e6a66b35c37aa166a3", "kind": "task", "name": "kanban-board-for-users", "by": "agent", "sure": false, "words": "Also records the owner's ask for a board the app's users can review it on."}
+{"commit": "5247a4ffae2451b577f49a6028ee1f294e6e291b", "kind": "task", "name": "iphone-walk-pitch", "by": "agent", "sure": false, "words": "walk the pitch on the iPhone simulator"}
+{"commit": "5247a4ffae2451b577f49a6028ee1f294e6e291b", "kind": "task", "name": "iphone-own-device-install", "by": "agent", "sure": false, "words": "install on the owner's iPhone"}
+{"commit": "2edc04f1b71e126bde651f0f54a0a7264aad4158", "kind": "task", "name": "recitation-plays-on-silent", "by": "agent", "sure": true, "words": "play with the ring switch on silent"}
+{"commit": "2edc04f1b71e126bde651f0f54a0a7264aad4158", "kind": "task", "name": "recitation-plays-in-background", "by": "agent", "sure": true, "words": "keep playing when the screen"}
+{"commit": "2edc04f1b71e126bde651f0f54a0a7264aad4158", "kind": "task", "name": "recitation-lock-screen-controls", "by": "agent", "sure": true, "words": "show play/pause on the lock screen"}
+{"commit": "f244956bc7724568ff5041a36a61dc726c242442", "kind": "task", "name": "testflight-archive-builds", "by": "agent", "sure": true, "words": "Apple requires a sandbox for every Mac build sent through TestFlight"}
+{"commit": "f244956bc7724568ff5041a36a61dc726c242442", "kind": "task", "name": "iphone-record-covers-iphone", "by": "agent", "sure": true, "words": "with both iOS and macOS ticked covers all"}
+{"commit": "304d325a503f6b24742455a0781fca4d66bb4bf4", "kind": "task", "name": "homepod-siri-request", "by": "agent", "sure": true, "words": "Siri on a HomePod gets its own steps"}
+{"commit": "304d325a503f6b24742455a0781fca4d66bb4bf4", "kind": "task", "name": "recitation-airplay", "by": "agent", "sure": false, "words": "AirPlay, Siri on the phone, then Apple's approval"}
+{"commit": "4552dc2b21c12e2a0be17ec9bb21690cb8aa14cd", "kind": "task", "name": "testflight-register-app", "by": "agent", "sure": true, "words": "The App Store Connect record is made"}
+{"commit": "1ab7e8486e7649c33b6786d910df23286c65013a", "kind": "task", "name": "testflight-upload-key", "by": "agent", "sure": true, "words": "The upload key is a file Apple's tools look for"}
+{"commit": "a24ed36bc45222c113aef36534296ebc160b6124", "kind": "task", "name": "testflight-licence-brief", "by": "agent", "sure": false, "words": "The licence brief gains a narrower question about an internal-only test"}
+{"commit": "f3f2c53b44e3866427c938d291f9e6655f4346c7", "kind": "task", "name": "testflight-sign-with-paid-team", "by": "agent", "sure": false, "words": "Signing waits on the owner signing in."}
+{"commit": "827f2780e9c36b8c07d0904a8cc2aec53c5d644f", "kind": "task", "name": "app-walk-whole-demo-path", "by": "agent", "sure": false, "words": "Walk the whole pitch in the iPad app with one command"}
+{"commit": "de3413bd757c2434f6f09e9e01ae37802a97d4e8", "kind": "task", "name": "testflight-upload-key", "by": "agent", "sure": false, "words": "App Store Connect keys come as AuthKey_*.p8"}
+{"commit": "5e0033e43c41148b370eb23051df334a0d4b970c", "kind": "task", "name": "drawer-holds-its-tools", "by": "agent", "sure": true, "words": "Share opens inside the verse drawer when the setting says so"}
+{"commit": "7649af14ef24b015e2b5d62f0b7f54543754c7a1", "kind": "task", "name": "drawer-holds-its-tools", "by": "agent", "sure": false, "words": "Listen opens its play options inside the verse drawer when the setting says so"}
+{"commit": "95e933276e8004d99b05c1142b036f7147782482", "kind": "task", "name": "pitch-walk-18-60-link-count", "by": "agent", "sure": true, "words": "18:60's note links to six places, and the walk now checks for six"}
+{"commit": "696a45d7c11cb0c056207319e3b20be6043d28d0", "kind": "task", "name": "word-drawer-stacks-on-verse", "by": "agent", "sure": true, "words": "A second tap on the lit verse can open the tapped word above the verse's drawer"}
+{"commit": "bb0faf04072ef49c45b88d2e3fe8590c9721d795", "kind": "task", "name": "word-drawer-stacks-on-verse", "by": "agent", "sure": false, "words": "a second tap on the lit verse puts it out again"}
+{"commit": "b133facb46cc6ef000e92a30fabe6d773399ff7c", "kind": "task", "name": "word-drawer-stacks-on-verse", "by": "agent", "sure": false, "words": "Keep the phone test runs off the laptop-and-iPad word-drawer tests"}
+{"commit": "9fa41b678b238c31c9890e8a1aa9937c3cfabd86", "kind": "task", "name": "pitch-first-passage-ready", "by": "agent", "sure": false, "words": "a new pitch item, make the first chosen passage (2:255)"}
+{"commit": "77f7e0d0b273c93932117095a94d3346899b0c8b", "kind": "task", "name": "pitch-first-passage-ready", "by": "agent", "sure": true, "words": "2:255 is demo-ready: its note matches the printed pages"}
+{"commit": "a64715c21cfa584d5d4c3576b7f9d2d71074b572", "kind": "task", "name": "pitch-first-passage-ready", "by": "agent", "sure": false, "words": "All six pitch passages are demo-ready in the iPad simulator"}
+{"commit": "efb6c12feb8923ba80c74831d51a099d6497f938", "kind": "task", "name": "testflight-sign-with-paid-team", "by": "agent", "sure": false, "words": "The check now also needs a paid team"}
+{"commit": "474ce716ff4399ed5a76ce8ac28a4a9bbf46593e", "kind": "task", "name": "testflight-sign-with-paid-team", "by": "agent", "sure": false, "words": "about a year means the paid team signed it"}
+{"commit": "2716ad9efa20d7a9f0a3144b85b2d644fb6c9090", "kind": "task", "name": "testflight-sign-with-paid-team", "by": "agent", "sure": true, "words": "The backlog row for signing with the paid team"}
+{"commit": "41db394371c2458ac9d9f1070e1fadb98077adb5", "kind": "task", "name": "testflight-sign-with-paid-team", "by": "agent", "sure": true, "words": "make app-release-ipad DEVICE=… runs the unit tests and the verse-touch test"}
+{"commit": "dc73bf3fe071fcaef89824293250ed1810eb7f98", "kind": "task", "name": "testflight-sign-with-paid-team", "by": "agent", "sure": false, "words": "the profile Xcode made did not include it"}
+{"commit": "8a3166e7e2fd33bad58749b9449596a2592af307", "kind": "task", "name": "device-list-from-apple", "by": "agent", "sure": true, "words": "make app-devices reads this laptop's signing profiles"}
+{"commit": "023917d943d15582f9fb2606ed1a9564cf9fdafb", "kind": "task", "name": "testflight-sign-with-paid-team", "by": "agent", "sure": false, "words": "Wait for a locked iPad to be unlocked"}
+{"commit": "351f33f3a105ca9881f08200d0dfaccc7960d167", "kind": "task", "name": "pitch-first-passage-ready", "by": "agent", "sure": false, "words": "Start one list of everything to check on the real iPad"}
+{"commit": "25c4e83a7cd56d60d7f298e3d502f35511e3e143", "kind": "task", "name": "word-drawer-stacks-on-verse", "by": "agent", "sure": false, "words": "Going full screen or picking another tool while the word's drawer is stacked on the verse's closes both"}
+{"commit": "68cf62bed7c880cc7ca44d3919c66eb770e648e8", "kind": "task", "name": "word-drawer-stacks-on-verse", "by": "agent", "sure": false, "words": "Close the word's drawer when its verse's drawer moves on"}
+{"commit": "e08159e8916182e2731416bc0a664cc22eace8e8", "kind": "task", "name": "drawers-for-every-tool", "by": "agent", "sure": false, "words": "List a verse's look-alikes in its drawer, in three sections"}
+{"commit": "4871bb1bb4172d036b12fa617079a97b8bdb6e16", "kind": "task", "name": "drawers-for-every-tool", "by": "agent", "sure": false, "words": "one settings button in the top bar holding what the bar carries today"}
+{"commit": "4871bb1bb4172d036b12fa617079a97b8bdb6e16", "kind": "feature", "name": "settings", "by": "agent", "sure": true, "words": "Put the reading settings behind one button in the top bar, as a setting"}
+{"commit": "0d363caf3c3203d0d8477de9c4f56e266e8947b9", "kind": "task", "name": "drawers-for-every-tool", "by": "agent", "sure": false, "words": "which drawer is open and which sits on which"}
+{"commit": "0d363caf3c3203d0d8477de9c4f56e266e8947b9", "kind": "task", "name": "word-drawer-stacks-on-verse", "by": "agent", "sure": false, "words": "With the word's drawer stacked on the verse's"}
+{"commit": "e92b83582d20db1c30b5761ceb43ce5095094ea0", "kind": "task", "name": "remeasure-loading-speed", "by": "agent", "sure": false, "words": "re-measure loading speed before adding more code"}
+{"commit": "e92b83582d20db1c30b5761ceb43ce5095094ea0", "kind": "task", "name": "pencil-pens-as-rings", "by": "agent", "sure": false, "words": "the pens at the pencil's tip laid out as rings"}
+{"commit": "e92b83582d20db1c30b5761ceb43ce5095094ea0", "kind": "task", "name": "calendar-of-each-days-work", "by": "agent", "sure": false, "words": "a calendar with each day's mistakes and pages"}
+{"commit": "e0e3420ece47a9fdfde26b370c27c7d740cdd670", "kind": "task", "name": "pencil-pens-settings-page", "by": "agent", "sure": true, "words": "a settings page that shows the pencil's pens"}
+{"commit": "fe56105d12c03a9035722508ed198c59d335ed4e", "kind": "task", "name": "remeasure-loading-speed", "by": "agent", "sure": true, "words": "re-measuring loading speed"}
+{"commit": "fe56105d12c03a9035722508ed198c59d335ed4e", "kind": "task", "name": "pencil-pens-as-rings", "by": "agent", "sure": true, "words": "the pens as rings at the pencil's tip"}
+{"commit": "fe56105d12c03a9035722508ed198c59d335ed4e", "kind": "task", "name": "pencil-pens-settings-page", "by": "agent", "sure": true, "words": "a settings page that shows the pens"}
+{"commit": "fe56105d12c03a9035722508ed198c59d335ed4e", "kind": "task", "name": "calendar-of-each-days-work", "by": "agent", "sure": true, "words": "a calendar of each day's work"}
+{"commit": "fe56105d12c03a9035722508ed198c59d335ed4e", "kind": "task", "name": "label-commits-with-what-they-are-for", "by": "agent", "sure": false, "words": "The plan for linking commits back to what they are for is checked in as its own file"}
+{"commit": "46b4221f4a84f46724c72d54e7df41a65ba67bb0", "kind": "none", "by": "agent", "sure": true, "words": "a builders-only tool turned on for the dev server"}
+{"commit": "a7773d689683218355b86f2484961b8b5e6599c5", "kind": "feature", "name": "pens-and-pencil", "by": "agent", "sure": false, "words": "every letter switched the drawing tool"}
+{"commit": "3a8920d591e53c6bd02bec101419ea55c2e70042", "kind": "none", "by": "agent", "sure": true, "words": "replies to page comments"}
+{"commit": "a48b68f981d606fd65f6c938bfebaa83cbb457b4", "kind": "none", "by": "agent", "sure": true, "words": "a session retro note"}
+{"commit": "32275e76daa964a23db655091e464627d706b333", "kind": "none", "by": "agent", "sure": true, "words": "a kept page-comment thread"}
+{"commit": "965c85e5c71d5f86483e701ef0ad787c167fb3d9", "kind": "feature", "name": "wayfinding", "by": "agent", "sure": false, "words": "The page under a folded corner is the page's own paper"}
+{"commit": "4ff48525dd00161e98386d7fd6681eaf24c6126c", "kind": "feature", "name": "wayfinding", "by": "agent", "sure": false, "words": "The folded corner keeps a light shade, so it still reads as a fold"}
+{"commit": "e0796b6cdd8a64cb7aedea3bb9b21a13ab185d97", "kind": "none", "by": "agent", "sure": true, "words": "replies to page comments"}
+{"commit": "c70bed782421c30d1ad2c143045831ace04be8ce", "kind": "none", "by": "agent", "sure": true, "words": "a builders-only push check made steadier"}
+{"commit": "63444346c07233409cf77aa7866c74d00ccfa679", "kind": "feature", "name": "wayfinding", "by": "agent", "sure": false, "words": "the flap's tip is rounded like the page's corners"}
+{"commit": "d7de39cbe6d4b7e0a6abe5009479288cc34b4db2", "kind": "none", "by": "agent", "sure": true, "words": "a backlog list change for builders"}
+{"commit": "ed9cfe577e3b09b5082dd39e625a720694687cf3", "kind": "feature", "name": "wayfinding", "by": "agent", "sure": false, "words": "the corner on the page's own corner is rounded too"}
+{"commit": "d1c171efb4549153dde0b4dab471c55afd65e28c", "kind": "none", "by": "agent", "sure": true, "words": "a planning document linking plans"}
+{"commit": "eff3b5d49e829b40e4ecd96676d64b7db7fd72aa", "kind": "feature", "name": "wayfinding", "by": "agent", "sure": false, "words": "The short ribbon was painted across its whole 44px press target"}
+{"commit": "4afab2ffa249308ef85a6f4fbcff0979913d2129", "kind": "none", "by": "agent", "sure": true, "words": "a test made steadier"}
+{"commit": "57c08355f6f5fe394abbaaf1ebf97d71645307f3", "kind": "none", "by": "agent", "sure": true, "words": "a wording fix in a research document"}
+{"commit": "2848e3abb387b4aee63eeb9935b80d38a740dab6", "kind": "none", "by": "agent", "sure": true, "words": "a wording fix on a design page"}
+{"commit": "ec9e55a9610d6f301637d3bcc6eb7c88c6d9a3b3", "kind": "use-case", "name": "turn-the-page", "by": "agent", "sure": false, "words": "Folded corner lies below the paper's frame"}
+{"commit": "3c7a67fbe8de6255c478ec265910780f84bf161b", "kind": "none", "by": "agent", "sure": true, "words": "a builders-only board sync tool retry"}
+{"commit": "1ed01ccbfd829f51a99afb5db71c2114569603e6", "kind": "none", "by": "agent", "sure": true, "words": "goal notes and backlog tagging for the builders"}
+{"commit": "1020ef8484e8ae42f6953bcb29b6e1bc1f49f349", "kind": "none", "by": "agent", "sure": true, "words": "tests for the pitch demo steps"}
+{"commit": "a1c88edbfe2f9478aace7035524c45bedd0b9a4e", "kind": "none", "by": "agent", "sure": true, "words": "a size number recorded"}
+{"commit": "4ce8f17184457e02fa8a7a3efca7b5d9a449528d", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "why the iPad app closes on a verse tap"}
+{"commit": "7db5a4f2340d11833b053cf8918ea9bab1880886", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "why the iPad app closes when a verse is touched"}
+{"commit": "627a5514d310f6a40633c076950f09866ec8b489", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "the iPad closing when a verse is touched"}
+{"commit": "22995f5b155c5170c1683622661a65d689b56a27", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "building the web view later fixed the iPad crash"}
+{"commit": "2c26673d06437eb9ca9f5082ec5731710ce56a2d", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "the 18.5 simulator runs the app now"}
+{"commit": "bc762b038e861993e7ef44def082161962da6dec", "kind": "none", "by": "agent", "sure": true, "words": "a builders-only command to copy crash reports"}
+{"commit": "564cd832133ac52f541f8093eaa0707cf824884f", "kind": "none", "by": "agent", "sure": true, "words": "a size number recorded"}
+{"commit": "8198b7cf946d4a137bf6fb847773f2b2b7d1f6af", "kind": "feature", "name": "settings", "by": "agent", "sure": false, "words": "Whether the line of help beside the bar stays as well is a new setting"}
+{"commit": "4b9ac764268a5727927a0090eb2b13641d336025", "kind": "none", "by": "agent", "sure": true, "words": "a test made steadier"}
+{"commit": "5447223a8fd06aa062f6e4f1260e2c96546a8035", "kind": "feature", "name": "desktop-spread", "by": "agent", "sure": false, "words": "On a magnified book, a page turns without the normal-size corner peel"}
+{"commit": "c53d1b83aa9c3938dabdc982a3507189fe78b377", "kind": "feature", "name": "pens-and-pencil", "by": "agent", "sure": false, "words": "with the Mark up button set to the left"}
+{"commit": "17cdcf7053b20356f915372aeea1f091d56f35b4", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "touching a verse no longer closes the iPad app"}
+{"commit": "82371403be7b9689f7b0bee3fddfd0c5a669dc8e", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "Let the app start on iPadOS 18 simulators"}

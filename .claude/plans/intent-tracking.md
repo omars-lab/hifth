@@ -1,7 +1,22 @@
 # Plan: link every commit back to what it is for
 
-*Name: `intent-tracking`. Written 2026-11-10. Status: **slices A, B and C built** (labels,
-reading them back, and the picture: `make intent`, 2026-11-11); slice D (old history) is next. Tasks: `label-commits-with-what-they-are-for`.*
+*Name: `intent-tracking`. Written 2026-11-10. Status: **slices A to E built** (labels,
+reading them back, the picture: `make intent`, links for old commits, and the changelog and
+roadmap drafts, 2026-11-11). Slice D was
+tried on the commits since 2026-11-01: all 109 that had no label now have an answer in
+`.intent/links.jsonl`. Readers of the history answered 105 of them (61 name a task, 26 name only a
+use case or a feature, 18 are chores that belong to nothing), and the other 4 carry only a rule's
+guess from their branch name. Going further back than
+2026-11-01 is the owner's call. Slice E: `intent changelog --since 2026-11-01` and `intent roadmap`
+write `.intent/drafts/changelog.md` and `.intent/drafts/roadmap.md`, checked in for the owner to
+correct; the settings now say a use case whose actor is a hafiz is one a reader would notice, and
+that a task is "now" when it is marked next or for the pitch and "later" when it is blocked. Two
+things the first drafts showed. 117 of the 127 open tasks name no use case and no feature, so the
+roadmap files them in one counted heap; the fix is on the task rows, not in the tool. And 42 of
+the changelog's lines rest on a guess, so none of it goes into "What's New" text unchecked. This
+repo is public on GitHub, so the checked-in roadmap can be read there even though the site does
+not show it. Slice F (the push check refuses unlabelled commits; a second repo) is next. Tasks:
+`label-commits-with-what-they-are-for`.*
 
 **Asked** (owner, 2026-11-10, in the planning session of that day): a way to track work
 properly, where a use case links to its feature, to the tasks in the task list, to the commits
