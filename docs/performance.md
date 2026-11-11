@@ -540,7 +540,36 @@ and in the limit's history, both in the optimizing-performance skill, and a test
 the limit moves without a line of history beside it.
 
 **What it leaves.** Start-up as built has crept from 2138 ms a month ago to 2306 ms. The next
-time the limit is reached, a trim or a faster start comes first, not another raise.
+time the limit is reached, a trim or a faster start comes first, not another raise. Finding
+what slowed it is item ⑳.
+
+---
+
+### ⑳ Start-up got 168 ms slower in a month, and nobody knows which change did it · **open**
+
+**Where it stands (2026-11-10).** On a modelled slow phone the app took 2138 ms to become
+usable on 2026-10-11 and 2306 ms on 2026-11-10, both measured with nothing else running. The
+goal is 2500 ms, so 194 ms of margin is left. The app's code grew by about 10 KB in that month,
+but the same night's measurement shows 25 KB of extra download costing 144 ms, so size alone
+does not explain 168 ms. Something that runs at start-up got slower.
+
+**Why it matters.** The size limit only counts bytes. Work done at start-up (reading saved
+settings, drawing drawers and panels nobody has opened yet) costs time without costing many
+bytes, so the size check never sees it. And the two trims left on the list only move code from
+one file to another, which frees no room under the limit.
+
+**What to do.**
+
+1. Measure start-up at a handful of points in the month's history (the build as it was on
+   2026-10-11, then every week or so) to find the changes where the time stepped up.
+2. For each step, look at what that change runs before the first page can be used, and move
+   what can wait until it is opened.
+3. Write down at the top of the trims list what really frees room under the size limit, since
+   the two candidates there do not.
+
+**Done when:** the slow-down is traced to named changes, start-up is back near 2150 ms or the
+reason it cannot be is written here, and a check notices the next creep (for example, the
+push check comparing the last recorded start-up time with the one before it).
 
 ---
 

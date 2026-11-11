@@ -5897,7 +5897,8 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner's page comment of 2026-11-07: a developer page that shows only when the app runs on this laptop (localhost). Today the developer views are separate: the side-by-side library comparison page and build-time flags. Next step is to list what a developer page should hold, then build it as one of the bottom pages, absent from a real build."
+      "feature": "qul-page-diff",
+      "note": "Owner's page comment of 2026-11-07: a developer page that shows only when the app runs on this laptop (localhost). Today the developer views are separate: the side-by-side library comparison page and build-time flags. Next step is to list what a developer page should hold, then build it as one of the bottom pages, absent from a real build. It names the comparison page as its feature because that is the developer view that exists today; it names no use case yet, because none is written for a developer looking inside the running app, and one is owed when the page's contents are listed."
     },
     {
       "id": "remeasure-loading-speed",
@@ -5960,6 +5961,18 @@
       "severity": "question",
       "owner": "agent",
       "note": "Owner, 2026-11-10: link a use case to its feature, its tasks, the commits that did them and the plan they came from, checked in, with the labels added by a hook. First part: a git hook adds lines to each commit message naming the task (a row here), its use case, its feature and its plan, and the push check lists commits with none. Later parts (walking the links, the picture, old history, release notes) are in .claude/plans/intent-tracking.md."
+    },
+    {
+      "id": "startup-slowed-in-a-month",
+      "source": {
+        "file": "docs/performance.md",
+        "item": "⑳"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "performance",
+      "note": "Start-up on a modelled slow phone went from 2138 ms (2026-10-11) to 2306 ms (2026-11-10), both measured alone, against a 2500 ms goal. Size alone does not explain it: 25 KB of extra download costs 144 ms and the app grew about 10 KB. Next step: measure start-up at a handful of points in that month's history to find which changes slowed it, move what can wait out of start-up, and write down what really frees room under the size limit, since the two trims left on the list only move code between files."
     }
   ]
 }
