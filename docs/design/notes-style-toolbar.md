@@ -97,7 +97,7 @@ Measured sideways: the header is about 71 points, the tool strip row about 56 (a
 | Jump | A pen. | You drag from where you left the verse to where your memory went, which is a stroke on the page. |
 | Note, Harakat, Word | **One** pen, "Note", with three ways to aim it on the second tap: a word or verse; one vowel-sign, with the magnifier; one part of a word, opened up. | All three point at a spot on the page and attach something to it. Notes' eraser shows the pattern: one tool, with modes behind a second tap. This takes three buttons off the bar. |
 | Bookmark | A pen. | One tap places it. |
-| Eraser | **New.** | Notes has one and we do not. Today a mark is removed through each tool's own way of undoing it. |
+| Eraser | **New.** | Notes has one and, when this was written, we did not: a mark was removed through each tool's own way of undoing it. Built 2026-10-12 (question ③ below). |
 | Crop | Behind the ⋯ (or the side slot). | It makes a picture to share; it does not mark the page. |
 | Page zoom | It stays in the header (− 100% +). | It is about viewing, not marking. |
 

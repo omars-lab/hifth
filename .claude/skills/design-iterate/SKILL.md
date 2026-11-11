@@ -83,7 +83,8 @@ option written to lose). Then stop; the choice is the owner's.
 Hand the owner the live page and let them pick by doing. Open it, on the page and in what you
 say, with the fundamentals in a few short sentences — what differs, why, what stays the same, one
 real example — before any option; the `decide` skill's first section is the rule. Record the choice with the `decide`
-skill: the winning component **graduates into the app**, the losers are **deleted**, and the row in
+skill: the winning component **graduates into the app** as the default, the others **stay as a setting
+in the info panel** the reader can switch to (the rule since 2026-10-08), and the row in
 `docs/decisions.json` names the options page as both its `artifact` (the site address) and its
 `page` (checked in). Nothing was throwaway that the choice did not need.
 
@@ -94,7 +95,7 @@ issues / decide (frame the question)
         ↓
 design-iterate  ← you are here: build the options, render, look, iterate
         ↓
-decide (record the answer; winner graduates, losers deleted)
+decide (record the answer; winner becomes the default, the others stay as a setting)
         ↓
 testing (hold the winner still: e2e / golden)
 ```

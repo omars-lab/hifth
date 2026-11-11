@@ -380,6 +380,7 @@ exist only on the real iPad, so the last check is a finger (and the Pencil) on t
 | you see | cause | do |
 |---|---|---|
 | "No web build in this app" page | `native/WebBundle/` empty (gitignored) | `make app-web`, then build again |
+| `make app-probe` ends "the probe never answered", or `make app-shot` ends "no screenshot after 30 s", and the app's screen is white with "not found: index.html" in the corner | the same: this working copy never had `make app-web` run in it (each working copy has its own `native/WebBundle/`). Neither command checks first, so each waits out its whole time limit | `make app-web FLAVOUR=public` (or the pitch), then run it again; `xcrun simctl io <iPad id> screenshot <file>` shows the screen when in doubt |
 | Gatekeeper: app "is damaged and can't be opened" | an unsigned bundle the system had to launch (usually the UI test runner) | ad-hoc signing is already set for every Mac target in `project.yml`; `make app-clean` and rebuild; check with `codesign -dv native/build/Build/Products/Debug/Hifth.app` |
 | "Timed out while enabling automation mode" | Mac XCUITest needs your terminal allowed under System Settings → Privacy & Security → Accessibility (and Automation) | grant it, rerun `make app-test-mac-ui`; `make app-test` skips the Mac UI test on purpose |
 | old page after a rebuild on the simulator | stale install | `xcrun simctl uninstall <udid> com.bytesofpurpose.hifth`, then `make app-run-ipad` |
