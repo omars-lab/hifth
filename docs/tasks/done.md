@@ -94,6 +94,35 @@ highlighter's colours in an outer ring. The row that was there before stays as a
 **Done:** Settings has a button, "See what each pen does". Its page says how to open the pens,
 shows them working in the layout the reader chose, and gives one line per pen. PR #591.
 
+### 2026-11-11 — edge-grab-firefox-test-fails-on-its-own: the page-edge strip keeps its rounded corners
+
+**Done:** The strip you grab to turn the page sometimes measured the paper before the left
+page knew which side it was on, and kept a square corner. It now measures again whenever a
+page is added or changes side. A page drawn more than two seconds late no longer keeps a
+square strip either. Two browser tests hold it, run 25 times each in Firefox. Design:
+`docs/design/build-and-test.md` ③; account: `docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md`.
+
+### 2026-11-11 — skills-miss-three-known-wrong-turns: three wrong turns written into the skills
+
+**Done:** The run-app skill says the preview keeps the old build after a rebuild and gives the
+line that clears it. The walk-app skill says a made-up Escape does not close the info panel.
+The speed skill names the setting that switches the speed probe on for the laptop's dev
+server. Design: `docs/design/build-and-test.md` ⑤.
+
+### 2026-11-11 — browser-test-skipped-unnoticed: a new browser test cannot miss a run unseen
+
+**Done:** A checked-in record says which runs pick up each browser test file. A check before
+every commit asks the test runner and refuses a new file, or one that joined or left a run,
+until the record is updated; for a new file it prints the runs it is in and the ones it is
+not. Design: `docs/design/build-and-test.md` ①.
+
+### 2026-11-11 — push-says-when-port-is-held: a push says at once when the test port is taken
+
+**Done:** The first push check looks at the two ports the browser tests serve the app on. When
+a leftover server holds one, the push stops in a second and prints the port, the program
+holding it and the command that stops it, where before it failed minutes in like a broken
+test. Design: `docs/design/build-and-test.md` ②.
+
 ### 2026-11-11 — app-pages-developer-page: a developer page only the dev server shows
 
 **Done:** With the row of page icons on, the laptop's dev server shows a third icon, Developer.

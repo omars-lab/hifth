@@ -1,0 +1,127 @@
+/**
+ * A push says at the start when something already holds the port the browser
+ * tests serve the app on (docs/design/build-and-test.md ②). Before this, a
+ * server left over from an earlier look let the push run for minutes and then
+ * fail in a way that read like a broken test.
+ *
+ * Each test runs the real script against a port a made-up server holds, or
+ * one nothing holds. Written before the script (2026-11-11) and seen failing.
+ *
+ * Run with the other script tests: pnpm test:scripts
+ */
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
+import { createServer } from "node:net";
+import { fileURLToPath } from "node:url";
+
+const SCRIPT = fileURLToPath(new URL("e2e-port-free.mjs", import.meta.url));
+
+/** A server on a port the system picks, on the given address. */
+const hold = (host) =>
+  new Promise((done, fail) => {
+    const s = createServer();
+    s.once("error", fail);
+    s.listen(0, host, () => done(s));
+  });
+
+/** A port nothing holds: open one, note its number, close it. */
+async function freePort() {
+  const s = await hold("127.0.0.1");
+  const { port } = s.address();
+  await new Promise((r) => s.close(r));
+  return port;
+}
+
+/** Run the script told to look at `port` (and so port + 1000 for the pitch build). */
+const run = (port, env = {}) =>
+  new Promise((done) => {
+    const child = spawn("node", [SCRIPT], {
+      // Start from a known state: none of the settings that switch the look off.
+      env: { ...process.env, HIFTH_BASE_URL: "", HIFTH_REUSE_SERVER: "", CI: "", HIFTH_E2E_PORT: String(port), ...env },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let out = "";
+    child.stdout.on("data", (d) => (out += d));
+    child.stderr.on("data", (d) => (out += d));
+    child.on("exit", (status) => done({ status, out }));
+  });
+
+test("with nothing on either port it passes and says nothing", async () => {
+  const port = await freePort();
+  const { status, out } = await run(port);
+  assert.equal(status, 0, out);
+  assert.equal(out.trim(), "");
+});
+
+test("a server on the app's port stops it, naming the port, who holds it and how to stop it", async () => {
+  const s = await hold("127.0.0.1");
+  try {
+    const { port } = s.address();
+    const { status, out } = await run(port);
+    assert.equal(status, 1, out);
+    assert.match(out, new RegExp(`\\b${port}\\b`));
+    // This test's own process is the holder.
+    assert.match(out, new RegExp(`\\b${process.pid}\\b`));
+    assert.match(out, new RegExp(`kill ${process.pid}\\b`));
+  } finally {
+    await new Promise((r) => s.close(r));
+  }
+});
+
+test("a server on the pitch build's port stops it too", async () => {
+  const s = await hold("127.0.0.1");
+  try {
+    const pitch = s.address().port;
+    const { status, out } = await run(pitch - 1000);
+    assert.equal(status, 1, out);
+    assert.match(out, new RegExp(`\\b${pitch}\\b`));
+  } finally {
+    await new Promise((r) => s.close(r));
+  }
+});
+
+test("a server that listens only on the other kind of address is still found", async (t) => {
+  // The preview server answers on whichever of the two the name "localhost"
+  // gives it, so a look at one of them alone would miss half the leftovers.
+  // On the Mac this was written on, a server on this address also answers on
+  // the other, so here it is the two tests above that fail when only one
+  // address is tried (seen with only this one tried, 2026-11-11). This test
+  // is for a machine where the two are kept apart.
+  let s;
+  try {
+    s = await hold("::1");
+  } catch {
+    t.skip("this machine has no ::1 address");
+    return;
+  }
+  try {
+    const { status, out } = await run(s.address().port);
+    assert.equal(status, 1, out);
+  } finally {
+    await new Promise((r) => s.close(r));
+  }
+});
+
+test("a run pointed at a server that is already up does not look at the ports", async () => {
+  // HIFTH_BASE_URL makes the tests start no server of their own.
+  const s = await hold("127.0.0.1");
+  try {
+    const { status, out } = await run(s.address().port, { HIFTH_BASE_URL: "http://localhost:9" });
+    assert.equal(status, 0, out);
+  } finally {
+    await new Promise((r) => s.close(r));
+  }
+});
+
+test("a run asked by name to use the server on the port does not stop for it", async () => {
+  const s = await hold("127.0.0.1");
+  try {
+    const port = s.address().port;
+    assert.equal((await run(port, { HIFTH_REUSE_SERVER: "1" })).status, 0);
+    // Hosted CI never uses a server that is already there, so there it still stops.
+    assert.equal((await run(port, { HIFTH_REUSE_SERVER: "1", CI: "true" })).status, 1);
+  } finally {
+    await new Promise((r) => s.close(r));
+  }
+});

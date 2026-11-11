@@ -100,6 +100,18 @@ HIFTH_BASE_URL=http://localhost:7122 pnpm -C apps/web exec playwright test --pro
 It serves `dist` as it is on disk, so a rebuild is picked up; it is opt-in because it
 will happily test a build you forgot to redo.
 
+**A new test file: say where it runs.** The laptop (`desktop`) and Firefox
+(`desktop-firefox`) runs each pick their files from a list in `apps/web/playwright.config.ts`;
+the two phone runs take everything not named as left out. `apps/web/e2e/runs.json` records
+which runs pick up each file, and the commit check (`pnpm gate:e2e-runs`) refuses a new file,
+or one that joined or left a run, printing where it runs and where it does not. Add the file
+to the lists it belongs on, then `pnpm gate:e2e-runs --write` and commit the record with it.
+
+A push looks at the copy's two ports before anything else (`make e2e-port-free`). If a
+preview server from an earlier look is still on one, the push stops in a second and prints
+the port, the program holding it and the `kill` line that stops it. Run the same target by
+hand before a long browser run.
+
 ### Firefox runs a fixed list of test files
 
 The owner reads in Firefox, but the `desktop-firefox` project runs **only the files named
@@ -125,6 +137,23 @@ The other projects: `pitch` and `pitch-firefox` (the private pitch build, its ow
 make report    # opens the last run's traces, DOM snapshots, console, network,
                # and the three-way image diff for a golden failure
 ```
+
+**A test that fails now and then and passes on the retry: find out whether the test or the
+app is wrong before touching either.** Three steps, each a few minutes:
+
+1. Run only that test many times with no retries:
+   `pnpm exec playwright test e2e/<file> --project=desktop-firefox -g "<name>" --repeat-each 25 --retries 0`
+   (from `apps/web`). Now it fails on demand.
+2. Make the test keep looking (`expect(async () => { … }).toPass({ timeout: 10_000 })`). If it
+   now always passes, the test was looking too soon. If it still fails, the app is wrong and
+   stays wrong, which a reader would see.
+3. For an app fault, have the code write down what it saw each time it ran (a list on
+   `window`, printed in the test's failure message), read one failing run, then take the
+   record out. The browser tests serve the built app, so run `make -s build` after each
+   change to the app's code, or the record never shows up.
+
+The page-edge strip was found this way on 2026-11-11
+(`docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md`).
 
 ## The golden pictures
 

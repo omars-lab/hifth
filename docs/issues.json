@@ -5971,10 +5971,11 @@
         "file": "docs/design/build-and-test.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "risk",
       "owner": "agent",
-      "note": "A new browser test file left off the laptop and Firefox runs' hand-kept lists is not run there, and nothing says so. It happened twice in a week in November 2026. Next step: a check before a commit that every browser test file is on a list or named as left out, with a test of the check."
+      "note": "Answered 2026-11-11: a checked-in record says which runs pick up each browser test file, and a check before every commit asks the test runner and refuses a new file, or a file that joined or left a run, until the record is updated. For a new file it prints the runs it is in and the ones it is not. Tried for real with a throwaway test file.",
+      "closedBy": "scripts/gate-e2e-runs.test.mjs"
     },
     {
       "id": "push-says-when-port-is-held",
@@ -5982,10 +5983,11 @@
         "file": "docs/design/build-and-test.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "defect",
       "owner": "agent",
-      "note": "When a server left over from an earlier look holds the browser tests' port, a push runs for minutes and then fails in a way that reads like a broken test. Next step: the push looks at the port first and says in one line what holds it and how to stop it, test first."
+      "note": "Answered 2026-11-11: the first push check now looks at the two ports the browser tests serve the app on, and when one is held it stops in a second, naming the port, the program holding it and the command that stops it. Tried for real with a preview server left on the port.",
+      "closedBy": "scripts/e2e-port-free.test.mjs"
     },
     {
       "id": "edge-grab-firefox-test-fails-on-its-own",
@@ -5993,10 +5995,11 @@
         "file": "docs/design/build-and-test.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "defect",
       "owner": "agent",
-      "note": "The Firefox test of grabbing the page's edge fails now and then with no change to the code it tests, and each rerun of a push costs about 13 minutes. Next step: find what it waits on that is not always ready, fix the wait, run it twenty times clean."
+      "note": "Answered 2026-11-11: it was a fault in the app. The strip you grab to turn the page copies its rounded corners from the paper, and sometimes measured a moment before the left page had been told which side it was on, then stopped looking and kept a square corner. It now measures again whenever a page is added or changes side, which also fixes a strip staying square when a page draws more than two seconds late. Both tests ran 25 times each in Firefox with no failure (docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md).",
+      "closedBy": "apps/web/e2e/edge-peel.spec.ts"
     },
     {
       "id": "comment-bar-covers-bottom-row-on-phone-width",
@@ -6007,7 +6010,7 @@
       "status": "open",
       "severity": "defect",
       "owner": "agent",
-      "note": "On the dev server at phone width the comment tool's bar covers a bottom row of icons until Hide is pressed (found 2026-11-11 while checking the developer page). The bar comes from the owner's plugin collection. Next step: move or fold the bar at phone width in the plugin, or say in our skills to press Hide before a phone-width look."
+      "note": "On the dev server at phone width the comment tool's bar lies over the bottom of the app, so a bottom row of icons cannot be pressed until the bar is hidden. Measured at 390 wide on 2026-11-11: hiding it is not enough, because the small tab it leaves still lies over the last icon and the end of the slider. The run-app skill now says to use the preview, which never has the bar, or to take the bar off the page for the look. Next step, in the owner's plugin collection and not here: the bar folds or moves at phone width, and remembers being hidden across a reload."
     },
     {
       "id": "skills-miss-three-known-wrong-turns",
@@ -6015,10 +6018,10 @@
         "file": "docs/design/build-and-test.md",
         "item": "⑤"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "defect",
       "owner": "agent",
-      "note": "Three things each cost a wrong turn and are written only in session notes: the local preview serving the old build until its saved copy is cleared, a made-up Escape not closing the info panel in a walk script, and the speed probe's dev-server setting that no command or skill names. Next step: one line each in the skill a session would be reading at the time."
+      "note": "Answered 2026-11-11: each of the three now has a line in the skill a session would be reading at the time: the preview serving the old build until its saved copy is cleared (run-app, with the line that clears it), a made-up Escape not closing the info panel in a walk script (walk-app), and the setting that switches the speed probe on for the laptop's dev server (optimizing-performance)."
     },
     {
       "id": "startup-slowed-in-a-month",

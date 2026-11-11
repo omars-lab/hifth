@@ -106,6 +106,10 @@ seconds. Run it before the slower iPad walk; it is not a substitute for it.
 | `scripts/gap-throttle.mjs` | runs the gap walk in Chromium at home speed, slow wifi and poor wifi, once for each way of making the next verse ready and each pause before the press, each in a fresh browser | comparing the next-verse settings, or checking a slow connection, without a device; point it at a local build with `--url`, and at another surah's page with `--route`; `--pause 600,2000` tries each pause before the press and `--gaps 0` times only the first verse; `--from tools --route /hafs-kfqc/2:255` presses Play on that verse's tools instead of the corner | `node .claude/skills/walk-app/scripts/gap-throttle.mjs --url http://localhost:5197/` |
 | `make app-test ONLY=` | one simulator test, which can turn the iPad and measure the web view's own picture | pinning an app-only fault, watched failing first | `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize` |
 
+A made-up Escape key sent from a walk script does not close the info panel, though it does
+close a pen's question. Close the panel with its own close button, as
+`scripts/app-pages-walk.js` does (`header button` inside the panel).
+
 The walk scripts find buttons by their names, so a button renamed in the messages leaves a walk
 searching for the old name; `node --test scripts/walk-names.test.mjs` checks each search against
 the message it means, and a new search for a named button gets a row there. Where the app puts

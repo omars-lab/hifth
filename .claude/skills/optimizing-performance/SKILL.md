@@ -85,6 +85,11 @@ it does not; never raise just to make a red check go green without looking at th
   GitHub Actions minutes, and left Lighthouse out as too slow for a hook). Run `make lighthouse`
   before a demo, and whenever the size cap moves.
 
+- **The speed probe on the laptop's dev server is `VITE_PERF_PROBE=1 make dev`.** The probe is
+  the panel of timings drawn over the page. It is switched on when the app is built or served,
+  not from the address bar, and the only make target that names it (`make phone-perf`) builds
+  it for a phone. The dev server's Developer page says whether it is on.
+
 ## What to trim, and how
 
 **Read [trims.md](trims.md) now.** It holds where the room goes, each trim's status (in progress,

@@ -40,7 +40,12 @@ test.describe("Hifth · lifting a page by its corner", () => {
     // The owner, 2026-11-07: the shading on hover started below the top of the
     // book and ran on under the pages, with square corners.
     await openAt8(page);
-    for (const side of ["left", "right"] as const) {
+    // The two pages are drawn one after the other and each strip finds its
+    // paper a frame later, so look until it has. One look straight after the
+    // first page showed failed on its own in Firefox now and then. Looking
+    // for ten seconds then showed the real fault: a strip measured before its
+    // leaf was told which side it is on kept the other side's square corner.
+    for (const side of ["left", "right"] as const) await expect(async () => {
       const got = await page.getByTestId(`edge-grab-${side}`).evaluate((rail, side) => {
         const book = rail.parentElement!.getBoundingClientRect();
         const papers = [...rail.parentElement!.querySelectorAll("[data-live] svg[aria-labelledby]")]
@@ -49,17 +54,46 @@ test.describe("Hifth · lifting a page by its corner", () => {
         const paper = papers.find((p) => {
           const r = p.getBoundingClientRect();
           return side === "left" ? r.left + r.width / 2 < book.left + book.width / 2 : r.left + r.width / 2 >= book.left + book.width / 2;
-        })!;
+        });
+        if (!paper) return null;
         const r = rail.getBoundingClientRect();
         const pr = paper.getBoundingClientRect();
         const cs = getComputedStyle(rail);
         const outer = side === "left" ? [cs.borderTopLeftRadius, cs.borderBottomLeftRadius] : [cs.borderTopRightRadius, cs.borderBottomRightRadius];
         return { top: r.top - pr.top, bottom: r.bottom - pr.bottom, outer };
       }, side);
-      expect(Math.abs(got.top), `${side} strip starts at the paper's head`).toBeLessThan(1.5);
-      expect(Math.abs(got.bottom), `${side} strip ends at the paper's foot`).toBeLessThan(1.5);
-      for (const r of got.outer) expect(parseFloat(r), `${side} strip's outer corner is rounded`).toBeGreaterThan(0);
+      expect(got, `${side} page is drawn`).not.toBeNull();
+      expect(Math.abs(got!.top), `${side} strip starts at the paper's head`).toBeLessThan(1.5);
+      expect(Math.abs(got!.bottom), `${side} strip ends at the paper's foot`).toBeLessThan(1.5);
+      for (const r of got!.outer) expect(parseFloat(r), `${side} strip's outer corner is rounded`).toBeGreaterThan(0);
+    }).toPass({ timeout: 10_000 });
+  });
+
+  test("a facing page that draws late still gets a strip with rounded corners", async ({ browser }) => {
+    // Found 2026-11-11 while chasing the test above failing on its own in
+    // Firefox: the strips looked for their paper for two seconds and then gave
+    // up, so a page whose drawing came later kept a square strip until the next
+    // turn. The drawing of every page but 8 is held back here for longer than that.
+    const context = await browser.newContext({ serviceWorkers: "block" });
+    const page = await context.newPage();
+    await page.route(/\.svg(\?|$)/, async (route) => {
+      if (!/\/8\.svg/.test(route.request().url())) await new Promise((r) => setTimeout(r, 3000));
+      await route.continue();
+    });
+    await openAt8(page);
+    for (const side of ["left", "right"] as const) {
+      await expect
+        .poll(
+          () =>
+            page.getByTestId(`edge-grab-${side}`).evaluate((rail, side) => {
+              const cs = getComputedStyle(rail);
+              return parseFloat(side === "left" ? cs.borderTopLeftRadius : cs.borderTopRightRadius);
+            }, side),
+          { message: `${side} strip's outer corner is rounded once its page is drawn`, timeout: 10_000 },
+        )
+        .toBeGreaterThan(0);
     }
+    await context.close();
   });
 
   test("mid-grab the corner lifts with the hand and the next pages show beneath", async ({

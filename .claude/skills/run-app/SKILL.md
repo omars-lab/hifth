@@ -39,7 +39,7 @@ app either.
 If the ask is genuinely "open that design page", `open docs/design/<name>.html` —
 but confirm which, because "desktop UI" reads both ways.
 
-## Seeing a change — three ways a fix gets checked where it cannot fail
+## Seeing a change — five ways a fix gets checked where it cannot fail
 
 1. **A hash-only navigation is not a reload.** The app routes on `#/…`, so pointing
    the tab at a new `#` address keeps the old module graph running. After an edit,
@@ -52,6 +52,18 @@ but confirm which, because "desktop UI" reads both ways.
    ship a fix for the built app that only the dev server needed.
 3. **e2e runs the build.** `pnpm --filter @hifth/web build` first, and free 4173, the tests' own port in the main checkout,
    (`lsof -ti:4173 | xargs kill`) or Playwright refuses to start its own.
+4. **The preview keeps the old build after a rebuild.** The built app saves itself in the
+   browser so it works offline, and a tab that has opened it once goes on being served that
+   saved copy. A change then looks as if it did not land. Clear it in the tab, then reload:
+   `navigator.serviceWorker.getRegistrations().then((rs) => Promise.all(rs.map((r) => r.unregister()))).then(() => location.reload())`.
+   The dev server (7122) saves nothing, so it never does this.
+5. **At phone width the dev server's comment bar covers the bottom of the app.** The bar for
+   leaving comments on a page sits in the bottom corner of every dev-server page, and on a
+   narrow window it lies over the slider or a bottom row of icons, so a press there lands on
+   the bar. Its **Hide** button is not enough: the small Comments tab it leaves still lies
+   over the last icon of the row and the end of the slider (measured at 390 wide, 2026-11-11),
+   and Hide is forgotten on reload. Look at the preview, which never has the bar, or take the
+   bar off the page for the look: `document.getElementById("__page-comments")?.remove()`.
 
 ## Screenshotting the app when there is no browser window — `make drive`
 
