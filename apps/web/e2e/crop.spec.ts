@@ -21,7 +21,11 @@ test.describe("Hifth · the crop tool", () => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page)).toBeVisible();
     await pickCrop(page, isMobile);
-    await expect(page.getByText("Drag a box over the page to cut it out")).toBeVisible();
+    // The tool's own hover label carries the same words, and the pointer that
+    // picked the tool is still resting on it (tool-help.spec.ts): the help
+    // asked for here is the line, outside the label.
+    const hint = page.getByText("Drag a box over the page to cut it out");
+    await expect(hint.and(page.locator(":not([role=tooltip] *)"))).toBeVisible();
 
     const r = (await pageSvg(page).boundingBox())!;
     const from = { x: r.x + r.width * 0.2, y: r.y + r.height * 0.3 };
