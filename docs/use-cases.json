@@ -687,6 +687,64 @@
       ]
     },
     {
+      "id": "find-everything-about-my-verse-in-one-place",
+      "actor": "hafiz",
+      "goal": "When I touch a verse, put everything I can do with it in one drawer under the page, so I never hunt for a button or lose sight of the verse.",
+      "feature": "select-an-ayah",
+      "code": [
+        {
+          "file": "apps/web/src/components/VerseDrawer.tsx",
+          "symbol": "VerseDrawer"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/desktop.spec.ts",
+          "test": "a verse tap opens the verse's drawer below the page; Escape closes it"
+        },
+        {
+          "file": "apps/web/e2e/drawer-tools.spec.ts",
+          "test": "with the setting on, Same roots opens inside the drawer, not as its own card, and the verse stays in sight"
+        },
+        {
+          "file": "apps/web/e2e/word-stack.spec.ts",
+          "test": "with the setting on, a second tap on the lit verse opens the word above the verse's drawer, and both stay"
+        }
+      ],
+      "gap": "The commentary still opens as its own card, not inside the drawer, so the promise holds for Listen, Same roots, Share and the look-alikes only."
+    },
+    {
+      "id": "read-the-commentary-beside-my-verse",
+      "actor": "hafiz",
+      "goal": "When a verse puzzles me, show me what a commentary I trust says about it, right beside the verse, and tell me whose words they are.",
+      "feature": "tafsir-seam",
+      "code": [
+        {
+          "file": "apps/web/src/tafsir/commentary.ts",
+          "symbol": "noteFor"
+        },
+        {
+          "file": "apps/web/src/tafsir/sideload.ts",
+          "symbol": "importTafsirBundle"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/src/tafsir/commentary.test.ts",
+          "test": "carries the source, so the drawer names whose words these are"
+        },
+        {
+          "file": "apps/web/src/tafsir/commentary.test.ts",
+          "test": "finds an entry by a canonical ayah key"
+        },
+        {
+          "file": "apps/web/src/tafsir/sideload.test.ts",
+          "test": "stores, registers a provider, and reports what it did"
+        }
+      ],
+      "gap": "Proven on made-up notes only. Whether a real book's notes match its print, passage by passage, is checked by hand in the private build, and no test here can hold that book's words."
+    },
+    {
       "id": "pick-a-pen-without-leaving-the-verse",
       "actor": "hafiz",
       "goal": "When I squeeze my pencil, give me the pens right where I am writing, so I can mark a mistake without looking away from the verse.",
