@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { spokenName } from "./spoken-name";
 import {
   Adjacency,
@@ -259,6 +259,11 @@ import { rememberSettingsAt, savedSettingsAt, type SettingsAt } from "./settings
 import { rememberDrawerMarks, savedDrawerMarks, type DrawerMarks } from "./drawer-marks";
 import { SettingsDrawer } from "./components/SettingsDrawer";
 import { PageRow } from "./components/PageRow";
+
+// The developer page (docs/design/app-pages.md ②) exists only on the laptop's dev
+// server. `import.meta.env.DEV` is a constant the build folds, so a real build has
+// neither the page nor the import; the size check refuses one that does.
+const DeveloperPage = import.meta.env.DEV ? lazy(() => import("./components/DeveloperPage")) : null;
 import { rememberAppPages, savedAppPages, type AppPage, type AppPages } from "./app-pages";
 import { rememberWordTap, savedWordTap, type WordTap } from "./word-tap";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
@@ -5237,7 +5242,14 @@ export function App(): JSX.Element {
       ) : (
         deletedNote && <UndoBar said={deletedNote.said} onUndo={undoDelete} onDone={endNoteUndo} />
       )}
-      {appPages === "row" && <PageRow page={appPage} onPage={setAppPage} />}
+      {DeveloperPage && appPages === "row" && appPage === "developer" && (
+        <Suspense fallback={null}>
+          <DeveloperPage onClose={() => setAppPage("mushaf")} />
+        </Suspense>
+      )}
+      {appPages === "row" && (
+        <PageRow page={appPage} onPage={setAppPage} developer={DeveloperPage ? "Developer" : undefined} />
+      )}
       <LiveAnnouncer message={message} />
     </div>
     </FullScreenContext.Provider>

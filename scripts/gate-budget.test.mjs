@@ -71,6 +71,22 @@ test("gate:budget passes the drawer and the held book in the pitch build", () =>
   assert.equal(r.status, 0, r.out);
 });
 
+// The developer page is for the laptop's dev server alone (docs/design/app-pages.md ②).
+const DEVELOPER = 'h("div", { "data-developer-page": "" });';
+
+test("gate:budget refuses the developer page in a public build", () => {
+  const r = check(DEVELOPER);
+  assert.equal(r.status, 1, r.out);
+  assert.match(r.out, /the developer page is in a build/);
+  assert.match(r.out, /"data-developer-page"/);
+});
+
+test("gate:budget refuses the developer page in the pitch build too", () => {
+  const r = check(`${DRAWER}${HELD}${DEVELOPER}`, { VITE_PITCH: "1" });
+  assert.equal(r.status, 1, r.out);
+  assert.match(r.out, /the developer page is in a build/);
+});
+
 test("gate:budget does not mistake the drawer's words for its code", () => {
   // Its words sit in the shared word list, which every build carries.
   const r = check('const words = { surahIntro: "Surah introduction" };');

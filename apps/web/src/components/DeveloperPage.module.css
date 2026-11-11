@@ -1,0 +1,94 @@
+/* The developer page: over the mushaf, down to the row of page icons. Dev server only. */
+.page {
+  position: fixed;
+  inset-block: 0 var(--page-row-h, 0px);
+  inset-inline: 0;
+  z-index: var(--z-modal);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding-inline: max(var(--space-4), calc((100% - 640px) / 2));
+  padding-block: max(var(--space-4), env(safe-area-inset-top)) var(--space-5);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.note {
+  margin-block: var(--space-1) 0;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+}
+
+.part {
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.part h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-md);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px var(--space-3);
+  align-items: center;
+  padding-block: var(--space-2);
+}
+
+.name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.state {
+  color: var(--ink-soft);
+}
+
+.state[data-on] {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.what {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.forget {
+  min-block-size: 44px;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--paper-raised);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.link {
+  color: var(--accent-strong);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.link:focus-visible,
+.forget:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

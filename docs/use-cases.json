@@ -1063,6 +1063,45 @@
       "gap": "Only `distance` is stated as a plural. Seven other Arabic messages still write one fixed form for every count — «٣ روابط» is right, «١١ روابط» is not. They are one JSON edit each now, and each wants a hafiz's eye. docs/design/i18n.md §⑨."
     },
     {
+      "id": "see-how-the-running-app-was-set-up",
+      "actor": "maintainer",
+      "goal": "See in one place how the app in front of me was started, what this browser remembers for it and what screen it thinks it is on, and reach the developer-only pages from there, with none of it in a build a reader gets.",
+      "feature": "qul-page-diff",
+      "code": [
+        {
+          "file": "apps/web/src/components/DeveloperPage.tsx",
+          "symbol": "export default function DeveloperPage"
+        },
+        {
+          "file": "scripts/gate-budget.mjs",
+          "symbol": "const developer"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/src/components/DeveloperPage.test.tsx",
+          "test": "says how this app was built, switch by switch, with the command for each"
+        },
+        {
+          "file": "apps/web/src/components/DeveloperPage.test.tsx",
+          "test": "forgets one remembered thing when asked, and leaves the rest"
+        },
+        {
+          "file": "scripts/gate-budget.test.mjs",
+          "test": "gate:budget refuses the developer page in a public build"
+        },
+        {
+          "file": "scripts/gate-budget.test.mjs",
+          "test": "gate:budget refuses the developer page in the pitch build too"
+        },
+        {
+          "file": "apps/web/e2e/app-pages.spec.ts",
+          "test": "switched on, the row shows the mushaf and settings, and no developer page in a real build"
+        }
+      ],
+      "gap": "No browser test opens the page itself, since the browser tests run a built app and no build has it; it was looked at by hand on the dev server in Chrome and Firefox (2026-11-11). On a narrow window the comment tool's bar covers the row's icons until it is hidden."
+    },
+    {
       "id": "add-a-language-without-retyping-the-chrome",
       "actor": "maintainer",
       "goal": "Give the app a third language by writing that language, not by re-typing 134 interface members and hoping I got the plural rules right.",
