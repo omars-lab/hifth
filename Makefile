@@ -368,7 +368,7 @@ etl-check: core ## Rebuild the shipped data and fail if it differs from what is 
 	  || { echo "  ✗ the data rebuild differs from the committed assets (run: make etl, then commit)"; exit 1; }
 
 .PHONY: pre-commit
-pre-commit: secrets-staged checks-fast ## Everything checked before each commit — the pre-commit hook runs exactly this
+pre-commit: secrets-staged env-check-staged checks-fast ## Everything checked before each commit — the pre-commit hook runs exactly this
 	@# The two asset gates weigh all 604 pages (~9 s together), so a commit
 	@# pays for them only when it touches the assets. pre-push runs them always.
 	@if git diff --cached --name-only | grep -q '^apps/web/public/assets/'; then \
@@ -979,3 +979,5 @@ comments:  ## Serve the pages with the comment button (development-manager)
 .PHONY: prepare-commit-msg
 prepare-commit-msg:
 	@if command -v intent >/dev/null 2>&1; then intent label-commit "$(MSG)" "$(SOURCE)" || true; else echo "intent: the intent tool is not installed, so this commit has no label. Install the intent-manager plugin to label commits." >&2; fi
+
+include env.mk
