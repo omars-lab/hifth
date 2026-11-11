@@ -80,6 +80,35 @@ for (const size of [
       await expect(drawer(page)).toBeVisible();
     });
 
+    // The word's drawer stands on the verse's. When the verse's drawer goes
+    // away under it, the word's goes with it, rather than floating over a gap
+    // (checked 2026-11-10, the open note on the stacked drawer).
+    for (const away of [
+      {
+        how: "the page goes full screen",
+        go: (page: Page) =>
+          page.getByRole("button", { name: "Full screen" }).filter({ visible: true }).first().click(),
+      },
+      {
+        how: "the highlighter is picked",
+        go: (page: Page) =>
+          page.getByRole("toolbar", { name: "Page tools" }).getByRole("radio", { name: "Highlight", exact: true }).click(),
+      },
+    ]) {
+      test(`with the word's drawer stacked, it closes with the verse's when ${away.how}`, async ({ page }) => {
+        await page.addInitScript((key) => localStorage.setItem(key, "word"), WORD_TAP_KEY);
+        await page.goto("/#/hafs-kfqc/2:45");
+        await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+        const at = await inLitVerse(page);
+        await page.mouse.click(at.x, at.y);
+        await expect(parts(page)).toBeVisible();
+
+        await away.go(page);
+        if (away.how.includes("full screen")) await expect(drawer(page)).toHaveCount(0);
+        await expect(parts(page), "no word drawer left over the page").toHaveCount(0);
+      });
+    }
+
     test("with the setting on and the highlighter in hand, a second tap still puts the verse out", async ({
       page,
     }) => {

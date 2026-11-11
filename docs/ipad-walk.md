@@ -42,6 +42,13 @@ Each is parked on the by-hand list because the simulator cannot show it. Do any 
 - [ ] **Keep a long surah on ordinary Wi-Fi** (Wi-Fi back on for this one). Hold Al-Baqarah's name at the top of the page and keep its recitation, about 131 MB. Right: the count keeps moving, Stop stops it, and once done it plays with Wi-Fi off.
 - [ ] **Apple Pencil double-tap and squeeze**, if a pencil is at hand. Try each pencil setting in the iPad's Settings → Apple Pencil. Right: the tool palette setting opens Hifth's pens; eraser or last-tool swaps between the last pen and plain selecting; nothing on the page is lost.
 
+## Two drawer settings waiting for your choice
+
+Both are built and sit in the info panel (the "About Hifth" button). Today's way is still the default for each. Try the other way on the iPad, then say which should be the default.
+
+- [ ] **Where a verse's tools open.** Pick "Inside the verse's drawer", tap a verse, and press Share, Same roots and Listen in turn. Each opens under the drawer's buttons instead of on a card of its own, and the verse stays in sight above. Which feels better in the hand?
+- [ ] **Tapping the lit verse again.** Pick "Opens the word you tapped", tap a verse, then tap one of its words. The word's letters and signs open in a drawer on top of the verse's, and the verse stays lit. A tap elsewhere closes the word's drawer. Should this replace putting the verse out?
+
 ## What you saw
 
 Write here, in any words. The agent turns each line into a test.
@@ -50,4 +57,4 @@ Write here, in any words. The agent turns each line into a test.
 
 ## Where these come from
 
-The pitch steps are the pitch script (`.claude/skills/walk-app/pitch-script.md`); the other checks are items 3, 12, 13, 17, 18 and 19 of the by-hand list (`.claude/skills/manual-testing/checklist.md`). When a check here changes, change it there too.
+The pitch steps are the pitch script (`.claude/skills/walk-app/pitch-script.md`); the other checks are items 3, 12, 13, 17, 18 and 19 of the by-hand list (`.claude/skills/manual-testing/checklist.md`); the two drawer settings are the open drawer questions in the issue list (`docs/issues.json`: `drawer-holds-its-tools`, `word-drawer-stacks-on-verse`). When a check here changes, change it there too.
