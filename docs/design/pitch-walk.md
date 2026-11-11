@@ -44,3 +44,24 @@ cross-references; the app adds no look-alikes of its own to 18:60. The note also
 which is likely where the hand count came from. The script's eight was wrong and now says six. The
 walk and the browser test for step 13 both check for exactly six cards, so a lost or extra link
 fails the step instead of being written down.
+
+### ② Can a fault seen while walking the pitch on the real iPad be reported with one screenshot? · **open**
+
+The machine walk runs in the simulator. The owner's own walk, holding the real iPad, is the one
+that says how the pitch *feels*, and today what he sees on it reaches us only as words typed under
+"What you saw" on the [iPad walk page](../ipad-walk.md): no picture, no record of what he did just
+before, and no record of where in the app he was. A fault met once is then hard to find again, and
+the walk costs him more typing than it should.
+
+The plan (2026-11-11, `.claude/plans/` on the walk branch): in the build installed from the
+laptop only, taking a screenshot keeps the app's own picture, where you were (page, verse, what was
+open, which build), an optional note, the last ten seconds of taps, and the five seconds before as a
+short video. `make walk-pull` copies them off the iPad, and `make walk-gallery` shows them in the
+order taken. A release build contains none of it. The captures show the book's text, so they stay
+in a folder git ignores and are never committed or sent.
+
+**What would answer it:** first a half-day check on the iPad of the three things nobody has tried
+(does the app hear the screenshot, how often iOS asks to record the screen, can the laptop copy the
+app's files). Then the picture, note, pull and gallery; then the video. Answered when the owner
+takes three screenshots on a walk and each shows up in the gallery with its picture, where he was
+and the moments before.

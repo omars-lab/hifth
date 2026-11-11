@@ -3939,6 +3939,17 @@
       "note": "Set up hifth.bytesofpurpose.com/share on Cloudflare with its free database behind it: the address entry, a small server at /share, a placeholder page with no Qur'an text. What it shows waits on ③ and ⑫; nothing goes live before ②; re-ask whether the name is for good before a passkey or app link is tied to it."
     },
     {
+      "id": "hifth-app-domain",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑭"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "hifth.app, bought at Namecheap on 2026-11-10: a new Cloudflare account, the domain added, its nameservers moved now (cloudflare-onboarding skill); the registration moved after about 2027-01-09 when the 60-day lock lifts. Then re-ask whether the share page lives on hifth.app, and point the site's Cloudflare setup at the new account. 2026-11-11: Cloudflare says the domain is active; a read-only token is saved encrypted and its key is backed up in LastPass. Later that day: the account ID and one token that edits hifth.app's DNS and publishes static pages (Pages) on the new account are saved encrypted too, as CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (it ends 2027-11-12), and checked against Cloudflare: it reads the domain's 7 DNS records and reaches the account's Pages, which has no projects yet. Next: decide whether the share page lives on hifth.app; nothing is published there yet."
+    },
+    {
       "id": "kanban-board-for-users",
       "source": {
         "file": "docs/design/project-board.md",
@@ -5867,12 +5878,24 @@
         "item": "③"
       },
       "status": "open",
-      "next": true,
       "severity": "question",
       "owner": "agent",
       "useCase": "find-everything-about-my-verse-in-one-place",
       "feature": "select-an-ayah",
       "note": "Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets. Asked again three times the same day, once each for Same roots, Listen (open the play options in the drawer) and Share (the share-as-a-link options in the drawer). Next up (2026-11-07): it is what the owner asked for most today, and the drawer is where The Study Quran's commentary would sit beside its verse in the pitch. Built 2026-11-09 for Same roots, as a setting in the info panel (the separate card stays the default until the owner tries it): the list opens under the drawer's buttons, cut to the room under the lit verse, since on a two-page spread the page cannot move up. Share and Listen followed the same day, the same way: Listen's press also opens its play options (play on to a verse, repeat each verse, speed), kept on the device. The commentary stays a card for now. Left: the owner tries the setting and says whether it becomes the default."
+    },
+    {
+      "id": "walk-feedback-capture",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/pitch-walk.md",
+        "item": "②"
+      },
+      "status": "open",
+      "next": true,
+      "severity": "question",
+      "owner": "agent",
+      "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11; slice 0 (the on-iPad check) needs the owner holding the iPad for ten minutes."
     },
     {
       "id": "pitch-walk-18-60-link-count",

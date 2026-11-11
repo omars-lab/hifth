@@ -94,3 +94,6 @@ native/Hifth.xcodeproj/
 native/build/
 native/shots/*
 !native/shots/baseline/
+# cloudflare-onboarding: plaintext .env and the key stay out; encrypted copies go in
+!.env.encrypted
+!.env.*.encrypted
