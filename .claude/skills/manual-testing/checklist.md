@@ -28,7 +28,8 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
    screen; the note reads sharp, in the book's typeface; a page turn follows your finger; nothing
    says it needs a connection. The simulator walks all of this by machine, but only the real
    device shows its own speed, its fonts and how a turn feels. Anything wrong becomes an XCUITest
-   or Playwright case.
+   or Playwright case. The walk to tick through on the iPad itself, with the other iPad-only
+   checks below, is `docs/ipad-walk.md`.
 
 4. **Arabic number wording.** Open `docs/design/arabic-number-agreement-review.html` and read the
    counts as they appear in the Arabic interface (best with a hafiz). Right: each count agrees
