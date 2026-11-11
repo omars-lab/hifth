@@ -192,6 +192,28 @@ if (totalGz > BUDGET_GZ) {
   process.exit(1);
 }
 
+// What a reader downloads before the first page can be used: the main script,
+// the English words and the style sheet. The total above cannot see code move
+// from a late-loading file into start-up, and start-up time does not grow
+// smoothly: it goes up about 150 ms at a time (docs/performance.md ⑳). Measured
+// 2026-11-11: the step from about 2140 ms to about 2290 ms is near 160 KB, the
+// app is at 170 KB, and 190 KB still read 2290 ms. 185 leaves a little under that.
+const STARTUP_GZ = 185 * 1024;
+const startupFiles = walk(DIST)
+  .map((f) => f.replace(DIST + "/", ""))
+  .filter((n) => /^assets\/(index|en\.gen)-[A-Za-z0-9_-]{8}\.(js|css)$/.test(n));
+const startupGz = startupFiles.reduce((sum, n) => sum + gzipSync(readFileSync(join(DIST, n))).length, 0);
+if (startupFiles.length) console.log(`  start-up download: ${kb(startupGz)} KB gz of ${kb(STARTUP_GZ)} (main script, English words, style sheet)`);
+if (startupGz > STARTUP_GZ) {
+  console.error(
+    `gate:budget — FAIL: the start-up download is ${kb(startupGz)} KB gz, over its ${kb(STARTUP_GZ)} KB limit.\n` +
+      "  Past this size the app takes about 150 ms longer to be usable on a slow phone.\n" +
+      "  Move what the first page does not need into a file that loads later (the\n" +
+      "  optimizing-performance skill), or measure again with `make perf-sweep` before raising it.",
+  );
+  process.exit(1);
+}
+
 const drift = totalGz - baseline.totalGz;
 if (Math.abs(drift) > TOLERANCE_GZ) {
   console.error(
