@@ -17,6 +17,12 @@ NAME="${1:-}"
 FILE="${2:-.env}"
 [ -n "$NAME" ] || { echo "usage: $0 NAME [file]   (then type the value at the hidden prompt)" >&2; exit 2; }
 
+# Check Node before asking for or writing anything: otherwise the value lands in
+# .env and the encrypt step then refuses, leaving the committed copy behind.
+# shellcheck source=lib/dotenvx.sh
+. "$HERE/lib/dotenvx.sh"
+need_dotenvx
+
 if [ -t 0 ]; then
   printf 'Paste the value for %s (it will not show), then press Return: ' "$NAME" >&2
   IFS= read -rs value; echo >&2
