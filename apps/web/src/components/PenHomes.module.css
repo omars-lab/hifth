@@ -100,6 +100,48 @@
   max-inline-size: calc(100vw - 16px);
 }
 
+/* The pens as rings round the pencil's tip (pen-ring.ts). The box is only
+   room: it takes no touch, so the hole in the middle and the gaps between the
+   buttons stay the page's. Each button is a raised disc of its own, put where
+   it stands by script, its middle on the spot. */
+.rings {
+  position: fixed;
+  z-index: calc(var(--z-chrome) + 4);
+  left: 0;
+  top: 0;
+  inline-size: 312px;
+  block-size: 312px;
+  pointer-events: none;
+  font-family: var(--font-chrome);
+}
+
+.rings > div,
+.rings [role="radiogroup"] {
+  display: contents;
+}
+
+.rings [role="radio"] {
+  position: absolute;
+  translate: -50% -50%;
+  inline-size: 44px;
+  block-size: 44px;
+  min-inline-size: 0;
+  min-block-size: 0;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: var(--paper-raised, var(--paper));
+  box-shadow: var(--shadow-2, 0 2px 8px rgb(0 0 0 / 0.14));
+  pointer-events: auto;
+}
+
+/* On is still said by fill; the tint is see-through, so the paper goes under it. */
+.rings [role="radio"][aria-checked="true"] {
+  background:
+    linear-gradient(var(--accent-tint), var(--accent-tint)),
+    var(--paper-raised, var(--paper));
+}
+
 .grip {
   display: inline-grid;
   place-items: center;

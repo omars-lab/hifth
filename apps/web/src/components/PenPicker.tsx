@@ -29,10 +29,13 @@ export function PenPicker({
   pen,
   onPen,
   narrow = false,
+  spots,
 }: {
   pen: Pen;
   onPen: (pen: Pen) => void;
   narrow?: boolean;
+  /** Where each of the eight stands, when a home places them itself (the rings at the pencil's tip). */
+  spots?: readonly React.CSSProperties[] | undefined;
 }): JSX.Element {
   const { t } = useT();
   const [wordPen, setWordPen] = useState<Pen>(() => savedWordPen());
@@ -43,8 +46,8 @@ export function PenPicker({
   };
   return (
     <div className={styles.both} data-narrow={narrow || undefined}>
-      <PenRow label={t.penLabel} pen={pen} onPen={onPen} />
-      <PenRow label={t.penWordsLabel} pen={wordPen} onPen={chooseWordPen} words />
+      <PenRow label={t.penLabel} pen={pen} onPen={onPen} spots={spots?.slice(0, PENS.length)} />
+      <PenRow label={t.penWordsLabel} pen={wordPen} onPen={chooseWordPen} words spots={spots?.slice(PENS.length)} />
     </div>
   );
 }
@@ -54,11 +57,13 @@ function PenRow({
   pen,
   onPen,
   words = false,
+  spots,
 }: {
   label: string;
   pen: Pen;
   onPen: (pen: Pen) => void;
   words?: boolean;
+  spots?: readonly React.CSSProperties[] | undefined;
 }): JSX.Element {
   const { t } = useT();
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
@@ -101,6 +106,7 @@ function PenRow({
           aria-label={name[x]}
           title={words ? `${label}: ${name[x]}` : name[x]}
           tabIndex={pen === x ? 0 : -1}
+          style={spots?.[i]}
           onClick={() => onPen(x)}
         >
           <span className={styles.swatch} style={{ background: `var(--pen-${x})` }} aria-hidden="true" />

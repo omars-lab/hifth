@@ -279,8 +279,10 @@ export default defineConfig({
           // (2026-10-10, walking the live site).
           // And `slider-arrows`: Firefox drew the slider's two end arrows from
           // different fonts, one a third the size of the other (2026-10-12).
+          // And `pencil`: the rings at the pencil's tip are placed by script
+          // and drawn with layered backgrounds, both worth a second engine.
           name: "desktop-firefox",
-          testMatch: /(spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks)\.spec\.ts/,
+          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },

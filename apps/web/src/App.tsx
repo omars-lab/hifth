@@ -126,7 +126,8 @@ import { USE_PENS } from "./usage";
 import { useT, type Strings } from "./i18n";
 import { JumpPicker, type JumpChoice } from "./components/JumpPicker";
 import { useHashRouter } from "./useHashRouter";
-import { exposeToShell, isNative, nativeShare, shareBase } from "./native-bridge";
+import { exposeToShell, isNative, nativeInfo, nativeShare, shareBase } from "./native-bridge";
+import { rememberTipPens, savedTipPens, type TipPens } from "./pen-ring";
 import { pencilAction, pencilGesture, swapTool } from "./pencil";
 import { linksFor } from "./share-links";
 import { CARD_QUERY, DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
@@ -3661,6 +3662,12 @@ export function App(): JSX.Element {
   // setting does here). The pens open at the tip, or where the pencil last
   // hovered when it was not near, or mid-screen.
   const [pencilPens, setPencilPens] = useState<{ x: number; y: number } | null>(null);
+  // As rings round the tip, the default, or the row first built (pen-ring.ts).
+  const [tipPens, setTipPens] = useState<TipPens>(() => savedTipPens());
+  const chooseTipPens = useCallback((choice: TipPens) => {
+    rememberTipPens(choice);
+    setTipPens(choice);
+  }, []);
   const closePencilPens = useCallback(() => setPencilPens(null), []);
   const hoverRef = useRef<{ x: number; y: number } | null>(null);
   useEffect(() => {
@@ -4236,18 +4243,12 @@ export function App(): JSX.Element {
         <PenHomeAt
           at={pencilPens}
           onClose={closePencilPens}
+          layout={tipPens}
           tool={tool}
           locked={locked}
-          onTool={(next, lock) => {
-            chooseTool(next, lock);
-            // The highlighter offers its four pens; the pick among them closes these.
-            if (next !== "highlight") closePencilPens();
-          }}
+          onTool={chooseTool}
           pen={pen}
-          onPen={(next) => {
-            choosePen(next);
-            closePencilPens();
-          }}
+          onPen={choosePen}
           tools={barTools}
           aim={markAim}
         />
@@ -4693,6 +4694,9 @@ export function App(): JSX.Element {
             onMistakeTap={chooseMistakeTap}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
+            // Only the iPad app has a pencil to squeeze.
+            tipPens={nativeInfo()?.platform === "ios" ? tipPens : undefined}
+            onTipPens={chooseTipPens}
             penSide={desktop ? penSide : undefined}
             onPenSide={desktop ? choosePenSide : undefined}
             railHome={desktop ? railHome : undefined}
