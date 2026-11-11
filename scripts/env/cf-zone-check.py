@@ -12,7 +12,8 @@ From the cloudflare-onboarding skill. It looks in three places and says what eac
   3. Cloudflare: whether the domain has been added to the account, its status
      (pending / active) and the two nameservers Cloudflare assigned it. This needs a
      token with Zone Read, taken from .env (--token-name, default CLOUDFLARE_API_TOKEN,
-     then CLOUDFLARE_DNS_TOKEN). Without one, steps 1 and 2 still run.
+     then CLOUDFLARE_DNS_TOKEN, then any other CLOUDFLARE_*TOKEN*). Without one, steps 1
+     and 2 still run.
 
 Then it gives one plain verdict and the next step. Exit 0 when Cloudflare says active,
 1 when there is a step left, 2 when it could not look. The token goes to curl on stdin
@@ -20,6 +21,7 @@ and is never printed.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -102,7 +104,10 @@ def pick_token(name):
     if not os.path.exists('.env'):
         return None, None
     env = envfile.read('.env')
-    for n in ([name] if name else ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_DNS_TOKEN']):
+    # The usual two first, then any other saved Cloudflare token (e.g. a read-only one).
+    others = sorted(k for k in env if re.match(r'^(CLOUDFLARE|CF)_.*TOKEN', k)
+                    and k not in ('CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_DNS_TOKEN'))
+    for n in ([name] if name else ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_DNS_TOKEN'] + others):
         v = env.get(n, '')
         if v and not v.startswith('encrypted:'):
             return n, v
