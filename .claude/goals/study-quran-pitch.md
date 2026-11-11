@@ -62,7 +62,9 @@ Update this table whenever a walk is run or the backlog is tagged, so it shows t
    rows stay in the backlog.
 5. **Walk the six passages on the owner's real iPad** (next, 2026-11-10). The app is on it and
    no longer closes on a touch, but every walk so far ran in the simulator, which missed that
-   crash. Install with `make app-release-ipad DEVICE=…`, then walk the pitch script on the iPad.
+   crash. Install with `make app-release-ipad DEVICE=…`, then walk the pitch script on the iPad:
+   `docs/ipad-walk.md` is the list to tick through, with the other checks only the iPad can show.
+   2026-11-10: the pitch build is on the iPad; the walk waits for the owner.
 
 ## The tools that make this repeatable
 
