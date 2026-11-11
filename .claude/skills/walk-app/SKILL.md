@@ -16,7 +16,7 @@ the public site). **How long:** a full walk is an hour or two; a walk of one are
 3. Off the checklist too: use the app as a scholar would for ten minutes per flavour. The list only
    knows the faults already found.
 4. Each fault: write it down, then fix it worst first (the loop below).
-5. End by moving finished tasks to `docs/tasks/done.md` and saying what is still open.
+5. End by moving finished tasks to `docs/tasks/done.md`, each entry led by its backlog row's name so it can be tied to its commits, and saying what is still open.
 
 ```mermaid
 flowchart LR
@@ -128,7 +128,7 @@ Each fault gets, in the same change as its fix:
   numbered, its heading a question a stranger could answer, marked **open** or **fixed**);
 - **a row** in `docs/issues.json` with its `closedBy` test, then `make -s tasks-doc issues-doc` and
   `pnpm gate:issues`;
-- **a task** while it is open, moved to `docs/tasks/done.md` when merged;
+- **a task** while it is open, moved to `docs/tasks/done.md` when merged, led by its backlog row's name;
 - **a test written first and watched failing** — a Playwright test when a reader would see it;
 - **a line in [checklist.md](checklist.md)** under its surface, naming the flavours and the issue.
   If the fault is a new *kind* (a new surface, a new flavour), add the heading or the flavour too.

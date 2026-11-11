@@ -90,6 +90,16 @@ Two things it will not tell you and you should weigh:
   waits on `mounted-set-ceiling`, which waits on the perf verdict. Working the
   tail of a chain is work you will redo.
 
+**What a scholar would hit in the demo comes first.** A row with `"pitch": true` is a fault on
+the path the pitch walks (the six passages in `.claude/goals/study-quran-pitch.md`).
+`make issues PITCH=1` lists and counts only those, and that count is one of the goal's
+numbers. Add the tag when a walk of the demo finds the fault; the check refuses any value
+but `true`.
+
+**Before the first commit on a row,** run `intent start <the row's id>` on the branch. A hook
+then ends each commit message with the task, its use case, its feature and its plan, read from
+the row's `useCase` and `feature` fields. `intent status` shows what is set.
+
 ## Open — write a new one down
 
 Order matters: the register first, the index second. The item's text belongs to
