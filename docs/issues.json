@@ -3939,6 +3939,17 @@
       "note": "Set up hifth.bytesofpurpose.com/share on Cloudflare with its free database behind it: the address entry, a small server at /share, a placeholder page with no Qur'an text. What it shows waits on ③ and ⑫; nothing goes live before ②; re-ask whether the name is for good before a passkey or app link is tied to it."
     },
     {
+      "id": "hifth-app-domain",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑭"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "hifth.app, bought at Namecheap on 2026-11-10: a new Cloudflare account, the domain added, its nameservers moved now (cloudflare-onboarding skill); the registration moved after about 2027-01-09 when the 60-day lock lifts. Then re-ask whether the share page lives on hifth.app, and point the site's Cloudflare setup at the new account."
+    },
+    {
       "id": "kanban-board-for-users",
       "source": {
         "file": "docs/design/project-board.md",

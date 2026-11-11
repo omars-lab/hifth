@@ -226,6 +226,10 @@ Asked by both. A sub-address such as `hifth.bytesofpurpose.com` or `share.byteso
 
 Follows from ⑥ and ⑧. Needs: the `hifth` address entry under bytesofpurpose.com in Cloudflare, a small Cloudflare server answering at `/share` with the free database behind it, and a placeholder page there that carries no Qur'an text and no held commentary. What the page shows waits on ③ (which way) and ⑫ (page or list); nothing a reader sends goes live before ② (may a student's mistakes be sent at all) is answered. Before any passkey or link that opens the app is tied to the name, ask once more whether `hifth.bytesofpurpose.com` is the name for good.
 
+### ⑭ Move `hifth.app`, bought at Namecheap, to a new Cloudflare account of its own · **open**
+
+Omar bought `hifth.app` at Namecheap on 2026-11-10. It moves in two steps, at two times. **Now:** open a new Cloudflare account for Hifth, apart from the one the EarlBear sites use; add `hifth.app` to it; and enter Cloudflare's two nameservers at Namecheap. The cloudflare-onboarding skill walks each step, makes Claude's tokens, keeps them encrypted, and checks the domain. **After about 2027-01-09**, when Namecheap's 60-day lock on a newly bought domain lifts, move the registration itself to Cloudflare; that only changes who bills. Once the domain is live on the new account, two follow-ups. First, ask whether the share page (⑧, ⑬) should live on `hifth.app` instead of `hifth.bytesofpurpose.com`, before any passkey or link that opens the app is tied to either name. Second, point the site's Cloudflare setup at the new account. **What would answer it:** the skill's domain check saying `hifth.app` is active on the new account.
+
 ### ⑨ If accounts come, which ways of signing in, and do they work inside the iPad and Mac apps? · **blocked**
 
 Asked by both. Suggested: Sign in with Apple and an email link, tried on a throwaway test project in both apps; Google later through the system browser; passkeys once Supabase's support settles. **What would answer it:** waits on the choice of way (③); the live locked link needs no sign-in.
