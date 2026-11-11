@@ -7,7 +7,10 @@
 // The crash that reached the owner's hands (docs/issues/ipad-crash-on-verse-touch.md)
 // printed the second and left the third.
 //
-//   release-watch.mjs --device <id> --route <route> --log <file> --out <crash dir> [--watch <seconds>]
+//   release-watch.mjs --device <id> --route <route> --log <file> --out <crash dir> [--watch <seconds>] [--unlock-wait <seconds>]
+//
+// --unlock-wait: how long to wait for a locked iPad to be unlocked, trying the
+// launch again every 5 seconds (default 180; HIFTH_UNLOCK_RETRY_MS shortens it in tests).
 //
 // Exit 0 pass · 1 the app closed, threw, or the iPad could not be reached · 3 new crash report.
 // HIFTH_DEVICECTL swaps Apple's device tool for a stand-in (the tests use one).
@@ -23,6 +26,8 @@ const route = opt("--route", "");
 const logFile = opt("--log");
 const out = opt("--out");
 const watchSeconds = Number(opt("--watch", "60"));
+const unlockWait = Number(opt("--unlock-wait", "180"));
+const retryMs = Number(process.env.HIFTH_UNLOCK_RETRY_MS || 5000);
 if (!device || !logFile || !out || !(watchSeconds > 0)) {
   console.error("usage: release-watch.mjs --device <id> --route <route> --log <file> --out <crash dir> [--watch <seconds>]");
   process.exit(2);
@@ -37,30 +42,47 @@ const launchArgs = ["device", "process", "launch", "--console", "--terminate-exi
 
 // A little before the launch, so a crash in the first second still counts.
 const since = new Date(Date.now() - 2000).toISOString();
-const sink = createWriteStream(logFile);
-log("launch_start", { route: route || "none", watch: watchSeconds, log: JSON.stringify(logFile) });
-const child = spawn(cmd, devicectl ? launchArgs : ["devicectl", ...launchArgs], {
-  env: { ...process.env, DEVICECTL_CHILD_HIFTH_ROUTE: route },
-  stdio: ["ignore", "pipe", "pipe"],
-});
-child.stdout.pipe(sink, { end: false });
-child.stderr.pipe(sink, { end: false });
 
-let closedEarly = false;
-const exited = new Promise((resolve) => child.on("exit", (code) => resolve(code)));
-const finished = await Promise.race([
-  exited.then((code) => ({ code })),
-  new Promise((resolve) => setTimeout(() => resolve(null), watchSeconds * 1000)),
-]);
-if (finished) {
-  closedEarly = true;
-  log("launch_exit", { code: finished.code, after: "early" });
-} else {
-  child.kill("SIGINT");
-  await Promise.race([exited, new Promise((r) => setTimeout(r, 3000))]);
-  if (child.exitCode === null) child.kill("SIGKILL");
+// One launch with its output saved; resolves to whether it closed early.
+async function launchOnce() {
+  const sink = createWriteStream(logFile);
+  const child = spawn(cmd, devicectl ? launchArgs : ["devicectl", ...launchArgs], {
+    env: { ...process.env, DEVICECTL_CHILD_HIFTH_ROUTE: route },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  child.stdout.pipe(sink, { end: false });
+  child.stderr.pipe(sink, { end: false });
+  const exited = new Promise((resolve) => child.on("exit", (code) => resolve(code)));
+  const finished = await Promise.race([
+    exited.then((code) => ({ code })),
+    new Promise((resolve) => setTimeout(() => resolve(null), watchSeconds * 1000)),
+  ]);
+  if (finished) log("launch_exit", { code: finished.code, after: "early" });
+  else {
+    child.kill("SIGINT");
+    await Promise.race([exited, new Promise((r) => setTimeout(r, 3000))]);
+    if (child.exitCode === null) child.kill("SIGKILL");
+  }
+  await new Promise((r) => sink.end(r));
+  return Boolean(finished);
 }
-await new Promise((r) => sink.end(r));
+const lockedOut = (text) => /failed to launch|Unable to launch/i.test(text) && /unlocked|Locked/.test(text);
+
+// The build takes long enough for the iPad to lock itself, so a locked iPad
+// is waited for (saying so once), not given up on at the first try.
+log("launch_start", { route: route || "none", watch: watchSeconds, log: JSON.stringify(logFile) });
+const waitUntil = Date.now() + unlockWait * 1000;
+let closedEarly = await launchOnce();
+let said = false;
+while (closedEarly && lockedOut(readFileSync(logFile, "utf8")) && Date.now() < waitUntil) {
+  if (!said) {
+    log("unlock_wait", { seconds: unlockWait });
+    console.error(`The iPad is locked. Unlock it; waiting up to ${unlockWait} seconds, then the app opens by itself.`);
+    said = true;
+  }
+  await new Promise((r) => setTimeout(r, retryMs));
+  closedEarly = await launchOnce();
+}
 
 const text = readFileSync(logFile, "utf8");
 let failed = false;
@@ -73,11 +95,11 @@ if (/Terminating app due to uncaught exception|uncaught exception of type/i.test
 // devicectl gave up before the app ever opened: say that, not "it closed".
 const neverOpened = closedEarly && /failed to launch|Unable to launch/i.test(text);
 if (neverOpened) {
-  const locked = /unlocked|Locked/.test(text);
+  const locked = lockedOut(text);
   log("fail", { why: "not_opened", locked });
   console.error(
     locked
-      ? `Could not open the app: the iPad is locked. Unlock it and run again (installed already). Output in ${logFile}.`
+      ? `Could not open the app: the iPad stayed locked for ${unlockWait} seconds. Unlock it and run again (installed already). Output in ${logFile}.`
       : `Could not open the app on the iPad. Devicectl's reason is in ${logFile}.`,
   );
   failed = true;

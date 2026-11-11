@@ -34,7 +34,10 @@ function fakeDevice(behaviour) {
 const a = process.argv.slice(2), at = (k) => a[a.indexOf(k) + 1], fs = require("fs");
 const dir = ${JSON.stringify(dir)};
 if (at("--device") !== ${JSON.stringify(DEVICE)}) { console.error("no such device"); process.exit(1); }
-if (a.includes("launch") && ${JSON.stringify(behaviour)} === "locked") {
+const tries = a.includes("launch") ? (fs.existsSync(dir + "/tries") ? Number(fs.readFileSync(dir + "/tries", "utf8")) : 0) + 1 : 0;
+if (tries) fs.writeFileSync(dir + "/tries", String(tries));
+const stillLocked = ${JSON.stringify(behaviour)} === "locked" || (${JSON.stringify(behaviour)} === "unlocked-later" && tries <= 2);
+if (a.includes("launch") && stillLocked) {
   console.log("ERROR: The application failed to launch. Unable to launch com.bytesofpurpose.hifth because the device was not, or could not be, unlocked.");
   process.exit(1);
 } else if (a.includes("launch")) {
@@ -56,13 +59,13 @@ else if (a.includes("copy")) fs.copyFileSync(dir + "/store/" + at("--source"), a
   return bin;
 }
 
-function run(behaviour) {
+function run(behaviour, extra = ["--unlock-wait", "1"]) {
   const work = mkdtempSync(join(tmpdir(), "hifth-release-"));
   const logFile = join(work, "console.log");
   const r = spawnSync(
     process.execPath,
-    [script, "--device", DEVICE, "--route", "/made-up/1:1", "--log", logFile, "--out", join(work, "crashes"), "--watch", "2"],
-    { encoding: "utf8", env: { ...process.env, HIFTH_DEVICECTL: fakeDevice(behaviour) }, timeout: 30_000 },
+    [script, "--device", DEVICE, "--route", "/made-up/1:1", "--log", logFile, "--out", join(work, "crashes"), "--watch", "2", ...extra],
+    { encoding: "utf8", env: { ...process.env, HIFTH_DEVICECTL: fakeDevice(behaviour), HIFTH_UNLOCK_RETRY_MS: "200" }, timeout: 30_000 },
   );
   return { ...r, log: readFileSync(logFile, "utf8") };
 }
@@ -97,4 +100,14 @@ test("a locked iPad says the app could not be opened, not that it closed", () =>
   assert.equal(r.status, 1);
   assert.match(r.stdout + r.stderr, /could not open the app.*unlock/is);
   assert.doesNotMatch(r.stdout + r.stderr, /closed by itself/);
+});
+
+// The build takes long enough for the iPad to lock itself (2026-11-10), so the
+// release waits for someone to unlock it rather than giving up at once.
+test("a locked iPad is waited for, and the app opens once it is unlocked", () => {
+  const r = run("unlocked-later", ["--unlock-wait", "20"]);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout + r.stderr, /locked.*unlock it/is);
+  assert.equal((r.stdout.match(/ev=unlock_wait /g) ?? []).length, 1, "says it is waiting once, not on every try");
+  assert.match(r.stdout, /ev=watch_done .*result=pass/);
 });

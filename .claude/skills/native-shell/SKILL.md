@@ -398,7 +398,7 @@ skills share them.
 
 | script | what it does | when to reach for it | command |
 |---|---|---|---|
-| `release-watch.mjs` | Opens the installed app on the iPad with its output saved, watches it, then checks for new crash reports. Says "could not open" for a locked iPad, "closed by itself" for an early exit, and fails on an uncaught error or a new report | The last step of every release to the iPad | `make app-release-ipad DEVICE=<name>` |
+| `release-watch.mjs` | Opens the installed app on the iPad with its output saved, watches it, then checks for new crash reports. Waits up to 3 minutes for a locked iPad to be unlocked (the build is long enough for it to lock itself), then says "could not open"; says "closed by itself" for an early exit, and fails on an uncaught error or a new report | The last step of every release to the iPad | `make app-release-ipad DEVICE=<name>` |
 | `profile-lasts.sh` | Reads the signing profile inside the built app and stops if it has under 30 days left, or if it does not list the plugged-in iPad (the iPad would refuse the app) | Run by every device install | `make app-device-install` |
 | `device-udid.mjs` | Turns a connected device's name into the hardware id the signing profile lists it by | Run by every device install, before the profile check | `node native/scripts/device-udid.mjs --device "<name>"` |
 | `xcode-account.sh` | Says whether Xcode has an account signed in | Run by every device install | `sh native/scripts/xcode-account.sh` |
