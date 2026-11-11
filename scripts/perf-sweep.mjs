@@ -21,6 +21,14 @@
  * Run: `make perf-sweep` (builds first). Slow: about a minute per amount.
  *   --add 0,25,50,100   the amounts to try, KB gzipped (0 is the app as built)
  *   --runs 5            Lighthouse runs per amount; the median is kept
+ *
+ * Comparing built copies (is the app slower than it was, or is the laptop?):
+ *   --compare old=<folder>,new=<folder>   built copies of the app, each with a name
+ *   --rounds 5                            each round measures every copy once, in turn
+ *   --out <file>                          where the result goes (never the sweep record)
+ *   --keep <folder>                       keep each full report, as <name>-<round>.json
+ * The copies take turns so that a busy minute on the laptop falls on all of
+ * them alike. Every run is kept, since five runs can fall into two groups.
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
@@ -31,7 +39,8 @@ import { gzipSync } from "node:zlib";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const DIST = join(ROOT, "apps", "web", "dist");
-const LHCI_DIR = join(ROOT, ".lighthouseci");
+// Where the measuring tool leaves its reports. The setting is for the tests.
+const LHCI_DIR = process.env.HIFTH_LHCI_DIR || join(ROOT, ".lighthouseci");
 const OUT = join(ROOT, "docs", "performance", "sweep.json");
 
 const arg = (name, fallback) => {
@@ -46,7 +55,8 @@ const log = (ev, fields = {}) =>
     [new Date().toISOString(), `pid=${process.pid}`, `ev=${ev}`, ...Object.entries(fields).map(([k, v]) => `${k}=${v}`)].join(" "),
   );
 
-if (!existsSync(DIST)) {
+const COMPARE = arg("compare", "");
+if (!COMPARE && !existsSync(DIST)) {
   console.error("perf-sweep — apps/web/dist not found; build first (`make perf-sweep` does)");
   process.exit(1);
 }
@@ -66,6 +76,78 @@ const median = (xs) => {
 };
 
 const chrome = process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+
+/** Measure one folder `runs` times; the full reports, or null when the tool failed. */
+function measure(folder, runs, fields) {
+  const seen = new Set(existsSync(LHCI_DIR) ? readdirSync(LHCI_DIR) : []);
+  log("lighthouse_start", { ...fields, runs });
+  try {
+    execFileSync(
+      "pnpm",
+      ["dlx", "@lhci/cli@0.14.x", "collect", `--collect.staticDistDir=${folder}`, `--collect.numberOfRuns=${runs}`],
+      { cwd: ROOT, stdio: "ignore", timeout: 15 * 60_000, env: { ...process.env, CHROME_PATH: chrome } },
+    );
+  } catch (e) {
+    log("lighthouse_failed", { ...fields, msg: JSON.stringify(String(e.message).slice(0, 200)) });
+    return null;
+  }
+  return readdirSync(LHCI_DIR)
+    .filter((f) => f.startsWith("lhr-") && f.endsWith(".json") && !seen.has(f))
+    .map((f) => readFileSync(join(LHCI_DIR, f), "utf8"));
+}
+
+if (COMPARE) {
+  const builds = COMPARE.split(",").map((pair) => {
+    const at = pair.indexOf("=");
+    return { name: pair.slice(0, at), folder: pair.slice(at + 1), reports: [] };
+  });
+  const out = arg("out", "");
+  const keep = arg("keep", "");
+  const rounds = Number(arg("rounds", "5"));
+  if (!out) {
+    console.error("perf-sweep — --compare needs --out <file> for its result; it never writes the sweep record");
+    process.exit(1);
+  }
+  for (const b of builds) {
+    if (!b.name || !existsSync(join(b.folder, "assets"))) {
+      console.error(`perf-sweep — no built app at ${b.folder} (give each copy as name=folder)`);
+      process.exit(1);
+    }
+  }
+  if (keep) mkdirSync(keep, { recursive: true });
+  for (let round = 1; round <= rounds; round += 1) {
+    for (const b of builds) {
+      const texts = measure(b.folder, 1, { build: b.name, round });
+      if (!texts || !texts.length) continue;
+      const report = JSON.parse(texts[0]);
+      b.reports.push(report);
+      if (keep) writeFileSync(join(keep, `${b.name}-${round}.json`), texts[0]);
+      log("lighthouse_done", { build: b.name, round, startup_ms: Math.round(report.audits.interactive.numericValue) });
+    }
+  }
+  const all = (b, id) => b.reports.map((r) => Math.round(r.audits[id].numericValue));
+  writeFileSync(
+    out,
+    `${JSON.stringify(
+      {
+        measuredAt: new Date().toISOString(),
+        goalMs: 2500,
+        builds: builds.map((b) => ({
+          name: b.name,
+          runs: b.reports.length,
+          startupMs: b.reports.length ? median(all(b, "interactive")) : null,
+          allStartupMs: all(b, "interactive"),
+          allLargestPaintMs: all(b, "largest-contentful-paint"),
+          allBlockingMs: all(b, "total-blocking-time"),
+        })),
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  log("compare_written", { file: out, builds: builds.length, rounds });
+  process.exit(0);
+}
 const work = join(tmpdir(), `hifth-perf-sweep-${process.pid}`);
 const points = [];
 
@@ -79,21 +161,9 @@ for (const kb of ADD_KB) {
   if (kb > 0) writeFileSync(file, readFileSync(file, "utf8") + padding(kb * 1024));
   const scriptGz = gzipSync(readFileSync(file)).length;
 
-  const seen = new Set(existsSync(LHCI_DIR) ? readdirSync(LHCI_DIR) : []);
-  log("lighthouse_start", { add_kb: kb, script_gz: scriptGz, runs: RUNS });
-  try {
-    execFileSync(
-      "pnpm",
-      ["dlx", "@lhci/cli@0.14.x", "collect", `--collect.staticDistDir=${work}`, `--collect.numberOfRuns=${RUNS}`],
-      { cwd: ROOT, stdio: "ignore", timeout: 15 * 60_000, env: { ...process.env, CHROME_PATH: chrome } },
-    );
-  } catch (e) {
-    log("lighthouse_failed", { add_kb: kb, msg: JSON.stringify(String(e.message).slice(0, 200)) });
-    continue;
-  }
-  const reports = readdirSync(LHCI_DIR)
-    .filter((f) => f.startsWith("lhr-") && f.endsWith(".json") && !seen.has(f))
-    .map((f) => JSON.parse(readFileSync(join(LHCI_DIR, f), "utf8")));
+  const texts = measure(work, RUNS, { add_kb: kb, script_gz: scriptGz });
+  if (!texts) continue;
+  const reports = texts.map((t) => JSON.parse(t));
   const metric = (id) => Math.round(median(reports.map((r) => r.audits[id].numericValue)));
   const point = {
     addedKb: kb,

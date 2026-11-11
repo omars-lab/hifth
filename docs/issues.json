@@ -6029,11 +6029,24 @@
         "file": "docs/performance.md",
         "item": "⑳"
       },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "performance",
+      "closedBy": "scripts/gate-budget.test.mjs",
+      "note": "Start-up on a modelled slow phone went from about 2140 ms (2026-10-11) to about 2290 ms. Measured side by side on 2026-11-11: features added about 22 KB to what is downloaded at start-up, over twenty-two merges, and start-up time goes up one 150 ms step at about 160 KB. Nothing at start-up got slower. The size check now also limits the start-up download to 185 KB, under the next step. Winning the 150 ms back is its own row."
+    },
+    {
+      "id": "move-12-kb-out-of-startup",
+      "source": {
+        "file": "docs/performance.md",
+        "item": "㉑"
+      },
       "status": "open",
       "severity": "risk",
       "owner": "agent",
       "feature": "performance",
-      "note": "Start-up on a modelled slow phone went from 2138 ms (2026-10-11) to 2306 ms (2026-11-10), both measured alone, against a 2500 ms goal. Size alone does not explain it: 25 KB of extra download costs 144 ms and the app grew about 10 KB. Next step: measure start-up at a handful of points in that month's history to find which changes slowed it, move what can wait out of start-up, and write down what really frees room under the size limit, since the two trims left on the list only move code between files."
+      "note": "The app downloads 171 KB before the first page can be used, and start-up drops from about 2290 ms to about 2140 ms once that is under about 160 KB. Next step: load the laptop's page-edge strips (about 3 KB) and the zoom and edge-turn parts of the page stage later, one at a time, measuring each beside the last, then lower the start-up limit to just above the new size."
     }
   ]
 }

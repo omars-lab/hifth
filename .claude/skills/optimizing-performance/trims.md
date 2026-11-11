@@ -14,6 +14,16 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**What slowed start-up, found 2026-11-11.** Not work at start-up: size. Start-up time goes up
+one step of about 150 ms at a time as the start-up download grows (main script, English words,
+style sheet). The step from about 2140 ms to about 2290 is near 160 KB; the app is at 171 KB;
+the next step is past 190. So two things changed here. The size check now has a second limit,
+185 KB on the start-up download, and prints that number on every run. And the two candidates
+below are worth taking after all: they do not lower the total the cap counts, but moving about
+12 KB out of start-up wins back 150 ms (`docs/performance.md` ㉑, backlog row
+`move-12-kb-out-of-startup`). Nothing the app ships changed size. Full account:
+`docs/issues/startup-slowed-in-a-month.md`.
+
 **Measured again 2026-11-10 (night), with nothing else running: cap raised to 210 KB.** Start-up
 came out in order this time: 2306 ms as built (five runs, 2297 to 2405), 2450 ms with 25 KB added,
 2451 ms with 50 KB added, 2746 ms with 100 KB added, against the 2500 ms goal. So 25 KB of

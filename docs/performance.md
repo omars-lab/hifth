@@ -545,31 +545,60 @@ what slowed it is item ⑳.
 
 ---
 
-### ⑳ Start-up got 168 ms slower in a month, and nobody knows which change did it · **open**
+### ⑳ Start-up got about 150 ms slower in a month. What did it? · **fixed**
 
-**Where it stands (2026-11-10).** On a modelled slow phone the app took 2138 ms to become
-usable on 2026-10-11 and 2306 ms on 2026-11-10, both measured with nothing else running. The
-goal is 2500 ms, so 194 ms of margin is left. The app's code grew by about 10 KB in that month,
-but the same night's measurement shows 25 KB of extra download costing 144 ms, so size alone
-does not explain 168 ms. Something that runs at start-up got slower.
+**The answer (2026-11-11).** Features did, by adding about 22 KB to what a reader downloads
+before the first page can be used. Nothing that runs at start-up got slower. The full account,
+with every run, is in [issues/startup-slowed-in-a-month.md](issues/startup-slowed-in-a-month.md).
 
-**Why it matters.** The size limit only counts bytes. Work done at start-up (reading saved
-settings, drawing drawers and panels nobody has opened yet) costs time without costing many
-bytes, so the size check never sees it. And the two trims left on the list only move code from
-one file to another, which frees no room under the limit.
+- **Start-up time goes up in steps, not smoothly.** On the modelled slow phone it reads about
+  2140 ms, then about 2290, then about 2440, each step being one more trip to the server. The
+  build of 2026-10-11 stayed at 2140 with 10 KB of padding added and jumped to 2290 with 15.
+- **Today's build is one step up.** It downloads 170 KB at start-up where the October build
+  downloaded 148, so it sits about 10 KB past that step. The October build with 25 KB of
+  padding read 2287 ms; today's reads 2294.
+- **No single change did it.** Twenty-two merges changed the size, none adding more than
+  1.6 KB to the main script. In all it grew 16.4 KB, the English words 3.9 and the style
+  sheet 1.7.
+- **It is the whole start-up download that counts.** Padding the style sheet instead of the
+  main script crossed the same step.
+- **No extra work.** Measured side by side today, the two builds spend the same time running
+  script at start-up (about 100 ms on the modelled phone) and neither has a long pause.
+- **The earlier note here was wrong twice.** It said the app grew about 10 KB (it was 22), and
+  so concluded that something at start-up had got slower.
+- **One reading of five can mislead.** The October build reads either 2140 or 2550 on the same
+  code, depending on whether the first page's drawing lands before or after its image is asked
+  for, a few thousandths of a second either way. Its middle of five was 2138 in October and
+  2553 today. Compare the lower group, not the middle.
 
-**What to do.**
+**What now notices the next creep.** The size check has a second limit: the start-up download
+(main script, English words, style sheet) may not pass 185 KB. Today's build with 20 KB of
+padding still read 2292 ms, so the next step up is past 190. A limit on size was chosen over
+comparing two times, because a time flips between groups and a size does not.
 
-1. Measure start-up at a handful of points in the month's history (the build as it was on
-   2026-10-11, then every week or so) to find the changes where the time stepped up.
-2. For each step, look at what that change runs before the first page can be used, and move
-   what can wait until it is opened.
-3. Write down at the top of the trims list what really frees room under the size limit, since
-   the two candidates there do not.
+**What it leaves.** Getting back to about 2140 ms is item ㉑.
 
-**Done when:** the slow-down is traced to named changes, start-up is back near 2150 ms or the
-reason it cannot be is written here, and a check notices the next creep (for example, the
-push check comparing the last recorded start-up time with the one before it).
+---
+
+### ㉑ Moving about 12 KB out of start-up would make the app usable 150 ms sooner · **open**
+
+**Where it stands (2026-11-11).** The start-up download is 171 KB and the step down is near
+160 KB (somewhere between 158 and 160). So about 12 KB has to load later, not at start-up, and
+then stay out. The two candidates already on the trims list are the page-edge strips for the
+laptop (about 3 KB, which a phone never uses) and the zoom and edge-turn parts of the page
+stage (part of 15 KB). They do not lower the total the size cap counts, which is why they were
+passed over; they do lower start-up, which is what this item is about.
+
+**Why it matters.** A hafiz opening the app on a slow connection waits 2.3 seconds where it
+was 2.1. The goal is 2.5, so this is margin, not a broken promise.
+
+**What to do.** Take the trims one at a time with the checklist in the optimizing-performance
+skill. After each, measure this build beside the last with the compare mode of the start-up
+script. When the reading drops to about 2140, lower the start-up limit to just above the new
+size so it cannot drift back.
+
+**Done when:** start-up reads about 2140 ms in the lower group of five, and the start-up limit
+sits just above the new size.
 
 ---
 

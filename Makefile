@@ -288,6 +288,11 @@ perf-sweep: build ## Measure start-up time as code is added (slow: ~1 min per am
 	CHROME_PATH="$${CHROME_PATH:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}" \
 	  node scripts/perf-sweep.mjs --add "$${ADD:-0,25,50,100}"
 
+.PHONY: perf-compare
+perf-compare: ## Measure built copies of the app in turns. COPIES=old=<folder>,new=<folder> OUT=<file> [ROUNDS=5] [KEEP=<folder>]
+	@test -n "$(COPIES)" -a -n "$(OUT)" || { echo "perf-compare: give COPIES=old=<folder>,new=<folder> and OUT=<file>"; exit 1; }
+	@node scripts/perf-sweep.mjs --compare "$(COPIES)" --out "$(OUT)" --rounds "$${ROUNDS:-5}" $(if $(KEEP),--keep "$(KEEP)")
+
 .PHONY: perf-report
 perf-report: build ## Draw the code-size charts into docs/performance/bundle-report.html
 	node scripts/perf-report.mjs
