@@ -19,6 +19,7 @@ export function WordPartsHost({
   docked,
   stackAbove,
   onCover,
+  marks,
   chosen,
   onPick,
   onPickMany,
@@ -39,6 +40,8 @@ export function WordPartsHost({
   /** Docked on top of this box (the verse drawer) rather than the window's foot. */
   stackAbove?: () => Element | null;
   onCover?: (top: number | null) => void;
+  /** Stacked, how it shows the drawer under it (see WordParts). */
+  marks?: "path" | "tag" | undefined;
   chosen?: number | null;
   /** The part picked, its name, and where on the page a note on it is pinned. */
   onPick: (mark: number | null, name: string | null, at: { x: number; y: number }) => void;
@@ -77,6 +80,7 @@ export function WordPartsHost({
       docked={docked}
       stackAbove={stackAbove}
       onCover={onCover}
+      marks={marks}
       chosen={chosen}
       onPick={(mark, name) => onPick(mark, name, pinOver(mark))}
       onPickMany={

@@ -14,6 +14,11 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Checked again 2026-11-10 (later), nothing taken.** 199.3 KB against the 200 KB cap, after
+the setting for showing which drawer sits on which (+0.9 KB). 0.7 KB of room is left. The two
+candidates below move code between files, so they would not lower the counted total; the next step
+is the clean sweep the note below asks for (nothing else running), done before the next feature.
+
 **Checked again 2026-11-10, sweep run, cap kept.** 198.4 KB against the 200 KB cap, after the
 reading settings behind one button (+1.5 KB). A fresh `make perf-sweep` gave 2553 ms with nothing
 added, 2443 ms with 25 KB and 50 KB added, and 2745 ms with 100 KB added. It was run with the dev

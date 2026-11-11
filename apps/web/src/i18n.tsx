@@ -820,6 +820,16 @@ export interface Strings {
   settingsAtBar: string;
   settingsAtDrawer: string;
   settingsAtNote: string;
+  /** Which drawer sits on which (ayah-drawer ①). */
+  drawerBack(label: string): string;
+  drawerWord: string;
+  levelSettings: string;
+  levelVerse: string;
+  levelWord: string;
+  drawerMarksTitle: string;
+  drawerMarksPath: string;
+  drawerMarksTag: string;
+  drawerMarksNote: string;
   /** Settings: what a second tap on the lit verse does (selection-drawer ①). */
   wordTapTitle: string;
   wordTapOff: string;
@@ -1684,6 +1694,15 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     settingsAtBar: m.settingsAtBar,
     settingsAtDrawer: m.settingsAtDrawer,
     settingsAtNote: m.settingsAtNote,
+    drawerBack: (label) => m.drawerBack({ label }),
+    drawerWord: m.drawerWord,
+    levelSettings: m.levelSettings,
+    levelVerse: m.levelVerse,
+    levelWord: m.levelWord,
+    drawerMarksTitle: m.drawerMarksTitle,
+    drawerMarksPath: m.drawerMarksPath,
+    drawerMarksTag: m.drawerMarksTag,
+    drawerMarksNote: m.drawerMarksNote,
     wordTapTitle: m.wordTapTitle,
     wordTapOff: m.wordTapOff,
     wordTapWord: m.wordTapWord,

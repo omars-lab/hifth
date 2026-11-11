@@ -255,6 +255,7 @@ import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from ".
 import { rememberDrawerTools, savedDrawerTools, type DrawerTools } from "./drawer-tools";
 import { rememberToolHelp, savedToolHelp, type ToolHelp } from "./tool-help";
 import { rememberSettingsAt, savedSettingsAt, type SettingsAt } from "./settings-at";
+import { rememberDrawerMarks, savedDrawerMarks, type DrawerMarks } from "./drawer-marks";
 import { SettingsDrawer } from "./components/SettingsDrawer";
 import { rememberWordTap, savedWordTap, type WordTap } from "./word-tap";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
@@ -476,6 +477,13 @@ export function App(): JSX.Element {
     rememberSettingsAt(choice);
     setSettingsAt(choice);
     setSettingsOpen(false);
+  }, []);
+  // How a drawer shows what it sits on (ayah-drawer ①; a setting since
+  // 2026-11-10): a path in the top drawer's head, unless tags are chosen.
+  const [drawerMarks, setDrawerMarks] = useState<DrawerMarks>(() => savedDrawerMarks());
+  const chooseDrawerMarks = useCallback((choice: DrawerMarks) => {
+    rememberDrawerMarks(choice);
+    setDrawerMarks(choice);
   }, []);
   // Show the look-alikes in the drawer: fold whatever other tool is open there.
   const showLooksInDrawer = useCallback(() => {
@@ -4129,7 +4137,7 @@ export function App(): JSX.Element {
         {settingsAt === "drawer" ? (
           // The same two controls, behind one button (ayah-drawer ①). Stacked,
           // since a drawer is a column, not a row.
-          <SettingsDrawer open={settingsOpen} onOpen={setSettingsOpen}>
+          <SettingsDrawer open={settingsOpen} onOpen={setSettingsOpen} tag={drawerMarks === "tag"}>
             <SkinToggle skin={skin} onChange={setSkin} onOpenLegend={() => setLegendOpen(true)} />
             <DesktopChrome
               pageMode={pageMode}
@@ -4667,6 +4675,8 @@ export function App(): JSX.Element {
             onToolHelp={chooseToolHelp}
             settingsAt={settingsAt}
             onSettingsAt={chooseSettingsAt}
+            drawerMarks={drawerMarks}
+            onDrawerMarks={chooseDrawerMarks}
             wordTap={wordTap}
             onWordTap={chooseWordTap}
             runMark={runMark}
@@ -4832,6 +4842,7 @@ export function App(): JSX.Element {
           The number's menu is one of those: it lists the same things, so the
           two never show at once. */}
       <VerseDrawer
+        tag={drawerMarks === "tag"}
         label={drawerKey ? (t.ayahLabel(drawerKey) ?? drawerKey) : null}
         open={drawerUp}
         onClose={putDrawerAway}
@@ -5145,6 +5156,7 @@ export function App(): JSX.Element {
             mode="note"
             docked
             stackAbove={verseDrawerBox}
+            marks={wordOpen.stacked ? drawerMarks : undefined}
             onCover={setWordTop}
             onPick={(mark, _name, at) => pickWordPart({ ...at, mark })}
             onPickMany={(marks, at) => pickWordPart({ ...at, marks })}
