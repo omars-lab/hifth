@@ -58,7 +58,13 @@ function ToolRow({
   tools = TOOLS,
   ring,
   onMove = onTool,
-}: PenHomeProps & { upright?: boolean; ring?: boolean; onMove?: (tool: PageTool) => void }): JSX.Element {
+  explained,
+}: PenHomeProps & {
+  upright?: boolean;
+  ring?: boolean;
+  onMove?: (tool: PageTool) => void;
+  explained?: ((tool: PageTool) => string) | undefined;
+}): JSX.Element {
   const { t, dir } = useT();
   const press = useToolPress(tool, onTool);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
@@ -97,6 +103,7 @@ function ToolRow({
           aria-checked={tool === x}
           aria-label={toolName(t, x)}
           aria-keyshortcuts={letter}
+          aria-describedby={explained?.(x)}
           title={`${toolName(t, x)} (${letter})`}
           tabIndex={tool === x ? 0 : -1}
           data-locked={(locked && tool === x) || undefined}
@@ -276,7 +283,7 @@ export function PenHomeFloat(props: PenHomeProps): JSX.Element {
  * else".
  */
 export function PenHomeAt(props: PenHomeProps & { at: { x: number; y: number }; onClose: () => void; layout: TipPens }): JSX.Element {
-  const { at, onClose, layout, tool, locked, onTool, onPen, aim, tools = TOOLS } = props;
+  const { at, onClose, layout, tool, locked, onTool, onPen, aim } = props;
   const { t, dir } = useT();
   const box = useRef<HTMLDivElement>(null);
   const rings = layout === "rings";
@@ -328,6 +335,38 @@ export function PenHomeAt(props: PenHomeProps & { at: { x: number; y: number }; 
       window.removeEventListener("pointerdown", onDown, true);
     };
   }, [onClose]);
+  return (
+    <div ref={box} className={rings ? styles.rings : styles.atTip} role="toolbar" aria-label={t.toolbarLabel} dir={dir} data-pencil-pens={layout} data-tool={tool}>
+      <TipPensInside {...props} onTool={pick} onMove={onTool} onPen={pickPen} onAim={pickAim} />
+    </div>
+  );
+}
+
+/** Where to find the line that explains each button, on a page that has them (PenGuide.tsx). */
+export interface PensExplained {
+  tool: (tool: PageTool) => string;
+  pen: string;
+  words: string;
+}
+
+/**
+ * What stands inside the pens at the pencil's tip, in either layout: the
+ * tools, and outside the one on its own choices. Shared by the pens the iPad
+ * opens and the copy of them the info panel explains, so the two cannot drift
+ * apart.
+ */
+function TipPensInside(
+  props: PenHomeProps & {
+    layout: TipPens;
+    onMove: (tool: PageTool) => void;
+    onAim: (aim: MarkAim) => void;
+    words?: { pen: Pen; onPen: (pen: Pen) => void } | undefined;
+    explained?: PensExplained | undefined;
+  },
+): JSX.Element {
+  const { layout, tool, aim, tools = TOOLS, onMove, onAim, words, explained } = props;
+  const { dir } = useT();
+  const rings = layout === "rings";
   // On the rings a tool's choices stand outside it, centred on it.
   const rtl = dir === "rtl";
   const spots = (groups: readonly number[]) =>
@@ -335,10 +374,34 @@ export function PenHomeAt(props: PenHomeProps & { at: { x: number; y: number }; 
       ? outerSpots(innerSpot(Math.max(0, tools.findIndex((x) => x.tool === tool)), tools.length, rtl).angle, groups, rtl).map(spotStyle)
       : undefined;
   return (
-    <div ref={box} className={rings ? styles.rings : styles.atTip} role="toolbar" aria-label={t.toolbarLabel} dir={dir} data-pencil-pens={layout} data-tool={tool}>
-      <ToolRow {...props} onTool={pick} onMove={onTool} ring={rings} />
-      {tool === "highlight" && <PenPicker pen={props.pen} onPen={pickPen} spots={spots([PENS.length, PENS.length])} />}
-      {aim && isMarkAim(tool) && <AimPicker aim={aim} onAim={pickAim} spots={spots([MARK_AIMS.length])} />}
+    <>
+      <ToolRow {...props} onMove={onMove} ring={rings} explained={explained?.tool} />
+      {tool === "highlight" && (
+        <PenPicker pen={props.pen} onPen={props.onPen} spots={spots([PENS.length, PENS.length])} words={words} explained={explained} />
+      )}
+      {aim && isMarkAim(tool) && <AimPicker aim={aim} onAim={onAim} spots={spots([MARK_AIMS.length])} explained={explained?.tool} />}
+    </>
+  );
+}
+
+/**
+ * The same pens, standing in a page instead of at the pencil's tip, for the
+ * page that explains them (PenGuide.tsx). They work, so a reader can press
+ * each one, but they are run by that page: nothing here closes them, and no
+ * pick reaches the mus'haf page unless the page showing them passes it on.
+ */
+export function PenHomeHere(
+  props: PenHomeProps & {
+    layout: TipPens;
+    words: { pen: Pen; onPen: (pen: Pen) => void };
+    explained: PensExplained;
+  },
+): JSX.Element {
+  const { layout, tool, locked, onTool } = props;
+  const { t, dir } = useT();
+  return (
+    <div className={layout === "rings" ? styles.ringsHere : styles.rowHere} role="toolbar" aria-label={t.toolbarLabel} dir={dir} data-pencil-pens={layout} data-tool={tool}>
+      <TipPensInside {...props} onMove={onTool} onAim={(next) => onTool(next, locked)} />
     </div>
   );
 }

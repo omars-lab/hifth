@@ -18,6 +18,7 @@ import { ayahTarget } from "./ayah";
 /** Source files that must not be in the script the first page waits for. */
 const LATER = [
   "components/Colophon.tsx",
+  "components/PenGuide.tsx",
   "components/RevisionMap.tsx",
   "components/PackShelf.tsx",
   "components/BookmarkShelf.tsx",

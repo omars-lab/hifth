@@ -30,24 +30,41 @@ export function PenPicker({
   onPen,
   narrow = false,
   spots,
+  words,
+  explained,
 }: {
   pen: Pen;
   onPen: (pen: Pen) => void;
   narrow?: boolean;
   /** Where each of the eight stands, when a home places them itself (the rings at the pencil's tip). */
   spots?: readonly React.CSSProperties[] | undefined;
+  /**
+   * The held words' pen, when whoever shows the pens keeps it themselves: the
+   * page that explains the pens (PenGuide.tsx), where a pick must not reach
+   * the mus'haf page. Left out, the pick is kept here and put on the page.
+   */
+  words?: { pen: Pen; onPen: (pen: Pen) => void } | undefined;
+  /** The ids of the lines that explain each row, where a page has them. */
+  explained?: { pen: string; words: string } | undefined;
 }): JSX.Element {
   const { t } = useT();
-  const [wordPen, setWordPen] = useState<Pen>(() => savedWordPen());
+  const [ownWordPen, setOwnWordPen] = useState<Pen>(() => savedWordPen());
   const chooseWordPen = (next: Pen) => {
     rememberWordPen(next);
     applyWordPen(next);
-    setWordPen(next);
+    setOwnWordPen(next);
   };
   return (
     <div className={styles.both} data-narrow={narrow || undefined}>
-      <PenRow label={t.penLabel} pen={pen} onPen={onPen} spots={spots?.slice(0, PENS.length)} />
-      <PenRow label={t.penWordsLabel} pen={wordPen} onPen={chooseWordPen} words spots={spots?.slice(PENS.length)} />
+      <PenRow label={t.penLabel} pen={pen} onPen={onPen} spots={spots?.slice(0, PENS.length)} explained={explained?.pen} />
+      <PenRow
+        label={t.penWordsLabel}
+        pen={words ? words.pen : ownWordPen}
+        onPen={words ? words.onPen : chooseWordPen}
+        words
+        spots={spots?.slice(PENS.length)}
+        explained={explained?.words}
+      />
     </div>
   );
 }
@@ -58,12 +75,14 @@ function PenRow({
   onPen,
   words = false,
   spots,
+  explained,
 }: {
   label: string;
   pen: Pen;
   onPen: (pen: Pen) => void;
   words?: boolean;
   spots?: readonly React.CSSProperties[] | undefined;
+  explained?: string | undefined;
 }): JSX.Element {
   const { t } = useT();
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
@@ -104,6 +123,7 @@ function PenRow({
           className={styles.pen}
           aria-checked={pen === x}
           aria-label={name[x]}
+          aria-describedby={explained}
           title={words ? `${label}: ${name[x]}` : name[x]}
           tabIndex={pen === x ? 0 : -1}
           style={spots?.[i]}

@@ -742,6 +742,15 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   EVALFILE=.claude/skills/walk-app/scripts/pencil-walk.js` · test: `apps/web/e2e/pencil.spec.ts`,
   `native/HifthTests/PencilTests.swift` · walked 2026-10-13, nothing wrong; the real pencil is
   parked (manual testing 19)
+- [ ] Open the page that explains the pens (the info panel, "See what each pen does") **in the
+  iPad app**, with rings and with the row: every pen is there and explained, the highlighter
+  brings out its eight pens, none is cut off at the panel's sides, and pressing them changes
+  nothing on the reader's page or in what the app remembers; Back returns to the info panel.
+  · `make app-probe TARGET=ipad [SIDEWAYS=1] LOCALE=en ROUTE=/hafs-kfqc/p7
+  EVALFILE=.claude/skills/walk-app/scripts/pen-guide-walk.js PROBE_TIMEOUT_S=200` · test:
+  `apps/web/e2e/pen-guide.spec.ts` · walked 2026-11-11 on its side with rings, on its side with
+  the row, and upright in Arabic with the row, nothing wrong. To walk the row, set it first in
+  the info panel ("The pens at the pencil's tip") and put it back after.
 - [ ] Open the app at a verse and at a page; turn, zoom, open a note. · `make app-run-mac`,
   `make app-run-ipad` · Same as the browser. · see the native-shell skill
 - [ ] With a note up, make the Mac window too small for the open book (1000 wide, or 700 high),

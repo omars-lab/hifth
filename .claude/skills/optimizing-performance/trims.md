@@ -25,6 +25,13 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Checked again 2026-11-11, nothing taken.** 204.2 KB against the 210 KB cap, after the page
+that explains the pencil's pens (+3.7 KB). Of that, 1.8 KB is its words in the two languages,
+1.5 KB is the page itself, which already loads only when settings first open, and 0.5 KB is in
+the start-up script (the toolbar's fuller lines for Select and Highlight). 5.8 KB of room is
+left for the calendar. The two candidates below still only move code between files, so neither
+was taken; the open item `startup-slowed-in-a-month` is still the one that could free room.
+
 **Checked again 2026-11-10 (later), nothing taken.** 199.3 KB against the 200 KB cap, after
 the setting for showing which drawer sits on which (+0.9 KB). 0.7 KB of room is left. The two
 candidates below move code between files, so they would not lower the counted total; the next step

@@ -1,6 +1,7 @@
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { ArrowShowing } from "@hifth/core";
 import { useT } from "../i18n";
+import { PenGuide } from "./PenGuide";
 import { LOCALES } from "../lang";
 import { LOCALE_IDS } from "../messages/locales.gen";
 import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
@@ -98,6 +99,8 @@ interface ColophonProps {
   /** How the pens open at the pencil's tip; left out where there is no pencil. */
   tipPens?: TipPens | undefined;
   onTipPens?: ((choice: TipPens) => void) | undefined;
+  /** The layout the page that explains the pencil's pens draws them in (PenGuide.tsx); on every device. */
+  pensLayout?: TipPens | undefined;
   /** Where the look-alike chips go when a magnified page leaves no desk; remembered on this device. */
   penSide?: PenSide | undefined;
   onPenSide?: ((side: PenSide) => void) | undefined;
@@ -114,7 +117,9 @@ interface ColophonProps {
 function focusables(root: HTMLElement): HTMLElement[] {
   const sel =
     'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
-  return Array.from(root.querySelectorAll<HTMLElement>(sel));
+  // Laid out, so the panel's own sections do not count while a page of it
+  // (the pens, explained) stands in their place.
+  return Array.from(root.querySelectorAll<HTMLElement>(sel)).filter((el) => el.getClientRects().length > 0);
 }
 
 interface Credit {
@@ -318,6 +323,7 @@ export function Colophon({
   onPenHome,
   tipPens,
   onTipPens,
+  pensLayout,
   penSide,
   onPenSide,
   railHome,
@@ -347,6 +353,30 @@ export function Colophon({
   const lookalikePreview = useLookalikePreview();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
+  // The page that explains the pencil's pens stands in the panel's place
+  // until Back; the panel is kept under it, so it comes back where it was.
+  const [penGuide, setPenGuide] = useState(false);
+  const penGuideOpener = useRef<HTMLButtonElement>(null);
+  const scrolledTo = useRef(0);
+  const openPenGuide = () => {
+    scrolledTo.current = sheetRef.current?.scrollTop ?? 0;
+    setPenGuide(true);
+  };
+  const closePenGuide = useCallback(() => setPenGuide(false), []);
+  const wasPenGuide = useRef(false);
+  useLayoutEffect(() => {
+    const sheet = sheetRef.current;
+    if (sheet && penGuide) sheet.scrollTop = 0;
+    if (sheet && !penGuide && wasPenGuide.current) {
+      sheet.scrollTop = scrolledTo.current;
+      penGuideOpener.current?.focus({ preventScroll: true });
+    }
+    wasPenGuide.current = penGuide;
+  }, [penGuide]);
+  // Closed from the pens' page, the panel opens next time as itself.
+  useLayoutEffect(() => {
+    if (!open) setPenGuide(false);
+  }, [open]);
 
   // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
   useLayoutEffect(() => {
@@ -403,6 +433,7 @@ export function Colophon({
         dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
+        data-page={penGuide ? "pens" : undefined}
       >
         <div className={styles.grip} aria-hidden="true" />
         <header className={styles.head}>
@@ -414,6 +445,11 @@ export function Colophon({
             ✕
           </button>
         </header>
+        {penGuide && pensLayout && (
+          <div className={styles.page}>
+            <PenGuide layout={pensLayout} marks={markTools ?? "one"} onBack={closePenGuide} />
+          </div>
+        )}
 
         {/* One button per language rather than one toggle. A single "switch to
             English" control is unreadable to the half of its audience that
@@ -1321,6 +1357,20 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.tipPensNote}</p>
+          </section>
+        )}
+        {/* The pens the pencil opens, to try, each with its line (PenGuide.tsx).
+            On every device: a reader without a pencil can still see what the
+            pens are before buying one, and the tools are the same everywhere. */}
+        {pensLayout && (
+          <section className={styles.block} aria-labelledby="colophon-pen-guide">
+            <h3 className={styles.subhead} id="colophon-pen-guide">
+              {t.penGuideSection}
+            </h3>
+            <button ref={penGuideOpener} type="button" className={styles.toggle} onClick={openPenGuide} data-pen-guide-open="">
+              <span>{t.penGuideOpen}</span>
+            </button>
+            <p className={styles.note}>{t.penGuideNote}</p>
           </section>
         )}
         {/* Which side the pens down the side and the Mark up button stand on

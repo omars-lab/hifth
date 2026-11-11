@@ -2126,11 +2126,13 @@ test.describe("Hifth · the page tools bar", () => {
     await page.goto("/#/hafs-kfqc/p8");
     await expect(pageSvg(page, 8)).toBeVisible();
     await expect(toolBtn(page, "Select")).toHaveAttribute("aria-checked", "true");
-    await expect(bar(page)).toContainText("Select tool");
+    // Select and Highlight say what they do, like every other tool; they used
+    // to say only "Select tool" and "Highlight tool" (2026-11-11).
+    await expect(bar(page)).toContainText("Click a verse to open the verses like it, or drag across a passage");
 
     await page.keyboard.press("KeyH");
     await expect(toolBtn(page, "Highlight")).toHaveAttribute("aria-checked", "true");
-    await expect(bar(page)).toContainText("Highlight tool");
+    await expect(bar(page)).toContainText("Drag across a passage to colour it");
     // The pointer says it too, on the page itself.
     const cursor = await page
       .locator('[data-tool="highlight"][data-page="8"]')

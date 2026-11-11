@@ -2515,6 +2515,11 @@
           "note": "The info panel. Every choice the reader can make is a radio group here."
         },
         {
+          "file": "apps/web/src/components/PenGuide.tsx",
+          "symbol": "PenGuide",
+          "note": "A page inside the info panel: the pencil's pens, working but for trying only, and a line on each. The pattern for any later page inside the panel."
+        },
+        {
           "file": "apps/web/src/settings-at.ts",
           "symbol": "savedSettingsAt",
           "note": "Whether the reading settings sit in the top bar or behind one button."

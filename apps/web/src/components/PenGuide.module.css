@@ -1,0 +1,150 @@
+/* The page that explains the pencil's pens, inside the info panel
+   (PenGuide.tsx). It borrows the panel's own measures, so it reads as one of
+   its pages and not as a sheet over a sheet. */
+.guide {
+  margin-block-start: var(--space-2);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-2) var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Back points the way the reader came from: the other way in Arabic. */
+[dir="rtl"] .chevron {
+  scale: -1 1;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.part {
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.head {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.text {
+  margin: 0;
+}
+
+.how {
+  margin: 0 0 var(--space-2);
+  padding-inline-start: 1.2em;
+}
+
+/* Room for the pens to stand in: the rings are a fixed size, and the row
+   wraps, so neither can push the panel wider than the screen. */
+.stand {
+  display: flex;
+  justify-content: center;
+  margin-block: var(--space-3) var(--space-2);
+  max-inline-size: 100%;
+}
+
+.now {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--accent-tint);
+  /* Tall enough for two lines, so the list under it does not jump as the pen
+     changes. */
+  min-block-size: 4.6em;
+}
+
+.list {
+  display: grid;
+  gap: var(--space-1, 4px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+}
+
+/* The pen on is said by a rule down its line's edge as well as by the fill. */
+.row[data-on] {
+  background: var(--accent-tint);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+[dir="rtl"] .row[data-on] {
+  box-shadow: inset -3px 0 0 var(--accent);
+}
+
+.icon,
+.swatches {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  inline-size: 44px;
+  min-block-size: 28px;
+  color: var(--ink);
+}
+
+.swatches {
+  grid-template-columns: repeat(2, auto);
+  gap: 3px;
+}
+
+.swatch {
+  inline-size: 14px;
+  block-size: 14px;
+  border-radius: 50%;
+}
+
+/* A held run of words is a short band, so its pens are drawn as one. */
+.swatches[data-words] .swatch {
+  inline-size: 18px;
+  block-size: 8px;
+  border-radius: 4px;
+}
+
+.says {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}

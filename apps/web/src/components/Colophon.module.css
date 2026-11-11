@@ -340,3 +340,9 @@
 .sheet:focus {
   outline: none;
 }
+
+/* A page of the panel standing in its place (the pens, explained): everything
+   but the title row and the page itself is put away until Back. */
+.sheet[data-page] > :not(.head, .grip, .page) {
+  display: none;
+}

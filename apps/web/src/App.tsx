@@ -4697,6 +4697,7 @@ export function App(): JSX.Element {
             // Only the iPad app has a pencil to squeeze.
             tipPens={nativeInfo()?.platform === "ios" ? tipPens : undefined}
             onTipPens={chooseTipPens}
+            pensLayout={tipPens}
             penSide={desktop ? penSide : undefined}
             onPenSide={desktop ? choosePenSide : undefined}
             railHome={desktop ? railHome : undefined}
