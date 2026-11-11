@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hifth — revise on the page you memorised</title>
+  <meta name="description" content="Hifth is a mus'haf for huffaz: the same 604 pages, line for line, with look-alike verses one tap apart and a place to mark where you slipped. Open it in your browser; the Mac app is coming soon." />
+  <meta name="theme-color" content="#f4efe6" />
+  <link rel="icon" href="/read/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="/notify.js" defer></script>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="hero-text">
+        <p class="wordmark" lang="ar" dir="rtl">حفظ</p>
+        <h1>Hifth</h1>
+        <p class="lead">Revise the Qur'an on the page you memorised it from.</p>
+        <p class="actions">
+          <a class="button primary" href="/read/">Open Hifth in your browser</a>
+        </p>
+        <p class="mac">Mac app — coming soon</p>
+      </div>
+      <figure class="hero-picture">
+        <img src="/page-shot.png" width="780" height="1688"
+             alt="A page of the mus'haf in Hifth, with one verse highlighted." />
+      </figure>
+    </section>
+
+    <section class="points" aria-label="What Hifth does">
+      <div>
+        <h2>The page you know</h2>
+        <p>The 604-page mus'haf, line for line, so a verse sits where your memory puts it.</p>
+      </div>
+      <div>
+        <h2>Look-alike verses, one tap apart</h2>
+        <p>Verses that are easy to mix up are linked, so you can jump between them and see what differs.</p>
+      </div>
+      <div>
+        <h2>Mark where you slipped</h2>
+        <p>Put a mark on the word you stumbled on, and see where your mistakes gather over time.</p>
+      </div>
+    </section>
+
+    <section class="notify" id="notify">
+      <h2>Hear when the Mac app is out</h2>
+      <p>Leave your email and we will write once, when it ships. Nothing else.
+         <a href="/privacy.html">What we keep, and how to leave.</a></p>
+      <form id="notify-form" action="/api/notify" method="post" novalidate>
+        <label for="notify-email" class="visually-hidden">Email</label>
+        <input id="notify-email" name="email" type="email" autocomplete="email"
+               placeholder="you@example.com" required />
+        <button class="button" type="submit">Tell me</button>
+        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-action="notify"></div>
+        <p class="notify-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>Hifth is free software under the GNU GPL.
+      <a href="https://github.com/omars-lab/hifth">Source code</a> ·
+      <a href="/privacy.html">Privacy</a> ·
+      <a href="https://blog.bytesofpurpose.com/hifth/docs/">How it was designed</a></p>
+  </footer>
+</body>
+</html>

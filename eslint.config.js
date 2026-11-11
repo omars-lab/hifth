@@ -121,6 +121,11 @@ export default tseslint.config(
     files: ["apps/web/**/*.{ts,tsx}"],
     languageOptions: { globals: { ...globals.browser } },
   },
+  // hifth.app's front page: its script runs in the browser as is, with no build step.
+  {
+    files: ["apps/landing/*.js"],
+    languageOptions: { globals: { ...globals.browser } },
+  },
   // Config/test files may use dev globals.
   {
     files: ["**/*.config.{ts,js}", "**/*.test.{ts,tsx}", "**/vitest.setup.ts"],
