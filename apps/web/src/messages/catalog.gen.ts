@@ -571,6 +571,10 @@ export interface Catalog {
   readonly toolErase: string;
   readonly toolEraseHint: string;
   readonly toolEraseHintClick: string;
+  readonly toolHelpHover: string;
+  readonly toolHelpLine: string;
+  readonly toolHelpNote: string;
+  readonly toolHelpTitle: string;
   readonly toolHighlight: string;
   readonly toolJump: string;
   readonly toolJumpHint: string;

@@ -7,6 +7,7 @@ import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
+import { TOOL_HELPS, type ToolHelp } from "../tool-help";
 import { WORD_TAPS, type WordTap } from "../word-tap";
 import { RUN_MARKS, type RunMark } from "../run-mark";
 import { RUN_FOLLOWS, rememberRunFollow, useRunFollow } from "../run-follow";
@@ -59,6 +60,9 @@ interface ColophonProps {
   /** Where a verse's tools open, a card or inside its drawer; remembered on this device. */
   drawerTools?: DrawerTools;
   onDrawerTools?: (choice: DrawerTools) => void;
+  /** Whether the line beside the page tools stays, or only each tool's label; remembered on this device. */
+  toolHelp?: ToolHelp;
+  onToolHelp?: (choice: ToolHelp) => void;
   wordTap?: WordTap;
   onWordTap?: (choice: WordTap) => void;
   /** How the page shows the verse a "Play to" run is reciting; remembered on this device. */
@@ -278,6 +282,8 @@ export function Colophon({
   onVerseGestures,
   drawerTools,
   onDrawerTools,
+  toolHelp,
+  onToolHelp,
   wordTap,
   onWordTap,
   runMark,
@@ -528,6 +534,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.drawerToolsNote}</p>
+          </section>
+        )}
+
+        {/* The help for the page tools (ayah-drawer ①): each tool's label
+            always, and the line beside the bar until the owner drops it. */}
+        {toolHelp && onToolHelp && (
+          <section className={styles.block} aria-labelledby="colophon-tool-help">
+            <h3 className={styles.subhead} id="colophon-tool-help">
+              {t.toolHelpTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-tool-help">
+              {TOOL_HELPS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={toolHelp === choice}
+                  data-tool-help={choice}
+                  onClick={() => onToolHelp(choice)}
+                >
+                  {choice === "line" ? t.toolHelpLine : t.toolHelpHover}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.toolHelpNote}</p>
           </section>
         )}
 
