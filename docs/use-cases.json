@@ -937,6 +937,14 @@
         {
           "file": "apps/web/e2e/revision.spec.ts",
           "test": "a wiped record reads as a young record, not as an empty one"
+        },
+        {
+          "file": "apps/web/e2e/record-days.spec.ts",
+          "test": "a verse opened today is counted under today, as a month and as a list"
+        },
+        {
+          "file": "apps/web/e2e/record-days.spec.ts",
+          "test": "mistakes marked on two days are counted on each, by kind, and each opens its verse"
         }
       ],
       "gap": "Two holes, and the first is not closable in this repo. iOS deletes script-writable storage after seven days of no interaction, which is precisely the history this promise is about. The e2e can take the record with one CDP call and prove the map still says how old it is, but it cannot wait eight days on a real phone — that is docs/validation/ledger.json → offline-survival-8-day. Second, the marquee path is proven at the store, not through the gesture: no unit test drives a real drag, so «one look, not twelve» is asserted on `recordLook` rather than on a release over twelve ayahs. Loop 4b closed the third hole this entry used to carry: the map drew two held hizb and fifty-eight absent ones, so it was a picture of an inventory rather than of a mus'haf. It is sixty of sixty now, and the absent treatment is held by a trimmed manifest instead of by the build. A fourth is new with the press: the grid's ArrowUp/ArrowDown ask the browser how many cells fit on a row, and in jsdom every `offsetTop` is 0, so the unit suite proves the sideways walk and the browser proves the rest — the vertical step is asserted nowhere, and would degenerate to Home/End without failing a test.",

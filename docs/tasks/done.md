@@ -9,7 +9,7 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
-## Sessions of 2026-11-09 and 2026-11-10
+## Sessions of 2026-11-09 to 2026-11-11
 
 These sessions' task numbers started again from 1, so they would clash with the numbers below.
 They are listed here by date instead. What is still open from them is in
@@ -82,6 +82,24 @@ t_29ebee). The narrow ribbon merged.
 - `label-commits-with-what-they-are-for`, first part: a git hook ends each commit message with
   the task, use case, feature and plan it was for; a backlog row may name its use case and
   feature; the push check lists commits with no label.
+
+### 2026-11-11 — pencil-pens-as-rings: the pens at the pencil's tip, as rings
+
+**Done:** A pencil squeeze or double-tap opens the pens as rings round the tip, with the
+highlighter's colours in an outer ring. The row that was there before stays as a setting. Design:
+`docs/design/pencil-gestures.md`. PR #590.
+
+### 2026-11-11 — pencil-pens-settings-page: a page that shows the pencil's pens
+
+**Done:** Settings has a button, "See what each pen does". Its page says how to open the pens,
+shows them working in the layout the reader chose, and gives one line per pen. PR #591.
+
+### 2026-11-11 — calendar-of-each-days-work: the record, day by day
+
+**Done:** The record of what was opened can be read as a month or as a list of days, beside the
+map. Each day shows verses, pages and juz opened, mistakes by kind and the pages they fall on, and
+each mistake opens its verse. Design: `docs/design/revision-record.md` ⑤, which stays open for the
+owner to say which layout the sheet should favour.
 
 ## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)
 

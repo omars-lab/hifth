@@ -52,7 +52,9 @@ const ROOT = process.env.HIFTH_GATE_ROOT
  * The revision record: `App.tsx` is where a tap lands; `RevisionMap.tsx` is the
  * picture the record exists for — it reads the record and draws it, with no
  * route and no link, and it is the module a "share your progress" button would
- * be added to first.
+ * be added to first. `RevisionDays.tsx` is the same record drawn day by day, and
+ * `revision-days.ts` is the count it reads: that count is the record with the
+ * days added up, so it is guarded as part of the record, not as a reader of it.
  *
  * The confusion-jump record (docs/design/confusion-jumps.md) is the same kind
  * of thing: a list of where one person's memory of the Qur'an slips, and how
@@ -66,12 +68,14 @@ const RECORDS = [
   {
     name: "the revision record",
     why: "The record is a log of when someone was reading Qur'an",
-    modules: ["packages/core/src/revision.ts", "apps/web/src/revision-store.ts"],
-    files: ["revision", "revision-store"],
-    symbols: ["rollUp", "lastSeen", "scopesOf", "dayOf", "daysBetween", "editionOf", "RevisionEvent", "RevisionScope", "DayStamp"],
+    modules: ["packages/core/src/revision.ts", "packages/core/src/revision-days.ts", "apps/web/src/revision-store.ts"],
+    files: ["revision", "revision-days", "revision-store"],
+    symbols: ["rollUp", "lastSeen", "scopesOf", "dayOf", "daysBetween", "editionOf", "daysOf", "DayCount", "RevisionEvent", "RevisionScope", "DayStamp"],
     allowed: new Map([
       ["apps/web/src/App.tsx", "where a deliberate tap becomes a recorded look"],
       ["apps/web/src/components/RevisionMap.tsx", "the picture; reads the record, sends nothing"],
+      ["apps/web/src/components/RevisionDays.tsx", "the record day by day; reads it, sends nothing"],
+      ["packages/core/src/revision-days.ts", "the day-by-day count, built on the pure module; part of the record itself"],
       ["apps/web/src/revision-store.ts", "the store is built on the pure module"],
       ["packages/core/src/index.ts", "the barrel that exports it"],
     ]),

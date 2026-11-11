@@ -41,7 +41,7 @@
  * throw away the only signal that a wipe happened.
  */
 
-import type { DayStamp, RevisionEvent } from "@hifth/core";
+import type { DayStamp, MistakeWhat, RevisionEvent } from "@hifth/core";
 import { dayOf, daysBetween } from "@hifth/core";
 
 const DB_NAME = "hifth.revision.v1";
@@ -68,6 +68,8 @@ export interface Look {
   readonly page: number;
   /** The reader marked a mistake here (see `RevisionEvent.slip`). */
   readonly slip?: boolean;
+  /** What went wrong, when the reader said so as they marked it (see `RevisionEvent.what`). */
+  readonly what?: MistakeWhat;
 }
 
 export interface RevisionRecord {
@@ -194,6 +196,7 @@ export async function recordLook(look: Look, now: number = Date.now()): Promise<
       at: now,
       tz: -new Date(now).getTimezoneOffset(),
       ...(look.slip ? { slip: true as const } : {}),
+      ...(look.slip && look.what ? { what: look.what } : {}),
     };
     const day = dayOf(event);
     const tx = db.transaction([DAYS, META], "readwrite");

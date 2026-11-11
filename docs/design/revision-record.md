@@ -380,3 +380,39 @@ by day and the count of mistakes, built beside today's picture and sharing its c
 of days with the numbers written out, and letting the owner pick; the other stays as a
 setting. The record still never leaves the device. What to build and how to test it:
 [the open-work list, item 4](../../.claude/plans/open-work-2026-11.md).
+
+**Built both ways, 2026-11-11; the owner's pick is what is left.** The record sheet now has three
+choices along its top: Map (today's picture, still the one it opens on), Month and Days. The
+choice is remembered on the device.
+
+- **Month** is a calendar month, one square a day. A day with work on it is tinted, and a day
+  with mistakes carries their number in red. Days before the record began and days still to come
+  are drawn with a dashed edge and cannot be pressed, so "nothing opened" is never confused with
+  "the record cannot say". Pressing a day spells it out underneath. Arrows step a month at a time,
+  no further back than the record goes. The week starts on Saturday in Arabic and Sunday in
+  English.
+- **Days** lists the days that have anything on them, newest first, each spelled out in full.
+
+Both say the same things for a day, from one count: the verses and pages opened and the juz they
+fall in; the mistakes marked, by kind (the whole word, a harakat, going into another verse) and
+the pages they fall on; and each mistake as a button that opens its verse and closes the sheet.
+
+Three things worth knowing about how it counts:
+
+- It counts from the device's own record, not from the marks on the page. So a mistake stays in
+  its day after its mark is cleared, and marks loaded from a file do not fill in days.
+- The kind of mistake is only kept from 2026-11-11 on. A mistake recorded earlier is counted as
+  the whole word.
+- Hizb is not shown per day yet. Juz is.
+
+**Where the choice lives, and why not in settings:** the rule is that the layout which loses stays
+as a setting. Here all three sit in the sheet itself, because a reader wants the map on one visit
+and the month on the next, and a switch two taps away in settings would hide that. Which of Month
+and Days the sheet should favour is the owner's call, made by using both.
+
+**Checked:** counting tests in the core package and the store; browser tests (Chrome, Firefox,
+two phone sizes) that make looks and mistakes on two made-up days and read them back in both
+layouts, that a day with nothing the book can place shows no line of noughts, and that in Arabic
+the earlier-month arrow sits on the right with no turn of our own; by eye in English and Arabic
+at laptop and phone width; and in the iPad app, both ways up, with the walk-app skill's
+record-days script.

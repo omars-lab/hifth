@@ -25,6 +25,19 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Checked again 2026-11-11 (later), one small trim taken.** 206.6 KB against the 210 KB cap,
+after the record's two by-day layouts (+2.4 KB). Of that, 1.8 KB is the two layouts and their
+day-by-day count, which load with the record sheet and not at start-up, 0.3 KB is in the
+start-up script (the switch's words and keeping what kind of mistake was marked), and 0.3 KB is
+their words in the two languages. The trim: the day-by-day count first sat in the same core file
+as the code that records a look, so it loaded at start-up though only the record sheet reads it.
+In a file of its own it moved out, 0.4 KB off start-up; the total is the same. The load-later
+browser test now fails if that file is found in the start-up script again. Worth copying
+whenever a function only a late-loading screen uses is added to a core file start-up reads.
+3.4 KB of room is left, and the page icons along the bottom are still to come, so the next
+feature that adds to start-up needs a trim first. The open item `startup-slowed-in-a-month` is
+still the one that could free room.
+
 **Checked again 2026-11-11, nothing taken.** 204.2 KB against the 210 KB cap, after the page
 that explains the pencil's pens (+3.7 KB). Of that, 1.8 KB is its words in the two languages,
 1.5 KB is the page itself, which already loads only when settings first open, and 0.5 KB is in

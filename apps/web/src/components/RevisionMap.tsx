@@ -15,6 +15,7 @@ import {
 import { useT } from "../i18n";
 import { readRecord, revisionStoreSupported, type RevisionRecord } from "../revision-store";
 import { PackShelf } from "./PackShelf";
+import { RevisionDays } from "./RevisionDays";
 import styles from "./RevisionMap.module.css";
 
 interface RevisionMapProps {
@@ -81,6 +82,8 @@ interface RevisionMapProps {
    * than a mocked global — the same reason `revision.ts` is clockless.
    */
   today?: string;
+  /** Open a verse and close the sheet: a mistake pressed in a by-day view. */
+  onGoToVerse?: ((key: string) => void) | undefined;
   /**
    * The reader's bookmarks section, drawn under the map at every scope. Passed
    * in rather than built here because the bookmarks belong to the app — the
@@ -292,6 +295,20 @@ export function holdings(
  * it with room to spare. The map is a little less dense for it and still shows
  * the whole book at a glance, which is the only reason to open it.
  */
+/** What the sheet shows: the map of the book, or one of the two by-day layouts. */
+type RecordView = "map" | "month" | "days";
+const VIEWS: readonly RecordView[] = ["map", "month", "days"];
+const VIEW_KEY = "hifth.record.view.v1";
+
+function readView(): RecordView {
+  try {
+    const saved = localStorage.getItem(VIEW_KEY) as RecordView | null;
+    return saved && VIEWS.includes(saved) ? saved : "map";
+  } catch {
+    return "map";
+  }
+}
+
 export function RevisionMap({
   open,
   onClose,
@@ -302,6 +319,7 @@ export function RevisionMap({
   onGoToPage,
   openAt,
   today,
+  onGoToVerse,
   children,
 }: RevisionMapProps): JSX.Element | null {
   const { t, dir } = useT();
@@ -309,6 +327,9 @@ export function RevisionMap({
   const gridRef = useRef<HTMLUListElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
   const [scope, setScope] = useState<RevisionScope>("hizb");
+  // What the sheet shows: the map of the book, or the record day by day, as a
+  // month or as a list of days. The reader's choice, kept on this device.
+  const [view, setView] = useState<RecordView>(readView);
   // Which slice of the record the colouring is drawn from. The whole record by
   // default; a single month otherwise. Independent of `scope` — a reader may ask
   // "which juz this month" — so it has its own state and clears no cursor: the
@@ -588,6 +609,30 @@ export function RevisionMap({
             part of what the picture *is*. */}
         <p className={styles.caveat}>{t.mapCaveat}</p>
 
+        <div className={styles.scopeRow} role="radiogroup" aria-label={t.mapViewGroup}>
+          {VIEWS.map((v) => (
+            <button
+              key={v}
+              type="button"
+              role="radio"
+              className={styles.scope}
+              aria-checked={view === v}
+              onClick={() => {
+                setView(v);
+                try {
+                  localStorage.setItem(VIEW_KEY, v);
+                } catch {
+                  // Private mode: the choice lasts until the page is closed.
+                }
+              }}
+            >
+              {v === "map" ? t.mapViewMap : v === "month" ? t.mapViewMonth : t.mapViewDays}
+            </button>
+          ))}
+        </div>
+
+        {view === "map" && (
+        <>
         <div className={styles.scopeRow} role="radiogroup" aria-label={t.mapScopeGroup}>
           {(["page", "hizb", "juz"] as const).map((s) => (
             <button
@@ -630,6 +675,8 @@ export function RevisionMap({
             </button>
           ))}
         </div>
+        </>
+        )}
 
         {!revisionStoreSupported() ? (
           <p className={styles.body}>{t.mapNoStore}</p>
@@ -640,6 +687,17 @@ export function RevisionMap({
           <>
             <p className={styles.body}>{t.mapLoading}</p>
           </>
+        ) : view !== "map" ? (
+          asOf && (
+            <RevisionDays
+              layout={view}
+              events={record.events}
+              since={record.since ?? null}
+              today={asOf}
+              edition={edition}
+              onGoToVerse={onGoToVerse}
+            />
+          )
         ) : (
           <>
             {/* The grid is mus'haf furniture — division 1 sits at the right and
@@ -781,7 +839,7 @@ export function RevisionMap({
             pack perfectly well. Shown at juz scope only — a pack *is* a juz, and
             offering to keep one under a grid of 604 pages would be offering it
             in a unit the reader is not looking at. */}
-        {scope === "juz" && <PackShelf edition={edition} pages={pages} page={page} />}
+        {view === "map" && scope === "juz" && <PackShelf edition={edition} pages={pages} page={page} />}
 
         {children}
       </div>

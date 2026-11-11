@@ -15,6 +15,8 @@ const RECORD = "packages/core/src/revision.ts";
 const STORE = "apps/web/src/revision-store.ts";
 const importStore = "import { x } " + "from " + '"../revision-store";';
 const importBarrel = "import { rollUp } " + "from " + '"@hifth/core";';
+const DAYS = "packages/core/src/revision-days.ts";
+const importDays = "import { daysOf, type DayCount } " + "from " + '"@hifth/core";';
 const JUMPS = "packages/core/src/confusions.ts";
 const JUMP_STORE = "apps/web/src/bookmark-store.ts";
 const importJumps = "import {\n  markConfusion,\n} " + "from " + '"@hifth/core";';
@@ -28,6 +30,8 @@ const clean = {
   [STORE]: "import { rollUp } " + "from " + '"@hifth/core/src/revision.js";\nexport const s = rollUp();',
   "apps/web/src/App.tsx": importBarrel,
   "apps/web/src/components/RevisionMap.tsx": importBarrel,
+  "apps/web/src/components/RevisionDays.tsx": importDays,
+  [DAYS]: "import { dayOf } " + "from " + '"./revision.js";\nexport function daysOf() { return [dayOf]; }',
   "packages/core/src/index.ts": "export * " + "from " + '"./revision.js";',
   "scripts/build-thing.mjs": "export const nothing = 0;",
   [JUMPS]: "export function markConfusion() { return []; }",
@@ -53,7 +57,7 @@ test("gate:revision-privacy passes when only the allowed modules reach the recor
   withFixture(clean, (root) => {
     const r = runGate("revision-privacy", root);
     assert.equal(r.status, 0, r.out);
-    assert.match(r.out, /OK \(6 record modules/);
+    assert.match(r.out, /OK \(7 record modules/);
   });
 });
 
@@ -79,6 +83,22 @@ test("gate:revision-privacy refuses a way off the device inside the record's own
     const r = runGate("revision-privacy", root);
     assert.equal(r.status, 1, r.out);
     assert.match(r.out, /revision\.ts contains `fetch\(`/);
+  });
+});
+
+test("gate:revision-privacy refuses a new reader of the day-by-day count", () => {
+  withFixture({ ...clean, "apps/web/src/components/ShareDays.tsx": importDays }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /ShareDays\.tsx imports the revision record/);
+  });
+});
+
+test("gate:revision-privacy refuses a way off the device inside the day-by-day count", () => {
+  withFixture({ ...clean, [DAYS]: clean[DAYS] + "\nfetch" + '("/days");' }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /revision-days\.ts contains/);
   });
 });
 

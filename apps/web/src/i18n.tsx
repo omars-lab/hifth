@@ -101,6 +101,7 @@ import {
   surahName as fmtSurahName,
   surahNames,
   tenths,
+  weekOf,
 } from "./format";
 import type { Catalog } from "./messages/catalog.gen";
 import { CATALOG_LOADERS } from "./messages/catalogs.gen";
@@ -549,6 +550,30 @@ export interface Strings {
   mapSlips: string;
   /** A cell's accessible name with its count of marked mistakes added. */
   mapCellSlips(cell: string, n: number): string;
+  /* ---- the record, day by day (RevisionDays) ---- */
+  /** The switch between the map of the book and the two by-day layouts. */
+  mapViewGroup: string;
+  mapViewMap: string;
+  mapViewMonth: string;
+  mapViewDays: string;
+  /** A day as a reader writes it, and a month with its year. */
+  dayLong(day: string): string;
+  monthLong(year: number, month: number): string;
+  /** The week's first day (0 is Sunday) and its seven short day names from there. */
+  weekStart: number;
+  weekdays: readonly string[];
+  /** "3 pages", for a day's count of pages. */
+  pagesN(n: number): string;
+  /** The third kind of mistake; the other two reuse the question's own names. */
+  dayKindVerse: string;
+  daysNone: string;
+  /** A month square's name: a day outside the record, an idle day, a day with no mistake. */
+  dayOutside(day: string): string;
+  dayNothing(day: string): string;
+  dayOpened(day: string): string;
+  monthEarlier: string;
+  monthLater: string;
+  dayPick: string;
   /** A cell's accessible name, one per state. */
   mapCellAbsent(label: string): string;
   mapCellNever(label: string): string;
@@ -1513,6 +1538,22 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mapRecent: m.mapRecent,
     mapSlips: m.mapSlips,
     mapCellSlips: (cell, count) => m.mapCellSlips({ cell, n: count, nText: n(count) }),
+    mapViewGroup: m.mapViewGroup,
+    mapViewMap: m.mapViewMap,
+    mapViewMonth: m.mapViewMonth,
+    mapViewDays: m.mapViewDays,
+    dayLong: (day) => longDay(day, lang),
+    monthLong: (year, month) => longMonth(year, month, lang),
+    ...weekOf(lang),
+    pagesN: (count) => m.distancePages({ n: count, nText: n(count) }),
+    dayKindVerse: m.dayKindVerse,
+    daysNone: m.daysNone,
+    dayOutside: (day) => m.dayOutside({ dayText: longDay(day, lang) }),
+    dayNothing: (day) => m.dayNothing({ dayText: longDay(day, lang) }),
+    dayOpened: (day) => m.dayOpened({ dayText: longDay(day, lang) }),
+    monthEarlier: m.monthEarlier,
+    monthLater: m.monthLater,
+    dayPick: m.dayPick,
     mapCellAbsent: (label) => m.mapCellAbsent({ label }),
     mapCellNever: (label) => m.mapCellNever({ label }),
     // Not a plural: "today" and "yesterday" are not categories any CLDR rule

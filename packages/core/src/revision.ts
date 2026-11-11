@@ -94,7 +94,18 @@ export interface RevisionEvent {
    * "I never slipped".
    */
   readonly slip?: true;
+  /**
+   * What went wrong, when the reader said so as they marked it: a wrong sign on
+   * the word ("sign"), or reading on into another verse ("verse"). Absent means
+   * a word marked with nothing more said, which is also every mistake recorded
+   * before this field existed. An answer given later, on a word already marked,
+   * is not written back: the record keeps the moment, not the mark.
+   */
+  readonly what?: MistakeWhat;
 }
+
+/** What a mistake's event can say went wrong; see `RevisionEvent.what`. */
+export type MistakeWhat = "sign" | "verse";
 
 /** The local calendar day an event belongs to. */
 export function dayOf(event: RevisionEvent): DayStamp {

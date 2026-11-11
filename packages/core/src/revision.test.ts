@@ -10,6 +10,7 @@ import {
   slipsIn,
   type RevisionEvent,
 } from "./revision.js";
+import { daysOf } from "./revision-days.js";
 
 const EDITION = "hafs-kfqc";
 const key = (surah: number, ayah: number) => `quran/${EDITION}/${surah}:${ayah}`;
@@ -278,5 +279,83 @@ describe("slipsIn", () => {
   it("still lets a slip warm its division like any look", () => {
     const only = look({ slip: true });
     expect(lastSeen([only], "page").get(7)).toBe("2026-03-09");
+  });
+});
+
+describe("daysOf", () => {
+  const at = (iso: string) => Date.parse(iso);
+
+  it("gives one row per day worked, newest first, and leaves idle days out", () => {
+    const days = daysOf(
+      [look({ at: at("2026-03-09T12:00:00Z") }), look({ at: at("2026-03-11T12:00:00Z") }), look({ at: at("2026-03-11T13:00:00Z") })],
+      EDITION,
+    );
+    expect(days.map((d) => d.day)).toEqual(["2026-03-11", "2026-03-09"]);
+  });
+
+  it("puts 11 pm and 1 am on two days, by the reader's own clock", () => {
+    // Riyadh, +03: 20:00Z is 23:00 on the 9th, 22:00Z is 01:00 on the 10th.
+    const days = daysOf(
+      [look({ at: at("2026-03-09T20:00:00Z"), tz: 180, slip: true }), look({ at: at("2026-03-09T22:00:00Z"), tz: 180, slip: true })],
+      EDITION,
+    );
+    expect(days.map((d) => [d.day, d.mistakes.length])).toEqual([
+      ["2026-03-10", 1],
+      ["2026-03-09", 1],
+    ]);
+  });
+
+  it("keeps a look on the day it was recorded, wherever it is read later", () => {
+    // Recorded at 23:30 in Jakarta (+07); the row must not move when the device
+    // reading it is somewhere else, because nothing but the event's own offset is used.
+    const days = daysOf([look({ at: at("2026-03-09T16:30:00Z"), tz: 420 })], EDITION);
+    expect(days[0]?.day).toBe("2026-03-09");
+  });
+
+  it("counts a dragged passage as one look, and its verses each once", () => {
+    const days = daysOf(
+      [look({ key: key(2, 48), endKey: key(2, 52) }), look({ key: key(2, 50) })],
+      EDITION,
+    );
+    expect(days[0]?.looks).toBe(2);
+    expect(days[0]?.verses).toBe(5); // 48 to 52; 50 is already among them
+  });
+
+  it("counts pages only in the print on the stage, and juz in every print", () => {
+    const other = `quran/another-print/2:48`;
+    const days = daysOf([look({ page: 7 }), look({ key: other, page: 9 }), look({ page: 7 })], EDITION);
+    expect(days[0]?.pages).toEqual([7]);
+    expect(days[0]?.juz).toEqual([1]);
+    expect(days[0]?.looks).toBe(3);
+  });
+
+  it("names the juz a day touched, in order, from the book's own boundaries", () => {
+    const days = daysOf([look({ key: key(18, 10), page: 294 }), look({ key: key(2, 255), page: 42 })], EDITION);
+    expect(days[0]?.juz).toEqual([3, 15]);
+  });
+
+  it("lists a day's mistakes oldest first, with what went wrong where it was said", () => {
+    const days = daysOf(
+      [
+        look({ at: at("2026-03-09T12:00:00Z"), slip: true }),
+        look({ at: at("2026-03-09T12:05:00Z"), slip: true, what: "sign", key: key(2, 49) }),
+        look({ at: at("2026-03-09T12:10:00Z"), slip: true, what: "verse", key: key(2, 255), page: 42 }),
+        look({ at: at("2026-03-09T12:20:00Z") }),
+      ],
+      EDITION,
+    );
+    const day = days[0]!;
+    expect(day.mistakes.map((m) => m.what ?? "word")).toEqual(["word", "sign", "verse"]);
+    expect(day.kinds).toEqual({ word: 1, sign: 1, verse: 1 });
+    expect(day.mistakePages).toEqual([7, 42]);
+    expect(day.looks).toBe(4);
+  });
+
+  it("drops a look it cannot place rather than guess", () => {
+    const days = daysOf([look({ key: "not a key", page: 7, slip: true })], EDITION);
+    expect(days[0]?.pages).toEqual([]);
+    expect(days[0]?.juz).toEqual([]);
+    expect(days[0]?.mistakes).toHaveLength(1);
+    expect(days[0]?.mistakePages).toEqual([]);
   });
 });
