@@ -2322,8 +2322,19 @@ export function App(): JSX.Element {
   );
   // The word tool's tap opens the word into its parts; a part picked drops a
   // note on it (a sign, or the whole word).
-  const [wordOpen, setWordOpen] = useState<{ page: number; key: string; word: number; rect: WordRect } | null>(
-    null,
+  // `stacked`: opened by a second tap on the lit verse, on top of its drawer,
+  // so it lives only as long as that drawer stays on that verse.
+  const [wordOpen, setWordOpen] = useState<{
+    page: number;
+    key: string;
+    word: number;
+    rect: WordRect;
+    stacked?: boolean;
+  } | null>(null);
+  const openWord = useCallback(
+    (at: { page: number; key: string; word: number; rect: WordRect }) =>
+      setWordOpen({ ...at, stacked: openWordsOfRef.current === at.key }),
+    [],
   );
   // The crop tool's box, in the page's own units, while its sheet is open.
   const [crop, setCrop] = useState<CropBox | null>(null);
@@ -3937,6 +3948,12 @@ export function App(): JSX.Element {
   // Only under the plain pointer: the highlighter keeps its own second tap.
   const openWordsOf = wordTap === "word" && drawerUp && tool === "select" ? selectedKey : null;
   openWordsOfRef.current = openWordsOf;
+  // The address moving the verse on (the back button, a link from another app)
+  // takes no tap on the page, so nothing else closed a stacked word's drawer:
+  // it was left over the next verse's, or over no drawer at all (2026-11-10).
+  useEffect(() => {
+    if (wordOpen?.stacked && wordOpen.key !== openWordsOf) setWordOpen(null);
+  }, [wordOpen, openWordsOf]);
   // The drawer's Play, the Listen in a verse number's menu and the Play to in
   // a held verse's menu have their verse asked for as they come into reach
   // (docs/PLAN.md, item 65). Declared after the effect that stops a recitation
@@ -4308,7 +4325,7 @@ export function App(): JSX.Element {
                   onErase={erase}
                   onMarkWord={markWord}
                 onPickSign={pickSignNote}
-                onOpenWord={setWordOpen}
+                onOpenWord={openWord}
                 openWordsOf={openWordsOf}
                 onCrop={setCrop}
                   labelFor={(key) => t.ayahAria(t.ayahLabel(key) ?? key)}
@@ -4413,7 +4430,7 @@ export function App(): JSX.Element {
                   onErase={erase}
                 onMarkWord={markWord}
                 onPickSign={pickSignNote}
-                onOpenWord={setWordOpen}
+                onOpenWord={openWord}
                 openWordsOf={openWordsOf}
                 onCrop={setCrop}
               />

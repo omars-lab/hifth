@@ -80,6 +80,61 @@ for (const size of [
       await expect(drawer(page)).toBeVisible();
     });
 
+    // The word's drawer stands on the verse's, and must never float over a gap
+    // (checked 2026-11-10, the open note on the stacked drawer). Going full
+    // screen or picking the highlighter is a tap outside the word's drawer,
+    // which closes it; the keys for both do nothing while it is open.
+    for (const away of [
+      {
+        how: "the page goes full screen",
+        go: (page: Page) =>
+          page.getByRole("button", { name: "Full screen" }).filter({ visible: true }).first().click(),
+      },
+      {
+        how: "the highlighter is picked",
+        go: (page: Page) =>
+          page.getByRole("toolbar", { name: "Page tools" }).getByRole("radio", { name: "Highlight", exact: true }).click(),
+      },
+    ]) {
+      test(`with the word's drawer stacked, it closes when ${away.how}`, async ({ page }) => {
+        await page.addInitScript((key) => localStorage.setItem(key, "word"), WORD_TAP_KEY);
+        await page.goto("/#/hafs-kfqc/2:45");
+        await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+        const at = await inLitVerse(page);
+        await page.mouse.click(at.x, at.y);
+        await expect(parts(page)).toBeVisible();
+
+        await away.go(page);
+        if (away.how.includes("full screen")) await expect(drawer(page)).toHaveCount(0);
+        await expect(parts(page), "no word drawer left over the page").toHaveCount(0);
+      });
+    }
+
+    // A tap outside the word's drawer closes it anyway, so the cases above
+    // could not leave it floating. The address changing with no tap on the
+    // page can: the back button, or a link from another app (2026-11-10).
+    for (const to of [
+      { how: "a page with no verse", hash: "#/hafs-kfqc/p3" },
+      { how: "another verse", hash: "#/hafs-kfqc/2:50" },
+    ]) {
+      test(`with the word's drawer stacked, moving to ${to.how} by the address leaves no word's drawer behind`, async ({
+        page,
+      }) => {
+        await page.addInitScript((key) => localStorage.setItem(key, "word"), WORD_TAP_KEY);
+        await page.goto("/#/hafs-kfqc/2:45");
+        await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+        const at = await inLitVerse(page);
+        await page.mouse.click(at.x, at.y);
+        await expect(parts(page)).toBeVisible();
+
+        await page.evaluate((hash) => {
+          location.hash = hash;
+        }, to.hash);
+        await page.waitForTimeout(600);
+        await expect(parts(page), "the word's drawer went with its verse").toHaveCount(0);
+      });
+    }
+
     test("with the setting on and the highlighter in hand, a second tap still puts the verse out", async ({
       page,
     }) => {
