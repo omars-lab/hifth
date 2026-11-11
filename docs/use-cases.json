@@ -687,6 +687,60 @@
       ]
     },
     {
+      "id": "pick-a-pen-without-leaving-the-verse",
+      "actor": "hafiz",
+      "goal": "When I squeeze my pencil, give me the pens right where I am writing, so I can mark a mistake without looking away from the verse.",
+      "feature": "pens-and-pencil",
+      "code": [
+        {
+          "file": "apps/web/src/components/PenHomes.tsx",
+          "symbol": "PenHomeAt"
+        },
+        {
+          "file": "apps/web/src/pencil.ts",
+          "symbol": "pencilAction"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/pencil.spec.ts",
+          "test": "a squeeze opens the pens beside the tip, whole on the screen, and a pick puts that pen in hand"
+        },
+        {
+          "file": "apps/web/e2e/pencil.spec.ts",
+          "test": "a double-tap swaps between the last tool used and plain selecting"
+        }
+      ],
+      "gap": "A browser has no pencil and no hand, so the tests stand in for the squeeze and cannot show whether the hand holding the pencil covers the pens. That check is by hand on the iPad, in docs/ipad-walk.md. A reader with no pencil has no way yet to see what the pens are: docs/design/pencil-gestures.md ③."
+    },
+    {
+      "id": "have-it-my-way-and-keep-it",
+      "actor": "hafiz",
+      "goal": "Where the app could work two ways, let me pick the one I like, and remember it next time.",
+      "feature": "settings",
+      "code": [
+        {
+          "file": "apps/web/src/components/Colophon.tsx",
+          "symbol": "Colophon"
+        },
+        {
+          "file": "apps/web/src/settings-at.ts",
+          "symbol": "savedSettingsAt"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/settings-drawer.spec.ts",
+          "test": "the info panel switches between the two"
+        },
+        {
+          "file": "apps/web/e2e/pen-homes.spec.ts",
+          "test": "the setting switches the home at once, and is remembered"
+        }
+      ],
+      "gap": "Each setting is proven by its own test; nothing checks that every choice in the info panel is remembered. The choices are still one long list in the info panel, with no page of their own: docs/design/app-pages.md ①."
+    },
+    {
       "id": "read-with-tajweed-colouring",
       "actor": "hafiz",
       "goal": "Colour the rules while I revise, and take the colour away again without moving a single glyph.",

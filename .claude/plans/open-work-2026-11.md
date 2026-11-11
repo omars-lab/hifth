@@ -34,7 +34,9 @@ limit. So item 2 comes first: it decides whether the limit can go up.
 - **Where to work:** the main checkout is `/Users/omareid/Workspace/git/hifth` and serves the
   dev app that the owner comments on. Work on a branch in a separate working copy. Reuse an
   idle one (`/Users/omareid/Workspace/git/hifth-walk`, `hifth-words`):
-  `git -C <it> switch -c <branch> origin/main`. The hook allows at most 5 working copies.
+  `git -C <it> switch -c <branch> origin/main`. A hook stops and asks once 5 working copies exist, and it does
+  not see the ones a helper agent makes under `.claude/worktrees/`, so remove those by hand
+  when the agent's work is on main (three were left over and removed on 2026-11-10).
 - **Git:**
   - run `git branch --show-current` before every commit;
   - stage files by name, never `git add -A`;
@@ -53,8 +55,12 @@ limit. So item 2 comes first: it decides whether the limit can go up.
   | backlog pages | `make issues-doc backlog` |
 
 - **Pushing:** the push runs every local check (about 13 minutes). Run it in the background
-  with its output in a log file. Don't edit that working copy, and don't run browser tests in
-  another one, until it finishes. They share a port.
+  with its output in a log file. Don't edit that working copy until it finishes. Browser
+  tests in another working copy are fine: each working copy serves the app on its own port
+  (`scripts/lib/e2e-port.mjs`).
+- **Firefox runs only the tests on its list.** The `desktop-firefox` run covers a fixed list
+  of test files in `apps/web/playwright.config.ts`. A new test file, and the pencil tests,
+  are not on it, so add them there or the Firefox run tests nothing for that work.
 - **Merging:** there is standing approval to merge a green PR:
   1. `gh pr merge N --repo omars-lab/hifth --merge --delete-branch`
   2. `make -C <working copy> board` to update the project board
@@ -169,8 +175,14 @@ limit. So item 2 comes first: it decides whether the limit can go up.
     counting is in `packages/core/src/revision.ts`, the storing in
     `apps/web/src/revision-store.ts`, which also keeps the day recording started;
   - the earlier plan for this record is `.claude/plans/interaction-calendar.md`. Read it
-    first.
-  - So the counts need no new data, only a view.
+    first, but it is out of date where it says hizb boundaries do not exist;
+  - a picture of that record is already built: `apps/web/src/components/RevisionMap.tsx`
+    colours each page, hizb or juz by how many days ago it was last opened. It is laid out
+    by place in the mushaf, not by day, and it does not count mistakes;
+  - the hizb boundaries are already in our own data (`HIZB_STARTS` and `hizbOf` in
+    `packages/core/src/quran-meta.ts`).
+  - So the counts need no new data. The new part is the by-day layout and the mistakes per
+    day, built beside the existing picture and sharing its counting.
 - **Per day, first cut:**
   - mistakes added, split by kind (wrong letter, wrong vowel, verse ran on);
   - how many different pages they fall on;
@@ -182,7 +194,7 @@ limit. So item 2 comes first: it decides whether the limit can go up.
   - The calendar says how old its record is ("recording since 3 March"), because an iPad
     browser tab can lose its stored data after seven days unused. The installed app keeps it.
   - A day runs by the reader's own clock: work at 11 pm and at 1 am counts on two days.
-  - Counting by hizb waits until the hizb boundaries are part of our own data.
+  - Counting by hizb uses the boundaries already in our data, never "half a juz".
 - **Build it more than one way:**
   - a month grid with a shade per day;
   - a list of days, newest first, with the numbers written out.
@@ -214,9 +226,10 @@ limit. So item 2 comes first: it decides whether the limit can go up.
 
 - **The iPad walk** (`docs/ipad-walk.md`): the owner walks the checks on the iPad. Each answer
   becomes a test.
-- **TestFlight upload:** the archive build can be made now; the upload stays locked until the
-  App Store Connect side is finished. Steps and what is left are in
-  `docs/research/2026-11-09-testflight-own-devices.md`.
+- **TestFlight upload:** the archive build can be made now. The upload waits on two things:
+  the App Store Connect side being finished, and the licences being read, because any
+  TestFlight build is an upload to Apple and today's decision says nothing is uploaded until
+  then. Steps and what is left are in `docs/research/2026-11-09-testflight-own-devices.md`.
 - **Free or paid:** draft which features would be free and which paid, for the owner to mark
   up. The questions are in `docs/design/paid-features.md`. Nothing of the Qur'an itself is
   ever paid for.

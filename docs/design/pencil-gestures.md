@@ -388,9 +388,38 @@ once the build lands.
 **Built 2026-10-13.** The page's handler is `window.__HIFTH_PAGE__.pencil`, beside the Mac
 menu's page turn, rather than the `__hifthPencil` sketched above. Each of Apple's settings has
 one answer: tool palette opens Hifth's pens beside the tip; switch to eraser and switch to last
-used swap the tool in hand (Hifth has no eraser, and its tools put themselves down after one use,
-so the swap picks up the last tool used, or puts down the one in hand); colour palette and ink
+used swap the tool in hand (Hifth had no eraser that day, and its tools put themselves down after
+one use, so the swap picks up the last tool used, or puts down the one in hand; an eraser has been
+added since, and the swap still works this way); colour palette and ink
 attributes open the highlighter's pens; off and run shortcut do nothing. With the tip away from
 the screen the pens open where the pencil last hovered, or mid-screen. Upright, the highlighter's
 two rows of pens were wider than the screen; they now wrap. Tests: `native/HifthTests/PencilTests.swift`
 and `apps/web/e2e/pencil.spec.ts`. The by-hand list above is parked as manual testing 19.
+
+### ② Should the pens at the pencil's tip be rings around it, instead of a row beside it? · **open**
+
+**Asked by the owner, 2026-11-10:** the pens laid out as rings around the tip, "layers of an
+onion". Picking a tool that has its own choices adds an outer ring: the highlighter's four
+pens, or Note, Harakat and Word for the Mark button.
+
+**What it changes for a hafiz:** every pen is the same short reach from the tip, so a mistake
+is marked without the hand travelling along a row or the eye leaving the verse. The risk is
+the hand holding the pencil covering part of the ring.
+
+**What would answer it:** building the rings as a second layout beside today's row, picked in
+the info panel, and trying both on the iPad with a pencil. Rings start as the default because
+the owner asked for them; the row stays as the other choice. What to build and how to test it:
+[the open-work list, item 3](../../.claude/plans/open-work-2026-11.md).
+
+### ③ How does a reader with no pencil find out what the pens are? · **open**
+
+**Asked by the owner, 2026-11-10:** a page among the settings that draws the pens a reader
+would see at the pencil's tip and explains each button.
+
+**What it changes for a hafiz:** today the pens only appear on an iPad with a pencil, after
+the right iPad setting. A reader without one, or one who has not found the squeeze, never
+learns what is there. The page shows it to everyone, on a laptop too.
+
+**What would answer it:** the page built with the same working pens the iPad opens, one plain
+line beside each, and how to open them for real at the top. What to build and how to test it:
+[the open-work list, item 3b](../../.claude/plans/open-work-2026-11.md).

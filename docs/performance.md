@@ -524,6 +524,19 @@ with the evidence, is in [the Preact swap write-up](issues/preact-swap.md); a br
 checks that the start-up script carries Preact and not React, so the swap cannot quietly
 revert.
 
+### ⑲ The app is 0.7 KB under its size limit, and three features are about to add code · **open**
+
+**Where it stands (2026-11-10).** 199.3 KB of the 200 KB limit is used. The trims still on
+the list only move code between files, so they do not lower the total. The last start-up
+measurement was taken with other things running and was too noisy to justify raising the
+limit.
+
+**What would answer it:** measuring start-up again with nothing else running on the laptop.
+If the measurement shows room, the limit goes up with the numbers written down; if not, a
+trim is taken before the next feature. Either way the result goes at the top of the trims
+list in the optimizing-performance skill. Steps:
+[the open-work list, item 2](../.claude/plans/open-work-2026-11.md).
+
 ---
 
 ---

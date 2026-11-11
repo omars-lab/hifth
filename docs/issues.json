@@ -2623,7 +2623,7 @@
       "status": "open",
       "severity": "defect",
       "owner": "agent",
-      "note": "The next most important thing for the pitch (2026-11-09): none of the six chosen passages is demo-ready yet. Take the first, 2:255, and walk it on the iPad against the printed book: its page, its marks, its look-alikes, and above all its note reading as the print does (paragraphs, headings, which note goes with which verse). This is the one thing the Study Quran team will check against their own book. Fix what differs, each with a test that uses made-up text, mark the row ready in the pitch script (.claude/skills/walk-app/pitch-script.md), then the next passage. 2026-11-09: 2:255 is ready. Its note was read against the printed pages and matches in paragraph breaks, slanted words and all 27 references; the one difference, a capital letter in the verse the print does not have, is fixed, and the extractor no longer pushes a verse into its note when the hand-read copy differs only in a letter's case (test in translation.test.mjs). Next: 2:48 and its look-alikes. 2026-11-09: all six passages are ready in the iPad simulator. The notes of 2:48, 15:30–31, 18:10–14 and the shared 18:60–82 note (with 18:60, 18:61 and 18:65) match the printed pages in breaks, slanted words and references, with nothing to fix; 10:15 → 19:73 has no note and is checked by picture; the walk passes 6 of 6 for these steps. Left: the own notes of 18:62–82 beyond 18:65, off the demo's path, and a walk on the owner's own iPad. The row stays open only because the wider question it comes from, whether any note further out still differs from the print, is still open."
+      "note": "The next most important thing for the pitch (2026-11-09): none of the six chosen passages is demo-ready yet. Take the first, 2:255, and walk it on the iPad against the printed book: its page, its marks, its look-alikes, and above all its note reading as the print does (paragraphs, headings, which note goes with which verse). This is the one thing the Study Quran team will check against their own book. Fix what differs, each with a test that uses made-up text, mark the row ready in the pitch script (.claude/skills/walk-app/pitch-script.md), then the next passage. 2026-11-09: 2:255 is ready. Its note was read against the printed pages and matches in paragraph breaks, slanted words and all 27 references; the one difference, a capital letter in the verse the print does not have, is fixed, and the extractor no longer pushes a verse into its note when the hand-read copy differs only in a letter's case (test in translation.test.mjs). Next: 2:48 and its look-alikes. 2026-11-09: all six passages are ready in the iPad simulator. The notes of 2:48, 15:30–31, 18:10–14 and the shared 18:60–82 note (with 18:60, 18:61 and 18:65) match the printed pages in breaks, slanted words and references, with nothing to fix; 10:15 → 19:73 has no note and is checked by picture; the walk passes 6 of 6 for these steps. Left: the own notes of 18:62–82 beyond 18:65, off the demo's path, and a walk on the owner's own iPad. The row stays open only because the wider question it comes from, whether any note further out still differs from the print, is still open. 2026-11-10: the next most important thing for the pitch is now the owner's walk of the six passages on his own iPad (docs/ipad-walk.md); the pitch build is on it and waits for him. The top thing the agent can do alone is re-measuring loading speed with nothing else running, which decides whether the app's size limit can go up before the pencil and calendar work adds code (.claude/plans/open-work-2026-11.md, item 2)."
     },
     {
       "id": "pitch-commentary-differs-from-print",
@@ -5896,6 +5896,50 @@
       "severity": "question",
       "owner": "agent",
       "note": "Owner's page comment of 2026-11-07: a developer page that shows only when the app runs on this laptop (localhost). Today the developer views are separate: the side-by-side library comparison page and build-time flags. Next step is to list what a developer page should hold, then build it as one of the bottom pages, absent from a real build."
+    },
+    {
+      "id": "remeasure-loading-speed",
+      "source": {
+        "file": "docs/performance.md",
+        "item": "⑲"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "The app is 0.7 KB under its 200 KB size limit and the pencil rings, the pens page and the calendar all add code. Measure start-up again with nothing else running, then either raise the limit with the numbers written down or take a trim first. The top thing the agent can do alone as of 2026-11-10. Steps: .claude/plans/open-work-2026-11.md, item 2."
+    },
+    {
+      "id": "pencil-pens-as-rings",
+      "source": {
+        "file": "docs/design/pencil-gestures.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-10: the pens at the Apple Pencil's tip laid out as rings around it, with an outer ring for a tool's own choices (the highlighter's four pens; Note, Harakat and Word). Built as a second layout beside today's row, picked in the info panel, rings the default. What to build and how to test it: .claude/plans/open-work-2026-11.md, item 3."
+    },
+    {
+      "id": "pencil-pens-settings-page",
+      "source": {
+        "file": "docs/design/pencil-gestures.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-10: a page among the settings that draws the working pens a reader would see at the pencil's tip and explains each button, so a reader with no pencil, or on a laptop, can see what is there. Comes after the rings. What to build and how to test it: .claude/plans/open-work-2026-11.md, item 3b."
+    },
+    {
+      "id": "calendar-of-each-days-work",
+      "source": {
+        "file": "docs/design/revision-record.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-10: a calendar with numbers for each day (mistakes added, pages they fall on, pages and verses opened). Each look and mistake already keeps its day and the hizb boundaries are in our data, so the new part is the by-day layout and the mistake counts, beside today's picture. Built two ways, a month grid and a list of days; the owner picks and the other stays as a setting. What to build and how to test it: .claude/plans/open-work-2026-11.md, item 4."
     }
   ]
 }
