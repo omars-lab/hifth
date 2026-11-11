@@ -20,8 +20,9 @@
       "id": "id",
       "says": "goal",
       "reader": { "field": "actor", "values": ["hafiz"] },
-      "links": { "feature": "feature" }
+      "links": { "feature": "feature", "person": "actor" }
     },
+    "person": { "file": "docs/use-cases.json", "list": "actors", "id": "id", "says": "what", "title": "name" },
     "feature": { "file": "docs/map.json", "list": "features", "id": "id", "files": { "field": "entry", "key": "file" } },
     "plan": { "glob": ".claude/plans/*.md" }
   }

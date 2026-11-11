@@ -4,6 +4,8 @@
 
 127 open tasks: 6 now, 68 next, 53 later. 4 name a use case, 6 name only a part of the product, 117 are tied to nothing yet.
 
+123 of 127 open tasks name nobody they are for.
+
 ## Now
 
 ### Part of the product: settings
