@@ -1,6 +1,7 @@
 {
   "version": 1,
   "main": "main",
+  "asks": { "capture": true },
   "kinds": {
     "task": {
       "file": "docs/issues.json",

@@ -2,9 +2,9 @@
 
 *This is a draft, written by `intent roadmap` on 2026-11-11. Running the command again writes over it.*
 
-127 open tasks: 6 now, 68 next, 53 later. 5 name a use case, 6 name only a part of the product, 116 are tied to nothing yet.
+127 open tasks: 6 now, 68 next, 53 later. 10 name a use case, 4 name only a part of the product, 113 are tied to nothing yet.
 
-122 of 127 open tasks name nobody they are for.
+117 of 127 open tasks name nobody they are for.
 
 ## Now
 
@@ -14,22 +14,19 @@ Open it in a masjid basement, on a plane, a week after I last used it, and have 
 
 - **check-offline-survival**
 
-### Part of the product: settings
+### read-the-commentary-beside-my-verse
 
-The reader's own choices: the reading settings in the top bar (or behind one button, in a drawer), and every "which way do you want this" choice in the info…
-
-- **drawers-for-every-tool**: Owner's page comments of 2026-11-07: settings, verse and word drawers stacked one above the next, look-alike verses as sections with empty placeholders, verse…
-
-### Part of the product: golden-images
-
-The visual gate: highlight geometry the DOM cannot describe, pinned as images.
-
-- **word-drawer-stacks-on-verse**: Owner's page comment of 2026-11-07 asked whether a tap on a word opens a word drawer stacked on the verse drawer.
-
-### Tied to nothing yet (3)
+When a verse puzzles me, show me what a commentary I trust says about it, right beside the verse, and tell me whose words they are.
 
 - **pitch-first-passage-ready**: The next most important thing for the pitch (2026-11-09): none of the six chosen passages is demo-ready yet.
 - **pitch-commentary-differs-from-print**: Found walking the desktop pitch: 125 notes repeated a passage where the capture took a paragraph twice across a page break; joined in…
+
+### find-everything-about-my-verse-in-one-place
+
+When I touch a verse, put everything I can do with it in one drawer under the page, so I never hunt for a button or lose sight of the verse.
+
+- **drawers-for-every-tool**: Owner's page comments of 2026-11-07: settings, verse and word drawers stacked one above the next, look-alike verses as sections with empty placeholders, verse…
+- **word-drawer-stacks-on-verse**: Owner's page comment of 2026-11-07 asked whether a tap on a word opens a word drawer stacked on the verse drawer.
 - **drawer-holds-its-tools**: Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets.
 
 ## Next

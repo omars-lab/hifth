@@ -1,0 +1,664 @@
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f2c4b109-6f3c-4181-8cfb-a659979fbfe0", "date": "2026-07-20", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "122d4315-e228-4095-8da0-724a2a10e272", "date": "2026-07-20", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a9f20337-ffb1-45e5-83c7-a1af4a98e04c", "date": "2026-07-20", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d951caf3-4431-44a3-80dc-a8dd5ea7b8b6", "date": "2026-07-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "8e3b8a8a-331b-47f6-9f3f-8de463ec5a56", "date": "2026-07-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "20be9d5e-c93c-4cb5-a925-2c2a9995ad37", "date": "2026-07-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a5dd8cd7-4532-4bee-9ba2-50f339565e6e", "date": "2026-07-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0a5d7470-1a95-42b3-87cc-fe38f9a14101", "date": "2026-07-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "aab6d591-1a5a-48fc-be73-897dd4150419", "date": "2026-07-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a1ee0971-0204-4fa1-9c22-775c578f13c2", "date": "2026-07-23", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "9fe1f415-769b-4419-92cb-f3ae9fa41b1a", "date": "2026-07-23", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ca641157-cfd8-4758-ba43-e21dcafb50a0", "date": "2026-07-23", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d40a06f3-a2c1-4950-8a69-64319ee07a4d", "date": "2026-07-23", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "7366f2e4-474b-453f-bb22-66d4a8ce4e61", "date": "2026-07-23", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "cea069c2-cac3-4f4e-a390-1d66916adcb8", "date": "2026-07-23", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "5399cb3e-a4aa-4754-a603-5293f9ec25d7", "date": "2026-07-23", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f2ef4319-0fb0-423d-b1bc-19ccb960581d", "date": "2026-07-25", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "2124a870-d908-46a2-a99f-ee70706aa15f", "date": "2026-07-25", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "eb74e770-a786-4d58-8f91-9ea7ecde4368", "date": "2026-07-25", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ffbb0b3e-c5e3-45d4-9a29-0436ede96ae3", "date": "2026-07-25", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b7afa3d0-aa1c-49a4-ac7d-1b25a639055d", "date": "2026-07-25", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "953c0301-148b-4b74-9650-c6946b566bb7", "date": "2026-07-25", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e55a86b5-4fc2-498e-a3c4-ba77e38f3b6d", "date": "2026-07-26", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a899f8a4-d044-4331-869f-332c890a23f9", "date": "2026-07-26", "level": "task", "links": [{"kind": "feature", "name": "validation"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "17654cd0-1322-438d-a0a4-c0b6437c67bd", "date": "2026-07-26", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "26d65ea7-55b4-48d2-97d1-ad4d32704f2d", "date": "2026-07-26", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6075717a-929a-4651-9100-cdc636a1fa13", "date": "2026-07-26", "level": "task", "links": [{"kind": "feature", "name": "validation"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "7b101430-a1c9-4ee0-b3a5-fef464adf2bc", "date": "2026-07-26", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "50389ea9-5728-4be7-a83b-ba101b1ede55", "date": "2026-07-27", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "89565550-eb8a-40ed-9b79-f45505131621", "date": "2026-07-27", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "dbd85fa2-14a0-4f3d-9520-ff73b98a6136", "date": "2026-07-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "09a3d8e5-2262-454b-995f-c3f71bba60b8", "date": "2026-07-27", "level": "task", "links": [{"kind": "feature", "name": "word-selection"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "4fae6e60-3fea-4fa4-a4d3-f91a8bcbb61a", "date": "2026-07-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e5b26f26-fcfe-40fa-915e-b1c5b78e65fc", "date": "2026-07-27", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f6814cd8-1d46-4e01-964d-317db3f15c94", "date": "2026-07-27", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "289b4900-fcf4-4e2e-bb44-72e4eda42c49", "date": "2026-07-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "c1aac435-006e-4043-b7b4-cedd407aeeae", "date": "2026-07-27", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ef7cd517-46b1-4693-9096-57e81bcb9588", "date": "2026-07-27", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "5e3966e9-b287-41f1-b4fb-de3c333fb62d", "date": "2026-07-28", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "fa3af986-b205-494b-b6a4-fc33f70c9ccf", "date": "2026-07-28", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "470b82be-2a18-4798-bffb-05e7b8a5c007", "date": "2026-07-28", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "88f5fc6e-fd4b-4706-8d3b-2c778c37ac61", "date": "2026-07-28", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ccfbc9d4-1a8b-4c36-9c33-a26ac648eb52", "date": "2026-07-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "80c112e4-b7b1-4572-845b-4aafda3566d4", "date": "2026-07-28", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a7698543-8cd9-4fac-b7bb-ff26fc5db88a", "date": "2026-07-29", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "944b73ac-fff6-473f-9cc2-aafb8eb82e72", "date": "2026-07-29", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "9a452292-04a8-4315-9f7e-62b0e3753a2f", "date": "2026-07-29", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "3ebd01e9-0ba0-4ec3-ae9e-2332e000927a", "date": "2026-07-29", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f353bfce-14cb-439c-9e92-2e5c3f27cb67", "date": "2026-07-29", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ff9f3ecd-10ed-49e1-ade0-b989fe03316e", "date": "2026-07-29", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d848ffc3-5f68-4181-b319-721dd8eb60aa", "date": "2026-07-29", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "70f9d8ed-af51-4542-85ac-b24434cb837a", "date": "2026-07-29", "level": "plan", "links": [{"kind": "feature", "name": "ui-language"}, {"kind": "use-case", "name": "read-the-chrome-in-a-language-i-read"}], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6a74728b-9cd7-4f6b-8753-cd7f333b1f0f", "date": "2026-07-29", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "c4ebb1be-5f81-4ed5-a49c-4f3209918841", "date": "2026-07-29", "level": "task", "links": [{"kind": "feature", "name": "wayfinding"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "06f43c5d-9c98-4da1-a92b-a9688a974b0c", "date": "2026-07-29", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "2a994076-720f-4e16-9cbb-1393ffd1208d", "date": "2026-07-30", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "78bd7447-1c2b-481c-a158-1bf6021c98a9", "date": "2026-07-30", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "9fd938f4-2155-4ec3-be57-8616b947f9fc", "date": "2026-07-30", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "70cd7e9a-1a4c-460a-9e75-f0b2660b5641", "date": "2026-07-30", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "3c5a01c5-3b9d-445d-ac70-fff5a0a99a3f", "date": "2026-07-30", "level": "way-of-working", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b3aa3ae0-c04b-4284-84f6-369a694a9214", "date": "2026-07-31", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "18ca4390-100e-42b2-9430-af524a15faa8", "date": "2026-07-31", "level": "plan", "links": [{"kind": "feature", "name": "desktop-spread"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "86be857c-84f4-47dd-a117-1550fe36ebf8", "date": "2026-07-31", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0f27256e-f484-4fd7-aa12-3762698b8233", "date": "2026-07-31", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0d9e5db9-7ccd-4d66-983b-dd974286231d", "date": "2026-07-31", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e5e3bd82-8b08-420d-a7d1-64220eb00729", "date": "2026-07-31", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "29661d17-2d0e-4d75-a377-da4e1d0ae892", "date": "2026-07-31", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ad78df73-43e7-4d86-895d-8ca4fb8f5928", "date": "2026-07-31", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "59ccb584-56bf-47cf-8d46-940b0e3289d5", "date": "2026-08-01", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "fc83ce66-3f6d-4461-9ab1-acd8feff1a4d", "date": "2026-08-01", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "73b23796-3d59-4b4f-8c8f-b34d78a42161", "date": "2026-08-01", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "8bd83925-7d61-46d9-b18b-e6f1a0ba612f", "date": "2026-08-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0ad87371-a4c8-4970-8969-34975e889d2e", "date": "2026-08-01", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "96b05af2-0a97-4a72-9885-527650d6a0b2", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "9a7b4d12-344f-4582-96f2-6f5deec38416", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a409d2fe-e12f-4bb6-b81c-951ca3ec789d", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "1d277d49-98e8-4c40-9b7a-7d7fc18d16cb", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6127eba1-ca62-40ce-b7e5-3090b16a9234", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ecbd8b67-c797-4413-b488-60a7292ce523", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "27f6ef6d-35da-43c3-8408-effb366f3ef0", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "278a70c2-76ec-4313-a6ac-3d5daedc4dd4", "date": "2026-08-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "2e350c50-fae7-4c0e-979b-273e8943ec59", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "78705e41-a974-4c6f-8d79-12f5a8e8a60a", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b928c58f-9070-48e2-becc-fbf5b4386bc5", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "df8d1879-8d02-4b26-b0dd-206c19447497", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "4effb1ec-9e6c-4df2-a5b0-7a0b96c60af7", "date": "2026-08-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0aea6f6b-17d5-4bc4-89e4-d8cf21b0f9a7", "date": "2026-08-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f18a0edf-06e5-44b1-a23c-3b980037110c", "date": "2026-08-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e6e08ea5-c8b3-4162-a9b3-bbdfbbd69ea7", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0daf72c0-d285-4e74-bdaf-87324d904b5f", "date": "2026-08-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0a2ea93f-a51a-42b6-b22f-4de23e12c0c0", "date": "2026-08-03", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f9bd0c3d-c809-4b0a-85df-b4a05f852021", "date": "2026-08-03", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "65928904-d7b0-42fd-920e-e6e76307db1b", "date": "2026-08-03", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "4ae4f739-8e5f-4746-877b-67e932f78791", "date": "2026-08-03", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ef24b7ad-43c2-417a-90e3-bbf62a9b7b34", "date": "2026-08-03", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "4b1ef0ba-b063-4fca-9fc4-8288bff36a56", "date": "2026-08-03", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e1880a95-ba80-4220-a154-aa5e3192b69b", "date": "2026-08-03", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "75bf1a13-10fc-4b15-8b71-58d8a3899a92", "date": "2026-08-04", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d5c84104-f55f-48d1-8cf6-f30a7658fa17", "date": "2026-08-04", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "785f4602-50f1-4124-bd75-cd85b8e20e1f", "date": "2026-08-04", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "c53223b4-2fd7-4be5-9faf-d654c9c7c57e", "date": "2026-08-04", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "854382dd-92c2-47b8-859f-8f779557aeec", "date": "2026-08-04", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a80dae2b-be55-4f53-8cfc-844cf21ad095", "date": "2026-08-04", "level": "plan", "links": [{"kind": "feature", "name": "word-indexing"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "78f0c159-b96d-4ddb-b962-724fe840bc84", "date": "2026-08-05", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "41b03886-a9f4-48ab-9bcc-ec8a99f3dc9f", "date": "2026-08-05", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "1491f3ec-b292-4138-91ee-2640c0301a7e", "date": "2026-08-05", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "cf201152-bbd1-4548-8656-5e5e4dc87a07", "date": "2026-08-05", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "fde5b98b-e46d-48b7-bcbd-62710d5852e3", "date": "2026-08-05", "level": "correction", "links": [{"kind": "task", "name": "announcing-a-run-needs-the-text"}], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "81c418b9-07ef-4a1a-9183-043dd8ebcfe1", "date": "2026-08-05", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "268ffeeb-d550-481e-ba27-b3ee1d4ac93c", "date": "2026-08-05", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "748c3c7d-8d50-45dd-8c02-74b73dfd6453", "date": "2026-08-05", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "1c0a6af9-531a-4ca3-bbf7-393471bb398e", "date": "2026-08-05", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f2e797fe-07cd-4fbd-8952-25cc378cd1ce", "date": "2026-08-05", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "24f5f227-90e7-4870-897e-39f988ba146f", "date": "2026-08-06", "level": "task", "links": [{"kind": "feature", "name": "desktop-spread"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6b6bf0f8-e14c-4196-941a-8b5a0820b7c1", "date": "2026-08-06", "level": "task", "links": [{"kind": "task", "name": "plain-wheel-does-nothing"}, {"kind": "use-case", "name": "jump-a-juz-without-leaving-the-page"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "7632abcb-8e6d-4a44-9718-0051692105ab", "date": "2026-08-06", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "03d0b2d6-87c0-40f5-8f59-b6ecf80c5bb1", "date": "2026-08-06", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "90bf712a-a65e-4bf7-accd-56b0e0675d5a", "date": "2026-08-06", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "c9fba6be-f5e8-4c3b-844e-a8da746f7b1e", "date": "2026-08-06", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "dc32f6a2-c245-4648-a00a-ec5ee7474eb4", "date": "2026-08-06", "level": "task", "links": [{"kind": "task", "name": "site-answers-on-plain-http"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ef26f617-2a51-4c93-accf-3d6b35a05979", "date": "2026-08-06", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "33f6c30d-80c1-4ab0-8a7c-dc3534e0f4cf", "date": "2026-08-06", "level": "task", "links": [{"kind": "task", "name": "site-answers-on-plain-http"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a54252b4-503c-4bf8-a5fe-d2c4433c1bc9", "date": "2026-08-06", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0aebb917-95fc-4932-9110-2b747e4ba325", "date": "2026-08-06", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "12502983-c439-4f0f-a888-4e3135a6dd9d", "date": "2026-08-06", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "34203e0c-47c7-4023-9c9a-11a064640821", "date": "2026-08-06", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "87c8071b-f2d3-47fa-babe-3594de86fbf2", "date": "2026-08-06", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "55017b87-e9f5-43dc-91eb-fa7affaa77e4", "date": "2026-08-06", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "af8ed295-d501-447c-8cac-6d8eaaf08dbf", "date": "2026-08-07", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "39deb98b-4d11-41d4-af0a-7ffd3630e5af", "date": "2026-08-07", "level": "plan", "links": [{"kind": "feature", "name": "encoding-inspector"}], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "5467bcb0-35e0-4dd2-9156-0413f8d804a7", "date": "2026-08-07", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b964d33e-f19b-4aa8-9cb5-c44c3f670aa5", "date": "2026-08-07", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e57a4d46-b1a4-494b-8d23-ed0d55500d19", "date": "2026-08-07", "level": "task", "links": [{"kind": "feature", "name": "etl-pipeline"}, {"kind": "task", "name": "etl-map-should-generate-itself"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "784ef58b-8c99-494e-93a8-791791bbb2b9", "date": "2026-08-07", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "cfc83516-a22e-4e3b-aab0-681ce23e8d5e", "date": "2026-08-07", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0af09843-acda-4d6b-9247-174bbaeebb06", "date": "2026-08-07", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "69d5c7d9-8d36-4dcd-9f4e-d7076c6a8469", "date": "2026-08-07", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "9536fc4b-2617-46f2-b94c-6b5b85729165", "date": "2026-08-07", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "c8809755-f605-44d3-b3dd-f057e7efbc2f", "date": "2026-08-07", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "193f057c-e746-469b-b98c-86f481e89113", "date": "2026-08-07", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "dd15fade-69c1-49a0-aeff-3e86afd40155", "date": "2026-08-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "25fb5717-5f63-44de-8d79-2eb8d785e1a2", "date": "2026-08-08", "level": "task", "links": [{"kind": "feature", "name": "decisions"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ece2edfa-a8ec-4ef6-b5c5-ecfb749d23c3", "date": "2026-08-08", "level": "task", "links": [{"kind": "feature", "name": "decisions"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "81f5f685-a970-484b-87eb-43e41ceb658d", "date": "2026-08-08", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f102228b-befe-4ccd-afc4-7100a66885de", "date": "2026-08-08", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "61f7f08e-3a73-4569-a89a-24599120ce6f", "date": "2026-08-08", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "5044b9c2-76ec-4f42-a8a6-bc2d1b73d9a8", "date": "2026-08-08", "level": "goal", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "8cc58c39-b362-4d0f-a9f3-81f1f242cf29", "date": "2026-08-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "06dad729-e608-439d-baa6-80e371dc7376", "date": "2026-08-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0348f5f1-73b2-4227-89ff-1a720c8c9cf3", "date": "2026-08-09", "level": "task", "links": [{"kind": "task", "name": "check-placement-correction-by-eye"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "56d74b0d-374a-4a83-9ce1-c06cc4083702", "date": "2026-08-12", "level": "task", "links": [{"kind": "task", "name": "check-placement-correction-by-eye"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "005e319b-0c78-4a45-ba6f-a1a031df871e", "date": "2026-08-12", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e910bb32-2b0d-4c6b-acc9-6b5b0354a07c", "date": "2026-08-12", "level": "task", "links": [{"kind": "plan", "name": "sitting-instrument"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "8be1ce41-b1c4-4c9a-bb26-f616d9317cd3", "date": "2026-08-12", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "050f755e-2c76-4f60-9cce-35bbc8e59b0a", "date": "2026-08-12", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "2c16ae7c-2792-4343-9667-0bf3c521bcb0", "date": "2026-08-12", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a3d18546-b597-462d-955e-602f2e095171", "date": "2026-08-12", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "243a3907-a65d-4836-af34-2a894ef971ef", "date": "2026-08-12", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6b137a96-c7d7-418d-ad26-fb645ef8000c", "date": "2026-08-12", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "9349d5ea-b4bd-4bad-ab68-9627ea3e3219", "date": "2026-08-12", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "afcb6852-0c1c-4690-8028-a829f28c69e3", "date": "2026-08-12", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "bf6eadd2-b983-48fc-9565-e472c5a6efb6", "date": "2026-08-12", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f902d91a-efb4-4dc3-b954-579f6975bca4", "date": "2026-08-12", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "22dc850f-f848-4d50-b6c0-7f50ecf14abd", "date": "2026-08-12", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "19d19c2f-e250-47e0-b071-168626645334", "date": "2026-08-12", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "eb081ce8-c56e-4054-8297-53bf96d11fc9", "date": "2026-08-12", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0bca4942-9c91-47a6-bf83-d00549d03e0f", "date": "2026-08-12", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "32e33a6d-8301-47cb-a431-659fa5752d9a", "date": "2026-08-12", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "caf03815-677a-41b9-bceb-e269ca69a56b", "date": "2026-08-12", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "3edb8a70-7b76-4285-bdb8-280629487e01", "date": "2026-08-12", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "7ee890f2-3fe8-4785-9554-7e265884bdbc", "date": "2026-08-13", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "213ac8b0-f74f-4c85-916c-e782ca89e716", "date": "2026-08-13", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "58728131-94e8-4b64-8520-cfc7661ae865", "date": "2026-08-13", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "22d0b99a-1403-435a-bdcc-2d1b8985c021", "date": "2026-08-13", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "37a08046-6cbc-454c-9065-d4ae53b6da1c", "date": "2026-08-13", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6574f60d-ebfd-430f-bbfa-71e3e537465c", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d9b2440f-fa15-45d4-9eb5-6c7d0afdefde", "date": "2026-08-13", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b4a12ca7-2bb3-403b-8373-87aa383318ac", "date": "2026-08-13", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d02e8274-85cd-4236-8381-3d62ce55104d", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ee642a42-d26e-4411-ab64-046bf0207ccb", "date": "2026-08-13", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f645491e-cb1f-49c2-a6dd-0997f647d87a", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0734747a-7837-4b81-be6c-7a145e0f473b", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "c1080abe-f98b-42d2-b3d8-60b62d8b8663", "date": "2026-08-13", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "832516e6-b4cf-4c0c-9a4f-278e03943991", "date": "2026-08-13", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e9db0754-619b-4286-a23d-90b6424ad66a", "date": "2026-08-13", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "da26f69e-55e0-46ad-afad-aaf7c851df38", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b1ebbd49-400f-41dc-908b-53382c8e1860", "date": "2026-08-13", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "325697b4-ed94-4986-ae5e-ac3fe87436ef", "date": "2026-08-13", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6919fd25-a136-4e3b-8089-ff0d82eb6f83", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "8247601b-f901-4cff-8c1d-1288262aa4dd", "date": "2026-08-13", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "1d36b654-5d09-44fa-8eaa-5a0010551bc5", "date": "2026-08-13", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "9fc7d5a3-0f69-4311-b0ac-7975d87a76bc", "date": "2026-08-13", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a05c2ab0-dea4-4244-ada7-a5e90a6b4662", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "1f62f9c1-a234-42ab-b5ce-887505551415", "date": "2026-08-13", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b1ae79e7-4b35-47d2-b8af-a9c1e4158c86", "date": "2026-08-13", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "33a87bbb-e1fb-469d-95d1-fc89436cbfa0", "date": "2026-08-13", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f5d58095-9d95-4d08-a45d-5f0a32380dcd", "date": "2026-08-13", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "486773ea-b232-434b-8c61-add193c586a5", "date": "2026-08-13", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e6a7f21c-fd75-4101-9087-6b1a26aa7151", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "30569670-d48b-429f-a557-9ab586bb1a4c", "date": "2026-08-13", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f34dabf3-e0ed-47fc-a5fd-bf31c8825778", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0cbef5c5-6ac3-4112-9419-220d49b28e60", "date": "2026-08-13", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f3b50bad-ea6b-49d6-8992-a9bcbf5b53b4", "date": "2026-08-14", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "2b78630f-b509-4ab9-9d5e-ccdd6f1ef384", "date": "2026-08-14", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "33368883-1734-44dc-87df-6a56db3b3261", "date": "2026-08-14", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "5f52f012-1b9f-484f-8ae0-9f9b6ce00463", "date": "2026-08-14", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e3e297ac-5d96-4ae5-82fb-ff3c42af0839", "date": "2026-08-14", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "49f09d26-1426-4965-a1a1-1f2f71cdbfad", "date": "2026-08-14", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "54fb6ecc-83bb-4e16-8e66-45339732c6ca", "date": "2026-08-14", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e1cc95b1-fed1-45d4-8b63-3893226dcd03", "date": "2026-08-14", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "475ec6a6-c0a0-49fc-bfe9-17bd40331fb8", "date": "2026-08-14", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "41474808-4e4c-4ec3-9e56-b1ffa71da6ee", "date": "2026-08-14", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "534777af-c814-41ef-982a-99f3aa205e3c", "date": "2026-08-14", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ccd3e4a0-a3c1-4169-9d94-f36b06fc2652", "date": "2026-08-14", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b97e5f46-ae09-4aa9-9588-bc88f1cb88f1", "date": "2026-08-14", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d0830c6f-155f-47fb-ac18-f20477ec5221", "date": "2026-08-14", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "9db90cfe-68ae-478f-9e8e-27a1e7dd211a", "date": "2026-08-14", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "57c0d5e1-bce6-4969-9116-1abc6ae90aaa", "date": "2026-08-15", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "5659e898-f01c-404c-aa59-9c5a8888d340", "date": "2026-08-15", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "c506fe34-cea2-43c4-9365-2c7ff6571441", "date": "2026-08-15", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d6184db0-fbab-4886-bb32-38632627bd7f", "date": "2026-08-15", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "87853f3c-ac37-4209-9a9a-047e79142a1d", "date": "2026-08-15", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "5dee4b38-4045-4257-bf6d-5469c1b7fc0a", "date": "2026-08-15", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ab209f11-ef8c-42fd-91e6-ab862126859c", "date": "2026-08-15", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e9ee986e-df81-4b7e-8e90-305c43f78e3c", "date": "2026-08-15", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "392a404b-d2e0-4195-a267-2ffc72497fd3", "date": "2026-08-15", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b8ddd677-a99e-4fe6-be21-3b6ae5f48902", "date": "2026-08-16", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "1c3644ac-a071-4131-8af9-8906491a6bbf", "date": "2026-08-16", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "992c990a-b8cf-45a8-b62d-d7f450e93dc5", "date": "2026-08-16", "level": "task", "links": [{"kind": "task", "name": "adj-shards-ship-no-notice"}], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "92acd397-97a2-4d7f-a0ce-a71e6d6be9f5", "date": "2026-08-16", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "c91952e1-abe3-4d7d-8303-29a0dff9ad2e", "date": "2026-08-16", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "649f1008-4282-42da-8311-106600146ede", "date": "2026-08-16", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e78d0478-dde1-4c40-917f-24e5aab6a402", "date": "2026-08-16", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a38e1470-02bd-4fa7-8905-0371dc9bf11a", "date": "2026-08-16", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "33b4f0cf-3d6a-4613-9f55-e6ee7b00c23c", "date": "2026-08-16", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e02aad19-4688-43de-a366-ae4f5accaf3f", "date": "2026-08-16", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "36db70e5-432d-4d80-8b2a-03413e4d5910", "date": "2026-08-17", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "4979ac76-b416-46ed-acb1-ab1a7c1156c7", "date": "2026-08-17", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "94ab35da-3f8b-42de-980e-222710d05ba5", "date": "2026-08-17", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "961c9ae1-82b4-4e9c-980a-b4c2ce1409ca", "date": "2026-08-17", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "347c599b-83f6-4ee5-bd0c-c7d2404da465", "date": "2026-08-17", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6f282299-ae30-4a3c-89fd-3518689df4d2", "date": "2026-08-17", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6467ed8a-8e9c-494a-806e-c01043c87c98", "date": "2026-08-17", "level": "task", "links": [{"kind": "plan", "name": "sitting-instrument"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "c731902e-71b2-4bca-9ba3-e7168d9ad982", "date": "2026-08-17", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ada8b26c-5c3f-4e72-a116-a7ce11bbe9eb", "date": "2026-08-17", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "98400f2c-a1f4-4a89-af40-a18b6ff76d7d", "date": "2026-08-17", "level": "plan", "links": [{"kind": "plan", "name": "sitting-instrument"}, {"kind": "task", "name": "a-sitting-was-reachable-only-from-the-machine-serving-it"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "dcdc6832-d7cb-41b8-8de9-529a81298d0c", "date": "2026-08-17", "level": "correction", "links": [{"kind": "plan", "name": "sitting-instrument"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "937a6474-feb9-4925-bf89-e72abf0bf56e", "date": "2026-08-17", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "436f87a6-d917-436f-a402-089a41ee683b", "date": "2026-08-17", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b96bb062-228d-4282-8025-71e22cc4b7e4", "date": "2026-08-17", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "3c579a33-9abb-4280-b89b-80b27ba349cf", "date": "2026-08-17", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "22d592fc-3454-4272-b79a-97bee2382150", "date": "2026-08-17", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ebb1bd6c-6246-4352-88f9-3e8f8de0f46f", "date": "2026-08-17", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "903ba29c-f170-43af-8bce-e6dd49418084", "date": "2026-08-17", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "bc0810e2-c5b3-4e5c-a2c8-937df19df1c3", "date": "2026-08-17", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "09a51044-9229-46db-9a24-41fd2c228f58", "date": "2026-08-17", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "bc14920c-5326-4c62-8c95-5892fc063e06", "date": "2026-08-18", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "07bc0832-84bd-482f-8265-53c15c88239b", "date": "2026-08-18", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "cd075320-7184-41ed-99c9-5b2086f67e87", "date": "2026-08-18", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "98294198-1da2-4be2-847e-a880c24b1d79", "date": "2026-08-19", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "bd33cc30-2482-4080-902c-f0cadd7ea006", "date": "2026-08-19", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "ea474ba2-7f10-4b99-b853-e5bb21e1112d", "date": "2026-08-19", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e0fcfe7f-6d10-4bee-be85-f1a37b5a2b36", "date": "2026-08-19", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "fce5d882-8a81-4dad-9545-bfae6a0f8d14", "date": "2026-08-19", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d358923b-f208-4444-90b0-9d06c0ac2627", "date": "2026-08-19", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "95ecd823-181b-42b7-8e39-2ca13ff6004b", "date": "2026-08-19", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "10f4def3-c754-4450-a04e-0b20df6bd2ab", "date": "2026-08-19", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "287e3345-3561-46f5-9a03-ec1b57f2570a", "date": "2026-08-19", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f0eaae7e-1769-4421-a11d-3740bbf818d5", "date": "2026-08-19", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a5fe00e3-5180-4bbe-9f80-a93e177d1eeb", "date": "2026-08-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "be4dd1e6-11d5-4586-b6df-5bb5273a404c", "date": "2026-08-20", "level": "task", "links": [{"kind": "task", "name": "reach-for-the-ink-rather-than-resize-toward-it-guard-shape"}], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "f0f6b9c5-1106-48ca-9bc5-a2cf633c7d5d", "date": "2026-08-20", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "30433f23-b73c-425a-8d9a-5d2998d91b59", "date": "2026-08-20", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "335ad50b-e922-4c8c-9175-cc113a8d8229", "date": "2026-08-20", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "0b73b7e2-9222-46ce-98e6-5a0aad179279", "date": "2026-08-20", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "d0f2a595-9834-49b2-a972-a4f30286766a", "date": "2026-08-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "654c02a3-8d5e-4cd0-bb2a-cb373c41f637", "date": "2026-08-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "02475550-d6c1-4f40-b27c-1e7405f42c84", "date": "2026-08-20", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "3c45dbc0-ea78-44c4-9b9a-045adce11a6d", "date": "2026-08-26", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "81278ac9-5afd-4713-a030-a798d4eb6e04", "date": "2026-08-26", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "81f88950-a908-43d3-8e84-7f2f4453a4e6", "date": "2026-08-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "4a911f99-9a56-41fc-8c2d-3883f9526699", "date": "2026-08-26", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "2e436208-4b08-41d5-8873-23217d7201e5", "date": "2026-08-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "40cbf12c-1278-4090-8faf-a3b92bd06172", "date": "2026-08-26", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "27a36052-375c-4c1d-8bca-e4c633bde238", "date": "2026-08-26", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "b46e6c9a-6b35-4cd7-8534-5ff9d26e0853", "date": "2026-08-27", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "2e0e8890-a6a7-4ba7-a6e0-ac600b37fafe", "date": "2026-08-28", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "6e070112-4057-4993-a612-6692ee1047c2", "date": "2026-08-28", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "9d2b586e-95b0-4182-91cb-9270bc495267", "date": "2026-08-28", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "a86ff5a3-5b12-4658-ba76-4174c04303b2", "date": "2026-08-28", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "3a828bad-d3f2-4a6a-87eb-07ce4e709386", "date": "2026-08-28", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "df9695dd-b70e-4eb5-9351-676e7cfec088", "date": "2026-08-28", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "e72fcf01-fb1e-4dd5-ada5-86f0237353b5", "date": "2026-08-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "0da21e77-a946-4228-877a-aee0949749f7", "prompt": "beed6d42-2149-4161-ba27-7ff68c349384", "date": "2026-08-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c32f0373-e718-45c1-b20e-ab72879c4261", "prompt": "95f6b0f0-2524-47b4-ac0a-5e3a331b3776", "date": "2026-08-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "01943121-9a01-40a7-b6d0-681131bd3453", "date": "2026-08-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "b7576bfc-7c44-4d62-bbd0-c02bcffb56a9", "date": "2026-08-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "803f5f54-06c3-44b2-9d43-093280b07971", "date": "2026-08-28", "level": "task", "links": [{"kind": "feature", "name": "confusion-jumps"}], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "2c0e432a-5b56-418b-aad4-a6a38e01a510", "date": "2026-08-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "61d7c56c-f889-4e9b-9122-dada5f835772", "date": "2026-08-29", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "476ee481-4fcf-4a9c-bc39-7813fc8fa377", "date": "2026-08-29", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "2434b757-9980-457b-8a44-0cce21fbaeda", "date": "2026-08-29", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "2926ee00-9b00-403d-92ee-782d2c27c1f5", "date": "2026-08-29", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "ea12d6bb-d2e2-4869-a003-d74d0ab1108e", "date": "2026-08-31", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "9b9d2cf4-2e30-4f51-8470-d5d850b63b9d", "date": "2026-08-31", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "a3ecaf85-a001-4f90-a95f-43e5f8935023", "date": "2026-08-31", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "dbabcc28-a9db-4765-b3a3-5b6b75569583", "date": "2026-09-01", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "edd613a6-09ce-408d-9157-4284bf3bd2c0", "date": "2026-09-01", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "84176245-a179-4b61-9f12-edf36280f6ab", "date": "2026-09-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e1a37078-db9f-4e9e-a2a4-0d297cd099ff", "prompt": "0758f963-6f48-45ee-bb83-3faac49dd8a4", "date": "2026-09-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "9cf0956f-1064-46c3-b809-fe3cdaeacd6d", "date": "2026-09-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "f799fe7d-f2a0-4c83-be52-d387c950d8c6", "date": "2026-09-01", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "df97e99c-4a00-4aa0-be6a-769a15a7b320", "date": "2026-09-01", "level": "correction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "13948766-5aff-4be0-b7f9-8fb64de3cb2c", "date": "2026-09-01", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b9b9fb47-2d78-43e3-acce-f37b1b01b429", "date": "2026-09-01", "level": "way-of-working", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "ebcfce1a-b997-4a8c-99ee-177f27076d99", "date": "2026-09-01", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "61cacf53-043f-48c8-a734-4b62794e9940", "date": "2026-09-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "fd6dd124-46dc-48f1-8ec2-f1f304d8f46f", "date": "2026-09-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "4e5e8b67-b38b-4cd7-9ef5-54ca7e231464", "date": "2026-09-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7e03895c-553d-4eb5-abc2-15c602e2d8fc", "date": "2026-09-01", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "53ae528e-5611-425d-8a7c-ed5cdfda19ad", "date": "2026-09-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b632640a-681f-4db6-834e-93774e81a378", "date": "2026-09-02", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "d4649e1a-9eb8-4b40-956c-4b6f3e0cac52", "date": "2026-09-02", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "c79d2599-858c-44f5-be5b-c5d50a550400", "date": "2026-09-02", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "ac2199bf-0c67-426c-9aff-098caa6b6f10", "date": "2026-09-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "cec2a090-3893-4a89-8dfe-f5abb39a25e0", "date": "2026-09-02", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7baabfa6-b400-4f90-9358-9e319dab1c31", "date": "2026-09-02", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b27914a9-6987-4851-972b-d3de106b2b23", "date": "2026-09-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "e524328e-7d5f-43da-89c0-6c01363695f3", "date": "2026-09-02", "level": "task", "links": [{"kind": "feature", "name": "decisions"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "f1a17200-e9e9-4312-92ca-50c1d8da7e48", "date": "2026-09-02", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "2189aa9b-66f4-41e0-bec7-f5b052c69dc5", "date": "2026-09-02", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0f95e508-9a3f-4791-b370-ec1ad105b6d8", "date": "2026-09-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "4c8c77fa-820c-4689-afd6-91de1ed24713", "date": "2026-09-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "588779cf-2186-4cb8-8fec-b05485823b28", "date": "2026-09-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7d69d047-6cae-4d1a-8e10-c96853c8b30a", "date": "2026-09-02", "level": "plan", "links": [{"kind": "feature", "name": "decisions"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "50328af8-ddef-40fd-b8e9-92d8b9dec56f", "date": "2026-09-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "dde1b003-33cd-4b72-81a4-b2edc2b48817", "date": "2026-09-02", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "81c8b9bd-8bb6-4523-8a19-affe74267d5c", "date": "2026-09-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "9275c676-c3b0-4953-8be4-0bf67109366c", "date": "2026-09-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "032037e7-9ca1-49e3-983d-60cd7970b406", "date": "2026-09-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "8561f805-edd9-4275-bb08-1bf2071cf138", "date": "2026-09-02", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "426a178e-1630-4fa3-8b77-d5b963b2a0ff", "date": "2026-09-03", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0f95dc44-e97f-4093-bf11-00d3aabbf24a", "date": "2026-09-03", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "f9caaebf-56e6-4e14-b8ee-c5175fb8621e", "date": "2026-09-03", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "2c4fab73-39a6-4d77-9790-d1a13cc4c68d", "date": "2026-09-03", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "18cf5ea6-4bc8-4d52-84f7-6fdca081938f", "date": "2026-09-03", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0c903561-bc53-4d15-8049-2e8d13168d9a", "date": "2026-09-03", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "f5d359d5-0c07-4fec-87ae-e2505c2f2c24", "date": "2026-09-03", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "438bfaff-6e90-4ec0-93a7-5e3fa6a5edcc", "date": "2026-09-03", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "4474dc9f-39c3-4382-a3ee-303cea011d66", "date": "2026-09-03", "level": "task", "links": [{"kind": "task", "name": "plan-graduate-page-bar-winners"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0b8001d2-2cdd-4b96-b642-1426ea8211c5", "date": "2026-09-03", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "3382d065-1251-44c3-b74c-1c9ec2b577f6", "date": "2026-09-03", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "2d06a126-c11f-4081-bd4d-6a82cacfbae2", "prompt": "f309188f-6a99-439f-aa5c-c07a8f21aa28", "date": "2026-09-03", "level": "plan", "links": [{"kind": "feature", "name": "etl-plugins"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "3df56b75-e869-4ccf-8c12-4631827bf618", "date": "2026-09-03", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "82d60096-91a4-4deb-8fd5-911bde4e91c1", "date": "2026-09-03", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "1726a2eb-3ea7-4e15-86f3-c10048b68f78", "date": "2026-09-03", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b2bc937f-7cdb-4d2a-bcfa-ad1bb0a3c23d", "date": "2026-09-03", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "90a4aa27-dc4d-4263-a8c8-d8bee9480eed", "date": "2026-09-03", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7d888ad6-ccb1-4a1f-81cb-4050f6ea5a5f", "date": "2026-09-04", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "2d06a126-c11f-4081-bd4d-6a82cacfbae2", "prompt": "87c1e428-06ce-4951-a4a7-ee113c7f7b02", "date": "2026-09-04", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "2d06a126-c11f-4081-bd4d-6a82cacfbae2", "prompt": "fadc2d5d-1480-4e1a-98ea-d9e30134f205", "date": "2026-09-04", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "2d06a126-c11f-4081-bd4d-6a82cacfbae2", "prompt": "1c2bd405-92ff-41d0-844b-660a257534f7", "date": "2026-09-04", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "2d06a126-c11f-4081-bd4d-6a82cacfbae2", "prompt": "0dc7a6a9-7217-4209-967a-756fa4695314", "date": "2026-09-04", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "bb735c0f-ecb3-4084-8c80-c43f2c20bdc6", "date": "2026-09-04", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "2ea6dc61-59ad-4683-a3a8-6758975737f5", "date": "2026-09-04", "level": "way-of-working", "links": [], "sure": true, "by": "reader"}
+{"session": "2d06a126-c11f-4081-bd4d-6a82cacfbae2", "prompt": "c90d47c3-424c-40b4-9904-07ed3f9623d7", "date": "2026-09-04", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "2d06a126-c11f-4081-bd4d-6a82cacfbae2", "prompt": "0d146ab2-a227-4491-96da-503127ced415", "date": "2026-09-04", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "2c275dbf-e4eb-4970-b3f5-33c66bd45262", "date": "2026-09-04", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "62631a28-217b-4f61-ae5d-b158b7e35247", "date": "2026-09-06", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "25653af0-4a92-4a31-8bdf-a352d177b379", "date": "2026-09-06", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "d3c88846-3244-4a0f-aa16-e10e7a20eaed", "date": "2026-09-06", "level": "task", "links": [{"kind": "task", "name": "plan-qul-dev-toggle"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "75be5e15-fc5c-4b25-84ba-54cbb4af8392", "date": "2026-09-06", "level": "task", "links": [{"kind": "task", "name": "plan-qul-dev-toggle"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7db446be-0a82-4b4e-85b3-a3f8da6f1daa", "date": "2026-09-07", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "4b813de7-11f1-4a2e-888e-a0ec8f9a2ad8", "date": "2026-09-07", "level": "plan", "links": [{"kind": "feature", "name": "qul-store"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "9ca04dcf-56b2-4abe-923f-614747269363", "date": "2026-09-07", "level": "way-of-working", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "92eaa313-94ce-4de8-a62e-543523ee3e6e", "date": "2026-09-07", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0566390d-5b1e-42c9-a3ec-8baee449b61c", "date": "2026-09-07", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "757f6c5e-2de1-40d3-b442-e59bf7f7f414", "date": "2026-09-07", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0023f2ef-7c2d-43f4-99ce-89e236384cb5", "date": "2026-09-08", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "aed854e8-2a55-43cb-9031-638dbb59ea97", "date": "2026-09-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "37d51231-83e3-4f91-a616-3138d9e2baa8", "date": "2026-09-08", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "069e7a3f-a781-4f44-9485-295f5eeb790d", "date": "2026-09-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5b8ad7f2-2921-4b47-bad3-01b4df914fbf", "date": "2026-09-08", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7f12dd61-1469-4def-840a-ce3180438b8f", "date": "2026-09-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "68be022a-b5db-48b0-829d-e70ce3ecd629", "date": "2026-09-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "24e4cad7-61d2-4129-a358-5bf76a8471e2", "date": "2026-09-08", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0ebbfa25-be6c-41ab-841a-01546d926197", "date": "2026-09-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "2682910e-d119-4c3d-b857-b80336b6f5ee", "date": "2026-09-08", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "1be9bcc6-e337-4f64-8f0e-d845eb9eee15", "date": "2026-09-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "ef2702b4-11c3-42c9-a2df-a61c09b182cd", "date": "2026-09-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "3d90506c-8ea1-4fdf-9b9f-6a000181a04b", "date": "2026-09-08", "level": "way-of-working", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "739d7723-8069-4266-b9e3-fac2e581bbe4", "date": "2026-09-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "292dbd3f-e4fa-450e-8899-f3a99827b8ee", "date": "2026-09-08", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b3b30420-890c-445a-ad12-3c85837f9b0c", "date": "2026-09-08", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "c04a28db-7363-4d31-ae61-1c1c65124b04", "date": "2026-09-09", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "3e3cb146-a3a3-4e01-9bce-8d56f86b3f7c", "date": "2026-09-09", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "ec5648e7-7fdf-4158-ae70-5733cb5e84b1", "date": "2026-09-09", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "e1b75f97-bc7b-468f-8ad8-ee8eb900b6bb", "date": "2026-09-09", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "a1cae09b-6537-4120-a542-2a3488bb625b", "date": "2026-09-09", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "45941014-b839-4180-937f-b824c6aa41f5", "date": "2026-09-09", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "cc39a99b-6640-4691-97c8-584b082f8c07", "date": "2026-09-09", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "fd5ab337-4eca-4bf3-8639-2987b57df937", "date": "2026-09-09", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0308625f-7b65-4bd7-ab65-9a3a2173ae1b", "date": "2026-09-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "a669a714-9523-436b-9680-d3521bd65dc0", "date": "2026-09-09", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "3abeb0a1-f43e-45fc-a36e-8b9d27edc63b", "date": "2026-09-09", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "cf1c9560-d5c0-4c05-8795-691109433afc", "date": "2026-09-10", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "4166f1c2-bdb5-4d09-a1d9-0bbba5fa6495", "date": "2026-09-10", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "2d06a126-c11f-4081-bd4d-6a82cacfbae2", "prompt": "00caf4e2-cacc-4657-b98f-4a571a68a61a", "date": "2026-09-10", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "c7002b95-f41b-4e7b-a0ee-4c9c0571677b", "date": "2026-09-10", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5a48d2fa-a4c5-4168-86b0-53d3dc1a434e", "date": "2026-09-10", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "77caa535-78fb-4167-a292-ca39018fdff7", "date": "2026-09-11", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "930725be-8d4e-4e9f-801e-e30f18dd1935", "date": "2026-09-11", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "800be5b6-e5ab-47e3-8ad8-bb795e3461ca", "date": "2026-09-11", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "00d03a1f-a0d2-4f08-878e-976948bb909e", "date": "2026-09-12", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "8458a021-90d9-4cf0-9174-7c98661f1eac", "date": "2026-09-12", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "cc5e66c8-c42a-4f00-835a-bd8fba71a41c", "date": "2026-09-12", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b0a864c7-f0ed-45d4-990e-d511c5e4006a", "date": "2026-09-19", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "9fd23898-bbbd-4a9f-a420-ee2b6cb3d328", "date": "2026-09-19", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "88acc3c1-98f8-4aed-8ca4-09629e840a06", "date": "2026-09-19", "level": "goal", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "d7017850-8503-41e2-b7bc-e8294d564877", "date": "2026-09-19", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "1d6958eb-87ef-4e81-9056-08c47dce9c15", "date": "2026-09-19", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "3db00b01-4ed1-48be-880f-4bab8f763457", "date": "2026-09-19", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "66eeb799-d6c9-401d-9895-3ed5ec76bd20", "date": "2026-09-19", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b10ec667-956a-47a6-8bb1-362cfac3713c", "date": "2026-09-19", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5c0c0548-8c8e-47a2-a420-609e4ea24d83", "date": "2026-09-19", "level": "task", "links": [{"kind": "use-case", "name": "find-everything-about-my-verse-in-one-place"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "d7e25bab-3d74-45b4-87e1-33c17a639675", "date": "2026-09-20", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "3fe8b6ef-3e58-4810-b8a0-cc71570e41a0", "date": "2026-09-20", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5eaf32cb-7909-478d-a978-6569dcc762ca", "date": "2026-09-20", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "a922c241-a016-467e-995e-1f32a6cf5d54", "date": "2026-09-20", "level": "task", "links": [{"kind": "use-case", "name": "read-the-commentary-beside-my-verse"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "147f1598-e41c-41ad-b6fc-601199c03946", "date": "2026-09-21", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "ae815ac8-5b4f-44d5-85af-9525757f57d9", "date": "2026-09-21", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "1275707d-1257-45b5-afeb-dab939e9c095", "date": "2026-09-21", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "51958058-1c4b-4132-a283-89cca5a8864b", "date": "2026-09-21", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5f0d01ca-53d9-4941-8ced-417df6c454cb", "date": "2026-09-21", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "2de6e9be-81f7-482b-90ac-f56273e61488", "date": "2026-09-21", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "563fd90e-3a06-42fd-92f7-516f777f53f2", "date": "2026-09-21", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "86f44473-0a18-4083-993c-5b9e5ca0ac68", "date": "2026-09-21", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "99c17816-9e0f-4bf9-a539-cd6c08444485", "date": "2026-09-21", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "cc73722a-8f68-43c3-88b8-15d38ecbb3aa", "date": "2026-09-21", "level": "way-of-working", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b93163f8-8afe-4261-9381-8f95699a8e4f", "date": "2026-09-21", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "01533def-6225-4900-b41a-23de7c0d6f82", "date": "2026-09-21", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0ee2a9fe-9cef-4790-a35f-fc5a166cc458", "date": "2026-09-21", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5cb5d156-57a1-411a-8c9a-a35cfd097002", "date": "2026-09-21", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "6b13d4df-7c69-4de4-8179-32bad7956227", "date": "2026-09-21", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "86836b53-06ec-448f-9a5b-b8c29c4c34e7", "date": "2026-09-22", "level": "task", "links": [{"kind": "task", "name": "rigor-stack-pins-the-checking-code"}], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "53d3d12a-0312-45b1-8721-ed3287718ef0", "date": "2026-09-22", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "bb95e23d-6fe8-4279-834c-5d41474f632b", "date": "2026-09-22", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "04ee828a-d8d9-40fb-b25a-41d0ea286bb1", "date": "2026-09-22", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "93ebc01f-3d3d-4623-a9e1-643ea5b90fce", "date": "2026-09-23", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "9e1d54cc-ad0d-4fc3-a809-e92d7f656a85", "date": "2026-09-23", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "c931c751-5a6f-4cb4-aa5d-93d99a032f21", "date": "2026-09-23", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "e5f6f8b2-f850-459b-a844-0a4b1b276502", "date": "2026-09-25", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "d45e16b4-aaa0-40ab-8d57-c897d2f34992", "date": "2026-09-25", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "52b51b79-9c51-481e-b078-030155071ef3", "date": "2026-09-25", "level": "correction", "links": [{"kind": "feature", "name": "wayfinding"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0831908d-21a1-4779-913d-3949a0263356", "date": "2026-09-25", "level": "correction", "links": [{"kind": "feature", "name": "wayfinding"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "3484155a-fb89-44d7-bf50-d4832954a3b0", "date": "2026-09-25", "level": "correction", "links": [{"kind": "feature", "name": "wayfinding"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "2b093848-aba2-4ba3-989e-200521029956", "date": "2026-09-25", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "8f296e66-4e02-4969-93a6-943ff9141f1b", "date": "2026-09-25", "level": "correction", "links": [{"kind": "feature", "name": "wayfinding"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "c4b6ab5f-3c6b-4f4b-8c40-c947aae034ce", "date": "2026-09-25", "level": "correction", "links": [{"kind": "feature", "name": "wayfinding"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "447e1a73-93bf-4a20-a49a-1574967cbae0", "date": "2026-09-25", "level": "correction", "links": [{"kind": "feature", "name": "wayfinding"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "c4c8b22e-5362-4f7f-bafc-c079fef0abcd", "date": "2026-09-25", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5c8422e7-7bca-4f37-be40-d5692911963e", "date": "2026-09-25", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b0ef3cb7-fbb1-4f52-8301-6720d3991955", "date": "2026-09-26", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "89c2c0f3-e7d5-48b8-a830-46563907615b", "date": "2026-09-26", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "96b36410-7e10-4a52-89b2-d8d6ae9f2055", "date": "2026-09-26", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "a2dbb91c-f935-43f4-9386-a149e46a4eca", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "530e23a3-33fe-4224-8984-5178e20cb304", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "a507d914-a407-40ca-b96a-dc2041398aa5", "date": "2026-09-26", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "33008450-83e8-4700-b36f-c4be40ac8006", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "57c06ee7-ab01-4542-81e2-0f1f19b0f6a0", "date": "2026-09-26", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "8e7ec685-5cca-426f-b175-4f5eaa22ffa3", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "62939459-9d86-49ce-ad75-f35f39366da8", "date": "2026-09-26", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7b01b466-b7ac-4cf6-9e27-2d7c48cace0e", "date": "2026-09-26", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "3e999164-3314-4372-8090-f5805c77e6db", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "fcf021c6-3095-43d6-8143-6de9c14a814c", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5d5c25b4-ab0d-41c1-97a1-3897cd327d1d", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "e86b2fab-a7bb-4017-8d92-f1f7d46fd1d3", "date": "2026-09-26", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "edf2b23e-a7b0-4641-b494-61569da0d5f9", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "356e19db-d4d9-439c-8a5a-5ce8ff62fca6", "date": "2026-09-26", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "e1019c4b-48a0-4c12-9614-dbda3499cadb", "date": "2026-09-26", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "d23acedb-f217-4fae-af76-aa8d946a816c", "date": "2026-09-26", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "57414c99-cbc0-48d4-b9e8-6d77a5ebb2d1", "date": "2026-09-26", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "fece16f5-6e1b-4383-b4ec-255bb7b38716", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "f6f78460-f015-42b1-a325-25ce8afe9aa0", "date": "2026-09-26", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "1fcb94ee-2083-4c9e-9894-e7245bbdfdf4", "date": "2026-09-26", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "25731873-304c-4c57-abfd-2927458b6d8d", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "dd220fee-1912-4735-a147-d4ce29c376bd", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "1022356b-4e75-43d6-84c6-539eee20a299", "date": "2026-09-26", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "50d16aea-e615-46fb-beb5-8ead36a6ea04", "date": "2026-09-26", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "1fa94680-c61f-44a8-8cd4-42e8ff951bee", "date": "2026-09-26", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "bbd3bad8-2c63-454e-8070-cab8282cb4e3", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "c9b90f16-b17a-4ba2-bd85-f2c6427c15f5", "date": "2026-09-27", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "138753ce-84f5-4d57-953a-031979b320cb", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "d114d724-3ff3-493d-98e4-3d2fb704a2d8", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "68ca016c-9e2d-46f2-be33-03942fafda90", "date": "2026-09-27", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "2d3346f3-30d9-404c-8e09-f0ea3f2004a6", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "bb79ac0d-a565-464a-a120-c7d285c48ff0", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "95214206-5360-4833-98c9-1185c0636f0f", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "06f25d6b-6292-497b-a871-af1bca794c50", "date": "2026-09-27", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "e1daaaf3-2462-47b7-8994-d7c9ecffbd53", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7d7c02dc-e193-41b1-98b3-b73ed704633d", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "97f02c02-2e9c-4925-b3a5-6bff7a0acf21", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "e758ff87-e0ae-4584-b094-004d5c199b2d", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "39fa6c8c-8862-4954-a7da-2f522a65c613", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "9c2c7ac8-d96a-485a-8ffc-90da11e8a667", "date": "2026-09-27", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0ca36125-fe05-4da4-91f5-d55c193dbc29", "date": "2026-09-27", "level": "plan", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "cde0680c-3388-4a24-9bd9-f2ccc8ea2617", "date": "2026-09-27", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "f03c0e53-fee3-4a3c-9b0c-0eb44bc8a3ab", "date": "2026-09-27", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "aa3cf98a-1e58-4945-9f63-2432528bf218", "date": "2026-09-27", "level": "plan", "links": [{"kind": "feature", "name": "performance"}], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "55cb69d1-a3d8-4c3e-a35d-c0e2f73c9a6d", "date": "2026-09-27", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "175088f8-9f9d-4263-9b69-23b80216716d", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7f7381aa-c394-4553-8cf2-b8dfb3978774", "date": "2026-09-27", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0b7e428c-4a5a-4072-a1a1-e2f683befb19", "date": "2026-09-27", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "1eb4797b-b0fd-40c9-a1a0-7df4d82b5bf8", "date": "2026-09-27", "level": "way-of-working", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7b53584e-c31a-4ef5-8dc8-9522d9d4137b", "date": "2026-09-28", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5af11b30-1776-4ecb-99c0-95ae277de8b3", "date": "2026-09-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "ccf4f810-90a0-409c-bff3-7f1eac5ac1aa", "date": "2026-09-28", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "af7d53c3-25e6-4c6e-8634-5e7c925dbab5", "date": "2026-09-28", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "c70f9da9-01d9-4e77-8255-2a10541d41bd", "date": "2026-09-28", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "7bf62555-bb41-4b41-b85b-2db22fb78f70", "date": "2026-09-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "9fcaeaf6-1c1b-46bd-8c26-93ad75bdd4bd", "date": "2026-09-28", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0396ccc8-6591-4828-98d5-745478383977", "date": "2026-09-28", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0385c98a-981a-49a9-b5d2-f7ab94e5e9c0", "date": "2026-09-28", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "a1d1aab3-43ff-4224-a2b2-030e42f6e26f", "date": "2026-09-29", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "bc8d7857-6921-4c5e-b4e8-bc6bcae7733b", "date": "2026-09-29", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "0307cc4d-bd74-4d79-b535-5938586a7299", "date": "2026-09-29", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "1e9c1aba-2fb9-406f-a74c-2da8adefbb95", "date": "2026-09-29", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "b1c202b7-3cc7-4ce2-b283-eb7c1f6a8fff", "date": "2026-09-29", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "5c7f81ea-49ea-4ee6-8852-4094d07752a9", "date": "2026-09-29", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "91562d2f-0ed5-4ace-8ffc-6a45ef847421", "date": "2026-09-29", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "04bf8de6-9f74-4745-ab2a-b36f9591bba2", "date": "2026-09-29", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "a697bd17-c173-43db-832b-9ef5ecea0157", "date": "2026-09-29", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "6070e825-2622-4eb9-9eb2-c1108b70f9f1", "date": "2026-09-29", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "4bbf5be0-f81b-4679-a148-0c0cd4b11983", "date": "2026-09-29", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "a5f44651-abdf-4b34-800a-14bc6ab255f1", "date": "2026-09-29", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "885b2fae-6685-4287-9622-54beb3ade986", "date": "2026-09-29", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "461d438f-69c4-4103-9e6d-b764ec28ec61", "date": "2026-09-29", "level": "way-of-working", "links": [], "sure": true, "by": "reader"}
+{"session": "c8c77742-fa0c-48ea-9c25-4e720245832a", "prompt": "cbc6e48a-4029-4490-a932-44ae6448602d", "date": "2026-09-29", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "728cd0af-3dc4-401b-967d-970181026a32", "date": "2026-09-29", "level": "plan", "links": [{"kind": "feature", "name": "native-shell"}], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "58aa0685-29e3-48a5-84cb-0982f6327e3b", "date": "2026-09-29", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "8f2c9f16-ea98-48c7-966e-6197f000988a", "date": "2026-09-29", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "7489f8d6-ebe6-4f6c-8359-ed58d3a90763", "date": "2026-09-30", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "60f59742-d9bc-4057-a13e-d446c5cc9247", "date": "2026-09-30", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "6442a2af-3fec-4466-aadb-7166d203c3fe", "date": "2026-09-30", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "4cd2b53b-6987-4cd8-802d-09fcf2d8c87a", "date": "2026-09-30", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "9c56bd60-acad-4766-af6a-99084976023a", "date": "2026-09-30", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "bbbf31a3-8181-473f-bee1-8dc623eb3fc5", "date": "2026-09-30", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "3f76f463-cbd1-4f0a-b75f-8934b125624d", "date": "2026-09-30", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "9b493be2-7c40-4bd1-a5ad-609ff92b26ea", "date": "2026-09-30", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "bbae2f22-e270-41c5-b85b-47ae8142ec40", "date": "2026-09-30", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "0f800468-3bae-4f46-8026-43a6e7228769", "date": "2026-09-30", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "07dc385e-fb3a-441a-a0c8-2de6bf6fb446", "date": "2026-09-30", "level": "task", "links": [{"kind": "task", "name": "passage-and-run-colours"}], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "c76450ad-25f9-40a5-bff1-07e6279e2156", "date": "2026-10-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "347043a4-0580-4e30-a5ab-a74afaf5746d", "date": "2026-10-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "67f5484d-e956-406f-a2ca-fbb16d4e2bc3", "date": "2026-10-01", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "16a0c07d-88ff-4d75-b82c-06ca543074dd", "date": "2026-10-01", "level": "way-of-working", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "d2478481-8696-4402-afaa-e36ac1960fc7", "date": "2026-10-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "c3c6ef74-decc-46cc-9c9a-4279d6a3a3e3", "date": "2026-10-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "83ed2849-4238-49a3-a5df-3c5f7899a8bd", "date": "2026-10-01", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "b0975439-539a-4207-97cc-cbd06b23bd9e", "date": "2026-10-01", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "f2b859d0-86ba-4651-89c6-d356515d3538", "date": "2026-10-02", "level": "task", "links": [{"kind": "task", "name": "verse-long-press-menu"}], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "d2724f97-6d92-424a-bec7-36d4bf1b1668", "date": "2026-10-02", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "25d1e7f0-0b1e-48e8-9171-0860464c51b5", "date": "2026-10-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "2d0c9e92-2ede-40b8-9beb-ab53ae6f835f", "date": "2026-10-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "a68ddddf-46c4-4347-b218-ac29c79ab4b1", "date": "2026-10-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "e0e5b49d-c72c-4cbb-bacd-322e88213de8", "date": "2026-10-02", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "cd61d8b1-981a-46e5-853b-59e62dae24c8", "date": "2026-10-03", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "c8a80f58-9a45-48b3-a0ff-827aba7e444f", "date": "2026-10-03", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "3e4bfb81-08bf-4c6c-b67d-c6cb1c8c704b", "date": "2026-10-03", "level": "task", "links": [{"kind": "task", "name": "scoped-notes"}], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "e6ddccb7-b8bc-4eaa-9ec3-f2dc73c3540b", "date": "2026-10-03", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "a4d3bec1-a43b-4ece-965c-f63bb9f4793b", "date": "2026-10-04", "level": "task", "links": [{"kind": "task", "name": "pitch-intro-badge"}], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "0b74dd00-e5e5-43c1-a3dd-29044a195a3e", "date": "2026-10-04", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "105dba51-d6f8-4f5f-98ce-aaf21b24f9e1", "date": "2026-10-04", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "5801ff7a-dda3-4e0b-a31f-18b0e54aee2d", "date": "2026-10-05", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "dff81aef-602e-4062-b37e-ff5205fbb9ea", "date": "2026-10-05", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "5f095f83-8223-49e8-961c-4f91f1ba5b3a", "date": "2026-10-05", "level": "correction", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "87a2d7ba-221c-4910-8fa5-af8c47de505d", "date": "2026-10-05", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "991ae38f-11e1-469f-81eb-6b7b4038a9c1", "date": "2026-10-05", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "39d6fd93-0bb7-4ffc-a9a8-d81fc1e92ea0", "date": "2026-10-06", "level": "task", "links": [{"kind": "feature", "name": "pens-and-pencil"}], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "0f1e82c2-e077-4f6b-8536-823bbf573242", "date": "2026-10-06", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "857d7e1a-9e44-4033-bf33-1ea525d457b5", "date": "2026-10-07", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "c69a90a0-4769-48d6-a34e-9d192181abb5", "date": "2026-10-08", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "015b4a32-a29c-492b-88a6-ee2a63e90eb8", "date": "2026-10-08", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "bc09f69e-8ae7-454c-93ec-57ce554210c6", "date": "2026-10-09", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "1af0f4cf-d3ac-4c59-90bd-1801d40804ad", "date": "2026-10-09", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "3fb60616-9ebb-4477-b0d1-2207ca07493a", "date": "2026-10-10", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "18ec8906-7c24-4aac-9a50-8f242b819a36", "date": "2026-10-11", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "a80b7adb-6908-43e6-833a-25fcaea66cf2", "date": "2026-10-11", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "5cf2baa8-4e56-4a4f-8f8b-64fb00e5ae1c", "date": "2026-10-12", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "c4c4b182-0b49-4731-b567-d1f2a8a98932", "date": "2026-10-12", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "211100e4-4a1f-4962-87d2-710db49de28c", "date": "2026-10-13", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "f5333211-0fdb-47b4-873c-c41355f1b28c", "date": "2026-10-13", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "66455b57-07fd-481c-a124-45b745354b77", "date": "2026-10-15", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "8c3a31a4-b871-49c1-8dbc-ebb80906ceda", "date": "2026-10-23", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "e85ea537-5f5b-46cb-add4-971a01406e5a", "prompt": "19a2a3e7-64b9-4f15-af2c-f0a2d8f02a59", "date": "2026-10-25", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "568c70a9-a456-4b6c-811c-6bbff4d87f4a", "prompt": "a15b9470-c99d-4e7b-869c-c395bd82a171", "date": "2026-11-07", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "8185ffe4-b766-48c6-aaf4-f15bc5abfd0a", "date": "2026-11-07", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "5795d516-f583-4aed-9387-e03b2204d0fc", "date": "2026-11-07", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "01ec7ea7-240f-4763-bca9-d68510d6522a", "date": "2026-11-07", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "94ec4cdb-1e8b-45bc-9cb5-ca01802d2897", "date": "2026-11-07", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "71652471-ceac-45c1-8f31-8117fb04fd52", "date": "2026-11-08", "level": "task", "links": [{"kind": "plan", "name": "open-work-2026-11"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "f9ef809b-3471-4576-995c-ff38f376a14b", "date": "2026-11-09", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "31b9867b-771c-43d5-8de5-e31e6e3f0a16", "date": "2026-11-09", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "4a0fc114-bcef-4d9b-ae3d-40dab6f90438", "date": "2026-11-09", "level": "task", "links": [{"kind": "task", "name": "publisher-account-is-company"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "73bdc601-25d3-4548-8d77-4cb8fb4313bb", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "d39229f7-298e-4ed9-bd92-b239c825300f", "date": "2026-11-09", "level": "task", "links": [{"kind": "task", "name": "sharing-cloudflare-setup"}, {"kind": "task", "name": "sharing-address"}], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "a6fb2195-8528-4aca-a2fa-136cba460d17", "date": "2026-11-09", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "2ab12f7c-1e21-486a-b7d0-a451e69decb7", "date": "2026-11-09", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "f507e31b-2f4a-4701-9a35-b3ac899ceb68", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "f963cb8a-7c35-49ae-9016-e131ea89f637", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "b3a2ec22-19d1-40ec-876c-4af0d68e57b7", "date": "2026-11-09", "level": "correction", "links": [{"kind": "task", "name": "iphone-record-covers-iphone"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "47d6ea07-a79b-488c-b141-35cc3cfab4aa", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "0a9dfdd4-ad13-4ec6-9f9b-a64bdcbfcc27", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "ff13f51a-bf89-4b51-af65-85294725d4ce", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "87331432-97c3-4bbc-b9b6-fc9fb42becc2", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "57a9c51f-346d-4a75-8d7e-779852dedd44", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "3d0901fd-dc78-4f93-a65e-37706e54d933", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "8d70d328-7324-4014-9191-8d64bf58065b", "date": "2026-11-09", "level": "task", "links": [{"kind": "task", "name": "homepod-siri-request"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "3789f86f-9e14-498f-b968-025b7e465904", "date": "2026-11-09", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "330135fb-ac34-408e-97fc-60956a822590", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "cd65f8e6-37cf-466c-b03a-23b570cef52f", "date": "2026-11-09", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "dccebf8f-37ba-4c7d-bdf0-22bf0bc1c32b", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "b778f53f-699c-4868-93e4-673868006aac", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "0831a14f-e94e-4868-99c9-c72973bd96b7", "date": "2026-11-09", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "58022cf4-3e7e-4c86-8eb0-9b7d57519fc5", "date": "2026-11-09", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "36126570-c93e-4430-b725-3ef82999efb8", "date": "2026-11-09", "level": "question", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "efd8c035-7a29-4e28-97d0-7d73a6d5a1d5", "date": "2026-11-09", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "96547920-6b1a-4669-8fce-7c81524ff488", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "85885d88-c891-4ff9-b256-2826c384cc0a", "date": "2026-11-09", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "91026093-c0a8-43b6-b0e8-d0396305d27c", "date": "2026-11-09", "level": "task", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "4da152d3-7882-4b63-88f6-9fe00bfc2f7a", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "d00a3862-2390-444a-8432-d5e7e7777cec", "date": "2026-11-09", "level": "task", "links": [{"kind": "task", "name": "app-walk-whole-demo-path"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "fe640ae6-8bf6-46c8-a6bb-f8721bcfd978", "date": "2026-11-09", "level": "task", "links": [{"kind": "task", "name": "drawer-holds-its-tools"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "5f33ebb0-ba79-47b8-9b86-b1a6b1924d74", "date": "2026-11-09", "level": "task", "links": [{"kind": "task", "name": "app-walk-whole-demo-path"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "a85af75e-5c13-4c36-a405-214c851c3d37", "date": "2026-11-09", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "2d14425a-4326-4084-9031-5b9c20e668fb", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "a9998ed8-7e79-4f74-9b72-436f6e9531b4", "date": "2026-11-09", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "c8846f07-c07f-47de-856b-8b2fefffcad6", "date": "2026-11-09", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "bb98b9a5-578a-46a8-bf91-554a5ac39fc0", "date": "2026-11-09", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "5757f75a-4ddb-4084-af9e-f46011564378", "date": "2026-11-09", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "5c559353-4b7d-4bd1-b5b0-816220198b59", "date": "2026-11-09", "level": "not-an-instruction", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "7ca5e448-5f8f-4495-a570-58aa773616b9", "date": "2026-11-10", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "90c8d6e5-b55c-48a3-b023-ed8b1ea274c7", "date": "2026-11-10", "level": "task", "links": [{"kind": "task", "name": "testflight-sign-with-paid-team"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "0b3084b6-b368-401d-a4a8-a81b5f0ffa13", "date": "2026-11-10", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "756eca4c-6bac-4314-be30-a2aa4c3ec3cb", "date": "2026-11-10", "level": "task", "links": [{"kind": "task", "name": "testflight-sign-with-paid-team"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "74b70fb7-71bd-4bc1-b878-835ddd42e6db", "date": "2026-11-10", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "3a989845-405e-4bfb-b17c-e1922ca21cf8", "date": "2026-11-10", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "6deca7d1-dc34-43c8-94ab-345e74d373e1", "date": "2026-11-10", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "e37c4604-8080-4f17-8e09-2f79d7eb85b0", "date": "2026-11-10", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "13d98814-2e35-4535-bba8-7453f2d425d6", "date": "2026-11-10", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "b8dbe0f6-ac34-4fd2-bec0-19834e9e6641", "date": "2026-11-10", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "a391c2d6-e87e-40fc-91ff-7a79f822348e", "date": "2026-11-10", "level": "task", "links": [{"kind": "task", "name": "device-list-from-apple"}], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "bf51e50b-4b73-4ae6-84f5-b345b562afd4", "date": "2026-11-10", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "26934e42-8abb-4e33-93a8-65c9a0abf2a0", "date": "2026-11-11", "level": "task", "links": [], "sure": false, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "2708e9fc-d6d8-49f9-8c74-ac8aa3f3aa12", "date": "2026-11-11", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "4144014d-887f-4e31-902f-96dbba006337", "date": "2026-11-11", "level": "task", "links": [{"kind": "task", "name": "pencil-pens-as-rings"}], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "7a26bc03-fc13-4aa5-80b5-8442d53d8b25", "date": "2026-11-11", "level": "task", "links": [{"kind": "task", "name": "pencil-pens-settings-page"}], "sure": true, "by": "reader"}
+{"session": "32699dcf-b8d0-4b47-9803-cf7a2bbe1f48", "prompt": "d59de973-93f0-449d-98f5-061d8475d066", "date": "2026-11-11", "level": "task", "links": [{"kind": "plan", "name": "open-work-2026-11"}], "sure": false, "by": "reader"}
+{"session": "f20a6685-f1f6-450b-9b0a-9cf2dce93d64", "prompt": "a9612e59-c5cd-4dbc-8a2a-db3b1bb6b632", "date": "2026-11-11", "level": "plan", "links": [{"kind": "plan", "name": "open-work-2026-11"}, {"kind": "plan", "name": "intent-tracking"}], "sure": true, "by": "reader"}
+{"session": "f20a6685-f1f6-450b-9b0a-9cf2dce93d64", "prompt": "582becfa-c6b2-4cfe-bd4c-382687a91949", "date": "2026-11-11", "level": "plan", "links": [{"kind": "plan", "name": "intent-tracking"}], "sure": false, "by": "reader"}
+{"session": "f20a6685-f1f6-450b-9b0a-9cf2dce93d64", "prompt": "e2d28878-8e44-40d0-9934-f06a342a5a40", "date": "2026-11-11", "level": "plan", "links": [{"kind": "plan", "name": "intent-tracking"}], "sure": false, "by": "reader"}
+{"session": "f20a6685-f1f6-450b-9b0a-9cf2dce93d64", "prompt": "b1104889-4562-4f38-97c6-4db0c0b77c7c", "date": "2026-11-11", "level": "question", "links": [], "sure": true, "by": "reader"}
+{"session": "f20a6685-f1f6-450b-9b0a-9cf2dce93d64", "prompt": "43dca771-5b2f-4bf7-ae01-913f6a4bf0f2", "date": "2026-11-11", "level": "way-of-working", "links": [], "sure": false, "by": "reader"}
+{"session": "f20a6685-f1f6-450b-9b0a-9cf2dce93d64", "prompt": "3fe01120-4e70-40bc-9019-81243a0c663b", "date": "2026-11-11", "level": "not-an-instruction", "links": [], "sure": true, "by": "reader"}
