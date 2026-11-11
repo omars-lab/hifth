@@ -1,7 +1,7 @@
 {
   "$comment": [
-    "Start-up time as code is added. Written by scripts/perf-sweep.mjs, drawn by",
-    "scripts/perf-report.mjs. startupMs is Lighthouse's time-to-interactive, median",
+    "Start-up time as code is added. Written by .claude/skills/optimizing-performance/scripts/perf-sweep.mjs, drawn by",
+    ".claude/skills/optimizing-performance/scripts/perf-report.mjs. startupMs is Lighthouse's time-to-interactive, median",
     "of `runs`, on the phone pinned in .lighthouserc.json. The goal is 2500."
   ],
   "measuredAt": "2026-11-11T05:44:10.932Z",

@@ -11,7 +11,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const look = readFileSync(new URL("../.claude/skills/walk-app/scripts/fresh-look.js", import.meta.url), "utf8");
+const look = readFileSync(new URL("./fresh-look.js", import.meta.url), "utf8");
 
 test("the fresh-launch look compiles as one program for the probe", () => {
   assert.doesNotThrow(() => new vm.Script(look));

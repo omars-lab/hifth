@@ -11,7 +11,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 
-const dir = new URL("../.claude/skills/walk-app/scripts/", import.meta.url);
+const dir = new URL("./", import.meta.url);
 const scripts = readdirSync(dir).filter((f) => /\.(m?js)$/.test(f));
 
 test("every walk script reads a verse from a spoken name in either digits", () => {

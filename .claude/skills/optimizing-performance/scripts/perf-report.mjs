@@ -18,7 +18,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+const ROOT = new URL("../../../..", import.meta.url).pathname;
 const DIST = join(ROOT, "apps", "web", "dist");
 const OUT_DIR = join(ROOT, "docs", "performance");
 const OUT = join(OUT_DIR, "bundle-report.html");

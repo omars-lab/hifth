@@ -37,7 +37,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 
-const ROOT = new URL("..", import.meta.url).pathname;
+const ROOT = new URL("../../../..", import.meta.url).pathname;
 const DIST = join(ROOT, "apps", "web", "dist");
 // Where the measuring tool leaves its reports. The setting is for the tests.
 const LHCI_DIR = process.env.HIFTH_LHCI_DIR || join(ROOT, ".lighthouseci");
@@ -186,8 +186,8 @@ writeFileSync(
   `${JSON.stringify(
     {
       $comment: [
-        "Start-up time as code is added. Written by scripts/perf-sweep.mjs, drawn by",
-        "scripts/perf-report.mjs. startupMs is Lighthouse's time-to-interactive, median",
+        "Start-up time as code is added. Written by .claude/skills/optimizing-performance/scripts/perf-sweep.mjs, drawn by",
+        ".claude/skills/optimizing-performance/scripts/perf-report.mjs. startupMs is Lighthouse's time-to-interactive, median",
         "of `runs`, on the phone pinned in .lighthouserc.json. The goal is 2500.",
       ],
       measuredAt: new Date().toISOString(),

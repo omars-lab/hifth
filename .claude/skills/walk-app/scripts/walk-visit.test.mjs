@@ -10,7 +10,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const src = readFileSync(new URL("../.claude/skills/walk-app/scripts/visit-walk.js", import.meta.url), "utf8");
+const src = readFileSync(new URL("./visit-walk.js", import.meta.url), "utf8");
 
 test("the visit walk compiles as one program for the probe", () => {
   assert.doesNotThrow(() => new vm.Script(src));

@@ -111,7 +111,7 @@ close a pen's question. Close the panel with its own close button, as
 `scripts/app-pages-walk.js` does (`header button` inside the panel).
 
 The walk scripts find buttons by their names, so a button renamed in the messages leaves a walk
-searching for the old name; `node --test scripts/walk-names.test.mjs` checks each search against
+searching for the old name; `node --test .claude/skills/walk-app/scripts/walk-names.test.mjs` checks each search against
 the message it means, and a new search for a named button gets a row there. Where the app puts
 the words a button shows in front of its name (the app's name in the corner), the row names
 those words too, so the test checks the name the app really builds.

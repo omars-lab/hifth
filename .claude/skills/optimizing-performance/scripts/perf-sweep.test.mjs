@@ -75,7 +75,7 @@ test("two copies are measured in turns, and every run is kept", () => {
 
 test("comparing never writes the checked-in sweep record", () => {
   const s = setup();
-  const record = fileURLToPath(new URL("../docs/performance/sweep.json", import.meta.url));
+  const record = fileURLToPath(new URL("../../../../docs/performance/sweep.json", import.meta.url));
   const before = readFileSync(record, "utf8");
   const r = run(s, ["--compare", `a=${s.copy("a", 2000)}`, "--rounds", "1", "--out", join(s.dir, "r.json")]);
   assert.equal(r.status, 0, r.stdout + r.stderr);
