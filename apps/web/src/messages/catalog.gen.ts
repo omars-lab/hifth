@@ -111,10 +111,16 @@ export interface Catalog {
   readonly distancePages: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly distanceRelative: (d: { readonly dir: "later" | "other"; readonly pages: string | number }) => string;
   readonly distanceSame: string;
+  readonly drawerBack: (d: { readonly label: string | number }) => string;
+  readonly drawerMarksNote: string;
+  readonly drawerMarksPath: string;
+  readonly drawerMarksTag: string;
+  readonly drawerMarksTitle: string;
   readonly drawerToolsDrawer: string;
   readonly drawerToolsNote: string;
   readonly drawerToolsSheet: string;
   readonly drawerToolsTitle: string;
+  readonly drawerWord: string;
   readonly editionCurrent: string;
   readonly editionFoot: string;
   readonly editionMapsTo: (d: { readonly ref: string | number }) => string;
@@ -213,6 +219,9 @@ export interface Catalog {
   readonly legendNoneOnPage: string;
   readonly legendSelection: string;
   readonly legendTitle: string;
+  readonly levelSettings: string;
+  readonly levelVerse: string;
+  readonly levelWord: string;
   readonly licenceBody: string;
   readonly licenceHead: string;
   readonly likeVerse: (d: { readonly ref: string | number }) => string;

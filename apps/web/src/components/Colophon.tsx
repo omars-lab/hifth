@@ -9,6 +9,7 @@ import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
 import { TOOL_HELPS, type ToolHelp } from "../tool-help";
 import { SETTINGS_ATS, type SettingsAt } from "../settings-at";
+import { DRAWER_MARKS, type DrawerMarks } from "../drawer-marks";
 import { WORD_TAPS, type WordTap } from "../word-tap";
 import { RUN_MARKS, type RunMark } from "../run-mark";
 import { RUN_FOLLOWS, rememberRunFollow, useRunFollow } from "../run-follow";
@@ -67,6 +68,9 @@ interface ColophonProps {
   /** Whether the reading settings sit in the bar or in one drawer; remembered on this device. */
   settingsAt?: SettingsAt;
   onSettingsAt?: (choice: SettingsAt) => void;
+  /** How a drawer shows what it sits on: a path, or a tag per level; remembered on this device. */
+  drawerMarks?: DrawerMarks;
+  onDrawerMarks?: (choice: DrawerMarks) => void;
   wordTap?: WordTap;
   onWordTap?: (choice: WordTap) => void;
   /** How the page shows the verse a "Play to" run is reciting; remembered on this device. */
@@ -290,6 +294,8 @@ export function Colophon({
   onToolHelp,
   settingsAt,
   onSettingsAt,
+  drawerMarks,
+  onDrawerMarks,
   wordTap,
   onWordTap,
   runMark,
@@ -591,6 +597,31 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.settingsAtNote}</p>
+          </section>
+        )}
+
+        {/* Which drawer sits on which (ayah-drawer ①): a path in the top one's
+            head, or each one's level as a tag, until the owner has tried both. */}
+        {drawerMarks && onDrawerMarks && (
+          <section className={styles.block} aria-labelledby="colophon-drawer-marks">
+            <h3 className={styles.subhead} id="colophon-drawer-marks">
+              {t.drawerMarksTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-drawer-marks">
+              {DRAWER_MARKS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={drawerMarks === choice}
+                  onClick={() => onDrawerMarks(choice)}
+                >
+                  {choice === "path" ? t.drawerMarksPath : t.drawerMarksTag}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.drawerMarksNote}</p>
           </section>
         )}
 

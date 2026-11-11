@@ -35,6 +35,7 @@ export function VerseDrawer({
   onCover,
   keepClear,
   clearKey,
+  tag,
   children,
 }: {
   /** The verse's own name, "Al-Baqarah 2:48"; null when no verse is lit. */
@@ -62,6 +63,8 @@ export function VerseDrawer({
    */
   keepClear?: () => DOMRect[];
   clearKey?: string | null;
+  /** Name this drawer's level in its head (drawer-marks.ts, the tag setting). */
+  tag?: boolean;
   /** The tool buttons, each with its caption. */
   children: ReactNode;
 }): JSX.Element | null {
@@ -203,7 +206,10 @@ export function VerseDrawer({
   return (
     <section ref={ref} className={styles.drawer} aria-label={t.verseTools(label)} data-verse-drawer>
       <header className={styles.head}>
-        <span className={styles.title}>{label}</span>
+        <span className={styles.title}>
+          {tag && <span className={styles.level}>{t.levelVerse}</span>}
+          {label}
+        </span>
         {end}
         <button type="button" className={styles.close} aria-label={t.close} onClick={onClose}>
           <span aria-hidden="true">×</span>

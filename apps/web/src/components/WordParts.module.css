@@ -27,6 +27,29 @@
   font-size: 13px;
 }
 
+/* Which drawer sits on which (ayah-drawer ①). The path's first step: the verse
+   under this drawer, pressed to step back down to it. */
+.crumb {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent-strong);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* The level's tag, when the reader picked tags. */
+.level {
+  margin-inline-end: var(--space-2);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
 /* The word tool's row, in the verse drawer's place and shape (VerseDrawer.module.css):
    on the bottom of the window, over the bar under the page, rising as it opens. */
 .docked {
@@ -40,6 +63,11 @@
   padding-block-end: calc(var(--space-3) + env(safe-area-inset-bottom));
   border: none;
   background: var(--paper-raised, var(--paper));
+}
+
+/* The upper drawer's own coloured edge, after .docked so its "no border" does not undo it. */
+.docked.upper {
+  border-block-start: 3px solid var(--accent);
 }
 
 .dockedBottom {

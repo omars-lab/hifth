@@ -81,6 +81,12 @@ interface WordPartsProps {
   /** Stacked, where its top stands, so the page lifts the verse clear of it; null once it closes. */
   onCover?: ((top: number | null) => void) | undefined;
   /**
+   * Stacked on the verse's drawer, how it shows that (ayah-drawer ①): "path"
+   * heads it with the verse under it, a button back down to it; "tag" names
+   * its level and edges it in colour. Left out when it stands alone.
+   */
+  marks?: "path" | "tag" | undefined;
+  /**
    * The sign picked so far (mistake mode); null for the whole word. Left out
    * when nothing is marked yet, so nothing is shown pressed.
    */
@@ -146,6 +152,7 @@ export function WordParts({
   docked: dockedAsked = false,
   stackAbove,
   onCover,
+  marks,
   chosen,
   onPick,
   onPickMany,
@@ -335,7 +342,8 @@ export function WordParts({
     <div
       ref={boxRef}
       className={
-        docked ? `${styles.box} ${styles.docked} ${dockTop != null ? styles.dockedTop : styles.dockedBottom}` : styles.box
+        (docked ? `${styles.box} ${styles.docked} ${dockTop != null ? styles.dockedTop : styles.dockedBottom}` : styles.box) +
+        (marks === "tag" ? ` ${styles.upper}` : "")
       }
       role="dialog"
       aria-label={heading}
@@ -363,7 +371,21 @@ export function WordParts({
       }}
     >
       <div className={styles.head}>
-        <span>{heading}</span>
+        {marks === "path" ? (
+          // The verse under it, then this drawer: pressing the verse steps back down to it.
+          <span>
+            <button type="button" className={styles.crumb} aria-label={t.drawerBack(label)} onClick={onClose}>
+              {label}
+            </button>
+            <span aria-hidden="true"> › </span>
+            <span>{t.drawerWord}</span>
+          </span>
+        ) : (
+          <span>
+            {marks === "tag" && <span className={styles.level}>{t.levelWord}</span>}
+            {heading}
+          </span>
+        )}
         {docked && (
           <button type="button" className={styles.close} aria-label={t.close} onClick={onClose}>
             <span aria-hidden="true">×</span>

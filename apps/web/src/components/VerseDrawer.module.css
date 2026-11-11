@@ -61,6 +61,16 @@
   color: var(--ink-soft);
 }
 
+/* The drawer's level, when the reader picked tags (drawer-marks.ts). */
+.level {
+  margin-inline-end: var(--space-2);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
 .close {
   inline-size: 32px;
   block-size: 32px;

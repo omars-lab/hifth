@@ -17,10 +17,13 @@ import styles from "./SettingsDrawer.module.css";
 export function SettingsDrawer({
   open,
   onOpen,
+  tag,
   children,
 }: {
   open: boolean;
   onOpen: (open: boolean) => void;
+  /** Show the heading as the bottom level's tag (drawer-marks.ts, the tag setting). */
+  tag?: boolean;
   /** The controls, as the bar would have drawn them. */
   children: ReactNode;
 }): JSX.Element {
@@ -53,7 +56,7 @@ export function SettingsDrawer({
       </button>
       {open && (
         <section id="settings-drawer" className={styles.drawer} aria-label={t.settingsDrawer}>
-          <h2 className={styles.title}>{t.settingsDrawer}</h2>
+          <h2 className={styles.title + (tag ? ` ${styles.level}` : "")}>{t.settingsDrawer}</h2>
           {children}
         </section>
       )}
