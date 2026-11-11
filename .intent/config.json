@@ -17,7 +17,7 @@
       "says": "goal",
       "links": { "feature": "feature" }
     },
-    "feature": { "file": "docs/map.json", "list": "features", "id": "id" },
+    "feature": { "file": "docs/map.json", "list": "features", "id": "id", "files": { "field": "entry", "key": "file" } },
     "plan": { "glob": ".claude/plans/*.md" }
   }
 }

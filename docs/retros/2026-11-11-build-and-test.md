@@ -41,6 +41,13 @@ folded: no
   settings name it. Goals and decisions are not named yet (the page says so under its key), and
   the 13 by-hand checks take their status from `docs/validation/ledger.json`, which the tool
   does not read, so two finished ones are drawn as open.
+- intent-manager's `agents/link-backfiller.md`: told "none is for work no task describes", the
+  readers marked 33 of 105 old commits as belonging to nothing, and about a dozen were real
+  changes to the app. Giving the order to try (a task, then a use case or feature, then nothing)
+  brought it to 18, all chores.
+- intent-manager's `intent backfill merge`: a reader who agreed with a link a rule had already
+  made had the answer dropped as a repeat, so four commits were handed out on every run. Only
+  the run on real history showed it; the made-up test repo had no rule and reader agreeing.
 
 ## Worth copying
 - intent-manager's `intent draw`, before release: the page was looked at in its rare states
@@ -51,6 +58,9 @@ folded: no
   Three short steps found a cause that reading the code had not.
 - Holding back one file's delivery in a browser test (a context with the offline cache switched
   off, then a delayed route) turned "a slow connection might do this" into a failing test.
+- intent-manager's `skills/backfill-links/SKILL.md` step 5: before keeping the readers' links,
+  list every "belongs to nothing" answer beside its commit's subject and files. One screen of
+  reading showed the whole pattern of wrong answers, which a random sample of six only hinted at.
 
 ## Didn't work
 - Stopping a watcher "once both pages are found": found is not the same as settled. Watch for
