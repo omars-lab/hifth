@@ -15,7 +15,11 @@ things the first drafts showed. 117 of the 127 open tasks name no use case and n
 roadmap files them in one counted heap; the fix is on the task rows, not in the tool. And 42 of
 the changelog's lines rest on a guess, so none of it goes into "What's New" text unchecked. This
 repo is public on GitHub, so the checked-in roadmap can be read there even though the site does
-not show it. Slice F (the push check refuses unlabelled commits; a second repo) is next. Tasks:
+not show it. Slice F, first half, 2026-11-11: a push now refuses a commit that does not say what
+it was for, as the second of its checks, and prints the fix (`intent answer`, which adds a line to
+`.intent/links.jsonl` and rewrites nothing). It was switched on the day after the labels began,
+not after the two weeks of counting this plan first set, because the count was already zero; one
+word in the Makefile turns it back. The second half, a second repo (bikar), is next. Tasks:
 `label-commits-with-what-they-are-for`.*
 
 **Asked** (owner, 2026-11-10, in the planning session of that day): a way to track work
@@ -176,7 +180,8 @@ This is the tightest part, so it is decided first.
   same as a working one. The push check then lists unlabelled commits.
 - **A commit that truly belongs to nothing** carries `Intent-None: <reason>`. For the first
   two weeks the push check only counts unlabelled commits; once the count stays at zero it
-  refuses them.
+  refuses them. (Done early, 2026-11-11: it refuses them now. A refused commit is answered with
+  `intent answer <commit> <task>` or `--none "<why>"`, never rewritten.)
 - **Merge commits** carry no labels. The tool walks the commits a merge brought in.
 - **Old history is not rewritten.** Links for old commits go in a checked-in file,
   `.intent/links.jsonl`, one line per link, each saying where it came from and how sure it is.
