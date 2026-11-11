@@ -100,6 +100,13 @@ HIFTH_BASE_URL=http://localhost:7122 pnpm -C apps/web exec playwright test --pro
 It serves `dist` as it is on disk, so a rebuild is picked up; it is opt-in because it
 will happily test a build you forgot to redo.
 
+**A new test file: say where it runs.** The laptop (`desktop`) and Firefox
+(`desktop-firefox`) runs each pick their files from a list in `apps/web/playwright.config.ts`;
+the two phone runs take everything not named as left out. `apps/web/e2e/runs.json` records
+which runs pick up each file, and the commit check (`pnpm gate:e2e-runs`) refuses a new file,
+or one that joined or left a run, printing where it runs and where it does not. Add the file
+to the lists it belongs on, then `pnpm gate:e2e-runs --write` and commit the record with it.
+
 A push looks at the copy's two ports before anything else (`make e2e-port-free`). If a
 preview server from an earlier look is still on one, the push stops in a second and prints
 the port, the program holding it and the `kill` line that stops it. Run the same target by

@@ -9,14 +9,20 @@ built.
 
 ## Open questions, and what would answer each
 
-### ① Can a new browser test be skipped without anyone noticing? · **open**
+### ① Can a new browser test be skipped without anyone noticing? · **answered**
 
-Yes, today. The laptop and Firefox runs each read a hand-kept list of test files. A new test
-file left off the lists is not run there, and nothing says so. It happened twice in one week
-(the pencil tests, then the page icons), caught both times only by reading the run's count.
+Not any more (2026-11-11). It could: the laptop and Firefox runs each read a hand-kept list of
+test files, and a new file left off the lists was not run there, with nothing to say so. It
+happened twice in one week (the pencil tests, then the page icons).
 
-**What would close it:** a check, run before a commit, that every browser test file is on a
-list or is named as left out on purpose, with a test of that check.
+Now a checked-in record, `apps/web/e2e/runs.json`, says which runs pick up each test file. A
+check before every commit asks the test runner itself and refuses any difference: a new file,
+a file dropped from a run, a file added to one, a file no run picks up. For a new file it
+prints the runs it is in and the runs it is not in. Accepting what it prints is one command
+(`pnpm gate:e2e-runs --write`), and the changed record then shows in the commit.
+
+What it does not judge: whether a file *should* be in a run. Today 33 files run on the two
+phones only, and the record takes that as it stands.
 
 ### ② Does a push say straight away when it cannot run the browser tests? · **answered**
 

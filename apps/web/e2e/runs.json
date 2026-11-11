@@ -1,0 +1,336 @@
+{
+  "about": "Which browser runs pick up each test file. Checked by scripts/gate-e2e-runs.mjs, so a file cannot join or leave a run unseen. Do not edit by hand: change the lists in playwright.config.ts, then run `pnpm gate:e2e-runs --write` and read the difference.",
+  "files": {
+    "app-pages.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "audio.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "bookmarks.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "box.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "card-foot.spec.ts": [
+      "desktop"
+    ],
+    "chrome-fit.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "colophon.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "confusions.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "contrast.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "crop.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "deeplink.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "desktop.spec.ts": [
+      "desktop"
+    ],
+    "detent-live.spec.ts": [
+      "desktop"
+    ],
+    "drawer-marks.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "drawer-tools.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "drive-device.spec.ts": [
+      "desktop"
+    ],
+    "drive-evalfile.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "drive-touch.spec.ts": [
+      "desktop"
+    ],
+    "drive-video.spec.ts": [
+      "desktop"
+    ],
+    "edge-peel.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "eraser.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "golden.spec.ts": [
+      "golden"
+    ],
+    "guide-links.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "highlight.spec.ts": [
+      "android",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "hop.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "ipad-golden.spec.ts": [
+      "ipad-golden"
+    ],
+    "ipad.spec.ts": [
+      "ipad"
+    ],
+    "lang-load.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "lang.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "lazy-tools.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "link-builder.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "lookalike-compare-view.spec.ts": [
+      "android",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "lookalikes-in-drawer.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "mark-tools.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "marquee.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "mistakes.spec.ts": [
+      "desktop"
+    ],
+    "notes.spec.ts": [
+      "desktop"
+    ],
+    "offline.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "open-link.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "page-labels.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "page-library.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "page-turn.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "pagebar-detents.spec.ts": [
+      "desktop"
+    ],
+    "pagebar-fisheye.spec.ts": [
+      "desktop"
+    ],
+    "pagebar.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "pen-colours.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "pen-guide.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "pen-homes.spec.ts": [
+      "desktop"
+    ],
+    "pencil.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "phone-toolbar.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "pitch-script.spec.ts": [
+      "android",
+      "iphone",
+      "pitch-script"
+    ],
+    "pitch.spec.ts": [
+      "pitch",
+      "pitch-firefox"
+    ],
+    "quick-escape.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "qul.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "range.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "recitation-keep.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "record-days.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "revision.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "scoped-notes.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "settings-drawer.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "share-a11y.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "share-sheet.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "shots.spec.ts": [
+      "shots"
+    ],
+    "sign-tools.spec.ts": [
+      "desktop"
+    ],
+    "skin.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "slider-arrows.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "smoke.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "spoken-names.spec.ts": [
+      "android",
+      "desktop",
+      "iphone",
+      "pitch"
+    ],
+    "spread-fit.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "stage-fit.spec.ts": [
+      "android",
+      "desktop",
+      "iphone"
+    ],
+    "tajweed-key.spec.ts": [
+      "android",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "tool-help.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "turn-style.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "undo-redo.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "usage.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "verse-gestures.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox-runs",
+      "iphone"
+    ],
+    "wayfinding.spec.ts": [
+      "android",
+      "iphone"
+    ],
+    "word-stack.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "word.spec.ts": [
+      "android",
+      "iphone"
+    ]
+  }
+}

@@ -94,6 +94,13 @@ highlighter's colours in an outer ring. The row that was there before stays as a
 **Done:** Settings has a button, "See what each pen does". Its page says how to open the pens,
 shows them working in the layout the reader chose, and gives one line per pen. PR #591.
 
+### 2026-11-11 — browser-test-skipped-unnoticed: a new browser test cannot miss a run unseen
+
+**Done:** A checked-in record says which runs pick up each browser test file. A check before
+every commit asks the test runner and refuses a new file, or one that joined or left a run,
+until the record is updated; for a new file it prints the runs it is in and the ones it is
+not. Design: `docs/design/build-and-test.md` ①.
+
 ### 2026-11-11 — push-says-when-port-is-held: a push says at once when the test port is taken
 
 **Done:** The first push check looks at the two ports the browser tests serve the app on. When

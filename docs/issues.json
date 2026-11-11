@@ -5971,10 +5971,11 @@
         "file": "docs/design/build-and-test.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "risk",
       "owner": "agent",
-      "note": "A new browser test file left off the laptop and Firefox runs' hand-kept lists is not run there, and nothing says so. It happened twice in a week in November 2026. Next step: a check before a commit that every browser test file is on a list or named as left out, with a test of the check."
+      "note": "Answered 2026-11-11: a checked-in record says which runs pick up each browser test file, and a check before every commit asks the test runner and refuses a new file, or a file that joined or left a run, until the record is updated. For a new file it prints the runs it is in and the ones it is not. Tried for real with a throwaway test file.",
+      "closedBy": "scripts/gate-e2e-runs.test.mjs"
     },
     {
       "id": "push-says-when-port-is-held",
