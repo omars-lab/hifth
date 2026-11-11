@@ -37,8 +37,15 @@ folded: no
   ports opens both, and picks the numbers itself: the first fix let the system pick, which gives
   ports so high that the second does not exist, and it failed five runs in eight. Repeat a fix
   for a now-and-then failure 25 times before committing it.
+- `.intent/config.json`: a list only shows up in the picture `make intent` draws once the
+  settings name it. Goals and decisions are not named yet (the page says so under its key), and
+  the 13 by-hand checks take their status from `docs/validation/ledger.json`, which the tool
+  does not read, so two finished ones are drawn as open.
 
 ## Worth copying
+- intent-manager's `intent draw`, before release: the page was looked at in its rare states
+  (nothing linked, no main branch, a label naming a task that is gone) in two throwaway repos.
+  That found three wording faults the real repo could not show.
 - `.claude/skills/testing/SKILL.md` "A test that fails now and then": repeat it 25 times with
   no retries, make it keep looking, and if it still fails have the code write down what it saw.
   Three short steps found a cause that reading the code had not.
@@ -48,13 +55,3 @@ folded: no
 ## Didn't work
 - Stopping a watcher "once both pages are found": found is not the same as settled. Watch for
   the change that matters (a page changing side) instead of a count.
-
-## Slice C of the tracking work (the picture), same day
-- `Makefile` `intent`: draws the page with the installed tool into a folder that ignores itself.
-  Worth copying: the tool was looked at in its rare states (nothing linked, no main branch, a
-  label naming a task that is gone) in two throwaway repos before it was released, which found
-  three wording faults the real repo could not show.
-- `.intent/config.json`: a list only shows up in the picture once the settings name it. Goals
-  and decisions are not named yet, and the page says so in a line under the key.
-- Hand edits in the second working copy are refused until the file has been read in the same
-  stretch of the session; read the lines first, then edit.
