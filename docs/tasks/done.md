@@ -94,12 +94,27 @@ highlighter's colours in an outer ring. The row that was there before stays as a
 **Done:** Settings has a button, "See what each pen does". Its page says how to open the pens,
 shows them working in the layout the reader chose, and gives one line per pen. PR #591.
 
+### 2026-11-11 — app-pages-developer-page: a developer page only the dev server shows
+
+**Done:** With the row of page icons on, the laptop's dev server shows a third icon, Developer.
+Its page says which start-up switches are on and the command for each, the screen's size and
+language, links for the comparison page and the address-bar switches, and what the browser
+remembers, with a Forget button beside each. The size check refuses any build that carries it,
+the pitch build included. Design: `docs/design/app-pages.md` ②.
+
+### 2026-11-11 — app-pages-settings-and-developer: a row of page icons, and settings as a page
+
+**Done:** A row of page icons along the bottom, off by default, with the mus'haf and settings as
+pages; the mus'haf stays as it was left behind settings. Walked in the iPad app both ways up.
+Design: `docs/design/app-pages.md` ①, which stays open for the owner to say whether the row earns
+its height.
+
 ### 2026-11-11 — calendar-of-each-days-work: the record, day by day
 
 **Done:** The record of what was opened can be read as a month or as a list of days, beside the
 map. Each day shows verses, pages and juz opened, mistakes by kind and the pages they fall on, and
 each mistake opens its verse. Design: `docs/design/revision-record.md` ⑤, which stays open for the
-owner to say which layout the sheet should favour.
+owner to say which layout the sheet should favour. PR #592.
 
 ## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)
 

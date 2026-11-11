@@ -341,6 +341,26 @@
   outline: none;
 }
 
+/* The settings as a page of their own (app-pages ①): the whole screen down to
+   the row of page icons, square, with nothing sliding in. */
+.sheet[data-as="page"] {
+  inset-block: 0 var(--page-row-h, 0px);
+  inset-inline: 0;
+  inline-size: auto;
+  max-block-size: none;
+  /* The switches keep a column a line of words reads well in. */
+  padding-inline: max(var(--space-4), calc((100% - 640px) / 2));
+  padding-block-start: max(var(--space-3), env(safe-area-inset-top));
+  padding-block-end: var(--space-5);
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+}
+
+.sheet[data-as="page"] > .grip {
+  display: none;
+}
+
 /* A page of the panel standing in its place (the pens, explained): everything
    but the title row and the page itself is put away until Back. */
 .sheet[data-page] > :not(.head, .grip, .page) {

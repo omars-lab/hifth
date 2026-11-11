@@ -52,6 +52,10 @@ Both are built and sit in the info panel (the "About Hifth" button). Today's way
 - [ ] **Look-alikes in the drawer.** With the same setting on, tap 2:48. Its look-alikes are listed in the drawer under three headings (this surah, earlier surahs, later surahs), each saying "None" when it has none, and there are no look-alike chips beside the page. Is that easier to read than the chips?
 - [ ] **Tapping the lit verse again.** Pick "Opens the word you tapped", tap a verse, then tap one of its words. The word's letters and signs open in a drawer on top of the verse's, and the verse stays lit. A tap elsewhere closes the word's drawer. Should this replace putting the verse out?
 
+## A row of page icons, waiting for your choice
+
+- [ ] **Page icons along the bottom.** In the info panel, set "Page icons along the bottom" to On. A row with the mus'haf and settings appears under everything else. Press Settings, change something, and press the mus'haf icon to go back. The row takes 52 points of height from the page. Does it earn that? If yes, it becomes the default and the info panel keeps only the app's notes about itself. If no, it stays a setting.
+
 ## What you saw
 
 Write here, in any words. The agent turns each line into a test.

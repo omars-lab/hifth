@@ -123,6 +123,21 @@ if (leaked.length) {
   process.exit(1);
 }
 
+// The developer page is for the laptop's dev server alone (docs/design/app-pages.md ②):
+// no build may carry it, the pitch build included. The marker is an attribute only that
+// page writes.
+const developer = jsFiles
+  .filter((f) => readFileSync(f, "utf8").includes("data-developer-page"))
+  .map((f) => `  ${f.replace(DIST + "/", "")}: "data-developer-page"`);
+if (developer.length) {
+  console.error(
+    "gate:budget — FAIL: the developer page is in a build.\n" +
+      developer.join("\n") +
+      "\n  Check that App.tsx still reaches it only behind import.meta.env.DEV.",
+  );
+  process.exit(1);
+}
+
 const kb = (b) => (b / 1024).toFixed(1);
 const signed = (b) => `${b >= 0 ? "+" : "−"}${kb(Math.abs(b))}`;
 

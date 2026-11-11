@@ -10,6 +10,7 @@ import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
 import { TOOL_HELPS, type ToolHelp } from "../tool-help";
 import { SETTINGS_ATS, type SettingsAt } from "../settings-at";
+import { APP_PAGES, type AppPages } from "../app-pages";
 import { DRAWER_MARKS, type DrawerMarks } from "../drawer-marks";
 import { WORD_TAPS, type WordTap } from "../word-tap";
 import { RUN_MARKS, type RunMark } from "../run-mark";
@@ -70,6 +71,11 @@ interface ColophonProps {
   /** Whether the reading settings sit in the bar or in one drawer; remembered on this device. */
   settingsAt?: SettingsAt;
   onSettingsAt?: (choice: SettingsAt) => void;
+  /** Page icons along the bottom (app-pages.md ①). */
+  appPages?: AppPages;
+  onAppPages?: (choice: AppPages) => void;
+  /** Stand as the settings page (app-pages.md ①): the switches fill the screen down to the row of page icons, with no backdrop, and the app's notes about itself stay in the panel. */
+  asPage?: boolean;
   /** How a drawer shows what it sits on: a path, or a tag per level; remembered on this device. */
   drawerMarks?: DrawerMarks;
   onDrawerMarks?: (choice: DrawerMarks) => void;
@@ -303,6 +309,9 @@ export function Colophon({
   onToolHelp,
   settingsAt,
   onSettingsAt,
+  appPages,
+  onAppPages,
+  asPage = false,
   drawerMarks,
   onDrawerMarks,
   wordTap,
@@ -400,7 +409,8 @@ export function Colophon({
         onClose();
         return;
       }
-      if (e.key !== "Tab") return;
+      // A page, not a sheet: Tab walks on to the row of page icons under it.
+      if (e.key !== "Tab" || asPage) return;
       const sheet = sheetRef.current;
       if (!sheet) return;
       const items = focusables(sheet);
@@ -416,34 +426,37 @@ export function Colophon({
         first.focus();
       }
     },
-    [onClose],
+    [onClose, asPage],
   );
 
   if (!open) return null;
 
   return (
     <>
-      <div className={styles.scrim} onClick={onClose} aria-hidden="true" />
+      {!asPage && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
       <div
         ref={sheetRef}
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label={t.aboutTitle}
+        aria-label={asPage ? t.levelSettings : t.aboutTitle}
         dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}
         data-page={penGuide ? "pens" : undefined}
+        data-as={asPage ? "page" : undefined}
       >
         <div className={styles.grip} aria-hidden="true" />
         <header className={styles.head}>
           <span className={styles.glyph} aria-hidden="true">
             ۞
           </span>
-          <h2 className={styles.title}>{t.aboutTitle}</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
-            ✕
-          </button>
+          <h2 className={styles.title}>{asPage ? t.levelSettings : t.aboutTitle}</h2>
+          {!asPage && (
+            <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
+              ✕
+            </button>
+          )}
         </header>
         {penGuide && pensLayout && (
           <div className={styles.page}>
@@ -639,6 +652,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.settingsAtNote}</p>
+          </section>
+        )}
+
+        {/* Page icons along the bottom (app-pages ①): off, or a row that gives
+            settings a page of their own, until the owner has tried it. */}
+        {appPages && onAppPages && (
+          <section className={styles.block} aria-labelledby="colophon-app-pages">
+            <h3 className={styles.subhead} id="colophon-app-pages">
+              {t.appPagesTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-app-pages">
+              {APP_PAGES.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={appPages === choice}
+                  data-app-pages={choice}
+                  onClick={() => onAppPages(choice)}
+                >
+                  {choice === "off" ? t.stateOff : t.stateOn}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.appPagesNote}</p>
           </section>
         )}
 
@@ -1472,6 +1511,8 @@ export function Colophon({
             (docs/design/feature-usage.md). */}
         <UsageReadout />
 
+        {!asPage && (
+          <>
         <p className={styles.lede}>{t.aboutLede}</p>
         <p className={styles.caveat}>{t.aboutCaveat}</p>
 
@@ -1546,6 +1587,8 @@ export function Colophon({
             {SOURCE_REPO.replace("https://", "")}
           </a>
         </p>
+          </>
+        )}
       </div>
     </>
   );

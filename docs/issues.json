@@ -5883,10 +5883,10 @@
       },
       "status": "open",
       "severity": "question",
-      "owner": "agent",
+      "owner": "user",
       "useCase": "have-it-my-way-and-keep-it",
       "feature": "settings",
-      "note": "Owner's page comment of 2026-11-07: settings should be a page of their own, reached from page icons along the bottom like a Mac app, with the mushaf as the default page. Today every setting lives in the info panel (the ⓘ in the header). Next step is a rough build of a bottom row of page icons with the mushaf and a settings page."
+      "note": "Owner's page comment of 2026-11-07: settings should be a page of their own, reached from page icons along the bottom like a Mac app, with the mushaf as the default page. Built 2026-11-11 as a setting, off by default: a row of two icons under everything else, and settings filling the screen down to the row, with the mushaf left as it was behind them (apps/web/e2e/app-pages.spec.ts). To try it: open the info panel from the app's name, find \"Page icons along the bottom\" and press On. The question left is the owner's: does the row earn the 52 points of height it takes? If yes it becomes the default and the info panel keeps only the app's notes about itself; if no it stays a setting."
     },
     {
       "id": "app-pages-developer-page",
@@ -5894,11 +5894,13 @@
         "file": "docs/design/app-pages.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
+      "closedBy": "apps/web/src/components/DeveloperPage.test.tsx",
+      "useCase": "see-how-the-running-app-was-set-up",
       "feature": "qul-page-diff",
-      "note": "Owner's page comment of 2026-11-07: a developer page that shows only when the app runs on this laptop (localhost). Today the developer views are separate: the side-by-side library comparison page and build-time flags. Next step is to list what a developer page should hold, then build it as one of the bottom pages, absent from a real build. It names the comparison page as its feature because that is the developer view that exists today; it names no use case yet, because none is written for a developer looking inside the running app, and one is owed when the page's contents are listed."
+      "note": "Owner's page comment of 2026-11-07: a developer page that shows only when the app runs on this laptop (localhost). Built 2026-11-11 as a third icon in the row of page icons, shown only by the dev server: which start-up switches are on and the command for each, the screen's size and language, links for the comparison page and the address-bar switches, and what the browser remembers with a Forget button beside each. A real build has none of it: the size check looks for the page's marker in every built file and refuses the build, the pitch build included (scripts/gate-budget.test.mjs), and the browser test of the row counts two icons in a built app. To see it: make dev, switch the row on in the info panel, press Developer."
     },
     {
       "id": "remeasure-loading-speed",
@@ -5962,6 +5964,61 @@
       "severity": "question",
       "owner": "agent",
       "note": "Owner, 2026-11-10: link a use case to its feature, its tasks, the commits that did them and the plan they came from, checked in, with the labels added by a hook. First part: a git hook adds lines to each commit message naming the task (a row here), its use case, its feature and its plan, and the push check lists commits with none. Later parts (walking the links, the picture, old history, release notes) are in .claude/plans/intent-tracking.md."
+    },
+    {
+      "id": "browser-test-skipped-unnoticed",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "A new browser test file left off the laptop and Firefox runs' hand-kept lists is not run there, and nothing says so. It happened twice in a week in November 2026. Next step: a check before a commit that every browser test file is on a list or named as left out, with a test of the check."
+    },
+    {
+      "id": "push-says-when-port-is-held",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "When a server left over from an earlier look holds the browser tests' port, a push runs for minutes and then fails in a way that reads like a broken test. Next step: the push looks at the port first and says in one line what holds it and how to stop it, test first."
+    },
+    {
+      "id": "edge-grab-firefox-test-fails-on-its-own",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "The Firefox test of grabbing the page's edge fails now and then with no change to the code it tests, and each rerun of a push costs about 13 minutes. Next step: find what it waits on that is not always ready, fix the wait, run it twenty times clean."
+    },
+    {
+      "id": "comment-bar-covers-bottom-row-on-phone-width",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "On the dev server at phone width the comment tool's bar covers a bottom row of icons until Hide is pressed (found 2026-11-11 while checking the developer page). The bar comes from the owner's plugin collection. Next step: move or fold the bar at phone width in the plugin, or say in our skills to press Hide before a phone-width look."
+    },
+    {
+      "id": "skills-miss-three-known-wrong-turns",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Three things each cost a wrong turn and are written only in session notes: the local preview serving the old build until its saved copy is cleared, a made-up Escape not closing the info panel in a walk script, and the speed probe's dev-server setting that no command or skill names. Next step: one line each in the skill a session would be reading at the time."
     },
     {
       "id": "startup-slowed-in-a-month",

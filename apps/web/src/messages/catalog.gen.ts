@@ -9,6 +9,9 @@ export interface Catalog {
   readonly aboutFoot: string;
   readonly aboutLede: string;
   readonly aboutTitle: string;
+  readonly appPagesNav: string;
+  readonly appPagesNote: string;
+  readonly appPagesTitle: string;
   readonly arrivedAyah: (d: { readonly via: string | number; readonly label: string | number; readonly page: string | number }) => string;
   readonly arrivedJuz: (d: { readonly juzText: string | number; readonly page: string | number }) => string;
   readonly arrivedPage: (d: { readonly via: string | number; readonly page: string | number }) => string;

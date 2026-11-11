@@ -721,6 +721,13 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   In the apps, the `settings-walk` script. The large iPad upright shows one page but keeps the
   two-page and pen choices, rightly: it can open two pages, and the pens' place applies there;
   the iPad mini drops them.
+- [ ] In the info panel, set "Page icons along the bottom" to On: a row with the mus'haf and
+  settings stands under every other bar, whole on the screen and clear of the home bar, and no
+  bar lies under it. Press Settings: the switches fill the screen down to the row, side to side
+  on a wide screen too (not a narrow card), with no licence or sources. An arrow key does not
+  turn the page behind. Press the mus'haf icon: the page, its size and the lit verse are as they
+  were left. In Arabic the mus'haf icon is on the right. · phone, desktop, firefox, ipad,
+  ipad-side · tests: app-pages spec · in the apps, the `app-pages-walk` script
 - [ ] Open the app at a page, turn two pages, then open the info panel: *How you use the app* says
   turning the page twice, not three times, and still says so after the app is closed and opened
   again; in Arabic the counts are in the words' own letters, not stretched, and today's bar ends

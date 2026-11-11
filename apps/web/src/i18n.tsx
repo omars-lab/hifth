@@ -845,6 +845,10 @@ export interface Strings {
   settingsAtBar: string;
   settingsAtDrawer: string;
   settingsAtNote: string;
+  /** Page icons along the bottom (app-pages.md ①). */
+  appPagesNav: string;
+  appPagesTitle: string;
+  appPagesNote: string;
   /** Which drawer sits on which (ayah-drawer ①). */
   drawerBack(label: string): string;
   drawerWord: string;
@@ -1766,6 +1770,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     settingsAtBar: m.settingsAtBar,
     settingsAtDrawer: m.settingsAtDrawer,
     settingsAtNote: m.settingsAtNote,
+    appPagesNav: m.appPagesNav,
+    appPagesTitle: m.appPagesTitle,
+    appPagesNote: m.appPagesNote,
     drawerBack: (label) => m.drawerBack({ label }),
     drawerWord: m.drawerWord,
     levelSettings: m.levelSettings,
