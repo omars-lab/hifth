@@ -94,6 +94,13 @@ highlighter's colours in an outer ring. The row that was there before stays as a
 **Done:** Settings has a button, "See what each pen does". Its page says how to open the pens,
 shows them working in the layout the reader chose, and gives one line per pen. PR #591.
 
+### 2026-11-11 — push-says-when-port-is-held: a push says at once when the test port is taken
+
+**Done:** The first push check looks at the two ports the browser tests serve the app on. When
+a leftover server holds one, the push stops in a second and prints the port, the program
+holding it and the command that stops it, where before it failed minutes in like a broken
+test. Design: `docs/design/build-and-test.md` ②.
+
 ### 2026-11-11 — app-pages-developer-page: a developer page only the dev server shows
 
 **Done:** With the row of page icons on, the laptop's dev server shows a third icon, Developer.

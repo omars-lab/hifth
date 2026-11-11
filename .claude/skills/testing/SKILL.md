@@ -100,6 +100,11 @@ HIFTH_BASE_URL=http://localhost:7122 pnpm -C apps/web exec playwright test --pro
 It serves `dist` as it is on disk, so a rebuild is picked up; it is opt-in because it
 will happily test a build you forgot to redo.
 
+A push looks at the copy's two ports before anything else (`make e2e-port-free`). If a
+preview server from an earlier look is still on one, the push stops in a second and prints
+the port, the program holding it and the `kill` line that stops it. Run the same target by
+hand before a long browser run.
+
 ### Firefox runs a fixed list of test files
 
 The owner reads in Firefox, but the `desktop-firefox` project runs **only the files named

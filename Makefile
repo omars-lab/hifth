@@ -380,8 +380,16 @@ pre-push: ## Everything checked before each push — the pre-push hook runs exac
 	@# pre-push-checks, not here: added here it would also run on delete pushes.
 	@node scripts/push-deletes-only.mjs || $(MAKE) -s pre-push-checks
 
+.PHONY: e2e-port-free
+e2e-port-free: ## Is anything already on the ports the browser tests serve the app on?
+	@# First of the push checks, because it takes a second and the answer used
+	@# to arrive minutes in: a preview server left over from an earlier look
+	@# makes the tests' own server fail to start, which reads like a broken
+	@# test. It names the port, what holds it and how to stop it.
+	@node scripts/e2e-port-free.mjs
+
 .PHONY: pre-push-checks
-pre-push-checks: secrets-history checks-fast ## The checks a push that sends code must pass
+pre-push-checks: e2e-port-free secrets-history checks-fast ## The checks a push that sends code must pass
 	@$(MAKE) -s commit-labels
 	$(MAKE) etl-check
 	$(PNPM) audit:corpus

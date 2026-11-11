@@ -5982,10 +5982,11 @@
         "file": "docs/design/build-and-test.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "defect",
       "owner": "agent",
-      "note": "When a server left over from an earlier look holds the browser tests' port, a push runs for minutes and then fails in a way that reads like a broken test. Next step: the push looks at the port first and says in one line what holds it and how to stop it, test first."
+      "note": "Answered 2026-11-11: the first push check now looks at the two ports the browser tests serve the app on, and when one is held it stops in a second, naming the port, the program holding it and the command that stops it. Tried for real with a preview server left on the port.",
+      "closedBy": "scripts/e2e-port-free.test.mjs"
     },
     {
       "id": "edge-grab-firefox-test-fails-on-its-own",

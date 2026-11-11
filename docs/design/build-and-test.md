@@ -18,13 +18,17 @@ file left off the lists is not run there, and nothing says so. It happened twice
 **What would close it:** a check, run before a commit, that every browser test file is on a
 list or is named as left out on purpose, with a test of that check.
 
-### ② Does a push say straight away when it cannot run the browser tests? · **open**
+### ② Does a push say straight away when it cannot run the browser tests? · **answered**
 
-No. When a server left over from an earlier look still holds the browser tests' port, the push
-runs for minutes and then fails in a way that reads like a broken test.
+Yes, since 2026-11-11. The first thing a push now does is look at the two ports the browser
+tests serve the app on. If something is there, it stops within a second and says which port,
+which program holds it, and the command that stops it.
 
-**What would close it:** the push looks at the port first and says in one line what holds it
-and how to stop it, with a test written first.
+Before, a server left over from an earlier look let the push run for minutes and then fail in
+a way that read like a broken test.
+
+Tried for real: with a preview server left on the port, the push checks stopped at once with
+the message; with it stopped, they went on.
 
 ### ③ Does the Firefox test of grabbing the page's edge fail on its own some of the time? · **open**
 
