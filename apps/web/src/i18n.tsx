@@ -810,6 +810,10 @@ export interface Strings {
   drawerToolsSheet: string;
   drawerToolsDrawer: string;
   drawerToolsNote: string;
+  toolHelpTitle: string;
+  toolHelpLine: string;
+  toolHelpHover: string;
+  toolHelpNote: string;
   /** Settings: what a second tap on the lit verse does (selection-drawer ①). */
   wordTapTitle: string;
   wordTapOff: string;
@@ -1665,6 +1669,10 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     drawerToolsSheet: m.drawerToolsSheet,
     drawerToolsDrawer: m.drawerToolsDrawer,
     drawerToolsNote: m.drawerToolsNote,
+    toolHelpTitle: m.toolHelpTitle,
+    toolHelpLine: m.toolHelpLine,
+    toolHelpHover: m.toolHelpHover,
+    toolHelpNote: m.toolHelpNote,
     wordTapTitle: m.wordTapTitle,
     wordTapOff: m.wordTapOff,
     wordTapWord: m.wordTapWord,

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { useT } from "../i18n";
 import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import { isMarkAim, MARK_AIMS, type MarkAim } from "../mark-tools";
@@ -179,6 +179,12 @@ interface PageToolbarProps {
    * (rail-home.ts).
    */
   end?: ReactNode;
+  /**
+   * Whether the line beside the bar says what the tool that is on does. Each
+   * tool's own label says it either way (tool-help.ts); a touch screen keeps
+   * the line, having no way to bring a label up.
+   */
+  helpLine?: boolean;
 }
 
 /**
@@ -199,12 +205,13 @@ interface PageToolbarProps {
  * Hidden below the desktop breakpoint by CSS, like `DesktopChrome`: a phone
  * layout for the bar is the plan's step 5 and a decision of its own.
  */
-export function PageToolbar({ tool, locked, onTool, pen, onPen, tools = TOOLS, aim, end }: PageToolbarProps): JSX.Element {
+export function PageToolbar({ tool, locked, onTool, pen, onPen, tools = TOOLS, aim, end, helpLine = true }: PageToolbarProps): JSX.Element {
   const { t } = useT();
   const touch = useMediaQuery(TOUCH_QUERY);
   const press = useToolPress(tool, onTool);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
   const nameOf = (x: PageTool) => toolName(t, x);
+  const tipId = useId();
 
   // Arrow keys move focus along the bar and pick the tool they land on, as
   // arrows do in any radio group. The bar is laid out in reading order, so in
@@ -240,7 +247,7 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen, tools = TOOLS, a
             aria-checked={tool === x}
             aria-label={nameOf(x)}
             aria-keyshortcuts={letter}
-            title={`${nameOf(x)} (${letter})`}
+            aria-describedby={`${tipId}-${x}`}
             tabIndex={tool === x ? 0 : -1}
             data-locked={(locked && tool === x) || undefined}
             {...press(x)}
@@ -252,6 +259,10 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen, tools = TOOLS, a
             <span className={styles.letter} dir="ltr" aria-hidden="true">
               {letter}
             </span>
+            {/* Its label, shown while the pointer rests on the button or the
+                keyboard reaches it (the owner's comment of 2026-11-07). Ours,
+                not the browser's title, which comes late and says only the name. */}
+            <ToolTip id={`${tipId}-${x}`} name={nameOf(x)} letter={letter} hint={tipHint(t, x, touch)} />
           </button>
         ))}
       </div>
@@ -276,17 +287,37 @@ export function PageToolbar({ tool, locked, onTool, pen, onPen, tools = TOOLS, a
             over it. */}
         {/* An iPad on its side is wide enough for this bar, and a finger is
             told to tap where a mouse is told to click. */}
-        <span className={styles.name}>
+        {(helpLine || touch) && (
+        <span className={styles.name} data-tool-help-line="">
           {locked
             ? touch
               ? t.toolLockedHintTouch(nameOf(tool))
               : t.toolLockedHint(nameOf(tool))
             : toolHint(t, tool, touch)}
         </span>
+        )}
         {end}
       </div>
     </div>
   );
+}
+
+/** A tool's label: its name and key, and what it does when there is more to say than its name. */
+function ToolTip({ id, name, letter, hint }: { id: string; name: string; letter: string; hint: string | null }): JSX.Element {
+  return (
+    <span id={id} role="tooltip" className={styles.tip}>
+      <span className={styles.tipName}>
+        {name} <span dir="ltr">{letter}</span>
+      </span>
+      {hint && <span className={styles.tipHint}>{hint}</span>}
+    </span>
+  );
+}
+
+/** What a tool does, for its label, or null when the help would only repeat its name. */
+function tipHint(t: ReturnType<typeof useT>["t"], x: PageTool, touch: boolean): string | null {
+  const hint = toolHint(t, x, touch);
+  return hint === t.toolOn(toolName(t, x)) ? null : hint;
 }
 
 /** What to do with the tool that is on, or its name when there is nothing to add. */

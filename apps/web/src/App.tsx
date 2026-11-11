@@ -253,6 +253,7 @@ import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style"
 import { savedZoomAnchor, verseToGrowFrom } from "./zoom-anchor";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberDrawerTools, savedDrawerTools, type DrawerTools } from "./drawer-tools";
+import { rememberToolHelp, savedToolHelp, type ToolHelp } from "./tool-help";
 import { rememberWordTap, savedWordTap, type WordTap } from "./word-tap";
 import { rememberRunMark, savedRunMark, type RunMark } from "./run-mark";
 import { useRunFollow } from "./run-follow";
@@ -458,6 +459,13 @@ export function App(): JSX.Element {
     setDrawerTools(choice);
   }, []);
   const toolsInDrawer = drawerTools === "drawer";
+  // Whether the line beside the page tools stays now each tool has its own
+  // label (ayah-drawer ①; a setting since 2026-11-10, the line unless chosen).
+  const [toolHelp, setToolHelp] = useState<ToolHelp>(() => savedToolHelp());
+  const chooseToolHelp = useCallback((choice: ToolHelp) => {
+    rememberToolHelp(choice);
+    setToolHelp(choice);
+  }, []);
   // Show the look-alikes in the drawer: fold whatever other tool is open there.
   const showLooksInDrawer = useCallback(() => {
     setRootsOpen(false);
@@ -4184,6 +4192,7 @@ export function App(): JSX.Element {
           tools={barTools}
           aim={markAim}
           end={railAt === "tools" ? hopRail(undefined, "tools") : undefined}
+          helpLine={toolHelp === "line"}
         />
       )}
       {resolver && pencilPens && (
@@ -4625,6 +4634,8 @@ export function App(): JSX.Element {
             onVerseGestures={chooseVerseGestures}
             drawerTools={drawerTools}
             onDrawerTools={chooseDrawerTools}
+            toolHelp={toolHelp}
+            onToolHelp={chooseToolHelp}
             wordTap={wordTap}
             onWordTap={chooseWordTap}
             runMark={runMark}
