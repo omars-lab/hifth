@@ -1971,6 +1971,29 @@
       "decided": "setting",
       "by": "omar",
       "date": "2026-10-01"
+    },
+    {
+      "id": "commit-labels",
+      "question": "How does a change to the code say which task it was for?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "A few lines at the end of each commit message, added by a hook"
+        },
+        {
+          "id": "B",
+          "label": "A checked-in file that lists each commit beside its task"
+        },
+        {
+          "id": "C",
+          "label": "The task's name in the branch name and the pull request title only"
+        }
+      ],
+      "doc": "docs/decisions/commit-labels.md#so-what-was-decided",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-11-10"
     }
   ]
 }

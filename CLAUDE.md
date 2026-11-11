@@ -53,6 +53,9 @@ your head.
   tests use made-up text.
 - **Checks run on this laptop, before the push.** Hosted CI runs are scarce; only what cannot
   run here goes there.
+- **Say what the branch is for before the first commit.** `intent start <backlog row's name>`
+  once per branch; a hook then ends each commit message with the task, its use case, its
+  feature and its plan. `intent status` shows what is set.
 
 ## Decisions are explained in plain language, or they are not explained
 
@@ -219,6 +222,7 @@ Same rule in each: they index, they do not restate.
 | `docs/decisions.json` | what did we decide, and why? | `make decisions` · the `decide` skill |
 | `docs/validation/ledger.json` | what can only a human check? | `make validate` |
 | `docs/artifacts.json` | what have we published, and can anyone still see it? | `pnpm artifacts` |
+| the `Intent-` lines at the end of each commit message | which task, use case, feature and plan was this change for? | `intent start` · `make commit-labels` |
 
 `docs/map.json` and every other JSON register is **hand-edited, never generated**.
 

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Adds the Intent- lines to each commit message. The make target runs
+# `intent label-commit`. Written by `intent init`. It never stops a commit:
+# when make itself fails, it says so and the commit goes ahead.
+make -s prepare-commit-msg MSG="$1" SOURCE="$2" || echo "intent: could not label this commit (make prepare-commit-msg failed). The commit went ahead with no label." >&2

@@ -4,70 +4,70 @@
     "scripts/perf-report.mjs. startupMs is Lighthouse's time-to-interactive, median",
     "of `runs`, on the phone pinned in .lighthouserc.json. The goal is 2500."
   ],
-  "measuredAt": "2026-11-11T04:01:27.819Z",
+  "measuredAt": "2026-11-11T05:44:10.932Z",
   "goalMs": 2500,
   "points": [
     {
       "addedKb": 0,
-      "scriptGzKb": 134.3,
-      "appScriptGzKb": 134.3,
+      "scriptGzKb": 135,
+      "appScriptGzKb": 135,
       "runs": 5,
-      "startupMs": 2553,
-      "largestPaintMs": 2553,
-      "blockingMs": 0,
+      "startupMs": 2306,
+      "largestPaintMs": 2306,
+      "blockingMs": 62,
       "allStartupMs": [
-        2557,
-        2553,
-        2553,
-        2147,
-        2301
+        2297,
+        2313,
+        2405,
+        2299,
+        2306
       ]
     },
     {
       "addedKb": 25,
-      "scriptGzKb": 159.6,
-      "appScriptGzKb": 134.3,
+      "scriptGzKb": 160.4,
+      "appScriptGzKb": 135,
       "runs": 5,
-      "startupMs": 2443,
-      "largestPaintMs": 2443,
-      "blockingMs": 0,
+      "startupMs": 2450,
+      "largestPaintMs": 2450,
+      "blockingMs": 17,
       "allStartupMs": [
-        2442,
-        2446,
-        2445,
-        2296,
-        2443
+        2479,
+        2448,
+        2352,
+        2522,
+        2450
       ]
     },
     {
       "addedKb": 50,
-      "scriptGzKb": 184.6,
-      "appScriptGzKb": 134.3,
+      "scriptGzKb": 185.4,
+      "appScriptGzKb": 135,
       "runs": 5,
-      "startupMs": 2443,
-      "largestPaintMs": 2443,
+      "startupMs": 2451,
+      "largestPaintMs": 2451,
       "blockingMs": 0,
       "allStartupMs": [
-        2446,
-        2443,
+        2451,
+        2854,
+        2451,
         2445,
-        2443,
-        2442
+        2455
       ]
     },
     {
       "addedKb": 100,
-      "scriptGzKb": 234.6,
-      "appScriptGzKb": 134.3,
+      "scriptGzKb": 235.4,
+      "appScriptGzKb": 135,
       "runs": 5,
-      "startupMs": 2745,
-      "largestPaintMs": 2745,
+      "startupMs": 2746,
+      "largestPaintMs": 2746,
       "blockingMs": 0,
       "allStartupMs": [
-        2748,
-        2745,
-        2745,
-        3153,
+        2759,
+        3154,
+        2743,
+        2746,
         2745
       ]
     }

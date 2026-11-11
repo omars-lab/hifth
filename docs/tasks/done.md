@@ -74,6 +74,15 @@ t_29ebee). The narrow ribbon merged.
 - Which drawer sits on which: the word's drawer names the verse's drawer under it, or each
   drawer carries a tag naming its level, as a setting (PR #586, 2026-11-10).
 
+### 2026-11-10 — Loading speed measured again; commits say what they were for
+
+- `remeasure-loading-speed`: start-up measured with nothing else running (2306 ms as built,
+  2450 with 25 KB added, 2746 with 100 KB, against 2500). The size limit went from 200 KB to
+  210 KB, and a test fails if it moves again without its numbers written down.
+- `label-commits-with-what-they-are-for`, first part: a git hook ends each commit message with
+  the task, use case, feature and plan it was for; a backlog row may name its use case and
+  feature; the push check lists commits with no label.
+
 ## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)
 
 **Done:** 2026-10-25. The recitation-with-a-note walk read no verse in Arabic; it now reads Arabic digits, and a test checks every walk script for the same slip. The short laptop window's first screen walked in both browsers at both sizes: two pages, feet in sight, Full screen past a small phone's page.

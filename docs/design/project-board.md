@@ -62,3 +62,20 @@ Things a build would have to settle, none decided yet:
 
 What would answer it: show the pitch to the Study Quran team, and ask how they would want to
 send back what they find. A rough board in the app, built and tried once, would find the rest.
+
+### ② A commit does not say which task, use case or plan it was for · **open**
+
+Omar, 2026-11-10: link a use case to its feature, its tasks, the commits that did them and the
+plan they came from, checked in, with the labels added by a hook. Today one link is real: a
+use case names its feature. A backlog row names no use case, and a commit names nothing, so
+"what was this change for?" is answered by reading old chats.
+
+The first part: a row in the backlog may name its use case and its feature, and a git hook
+adds a few lines to the end of each commit message naming the task, the use case, the feature
+and the plan. The hook never stops a commit; the push check lists commits that have no label.
+The tool is a plugin any repo can use, not code in this one.
+
+What would answer it: the next four features built with the labels on. If asking "which
+commits did the pencil rings take, and what were they for?" gets a true answer from the
+labels alone, the first part works. The later parts (walking the links, a picture of them, old
+history, release notes) are in the plan page for this work.

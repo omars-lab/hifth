@@ -223,7 +223,7 @@ node-ok: ## Check the running node against .nvmrc + package.json engines
 	@scripts/require-node.sh
 
 .PHONY: gates
-gates: build ## The static gates: no <text> in SVG, license present, JS budget <200KB gz
+gates: build ## The static gates: no <text> in SVG, license present, JS budget <210KB gz
 	$(PNPM) gates
 
 .PHONY: lighthouse
@@ -382,6 +382,7 @@ pre-push: ## Everything checked before each push — the pre-push hook runs exac
 
 .PHONY: pre-push-checks
 pre-push-checks: secrets-history checks-fast ## The checks a push that sends code must pass
+	@$(MAKE) -s commit-labels
 	$(MAKE) etl-check
 	$(PNPM) audit:corpus
 	$(PNPM) gate:assets
@@ -400,6 +401,14 @@ pre-push-checks: secrets-history checks-fast ## The checks a push that sends cod
 	@# test (about a minute). It needs the gitignored notes, so on a machine
 	@# without them it is skipped with a line saying so, not failed.
 	$(if $(wildcard $(PITCH_DATA)),$(MAKE) pitch-e2e,@echo "  pitch suite skipped: no private pitch data at $(PITCH_DATA)")
+
+.PHONY: commit-labels
+commit-labels: ## Which commits on this branch say what they were for, and do the names they give exist?
+	@# Refuses a label naming a task, use case, feature or plan that is not in
+	@# its list. A commit with no label is only listed for now (2026-11-10);
+	@# once the count has stayed at zero for two weeks, add --strict here.
+	@# Without the tool it says so and passes: a silent skip looks like a pass.
+	@if command -v intent >/dev/null 2>&1; then intent check; else echo "  commit labels not checked: the intent tool is not installed (the intent-manager plugin puts it on the path)"; fi
 
 .PHONY: site
 site: build ## Build the public site and check it the way the deploy does (the deploy job runs this)
@@ -939,3 +948,9 @@ backup-note-fixes:  ## Copy the pitch's hand-made note fixes to a private iCloud
 comments:  ## Serve the pages with the comment button (development-manager)
 	@.page-comments/run serve --target http://127.0.0.1:7122 --port 8767
 # page-comments:end
+
+# Adds the Intent- lines to each commit message (intent label-commit).
+# Called by the prepare-commit-msg git hook. It never stops a commit.
+.PHONY: prepare-commit-msg
+prepare-commit-msg:
+	@if command -v intent >/dev/null 2>&1; then intent label-commit "$(MSG)" "$(SOURCE)" || true; else echo "intent: the intent tool is not installed, so this commit has no label. Install the intent-manager plugin to label commits." >&2; fi
