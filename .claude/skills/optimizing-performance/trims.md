@@ -25,6 +25,11 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Checked again 2026-11-11 (night), nothing to take.** 207.6 KB against the 210 KB cap, after
+the developer page (+0.1 KB). The page itself is in no build: the app reaches it only from the
+dev server, and the size check refuses any build that holds it. The 0.1 KB is the row learning
+to show a third icon. 2.4 KB of room is left.
+
 **Checked again 2026-11-11 (evening), nothing taken.** 207.5 KB against the 210 KB cap, after
 the row of page icons along the bottom and settings as a page (+0.9 KB). 0.6 KB of that is in
 the start-up script: the row, its style, the switch that turns it on and the wiring. 0.3 KB is
