@@ -2451,6 +2451,92 @@
       "seeAlso": [
         "revision-record"
       ]
+    },
+    {
+      "id": "pens-and-pencil",
+      "what": "The page's pens (highlighter, mistake pen, note, eraser), where they sit on each kind of screen, and how an Apple Pencil's squeeze or double-tap opens them at its tip in the iPad app. Design: docs/design/notes-style-toolbar.md and docs/design/pencil-gestures.md.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "apps/web/src/components/PenHomes.tsx",
+          "symbol": "PenHomeAt",
+          "note": "Start here for the pencil: the pens drawn at the tip. The same file holds every other home the pens have (the strip, the floating palette, the bottom row, the side)."
+        },
+        {
+          "file": "apps/web/src/pencil.ts",
+          "symbol": "pencilAction",
+          "note": "Turns the iPad's own Apple Pencil setting into what Hifth does: open the pens, open the highlighter's pens, swap the pen in hand, or nothing."
+        },
+        {
+          "file": "apps/web/src/pencil.ts",
+          "symbol": "besideTip",
+          "note": "Where the pens go so they sit beside the tip, never under it, and stay whole on the screen."
+        },
+        {
+          "file": "apps/web/src/pen-home.ts",
+          "symbol": "savedPenHome",
+          "note": "The setting for where the pens sit when there is no pencil, and its default on a finger's screen."
+        },
+        {
+          "file": "apps/web/src/components/PenPicker.tsx",
+          "symbol": "PenPicker",
+          "note": "The highlighter's own four pens, the choices a tool opens after it is picked."
+        },
+        {
+          "file": "apps/web/src/tool-help.ts",
+          "symbol": "savedToolHelp",
+          "note": "Whether each tool's help shows as a line beside the bar or as a label on the button."
+        }
+      ],
+      "extend": [
+        "A new layout for the pens at the tip is a new component beside the row in PenHomes.tsx and a setting shaped like pen-home.ts; the old layout stays as the other choice.",
+        "A new answer to one of the iPad's Pencil settings goes in pencilAction, with a case in pencil.test.ts.",
+        "Add any new browser test file to the Firefox list in apps/web/playwright.config.ts, or the Firefox run skips it.",
+        "The hand holding the pencil cannot be tested in a browser: add the check to docs/ipad-walk.md."
+      ],
+      "gates": [
+        "vitest pencil.test.ts pen-home.test.ts",
+        "playwright pencil.spec.ts pen-homes.spec.ts tool-help.spec.ts"
+      ],
+      "seeAlso": [
+        "page-notes",
+        "native-shell",
+        "settings"
+      ]
+    },
+    {
+      "id": "settings",
+      "what": "The reader's own choices: the reading settings in the top bar (or behind one button, in a drawer), and every \"which way do you want this\" choice in the info panel. Each choice is remembered on the device.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "apps/web/src/components/Colophon.tsx",
+          "symbol": "Colophon",
+          "note": "The info panel. Every choice the reader can make is a radio group here."
+        },
+        {
+          "file": "apps/web/src/settings-at.ts",
+          "symbol": "savedSettingsAt",
+          "note": "Whether the reading settings sit in the top bar or behind one button."
+        },
+        {
+          "file": "apps/web/src/drawer-marks.ts",
+          "symbol": "savedDrawerMarks",
+          "note": "A small, recent setting to copy: the choices, a key, a saved and a remember function."
+        }
+      ],
+      "extend": [
+        "A new setting is a small module like drawer-marks.ts, kept in state in App.tsx with a choose callback, and shown as a radio group in Colophon.tsx.",
+        "Its words go in both message files and i18n.tsx, then pnpm -s i18n:build.",
+        "When one way of doing something wins, the other stays here as the setting's second choice; it is not deleted."
+      ],
+      "gates": [
+        "playwright settings-drawer.spec.ts drawer-marks.spec.ts"
+      ],
+      "seeAlso": [
+        "pens-and-pencil",
+        "ui-language"
+      ]
     }
   ]
 }

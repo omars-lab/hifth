@@ -361,3 +361,22 @@ rather than left standing as an absolute the app no longer holds.
 **Owner, 2026-11-08: the second.** Nothing leaves unless it is in the reader's interest and under
 their control. The wording is now used above and in the check's own description; the check
 itself is unchanged, so anything leaving is still a deliberate act.
+
+### ⑤ Should the record also be shown day by day, with the mistakes marked each day? · **open**
+
+**Asked by the owner, 2026-11-10:** a calendar with numbers for each day: how many mistakes
+were added that day, how many pages they covered, and so on.
+
+**What it changes for a hafiz:** today's picture answers "which part have I left longest?".
+It cannot answer "what did I do on Tuesday, and where did I slip?". A day-by-day view shows a
+week of revision at a glance, and tapping a day lists that day's mistakes, each opening its
+verse.
+
+**What exists already:** each look and each mistake already keeps its day, and the hizb
+boundaries are in our own data, so nothing new has to be recorded. The new part is the layout
+by day and the count of mistakes, built beside today's picture and sharing its counting.
+
+**What would answer it:** building it two ways, a month grid with a shade per day and a list
+of days with the numbers written out, and letting the owner pick; the other stays as a
+setting. The record still never leaves the device. What to build and how to test it:
+[the open-work list, item 4](../../.claude/plans/open-work-2026-11.md).
