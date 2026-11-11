@@ -90,8 +90,11 @@ build included. This was watched failing once, by letting the page into a build 
 - **The speed probe cannot be on at the same time as this page on a phone.** The phone's
   probe is a build, and no build has this page. On the laptop the two can run together.
 - **On a narrow window, the comment tool's bar sits over the row's icons.** The comment tool
-  is also dev-server only. Its Hide button clears it. Written down for the build-and-test
-  work, not fixed here.
+  is also dev-server only. Its Hide button clears it. Written down in [build-and-test.md](build-and-test.md) ④, not fixed here.
+- **The private pitch demo runs from the dev server too, so it shows the Developer icon
+  whenever the row is on.** Harmless while the row is off by default. If ① ends with the row
+  as the default, the icon has to be kept out of the pitch demo first, or it sits in front of
+  the people the demo is for.
 - **Forgetting a remembered choice shows after the next load**, since the app read it when
   it started. The page says so.
 

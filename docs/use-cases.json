@@ -1099,7 +1099,7 @@
           "test": "switched on, the row shows the mushaf and settings, and no developer page in a real build"
         }
       ],
-      "gap": "No browser test opens the page itself, since the browser tests run a built app and no build has it; it was looked at by hand on the dev server in Chrome and Firefox (2026-11-11). On a narrow window the comment tool's bar covers the row's icons until it is hidden."
+      "gap": "No browser test opens the page itself, since the browser tests run a built app and no build has it; it was looked at by hand on the dev server in Chrome and Firefox (2026-11-11), which is also the only check that the page-turn keys do not reach the mus'haf behind it. On a narrow window the comment tool's bar covers the row's icons until it is hidden."
     },
     {
       "id": "add-a-language-without-retyping-the-chrome",
