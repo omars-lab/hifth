@@ -169,8 +169,24 @@ def main(argv):
     cf = norm(zone.get('name_servers') or [])
     status = zone.get('status', '?')
     print(f'  Cloudflare says    {status}; assigned {", ".join(cf)}')
+    # A token can see the domain and still be refused its DNS records (hifth's first
+    # edit token, 2026-11-11, lacked the DNS permission), so ask for them too.
+    dns_ok = True
+    if zone.get('id'):
+        rec = curl(f'{API}/zones/{zone["id"]}/dns_records?per_page=100', token)
+        if rec is not None and rec.get('success'):
+            print(f'  DNS records        {len(rec.get("result") or [])} readable with {name}')
+        elif rec is not None:
+            dns_ok = False
+            codes = ','.join(str(e.get('code')) for e in rec.get('errors') or []) or '?'
+            print(f'  DNS records        refused to {name} (code {codes})')
     print('')
     if status == 'active':
+        if not dns_ok:
+            print(f'Verdict: Cloudflare runs DNS for {domain}, but {name} cannot read its DNS records. In the')
+            print('         dashboard (Profile > API Tokens > the token > Edit), add the permission')
+            print(f'         Zone → DNS → Edit, with Zone Resources set to {domain}.')
+            return 1
         lag = '' if res == cf else ' Some resolvers still show the old nameservers; that clears by itself.'
         print(f'Verdict: done. Cloudflare runs DNS for {domain}.{lag}')
         return 0
