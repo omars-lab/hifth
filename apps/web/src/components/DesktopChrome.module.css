@@ -24,6 +24,19 @@
     align-items: center;
     gap: var(--space-4);
   }
+
+  /* Inside the settings drawer: a column, each control on its own line. */
+  .extras.stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  /* The drawer is only as wide as its widest control, which "Go to" would
+     otherwise break across two lines to fit. */
+  .stacked .keyWhat {
+    white-space: nowrap;
+  }
 }
 
 /* ---- the language switch ------------------------------------------------- */

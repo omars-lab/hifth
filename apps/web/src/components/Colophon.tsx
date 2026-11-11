@@ -8,6 +8,7 @@ import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
 import { TOOL_HELPS, type ToolHelp } from "../tool-help";
+import { SETTINGS_ATS, type SettingsAt } from "../settings-at";
 import { WORD_TAPS, type WordTap } from "../word-tap";
 import { RUN_MARKS, type RunMark } from "../run-mark";
 import { RUN_FOLLOWS, rememberRunFollow, useRunFollow } from "../run-follow";
@@ -63,6 +64,9 @@ interface ColophonProps {
   /** Whether the line beside the page tools stays, or only each tool's label; remembered on this device. */
   toolHelp?: ToolHelp;
   onToolHelp?: (choice: ToolHelp) => void;
+  /** Whether the reading settings sit in the bar or in one drawer; remembered on this device. */
+  settingsAt?: SettingsAt;
+  onSettingsAt?: (choice: SettingsAt) => void;
   wordTap?: WordTap;
   onWordTap?: (choice: WordTap) => void;
   /** How the page shows the verse a "Play to" run is reciting; remembered on this device. */
@@ -284,6 +288,8 @@ export function Colophon({
   onDrawerTools,
   toolHelp,
   onToolHelp,
+  settingsAt,
+  onSettingsAt,
   wordTap,
   onWordTap,
   runMark,
@@ -560,6 +566,31 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.toolHelpNote}</p>
+          </section>
+        )}
+        {/* Where the reading settings sit (ayah-drawer ①): each in the bar, or
+            all in one drawer behind a button, until the owner has tried both. */}
+        {settingsAt && onSettingsAt && (
+          <section className={styles.block} aria-labelledby="colophon-settings-at">
+            <h3 className={styles.subhead} id="colophon-settings-at">
+              {t.settingsAtTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-settings-at">
+              {SETTINGS_ATS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={settingsAt === choice}
+                  data-settings-at={choice}
+                  onClick={() => onSettingsAt(choice)}
+                >
+                  {choice === "bar" ? t.settingsAtBar : t.settingsAtDrawer}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.settingsAtNote}</p>
           </section>
         )}
 

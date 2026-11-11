@@ -814,6 +814,12 @@ export interface Strings {
   toolHelpLine: string;
   toolHelpHover: string;
   toolHelpNote: string;
+  /** The reading settings behind one top-bar button (ayah-drawer.md ①). */
+  settingsDrawer: string;
+  settingsAtTitle: string;
+  settingsAtBar: string;
+  settingsAtDrawer: string;
+  settingsAtNote: string;
   /** Settings: what a second tap on the lit verse does (selection-drawer ①). */
   wordTapTitle: string;
   wordTapOff: string;
@@ -1673,6 +1679,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     toolHelpLine: m.toolHelpLine,
     toolHelpHover: m.toolHelpHover,
     toolHelpNote: m.toolHelpNote,
+    settingsDrawer: m.settingsDrawer,
+    settingsAtTitle: m.settingsAtTitle,
+    settingsAtBar: m.settingsAtBar,
+    settingsAtDrawer: m.settingsAtDrawer,
+    settingsAtNote: m.settingsAtNote,
     wordTapTitle: m.wordTapTitle,
     wordTapOff: m.wordTapOff,
     wordTapWord: m.wordTapWord,
