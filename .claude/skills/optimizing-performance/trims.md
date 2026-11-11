@@ -14,6 +14,16 @@ first candidates are not rediscovered from scratch.
 | shared logic (`packages/core`) | ~15 KB | little: it is what the first page needs | none | — |
 | gesture library | ~9 KB | none worth the risk | none | — |
 
+**Measured again 2026-11-10 (night), with nothing else running: cap raised to 210 KB.** Start-up
+came out in order this time: 2306 ms as built (five runs, 2297 to 2405), 2450 ms with 25 KB added,
+2451 ms with 50 KB added, 2746 ms with 100 KB added, against the 2500 ms goal. So 25 KB of
+download-only code fits cleanly. 50 KB fits too, but by 49 ms and with one run of five at 2854,
+so it is not counted on. The cap went up by 10 KB, under half of the 25, which leaves 10.7 KB for
+the pencil rings, the pens page and the calendar. Two things to carry forward: start-up as built
+has crept from 2138 ms (2026-10-11) to 2306 ms, and the room is now thin enough that the next
+raise should not happen without a trim or a faster start first. The two candidates below still
+only move code between files.
+
 **Checked again 2026-11-10 (later), nothing taken.** 199.3 KB against the 200 KB cap, after
 the setting for showing which drawer sits on which (+0.9 KB). 0.7 KB of room is left. The two
 candidates below move code between files, so they would not lower the counted total; the next step

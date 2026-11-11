@@ -10,6 +10,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { gzipSync } from "node:zlib";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { makeFixture, dropFixture, runGate } from "./gate-fixture.mjs";
 
 const DIST = "apps/web/dist";
@@ -73,4 +75,21 @@ test("gate:budget does not mistake the drawer's words for its code", () => {
   // Its words sit in the shared word list, which every build carries.
   const r = check('const words = { surahIntro: "Surah introduction" };');
   assert.equal(r.status, 0, r.out);
+});
+
+test("the size limit is the one the last line of its written history gives", () => {
+  // The limit may only move with the start-up numbers that justified it written
+  // down (the optimizing-performance skill, "Cap history"). This fails when the
+  // number in the check moves and no line was added, or the other way round.
+  const here = new URL(".", import.meta.url).pathname;
+  const gate = readFileSync(join(here, "gate-budget.mjs"), "utf8");
+  const limit = Number(/const BUDGET_GZ = (\d+) \* 1024/.exec(gate)?.[1]);
+  const skill = readFileSync(
+    join(here, "..", ".claude", "skills", "optimizing-performance", "SKILL.md"),
+    "utf8",
+  );
+  const rows = [...skill.split("## Cap history")[1].matchAll(/^\| \d{4}-\d{2}[^|]*\| (\d+) KB \|/gm)];
+  assert.ok(rows.length > 0, "no dated lines found under Cap history");
+  assert.equal(limit, Number(rows.at(-1)[1]), "the limit and its last history line disagree");
+  assert.match(gate, new RegExp(`must stay under\\s+\\* ${limit} KB`), "the check's own opening comment names another limit");
 });

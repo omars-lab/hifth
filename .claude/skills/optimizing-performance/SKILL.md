@@ -106,6 +106,7 @@ each finding. It only reads files and the command's own output; it never builds 
 | 2026-07 | 150 KB | set in the original plan alongside the 2.5 s start-up goal |
 | 2026-09-27 | 175 KB | the app reached 149.3 KB. Sweep: start-up 2254 ms as built; still ≤ 2500 ms with +50 KB (2408), over it from +60 KB (2553). So ~50 KB of room for download-only code; raised by half of that (+25 KB). The owner chose to raise now and trim later |
 | 2026-10-11 | 200 KB | the app reached 171.7 KB, its start-up script 118.4 KB. Sweep: start-up 2138 ms as built; still ≤ 2500 ms with +75 KB (2437), over it from +100 KB (2586). So ~75 KB of room; raised by a third of it (+25 KB), inside the rule above. Moving code into a file loaded later would not have helped: every shipped script counts toward this total |
+| 2026-11-10 | 210 KB | the app reached 199.3 KB, with three features waiting. Sweep, run alone: start-up 2306 ms as built; still ≤ 2500 ms with +25 KB (2450) and +50 KB (2451), over it at +100 KB (2746). The margin at +50 KB is only 49 ms and one of its five runs read 2854, so the room was counted as the 25 KB that held cleanly; raised by 10 KB, under half of that. Start-up as built is 168 ms slower than at the last raise, so the next raise needs a trim or a faster start first |
 
 ### What the 2026-09-27 sweep taught us
 

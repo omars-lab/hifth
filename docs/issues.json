@@ -5905,10 +5905,11 @@
         "file": "docs/performance.md",
         "item": "⑲"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "The app is 0.7 KB under its 200 KB size limit and the pencil rings, the pens page and the calendar all add code. Measure start-up again with nothing else running, then either raise the limit with the numbers written down or take a trim first. The top thing the agent can do alone as of 2026-11-10. Steps: .claude/plans/open-work-2026-11.md, item 2."
+      "closedBy": "scripts/gate-budget.test.mjs",
+      "note": "The app was 0.7 KB under its 200 KB size limit and the pencil rings, the pens page and the calendar all add code. Measured alone on 2026-11-10: start-up 2306 ms as built, 2450 with 25 KB added, 2451 with 50 KB, 2746 with 100 KB, against 2500. The limit went to 210 KB, under half of the 25 KB that held cleanly. A test fails if the limit moves without a line in its written history. Start-up as built has crept up 168 ms in a month, so the next time the limit is reached a trim comes first."
     },
     {
       "id": "pencil-pens-as-rings",

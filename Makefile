@@ -223,7 +223,7 @@ node-ok: ## Check the running node against .nvmrc + package.json engines
 	@scripts/require-node.sh
 
 .PHONY: gates
-gates: build ## The static gates: no <text> in SVG, license present, JS budget <200KB gz
+gates: build ## The static gates: no <text> in SVG, license present, JS budget <210KB gz
 	$(PNPM) gates
 
 .PHONY: lighthouse

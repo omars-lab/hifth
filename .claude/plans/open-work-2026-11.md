@@ -1,6 +1,6 @@
 # Open work, one list (2026-11-10)
 
-*Name: `open-work-2026-11`. Tasks: `remeasure-loading-speed`, `pencil-pens-as-rings`,
+*Name: `open-work-2026-11`. Tasks: `remeasure-loading-speed` (done), `pencil-pens-as-rings`,
 `pencil-pens-settings-page`, `calendar-of-each-days-work`, `app-pages-settings-and-developer`,
 `app-pages-developer-page`. Use cases: `pick-a-pen-without-leaving-the-verse`,
 `see-what-i-have-not-opened-lately`, `have-it-my-way-and-keep-it`. Before the first commit on
@@ -19,9 +19,8 @@ test it and what counts as done.
 
 ```mermaid
 flowchart TD
-  B[2 · Re-measure loading speed with nothing else running] --> C[3 · The pens at the pencil's tip, as rings]
-  C --> C2[3b · A settings page that shows the pens and explains each one]
-  B --> D[4 · A calendar of each day's work]
+  C[3 · The pens at the pencil's tip, as rings] --> C2[3b · A settings page that shows the pens and explains each one]
+  C2 --> D[4 · A calendar of each day's work]
   C2 --> E[5 · The bottom row of page icons, the developer page]
   D --> E
   E --> F[Waiting on the owner: iPad walk, TestFlight upload, free-or-paid list]
@@ -30,8 +29,10 @@ flowchart TD
 
 Item 1, the drawer levels, merged on 2026-11-10 as PR #586.
 
-Items 3, 3b and 4 all add code, and the app has 0.7 KB of room left under its 200 KB size
-limit. So item 2 comes first: it decides whether the limit can go up.
+Item 2, re-measuring loading speed, was done on 2026-11-10: the size limit went from 200 KB
+to 210 KB on a measurement taken alone. Items 3, 3b and 4 all add code and share the 10.7 KB
+of room that leaves. If they need more, a trim comes first, not another raise (the reasons
+are at the top of the trims list in the optimizing-performance skill).
 
 ## Before you start: how this repo is worked
 
@@ -84,19 +85,6 @@ limit. So item 2 comes first: it decides whether the limit can go up.
   - Every fix or feature ships with its test, written first and seen failing.
   - Plain words in everything the owner reads.
   - Look at the real thing, in Firefox too, before calling it done.
-
-## 2 · Re-measure loading speed, then decide the size limit
-
-- **Why now:** 199.3 KB of the 200 KB limit is used. The trims still on the list only move
-  code between files, so they don't lower the total.
-- **How:**
-  - stop every preview and dev server you started;
-  - run `make perf-sweep` with nothing else running;
-  - raise the limit only if the sweep shows room, by the rule in the optimizing-performance
-    skill;
-  - write the result at the top of `.claude/skills/optimizing-performance/trims.md`.
-- **Done when:** the limit is either raised with the sweep's numbers written down, or kept,
-  and a trim is taken before item 3.
 
 ## 3 · The pens at the Apple Pencil's tip, as rings (owner, 2026-11-10)
 

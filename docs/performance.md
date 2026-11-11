@@ -524,18 +524,23 @@ with the evidence, is in [the Preact swap write-up](issues/preact-swap.md); a br
 checks that the start-up script carries Preact and not React, so the swap cannot quietly
 revert.
 
-### ⑲ The app is 0.7 KB under its size limit, and three features are about to add code · **open**
+### ⑲ The app is 0.7 KB under its size limit, and three features are about to add code · **fixed**
 
-**Where it stands (2026-11-10).** 199.3 KB of the 200 KB limit is used. The trims still on
-the list only move code between files, so they do not lower the total. The last start-up
-measurement was taken with other things running and was too noisy to justify raising the
-limit.
+**Where it stood (2026-11-10).** 199.3 KB of the 200 KB limit was used. The trims still on
+the list only move code between files, so they do not lower the total. The start-up
+measurement before this one was taken with other things running and was too noisy to justify
+raising the limit.
 
-**What would answer it:** measuring start-up again with nothing else running on the laptop.
-If the measurement shows room, the limit goes up with the numbers written down; if not, a
-trim is taken before the next feature. Either way the result goes at the top of the trims
-list in the optimizing-performance skill. Steps:
-[the open-work list, item 2](../.claude/plans/open-work-2026-11.md).
+**What answered it (2026-11-10, night).** Start-up was measured again with nothing else running
+on the laptop: 2306 ms as built, 2450 ms with 25 KB added, 2451 ms with 50 KB added and
+2746 ms with 100 KB added, against the 2500 ms goal. 25 KB fits cleanly; 50 KB fits by only
+49 ms. The limit went from 200 KB to 210 KB, under half of the room that held cleanly, which
+leaves 10.7 KB for the three features. The numbers are written at the top of the trims list
+and in the limit's history, both in the optimizing-performance skill, and a test now fails if
+the limit moves without a line of history beside it.
+
+**What it leaves.** Start-up as built has crept from 2138 ms a month ago to 2306 ms. The next
+time the limit is reached, a trim or a faster start comes first, not another raise.
 
 ---
 
