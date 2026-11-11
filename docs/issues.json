@@ -5884,6 +5884,8 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
+      "useCase": "have-it-my-way-and-keep-it",
+      "feature": "settings",
       "note": "Owner's page comment of 2026-11-07: settings should be a page of their own, reached from page icons along the bottom like a Mac app, with the mushaf as the default page. Today every setting lives in the info panel (the ⓘ in the header). Next step is a rough build of a bottom row of page icons with the mushaf and a settings page."
     },
     {
@@ -5917,6 +5919,8 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
+      "useCase": "pick-a-pen-without-leaving-the-verse",
+      "feature": "pens-and-pencil",
       "note": "Owner, 2026-11-10: the pens at the Apple Pencil's tip laid out as rings around it, with an outer ring for a tool's own choices (the highlighter's four pens; Note, Harakat and Word). Built as a second layout beside today's row, picked in the info panel, rings the default. What to build and how to test it: .claude/plans/open-work-2026-11.md, item 3."
     },
     {
@@ -5928,6 +5932,8 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
+      "useCase": "pick-a-pen-without-leaving-the-verse",
+      "feature": "settings",
       "note": "Owner, 2026-11-10: a page among the settings that draws the working pens a reader would see at the pencil's tip and explains each button, so a reader with no pencil, or on a laptop, can see what is there. Comes after the rings. What to build and how to test it: .claude/plans/open-work-2026-11.md, item 3b."
     },
     {
@@ -5939,7 +5945,20 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
+      "useCase": "see-what-i-have-not-opened-lately",
+      "feature": "revision-record",
       "note": "Owner, 2026-11-10: a calendar with numbers for each day (mistakes added, pages they fall on, pages and verses opened). Each look and mistake already keeps its day and the hizb boundaries are in our data, so the new part is the by-day layout and the mistake counts, beside today's picture. Built two ways, a month grid and a list of days; the owner picks and the other stays as a setting. What to build and how to test it: .claude/plans/open-work-2026-11.md, item 4."
+    },
+    {
+      "id": "label-commits-with-what-they-are-for",
+      "source": {
+        "file": "docs/design/project-board.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-10: link a use case to its feature, its tasks, the commits that did them and the plan they came from, checked in, with the labels added by a hook. First part: a git hook adds lines to each commit message naming the task (a row here), its use case, its feature and its plan, and the push check lists commits with none. Later parts (walking the links, the picture, old history, release notes) are in .claude/plans/intent-tracking.md."
     }
   ]
 }

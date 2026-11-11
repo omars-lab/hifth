@@ -134,6 +134,45 @@ test("gate:gates refuses a hook file that does more than call its target", () =>
   refuses(files({ hooks: { "pre-commit": body } }), /\.githooks\/pre-commit must be the one command `make -s pre-commit` \(found 2 command line\(s\)\)/);
 });
 
+// A hook that is not one of the two blocking ones (the one that labels a commit
+// message) is held to the same rule: one line, handing off to its own target.
+const LABEL_TARGET = "\nprepare-commit-msg:\n\t@echo label\n";
+const LABEL_HOOK =
+  '#!/bin/sh\n# Hands off to make; never stops a commit.\nmake -s prepare-commit-msg MSG="$1" SOURCE="$2" || echo "could not label this commit" >&2\n';
+
+test("gate:gates passes a third hook that hands what git gave it to its own target", () => {
+  const r = run(files({ makefile: MAKEFILE + LABEL_TARGET, hooks: { "prepare-commit-msg": LABEL_HOOK } }));
+  assert.equal(r.status, 0, r.out);
+});
+
+test("gate:gates refuses a third hook that does the work itself", () => {
+  const body = '#!/bin/sh\nintent label-commit "$1" "$2"\n';
+  refuses(
+    files({ makefile: MAKEFILE + LABEL_TARGET, hooks: { "prepare-commit-msg": body } }),
+    /\.githooks\/prepare-commit-msg must be the one command `make -s prepare-commit-msg`/,
+  );
+});
+
+test("gate:gates refuses a third hook that runs something else after its target", () => {
+  const body = '#!/bin/sh\nmake -s prepare-commit-msg MSG="$1" && pnpm gate:a\n';
+  refuses(
+    files({ makefile: MAKEFILE + LABEL_TARGET, hooks: { "prepare-commit-msg": body } }),
+    /\.githooks\/prepare-commit-msg must be the one command `make -s prepare-commit-msg`/,
+  );
+});
+
+test("gate:gates refuses a third hook whose target the Makefile does not have", () => {
+  refuses(
+    files({ hooks: { "prepare-commit-msg": LABEL_HOOK } }),
+    /the Makefile has no `prepare-commit-msg:` target, and the prepare-commit-msg hook runs it/,
+  );
+});
+
+test("gate:gates still refuses a blocking hook that carries on when its target fails", () => {
+  const body = '#!/bin/sh\nmake -s pre-push || echo "never mind" >&2\n';
+  refuses(files({ hooks: { "pre-push": body } }), /\.githooks\/pre-push must be the one command `make -s pre-push`/);
+});
+
 test("gate:gates reads a check name with a digit in it whole", () => {
   // Drop gate:i18n from the hooks only; a matcher that read it as "gate:i"
   // would complain about gate:i instead of naming gate:i18n.

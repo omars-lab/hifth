@@ -52,6 +52,12 @@ const ROOT = process.env.HIFTH_GATE_ROOT
 const WORKFLOWS = join(ROOT, ".github", "workflows");
 const HOOKS = join(ROOT, ".githooks");
 const HOOK_TARGETS = ["pre-commit", "pre-push"];
+// Any other file in .githooks/ (the one that labels a commit message, say). It
+// blocks nothing, so no check has to be reached through it, but it is held to
+// the same one-line rule: a hook file that does work is a second list.
+const OTHER_HOOKS = existsSync(HOOKS)
+  ? readdirSync(HOOKS).filter((f) => !f.startsWith(".") && !HOOK_TARGETS.includes(f)).sort()
+  : [];
 
 // `i18n` has digits in it, and the first version of this check was written with
 // [a-z-]+ and silently read `gate:i18n` as `gate:i` — a matcher that cannot
@@ -120,7 +126,7 @@ function reach(target, seen = new Set()) {
 
 const problems = [];
 
-for (const t of HOOK_TARGETS) {
+for (const t of [...HOOK_TARGETS, ...OTHER_HOOKS]) {
   if (!targets.has(t)) problems.push(`the Makefile has no \`${t}:\` target, and the ${t} hook runs it`);
 }
 const hooked = new Set(HOOK_TARGETS.flatMap((t) => [...reach(t)]));
@@ -140,8 +146,17 @@ if (existsSync(WORKFLOWS)) {
   }
 }
 
-/** Each hook is `make -s <target>` and nothing else. */
-for (const t of HOOK_TARGETS) {
+/**
+ * Each hook is `make -s <target>` and nothing else. A hook that blocks nothing
+ * may also pass on what git handed it (`MSG="$1"`) and may say so when make
+ * itself fails (`|| echo "…" >&2`), because it must never stop a commit. The
+ * two blocking hooks may do neither: carrying on after a failure is exactly
+ * what they exist to prevent.
+ */
+const HANDED_ON = String.raw`(\s+[A-Z_]+="\$[0-9]")*`;
+const SAYS_SO = String.raw`(\s+\|\|\s+echo\s+"[^"$\x60;&|]*"(\s+>&2)?)?`;
+for (const t of [...HOOK_TARGETS, ...OTHER_HOOKS]) {
+  const blocking = HOOK_TARGETS.includes(t);
   const file = join(HOOKS, t);
   if (!existsSync(file)) {
     problems.push(`.githooks/${t} is missing, so \`make ${t}\` never runs on its own`);
@@ -151,7 +166,7 @@ for (const t of HOOK_TARGETS) {
     .split("\n")
     .map((l) => l.trim())
     .filter((l) => l && !l.startsWith("#"));
-  const want = new RegExp(`^(exec\\s+)?make\\s+-s\\s+${t}$`);
+  const want = new RegExp(`^(exec\\s+)?make\\s+-s\\s+${t}${blocking ? "" : HANDED_ON + SAYS_SO}$`);
   if (lines.length !== 1 || !want.test(lines[0])) {
     problems.push(
       `.githooks/${t} must be the one command \`make -s ${t}\` (found ${lines.length} command line(s)). ` +

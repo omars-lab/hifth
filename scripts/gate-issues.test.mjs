@@ -160,6 +160,31 @@ test("gate:issues refuses an index page built from an older index", () => {
   refuses(files(entries()), /docs\/issues\.md was built from [0-9a-f]+, the source is now [0-9a-f]+/, { after: edit });
 });
 
+// A row may say which use case and which feature it is for. Both are optional;
+// when given, each must be a name the other two lists really have.
+const LISTS = {
+  "docs/use-cases.json": JSON.stringify({ useCases: [{ id: "turn-a-page" }] }),
+  "docs/map.json": JSON.stringify({ features: [{ id: "page-turning" }] }),
+};
+
+test("gate:issues passes a row naming a use case and a feature that exist", () => {
+  const tree = { ...files(patched("late-turn", { useCase: "turn-a-page", feature: "page-turning" })), ...LISTS };
+  withTree(tree, (root) => {
+    const r = runGate("issues", root);
+    assert.equal(r.status, 0, r.out);
+  });
+});
+
+test("gate:issues refuses a row naming a use case that does not exist", () => {
+  const tree = { ...files(patched("late-turn", { useCase: "turn-a-leaf" })), ...LISTS };
+  refuses(tree, /late-turn: useCase "turn-a-leaf" is not a use case in docs\/use-cases\.json/);
+});
+
+test("gate:issues refuses a row naming a feature that does not exist", () => {
+  const tree = { ...files(patched("late-turn", { feature: "page-flipping" })), ...LISTS };
+  refuses(tree, /late-turn: feature "page-flipping" is not a feature in docs\/map\.json/);
+});
+
 const listPitch = (root) => {
   const r = spawnSync(process.execPath, [new URL("gate-issues.mjs", import.meta.url).pathname, "--list", "--pitch"], {
     encoding: "utf8",

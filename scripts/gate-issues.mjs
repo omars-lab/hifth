@@ -45,7 +45,7 @@
  *   node scripts/gate-issues.mjs --list --pitch only the open items a scholar would hit
  *                                               in the pitch demo (rows tagged "pitch": true)
  */
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT } from "./code-pointers.mjs";
 import { readLedger } from "./validation-ledger.mjs";
@@ -76,6 +76,22 @@ const byId = new Map(issues.map((i) => [i.id, i]));
 
 /** Decisions by id: a blocker may name one, and must stop once it is made. */
 const decisionsById = new Map(readDecisions().map((d) => [d.id, d]));
+
+/**
+ * A row may say which use case and which feature it is for (`useCase`,
+ * `feature`). Both are optional and hand-written; when given, each must be a
+ * name its own list really has, or the link leads nowhere. The names are what
+ * the commit labels are read from (.intent/config.json).
+ */
+function namesIn(file, list) {
+  const path = join(ROOT, file);
+  if (!existsSync(path)) return null;
+  return new Set((JSON.parse(readFileSync(path, "utf8"))[list] ?? []).map((x) => x.id));
+}
+const LINKS = [
+  { field: "useCase", what: "use case", file: "docs/use-cases.json", list: "useCases" },
+  { field: "feature", what: "feature", file: "docs/map.json", list: "features" },
+].map((l) => ({ ...l, names: namesIn(l.file, l.list) }));
 
 /** Milestones a blocker may name — the ones the ledger already blocks on. */
 const milestones = new Set(checks.flatMap((c) => c.blocks ?? []));
@@ -172,6 +188,12 @@ for (const i of issues) {
   }
   if (!["agent", "user"].includes(i.owner)) {
     problems.push(`${where}: owner is "agent" or "user", not "${i.owner}".`);
+  }
+  for (const l of LINKS) {
+    if (!(l.field in i)) continue;
+    if (!l.names?.has(i[l.field])) {
+      problems.push(`${where}: ${l.field} ${JSON.stringify(i[l.field])} is not a ${l.what} in ${l.file}.`);
+    }
   }
 
   // ---- the source resolves, and agrees

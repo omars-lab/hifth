@@ -1,6 +1,7 @@
 # Plan: link every commit back to what it is for
 
-*Name: `intent-tracking`. Written 2026-11-10. Status: **not started**; slice A is next.*
+*Name: `intent-tracking`. Written 2026-11-10. Status: **slice A built** (2026-11-10); slice B
+is next. Tasks: `label-commits-with-what-they-are-for`.*
 
 **Asked** (owner, 2026-11-10, in the planning session of that day): a way to track work
 properly, where a use case links to its feature, to the tasks in the task list, to the commits

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "main": "main",
+  "kinds": {
+    "task": {
+      "file": "docs/issues.json",
+      "list": "issues",
+      "id": "id",
+      "links": { "use-case": "useCase", "feature": "feature" }
+    },
+    "use-case": { "file": "docs/use-cases.json", "list": "useCases", "id": "id" },
+    "feature": { "file": "docs/map.json", "list": "features", "id": "id" },
+    "plan": { "glob": ".claude/plans/*.md" }
+  }
+}

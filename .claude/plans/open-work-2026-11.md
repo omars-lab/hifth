@@ -1,5 +1,11 @@
 # Open work, one list (2026-11-10)
 
+*Name: `open-work-2026-11`. Tasks: `remeasure-loading-speed`, `pencil-pens-as-rings`,
+`pencil-pens-settings-page`, `calendar-of-each-days-work`, `app-pages-settings-and-developer`,
+`app-pages-developer-page`. Use cases: `pick-a-pen-without-leaving-the-verse`,
+`see-what-i-have-not-opened-lately`, `have-it-my-way-and-keep-it`. Before the first commit on
+a branch, run `intent start <task> --plan open-work-2026-11`.*
+
 All the open work as of 2026-11-10, in the order it will be taken. A new session should be
 able to start from this page alone. Each item says what to build, where the code is, how to
 test it and what counts as done.
