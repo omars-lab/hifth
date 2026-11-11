@@ -394,8 +394,7 @@ e2e-port-free: ## Is anything already on the ports the browser tests serve the a
 	@node scripts/e2e-port-free.mjs
 
 .PHONY: pre-push-checks
-pre-push-checks: e2e-port-free secrets-history checks-fast ## The checks a push that sends code must pass
-	@$(MAKE) -s commit-labels
+pre-push-checks: e2e-port-free commit-labels secrets-history checks-fast ## The checks a push that sends code must pass
 	$(MAKE) etl-check
 	$(PNPM) audit:corpus
 	$(PNPM) gate:assets
@@ -418,10 +417,16 @@ pre-push-checks: e2e-port-free secrets-history checks-fast ## The checks a push 
 .PHONY: commit-labels
 commit-labels: ## Which commits on this branch say what they were for, and do the names they give exist?
 	@# Refuses a label naming a task, use case, feature or plan that is not in
-	@# its list. A commit with no label is only listed for now (2026-11-10);
-	@# once the count has stayed at zero for two weeks, add --strict here.
+	@# its list, and (since 2026-11-11) a commit that does not say what it was
+	@# for. The plan was to only count those for two weeks first; the count
+	@# was already zero and the tool now prints the fix, so it was switched on
+	@# early. To go back to counting, take --strict off the line below. The
+	@# fix never rewrites a commit: `intent answer <commit> <task>` (or
+	@# --none "<why>") adds a line to .intent/links.jsonl; commit it and push.
+	@# It runs second of the push checks because it takes a second.
+	@# scripts/prepush-commit-labels.test.mjs holds both of those in place.
 	@# Without the tool it says so and passes: a silent skip looks like a pass.
-	@if command -v intent >/dev/null 2>&1; then intent check; else echo "  commit labels not checked: the intent tool is not installed (the intent-manager plugin puts it on the path)"; fi
+	@if command -v intent >/dev/null 2>&1; then intent check --strict; else echo "  commit labels not checked: the intent tool is not installed (the intent-manager plugin puts it on the path)"; fi
 
 .PHONY: intent
 intent: ## Draw what each commit was for (use case, feature, plan, task, commits) as one page, and open it
