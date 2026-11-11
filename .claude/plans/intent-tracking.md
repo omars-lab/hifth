@@ -3,8 +3,9 @@
 *Name: `intent-tracking`. Written 2026-11-10. Status: **slices A, B, C and D built** (labels,
 reading them back, the picture: `make intent`, and links for old commits, 2026-11-11). Slice D was
 tried on the commits since 2026-11-01: all 109 that had no label now have an answer in
-`.intent/links.jsonl` (61 name a task, 26 name only a use case or a feature, 18 are chores that
-belong to nothing, 4 have a guess from a rule plus a reader's feature). Going further back than
+`.intent/links.jsonl`. Readers of the history answered 105 of them (61 name a task, 26 name only a
+use case or a feature, 18 are chores that belong to nothing), and the other 4 carry only a rule's
+guess from their branch name. Going further back than
 2026-11-01 is the owner's call. Slice E (changelog and roadmap drafts) is next. Tasks: `label-commits-with-what-they-are-for`.*
 
 **Asked** (owner, 2026-11-10, in the planning session of that day): a way to track work
