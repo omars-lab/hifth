@@ -35,3 +35,9 @@ hubs:
     published:
       url: https://blog.bytesofpurpose.com/hifth/docs/
       host: github-pages
+  - id: hifth-intent
+    name: What the work in Hifth is for
+    description: Who each piece of work is for, from the ask to the commit. Drawn by `make intent`; served by the dev server only, never published.
+    visibility: private
+    use: local
+    local: { runner: hifth, path: /intent/ }

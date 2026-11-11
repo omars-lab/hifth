@@ -9,7 +9,42 @@ import { defineConfig, type Plugin } from "vite";
 import preact from "@preact/preset-vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { preloadScript } from "./src/lang-preload";
+import { intentPictureRoute } from "./src/dev/intent-picture";
 import { LOCALE_IDS } from "./src/messages/locales.gen";
+
+/**
+ * Serve the "what each commit was for" picture (`make intent`) at /intent/ on the dev
+ * server, so it opens from the local hub instead of as a file:// page. Dev only:
+ * `apply: "serve"` keeps it out of every build. The route is in src/dev/intent-picture.ts.
+ */
+function intentPictureDev(): Plugin {
+  const page = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", ".intent", "picture", "index.html");
+  return {
+    name: "hifth-intent-picture-dev",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url ?? "";
+        const route = intentPictureRoute(url);
+        if (!route) return next();
+        res.setHeader("Cache-Control", "no-store");
+        if (route === "add-slash") {
+          res.statusCode = 302;
+          res.setHeader("Location", `/intent/${url.slice("/intent".length)}`);
+          res.end();
+          return;
+        }
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        try {
+          res.end(readFileSync(page, "utf8"));
+        } catch {
+          res.statusCode = 404;
+          res.end("<p>No picture yet. Run <code>make intent</code> in the repo, then reload.</p>");
+        }
+      });
+    },
+  };
+}
 
 /**
  * Serve the QUL page fixtures to the dev diff view — dev only, never a build input.
@@ -195,6 +230,7 @@ export default defineConfig({
     dropPrivateUnlessPitch(),
     preloadReaderLanguage(),
     qulFixturesDev(),
+    intentPictureDev(),
     preact(),
     VitePWA({
       registerType: "prompt",

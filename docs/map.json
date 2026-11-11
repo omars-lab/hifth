@@ -2542,6 +2542,45 @@
         "pens-and-pencil",
         "ui-language"
       ]
+    },
+    {
+      "id": "hifth-app-site",
+      "what": "Typing hifth.app shows what Hifth is for, opens the app, and lets a reader leave an email to hear when the Mac app ships.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "apps/landing/index.html",
+          "symbol": "notify-form",
+          "note": "The front page: plain HTML and CSS, no framework, English throughout. Its picture comes from the public build's checked-in shots, never the pitch build. 'Mac app — coming soon' carries no store badge, because Apple's badge is meant to point at a live listing."
+        },
+        {
+          "file": "apps/landing/notify.js",
+          "symbol": "notify-form",
+          "note": "Sends the email and the spam-check token, and shows the server's reply in place. Without JavaScript the form still posts, and the server answers with a plain page."
+        },
+        {
+          "file": "apps/landing/privacy.html",
+          "symbol": "contact",
+          "note": "What the list keeps (an email and a date), why, where, and how to leave. Its contact address is owed by the owner."
+        },
+        {
+          "file": "apps/web/src/dev/intent-picture.ts",
+          "symbol": "intentPictureRoute",
+          "note": "Which address on the development server shows the 'what each commit was for' picture. Only /intent/ answers, so nothing else in the repository can be read through it; the plugin that uses it in vite.config.ts runs only on the development server."
+        }
+      ],
+      "extend": [
+        "The front page stays plain HTML: no build step, so what is checked in is what is served.",
+        "Emails never go in the repository, a log, a test or a commit. Tests use made-up addresses.",
+        "Any picture on the front page comes from the public build. The pitch build's text never goes on it."
+      ],
+      "gates": [
+        "vitest src/dev/intent-picture.test.ts"
+      ],
+      "seeAlso": [
+        "offline-pwa",
+        "share-links"
+      ]
     }
   ]
 }

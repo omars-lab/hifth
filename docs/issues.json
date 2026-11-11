@@ -6084,6 +6084,43 @@
       "owner": "agent",
       "feature": "performance",
       "note": "The app downloads 171 KB before the first page can be used, and start-up drops from about 2290 ms to about 2140 ms once that is under about 160 KB. Next step: load the laptop's page-edge strips (about 3 KB) and the zoom and edge-turn parts of the page stage later, one at a time, measuring each beside the last, then lower the start-up limit to just above the new size."
+    },
+    {
+      "id": "hifth-app-site",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "hifth.app has no front page yet, and the web app still lives only at the blog address. The front page and privacy page are drawn; the email form's server part, the app under /read, a tested way to publish and the 'Hifth has moved' sheet are still to build. Plan: .claude/plans/hifth-app-site.md."
+    },
+    {
+      "id": "intent-picture-on-local-hub",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "②"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "closedBy": "apps/web/src/dev/intent-picture.test.ts",
+      "note": "The 'what each commit was for' picture opened only as a file on disk, so the local hub could not list it. The development server now serves it at /intent/ (never in a production build), and the hub lists it as a private, local page."
+    },
+    {
+      "id": "privacy-page-contact-address",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "note": "The privacy page needs an address the owner reads, so a reader can ask to be taken off the list without the link in the email. It shows a placeholder until then, and the site does not go live with the placeholder."
     }
   ]
 }
