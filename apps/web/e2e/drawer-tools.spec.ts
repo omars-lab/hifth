@@ -73,9 +73,16 @@ for (const size of [
       // The drawer grew, and no line of the lit verse is under it.
       await settle(drawer(page));
       await expect.poll(async () => (await litLines(page)).length, { message: "a verse is lit" }).toBeGreaterThan(0);
-      const box = (await drawer(page).boundingBox())!;
-      const under = (await litLines(page)).filter((line) => overlaps(line, box));
-      expect(under, "lines of the verse under the drawer").toEqual([]);
+      // The page slides to keep the verse clear; it may still be moving once the drawer has settled.
+      await expect
+        .poll(
+          async () => {
+            const box = (await drawer(page).boundingBox())!;
+            return (await litLines(page)).filter((line) => overlaps(line, box)).length;
+          },
+          { message: "lines of the verse under the drawer" },
+        )
+        .toBe(0);
 
       // Pressing Same roots again folds the list away and leaves the drawer.
       await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
@@ -95,6 +102,11 @@ test("with the setting on, Escape folds the roots list away first, and a second 
   await expect(list).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(list).toBeHidden();
+  await expect(drawer(page)).toBeVisible();
+  // Folding the roots brings back the verse's look-alikes; Escape folds them next.
+  await expect(drawer(page).getByRole("region", { name: /^Look-alikes · / })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(drawer(page).getByRole("region", { name: /^Look-alikes · / })).toHaveCount(0);
   await expect(drawer(page)).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(drawer(page)).toBeHidden();
@@ -163,6 +175,10 @@ test.describe("Share inside the drawer", () => {
     await page.keyboard.press("Escape");
     await expect(links).toBeHidden();
     await expect(drawer(page)).toBeVisible();
+    // The look-alikes come back in its place, and fold on the next Escape.
+    await expect(drawer(page).getByRole("region", { name: /^Look-alikes · / })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(drawer(page).getByRole("region", { name: /^Look-alikes · / })).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(drawer(page)).toBeHidden();
   });
@@ -243,6 +259,10 @@ test.describe("Listen inside the drawer", () => {
     await page.keyboard.press("Escape");
     await expect(options).toBeHidden();
     await expect(drawer(page)).toBeVisible();
+    // The look-alikes come back in its place, and fold on the next Escape.
+    await expect(drawer(page).getByRole("region", { name: /^Look-alikes · / })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(drawer(page).getByRole("region", { name: /^Look-alikes · / })).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(drawer(page)).toBeHidden();
   });

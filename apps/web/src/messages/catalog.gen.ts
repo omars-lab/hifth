@@ -242,6 +242,9 @@ export interface Catalog {
   readonly lookalikePreviewNote: string;
   readonly lookalikePreviewPicture: string;
   readonly lookalikePreviewTitle: string;
+  readonly lookalikesAria: (d: { readonly count: string | number }) => string;
+  readonly lookalikesNone: string;
+  readonly lookalikesTitle: string;
   readonly mapAbsent: string;
   readonly mapActiveIn: (d: { readonly monthText: string | number }) => string;
   readonly mapCaveat: string;

@@ -1,0 +1,79 @@
+/* The look-alikes inside the verse's drawer: three sections under one head,
+   laid out as the roots list is when it sits in the drawer. */
+.inline {
+  padding: var(--space-2) var(--space-1) 0;
+  font-family: var(--font-chrome);
+  text-align: start;
+}
+
+.head {
+  position: sticky;
+  inset-block-start: calc(-1 * var(--space-3));
+  z-index: 1;
+  margin-block-start: calc(-1 * var(--space-3));
+  padding-block-start: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block-end: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+  background: var(--paper-raised);
+}
+
+.glyph {
+  font-size: var(--text-lg);
+  color: var(--accent-strong);
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.close {
+  min-inline-size: var(--touch-min);
+  min-block-size: var(--touch-min);
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.group {
+  padding-block: var(--space-2);
+}
+
+.group + .group {
+  border-block-start: 1px solid var(--hairline);
+}
+
+.groupTitle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.count {
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent-tint);
+  color: var(--accent-strong);
+  font-size: var(--text-xs);
+}
+
+/* A section with none says so, quietly, so it reads as "nothing here", not as
+   something still loading. */
+.none {
+  margin: 0;
+  padding-inline-start: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
