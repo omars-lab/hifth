@@ -6,9 +6,17 @@
       "file": "docs/issues.json",
       "list": "issues",
       "id": "id",
+      "says": "note",
+      "done": { "field": "status", "values": ["fixed", "answered", "confirmed"] },
       "links": { "use-case": "useCase", "feature": "feature" }
     },
-    "use-case": { "file": "docs/use-cases.json", "list": "useCases", "id": "id" },
+    "use-case": {
+      "file": "docs/use-cases.json",
+      "list": "useCases",
+      "id": "id",
+      "says": "goal",
+      "links": { "feature": "feature" }
+    },
     "feature": { "file": "docs/map.json", "list": "features", "id": "id" },
     "plan": { "glob": ".claude/plans/*.md" }
   }

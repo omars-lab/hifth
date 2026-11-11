@@ -19,6 +19,13 @@ folded: no
   the built files before reasoning from it.
 - `docs/issues.json`: rewriting it with a script to change two rows reformatted five other
   lines. It is hand-edited; change it with a plain edit.
+- Commit labels typed by hand (branch `stale-skills`): an `Intent-None:` line written one
+  paragraph above the credit lines was invisible to git's label reader, so six commits looked
+  unlabelled. Use `intent start --none "<reason>"` and let the hook write the line; the tool
+  (intent-manager 1.2.1) now also reads a label wherever it sits.
+- `intent why` on a merge commit (intent-manager 1.2.0, before release): it explained the next
+  ordinary commit instead. Found in review, not by the tests; a merge is the newest commit on
+  main most days, so try a new reading command on `HEAD` of main first.
 - `scripts/perf-sweep.mjs`: the middle of five readings hid that one build reads two values
   400 ms apart. `make perf-compare` keeps every run; read them all.
 - Moving test files into a skill's folder (branch `stale-skills`): a search-and-replace for
@@ -30,8 +37,15 @@ folded: no
   ports opens both, and picks the numbers itself: the first fix let the system pick, which gives
   ports so high that the second does not exist, and it failed five runs in eight. Repeat a fix
   for a now-and-then failure 25 times before committing it.
+- `.intent/config.json`: a list only shows up in the picture `make intent` draws once the
+  settings name it. Goals and decisions are not named yet (the page says so under its key), and
+  the 13 by-hand checks take their status from `docs/validation/ledger.json`, which the tool
+  does not read, so two finished ones are drawn as open.
 
 ## Worth copying
+- intent-manager's `intent draw`, before release: the page was looked at in its rare states
+  (nothing linked, no main branch, a label naming a task that is gone) in two throwaway repos.
+  That found three wording faults the real repo could not show.
 - `.claude/skills/testing/SKILL.md` "A test that fails now and then": repeat it 25 times with
   no retries, make it keep looking, and if it still fails have the code write down what it saw.
   Three short steps found a cause that reading the code had not.

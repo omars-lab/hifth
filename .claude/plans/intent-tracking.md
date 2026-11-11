@@ -1,7 +1,7 @@
 # Plan: link every commit back to what it is for
 
-*Name: `intent-tracking`. Written 2026-11-10. Status: **slice A built** (2026-11-10); slice B
-is next. Tasks: `label-commits-with-what-they-are-for`.*
+*Name: `intent-tracking`. Written 2026-11-10. Status: **slices A, B and C built** (labels,
+reading them back, and the picture: `make intent`, 2026-11-11); slice D (old history) is next. Tasks: `label-commits-with-what-they-are-for`.*
 
 **Asked** (owner, 2026-11-10, in the planning session of that day): a way to track work
 properly, where a use case links to its feature, to the tasks in the task list, to the commits
@@ -152,7 +152,10 @@ This is the tightest part, so it is decided first.
 
   The names all start with `Intent-` on purpose: ordinary body lines in old commits already
   get read by git as labels (`Notes:`, `Design:`), and these must never be confused with
-  them. They are read back with git's own parser, not a home-made one.
+  them. They are read back as any line of the message that starts `Intent-<Name>:`. Git's own
+  parser was the first choice and was dropped on 2026-11-11: it reads only the last paragraph
+  of a message, so six commits whose label was typed one paragraph above the credit lines
+  looked unlabelled to it while the hook counted them as labelled.
 - **When the hook cannot run** (the tool is not installed, the settings file is broken), it
   prints a line that says so and lets the commit through unlabelled. A silent hook looks the
   same as a working one. The push check then lists unlabelled commits.
