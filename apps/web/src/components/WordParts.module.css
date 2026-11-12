@@ -434,3 +434,14 @@
 .docked .rule {
   flex: none;
 }
+
+/* One kind's choices, in the kind-first and tabs layouts: centred, so a row that
+   wraps does not leave an empty column down one side (seen 2026-11-12, phone).
+   A docked row scrolls sideways instead, and centring it would clip its start. */
+.choices .row {
+  justify-content: center;
+}
+
+.docked .choices .row {
+  justify-content: flex-start;
+}

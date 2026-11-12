@@ -6308,8 +6308,8 @@
       },
       "status": "open",
       "severity": "question",
-      "owner": "agent",
-      "note": "Owner, 2026-11-12 (page comment t_2413cf): the Mistake pen should ask the kind of mistake first (harakah, makharij, a tajweed rule left out such as idgham, a hop into another verse), then the detail that kind needs. Build it two or three ways into the real question and let the owner choose by using them; the losing shapes stay as a setting."
+      "owner": "user",
+      "note": "Owner, 2026-11-12 (page comment t_2413cf): the Mistake pen should ask the kind of mistake first (harakah, makharij, a tajweed rule left out such as idgham, a hop into another verse), then the detail that kind needs. Build it two or three ways into the real question and let the owner choose by using them; the losing shapes stay as a setting. Built 2026-11-12: three layouts (kind first, kinds as tabs, everything at once) in the info panel, everything at once by default; the side-by-side note is docs/design/mistake-ask.md. Waiting on the owner to pick one by using it."
     },
     {
       "id": "share-menu-too-plain",

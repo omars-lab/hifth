@@ -316,6 +316,28 @@ test.describe("Hifth · the mistake question asks the kind of mistake", () => {
     });
   }
 
+  test("a kind's choices sit in the middle of the question, not bunched to one side", async ({ page }) => {
+    // Seen 2026-11-12 on a phone: in the tabs layout the harakat cards wrapped from
+    // the right and left an empty column down the left of the question.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await useLayout(page, "tabs");
+    await page.goto("/#/hafs-kfqc/p7?tool=mistake");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    // The row the harakat cards sit in.
+    const row = picker(page).locator('[role="tabpanel"] [data-sign]').first().locator("..");
+    await expect(row).toBeVisible();
+    const gaps = await row.evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      const cards = [...el.children].map((c) => c.getBoundingClientRect());
+      const left = Math.min(...cards.map((c) => c.left)) - box.left;
+      const right = box.right - Math.max(...cards.map((c) => c.right));
+      return { left, right };
+    });
+    expect(Math.abs(gaps.left - gaps.right)).toBeLessThanOrEqual(2);
+  });
+
   test("the layout is a setting in the info panel, everything at once until chosen, and remembered", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/p7");
     await expect(pageSvg(page, 7)).toBeVisible();

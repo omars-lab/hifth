@@ -645,7 +645,7 @@ export function WordParts({
               </button>
               <span>{whichName[open]}</span>
             </div>
-            {choicesOf(open)}
+            <div className={styles.choices}>{choicesOf(open)}</div>
             {clearRow}
           </>
         )
@@ -672,7 +672,7 @@ export function WordParts({
             ))}
           </div>
           <div role="tabpanel" data-open={open ?? "sign"}>
-            {choicesOf(open ?? "sign")}
+            <div className={styles.choices}>{choicesOf(open ?? "sign")}</div>
           </div>
           {actionsRow}
         </>
