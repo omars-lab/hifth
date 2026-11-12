@@ -257,9 +257,16 @@ Hifth will have paid features too (owner, 2026-11-12). Which ones, the price and
 pays are not chosen yet. Until they are, the front page says only that Hifth is open source, and
 promises nothing about price either way: no "free", and no price.
 
-### ⑯ Does the Arabic front page show the app in Arabic? · **open**
+### ⑯ Does the Arabic front page show the app in Arabic? · **fixed**
 
 Only its opening pictures do. The five feature pictures and the three device pictures are the
 same files as on the English page, so a reader who chose Arabic sees the app's buttons and labels
 in English further down. What would answer it: each of those eight taken again with the app set to
 Arabic, from the plain public build like the rest, and the Arabic page pointing at them.
+
+Done 2026-11-12: all eight were taken again in Arabic, and the Arabic page uses them. Taking them
+found one more fault: under each vowel sign the app wrote its English name ("fatha", "kasra")
+even in Arabic. Those names now come from the app's word list in both languages, and a browser
+test opens a word's parts in Arabic and fails on any Latin letter under a sign. The two-page
+opening picture is the same file in both languages on purpose: it shows only the mus'haf pages,
+with no buttons or labels.

@@ -6152,11 +6152,12 @@
         "file": "docs/design/hifth-app-site.md",
         "item": "⑯"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "The Arabic front page shows the app in Arabic only in its opening pictures; the five feature pictures and three device pictures are the English ones. Take each again with the app in Arabic, from the plain public build, and point the Arabic page at them."
+      "closedBy": "apps/web/e2e/landing-shots.spec.ts",
+      "note": "Fixed 2026-11-12: all eight taken again with the app in Arabic and the Arabic page points at them. Taking them showed the harakat under each sign named in English inside the Arabic app; they now come from the word list, held by a unit test and a browser test (sign-tools spec). Was: the Arabic front page shows the app in Arabic only in its opening pictures; the five feature pictures and three device pictures are the English ones. Take each again with the app in Arabic, from the plain public build, and point the Arabic page at them."
     },
     {
       "id": "hifth-app-turnstile-key",
