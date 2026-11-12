@@ -174,16 +174,19 @@ were left at the old address, because the app keeps them in a different store:
   says it is ready only once it knows the edition's pages, so a place that arrives early is not
   turned away. A page the edition doesn't have is ignored. The browser test checks all three in Chrome, Firefox and
   iPhone Safari.
-- the revision record. Still left behind.
+- the revision record. Still left behind. The owner's answer (12 November 2026): it comes only
+  when the reader chooses it, by its own clearly worded choice on the card, never folded silently
+  into "Carry my marks", because the reader decides who sees their data.
 - their settings (language, layout, sizes), so hifth.app opens in the default language. Still
-  left behind.
+  left behind; built and measured at 0.2 KB, waiting on room.
 
 Where they left off mattered most: a hafiz who carried across and landed on page one had to find
 their place again by hand.
 
 What would answer the rest: the carry sends the record and the settings too, and the browser test
 for the carry (⑦) finds them at the new address. The app sits exactly at its size limit after the
-place, so these two need room found first.
+place, so these two need room found first. The owner chose to find code to delete rather than
+raise the limit (12 November 2026).
 
 `www.hifth.app` is a separate address with its own store as well, so every link sends readers to
 `hifth.app` itself.

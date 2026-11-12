@@ -3878,10 +3878,10 @@
         "file": "docs/design/sharing-between-readers.md",
         "item": "④"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Decide whether the record of when you read ever goes with a share; suggested never by default, and only as a separate tick each time, which means naming one more way out in the privacy check."
+      "note": "Answered by the owner 2026-11-12: the reader decides who sees their data. The record goes only when the reader presses a button that says it is going and to whom; each such way out is named in the privacy check, and the reader can see who has it and take it back (sharing-who-has-my-data)."
     },
     {
       "id": "sharing-link-ending",
@@ -4002,6 +4002,17 @@
         "testflight-sign-with-paid-team"
       ],
       "note": "Test whether a teacher with no Apple device can open an iCloud share, and whether Apple's web library works in Firefox; only worth doing if iCloud sharing is picked."
+    },
+    {
+      "id": "sharing-who-has-my-data",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑮"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The reader decides who sees their data (owner, 2026-11-12), so every way out needs one place listing who has what since when, with a way to stop each, and a plain word that a sent file cannot be called back. Build it rough in the info panel beside the first live way out."
     },
     {
       "id": "sharing-teacher-view",
@@ -6181,7 +6192,7 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, and since 2026-11-12 where the reader left off: the new tab opens on that page, unless hifth.app has a newer place of its own. The revision record and the settings (language, layout, sizes) still stay at the old address, because they are kept in a different store, so hifth.app opens in the default language. The app sits exactly at its 210 KB size limit after the place, so these two need room first: a trim, a raise after a clean speed check, or leaving them for later. Next: build both as small as they can be, measure, and ask the owner which way to make room."
+      "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, and since 2026-11-12 where the reader left off: the new tab opens on that page, unless hifth.app has a newer place of its own. The revision record and the settings (language, layout, sizes) still stay at the old address, because they are kept in a different store, so hifth.app opens in the default language. The app sits exactly at its 210 KB size limit after the place. Owner, 2026-11-12: find code to delete rather than raise the limit; the settings carry is built and measured at 0.2 KB; the revision record comes only by its own clearly worded choice on the card, because the reader decides who sees their data."
     },
     {
       "id": "hifth-app-link-file",

@@ -202,9 +202,13 @@ Asked by A. Sharing between two people starts its own decision record, by the pr
 
 Asked by both. Recommended: the teacher's view fed by the file first, then the live locked link, then accounts only if a teacher needs all their students. **What would answer it:** your pick, written as a new decision record, with a rough build of the teacher's view so you choose by hand.
 
-### ④ Does the record of when you read ever go with a share, or only your mistakes and notes? · **open**
+### ④ Does the record of when you read ever go with a share, or only your mistakes and notes? · **answered**
 
-Asked by both. Suggested: never by default; if ever, a separate tick the student sees each time. **What would answer it:** your call. A yes means naming one more way out in the privacy check, with its reason.
+Asked by both. Suggested: never by default; if ever, a separate tick the student sees each time. **Answered by the owner, 12 November 2026:** the reader decides who sees their data. The record goes only when the reader presses a button that says it is going and to whom, and they can see who has it and take it back (⑮). Each such way out is still named in the privacy check, with its reason.
+
+### ⑮ Where does a reader see who has their data, and take it back? · **open**
+
+Asked by the owner, 12 November 2026, with the rule that the reader decides who sees their data. Every way a reader's marks or record can reach someone else (a carried copy, a teacher's link, their own iCloud) needs one place that lists who has what since when, with a way to stop each. A file already sent cannot be called back, so that place has to say so plainly rather than promise it. **What would answer it:** a rough build of that list in the info panel, beside the first live way out, judged by hand.
 
 ### ⑤ Should a shared link stop working by itself after a while, and should the teacher see new mistakes as they are made or only when they reopen it? · **open**
 

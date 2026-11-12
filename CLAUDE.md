@@ -65,6 +65,10 @@ your head.
 - **Things we will need someday go on the roadmap the same turn.** A backlog row that says what
   it waits on (marked blocked), then `make roadmap`. The roadmap is a view of the backlog, never
   a second list. (Owner, 2026-11-11.)
+- **The reader decides who sees their data.** Their marks, their revision record and their
+  settings are seen by no one else (another address, a teacher, a server, us) until they press a
+  button that says what goes and to whom. They can see who has it and take it back. The privacy
+  check makes each such way out a deliberate act. (Owner, 2026-11-12.)
 
 ## Decisions are explained in plain language, or they are not explained
 
