@@ -158,6 +158,17 @@ async function savedSeam(page: Page): Promise<Seam | null> {
   );
 }
 
+/** Waits until the tab has reloaded once, which laying carried settings does. */
+async function reloaded(tab: Page) {
+  await expect
+    .poll(() =>
+      tab
+        .evaluate(() => (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming).type)
+        .catch(() => "navigating"),
+    )
+    .toBe("reload");
+}
+
 /** Both stand-in addresses for every page in the test's browser, popups included, in English. */
 async function standIns(context: BrowserContext, baseURL: string | undefined) {
   const port = new URL(baseURL!).port;
@@ -265,8 +276,11 @@ test("the reader's settings come across too, and the reload they need loses noth
   const opened = context.waitForEvent("page");
   await page.getByTestId("moved-sheet").getByRole("button", { name: "Carry them to hifth.app" }).click();
   const arrived = await opened;
+  await reloaded(arrived);
 
   await expect(arrived.getByRole("navigation", { name: "Pages of the app" })).toBeVisible();
+  // The reload must not swallow the line that says what came across.
+  await expect(arrived.getByText("4 items came across from the old address")).toBeAttached();
   expect(await arrived.evaluate(() => localStorage.getItem("hifth.app.pages.v1"))).toBe("row");
   // This card's own record of the carry stays at the old address.
   expect(await arrived.evaluate(() => localStorage.getItem("hifth.moved.carried.v1"))).toBeNull();
@@ -275,6 +289,31 @@ test("the reader's settings come across too, and the reload they need loses noth
   await expect
     .poll(() => savedIds(arrived))
     .toEqual({ bookmarks: ["b-old-1", "b-old-2"], notes: ["n-old"], jumps: ["j-old"] });
+});
+
+// The setting the owner noticed missing: the language. Only the old address
+// has one here, so the new one would otherwise open in the device's language.
+test("the language chosen at the old address is the one hifth.app opens in", async ({ page, context, baseURL }) => {
+  const port = new URL(baseURL!).port;
+  const addresses = { old: `http://localhost:${port}`, next: `http://127.0.0.1:${port}` };
+  await context.addInitScript((addresses) => {
+    localStorage.setItem("hifth.moved.addresses.v1", JSON.stringify(addresses));
+    if (location.origin === addresses.old && !localStorage.getItem("hifth.lang.v1"))
+      localStorage.setItem("hifth.lang.v1", "ar");
+  }, addresses);
+  await page.goto(`${addresses.old}/#/hafs-kfqc/p7`);
+  await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+
+  const opened = context.waitForEvent("page");
+  await page.getByTestId("moved-sheet").getByRole("button").first().click();
+  const arrived = await opened;
+  await reloaded(arrived);
+
+  // The page's own markup already says Arabic before the app runs, so the proof
+  // is the app's line about what came across, written in Arabic after the reload.
+  await expect(arrived.getByText(/من العنوان القديم/)).toBeAttached();
+  await expect(arrived.locator("html")).toHaveAttribute("lang", "ar");
+  expect(await arrived.evaluate(() => localStorage.getItem("hifth.lang.v1"))).toBe("ar");
 });
 
 test("a place the new address already has, newer than the old one's, is kept", async ({ page, context, baseURL }) => {

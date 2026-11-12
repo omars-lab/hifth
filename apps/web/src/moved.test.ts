@@ -153,6 +153,7 @@ describe("which place the new address keeps", () => {
 const STAYS = new Set([
   // This card's own bookkeeping.
   "hifth.moved.addresses.v1",
+  "hifth.moved.arrived.v1",
   "hifth.moved.carried.v1",
   "hifth.moved.later.v1",
   // A notice the reader put away on this address.

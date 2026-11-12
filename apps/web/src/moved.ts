@@ -48,6 +48,8 @@ export const ADDRESSES_KEY = "hifth.moved.addresses.v1";
 export const LATER_KEY = "hifth.moved.later.v1";
 /** How many marks the carry took across, once it has. */
 export const CARRIED_KEY = "hifth.moved.carried.v1";
+/** The new tab's count of what arrived, kept across the reload that lays settings. */
+export const ARRIVED_KEY = "hifth.moved.arrived.v1";
 
 /** "Later" keeps the sheet away for a week. */
 export const LATER_MS = 7 * 24 * 60 * 60 * 1000;

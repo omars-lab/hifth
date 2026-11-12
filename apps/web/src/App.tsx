@@ -2383,6 +2383,7 @@ export function App(): JSX.Element {
     },
     CARRY_PLACE,
     () => Promise.all([bookmarksSaved(), notesSaved(), jumpsSaved()]),
+    (n) => announce(t.carryArrived(n)),
   );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
