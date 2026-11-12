@@ -128,6 +128,12 @@ export default tseslint.config(
     files: ["apps/landing/*.js"],
     languageOptions: { globals: { ...globals.browser } },
   },
+  // hifth.app's server part runs on Cloudflare, which has the web's Request, Response,
+  // FormData, URL and crypto; its tests run under Node, which has the same.
+  {
+    files: ["apps/landing/functions/**/*.js", "apps/landing/lib/*.mjs"],
+    languageOptions: { globals: { ...globals.serviceworker, ...globals.node } },
+  },
   // Config/test files may use dev globals.
   {
     files: ["**/*.config.{ts,js}", "**/*.test.{ts,tsx}", "**/vitest.setup.ts"],

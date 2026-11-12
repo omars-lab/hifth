@@ -1,0 +1,13 @@
+# hifth.app on Cloudflare Pages (the new account). Read by `wrangler pages dev` and
+# `wrangler pages deploy`, both run from this folder by the release tool.
+name = "hifth-app"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"
+
+# The "tell me when the Mac app is out" list. Table: schema.sql.
+# The id is filled in once the database is made on the new account (docs/issues.json,
+# hifth-app-first-release); until then the release tool refuses to publish.
+[[d1_databases]]
+binding = "DB"
+database_name = "hifth-notify"
+database_id = "not-made-yet"

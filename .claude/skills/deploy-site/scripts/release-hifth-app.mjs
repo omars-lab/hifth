@@ -18,7 +18,7 @@
  * releasing our site / ensuring the bare minimum is deployed (in prod, no dev functionality)".
  */
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { auditShipped, readFolder } from "./shipped.mjs";
@@ -54,6 +54,32 @@ export function assemble({ landing = LANDING, app = APP_DIST, out = OUT } = {}) 
   return out;
 }
 
+/**
+ * What is wrong with the site's Cloudflare settings (apps/landing/wrangler.toml), which the
+ * upload reads for the email list's database. Until the database is made on the new account,
+ * its id is a stand-in, and an upload would put up a form that saves nothing.
+ */
+export function configProblems(text) {
+  const path = "apps/landing/wrangler.toml";
+  if (typeof text !== "string") return [{ path, why: "the site's Cloudflare settings are missing" }];
+  const id = /^\s*database_id\s*=\s*"([^"]*)"/m.exec(text)?.[1];
+  if (!/^\s*binding\s*=\s*"DB"/m.test(text) || !id) {
+    return [{ path, why: "names no database for the email list, so the form would save nothing" }];
+  }
+  if (!/^[0-9a-f-]{32,36}$/i.test(id)) {
+    return [{ path, why: `the email list's database is not made yet (its id is "${id}"); make it on the new account and put its id here` }];
+  }
+  return [];
+}
+
+function readConfig() {
+  try {
+    return readFileSync(join(LANDING, "wrangler.toml"), "utf8");
+  } catch {
+    return null;
+  }
+}
+
 function git(...args) {
   const r = spawnSync("git", ["-C", REPO, ...args], { encoding: "utf8" });
   return { ok: r.status === 0, out: (r.stdout ?? "").trim() };
@@ -79,7 +105,7 @@ function say(problems, heading) {
 
 function check({ build }) {
   const commit = git("rev-parse", "HEAD").out;
-  const gitIssues = gitProblems();
+  const gitIssues = [...gitProblems(), ...configProblems(readConfig())];
   if (build) {
     console.log("Building the site and running its checks (make site)…");
     const r = spawnSync("make", ["-C", REPO, "site"], { stdio: "inherit" });

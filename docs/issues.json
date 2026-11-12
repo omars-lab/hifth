@@ -6095,7 +6095,7 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "hifth.app has no front page yet, and the web app still lives only at the blog address. The front page and privacy page are drawn; the email form's server part, the app under /read, a tested way to publish and the 'Hifth has moved' sheet are still to build. Plan: .claude/plans/hifth-app-site.md. 2026-11-11: the release tool is built and tested; the first upload waits on the owner's keys (hifth-app-first-release)."
+      "note": "hifth.app has no front page yet, and the web app still lives only at the blog address. The front page and privacy page are drawn; the email form's server part, the app under /read, a tested way to publish and the 'Hifth has moved' sheet are still to build. Plan: .claude/plans/hifth-app-site.md. 2026-11-11: the release tool is built and tested; the first upload waits on the owner's keys (hifth-app-first-release). 2026-11-12: the email form's server part is built and tried on Cloudflare's local server (sign up, repeat, bad address, leave); going live waits on making the database and the spam-check secret (hifth-app-first-release)."
     },
     {
       "id": "intent-picture-on-local-hub",
@@ -6132,7 +6132,7 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. It needs the Pages project made on the new account with hifth.app attached, the keys on this laptop, and the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload."
+      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. It needs the Pages project made on the new account with hifth.app attached, the keys on this laptop, and the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id."
     },
     {
       "id": "hifth-app-turnstile-key",

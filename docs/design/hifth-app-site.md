@@ -22,9 +22,9 @@ place to hear when the Mac app is out. The pages, marks and look-alike jumps are
 ### ① Is hifth.app live, with the app at /read and the email form working? · **open**
 
 Not yet. The front page and the privacy page are drawn and checked on a laptop and a phone-width
-screen. Still to come: the email form's server part and its database, the app copied under /read,
-one tested way to publish, and the "Hifth has moved" sheet on the old address. Each comes with
-its own tests.
+screen. The release tool is built and tested (④). The email form's server part is built (⑥).
+Still to come: the app copied under /read and the "Hifth has moved" sheet on the old address.
+Each comes with its own tests.
 
 What would answer it: hifth.app and hifth.app/read open in Firefox and Chrome; a throwaway email
 signs up and leaves again; marks made at the old address arrive at the new one.
@@ -53,7 +53,8 @@ run. Before it can:
 - the Cloudflare Pages project `hifth-app` has to be made on the new account, with `main` as
   its live branch and hifth.app attached to it;
 - the keys have to be on this laptop (`lpass login`, then `make env-keys-pull env-bootstrap`);
-- ③ and ⑤ have to be answered, or the check refuses the pages.
+- ③ and ⑤ have to be answered, or the check refuses the pages;
+- the email list's database has to be made (⑥), or the check refuses the site's settings.
 
 Two things still point at the old setup. The `app-setup` skill names
 hifth.bytesofpurpose.com/share for Cloudflare. `make deploy-cloudflare` publishes with wrangler's
@@ -69,3 +70,35 @@ The front page carries Cloudflare's published test key for its spam check (Turns
 lets every robot through. The release check refuses it. The real key comes from the new
 Cloudflare account, when the owner makes the Turnstile widget for hifth.app. Its secret half
 goes in as a Pages secret, never in the repository.
+
+### ⑥ Does the email form keep an address? · **built, not live**
+
+Yes, on this laptop (2026-11-12). It was tried on Cloudflare's own local server, with the real
+spam check in its test setting. From the page at phone width, an address went in and the page
+said "You're on the list". The same address again said "already on the list", and a bad one was
+turned away. The leave link took the address off, and the list was back to zero.
+
+How it works:
+
+1. The page sends the address and the spam-check answer to `/api/notify`.
+2. The server asks Cloudflare once whether the spam check passed, and on which site. An answer
+   can only be checked once, so it never asks twice.
+3. It keeps three things: the address, the date, and a random key for the leave link. It keeps
+   nothing else.
+4. The leave link, `/api/unsubscribe?t=…`, says the same thing whether or not it matched. The
+   link can't be used to find out whether an address is on the list.
+
+The answers never repeat the address. The tests use made-up addresses only.
+
+The code is in `apps/landing/lib/notify.mjs`, with its tests next to it. Cloudflare's
+two small entry files are in `apps/landing/functions/api/`, the table in
+`apps/landing/schema.sql`, and the site's Cloudflare settings in `apps/landing/wrangler.toml`.
+
+What is left before it is live:
+
+- make the database on the new account, put its id in the settings, and make its table;
+- put the spam check's secret in as a Pages secret (⑤);
+- a way to count the list without showing any address.
+
+Until the database is made, the release check refuses to publish.
+

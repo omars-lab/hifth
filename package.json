@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test && pnpm test:scripts",
-    "test:scripts": "node --test \"scripts/*.test.mjs\" \".claude/skills/*/scripts/*.test.mjs\"",
+    "test:scripts": "node --test \"scripts/*.test.mjs\" \".claude/skills/*/scripts/*.test.mjs\" \"apps/landing/lib/*.test.mjs\"",
     "test:e2e": "pnpm --filter @hifth/web test:e2e",
     "etl": "pnpm --filter @hifth/etl etl",
     "audit:corpus": "node packages/etl/scripts/audit-corpus.mjs",

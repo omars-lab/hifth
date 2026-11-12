@@ -79,6 +79,23 @@ make hifth-app-check ARGS=--no-build
 make hifth-app-verify ARGS="--url http://localhost:8788 --commit <the commit the build carries>"
 ```
 
+**The email form** has a server part. Its code is `apps/landing/lib/notify.mjs`, with Cloudflare's
+two entry files in `apps/landing/functions/api/`. Its database is described in
+`apps/landing/wrangler.toml`, with the table in `schema.sql`. The upload runs from
+`apps/landing/`, so wrangler finds all of these. None of them is copied into the release folder.
+
+- **Once, on the new account** (through dotenvx, like the upload):
+  1. `wrangler d1 create hifth-notify`, then put the id it prints in `wrangler.toml`. Until
+     then the check refuses the stand-in id.
+  2. `wrangler d1 execute hifth-notify --remote --file schema.sql`.
+  3. Put the spam check's secret in as a Pages secret, `TURNSTILE_SECRET`.
+- **To try the form locally:**
+  1. Make the local table: `wrangler d1 execute hifth-notify --local --file schema.sql`.
+  2. Start the server:
+     `wrangler pages dev dist --port 8788 --d1 DB=not-made-yet --binding TURNSTILE_SECRET=1x0000000000000000000000000000000AA --binding TURNSTILE_HOSTNAMES=localhost,example.com`.
+     That secret is Cloudflare's published test secret, which always passes. Once you give any
+     setting with `--binding`, the database has to be named with `--d1` too.
+
 The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch-all rule under
 `/read/` as an endless loop, and the app needs none, since it keeps its place after the `#`.
 Cloudflare also serves `privacy.html` at `/privacy`, so `_headers` names that address.

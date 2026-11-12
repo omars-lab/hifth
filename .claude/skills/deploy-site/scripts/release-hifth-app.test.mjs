@@ -14,7 +14,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { assemble } from "./release-hifth-app.mjs";
+import { assemble, configProblems } from "./release-hifth-app.mjs";
 import { auditShipped, readFolder } from "./shipped.mjs";
 
 function tree(root, files) {
@@ -89,4 +89,12 @@ test("putting it together again starts from an empty folder", () => {
   writeFileSync(join(out, "left-over.txt"), "from last time");
   assemble({ landing, app, out });
   assert.ok(!readFolder(out).files.some((f) => f.path === "left-over.txt"));
+});
+
+test("the site's Cloudflare settings are refused until the email list's database is made", () => {
+  const settings = (id) => `name = "hifth-app"\npages_build_output_dir = "dist"\n[[d1_databases]]\nbinding = "DB"\ndatabase_name = "hifth-notify"\ndatabase_id = "${id}"\n`;
+  assert.match(configProblems(settings("not-made-yet")).map((p) => p.why).join(" "), /database/);
+  assert.deepEqual(configProblems(settings("0f8b1c2e-0000-4000-8000-000000000000")), []);
+  assert.match(configProblems('name = "hifth-app"\n').map((p) => p.why).join(" "), /database/);
+  assert.match(configProblems(null).map((p) => p.why).join(" "), /settings/);
 });
