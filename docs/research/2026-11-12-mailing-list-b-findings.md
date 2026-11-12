@@ -85,7 +85,7 @@ Looked up with `dig` from this laptop, not from any web page.
 - Search — **snippet only**. Timed runs ("cron triggers") are a Workers feature with a `scheduled` handler. No source found saying Pages Functions have them; the pattern people describe is a separate small Worker on a timer.
 - <https://developers.cloudflare.com/workers/platform/limits/> — **fetched**, last updated 2026-10-29. Workers Free allows **5** timed triggers per account and 100,000 requests a day.
 
-## 2. iCloud+ Custom Email Domain
+## 2. What does iCloud+ allow, and how can another sender share the domain?
 
 ### What DNS does Apple ask for?
 
@@ -126,9 +126,9 @@ Looked up with `dig` from this laptop, not from any web page.
   - One DMARC record at the root covers everything, including subdomains.
   - Sending from a subdomain (for example `news.hifth.app`) keeps any reputation damage from a bulk send away from the owner's own day-to-day iCloud mail at the root.
 
-## 3. Free sending services
+## 3. Which free sending services could do it?
 
-### Resend
+### What does Resend give for free?
 
 - <https://resend.com/pricing> — **fetched** (no date shown).
   - Free plan, one-to-one ("transactional") mail: 3,000 a month, "limited to 100 emails per day", 3 domains.
@@ -148,7 +148,7 @@ Looked up with `dig` from this laptop, not from any web page.
 - Search on Resend's privacy framework — **snippet only**. EU-to-US transfers are covered by standard contract clauses and the EU-US Data Privacy Framework, certified March 2025.
 - Double opt-in: not looked at.
 
-### Brevo
+### What does Brevo give for free?
 
 - <https://www.brevo.com/pricing/> — **fetched** (page downloaded and the text read; the summary tool could not see it).
   - "Once we approve your account for sending, you can start sending up to 300 emails per day." So a new account is checked before it can send.
@@ -159,34 +159,34 @@ Looked up with `dig` from this laptop, not from any web page.
 - <https://help.brevo.com/hc/en-us/articles/208580669> — refused (403), not read.
 - Double opt-in, data location: not looked at.
 
-### Buttondown
+### What does Buttondown give for free?
 
 - <https://buttondown.com/pricing> — **fetched** (page downloaded and read). "Absolutely nothing for your first 100 subscribers." Includes "Send from a custom domain" and "Privacy-first". White-labelling is a $79-a-month add-on, which suggests free mail carries Buttondown's name (not stated outright).
 - Search — **snippet only**. About $9 a month near 1,000 subscribers, $29 near 5,000.
 - API on free, double opt-in, data location: not looked at.
 
-### MailerLite
+### What does MailerLite give for free?
 
 - <https://www.mailerlite.com/pricing> — **fetched**. Free: 250 subscribers, 2,500 emails a month. "Remove MailerLite logo" appears only from the paid Comfort plan (from $12 a month). "On Free, API and MCP access is limited and doesn't include sending." So we could not send our own list through its API on free.
 - Double opt-in, data location: not looked at.
 
-### Kit (formerly ConvertKit)
+### What does Kit (formerly ConvertKit) give for free?
 
 - <https://kit.com/pricing> — **fetched**. Free up to 10,000 subscribers; "There are no sending limits on any of our plans"; "Remove Kit branding" is not available on free; API available on free. Cheapest paid: Creator, $33 a month (1,000 subscribers).
 - <https://developers.kit.com/> — **fetched**, no plan details.
 - Kit sends to subscribers it holds; whether its API can send to addresses it does not hold: not looked at. Double opt-in, data location: not looked at.
 
-### EmailOctopus
+### What does EmailOctopus give for free?
 
 - <https://emailoctopus.com/pricing> — **fetched**. Free: 2,500 subscribers, 10,000 emails a month, EmailOctopus branding on free mail. Cheapest paid: Pro from $9 a month billed yearly.
 - Custom domain, API on free, double opt-in, data location: not stated or not looked at.
 
-### Mailchimp
+### What does Mailchimp give for free?
 
 - <https://mailchimp.com/pricing/marketing/> — **fetched** (copyright 2026). Free: 250 contacts; "Max of 500/mo or 250/day"; "Remove Mailchimp Branding" not included on free; "Sending will be paused if contact or email send limit is exceeded."
 - API, double opt-in, data location: not looked at.
 
-### Amazon SES
+### What does Amazon SES cost, and what does it take to start?
 
 - <https://aws.amazon.com/ses/pricing/> — **fetched** (copyright 2026). "$0.10 / 1,000 emails" for outgoing mail bought one by one. New AWS customers get "up to $200 in AWS Free Tier credits", the free plan lasting 6 months. The old "3,000 free a month for 12 months" offer is not on the page.
 - <https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html> — **fetched**.
@@ -194,13 +194,13 @@ Looked up with `dig` from this laptop, not from any web page.
   - To leave it you tell AWS whether the mail is marketing or one-to-one, give the website, and tick that you will "only send email to individuals who've explicitly requested it" and have a way to handle bounces and complaints. First answer within 96 hours.
 - SES sends what you give it; the list stays wherever you keep it. No footer. AWS itself does not add tracking by default (**snippet only**, from AWS's metrics FAQ).
 
-### Listmonk (run it yourself)
+### What would running Listmonk ourselves take?
 
 - <https://listmonk.app/> — **fetched**. "Free and open source self-hosted newsletter, mailing list manager." One program plus its own Postgres database. Single and double opt-in lists. "Multi-SMTP e-mail queues".
 - <https://listmonk.app/docs/> — **fetched**. Licence AGPLv3; the only dependency is Postgres.
 - It still needs a sending service behind it (such as SES) and a server that is always on. Not looked at further.
 
-## 4. Supabase in practice
+## 4. How does Supabase behave on the free plan?
 
 ### Does the free plan pause a quiet project?
 
@@ -211,7 +211,7 @@ Looked up with `dig` from this laptop, not from any web page.
   - "You can restore a paused project for up to 1 year after it was paused," by pressing **Resume project** in the dashboard.
 - <https://supabase.com/docs/guides/troubleshooting/http-status-codes> — **fetched**. Status 540: "The project the request was being made against has been paused." "The project cannot process requests until it is un-paused by the owner." **So a form writing to a paused project fails for every visitor until the owner resumes it.** A ping cannot wake it.
 - <https://supabase.com/docs/guides/platform/billing-on-supabase> — **fetched**. Two free projects per account; paused projects do not count toward that; paid plans never pause.
-- From this repository (the Supabase move design page on the `supabase-move` branch, not yet on main): the new project is set up but its library data is not loaded yet, and the only things that use it are three building scripts run by hand. **So nothing keeps it busy today**, and the owner already paused the old project once.
+- From this repository (the Supabase move design page on the `supabase-move` branch, not yet on main): the new project is set up but its library data is not loaded yet, and the only things that use it are three building scripts run by hand. **So nothing keeps it busy today**. (The old project was paused on purpose by the owner, not by inactivity.)
 
 ### Is a timed "keep awake" request allowed?
 
@@ -228,13 +228,14 @@ Looked up with `dig` from this laptop, not from any web page.
 - <https://supabase.com/docs/guides/database/postgres/row-level-security> — **fetched**. (Note to AI agents ignored.)
   - Turn row rules on, take away the default table rights, give back only what each role needs: "Adding policies doesn't take those grants back."
   - With row rules on and no rules written, the publishable key reaches nothing.
-  - Insert-only for the public role: grant insert only, plus an insert rule. Returning the new row would also need read rights, so ask the API for no row back.
+  - Insert-only for the public role: grant insert only, plus an insert rule.
+  - Not from this page: asking the API to send the new row back would also need read rights. That is general Postgres behaviour as I understand it, **not verified** from a fetched source. Asking for no row back avoids the question either way.
 - From this repository (the `supabase-move` branch, migration dated 2026-11-12): the new project already takes all rights on new tables, sequences and functions away from the public roles by default. **So a new sign-up table starts closed**, and anything the form may do has to be granted on purpose.
 - The same project holds the privately held outside library. A secret key kept on Cloudflare would open that library too if it ever leaked. (My reading, not a fetched source.)
 
-## 5. Rules for the mail itself
+## 5. What rules apply to the mail itself?
 
-### United States (CAN-SPAM)
+### What does US law (CAN-SPAM) require?
 
 - <https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business> — **fetched**, dated August 2023, edited January 2024.
   - Each marketing email must carry "a valid physical postal address": a street address, "a post office box you've registered with the U.S. Postal Service," or "a private mailbox you've registered with a commercial mail receiving agency."
@@ -243,7 +244,7 @@ Looked up with `dig` from this laptop, not from any web page.
   - Whether a message is commercial depends on its main purpose: content that "advertises or promotes a commercial product or service." A launch announcement for an app is most safely treated as commercial, even a free one (my reading).
   - Up to $53,088 per email in breach.
 
-### UK (PECR and UK GDPR) and EU (GDPR)
+### What do UK law (PECR and UK GDPR) and EU law (GDPR) require?
 
 - <https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/guide-to-pecr/electronic-and-telephone-marketing/electronic-mail-marketing/> — **fetched** (no date; "under review" for the 2025 data act).
   - No marketing email to individuals unless they "have specifically consented to electronic mail from you," for example by "ticking an opt-in box."
@@ -257,7 +258,7 @@ Looked up with `dig` from this laptop, not from any web page.
 - <https://gdpr-info.eu/art-7-gdpr/> — **fetched**. Article 7(1): the controller "shall be able to demonstrate that the data subject has consented." Article 7(3): consent can be withdrawn at any time, and "It shall be as easy to withdraw as to give consent."
 - **So:** double opt-in is advised, not required, in all three places. What is required is a record of the agreement and an easy way out.
 
-## 6. Other things that change the choice
+## 6. What else could change the choice?
 
 ### What do Gmail and Yahoo expect of senders?
 
@@ -280,8 +281,9 @@ Looked up with `dig` from this laptop, not from any web page.
 ### Is a leave link that deletes on a plain visit safe?
 
 - My own reasoning, **not from a fetched source**: some mail systems open every link in a message to check it for danger before the person sees it. A leave link that deletes the row on a plain visit could then remove people who never clicked. The one-click standard above uses a POST for this reason. A leave page that asks "Leave the list?" with a button, plus a separate POST address for the one-click headers, avoids it.
+- The same applies to the **confirm link**: a link that confirms on a plain visit could be confirmed by a scanner, which defeats the point of confirming. It gets the same treatment: the link opens a page with a "Confirm" button that sends a POST.
 
-## Every source, with how it was read
+## Which sources were read, and how?
 
 | Source | How read |
 | --- | --- |
