@@ -6159,6 +6159,17 @@
       "owner": "agent",
       "feature": "performance",
       "note": "The app downloads 171 KB before the first page can be used, and start-up drops from about 2290 ms to about 2140 ms once that is under about 160 KB. Next step: load the laptop's page-edge strips (about 3 KB) and the zoom and edge-turn parts of the page stage later, one at a time, measuring each beside the last, then lower the start-up limit to just above the new size."
+    },
+    {
+      "id": "supabase-move",
+      "source": {
+        "file": "docs/design/supabase-move.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, copied its rows into a git-ignored backup (counts match), and wrote the migration that closes its tables to the public key (they were open for reading and writing). Next, the owner creates the new project; then link, push the migrations, restore the backup, make a new password file, run the page-fixture script against it, and retire the old project."
     }
   ]
 }

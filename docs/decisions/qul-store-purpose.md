@@ -148,7 +148,7 @@ rendered on the app's own site — with the three store tables drawn too — at
 `docs/design/qul-data-erd.html`.
 
 *Where this lives in the code:* the held copy is reached through the Supabase command-line tool
-(project ref `zbkqfstkjmgzsrraodez`) and populated by the ingest step on branch
+and populated by the ingest step on branch
 `qul-etl-supabase` (off `qul-integration`); its source inputs stay in a gitignored `.cache/` so
 nothing lands in the tree. The word-by-word page is drawn from the digital-khatt 15-line layout
 (library id 21) and the QPC V4 word text (library id 47), with the surah-name and Nastaleeq fonts
