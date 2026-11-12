@@ -200,7 +200,8 @@ function fail(where, msg) {
   log("error", { where, msg: quote(msg) });
   console.error(
     where === "ipad"
-      ? `${msg}\nIs the iPad plugged in, unlocked and trusted, with a build from this laptop on it?`
+      ? `${msg}\nIs the iPad plugged in, unlocked and trusted, with a build from this laptop on it?` +
+        `\nOr no card has been answered on it yet: the app makes its answers folder at the first Done.`
       : `${msg}\nIs a simulator booted with the app installed (make app-run)?`,
   );
   process.exit(1);

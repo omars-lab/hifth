@@ -202,6 +202,17 @@ fs.writeFileSync(path.join(dest, "checks", "made-up-20270115-080000.json"), ${JS
   assert.match(again.stdout, /ev=done .*new=0/, "a file already copied is not counted again");
 });
 
+test("answers --device, when the copy fails, says the folder may not exist yet as well as asking about the cable", () => {
+  // The app makes Documents/checks at the first Done, so before any card is
+  // answered the copy fails even with the iPad plugged in and trusted.
+  const dir = temp("devnone");
+  const devicectl = standIn(dir, "devicectl", `console.error("ERROR: made-up failure"); process.exit(1);`);
+  const r = run(["answers", "--device", DEVICE, "--out", temp("out")], { HIFTH_DEVICECTL: devicectl });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /plugged in/);
+  assert.match(r.stderr, /no card has been answered/i);
+});
+
 test("the answers folder is kept out of git: answers can name what the pitch build showed", () => {
   const env = { ...process.env };
   for (const k of ["GIT_DIR", "GIT_INDEX_FILE", "GIT_WORK_TREE"]) delete env[k];
