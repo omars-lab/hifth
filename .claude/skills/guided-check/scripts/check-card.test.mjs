@@ -125,6 +125,22 @@ test("a file with no steps, or an empty one, is refused before anything is sent"
   assert.equal(run(["link", "--ledger", "no-such-row"]).status, 2);
 });
 
+// The screenshot test of 2026-11-12 had a step whose "see" said "Note in the
+// note field whether…". The owner pressed the cross and wrote no note, and
+// nobody could tell what the cross meant. A step is a tick-or-cross question.
+test("a step that asks for a note instead of a tick or a cross is named, and the card still goes", () => {
+  const file = stepsFile([
+    { do: "Open the made-up page", see: "Note in the note field whether it was slow." },
+    { do: "Turn the made-up page", see: "Tick if it slid over, cross if it jumped." },
+  ]);
+  const r = run(["link", "--file", file]);
+  assert.equal(r.status, 0, r.stderr);
+  const flagged = r.stdout.split("\n").filter((l) => l.includes("ev=unclear_step"));
+  assert.equal(flagged.length, 1, r.stdout);
+  assert.match(flagged[0], /step=1 /);
+  assert.match(r.stderr, /tick/i, "it says how to word the step");
+});
+
 test("send --sim hands the link to the booted simulator", () => {
   const dir = temp("sim");
   const simctl = standIn(dir, "simctl");
@@ -211,6 +227,54 @@ test("answers --device, when the copy fails, says the folder may not exist yet a
   assert.equal(r.status, 1);
   assert.match(r.stderr, /plugged in/);
   assert.match(r.stderr, /no card has been answered/i);
+});
+
+// A guided check often runs a build that writes its own log as well (the
+// screenshot test of 2026-11-12 wrote Documents/walk-probe/log.txt), and that
+// log was copied off by hand with a second command. --also brings it back with
+// the answers.
+test("answers --also copies a folder the build wrote beside the answers, from the iPad", () => {
+  const dir = temp("devalso");
+  const devicectl = standIn(
+    dir,
+    "devicectl",
+    `const src = a[a.indexOf("--source") + 1], dest = a[a.indexOf("--destination") + 1];
+const into = path.join(dest, path.basename(src));
+fs.mkdirSync(into, { recursive: true });
+if (src === "Documents/checks") fs.writeFileSync(path.join(into, "made-up-20270115-080000.json"), ${JSON.stringify(JSON.stringify(answer("made-up", ["pass"])))});
+else fs.writeFileSync(path.join(into, "log.txt"), "2027-01-15T08:00:00Z ev=made_up\\n");`,
+  );
+  const out = temp("out");
+  const r = run(["answers", "--device", DEVICE, "--out", out, "--also", "Documents/made-up-probe"], { HIFTH_DEVICECTL: devicectl });
+  assert.equal(r.status, 0, r.stderr);
+  const sources = calls(dir).map((c) => c[c.indexOf("--source") + 1]);
+  assert.deepEqual(sources, ["Documents/checks", "Documents/made-up-probe"]);
+  assert.equal(readFileSync(join(out, "made-up-probe", "log.txt"), "utf8"), "2027-01-15T08:00:00Z ev=made_up\n");
+  assert.match(r.stdout, /ev=also_copied from=Documents\/made-up-probe files=1 /);
+
+  // Copied again, the folder is the iPad's latest: a log that grew is not left stale.
+  const again = run(["answers", "--device", DEVICE, "--out", out, "--also", "Documents/made-up-probe"], { HIFTH_DEVICECTL: devicectl });
+  assert.equal(again.status, 0, again.stderr);
+  assert.match(again.stdout, /ev=also_copied .*files=1 /);
+});
+
+test("answers --also works from the simulator, and refuses a path that leaves the app's folder", () => {
+  const dir = temp("simalso");
+  const container = join(dir, "container");
+  mkdirSync(join(container, "Documents/checks"), { recursive: true });
+  mkdirSync(join(container, "Documents/made-up-probe"), { recursive: true });
+  writeFileSync(join(container, "Documents/made-up-probe/log.txt"), "made up\n");
+  const simctl = standIn(dir, "simctl", `if (a[0] === "get_app_container") console.log(${JSON.stringify(container)});`);
+  const out = temp("out");
+  const r = run(["answers", "--sim", "--out", out, "--also", "Documents/made-up-probe"], { HIFTH_SIMCTL: simctl });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(readFileSync(join(out, "made-up-probe", "log.txt"), "utf8"), "made up\n");
+
+  const away = run(["answers", "--sim", "--out", out, "--also", "Documents/../../elsewhere"], { HIFTH_SIMCTL: simctl });
+  assert.equal(away.status, 2, "a path with .. in it is refused");
+  const missing = run(["answers", "--sim", "--out", out, "--also", "Documents/not-there"], { HIFTH_SIMCTL: simctl });
+  assert.equal(missing.status, 1, "a folder the build never wrote is an error, said plainly");
+  assert.match(missing.stderr, /Documents\/not-there/);
 });
 
 test("the answers folder is kept out of git: answers can name what the pitch build showed", () => {

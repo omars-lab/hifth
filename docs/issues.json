@@ -5907,7 +5907,7 @@
       "next": true,
       "severity": "question",
       "owner": "agent",
-      "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11; slice 0 (the on-iPad check) needs the owner holding the iPad for ten minutes."
+      "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11. Slice 0, the throwaway check on the real iPad, ran 2026-11-12 and answered its three questions. (1) The app hears a screenshot taken with the two buttons and with the Pencil corner swipe, so no second way to capture is needed. (2) iOS asked to allow screen recording once, after the install. Apple's recorder kept the last 5 seconds as a clip of 4 to 12 MB each time. (3) The laptop copies files out of the app's Documents folder over the cable. One thing slice 2 must handle: coming back from the Home Screen, the recorder's first start failed with 'interrupted by multitasking' and only a later return started it. So the real build retries the start after a moment. Still to settle with the owner: whether the cross on the card's step 4 meant iOS asked about recording again, since no note was left. Next: slice 1, the picture, where you were, the note and the trail."
     },
     {
       "id": "check-card-link",
@@ -5916,12 +5916,13 @@
         "file": "docs/design/check-card.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
       "useCase": "run-a-check-a-machine-cannot",
       "feature": "validation",
-      "note": "Owner's ask of 2026-11-12, holding the iPad: a link that opens a small card in the app listing what to check, so the steps for a check on the device are not typed into the chat. Each step is answered with a tick or a cross, the answers are saved on the iPad and copied off by the laptop. Debug build only. Design note: docs/design/check-card.md. Built 2026-11-12 and working in the iPad simulator: make check-card sends a card (from a row of the by-hand checks list or a steps file) and make check-answers copies the answers back; a UI test in the app (SmokeTests testCheckLinkOpensACard) and the script's own test hold it. Still open until it runs on the real iPad: its first use there is the screenshot check for walk-feedback-capture (FILE=.claude/skills/walk-app/checks/walk-probe.json)."
+      "closedBy": ".claude/skills/guided-check/scripts/check-card.test.mjs",
+      "note": "Owner's ask of 2026-11-12, holding the iPad: a link that opens a small card in the app listing what to check, so the steps for a check on the device are not typed into the chat. Each step is answered with a tick or a cross, the answers are saved on the iPad and copied off by the laptop. Debug build only. Design note: docs/design/check-card.md. Built 2026-11-12 and working in the iPad simulator: make check-card sends a card (from a row of the by-hand checks list or a steps file) and make check-answers copies the answers back; a UI test in the app (SmokeTests testCheckLinkOpensACard) and the script's own test hold it. Ran on the real iPad the same evening, for the screenshot check of walk-feedback-capture (FILE=.claude/skills/guided-check/checks/walk-probe.json): the card arrived, the owner answered it, and make check-answers copied the answers back. One lesson from that run: a step that asked the owner to 'note whether' something came back as a cross with no note, which nobody could read. The script now names any step worded that way, and every step is a tick-or-cross question. How to run one of these is now its own skill, guided-check."
     },
     {
       "id": "feature-links-hub",
