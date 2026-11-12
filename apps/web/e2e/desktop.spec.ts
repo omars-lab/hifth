@@ -2553,6 +2553,16 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
         const list = page.getByRole("dialog");
         await expect(list).toBeVisible({ timeout: 20_000 });
         await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        // Both ways end with the page beside the list. On a busy laptop the page
+        // can sit still for a moment before its slide starts, and a still box
+        // read then was the whole page (491 pixels off, a push run of 2026-11-12).
+        const taken = await stillBoxOf(list);
+        await expect
+          .poll(async () => {
+            const b = await svg.boundingBox();
+            return b !== null && (b.x + b.width <= taken.x + 1 || b.x >= taken.x + taken.width - 1);
+          }, { message: "the page is beside the list, not under it", timeout: 10_000 })
+          .toBe(true);
         return (await stillBoxOf(svg)).width;
       };
       await page.goto(`/#/hafs-kfqc/${at}?view=one`);
