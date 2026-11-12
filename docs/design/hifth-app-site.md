@@ -250,3 +250,9 @@ and the decision check's site address change at once. Waits on hifth.app being l
 Not until readers have moved: the old address offers the carry (⑦), and turning it off before
 then would strand anyone who has not carried. What would answer it: the old address showing a
 page that sends readers on, once the carry has been on for a while.
+
+### ⑮ Which features will cost money? · **blocked**
+
+Hifth will have paid features too (owner, 2026-11-12). Which ones, the price and how a reader
+pays are not chosen yet. Until they are, the front page says only that Hifth is open source, and
+promises nothing about price either way: no "free", and no price.

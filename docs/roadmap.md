@@ -2,7 +2,7 @@
 
 *This is a draft, written by `intent roadmap` on 2026-11-12. Running the command again writes over it.*
 
-142 open tasks: 7 now, 75 next, 60 later. 10 name a use case, 17 name only a part of the product, 115 are tied to nothing yet.
+142 open tasks: 7 now, 74 next, 61 later. 10 name a use case, 17 name only a part of the product, 115 are tied to nothing yet.
 
 132 of 142 open tasks name nobody they are for.
 
@@ -87,7 +87,6 @@ Typing hifth.app shows what Hifth is for, opens the app, and lets a reader leave
 - **hifth-app-turnstile-key**: The front page carries Cloudflare's test key for the spam check, which lets every robot through, and the release check refuses it.
 - **carry-marks-switched-off**: The 'Hifth has moved' card and the way to carry marks across are built and tested in Chrome, Firefox and iPhone Safari, but switched off, so readers at the old…
 - **notify-list-not-live**: The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key…
-- **carry-leaves-settings-behind**: Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, and since 2026-11-12 where the reader left off: the new tab opens on that page…
 
 ### Tied to nothing yet (61)
 
@@ -141,10 +140,10 @@ Typing hifth.app shows what Hifth is for, opens the app, and lets a reader leave
 - **sharing-own-icloud**: Say yes or no to your mistakes, notes and bookmarks following you between your own iPad and Mac through your own private iCloud; the build rides on the…
 - **sharing-consent**: Decide whether a student's mistakes may be sent to another person at all, and what the student sees before saying yes; a new decision record, since sharing…
 - **sharing-which-way**: Pick how mistakes first reach a teacher; recommended: the teacher's view fed by the saved file first, then the live locked link with no accounts, accounts only…
-- **sharing-reading-times**: Decide whether the record of when you read ever goes with a share; suggested never by default, and only as a separate tick each time, which means naming one…
 - **sharing-link-ending**: Decide whether a shared link stops working by itself after a while, and whether the teacher sees new mistakes live or on reopening.
 - **sharing-cloudflare-setup**: Set up hifth.app/share on Cloudflare with its free database behind it: a small server at /share on the account that holds hifth.app, a placeholder page with no…
 - **kanban-board-for-users**: Give the people who use Hifth (the Study Quran team, testers, later huffaz) a kanban board to manage it and review it, beside the project's own GitHub board.
+- **sharing-who-has-my-data**: The reader decides who sees their data (owner, 2026-11-12), so every way out needs one place listing who has what since when, with a way to stop each, and a…
 - **sharing-teacher-view**: Build the teacher's view two rough ways, mistakes on the real page and as a list, open both on an iPad, and keep the loser as a setting.
 - **full-screen-side-tool-bar**: Owner's page comment of 2026-11-07: in full screen, keep the tool bar down the left or right edge, with a switch to hide and show it like the Mac Dock.
 - **bookmark-vs-left-off-ribbon**: Owner's page comment of 2026-11-07: the navy bookmark tabs and the red 'where you left off' ribbon look alike, so it is not clear which is which.
@@ -171,6 +170,7 @@ Typing hifth.app shows what Hifth is for, opens the app, and lets a reader leave
 - **hifth-app-builds-itself**: Let Cloudflare build and publish hifth.app on each merge instead of from the laptop, keeping the private pitch folder out and running the same checks.
 - **design-pages-to-hifth-app**: Move the design pages from the old address to hifth.app; every decision link and the decision check's site address change with them.
 - **retire-old-app-address**: Stop serving the app at the old address once readers have carried their marks across; until then the old address offers the carry.
+- **hifth-paid-features**: Hifth will have paid features too (owner, 2026-11-12, a comment on the front page).
 
 ### Tied to nothing yet (53)
 

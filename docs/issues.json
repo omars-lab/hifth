@@ -6284,6 +6284,21 @@
         "carry-marks-switched-off"
       ],
       "note": "Stop serving the app at the old address once readers have carried their marks across; until then the old address offers the carry."
+    },
+    {
+      "id": "hifth-paid-features",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑮"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "the owner choosing which features are paid"
+      ],
+      "note": "Hifth will have paid features too (owner, 2026-11-12, a comment on the front page). Which ones, at what price and how a reader pays are not chosen; until then the front page says only that Hifth is open source, and promises nothing about price either way."
     }
   ]
 }
