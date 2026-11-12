@@ -20,7 +20,7 @@ the app.
 | Server functions, stored secrets, file buckets, preview branches | None. |
 | Sign-ups | Not checked: the dump that would count them also copies password hashes, so it was refused. Very likely empty: no app code signs anyone in, and the settings file is the untouched default. Glance at *Authentication → Users* in the old dashboard to be sure. |
 | Licence for the word text | Read and marked done in the manual-check ledger before the text was loaded. The move does not change what is held, so it does not need reading again. |
-| Who could read it | **The tables were open to the project's public key, for reading and for writing.** Supabase opens every new table that way, and our migrations never closed them. This was read from the table rights and the missing row rules, not tried with the key. The key itself was never written in this repo, which limits who could have had it. The new migration (dated 2026-11-12) closes the tables, and a test now fails if a table is ever added open. |
+| Who could read it | **The tables were open to the project's public key, for reading and for writing.** Supabase opens every new table that way, and our migrations never closed them. This was read from the table rights and the missing row rules, not tried with the key. The key itself was never written in this repo, which limits who could have had it. The new migration (dated 2026-11-12) closes the tables, and a test now fails if a table is ever added open. **Closed on the old store the same day:** the migration was pushed there, and a fresh schema dump shows row rules on all three tables and no table rights left for the public roles. |
 | The connection password file | Gone from disk: it lived in a worktree that was removed. The new project gets a new one. |
 
 ## Where does the data come from for the new store?
@@ -44,8 +44,8 @@ project is paused. The steps:
 1. **Copy the data out of the old store.** Done 2026-11-12 (above).
 2. **Create the new account and project.** Postgres 17. Note the region: the connection
    address depends on it.
-3. **Point the Supabase command line at it.** Log in as the new account, then link the repo to
-   the new project from the repo root.
+3. **Point the Supabase command line at it.** Log in as the new account under its own profile,
+   so the old account's login stays where it is, then link the repo to the new project.
 4. **Build the tables.** Push the migrations. The new project starts with the tables already
    closed to the public key.
 5. **Load the data.** Restore the backup into the new project, then compare row counts with
@@ -58,19 +58,36 @@ project is paused. The steps:
 
 <details><summary>Commands for each step</summary>
 
+A Supabase command-line *profile* is a small file of web addresses plus a name, and the saved
+login is filed under that name. A profile file with its own name (`hifth`, kept at
+`~/.supabase/profiles/hifth.yaml`) therefore holds a second login next to the default one.
+Commands without `--profile` keep using the old account. Its contents:
+
 ```
-# 3 — after logging in as the new account in your own terminal
-supabase projects list
-supabase link --project-ref <new project's ref>
+name: hifth
+api_url: https://api.supabase.com
+project_host: supabase.co
+dashboard_url: https://supabase.com/dashboard
+pooler_host: supabase.com
+```
+
+Every command in steps 3 to 5 takes the same `--profile` flag. Setting `SUPABASE_ACCESS_TOKEN`
+in the shell beats both saved logins, so leave it unset.
+
+```
+# 3 — log in once, in your own terminal (it opens a browser)
+supabase login --profile ~/.supabase/profiles/hifth.yaml
+supabase --profile ~/.supabase/profiles/hifth.yaml projects list
+supabase --profile ~/.supabase/profiles/hifth.yaml link --project-ref <new project's ref>
 
 # 4
-supabase migration list         # both old migrations plus the close-the-tables one
-supabase db push
+supabase --profile ~/.supabase/profiles/hifth.yaml migration list   # all three show as not yet applied
+supabase --profile ~/.supabase/profiles/hifth.yaml db push
 
 # 5 — restore the backup (the password-bearing address is yours to supply)
 psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 \
   -f packages/etl/data/qul/.cache/qul-store-backup/public-data-2026-11-12.sql
-supabase inspect db table-stats --linked
+supabase --profile ~/.supabase/profiles/hifth.yaml inspect db table-stats --linked
 
 # 7
 dotenvx run -- node packages/etl/scripts/qul-page-fixture.mjs --page 1
