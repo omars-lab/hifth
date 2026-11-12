@@ -6133,7 +6133,7 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. It needs the Pages project made on the new account with hifth.app attached, the keys on this laptop, and the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id."
+      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. Done 2026-11-12: the keys work on this laptop, and the site project (hifth-app) is made on the new account. Still needed: hifth.app attached to that project after the first upload, the email list's database, the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id."
     },
     {
       "id": "hifth-app-turnstile-key",
@@ -6145,7 +6145,7 @@
       "severity": "question",
       "owner": "user",
       "feature": "hifth-app-site",
-      "note": "The front page carries Cloudflare's test key for the spam check, which lets every robot through, and the release check refuses it. The owner makes the Turnstile widget for hifth.app on the new account; the site key goes in the page and the secret goes in as a Pages secret."
+      "note": "The front page carries Cloudflare's test key for the spam check, which lets every robot through, and the release check refuses it. Either the owner makes the Turnstile widget for hifth.app on the new account, or adds Turnstile edit to the saved token and the agent makes it, so the secret is never pasted anywhere. The site key goes in the page and the secret goes in as a Pages secret."
     },
     {
       "id": "carry-marks-switched-off",
@@ -6169,7 +6169,7 @@
       "severity": "risk",
       "owner": "user",
       "feature": "hifth-app-site",
-      "note": "The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key and secret are not in. Next: make the database on the new account and put its id in apps/landing/wrangler.toml, push the spam-check secret, then sign up once with a throwaway address on the live page and see make hifth-app-list-count say 1."
+      "note": "The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key and secret are not in. On 2026-11-12 the saved Cloudflare token was refused for databases (it can reach the site project, not D1), so the owner adds D1 edit to that token. Next: make the database on the new account and put its id in apps/landing/wrangler.toml, push the spam-check secret, then sign up once with a throwaway address on the live page and see make hifth-app-list-count say 1."
     },
     {
       "id": "carry-leaves-settings-behind",
