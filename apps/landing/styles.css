@@ -34,6 +34,33 @@ body {
 
 main, footer { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
 
+/* English or Arabic, on every page (owner, 2026-11-12). Plain links to the other copy. */
+.lang-bar {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 12px 16px 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  font: 500 14px/1.2 ui-sans-serif, system-ui, sans-serif;
+}
+
+.lang-bar a {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.lang-bar a:hover { border-color: var(--rule); }
+
+.lang-bar a[aria-current="page"] {
+  border-color: var(--rule);
+  background: var(--card);
+  color: var(--ink);
+}
+
 a { color: var(--teal); }
 
 .hero {
@@ -60,6 +87,8 @@ a { color: var(--teal); }
   color: var(--teal);
   text-align: left;
 }
+
+html[dir="rtl"] .wordmark { text-align: right; }
 
 h1 {
   margin: 4px 0 0;
@@ -98,15 +127,39 @@ h1 {
   color: var(--muted);
 }
 
-.hero-picture { margin: 0; justify-self: center; }
+/* The opening picture: two facing pages as on a computer, and the same verse on a phone
+   tucked over the bottom corner, so both ways of reading show at once (owner, 2026-11-12). */
+.hero-picture {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  max-width: 560px;
+  justify-self: center;
+  padding-bottom: 8%;
+}
 
 .hero-picture img {
   display: block;
-  width: min(320px, 80vw);
   height: auto;
-  border-radius: 24px;
   border: 1px solid var(--rule);
   box-shadow: 0 20px 50px rgba(60, 45, 20, 0.18);
+}
+
+/* The phone sits on the left corner in both languages: the highlighted verse is on the
+   right-hand page of the spread, and the phone must not cover it. */
+.hero-picture .spread {
+  width: 88%;
+  margin-left: auto;
+  border-radius: 14px;
+}
+
+.hero-picture .phone {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 27%;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(60, 45, 20, 0.28);
 }
 
 .notify h2, .feature h3, .coming h3 {
@@ -154,7 +207,7 @@ h1 {
   background: var(--card);
 }
 
-.coming ul { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+.coming ul { margin: 0; padding-inline-start: 20px; display: grid; gap: 10px; }
 .coming strong { color: var(--ink); }
 
 /* The device tabs are radio buttons: they work with scripts off, and the arrow keys move
@@ -170,7 +223,8 @@ h1 {
 
 .device-tabs label {
   display: inline-block;
-  margin: 0 6px 8px 0;
+  margin: 0 0 8px;
+  margin-inline-end: 6px;
   padding: 8px 14px;
   border: 1px solid var(--rule);
   border-radius: 999px;
@@ -259,8 +313,12 @@ footer {
 .prose h1 { text-transform: none; letter-spacing: 0; font-size: 28px; color: var(--ink); }
 .prose h2 { font: 600 18px/1.3 ui-sans-serif, system-ui, sans-serif; margin-top: 28px; }
 
+/* Arabic has no capitals, and spacing its letters apart breaks their joins. */
+[lang="ar"] h1 { letter-spacing: 0; text-transform: none; }
+html[lang="ar"] body { font-family: "Geeza Pro", "Noto Naskh Arabic", ui-serif, serif; }
+
 @media (min-width: 760px) {
-  .hero { grid-template-columns: 1.2fr 1fr; padding-top: 72px; }
+  .hero { grid-template-columns: 1fr 1.15fr; padding-top: 56px; }
   .feature { grid-template-columns: 360px 1fr; gap: 40px; }
   .feature:nth-of-type(even) { grid-template-columns: 1fr 360px; }
   .feature:nth-of-type(even) img { order: 2; }

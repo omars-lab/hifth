@@ -324,3 +324,41 @@ function seed(page: Page, day: string, events: { key: string; page: number; at: 
     { day, events },
   );
 }
+
+/*
+ * The opening picture, in each of the front page's languages (owner, 2026-11-12: "i want to
+ * see two pages view as well", and an English/Arabic bar). Two facing pages as on a computer,
+ * and one page on a phone set in front of them, both with one verse highlighted. The app picks
+ * its language from the browser here, the way a reader's own browser would, so the phone's
+ * buttons are in the language of the page the picture sits on.
+ */
+for (const [suffix, locale] of [["", "en-US"], ["-ar", "ar"]] as const) {
+  test.describe(`the opening picture${suffix ? ", in Arabic" : ""}`, () => {
+    test.use({ locale });
+
+    /** The highlighter draws itself along the verse, line by line, after the page lands. */
+    const drawn = (page: Page) => page.waitForTimeout(2_000);
+
+    test(`hero-spread${suffix}: two facing pages, one verse highlighted`, async ({ page }) => {
+      await page.setViewportSize(LAPTOP);
+      await page.goto("/#/hafs-kfqc/2:48");
+      const pages = page.locator('svg[aria-labelledby^="page-label-"]:visible');
+      await expect(pages).toHaveCount(2, { timeout: 20_000 });
+      await expect(page.locator("html")).toHaveAttribute("lang", locale.slice(0, 2));
+      await drawn(page);
+      await cropAround(page, [pages.nth(0), pages.nth(1)], `hero-spread${suffix}`, { pad: 0, quality: 62 });
+    });
+
+    test.describe("on a phone", () => {
+      test.use({ viewport: PHONE, hasTouch: true });
+
+      test(`hero-phone${suffix}: one page in the hand`, async ({ page }) => {
+        await page.goto("/#/hafs-kfqc/2:48");
+        await expect(pageSvg(page, 7)).toBeVisible({ timeout: 20_000 });
+        await expect(page.locator("html")).toHaveAttribute("lang", locale.slice(0, 2));
+        await drawn(page);
+        await screen(page, `hero-phone${suffix}`);
+      });
+    });
+  });
+}

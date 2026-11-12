@@ -199,3 +199,42 @@ test("an email is cleaned the same way every time", () => {
   assert.equal(cleanEmail(""), null);
   assert.equal(cleanEmail(undefined), null);
 });
+
+// The Arabic front page sends lang=ar with the form (owner, 2026-11-12, the language bar), so
+// its reader is answered in Arabic, with scripts or without.
+test("a sign-up from the Arabic page is answered in Arabic", async () => {
+  const res = await handleNotify(signup({ email: "a@example.com", "cf-turnstile-response": "t", lang: "ar" }), ENV(fakeDb()), OPTS(siteverify(PASS).fetch));
+  const { message } = await res.json();
+  assert.match(message, /[؀-ۿ]/, "the message is in Arabic");
+  assert.doesNotMatch(message, /[A-Za-z]/, "with no English left in it");
+});
+
+test("without JavaScript, the Arabic page gets an Arabic page back, right to left, with a way home", async () => {
+  const res = await handleNotify(signup({ email: "bad", lang: "ar" }, { json: false }), ENV(fakeDb()), OPTS(siteverify(PASS).fetch));
+  assert.equal(res.status, 400);
+  const html = await res.text();
+  assert.match(html, /<html lang="ar" dir="rtl">/);
+  assert.match(html, /href="\/ar\/"/);
+  assert.doesNotMatch(html.replace(/<[^>]*>/g, "").replace(/Hifth/g, ""), /[A-Za-z]{3,}/, "no English words on it");
+});
+
+test("every answer has an Arabic copy", async () => {
+  const cases = [
+    [{}, {}],
+    [ENV(fakeDb()), { email: "bad" }],
+    [ENV(fakeDb()), { email: "a@example.com" }],
+    [ENV(fakeDb()), { email: "a@example.com", "cf-turnstile-response": "t" }, FAIL],
+  ];
+  for (const [env, fields, verdict = PASS] of cases) {
+    const res = await handleNotify(signup({ ...fields, lang: "ar" }), env, OPTS(siteverify(verdict).fetch));
+    assert.doesNotMatch((await res.json()).message, /[A-Za-z]/, JSON.stringify(fields));
+  }
+});
+
+test("any other language, or none, is answered in English", async () => {
+  for (const lang of ["fr", "", undefined]) {
+    const fields = { email: "a@example.com", "cf-turnstile-response": "t", ...(lang === undefined ? {} : { lang }) };
+    const res = await handleNotify(signup(fields), ENV(fakeDb()), OPTS(siteverify(PASS).fetch));
+    assert.match((await res.json()).message, /on the list/);
+  }
+});

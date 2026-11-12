@@ -14,14 +14,14 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const LANDING = join(dirname(fileURLToPath(import.meta.url)), "..", "apps", "landing");
-const PAGES = ["index.html", "privacy.html", "404.html"];
+const PAGES = ["index.html", "privacy.html", "404.html", "ar/index.html", "ar/privacy.html"];
 
 /** Lines of a page's visible text that call something free. */
 export function freeClaims(html) {
   return html
     .split("\n")
     .map((line) => line.replace(/<[^>]*>/g, " "))
-    .filter((text) => /\bfree\b/i.test(text))
+    .filter((text) => /\bfree\b|مجان/i.test(text))
     .map((text) => text.trim());
 }
 
@@ -29,6 +29,7 @@ test("the rule spots a free claim and ignores markup", () => {
   assert.deepEqual(freeClaims("<p>Hifth is free software under the GNU GPL.</p>"), [
     "Hifth is free software under the GNU GPL.",
   ]);
+  assert.deepEqual(freeClaims("<p>حفظ تطبيق مجاني</p>"), ["حفظ تطبيق مجاني"]);
   assert.deepEqual(freeClaims('<p class="free-tier">Hifth is open source.</p>'), []);
 });
 
@@ -97,9 +98,11 @@ test("the wordmark's font is kept on the site and holds the wordmark's letters",
   assert.equal(font.subarray(0, 4).toString("latin1"), "wOF2");
   assert.ok(font.length < 20_000, `the cut font is small (${font.length} bytes)`);
   assert.match(css, /\.wordmark\s*{[^}]*"Aref Ruqaa"/);
-  const html = readFileSync(join(LANDING, "index.html"), "utf8");
-  const words = [...html.matchAll(/class="wordmark"[^>]*>([^<]+)</g)].map((m) => m[1].trim());
-  assert.deepEqual(words, ["حفظ"], "only the wordmark is set in the cut font");
+  for (const name of ["index.html", "ar/index.html"]) {
+    const html = readFileSync(join(LANDING, name), "utf8");
+    const words = [...html.matchAll(/class="wordmark"[^>]*>([^<]+)</g)].map((m) => m[1].trim());
+    assert.deepEqual(words, ["حفظ"], `${name}: only the wordmark is set in the cut font`);
+  }
 });
 
 // Device tabs (owner, 2026-11-12, a comment on the front page): one tab per device. The ones
@@ -132,7 +135,7 @@ test("each device tab has a panel, and only what exists today opens the app", ()
 test("the public front page does not name The Study Quran", () => {
   for (const name of PAGES) {
     const html = readFileSync(join(LANDING, name), "utf8");
-    assert.doesNotMatch(html, /study\s*quran/i, name);
+    assert.doesNotMatch(html, /study\s*quran|القرآن الدراسي/i, name);
   }
 });
 
@@ -192,8 +195,117 @@ test("the picture check finds a missing picture, a refused kind and a pitch pict
   assert.ok(problems.some((p) => p.startsWith("shots/pitch-commentary.jpg: a picture from a pitch build")), problems.join("\n"));
 });
 
-test("every picture the front page names is in the folder and allowed to ship", () => {
-  const html = readFileSync(join(LANDING, "index.html"), "utf8");
-  const problems = pictureProblems(html);
-  assert.deepEqual(problems, [], problems.join("\n"));
+test("every picture the front pages name is in the folder and allowed to ship", () => {
+  for (const name of ["index.html", "ar/index.html"]) {
+    const problems = pictureProblems(readFileSync(join(LANDING, name), "utf8"));
+    assert.deepEqual(problems, [], `${name}:\n${problems.join("\n")}`);
+  }
+});
+
+/*
+ * The front page in two languages (owner, 2026-11-12, a comment on the opening picture: "there
+ * should also be a global bar to select language ... by default it should be english, but we
+ * should have option to switch to arabic"). English is the page at /, Arabic is its own page at
+ * /ar/, and a bar at the top of every page links the two. Two plain pages keep the site free of
+ * scripts that rewrite words, so each works with scripts off and a search engine sees both.
+ */
+const BILINGUAL = [
+  ["index.html", "ar/index.html"],
+  ["privacy.html", "ar/privacy.html"],
+];
+const read = (name) => readFileSync(join(LANDING, name), "utf8");
+const address = (name) => "/" + name.replace(/index\.html$/, "");
+
+/** The language bar's links, as [href, lang, current?]. */
+export function languageBar(html) {
+  const bar = html.match(/<nav class="lang-bar"[\s\S]*?<\/nav>/)?.[0];
+  if (!bar) return null;
+  return [...bar.matchAll(/<a([^>]*)>/g)].map(([, attrs]) => [
+    attrs.match(/href="([^"]+)"/)?.[1],
+    attrs.match(/hreflang="([^"]+)"/)?.[1],
+    /aria-current="page"/.test(attrs),
+  ]);
+}
+
+test("the language bar spots the link to the page you are on", () => {
+  const html = '<nav class="lang-bar" aria-label="Language"><a href="/" hreflang="en" aria-current="page">English</a> <a href="/ar/" hreflang="ar">العربية</a></nav>';
+  assert.deepEqual(languageBar(html), [["/", "en", true], ["/ar/", "ar", false]]);
+  assert.equal(languageBar("<p>no bar</p>"), null);
+});
+
+test("every page has the language bar, linking its English and Arabic copies", () => {
+  for (const [en, ar] of BILINGUAL) {
+    for (const [name, lang] of [[en, "en"], [ar, "ar"]]) {
+      const html = read(name);
+      assert.match(html, new RegExp(`<html lang="${lang}"${lang === "ar" ? ' dir="rtl"' : ""}>`), `${name} says its language`);
+      assert.deepEqual(
+        languageBar(html),
+        [[address(en), "en", lang === "en"], [address(ar), "ar", lang === "ar"]],
+        `${name}: English first, then Arabic, the page you are on marked`,
+      );
+      for (const [other, l] of [[en, "en"], [ar, "ar"]]) {
+        assert.match(html, new RegExp(`<link rel="alternate" hreflang="${l}" href="https://hifth.app${address(other)}" />`), `${name} names its ${l} copy for search engines`);
+      }
+    }
+  }
+  assert.ok(languageBar(read("404.html")), "the page for a wrong address has the bar too");
+});
+
+/** What a front page is made of, to compare the two languages' copies. */
+export function outline(html) {
+  return {
+    ids: [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]),
+    features: (html.match(/<div class="feature">/g) ?? []).length,
+    pictures: (html.match(/<img\s/g) ?? []).length,
+    opens: (html.match(/href="\/read\/"/g) ?? []).length,
+    form: html.match(/<form[^>]*>/)?.[0],
+    fields: [...html.matchAll(/<input[^>]*name="([^"]+)"/g)].map((m) => m[1]),
+  };
+}
+
+test("the Arabic front page has everything the English one has", () => {
+  assert.deepEqual(outline(read("ar/index.html")), outline(read("index.html")));
+});
+
+// The app picks its own language from what the reader chose in it, then the browser. A link
+// carrying ?lang= would beat the reader's own choice on every reload, since the app keeps the
+// address it was opened with, so both pages open the app the same way.
+test("both front pages open the app without forcing its language", () => {
+  for (const name of ["index.html", "ar/index.html"]) assert.doesNotMatch(read(name), /\?lang=/, name);
+});
+
+test("the Arabic sign-up form answers in Arabic", () => {
+  const html = read("ar/index.html");
+  assert.match(html, /<input type="hidden" name="lang" value="ar" \/>/);
+  assert.match(html, /class="cf-turnstile"[^>]*data-language="ar"/);
+  assert.match(html, /href="\/ar\/privacy\.html"/, "it links the Arabic privacy page");
+});
+
+// The scripture check refuses runs of fully vowelled Arabic, which is how a verse looks. The
+// page's own Arabic is plain words about the app, so it carries no vowel marks at all, and no
+// line of it can be taken for a verse.
+test("the Arabic pages carry no vowel marks", () => {
+  for (const name of ["ar/index.html", "ar/privacy.html"]) {
+    const marked = read(name).split("\n").filter((line) => /[\u064B-\u0652\u0670]/.test(line));
+    assert.deepEqual(marked, [], name);
+  }
+});
+
+/*
+ * The opening picture shows the book both ways (owner, 2026-11-12: "i want to see two pages view
+ * as well"): two facing pages as on a computer, and one page on a phone in front of it, each in
+ * the language of the page around it.
+ */
+test("the opening picture shows two facing pages and a phone, in the page's language", () => {
+  for (const [name, suffix] of [["index.html", ""], ["ar/index.html", "-ar"]]) {
+    const figure = read(name).match(/<figure class="hero-picture"[\s\S]*?<\/figure>/)?.[0] ?? "";
+    const imgs = [...figure.matchAll(/<img([^>]*)>/g)].map(([, a]) => ({
+      src: a.match(/src="([^"]+)"/)?.[1],
+      w: Number(a.match(/width="(\d+)"/)?.[1]),
+      h: Number(a.match(/height="(\d+)"/)?.[1]),
+    }));
+    assert.deepEqual(imgs.map((i) => i.src), [`/shots/hero-spread${suffix}.jpg`, `/shots/hero-phone${suffix}.jpg`], name);
+    assert.ok(imgs[0].w > imgs[0].h, `${name}: the facing pages are wider than tall`);
+    assert.ok(imgs[1].h > imgs[1].w, `${name}: the phone is taller than wide`);
+  }
 });

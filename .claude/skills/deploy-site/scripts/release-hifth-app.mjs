@@ -35,7 +35,7 @@ const SITE = "https://hifth.app";
 /** Front-page files: pages, styles, scripts and pictures at the top of apps/landing. */
 const LANDING_FILE = /^(_headers|_redirects|[\w-]+\.(html|css|js|png|svg|ico|webp))$/;
 /** Front-page folders copied whole, each with the kinds of file it may hold. */
-const LANDING_DIRS = { shots: /^[\w-]+\.(png|jpg|webp)$/, fonts: /^[\w.-]+\.(woff2|txt)$/ };
+const LANDING_DIRS = { ar: /^(index|privacy)\.html$/, shots: /^[\w-]+\.(png|jpg|webp)$/, fonts: /^[\w.-]+\.(woff2|txt)$/ };
 /** What every app build writes and the site never needs. */
 const APP_SKIP = (rel) => rel === "docs" || rel === "_headers" || rel === "_redirects" || extname(rel) === ".map";
 

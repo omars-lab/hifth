@@ -32,8 +32,46 @@ function wantsJson(request) {
   return (request.headers.get("Accept") || "").includes("application/json");
 }
 
-const page = (title, message) => `<!doctype html>
-<html lang="en">
+/*
+ * Every answer in both of the front page's languages. The Arabic page sends lang=ar with the
+ * form (owner, 2026-11-12, the language bar), so its reader is answered in Arabic, scripts or
+ * not; anything else is answered in English. The Arabic carries no vowel marks: it is plain
+ * words about the list, and the site's scripture check reads vowelled Arabic as a verse.
+ */
+const WORDS = {
+  en: {
+    closed: ["Not open yet", "The list isn't open yet. Please try again in a few days."],
+    badForm: ["That didn't go through", "That didn't look like the sign-up form. Please try again."],
+    badEmail: ["Check the address", "That doesn't look like an email address."],
+    noToken: ["One more step", "Please finish the spam check, then press the button again."],
+    unreachable: ["That didn't go through", "The spam check couldn't be reached. Please try again in a minute."],
+    failed: ["That didn't go through", "The spam check didn't pass. Please try again."],
+    already: ["Already on the list", "You're already on the list. We'll write once, when the Mac app is out."],
+    joined: ["You're on the list", "You're on the list. We'll write once, when the Mac app is out."],
+    left: ["You're off the list", "You're off the list. You won't hear from us."],
+    linkClosed: ["Not open yet", "This link doesn't work yet. Please try again in a few days."],
+    home: "Back to Hifth",
+  },
+  ar: {
+    closed: ["لم تفتح بعد", "القائمة لم تفتح بعد. حاول مرة أخرى بعد أيام."],
+    badForm: ["لم يصل طلبك", "لا يبدو هذا نموذج التسجيل. حاول مرة أخرى."],
+    badEmail: ["راجع العنوان", "لا يبدو هذا عنوان بريد إلكتروني."],
+    noToken: ["خطوة أخيرة", "أكمل التحقق من أنك لست برنامجا آليا، ثم اضغط الزر مرة أخرى."],
+    unreachable: ["لم يصل طلبك", "تعذر الوصول إلى التحقق. حاول مرة أخرى بعد دقيقة."],
+    failed: ["لم يصل طلبك", "لم ينجح التحقق. حاول مرة أخرى."],
+    already: ["أنت في القائمة", "أنت في القائمة من قبل. سنكتب إليك مرة واحدة، حين يصدر تطبيق ماك."],
+    joined: ["أضفناك إلى القائمة", "أضفناك إلى القائمة. سنكتب إليك مرة واحدة، حين يصدر تطبيق ماك."],
+    left: ["خرجت من القائمة", "خرجت من القائمة، ولن نراسلك."],
+    linkClosed: ["لم يفتح بعد", "هذا الرابط لا يعمل بعد. حاول مرة أخرى بعد أيام."],
+    home: "العودة إلى حفظ",
+  },
+};
+
+/** The language to answer in: Arabic when the page asked for it, English otherwise. */
+const langOf = (value) => (value === "ar" ? "ar" : "en");
+
+const page = (lang, title, message) => `<!doctype html>
+<html lang="${lang}"${lang === "ar" ? ' dir="rtl"' : ""}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -45,20 +83,21 @@ const page = (title, message) => `<!doctype html>
   <main class="prose">
     <h1>${title}</h1>
     <p>${message}</p>
-    <p><a href="/">Back to Hifth</a></p>
+    <p><a href="${lang === "ar" ? "/ar/" : "/"}">${WORDS[lang].home}</a></p>
   </main>
 </body>
 </html>
 `;
 
-function answer(request, status, title, message) {
+function answer(request, status, key, lang = "en") {
+  const [title, message] = WORDS[lang][key];
   if (wantsJson(request)) {
     return new Response(JSON.stringify({ ok: status < 300, message }), {
       status,
       headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
     });
   }
-  return new Response(page(title, message), {
+  return new Response(page(lang, title, message), {
     status,
     headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
   });
@@ -66,23 +105,22 @@ function answer(request, status, title, message) {
 
 /** POST /api/notify: check the spam token, then keep the email. */
 export async function handleNotify(request, env, { fetch = globalThis.fetch, now = () => new Date(), newToken = randomToken } = {}) {
-  if (!env?.DB || !env?.TURNSTILE_SECRET) {
-    return answer(request, 503, "Not open yet", "The list isn't open yet. Please try again in a few days.");
-  }
-
   let form;
   try {
     form = await request.formData();
   } catch {
-    return answer(request, 400, "That didn't go through", "That didn't look like the sign-up form. Please try again.");
+    form = null;
   }
+  const lang = langOf(form?.get("lang"));
+  if (!env?.DB || !env?.TURNSTILE_SECRET) return answer(request, 503, "closed", lang);
+  if (!form) return answer(request, 400, "badForm", lang);
   const email = cleanEmail(form.get("email"));
   if (!email) {
-    return answer(request, 400, "Check the address", "That doesn't look like an email address.");
+    return answer(request, 400, "badEmail", lang);
   }
   const token = form.get("cf-turnstile-response");
   if (typeof token !== "string" || !token) {
-    return answer(request, 400, "One more step", "Please finish the spam check, then press the button again.");
+    return answer(request, 400, "noToken", lang);
   }
 
   const check = new FormData();
@@ -96,14 +134,14 @@ export async function handleNotify(request, env, { fetch = globalThis.fetch, now
     const res = await fetch(SITEVERIFY, { method: "POST", body: check });
     verdict = await res.json();
   } catch {
-    return answer(request, 502, "That didn't go through", "The spam check couldn't be reached. Please try again in a minute.");
+    return answer(request, 502, "unreachable", lang);
   }
 
   const allowed = env.TURNSTILE_HOSTNAMES
     ? String(env.TURNSTILE_HOSTNAMES).split(",").map((h) => h.trim()).filter(Boolean)
     : DEFAULT_HOSTNAMES;
   if (!verdict?.success || !allowed.includes(verdict.hostname)) {
-    return answer(request, 403, "That didn't go through", "The spam check didn't pass. Please try again.");
+    return answer(request, 403, "failed", lang);
   }
 
   const result = await env.DB.prepare(
@@ -113,16 +151,21 @@ export async function handleNotify(request, env, { fetch = globalThis.fetch, now
     .run();
 
   if (result?.meta?.changes === 0) {
-    return answer(request, 200, "Already on the list", "You're already on the list. We'll write once, when the Mac app is out.");
+    return answer(request, 200, "already", lang);
   }
-  return answer(request, 200, "You're on the list", "You're on the list. We'll write once, when the Mac app is out.");
+  return answer(request, 200, "joined", lang);
 }
 
-/** GET /api/unsubscribe?t=…: take the email off the list. Says the same whether or not it matched. */
+/**
+ * GET /api/unsubscribe?t=…[&lang=ar]: take the email off the list. Says the same whether or not
+ * it matched. The leave link in an email to a reader who signed up in Arabic carries lang=ar.
+ */
 export async function handleUnsubscribe(request, env) {
-  const done = () => answer(request, 200, "You're off the list", "You're off the list. You won't hear from us.");
-  if (!env?.DB) return answer(request, 503, "Not open yet", "This link doesn't work yet. Please try again in a few days.");
-  const t = new URL(request.url).searchParams.get("t") || "";
+  const params = new URL(request.url).searchParams;
+  const lang = langOf(params.get("lang"));
+  const done = () => answer(request, 200, "left", lang);
+  if (!env?.DB) return answer(request, 503, "linkClosed", lang);
+  const t = params.get("t") || "";
   if (!/^[A-Za-z0-9_-]{16,128}$/.test(t)) return done();
   await env.DB.prepare("DELETE FROM notify WHERE unsubscribe_token = ?1").bind(t).run();
   return done();

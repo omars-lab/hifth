@@ -23,11 +23,12 @@ function cleanFolder() {
     { path: "privacy.html", text: "<p>Write to <a href=\"mailto:someone@example.com\">us</a>.</p>" },
     { path: "styles.css", text: "body { margin: 0 }" },
     { path: "notify.js", text: "fetch('/api/notify')" },
-    { path: "page-shot.png", text: null },
     { path: "shots/feature-notes.jpg", text: null },
     { path: "fonts/aref-ruqaa-wordmark.woff2", text: null },
     { path: "fonts/aref-ruqaa-OFL.txt", text: "SIL Open Font License" },
     { path: "404.html", text: "<h1>No page here</h1><a href=\"/\">Hifth</a>" },
+    { path: "ar/index.html", text: '<html lang="ar" dir="rtl"><h1>حفظ</h1>' },
+    { path: "ar/privacy.html", text: "<p>privacy</p>" },
     { path: "_headers", text: "/read/assets/*\n  Cache-Control: immutable\n" },
     { path: "read/index.html", text: '<script type="module" src="./assets/index-abc.js"></script>' },
     { path: "read/sw.js", text: "self.addEventListener('fetch', () => {})" },
@@ -47,12 +48,25 @@ const paths = (problems) => problems.map((p) => p.path);
 test("a clean release folder passes, and says what it holds", () => {
   const result = auditShipped(cleanFolder(), { commit: HEAD });
   assert.deepEqual(result.problems, []);
-  assert.equal(result.files, 19);
+  assert.equal(result.files, 20);
 });
 
 test("a file that is not on the list of what the site needs is refused", () => {
   const files = [...cleanFolder(), { path: "notes.txt", text: "hello" }, { path: "read/stray.json", text: "{}" }];
   assert.deepEqual(paths(refusals(files)), ["notes.txt", "read/stray.json"]);
+});
+
+// The Arabic front page and its privacy page sit in ar/ (owner, 2026-11-12, the language bar).
+// Only those two pages: the pictures, styles and script are shared from the root.
+test("the Arabic pages pass, and nothing else in their folder", () => {
+  const files = [...cleanFolder(), { path: "ar/notify.js", text: "" }, { path: "ar/shots/a.jpg", text: null }, { path: "ar/404.html", text: "" }];
+  assert.deepEqual(paths(refusals(files)), ["ar/notify.js", "ar/shots/a.jpg", "ar/404.html"]);
+});
+
+// The old single phone picture at the top of the page gave way to the two-page opening picture
+// in shots/ (t_9200ae); a leftover copy must not ship.
+test("the retired opening picture does not ship", () => {
+  assert.deepEqual(paths(refusals([...cleanFolder(), { path: "page-shot.png", text: null }])), ["page-shot.png"]);
 });
 
 test("the front page's pictures and wordmark font pass, and only in the kinds the page uses", () => {

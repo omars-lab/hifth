@@ -5,7 +5,7 @@
  * the site does not need, or a sign of a development feature. Two lists do the work:
  *
  *   ALLOWED  the files the site needs: the front page at the root (with its pictures in shots/
- *            and the wordmark's font in fonts/), the app under read/.
+ *            and the wordmark's font in fonts/), its Arabic copy in ar/, the app under read/.
  *            Anything else is refused, so a new kind of file has to be added here on purpose.
  *   NEVER    files that are refused with a reason, because each could really end up in the
  *            folder on this laptop. A pitch build leaves read/pitch/ behind (found 2026-11-11),
@@ -19,7 +19,8 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 
 const ALLOWED = [
-  /^(index\.html|privacy\.html|404\.html|styles\.css|notify\.js|page-shot\.png|_headers|_redirects)$/,
+  /^(index\.html|privacy\.html|404\.html|styles\.css|notify\.js|_headers|_redirects)$/,
+  /^ar\/(index|privacy)\.html$/,
   /^shots\/[\w-]+\.(png|jpg|webp)$/,
   /^fonts\/[\w.-]+\.(woff2|txt)$/,
   /^read\/(index\.html|sw\.js|workbox-[\w-]+\.js|manifest\.webmanifest|favicon\.svg)$/,

@@ -8,11 +8,17 @@
   <meta name="theme-color" content="#f4efe6" />
   <link rel="icon" href="/read/favicon.svg" type="image/svg+xml" />
   <link rel="preload" href="/fonts/aref-ruqaa-wordmark.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="alternate" hreflang="en" href="https://hifth.app/" />
+  <link rel="alternate" hreflang="ar" href="https://hifth.app/ar/" />
   <link rel="stylesheet" href="/styles.css" />
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script src="/notify.js" defer></script>
 </head>
 <body>
+  <nav class="lang-bar" aria-label="Language">
+    <a href="/" hreflang="en" lang="en" aria-current="page">English</a>
+    <a href="/ar/" hreflang="ar" lang="ar">العربية</a>
+  </nav>
   <main>
     <section class="hero">
       <div class="hero-text">
@@ -25,8 +31,10 @@
         <p class="mac">Mac and iPhone apps — coming soon</p>
       </div>
       <figure class="hero-picture">
-        <img src="/page-shot.png" width="780" height="1688"
-             alt="A page of the mus'haf in Hifth, with one verse highlighted." />
+        <img class="spread" src="/shots/hero-spread.jpg" width="1428" height="1132"
+             alt="Two facing pages of the mus'haf in Hifth on a computer, with one verse highlighted." />
+        <img class="phone" src="/shots/hero-phone.jpg" width="780" height="1688"
+             alt="The same verse on a phone, one page at a time." />
       </figure>
     </section>
 
@@ -150,6 +158,7 @@
       <p>Leave your email and we will write when they ship. Nothing else.
          <a href="/privacy.html">What we keep, and how to leave.</a></p>
       <form id="notify-form" action="/api/notify" method="post" novalidate>
+        <input type="hidden" name="lang" value="en" />
         <label for="notify-email" class="visually-hidden">Email</label>
         <input id="notify-email" name="email" type="email" autocomplete="email"
                placeholder="you@example.com" required />
