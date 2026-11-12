@@ -147,6 +147,10 @@ dashboard_url: https://supabase.com/dashboard
 pooler_host: supabase.com
 ```
 
+The older account (the bytesofpurpose site's project, and the old hifth store, paused
+2026-11-12) has its own profile the same way: `~/.supabase/profiles/bytesofpurpose.yaml`, with
+`name: bytesofpurpose`. Use it for anything on that account, never for hifth.
+
 The login is filed under `name`, which is why a bare `--profile hifth` does not work: the tool
 reads anything that is not one of its built-in names as a path to a profile file, and there is
 no file called `hifth`. Leave
