@@ -5321,6 +5321,18 @@
       "note": "On a large iPad upright (1024 to 1112 wide) the verse's drawer stood as a middle card over the bottom bar and the verse's name slid half under it, the bar's far end wider than the room beside the card. The drawer now covers the whole bar whenever a bar button would be cut, and the look-alike buttons ride its head meanwhile. iPad test at 1032 by 1376 and 1024 by 700 in both languages, watched failing first."
     },
     {
+      "id": "verse-drawer-grows-after-measuring",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "94"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "Found 2026-11-12 when a browser test failed once in a full run and passed on its retry; its picture showed the look-alike buttons left in the bar, half under the drawer. The likely cause, never made to happen again by slowing the CPU: on a large iPad upright the verse's drawer measured its own height once, when it opened. If it was still short then, it decided it covered no bar button, and when it grew it never checked again. The drawer now checks again whenever its own size changes, still never turning back into a card, which closes that hole for certain. The test holds the drawer short while it opens and then lets it grow; watched failing first. Still not covered: the bar's buttons moving without the bar changing size or gaining a button (a late font, say). If the test fails that way again, look there next."
+    },
+    {
       "id": "pens-left-in-arabic-setting",
       "source": {
         "file": "docs/PLAN.md",
@@ -5896,6 +5908,20 @@
       "severity": "question",
       "owner": "agent",
       "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11; slice 0 (the on-iPad check) needs the owner holding the iPad for ten minutes."
+    },
+    {
+      "id": "check-card-link",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/check-card.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "useCase": "run-a-check-a-machine-cannot",
+      "feature": "validation",
+      "note": "Owner's ask of 2026-11-12, holding the iPad: a link that opens a small card in the app listing what to check, so the steps for a check on the device are not typed into the chat. Each step is answered with a tick or a cross, the answers are saved on the iPad and copied off by the laptop. Debug build only. Design note: docs/design/check-card.md. Built 2026-11-12 and working in the iPad simulator: make check-card sends a card (from a row of the by-hand checks list or a steps file) and make check-answers copies the answers back; a UI test in the app (SmokeTests testCheckLinkOpensACard) and the script's own test hold it. Still open until it runs on the real iPad: its first use there is the screenshot check for walk-feedback-capture (FILE=.claude/skills/walk-app/checks/walk-probe.json)."
     },
     {
       "id": "feature-links-hub",

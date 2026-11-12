@@ -51,7 +51,8 @@ async function openOn(
     [COACH_STORAGE_KEY, LANG_STORAGE_KEY, lang, inApp, TIP_PENS_KEY, tip] as const,
   );
   await page.goto("/#/hafs-kfqc/p7");
-  await expect(page.locator("svg[aria-labelledby='page-label-7']:visible")).toBeVisible();
+  // A first load on a busy laptop can pass 5 seconds (Firefox, a push run of 2026-11-12).
+  await expect(page.locator("svg[aria-labelledby='page-label-7']:visible")).toBeVisible({ timeout: 20_000 });
   return { page, context };
 }
 

@@ -9,7 +9,7 @@ import Foundation
 /// opens when it is done. That is the whole x-callback-url convention
 /// (http://x-callback-url.com/specifications/), and nothing here goes beyond it.
 ///
-/// Two actions today:
+/// Three actions today:
 ///  - `open`     — a place, said plainly: `page=45`, `verse=2:255`
 ///                 (`verse=2:47-48` for a run) with optional `words=3-7`, or
 ///                 `surah=2` (its first verse, the surah's context open); an
@@ -23,6 +23,10 @@ import Foundation
 ///                 link. Answers once the page shows it, with `route` and the
 ///                 public `url` of the place.
 ///  - `current`  — no parameters. Answers with the `route` and `url` on screen.
+///  - `check`    — a card of steps to check by hand (`step=…&see=…`, repeated,
+///                 at most 12), with an `id` and a `title`. Shown only in a
+///                 build from the laptop; a release build answers
+///                 `not-in-this-build`. Answers on Done with `id` and `result`.
 ///
 /// Errors follow the convention too: `x-error` is opened with `errorCode` and
 /// `errorMessage`. No action here can be cancelled, so `x-cancel` is accepted
@@ -52,6 +56,26 @@ nonisolated enum XCallback {
         /// The hash to show, already in the web app's shape (`#/…`).
         case open(hash: String)
         case current
+        /// A card of steps to check by hand; shown only in a build from the laptop.
+        case check(Check)
+    }
+
+    /// One thing to do on the device, and what you should see when you do it.
+    struct CheckStep: Equatable, Codable {
+        let action: String
+        let see: String?
+    }
+
+    /// A card of steps: `check?id=…&title=…&step=…&see=…&step=…`.
+    struct Check: Equatable {
+        /// Letters, digits and dashes only, so it can name the answers file.
+        let id: String
+        let title: String
+        let steps: [CheckStep]
+
+        static let mostSteps = 12
+        static let defaultID = "check"
+        static let defaultTitle = "What to check"
     }
 
     struct Failure: Error, Equatable {
@@ -67,8 +91,13 @@ nonisolated enum XCallback {
             Route.editionProblem(id).map { Failure(code: "bad-route", message: $0) }
         }
         static func unknownAction(_ raw: String) -> Failure {
-            Failure(code: "unknown-action", message: "no action named \"\(raw)\"; try open or current")
+            Failure(code: "unknown-action", message: "no action named \"\(raw)\"; try open, current or check")
         }
+        static func badCheck(_ why: String) -> Failure {
+            Failure(code: "bad-check", message: why)
+        }
+        /// A build for the App Store or TestFlight has no check card.
+        static let notInThisBuild = Failure(code: "not-in-this-build", message: "check cards are only in a build installed from the laptop")
         static func routeNotShown(_ hash: String) -> Failure {
             Failure(code: "route-not-shown", message: "the page did not open \(hash.dropFirst())")
         }
@@ -100,6 +129,13 @@ nonisolated enum XCallback {
         func errorURL(_ failure: Failure) -> URL? {
             guard let error else { return nil }
             return Self.appending([("errorCode", failure.code), ("errorMessage", failure.message)], to: error)
+        }
+
+        /// `x-success` once a check card's Done is pressed: which check, and
+        /// `pass` or `fail`.
+        func checkDoneURL(id: String, result: String) -> URL? {
+            guard let success else { return nil }
+            return Self.appending([("id", id), ("result", result)], to: success)
         }
 
         /// Adds query parameters to a caller's address, keeping the caller's
@@ -165,6 +201,13 @@ nonisolated enum XCallback {
             }
         case "current":
             return .request(Request(action: .current, callbacks: callbacks))
+        case "check":
+            switch check(from: parts.queryItems ?? [], query: query) {
+            case .success(let check):
+                return .request(Request(action: .check(check), callbacks: callbacks))
+            case .failure(let failure):
+                return .failure(failure, callbacks)
+            }
         default:
             return .failure(.unknownAction(action), callbacks)
         }
@@ -226,6 +269,41 @@ nonisolated enum XCallback {
         if !pairs.isEmpty { route += "?" + pairs.joined(separator: "&") }
         guard let hash = Route.hash(from: route) else { return .failure(.badRoute(route)) }
         return .success(hash)
+    }
+
+    /// The steps of a `check` request, in the order given. `step` repeats, so
+    /// it is read from every query item, not the first-of-each-key map; each
+    /// `see` belongs to the `step` just before it.
+    private static func check(from items: [URLQueryItem], query: [String: String]) -> Result<Check, Failure> {
+        var steps: [CheckStep] = []
+        for item in items {
+            let value = (item.value ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            switch item.name {
+            case "step":
+                guard !value.isEmpty else { return .failure(.badCheck("a step is empty")) }
+                steps.append(CheckStep(action: value, see: nil))
+            case "see":
+                guard let last = steps.last, last.see == nil else {
+                    return .failure(.badCheck("each see goes right after the step it belongs to"))
+                }
+                steps[steps.count - 1] = CheckStep(action: last.action, see: value.isEmpty ? nil : value)
+            default:
+                continue
+            }
+        }
+        guard !steps.isEmpty else { return .failure(.badCheck("a check needs at least one step: step=Do this")) }
+        guard steps.count <= Check.mostSteps else {
+            return .failure(.badCheck("at most \(Check.mostSteps) steps on one card, not \(steps.count)"))
+        }
+        let rawID = (query["id"] ?? "").lowercased()
+            .replacingOccurrences(of: "[^a-z0-9]+", with: "-", options: .regularExpression)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
+        let title = (query["title"] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return .success(Check(
+            id: rawID.isEmpty ? Check.defaultID : String(rawID.prefix(60)),
+            title: title.isEmpty ? Check.defaultTitle : title,
+            steps: steps
+        ))
     }
 
     /// What the route grammar lets through unencoded; the rest is percent-encoded.

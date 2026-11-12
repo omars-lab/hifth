@@ -110,6 +110,10 @@ test("gate:issues refuses an entry pointing at a row that is gone", () => {
   refuses(files(patched("late-turn", { source: { file: DESIGN, item: "④" } })), /late-turn: .*page-turning\.md has no ④ row/);
 });
 
+test("gate:issues, for an entry that names no item, says to name one rather than \"no undefined row\"", () => {
+  refuses(files(patched("late-turn", { source: { file: DESIGN } })), /late-turn: its source names no item\. Add "item"/);
+});
+
 test("gate:issues refuses an entry whose status disagrees with the register", () => {
   refuses(files(patched("late-turn", { status: "confirmed" })), /late-turn: this file says "confirmed", .*says "open"/);
 });

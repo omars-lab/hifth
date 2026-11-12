@@ -359,6 +359,22 @@ app-device-open: ## Send one link to the app on a plugged-in iPad (DEVICE=… LI
 	@case '$(LINK)' in hifth://*) ;; *) echo "  LINK= must be a hifth:// link, e.g. LINK='hifth://x-callback-url/open?page=7'"; exit 1;; esac
 	xcrun devicectl device process launch --device "$(DEVICE)" --payload-url '$(LINK)' $(BUNDLE_ID)
 
+# ---- a card of things to check, on the app's screen (docs/design/check-card.md).
+# Builds a `check` link from a ledger row (ID=) or a steps file (FILE=) and sends
+# it; Done on the card saves the answers, and check-answers copies them into
+# native/shots/checks/ (ignored by git). Builds from this laptop only.
+CHECK_CARD = node .claude/skills/walk-app/scripts/check-card.mjs
+CHECK_FROM = $(if $(ID),--ledger $(ID))$(if $(FILE),--file $(FILE)) $(if $(FROM),--from $(FROM))
+CHECK_TO   = $(if $(SIM),--sim,--device "$(DEVICE)")
+check-card: ## Put a card of things to check on the app's screen (ID=<ledger row> or FILE=<steps.json>, FROM=13, SIM=1 or DEVICE=…)
+	@test -n "$(ID)$(FILE)" || { echo "  Say what to check: ID=<a row in docs/validation/ledger.json> or FILE=<steps.json>"; exit 1; }
+	@test -n "$(SIM)$(DEVICE)" || { echo ""; echo "  Say where: SIM=1 for the booted simulator, or DEVICE= one of:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@$(CHECK_CARD) send $(CHECK_FROM) $(CHECK_TO)
+
+check-answers: ## Copy the check card's answers off the app into native/shots/checks (SIM=1 or DEVICE=…)
+	@test -n "$(SIM)$(DEVICE)" || { echo ""; echo "  Say where from: SIM=1 for the booted simulator, or DEVICE= one of:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@$(CHECK_CARD) answers $(CHECK_TO)
+
 # ---- release to the plugged-in iPad, with the checks that would have caught the
 # touch crash (docs/issues/ipad-crash-on-verse-touch.md): the unit tests, the
 # verse-touch test on the iPad's own OS in the simulator, then the install, then

@@ -166,13 +166,15 @@ test.describe("Hifth · the highlighter on the page", () => {
     // Opened again under each setting, the way a reader who has it set arrives:
     // Firefox under test does not restyle a page already open when the setting
     // is flipped, though it matches the query (found 2026-10-10).
+    // Asked until it settles: just after a reload, on a busy laptop, Firefox
+    // has read back an empty style for a moment (a push run of 2026-11-12).
     await page.emulateMedia({ contrast: "more" });
     await reopen(page);
-    expect(await filterOf(), "more contrast: flat ink").toBe("none");
+    await expect.poll(filterOf, { message: "more contrast: flat ink" }).toBe("none");
 
     await page.emulateMedia({ contrast: "no-preference", forcedColors: "active" });
     await reopen(page);
-    expect(await filterOf(), "forced colours: flat ink").toBe("none");
+    await expect.poll(filterOf, { message: "forced colours: flat ink" }).toBe("none");
   });
 
   test("the ink is simply there for a reader who asks for less motion", async ({ page }) => {
@@ -182,6 +184,6 @@ test.describe("Hifth · the highlighter on the page", () => {
     expect(await animationOf(), "the pen wipes the line in by default").toBe("hifth-ink");
 
     await page.emulateMedia({ reducedMotion: "reduce" });
-    expect(await animationOf(), "less motion: no wipe").toBe("none");
+    await expect.poll(animationOf, { message: "less motion: no wipe" }).toBe("none");
   });
 });

@@ -583,6 +583,10 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   look-alike buttons ride its head, a tap away. · `VIEWPORT=1032x1376`, also `1024x700`, both
   languages, and the iPad app on the 13-inch upright · issue:
   `verse-drawer-cuts-bar-large-ipad-upright`
+- [ ] On a large iPad held upright, open the app straight onto a look-alike verse from a link
+  (2:49), cold, so the drawer opens while the app is still busy: once it settles the look-alike
+  buttons are in the drawer's head, never left in the bar half under it. · `VIEWPORT=1024x1366`,
+  the iPad app on the 13-inch upright · issue: `verse-drawer-grows-after-measuring`
 - [ ] On an iPad mini held upright, no card open, the look-alike buttons stand clear of the page's
   top lines (2:48). · `VIEWPORT=744x1133`, the iPad app on the mini · issue:
   `lookalike-buttons-on-top-lines-ipad-mini-upright`

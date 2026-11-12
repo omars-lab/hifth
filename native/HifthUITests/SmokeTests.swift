@@ -59,6 +59,38 @@ final class SmokeTests: XCTestCase {
     }
 
     #if os(iOS)
+    /// A `check` link opens the card of steps over the page; each step takes a
+    /// ✓ or ✗, and Done closes it. The steps are made up. iOS may ask "Open in
+    /// Hifth?" first; the test presses Open.
+    func testCheckLinkOpensACard() throws {
+        let app = launch(route: "/hafs-kfqc/p7")
+        waitForRoute("#/hafs-kfqc/p7", in: app)
+        let link = "hifth://x-callback-url/check?id=ui-test&title=Made%20up%20check"
+            + "&step=Turn%20the%20page&see=It%20slides%20over&step=Tap%20a%20verse"
+        XCUIDevice.shared.system.open(try XCTUnwrap(URL(string: link)))
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let openButton = springboard.buttons["Open"]
+        if openButton.waitForExistence(timeout: 4) { openButton.tap() }
+
+        let done = app.buttons["hifth.check.done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 10), "the card never opened")
+        XCTAssertTrue(app.staticTexts["Made up check"].waitForExistence(timeout: 3), "the card has no title")
+        XCTAssertTrue(app.staticTexts["You should see: It slides over"].exists)
+        app.buttons["hifth.check.1.pass"].tap()
+        app.buttons["hifth.check.2.fail"].tap()
+        XCTAssertTrue(app.staticTexts["2 of 2 answered"].exists)
+        attach(app, named: "check-card")
+
+        app.buttons["hifth.check.fold"].tap()
+        let unfold = app.buttons["hifth.check.unfold"]
+        XCTAssertTrue(unfold.waitForExistence(timeout: 3), "the card did not fold")
+        attach(app, named: "check-card-folded")
+        unfold.tap()
+
+        done.tap()
+        XCTAssertFalse(done.waitForExistence(timeout: 1), "Done did not close the card")
+    }
+
     /// A finger turns the page inside the app, not only in the browser: the
     /// mus'haf reads to the left, so drawing the page to the right brings the
     /// next one, and drawing it back returns.

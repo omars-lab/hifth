@@ -46,7 +46,7 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <p>The app is not a web server. These are <code>hifth://</code> links the operating system hands to the installed app: from a tapped link, from Shortcuts, from a script (<code>open</code>, <code>xcrun simctl openurl</code>). OpenAPI is used here as a way to write the contract down in one place that both people and tests read: <code>native/HifthTests/XCallbackTests.swift</code> runs every example under <code>x-examples</code> through the real parser, and <code>docs/design/app-url-scheme.html</code> is rendered from this file by <code>scripts/build-app-url-scheme.mjs</code>.</p>
 <p>Two kinds of address. A <strong>plain link</strong> (<code>hifth:///hafs-kfqc/2:255</code>) turns the page and says nothing back; a bad one is ignored. An <strong>x-callback-url request</strong> (<code>hifth://x-callback-url/open?route=…&amp;x-success=…</code>) does one action and then opens the caller's own address with the result, following the x-callback-url convention (x-callback-url.com): <code>x-success</code>, <code>x-error</code> and <code>x-cancel</code> name where to answer, and an error answer carries <code>errorCode</code> and <code>errorMessage</code>.</p>
 <p>The route grammar is the web app's own hash, unchanged: <code>/&lt;edition&gt;/&lt;target&gt;[?query]</code>. The app only checks its shape; the web app decides what it means (<code>docs/query-params.md</code> lists the query keys).</p>
-<nav><a href="#openLink">Plain link</a><a href="#xOpen">Open the app at a route, then tell the caller</a><a href="#xCurrent">Ask what the app is showing</a><a href="#builder">Build a link</a><a href="#editions">Editions</a><a href="#errors">Error codes</a></nav>
+<nav><a href="#openLink">Plain link</a><a href="#xOpen">Open the app at a route, then tell the caller</a><a href="#xCurrent">Ask what the app is showing</a><a href="#xCheck">Show a card of things to check</a><a href="#builder">Build a link</a><a href="#editions">Editions</a><a href="#errors">Error codes</a></nav>
 <section id="openLink">
 <h2>Plain link: open the app at a verse, a page or a run of verses</h2>
 <p class="path"><code>hifth://{edition}/{target}</code></p>
@@ -100,7 +100,7 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
 <p>Opened by the app when the action failed</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code></td><td><p></p></td></tr>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code></td><td><p></p></td></tr>
 <tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
@@ -148,6 +148,34 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
 <tr><td><code class="url">hifth://x-callback-url/current?x-success=drafts://x-callback-url/create</code><div class="faint"><p>Ask what is on screen; Drafts gets a new draft with route=… and url=… in its query.</p></div></td><td><code>current</code></td></tr>
 <tr><td><code class="url">hifth://x-callback-url/current?x-success=hifth://x-callback-url/current</code><div class="faint"><p>An answer address that points back into this app is dropped, so a request cannot answer itself for ever.</p></div></td><td><code>current</code></td></tr>
+</tbody></table>
+</section>
+<section id="xCheck">
+<h2>Show a card of things to check</h2>
+<p class="path"><code>hifth://x-callback-url/check</code></p>
+<p>Only in a build installed from the laptop; a release build answers <code>not-in-this-build</code>. Opens a small card over the page, top corner, listing the steps in order. Each step takes a ✓ or a ✗, there is a note, and Done closes it. Touches outside the card reach the page, so each step can be done with the card open, and it folds to one small button. On Done the answers are saved as one file in the app's <code>Documents/checks/</code> (<code>&lt;id&gt;-&lt;yyyyMMdd&gt;-&lt;HHmmss&gt;.json</code>: the steps, each answer, the note, the page showing and the time) and <code>x-success</code> is opened with <code>id</code> and <code>result</code>. Closing the card with its cross saves what was answered and opens nothing. A new card replaces the open one, saving it first if anything was answered. <code>make check-card</code> builds and sends these links; <code>make check-answers</code> copies the files off.</p>
+<h3>Parameters</h3>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>id</code></td><td>query</td><td>string</td><td><p>A name for the check, used in the answers' file name. Lowercased, anything but letters and digits becomes <code>-</code>, at most 60 characters. Default <code>check</code>.</p></td></tr>
+<tr><td><code>title</code></td><td>query</td><td>string</td><td><p>The card's heading. Default <code>What to check</code>.</p></td></tr>
+<tr><td><code>step</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One thing to do. Repeat it for each step, in order; 1 to 12 steps, none empty.</p></td></tr>
+<tr><td><code>see</code></td><td>query</td><td>string</td><td><p>What you should see, for the <code>step</code> just before it. At most one per step, and never before the first step.</p></td></tr>
+<tr><td><code>x-success</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action worked. Any app's address (<code>shortcuts://…</code>, <code>drafts://…</code>, <code>https://…</code>). The answer's parameters are added to its query. Ignored if it points back into this app, or at a file or a script.</p></td></tr>
+<tr><td><code>x-error</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action failed. Opened with <code>errorCode</code> and <code>errorMessage</code> added, as the x-callback-url convention names them. Same safety rule as x-success.</p></td></tr>
+<tr><td><code>x-cancel</code></td><td>query</td><td>string, uri</td><td><p>Accepted for completeness and never opened: neither action here can be cancelled by the reader.</p></td></tr>
+<tr><td><code>x-source</code></td><td>query</td><td>string</td><td><p>The calling app's name, per the convention. Accepted and not used; the app shows no 'back to' button.</p></td></tr>
+</tbody></table>
+<h3>What comes back</h3>
+<h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
+<p>Opened by the app when the action failed</p>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code></td><td><p></p></td></tr>
+<tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
+</tbody></table>
+<h3>Examples</h3>
+<table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
+<tr><td><code class="url">hifth://x-callback-url/check?id=screens-1&amp;title=Turning%20pages&amp;step=Turn%20to%20the%20next%20page&amp;see=The%20page%20slides%20over&amp;step=Turn%20back&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Log</code><div class="faint"><p>A card of two steps; the first says what you should see. Done answers with id=screens-1 and result=pass or fail.</p></div></td><td><code>check screens-1 2 steps</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/check?id=a&amp;see=Something&amp;step=Look&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>What you should see came before any step, so the card is refused.</p></div></td><td><code>error bad-check</code></td></tr>
 </tbody></table>
 </section>
 <section id="builder">
@@ -410,9 +438,40 @@ function openRoute(query, order, lists) {
     const hash = routeHash(route, lists);
     return hash ? { kind: "open", hash } : bad(`not a route: ${route}`);
 }
+/** Most steps on one check card (mirrors `XCallback.Check.mostSteps`). */
+const MOST_CHECK_STEPS = 12;
+/** A `check` card: every `step` in order, each `see` on the step before it
+ *  (mirrors `XCallback.check(from:query:)`). Only the outcome matters here:
+ *  the card's name and how many steps, or why it is refused. */
+function checkCard(raw, query) {
+    const bad = (message) => ({ kind: "error", code: "bad-check", message });
+    const steps = [];
+    for (const item of raw ? raw.split("&") : []) {
+        const eq = item.indexOf("=");
+        const name = percentDecode(eq < 0 ? item : item.slice(0, eq));
+        const value = (eq < 0 ? "" : percentDecode(item.slice(eq + 1))).trim();
+        if (name === "step") {
+            if (!value)
+                return bad("a step is empty");
+            steps.push({ see: false });
+        }
+        else if (name === "see") {
+            const last = steps[steps.length - 1];
+            if (!last || last.see)
+                return bad("each see goes right after the step it belongs to");
+            last.see = true;
+        }
+    }
+    if (!steps.length)
+        return bad("a check needs at least one step: step=Do this");
+    if (steps.length > MOST_CHECK_STEPS)
+        return bad(`at most ${MOST_CHECK_STEPS} steps on one card, not ${steps.length}`);
+    const id = (query.get("id") ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return { kind: "check", id: id ? id.slice(0, 60) : "check", steps: steps.length };
+}
 /** What the shell does with this link: opens a place, answers with the
- *  current one, refuses it in silence (a plain link that is not a route), or
- *  answers an error with a code and a reason. */
+ *  current one, opens a check card, refuses it in silence (a plain link that
+ *  is not a route), or answers an error with a code and a reason. */
 export function predictLink(raw, lists) {
     const p = parts(raw);
     if (!p)
@@ -425,8 +484,10 @@ export function predictLink(raw, lists) {
                 return openRoute(query, order, lists);
             case "current":
                 return { kind: "current" };
+            case "check":
+                return checkCard(p.query, query);
             default:
-                return { kind: "error", code: "unknown-action", message: `no action named "${action}"; try open or current` };
+                return { kind: "error", code: "unknown-action", message: `no action named "${action}"; try open, current or check` };
         }
     }
     const hash = plainRoute(p, lists);
@@ -439,6 +500,8 @@ export function describeOutcome(outcome) {
             return "open " + outcome.hash;
         case "current":
             return "current";
+        case "check":
+            return `check ${outcome.id} ${outcome.steps} steps`;
         case "refused":
             return "refused";
         case "error":
@@ -525,10 +588,10 @@ update();
 </section>
 <section id="errors">
 <h2>Error codes</h2>
-<p>An <code>x-error</code> answer carries <code>errorCode</code>, one of <code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, and a plain <code>errorMessage</code>.</p>
-<p><code>missing-route</code>: open named no page, verse, surah or route. <code>bad-route</code>: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. <code>unknown-action</code>: the path after x-callback-url is not open or current. <code>route-not-shown</code>: the place was accepted but the page never showed it.</p>
+<p>An <code>x-error</code> answer carries <code>errorCode</code>, one of <code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, and a plain <code>errorMessage</code>.</p>
+<p><code>missing-route</code>: open named no page, verse, surah or route. <code>bad-route</code>: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. <code>unknown-action</code>: the path after x-callback-url is not open, current or check. <code>route-not-shown</code>: the place was accepted but the page never showed it. <code>bad-check</code>: a check card with no steps, more than 12, an empty step, or a <code>see</code> with no step before it. <code>not-in-this-build</code>: a check card sent to a release build, which has none.</p>
 </section>
-<section id="more"><h2>Other examples</h2><table><tbody><tr><td><code class="url">hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Only open and current exist. Anything else answers errorCode=unknown-action.</p></div></td><td><code>error unknown-action</code></td></tr></tbody></table></section>
+<section id="more"><h2>Other examples</h2><table><tbody><tr><td><code class="url">hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Only open, current and check exist. Anything else answers errorCode=unknown-action.</p></div></td><td><code>error unknown-action</code></td></tr></tbody></table></section>
 </main>
 </body>
 </html>
