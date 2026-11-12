@@ -107,6 +107,12 @@
     "ipad.spec.ts": [
       "ipad"
     ],
+    "landing-pages.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "lang-load.spec.ts": [
       "android",
       "iphone"
