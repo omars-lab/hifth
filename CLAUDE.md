@@ -62,6 +62,9 @@ your head.
 - **Say what the branch is for before the first commit.** `intent start <backlog row's name>`
   once per branch; a hook then ends each commit message with the task, its use case, its
   feature and its plan. `intent status` shows what is set.
+- **Things we will need someday go on the roadmap the same turn.** A backlog row that says what
+  it waits on (marked blocked), then `make roadmap`. The roadmap is a view of the backlog, never
+  a second list. (Owner, 2026-11-11.)
 
 ## Decisions are explained in plain language, or they are not explained
 

@@ -1994,6 +1994,29 @@
       "decided": "A",
       "by": "omar",
       "date": "2026-11-10"
+    },
+    {
+      "id": "hifth-app-site",
+      "question": "Where should the reading app live once hifth.app has a front page?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Where it is today, with the front page linking to it"
+        },
+        {
+          "id": "B",
+          "label": "Moved under the new address now, as its reading page"
+        },
+        {
+          "id": "C",
+          "label": "The front page at the old address, and the new address unused for now"
+        }
+      ],
+      "doc": "docs/decisions/hifth-app-site.md#so-what-was-decided",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-11-11"
     }
   ]
 }

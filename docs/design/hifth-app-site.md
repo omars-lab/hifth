@@ -56,10 +56,10 @@ run. Before it can:
 - ③ and ⑤ have to be answered, or the check refuses the pages;
 - the email list's database has to be made (⑥), or the check refuses the site's settings.
 
-Two things still point at the old setup. The `app-setup` skill names
-hifth.bytesofpurpose.com/share for Cloudflare. `make deploy-cloudflare` publishes with wrangler's
-own login, which is the other account. Both get pointed at hifth.app, or retired, once the
-first upload works.
+One thing still points at the old setup: `make deploy-cloudflare` publishes with wrangler's
+own login, which is the other account. It gets pointed at hifth.app, or retired, once the
+first upload works. (The `app-setup` skill named hifth.bytesofpurpose.com/share for Cloudflare;
+since 2026-11-12 it names hifth.app.)
 
 What would answer it: `make hifth-app-publish` from a clean worktree at origin/main, ending in
 its own "live" line, and a look at hifth.app in Firefox and Chrome.
@@ -179,3 +179,44 @@ at the new address.
 
 `www.hifth.app` is a separate address with its own store as well, so every link sends readers to
 `hifth.app` itself.
+
+**Later: what will hifth.app need someday?** Each of these waits on something, so the roadmap files it under later. Signing in is not here:
+it is item ⑨ of [sharing between readers](sharing-between-readers.md), which now says what we
+know about Sign in with Apple. Moving the domain's registration to Cloudflare is item ⑭ there.
+
+### ⑨ Can a tapped hifth.app link open the app instead of the browser? · **blocked**
+
+Apple opens an app from a link only when the site holds a small file naming the app, at
+`hifth.app/.well-known/apple-app-site-association`, and the app is signed by the team that file
+names. What would answer it: that file on the site, and a tapped link on an iPad opening the app.
+Waits on the apps being signed with the paid Apple team.
+
+### ⑩ How does the list hear that the Mac app is out? · **blocked**
+
+The notify-me form keeps addresses but sends nothing; Cloudflare cannot send mail to any address
+by itself. Needs a mail service chosen, and one email written with the way to leave in it. What
+would answer it: a test send to a made-up address on our own domain arriving with a working
+leave link. Waits on the Mac app shipping.
+
+### ⑪ When does the page name the App Store, with Apple's badge? · **blocked**
+
+The page says "Mac app — coming soon" (the hifth-app-site decision). Apple's badge is meant to
+point at a live listing. Waits on the licence reading that decides whether Hifth can be sold on
+the App Store, and then on the listing going live.
+
+### ⑫ Could Cloudflare publish hifth.app by itself on each merge? · **blocked**
+
+Today the release tool publishes from this laptop, which costs no GitHub minutes. Cloudflare can
+build from the repository on each merge instead, but it would need the private pitch folder kept
+out and the same checks run there. Waits on the first hand-run upload working (④).
+
+### ⑬ Should the design pages move to hifth.app too? · **blocked**
+
+They stay at the old address, and every decision links them there. Moving them means every link
+and the decision check's site address change at once. Waits on hifth.app being live (④).
+
+### ⑭ When does the old address stop serving the app? · **blocked**
+
+Not until readers have moved: the old address offers the carry (⑦), and turning it off before
+then would strand anyone who has not carried. What would answer it: the old address showing a
+page that sends readers on, once the carry has been on for a while.

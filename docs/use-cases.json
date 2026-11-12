@@ -1555,6 +1555,87 @@
           "gate": "gate:budget"
         }
       ]
+    },
+    {
+      "id": "find-hifth-and-open-it",
+      "actor": "hafiz",
+      "goal": "Type one short address, see what Hifth is for, and open it in my browser.",
+      "feature": "hifth-app-site",
+      "code": [
+        {
+          "file": "apps/landing/index.html",
+          "symbol": "Open Hifth in your browser"
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/release-hifth-app.mjs",
+          "symbol": "export function assemble"
+        }
+      ],
+      "proof": [
+        {
+          "file": ".claude/skills/deploy-site/scripts/release-hifth-app.test.mjs",
+          "test": "the front page goes at the root and the app under read/, and nothing the site never needs"
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/shipped.test.mjs",
+          "test": "a release missing a page the site needs is refused"
+        }
+      ],
+      "gap": "Proven on this laptop only: hifth.app is not published yet (docs/issues.json, hifth-app-first-release)."
+    },
+    {
+      "id": "hear-when-the-mac-app-is-out",
+      "actor": "hafiz",
+      "goal": "Leave my email once, hear when the Mac app is out, and be able to take it off the list.",
+      "feature": "hifth-app-site",
+      "code": [
+        {
+          "file": "apps/landing/lib/notify.mjs",
+          "symbol": "export async function handleNotify"
+        },
+        {
+          "file": "apps/landing/lib/notify.mjs",
+          "symbol": "export async function handleUnsubscribe"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/landing/lib/notify.test.mjs",
+          "test": "a new email is kept with its date and a way to leave"
+        },
+        {
+          "file": "apps/landing/lib/notify.test.mjs",
+          "test": "the leave link takes the email off the list"
+        }
+      ],
+      "gap": "The list keeps nothing live yet: its database is not made and the real spam-check key is not in (docs/issues.json, notify-list-not-live)."
+    },
+    {
+      "id": "bring-my-marks-to-the-new-address",
+      "actor": "hafiz",
+      "goal": "My bookmarks, notes and jumps are at the old address. Carry them to hifth.app without losing the ones already there.",
+      "feature": "hifth-app-site",
+      "code": [
+        {
+          "file": "apps/web/src/moved.ts",
+          "symbol": "MOVED_SHEET_ON"
+        },
+        {
+          "file": "apps/web/src/useCarryIn.ts",
+          "symbol": "export function useCarryIn"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/carry-marks.spec.ts",
+          "test": "the old address carries bookmarks, notes and jumps to the new one, keeping what the new one had"
+        },
+        {
+          "file": "apps/web/e2e/carry-marks.spec.ts",
+          "test": "a page at any other address that opens the new one cannot hand it marks"
+        }
+      ],
+      "gap": "Switched off until hifth.app/read is live (docs/issues.json, carry-marks-switched-off); reader settings are not carried (carry-leaves-settings-behind)."
     }
   ]
 }

@@ -3925,7 +3925,7 @@
       "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Pick the sub-address for the share page (such as hifth.bytesofpurpose.com or share.bytesofpurpose.com) and add its address entry; the reading app stays on the blog's address. Answered by Omar on 2026-11-09: hifth.bytesofpurpose.com/share, for now."
+      "note": "Pick the sub-address for the share page (such as hifth.bytesofpurpose.com or share.bytesofpurpose.com) and add its address entry; the reading app stays on the blog's address. Answered by Omar on 2026-11-09: hifth.bytesofpurpose.com/share, for now. Moved on 2026-11-11, before anything was tied to the old name: the share page lives at hifth.app/share, beside the reading app at hifth.app/read (the hifth-app-site decision)."
     },
     {
       "id": "sharing-cloudflare-setup",
@@ -3936,7 +3936,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Set up hifth.bytesofpurpose.com/share on Cloudflare with its free database behind it: the address entry, a small server at /share, a placeholder page with no Qur'an text. What it shows waits on ③ and ⑫; nothing goes live before ②; re-ask whether the name is for good before a passkey or app link is tied to it."
+      "note": "Set up hifth.app/share on Cloudflare with its free database behind it: a small server at /share on the account that holds hifth.app, a placeholder page with no Qur'an text. What it shows waits on ③ and ⑫; nothing goes live before ②. The name is settled (2026-11-11): hifth.app, not hifth.bytesofpurpose.com."
     },
     {
       "id": "hifth-app-domain",
@@ -3944,10 +3944,11 @@
         "file": "docs/design/sharing-between-readers.md",
         "item": "⑭"
       },
-      "status": "open",
+      "status": "blocked",
+      "blockedBy": ["Namecheap's 60-day lock on a new domain, which lifts about 2027-01-09"],
       "severity": "question",
       "owner": "user",
-      "note": "hifth.app, bought at Namecheap on 2026-11-10: a new Cloudflare account, the domain added, its nameservers moved now (cloudflare-onboarding skill); the registration moved after about 2027-01-09 when the 60-day lock lifts. Then re-ask whether the share page lives on hifth.app, and point the site's Cloudflare setup at the new account. 2026-11-11: Cloudflare says the domain is active; a read-only token is saved encrypted and its key is backed up in LastPass. Later that day: the account ID and one token that edits hifth.app's DNS and publishes static pages (Pages) on the new account are saved encrypted too, as CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (it ends 2027-11-12), and checked against Cloudflare: it reads the domain's 7 DNS records and reaches the account's Pages, which has no projects yet. Next: decide whether the share page lives on hifth.app; nothing is published there yet."
+      "note": "hifth.app, bought at Namecheap on 2026-11-10: a new Cloudflare account, the domain added, its nameservers moved now (cloudflare-onboarding skill); the registration moved after about 2027-01-09 when the 60-day lock lifts. Then re-ask whether the share page lives on hifth.app, and point the site's Cloudflare setup at the new account. 2026-11-11: Cloudflare says the domain is active; a read-only token is saved encrypted and its key is backed up in LastPass. Later that day: the account ID and one token that edits hifth.app's DNS and publishes static pages (Pages) on the new account are saved encrypted too, as CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (it ends 2027-11-12), and checked against Cloudflare: it reads the domain's 7 DNS records and reaches the account's Pages, which has no projects yet. Next: decide whether the share page lives on hifth.app; nothing is published there yet. Answered 2026-11-11 in the plan the owner approved: the share page and any future sign-in live on hifth.app, and the reading app moves to hifth.app/read (the hifth-app-site decision). What is left here is moving the registration to Cloudflare after about 2027-01-09."
     },
     {
       "id": "kanban-board-for-users",
@@ -3972,7 +3973,7 @@
       "blockedBy": [
         "sharing-which-way"
       ],
-      "note": "If accounts come: try Sign in with Apple and an email link inside the iPad and Mac apps on a throwaway test project; Google later through the system browser. The live locked link needs no sign-in."
+      "note": "If accounts come: try Sign in with Apple and an email link inside the iPad and Mac apps on a throwaway test project; Google later through the system browser. The live locked link needs no sign-in. 2026-11-11: what is known about Sign in with Apple is written into ⑨ (where it lives, the server it needs, Apple's rules, the trial); still blocked on ③."
     },
     {
       "id": "sharing-paid",
@@ -6181,6 +6182,96 @@
       "owner": "agent",
       "feature": "hifth-app-site",
       "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, the same things the saved file holds. Where the reader left off, the revision record and their settings (language, layout, sizes) stay at the old address, because they are kept in a different store. A reader who carries across finds hifth.app opening at the first page, in the default language. Next: add them to what the carry sends (the place they left off first), and check them in the carry's browser test."
+    },
+    {
+      "id": "hifth-app-link-file",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑨"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "the apps signed with the paid Apple team"
+      ],
+      "note": "The small file at hifth.app/.well-known/apple-app-site-association that lets a tapped link open the app. Needs the paid team's ID in it, so it waits on the apps being signed with the paid team."
+    },
+    {
+      "id": "hifth-app-launch-email",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑩"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "the Mac app shipping"
+      ],
+      "note": "Choose a mail service and write the one email to the notify list when the Mac app is out, with the leave link in it. Cloudflare cannot send mail to any address by itself."
+    },
+    {
+      "id": "hifth-app-store-wording",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑪"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "the licence reading (testflight-plan ⑥)"
+      ],
+      "note": "Name the App Store and add Apple's badge to the front page once Hifth is listed there. The badge is meant to link to a live listing."
+    },
+    {
+      "id": "hifth-app-builds-itself",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑫"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "hifth-app-first-release"
+      ],
+      "note": "Let Cloudflare build and publish hifth.app on each merge instead of from the laptop, keeping the private pitch folder out and running the same checks."
+    },
+    {
+      "id": "design-pages-to-hifth-app",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑬"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "hifth-app-first-release"
+      ],
+      "note": "Move the design pages from the old address to hifth.app; every decision link and the decision check's site address change with them."
+    },
+    {
+      "id": "retire-old-app-address",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑭"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "carry-marks-switched-off"
+      ],
+      "note": "Stop serving the app at the old address once readers have carried their marks across; until then the old address offers the carry."
     }
   ]
 }

@@ -633,6 +633,12 @@ tasks: ## What is still open, by whose turn it is:  make tasks
 .PHONY: backlog
 backlog: tasks-doc ## Rebuild docs/backlog.md — every open item in full, on one page
 
+.PHONY: roadmap
+roadmap: ## Rebuild docs/roadmap.md: the backlog sorted now, next and later (later = waiting on something)
+	@command -v intent >/dev/null || { echo "✗ the intent tool is not installed (intent-manager plugin)"; exit 1; }
+	@intent roadmap --print > docs/roadmap.md
+	@echo "docs/roadmap.md: $$(grep -m1 'open task' docs/roadmap.md)"
+
 .PHONY: tasks-doc
 tasks-doc: ## Re-render docs/backlog.md, every open item in full, and docs/waiting-on-you.md, what only you can move
 	@node scripts/build-tasks-doc.mjs
