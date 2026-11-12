@@ -2884,6 +2884,29 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
     });
   }
 
+  test("a drawer that grows after it opens still takes the chips it then covers", async ({ page }) => {
+    // Once in a full run the drawer measured itself while still short, decided
+    // it covered no bar button, and never measured again: the chips stayed in
+    // the bar, half under it (push of 2026-11-12). Hold it short while it
+    // opens, then let it grow.
+    await page.addInitScript(() => {
+      const style = document.createElement("style");
+      style.id = "short-drawer";
+      style.textContent = "section[data-verse-drawer] > :not(header) { display: none !important; }";
+      document.addEventListener("DOMContentLoaded", () => document.head.append(style));
+    });
+    await page.setViewportSize({ width: 1024, height: 1366 });
+    await page.goto("/#/hafs-kfqc/2:49");
+    await expect(pageSvg(page, 8)).toBeVisible({ timeout: 20_000 });
+    const drawer = page.locator("section[data-verse-drawer]");
+    await expect(drawer).toBeVisible();
+    await expect(page.locator("footer").locator("button[data-direction]").first()).toBeVisible();
+    await page.evaluate(() => document.getElementById("short-drawer")?.remove());
+    await expect(drawer.locator("button[data-direction]").first()).toBeVisible();
+    await expect(drawer).toHaveAttribute("data-whole");
+    await expect(page.locator("footer").locator("button[data-direction]")).toHaveCount(0);
+  });
+
   test("the info panel moves the chips between the two rows at once, and remembers the choice", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 1366 });
     await page.goto("/#/hafs-kfqc/2:49");
