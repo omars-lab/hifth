@@ -70,6 +70,7 @@ export interface Catalog {
   readonly cardRoomNote: string;
   readonly cardRoomSmaller: string;
   readonly cardRoomTitle: string;
+  readonly carryArrived: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly chipAria: (d: { readonly direction: string | number; readonly countText: string | number }) => string;
   readonly clearSelection: string;
   readonly clickForNote: (d: { readonly source: string | number }) => string;
@@ -322,6 +323,14 @@ export interface Catalog {
   readonly mistakeWordPicked: string;
   readonly monthEarlier: string;
   readonly monthLater: string;
+  readonly movedBody: string;
+  readonly movedCarried: (d: { readonly n: number; readonly nText: string | number }) => string;
+  readonly movedCarry: string;
+  readonly movedFailed: string;
+  readonly movedLater: string;
+  readonly movedOpen: string;
+  readonly movedTitle: string;
+  readonly movedWaiting: string;
   readonly mushaf: string;
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
   readonly nextPage: string;

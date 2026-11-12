@@ -711,6 +711,15 @@ export interface Strings {
   bmLoad: string;
   bmLoaded(n: number): string;
   bmLoadBad: string;
+  movedTitle: string;
+  movedBody: string;
+  movedCarry: string;
+  movedLater: string;
+  movedWaiting: string;
+  movedCarried(n: number): string;
+  movedOpen: string;
+  movedFailed: string;
+  carryArrived(n: number): string;
   toolbarLabel: string;
   toolSelect: string;
   toolHighlight: string;
@@ -1658,6 +1667,15 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     bmLoad: m.bmLoad,
     bmLoaded: (count) => m.bmLoaded({ n: count, nText: n(count) }),
     bmLoadBad: m.bmLoadBad,
+    movedTitle: m.movedTitle,
+    movedBody: m.movedBody,
+    movedCarry: m.movedCarry,
+    movedLater: m.movedLater,
+    movedWaiting: m.movedWaiting,
+    movedCarried: (count) => m.movedCarried({ n: count, nText: n(count) }),
+    movedOpen: m.movedOpen,
+    movedFailed: m.movedFailed,
+    carryArrived: (count) => m.carryArrived({ n: count, nText: n(count) }),
     toolbarLabel: m.toolbarLabel,
     toolSelect: m.toolSelect,
     toolHighlight: m.toolHighlight,

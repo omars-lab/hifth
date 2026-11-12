@@ -44,38 +44,46 @@ export function useBookmarks(
   record?: Recorder,
 ): {
   bookmarks: readonly Bookmark[];
+  /** True once the bookmarks saved in this browser have been read in. */
+  loaded: boolean;
   commit: (next: Bookmark[], said: string, how?: CommitHow) => void;
   restore: (set: unknown, said: string) => void;
 } {
   const [bookmarks, setBookmarksState] = useState<readonly Bookmark[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const latest = useRef<readonly Bookmark[]>([]);
   const setBookmarks = useCallback((next: readonly Bookmark[] | ((now: readonly Bookmark[]) => readonly Bookmark[])) => {
     latest.current = typeof next === "function" ? next(latest.current) : next;
     setBookmarksState(latest.current);
   }, []);
 
+  // Writes go one after another, and the first waits for the read. Each opens
+  // the store on its own, and two opened close together (a drop, then the
+  // rename a moment later) could otherwise finish in either order — and the
+  // older set, landing last, would quietly put the old name back.
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
+
   useEffect(() => {
     let live = true;
-    void readBookmarks().then((set) => {
+    const read = readBookmarks().then((set) => {
       if (!live) return;
       // A drop made in the moment before the read landed is kept, not overwritten.
       setBookmarks((now) => (now.length === 0 ? set : [...set, ...now.filter((b) => !set.some((s) => s.id === b.id))]));
+      setLoaded(true);
     });
+    queue.current = read;
     return () => {
       live = false;
     };
   }, [setBookmarks]);
 
-  // Writes go one after another. Each opens the store on its own, and two
-  // opened close together (a drop, then the rename a moment later) could
-  // otherwise finish in either order — and the older set, landing last, would
-  // quietly put the old name back.
-  const queue = useRef<Promise<unknown>>(Promise.resolve());
   const write = useCallback(
     (next: readonly Bookmark[], said: string) => {
       setBookmarks(next);
+      // The set written is the one held when its turn comes, not the one at the
+      // commit: a commit made before the read landed did not yet hold what was read.
       queue.current = queue.current
-        .then(() => writeBookmarks([...next]))
+        .then(() => writeBookmarks([...latest.current]))
         .then((ok) => announce(ok ? said : notSaved));
     },
     [announce, notSaved, setBookmarks],
@@ -89,7 +97,7 @@ export function useBookmarks(
   );
   const restore = useCallback((set: unknown, said: string) => write(set as readonly Bookmark[], said), [write]);
 
-  return { bookmarks, commit, restore };
+  return { bookmarks, loaded, commit, restore };
 }
 
 /**

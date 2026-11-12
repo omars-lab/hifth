@@ -1,0 +1,68 @@
+/*
+ * "Hifth has moved" — a card at the foot of the screen, not a dialog: a hafiz in
+ * the middle of a page can carry on reading and answer it when they are ready.
+ */
+
+.card {
+  position: fixed;
+  inset-inline: var(--space-3);
+  inset-block-end: calc(var(--space-3) + env(safe-area-inset-bottom));
+  z-index: var(--z-ask);
+  max-inline-size: 30rem;
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4);
+  background: var(--paper-raised);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  color: var(--ink);
+}
+
+.title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.body {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.primary,
+.secondary {
+  min-block-size: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 8px;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primary {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+}
+
+.secondary {
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: inherit;
+}
+
+.primary:focus-visible,
+.secondary:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}

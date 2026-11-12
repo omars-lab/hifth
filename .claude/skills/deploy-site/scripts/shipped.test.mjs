@@ -103,6 +103,18 @@ test("a development feature named in a shipped file is refused, each with its re
   }
 });
 
+// The old address opens hifth.app/read in a new tab and hands it the reader's
+// marks through the link between the two tabs. This header cuts that link, and
+// the carry would then fail for every reader, quietly, falling back to a file.
+test("a header that cuts the link between the old tab and the new one is refused", () => {
+  const files = cleanFolder().map((f) =>
+    f.path === "_headers" ? { ...f, text: `${f.text}/*\n  Cross-Origin-Opener-Policy: same-origin\n` } : f,
+  );
+  const got = refusals(files);
+  assert.deepEqual(paths(got), ["_headers"]);
+  assert.match(got[0].why, /carry/);
+});
+
 test("a release missing a page the site needs is refused", () => {
   const files = cleanFolder().filter((f) => !["read/index.html", "privacy.html", "404.html"].includes(f.path));
   assert.deepEqual(paths(refusals(files)), ["privacy.html", "404.html", "read/index.html"]);

@@ -22,6 +22,11 @@
     "card-foot.spec.ts": [
       "desktop"
     ],
+    "carry-marks.spec.ts": [
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "chrome-fit.spec.ts": [
       "android",
       "iphone"

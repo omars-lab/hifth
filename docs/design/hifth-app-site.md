@@ -23,8 +23,8 @@ place to hear when the Mac app is out. The pages, marks and look-alike jumps are
 
 Not yet. The front page and the privacy page are drawn and checked on a laptop and a phone-width
 screen. The release tool is built and tested (④). The email form's server part is built (⑥).
-Still to come: the app copied under /read and the "Hifth has moved" sheet on the old address.
-Each comes with its own tests.
+The app runs under /read (checked 2026-11-12), and the way to carry marks across is built and
+tested, but switched off until hifth.app is live (⑦).
 
 What would answer it: hifth.app and hifth.app/read open in Firefox and Chrome; a throwaway email
 signs up and leaves again; marks made at the old address arrive at the new one.
@@ -102,3 +102,76 @@ What is left before it is live:
 
 Until the database is made, the release check refuses to publish.
 
+### ⑦ Can a reader at the old address bring their marks to hifth.app? · **open**
+
+Built, and switched off. It works in tests in Chrome, Firefox and iPhone Safari (2026-11-12). It stays off until hifth.app/read
+is live, and then one switch turns it on (step 5 of the plan).
+
+**Why it is needed.** A browser keeps a site's saved things under the site's exact address. A
+reader's bookmarks, notes and look-alike jumps at blog.bytesofpurpose.com stay there; hifth.app
+opens empty.
+
+**What the reader sees.** A card at the foot of the page, at the old address only (never in the
+iPad or Mac app): "Hifth has moved to hifth.app". It has two buttons:
+
+- **Carry them to hifth.app** opens hifth.app/read in a new tab, and the marks arrive there. The
+  new tab says how many came across, and the card says how many were carried. From then on the
+  card offers **Open hifth.app** instead.
+- **Later** puts the card away for a week.
+
+If hifth.app doesn't answer within 15 seconds, or the browser stops the tab from opening, the card
+offers **Save to a file**. The reader can then load that file at hifth.app, as they can today.
+
+**How it works.**
+
+```mermaid
+sequenceDiagram
+  participant Old as old address
+  participant New as hifth.app/read
+  Old->>New: opens it in a new tab (#/carry)
+  Note over New: waits until its own bookmarks are read in
+  New->>Old: ready
+  Old->>New: the same file "Save to a file" writes
+  Note over New: loads it like "Load from a file"; adds, never replaces
+  New->>Old: done, N items
+```
+
+- Each side listens only to the other's exact address, and only to the tab it opened or was
+  opened by. Any other page that sends the same message is ignored. A test checks this.
+- Loading adds to what hifth.app already holds; nothing there is replaced. Building the carry
+  found a real fault here, now fixed with a test. A bookmark loaded in the moment before the
+  saved ones were read in wrote a list holding only itself, so the saved ones were lost on disk.
+- A reload of the new tab doesn't take the file again.
+- hifth.app must never send the header that cuts a new tab off from the page that opened it
+  (Cross-Origin-Opener-Policy). The release check refuses it, with a test.
+
+What doesn't come across yet is ⑧.
+
+**Where the app lives under /read.** The app's offline helper (its service worker) covers
+`/read/` and nothing above it, so the front page is never cached as part of the app. The app keeps
+its place after the `#` in the link, so every link asks for `/read/` itself. That means there is
+no catch-all rule sending unknown paths to the app; a mistyped path gets the site's "No page here"
+page.
+
+The rules are in `apps/web/src/moved.ts`, with tests beside it. The card is
+`apps/web/src/components/MovedSheet.tsx`, the new tab's half is `apps/web/src/useCarryIn.ts`, and
+the browser test is `apps/web/e2e/carry-marks.spec.ts`. The test stands in for the two addresses
+with `localhost` and `127.0.0.1`, which a browser keeps apart like two sites.
+
+### ⑧ What does a reader leave behind when they carry their marks across? · **open**
+
+The carry brings what the saved file holds: bookmarks, notes and look-alike jumps. Three things
+stay at the old address, because the app keeps them in a different store:
+
+- where the reader left off, so hifth.app opens at the first page;
+- the revision record;
+- their settings (language, layout, sizes), so hifth.app opens in the default language.
+
+Where they left off matters most: a hafiz who carries across and lands on page one has to find
+their place again by hand.
+
+What would answer it: the carry sends these too, and the browser test for the carry (⑦) finds them
+at the new address.
+
+`www.hifth.app` is a separate address with its own store as well, so every link sends readers to
+`hifth.app` itself.

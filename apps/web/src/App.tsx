@@ -184,6 +184,8 @@ import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
 import { NoteFollow } from "./components/NoteFollow";
 import { useBookmarks, useConfusions, useNotes, useSeam } from "./useBookmarks";
+import { useCarryIn } from "./useCarryIn";
+import { MovedSheet } from "./components/MovedSheet";
 import {
   NO_HISTORY,
   recordStep,
@@ -1796,6 +1798,7 @@ export function App(): JSX.Element {
   }, [keepHistory]);
   const {
     bookmarks,
+    loaded: bookmarksLoaded,
     commit: commitBookmarks,
     restore: restoreBookmarks,
   } = useBookmarks(announce, t.bmNotSaved, recorders.bookmarks);
@@ -2305,26 +2308,36 @@ export function App(): JSX.Element {
     whole?: ScopedNote;
   } | null>(null);
 
+  // The file carries the notes that gather verses and, apart from them, the
+  // marked mistakes, which are still the old kind of note, and the jumps. The
+  // same text is what the carry to hifth.app sends (moved.ts).
+  const bookmarkFileText = useCallback(
+    () =>
+      JSON.stringify(
+        toBookmarkFile(bookmarks, Date.now(), notes.filter(isMistake), [...scoped], confusions),
+        null,
+        2,
+      ),
+    [bookmarks, notes, scoped, confusions],
+  );
+
   const saveBookmarkFile = useCallback(() => {
-    // The file carries the notes that gather verses and, apart from them, the
-    // marked mistakes, which are still the old kind of note, and the jumps.
-    const mistakes = notes.filter(isMistake);
-    const file = toBookmarkFile(bookmarks, Date.now(), mistakes, [...scoped], confusions);
-    const blob = new Blob([JSON.stringify(file, null, 2)], { type: "application/json" });
+    const blob = new Blob([bookmarkFileText()], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = "hifth-bookmarks.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, [bookmarks, notes, scoped, confusions]);
+  }, [bookmarkFileText]);
 
+  // Returns how many items the file added, or null when it was not a bookmark file.
   const loadBookmarkFile = useCallback(
-    (text: string) => {
+    (text: string, from: "file" | "carry" = "file"): number | null => {
       const file = parseBookmarkFile(text);
       if (!file) {
         announce(t.bmLoadBad);
-        return;
+        return null;
       }
       const merged = mergeBookmarks(bookmarks, file.bookmarks);
       const newBookmarks = merged.length - bookmarks.length;
@@ -2336,11 +2349,17 @@ export function App(): JSX.Element {
         ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
         ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
       ];
+      const added = Math.max(0, newBookmarks) + newNotes + newJumps;
+      const said =
+        from === "carry" ? t.carryArrived(added) : parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0);
       // A file loaded is not a step: its notes and jumps are not either.
-      commitBookmarks(merged, parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0), { unrecorded: true });
+      commitBookmarks(merged, said, { unrecorded: true });
+      return added;
     },
     [announce, bookmarks, commitBookmarks, loadNotesFile, loadConfusionsFile, t],
   );
+  // Opened by the old address to carry the reader's marks here (moved.ts).
+  useCarryIn(bookmarksLoaded, (text) => loadBookmarkFile(text, "carry"));
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
   // question first; the bookmarks it lifted wait here for a few seconds so one
@@ -5250,6 +5269,7 @@ export function App(): JSX.Element {
       {appPages === "row" && (
         <PageRow page={appPage} onPage={setAppPage} developer={DeveloperPage ? "Developer" : undefined} />
       )}
+      <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} />
       <LiveAnnouncer message={message} />
     </div>
     </FullScreenContext.Provider>

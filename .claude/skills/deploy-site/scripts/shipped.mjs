@@ -76,6 +76,12 @@ export function auditShipped(files, opts = {}) {
     }
     if (text == null) continue;
     for (const why of markersIn(text)) problems.push({ path, why });
+    if (path === "_headers" && /cross-origin-opener-policy/i.test(text)) {
+      problems.push({
+        path,
+        why: "it sets Cross-Origin-Opener-Policy, which cuts the old address's tab off from hifth.app's, so readers could not carry their marks across (apps/web/src/moved.ts)",
+      });
+    }
   }
   const have = new Set(files.map((f) => f.path));
   for (const path of REQUIRED) {
