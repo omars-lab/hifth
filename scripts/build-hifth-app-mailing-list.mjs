@@ -105,7 +105,7 @@ table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
 th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: left; }
 th { background: var(--code); }
 .diagram { margin: 1rem 0; padding: 12px; background: #ffffff; border-radius: 8px; overflow-x: auto; }
-.diagram svg { max-width: 100%; height: auto; }
+.diagram svg { display: block; margin: 0 auto; width: 100%; max-width: 520px !important; height: auto; }
 </style>
 </head>
 <body>

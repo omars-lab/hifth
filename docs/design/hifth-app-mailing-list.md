@@ -37,6 +37,7 @@ flowchart TD
   M -- "leave link" --> G["Page with a Leave button"]
   G -- "button press (POST)" --> P
   M -- "mail app's own Unsubscribe" --> P
+  S -. "script reads the list" .-> L
 ```
 
 ## Does Cloudflare do mailing lists?
@@ -124,7 +125,7 @@ Around all of these: Supabase free $0, the timer Worker $0, and the postal addre
 
 The raw work is in [researcher A's findings](../research/2026-11-12-mailing-list-a-findings.md) and [design](../research/2026-11-12-mailing-list-a-design.md), and [researcher B's findings](../research/2026-11-12-mailing-list-b-findings.md) and [design](../research/2026-11-12-mailing-list-b-design.md). The checker re-opened the sources behind the claims that decide something.
 
-**Agreed, and the source holds:** Resend free from a news subdomain; the list stays only in Supabase; narrow database functions behind the publishable key; a separate Worker to keep Supabase awake; Apple's mail ruled out; a confirmation email worth doing though no law names it; a leave address that takes a POST; a public TestFlight link in our own email, so no addresses go to Apple; DMARC at the root; the registrar's include probably left over.
+**Agreed, and the source holds:** Resend free from a news subdomain; the list stays only in Supabase; narrow database functions behind the publishable key; a separate Worker to keep Supabase awake; Apple's mail ruled out; a confirmation email worth doing though no law names it; a leave address that takes a POST; a public TestFlight link in our own email, so no addresses go to Apple; Amazon SES as the route for a big list; DMARC at the root; the registrar's include probably left over.
 
 Where they disagreed, and how it was settled:
 
@@ -133,18 +134,18 @@ Where they disagreed, and how it was settled:
 | Does Cloudflare's sending allow marketing mail? | Its FAQ says no | Its pages are silent on announcements | Cloudflare's FAQ answers "No" (re-fetched). A is right. |
 | How does the send script read the list? | A Supabase secret key kept on the laptop | The database password the load scripts already use | Both keys get past every rule. B's way makes no new key, so we take B's. |
 | How long do unconfirmed rows stay? | 30 days | 7 days | No source decides it. We take 7: an address nobody confirmed is someone who has not agreed, and signing up again costs nothing. |
-| Is the confirm link a button? | A plain link | A page with a button that sends a POST | B marked this as its own reasoning, not a source. We take it, for the same reason as the leave link. |
+| Is the confirm link a button? | Did not say how the link behaves | A page with a button that sends a POST | B marked this as its own reasoning, not a source, and A is silent. We take it, for the same reason as the leave link. |
 | Is Resend's free Broadcasts a route? | Rejected: it needs a copy of the list at Resend | A row in the size table | Both found the same fact (1,000 people free, held at Resend), which re-checks. We keep it as a fallback only. |
 
 Only one found:
 
-- **Only A:** keep the language the form sends; an unticked "also send me updates" box (not taken now, see below); Amazon SES as the route past 3,000.
-- **Only B:** the form should always answer "check your inbox"; Apple's "automated means, like scripts" clause (re-checked, section V.B.10); that the database password avoids a new key.
+- **Only A:** keep the language the form sends; an unticked "also send me updates" box (not taken now, see below).
+- **Only B:** the form should always answer "check your inbox"; what a paused Supabase project answers (an error, which the form must read as "try again later"); Apple's "automated means, like scripts" clause (re-checked, section V.B.10); that the database password avoids a new key.
 
 Still resting on a snippet, or not checked at all:
 
 - Whether Resend signs the one-click leave lines when they are added to each email. Its pages do not say; one test email to the owner's own inbox settles it.
-- How Resend's Broadcasts add their own leave lines.
+- How Resend's Broadcasts add their own leave lines, and whether Amazon SES signs added leave lines.
 - That the database functions return nothing on a repeat sign-up, and what read rights they need: designed, not yet run against Supabase.
 - The locked-down database setup exists only on an unmerged branch so far.
 - That Cloudflare's site code cannot hold a timer: one settings page and one forum answer.
@@ -156,7 +157,7 @@ Still resting on a snippet, or not checked at all:
 
 - **More than about 3,000 people, or regular updates:** move the sending to Amazon SES; the list stays put.
 - **The owner wants a newsletter, not one announcement:** a newsletter service earns its second copy of the list.
-- **Resend does not sign the added leave lines:** send through Amazon SES, which signs whatever we give it.
+- **Resend does not sign the added leave lines:** send through Amazon SES instead, once a test shows it signs them (not looked up).
 - **Supabase moves to a paid plan:** the keep-awake timer goes; the nightly tidy stays.
 - **Cloudflare's sending leaves beta and allows announcements:** it becomes worth a look, since it is the same account.
 
