@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ADDRESSES_KEY, CARRY_HASH, addressesFor, carryMessage, newerSeam, type CarriedSeam, type CarryPlace } from "./moved";
+import { ADDRESSES_KEY, CARRY_HASH, addressesFor, carryMessage, laySettings, newerSeam, type CarriedSeam, type CarryPlace } from "./moved";
 
 /*
  * The link the page was opened with, read once when the app's code first runs.
@@ -39,6 +39,7 @@ export function useCarryIn(
   load: (file: string) => number | null,
   go: (page: number) => boolean,
   place: CarryPlace,
+  saved: () => Promise<unknown>,
   openedWith = OPENED_WITH,
 ): void {
   const loadRef = useRef(load);
@@ -53,6 +54,8 @@ export function useCarryIn(
   if (ownAtOpen.current === null && openedWith === CARRY_HASH) ownAtOpen.current = place.read();
   const placeRef = useRef(place);
   placeRef.current = place;
+  const savedRef = useRef(saved);
+  savedRef.current = saved;
 
   useEffect(() => {
     if (!loaded || done.current || openedWith !== CARRY_HASH) return;
@@ -74,7 +77,17 @@ export function useCarryIn(
         const kept = newerSeam(own, msg.seam);
         // Written even when it is this address's own, since this tab may have
         // recorded its first page over it while it waited.
-        if (kept && goRef.current(kept.page)) void placeRef.current.write(kept);
+        const laid = (() => {
+          try {
+            return laySettings(localStorage, msg.settings);
+          } catch {
+            return 0;
+          }
+        })();
+        const placed = kept && goRef.current(kept.page) ? placeRef.current.write(kept) : null;
+        // Settings are read as the app starts, so they show after a reload; it
+        // waits for the marks and the place to reach disk, or it would cut them off.
+        if (laid) void Promise.all([placed, savedRef.current()]).then(() => window.location.reload());
       });
     };
     window.addEventListener("message", onMessage);

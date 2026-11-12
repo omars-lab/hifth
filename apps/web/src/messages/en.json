@@ -334,7 +334,7 @@
   "bmLoaded": "{n, plural, =0{Nothing new in that file} one{{nText} bookmark added from the file} other{{nText} bookmarks added from the file}}",
   "bmLoadBad": "That is not a bookmark file. Nothing was changed.",
   "movedTitle": "Hifth has moved to hifth.app",
-  "movedBody": "Your bookmarks, notes and jumps are kept in this browser, at this address. Carry them across and they will be waiting for you at hifth.app.",
+  "movedBody": "Your bookmarks, notes, jumps and settings are kept in this browser, at this address. Carry them across and they will be waiting for you at hifth.app.",
   "movedCarry": "Carry them to hifth.app",
   "movedLater": "Later",
   "movedWaiting": "Opening hifth.app…",

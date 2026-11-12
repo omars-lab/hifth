@@ -121,9 +121,42 @@ export interface CarryPlace {
   write(seam: CarriedSeam): Promise<boolean>;
 }
 
+/**
+ * Which of the reader's settings go with the carry: everything the app keeps under
+ * its own name in the browser, except this card's own keys, a dismissed notice,
+ * what this browser heard or kept of a recitation, and the names of the databases:
+ * the marks go by the file, and the revision record only when the reader says so.
+ */
+export const carriesSetting = (key: string): boolean =>
+  key.startsWith("hifth.") &&
+  !/^hifth\.(moved|notice|bookmarks|packs|revision|tafsir|usage|recitation\.(kept|heard))\./.test(key);
+
+/** The settings to send, read from the old address's storage. */
+export function settingsOf(storage: Storage): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (let i = 0; i < storage.length; i++) {
+    const k = storage.key(i);
+    const v = k && carriesSetting(k) ? storage.getItem(k) : null;
+    if (k && v !== null) out[k] = v;
+  }
+  return out;
+}
+
+/** Lays the carried settings the new address does not have yet. How many it laid. */
+export function laySettings(storage: Storage, settings: unknown): number {
+  let laid = 0;
+  if (!settings || typeof settings !== "object") return 0;
+  for (const [k, v] of Object.entries(settings)) {
+    if (!carriesSetting(k) || typeof v !== "string" || storage.getItem(k) !== null) continue;
+    storage.setItem(k, v);
+    laid++;
+  }
+  return laid;
+}
+
 export type CarryMessage =
   | { type: "hifth-carry-ready" }
-  | { type: "hifth-carry"; file: string; seam?: CarriedSeam }
+  | { type: "hifth-carry"; file: string; seam?: CarriedSeam | undefined; settings?: Record<string, string> | undefined }
   | { type: "hifth-carry-done"; added: number };
 
 function seamOf(v: unknown): CarriedSeam | undefined {
@@ -163,7 +196,7 @@ export function carryMessage(
     // An older old address sends no place, and a place in the wrong shape is
     // dropped; either way the marks still come across.
     const seam = seamOf(d.seam);
-    return seam ? { type: "hifth-carry", file: d.file, seam } : { type: "hifth-carry", file: d.file };
+    return { type: "hifth-carry", file: d.file, seam, settings: d.settings as Record<string, string> | undefined };
   }
   if (d.type === "hifth-carry-done" && Number.isInteger(d.added) && (d.added as number) >= 0)
     return { type: "hifth-carry-done", added: d.added as number };

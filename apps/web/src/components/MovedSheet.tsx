@@ -14,6 +14,7 @@ import {
   sheetState,
   type Addresses,
   type CarriedSeam,
+  settingsOf,
 } from "../moved";
 import styles from "./MovedSheet.module.css";
 
@@ -89,7 +90,7 @@ export function MovedSheet({ file, onSave, readPlace }: MovedSheetProps): JSX.El
         sent = true;
         const file = fileRef.current();
         // Where the reader left off goes with the marks, so hifth.app opens there.
-        void readPlace().then((seam) => tab.postMessage({ type: "hifth-carry", file, seam }, addresses.next));
+        void readPlace().then((seam) => tab.postMessage({ type: "hifth-carry", file, seam, settings: settingsOf(localStorage) }, addresses.next));
       } else if (msg?.type === "hifth-carry-done") {
         store(CARRIED_KEY, String(msg.added));
         setPhase({ at: "carried", added: msg.added });

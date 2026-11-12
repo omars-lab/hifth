@@ -241,6 +241,42 @@ test("the new address opens where the reader left off at the old one", async ({ 
   await expect.poll(async () => (await savedSeam(arrived))?.page).toBe(250);
 });
 
+// Found 2026-11-12 (hifth-app-site ⑧): the carry left the reader's settings
+// behind, so hifth.app opened with none of the choices they had made. Settings
+// are read as the app starts, so the new tab reloads once they are laid; the
+// reload must wait until the marks and the place are saved, or it cuts them off.
+test("the reader's settings come across too, and the reload they need loses nothing", async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  const { old } = await standIns(context, baseURL);
+  await page.goto(`${old}/#/hafs-kfqc/p250`);
+  await putMarks(page, {
+    bookmarks: [bookmark("b-old-1", 5), bookmark("b-old-2", 6)],
+    notes: [note("n-old", "2:39")],
+    jumps: [jump("j-old", "2:59", "2:35")],
+  });
+  await putSeam(page, { page: 250, at: 2_000 });
+  await page.evaluate(() => localStorage.setItem("hifth.app.pages.v1", "row"));
+  await page.reload();
+  await expect(page.getByRole("navigation", { name: "Pages of the app" })).toBeVisible();
+
+  const opened = context.waitForEvent("page");
+  await page.getByTestId("moved-sheet").getByRole("button", { name: "Carry them to hifth.app" }).click();
+  const arrived = await opened;
+
+  await expect(arrived.getByRole("navigation", { name: "Pages of the app" })).toBeVisible();
+  expect(await arrived.evaluate(() => localStorage.getItem("hifth.app.pages.v1"))).toBe("row");
+  // This card's own record of the carry stays at the old address.
+  expect(await arrived.evaluate(() => localStorage.getItem("hifth.moved.carried.v1"))).toBeNull();
+  await expect(arrived).toHaveURL(/#\/hafs-kfqc\/p250$/);
+  await expect.poll(async () => (await savedSeam(arrived))?.page).toBe(250);
+  await expect
+    .poll(() => savedIds(arrived))
+    .toEqual({ bookmarks: ["b-old-1", "b-old-2"], notes: ["n-old"], jumps: ["j-old"] });
+});
+
 test("a place the new address already has, newer than the old one's, is kept", async ({ page, context, baseURL }) => {
   const { old, next } = await standIns(context, baseURL);
   const ahead = await context.newPage();

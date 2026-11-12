@@ -1805,6 +1805,7 @@ export function App(): JSX.Element {
     loaded: bookmarksLoaded,
     commit: commitBookmarks,
     restore: restoreBookmarks,
+    saved: bookmarksSaved,
   } = useBookmarks(announce, t.bmNotSaved, recorders.bookmarks);
   // The red seam: where the reader left off, following the last page they stayed on.
   const seamPage = useSeam(page);
@@ -1944,6 +1945,7 @@ export function App(): JSX.Element {
     commitScoped,
     loadFile: loadNotesFile,
     restore: restoreNotes,
+    saved: notesSaved,
   } = useNotes(announce, t.bmNotSaved, recorders.notes);
   const [noteOpenId, setNoteOpenId] = useState<string | null>(null);
   const openNote = notes.find((n) => n.id === noteOpenId) ?? null;
@@ -2000,6 +2002,7 @@ export function App(): JSX.Element {
     commit: commitConfusions,
     loadFile: loadConfusionsFile,
     restore: restoreConfusions,
+    saved: jumpsSaved,
   } = useConfusions(announce, t.bmNotSaved, recorders.jumps);
   const confusionMarks = useMemo(() => countConfusionMarks(confusions), [confusions]);
   // And the smaller one at the next pause sign after where each jump left
@@ -2379,6 +2382,7 @@ export function App(): JSX.Element {
       return true;
     },
     CARRY_PLACE,
+    () => Promise.all([bookmarksSaved(), notesSaved(), jumpsSaved()]),
   );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no

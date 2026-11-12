@@ -329,7 +329,7 @@ const messages: Catalog = {
   mistakeWordPicked: "عُلّمت الكلمة خاطئة",
   monthEarlier: "الشهر السابق",
   monthLater: "الشهر التالي",
-  movedBody: "علاماتك وملاحظاتك وقفزاتك محفوظة في هذا المتصفّح، على هذا العنوان. انقلها لتجدها في انتظارك على hifth.app.",
+  movedBody: "علاماتك وملاحظاتك وقفزاتك وإعداداتك محفوظة في هذا المتصفّح، على هذا العنوان. انقلها لتجدها في انتظارك على hifth.app.",
   movedCarried: (d) => plural(LC, d.n, { "0": "لدى hifth.app كلّ ما هنا", zero: "لدى hifth.app كلّ ما هنا", one: "نُقل عنصر واحد إلى hifth.app", two: "نُقل عنصران إلى hifth.app", few: "نُقلت " + d.nText + " عناصر إلى hifth.app", many: "نُقل " + d.nText + " عنصرًا إلى hifth.app", other: "نُقل " + d.nText + " عنصر إلى hifth.app" }),
   movedCarry: "انقلها إلى hifth.app",
   movedFailed: "لم يُجب hifth.app. احفظ في ملف هنا، ثم حمّل الملف على hifth.app.",

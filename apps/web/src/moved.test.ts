@@ -4,8 +4,11 @@ import {
   LATER_MS,
   MOVED_SHEET_ON,
   addressesFor,
+  carriesSetting,
   carryMessage,
+  laySettings,
   newerSeam,
+  settingsOf,
   sheetOn,
   sheetShows,
   sheetState,
@@ -138,5 +141,90 @@ describe("which place the new address keeps", () => {
     expect(newerSeam({ page: 9, at: 1_000 }, old)).toEqual(old);
     expect(newerSeam({ page: 9, at: 1_000 }, undefined)).toEqual({ page: 9, at: 1_000 });
     expect(newerSeam(null, undefined)).toBeNull();
+  });
+});
+
+/**
+ * Every name the app saves under, sorted by hand into what the carry takes and
+ * what it leaves. A new name fails here until someone decides which it is, so a
+ * private record can never ride along by being new. Databases are listed too:
+ * they are not settings, and the carry must not take one by its name.
+ */
+const STAYS = new Set([
+  // This card's own bookkeeping.
+  "hifth.moved.addresses.v1",
+  "hifth.moved.carried.v1",
+  "hifth.moved.later.v1",
+  // A notice the reader put away on this address.
+  "hifth.notice.",
+  // What this browser heard or kept of a recitation.
+  "hifth.recitation.heard.v1",
+  "hifth.recitation.kept.v1",
+  // Databases, not settings: the marks go by the file, the revision record only
+  // by its own choice, and the rest are this browser's own.
+  "hifth.bookmarks.v1",
+  "hifth.packs.v1",
+  "hifth.revision.v1",
+  "hifth.tafsir.v1",
+  "hifth.usage.v1",
+]);
+
+const SOURCES = import.meta.glob(["./**/*.{ts,tsx}", "!./**/*.test.{ts,tsx}"], {
+  query: "?raw",
+  import: "default",
+  eager: true,
+}) as Record<string, string>;
+
+describe("which settings the carry takes", () => {
+  const names = new Set(
+    Object.values(SOURCES).flatMap((src) => [...src.matchAll(/"(hifth\.[\w.-]+)"/g)].map((m) => m[1]!)),
+  );
+
+  it("finds the names the app saves under", () => {
+    expect(names.size).toBeGreaterThan(40);
+    expect(names).toContain("hifth.lang.v1");
+  });
+
+  it("takes every saved name except the ones that stay, and none that stay", () => {
+    const wrong = [...names].filter((n) => carriesSetting(n) === STAYS.has(n));
+    expect(wrong).toEqual([]);
+  });
+
+  it("lists nothing as staying that the app no longer saves under", () => {
+    expect([...STAYS].filter((n) => !names.has(n))).toEqual([]);
+  });
+
+  it("reads the settings to send, and leaves the rest of the browser's storage alone", () => {
+    const store = new Map([
+      ["hifth.lang.v1", "en"],
+      ["hifth.moved.later.v1", "5"],
+      ["other.site.key", "x"],
+    ]);
+    const storage = {
+      get length() {
+        return store.size;
+      },
+      key: (i: number) => [...store.keys()][i] ?? null,
+      getItem: (k: string) => store.get(k) ?? null,
+    } as unknown as Storage;
+    expect(settingsOf(storage)).toEqual({ "hifth.lang.v1": "en" });
+  });
+
+  it("lays only settings the new address does not have, and only ones it takes", () => {
+    const store = new Map([["hifth.lang.v1", "ar"]]);
+    const storage = {
+      getItem: (k: string) => store.get(k) ?? null,
+      setItem: (k: string, v: string) => void store.set(k, v),
+    } as unknown as Storage;
+    const laid = laySettings(storage, {
+      "hifth.lang.v1": "en",
+      "hifth.turn.style.v1": "slide",
+      "hifth.revision.v1": "x",
+      "other.site.key": "x",
+      "hifth.open-size.v1": 3,
+    });
+    expect(laid).toBe(1);
+    expect(Object.fromEntries(store)).toEqual({ "hifth.lang.v1": "ar", "hifth.turn.style.v1": "slide" });
+    expect(laySettings(storage, "not settings")).toBe(0);
   });
 });

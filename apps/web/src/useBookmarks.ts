@@ -48,6 +48,8 @@ export function useBookmarks(
   loaded: boolean;
   commit: (next: Bookmark[], said: string, how?: CommitHow) => void;
   restore: (set: unknown, said: string) => void;
+  /** Settles once every write asked for so far has reached disk. */
+  saved: () => Promise<unknown>;
 } {
   const [bookmarks, setBookmarksState] = useState<readonly Bookmark[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -97,7 +99,7 @@ export function useBookmarks(
   );
   const restore = useCallback((set: unknown, said: string) => write(set as readonly Bookmark[], said), [write]);
 
-  return { bookmarks, loaded, commit, restore };
+  return { bookmarks, loaded, commit, restore, saved: () => queue.current };
 }
 
 /**
@@ -163,6 +165,8 @@ export function useNotes(
   commitScoped: (next: readonly ScopedNote[], said: string, how?: CommitHow) => void;
   loadFile: (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => number;
   restore: (held: unknown, said: string) => void;
+  /** Settles once every write asked for so far has reached disk. */
+  saved: () => Promise<unknown>;
 } {
   const [held, setHeld] = useState<Held>(EMPTY);
   const [loaded, setLoaded] = useState(false);
@@ -272,7 +276,7 @@ export function useNotes(
   );
 
   const notes = useMemo(() => [...pinsOf(held.scoped), ...held.mistakes], [held]);
-  return { notes, scoped: held.scoped, loaded, commit, commitScoped, loadFile, restore };
+  return { notes, scoped: held.scoped, loaded, commit, commitScoped, loadFile, restore, saved: () => queue.current };
 }
 
 interface Held {
@@ -301,6 +305,8 @@ export function useConfusions(
   commit: (next: readonly Confusion[], said: string, how?: CommitHow) => void;
   loadFile: (fileJumps: readonly Confusion[]) => number;
   restore: (jumps: unknown, said: string) => void;
+  /** Settles once every write asked for so far has reached disk. */
+  saved: () => Promise<unknown>;
 } {
   const [held, setHeld] = useState<readonly Confusion[]>([]);
   const [device, setDevice] = useState<Device | null>(null);
@@ -369,5 +375,5 @@ export function useConfusions(
     [hold, save],
   );
 
-  return { confusions: held, device, loaded, commit, loadFile, restore };
+  return { confusions: held, device, loaded, commit, loadFile, restore, saved: () => queue.current };
 }

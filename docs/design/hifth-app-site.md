@@ -177,16 +177,26 @@ were left at the old address, because the app keeps them in a different store:
 - the revision record. Still left behind. The owner's answer (12 November 2026): it comes only
   when the reader chooses it, by its own clearly worded choice on the card, never folded silently
   into "Carry my marks", because the reader decides who sees their data.
-- their settings (language, layout, sizes), so hifth.app opens in the default language. Still
-  left behind; built and measured at 0.2 KB, waiting on room.
+- their settings (language, layout, sizes), so hifth.app opened in the default language. **Now
+  carried** (12 November 2026): every choice the reader made comes across, unless hifth.app
+  already has its own choice for it. What stays behind is listed by name: the card's own record
+  of the carry, notices put away, what this browser heard or kept of a recitation, and the
+  databases (the marks go by the file; the revision record waits for its own choice). A unit test
+  finds every name the app saves under and fails on a new one until someone sorts it, so a
+  private record can't ride along by being new. Settings are read as the app starts, so the new
+  tab reloads once, and only after the marks and the place have been saved. The browser test
+  checks the marks, the place and a setting after that reload, ten times over in Chrome, Firefox
+  and iPhone Safari. It could not make a save get cut off even with the wait removed, because the
+  browser saves in order and the place goes last; the wait stays as a safeguard. The card now
+  says "bookmarks, notes, jumps and settings".
 
 Where they left off mattered most: a hafiz who carried across and landed on page one had to find
 their place again by hand.
 
-What would answer the rest: the carry sends the record and the settings too, and the browser test
-for the carry (⑦) finds them at the new address. The app sits exactly at its size limit after the
-place, so these two need room found first. The owner chose to find code to delete rather than
-raise the limit (12 November 2026).
+What would answer the rest: the revision record gets its own worded choice on the card, and the
+browser test for the carry (⑦) finds it at the new address. Room was found first, as the owner
+chose (12 November 2026): the words table lost 4.1 KB of lines that only copied messages across,
+and the settings carry took 0.3 KB of it.
 
 `www.hifth.app` is a separate address with its own store as well, so every link sends readers to
 `hifth.app` itself.

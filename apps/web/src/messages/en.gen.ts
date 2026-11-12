@@ -329,7 +329,7 @@ const messages: Catalog = {
   mistakeWordPicked: "Wrong word marked",
   monthEarlier: "Earlier month",
   monthLater: "Later month",
-  movedBody: "Your bookmarks, notes and jumps are kept in this browser, at this address. Carry them across and they will be waiting for you at hifth.app.",
+  movedBody: "Your bookmarks, notes, jumps and settings are kept in this browser, at this address. Carry them across and they will be waiting for you at hifth.app.",
   movedCarried: (d) => plural(LC, d.n, { "0": "hifth.app already has everything from here", one: d.nText + " item carried to hifth.app", other: d.nText + " items carried to hifth.app" }),
   movedCarry: "Carry them to hifth.app",
   movedFailed: "hifth.app did not answer. Save to a file here, then load that file at hifth.app.",

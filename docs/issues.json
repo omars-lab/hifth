@@ -6192,7 +6192,7 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, and since 2026-11-12 where the reader left off: the new tab opens on that page, unless hifth.app has a newer place of its own. The revision record and the settings (language, layout, sizes) still stay at the old address, because they are kept in a different store, so hifth.app opens in the default language. The app sits exactly at its 210 KB size limit after the place. Owner, 2026-11-12: find code to delete rather than raise the limit; the settings carry is built and measured at 0.2 KB; the revision record comes only by its own clearly worded choice on the card, because the reader decides who sees their data."
+      "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, where the reader left off (2026-11-12), and their settings (2026-11-12, each name sorted by hand into goes or stays, checked by a unit test). Only the revision record still stays at the old address: it comes only by its own clearly worded choice on the card, because the reader decides who sees their data (owner, 2026-11-12). Room was found by trimming 4.1 KB from the words table."
     },
     {
       "id": "hifth-app-link-file",
