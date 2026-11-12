@@ -817,8 +817,10 @@ deploy-cloudflare: ## Publish to Cloudflare Pages from this machine (GitHub Page
 RELEASE := node .claude/skills/deploy-site/scripts/release-hifth-app.mjs
 
 .PHONY: hifth-app-check hifth-app-serve hifth-app-publish hifth-app-verify hifth-app-list-count
-hifth-app-serve: ## Serve hifth.app on this laptop at http://127.0.0.1:7124 (the app at /read/, the form with test keys); ARGS=--no-build reuses the last build
-	@$(RELEASE) serve $(ARGS)
+hifth-app-serve: ## Serve hifth.app on this laptop at http://127.0.0.1:7124, with page comments (the app at /read/, the form with test keys); ARGS=--no-build reuses the last build
+	@$(RELEASE) prepare $(ARGS)
+	@echo "hifth.app on this laptop, with comments: http://127.0.0.1:7124/ (the app is at /read/)"
+	@.page-comments/run serve --port 7124 --behind '$(RELEASE) serve --port {port}'
 
 hifth-app-check: ## Build hifth.app's release folder and refuse it if anything but the bare minimum is in it
 	@$(RELEASE) check $(ARGS)

@@ -89,7 +89,8 @@ two entry files in `apps/landing/functions/api/`. Its database is described in
      then the check refuses the stand-in id.
   2. `wrangler d1 execute hifth-notify --remote --file schema.sql`.
   3. Put the spam check's secret in as a Pages secret, `TURNSTILE_SECRET`.
-- **To try the form locally:** `make hifth-app-serve`, then open http://127.0.0.1:7124/. It makes
+- **To try the form locally:** `make hifth-app-serve`, then open http://127.0.0.1:7124/ (press C to
+  leave a comment on the page). It makes
   the local table and starts the server with Cloudflare's published test secret, which always
   passes. Once any setting is given with `--binding`, the database has to be named with `--d1`
   too; the script does both.
@@ -112,7 +113,8 @@ Cloudflare also serves `privacy.html` at `/privacy`, so `_headers` names that ad
 | Script | What it does | When to reach for it | Command |
 |---|---|---|---|
 | `scripts/release-hifth-app.mjs check` | Builds (make site), puts the release folder together in `apps/landing/dist/`, and refuses it if it holds anything extra or the commit is not releasable | Before every release; to see what would go up | `make hifth-app-check` (`ARGS=--no-build` checks the last build) |
-| `scripts/release-hifth-app.mjs serve` | Builds and checks the release folder like `check`, without asking for a merged commit, makes the local sign-up table, and serves it all with Cloudflare's local server and the spam check's always-pass test keys | To look at hifth.app on this laptop, form included; the local launcher starts it | `make hifth-app-serve` (`ARGS=--no-build` reuses the last build) |
+| `scripts/release-hifth-app.mjs prepare` | Builds and checks the release folder like `check`, without asking for a merged commit (what would stop a release is listed, not refused), and makes the local sign-up table | First half of looking at hifth.app on this laptop | `make hifth-app-serve` runs it (`ARGS=--no-build` reuses the last build) |
+| `scripts/release-hifth-app.mjs serve --port N` | Serves the prepared folder with Cloudflare's local server and the spam check's always-pass test keys | Second half; `make hifth-app-serve` has the comment server start it behind itself, so http://127.0.0.1:7124 has the Comment button | `make hifth-app-serve` |
 | `scripts/release-hifth-app.mjs publish` | The check, then `wrangler pages deploy` with the saved keys, then verify | To release hifth.app | `make hifth-app-publish` |
 | `scripts/release-hifth-app.mjs verify` | Looks at the live site as a reader's browser does | After a release; when someone asks if hifth.app is live | `make hifth-app-verify` (`ARGS="--url https://x.pages.dev"` for a preview) |
 | `scripts/list-count.mjs` | Asks Cloudflare how many people are on the Mac-app list, and prints that number only; an answer holding anything else is refused | When someone asks how many signed up; after a sign-up test on the live site | `make hifth-app-list-count` |
