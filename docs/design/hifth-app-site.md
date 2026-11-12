@@ -165,17 +165,25 @@ with `localhost` and `127.0.0.1`, which a browser keeps apart like two sites.
 ### ⑧ What does a reader leave behind when they carry their marks across? · **open**
 
 The carry brings what the saved file holds: bookmarks, notes and look-alike jumps. Three things
-stay at the old address, because the app keeps them in a different store:
+were left at the old address, because the app keeps them in a different store:
 
-- where the reader left off, so hifth.app opens at the first page;
-- the revision record;
-- their settings (language, layout, sizes), so hifth.app opens in the default language.
+- where the reader left off, so hifth.app opened at the first page. **Now carried** (12 November
+  2026): the new tab opens on the page the red ribbon marks. If hifth.app already has a place that
+  moved more recently, that one is kept. The new tab reads its own place the moment it opens, so a
+  slow carry can't lose to the first page the tab itself recorded while it waited. The new tab
+  says it is ready only once it knows the edition's pages, so a place that arrives early is not
+  turned away. A page the edition doesn't have is ignored. The browser test checks all three in Chrome, Firefox and
+  iPhone Safari.
+- the revision record. Still left behind.
+- their settings (language, layout, sizes), so hifth.app opens in the default language. Still
+  left behind.
 
-Where they left off matters most: a hafiz who carries across and lands on page one has to find
+Where they left off mattered most: a hafiz who carried across and landed on page one had to find
 their place again by hand.
 
-What would answer it: the carry sends these too, and the browser test for the carry (⑦) finds them
-at the new address.
+What would answer the rest: the carry sends the record and the settings too, and the browser test
+for the carry (⑦) finds them at the new address. The app sits exactly at its size limit after the
+place, so these two need room found first.
 
 `www.hifth.app` is a separate address with its own store as well, so every link sends readers to
 `hifth.app` itself.

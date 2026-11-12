@@ -35,6 +35,15 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Checked again 2026-11-12, nothing taken, nothing left.** 210.0 KB against the 210 KB cap. Of the
++2.5 KB, 2.2 KB is carrying marks from the old address to hifth.app (the card at the old address,
+the new tab's half and their words in the two languages), which went in without the baseline
+moving, and 0.3 KB is the carry bringing where the reader left off. Most of it is in the start-up
+script, since both halves listen from the first moment; moving them to a later file would ease
+start-up but not the counted total. The carry still owes the revision record and the settings
+(backlog row `carry-leaves-settings-behind`); neither fits, so they need a trim, a raise after a
+clean `make perf-sweep`, or to wait.
+
 **Checked again 2026-11-11 (late night), nothing to take.** 207.6 KB against the 210 KB cap,
 unchanged after the page-edge strip learned to measure again when a page changes side (+0.0 KB:
 a timer swapped for a watcher). 2.4 KB of room is left.

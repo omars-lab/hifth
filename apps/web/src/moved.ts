@@ -105,10 +105,45 @@ export function sheetState(carried: string | null): "carry" | "open" {
   return carried !== null && /^\d+$/.test(carried) ? "open" : "carry";
 }
 
+/** Where the reader left off: the red ribbon's page, and when it last moved. */
+export interface CarriedSeam {
+  readonly page: number;
+  readonly at: number;
+}
+
+/**
+ * How the carry reads and lays the reader's place. Handed in by the app, so the
+ * two halves of the carry never open the store that also holds the look-alike
+ * jumps (the revision-privacy check keeps that store's importers to a short list).
+ */
+export interface CarryPlace {
+  read(): Promise<CarriedSeam | null>;
+  write(seam: CarriedSeam): Promise<boolean>;
+}
+
 export type CarryMessage =
   | { type: "hifth-carry-ready" }
-  | { type: "hifth-carry"; file: string }
+  | { type: "hifth-carry"; file: string; seam?: CarriedSeam }
   | { type: "hifth-carry-done"; added: number };
+
+function seamOf(v: unknown): CarriedSeam | undefined {
+  const s = v as Record<string, unknown> | null;
+  if (!s || typeof s !== "object") return undefined;
+  const { page, at } = s;
+  return Number.isInteger(page) && (page as number) >= 1 && Number.isFinite(at)
+    ? { page: page as number, at: at as number }
+    : undefined;
+}
+
+/**
+ * Which place the new address keeps: the one that moved last. A place the
+ * reader already has at hifth.app, newer than the old address's, is not undone
+ * by a carry. Null only when neither address has one.
+ */
+export function newerSeam(own: CarriedSeam | null, carried: CarriedSeam | undefined): CarriedSeam | null {
+  if (!carried) return own;
+  return own && own.at >= carried.at ? own : carried;
+}
 
 /**
  * A message the carry understands, or null. It must come from the exact address
@@ -124,7 +159,12 @@ export function carryMessage(
   const d = e.data as Record<string, unknown> | null;
   if (!d || typeof d !== "object") return null;
   if (d.type === "hifth-carry-ready") return { type: "hifth-carry-ready" };
-  if (d.type === "hifth-carry" && typeof d.file === "string") return { type: "hifth-carry", file: d.file };
+  if (d.type === "hifth-carry" && typeof d.file === "string") {
+    // An older old address sends no place, and a place in the wrong shape is
+    // dropped; either way the marks still come across.
+    const seam = seamOf(d.seam);
+    return seam ? { type: "hifth-carry", file: d.file, seam } : { type: "hifth-carry", file: d.file };
+  }
   if (d.type === "hifth-carry-done" && Number.isInteger(d.added) && (d.added as number) >= 0)
     return { type: "hifth-carry-done", added: d.added as number };
   return null;

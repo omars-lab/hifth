@@ -184,6 +184,7 @@ import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
 import { NoteFollow } from "./components/NoteFollow";
 import { useBookmarks, useConfusions, useNotes, useSeam } from "./useBookmarks";
+import { readSeam, writeSeam } from "./bookmark-store";
 import { useCarryIn } from "./useCarryIn";
 import { MovedSheet } from "./components/MovedSheet";
 import {
@@ -291,6 +292,9 @@ import styles from "./App.module.css";
 // build instead opens on page 1 — al-Fātiḥah, the surah the demo is built around
 // — so the first thing in the room is the page we polished.
 const START_PAGE = PITCH ? 1 : 7;
+
+/** Where the reader left off, as the carry to hifth.app reads and lays it. */
+const CARRY_PLACE = { read: readSeam, write: writeSeam };
 
 /** `quran/…/2:47` → its spec-§7 ref, or null if it is not a bare ayah key. */
 /** Whichever sheet over the foot of a phone reaches highest, or null when none does. */
@@ -2364,7 +2368,18 @@ export function App(): JSX.Element {
   // Ready only once all three kinds of mark are read in: the notes and the jumps
   // refuse to save before their own read lands, and a carried file loaded then
   // would stay in memory and never reach disk.
-  useCarryIn(bookmarksLoaded && notesLoaded && jumpsLoaded, (text) => loadBookmarkFile(text, "carry"));
+  useCarryIn(
+    // The page list too: a place carried before the pages are known would be
+    // refused as a page this edition does not have.
+    bookmarksLoaded && notesLoaded && jumpsLoaded && pageTurns.pages.length > 0,
+    (text) => loadBookmarkFile(text, "carry"),
+    (p) => {
+      if (!pageTurns.anchors.has(p)) return false;
+      goToPage(p);
+      return true;
+    },
+    CARRY_PLACE,
+  );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
   // question first; the bookmarks it lifted wait here for a few seconds so one
@@ -4844,7 +4859,7 @@ export function App(): JSX.Element {
       )}
       {/* "Hifth has moved": a row of its own above the trail, like the note
           bar, so it covers neither the page bar nor the trail. */}
-      <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} />
+      <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} readPlace={readSeam} />
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
         {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}

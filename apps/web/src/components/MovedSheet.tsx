@@ -13,6 +13,7 @@ import {
   sheetShows,
   sheetState,
   type Addresses,
+  type CarriedSeam,
 } from "../moved";
 import styles from "./MovedSheet.module.css";
 
@@ -37,6 +38,8 @@ interface MovedSheetProps {
   file: () => string;
   /** "Save to a file", for when hifth.app does not answer. */
   onSave: () => void;
+  /** Where the reader left off, which goes with the file so hifth.app opens there. */
+  readPlace: () => Promise<CarriedSeam | null>;
 }
 
 type Phase = { at: "ask" } | { at: "waiting" } | { at: "carried"; added: number } | { at: "failed" };
@@ -50,7 +53,7 @@ type Phase = { at: "ask" } | { at: "waiting" } | { at: "carried"; added: number 
  * to that address only. If it has not answered after a while, or the browser
  * kept the tab from opening, the card offers to save the file instead.
  */
-export function MovedSheet({ file, onSave }: MovedSheetProps): JSX.Element | null {
+export function MovedSheet({ file, onSave, readPlace }: MovedSheetProps): JSX.Element | null {
   const { t } = useT();
   const [addresses] = useState<Addresses>(() => addressesFor(window.location.protocol, stored(ADDRESSES_KEY)));
   const [shown, setShown] = useState(() =>
@@ -84,7 +87,9 @@ export function MovedSheet({ file, onSave }: MovedSheetProps): JSX.Element | nul
       const msg = carryMessage(e, addresses.next, tab);
       if (msg?.type === "hifth-carry-ready" && !sent) {
         sent = true;
-        tab.postMessage({ type: "hifth-carry", file: fileRef.current() }, addresses.next);
+        const file = fileRef.current();
+        // Where the reader left off goes with the marks, so hifth.app opens there.
+        void readPlace().then((seam) => tab.postMessage({ type: "hifth-carry", file, seam }, addresses.next));
       } else if (msg?.type === "hifth-carry-done") {
         store(CARRIED_KEY, String(msg.added));
         setPhase({ at: "carried", added: msg.added });

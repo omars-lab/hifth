@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ADDRESSES_KEY, CARRY_HASH, addressesFor, carryMessage } from "./moved";
+import { ADDRESSES_KEY, CARRY_HASH, addressesFor, carryMessage, newerSeam, type CarriedSeam, type CarryPlace } from "./moved";
 
 /*
  * The link the page was opened with, read once when the app's code first runs.
@@ -28,11 +28,31 @@ function storedAddresses(): string | null {
  * `load` returns how many items the file added, or null when it was not a
  * bookmark file (nothing then goes back, and the old page offers the file
  * instead once it has waited long enough).
+ *
+ * Where the reader left off comes with the file. The new address keeps whichever
+ * place moved last, its own or the carried one, and `go` turns to it, so a hafiz
+ * does not land on the first page and hunt for their place. `go` says false for a
+ * page this edition does not have, and then the place is not kept.
  */
-export function useCarryIn(loaded: boolean, load: (file: string) => number | null, openedWith = OPENED_WITH): void {
+export function useCarryIn(
+  loaded: boolean,
+  load: (file: string) => number | null,
+  go: (page: number) => boolean,
+  place: CarryPlace,
+  openedWith = OPENED_WITH,
+): void {
   const loadRef = useRef(load);
   loadRef.current = load;
+  const goRef = useRef(go);
+  goRef.current = go;
   const done = useRef(false);
+  // This address's own place, read as the tab opens. Read later, it could be the
+  // first page this tab itself recorded while waiting for the old one (a page
+  // counts as read after a few seconds), which would beat the carried place.
+  const ownAtOpen = useRef<Promise<CarriedSeam | null> | null>(null);
+  if (ownAtOpen.current === null && openedWith === CARRY_HASH) ownAtOpen.current = place.read();
+  const placeRef = useRef(place);
+  placeRef.current = place;
 
   useEffect(() => {
     if (!loaded || done.current || openedWith !== CARRY_HASH) return;
@@ -48,7 +68,14 @@ export function useCarryIn(loaded: boolean, load: (file: string) => number | nul
       // A reload of this page must not take the file again.
       if (window.location.hash === CARRY_HASH)
         window.history.replaceState(null, "", window.location.pathname + window.location.search);
-      if (added !== null) opener.postMessage({ type: "hifth-carry-done", added }, addresses.old);
+      if (added === null) return;
+      opener.postMessage({ type: "hifth-carry-done", added }, addresses.old);
+      void ownAtOpen.current?.then((own) => {
+        const kept = newerSeam(own, msg.seam);
+        // Written even when it is this address's own, since this tab may have
+        // recorded its first page over it while it waited.
+        if (kept && goRef.current(kept.page)) void placeRef.current.write(kept);
+      });
     };
     window.addEventListener("message", onMessage);
     opener.postMessage({ type: "hifth-carry-ready" }, addresses.old);

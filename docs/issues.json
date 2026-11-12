@@ -6181,7 +6181,7 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, the same things the saved file holds. Where the reader left off, the revision record and their settings (language, layout, sizes) stay at the old address, because they are kept in a different store. A reader who carries across finds hifth.app opening at the first page, in the default language. Next: add them to what the carry sends (the place they left off first), and check them in the carry's browser test."
+      "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, and since 2026-11-12 where the reader left off: the new tab opens on that page, unless hifth.app has a newer place of its own. The revision record and the settings (language, layout, sizes) still stay at the old address, because they are kept in a different store, so hifth.app opens in the default language. The app sits exactly at its 210 KB size limit after the place, so these two need room first: a trim, a raise after a clean speed check, or leaving them for later. Next: build both as small as they can be, measure, and ask the owner which way to make room."
     },
     {
       "id": "hifth-app-link-file",

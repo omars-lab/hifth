@@ -5,6 +5,7 @@ import {
   MOVED_SHEET_ON,
   addressesFor,
   carryMessage,
+  newerSeam,
   sheetOn,
   sheetShows,
   sheetState,
@@ -114,5 +115,28 @@ describe("the messages the two pages pass", () => {
     expect(carryMessage({ ...at, data: { type: "hifth-carry-done", added: -1 } }, ADDRESSES.old, opener)).toBeNull();
     expect(carryMessage({ ...at, data: { type: "something-else" } }, ADDRESSES.old, opener)).toBeNull();
     expect(carryMessage({ ...at, data: "hifth-carry" }, ADDRESSES.old, opener)).toBeNull();
+  });
+
+  it("takes the place the reader left off when it is whole, and the marks either way", () => {
+    const at = { origin: ADDRESSES.old, source: opener };
+    const carry = (seam: unknown) =>
+      carryMessage({ ...at, data: { type: "hifth-carry", file: "{}", seam } }, ADDRESSES.old, opener);
+    expect(carry({ page: 250, at: 2_000 })).toEqual({ type: "hifth-carry", file: "{}", seam: { page: 250, at: 2_000 } });
+    // A place in the wrong shape is dropped; the file still comes across.
+    for (const bad of [{ page: 0, at: 1 }, { page: 2.5, at: 1 }, { page: "250", at: 1 }, { page: 250 }, "p250", null])
+      expect(carry(bad)).toEqual({ type: "hifth-carry", file: "{}" });
+    // Only the two fields are kept, whatever else rides along.
+    expect(carry({ page: 3, at: 4, extra: "x" })).toEqual({ type: "hifth-carry", file: "{}", seam: { page: 3, at: 4 } });
+  });
+});
+
+describe("which place the new address keeps", () => {
+  it("keeps whichever moved last, and the carried one when the new address has none", () => {
+    const old = { page: 250, at: 2_000 };
+    expect(newerSeam(null, old)).toEqual(old);
+    expect(newerSeam({ page: 300, at: 5_000 }, old)).toEqual({ page: 300, at: 5_000 });
+    expect(newerSeam({ page: 9, at: 1_000 }, old)).toEqual(old);
+    expect(newerSeam({ page: 9, at: 1_000 }, undefined)).toEqual({ page: 9, at: 1_000 });
+    expect(newerSeam(null, undefined)).toBeNull();
   });
 });

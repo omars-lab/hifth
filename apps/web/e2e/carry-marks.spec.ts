@@ -107,6 +107,57 @@ async function savedIds(page: Page): Promise<{ bookmarks: string[]; notes: strin
   );
 }
 
+interface Seam {
+  page: number;
+  at: number;
+}
+
+/** Where the reader left off at this page's address: the red ribbon, kept beside the bookmarks. */
+async function putSeam(page: Page, seam: Seam): Promise<void> {
+  await page.evaluate(
+    ({ db, seam }) =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open(db);
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const tx = open.result.transaction("sets", "readwrite");
+          tx.objectStore("sets").put({ id: "seam", ...seam });
+          tx.oncomplete = () => {
+            open.result.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+    { db: DB, seam },
+  );
+}
+
+async function savedSeam(page: Page): Promise<Seam | null> {
+  return page.evaluate(
+    (db) =>
+      new Promise<Seam | null>((resolve, reject) => {
+        const open = indexedDB.open(db);
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          if (!open.result.objectStoreNames.contains("sets")) {
+            open.result.close();
+            resolve(null);
+            return;
+          }
+          const get = open.result.transaction("sets").objectStore("sets").get("seam");
+          get.onsuccess = () => {
+            open.result.close();
+            const r = get.result as (Seam & { id: string }) | undefined;
+            resolve(r ? { page: r.page, at: r.at } : null);
+          };
+          get.onerror = () => reject(get.error);
+        };
+      }),
+    DB,
+  );
+}
+
 /** Both stand-in addresses for every page in the test's browser, popups included, in English. */
 async function standIns(context: BrowserContext, baseURL: string | undefined) {
   const port = new URL(baseURL!).port;
@@ -171,6 +222,102 @@ test("the old address carries bookmarks, notes and jumps to the new one, keeping
   await expect(page.getByTestId("moved-sheet").getByRole("link", { name: "Open hifth.app" })).toBeVisible();
 });
 
+// Found 2026-11-12 (hifth-app-site ⑧): the carry brought the marks but not the
+// place, so a hafiz landed on page one of hifth.app and had to find their page
+// again by hand. The new tab now opens where they left off.
+// The old page records the page it sits on as the reader's place after a few
+// seconds, as it would for a real reader, so each test opens it on page 250.
+test("the new address opens where the reader left off at the old one", async ({ page, context, baseURL }) => {
+  const { old } = await standIns(context, baseURL);
+  await page.goto(`${old}/#/hafs-kfqc/p250`);
+  await putSeam(page, { page: 250, at: 2_000 });
+  await page.reload();
+
+  const opened = context.waitForEvent("page");
+  await page.getByTestId("moved-sheet").getByRole("button", { name: "Carry them to hifth.app" }).click();
+  const arrived = await opened;
+
+  await expect(arrived).toHaveURL(/#\/hafs-kfqc\/p250$/);
+  await expect.poll(async () => (await savedSeam(arrived))?.page).toBe(250);
+});
+
+test("a place the new address already has, newer than the old one's, is kept", async ({ page, context, baseURL }) => {
+  const { old, next } = await standIns(context, baseURL);
+  const ahead = await context.newPage();
+  await ahead.goto(`${next}/#/hafs-kfqc/p9`);
+  // Newer than anything the old page could record while this test runs.
+  const later = Date.now() + 10 * 60_000;
+  await putSeam(ahead, { page: 300, at: later });
+  await ahead.close();
+
+  await page.goto(`${old}/#/hafs-kfqc/p250`);
+  await putSeam(page, { page: 250, at: 2_000 });
+  await page.reload();
+
+  const opened = context.waitForEvent("page");
+  await page.getByTestId("moved-sheet").getByRole("button", { name: "Carry them to hifth.app" }).click();
+  const arrived = await opened;
+
+  await expect(arrived).toHaveURL(/#\/hafs-kfqc\/p300$/);
+  await expect.poll(() => savedSeam(arrived)).toEqual({ page: 300, at: later });
+});
+
+// A slow phone: the old page answers only after the new tab has sat on its first
+// page long enough to record it as read. That first page must not beat the place
+// the reader actually left off.
+test("a slow carry still opens where the reader left off", async ({ page, context, baseURL }) => {
+  const { old } = await standIns(context, baseURL);
+  await page.goto(`${old}/#/hafs-kfqc/p250`);
+  await putSeam(page, { page: 250, at: 2_000 });
+  await page.reload();
+  await expect(page.getByTestId("moved-sheet")).toBeVisible();
+  // Keep the old address's store busy writing for 8 s: it cannot read the place,
+  // so it cannot answer, until then. Plain storage, so every browser is slowed alike.
+  await page.evaluate(
+    (db) =>
+      new Promise<void>((resolve) => {
+        const open = indexedDB.open(db);
+        open.onsuccess = () => {
+          const sets = open.result.transaction("sets", "readwrite").objectStore("sets");
+          const until = Date.now() + 8_000;
+          const spin = () => {
+            if (Date.now() < until) sets.get("nothing").onsuccess = spin;
+            else open.result.close();
+          };
+          spin();
+          resolve();
+        };
+      }),
+    DB,
+  );
+
+  const opened = context.waitForEvent("page");
+  await page.getByTestId("moved-sheet").getByRole("button", { name: "Carry them to hifth.app" }).click();
+  const arrived = await opened;
+
+  await expect(arrived).toHaveURL(/#\/hafs-kfqc\/p250$/, { timeout: 15_000 });
+  await expect.poll(async () => (await savedSeam(arrived))?.page).toBe(250);
+});
+
+test("a place on a page this edition does not have is not kept", async ({ page, context, baseURL }) => {
+  const { old } = await standIns(context, baseURL);
+  await page.goto(`${old}/#/hafs-kfqc/p7`);
+  await putSeam(page, { page: 9_999, at: 2_000 });
+  await page.reload();
+
+  const opened = context.waitForEvent("page");
+  const sheet = page.getByTestId("moved-sheet");
+  await sheet.getByRole("button", { name: "Carry them to hifth.app" }).click();
+  const arrived = await opened;
+
+  await expect(sheet.getByRole("link", { name: "Open hifth.app" })).toBeVisible();
+  await page.waitForTimeout(500);
+  // Under a slow run the old page may record page 7 first and carry that; either
+  // way page 9999 is never kept or turned to.
+  expect((await savedSeam(arrived))?.page).not.toBe(9_999);
+  await expect(arrived).not.toHaveURL(/p9999/);
+});
+
 test("a page at any other address that opens the new one cannot hand it marks", async ({ page, context, baseURL }) => {
   const { next } = await standIns(context, baseURL);
   // The opener here is at the new address itself, not the old one: a real
@@ -186,11 +333,16 @@ test("a page at any other address that opens the new one cannot hand it marks", 
   // A whole, valid file, so the only reason left to refuse it is who sent it.
   const file = JSON.stringify({ kind: "hifth.bookmarks", version: 1, savedAt: 1_000, bookmarks: [bookmark("intruder", 8)] });
   await page.evaluate((file) => {
-    (window as unknown as { carryTab: Window }).carryTab.postMessage({ type: "hifth-carry", file }, "*");
+    (window as unknown as { carryTab: Window }).carryTab.postMessage(
+      { type: "hifth-carry", file, seam: { page: 400, at: 9_000 } },
+      "*",
+    );
   }, file);
   await page.waitForTimeout(500);
   await expect(tab.getByText(/came across from the old address/)).toHaveCount(0);
   expect((await savedIds(tab)).bookmarks).toEqual([]);
+  expect(await savedSeam(tab)).toBeNull();
+  await expect(tab).not.toHaveURL(/p400/);
 });
 
 test("when the new tab cannot open, the card offers the file instead", async ({ page, context, baseURL }) => {
