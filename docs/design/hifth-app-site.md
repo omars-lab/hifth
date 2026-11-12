@@ -256,3 +256,10 @@ page that sends readers on, once the carry has been on for a while.
 Hifth will have paid features too (owner, 2026-11-12). Which ones, the price and how a reader
 pays are not chosen yet. Until they are, the front page says only that Hifth is open source, and
 promises nothing about price either way: no "free", and no price.
+
+### ⑯ Does the Arabic front page show the app in Arabic? · **open**
+
+Only its opening pictures do. The five feature pictures and the three device pictures are the
+same files as on the English page, so a reader who chose Arabic sees the app's buttons and labels
+in English further down. What would answer it: each of those eight taken again with the app set to
+Arabic, from the plain public build like the rest, and the Arabic page pointing at them.

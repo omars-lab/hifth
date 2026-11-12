@@ -6144,7 +6144,19 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. Done 2026-11-12: the keys work on this laptop, and the site project (hifth-app) is made on the new account. Still needed: hifth.app attached to that project after the first upload, the email list's database, the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id."
+      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. Done 2026-11-12: the keys work on this laptop, and the site project (hifth-app) is made on the new account. Still needed: hifth.app attached to that project after the first upload, the email list's database, the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id. 2026-11-12: this is the top item for the front page; it waits on three things from the owner: the email list's database, the contact address the privacy page names, and the real spam-check key."
+    },
+    {
+      "id": "hifth-app-arabic-pictures",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑯"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The Arabic front page shows the app in Arabic only in its opening pictures; the five feature pictures and three device pictures are the English ones. Take each again with the app in Arabic, from the plain public build, and point the Arabic page at them."
     },
     {
       "id": "hifth-app-turnstile-key",
@@ -6320,7 +6332,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner, 2026-11-12 (page comment t_bffcd4): the share menu looks too plain. Build two or three better-looking versions into the real sheet, try them at phone size, the owner picks, the others stay as a setting. Built 2026-11-12 as three looks in the info panel (preview card, the default; tiles; plain), drawn in docs/design/share-look.md; waiting on the owner's pick. Also seen while testing, older than the looks: on a phone the menu reopens on the last choice (its roots, say), on a computer it starts again from the ayah as it is. Settle which is right and make both do it."
+      "note": "Owner, 2026-11-12 (page comment t_bffcd4): the share menu looks too plain. Build two or three better-looking versions into the real sheet, try them at phone size, the owner picks, the others stay as a setting. Built 2026-11-12 as three looks in the info panel (preview card, the default; tiles; plain), drawn in docs/design/share-look.md; waiting on the owner's pick. Also seen while testing, older than the looks: in the iPhone test run the menu reopened on the last choice (its roots, say). The choice is kept only while the share button stays on screen and is saved nowhere; whether a computer does the same is not yet checked. Settle whether the menu should remember the choice, and make every device do it."
     },
     {
       "id": "calendar-looks-plain",
