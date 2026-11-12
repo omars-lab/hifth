@@ -619,6 +619,7 @@
   "mistakeWholeWord": "The whole word",
   "mistakeAnother": "Went into another verse…",
   "mistakeSignPicked": "Wrong harakat marked: the {name}",
+  "signName": "{sign, select, fatha{fatha} kasra{kasra} damma{damma} sukun{sukun} shadda{shadda} hamza{hamza} wasla{wasla} superscript_alef{superscript alef} maddah{maddah} rounded_zero{rounded zero} successive_fathatan{successive fathatan} successive_kasratan{successive kasratan} successive_dammatan{successive dammatan} small_waw{small waw} small_yeh{small yeh} fathatan{fathatan} kasratan{kasratan} dammatan{dammatan} small_meem{small meem} damma_iqlab{damma iqlab} fatha_iqlab{fatha iqlab} kasra_iqlab{kasra iqlab} rectangular_zero{rectangular zero} small_seen{small seen} vowel_sign{vowel sign} small_noon{small noon} other{sign}}",
   "mistakeWordPicked": "Wrong word marked",
   "mistakeNoSigns": "No vowel-signs are recorded on this word.",
   "mistakeClear": "Clear mark",

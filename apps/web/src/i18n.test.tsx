@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { afterEach, describe, expect, it } from "vitest";
+import { DIACRITICS } from "@hifth/core";
 import { Colophon } from "./components/Colophon";
 import { LangProvider, stringsFor, useT } from "./i18n";
 import { LANG_STORAGE_KEY, LOCALES, detectLang, dirOf } from "./lang";
@@ -195,6 +196,16 @@ describe("the bundles", () => {
     expect(ar.primary).toBe("إدغام");
     expect(en.secondary).toBe("إدغام");
     expect(en.primary).toBe("idgham");
+  });
+
+  it("names every harakah in the reader's language", () => {
+    // The mistake question showed "fatha", "kasra" under each sign with the app
+    // in Arabic (seen in the front page's Arabic pictures, 2026-11-12).
+    for (const name of DIACRITICS) {
+      expect(AR.signName(name), name).toMatch(ARABIC);
+      expect(EN.signName(name)).toBe(name);
+    }
+    expect(AR.signName("not a sign")).toBe("not a sign");
   });
 });
 

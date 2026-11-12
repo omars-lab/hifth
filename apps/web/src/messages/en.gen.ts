@@ -628,6 +628,7 @@ const messages: Catalog = {
   shared: "Shared",
   sharesWords: (d) => plural(LC, d.n, { one: "Shares one word", other: "Shares " + d.nText + " words" }),
   showBars: "Show the bars",
+  signName: (d) => select(d.sign, { fatha: "fatha", kasra: "kasra", damma: "damma", sukun: "sukun", shadda: "shadda", hamza: "hamza", wasla: "wasla", "superscript_alef": "superscript alef", maddah: "maddah", "rounded_zero": "rounded zero", "successive_fathatan": "successive fathatan", "successive_kasratan": "successive kasratan", "successive_dammatan": "successive dammatan", "small_waw": "small waw", "small_yeh": "small yeh", fathatan: "fathatan", kasratan: "kasratan", dammatan: "dammatan", "small_meem": "small meem", "damma_iqlab": "damma iqlab", "fatha_iqlab": "fatha iqlab", "kasra_iqlab": "kasra iqlab", "rectangular_zero": "rectangular zero", "small_seen": "small seen", "vowel_sign": "vowel sign", "small_noon": "small noon", other: "sign" }),
   skinGroup: "Page appearance",
   slipMarked: (d) => "Mistake marked: " + d.fromText + " went into " + d.toText + plural(LC, d.n, { one: "", other: ", " + d.nText + " times now" }),
   slipMarkedUnsure: (d) => "Mistake marked: " + d.fromText + " went into another verse; you can say which later",

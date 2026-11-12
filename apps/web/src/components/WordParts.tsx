@@ -427,7 +427,9 @@ export function WordParts({
         }
         data-part="sign"
         data-sign={s.index}
-        onClick={(e) => (mistake ? answer({ what: "sign", mark: s.index }, s.name) : takeSign(e, s.index, s.name))}
+        onClick={(e) =>
+          mistake ? answer({ what: "sign", mark: s.index }, t.signName(s.name)) : takeSign(e, s.index, t.signName(s.name))
+        }
       >
         <span className={styles.copy} style={{ width: cw, height: ch }} aria-hidden="true">
           <span className={styles.faint}>{print()}</span>
@@ -436,7 +438,7 @@ export function WordParts({
           </span>
           <span className={styles.ring} style={{ left: sx - 2, top: sy - 2, width: sw + 4, height: sh + 4 }} />
         </span>
-        <span className={styles.name}>{s.name}</span>
+        <span className={styles.name}>{t.signName(s.name)}</span>
       </button>
     );
   });

@@ -622,6 +622,7 @@ export interface Catalog {
   readonly shared: string;
   readonly sharesWords: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly showBars: string;
+  readonly signName: (d: { readonly sign: "fatha" | "kasra" | "damma" | "sukun" | "shadda" | "hamza" | "wasla" | "superscript_alef" | "maddah" | "rounded_zero" | "successive_fathatan" | "successive_kasratan" | "successive_dammatan" | "small_waw" | "small_yeh" | "fathatan" | "kasratan" | "dammatan" | "small_meem" | "damma_iqlab" | "fatha_iqlab" | "kasra_iqlab" | "rectangular_zero" | "small_seen" | "vowel_sign" | "small_noon" | "other" }) => string;
   readonly skinGroup: string;
   readonly slipMarked: (d: { readonly fromText: string | number; readonly toText: string | number; readonly n: number; readonly nText: string | number }) => string;
   readonly slipMarkedUnsure: (d: { readonly fromText: string | number }) => string;

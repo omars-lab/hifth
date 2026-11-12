@@ -106,6 +106,9 @@ import {
 import type { Catalog } from "./messages/catalog.gen";
 import { CATALOG_LOADERS } from "./messages/catalogs.gen";
 
+/** The cases of the harakah-name message: the sign list's names, underscored. */
+type SignCase = Parameters<Catalog["signName"]>[0]["sign"];
+
 export type { EditionCopy };
 
 /** A hop rail bucket, and a root-lens/edition row. Kept structural on purpose:
@@ -819,6 +822,9 @@ export interface Strings {
   mistakeAnother: string;
   /** Said when a sign is picked, named by the sign ("fatha"). */
   mistakeSignPicked(name: string): string;
+  /** A harakah's name in the reader's language, from the sign list's English
+   *  name ("fatha"). A name the list does not know comes back as it is. */
+  signName(name: string): string;
   mistakeWordPicked: string;
   mistakeNoSigns: string;
   mistakeClear: string;
@@ -1541,6 +1547,12 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mistakeMarked: (label) => m.mistakeMarked({ label }),
     mistakePicker: (label) => m.mistakePicker({ label }),
     mistakeSignPicked: (name) => m.mistakeSignPicked({ name }),
+    signName: (name) => {
+      // The sign list's names are the select's cases with spaces as underscores;
+      // a name it does not know falls to `other`, and is then kept as it came.
+      const said = m.signName({ sign: name.replace(/ /g, "_") as SignCase });
+      return said === m.signName({ sign: "other" }) ? name : said;
+    },
     mistakeLetterPicked: (count) => m.mistakeLetterPicked({ nText: n(count) }),
     mistakeRulePicked: (name) => m.mistakeRulePicked({ name }),
     verseTools: (label) => m.verseTools({ label }),

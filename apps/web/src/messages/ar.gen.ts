@@ -628,6 +628,7 @@ const messages: Catalog = {
   shared: "تمت المشاركة",
   sharesWords: (d) => plural(LC, d.n, { zero: "لا تشترك في كلمة", one: "تشترك في كلمة واحدة", two: "تشترك في كلمتين", few: "تشترك في " + d.nText + " كلمات", many: "تشترك في " + d.nText + " كلمة", other: "تشترك في " + d.nText + " كلمة" }),
   showBars: "إظهار الأشرطة",
+  signName: (d) => select(d.sign, { fatha: "فتحة", kasra: "كسرة", damma: "ضمّة", sukun: "سكون", shadda: "شدّة", hamza: "همزة", wasla: "علامة الوصل", "superscript_alef": "ألف خنجرية", maddah: "مدّة", "rounded_zero": "صفر مستدير", "successive_fathatan": "تنوين فتح متتابع", "successive_kasratan": "تنوين كسر متتابع", "successive_dammatan": "تنوين ضمّ متتابع", "small_waw": "واو صغيرة", "small_yeh": "ياء صغيرة", fathatan: "تنوين فتح", kasratan: "تنوين كسر", dammatan: "تنوين ضمّ", "small_meem": "ميم صغيرة", "damma_iqlab": "ضمّة الإقلاب", "fatha_iqlab": "فتحة الإقلاب", "kasra_iqlab": "كسرة الإقلاب", "rectangular_zero": "صفر مستطيل", "small_seen": "سين صغيرة", "vowel_sign": "علامة حركة", "small_noon": "نون صغيرة", other: "علامة" }),
   skinGroup: "مظهر الصفحة",
   slipMarked: (d) => "عُلّم خطأ: دخلتَ من " + d.fromText + " في " + d.toText + plural(LC, d.n, { zero: "", one: "", two: "، مرتين حتى الآن", few: "، " + d.nText + " مرات حتى الآن", many: "، " + d.nText + " مرة حتى الآن", other: "، " + d.nText + " مرة حتى الآن" }),
   slipMarkedUnsure: (d) => "عُلّم خطأ: دخلتَ من " + d.fromText + " في آية أخرى؛ يمكنك أن تحدّدها لاحقًا",
