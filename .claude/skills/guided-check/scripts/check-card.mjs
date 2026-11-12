@@ -8,7 +8,11 @@
 //
 //   check-card.mjs link    (--file <steps.json> | --ledger <row id>) [--from N]
 //   check-card.mjs send    (--file … | --ledger …) [--from N] (--sim | --device <id>)
-//   check-card.mjs answers (--sim | --device <id>) [--out <dir>] [--print-out]
+//   check-card.mjs answers (--sim | --device <id>) [--out <dir>] [--also <folder>] [--print-out]
+//
+// --also copies a folder the build wrote in its own data (Documents/walk-probe,
+// say) to <out>/<its name>, replacing the last copy, so a log comes back with
+// the answers in one command.
 //
 // A steps file: { "id": "…", "title": "…", "steps": [{ "do": "…", "see": "…" }] }
 // A ledger row (docs/validation/ledger.json): each runbook step's `short` (or
@@ -24,7 +28,7 @@
 //
 // HIFTH_SIMCTL and HIFTH_DEVICECTL swap Apple's tools for stand-ins (the tests use them).
 import { spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 
@@ -117,6 +121,19 @@ function theCheck() {
     }
     steps.push(step);
   }
+  // A step answered with a cross and no note says nothing when its "see" only
+  // asked for a note (the screenshot test, 2026-11-12). Named, not refused:
+  // a ledger row's wording is fixed in the ledger, not here.
+  steps.forEach((s, i) => {
+    const see = String(s.see ?? "");
+    if (/\b(note|whether)\b/i.test(see) && !/\b(tick|cross)\b/i.test(see)) {
+      log("unclear_step", { step: from + i, id: quote(check.id) });
+      console.error(
+        `Step ${from + i} of ${check.id} asks for a note, so a cross with no note cannot be read.` +
+          `\nWord it as a question with two answers: "Tick if …, cross if …".`,
+      );
+    }
+  });
   const next = from - 1 + steps.length + 1;
   if (next <= check.steps.length) log("more_steps", { id: check.id, total: check.steps.length, next_from: next });
   return { id, title: check.title, steps };
@@ -159,18 +176,72 @@ function summarise(path) {
   });
 }
 
+const filesUnder = (dir) =>
+  readdirSync(dir).reduce((n, name) => n + (statSync(join(dir, name)).isDirectory() ? filesUnder(join(dir, name)) : 1), 0);
+
+/** A folder inside the app's own data, such as Documents/walk-probe: never absolute, never `..`. */
+function alsoPath() {
+  const also = opt("--also");
+  if (also === undefined) return undefined;
+  const parts = String(also).split("/").filter(Boolean);
+  if (also.startsWith("/") || parts.length === 0 || parts.includes("..")) {
+    refuse(`--also takes a folder inside the app's data, such as Documents/walk-probe: ${also}`);
+  }
+  return parts.join("/");
+}
+
+/**
+ * Copy a folder the build wrote (its own log, say) next to the answers, as
+ * <out>/<its name>. Replaced each time: a log that grew on the iPad must not
+ * stay stale here.
+ */
+function copyAlso(also, out, container) {
+  const name = basename(also);
+  let from;
+  let work;
+  if (container) {
+    from = join(container, also);
+    if (!existsSync(from)) noAlso(also, "the simulator");
+  } else {
+    work = mkdtempSync(join(tmpdir(), "hifth-also-"));
+    const r = devicectl([
+      "device", "copy", "from", "--device", opt("--device"),
+      "--domain-type", "appDataContainer", "--domain-identifier", BUNDLE,
+      "--source", also, "--destination", work,
+    ]);
+    if (r.status !== 0) noAlso(also, "the iPad", firstLine(r));
+    // devicectl may put the folder itself inside the destination, or only its files.
+    const nested = join(work, name);
+    from = existsSync(nested) && statSync(nested).isDirectory() ? nested : work;
+  }
+  const dest = join(out, name);
+  rmSync(dest, { recursive: true, force: true });
+  cpSync(from, dest, { recursive: true });
+  if (work) rmSync(work, { recursive: true, force: true });
+  log("also_copied", { from: also, files: filesUnder(dest), to: dest });
+}
+
+function noAlso(also, where, why = "") {
+  log("error", { where: "also", msg: quote(`${also} not on ${where} ${why}`) });
+  console.error(`${also} is not in the app's data on ${where}${why ? ` (${why})` : ""}.\nDid this build write it? Check the path, and that the build on it is the one that writes it.`);
+  process.exit(1);
+}
+
 function answers() {
   const out = opt("--out") ?? DEFAULT_OUT;
   if (flag("--print-out")) {
     console.log(out);
     return;
   }
+  const also = alsoPath();
   const work = mkdtempSync(join(tmpdir(), "hifth-checks-"));
   let found;
+  let container;
   if (flag("--sim")) {
     const r = simctl(["get_app_container", "booted", BUNDLE, "data"]);
     if (r.status !== 0) fail("simulator", `could not find the app in the booted simulator: ${firstLine(r)}`);
-    found = jsonFilesUnder(join(r.stdout.trim(), "Documents/checks"));
+    container = r.stdout.trim();
+    found = jsonFilesUnder(join(container, "Documents/checks"));
   } else if (opt("--device")) {
     log("copy_start", { from: "ipad" });
     const r = devicectl([
@@ -193,6 +264,7 @@ function answers() {
     summarise(dest);
   }
   rmSync(work, { recursive: true, force: true });
+  if (also) copyAlso(also, out, container);
   log("done", { out, found: found.length, new: fresh });
 }
 

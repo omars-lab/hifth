@@ -363,7 +363,7 @@ app-device-open: ## Send one link to the app on a plugged-in iPad (DEVICE=… LI
 # Builds a `check` link from a ledger row (ID=) or a steps file (FILE=) and sends
 # it; Done on the card saves the answers, and check-answers copies them into
 # native/shots/checks/ (ignored by git). Builds from this laptop only.
-CHECK_CARD = node .claude/skills/walk-app/scripts/check-card.mjs
+CHECK_CARD = node .claude/skills/guided-check/scripts/check-card.mjs
 CHECK_FROM = $(if $(ID),--ledger $(ID))$(if $(FILE),--file $(FILE)) $(if $(FROM),--from $(FROM))
 CHECK_TO   = $(if $(SIM),--sim,--device "$(DEVICE)")
 check-card: ## Put a card of things to check on the app's screen (ID=<ledger row> or FILE=<steps.json>, FROM=13, SIM=1 or DEVICE=…)
@@ -371,9 +371,9 @@ check-card: ## Put a card of things to check on the app's screen (ID=<ledger row
 	@test -n "$(SIM)$(DEVICE)" || { echo ""; echo "  Say where: SIM=1 for the booted simulator, or DEVICE= one of:"; xcrun devicectl list devices; echo ""; exit 1; }
 	@$(CHECK_CARD) send $(CHECK_FROM) $(CHECK_TO)
 
-check-answers: ## Copy the check card's answers off the app into native/shots/checks (SIM=1 or DEVICE=…)
+check-answers: ## Copy the check card's answers off the app into native/shots/checks (SIM=1 or DEVICE=…; ALSO=Documents/<folder> brings a build's own log too)
 	@test -n "$(SIM)$(DEVICE)" || { echo ""; echo "  Say where from: SIM=1 for the booted simulator, or DEVICE= one of:"; xcrun devicectl list devices; echo ""; exit 1; }
-	@$(CHECK_CARD) answers $(CHECK_TO)
+	@$(CHECK_CARD) answers $(CHECK_TO) $(if $(ALSO),--also "$(ALSO)")
 
 # ---- release to the plugged-in iPad, with the checks that would have caught the
 # touch crash (docs/issues/ipad-crash-on-verse-touch.md): the unit tests, the

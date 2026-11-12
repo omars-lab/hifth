@@ -66,7 +66,19 @@ app's files). Then the picture, note, pull and gallery; then the video. Answered
 takes three screenshots on a walk and each shows up in the gallery with its picture, where he was
 and the moments before.
 
-**Next step (2026-11-12):** the [check card](check-card.md) now exists, so the half-day check is
-one install on the iPad carrying the card and the throwaway probe. The owner answers the three
-questions on the card, about ten minutes, and the laptop copies the answers and the probe's log
-off. It waits on the owner saying go.
+**What the check on the real iPad found (2026-11-12):** one install carried the
+[check card](check-card.md) and a throwaway probe. The owner answered the card, and the laptop
+copied the answers and the probe's log off. All three questions are answered:
+
+- **Screenshots are heard both ways:** with the two buttons, and with the Pencil swiped up from the
+  corner. No second way to capture is needed.
+- **iOS asked to allow screen recording once,** after the install. Apple's recorder kept the last
+  5 seconds as a clip each time, 4 to 12 MB.
+- **The laptop can copy files out of the app** over the cable.
+
+One thing the real build must handle: coming back from the Home Screen, the recorder's first start
+failed ("interrupted by multitasking"), and only a later return started it. So the build tries
+again after a moment.
+
+**Next step:** slice 1, the picture, where you were, the note and the trail. The way this check
+was run is now the guided-check skill.

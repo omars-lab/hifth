@@ -56,13 +56,15 @@ the other links: `docs/design/app-url-scheme.openapi.json`.
 
 ## Open questions, and what would answer each
 
-### ① Can a link from the laptop open a card of steps in the app on the iPad? · **open**
+### ① Can a link from the laptop open a card of steps in the app on the iPad? · **fixed**
 
-The link, the card and the saved answers are described above. None of it has run on the real
-iPad yet, and sending any link to the running app over the cable has not been tried either.
+Yes. On 2026-11-12 the screenshot check for walk-feedback-capture went to the real iPad as a card
+with `make check-card`. The owner answered it, and `make check-answers` copied the answers back.
 
-**What would answer it:** the screenshot check for walk-feedback-capture, sent as a card with
-`make check-card`, answered on the iPad, and its answers copied back with `make check-answers`.
+One lesson from that run: a step that asked for a note ("note whether iOS asked again") came back
+as a cross with no note, and its meaning was lost. Every step is now a question with a tick or a
+cross for an answer, and the script names any step that isn't. How to run one of these checks,
+start to finish, is the guided-check skill (`.claude/skills/guided-check/SKILL.md`).
 
 ## How the card behaves
 
