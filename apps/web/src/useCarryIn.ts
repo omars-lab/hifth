@@ -43,7 +43,8 @@ export function useCarryIn(
   go: (page: number) => boolean,
   place: CarryPlace,
   saved: () => Promise<unknown>,
-  arrived: (added: number) => void,
+  arrived: (added: number, looks: number | null) => void,
+  takeRecord: (record: unknown) => Promise<number>,
   openedWith = OPENED_WITH,
 ): void {
   const loadRef = useRef(load);
@@ -62,6 +63,8 @@ export function useCarryIn(
   savedRef.current = saved;
   const arrivedRef = useRef(arrived);
   arrivedRef.current = arrived;
+  const takeRecordRef = useRef(takeRecord);
+  takeRecordRef.current = takeRecord;
 
   // After the reload that lays the settings, say again what came across. The
   // reloaded page first says which page it opened at, and only one line is
@@ -70,9 +73,10 @@ export function useCarryIn(
     if (!loaded) return;
     const later = window.setTimeout(() => {
       try {
-        const n = sessionStorage.getItem(ARRIVED_KEY);
+        const said = sessionStorage.getItem(ARRIVED_KEY);
         sessionStorage.removeItem(ARRIVED_KEY);
-        if (n !== null) arrivedRef.current(Number(n));
+        const [n, looks] = (said ?? "").split(" ");
+        if (said) arrivedRef.current(Number(n), looks ? Number(looks) : null);
       } catch {
         // No session storage: the marks are there, only the line is not.
       }
@@ -108,12 +112,15 @@ export function useCarryIn(
           }
         })();
         const placed = kept && goRef.current(kept.page) ? placeRef.current.write(kept) : null;
+        // What the reader has opened comes only if they ticked the box for it.
+        const took = msg.record === undefined ? null : takeRecordRef.current(msg.record);
+        if (took && !laid) void took.then((looks) => arrivedRef.current(added, looks));
         // Settings are read as the app starts, so they show after a reload; it
         // waits for the marks and the place to reach disk, or it would cut them off.
         if (laid)
-          void Promise.all([placed, savedRef.current()]).then(() => {
+          void Promise.all([placed, took, savedRef.current()]).then(([, looks]) => {
             try {
-              sessionStorage.setItem(ARRIVED_KEY, String(added));
+              sessionStorage.setItem(ARRIVED_KEY, looks === null ? String(added) : `${added} ${looks}`);
             } catch {
               // The reload still shows the settings; only the line is lost.
             }

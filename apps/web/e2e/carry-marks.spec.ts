@@ -158,6 +158,66 @@ async function savedSeam(page: Page): Promise<Seam | null> {
   );
 }
 
+const RECORD_DB = "hifth.revision.v1";
+
+/** Looks at this page's address, as the app records them: one row per day. Made-up verses, recent days. */
+async function putLooks(page: Page, n: number): Promise<void> {
+  await page.evaluate(
+    ({ db, n }) =>
+      new Promise<void>((resolve, reject) => {
+        const open = indexedDB.open(db, 1);
+        open.onupgradeneeded = () => {
+          open.result.createObjectStore("days", { keyPath: "day" });
+          open.result.createObjectStore("meta", { keyPath: "id" });
+        };
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const tx = open.result.transaction("days", "readwrite");
+          for (let i = 0; i < n; i++) {
+            const at = Date.now() - (i + 1) * 86_400_000;
+            const day = new Date(at).toISOString().slice(0, 10);
+            tx.objectStore("days").put({ day, events: [{ key: `quran/hafs-kfqc/2:${40 + i}`, page: 7, at, tz: 0 }] });
+          }
+          tx.oncomplete = () => {
+            open.result.close();
+            resolve();
+          };
+          tx.onerror = () => reject(tx.error);
+        };
+      }),
+    { db: RECORD_DB, n },
+  );
+}
+
+/**
+ * How many looks this page's address holds. Counting never makes the database:
+ * an empty one left behind here would have no room for the app to write into.
+ */
+async function lookCount(page: Page): Promise<number> {
+  return page.evaluate(
+    (db) =>
+      new Promise<number>((resolve, reject) => {
+        const open = indexedDB.open(db);
+        open.onupgradeneeded = () => open.transaction?.abort();
+        open.onerror = () => (open.error?.name === "AbortError" ? resolve(0) : reject(open.error));
+        open.onsuccess = () => {
+          if (!open.result.objectStoreNames.contains("days")) {
+            open.result.close();
+            resolve(0);
+            return;
+          }
+          const all = open.result.transaction("days").objectStore("days").getAll();
+          all.onsuccess = () => {
+            open.result.close();
+            resolve((all.result as { events: unknown[] }[]).reduce((n, d) => n + d.events.length, 0));
+          };
+          all.onerror = () => reject(all.error);
+        };
+      }),
+    RECORD_DB,
+  );
+}
+
 /** Waits until the tab has reloaded once, which laying carried settings does. */
 async function reloaded(tab: Page) {
   await expect
@@ -314,6 +374,53 @@ test("the language chosen at the old address is the one hifth.app opens in", asy
   await expect(arrived.getByText(/من العنوان القديم/)).toBeAttached();
   await expect(arrived.locator("html")).toHaveAttribute("lang", "ar");
   expect(await arrived.evaluate(() => localStorage.getItem("hifth.lang.v1"))).toBe("ar");
+});
+
+// Owner, 2026-11-12: the reader decides who sees their data. What they have
+// opened (which ayahs, when, and where they marked a mistake) goes to hifth.app
+// only when they tick the box that says so; "Carry them" alone never sends it,
+// and the box stays on the card afterwards so it can still be sent later.
+test("what the reader has opened goes only when they tick the box for it, and can be sent later", async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  const { old } = await standIns(context, baseURL);
+  await page.goto(`${old}/#/hafs-kfqc/p7`);
+  await putMarks(page, { bookmarks: [bookmark("b-old", 5)], notes: [], jumps: [] });
+  await putLooks(page, 3);
+  await page.reload();
+
+  // Carried without the box: the marks go, the record stays.
+  const sheet = page.getByTestId("moved-sheet");
+  const box = sheet.getByRole("checkbox", { name: /Also send what I have opened/ });
+  await expect(box).not.toBeChecked();
+  let opened = context.waitForEvent("page");
+  await sheet.getByRole("button", { name: "Carry them to hifth.app" }).click();
+  const first = await opened;
+  await expect(sheet.getByRole("status")).toHaveText("1 item carried to hifth.app");
+  await expect.poll(() => savedIds(first)).toMatchObject({ bookmarks: ["b-old"] });
+  expect(await lookCount(first)).toBe(0);
+
+  // The box is still there; ticked, the card offers to send just that.
+  await box.check();
+  opened = context.waitForEvent("page");
+  await sheet.getByRole("button", { name: "Send what I have opened" }).click();
+  const second = await opened;
+  await expect(sheet.getByRole("status")).toContainText("What you have opened went too.");
+  await expect.poll(() => lookCount(second)).toBe(3);
+  await expect(box).toHaveCount(0);
+  await expect(sheet.getByRole("link", { name: "Open hifth.app" })).toBeVisible();
+
+  // Sent again (the card forgot it had), nothing is counted twice.
+  await page.evaluate(() => localStorage.removeItem("hifth.moved.record.v1"));
+  await page.reload();
+  await page.getByTestId("moved-sheet").getByRole("checkbox", { name: /Also send what I have opened/ }).check();
+  opened = context.waitForEvent("page");
+  await page.getByTestId("moved-sheet").getByRole("button", { name: "Send what I have opened" }).click();
+  const third = await opened;
+  await expect(page.getByTestId("moved-sheet").getByRole("status")).toContainText("What you have opened went too.");
+  await expect.poll(() => lookCount(third)).toBe(3);
 });
 
 test("a place the new address already has, newer than the old one's, is kept", async ({ page, context, baseURL }) => {

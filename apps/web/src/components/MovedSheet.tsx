@@ -7,6 +7,7 @@ import {
   CARRY_HASH,
   CARRY_WAIT_MS,
   LATER_KEY,
+  RECORD_KEY,
   addressesFor,
   carryMessage,
   sheetOn,
@@ -41,9 +42,11 @@ interface MovedSheetProps {
   onSave: () => void;
   /** Where the reader left off, which goes with the file so hifth.app opens there. */
   readPlace: () => Promise<CarriedSeam | null>;
+  /** What the reader has opened (the revision record), read only if they tick the box that names it. */
+  readRecord: () => Promise<unknown>;
 }
 
-type Phase = { at: "ask" } | { at: "waiting" } | { at: "carried"; added: number } | { at: "failed" };
+type Phase = { at: "ask" } | { at: "waiting" } | { at: "carried"; added: number; record: boolean } | { at: "failed" };
 
 /**
  * The old address's half of carrying marks across (moved.ts says the whole of it).
@@ -53,8 +56,13 @@ type Phase = { at: "ask" } | { at: "waiting" } | { at: "carried"; added: number 
  * browser allows it — waits for it to say it is ready, and sends it the file,
  * to that address only. If it has not answered after a while, or the browser
  * kept the tab from opening, the card offers to save the file instead.
+ *
+ * What the reader has opened (the revision record) goes only when they tick the
+ * box that names it, never with "Carry them" alone. The box stays on the card
+ * after the marks have gone, until the record has been sent, so a reader who
+ * left it unticked can still send it later.
  */
-export function MovedSheet({ file, onSave, readPlace }: MovedSheetProps): JSX.Element | null {
+export function MovedSheet({ file, onSave, readPlace, readRecord }: MovedSheetProps): JSX.Element | null {
   const { t } = useT();
   const [addresses] = useState<Addresses>(() => addressesFor(window.location.protocol, stored(ADDRESSES_KEY)));
   const [shown, setShown] = useState(() =>
@@ -69,6 +77,8 @@ export function MovedSheet({ file, onSave, readPlace }: MovedSheetProps): JSX.El
   );
   const [phase, setPhase] = useState<Phase>({ at: "ask" });
   const carried = sheetState(stored(CARRIED_KEY)) === "open";
+  const [recordSent, setRecordSent] = useState(() => stored(RECORD_KEY) !== null);
+  const [withRecord, setWithRecord] = useState(false);
   const fileRef = useRef(file);
   fileRef.current = file;
   const stop = useRef<(() => void) | null>(null);
@@ -90,10 +100,21 @@ export function MovedSheet({ file, onSave, readPlace }: MovedSheetProps): JSX.El
         sent = true;
         const file = fileRef.current();
         // Where the reader left off goes with the marks, so hifth.app opens there.
-        void readPlace().then((seam) => tab.postMessage({ type: "hifth-carry", file, seam, settings: settingsOf(localStorage) }, addresses.next));
+        // The record is read only when the box is ticked.
+        void Promise.all([readPlace(), withRecord ? readRecord() : undefined]).then(([seam, record]) =>
+          tab.postMessage(
+            { type: "hifth-carry", file, seam, settings: settingsOf(localStorage), ...(withRecord ? { record } : {}) },
+            addresses.next,
+          ),
+        );
       } else if (msg?.type === "hifth-carry-done") {
         store(CARRIED_KEY, String(msg.added));
-        setPhase({ at: "carried", added: msg.added });
+        if (withRecord) {
+          store(RECORD_KEY, String(Date.now()));
+          setRecordSent(true);
+          setWithRecord(false);
+        }
+        setPhase({ at: "carried", added: msg.added, record: withRecord });
         stop.current?.();
       }
     };
@@ -107,7 +128,7 @@ export function MovedSheet({ file, onSave, readPlace }: MovedSheetProps): JSX.El
       window.clearTimeout(timer);
       stop.current = null;
     };
-  }, [addresses]);
+  }, [addresses, withRecord]);
 
   const later = useCallback(() => {
     stop.current?.();
@@ -119,7 +140,9 @@ export function MovedSheet({ file, onSave, readPlace }: MovedSheetProps): JSX.El
 
   const line =
     phase.at === "carried"
-      ? t.movedCarried(phase.added)
+      ? phase.record
+        ? `${t.movedCarried(phase.added)}${t.sep}${t.movedRecordSent}`
+        : t.movedCarried(phase.added)
       : phase.at === "waiting"
         ? t.movedWaiting
         : phase.at === "failed"
@@ -134,18 +157,24 @@ export function MovedSheet({ file, onSave, readPlace }: MovedSheetProps): JSX.El
       <p className={styles.body} role="status">
         {line}
       </p>
+      {recordSent || phase.at === "waiting" ? null : (
+        <label className={styles.record}>
+          <input type="checkbox" checked={withRecord} onChange={(e) => setWithRecord(e.target.checked)} />
+          {t.movedRecordBox}
+        </label>
+      )}
       <div className={styles.actions}>
         {phase.at === "failed" ? (
           <button type="button" className={styles.primary} onClick={onSave}>
             {t.bmSave}
           </button>
-        ) : carried || phase.at === "carried" ? (
+        ) : (carried || phase.at === "carried") && !withRecord ? (
           <a className={styles.primary} href={addresses.page}>
             {t.movedOpen}
           </a>
         ) : (
           <button type="button" className={styles.primary} onClick={carry} disabled={phase.at === "waiting"}>
-            {t.movedCarry}
+            {carried || phase.at === "carried" ? t.movedRecordSend : t.movedCarry}
           </button>
         )}
         <button type="button" className={styles.secondary} onClick={later}>

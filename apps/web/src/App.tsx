@@ -119,7 +119,7 @@ import {
   loadTajweedVocabulary,
 } from "./assets";
 import { applyFieldToDocument, fieldFromHash } from "./field";
-import { recordLook } from "./revision-store";
+import { readRecord, recordLook, takeRecord } from "./revision-store";
 import { countUse } from "./usage-store";
 import { useCountChange, useCountUse } from "./use-count";
 import { USE_PENS } from "./usage";
@@ -2383,7 +2383,8 @@ export function App(): JSX.Element {
     },
     CARRY_PLACE,
     () => Promise.all([bookmarksSaved(), notesSaved(), jumpsSaved()]),
-    (n) => announce(t.carryArrived(n)),
+    (n, looks) => announce(looks === null ? t.carryArrived(n) : `${t.carryArrived(n)}${t.sep}${t.carryRecordArrived(looks)}`),
+    takeRecord,
   );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
@@ -4864,7 +4865,7 @@ export function App(): JSX.Element {
       )}
       {/* "Hifth has moved": a row of its own above the trail, like the note
           bar, so it covers neither the page bar nor the trail. */}
-      <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} readPlace={readSeam} />
+      <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} readPlace={readSeam} readRecord={readRecord} />
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
         {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}

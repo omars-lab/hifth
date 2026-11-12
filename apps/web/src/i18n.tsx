@@ -720,6 +720,10 @@ export interface Strings {
   movedOpen: string;
   movedFailed: string;
   carryArrived(n: number): string;
+  movedRecordBox: string;
+  movedRecordSend: string;
+  movedRecordSent: string;
+  carryRecordArrived(n: number): string;
   toolbarLabel: string;
   toolSelect: string;
   toolHighlight: string;
@@ -1475,6 +1479,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     bmLoaded: (count) => m.bmLoaded({ n: count, nText: n(count) }),
     movedCarried: (count) => m.movedCarried({ n: count, nText: n(count) }),
     carryArrived: (count) => m.carryArrived({ n: count, nText: n(count) }),
+    carryRecordArrived: (count) => m.carryRecordArrived({ n: count, nText: n(count) }),
     toolOn: (name) => m.toolOn({ name }),
     toolLocked: (name) => m.toolLocked({ name }),
     toolLockedHint: (name) => m.toolLockedHint({ name }),

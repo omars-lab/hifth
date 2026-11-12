@@ -149,7 +149,7 @@ sequenceDiagram
 - hifth.app must never send the header that cuts a new tab off from the page that opened it
   (Cross-Origin-Opener-Policy). The release check refuses it, with a test.
 
-What doesn't come across yet is ⑧.
+What comes across, and what only comes when the reader says so, is ⑧.
 
 **Where the app lives under /read.** The app's offline helper (its service worker) covers
 `/read/` and nothing above it, so the front page is never cached as part of the app. The app keeps
@@ -162,7 +162,7 @@ The rules are in `apps/web/src/moved.ts`, with tests beside it. The card is
 the browser test is `apps/web/e2e/carry-marks.spec.ts`. The test stands in for the two addresses
 with `localhost` and `127.0.0.1`, which a browser keeps apart like two sites.
 
-### ⑧ What does a reader leave behind when they carry their marks across? · **open**
+### ⑧ What does a reader leave behind when they carry their marks across? · **fixed**
 
 The carry brings what the saved file holds: bookmarks, notes and look-alike jumps. Three things
 were left at the old address, because the app keeps them in a different store:
@@ -174,9 +174,19 @@ were left at the old address, because the app keeps them in a different store:
   says it is ready only once it knows the edition's pages, so a place that arrives early is not
   turned away. A page the edition doesn't have is ignored. The browser test checks all three in Chrome, Firefox and
   iPhone Safari.
-- the revision record. Still left behind. The owner's answer (12 November 2026): it comes only
-  when the reader chooses it, by its own clearly worded choice on the card, never folded silently
-  into "Carry my marks", because the reader decides who sees their data.
+- the revision record (what the reader has opened: which ayahs, when, and where they marked a
+  mistake). **Now carried, only when the reader ticks its box** (12 November 2026). The owner's
+  answer: the reader decides who sees their data, so it is never folded into "Carry them". The
+  card has its own box, unticked, that says what goes and to whom: "Also send what I have opened
+  … It goes to hifth.app in this browser, and nowhere else." The box stays on the card after the
+  marks have gone, and then the button reads "Send what I have opened", so a reader who left it
+  unticked can send it later. Nothing in the record is trusted at the new address: each look is
+  checked, filed by its own day, dropped if it is older than the 400 days the app keeps, and
+  skipped if hifth.app already has it, so sending twice counts nothing twice. The privacy check
+  now names this as the record's one way out and fails if the app hands the record to anything
+  else. The browser test checks, in Chrome, Firefox and iPhone Safari: unticked sends no looks,
+  ticked brings them, and sent twice they are not doubled. It is listed as a way out in the
+  "who has my data" question ([sharing ⑮](sharing-between-readers.md)).
 - their settings (language, layout, sizes), so hifth.app opened in the default language. **Now
   carried** (12 November 2026): every choice the reader made comes across, unless hifth.app
   already has its own choice for it. What stays behind is listed by name: the card's own record
@@ -193,10 +203,9 @@ were left at the old address, because the app keeps them in a different store:
 Where they left off mattered most: a hafiz who carried across and landed on page one had to find
 their place again by hand.
 
-What would answer the rest: the revision record gets its own worded choice on the card, and the
-browser test for the carry (⑦) finds it at the new address. Room was found first, as the owner
-chose (12 November 2026): the words table lost 4.1 KB of lines that only copied messages across,
-and the settings carry took 0.3 KB of it.
+Room was found first, as the owner chose (12 November 2026): the words table lost 4.1 KB of lines
+that only copied messages across. The settings carry took 0.3 KB of it, and the record's box
+1.2 KB.
 
 `www.hifth.app` is a separate address with its own store as well, so every link sends readers to
 `hifth.app` itself.

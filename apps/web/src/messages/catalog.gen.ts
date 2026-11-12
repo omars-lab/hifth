@@ -71,6 +71,7 @@ export interface Catalog {
   readonly cardRoomSmaller: string;
   readonly cardRoomTitle: string;
   readonly carryArrived: (d: { readonly n: number; readonly nText: string | number }) => string;
+  readonly carryRecordArrived: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly chipAria: (d: { readonly direction: string | number; readonly countText: string | number }) => string;
   readonly clearSelection: string;
   readonly clickForNote: (d: { readonly source: string | number }) => string;
@@ -329,6 +330,9 @@ export interface Catalog {
   readonly movedFailed: string;
   readonly movedLater: string;
   readonly movedOpen: string;
+  readonly movedRecordBox: string;
+  readonly movedRecordSend: string;
+  readonly movedRecordSent: string;
   readonly movedTitle: string;
   readonly movedWaiting: string;
   readonly mushaf: string;

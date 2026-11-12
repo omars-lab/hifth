@@ -48,6 +48,8 @@ export const ADDRESSES_KEY = "hifth.moved.addresses.v1";
 export const LATER_KEY = "hifth.moved.later.v1";
 /** How many marks the carry took across, once it has. */
 export const CARRIED_KEY = "hifth.moved.carried.v1";
+/** When the reader sent what they have opened (their revision record) to hifth.app. */
+export const RECORD_KEY = "hifth.moved.record.v1";
 /** The new tab's count of what arrived, kept across the reload that lays settings. */
 export const ARRIVED_KEY = "hifth.moved.arrived.v1";
 
@@ -158,7 +160,14 @@ export function laySettings(storage: Storage, settings: unknown): number {
 
 export type CarryMessage =
   | { type: "hifth-carry-ready" }
-  | { type: "hifth-carry"; file: string; seam?: CarriedSeam | undefined; settings?: Record<string, string> | undefined }
+  | {
+      type: "hifth-carry";
+      file: string;
+      seam?: CarriedSeam | undefined;
+      settings?: Record<string, string> | undefined;
+      /** The revision record, only when the reader ticked the box that names it. Checked by its store. */
+      record?: unknown;
+    }
   | { type: "hifth-carry-done"; added: number };
 
 function seamOf(v: unknown): CarriedSeam | undefined {
@@ -198,7 +207,13 @@ export function carryMessage(
     // An older old address sends no place, and a place in the wrong shape is
     // dropped; either way the marks still come across.
     const seam = seamOf(d.seam);
-    return { type: "hifth-carry", file: d.file, seam, settings: d.settings as Record<string, string> | undefined };
+    return {
+      type: "hifth-carry",
+      file: d.file,
+      seam,
+      settings: d.settings as Record<string, string> | undefined,
+      ...(d.record === undefined ? {} : { record: d.record }),
+    };
   }
   if (d.type === "hifth-carry-done" && Number.isInteger(d.added) && (d.added as number) >= 0)
     return { type: "hifth-carry-done", added: d.added as number };

@@ -6188,11 +6188,12 @@
         "file": "docs/design/hifth-app-site.md",
         "item": "⑧"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, where the reader left off (2026-11-12), and their settings (2026-11-12, each name sorted by hand into goes or stays, checked by a unit test). Only the revision record still stays at the old address: it comes only by its own clearly worded choice on the card, because the reader decides who sees their data (owner, 2026-11-12). Room was found by trimming 4.1 KB from the words table."
+      "closedBy": "apps/web/e2e/carry-marks.spec.ts",
+      "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, where the reader left off, and their settings (each name sorted by hand into goes or stays, checked by a unit test). The revision record comes only when the reader ticks its own unticked box on the card, which stays offered after the marks have gone (owner, 2026-11-12: the reader decides who sees their data). Each look is checked and filed by its own day at the new address, and never counted twice; the privacy check names this as the record's one way out. Browser tests in Chrome, Firefox and iPhone Safari. Closed 2026-11-12."
     },
     {
       "id": "hifth-app-link-file",
