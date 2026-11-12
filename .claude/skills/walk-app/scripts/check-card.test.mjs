@@ -93,6 +93,32 @@ test("a ledger row gives its short line as the step and the first sentence it ex
   assert.deepEqual(two.getAll("step"), ["Long made-up instruction 13, with detail.", "Long made-up instruction 14, with detail."]);
 });
 
+// iOS cuts a link that opens the app at 2,048 characters and the step it cuts
+// through never reaches the card (seen in the iPad simulator, 2026-11-12: 12
+// steps sent, 9 arrived). So a card stops short of that and the rest goes on the next.
+test("a long list is split so no card's link passes 2,000 characters", () => {
+  const steps = Array.from({ length: 12 }, (_, i) => ({
+    do: `Step ${i + 1} made up words to pad the line out a little further`,
+    see: `Result ${i + 1} with more made up words padding the link out so it grows long enough`,
+  }));
+  const file = stepsFile(steps);
+  const first = run(["link", "--file", file]);
+  assert.equal(first.status, 0, first.stderr);
+  const link = linkOf(first.stdout);
+  assert.ok(link.length <= 2000, `the link is ${link.length} characters`);
+  const sent = new URL(link).searchParams.getAll("step").length;
+  assert.ok(sent < 12 && sent > 0, `${sent} steps on the first card`);
+  assert.match(first.stdout, new RegExp(`ev=more_steps .*next_from=${sent + 1}`));
+
+  const rest = run(["link", "--file", file, "--from", String(sent + 1)]);
+  assert.equal(rest.status, 0, rest.stderr);
+  assert.equal(new URL(linkOf(rest.stdout)).searchParams.getAll("step")[0], `Step ${sent + 1} made up words to pad the line out a little further`);
+
+  const huge = run(["link", "--file", stepsFile([{ do: "x".repeat(2100) }])]);
+  assert.equal(huge.status, 2, "one step too long for any card is refused");
+  assert.match(huge.stderr, /too long/);
+});
+
 test("a file with no steps, or an empty one, is refused before anything is sent", () => {
   assert.equal(run(["link", "--file", stepsFile([])]).status, 2);
   assert.equal(run(["link", "--file", stepsFile([{ do: "  " }])]).status, 2);

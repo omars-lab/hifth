@@ -13,7 +13,8 @@
 // A steps file: { "id": "…", "title": "…", "steps": [{ "do": "…", "see": "…" }] }
 // A ledger row (docs/validation/ledger.json): each runbook step's `short` (or
 // `do`) is the step, and the first sentence of its `expect` is what to see.
-// One card holds 12 steps; a longer list prints the --from that sends the rest.
+// One card holds 12 steps and a link of at most 2,000 characters (iOS cuts a
+// longer one); a longer list prints the --from that sends the rest.
 //
 // Answers land in native/shots/checks/, which git ignores: a check run on the
 // pitch build can describe what that build shows.
@@ -29,6 +30,9 @@ import { basename, join } from "node:path";
 
 const BUNDLE = "com.bytesofpurpose.hifth";
 const MOST_STEPS = 12;
+// iOS cuts a link that opens an app at 2,048 characters, and the step it cuts
+// through never reaches the card (iPad simulator, 2026-11-12). Stay well short.
+const MOST_CHARS = 2000;
 const DEFAULT_OUT = "native/shots/checks";
 const root = new URL("../../../..", import.meta.url).pathname;
 
@@ -100,10 +104,22 @@ function theCheck() {
     if (!String(s.do ?? "").trim()) refuse(`step ${i + 1} of ${check.id} is empty`);
   });
   if (from > check.steps.length) refuse(`${check.id} has ${check.steps.length} steps; --from ${from} is past the end`);
-  const steps = check.steps.slice(from - 1, from - 1 + MOST_STEPS);
+  const id = from > 1 ? `${check.id}-from-${from}` : check.id;
+  // Fill the card a step at a time, until 12 steps or the link would pass MOST_CHARS.
+  const steps = [];
+  for (const step of check.steps.slice(from - 1)) {
+    if (steps.length === MOST_STEPS) break;
+    if (linkFor({ id, title: check.title, steps: [...steps, step] }).length > MOST_CHARS) {
+      if (steps.length === 0) {
+        refuse(`step ${from} of ${check.id} is too long for one card: its link passes ${MOST_CHARS} characters. Shorten it.`);
+      }
+      break;
+    }
+    steps.push(step);
+  }
   const next = from - 1 + steps.length + 1;
   if (next <= check.steps.length) log("more_steps", { id: check.id, total: check.steps.length, next_from: next });
-  return { id: from > 1 ? `${check.id}-from-${from}` : check.id, title: check.title, steps };
+  return { id, title: check.title, steps };
 }
 
 /** Each value encoded on its own: `+` stays a plus in the app, so spaces are %20. */

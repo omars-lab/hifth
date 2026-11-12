@@ -42,6 +42,11 @@ hifth://x-callback-url/check?id=<name>&title=<one line>&step=<do this>&see=<you 
 - `id` names the check, so the saved answers can be matched to it. `title` is the card's
   heading.
 - At most 12 steps, so the card stays small.
+- A link of at most 2,000 characters. iOS cuts a link that opens an app at 2,048
+  characters, and the step it cuts through never reaches the card: in the iPad
+  simulator on 2026-11-12, a 15-step check sent 12 steps in a 2,523-character link
+  and only 9 arrived. The laptop script fills each card only until the next step
+  would pass 2,000 characters, and prints where the next card starts.
 - `x-success`, if given, is opened when you press Done, with `id` and `result` (`pass` when
   every step got ✓, otherwise `fail`).
 - A link with no step, or more than 12, is refused with `bad-check`.
@@ -76,7 +81,7 @@ iPad yet, and sending any link to the running app over the cable has not been tr
 | `make check-card ID=<name> DEVICE=…` | builds the link from that check in the manual-testing list and sends it to the iPad |
 | `make check-card FILE=<path> DEVICE=…` | the same, from a small JSON file of steps (for a one-off check that is not in the list) |
 | `make check-card … SIM=1` | sends it to the simulator instead |
-| `make check-card ID=<name> FROM=13 …` | one card holds 12 steps; a longer check prints the `FROM=` that sends the rest as a second card |
+| `make check-card ID=<name> FROM=13 …` | one card holds 12 steps in a link of at most 2,000 characters; a longer check prints the `FROM=` that sends the rest as a second card |
 | `make check-answers DEVICE=…` | copies the saved answers off the iPad into `native/shots/checks/` (ignored by git) |
 
 The script calls Apple's device tool directly, with the link as one argument, so a step with
