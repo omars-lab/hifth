@@ -117,7 +117,11 @@ final class ShellModel {
         #endif
 
         let webView = WKWebView(frame: .zero, configuration: configuration)
+        #if DEBUG
+        // Safari's Web Inspector reaches the page over the cable: builds from this
+        // laptop only, never a release.
         webView.isInspectable = true
+        #endif
         webView.allowsBackForwardNavigationGestures = false
         webView.allowsLinkPreview = false
         webView.navigationDelegate = navigation
