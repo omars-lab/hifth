@@ -65,6 +65,23 @@ describe("the bundles", () => {
     for (const id of LOCALE_IDS) expect(stringsFor(id)).toBeDefined();
   });
 
+  it("hands every plain message across in its own language, not another's", async () => {
+    // The bundle takes the catalog's messages as they are and adapts only a few.
+    // Each language's plain sentences must be its own catalog's, word for word.
+    const { default: enMessages } = await import("./messages/en.gen");
+    const { default: arMessages } = await import("./messages/ar.gen");
+    let checked = 0;
+    for (const [bundle, messages] of [[EN, enMessages], [AR, arMessages]] as const) {
+      for (const [k, v] of Object.entries(messages)) {
+        const got = (bundle as unknown as Record<string, unknown>)[k];
+        if (typeof v !== "string" || typeof got !== "string") continue;
+        expect(got, k).toBe(v);
+        checked++;
+      }
+    }
+    expect(checked).toBeGreaterThan(400);
+  });
+
   it("carries the same keys in every language", () => {
     // TypeScript already enforces this at build time; asserting it at runtime
     // catches the one case the type cannot see — a bundle built by spreading

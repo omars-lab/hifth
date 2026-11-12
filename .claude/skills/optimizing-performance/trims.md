@@ -35,6 +35,17 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Trimmed 2026-11-12: the words table, −4.1 KB, nothing a reader sees changed.** With the app at
+210.0 of 210 KB and two small carries waiting, the owner chose finding code to delete over raising
+the limit. A map of the main script by source file showed `i18n.tsx` at 7.4 KB gz, most of it 537
+lines that each copied one message across under its own name (`about: m.about,`). One spread of
+the catalog (`...m`) now does that, and only the messages that need adapting (digits, surah names,
+choices) are written out. 210.0 → 205.9 KB, main script 139.1 → 135.0 KB. A unit test checks every
+plain sentence in both languages still comes from its own catalog, word for word, and the language
+browser tests pass in Chrome, Firefox and iPhone Safari. How the map was made: build with
+`--sourcemap` into a scratch folder and add up each source file's share of the main script; worth
+keeping in mind as the first look next time, before guessing.
+
 **Checked again 2026-11-12, nothing taken, nothing left.** 210.0 KB against the 210 KB cap. Of the
 +2.5 KB, 2.2 KB is carrying marks from the old address to hifth.app (the card at the old address,
 the new tab's half and their words in the two languages), which went in without the baseline
