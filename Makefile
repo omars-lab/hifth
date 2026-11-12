@@ -146,6 +146,13 @@ pitch-walk: ## The pitch demo walked in the real iPad app on its side, in one st
 	@test -f $(PITCH_DATA) || { echo "  No private pitch data — $(PITCH_DATA)"; exit 1; }
 	@node .claude/skills/walk-app/scripts/pitch-walk.mjs $(if $(STEP),--step $(STEP)) $(if $(NO_BUILD),--no-build)
 
+.PHONY: feature-links
+feature-links: ## The features page for the development hub, at /dev-hub/ on the dev server [PICTURES=1 takes pictures from the public build at BASE, default the preview on 7123]
+	@# One card per place, tool and panel a link can open (docs/design/feature-links.md).
+	@# Pictures refuse a site that hands out the pitch build's private commentary.
+	@# The switch is PICTURES, not SHOTS: native/Makefile.native's SHOTS names a folder, so it is always set.
+	@node .claude/skills/walk-app/scripts/feature-links.mjs $(if $(PICTURES),--shots --base $(or $(BASE),http://127.0.0.1:7123/))
+
 .PHONY: report
 report: ## Open the last e2e run's report — traces, image diffs, the failing screen
 	@# Playwright's own report, not a hand-rolled one. It answers "did the
