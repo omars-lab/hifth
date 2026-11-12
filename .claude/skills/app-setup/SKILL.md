@@ -125,6 +125,36 @@ Managed with the Supabase command line on its own account, not the connected one
 at its free limit). Never write the project's private ID in the repo, a PR or a chat. Tracked
 in the held-copy plugin's own pages, under the `qul-etl-plugins` decision.
 
+**Always name the profile.** The command line keeps one saved login per *profile*, and the
+default login on this laptop belongs to a different account. Hifth's account has its own profile
+file, `~/.supabase/profiles/hifth.yaml`. So every command that reaches the hosted store takes
+`--profile ~/.supabase/profiles/hifth.yaml`. A command without it runs as the other account.
+`scripts/supabase-profile.test.mjs` fails if a skill lists one without it.
+
+| Step | Who | Command |
+| --- | --- | --- |
+| Make the profile file (once per laptop) | agent | write the five lines below to `~/.supabase/profiles/hifth.yaml` |
+| Log in (opens a browser) | you, in your own terminal | `supabase login --profile ~/.supabase/profiles/hifth.yaml` |
+| Check it is the right account | agent | `supabase --profile ~/.supabase/profiles/hifth.yaml projects list` |
+| Link a checkout (per checkout) | agent | `supabase --profile ~/.supabase/profiles/hifth.yaml link --project-ref <ref>` |
+| Build the tables | agent | `supabase --profile ~/.supabase/profiles/hifth.yaml db push` |
+
+```
+name: hifth
+api_url: https://api.supabase.com
+project_host: supabase.co
+dashboard_url: https://supabase.com/dashboard
+pooler_host: supabase.com
+```
+
+The login is filed under `name`, which is why a bare `--profile hifth` does not work: the tool
+reads anything that is not one of its built-in names as a path to a profile file, and there is
+no file called `hifth`. Leave
+`SUPABASE_ACCESS_TOKEN` unset, because it overrides every saved login. The link to a project is
+kept per checkout, in the ignored `supabase/.temp`, so a new worktree links again. The
+building scripts don't use the login at all: they connect with the password-bearing address in
+`SUPABASE_DB_URL`, which is yours to hold.
+
 ## This laptop
 
 | step | command | why |

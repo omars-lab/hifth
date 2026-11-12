@@ -31,8 +31,10 @@ old store was the only ready copy. It was copied on 2026-11-12 into a git-ignore
 store exactly. It was then loaded into a throwaway copy of Supabase's own Postgres 17, on top of the
 three migrations and as the same database role step 5 uses. It loaded with no errors: every row
 came back, word ids 1 to 83,668 with none missing and no empty word. The backup holds the word
-text, so it stays in that ignored folder, plus one copy kept outside this checkout by the owner,
-because a folder named `.cache` has been cleared on this laptop before.
+text, so it stays in that ignored folder, plus a second copy in the owner's iCloud Drive (made
+2026-11-12, checksum matches), because a folder named `.cache` has been cleared on this laptop
+before. The old project was paused the same day, so these two files are the working copies until
+the new store is loaded.
 
 ## Open questions, and what would answer each
 
@@ -48,8 +50,11 @@ project is paused. The steps:
    so the old account's login stays where it is, then link the repo to the new project.
 4. **Build the tables.** Push the migrations. The new project starts with the tables already
    closed to the public key.
-5. **Load the data.** Restore the backup into the new project, then compare row counts with
-   9,046 / 83,668 / 4.
+5. **Load the data — later, once the new project is set up.** The owner chose (2026-11-12) to
+   set the new project up first and bring the data over afterwards. Restore the backup into the
+   new project, then compare row counts with 9,046 / 83,668 / 4. The backup is the old project's
+   data as of the day it was paused, so pulling again from the old project would need it
+   restored first and gives the same rows.
 6. **Make a new password file.** Copy the new connection address from the dashboard (use the
    *session pooler* one, since this laptop has no IPv6). Store it in an encrypted env file the
    way the scripts expect, and back its key up.

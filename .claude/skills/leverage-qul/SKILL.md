@@ -28,7 +28,7 @@ read. So the ways this project uses QUL are now:
   un-vendored target.
 - **A held copy — the store (option D).** A copy of the page positions and the word text may
   be *held* in the hosted database this project controls (reached through the Supabase
-  command-line tool), populated by `ingest-qul-supabase.mjs` from the same gitignored
+  command-line tool, always with hifth's own profile; the app-setup skill says how), populated by `ingest-qul-supabase.mjs` from the same gitignored
   `.cache/`. It never enters the repository or the shipped bundle, and it is read by the
   building tools alone — whether any reader receives those bytes is a separate open question,
   not settled by D. The text-bearing word export may be held only after its licence is read
