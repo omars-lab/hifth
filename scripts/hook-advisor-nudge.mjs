@@ -36,18 +36,21 @@ export const WINDOW_MS = 3 * 60 * 60 * 1000;
  * (/rename, kept in its log as a custom-title line), the backlog task its branch was started for
  * (intent start, kept in git config as branch.<name>.intent-task), and only when neither is set,
  * the goal marked current in .claude/goals/README.md. Nothing about a goal is written here.
+ * Before all of them comes the goal recorded for the session itself (intent focus, kept by the
+ * intent plugin in .claude/data/intent/sessions.jsonl).
  */
-export function question({ session = null, task = null, goal = null } = {}) {
+export function question({ focus = null, session = null, task = null, goal = null } = {}) {
   const at = [];
-  if (session) at.push(`this session is "${session}"`);
+  if (focus) at.push(`this session is for the ${focus.kind} ${focus.id}`);
+  if (session) at.push(`this session is named "${session}"`);
   if (task) at.push(`its branch is for the backlog task ${task.id}${task.summary ? ` (${task.summary})` : ""}`);
-  const focus = at.length
+  const ask = at.length
     ? `The work at hand: ${at.join("; ")}. Ask what the next most important thing is for that work and the people it serves.`
     : goal
       ? `No focus is set for this session, so use the project's current goal: ${goal}. Ask what the next most important thing is for it.`
       : "No focus is set for this session. Ask what the next most important thing is for the people Hifth is for.";
   return (
-    `Before you stop: ${focus} If the owner named a different focus in the conversation, that wins. ` +
+    `Before you stop: ${ask} If the owner named a different focus in the conversation, that wins. ` +
     "Call the advisor if you have it; if you do not, answer it yourself from docs/backlog.md and " +
     "what this session found. Put the answer in docs/backlog.md (a new item, or move an existing " +
     "one up), and tell the owner in one plain sentence. If it is now the top item, start on it; " +
@@ -61,6 +64,28 @@ export function verdict({ stopHookActive, now, lastNudgeAt, objective = {} }) {
   if (stopHookActive) return null;
   if (typeof lastNudgeAt === "number" && now - lastNudgeAt < WINDOW_MS) return null;
   return question(objective);
+}
+
+/** The goal recorded for this session in the repo's own record; null when none. */
+export function sessionFocus(repo, sessionId) {
+  let text;
+  try {
+    text = readFileSync(join(repo, ".claude", "data", "intent", "sessions.jsonl"), "utf8");
+  } catch {
+    return null;
+  }
+  let focus = null;
+  for (const line of text.split("\n")) {
+    try {
+      const entry = JSON.parse(line);
+      if (entry.session === sessionId && entry.focus?.kind && entry.focus?.id) {
+        focus = { kind: String(entry.focus.kind), id: String(entry.focus.id) };
+      }
+    } catch {
+      // A line that is not whole JSON is skipped.
+    }
+  }
+  return focus;
 }
 
 /** The last name the session was given, from its log; null when it has none. */
@@ -148,12 +173,17 @@ if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).
     let objective = {};
     if (verdict({ stopHookActive, now, lastNudgeAt })) {
       const { repo, task } = branchTask(input.cwd || process.env.CLAUDE_PROJECT_DIR || process.cwd());
-      objective = { session: input.transcript_path ? sessionTitle(input.transcript_path) : null, task, goal: currentGoal(repo) };
+      objective = {
+        focus: input.session_id ? sessionFocus(repo, String(input.session_id)) : null,
+        session: input.transcript_path ? sessionTitle(input.transcript_path) : null,
+        task,
+        goal: currentGoal(repo),
+      };
     }
     const reason = verdict({ stopHookActive, now, lastNudgeAt, objective });
     if (reason) {
       writeFileSync(stateFile, JSON.stringify({ at: now }));
-      log("nudge", { session, focus: objective.session ? "session" : objective.task ? "task" : objective.goal ? "goal" : "none" });
+      log("nudge", { session, focus: objective.focus ? "recorded" : objective.session ? "session" : objective.task ? "task" : objective.goal ? "goal" : "none" });
       process.stdout.write(JSON.stringify({ decision: "block", reason }));
     } else {
       log("let_through", { session, why: input.stop_hook_active === true ? "stop_hook_active" : "within_window" });

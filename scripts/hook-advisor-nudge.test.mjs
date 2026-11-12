@@ -5,7 +5,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { WINDOW_MS, currentGoal, sessionTitle, taskFor, verdict } from "./hook-advisor-nudge.mjs";
+import { WINDOW_MS, currentGoal, sessionFocus, sessionTitle, taskFor, verdict } from "./hook-advisor-nudge.mjs";
 
 const NOW = Date.parse("2026-10-08T15:00:00Z");
 
@@ -46,6 +46,27 @@ test("with no focus set, the project's current goal is read, not written into th
   const r = verdict({ stopHookActive: false, now: NOW, lastNudgeAt: null, objective: { goal: "A made-up standing goal" } });
   assert.match(r, /A made-up standing goal/);
   assert.match(r, /no focus/i);
+});
+
+test("the session's recorded goal comes first, read from the repo's own record", () => {
+  const dir = mkdtempSync(join(tmpdir(), "nudge-focus-"));
+  mkdirSync(join(dir, ".claude", "data", "intent"), { recursive: true });
+  writeFileSync(join(dir, ".claude", "data", "intent", "sessions.jsonl"), [
+    JSON.stringify({ session: "s1", date: "2026-11-12", focus: { kind: "task", id: "old-row" }, by: "branch" }),
+    JSON.stringify({ session: "s2", date: "2026-11-12", focus: { kind: "goal", id: "other" }, by: "owner" }),
+    JSON.stringify({ session: "s1", date: "2026-11-12", focus: { kind: "task", id: "made-up-row" }, by: "owner" }),
+    "not json",
+  ].join("\n"));
+  assert.deepEqual(sessionFocus(dir, "s1"), { kind: "task", id: "made-up-row" });
+  assert.equal(sessionFocus(dir, "s3"), null);
+  assert.equal(sessionFocus(join(dir, "nowhere"), "s1"), null);
+
+  const r = verdict({
+    stopHookActive: false, now: NOW, lastNudgeAt: null,
+    objective: { focus: { kind: "plan", id: "made-up-plan" }, session: "a-name", goal: "A made-up standing goal" },
+  });
+  assert.match(r, /plan made-up-plan/);
+  assert.doesNotMatch(r, /made-up standing goal/i);
 });
 
 test("the session's name is the last one it was given in its log", () => {
