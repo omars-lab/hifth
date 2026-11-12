@@ -118,6 +118,9 @@
       "desktop-firefox",
       "iphone"
     ],
+    "landing-shots.spec.ts": [
+      "landing-shots"
+    ],
     "lang-load.spec.ts": [
       "android",
       "iphone"

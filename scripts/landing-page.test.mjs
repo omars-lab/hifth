@@ -101,3 +101,99 @@ test("the wordmark's font is kept on the site and holds the wordmark's letters",
   const words = [...html.matchAll(/class="wordmark"[^>]*>([^<]+)</g)].map((m) => m[1].trim());
   assert.deepEqual(words, ["حفظ"], "only the wordmark is set in the cut font");
 });
+
+// Device tabs (owner, 2026-11-12, a comment on the front page): one tab per device. The ones
+// that work today open the app in the browser; the apps that have not shipped say "coming soon"
+// and lead to the sign-up form. They are radio buttons and CSS, so they work with scripts off.
+test("each device tab has a panel, and only what exists today opens the app", () => {
+  const html = readFileSync(join(LANDING, "index.html"), "utf8");
+  const css = readFileSync(join(LANDING, "styles.css"), "utf8");
+  const tabs = [...html.matchAll(/<input[^>]*name="device"[^>]*id="device-([\w-]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(tabs, ["desktop", "mobile", "ipad", "iphone", "mac"]);
+  for (const tab of tabs) {
+    const panel = html.match(new RegExp(`<div class="device-panel" id="panel-${tab}"[\\s\\S]*?</div>\\s*<!-- /panel -->`))?.[0];
+    assert.ok(panel, `a panel for ${tab}`);
+    assert.match(html, new RegExp(`<label for="device-${tab}"`), `a label for ${tab}`);
+    assert.match(css, new RegExp(`#device-${tab}:checked ~ \\.device-panels #panel-${tab}`), `CSS shows ${tab}'s panel`);
+    const app = tab === "iphone" || tab === "mac";
+    if (app) {
+      assert.match(panel, /coming soon/i, `${tab} says coming soon`);
+      assert.match(panel, /href="#notify"/, `${tab} leads to the sign-up form`);
+      assert.doesNotMatch(panel, /href="\/read\/"/, `${tab} does not open the browser app as if it were the app`);
+    } else {
+      assert.match(panel, /href="\/read\/"/, `${tab} opens the app`);
+    }
+  }
+  assert.equal((html.match(/name="device"[^>]*checked/g) ?? []).length, 1, "one tab starts chosen");
+});
+
+// The pitch to The Study Quran's team is private; the public front page never names it or
+// promises its commentary (project CLAUDE.md, "What we are building right now").
+test("the public front page does not name The Study Quran", () => {
+  for (const name of PAGES) {
+    const html = readFileSync(join(LANDING, name), "utf8");
+    assert.doesNotMatch(html, /study\s*quran/i, name);
+  }
+});
+
+/**
+ * Every picture the front page shows must be in the folder and allowed to ship.
+ *
+ * The pictures are taken by `make landing-shots` into apps/landing/shots/, and the
+ * release copies only the kinds the allow list in shipped.mjs names. A picture the
+ * page names but nobody took, or one in a kind the release drops, is a broken image
+ * on hifth.app that no test of the app would notice. Added 2026-11-12 with the
+ * front page's pictures.
+ */
+import { existsSync } from "node:fs";
+import { auditShipped } from "../.claude/skills/deploy-site/scripts/shipped.mjs";
+
+/** The shots/ pictures a page names, as paths from the site's root. */
+export function picturesNamed(html) {
+  const found = new Set();
+  for (const [, url] of html.matchAll(/(?:src|href|srcset)="([^"]+)"/g)) {
+    for (const part of url.split(",")) {
+      const path = part.trim().split(/\s+/)[0].replace(/^\.?\//, "");
+      if (path.startsWith("shots/")) found.add(path);
+    }
+  }
+  return [...found].sort();
+}
+
+/** What is wrong with each picture a page names: missing from the folder, or refused by the release. */
+export function pictureProblems(html, landing = LANDING) {
+  const problems = [];
+  for (const path of picturesNamed(html)) {
+    if (!existsSync(join(landing, path))) problems.push(`${path}: not in apps/landing (run make landing-shots)`);
+    const refused = auditShipped([{ path, text: null }]).problems.filter((p) => p.path === path);
+    for (const { why } of refused) problems.push(`${path}: ${why}`);
+  }
+  return problems;
+}
+
+test("the picture check finds a missing picture, a refused kind and a pitch picture", () => {
+  const html = [
+    '<img src="/shots/nobody-took-this.jpg" alt="">',
+    '<img src="shots/moving.gif" alt="">',
+    '<source srcset="/shots/pitch-commentary.jpg 2x, /shots/also-missing.webp 1x">',
+    '<a href="/read/">not a picture</a>',
+  ].join("\n");
+  assert.deepEqual(picturesNamed(html), [
+    "shots/also-missing.webp",
+    "shots/moving.gif",
+    "shots/nobody-took-this.jpg",
+    "shots/pitch-commentary.jpg",
+  ]);
+  const problems = pictureProblems(html);
+  for (const path of picturesNamed(html)) {
+    assert.ok(problems.some((p) => p.startsWith(`${path}: not in apps/landing`)), `${path} should be missing`);
+  }
+  assert.ok(problems.some((p) => p.startsWith("shots/moving.gif: not on the list")), problems.join("\n"));
+  assert.ok(problems.some((p) => p.startsWith("shots/pitch-commentary.jpg: a picture from a pitch build")), problems.join("\n"));
+});
+
+test("every picture the front page names is in the folder and allowed to ship", () => {
+  const html = readFileSync(join(LANDING, "index.html"), "utf8");
+  const problems = pictureProblems(html);
+  assert.deepEqual(problems, [], problems.join("\n"));
+});

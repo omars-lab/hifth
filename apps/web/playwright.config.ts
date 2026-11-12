@@ -17,6 +17,11 @@ const externalBase = process.env.HIFTH_BASE_URL;
 // that an ordinary run does not have.
 const shots = process.env.HIFTH_SHOTS === "1";
 
+// The front page's pictures (e2e/landing-shots.spec.ts → apps/landing/shots/),
+// made by `make landing-shots` for the same reason, and only from the plain
+// build: the pitch build can show The Study Quran's text, and the front page is public.
+const landingShots = process.env.HIFTH_LANDING_SHOTS === "1";
+
 // The pitch build's own e2e (e2e/pitch.spec.ts). It is not in the ordinary
 // suite for the same reason the pitch layer is not in the public bundle: the
 // commentary sheet only exists when VITE_PITCH=1, and the notes it shows live
@@ -169,6 +174,16 @@ export default defineConfig({
           },
         },
       ]
+    : landingShots
+    ? [
+        {
+          // Each test sets its own screen (a laptop, a phone, an iPad); `isMobile`
+          // stays off, as in `shots`, so a crop lands where it was measured.
+          name: "landing-shots",
+          testMatch: /landing-shots\.spec\.ts/,
+          use: { browserName: "chromium", deviceScaleFactor: 2 },
+        },
+      ]
     : shots
     ? [
         {
@@ -193,7 +208,8 @@ export default defineConfig({
           // up (e2e/chrome-fit.spec.ts), so the runbook can be photographed on
           // the phone most readers are holding.
           name: "shots",
-          testMatch: /shots\.spec\.ts/,
+          // Only the guide's own file: landing-shots.spec.ts belongs to its own run.
+          testMatch: /(?<!landing-)shots\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 390, height: 844 },

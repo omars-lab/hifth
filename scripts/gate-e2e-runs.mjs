@@ -53,11 +53,17 @@ function ask(env) {
 
 const fromFile = (path) => JSON.parse(readFileSync(path, "utf8"));
 // Some runs are only set up when asked for by name: the private pitch build's,
-// and the one that takes pictures for the docs. Each is asked for in turn.
-const OFF = { HIFTH_PITCH: "", HIFTH_SHOTS: "" };
+// the one that takes pictures for the docs, and the one that takes the front
+// page's pictures. Each is asked for in turn.
+const OFF = { HIFTH_PITCH: "", HIFTH_SHOTS: "", HIFTH_LANDING_SHOTS: "" };
 const listings = opt("--list")
   ? [fromFile(opt("--list")), ...(opt("--pitch-list") ? [fromFile(opt("--pitch-list"))] : [])]
-  : [ask(OFF), ask({ ...OFF, HIFTH_PITCH: "1" }), ask({ ...OFF, HIFTH_SHOTS: "1" })];
+  : [
+      ask(OFF),
+      ask({ ...OFF, HIFTH_PITCH: "1" }),
+      ask({ ...OFF, HIFTH_SHOTS: "1" }),
+      ask({ ...OFF, HIFTH_LANDING_SHOTS: "1" }),
+    ];
 
 /** file -> the runs that pick it up */
 const now = new Map();

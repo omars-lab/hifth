@@ -852,6 +852,18 @@ shots: ## Recapture the guide's screenshots from the real app into docs/validati
 	@echo "  documentation, so a wrong one teaches a wrong expectation."
 	@echo ""
 
+.PHONY: landing-shots
+landing-shots: ## Retake the front page's pictures from the plain app into apps/landing/shots/
+	@# The plain build only: the pitch build can show The Study Quran's text,
+	@# and hifth.app is public. The release refuses a picture named for the pitch.
+	$(CORE) build
+	$(WEB) build
+	HIFTH_LANDING_SHOTS=1 $(WEB) exec playwright test --project=landing-shots --retries=0
+	@ls -l apps/landing/shots/
+	@echo ""
+	@echo "  Look at every picture before using it on the front page."
+	@echo ""
+
 .PHONY: source-offer
 source-offer: ## Follow the GPL §6 offer as a stranger would:  make source-offer URL=<deployed>
 	@# NOT part of `make ci` or `pnpm gates`, and the script is named `check-`

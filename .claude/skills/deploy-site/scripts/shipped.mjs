@@ -4,7 +4,8 @@
  * The release reads the exact folder it is about to upload and refuses it if it holds a file
  * the site does not need, or a sign of a development feature. Two lists do the work:
  *
- *   ALLOWED  the files the site needs: the front page at the root, the app under read/.
+ *   ALLOWED  the files the site needs: the front page at the root (with its pictures in shots/
+ *            and the wordmark's font in fonts/), the app under read/.
  *            Anything else is refused, so a new kind of file has to be added here on purpose.
  *   NEVER    files that are refused with a reason, because each could really end up in the
  *            folder on this laptop. A pitch build leaves read/pitch/ behind (found 2026-11-11),
@@ -19,6 +20,8 @@ import { extname, join, relative, sep } from "node:path";
 
 const ALLOWED = [
   /^(index\.html|privacy\.html|404\.html|styles\.css|notify\.js|page-shot\.png|_headers|_redirects)$/,
+  /^shots\/[\w-]+\.(png|jpg|webp)$/,
+  /^fonts\/[\w.-]+\.(woff2|txt)$/,
   /^read\/(index\.html|sw\.js|workbox-[\w-]+\.js|manifest\.webmanifest|favicon\.svg)$/,
   /^read\/icons\/[\w.-]+$/,
   /^read\/assets\/.+$/,
@@ -27,6 +30,7 @@ const ALLOWED = [
 const NEVER = [
   [/(^|\/)\./, "a hidden file; nothing on the site starts with a dot"],
   [/\.map$/, "a debug copy of the source code, which only a developer needs"],
+  [/^shots\/[^/]*pitch/, "a picture from a pitch build, which can show The Study Quran's text and never goes on the public site"],
   [/(^|\/)pitch\//, "part of a pitch build, which holds The Study Quran's text and never goes on the public site"],
   [/^read\/docs\//, "a design page; those stay at blog.bytesofpurpose.com/hifth/docs/"],
   [/^(functions|lib)\//, "the server's own code, which would be readable as a plain file"],

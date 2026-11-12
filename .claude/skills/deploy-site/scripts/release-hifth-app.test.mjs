@@ -35,6 +35,10 @@ function fixture(appExtra = {}) {
     "styles.css": "body{}",
     "notify.js": "fetch('/api/notify')",
     "page-shot.png": "png",
+    "shots/feature-notes.jpg": "jpg",
+    "shots/notes.md": "draft",
+    "fonts/aref-ruqaa-wordmark.woff2": "woff2",
+    "fonts/aref-ruqaa-OFL.txt": "licence",
     "_headers": "/read/sw.js\n  Cache-Control: no-cache\n",
     "_redirects": "/read/*  /read/index.html  200\n",
     "package.json": "{}",
@@ -65,6 +69,8 @@ test("the front page goes at the root and the app under read/, and nothing the s
     "404.html",
     "_headers",
     "_redirects",
+    "fonts/aref-ruqaa-OFL.txt",
+    "fonts/aref-ruqaa-wordmark.woff2",
     "index.html",
     "notify.js",
     "page-shot.png",
@@ -72,6 +78,7 @@ test("the front page goes at the root and the app under read/, and nothing the s
     "read/assets/index-abc.js",
     "read/index.html",
     "read/sw.js",
+    "shots/feature-notes.jpg",
     "styles.css",
   ]);
 });

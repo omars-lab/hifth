@@ -24,6 +24,9 @@ function cleanFolder() {
     { path: "styles.css", text: "body { margin: 0 }" },
     { path: "notify.js", text: "fetch('/api/notify')" },
     { path: "page-shot.png", text: null },
+    { path: "shots/feature-notes.jpg", text: null },
+    { path: "fonts/aref-ruqaa-wordmark.woff2", text: null },
+    { path: "fonts/aref-ruqaa-OFL.txt", text: "SIL Open Font License" },
     { path: "404.html", text: "<h1>No page here</h1><a href=\"/\">Hifth</a>" },
     { path: "_headers", text: "/read/assets/*\n  Cache-Control: immutable\n" },
     { path: "read/index.html", text: '<script type="module" src="./assets/index-abc.js"></script>' },
@@ -44,12 +47,30 @@ const paths = (problems) => problems.map((p) => p.path);
 test("a clean release folder passes, and says what it holds", () => {
   const result = auditShipped(cleanFolder(), { commit: HEAD });
   assert.deepEqual(result.problems, []);
-  assert.equal(result.files, 16);
+  assert.equal(result.files, 19);
 });
 
 test("a file that is not on the list of what the site needs is refused", () => {
   const files = [...cleanFolder(), { path: "notes.txt", text: "hello" }, { path: "read/stray.json", text: "{}" }];
   assert.deepEqual(paths(refusals(files)), ["notes.txt", "read/stray.json"]);
+});
+
+test("the front page's pictures and wordmark font pass, and only in the kinds the page uses", () => {
+  const files = [
+    ...cleanFolder(),
+    { path: "shots/device-phone.png", text: null },
+    { path: "shots/notes.md", text: "draft" },
+    { path: "shots/deep/feature.jpg", text: null },
+    { path: "fonts/wordmark.ttf", text: null },
+  ];
+  assert.deepEqual(paths(refusals(files)), ["shots/notes.md", "shots/deep/feature.jpg", "fonts/wordmark.ttf"]);
+});
+
+test("a front-page picture named for the pitch build is refused, with the reason", () => {
+  const files = [...cleanFolder(), { path: "shots/pitch-commentary.jpg", text: null }];
+  const [problem] = refusals(files);
+  assert.equal(problem.path, "shots/pitch-commentary.jpg");
+  assert.match(problem.why, /pitch/);
 });
 
 test("a pitch build left in the app's folder is refused, with the reason", () => {

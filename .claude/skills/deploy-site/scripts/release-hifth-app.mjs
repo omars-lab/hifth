@@ -34,6 +34,8 @@ const SITE = "https://hifth.app";
 
 /** Front-page files: pages, styles, scripts and pictures at the top of apps/landing. */
 const LANDING_FILE = /^(_headers|_redirects|[\w-]+\.(html|css|js|png|svg|ico|webp))$/;
+/** Front-page folders copied whole, each with the kinds of file it may hold. */
+const LANDING_DIRS = { shots: /^[\w-]+\.(png|jpg|webp)$/, fonts: /^[\w.-]+\.(woff2|txt)$/ };
 /** What every app build writes and the site never needs. */
 const APP_SKIP = (rel) => rel === "docs" || rel === "_headers" || rel === "_redirects" || extname(rel) === ".map";
 
@@ -45,6 +47,14 @@ export function assemble({ landing = LANDING, app = APP_DIST, out = OUT } = {}) 
     const full = join(landing, name);
     if (statSync(full).isFile() && LANDING_FILE.test(name) && !/\.test\./.test(name)) {
       cpSync(full, join(out, name));
+    }
+  }
+  for (const [dir, kind] of Object.entries(LANDING_DIRS)) {
+    if (!existsSync(join(landing, dir))) continue;
+    for (const name of readdirSync(join(landing, dir))) {
+      if (!kind.test(name)) continue;
+      mkdirSync(join(out, dir), { recursive: true });
+      cpSync(join(landing, dir, name), join(out, dir, name));
     }
   }
   cpSync(app, join(out, "read"), {
