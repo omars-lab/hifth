@@ -47,6 +47,16 @@ struct ShellView: View {
                     .frame(width: 1, height: 1)
                     .accessibilityIdentifier("hifth.ready")
             }
+            #if DEBUG
+            // The check card a `check` link opened, top corner, over the page.
+            if let card = model.checkCard {
+                CheckCardView(card: card, onDone: model.finishCheck, onClose: model.closeCheck)
+                    .padding(.top, 56)
+                    .padding(.trailing, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .id(ObjectIdentifier(card))
+            }
+            #endif
         }
         #if os(macOS)
         .navigationTitle(model.title)

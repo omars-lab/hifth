@@ -190,6 +190,45 @@ final class ShellModel {
             } else {
                 answer(request.callbacks.successURL(route: currentHash, publicBase: Self.publicBase))
             }
+        case .check(let check):
+            #if DEBUG
+            // A new card replaces the one on screen; what was answered there is kept.
+            if let old = checkCard, old.touched { save(old) }
+            checkCard = CheckCard(check: check, callbacks: request.callbacks)
+            #else
+            answer(request.callbacks.errorURL(.notInThisBuild))
+            #endif
+        }
+    }
+
+    // MARK: - The check card (builds from the laptop only)
+
+    /// The card a `check` link opened, while it is on screen.
+    private(set) var checkCard: CheckCard?
+    /// Where answers are saved; the tests point it at a scratch folder.
+    @ObservationIgnored var checksFolder: URL = CheckStore.defaultFolder
+
+    /// Done: save the answers, tell the caller the result, close the card.
+    func finishCheck() {
+        guard let card = checkCard else { return }
+        save(card)
+        checkCard = nil
+        answer(card.callbacks.checkDoneURL(id: card.check.id, result: card.result))
+    }
+
+    /// Closed without Done: keep what was answered, tell nobody.
+    func closeCheck() {
+        guard let card = checkCard else { return }
+        if card.touched { save(card) }
+        checkCard = nil
+    }
+
+    private func save(_ card: CheckCard) {
+        do {
+            let file = try CheckStore.save(card.record(route: currentHash, at: Date()), in: checksFolder)
+            print("check answers saved \(file.lastPathComponent)")
+        } catch {
+            print("check answers not saved \(error)")
         }
     }
 

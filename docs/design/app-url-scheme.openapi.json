@@ -303,6 +303,79 @@
           }
         }
       }
+    },
+    "/x-callback-url/check": {
+      "get": {
+        "operationId": "xCheck",
+        "tags": [
+          "x-callback-url"
+        ],
+        "summary": "Show a card of things to check",
+        "description": "Only in a build installed from the laptop; a release build answers `not-in-this-build`. Opens a small card over the page, top corner, listing the steps in order. Each step takes a ✓ or a ✗, there is a note, and Done closes it. Touches outside the card reach the page, so each step can be done with the card open, and it folds to one small button. On Done the answers are saved as one file in the app's `Documents/checks/` (`<id>-<yyyyMMdd>-<HHmmss>.json`: the steps, each answer, the note, the page showing and the time) and `x-success` is opened with `id` and `result`. Closing the card with its cross saves what was answered and opens nothing. A new card replaces the open one, saving it first if anything was answered. `make check-card` builds and sends these links; `make check-answers` copies the files off.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "description": "A name for the check, used in the answers' file name. Lowercased, anything but letters and digits becomes `-`, at most 60 characters. Default `check`.",
+            "schema": {
+              "type": "string",
+              "examples": [
+                "screens-1"
+              ]
+            }
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "description": "The card's heading. Default `What to check`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "step",
+            "in": "query",
+            "required": true,
+            "description": "One thing to do. Repeat it for each step, in order; 1 to 12 steps, none empty.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "see",
+            "in": "query",
+            "required": false,
+            "description": "What you should see, for the `step` just before it. At most one per step, and never before the first step.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/xSuccess"
+          },
+          {
+            "$ref": "#/components/parameters/xError"
+          },
+          {
+            "$ref": "#/components/parameters/xCancel"
+          },
+          {
+            "$ref": "#/components/parameters/xSource"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Nothing comes back on this address. When Done is pressed, `x-success` is opened with `id` (the check's name) and `result` (`pass` when every step got a ✓, otherwise `fail`). A bad card answers on `x-error` at once."
+          }
+        },
+        "callbacks": {
+          "error": {
+            "$ref": "#/components/callbacks/error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -437,9 +510,11 @@
           "missing-route",
           "bad-route",
           "unknown-action",
-          "route-not-shown"
+          "route-not-shown",
+          "bad-check",
+          "not-in-this-build"
         ],
-        "description": "`missing-route`: open named no page, verse, surah or route. `bad-route`: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. `unknown-action`: the path after x-callback-url is not open or current. `route-not-shown`: the place was accepted but the page never showed it."
+        "description": "`missing-route`: open named no page, verse, surah or route. `bad-route`: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. `unknown-action`: the path after x-callback-url is not open, current or check. `route-not-shown`: the place was accepted but the page never showed it. `bad-check`: a check card with no steps, more than 12, an empty step, or a `see` with no step before it. `not-in-this-build`: a check card sent to a release build, which has none."
       }
     },
     "callbacks": {
@@ -640,7 +715,17 @@
     {
       "url": "hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
       "result": "error unknown-action",
-      "note": "Only open and current exist. Anything else answers errorCode=unknown-action."
+      "note": "Only open, current and check exist. Anything else answers errorCode=unknown-action."
+    },
+    {
+      "url": "hifth://x-callback-url/check?id=screens-1&title=Turning%20pages&step=Turn%20to%20the%20next%20page&see=The%20page%20slides%20over&step=Turn%20back&x-success=shortcuts://x-callback-url/run-shortcut?name=Log",
+      "result": "check screens-1 2 steps",
+      "note": "A card of two steps; the first says what you should see. Done answers with id=screens-1 and result=pass or fail."
+    },
+    {
+      "url": "hifth://x-callback-url/check?id=a&see=Something&step=Look&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
+      "result": "error bad-check",
+      "note": "What you should see came before any step, so the card is refused."
     },
     {
       "url": "hifth://x-callback-url/current?x-success=hifth://x-callback-url/current",

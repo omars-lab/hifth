@@ -5898,6 +5898,20 @@
       "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11; slice 0 (the on-iPad check) needs the owner holding the iPad for ten minutes."
     },
     {
+      "id": "check-card-link",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/check-card.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "useCase": "run-a-check-a-machine-cannot",
+      "feature": "validation",
+      "note": "Owner's ask of 2026-11-12, holding the iPad: a link that opens a small card in the app listing what to check, so the steps for a check on the device are not typed into the chat. Each step is answered with a tick or a cross, the answers are saved on the iPad and copied off by the laptop. Debug build only. Design note: docs/design/check-card.md. Its first use is the screenshot check for walk-feedback-capture."
+    },
+    {
       "id": "feature-links-hub",
       "pitch": true,
       "source": {
