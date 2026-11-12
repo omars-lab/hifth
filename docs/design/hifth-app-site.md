@@ -42,3 +42,30 @@ the route serves that one page and nothing else from the repository. Draw or red
 The privacy page tells a reader how to have their email removed without the link in the email.
 It needs an address the owner reads. Until the owner picks one, the page shows a placeholder,
 and the site does not go live with it.
+
+### ④ Has the release tool ever put hifth.app up? · **open**
+
+Not yet. `make hifth-app-check` is proven on a real build: it refused exactly the four real
+problems and nothing else. The last look at the live site is proven against Cloudflare's own
+local server (see `docs/issues/hifth-app-unknown-addresses.md`). The upload itself has never
+run. Before it can:
+
+- the Cloudflare Pages project `hifth-app` has to be made on the new account, with `main` as
+  its live branch and hifth.app attached to it;
+- the keys have to be on this laptop (`lpass login`, then `make env-keys-pull env-bootstrap`);
+- ③ and ⑤ have to be answered, or the check refuses the pages.
+
+Two things still point at the old setup. The `app-setup` skill names
+hifth.bytesofpurpose.com/share for Cloudflare. `make deploy-cloudflare` publishes with wrangler's
+own login, which is the other account. Both get pointed at hifth.app, or retired, once the
+first upload works.
+
+What would answer it: `make hifth-app-publish` from a clean worktree at origin/main, ending in
+its own "live" line, and a look at hifth.app in Firefox and Chrome.
+
+### ⑤ Which spam-check key does the email form carry? · **open**
+
+The front page carries Cloudflare's published test key for its spam check (Turnstile), which
+lets every robot through. The release check refuses it. The real key comes from the new
+Cloudflare account, when the owner makes the Turnstile widget for hifth.app. Its secret half
+goes in as a Pages secret, never in the repository.

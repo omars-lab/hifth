@@ -24,8 +24,8 @@ which behaves like the real host, and asked for each address.
 - **The commit isn't in the app's main script.** The build puts it in a script the main one
   loads later (`rarely-used-*.js`). The folder check looked in every script, so it passed. The
   live look fetched only the main script, so it would have failed every real release.
-- **`/privacy.html` answers 308** and sends the browser on to `/privacy`. So a caching rule
-  for `/privacy.html` never applied.
+- **`/privacy.html` answers 308** and sends the browser on to `/privacy`. So the page a reader
+  gets is the one at `/privacy`, and a caching rule should name that address.
 
 ## What changed
 
@@ -38,7 +38,11 @@ which behaves like the real host, and asked for each address.
   the host does with unknown addresses. A test covers a host that answers 200 with the front
   page, and still catches a pitch build that went up.
 - The live look follows the scripts the main script names, one step down, to find the commit.
-- `_headers` names `/privacy` and `/read/`, the addresses Cloudflare really serves.
+- `_headers` names `/privacy` and `/read/`, the addresses Cloudflare really serves. Each
+  rule was then seen in the server's answers: no-cache on the pages, the service worker and the
+  manifest, and a year's cache on the app's named build files.
+- The look no longer excuses a development address that answers with the app's own page. That
+  excuse only existed for the deleted rule, and now it could only hide a leak.
 
 Afterwards, against the same local server, the look reported only what the owner still owes:
 the spam check's real key and the privacy page's contact address. A made-up pitch page placed in

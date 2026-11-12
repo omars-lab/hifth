@@ -2,8 +2,8 @@
  * After a release, look at the live site the way a reader's browser does.
  *
  * The front page, the privacy page and the app must answer, and the app must carry the
- * commit just released. Every development address must answer with nothing, or with the
- * app's own page, never with what it serves on this laptop. The tests hand verifyLive a
+ * commit just released. Every development address must answer with an error, or the same way as an
+ * address that cannot exist, never with what it serves on this laptop. The tests hand verifyLive a
  * made-up network: a map from address to answer. Written before live.mjs and seen failing.
  *
  * Run with: pnpm test:scripts
@@ -103,4 +103,11 @@ test("on that host, a pitch build that went up is still reported", async () => {
   const frontPage = (s) => [200, s["/"][1]];
   const problems = await verifyLive(BASE, { commit: HEAD, fetch: network(site, frontPage).fetch });
   assert.deepEqual(problems.map((p) => p.path), ["/read/pitch/"]);
+});
+
+test("a development address that answers with the app's own page is reported", async () => {
+  const site = goodSite();
+  site["/read/docs/"] = site["/read/"];
+  const problems = await verifyLive(BASE, { commit: HEAD, fetch: network(site).fetch });
+  assert.deepEqual(problems.map((p) => p.path), ["/read/docs/"]);
 });

@@ -6121,6 +6121,30 @@
       "owner": "user",
       "feature": "hifth-app-site",
       "note": "The privacy page needs an address the owner reads, so a reader can ask to be taken off the list without the link in the email. It shows a placeholder until then, and the site does not go live with the placeholder."
+    },
+    {
+      "id": "hifth-app-first-release",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. It needs the Pages project made on the new account with hifth.app attached, the keys on this laptop, and the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload."
+    },
+    {
+      "id": "hifth-app-turnstile-key",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "note": "The front page carries Cloudflare's test key for the spam check, which lets every robot through, and the release check refuses it. The owner makes the Turnstile widget for hifth.app on the new account; the site key goes in the page and the secret goes in as a Pages secret."
     }
   ]
 }

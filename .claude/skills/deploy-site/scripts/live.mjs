@@ -90,7 +90,7 @@ export async function verifyLive(base, { commit, fetch = globalThis.fetch }) {
   // development address that answers the same way is serving nothing, whatever the host does
   // with unknown addresses (Cloudflare Pages without a 404 page answers 200 with the front
   // page; measured with wrangler pages dev, 2026-11-11).
-  const nothing = new Set([bodies["/read/"]]);
+  const nothing = new Set();
   for (const path of ["/no-such-page-hifth-release-check", "/read/no-such-page-hifth-release-check"]) {
     const res = await get(path);
     if (res) nothing.add(res.body);

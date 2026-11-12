@@ -14,7 +14,9 @@ make hifth-app-verify     look at the live site again, any time
 ```
 
 Run them with Node 22 on the path (`export PATH="$HOME/.nvm/versions/node/v22.22.3/bin:$PATH"`).
-Release from a clean main checkout, after the merge. The check refuses anything else.
+Release after the merge, from a worktree switched to origin/main with nothing uncommitted. The
+main checkout usually holds other sessions' work, so the check would refuse it. The check refuses
+anything but a clean tree whose commit is on origin/main.
 
 ```mermaid
 flowchart LR
