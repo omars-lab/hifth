@@ -35,6 +35,7 @@ import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-l
 import { MARK_TOOLS, type MarkTools } from "../mark-tools";
 import { ERASER_PLACES, type EraserPlace } from "../eraser-place";
 import { MISTAKE_TAPS, type MistakeTap } from "../mistake-tap";
+import { MISTAKE_ASKS, type MistakeAsk } from "../mistake-ask";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { TIP_PENS, type TipPens } from "../pen-ring";
 import { PEN_SIDES, type PenSide } from "../pen-side";
@@ -99,6 +100,9 @@ interface ColophonProps {
   /** What a tap with the Mistake pen does; remembered on this device. */
   mistakeTap?: MistakeTap | undefined;
   onMistakeTap?: ((choice: MistakeTap) => void) | undefined;
+  /** How the Mistake pen's question is laid out; remembered on this device. */
+  mistakeAsk?: MistakeAsk | undefined;
+  onMistakeAsk?: ((choice: MistakeAsk) => void) | undefined;
   /** Where the page tools sit on a computer or an iPad held sideways; remembered on this device. */
   penHome?: PenHome | undefined;
   onPenHome?: ((home: PenHome) => void) | undefined;
@@ -277,6 +281,12 @@ const MISTAKE_TAP_NAME: Record<MistakeTap, (t: ReturnType<typeof useT>["t"]) => 
   quiet: (t) => t.mistakeTapQuiet,
 };
 
+const MISTAKE_ASK_NAME: Record<MistakeAsk, (t: ReturnType<typeof useT>["t"]) => string> = {
+  steps: (t) => t.mistakeAskSteps,
+  tabs: (t) => t.mistakeAskTabs,
+  list: (t) => t.mistakeAskList,
+};
+
 const PEN_HOME_NAME: Record<PenHome, (t: ReturnType<typeof useT>["t"]) => string> = {
   strip: (t) => t.penHomeStrip,
   float: (t) => t.penHomeFloat,
@@ -328,6 +338,8 @@ export function Colophon({
   onEraserPlace,
   mistakeTap,
   onMistakeTap,
+  mistakeAsk,
+  onMistakeAsk,
   penHome,
   onPenHome,
   tipPens,
@@ -1344,6 +1356,32 @@ export function Colophon({
               ))}
             </div>
             <p className={styles.note}>{t.mistakeTapNote}</p>
+          </section>
+        )}
+        {/* How the Mistake pen's question is laid out, now that it asks the kind
+            (a letter, a tajweed rule, as well as the harakat): three ways, kept
+            while the owner tries them (2026-11-12). */}
+        {mistakeAsk && onMistakeAsk && (
+          <section className={styles.block} aria-labelledby="colophon-mistake-ask">
+            <h3 className={styles.subhead} id="colophon-mistake-ask">
+              {t.mistakeAskTitle}
+            </h3>
+            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-mistake-ask">
+              {MISTAKE_ASKS.map((choice) => (
+                <button
+                  key={choice}
+                  type="button"
+                  role="radio"
+                  className={styles.lang}
+                  aria-checked={mistakeAsk === choice}
+                  data-mistake-ask-choice={choice}
+                  onClick={() => onMistakeAsk(choice)}
+                >
+                  {MISTAKE_ASK_NAME[choice](t)}
+                </button>
+              ))}
+            </div>
+            <p className={styles.note}>{t.mistakeAskNote}</p>
           </section>
         )}
         {/* Where the page tools sit (docs/design/notes-style-toolbar.md, ①): all

@@ -45,7 +45,15 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
     d.mistakes.length > 0 ? t.mapCellSlips(t.dayLong(d.day), d.mistakes.length) : t.dayOpened(d.day);
 
   const kindOf = (m: RevisionEvent): string =>
-    m.what === "sign" ? t.toolSign : m.what === "verse" ? t.dayKindVerse : t.mistakeWholeWord;
+    m.what === "sign"
+      ? t.toolSign
+      : m.what === "letter"
+        ? t.mistakeKindLetter
+        : m.what === "rule"
+          ? t.mistakeKindRule
+          : m.what === "verse"
+            ? t.dayKindVerse
+            : t.mistakeWholeWord;
 
   const body = (d: DayCount): JSX.Element => (
     <>

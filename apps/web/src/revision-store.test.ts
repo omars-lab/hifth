@@ -257,6 +257,15 @@ describe("takeRecord: a record carried from the old address", () => {
     expect(since).toBe("2026-03-01");
   });
 
+  it("takes a letter or a tajweed rule as the kind of a carried mistake", async () => {
+    const added = await takeRecord(
+      { events: [look("2026-03-09T12:00:00Z", { slip: true, what: "letter" }), look("2026-03-09T12:01:00Z", { slip: true, what: "rule" })] },
+      NOW,
+    );
+    expect(added).toBe(2);
+    expect((await read()).events.map((e) => e.what)).toEqual(["letter", "rule"]);
+  });
+
   it("taken twice, adds nothing the second time", async () => {
     const record = { events: [look("2026-03-09T12:00:00Z"), look("2026-03-09T13:00:00Z")], since: "2026-03-01" };
     expect(await takeRecord(record, NOW)).toBe(2);

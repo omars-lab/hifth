@@ -822,6 +822,27 @@ export interface Strings {
   mistakeClear: string;
   mistakeCleared: string;
   mistakeRestored: string;
+  /** The kinds the question offers, besides the whole word and another verse. */
+  mistakeKindSign: string;
+  mistakeKindLetter: string;
+  mistakeKindRule: string;
+  /** Over each kind's choices. */
+  mistakeSignWhich: string;
+  mistakeLetterWhich: string;
+  mistakeRuleWhich: string;
+  /** A letter kind whose letter is not said, for a word the print was not cut into letters. */
+  mistakeAnyLetter: string;
+  mistakeBack: string;
+  /** Said when a letter is picked, by its place from the right (1 = first). */
+  mistakeLetterPicked(n: number): string;
+  mistakeAnyLetterPicked: string;
+  /** Said when a tajweed rule is picked, by the rule's name. */
+  mistakeRulePicked(name: string): string;
+  mistakeAskTitle: string;
+  mistakeAskSteps: string;
+  mistakeAskTabs: string;
+  mistakeAskList: string;
+  mistakeAskNote: string;
   toolSign: string;
   toolSignHint: string;
   toolRead: string;
@@ -1508,6 +1529,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mistakeMarked: (label) => m.mistakeMarked({ label }),
     mistakePicker: (label) => m.mistakePicker({ label }),
     mistakeSignPicked: (name) => m.mistakeSignPicked({ name }),
+    mistakeLetterPicked: (count) => m.mistakeLetterPicked({ nText: n(count) }),
+    mistakeRulePicked: (name) => m.mistakeRulePicked({ name }),
     verseTools: (label) => m.verseTools({ label }),
     vdBookmarkAria: (label) => m.vdBookmarkAria({ label }),
     drawerBack: (label) => m.drawerBack({ label }),

@@ -42,7 +42,7 @@
  */
 
 import type { DayStamp, MistakeWhat, RevisionEvent } from "@hifth/core";
-import { dayOf, daysBetween, parseAyahKey } from "@hifth/core";
+import { MISTAKE_WHATS, dayOf, daysBetween, parseAyahKey } from "@hifth/core";
 
 const DB_NAME = "hifth.revision.v1";
 const DB_VERSION = 1;
@@ -300,7 +300,7 @@ function carriedLook(x: unknown): RevisionEvent | null {
   if (!isVerse(key) || (endKey !== undefined && !isVerse(endKey))) return null;
   if (!Number.isInteger(page) || (page as number) < 1 || !Number.isFinite(at)) return null;
   if (!Number.isInteger(tz) || Math.abs(tz as number) > 14 * 60) return null;
-  if ((slip !== undefined && slip !== true) || (what !== undefined && (!slip || (what !== "sign" && what !== "verse"))))
+  if ((slip !== undefined && slip !== true) || (what !== undefined && (!slip || !MISTAKE_WHATS.includes(what as MistakeWhat))))
     return null;
   return {
     key,

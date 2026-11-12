@@ -158,7 +158,8 @@
       "iphone"
     ],
     "mistakes.spec.ts": [
-      "desktop"
+      "desktop",
+      "desktop-firefox"
     ],
     "notes.spec.ts": [
       "desktop"

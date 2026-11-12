@@ -13,7 +13,9 @@ import {
   editNote,
   markMistake,
   mistakeOn,
-  pickMistakeSign,
+  answerMistake as setMistakeAnswer,
+  mistakeKindOf,
+  type MistakeAnswer,
   removeNote,
   restoreNote,
   addVerse,
@@ -277,6 +279,7 @@ import { usePageDestination } from "./page-destination";
 import { isMarkAim, rememberMarkTools, savedMarkTools, toolsFor, type MarkAim, type MarkTools } from "./mark-tools";
 import { rememberEraserPlace, savedEraserPlace, type EraserPlace } from "./eraser-place";
 import { rememberMistakeTap, savedMistakeTap, type MistakeTap } from "./mistake-tap";
+import { rememberMistakeAsk, savedMistakeAsk, type MistakeAsk } from "./mistake-ask";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberPenSide, savedPenSide, type PenSide } from "./pen-side";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
@@ -1874,6 +1877,12 @@ export function App(): JSX.Element {
     rememberMistakeTap(choice);
     setMistakeTap(choice);
   }, []);
+  // How the question asks the kind of mistake: the kinds first, as tabs, or all at once (mistake-ask).
+  const [mistakeAsk, setMistakeAsk] = useState<MistakeAsk>(() => savedMistakeAsk());
+  const chooseMistakeAsk = useCallback((choice: MistakeAsk) => {
+    rememberMistakeAsk(choice);
+    setMistakeAsk(choice);
+  }, []);
   const [lastAim, setLastAim] = useState<MarkAim>("note");
   // The last tool other than plain selecting, for the pencil's double-tap swap.
   const lastToolRef = useRef<PageTool | null>(null);
@@ -2677,8 +2686,21 @@ export function App(): JSX.Element {
     },
     [notes, commitNotes, t, mistakeTap],
   );
+  /** What is said once an answer is picked: which sign, which letter, which rule. */
+  const saidForMistake = (a: MistakeAnswer, name: string | null) =>
+    a.what === "sign"
+      ? name
+        ? t.mistakeSignPicked(name)
+        : t.mistakeWordPicked
+      : a.what === "letter"
+        ? a.letter !== undefined
+          ? t.mistakeLetterPicked(a.letter + 1)
+          : t.mistakeAnyLetterPicked
+        : a.what === "rule"
+          ? t.mistakeRulePicked(name ?? a.rule)
+          : t.mistakeWordPicked;
   // The question answered for a word not marked yet: one change, one Undo.
-  const answerMistake = (mark: number | null, name: string | null) => {
+  const answerFreshMistake = (answer: MistakeAnswer, name: string | null) => {
     const a = askingMistake;
     setAskingMistake(null);
     if (!a) return;
@@ -2686,9 +2708,12 @@ export function App(): JSX.Element {
     const now = Date.now();
     let next = markMistake(notes, where, now);
     const made = mistakeOn(next, a.page, a.key, a.word);
-    if (made && mark !== null) next = pickMistakeSign(next, made.id, mark, now);
-    commitNotes(next, name ? t.mistakeSignPicked(name) : t.mistakeMarked(t.ayahLabel(a.key) ?? a.key));
-    void recordLook({ key: a.key, page: a.page, slip: true, ...(mark !== null ? { what: "sign" as const } : {}) });
+    if (made) next = setMistakeAnswer(next, made.id, answer, now);
+    commitNotes(
+      next,
+      answer.what === "word" ? t.mistakeMarked(t.ayahLabel(a.key) ?? a.key) : saidForMistake(answer, name),
+    );
+    void recordLook({ key: a.key, page: a.page, slip: true, ...(answer.what !== "word" ? { what: answer.what } : {}) });
   };
   // "Went into another verse…": no red on the word, which was read right;
   // the mistake is the turn, said the way a jump is, look-alikes first.
@@ -2710,14 +2735,20 @@ export function App(): JSX.Element {
     commitNotes(removeNote(notes, n.id), t.mistakeCleared);
     mistakeIntoAnother(n.key, n.page, n.word, false);
   };
-  const pickSign = (mark: number | null, name: string | null) => {
+  // The question answered again for a word already marked: what went wrong is changed.
+  const answerMarkedMistake = (answer: MistakeAnswer, name: string | null) => {
     const n = picking;
     setPickingId(null);
     if (!n) return;
-    commitNotes(
-      pickMistakeSign(notes, n.id, mark, Date.now()),
-      name ? t.mistakeSignPicked(name) : t.mistakeWordPicked,
-    );
+    commitNotes(setMistakeAnswer(notes, n.id, answer, Date.now()), saidForMistake(answer, name));
+  };
+  /** What a mark already says, in the question's own terms, so it opens at that kind. */
+  const answeredOf = (n: Note): MistakeAnswer => {
+    const kind = mistakeKindOf(n);
+    if (kind === "sign" && n.mark !== null && n.mark !== undefined) return { what: "sign", mark: n.mark };
+    if (kind === "letter") return { what: "letter", letter: n.letter };
+    if (kind === "rule" && n.rule) return { what: "rule", rule: n.rule };
+    return { what: "word" };
   };
   const clearMistake = () => {
     const n = picking;
@@ -4760,6 +4791,8 @@ export function App(): JSX.Element {
             onEraserPlace={desktop ? chooseEraserPlace : undefined}
             mistakeTap={mistakeTap}
             onMistakeTap={chooseMistakeTap}
+            mistakeAsk={mistakeAsk}
+            onMistakeAsk={chooseMistakeAsk}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
             // Only the iPad app has a pencil to squeeze.
@@ -5258,8 +5291,10 @@ export function App(): JSX.Element {
               return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
             }}
             mode="mistake"
-            chosen={picking.mark ?? null}
-            onPick={(mark, name) => pickSign(mark, name)}
+            answered={answeredOf(picking)}
+            ask={mistakeAsk}
+            onAnswer={(answer, name) => answerMarkedMistake(answer, name)}
+            onPick={(mark, name) => answerMarkedMistake(mark === null ? { what: "word" } : { what: "sign", mark }, name)}
             onClear={clearMistake}
             onAnother={turnMistakeIntoAnother}
             onClose={() => setPickingId(null)}
@@ -5277,7 +5312,9 @@ export function App(): JSX.Element {
             label={t.ayahLabel(askingMistake.key) ?? askingMistake.key}
             anchor={() => askingMistake.rect}
             mode="mistake"
-            onPick={(mark, name) => answerMistake(mark, name)}
+            ask={mistakeAsk}
+            onAnswer={(answer, name) => answerFreshMistake(answer, name)}
+            onPick={(mark, name) => answerFreshMistake(mark === null ? { what: "word" } : { what: "sign", mark }, name)}
             onAnother={answerAnother}
             onClose={() => setAskingMistake(null)}
           />
