@@ -32,6 +32,14 @@ hubs:
     description: The design notes, option comparisons and review sheets behind Hifth.
     visibility: public
     use: published
+    fallback: local
+    local: { runner: hifth-preview, path: /docs/ }   # the build stages docs/; the dev server on 7122 does not
     published:
       url: https://blog.bytesofpurpose.com/hifth/docs/
       host: github-pages
+  - id: hifth-dev-hub
+    name: Hifth features by link
+    description: One card per place, tool and panel a link can open, with a picture, a link for this browser and the command that sends it to the iPad.
+    visibility: private
+    use: local
+    local: { runner: hifth, path: /dev-hub/ }   # written by `make feature-links`; served by the dev server only

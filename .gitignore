@@ -94,6 +94,10 @@ native/Hifth.xcodeproj/
 native/build/
 native/shots/*
 !native/shots/baseline/
+
+# The features page on the development hub (`make feature-links`): written fresh
+# each time, pictures from the public build only; served at /dev-hub/ in dev.
+.dev-hub/
 # cloudflare-onboarding: plaintext .env and the key stay out; encrypted copies go in
 !.env.encrypted
 !.env.*.encrypted

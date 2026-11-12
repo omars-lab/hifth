@@ -106,7 +106,7 @@ SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(pats
 
 .PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
         app-run-ipad app-shot app-probe app-open app-test app-walk app-test-mac-ui app-unit-test app-logs app-clean \
-        app-golden app-golden-update app-device-install app-release-ipad app-crash-logs app-devices app-device-register app-archive app-testflight
+        app-golden app-golden-update app-device-install app-device-open app-release-ipad app-crash-logs app-devices app-device-register app-archive app-testflight
 
 app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
 	python3 $(NATIVE)/scripts/make-appicon.py
@@ -350,6 +350,14 @@ app-device-install: app-generate ## Build for a plugged-in iPad, install and lau
 	xcrun devicectl device install app --device "$(DEVICE)" $(DERIVED)/Build/Products/Debug-iphoneos/Hifth.app
 	$(if $(filter watch,$(LAUNCH)),node native/scripts/release-watch.mjs --device "$(DEVICE)" --route "$(ROUTE)" \
 	  --log $(RELEASE_LOG) --out $(CRASH_DIR) --watch $(WATCH),DEVICECTL_CHILD_HIFTH_ROUTE=$(ROUTE) xcrun devicectl device process launch --device "$(DEVICE)" $(BUNDLE_ID))
+
+# Hands one link to the app on a plugged-in iPad, the cards' command on the features page
+# (make feature-links). Whether it turns the page of an app already open, or restarts it,
+# is the first open question in docs/design/feature-links.md.
+app-device-open: ## Send one link to the app on a plugged-in iPad (DEVICE=… LINK='hifth://x-callback-url/open?page=7')
+	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@case '$(LINK)' in hifth://*) ;; *) echo "  LINK= must be a hifth:// link, e.g. LINK='hifth://x-callback-url/open?page=7'"; exit 1;; esac
+	xcrun devicectl device process launch --device "$(DEVICE)" --payload-url '$(LINK)' $(BUNDLE_ID)
 
 # ---- release to the plugged-in iPad, with the checks that would have caught the
 # touch crash (docs/issues/ipad-crash-on-verse-touch.md): the unit tests, the
