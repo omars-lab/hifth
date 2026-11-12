@@ -44,9 +44,19 @@ a { color: var(--teal); }
   padding: 48px 0 32px;
 }
 
+/* The wordmark's face (owner, 2026-11-12). Aref Ruqaa is under the SIL Open Font Licence
+   (fonts/aref-ruqaa-OFL.txt, and the notice is inside the file too). The file is cut down to
+   the three letters of the wordmark, about 5 KB, so the site keeps it instead of a font host. */
+@font-face {
+  font-family: "Aref Ruqaa";
+  src: url("fonts/aref-ruqaa-wordmark.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}
+
 .wordmark {
   margin: 0;
-  font: 700 56px/1 "Geeza Pro", "Noto Naskh Arabic", serif;
+  font: 700 64px/1.15 "Aref Ruqaa", "Geeza Pro", "Noto Naskh Arabic", serif;
   color: var(--teal);
   text-align: left;
 }

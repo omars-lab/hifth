@@ -83,3 +83,21 @@ test("the sign-up button does not outweigh the email box", () => {
   const css = readFileSync(join(LANDING, "styles.css"), "utf8");
   assert.deepEqual(buttonOutweighsEmail(css), []);
 });
+
+// The wordmark is set in Aref Ruqaa (owner, 2026-11-12, a comment on the front page). The font is
+// kept on the site, cut down to the wordmark's letters, so the page asks no outside host for it.
+// A cut file holds only those letters, so any other Arabic set in it would fall back unseen.
+test("the wordmark's font is kept on the site and holds the wordmark's letters", () => {
+  const css = readFileSync(join(LANDING, "styles.css"), "utf8");
+  const face = css.match(/@font-face\s*{[^}]*}/)?.[0] ?? "";
+  assert.match(face, /font-family:\s*"Aref Ruqaa"/);
+  const url = face.match(/url\("?([^")]+)"?\)/)?.[1];
+  assert.ok(url && !/^https?:/.test(url), "the font is served from the site itself");
+  const font = readFileSync(join(LANDING, url));
+  assert.equal(font.subarray(0, 4).toString("latin1"), "wOF2");
+  assert.ok(font.length < 20_000, `the cut font is small (${font.length} bytes)`);
+  assert.match(css, /\.wordmark\s*{[^}]*"Aref Ruqaa"/);
+  const html = readFileSync(join(LANDING, "index.html"), "utf8");
+  const words = [...html.matchAll(/class="wordmark"[^>]*>([^<]+)</g)].map((m) => m[1].trim());
+  assert.deepEqual(words, ["حفظ"], "only the wordmark is set in the cut font");
+});
