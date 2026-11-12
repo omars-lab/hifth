@@ -21,6 +21,16 @@ test("the first stop of a session is sent back to ask what matters most next", (
   assert.match(r, /docs\/backlog\.md/);
 });
 
+// Omar, 2026-11-11: "why do we keep on going back to the walk? our session focus is the hifth
+// app landing page". The question steered a session the owner had pointed at other work back to
+// the pitch, and wrote that the session's own work should wait.
+test("the question stays inside the work the owner set for the session", () => {
+  const r = verdict({ stopHookActive: false, now: NOW, lastNudgeAt: null });
+  assert.match(r, /focus/i);
+  assert.match(r, /within that work/i);
+  assert.match(r, /do not steer/i);
+});
+
 test("a stop soon after the last nudge is let through", () => {
   assert.equal(verdict({ stopHookActive: false, now: NOW, lastNudgeAt: NOW - 60_000 }), null);
 });

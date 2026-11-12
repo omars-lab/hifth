@@ -8,6 +8,10 @@
  * drift into what is easiest to close; one question to a stronger reviewer, asked about the
  * users rather than the code, keeps the next pick honest.
  *
+ * It asks within the session's own focus. On 2026-11-11 it kept turning a session the owner had
+ * set on the hifth.app front page back to the pitch walk (Omar: "why do we keep on going back to
+ * the walk? our session focus is the hifth app landing page").
+ *
  * There is no hook that can still talk to the session once it has ended, so this runs on Stop,
  * which fires at the end of every turn. To keep it to "the end of a session" in practice it asks
  * at most once per WINDOW_MS for a session: the first stop, then again only if the same session
@@ -33,7 +37,9 @@ const REASON =
   "if you do not, answer it yourself from docs/backlog.md and what this session found. " +
   "Put the answer in docs/backlog.md (a new item, or move an existing one up), and tell the " +
   "owner in one plain sentence. If it is now the top item, start on it; do not open a large new " +
-  "piece of work only because this reminder asked.";
+  "piece of work only because this reminder asked. If the owner set a focus for this session, " +
+  "answer within that work: the next most important thing for it and the people it serves. " +
+  "Do not steer the session back to another goal, and do not write that its work should wait.";
 
 /** The reminder to send, or null to let the stop through. */
 export function verdict({ stopHookActive, now, lastNudgeAt }) {

@@ -6095,7 +6095,7 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "hifth.app has no front page yet, and the web app still lives only at the blog address. The front page and privacy page are drawn; the email form's server part, the app under /read, a tested way to publish and the 'Hifth has moved' sheet are still to build. Plan: .claude/plans/hifth-app-site.md. Off the pitch path (2026-11-11): it sits behind walk-feedback-capture, the owner's walk of the pitch on the real iPad, which is the next thing for the Study Quran demo; the release tool is built and waits on the owner's keys, so nothing here needs to jump ahead of the walk."
+      "note": "hifth.app has no front page yet, and the web app still lives only at the blog address. The front page and privacy page are drawn; the email form's server part, the app under /read, a tested way to publish and the 'Hifth has moved' sheet are still to build. Plan: .claude/plans/hifth-app-site.md. 2026-11-11: the release tool is built and tested; the first upload waits on the owner's keys (hifth-app-first-release)."
     },
     {
       "id": "intent-picture-on-local-hub",
