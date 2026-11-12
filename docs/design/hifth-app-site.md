@@ -71,9 +71,9 @@ lets every robot through. The release check refuses it. The real key comes from 
 Cloudflare account, when the owner makes the Turnstile widget for hifth.app. Its secret half
 goes in as a Pages secret, never in the repository.
 
-### ⑥ Does the email form keep an address? · **built, not live**
+### ⑥ Does the email form keep an address? · **open**
 
-Yes, on this laptop (2026-11-12). It was tried on Cloudflare's own local server, with the real
+Built, not live yet. It works on this laptop (2026-11-12). It was tried on Cloudflare's own local server, with the real
 spam check in its test setting. From the page at phone width, an address went in and the page
 said "You're on the list". The same address again said "already on the list", and a bad one was
 turned away. The leave link took the address off, and the list was back to zero.
@@ -98,7 +98,11 @@ What is left before it is live:
 
 - make the database on the new account, put its id in the settings, and make its table;
 - put the spam check's secret in as a Pages secret (⑤);
-- a way to count the list without showing any address.
+- sign up on the live site with a made-up address, see `make hifth-app-list-count` go up by one,
+  leave with the link, and see it go back down.
+
+The count is built: `make hifth-app-list-count` asks Cloudflare for the number alone and refuses
+an answer that holds anything else, so it can never put an address on the screen.
 
 Until the database is made, the release check refuses to publish.
 

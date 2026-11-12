@@ -1935,6 +1935,7 @@ export function App(): JSX.Element {
   const {
     notes,
     scoped,
+    loaded: notesLoaded,
     commit: commitNotes,
     commitScoped,
     loadFile: loadNotesFile,
@@ -1991,6 +1992,7 @@ export function App(): JSX.Element {
   const {
     confusions,
     device,
+    loaded: jumpsLoaded,
     commit: commitConfusions,
     loadFile: loadConfusionsFile,
     restore: restoreConfusions,
@@ -2359,7 +2361,10 @@ export function App(): JSX.Element {
     [announce, bookmarks, commitBookmarks, loadNotesFile, loadConfusionsFile, t],
   );
   // Opened by the old address to carry the reader's marks here (moved.ts).
-  useCarryIn(bookmarksLoaded, (text) => loadBookmarkFile(text, "carry"));
+  // Ready only once all three kinds of mark are read in: the notes and the jumps
+  // refuse to save before their own read lands, and a carried file loaded then
+  // would stay in memory and never reach disk.
+  useCarryIn(bookmarksLoaded && notesLoaded && jumpsLoaded, (text) => loadBookmarkFile(text, "carry"));
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
   // question first; the bookmarks it lifted wait here for a few seconds so one
@@ -4837,6 +4842,9 @@ export function App(): JSX.Element {
           onStop={stopFollowing}
         />
       )}
+      {/* "Hifth has moved": a row of its own above the trail, like the note
+          bar, so it covers neither the page bar nor the trail. */}
+      <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} />
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
         {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
@@ -5269,7 +5277,6 @@ export function App(): JSX.Element {
       {appPages === "row" && (
         <PageRow page={appPage} onPage={setAppPage} developer={DeveloperPage ? "Developer" : undefined} />
       )}
-      <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} />
       <LiveAnnouncer message={message} />
     </div>
     </FullScreenContext.Provider>

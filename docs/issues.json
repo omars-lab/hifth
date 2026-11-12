@@ -6156,7 +6156,19 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "The 'Hifth has moved' card and the way to carry marks across are built and tested in Chrome, Firefox and iPhone Safari, but switched off, so readers at the old address are not told yet. Next, once hifth.app/read is live and checked: turn the switch on (MOVED_SHEET_ON in apps/web/src/moved.ts) in a change of its own that merges alone, then make three marks at the old address in Firefox and Chrome, carry them, and see three at hifth.app/read."
+      "note": "The 'Hifth has moved' card and the way to carry marks across are built and tested in Chrome, Firefox and iPhone Safari, but switched off, so readers at the old address are not told yet. Looked at 2026-11-12 at phone and iPad width: the card had covered the page bar and the trail, and is now a row of its own above them, with a test. Next, once hifth.app/read is live and checked: turn the switch on (MOVED_SHEET_ON in apps/web/src/moved.ts) in a change of its own that merges alone, then make three marks at the old address in Firefox and Chrome, carry them, and see three at hifth.app/read."
+    },
+    {
+      "id": "notify-list-not-live",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "note": "The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key and secret are not in. Next: make the database on the new account and put its id in apps/landing/wrangler.toml, push the spam-check secret, then sign up once with a throwaway address on the live page and see make hifth-app-list-count say 1."
     },
     {
       "id": "carry-leaves-settings-behind",

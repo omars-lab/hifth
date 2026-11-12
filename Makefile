@@ -810,7 +810,7 @@ deploy-cloudflare: ## Publish to Cloudflare Pages from this machine (GitHub Page
 # that holds the domain. The script and its tests live in the deploy-site skill.
 RELEASE := node .claude/skills/deploy-site/scripts/release-hifth-app.mjs
 
-.PHONY: hifth-app-check hifth-app-publish hifth-app-verify
+.PHONY: hifth-app-check hifth-app-publish hifth-app-verify hifth-app-list-count
 hifth-app-check: ## Build hifth.app's release folder and refuse it if anything but the bare minimum is in it
 	@$(RELEASE) check $(ARGS)
 
@@ -819,6 +819,9 @@ hifth-app-publish: ## Check, upload to hifth.app with the saved keys, then look 
 
 hifth-app-verify: ## Look at live hifth.app: pages answer, the app is this commit, no development address serves anything
 	@$(RELEASE) verify $(ARGS)
+
+hifth-app-list-count: ## How many people are on hifth.app's Mac-app list; never shows an address
+	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/list-count.mjs
 
 .PHONY: shots
 shots: ## Recapture the guide's screenshots from the real app into docs/validation/shots/

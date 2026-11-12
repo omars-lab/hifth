@@ -20,7 +20,7 @@ function storedAddresses(): string | null {
  * The new address's half of carrying marks across (moved.ts says the whole of it).
  *
  * When this page was opened by the old address for the carry, it waits until the
- * bookmarks saved in this browser have loaded, tells the old page it is ready,
+ * bookmarks, notes and jumps saved in this browser have loaded, tells the old page it is ready,
  * takes the file it sends, loads it the way "Load from a file" does, and says how
  * many items came across. It listens only to the window that opened it, and only
  * at the old address; anything else is ignored.

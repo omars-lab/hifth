@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/preact";
 import type { Bookmark } from "@hifth/core";
 import { readBookmarks, writeBookmarks } from "./bookmark-store";
-import { useBookmarks } from "./useBookmarks";
+import { useBookmarks, useConfusions, useNotes } from "./useBookmarks";
 
 /*
  * The bookmarks a browser already holds must survive a bookmark made in the moment
@@ -42,5 +42,24 @@ describe("useBookmarks", () => {
     await waitFor(() => expect(said).toEqual(["added"]));
     expect((await readBookmarks()).map((b) => b.id).sort()).toEqual(["a", "b"]);
     expect(result.current.bookmarks.map((b) => b.id).sort()).toEqual(["a", "b"]);
+  });
+});
+
+/*
+ * The notes and the jumps refuse to save until their own read has landed, so a
+ * carried file loaded before then would sit in memory and never reach disk. The
+ * new page waits for all three reads before it says it is ready (useCarryIn).
+ */
+describe("the notes and jumps say when they have been read in", () => {
+  it("notes", async () => {
+    const { result } = renderHook(() => useNotes(() => {}, "not saved"));
+    expect(result.current.loaded).toBe(false);
+    await waitFor(() => expect(result.current.loaded).toBe(true));
+  });
+
+  it("jumps", async () => {
+    const { result } = renderHook(() => useConfusions(() => {}, "not saved"));
+    expect(result.current.loaded).toBe(false);
+    await waitFor(() => expect(result.current.loaded).toBe(true));
   });
 });

@@ -116,6 +116,7 @@ Cloudflare also serves `privacy.html` at `/privacy`, so `_headers` names that ad
 | `scripts/release-hifth-app.mjs check` | Builds (make site), puts the release folder together in `apps/landing/dist/`, and refuses it if it holds anything extra or the commit is not releasable | Before every release; to see what would go up | `make hifth-app-check` (`ARGS=--no-build` checks the last build) |
 | `scripts/release-hifth-app.mjs publish` | The check, then `wrangler pages deploy` with the saved keys, then verify | To release hifth.app | `make hifth-app-publish` |
 | `scripts/release-hifth-app.mjs verify` | Looks at the live site as a reader's browser does | After a release; when someone asks if hifth.app is live | `make hifth-app-verify` (`ARGS="--url https://x.pages.dev"` for a preview) |
+| `scripts/list-count.mjs` | Asks Cloudflare how many people are on the Mac-app list, and prints that number only; an answer holding anything else is refused | When someone asks how many signed up; after a sign-up test on the live site | `make hifth-app-list-count` |
 | `scripts/shipped.mjs` | The lists of what may and may not go up, and the folder check | Changing what the site may hold | imported; tests: `node --test .claude/skills/deploy-site/scripts/shipped.test.mjs` |
 | `scripts/live.mjs` | The look at the live site | Changing what verify asks for | imported; tests: `node --test .claude/skills/deploy-site/scripts/live.test.mjs` |
 

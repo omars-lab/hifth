@@ -156,6 +156,8 @@ export function useNotes(
 ): {
   notes: readonly Note[];
   scoped: readonly ScopedNote[];
+  /** True once the saved notes have been read in; nothing is written before. */
+  loaded: boolean;
   commit: (next: Note[], said: string, how?: CommitHow) => void;
   /** Replace the notes that gather verses outright, as joining a note and its Undo do. */
   commitScoped: (next: readonly ScopedNote[], said: string, how?: CommitHow) => void;
@@ -163,6 +165,7 @@ export function useNotes(
   restore: (held: unknown, said: string) => void;
 } {
   const [held, setHeld] = useState<Held>(EMPTY);
+  const [loaded, setLoaded] = useState(false);
   // The latest notes, for the write: a write queued before the read landed
   // must still write what the reader has now, not what they had then.
   const latest = useRef<Held>(EMPTY);
@@ -190,6 +193,7 @@ export function useNotes(
         scoped: [...kept, ...now.scoped.filter((n) => !got.scoped.some((s) => s.id === n.id))],
         mistakes: [...got.mistakes, ...now.mistakes.filter((n) => !got.mistakes.some((s) => s.id === n.id))],
       });
+      setLoaded(true);
     });
     queue.current = read;
     return () => {
@@ -268,7 +272,7 @@ export function useNotes(
   );
 
   const notes = useMemo(() => [...pinsOf(held.scoped), ...held.mistakes], [held]);
-  return { notes, scoped: held.scoped, commit, commitScoped, loadFile, restore };
+  return { notes, scoped: held.scoped, loaded, commit, commitScoped, loadFile, restore };
 }
 
 interface Held {
@@ -292,12 +296,15 @@ export function useConfusions(
 ): {
   confusions: readonly Confusion[];
   device: Device | null;
+  /** True once the saved jumps have been read in; nothing is written before. */
+  loaded: boolean;
   commit: (next: readonly Confusion[], said: string, how?: CommitHow) => void;
   loadFile: (fileJumps: readonly Confusion[]) => number;
   restore: (jumps: unknown, said: string) => void;
 } {
   const [held, setHeld] = useState<readonly Confusion[]>([]);
   const [device, setDevice] = useState<Device | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const latest = useRef<readonly Confusion[]>([]);
   const read = useRef(false);
   const queue = useRef<Promise<unknown>>(Promise.resolve());
@@ -317,6 +324,7 @@ export function useConfusions(
       read.current = true;
       // Jumps marked before the read landed are kept beside what was read.
       hold(mergeConfusions(got, latest.current));
+      setLoaded(true);
     });
     return () => {
       live = false;
@@ -361,5 +369,5 @@ export function useConfusions(
     [hold, save],
   );
 
-  return { confusions: held, device, commit, loadFile, restore };
+  return { confusions: held, device, loaded, commit, loadFile, restore };
 }

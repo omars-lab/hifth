@@ -1,15 +1,18 @@
 /*
- * "Hifth has moved" — a card at the foot of the screen, not a dialog: a hafiz in
- * the middle of a page can carry on reading and answer it when they are ready.
+ * "Hifth has moved" — a card above the trail, not a dialog: a hafiz in the
+ * middle of a page can carry on reading and answer it when they are ready.
+ *
+ * A row of its own, not floating: at the foot of the screen it sat over the page
+ * bar and the trail (2026-11-12, e2e/carry-marks.spec.ts). As a row it takes its
+ * height from the page, the way the note-following bar does, and covers nothing.
  */
 
 .card {
-  position: fixed;
-  inset-inline: var(--space-3);
-  inset-block-end: calc(var(--space-3) + env(safe-area-inset-bottom));
-  z-index: var(--z-ask);
+  flex: none;
+  box-sizing: border-box;
+  inline-size: calc(100% - 2 * var(--space-3));
   max-inline-size: 30rem;
-  margin-inline: auto;
+  margin: var(--space-2) auto;
   padding: var(--space-3) var(--space-4);
   background: var(--paper-raised);
   border: 1px solid var(--hairline);
