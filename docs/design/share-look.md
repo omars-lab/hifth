@@ -59,7 +59,8 @@ The pictures come from the development server, so the address in the preview car
 
 - **On a phone held sideways, the full preview card pushed the buttons out of sight.** There is little height there, and the card's address and "opens with" lines took it. Sideways, the card now keeps one line, the verse's name. A test now opens the menu sideways in every look, in English and in Arabic, and fails if any button is cut off.
 - **Tiles left empty columns on a wide screen.** Laid out as a grid, the three tiles took only part of the row on a computer. They now stretch to fill it.
-- **On a phone the menu reopens on the last choice; on a computer it starts again.** In the tests, a phone that had picked "Its roots" opened on "Its roots" the next time, while a computer went back to "The ayah as it is". That is true in every look and older than this change; which one is right is noted on the backlog. The preview card shows the choice either way, so you see it before sending.
+- **The inside-the-drawer menu pushed the links out of sight on a verse low on the page.** With "Inside the verse's drawer" on, the drawer's tool panel gets only the room left under the verse, and never less than about 160 pixels. The preview card and the tiles were taller than that, so on Al-Baqarah 2:48 you had to scroll to reach the links. Inside the drawer the card is left out (the drawer's heading already names the verse) and tiles sit one line high. A test now checks every look fits in that smallest room.
+- **The menu sometimes reopens on the last choice.** In the iPhone test run, a menu that had picked "Its roots" opened on "Its roots" the next time. The choice is kept while the share button stays on screen and is saved nowhere, so it lasts only until the button is redrawn. Whether a computer does the same is not yet checked; it is on the backlog. It is older than this change and the same in every look. The preview card shows the choice either way, so you see it before sending.
 
 ## What else could we have tried?
 
@@ -75,7 +76,7 @@ The pictures come from the development server, so the address in the preview car
 ## What is this not settling?
 
 - **What the links open, and their addresses.** That is the share-sheet decision, unchanged here.
-- **The share menu inside the verse's drawer** (a setting) uses the same looks, but is not pictured here.
+- **The share menu inside the verse's drawer** (a setting) uses the same looks, without the preview card and with one-line tiles (see above). It was checked on a phone held upright; it is not pictured here.
 
 ## Where it lives
 

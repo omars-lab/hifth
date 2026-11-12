@@ -192,6 +192,45 @@ test.describe("Share inside the drawer", () => {
 });
 
 /*
+ * Inside the drawer a tool's panel is cut to the room left under the lit
+ * verse, never shorter than a floor of 10rem (VerseDrawer's fit). A verse low
+ * on the page gets only that floor. The preview card and the tall tiles of the
+ * share menu (share-look.ts) were taller than it, so on such a verse the links
+ * sat below the cut until you scrolled (seen 2026-11-12 on 2:48). Every look
+ * now fits inside the floor, so both links are in sight wherever the verse is.
+ *
+ * Watched failing before the fix: preview 263px and tiles 200px, floor 160px.
+ */
+test.describe("Share inside the drawer on a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  for (const look of ["plain", "preview", "tiles"]) {
+    test(`fits inside the shortest the drawer's panel can be (${look})`, async ({ page }) => {
+      await page.addInitScript(
+        ([key, l]) => {
+          localStorage.setItem(key!, "drawer");
+          localStorage.setItem("hifth.share.look.v1", l!);
+        },
+        [DRAWER_TOOLS_KEY, look],
+      );
+      await page.goto("/#/hafs-kfqc/2:48");
+      await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+      await drawer(page).getByRole("button", { name: "Share this ayah as a link" }).click();
+      const links = drawer(page).getByRole("region", { name: "Share this ayah as a link" });
+      await expect(links.getByRole("button", { name: "Copy the app link" })).toBeVisible();
+      await expect(links.getByRole("button", { name: "Share the website link" })).toBeVisible();
+
+      const [height, floor] = await links.evaluate((region) => {
+        const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        const most = Math.min(innerHeight * 0.4, 22 * rem);
+        return [region.getBoundingClientRect().height, Math.min(most, 10 * rem)];
+      });
+      expect(height, `the share section's height, against the floor of ${floor}px`).toBeLessThanOrEqual(floor);
+    });
+  }
+});
+
+/*
  * Listen, the third tool moved (owner, 2026-11-07: "clicking play should
  * expand drawer as well with additional play options"). With the setting on, a
  * press plays the verse and opens its play options under the drawer's buttons:
