@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hifth notify list</title>
+<meta name="description" content="The &quot;tell me when the Mac app is out&quot; list: where it lives and what sends its emails">
+<!-- Built by scripts/build-hifth-app-mailing-list.mjs from hifth-app-mailing-list.md. Do not edit by hand. -->
+<style>
+:root { --bg: #fbfaf7; --ink: #1f2328; --muted: #5b636d; --line: #d9dcd3; --tip: #eef6ee; --tip-edge: #3d8b55; --code: #f0efe9; --link: #1f5fa8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #161c25; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2e3846; --tip: #17271d; --tip-edge: #5fbf7a; --code: #1d2531; --link: #8cb8f0; } }
+:root[data-theme="dark"] { --bg: #161c25; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2e3846; --tip: #17271d; --tip-edge: #5fbf7a; --code: #1d2531; --link: #8cb8f0; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+main { max-width: 60rem; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.6rem; line-height: 1.25; }
+h2 { font-size: 1.25rem; margin-top: 2.2rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
+h3 { font-size: 1.05rem; margin-top: 1.6rem; }
+a { color: var(--link); }
+code { background: var(--code); padding: 0 4px; border-radius: 4px; font-size: 0.9em; }
+.callout { background: var(--tip); border-left: 4px solid var(--tip-edge); padding: 4px 16px; border-radius: 6px; }
+.callout-title { font-weight: 700; margin-bottom: 0; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: left; }
+th { background: var(--code); }
+.diagram { margin: 1rem 0; padding: 12px; background: #ffffff; border-radius: 8px; overflow-x: auto; }
+.diagram svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<main>
+<h1>The &quot;tell me when the Mac app is out&quot; list: where it lives and what sends its emails</h1>
+<aside class="callout tip"><p class="callout-title">Recommended</p>
+
+<p>Keep the list in Supabase, as the owner decided on 2026-11-12, and send its emails with Resend&#39;s free plan from a separate address under news.hifth.app.
+The sign-up form calls three small, locked-down functions in the database, so the site never holds a key that can read the list.
+Each person gets one confirmation email, then one launch email with their own leave link, and the owner&#39;s Apple mail on hifth.app is left exactly as it is.
+Free up to 100 emails a day; a bigger launch day is spread over a few days or costs $20 for one month.</p>
+</aside>
+
+<p>What the owner has to do:</p>
+<ol>
+<li>Make a Resend account on the free plan, and add news.hifth.app as its sending domain.</li>
+<li>Add the three records Resend shows under news.hifth.app, plus one new &quot;watch only&quot; mail-checking record (DMARC) at the root, in Cloudflare&#39;s DNS. The table below says which.</li>
+<li>Pick a postal address to print at the foot of each email: a US Post Office box or a private mailbox service both count.</li>
+<li>Put the Resend key and the Supabase values in through <code>make env-set</code>, then send them on with <code>make push-secrets</code>. When to push is the owner&#39;s call.</li>
+<li>Say which way the open choice below goes (what sends the emails), or let the recommendation stand.</li>
+</ol>
+<p>For a hafiz: barely. This is the page someone reaches before the app, not the app. What a reader feels is that signing up asks once, writes twice, and leaving takes one press.</p>
+<p>The rendered page, with the diagram drawn, is checked in as <a href="hifth-app-mailing-list.html">hifth-app-mailing-list.html</a> and served at <a href="https://blog.bytesofpurpose.com/hifth/docs/design/hifth-app-mailing-list.html">https://blog.bytesofpurpose.com/hifth/docs/design/hifth-app-mailing-list.html</a>.</p>
+<h2>Words used here</h2>
+<ul>
+<li><strong>The list</strong>: the email addresses of people who asked, on hifth.app, to hear when the Mac app ships.</li>
+<li><strong>Confirmation email (double opt-in)</strong>: after signing up, the person gets one email with a button; only those who press it get the launch email.</li>
+<li><strong>Leave link</strong>: the link in every email that takes the person off the list.</li>
+<li><strong>One-click leave</strong>: two lines hidden in an email&#39;s header that let Gmail or Apple Mail show their own &quot;Unsubscribe&quot; button, which works without opening a page.</li>
+<li><strong>Sender record (SPF), signing key (DKIM), mail-checking record (DMARC)</strong>: three DNS records receiving mail servers read to decide whether an email really came from hifth.app.</li>
+</ul>
+<h2>How does a sign-up travel, and how does an email go out?</h2>
+<figure class="diagram"><svg id="mail-diagram-0" width="100%" xmlns="http://www.w3.org/2000/svg" class="flowchart" style="max-width: 481px;" viewBox="4 4 481 816.1" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#mail-diagram-0{font-family:ui-sans-serif,system-ui,sans-serif;font-size:16px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#mail-diagram-0 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#mail-diagram-0 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#mail-diagram-0 .error-icon{fill:#552222;}#mail-diagram-0 .error-text{fill:#552222;stroke:#552222;}#mail-diagram-0 .edge-thickness-normal{stroke-width:1px;}#mail-diagram-0 .edge-thickness-thick{stroke-width:3.5px;}#mail-diagram-0 .edge-pattern-solid{stroke-dasharray:0;}#mail-diagram-0 .edge-thickness-invisible{stroke-width:0;fill:none;}#mail-diagram-0 .edge-pattern-dashed{stroke-dasharray:3;}#mail-diagram-0 .edge-pattern-dotted{stroke-dasharray:2;}#mail-diagram-0 .marker{fill:#666;stroke:#666;}#mail-diagram-0 .marker.cross{stroke:#666;}#mail-diagram-0 svg{font-family:ui-sans-serif,system-ui,sans-serif;font-size:16px;}#mail-diagram-0 p{margin:0;}#mail-diagram-0 .label{font-family:ui-sans-serif,system-ui,sans-serif;color:#000000;}#mail-diagram-0 .cluster-label text{fill:#333;}#mail-diagram-0 .cluster-label span{color:#333;}#mail-diagram-0 .cluster-label span p{background-color:transparent;}#mail-diagram-0 .label text,#mail-diagram-0 span{fill:#000000;color:#000000;}#mail-diagram-0 .node rect,#mail-diagram-0 .node circle,#mail-diagram-0 .node ellipse,#mail-diagram-0 .node polygon,#mail-diagram-0 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#mail-diagram-0 .rough-node .label text,#mail-diagram-0 .node .label text,#mail-diagram-0 .image-shape .label,#mail-diagram-0 .icon-shape .label{text-anchor:middle;}#mail-diagram-0 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#mail-diagram-0 .rough-node .label,#mail-diagram-0 .node .label,#mail-diagram-0 .image-shape .label,#mail-diagram-0 .icon-shape .label{text-align:center;}#mail-diagram-0 .node.clickable{cursor:pointer;}#mail-diagram-0 .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#mail-diagram-0 .arrowheadPath{fill:#333333;}#mail-diagram-0 .edgePaths .path{stroke:#666;stroke-width:1px;}#mail-diagram-0 .flowchart-link{stroke:#666;fill:none;}#mail-diagram-0 .edgeLabel{background-color:white;text-align:center;}#mail-diagram-0 .edgeLabel p{background-color:white;}#mail-diagram-0 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#mail-diagram-0 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#mail-diagram-0 .cluster rect{fill:hsl(0, 0%, 98.9%);stroke:#707070;stroke-width:1px;}#mail-diagram-0 .cluster text{fill:#333;}#mail-diagram-0 .cluster span{color:#333;}#mail-diagram-0 .node .collapsed-indicator{fill:#707070;stroke:none;opacity:0.6;}#mail-diagram-0 .node .collapsed-separator{stroke:#707070;stroke-width:0.7px;}#mail-diagram-0 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#mail-diagram-0 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#mail-diagram-0 rect.text{fill:none;stroke-width:0;}#mail-diagram-0 .icon-shape,#mail-diagram-0 .image-shape{background-color:white;text-align:center;}#mail-diagram-0 .icon-shape p,#mail-diagram-0 .image-shape p{background-color:white;padding:2px;}#mail-diagram-0 .icon-shape .label rect,#mail-diagram-0 .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#mail-diagram-0 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.1em;}#mail-diagram-0 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#mail-diagram-0 .node .neo-node{stroke:#999;}#mail-diagram-0 [data-look="neo"].node rect,#mail-diagram-0 [data-look="neo"].cluster rect,#mail-diagram-0 [data-look="neo"].node polygon{stroke:url(#mail-diagram-0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mail-diagram-0 [data-look="neo"].swimlane.cluster rect{filter:none;}#mail-diagram-0 [data-look="neo"].node path{stroke:url(#mail-diagram-0-gradient);stroke-width:1px;}#mail-diagram-0 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mail-diagram-0 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#mail-diagram-0 [data-look="neo"].node circle{stroke:url(#mail-diagram-0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mail-diagram-0 [data-look="neo"].node circle .state-start{fill:#000000;}#mail-diagram-0 [data-look="neo"].icon-shape .icon{fill:url(#mail-diagram-0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mail-diagram-0 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#mail-diagram-0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#mail-diagram-0 :root{--mermaid-font-family:ui-sans-serif,system-ui,sans-serif;}</style><g><marker id="mail-diagram-0_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="mail-diagram-0_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="mail-diagram-0_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></path></marker><marker id="mail-diagram-0_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></polygon></marker><marker id="mail-diagram-0_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="mail-diagram-0_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="mail-diagram-0_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.2" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></circle></marker><marker id="mail-diagram-0_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></circle></marker><marker id="mail-diagram-0_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="mail-diagram-0_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="mail-diagram-0_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"></path></marker><marker id="mail-diagram-0_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"></path></marker><g class="root"><g class="clusters"></g><g class="edges edgePaths"><path d="M401,548L401,560.9Q401,568 393.9,568L344.0,568Q337,568 337,575.0L337,584" id="mail-diagram-0-L_F_P_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke-dasharray: 0 0 90.6 4; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_F_P_0" data-points="W3sieCI6NDAxLCJ5Ijo1NDh9LHsieCI6NDAxLCJ5Ijo1Njh9LHsieCI6MzM3LCJ5Ijo1Njh9LHsieCI6MzM3LCJ5Ijo1ODh9XQ==" data-look="neo" marker-end="url(#mail-diagram-0_flowchart-v2-pointEnd-margin)"></path><path d="M304,660L304,696" id="mail-diagram-0-L_P_S_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke-dasharray: 0 0 32 4; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_P_S_0" data-points="W3sieCI6MzA0LCJ5Ijo2NjB9LHsieCI6MzA0LCJ5Ijo3MDB9XQ==" data-look="neo" marker-end="url(#mail-diagram-0_flowchart-v2-pointEnd-margin)"></path><path d="M196,84L196,120" id="mail-diagram-0-L_L_R_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke-dasharray: 0 0 32 4; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_L_R_0" data-points="W3sieCI6MTk2LCJ5Ijo4NH0seyJ4IjoxOTYsInkiOjEyNH1d" data-look="neo" marker-end="url(#mail-diagram-0_flowchart-v2-pointEnd-margin)"></path><path d="M196,172L196,208" id="mail-diagram-0-L_R_M_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke-dasharray: 0 0 32 4; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_R_M_0" data-points="W3sieCI6MTk2LCJ5IjoxNzJ9LHsieCI6MTk2LCJ5IjoyMTJ9XQ==" data-look="neo" marker-end="url(#mail-diagram-0_flowchart-v2-pointEnd-margin)"></path><path d="M174,260L174,272.9Q174,280 166.9,280L95.0,280Q88,280 88,287.0L88,360" id="mail-diagram-0-L_M_G_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke-dasharray: 0 0 176.6 4; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_M_G_0" data-points="W3sieCI6MTc0LCJ5IjoyNjB9LHsieCI6MTc0LCJ5IjoyODB9LHsieCI6ODgsInkiOjI4MH0seyJ4Ijo4OCwieSI6MzY0fV0=" data-look="neo" marker-end="url(#mail-diagram-0_flowchart-v2-pointEnd-margin)"></path><path d="M88,436L88,560.9Q88,568 95.0,568L263.9,568Q271,568 271,575.0L271,584" id="mail-diagram-0-L_G_P_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke-dasharray: 0 0 321.6 4; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_G_P_0" data-points="W3sieCI6ODgsInkiOjQzNn0seyJ4Ijo4OCwieSI6NTY4fSx7IngiOjI3MSwieSI6NTY4fSx7IngiOjI3MSwieSI6NTg4fV0=" data-look="neo" marker-end="url(#mail-diagram-0_flowchart-v2-pointEnd-margin)"></path><path d="M218,260L218,272.9Q218,280 225.0,280L296.9,280Q304,280 304,287.0L304,312L304,512L304,584" id="mail-diagram-0-L_M_P_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style="stroke-dasharray: 0 0 400.6 4; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_M_P_0" data-points="W3sieCI6MjE4LCJ5IjoyNjB9LHsieCI6MjE4LCJ5IjoyODB9LHsieCI6MzA0LCJ5IjoyODB9LHsieCI6MzA0LCJ5IjozMTJ9LHsieCI6MzA0LCJ5Ijo1MTJ9LHsieCI6MzA0LCJ5Ijo1ODh9XQ==" data-look="neo" marker-end="url(#mail-diagram-0_flowchart-v2-pointEnd-margin)"></path></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(87.8, 312)"><g class="label" data-id="L_M_G_0" transform="translate(-33.3, -12)"><foreignObject width="66.6" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>leave link</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(87.9, 512)"><g class="label" data-id="L_G_P_0" transform="translate(-74.4, -12)"><foreignObject width="148.9" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>button press (POST)</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(304, 400)"><g class="label" data-id="L_M_P_0" transform="translate(-100, -24)"><foreignObject width="200" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="edgeLabel"><p>mail app's own Unsubscribe</p></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="mail-diagram-0-flowchart-F-0" data-look="neo" transform="translate(401, 512)"><rect class="basic label-container" style="" x="-76" y="-36" width="152" height="72"></rect><g class="label" style="" transform="translate(-60, -24)"><rect></rect><foreignObject width="120" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"><span class="nodeLabel"><p>Form on hifth.app</p></span></div></foreignObject></g></g><g class="node default" id="mail-diagram-0-flowchart-P-1" data-look="neo" transform="translate(304, 624)"><rect class="basic label-container" style="" x="-76" y="-36" width="152" height="72"></rect><g class="label" style="" transform="translate(-60, -24)"><rect></rect><foreignObject width="120" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"><span class="nodeLabel"><p>Site's small server code</p></span></div></foreignObject></g></g><g class="node default" id="mail-diagram-0-flowchart-S-3" data-look="neo" transform="translate(304, 756.0)"><path d="M0,13.3 a72,13.3 0,0,0 144,0 a72,13.3 0,0,0 -144,0 l0,85.3 a72,13.3 0,0,0 144,0 l0,-85.3" class="basic label-container outer-path" style="" transform="translate(-72, -56.0)"></path><g class="label" style="" transform="translate(-60, -16)"><rect></rect><foreignObject width="120" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"><span class="nodeLabel"><p>Supabase: add, confirm, remove</p></span></div></foreignObject></g></g><g class="node default" id="mail-diagram-0-flowchart-L-4" data-look="neo" transform="translate(196, 48)"><rect class="basic label-container" style="" x="-76" y="-36" width="152" height="72"></rect><g class="label" style="" transform="translate(-60, -24)"><rect></rect><foreignObject width="120" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"><span class="nodeLabel"><p>Owner's laptop script</p></span></div></foreignObject></g></g><g class="node default" id="mail-diagram-0-flowchart-R-5" data-look="neo" transform="translate(196, 148)"><rect class="basic label-container" style="" x="-76" y="-24" width="152" height="48"></rect><g class="label" style="" transform="translate(-60, -12)"><rect></rect><foreignObject width="120" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: nowrap; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"><span class="nodeLabel"><p>Resend</p></span></div></foreignObject></g></g><g class="node default" id="mail-diagram-0-flowchart-M-7" data-look="neo" transform="translate(196, 236)"><rect class="basic label-container" style="" x="-76" y="-24" width="152" height="48"></rect><g class="label" style="" transform="translate(-60, -12)"><rect></rect><foreignObject width="120" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: nowrap; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"><span class="nodeLabel"><p>Reader's inbox</p></span></div></foreignObject></g></g><g class="node default" id="mail-diagram-0-flowchart-G-9" data-look="neo" transform="translate(88, 400)"><rect class="basic label-container" style="" x="-76" y="-36" width="152" height="72"></rect><g class="label" style="" transform="translate(-60, -24)"><rect></rect><foreignObject width="120" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 120px; text-align: center; width: 120px;"><span class="nodeLabel"><p>Page with a Leave button</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="mail-diagram-0-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.0" flood-color="#000000"></feDropShadow></filter></defs><defs><filter id="mail-diagram-0-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.0" flood-color="#000000"></feDropShadow></filter></defs><linearGradient id="mail-diagram-0-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3%)" stop-opacity="1"></stop><stop offset="100%" stop-color="hsl(0, 0%, 88.9%)" stop-opacity="1"></stop></linearGradient></svg></figure>
+
+
+<h2>Does Cloudflare do mailing lists?</h2>
+<p>No. Cloudflare&#39;s own sending service is a public beta, needs the $5-a-month Workers plan, and its FAQ answers &quot;No&quot; when asked whether it may be used for marketing or bulk mail.</p>
+<p>Its free &quot;send to a verified address&quot; option only reaches addresses the owner has proved they own, and it hangs off Cloudflare&#39;s mail-receiving service, which cannot be switched on while Apple holds hifth.app&#39;s mail (it fails with error 2008).</p>
+<p>So Cloudflare stays where it is good: it runs the site, its DNS, and a daily timer.</p>
+<h2>Can the owner&#39;s Apple mail (iCloud+) send it?</h2>
+<p>Not the launch email. iCloud+ allows 1,000 messages a day and 500 people per message, but Apple&#39;s terms say the service is &quot;designed and intended for personal use on an individual basis&quot; (section IV.A), forbid &quot;unsolicited or unauthorized email … advertising, promotional&quot; (V.B.7), and forbid &quot;accessing the Service through any automated means, like scripts&quot; (V.B.10).</p>
+<p>One message to many people also cannot carry each person&#39;s own leave link or the one-click leave lines.</p>
+<p>It stays the owner&#39;s inbox: every launch email sets its reply address to the owner&#39;s hifth.app address, so replies land there.</p>
+<h2>What sends the launch email?</h2>
+<p><strong>Recommended:</strong> A, Resend&#39;s free plan, sending one email per person from news.hifth.app, driven by a short script on the owner&#39;s laptop. The list never leaves Supabase.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>A. Resend free, list stays in Supabase</strong> (recommended)</th>
+<th><strong>B. Amazon&#39;s mail service (SES)</strong></th>
+<th><strong>C. A newsletter service (Kit, Brevo, Buttondown, or Resend&#39;s own &quot;Broadcasts&quot;)</strong></th>
+<th><strong>D. Cloudflare&#39;s paid sending</strong></th>
+<th><strong>E. The owner&#39;s Apple mail</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Pros</strong></td>
+<td>Free: 100 a day, 3,000 a month. Ten-minute setup. Tracking off by default. Its records sit under news.hifth.app, so Apple&#39;s mail is untouched. Each email carries that person&#39;s own leave link.</td>
+<td>Cheapest at any size: 10 cents per 1,000. No daily cap once approved.</td>
+<td>A ready editor, hosted leave page and archive. Resend&#39;s Broadcasts send to up to 1,000 people at once on its free plan.</td>
+<td>Same company as the site; 3,000 a month included.</td>
+<td>Already set up; costs nothing.</td>
+</tr>
+<tr>
+<td><strong>Cons</strong></td>
+<td>Over 100 on launch day means spreading over days or paying $20 for one month. Resend keeps message logs in the US.</td>
+<td>An AWS account, a review to leave its trial mode (answered within 96 hours), more DNS records.</td>
+<td>Holds a second copy of the list, with its own &quot;has left&quot; list that drifts from Supabase. Some free plans add their footer.</td>
+<td>Not free ($5 a month). Still a beta. Its FAQ says no marketing mail.</td>
+<td>Apple&#39;s terms forbid it, and it has no per-person leave link.</td>
+</tr>
+<tr>
+<td><strong>Commits us to</strong></td>
+<td>One new account, a send script, and naming Resend on the privacy page.</td>
+<td>A second cloud account to look after for a few emails a year.</td>
+<td>Copying the list over before each send and copying leavers back; the owner decided the list lives in Supabase.</td>
+<td>$5 every month, and Cloudflare&#39;s beta rules.</td>
+<td>Nothing; it is ruled out.</td>
+</tr>
+</tbody></table></div>
+<p>Kept in reserve: if launch day is between 100 and 1,000 people and neither waiting nor $20 is wanted, Resend&#39;s free Broadcasts can send it in one go from a temporary copy, deleted straight after. That copy is the one exception to &quot;the list lives only in Supabase&quot;, so it is a fallback, not the plan.</p>
+<p>If the list grows past about 3,000, or regular updates start, the send script hands the mail to Amazon&#39;s service instead; the list and the script&#39;s shape do not change.</p>
+<h2>Where does the list live, and who can read it?</h2>
+<p>In Supabase, on the hifth.app project. The owner decided this on 2026-11-12, in place of Cloudflare&#39;s database.</p>
+<ul>
+<li><strong>The table</strong> sits in its own section of the database that Supabase&#39;s web interface does not serve, so nothing can list it from outside.</li>
+<li><strong>Three small database functions</strong> do the only things the site may do: add an address, confirm it, remove it. Each runs with fixed rights and returns nothing about anyone else.</li>
+<li><strong>The site holds only the public (&quot;publishable&quot;) key.</strong> That key can call the three functions and nothing more. Supabase&#39;s secret key is never put on the site: it gets past every rule in the whole project, including the privately held outside library.</li>
+<li><strong>The laptop script reads the list</strong> with the database password the existing load scripts already use, so no new all-powerful key is made. It is just as powerful as the secret key, so it stays on the laptop, never in a file the repository tracks.</li>
+<li><strong>What a row keeps:</strong> the address, when it signed up, when it confirmed, which language page it came from, and its leave code. Rows never confirmed are deleted after 7 days.</li>
+<li><strong>Supabase&#39;s free plan pauses a project after 7 quiet days</strong>, and a paused project answers every call with a &quot;paused&quot; error until the owner resumes it by hand. A daily timer on a small separate Cloudflare Worker pokes it awake and, in the same run, deletes unconfirmed rows. (Cloudflare&#39;s free plan allows five timers; the site&#39;s own server code cannot hold one.)</li>
+<li><strong>If Supabase is paused anyway</strong>, the form says &quot;please try again later&quot;, never &quot;you are on the list&quot;.</li>
+</ul>
+<h2>What changes on hifth.app&#39;s DNS?</h2>
+<p>All in Cloudflare&#39;s DNS, all set to &quot;DNS only&quot; (not proxied).</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Record</th>
+<th>Where</th>
+<th>Value, in words</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Mail server (MX)</td>
+<td>send.news.hifth.app</td>
+<td>Resend&#39;s bounce server, as Resend shows it</td>
+<td>Bounced mail goes back to Resend, which stops sending to dead addresses</td>
+</tr>
+<tr>
+<td>Sender record (SPF, TXT)</td>
+<td>send.news.hifth.app</td>
+<td>The line Resend shows, naming its servers</td>
+<td>Lets a receiver check Resend may send for news.hifth.app</td>
+</tr>
+<tr>
+<td>Signing key (DKIM, TXT)</td>
+<td>resend._domainkey.news.hifth.app</td>
+<td>Resend&#39;s public key, as Resend shows it</td>
+<td>Every email is signed, so it cannot be forged and the one-click leave lines are covered</td>
+</tr>
+<tr>
+<td>Mail-checking record (DMARC, TXT)</td>
+<td>_dmarc.hifth.app (new)</td>
+<td>&quot;Watch only&quot; to start (p=none), with reports to an address the owner reads</td>
+<td>There is none today. One record at the root covers Apple&#39;s mail and news.hifth.app; tighten after a few clean weeks</td>
+</tr>
+<tr>
+<td>Root sender record (SPF), one part</td>
+<td>hifth.app (edit, optional)</td>
+<td>Remove the registrar&#39;s old forwarding include</td>
+<td>Left over from before Apple; check the registrar&#39;s forwarding is off first. It uses lookups toward the limit of 10</td>
+</tr>
+<tr>
+<td>Apple&#39;s two mail servers, Apple&#39;s key, Apple&#39;s ownership record, Apple&#39;s part of the root sender record</td>
+<td>hifth.app</td>
+<td>Unchanged</td>
+<td>The owner&#39;s own mail keeps working as it does today</td>
+</tr>
+</tbody></table></div>
+<h2>What happens to the form, the leave link and the privacy page?</h2>
+<ul>
+<li><strong>The form&#39;s server code still writes to Cloudflare&#39;s database.</strong> It has to call the Supabase &quot;add&quot; function instead. Until it does, the form keeps no address.</li>
+<li><strong>The form&#39;s answer gives away who is on the list.</strong> Today a second sign-up with the same address answers &quot;already&quot;. It should always say &quot;check your inbox&quot;, whatever happened.</li>
+<li><strong>The form promises &quot;Nothing else&quot;.</strong> With a confirmation email, the promise becomes: one email to confirm, then one when the app ships. The English and Arabic pages both need the new wording.</li>
+<li><strong>The language the form already sends is thrown away.</strong> Keep it, so the launch email goes out in the reader&#39;s language.</li>
+<li><strong>The leave link deletes on a plain visit.</strong> Some mail systems open every link in a message to scan it, which would remove people who never clicked. The link should open a page with a &quot;Leave the list&quot; button that sends a POST, and the one-click leave lines point at a separate address that takes a POST directly, with no redirect. The confirm link works the same way, so a scanner cannot confirm anyone.</li>
+<li><strong>The privacy page names Cloudflare&#39;s database.</strong> It must name Supabase, name Resend as what sends the mail and where it keeps logs (the US), and list what a row keeps (address, two dates, language). It already says the list is used only for the launch; keep that.</li>
+</ul>
+<h2>What does it cost at 100, 1,000 and 5,000 people?</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>People on launch day</th>
+<th>Resend free (recommended)</th>
+<th>Resend, one paid month</th>
+<th>Resend Broadcasts (fallback)</th>
+<th>Amazon SES</th>
+<th>Cloudflare paid sending</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>100</td>
+<td>$0, same day</td>
+<td>not needed</td>
+<td>$0</td>
+<td>about 1 cent</td>
+<td>$5 a month (and not allowed for this)</td>
+</tr>
+<tr>
+<td>1,000</td>
+<td>$0, spread over about 10 days</td>
+<td>$20 once, same day</td>
+<td>$0, same day, temporary copy</td>
+<td>about 10 cents</td>
+<td>$5 a month (not allowed)</td>
+</tr>
+<tr>
+<td>5,000</td>
+<td>$0, over about 50 days across two months (3,000 a month cap)</td>
+<td>$20 once, same day</td>
+<td>$40 a month (its free plan holds 1,000)</td>
+<td>about 50 cents, plus setup</td>
+<td>about $5.70 (not allowed)</td>
+</tr>
+</tbody></table></div>
+<p>Around all of these: Supabase free $0, the timer Worker $0, and the postal address (a PO box or mailbox service, price not looked up). Confirmation emails share Resend&#39;s 100-a-day cap.</p>
+<h2>What do the rules (US, EU, UK) ask of us?</h2>
+<ul>
+<li><strong>US (CAN-SPAM).</strong> Say who it is from. Carry a postal address in every launch email: a PO box registered with the US Postal Service, or a private mailbox at a registered mail-receiving business, counts. Keep the leave link working for at least 30 days and honour it within 10 business days (ours is at once). The fine is up to $53,088 per email.</li>
+<li><strong>UK (PECR and the regulator&#39;s guidance).</strong> Consent must be specific and given by a clear action, and we must keep a record of who agreed, when and how. The confirmation press is that record.</li>
+<li><strong>EU (GDPR, Article 7).</strong> We must be able to show each person agreed, and leaving must be as easy as joining. Nothing we read requires a confirmation email by name, but it is the plainest proof.</li>
+<li><strong>Gmail and Yahoo.</strong> Above 5,000 a day they demand one-click leave; we add it from the first email anyway.</li>
+</ul>
+<h2>Where the two researchers agreed and disagreed</h2>
+<p>The raw work is in <a href="../research/2026-11-12-mailing-list-a-findings.md">researcher A&#39;s findings</a> and <a href="../research/2026-11-12-mailing-list-a-design.md">design</a>, and <a href="../research/2026-11-12-mailing-list-b-findings.md">researcher B&#39;s findings</a> and <a href="../research/2026-11-12-mailing-list-b-design.md">design</a>. The checker re-opened the sources behind the claims that decide something.</p>
+<p><strong>Agreed, and the source holds:</strong> Resend free from a news subdomain; the list stays only in Supabase; narrow database functions behind the publishable key; a separate Worker to keep Supabase awake; Apple&#39;s mail ruled out; a confirmation email worth doing though no law names it; a leave address that takes a POST; a public TestFlight link in our own email, so no addresses go to Apple; DMARC at the root; the registrar&#39;s include probably left over.</p>
+<p>Where they disagreed, and how it was settled:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>A said</th>
+<th>B said</th>
+<th>What the source shows, and what we do</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Does Cloudflare&#39;s sending allow marketing mail?</td>
+<td>Its FAQ says no</td>
+<td>Its pages are silent on announcements</td>
+<td>Cloudflare&#39;s FAQ answers &quot;No&quot; (re-fetched). A is right.</td>
+</tr>
+<tr>
+<td>How does the send script read the list?</td>
+<td>A Supabase secret key kept on the laptop</td>
+<td>The database password the load scripts already use</td>
+<td>Both keys get past every rule. B&#39;s way makes no new key, so we take B&#39;s.</td>
+</tr>
+<tr>
+<td>How long do unconfirmed rows stay?</td>
+<td>30 days</td>
+<td>7 days</td>
+<td>No source decides it. We take 7: an address nobody confirmed is someone who has not agreed, and signing up again costs nothing.</td>
+</tr>
+<tr>
+<td>Is the confirm link a button?</td>
+<td>A plain link</td>
+<td>A page with a button that sends a POST</td>
+<td>B marked this as its own reasoning, not a source. We take it, for the same reason as the leave link.</td>
+</tr>
+<tr>
+<td>Is Resend&#39;s free Broadcasts a route?</td>
+<td>Rejected: it needs a copy of the list at Resend</td>
+<td>A row in the size table</td>
+<td>Both found the same fact (1,000 people free, held at Resend), which re-checks. We keep it as a fallback only.</td>
+</tr>
+</tbody></table></div>
+<p>Only one found:</p>
+<ul>
+<li><strong>Only A:</strong> keep the language the form sends; an unticked &quot;also send me updates&quot; box (not taken now, see below); Amazon SES as the route past 3,000.</li>
+<li><strong>Only B:</strong> the form should always answer &quot;check your inbox&quot;; Apple&#39;s &quot;automated means, like scripts&quot; clause (re-checked, section V.B.10); that the database password avoids a new key.</li>
+</ul>
+<p>Still resting on a snippet, or not checked at all:</p>
+<ul>
+<li>Whether Resend signs the one-click leave lines when they are added to each email. Its pages do not say; one test email to the owner&#39;s own inbox settles it.</li>
+<li>How Resend&#39;s Broadcasts add their own leave lines.</li>
+<li>That the database functions return nothing on a repeat sign-up, and what read rights they need: designed, not yet run against Supabase.</li>
+<li>The locked-down database setup exists only on an unmerged branch so far.</li>
+<li>That Cloudflare&#39;s site code cannot hold a timer: one settings page and one forum answer.</li>
+<li>EU rules beyond Article 7, including whether Germany expects a confirmation email: snippets only.</li>
+<li>The prices of a PO box, Supabase&#39;s paid plans, and whether Resend&#39;s free plan adds a footer: not looked up.</li>
+<li>How others keep a free Supabase project awake: snippets only.</li>
+</ul>
+<h2>What would change the answer?</h2>
+<ul>
+<li><strong>More than about 3,000 people, or regular updates:</strong> move the sending to Amazon SES; the list stays put.</li>
+<li><strong>The owner wants a newsletter, not one announcement:</strong> a newsletter service earns its second copy of the list.</li>
+<li><strong>Resend does not sign the added leave lines:</strong> send through Amazon SES, which signs whatever we give it.</li>
+<li><strong>Supabase moves to a paid plan:</strong> the keep-awake timer goes; the nightly tidy stays.</li>
+<li><strong>Cloudflare&#39;s sending leaves beta and allows announcements:</strong> it becomes worth a look, since it is the same account.</li>
+</ul>
+<h2>What is this not settling?</h2>
+<ul>
+<li>The words of the launch email itself, and whether it goes out in both languages or the reader&#39;s own.</li>
+<li>An &quot;also send me updates&quot; box. Not now: the list is for one launch.</li>
+<li>Whether the launch is a TestFlight beta or an App Store release. The link goes in the email either way.</li>
+<li>Who answers replies, and how fast.</li>
+<li>The privacy page&#39;s full rewrite; this names what it must say, not its words.</li>
+</ul>
+<h2>Open questions, and what would answer each</h2>
+<h3>① The form&#39;s server code still writes to Cloudflare&#39;s database · <strong>open</strong></h3>
+<p>Answered by moving it to call the Supabase &quot;add&quot; function with the publishable key, with a test that a paused project answers &quot;try again later&quot;.</p>
+<h3>② The leave link removes someone on a plain visit · <strong>open</strong></h3>
+<p>Answered by a page with a &quot;Leave the list&quot; button that sends a POST, a separate POST address for one-click leave, and a test that a plain visit removes nobody.</p>
+<h3>③ The privacy page names Cloudflare&#39;s database · <strong>open</strong></h3>
+<p>Answered by naming Supabase and Resend, where each keeps data, and what a row holds, in both languages.</p>
+<h3>④ No mail-checking record (DMARC), and a leftover include in the sender record · <strong>open</strong></h3>
+<p>Answered by the owner adding a &quot;watch only&quot; DMARC record at the root and, once the registrar&#39;s forwarding is confirmed off, removing its include.</p>
+<h3>⑤ The form promises &quot;Nothing else&quot; · <strong>open</strong></h3>
+<p>Answered by wording that says one email to confirm, then one when the app ships, on the English and Arabic pages.</p>
+<h3>⑥ A repeat sign-up shows the address is already on the list · <strong>open</strong></h3>
+<p>Answered by the form always saying &quot;check your inbox&quot;, with a test that a repeat sign-up gets the same answer as a new one.</p>
+
+</main>
+</body>
+</html>

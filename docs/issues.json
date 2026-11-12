@@ -6144,7 +6144,7 @@
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. Done 2026-11-12: the keys work on this laptop, and the site project (hifth-app) is made on the new account. Still needed: hifth.app attached to that project after the first upload, the email list's database, the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id. 2026-11-12: this is the top item for the front page; it waits on three things from the owner: the email list's database, the contact address the privacy page names, and the real spam-check key."
+      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. Done 2026-11-12: the keys work on this laptop, and the site project (hifth-app) is made on the new account. Still needed: hifth.app attached to that project after the first upload, the email list's database, the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id. 2026-11-12: this is the top item for the front page; it waits on three things from the owner: the email list's database, the contact address the privacy page names, and the real spam-check key. 2026-11-12: the email list moves to Supabase (owner's choice), so the Cloudflare database step above no longer applies; see notify-function-on-d1."
     },
     {
       "id": "hifth-app-arabic-pictures",
@@ -6193,7 +6193,7 @@
       "severity": "risk",
       "owner": "user",
       "feature": "hifth-app-site",
-      "note": "The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key and secret are not in. On 2026-11-12 the saved Cloudflare token was refused for databases (it can reach the site project, not D1), so the owner adds D1 edit to that token. Next: make the database on the new account and put its id in apps/landing/wrangler.toml, push the spam-check secret, then sign up once with a throwaway address on the live page and see make hifth-app-list-count say 1."
+      "note": "The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key and secret are not in. On 2026-11-12 the saved Cloudflare token was refused for databases (it can reach the site project, not D1), so the owner adds D1 edit to that token. Next: make the database on the new account and put its id in apps/landing/wrangler.toml, push the spam-check secret, then sign up once with a throwaway address on the live page and see make hifth-app-list-count say 1. 2026-11-12: the owner chose Supabase, not Cloudflare's database, for the list, so the database steps above are replaced by notify-function-on-d1; the sender and the rest are in docs/design/hifth-app-mailing-list.md."
     },
     {
       "id": "carry-leaves-settings-behind",
@@ -6236,7 +6236,7 @@
       "blockedBy": [
         "the Mac app shipping"
       ],
-      "note": "Choose a mail service and write the one email to the notify list when the Mac app is out, with the leave link in it. Cloudflare cannot send mail to any address by itself."
+      "note": "Choose a mail service and write the one email to the notify list when the Mac app is out, with the leave link in it. Cloudflare cannot send mail to any address by itself. 2026-11-12: what sends it is now an open decision (notify-list-sender) with Resend's free plan recommended, in docs/design/hifth-app-mailing-list.md."
     },
     {
       "id": "hifth-app-store-wording",
@@ -6346,6 +6346,78 @@
       "owner": "agent",
       "feature": "revision-record",
       "note": "Owner, 2026-11-12 (page comment t_476e84): the month and day views should look more appealing. Look at how good habit and streak calendars draw a day's status, build two or three versions into the record sheet, the owner picks, the others stay as a setting. Built 2026-11-12 as three looks in the info panel (shades, the default; rings; cards), drawn in docs/design/calendar-look.md; waiting on the owner's pick."
+    },
+    {
+      "id": "notify-function-on-d1",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The sign-up server code (apps/landing/lib/notify.mjs) still writes to Cloudflare's database, but the owner chose Supabase for the list on 2026-11-12. Move it to call a Supabase add function with the publishable key, with the table in a schema the web interface does not serve; a paused project must answer try again later, never success. The locked-down database setup is on the unmerged supabase-move branch."
+    },
+    {
+      "id": "notify-leave-on-visit",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The leave link (apps/landing/functions/api/unsubscribe.js) deletes the row on a plain visit, so a mail scanner opening every link would remove people. Make it a page with a Leave the list button that sends a POST, add a separate POST address for the one-click leave headers (no redirect), and a test that a plain visit removes nobody. The confirm link works the same way."
+    },
+    {
+      "id": "privacy-page-names-d1",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The privacy page (apps/landing/privacy.html and its Arabic twin) says the list is kept in Cloudflare's database and that only two things are kept. Name Supabase, name Resend as the sender and that it keeps logs in the US, and list what a row keeps (address, signed-up and confirmed dates, language, leave code). Waits on the sender choice (decision notify-list-sender)."
+    },
+    {
+      "id": "hifth-app-dmarc-spf",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "note": "hifth.app has no DMARC record, and its root SPF record still includes the registrar's old mail-forwarding servers, left over from before Apple held the mail. Owner adds a watch-only DMARC record (p=none) at the root with reports to an address they read; once the registrar's forwarding is confirmed off, remove its include. Apple's records stay as they are."
+    },
+    {
+      "id": "notify-form-promise",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The form says Nothing else, and the privacy page says the address is used to write when the apps ship. With a confirmation email the promise becomes one email to confirm, then one when the app ships. Change the wording on the English and Arabic pages in the same change as the confirmation email."
+    },
+    {
+      "id": "notify-form-reveals-member",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "A repeat sign-up answers already on the list, which tells anyone whether an address is signed up. The form should always answer check your inbox, with a test that a repeat sign-up gets the same answer as a new one."
     }
   ]
 }

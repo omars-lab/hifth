@@ -83,15 +83,20 @@ IPv6 only). That address carries the password, so it is the owner's to hold and 
 
 The owner decided on 2026-11-12 that the notify list lives here, not in Cloudflare's own
 database. The function in `apps/landing/functions/api/` is still written for Cloudflare's
-database and has to move. How the mail gets sent is being researched
-(`docs/research/2026-11-12-mailing-list-*`); the design page that follows it is where the table
-and the function's shape are settled. Link it here when it lands.
+database and has to move (issue `notify-function-on-d1`). The table and the function's shape
+are in `docs/design/hifth-app-mailing-list.md`, under "Where does the list live, and who can
+read it?".
 
-Until then, what any version must keep:
+What any version must keep:
 
 - The table has row-level security on and no rule that lets the public read it.
-- The function holds the only key that can write, as a secret on the Pages project, set through
-  `make push-secrets`, never in `wrangler.toml` or the front page.
+- The table sits in a schema the web interface does not serve. The site calls three narrow
+  database functions (add, confirm, remove), each with fixed rights and a fixed search path, using
+  only the publishable key. The secret key never goes on the site: it gets past every rule in the
+  project, including the held outside library. The Supabase address and publishable key reach
+  the Pages project through `make push-secrets`, never `wrangler.toml` or the front page.
+- The laptop send script reads the list with the database password the load scripts already
+  use, so no new all-powerful key is made.
 - Counting the list prints a number only, as `make hifth-app-list-count` does today.
 
 ## Rules

@@ -88,6 +88,10 @@ How it works:
 4. The leave link, `/api/unsubscribe?t=…`, says the same thing whether or not it matched. The
    link can't be used to find out whether an address is on the list.
 
+2026-11-12: the owner chose Supabase, not Cloudflare's database, for the list. What changes
+because of that (the form's server code, the leave link, the privacy page, the form's wording)
+is in [the notify list's design](hifth-app-mailing-list.md), with its own open questions.
+
 The answers never repeat the address. The tests use made-up addresses only.
 
 The code is in `apps/landing/lib/notify.mjs`, with its tests next to it. Cloudflare's
@@ -227,6 +231,9 @@ The notify-me form keeps addresses but sends nothing; Cloudflare cannot send mai
 by itself. Needs a mail service chosen, and one email written with the way to leave in it. What
 would answer it: a test send to a made-up address on our own domain arriving with a working
 leave link. Waits on the Mac app shipping.
+
+2026-11-12: which mail service is now an open decision, with Resend's free plan recommended, in
+[the notify list's design](hifth-app-mailing-list.md).
 
 ### ⑪ When does the page name the App Store, with Apple's badge? · **blocked**
 

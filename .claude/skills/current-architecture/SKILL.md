@@ -64,16 +64,19 @@ flowchart LR
 ## What is settled, and what is still open
 
 - **Settled 2026-11-12 by the owner, in chat:** the notify list's data lives in Supabase, not in
-  Cloudflare's own database (D1). It is not yet in `docs/decisions.json`.
+  Cloudflare's own database (D1). Recorded as decision `notify-list-store`.
 - **Not done yet:** the notify function in `apps/landing/functions/api/` and
   `apps/landing/wrangler.toml` are still written against D1. They have to move to Supabase
-  before the first release.
-- **Still open:** what sends the mail to the list. The research is in
-  `docs/research/2026-11-12-mailing-list-*`, and a design page follows it.
+  before the first release (issue `notify-function-on-d1`).
+- **Still open:** what sends the mail to the list, decision `notify-list-sender`, with Resend's
+  free plan from news.hifth.app recommended. The design is `docs/design/hifth-app-mailing-list.md`
+  (its page, `docs/design/hifth-app-mailing-list.html`, is rebuilt by
+  `scripts/build-hifth-app-mailing-list.mjs`); the research behind it is in
+  `docs/research/2026-11-12-mailing-list-*`.
 - **Worth a look:** hifth.app's mail records (checked 2026-11-12) send mail to Apple and carry
   Apple's signing record, but the sender rule still also names the registrar's old mail
   forwarding, and there is no record telling other mail servers what to do with forged mail
-  (no DMARC). Both matter once the list sends from the domain.
+  (no DMARC). Both matter once the list sends from the domain (issue `hifth-app-dmarc-spf`).
 - **Still open:** the share page at hifth.app/share. The `app-setup` skill still describes it on
   Cloudflare with its own free database; that predates the Supabase choice.
 
