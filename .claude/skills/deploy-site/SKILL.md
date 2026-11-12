@@ -54,7 +54,9 @@ The lists live in `scripts/shipped.mjs`. A new kind of file has to be added ther
   - Cloudflare's test key for the spam check;
   - a `localhost` or `127.0.0.1` address;
   - the privacy page's "[contact address to come]" placeholder.
-- **Missing pieces:** the front page, the privacy page, the app's page, and its service worker.
+- **Missing pieces:** the front page, the privacy page, the "no page here" page, the app's page,
+  and its service worker. Without the "no page here" page, Cloudflare answers every unknown
+  address with the front page, so a mistyped link looks like it worked.
 - **The wrong commit:** the app must carry the commit being released, because its source-code
   offer names that commit (the app's licence is the GPL).
 - **The tree:** uncommitted changes, or a commit not on origin/main.
@@ -63,8 +65,21 @@ When the check refuses, fix the cause. Don't widen a list to make the refusal go
 file really belongs on the site. If it does, say so in the commit.
 
 After the upload, `verify` fetches the live front page, the privacy page and the app, and checks
-that the app carries this commit. Then it asks for every development address (`live.mjs`,
-`DEV_PATHS`). Each must answer with an error or with the app's own page, never with content.
+that the app carries this commit (in its main script or a script that one loads). Then it asks
+for every development address (`live.mjs`, `DEV_PATHS`). Each must answer with an error, or with
+the same page as an address that cannot exist, never with content.
+
+**Try it before publishing** on Cloudflare's own local server, which behaves like the real host:
+
+```
+make hifth-app-check ARGS=--no-build
+(cd apps/landing && wrangler pages dev dist --port 8788)
+make hifth-app-verify ARGS="--url http://localhost:8788 --commit <the commit the build carries>"
+```
+
+The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch-all rule under
+`/read/` as an endless loop, and the app needs none, since it keeps its place after the `#`.
+Cloudflare also serves `privacy.html` at `/privacy`, so `_headers` names that address.
 
 ## Rules
 

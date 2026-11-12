@@ -31,6 +31,7 @@ function fixture(appExtra = {}) {
   tree(landing, {
     "index.html": "<h1>Hifth</h1>",
     "privacy.html": "<p>privacy</p>",
+    "404.html": "<h1>No page here</h1>",
     "styles.css": "body{}",
     "notify.js": "fetch('/api/notify')",
     "page-shot.png": "png",
@@ -61,6 +62,7 @@ test("the front page goes at the root and the app under read/, and nothing the s
   const { landing, app, out } = fixture();
   assemble({ landing, app, out });
   assert.deepEqual(readFolder(out).files.map((f) => f.path), [
+    "404.html",
     "_headers",
     "_redirects",
     "index.html",

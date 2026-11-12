@@ -22,6 +22,8 @@ export default tseslint.config(
       // it is gitignored there and not ours to lint.
       "docs/.obsidian/**",
       "**/dev-dist/**",
+      // wrangler pages dev writes generated code here; ignored by git too.
+      "**/.wrangler/**",
       "**/build/**",
       "**/node_modules/**",
       "**/playwright-report/**",

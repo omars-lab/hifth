@@ -22,17 +22,24 @@ function goodSite() {
     "/": [200, '<h1>Hifth</h1><a href="/read/">Open Hifth in your browser</a>'],
     "/privacy.html": [200, "<p>Write to us.</p>"],
     "/read/": [200, SHELL],
-    "/read/assets/index-abc.js": [200, `const c="${HEAD}";`],
+    // Like the real build: the commit sits in a script the main one loads later, not in the
+    // main script itself (seen in the 2026-11-11 build: rarely-used-*.js).
+    "/read/assets/index-abc.js": [200, 'const s=()=>import("./rarely-used-xyz.js");'],
+    "/read/assets/rarely-used-xyz.js": [200, `const c="${HEAD}";`],
   };
 }
 
-/** A made-up fetch: a listed address answers as listed; /read/* falls back to the app; else 404. */
-function network(site) {
+/**
+ * A made-up fetch: a listed address answers as listed, and any other address gets `unknown`:
+ * a plain 404 by default, or, the way Cloudflare Pages answers when a site has no 404 page,
+ * the front page with a 200 (measured with wrangler pages dev, 2026-11-11).
+ */
+function network(site, unknown = () => [404, "Not found"]) {
   const asked = [];
   const fetch = async (url) => {
     const path = new URL(url).pathname;
     asked.push(path);
-    const hit = site[path] ?? (path.startsWith("/read/") ? site["/read/"] : [404, "Not found"]);
+    const hit = site[path] ?? unknown(site, path);
     return { status: hit[0], text: async () => hit[1] };
   };
   return { fetch, asked };
@@ -82,4 +89,18 @@ test("a site that cannot be reached says so instead of passing", async () => {
   const problems = await verifyLive(BASE, { commit: HEAD, fetch });
   assert.ok(problems.length > 0);
   assert.match(problems[0].why, /could not reach/);
+});
+
+test("a host that answers every unknown address with the front page still passes a good release", async () => {
+  const frontPage = (site) => [200, site["/"][1]];
+  const problems = await verifyLive(BASE, { commit: HEAD, fetch: network(goodSite(), frontPage).fetch });
+  assert.deepEqual(problems, []);
+});
+
+test("on that host, a pitch build that went up is still reported", async () => {
+  const site = goodSite();
+  site["/read/pitch/"] = [200, "<html>the pitch</html>"];
+  const frontPage = (s) => [200, s["/"][1]];
+  const problems = await verifyLive(BASE, { commit: HEAD, fetch: network(site, frontPage).fetch });
+  assert.deepEqual(problems.map((p) => p.path), ["/read/pitch/"]);
 });

@@ -24,7 +24,7 @@ function cleanFolder() {
     { path: "styles.css", text: "body { margin: 0 }" },
     { path: "notify.js", text: "fetch('/api/notify')" },
     { path: "page-shot.png", text: null },
-    { path: "_redirects", text: "/read/*  /read/index.html  200\n" },
+    { path: "404.html", text: "<h1>No page here</h1><a href=\"/\">Hifth</a>" },
     { path: "_headers", text: "/read/assets/*\n  Cache-Control: immutable\n" },
     { path: "read/index.html", text: '<script type="module" src="./assets/index-abc.js"></script>' },
     { path: "read/sw.js", text: "self.addEventListener('fetch', () => {})" },
@@ -104,8 +104,8 @@ test("a development feature named in a shipped file is refused, each with its re
 });
 
 test("a release missing a page the site needs is refused", () => {
-  const files = cleanFolder().filter((f) => f.path !== "read/index.html" && f.path !== "privacy.html");
-  assert.deepEqual(paths(refusals(files)), ["privacy.html", "read/index.html"]);
+  const files = cleanFolder().filter((f) => !["read/index.html", "privacy.html", "404.html"].includes(f.path));
+  assert.deepEqual(paths(refusals(files)), ["privacy.html", "404.html", "read/index.html"]);
 });
 
 test("the app must carry the commit being released, so its source-code offer is true", () => {

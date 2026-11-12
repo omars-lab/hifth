@@ -18,7 +18,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 
 const ALLOWED = [
-  /^(index\.html|privacy\.html|styles\.css|notify\.js|page-shot\.png|_headers|_redirects)$/,
+  /^(index\.html|privacy\.html|404\.html|styles\.css|notify\.js|page-shot\.png|_headers|_redirects)$/,
   /^read\/(index\.html|sw\.js|workbox-[\w-]+\.js|manifest\.webmanifest|favicon\.svg)$/,
   /^read\/icons\/[\w.-]+$/,
   /^read\/assets\/.+$/,
@@ -47,7 +47,7 @@ export function markersIn(text) {
   return MARKERS.filter(([re]) => re.test(text)).map(([, why]) => `it mentions ${why}`);
 }
 
-const REQUIRED = ["index.html", "privacy.html", "read/index.html", "read/sw.js"];
+const REQUIRED = ["index.html", "privacy.html", "404.html", "read/index.html", "read/sw.js"];
 
 const TEXT = new Set([".html", ".js", ".css", ".json", ".webmanifest", ".svg", ".txt", ".xml"]);
 

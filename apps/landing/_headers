@@ -1,11 +1,13 @@
 # Cloudflare Pages reads this file only at the top of the site, so the app's own rules
 # (apps/web/public/_headers) are restated here under /read/. The release leaves the app's
 # copy out. Hashed build files never change; everything else revalidates so updates land.
+# Cloudflare serves a page at its address without .html (privacy.html at /privacy, the app's
+# index.html at /read/), so the rules name those addresses.
 
 /
   Cache-Control: no-cache
 
-/privacy.html
+/privacy
   Cache-Control: no-cache
 
 /read/assets/*
@@ -23,5 +25,5 @@
 /read/manifest.webmanifest
   Cache-Control: no-cache
 
-/read/index.html
+/read/
   Cache-Control: no-cache
