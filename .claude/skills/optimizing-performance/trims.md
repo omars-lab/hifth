@@ -35,6 +35,18 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Trimmed again 2026-11-12: −3.1 KB, nothing a reader sees changed.** The calendar and share-menu
+redesigns the owner asked for needed room, and the app was at 209.6 of 210 KB. The size map
+(`scripts/size-by-source.mjs`, now a kept tool) pointed at two things. The offline worker was
+registered through the plugin's helper, which fetches a 2.3 KB library to watch for a waiting
+update; nothing asked it to show one, so a plain register call does the same (−2.7 KB with its
+loader). And the info panel had one settings block copied 35 times; a shared piece took 0.4 KB,
+less than its source suggests, because compression already squeezed most of the repetition out.
+209.6 → 206.5 KB. Unit tests check the worker is registered at the build's address in a browser,
+and not in the app shell or on the dev server; the offline and info-panel browser tests pass in
+Chrome and Firefox. Worth remembering: copied code costs little once compressed, a whole library
+pulled in for one call costs its full size.
+
 **Trimmed 2026-11-12: the words table, −4.1 KB, nothing a reader sees changed.** With the app at
 210.0 of 210 KB and two small carries waiting, the owner chose finding code to delete over raising
 the limit. A map of the main script by source file showed `i18n.tsx` at 7.4 KB gz, most of it 537

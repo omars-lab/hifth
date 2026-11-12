@@ -7,7 +7,6 @@
  * nicety. Loop 0 scaffolds the capture + a subscribe hook; the full pin-a-juz
  * + persist() flow is Loop 6.
  */
-import { registerSW } from "virtual:pwa-register";
 import { requestPersistentStorage } from "./storage";
 import { isNative } from "./native-bridge";
 
@@ -284,11 +283,15 @@ export function initPwa(): void {
     // first tap, which came before there was anything to weigh.
     void requestPersistentStorage();
   });
-  // Prompt-type registration: the SW updates in the background; Loop 6 surfaces
-  // an "update ready" affordance. For Loop 0 we just register.
-  registerSW({ immediate: true });
-
   if (!("serviceWorker" in navigator)) return;
+  // Registered by hand since 2026-11-12. The plugin's helper fetched a 2.3 KB
+  // library to watch for a waiting update, and with nothing asking it to show
+  // one, it did no more than this line. A new worker still waits until every
+  // tab of the old one closes (no skipWaiting in the build), as before. The dev
+  // server serves no worker, so it registers none.
+  if (import.meta.env.PROD) {
+    navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(() => undefined);
+  }
   // Only meaningful once a worker is actually controlling this page: before
   // that, an empty cache is a first visit rather than an eviction, and the
   // first visit's own install is already on its way to filling it.

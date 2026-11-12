@@ -123,6 +123,54 @@ interface ColophonProps {
   spread?: boolean;
 }
 
+/** One setting the reader picks from: a heading, a row of radio buttons, a note.
+    Each button carries `data-<data>` set to its choice, which the tests find it by.
+    Written once on 2026-11-12, when the same block had been copied 35 times. */
+function Choice<C extends string>({
+  id,
+  title,
+  note,
+  value,
+  options,
+  label,
+  data,
+  onPick,
+}: {
+  id: string;
+  title: string;
+  note: string;
+  value: C;
+  options: readonly C[];
+  label: (choice: C) => string;
+  data: string;
+  onPick: (choice: C) => void;
+}) {
+  const head = `colophon-${id}`;
+  return (
+    <section className={styles.block} aria-labelledby={head}>
+      <h3 className={styles.subhead} id={head}>
+        {title}
+      </h3>
+      <div className={styles.langRow} role="radiogroup" aria-labelledby={head}>
+        {options.map((choice) => (
+          <button
+            key={choice}
+            type="button"
+            role="radio"
+            className={styles.lang}
+            aria-checked={value === choice}
+            {...{ [`data-${data}`]: choice }}
+            onClick={() => onPick(choice)}
+          >
+            {label(choice)}
+          </button>
+        ))}
+      </div>
+      <p className={styles.note}>{note}</p>
+    </section>
+  );
+}
+
 /** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
 function focusables(root: HTMLElement): HTMLElement[] {
   const sel =
@@ -541,156 +589,36 @@ export function Colophon({
             the reader picks). Three states, so a radio group like the language
             one, each button naming the style it offers. */}
         {turnStyle && onTurnStyle && (
-          <section className={styles.block} aria-labelledby="colophon-turn">
-            <h3 className={styles.subhead} id="colophon-turn">
-              {t.turnSectionTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-turn">
-              {TURN_STYLES.map((style) => (
-                <button
-                  key={style}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={turnStyle === style}
-                  data-turn-style={style}
-                  onClick={() => onTurnStyle(style)}
-                >
-                  {style === "seam" ? t.turnStyleSeam : style === "curl" ? t.turnStyleCurl : t.turnStyleLift}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.turnStyleNote}</p>
-          </section>
+          <Choice id="turn" title={t.turnSectionTitle} note={t.turnStyleNote} value={turnStyle} options={TURN_STYLES} label={(style) => style === "seam" ? t.turnStyleSeam : style === "curl" ? t.turnStyleCurl : t.turnStyleLift} data="turn-style" onPick={onTurnStyle} />
         )}
 
         {/* What a tap and a hold on a verse do (docs/design/verse-tap-and-hold.md):
             three ways, so a radio group like the page turn's. */}
         {verseGestures && onVerseGestures && (
-          <section className={styles.block} aria-labelledby="colophon-gestures">
-            <h3 className={styles.subhead} id="colophon-gestures">
-              {t.verseGesturesTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-gestures">
-              {VERSE_GESTURES.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={verseGestures === choice}
-                  data-verse-gestures={choice}
-                  onClick={() => onVerseGestures(choice)}
-                >
-                  {choice === "a" ? t.verseGesturesA : choice === "b" ? t.verseGesturesB : t.verseGesturesC}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.verseGesturesNote}</p>
-          </section>
+          <Choice id="gestures" title={t.verseGesturesTitle} note={t.verseGesturesNote} value={verseGestures} options={VERSE_GESTURES} label={(choice) => choice === "a" ? t.verseGesturesA : choice === "b" ? t.verseGesturesB : t.verseGesturesC} data="verse-gestures" onPick={onVerseGestures} />
         )}
 
         {/* Where a verse's tools open (selection-drawer ③): both built, the
             card by default until the owner has tried the drawer by hand. */}
         {drawerTools && onDrawerTools && (
-          <section className={styles.block} aria-labelledby="colophon-drawer-tools">
-            <h3 className={styles.subhead} id="colophon-drawer-tools">
-              {t.drawerToolsTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-drawer-tools">
-              {DRAWER_TOOLS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={drawerTools === choice}
-                  data-drawer-tools={choice}
-                  onClick={() => onDrawerTools(choice)}
-                >
-                  {choice === "sheet" ? t.drawerToolsSheet : t.drawerToolsDrawer}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.drawerToolsNote}</p>
-          </section>
+          <Choice id="drawer-tools" title={t.drawerToolsTitle} note={t.drawerToolsNote} value={drawerTools} options={DRAWER_TOOLS} label={(choice) => choice === "sheet" ? t.drawerToolsSheet : t.drawerToolsDrawer} data="drawer-tools" onPick={onDrawerTools} />
         )}
 
         {/* The help for the page tools (ayah-drawer ①): each tool's label
             always, and the line beside the bar until the owner drops it. */}
         {toolHelp && onToolHelp && (
-          <section className={styles.block} aria-labelledby="colophon-tool-help">
-            <h3 className={styles.subhead} id="colophon-tool-help">
-              {t.toolHelpTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-tool-help">
-              {TOOL_HELPS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={toolHelp === choice}
-                  data-tool-help={choice}
-                  onClick={() => onToolHelp(choice)}
-                >
-                  {choice === "line" ? t.toolHelpLine : t.toolHelpHover}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.toolHelpNote}</p>
-          </section>
+          <Choice id="tool-help" title={t.toolHelpTitle} note={t.toolHelpNote} value={toolHelp} options={TOOL_HELPS} label={(choice) => choice === "line" ? t.toolHelpLine : t.toolHelpHover} data="tool-help" onPick={onToolHelp} />
         )}
         {/* Where the reading settings sit (ayah-drawer ①): each in the bar, or
             all in one drawer behind a button, until the owner has tried both. */}
         {settingsAt && onSettingsAt && (
-          <section className={styles.block} aria-labelledby="colophon-settings-at">
-            <h3 className={styles.subhead} id="colophon-settings-at">
-              {t.settingsAtTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-settings-at">
-              {SETTINGS_ATS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={settingsAt === choice}
-                  data-settings-at={choice}
-                  onClick={() => onSettingsAt(choice)}
-                >
-                  {choice === "bar" ? t.settingsAtBar : t.settingsAtDrawer}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.settingsAtNote}</p>
-          </section>
+          <Choice id="settings-at" title={t.settingsAtTitle} note={t.settingsAtNote} value={settingsAt} options={SETTINGS_ATS} label={(choice) => choice === "bar" ? t.settingsAtBar : t.settingsAtDrawer} data="settings-at" onPick={onSettingsAt} />
         )}
 
         {/* Page icons along the bottom (app-pages ①): off, or a row that gives
             settings a page of their own, until the owner has tried it. */}
         {appPages && onAppPages && (
-          <section className={styles.block} aria-labelledby="colophon-app-pages">
-            <h3 className={styles.subhead} id="colophon-app-pages">
-              {t.appPagesTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-app-pages">
-              {APP_PAGES.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={appPages === choice}
-                  data-app-pages={choice}
-                  onClick={() => onAppPages(choice)}
-                >
-                  {choice === "off" ? t.stateOff : t.stateOn}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.appPagesNote}</p>
-          </section>
+          <Choice id="app-pages" title={t.appPagesTitle} note={t.appPagesNote} value={appPages} options={APP_PAGES} label={(choice) => choice === "off" ? t.stateOff : t.stateOn} data="app-pages" onPick={onAppPages} />
         )}
 
         {/* Which drawer sits on which (ayah-drawer ①): a path in the top one's
@@ -721,174 +649,34 @@ export function Colophon({
         {/* What a second tap on the lit verse does (selection-drawer ①): both
             built, putting it out by default until the owner has tried the other. */}
         {wordTap && onWordTap && (
-          <section className={styles.block} aria-labelledby="colophon-word-tap">
-            <h3 className={styles.subhead} id="colophon-word-tap">
-              {t.wordTapTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-word-tap">
-              {WORD_TAPS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={wordTap === choice}
-                  data-word-tap={choice}
-                  onClick={() => onWordTap(choice)}
-                >
-                  {choice === "off" ? t.wordTapOff : t.wordTapWord}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.wordTapNote}</p>
-          </section>
+          <Choice id="word-tap" title={t.wordTapTitle} note={t.wordTapNote} value={wordTap} options={WORD_TAPS} label={(choice) => choice === "off" ? t.wordTapOff : t.wordTapWord} data="word-tap" onPick={onWordTap} />
         )}
 
         {/* How the page shows the verse a "Play to" run is reciting
             (docs/PLAN.md, item 57): built two ways, the moving light first. */}
         {runMark && onRunMark && (
-          <section className={styles.block} aria-labelledby="colophon-run-mark">
-            <h3 className={styles.subhead} id="colophon-run-mark">
-              {t.runMarkTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-run-mark">
-              {RUN_MARKS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={runMark === choice}
-                  data-run-mark={choice}
-                  onClick={() => onRunMark(choice)}
-                >
-                  {choice === "light" ? t.runMarkLight : t.runMarkRing}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.runMarkNote}</p>
-          </section>
+          <Choice id="run-mark" title={t.runMarkTitle} note={t.runMarkNote} value={runMark} options={RUN_MARKS} label={(choice) => choice === "light" ? t.runMarkLight : t.runMarkRing} data="run-mark" onPick={onRunMark} />
         )}
 
         {/* What the page does when the reader turns away from a run while it
             plays (docs/PLAN.md, item 59): staying is the default; going back stays. */}
-        <section className={styles.block} aria-labelledby="colophon-run-follow">
-          <h3 className={styles.subhead} id="colophon-run-follow">
-            {t.runFollowTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-run-follow">
-            {RUN_FOLLOWS.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={runFollow === choice}
-                data-run-follow={choice}
-                onClick={() => rememberRunFollow(choice)}
-              >
-                {choice === "stay" ? t.runFollowStay : t.runFollowBack}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.runFollowNote}</p>
-        </section>
+        <Choice id="run-follow" title={t.runFollowTitle} note={t.runFollowNote} value={runFollow} options={RUN_FOLLOWS} label={(choice) => choice === "stay" ? t.runFollowStay : t.runFollowBack} data="run-follow" onPick={rememberRunFollow} />
 
         {/* Where the zoom buttons grow the page from (docs/PLAN.md, item 66):
             the chosen verse is the default; the middle, as it was, stays. */}
-        <section className={styles.block} aria-labelledby="colophon-zoom-anchor">
-          <h3 className={styles.subhead} id="colophon-zoom-anchor">
-            {t.zoomAnchorTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-zoom-anchor">
-            {ZOOM_ANCHORS.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={zoomAnchor === choice}
-                data-zoom-anchor={choice}
-                onClick={() => rememberZoomAnchor(choice)}
-              >
-                {choice === "verse" ? t.zoomAnchorVerse : t.zoomAnchorMiddle}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.zoomAnchorNote}</p>
-        </section>
+        <Choice id="zoom-anchor" title={t.zoomAnchorTitle} note={t.zoomAnchorNote} value={zoomAnchor} options={ZOOM_ANCHORS} label={(choice) => choice === "verse" ? t.zoomAnchorVerse : t.zoomAnchorMiddle} data="zoom-anchor" onPick={rememberZoomAnchor} />
 
         {/* What zooming in keeps on the screen (docs/PLAN.md, item 100): the
             starts of the lines are the default; growing from the fold stays. */}
-        <section className={styles.block} aria-labelledby="colophon-zoom-across">
-          <h3 className={styles.subhead} id="colophon-zoom-across">
-            {t.zoomAcrossTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-zoom-across">
-            {ZOOM_ACROSSES.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={zoomAcross === choice}
-                data-zoom-across={choice}
-                onClick={() => rememberZoomAcross(choice)}
-              >
-                {choice === "starts" ? t.zoomAcrossStarts : t.zoomAcrossFold}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.zoomAcrossNote}</p>
-        </section>
+        <Choice id="zoom-across" title={t.zoomAcrossTitle} note={t.zoomAcrossNote} value={zoomAcross} options={ZOOM_ACROSSES} label={(choice) => choice === "starts" ? t.zoomAcrossStarts : t.zoomAcrossFold} data="zoom-across" onPick={rememberZoomAcross} />
 
         {/* How a note across the page's foot leaves (docs/PLAN.md, item 72):
             sliding away as the page comes down is the default; at once stays. */}
-        <section className={styles.block} aria-labelledby="colophon-note-leave">
-          <h3 className={styles.subhead} id="colophon-note-leave">
-            {t.noteLeaveTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-note-leave">
-            {NOTE_LEAVES.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={noteLeave === choice}
-                data-note-leave={choice}
-                onClick={() => rememberNoteLeave(choice)}
-              >
-                {choice === "slide" ? t.noteLeaveSlide : t.noteLeaveAtOnce}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.noteLeaveNote}</p>
-        </section>
+        <Choice id="note-leave" title={t.noteLeaveTitle} note={t.noteLeaveNote} value={noteLeave} options={NOTE_LEAVES} label={(choice) => choice === "slide" ? t.noteLeaveSlide : t.noteLeaveAtOnce} data="note-leave" onPick={rememberNoteLeave} />
 
         {/* How a run makes its next verse ready while one sounds (docs/PLAN.md,
             item 63): holding it in hand is the default; asking early and off stay. */}
-        <section className={styles.block} aria-labelledby="colophon-run-ahead">
-          <h3 className={styles.subhead} id="colophon-run-ahead">
-            {t.runAheadTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-run-ahead">
-            {RUN_AHEADS.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={runAhead === choice}
-                data-run-ahead={choice}
-                onClick={() => rememberRunAhead(choice)}
-              >
-                {choice === "hold" ? t.runAheadHold : choice === "ask" ? t.runAheadAsk : t.runAheadOff}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.runAheadNote}</p>
-        </section>
+        <Choice id="run-ahead" title={t.runAheadTitle} note={t.runAheadNote} value={runAhead} options={RUN_AHEADS} label={(choice) => choice === "hold" ? t.runAheadHold : choice === "ask" ? t.runAheadAsk : t.runAheadOff} data="run-ahead" onPick={rememberRunAhead} />
 
         {/* The surahs whose recitation is kept on this device (docs/PLAN.md,
             item 101), beside the setting for how the next verses are fetched. */}
@@ -897,27 +685,7 @@ export function Colophon({
         {/* How the saved jump arrows show (docs/design/jump-arrows-options.md):
             the owner chose staying, and kept the other way as a choice. */}
         {arrowShowing && onArrowShowing && (
-          <section className={styles.block} aria-labelledby="colophon-jump-arrows">
-            <h3 className={styles.subhead} id="colophon-jump-arrows">
-              {t.jumpArrowsTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-jump-arrows">
-              {ARROW_SHOWINGS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={arrowShowing === choice}
-                  data-jump-arrows={choice}
-                  onClick={() => onArrowShowing(choice)}
-                >
-                  {choice === "stays" ? t.jumpArrowsStays : t.jumpArrowsAsked}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.jumpArrowsNote}</p>
-          </section>
+          <Choice id="jump-arrows" title={t.jumpArrowsTitle} note={t.jumpArrowsNote} value={arrowShowing} options={ARROW_SHOWINGS} label={(choice) => choice === "stays" ? t.jumpArrowsStays : t.jumpArrowsAsked} data="jump-arrows" onPick={onArrowShowing} />
         )}
 
         {/* What a card over the facing page does at the page's outer edge
@@ -925,78 +693,18 @@ export function Colophon({
             grabbing through on 2026-10-23, and the other two stay choosable. Only where two pages
             can face each other: on a phone there is no facing page to cover. */}
         {spread && (
-        <section className={styles.block} aria-labelledby="colophon-card-edge">
-          <h3 className={styles.subhead} id="colophon-card-edge">
-            {t.cardEdgeTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-card-edge">
-            {CARD_EDGES.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={cardEdge === choice}
-                data-card-edge={choice}
-                onClick={() => rememberCardEdge(choice)}
-              >
-                {choice === "covers" ? t.cardEdgeCovers : choice === "clear" ? t.cardEdgeClear : t.cardEdgeTurns}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.cardEdgeNote}</p>
-        </section>
+        <Choice id="card-edge" title={t.cardEdgeTitle} note={t.cardEdgeNote} value={cardEdge} options={CARD_EDGES} label={(choice) => choice === "covers" ? t.cardEdgeCovers : choice === "clear" ? t.cardEdgeClear : t.cardEdgeTurns} data="card-edge" onPick={rememberCardEdge} />
         )}
 
         {/* How the two opening pages fill their paper (knowledge-graph-commentary.md,
             item 36): the owner's pick is the default, the other kept as a choice. */}
-        <section className={styles.block} aria-labelledby="colophon-opening-text">
-          <h3 className={styles.subhead} id="colophon-opening-text">
-            {t.openingTextTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-opening-text">
-            {OPENING_TEXTS.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={openingText === choice}
-                data-opening-text={choice}
-                onClick={() => rememberOpeningText(choice)}
-              >
-                {choice === "large" ? t.openingTextLarge : t.openingTextEven}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.openingTextNote}</p>
-        </section>
+        <Choice id="opening-text" title={t.openingTextTitle} note={t.openingTextNote} value={openingText} options={OPENING_TEXTS} label={(choice) => choice === "large" ? t.openingTextLarge : t.openingTextEven} data="opening-text" onPick={rememberOpeningText} />
 
         {/* How many related verses a note lists before the reader asks
             (knowledge-graph-commentary.md, item 41): the line is the default,
             the whole list kept as a choice. Only the private build has notes. */}
         {PITCH && (
-          <section className={styles.block} aria-labelledby="colophon-related-list">
-            <h3 className={styles.subhead} id="colophon-related-list">
-              {t.relatedListTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-related-list">
-              {RELATED_LISTS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={relatedList === choice}
-                  data-related-list={choice}
-                  onClick={() => rememberRelatedList(choice)}
-                >
-                  {choice === "line" ? t.relatedListLine : t.relatedListAll}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.relatedListNote}</p>
-          </section>
+          <Choice id="related-list" title={t.relatedListTitle} note={t.relatedListNote} value={relatedList} options={RELATED_LISTS} label={(choice) => choice === "line" ? t.relatedListLine : t.relatedListAll} data="related-list" onPick={rememberRelatedList} />
         )}
 
         {/* How a verse a little taller than the room above its note is shown
@@ -1004,54 +712,14 @@ export function Colophon({
             little smaller is the default, the note a little shorter kept as a
             choice. Only the private build has notes. */}
         {PITCH && (
-          <section className={styles.block} aria-labelledby="colophon-long-verse">
-            <h3 className={styles.subhead} id="colophon-long-verse">
-              {t.longVerseTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-long-verse">
-              {LONG_VERSES.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={longVerse === choice}
-                  data-long-verse={choice}
-                  onClick={() => rememberLongVerse(choice)}
-                >
-                  {choice === "smaller" ? t.longVerseSmaller : t.longVerseShorter}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.longVerseNote}</p>
-          </section>
+          <Choice id="long-verse" title={t.longVerseTitle} note={t.longVerseNote} value={longVerse} options={LONG_VERSES} label={(choice) => choice === "smaller" ? t.longVerseSmaller : t.longVerseShorter} data="long-verse" onPick={rememberLongVerse} />
         )}
 
         {/* How a look-alike whose shared words come more than once is compared
             (knowledge-graph-commentary.md, item 49): every shared stretch
             marked is the default, the two side by side unmarked kept as a
             choice. */}
-        <section className={styles.block} aria-labelledby="colophon-lookalike-compare">
-          <h3 className={styles.subhead} id="colophon-lookalike-compare">
-            {t.lookalikeCompareTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-lookalike-compare">
-            {LOOKALIKE_COMPARES.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={lookalikeCompare === choice}
-                data-lookalike-compare={choice}
-                onClick={() => rememberLookalikeCompare(choice)}
-              >
-                {choice === "every" ? t.lookalikeCompareEvery : t.lookalikeComparePlain}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.lookalikeCompareNote}</p>
-        </section>
+        <Choice id="lookalike-compare" title={t.lookalikeCompareTitle} note={t.lookalikeCompareNote} value={lookalikeCompare} options={LOOKALIKE_COMPARES} label={(choice) => choice === "every" ? t.lookalikeCompareEvery : t.lookalikeComparePlain} data="lookalike-compare" onPick={rememberLookalikeCompare} />
 
         {/* What a look-alike list does with a passage row when a verse inside
             it is listed too (knowledge-graph-commentary.md, item 47): all three
@@ -1084,147 +752,27 @@ export function Colophon({
 
         {/* Where a passage row's arrow lands (lookalike-rows.md, item 17): the
             owner picked the most-alike verse, 2026-10-12; the first verse stays. */}
-        <section className={styles.block} aria-labelledby="colophon-passage-hop">
-          <h3 className={styles.subhead} id="colophon-passage-hop">
-            {t.passageHopTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-passage-hop">
-            {PASSAGE_HOPS.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={passageHop === choice}
-                data-passage-hop={choice}
-                onClick={() => rememberPassageHop(choice)}
-              >
-                {choice === "alike" ? t.passageHopAlike : t.passageHopFirst}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.passageHopNote}</p>
-        </section>
+        <Choice id="passage-hop" title={t.passageHopTitle} note={t.passageHopNote} value={passageHop} options={PASSAGE_HOPS} label={(choice) => choice === "alike" ? t.passageHopAlike : t.passageHopFirst} data="passage-hop" onPick={rememberPassageHop} />
 
         {/* Which way the look-alike signs' arrows point (knowledge-graph-commentary.md,
             item 8): the owner picked the book's way, 2026-10-12; the old way stays. */}
-        <section className={styles.block} aria-labelledby="colophon-lookalike-arrows">
-          <h3 className={styles.subhead} id="colophon-lookalike-arrows">
-            {t.lookalikeArrowsTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-lookalike-arrows">
-            {LOOKALIKE_ARROWS.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={lookalikeArrows === choice}
-                data-lookalike-arrows={choice}
-                onClick={() => rememberLookalikeArrows(choice)}
-              >
-                {choice === "book" ? t.lookalikeArrowsBook : t.lookalikeArrowsReading}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.lookalikeArrowsNote}</p>
-        </section>
+        <Choice id="lookalike-arrows" title={t.lookalikeArrowsTitle} note={t.lookalikeArrowsNote} value={lookalikeArrows} options={LOOKALIKE_ARROWS} label={(choice) => choice === "book" ? t.lookalikeArrowsBook : t.lookalikeArrowsReading} data="lookalike-arrows" onPick={rememberLookalikeArrows} />
 
         {/* Where a turn lands when the page opened bigger than the screen
             (docs/PLAN.md, item 97): the owner picked the top, 2026-10-13; the old way stays. */}
-        <section className={styles.block} aria-labelledby="colophon-turn-landing">
-          <h3 className={styles.subhead} id="colophon-turn-landing">
-            {t.turnLandingTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-turn-landing">
-            {TURN_LANDINGS.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={turnLanding === choice}
-                data-turn-landing={choice}
-                onClick={() => rememberTurnLanding(choice)}
-              >
-                {choice === "top" ? t.turnLandingTop : t.turnLandingSame}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.turnLandingNote}</p>
-        </section>
+        <Choice id="turn-landing" title={t.turnLandingTitle} note={t.turnLandingNote} value={turnLanding} options={TURN_LANDINGS} label={(choice) => choice === "top" ? t.turnLandingTop : t.turnLandingSame} data="turn-landing" onPick={rememberTurnLanding} />
 
         {/* How big a verse's page opens on an upright screen (docs/PLAN.md, item 98):
             a little closer is the default; the whole page is the other way. */}
-        <section className={styles.block} aria-labelledby="colophon-open-size">
-          <h3 className={styles.subhead} id="colophon-open-size">
-            {t.openSizeTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-open-size">
-            {OPEN_SIZES.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={openSize === choice}
-                data-open-size={choice}
-                onClick={() => rememberOpenSize(choice)}
-              >
-                {choice === "closer" ? t.openSizeCloser : t.openSizeWhole}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.openSizeNote}</p>
-        </section>
+        <Choice id="open-size" title={t.openSizeTitle} note={t.openSizeNote} value={openSize} options={OPEN_SIZES} label={(choice) => choice === "closer" ? t.openSizeCloser : t.openSizeWhole} data="open-size" onPick={rememberOpenSize} />
 
         {/* How big the page is when the iPad comes back upright (docs/PLAN.md,
             item 99): the size it opened at is the default; whole is the other way. */}
-        <section className={styles.block} aria-labelledby="colophon-upright-again">
-          <h3 className={styles.subhead} id="colophon-upright-again">
-            {t.uprightAgainTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-upright-again">
-            {UPRIGHT_AGAINS.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={uprightAgain === choice}
-                data-upright-again={choice}
-                onClick={() => rememberUprightAgain(choice)}
-              >
-                {choice === "opening" ? t.uprightAgainOpening : t.uprightAgainWhole}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.uprightAgainNote}</p>
-        </section>
+        <Choice id="upright-again" title={t.uprightAgainTitle} note={t.uprightAgainNote} value={uprightAgain} options={UPRIGHT_AGAINS} label={(choice) => choice === "opening" ? t.uprightAgainOpening : t.uprightAgainWhole} data="upright-again" onPick={rememberUprightAgain} />
 
         {/* How long a bookmark's ribbon hangs (docs/PLAN.md, item 49): short,
             above the first line, is the default; the long one stays. */}
-        <section className={styles.block} aria-labelledby="colophon-ribbon-length">
-          <h3 className={styles.subhead} id="colophon-ribbon-length">
-            {t.ribbonLengthTitle}
-          </h3>
-          <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-ribbon-length">
-            {RIBBON_LENGTHS.map((choice) => (
-              <button
-                key={choice}
-                type="button"
-                role="radio"
-                className={styles.lang}
-                aria-checked={ribbonLength === choice}
-                data-ribbon-length={choice}
-                onClick={() => rememberRibbonLength(choice)}
-              >
-                {choice === "short" ? t.ribbonLengthShort : t.ribbonLengthLong}
-              </button>
-            ))}
-          </div>
-          <p className={styles.note}>{t.ribbonLengthNote}</p>
-        </section>
+        <Choice id="ribbon-length" title={t.ribbonLengthTitle} note={t.ribbonLengthNote} value={ribbonLength} options={RIBBON_LENGTHS} label={(choice) => choice === "short" ? t.ribbonLengthShort : t.ribbonLengthLong} data="ribbon-length" onPick={rememberRibbonLength} />
 
         {/* What a closed look-alike row shows of the words the pair shares
             (docs/design/lookalike-rows.md, item 6): every way built, the picture
@@ -1258,183 +806,43 @@ export function Colophon({
         {/* How a note draws the parts it can be about (docs/design/scoped-notes.md,
             step 7): every look kept while they are tried, so a radio group too. */}
         {scopeLook && onScopeLook && (
-          <section className={styles.block} aria-labelledby="colophon-scope-look">
-            <h3 className={styles.subhead} id="colophon-scope-look">
-              {t.scopeLookTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-scope-look">
-              {SCOPE_LOOKS.map((look) => (
-                <button
-                  key={look}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={scopeLook === look}
-                  data-scope-look={look}
-                  onClick={() => onScopeLook(look)}
-                >
-                  {SCOPE_LOOK_NAME[look](t)}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.scopeLookNote}</p>
-          </section>
+          <Choice id="scope-look" title={t.scopeLookTitle} note={t.scopeLookNote} value={scopeLook} options={SCOPE_LOOKS} label={(c) => SCOPE_LOOK_NAME[c](t)} data="scope-look" onPick={onScopeLook} />
         )}
         {/* Note, Harakat and Word as three buttons or one (docs/design/notes-
             style-toolbar.md, ②): the one button built as a setting, three kept
             as the default (owner, 2026-10-12). Every layout has a tools bar. */}
         {markTools && onMarkTools && (
-          <section className={styles.block} aria-labelledby="colophon-mark-tools">
-            <h3 className={styles.subhead} id="colophon-mark-tools">
-              {t.markToolsTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-mark-tools">
-              {MARK_TOOLS.map((shape) => (
-                <button
-                  key={shape}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={markTools === shape}
-                  data-mark-tools-choice={shape}
-                  onClick={() => onMarkTools(shape)}
-                >
-                  {MARK_TOOLS_NAME[shape](t)}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.markToolsNote}</p>
-          </section>
+          <Choice id="mark-tools" title={t.markToolsTitle} note={t.markToolsNote} value={markTools} options={MARK_TOOLS} label={(c) => MARK_TOOLS_NAME[c](t)} data="mark-tools-choice" onPick={onMarkTools} />
         )}
         {/* Where the eraser sits on a computer: last of the tools, the default
             since the owner's page comment of 2026-11-07, or beside Undo, where
             it was first built. A phone keeps it beside Undo. */}
         {eraserPlace && onEraserPlace && (
-          <section className={styles.block} aria-labelledby="colophon-eraser-place">
-            <h3 className={styles.subhead} id="colophon-eraser-place">
-              {t.eraserPlaceTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-eraser-place">
-              {ERASER_PLACES.map((place) => (
-                <button
-                  key={place}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={eraserPlace === place}
-                  data-eraser-place-choice={place}
-                  onClick={() => onEraserPlace(place)}
-                >
-                  {ERASER_PLACE_NAME[place](t)}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.eraserPlaceNote}</p>
-          </section>
+          <Choice id="eraser-place" title={t.eraserPlaceTitle} note={t.eraserPlaceNote} value={eraserPlace} options={ERASER_PLACES} label={(c) => ERASER_PLACE_NAME[c](t)} data="eraser-place-choice" onPick={onEraserPlace} />
         )}
         {/* What a tap with the Mistake pen does (docs/PLAN.md, item 103): ask
             what went wrong is the default the owner chose on 2026-10-13; the
             first way, mark at once, is kept as the other choice. */}
         {mistakeTap && onMistakeTap && (
-          <section className={styles.block} aria-labelledby="colophon-mistake-tap">
-            <h3 className={styles.subhead} id="colophon-mistake-tap">
-              {t.mistakeTapTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-mistake-tap">
-              {MISTAKE_TAPS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={mistakeTap === choice}
-                  data-mistake-tap-choice={choice}
-                  onClick={() => onMistakeTap(choice)}
-                >
-                  {MISTAKE_TAP_NAME[choice](t)}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.mistakeTapNote}</p>
-          </section>
+          <Choice id="mistake-tap" title={t.mistakeTapTitle} note={t.mistakeTapNote} value={mistakeTap} options={MISTAKE_TAPS} label={(c) => MISTAKE_TAP_NAME[c](t)} data="mistake-tap-choice" onPick={onMistakeTap} />
         )}
         {/* How the Mistake pen's question is laid out, now that it asks the kind
             (a letter, a tajweed rule, as well as the harakat): three ways, kept
             while the owner tries them (2026-11-12). */}
         {mistakeAsk && onMistakeAsk && (
-          <section className={styles.block} aria-labelledby="colophon-mistake-ask">
-            <h3 className={styles.subhead} id="colophon-mistake-ask">
-              {t.mistakeAskTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-mistake-ask">
-              {MISTAKE_ASKS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={mistakeAsk === choice}
-                  data-mistake-ask-choice={choice}
-                  onClick={() => onMistakeAsk(choice)}
-                >
-                  {MISTAKE_ASK_NAME[choice](t)}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.mistakeAskNote}</p>
-          </section>
+          <Choice id="mistake-ask" title={t.mistakeAskTitle} note={t.mistakeAskNote} value={mistakeAsk} options={MISTAKE_ASKS} label={(c) => MISTAKE_ASK_NAME[c](t)} data="mistake-ask-choice" onPick={onMistakeAsk} />
         )}
         {/* Where the page tools sit (docs/design/notes-style-toolbar.md, ①): all
             three homes the study drew, kept while they are tried (owner,
             2026-10-05). Only on the layout that has the tools bar. */}
         {penHome && onPenHome && (
-          <section className={styles.block} aria-labelledby="colophon-pen-home">
-            <h3 className={styles.subhead} id="colophon-pen-home">
-              {t.penHomeTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-pen-home">
-              {PEN_HOMES.map((home) => (
-                <button
-                  key={home}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={penHome === home}
-                  data-pen-home-choice={home}
-                  onClick={() => onPenHome(home)}
-                >
-                  {PEN_HOME_NAME[home](t)}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.penHomeNote}</p>
-          </section>
+          <Choice id="pen-home" title={t.penHomeTitle} note={t.penHomeNote} value={penHome} options={PEN_HOMES} label={(c) => PEN_HOME_NAME[c](t)} data="pen-home-choice" onPick={onPenHome} />
         )}
         {/* How the pens open at the Apple Pencil's tip (pen-ring.ts): rings
             round it, or the row first built, kept as the other way. Only in
             the iPad app, the one place with a pencil to squeeze. */}
         {tipPens && onTipPens && (
-          <section className={styles.block} aria-labelledby="colophon-tip-pens">
-            <h3 className={styles.subhead} id="colophon-tip-pens">
-              {t.tipPensTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-tip-pens">
-              {TIP_PENS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={tipPens === choice}
-                  data-tip-pens-choice={choice}
-                  onClick={() => onTipPens(choice)}
-                >
-                  {choice === "rings" ? t.tipPensRings : t.tipPensRow}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.tipPensNote}</p>
-          </section>
+          <Choice id="tip-pens" title={t.tipPensTitle} note={t.tipPensNote} value={tipPens} options={TIP_PENS} label={(choice) => choice === "rings" ? t.tipPensRings : t.tipPensRow} data="tip-pens-choice" onPick={onTipPens} />
         )}
         {/* The pens the pencil opens, to try, each with its line (PenGuide.tsx).
             On every device: a reader without a pencil can still see what the
@@ -1454,80 +862,20 @@ export function Colophon({
             (docs/PLAN.md, 95): the right by default, the left mirrored, the
             owner's pick of 2026-10-12. Only on the layout that has them. */}
         {penSide && onPenSide && (
-          <section className={styles.block} aria-labelledby="colophon-pen-side">
-            <h3 className={styles.subhead} id="colophon-pen-side">
-              {t.penSideTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-pen-side">
-              {PEN_SIDES.map((side) => (
-                <button
-                  key={side}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={penSide === side}
-                  data-pen-side-choice={side}
-                  onClick={() => onPenSide(side)}
-                >
-                  {PEN_SIDE_NAME[side](t)}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.penSideNote}</p>
-          </section>
+          <Choice id="pen-side" title={t.penSideTitle} note={t.penSideNote} value={penSide} options={PEN_SIDES} label={(c) => PEN_SIDE_NAME[c](t)} data="pen-side-choice" onPick={onPenSide} />
         )}
         {/* Where the look-alike chips go when a magnified page leaves no desk
             beside it (docs/design/lookalike-rows.md, ⑧): both homes built,
             the bottom row by default. Only on the layout with a desk. */}
         {railHome && onRailHome && (
-          <section className={styles.block} aria-labelledby="colophon-rail-home">
-            <h3 className={styles.subhead} id="colophon-rail-home">
-              {t.railHomeTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-rail-home">
-              {RAIL_HOMES.map((home) => (
-                <button
-                  key={home}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={railHome === home}
-                  data-rail-home-choice={home}
-                  onClick={() => onRailHome(home)}
-                >
-                  {RAIL_HOME_NAME[home](t)}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.railHomeNote}</p>
-          </section>
+          <Choice id="rail-home" title={t.railHomeTitle} note={t.railHomeNote} value={railHome} options={RAIL_HOMES} label={(c) => RAIL_HOME_NAME[c](t)} data="rail-home-choice" onPick={onRailHome} />
         )}
         {/* Where one page goes when a card opens beside it, the roots list or
             the share card (docs/design/lookalike-rows.md, ⑩ and ⑪): into the
             room the card leaves by default, or kept in the window's middle
             and drawn smaller. Only on the layout with a desk. */}
         {railHome && onRailHome && (
-          <section className={styles.block} aria-labelledby="colophon-card-room">
-            <h3 className={styles.subhead} id="colophon-card-room">
-              {t.cardRoomTitle}
-            </h3>
-            <div className={styles.langRow} role="radiogroup" aria-labelledby="colophon-card-room">
-              {CARD_ROOMS.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  role="radio"
-                  className={styles.lang}
-                  aria-checked={cardRoom === choice}
-                  data-card-room={choice}
-                  onClick={() => rememberCardRoom(choice)}
-                >
-                  {choice === "aside" ? t.cardRoomAside : t.cardRoomSmaller}
-                </button>
-              ))}
-            </div>
-            <p className={styles.note}>{t.cardRoomNote}</p>
-          </section>
+          <Choice id="card-room" title={t.cardRoomTitle} note={t.cardRoomNote} value={cardRoom} options={CARD_ROOMS} label={(choice) => choice === "aside" ? t.cardRoomAside : t.cardRoomSmaller} data="card-room" onPick={rememberCardRoom} />
         )}
 
         {/* The tips used to open on a device's first visit, above the page. The
