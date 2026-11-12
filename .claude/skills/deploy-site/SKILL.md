@@ -89,12 +89,10 @@ two entry files in `apps/landing/functions/api/`. Its database is described in
      then the check refuses the stand-in id.
   2. `wrangler d1 execute hifth-notify --remote --file schema.sql`.
   3. Put the spam check's secret in as a Pages secret, `TURNSTILE_SECRET`.
-- **To try the form locally:**
-  1. Make the local table: `wrangler d1 execute hifth-notify --local --file schema.sql`.
-  2. Start the server:
-     `wrangler pages dev dist --port 8788 --d1 DB=not-made-yet --binding TURNSTILE_SECRET=1x0000000000000000000000000000000AA --binding TURNSTILE_HOSTNAMES=localhost,example.com`.
-     That secret is Cloudflare's published test secret, which always passes. Once you give any
-     setting with `--binding`, the database has to be named with `--d1` too.
+- **To try the form locally:** `make hifth-app-serve`, then open http://127.0.0.1:7124/. It makes
+  the local table and starts the server with Cloudflare's published test secret, which always
+  passes. Once any setting is given with `--binding`, the database has to be named with `--d1`
+  too; the script does both.
 
 The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch-all rule under
 `/read/` as an endless loop, and the app needs none, since it keeps its place after the `#`.
@@ -114,6 +112,7 @@ Cloudflare also serves `privacy.html` at `/privacy`, so `_headers` names that ad
 | Script | What it does | When to reach for it | Command |
 |---|---|---|---|
 | `scripts/release-hifth-app.mjs check` | Builds (make site), puts the release folder together in `apps/landing/dist/`, and refuses it if it holds anything extra or the commit is not releasable | Before every release; to see what would go up | `make hifth-app-check` (`ARGS=--no-build` checks the last build) |
+| `scripts/release-hifth-app.mjs serve` | Builds and checks the release folder like `check`, without asking for a merged commit, makes the local sign-up table, and serves it all with Cloudflare's local server and the spam check's always-pass test keys | To look at hifth.app on this laptop, form included; the local launcher starts it | `make hifth-app-serve` (`ARGS=--no-build` reuses the last build) |
 | `scripts/release-hifth-app.mjs publish` | The check, then `wrangler pages deploy` with the saved keys, then verify | To release hifth.app | `make hifth-app-publish` |
 | `scripts/release-hifth-app.mjs verify` | Looks at the live site as a reader's browser does | After a release; when someone asks if hifth.app is live | `make hifth-app-verify` (`ARGS="--url https://x.pages.dev"` for a preview) |
 | `scripts/list-count.mjs` | Asks Cloudflare how many people are on the Mac-app list, and prints that number only; an answer holding anything else is refused | When someone asks how many signed up; after a sign-up test on the live site | `make hifth-app-list-count` |

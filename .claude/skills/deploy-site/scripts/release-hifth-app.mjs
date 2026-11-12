@@ -103,9 +103,11 @@ function say(problems, heading) {
   for (const p of problems) console.log(`  ✗ ${p.path} — ${p.why}`);
 }
 
-function check({ build }) {
+function check({ build, release = true }) {
   const commit = git("rev-parse", "HEAD").out;
-  const gitIssues = [...gitProblems(), ...configProblems(readConfig())];
+  // A folder put together only to look at on this laptop may come from work not
+  // yet committed or merged; what it holds is still checked.
+  const gitIssues = release ? [...gitProblems(), ...configProblems(readConfig())] : [];
   if (build) {
     console.log("Building the site and running its checks (make site)…");
     const r = spawnSync("make", ["-C", REPO, "site"], { stdio: "inherit" });
@@ -164,6 +166,40 @@ function publish() {
   return true;
 }
 
+/** Cloudflare's published test secret for the spam check: every answer passes, and says it came from example.com. */
+export const TEST_TURNSTILE_SECRET = "1x0000000000000000000000000000000AA";
+
+/** What `wrangler pages dev` is run with to serve the release folder on this laptop, form and all. */
+export function serveArgs(port) {
+  return [
+    "pages", "dev", "dist", "--ip", "127.0.0.1", "--port", String(port),
+    // Once any setting is given with --binding, the database has to be named too.
+    "--d1", "DB=not-made-yet",
+    "--binding", `TURNSTILE_SECRET=${TEST_TURNSTILE_SECRET}`,
+    "--binding", "TURNSTILE_HOSTNAMES=localhost,127.0.0.1,example.com",
+  ];
+}
+
+/**
+ * hifth.app on this laptop: the same folder a release would upload, served by
+ * Cloudflare's own local server, with the sign-up list in a local database and
+ * the spam check's always-pass test keys. Nothing here reaches Cloudflare.
+ */
+function serve({ build, port }) {
+  const { ok, out } = check({ build, release: false });
+  if (!out) return false;
+  // What would stop a release (the test key, the placeholder address) is what a
+  // local look needs, so it is listed above and served anyway.
+  if (!ok) console.log("  (served anyway: those stop a release, not a look on this laptop)");
+  const run = (args) => spawnSync("wrangler", args, { cwd: LANDING, stdio: "inherit" }).status === 0;
+  if (!run(["d1", "execute", "hifth-notify", "--local", "--file", "schema.sql"])) {
+    console.log("\n✗ could not make the local sign-up table.");
+    return false;
+  }
+  console.log(`\nhifth.app on this laptop: http://127.0.0.1:${port}/ (the app is at /read/)`);
+  return run(serveArgs(port));
+}
+
 async function main(argv) {
   const [command, ...rest] = argv;
   const flag = (name) => {
@@ -171,9 +207,10 @@ async function main(argv) {
     return i >= 0 ? rest[i + 1] : undefined;
   };
   if (command === "check") return check({ build: !rest.includes("--no-build") }).ok;
+  if (command === "serve") return serve({ build: !rest.includes("--no-build"), port: flag("--port") ?? "7124" });
   if (command === "verify") return verify({ url: flag("--url"), commit: flag("--commit") });
   if (command === "publish") return publish() && (await verify());
-  console.log("usage: release-hifth-app.mjs check [--no-build] | publish | verify [--url URL] [--commit SHA]");
+  console.log("usage: release-hifth-app.mjs check [--no-build] | serve [--no-build] [--port N] | publish | verify [--url URL] [--commit SHA]");
   return false;
 }
 

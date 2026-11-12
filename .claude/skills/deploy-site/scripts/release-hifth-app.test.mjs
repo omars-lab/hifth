@@ -14,7 +14,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { assemble, configProblems } from "./release-hifth-app.mjs";
+import { TEST_TURNSTILE_SECRET, assemble, configProblems, serveArgs } from "./release-hifth-app.mjs";
 import { auditShipped, readFolder } from "./shipped.mjs";
 
 function tree(root, files) {
@@ -97,4 +97,14 @@ test("the site's Cloudflare settings are refused until the email list's database
   assert.deepEqual(configProblems(settings("0f8b1c2e-0000-4000-8000-000000000000")), []);
   assert.match(configProblems('name = "hifth-app"\n').map((p) => p.why).join(" "), /database/);
   assert.match(configProblems(null).map((p) => p.why).join(" "), /settings/);
+});
+
+test("serving on this laptop listens only here, uses the always-pass test secret, and never the real database", () => {
+  const args = serveArgs(7124);
+  assert.deepEqual(args.slice(0, 3), ["pages", "dev", "dist"]);
+  assert.equal(args[args.indexOf("--ip") + 1], "127.0.0.1");
+  assert.equal(args[args.indexOf("--port") + 1], "7124");
+  assert.ok(args.includes(`TURNSTILE_SECRET=${TEST_TURNSTILE_SECRET}`));
+  assert.ok(!args.includes("--remote"));
+  assert.equal(TEST_TURNSTILE_SECRET, "1x0000000000000000000000000000000AA");
 });
