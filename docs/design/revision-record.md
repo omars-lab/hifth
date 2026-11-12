@@ -426,3 +426,20 @@ layouts, that a day with nothing the book can place shows no line of noughts, an
 the earlier-month arrow sits on the right with no turn of our own; by eye in English and Arabic
 at laptop and phone width; and in the iPad app, both ways up, with the walk-app skill's
 record-days script.
+
+### ⑥ How should the month and day views look, so they are pleasant to open? · **open**
+
+**Asked by the owner, 2026-11-12** (a comment on the front page's picture of the month view):
+"our calendar needs to be revisited, how do we make more aesthetically appealing calendar
+status widgets".
+
+**What it changes for a hafiz:** a record that is pleasant to look at gets opened, and a
+record that is opened is the one that shows what has been left too long. The numbers stay the
+same; the look is what is being asked about.
+
+**What the app does today:** Month is a plain grid of squares, tinted on a day with work and
+with a red number on a day with mistakes; Days is a list with the numbers written out.
+
+**What would answer it:** look at how well-made habit and streak calendars draw a day's
+status (rings, dots, shades), then build two or three versions into the real sheet, the owner
+picks, and the others stay as a setting.

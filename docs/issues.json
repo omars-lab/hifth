@@ -6299,6 +6299,40 @@
         "the owner choosing which features are paid"
       ],
       "note": "Hifth will have paid features too (owner, 2026-11-12, a comment on the front page). Which ones, at what price and how a reader pays are not chosen; until then the front page says only that Hifth is open source, and promises nothing about price either way."
+    },
+    {
+      "id": "mistake-kinds-beyond-the-word",
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "⑩"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-12 (page comment t_2413cf): the Mistake pen should ask the kind of mistake first (harakah, makharij, a tajweed rule left out such as idgham, a hop into another verse), then the detail that kind needs. Build it two or three ways into the real question and let the owner choose by using them; the losing shapes stay as a setting."
+    },
+    {
+      "id": "share-menu-too-plain",
+      "source": {
+        "file": "docs/design/app-links-editions-and-builder.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-12 (page comment t_bffcd4): the share menu looks too plain. Build two or three better-looking versions into the real sheet, try them at phone size, the owner picks, the others stay as a setting."
+    },
+    {
+      "id": "calendar-looks-plain",
+      "source": {
+        "file": "docs/design/revision-record.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "revision-record",
+      "note": "Owner, 2026-11-12 (page comment t_476e84): the month and day views should look more appealing. Look at how good habit and streak calendars draw a day's status, build two or three versions into the record sheet, the owner picks, the others stay as a setting."
     }
   ]
 }
