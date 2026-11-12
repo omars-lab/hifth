@@ -5898,6 +5898,54 @@
       "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11; slice 0 (the on-iPad check) needs the owner holding the iPad for ten minutes."
     },
     {
+      "id": "feature-links-hub",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/feature-links.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's ask of 2026-11-12: links that open and test each feature of the app on the real iPad, and a page on the development hub that shows each feature with a picture and the link that opens it. The app already answers links that open a page, a verse, a tool or a panel, and the laptop can hand the app a link over the cable; nothing yet tells the laptop what happened, so a debug-only 'capture' link is the missing piece, shared with walk-feedback-capture. Design note being written: docs/design/feature-links.md. Pictures only from the build with no Qur'an text. Hub entry agreed with the session doing hifth.app, which owns the hub list."
+    },
+    {
+      "id": "link-to-running-app",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/feature-links.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "First step of feature-links-hub and of walking the iPad together: send one page link to the app on the real iPad while it is open, once without and once with the option that closes it first, with a note on the page beforehand, and write down whether the page turns or the app restarts. Under an hour, no app change; waits only on the owner's iPad being on the cable and unlocked."
+    },
+    {
+      "id": "app-reaches-laptop-over-tailscale",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/walk-together.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "For walking the iPad together: the page inside the app comes from a private address, and it may need extra settings before it may call the laptop's comment server at its Tailscale https address. Answered by step 2 of the walk-together note, with the server's log showing the app's first request."
+    },
+    {
+      "id": "walk-the-ipad-together",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/walk-together.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's ask of 2026-11-12: while he holds the iPad, Claude opens pages and marks spots for him to look at, and he leaves comments with a button. Design note: docs/design/walk-together.md, which recommends putting the existing comment bar into the debug app, loaded from the laptop over Tailscale. First check, about an hour and no app change: open the laptop's dev site in Safari on the iPad over Tailscale and trade one comment each way. Before any pitch walk uses it, comments must go to a folder git ignores, with comments on selected words off and pictures kept on the laptop, because the selected words would be the book's text."
+    },
+    {
       "id": "pitch-walk-18-60-link-count",
       "pitch": true,
       "source": {
