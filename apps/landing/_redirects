@@ -1,0 +1,4 @@
+# Only the app falls back to its own page. The app routes by the part after #, so any
+# /read/ address that is not a real file opens the app, which then reads the #. Nothing
+# at the top of the site falls back: a wrong address there is an honest 404.
+/read/*  /read/index.html  200

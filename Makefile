@@ -806,6 +806,20 @@ deploy-cloudflare: ## Publish to Cloudflare Pages from this machine (GitHub Page
 	$(WEB) build
 	cd apps/web && $(PNPM) dlx wrangler pages deploy dist --project-name hifth
 
+# hifth.app: the front page at the root, the app under /read/, on the Cloudflare account
+# that holds the domain. The script and its tests live in the deploy-site skill.
+RELEASE := node .claude/skills/deploy-site/scripts/release-hifth-app.mjs
+
+.PHONY: hifth-app-check hifth-app-publish hifth-app-verify
+hifth-app-check: ## Build hifth.app's release folder and refuse it if anything but the bare minimum is in it
+	@$(RELEASE) check $(ARGS)
+
+hifth-app-publish: ## Check, upload to hifth.app with the saved keys, then look at the live site
+	@dotenvx run --quiet -- $(RELEASE) publish
+
+hifth-app-verify: ## Look at live hifth.app: pages answer, the app is this commit, no development address serves anything
+	@$(RELEASE) verify $(ARGS)
+
 .PHONY: shots
 shots: ## Recapture the guide's screenshots from the real app into docs/validation/shots/
 	@# Two passes, because the perf probe is a build-time flag and not a URL
