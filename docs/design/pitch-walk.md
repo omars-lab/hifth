@@ -65,3 +65,8 @@ in a folder git ignores and are never committed or sent.
 app's files). Then the picture, note, pull and gallery; then the video. Answered when the owner
 takes three screenshots on a walk and each shows up in the gallery with its picture, where he was
 and the moments before.
+
+**Next step (2026-11-12):** the [check card](check-card.md) now exists, so the half-day check is
+one install on the iPad carrying the card and the throwaway probe. The owner answers the three
+questions on the card, about ten minutes, and the laptop copies the answers and the probe's log
+off. It waits on the owner saying go.

@@ -5330,7 +5330,7 @@
       "severity": "defect",
       "owner": "agent",
       "closedBy": "apps/web/e2e/desktop.spec.ts",
-      "note": "Found 2026-11-12 when a browser test failed once in a full run and passed on its retry. On a large iPad upright the verse's drawer measured its own height once, when it opened. If it was still short then, it decided it covered no bar button, and when it grew it never checked again, so the look-alike buttons stayed in the bar, half under it, until the window changed size. The drawer now checks again whenever its own size changes, still never turning back into a card. The test holds the drawer short while it opens and then lets it grow; watched failing first."
+      "note": "Found 2026-11-12 when a browser test failed once in a full run and passed on its retry; its picture showed the look-alike buttons left in the bar, half under the drawer. The likely cause, never made to happen again by slowing the CPU: on a large iPad upright the verse's drawer measured its own height once, when it opened. If it was still short then, it decided it covered no bar button, and when it grew it never checked again. The drawer now checks again whenever its own size changes, still never turning back into a card, which closes that hole for certain. The test holds the drawer short while it opens and then lets it grow; watched failing first. Still not covered: the bar's buttons moving without the bar changing size or gaining a button (a late font, say). If the test fails that way again, look there next."
     },
     {
       "id": "pens-left-in-arabic-setting",

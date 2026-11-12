@@ -120,10 +120,10 @@ export function VerseDrawer({
     // without changing the bar's own size.
     const moved = typeof MutationObserver === "undefined" ? null : new MutationObserver(() => fit(false));
     moved?.observe(bar, { childList: true, subtree: true });
-    // The card can grow after it first measured itself (its buttons arriving
-    // late on a busy machine), and a short card covers no bar button: the
-    // chips stayed in the bar, half under it, until the window changed size
-    // (a full test run, 2026-11-12). Its own size changing checks again, but
+    // The card can grow after it first measured itself, and a short card
+    // covers no bar button: the likely reason the chips once stayed in the
+    // bar, half under it, until the window changed size (a full test run,
+    // 2026-11-12). Its own size changing checks again, but
     // never turns it back, as for the bar's buttons. A frame later, so the
     // check's own change of shape is not seen inside the same notice.
     let frame = 0;
