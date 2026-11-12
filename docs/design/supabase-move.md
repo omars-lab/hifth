@@ -20,7 +20,7 @@ the app.
 | Server functions, stored secrets, file buckets, preview branches | None. |
 | Sign-ups | Not checked: the dump that would count them also copies password hashes, so it was refused. Very likely empty: no app code signs anyone in, and the settings file is the untouched default. Glance at *Authentication → Users* in the old dashboard to be sure. |
 | Licence for the word text | Read and marked done in the manual-check ledger before the text was loaded. The move does not change what is held, so it does not need reading again. |
-| Who could read it | **The tables were open to the project's public key, for reading and for writing.** Supabase opens every new table that way, and our migrations never closed them. The new migration (dated 2026-11-12) closes them, and a test now fails if a table is ever added open. |
+| Who could read it | **The tables were open to the project's public key, for reading and for writing.** Supabase opens every new table that way, and our migrations never closed them. This was read from the table rights and the missing row rules, not tried with the key. The key itself was never written in this repo, which limits who could have had it. The new migration (dated 2026-11-12) closes the tables, and a test now fails if a table is ever added open. |
 | The connection password file | Gone from disk: it lived in a worktree that was removed. The new project gets a new one. |
 
 ## Where does the data come from for the new store?
@@ -28,7 +28,11 @@ the app.
 The two downloaded source files the fill-in script reads are no longer on this laptop. So the
 old store was the only ready copy. It was copied on 2026-11-12 into a git-ignored backup
 (`packages/etl/data/qul/.cache/qul-store-backup/`), and the copy's row counts match the live
-store exactly. The backup holds the word text, so it never leaves that ignored folder.
+store exactly. It was then loaded into a throwaway copy of Supabase's own Postgres 17, on top of the
+three migrations and as the same database role step 5 uses. It loaded with no errors: every row
+came back, word ids 1 to 83,668 with none missing and no empty word. The backup holds the word
+text, so it stays in that ignored folder, plus one copy kept outside this checkout by the owner,
+because a folder named `.cache` has been cleared on this laptop before.
 
 ## Open questions, and what would answer each
 
@@ -69,10 +73,11 @@ psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 \
 supabase inspect db table-stats --linked
 
 # 7
-dotenvx run -- node packages/etl/scripts/qul-page-fixture.mjs
+dotenvx run -- node packages/etl/scripts/qul-page-fixture.mjs --page 1
 ```
 
 Keep the new project's ID out of the repo, PRs and pages, as the setup guide says. The old one
-had been written into two decision records and is now removed from them.
+had been written into two published decision records and is now removed from those pages. It
+is still in git history and in one agent memory note.
 
 </details>
