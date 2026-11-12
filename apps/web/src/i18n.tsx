@@ -843,6 +843,11 @@ export interface Strings {
   mistakeAskTabs: string;
   mistakeAskList: string;
   mistakeAskNote: string;
+  calendarLookTitle: string;
+  calendarLookShades: string;
+  calendarLookRings: string;
+  calendarLookCards: string;
+  calendarLookNote: string;
   toolSign: string;
   toolSignHint: string;
   toolRead: string;

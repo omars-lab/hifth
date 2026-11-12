@@ -181,6 +181,54 @@ test.describe("Hifth · the record, day by day", () => {
     await expect(day).toContainText("A tajweed rule 1");
   });
 
+  test("the month shows how much each day held, in the look chosen in the info panel", async ({ page, hasTouch }) => {
+    await page.clock.setFixedTime(DAY_TWO);
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    if (hasTouch) await tapAyah(page, "#verse-55");
+    else {
+      const at = await ayahTarget(page, "#verse-55");
+      await page.mouse.click(at.x, at.y);
+    }
+    await expect.poll(() => saved(page)).toEqual({ looks: 1, mistakes: 0 });
+    // The day before: twenty made-up verses, more than a page.
+    const at = DAY_ONE.getTime();
+    const tz = -DAY_ONE.getTimezoneOffset();
+    await seed(
+      page,
+      "2026-03-09",
+      Array.from({ length: 20 }, (_, i) => ({ key: `quran/hafs-kfqc/2:${i + 1}`, page: 2 + Math.floor(i / 7), at: at + i, tz })),
+    );
+    await page.reload();
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+
+    let sheet = await openRecord(page);
+    await sheet.getByRole("radio", { name: "Month", exact: true }).click();
+    let month = sheet.getByRole("group", { name: "Mar 2026" });
+    // Shades when nobody chose; one verse is the lowest step, twenty the third.
+    await expect(month).toHaveAttribute("data-look", "shades");
+    await expect(month.locator('[data-day="2026-03-10"]')).toHaveAttribute("data-level", "1");
+    await expect(month.locator('[data-day="2026-03-09"]')).toHaveAttribute("data-level", "3");
+    const light = await month.locator('[data-day="2026-03-10"]').evaluate((el) => getComputedStyle(el).backgroundColor);
+    const deep = await month.locator('[data-day="2026-03-09"]').evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(deep, "the busier day is a deeper shade").not.toBe(light);
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+
+    // Rings, picked in the info panel, is what the month draws next time it opens.
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    const choices = page.getByRole("dialog").locator('[aria-labelledby="colophon-calendar-look"]').getByRole("radio");
+    await expect(choices).toHaveCount(3);
+    await choices.and(page.locator('[data-calendar-look-choice="rings"]')).click();
+    await expect(choices.and(page.locator('[data-calendar-look-choice="rings"]'))).toHaveAttribute("aria-checked", "true");
+    await page.keyboard.press("Escape");
+    sheet = await openRecord(page);
+    month = sheet.getByRole("group", { name: "Mar 2026" });
+    await expect(month).toHaveAttribute("data-look", "rings");
+    const round = await month.locator('[data-day="2026-03-09"]').evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
+    expect(round).toBe("50%");
+  });
+
   test("in Arabic the arrow to the earlier month is on the right and points right", async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("hifth.lang.v1", "ar"));
     await page.addInitScript(() => localStorage.setItem("hifth.record.view.v1", "month"));

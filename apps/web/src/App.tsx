@@ -280,6 +280,7 @@ import { isMarkAim, rememberMarkTools, savedMarkTools, toolsFor, type MarkAim, t
 import { rememberEraserPlace, savedEraserPlace, type EraserPlace } from "./eraser-place";
 import { rememberMistakeTap, savedMistakeTap, type MistakeTap } from "./mistake-tap";
 import { rememberMistakeAsk, savedMistakeAsk, type MistakeAsk } from "./mistake-ask";
+import { rememberCalendarLook, savedCalendarLook, type CalendarLook } from "./calendar-look";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberPenSide, savedPenSide, type PenSide } from "./pen-side";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
@@ -1879,6 +1880,12 @@ export function App(): JSX.Element {
   }, []);
   // How the question asks the kind of mistake: the kinds first, as tabs, or all at once (mistake-ask).
   const [mistakeAsk, setMistakeAsk] = useState<MistakeAsk>(() => savedMistakeAsk());
+  // How the record's month draws a day; the month reads it itself when it opens.
+  const [calendarLook, setCalendarLook] = useState<CalendarLook>(() => savedCalendarLook());
+  const chooseCalendarLook = useCallback((choice: CalendarLook) => {
+    rememberCalendarLook(choice);
+    setCalendarLook(choice);
+  }, []);
   const chooseMistakeAsk = useCallback((choice: MistakeAsk) => {
     rememberMistakeAsk(choice);
     setMistakeAsk(choice);
@@ -4793,6 +4800,8 @@ export function App(): JSX.Element {
             onMistakeTap={chooseMistakeTap}
             mistakeAsk={mistakeAsk}
             onMistakeAsk={chooseMistakeAsk}
+            calendarLook={calendarLook}
+            onCalendarLook={chooseCalendarLook}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
             // Only the iPad app has a pencil to squeeze.

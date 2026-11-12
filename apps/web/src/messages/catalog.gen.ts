@@ -61,6 +61,11 @@ export interface Catalog {
   readonly bmUndo: string;
   readonly bmUnfold: (d: { readonly count: number; readonly countText: string | number }) => string;
   readonly bmUnfolded: (d: { readonly count: number; readonly countText: string | number }) => string;
+  readonly calendarLookCards: string;
+  readonly calendarLookNote: string;
+  readonly calendarLookRings: string;
+  readonly calendarLookShades: string;
+  readonly calendarLookTitle: string;
   readonly cardEdgeClear: string;
   readonly cardEdgeCovers: string;
   readonly cardEdgeNote: string;

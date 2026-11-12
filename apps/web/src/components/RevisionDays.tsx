@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { daysOf, editionOf, type DayCount, type DayStamp, type RevisionEvent } from "@hifth/core";
 import { useT } from "../i18n";
+import { dayLevel, savedCalendarLook } from "../calendar-look";
 import styles from "./RevisionDays.module.css";
 
 /*
@@ -40,6 +41,9 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
   const first = [since, oldest, today].filter((d): d is DayStamp => !!d).sort()[0]!;
   const [month, setMonth] = useState(today.slice(0, 7));
   const [picked, setPicked] = useState<DayStamp | null>(null);
+  // How the month draws a day (the info panel's "How the calendar looks"); read
+  // when the sheet opens, which is the only time the month is on screen.
+  const [look] = useState(savedCalendarLook);
 
   const headline = (d: DayCount): string =>
     d.mistakes.length > 0 ? t.mapCellSlips(t.dayLong(d.day), d.mistakes.length) : t.dayOpened(d.day);
@@ -158,7 +162,7 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
           ›
         </button>
       </div>
-      <div className={styles.month} role="group" aria-label={t.monthLong(year, mon)}>
+      <div className={styles.month} role="group" aria-label={t.monthLong(year, mon)} data-look={look}>
         {t.weekdays.map((name) => (
           <span key={name} className={styles.weekday} aria-hidden="true">
             {name}
@@ -174,10 +178,14 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
               key={stamp}
               type="button"
               className={styles.square}
-              style={i === 0 ? { gridColumnStart: lead + 1 } : undefined}
+              style={{
+                gridColumnStart: i === 0 ? lead + 1 : undefined,
+                ["--fill" as string]: d ? Math.min(d.verses / 30, 1) : 0,
+              }}
               data-day={stamp}
               data-state={outside ? "outside" : d ? "worked" : "idle"}
               data-mistakes={count > 0 ? count : undefined}
+              data-level={d ? dayLevel(d.verses) : undefined}
               data-today={stamp === today ? "" : undefined}
               aria-pressed={picked === stamp}
               aria-label={outside ? t.dayOutside(stamp) : d ? headline(d) : t.dayNothing(stamp)}

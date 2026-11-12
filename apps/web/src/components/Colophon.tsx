@@ -36,6 +36,7 @@ import { MARK_TOOLS, type MarkTools } from "../mark-tools";
 import { ERASER_PLACES, type EraserPlace } from "../eraser-place";
 import { MISTAKE_TAPS, type MistakeTap } from "../mistake-tap";
 import { MISTAKE_ASKS, type MistakeAsk } from "../mistake-ask";
+import { CALENDAR_LOOKS, type CalendarLook } from "../calendar-look";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { TIP_PENS, type TipPens } from "../pen-ring";
 import { PEN_SIDES, type PenSide } from "../pen-side";
@@ -103,6 +104,9 @@ interface ColophonProps {
   /** How the Mistake pen's question is laid out; remembered on this device. */
   mistakeAsk?: MistakeAsk | undefined;
   onMistakeAsk?: ((choice: MistakeAsk) => void) | undefined;
+  /** How the record's month draws each day; remembered on this device. */
+  calendarLook?: CalendarLook | undefined;
+  onCalendarLook?: ((choice: CalendarLook) => void) | undefined;
   /** Where the page tools sit on a computer or an iPad held sideways; remembered on this device. */
   penHome?: PenHome | undefined;
   onPenHome?: ((home: PenHome) => void) | undefined;
@@ -329,6 +333,12 @@ const MISTAKE_TAP_NAME: Record<MistakeTap, (t: ReturnType<typeof useT>["t"]) => 
   quiet: (t) => t.mistakeTapQuiet,
 };
 
+const CALENDAR_LOOK_NAME: Record<CalendarLook, (t: ReturnType<typeof useT>["t"]) => string> = {
+  shades: (t) => t.calendarLookShades,
+  rings: (t) => t.calendarLookRings,
+  cards: (t) => t.calendarLookCards,
+};
+
 const MISTAKE_ASK_NAME: Record<MistakeAsk, (t: ReturnType<typeof useT>["t"]) => string> = {
   steps: (t) => t.mistakeAskSteps,
   tabs: (t) => t.mistakeAskTabs,
@@ -388,6 +398,8 @@ export function Colophon({
   onMistakeTap,
   mistakeAsk,
   onMistakeAsk,
+  calendarLook,
+  onCalendarLook,
   penHome,
   onPenHome,
   tipPens,
@@ -831,6 +843,12 @@ export function Colophon({
             while the owner tries them (2026-11-12). */}
         {mistakeAsk && onMistakeAsk && (
           <Choice id="mistake-ask" title={t.mistakeAskTitle} note={t.mistakeAskNote} value={mistakeAsk} options={MISTAKE_ASKS} label={(c) => MISTAKE_ASK_NAME[c](t)} data="mistake-ask-choice" onPick={onMistakeAsk} />
+        )}
+        {/* How the record's month draws a day (front-page comment, 2026-11-12:
+            the calendar should be more appealing): three ways, kept while the
+            owner tries them. */}
+        {calendarLook && onCalendarLook && (
+          <Choice id="calendar-look" title={t.calendarLookTitle} note={t.calendarLookNote} value={calendarLook} options={CALENDAR_LOOKS} label={(c) => CALENDAR_LOOK_NAME[c](t)} data="calendar-look-choice" onPick={onCalendarLook} />
         )}
         {/* Where the page tools sit (docs/design/notes-style-toolbar.md, ①): all
             three homes the study drew, kept while they are tried (owner,
