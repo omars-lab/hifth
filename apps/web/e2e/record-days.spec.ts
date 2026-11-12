@@ -58,7 +58,11 @@ async function openRecord(page: Page): Promise<Locator> {
  * the page could make (a verse the book cannot place). Done once the app has
  * made its own stores, so nothing here creates them.
  */
-function seed(page: Page, day: string, events: { key: string; page: number; at: number; tz: number }[]): Promise<void> {
+function seed(
+  page: Page,
+  day: string,
+  events: { key: string; page: number; at: number; tz: number; slip?: boolean; what?: string }[],
+): Promise<void> {
   return page.evaluate(
     ({ day, events }) =>
       new Promise<void>((resolve, reject) => {
@@ -148,6 +152,33 @@ test.describe("Hifth · the record, day by day", () => {
     // The heading and nothing under it: no "0 pages", no "no verses yet".
     await expect(days.nth(1).locator("p")).toHaveCount(0);
     await expect(days.nth(0).locator("p")).toHaveCount(1);
+  });
+
+  test("a day's line counts letter and rule mistakes, not only words, harakat and hops", async ({ page, hasTouch }) => {
+    await page.clock.setFixedTime(DAY_TWO);
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    if (hasTouch) await tapAyah(page, "#verse-55");
+    else {
+      const at = await ayahTarget(page, "#verse-55");
+      await page.mouse.click(at.x, at.y);
+    }
+    await expect.poll(() => saved(page)).toEqual({ looks: 1, mistakes: 0 });
+    const at = DAY_ONE.getTime();
+    const tz = -DAY_ONE.getTimezoneOffset();
+    await seed(page, "2026-03-09", [
+      { key: "quran/hafs-kfqc/2:46", page: 7, at, tz, slip: true, what: "letter" },
+      { key: "quran/hafs-kfqc/2:47", page: 7, at: at + 1, tz, slip: true, what: "rule" },
+    ]);
+    await page.reload();
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+
+    const sheet = await openRecord(page);
+    await sheet.getByRole("radio", { name: "Days", exact: true }).click();
+    const day = sheet.getByRole("list", { name: "Days" }).locator("> li").nth(1);
+    await expect(day).toContainText("Mar 9th, 2026 · 2 mistakes marked");
+    await expect(day).toContainText("A letter (makharij) 1");
+    await expect(day).toContainText("A tajweed rule 1");
   });
 
   test("in Arabic the arrow to the earlier month is on the right and points right", async ({ page }) => {

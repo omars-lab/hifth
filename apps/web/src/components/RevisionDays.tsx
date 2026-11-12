@@ -76,6 +76,8 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
             {[
               d.kinds.word > 0 && `${t.mistakeWholeWord} ${t.num(d.kinds.word)}`,
               d.kinds.sign > 0 && `${t.toolSign} ${t.num(d.kinds.sign)}`,
+              d.kinds.letter > 0 && `${t.mistakeKindLetter} ${t.num(d.kinds.letter)}`,
+              d.kinds.rule > 0 && `${t.mistakeKindRule} ${t.num(d.kinds.rule)}`,
               d.kinds.verse > 0 && `${t.dayKindVerse} ${t.num(d.kinds.verse)}`,
               ...d.mistakePages.map((p) => t.pageN(p)),
             ]
