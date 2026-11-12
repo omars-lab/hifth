@@ -6320,7 +6320,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner, 2026-11-12 (page comment t_bffcd4): the share menu looks too plain. Build two or three better-looking versions into the real sheet, try them at phone size, the owner picks, the others stay as a setting."
+      "note": "Owner, 2026-11-12 (page comment t_bffcd4): the share menu looks too plain. Build two or three better-looking versions into the real sheet, try them at phone size, the owner picks, the others stay as a setting. Built 2026-11-12 as three looks in the info panel (preview card, the default; tiles; plain), drawn in docs/design/share-look.md; waiting on the owner's pick. Also seen while testing, older than the looks: on a phone the menu reopens on the last choice (its roots, say), on a computer it starts again from the ayah as it is. Settle which is right and make both do it."
     },
     {
       "id": "calendar-looks-plain",
@@ -6332,7 +6332,7 @@
       "severity": "question",
       "owner": "agent",
       "feature": "revision-record",
-      "note": "Owner, 2026-11-12 (page comment t_476e84): the month and day views should look more appealing. Look at how good habit and streak calendars draw a day's status, build two or three versions into the record sheet, the owner picks, the others stay as a setting."
+      "note": "Owner, 2026-11-12 (page comment t_476e84): the month and day views should look more appealing. Look at how good habit and streak calendars draw a day's status, build two or three versions into the record sheet, the owner picks, the others stay as a setting. Built 2026-11-12 as three looks in the info panel (shades, the default; rings; cards), drawn in docs/design/calendar-look.md; waiting on the owner's pick."
     }
   ]
 }

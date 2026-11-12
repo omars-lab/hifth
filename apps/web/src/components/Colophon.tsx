@@ -37,6 +37,7 @@ import { ERASER_PLACES, type EraserPlace } from "../eraser-place";
 import { MISTAKE_TAPS, type MistakeTap } from "../mistake-tap";
 import { MISTAKE_ASKS, type MistakeAsk } from "../mistake-ask";
 import { CALENDAR_LOOKS, type CalendarLook } from "../calendar-look";
+import { SHARE_LOOKS, type ShareLook } from "../share-look";
 import { PEN_HOMES, type PenHome } from "../pen-home";
 import { TIP_PENS, type TipPens } from "../pen-ring";
 import { PEN_SIDES, type PenSide } from "../pen-side";
@@ -106,6 +107,8 @@ interface ColophonProps {
   onMistakeAsk?: ((choice: MistakeAsk) => void) | undefined;
   /** How the record's month draws each day; remembered on this device. */
   calendarLook?: CalendarLook | undefined;
+  shareLook?: ShareLook | undefined;
+  onShareLook?: ((choice: ShareLook) => void) | undefined;
   onCalendarLook?: ((choice: CalendarLook) => void) | undefined;
   /** Where the page tools sit on a computer or an iPad held sideways; remembered on this device. */
   penHome?: PenHome | undefined;
@@ -338,6 +341,11 @@ const CALENDAR_LOOK_NAME: Record<CalendarLook, (t: ReturnType<typeof useT>["t"])
   rings: (t) => t.calendarLookRings,
   cards: (t) => t.calendarLookCards,
 };
+const SHARE_LOOK_NAME: Record<ShareLook, (t: ReturnType<typeof useT>["t"]) => string> = {
+  preview: (t) => t.shareLookPreview,
+  tiles: (t) => t.shareLookTiles,
+  plain: (t) => t.shareLookPlain,
+};
 
 const MISTAKE_ASK_NAME: Record<MistakeAsk, (t: ReturnType<typeof useT>["t"]) => string> = {
   steps: (t) => t.mistakeAskSteps,
@@ -399,6 +407,8 @@ export function Colophon({
   mistakeAsk,
   onMistakeAsk,
   calendarLook,
+  shareLook,
+  onShareLook,
   onCalendarLook,
   penHome,
   onPenHome,
@@ -849,6 +859,11 @@ export function Colophon({
             owner tries them. */}
         {calendarLook && onCalendarLook && (
           <Choice id="calendar-look" title={t.calendarLookTitle} note={t.calendarLookNote} value={calendarLook} options={CALENDAR_LOOKS} label={(c) => CALENDAR_LOOK_NAME[c](t)} data="calendar-look-choice" onPick={onCalendarLook} />
+        )}
+        {/* How the share menu looks (front-page comment, 2026-11-12: the share
+            menu is too plain): three ways, kept while the owner tries them. */}
+        {shareLook && onShareLook && (
+          <Choice id="share-look" title={t.shareLookTitle} note={t.shareLookNote} value={shareLook} options={SHARE_LOOKS} label={(c) => SHARE_LOOK_NAME[c](t)} data="share-look-choice" onPick={onShareLook} />
         )}
         {/* Where the page tools sit (docs/design/notes-style-toolbar.md, ①): all
             three homes the study drew, kept while they are tried (owner,

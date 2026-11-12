@@ -596,6 +596,7 @@ export interface Catalog {
   readonly settingsDrawer: string;
   readonly shareApp: string;
   readonly shareAppAria: string;
+  readonly shareAppHint: string;
   readonly shareAriaAyah: string;
   readonly shareAriaRange: string;
   readonly shareAriaTrail: string;
@@ -603,11 +604,17 @@ export interface Catalog {
   readonly shareCommentary: string;
   readonly shareLabel: string;
   readonly shareLabelTrail: string;
+  readonly shareLookNote: string;
+  readonly shareLookPlain: string;
+  readonly shareLookPreview: string;
+  readonly shareLookTiles: string;
+  readonly shareLookTitle: string;
   readonly shareLookalikes: string;
   readonly shareOpenWith: string;
   readonly shareRoots: string;
   readonly shareSite: string;
   readonly shareSiteAria: string;
+  readonly shareSiteHint: string;
   readonly shareTextAyah: string;
   readonly shareTextRange: string;
   readonly shareTextTrail: string;

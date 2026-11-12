@@ -376,6 +376,8 @@ export interface Strings {
   shareSiteAria: string;
   shareApp: string;
   shareAppAria: string;
+  shareSiteHint: string;
+  shareAppHint: string;
 
   /* ---- coach marks -------------------------------------------------------- */
   coachRegion: string;
@@ -848,6 +850,11 @@ export interface Strings {
   calendarLookRings: string;
   calendarLookCards: string;
   calendarLookNote: string;
+  shareLookTitle: string;
+  shareLookPreview: string;
+  shareLookTiles: string;
+  shareLookPlain: string;
+  shareLookNote: string;
   toolSign: string;
   toolSignHint: string;
   toolRead: string;

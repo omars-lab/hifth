@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type AppState, type LeafSide } from "@hifth/core";
+import { ayahLabelAt, digits } from "../format";
 import { useT } from "../i18n";
 import { nativeShare, shareBase } from "../native-bridge";
 import { linksFor, shareShapeFromUrl, type SharePanel, type ShareShape } from "../share-links";
+import { savedShareLook, shortAddress } from "../share-look";
 import { leafStyle, useOverLeaf } from "./over-leaf";
 import { useSideCover, type CardSpan } from "./short-band";
 import styles from "./ShareSheet.module.css";
@@ -119,7 +121,7 @@ function useShare(state: AppState | null, hasTrail: boolean, variant: "ayah" | "
   // else could open.
   const links = state ? linksFor(state, isRange ? "" : panel, shareBase()) : null;
 
-  return { ariaLabel, links, panel, setPanel, isRange, feedback, setFeedback, shareSite, shareApp };
+  return { state, ariaLabel, links, panel, setPanel, isRange, feedback, setFeedback, shareSite, shareApp };
 }
 
 type Share = ReturnType<typeof useShare>;
@@ -274,14 +276,20 @@ export function ShareSheet({
   );
 }
 
+/** A sign for each thing a link can open, drawn on the tiles. */
+const SIGN: Record<SharePanel, string> = { "": "¶", lookalikes: "≈", roots: "√", commentary: "❝" };
+
 /**
  * What the sheet holds below its title: what the link should open, the two
- * links, and what happened. The same in the card and in the drawer.
+ * links, and what happened. The same in the card and in the drawer, drawn in
+ * the look chosen in the info panel (share-look.ts), read each time it opens.
+ * Every look has the same choices and buttons under the same names.
  */
 function ShareBody({ share, shape, pitch }: { share: Share; shape: ShareShape; pitch: boolean }): JSX.Element | null {
-  const { t } = useT();
+  const { t, lang } = useT();
   const legendId = useId();
-  const { links, panel, setPanel, isRange, feedback, shareSite, shareApp } = share;
+  const [look] = useState(savedShareLook);
+  const { state, links, panel, setPanel, isRange, feedback, shareSite, shareApp } = share;
   if (!links) return null;
   const panels: { id: SharePanel; label: string }[] = [
     { id: "", label: t.shareAsIs },
@@ -289,8 +297,30 @@ function ShareBody({ share, shape, pitch }: { share: Share; shape: ShareShape; p
     { id: "roots", label: t.shareRoots },
     ...(pitch ? [{ id: "commentary" as const, label: t.shareCommentary }] : []),
   ];
+  const sel = state?.select;
+  const title = !sel
+    ? t.shareTitle
+    : "toAyah" in sel && sel.toAyah !== sel.ayah
+      ? `${ayahLabelAt(sel.surah, sel.ayah, lang)}–${digits(sel.toAyah, lang)}`
+      : ayahLabelAt(sel.surah, sel.ayah, lang);
+  const opens = panels.find((p) => p.id === panel) ?? panels[0]!;
+  const tiles = look === "tiles";
   return (
-    <>
+    <div className={styles.body} data-share-look={look}>
+      {look === "preview" && (
+        <div className={styles.preview} data-share-preview="">
+          <span className={styles.previewSite}>{t.shareTitle}</span>
+          <span className={styles.previewTitle}>{title}</span>
+          {shape === "c" && !isRange && (
+            <span className={styles.previewOpens}>
+              <span aria-hidden="true">{SIGN[opens.id]}</span> {opens.label}
+            </span>
+          )}
+          <span className={styles.previewUrl}>
+            <bdi dir="ltr">{shortAddress(links.site)}</bdi>
+          </span>
+        </div>
+      )}
       {shape === "c" && !isRange && (
         <div className={styles.panels} role="radiogroup" aria-labelledby={legendId}>
           <span id={legendId} className={styles.legend}>
@@ -305,6 +335,11 @@ function ShareBody({ share, shape, pitch }: { share: Share; shape: ShareShape; p
                 checked={panel === p.id}
                 onChange={() => setPanel(p.id)}
               />
+              {tiles && (
+                <span className={styles.sign} aria-hidden="true">
+                  {SIGN[p.id]}
+                </span>
+              )}
               <span>{p.label}</span>
             </label>
           ))}
@@ -314,13 +349,17 @@ function ShareBody({ share, shape, pitch }: { share: Share; shape: ShareShape; p
         <button
           type="button"
           className={styles.link}
+          data-main=""
           onClick={() => void shareSite(links.site)}
           aria-label={t.shareSiteAria}
         >
           <span className={styles.glyph} aria-hidden="true">
             ⇪
           </span>
-          <span>{t.shareSite}</span>
+          <span className={styles.linkText}>
+            <span>{t.shareSite}</span>
+            {tiles && <span className={styles.hint}>{t.shareSiteHint}</span>}
+          </span>
         </button>
         <button
           type="button"
@@ -331,13 +370,16 @@ function ShareBody({ share, shape, pitch }: { share: Share; shape: ShareShape; p
           <span className={styles.glyph} aria-hidden="true">
             ⧉
           </span>
-          <span>{t.shareApp}</span>
+          <span className={styles.linkText}>
+            <span>{t.shareApp}</span>
+            {tiles && <span className={styles.hint}>{t.shareAppHint}</span>}
+          </span>
         </button>
       </div>
       <span className={styles.feedback} role="status" data-kind={feedback?.kind}>
         {feedback?.text}
       </span>
-    </>
+    </div>
   );
 }
 

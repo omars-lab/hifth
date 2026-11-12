@@ -281,6 +281,7 @@ import { rememberEraserPlace, savedEraserPlace, type EraserPlace } from "./erase
 import { rememberMistakeTap, savedMistakeTap, type MistakeTap } from "./mistake-tap";
 import { rememberMistakeAsk, savedMistakeAsk, type MistakeAsk } from "./mistake-ask";
 import { rememberCalendarLook, savedCalendarLook, type CalendarLook } from "./calendar-look";
+import { rememberShareLook, savedShareLook, type ShareLook } from "./share-look";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberPenSide, savedPenSide, type PenSide } from "./pen-side";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
@@ -1885,6 +1886,12 @@ export function App(): JSX.Element {
   const chooseCalendarLook = useCallback((choice: CalendarLook) => {
     rememberCalendarLook(choice);
     setCalendarLook(choice);
+  }, []);
+  // How the share menu looks; the menu reads it itself each time it opens.
+  const [shareLook, setShareLook] = useState<ShareLook>(() => savedShareLook());
+  const chooseShareLook = useCallback((choice: ShareLook) => {
+    rememberShareLook(choice);
+    setShareLook(choice);
   }, []);
   const chooseMistakeAsk = useCallback((choice: MistakeAsk) => {
     rememberMistakeAsk(choice);
@@ -4802,6 +4809,8 @@ export function App(): JSX.Element {
             onMistakeAsk={chooseMistakeAsk}
             calendarLook={calendarLook}
             onCalendarLook={chooseCalendarLook}
+            shareLook={shareLook}
+            onShareLook={chooseShareLook}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
             // Only the iPad app has a pencil to squeeze.
