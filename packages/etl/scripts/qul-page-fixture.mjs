@@ -95,6 +95,7 @@ select coalesce(json_build_object(
 let out;
 try {
   out = execFileSync("psql", [DB_URL, "-t", "-A", "-X", "-q", "-c", SQL], {
+    env: { ...process.env, PGSSLMODE: process.env.PGSSLMODE || "require" }, // never talk to the store unencrypted
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
   }).trim();
