@@ -84,19 +84,32 @@ the list arrived after the drawer had risen, the picture appeared and its row gr
 picture line, 28 pixels. That pushed the drawer up. The look-alikes file itself was on time.
 
 **The fix:** until the picture can be drawn, a blank space as tall as one picture line stands
-in its place. When the picture comes, it fills that space and nothing moves. If the page turns
-out to have nothing to cut, the space closes, which can still move the tools once. That has not
-been seen. A run of shared words long enough to wrap onto a second picture line would also
-still grow by one line. Both are rare, and the test would show either one.
+in its place. When the picture comes, it fills that space and nothing moves.
+
+Two cases can still move the tools once, both counted on 2026-11-13 over every look-alike row
+that shows a picture (3,744 rows):
+
+- **The space closes if the picture cannot be drawn.** No row has nothing to cut: every page's
+  word list ships, and none of the 3,744 comes out empty. So it closes only if the word list
+  fails to download.
+- **A picture that wraps onto a second line still grows by that line.** 54 rows wrap in a list
+  340 pixels wide, and 127 at 280 pixels. They grow only when their picture is late.
+
+Seen by eye on 2026-11-13, with the word lists held back: the space is a plain empty line under
+the row's caption, in the drawer and in the separate look-alikes card, at phone and laptop
+widths, in Chrome and Firefox.
 
 Two smaller things on the way:
 
 - **The picture was drawn a frame late.** It was drawn just after the frame was shown, so for
   one frame the row had no picture and was shorter. It is now drawn before the frame is shown.
-- **The test now turns off the drawer's slide up**, as a reader who asks for less motion would.
-  Mid-slide, a busy moment skipped frames, and the test read a point on the way up as the place
-  the tools came to rest. Without the slide, the drawer appears where it rests, so any later
-  move is a real jump.
+- **The test watches the slide up, and counts rest from its end.** The test used to say the
+  tools had come to rest once they held still for 150 ms. Mid-slide, a busy moment can skip
+  150 ms of frames (one run recorded a 151 ms gap), so the test read a point on the way up as
+  the place the tools came to rest. Now each frame notes whether the drawer is still sliding,
+  and rest is the first frame after the slide ends. A failure prints every frame's time and
+  place. The slide stays on in the test, as it is for most readers; a reader who asks for less
+  motion has no slide, which is the easier case.
 
 ## The tests that hold it
 
@@ -117,7 +130,13 @@ In the drawer tools test file, "the tools in the drawer keep still once they hav
 - Another does the same on 2:102, nine lines long. With the cut turned off, it fails (two
   lines under the drawer at both sizes); with the lift turned off, it fails too.
 
-**Results with all three fixes:** the ten drawer tests, run 40 times each at the iPad-on-its-side
-size, passed all 400 times. The drawer, look-alike comparison and pitch tests pass in every
-browser the project tests (phone, iPad, laptop Chrome, Firefox and Android sizes), and so do the
-app's 336 component unit tests.
+**Results with all three fixes:**
+
+- With the slide turned off, the ten drawer tests ran 40 times each at the iPad-on-its-side
+  size and passed all 400 times.
+- With the slide on and rest counted from its end, the four keep-still tests ran 40 times each
+  in the phone-size browser and passed all 160 times. With the blank space turned off, 7 runs
+  out of 8 failed (451 → 424 after the slide had ended), so the test still catches the jump.
+- The drawer tests and the two look-alike test files passed 86 out of 86 in every browser that
+  runs them: laptop Chrome, phone and Android sizes run all three files; Firefox runs only the
+  two look-alike files. The iPad-only run and the pitch tests do not include these files.

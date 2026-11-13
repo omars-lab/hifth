@@ -91,8 +91,9 @@ the page lifted it, then grew; and the small picture of the words a look-alike s
 late and grew its row. Since 2026-11-13 the drawer waits for the look-alikes (at most two
 seconds), the list is cut from the verse's height and the highest the page can lift it, once,
 as the tool opens, and a blank space holds the picture's place until it comes. The tests now
-record where Same roots stands on every frame, and a long verse (2:102) must stay clear of the
-list. Run 40 times each, the ten drawer tests passed 400 times out of 400.
+record where Same roots stands on every frame, from the end of the slide up, and a long verse
+(2:102) must stay clear of the list. Run 40 times each, the drawer tests passed every time:
+400 out of 400 with the slide off, and the four keep-still tests 160 out of 160 with it on.
 The whole story is in [the issue write-up](../issues/drawer-tools-jumped-after-rising.md).
 
 ### ⑦ Can a session started in the main folder check the Cloudflare tokens? · **open**

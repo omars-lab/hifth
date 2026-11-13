@@ -206,7 +206,9 @@ Running the tests 40 times found a third, smaller jump: the picture of a look-al
 words arrived late and grew its row by 28 pixels. A blank space one picture line tall now holds
 its place until it comes. New tests record where Same roots stands on every frame, with the
 look-alikes or the picture held back, and check that a long verse (2:102) stays clear of the
-list. The ten drawer tests then passed 400 times out of 400. Write-up:
+list. The ten drawer tests then passed 400 times out of 400 with the drawer's slide up off. The
+test now keeps the slide on and counts rest from the end of the slide; the four keep-still tests
+passed 160 times out of 160 that way, and still fail with the blank space taken out. Write-up:
 `docs/issues/drawer-tools-jumped-after-rising.md`.
 
 ## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)

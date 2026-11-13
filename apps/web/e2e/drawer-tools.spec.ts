@@ -122,15 +122,13 @@ test.describe("the tools in the drawer keep still once they have risen", () => {
 
   async function watched(browser: Browser, hold: Promise<void> | null, holdPicture: Promise<void> | null): Promise<Page> {
     // Own the context: the service worker answers fetches itself, where
-    // `page.route` cannot slow them.
-    // Without the rise's slide, the drawer appears where it comes to rest, so
-    // any later move is a jump. With it, a busy moment mid-slide skipped
-    // frames, and a point on the way up read as a resting place.
+    // `page.route` cannot slow them. The drawer slides up as it does for most
+    // readers; a reader who asks for less motion has no slide, which is the
+    // easier case.
     const context = await browser.newContext({
       serviceWorkers: "block",
       locale: "en-US",
       viewport: { width: 1180, height: 820 },
-      reducedMotion: "reduce",
     });
     const page = await context.newPage();
     if (hold) {
@@ -152,15 +150,23 @@ test.describe("the tools in the drawer keep still once they have risen", () => {
     await page.addInitScript((key) => {
       localStorage.setItem(key, "drawer");
       // Where Same roots stands, every frame it moves: a check from the test
-      // itself polls too slowly to see a jump between two of its looks.
-      const seen: { t: number; y: number }[] = [];
+      // itself polls too slowly to see a jump between two of its looks. Each
+      // look also notes whether the drawer is still sliding up, and how long
+      // since the frame before: a busy moment mid-slide can skip 150 ms of
+      // frames, and a point on the way up then looks like a resting place.
+      const seen: { t: number; y: number; gap: number; sliding: boolean }[] = [];
       (window as unknown as { __rootsAt: typeof seen }).__rootsAt = seen;
+      let last = performance.now();
       const look = () => {
+        const now = performance.now();
         const b = document.querySelector('[data-verse-drawer] button[aria-label^="Same roots"]');
         if (b) {
           const y = Math.round(b.getBoundingClientRect().y);
-          if (seen.at(-1)?.y !== y) seen.push({ t: performance.now(), y });
+          const d = b.closest("[data-verse-drawer]");
+          const sliding = !!d?.getAnimations().some((a) => a.playState === "running");
+          if (seen.at(-1)?.y !== y || seen.at(-1)?.sliding !== sliding) seen.push({ t: now, y, gap: Math.round(now - last), sliding });
         }
+        last = now;
         requestAnimationFrame(look);
       };
       requestAnimationFrame(look);
@@ -187,11 +193,16 @@ test.describe("the tools in the drawer keep still once they have risen", () => {
       // Past every late measure the app makes, and past the held picture.
       await page.waitForTimeout(1500);
       await expect(drawer(page).locator("[data-shared-words] svg").first()).toBeVisible();
-      const seen = await page.evaluate(() => (window as unknown as { __rootsAt: { t: number; y: number }[] }).__rootsAt);
-      // At rest: held still for 150 ms, about the time a reader takes to aim and press.
-      const rest = seen.findIndex((at, i) => i === seen.length - 1 || seen[i + 1]!.t - at.t >= 150);
+      const seen = await page.evaluate(
+        () => (window as unknown as { __rootsAt: { t: number; y: number; gap: number; sliding: boolean }[] }).__rootsAt,
+      );
+      // Every look as [ms, where, ms since the frame before, S if sliding], for a failure to show.
+      const record = JSON.stringify(seen.map((at) => [Math.round(at.t), at.y, at.gap, at.sliding ? "S" : "-"]));
+      // At rest: the first look once the drawer has stopped sliding up.
+      const rest = seen.findIndex((at) => !at.sliding);
+      expect(rest, `the drawer stopped sliding ${record}`).toBeGreaterThanOrEqual(0);
       const restY = seen[rest]!.y;
-      expect(seen.slice(rest).map((at) => at.y), "where Same roots stood after it first came to rest").toEqual([restY]);
+      expect(seen.slice(rest).map((at) => at.y), `where Same roots stood after it first came to rest ${record}`).toEqual([restY]);
       const box = (await drawer(page).getByRole("button", { name: /^Same roots · / }).boundingBox())!;
       await page.mouse.click(box.x + box.width / 2, restY + box.height / 2);
       await expect(drawer(page).getByRole("region", { name: /^Roots · / })).toBeVisible();
