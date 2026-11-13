@@ -10,12 +10,18 @@ the app.
 
 **Status:** started 2026-11-12. On 2026-11-13 the data was loaded into the new store, and every
 row was checked against the old store: the same rows in all three tables. The new store was
-also locked down further than the old one (below). One step is left: the page-fixture script
-has to run against the new store, and that needs the new password file, which only the owner
-can make. The old project is still running, and stays running until then. (This page said on
+also locked down further than the old one (below). Later that day the owner saved the new
+password file and the page-fixture script ran against the new store, so the move is proven.
+What is left is deleting the old project (③). The old project is still running until then. (This page said on
 2026-11-12 that the old one was paused; on 2026-11-13 it showed as running and answered
-queries, so that was wrong.) Tracked as the `supabase-move` row in the issue register, with one
-smaller item after it (③); ② is answered.
+queries, so that was wrong.) Tracked as the `supabase-move` row in the issue register, with
+smaller items after it (③, ④, ⑤); ② is answered.
+
+**A leak on the way (2026-11-13).** While checking the saved settings, a Claude session printed
+every saved value into its chat. The two Cloudflare tokens were replaced the same day; the
+database password is replaced the same way (the secrets skill's table says how). What happened,
+and the guard that now refuses such commands, is in
+[docs/issues/secrets-printed-into-chat.md](../issues/secrets-printed-into-chat.md).
 
 ## What is in the old store? (audited 2026-11-12)
 
@@ -85,7 +91,8 @@ script does exactly that. Written up in `docs/issues/supabase-config-push-answer
 ### ① Has the store moved to the new account, closed to the public key, with the old one retired? · **open**
 
 **What would answer it:** the new store holds the same rows as the old one, and the page-fixture
-script runs against it. The first is done (2026-11-13); the second waits on step 6. The steps:
+script runs against it. Both are done (2026-11-13). What is left is step 8, deleting the old
+project. The steps:
 
 1. **Copy the data out of the old store.** Done 2026-11-12 (above).
 2. **Create the new account and project.** Done 2026-11-12: project `hifth.app`, region
@@ -112,8 +119,11 @@ script runs against it. The first is done (2026-11-13); the second waits on step
    hidden-prompt command. The prompt shows the shape it expects and refuses anything else (the
    project's web address, the direct address, the placeholder password left in, the wrong port
    or region), and `make env-check` checks a value already saved. That check was added on
-   2026-11-13, after the web address was saved here by mistake.
-7. **Prove it works.** Run the page-fixture script against the new store.
+   2026-11-13, after the web address was saved here by mistake. Done 2026-11-13. Every saved
+   entry, where its value comes from and the commands for it are in the `secrets` skill.
+7. **Prove it works.** Run the page-fixture script against the new store. Done 2026-11-13:
+   page 1 (8 lines, 36 words) and page 604 (15 lines, 73 words). It first failed because
+   Homebrew keeps `psql` in its own folder, off the path; the store scripts now look there too.
 8. **Retire the old project.** Only after step 7. That is item ③.
 
 <details><summary>Commands for each step</summary>
@@ -193,4 +203,16 @@ old store. Supabase can limit that to a list of addresses.
 | What it commits to | Nothing | Updating the list from a known address, or keeping a fixed address (a VPN with a set exit) |
 
 **What would answer it:** the owner's choice. The store check reports which way it is set and
-does not fail either way.
+does not fail either way. The leak on 2026-11-13 printed the database password into a chat; a
+list would have made that password useless from anywhere but this laptop.
+
+### ⑤ Will reinstalling the Cloudflare setup keep the format checks? · **open**
+
+The saving and checking commands (`make env-set`, `make env-check` and the scripts under
+`scripts/env/`) are written into this repo by the global `cloudflare-onboarding` skill, and its
+installer overwrites them when rerun. The checks added here on 2026-11-13 (the shape each value
+must have, the refusal to save when only the encrypted copy exists) are not in the installer
+yet, so a reinstall would quietly drop them.
+
+**What would answer it:** the same checks carried into the `cloudflare-onboarding` skill's own
+copies, with their tests, so every repo it sets up gets them.

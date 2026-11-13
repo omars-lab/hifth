@@ -6169,7 +6169,7 @@
       "status": "open",
       "severity": "risk",
       "owner": "user",
-      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up, and built the new project's tables already closed. Done 2026-11-13: loaded the backup into the new store and checked every row against the old store (all three tables match), and locked the new store down further (web door off, sign-ups off, unencrypted connections refused, settings kept in the repo, a check that fails if any drifts back). Left: the owner makes the new password file in their own terminal (make env-set NAME=SUPABASE_DB_URL), then the page-fixture script runs against the new store."
+      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up, and built the new project's tables already closed. Done 2026-11-13: loaded the backup into the new store and checked every row against the old store (all three tables match), and locked the new store down further (web door off, sign-ups off, unencrypted connections refused, settings kept in the repo, a check that fails if any drifts back). Done 2026-11-13: the owner saved the new password file, and the page-fixture script ran against the new store (pages 1 and 604). Left: delete the old project (③). Kept open until then, because the item asks for the old one retired."
     },
     {
       "id": "supabase-old-store-sign-ups",
@@ -6203,6 +6203,17 @@
       "severity": "question",
       "owner": "user",
       "note": "Should the new store accept connections only from listed internet addresses? Today it accepts any address that has the password. A list would shut out a stolen password used elsewhere, but this laptop's address changes, so a fixed list would lock the owner out until it is updated. The store check reports it and does not fail on it."
+    },
+    {
+      "id": "env-formats-upstream",
+      "source": {
+        "file": "docs/design/supabase-move.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "The value-shape checks and the refusal to save with only the encrypted copy (added 2026-11-13) live in files the global cloudflare-onboarding installer overwrites. Carry them, with their tests, into that skill's own copies so a reinstall keeps them and other repos get them."
     }
   ]
 }
