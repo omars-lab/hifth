@@ -8,10 +8,14 @@ reader uses touches it. The app and the site never call it; only three building 
 **What does a hafiz notice?** Nothing. The store feeds the tools that make and check pages, not
 the app.
 
-**Status:** started 2026-11-12. As of 2026-11-13 the new project is built and closed, and the
-old one is paused. The data is not loaded yet: that waits on the owner making the new password
-file (step 6). Tracked as the `supabase-move` row in the issue register, with two smaller items
-after it (② and ③).
+**Status:** started 2026-11-12. On 2026-11-13 the data was loaded into the new store, and every
+row was checked against the old store: the same rows in all three tables. The new store was
+also locked down further than the old one (below). One step is left: the page-fixture script
+has to run against the new store, and that needs the new password file, which only the owner
+can make. The old project is still running, and stays running until then. (This page said on
+2026-11-12 that the old one was paused; on 2026-11-13 it showed as running and answered
+queries, so that was wrong.) Tracked as the `supabase-move` row in the issue register, with one
+smaller item after it (③); ② is answered.
 
 ## What is in the old store? (audited 2026-11-12)
 
@@ -21,7 +25,7 @@ after it (② and ③).
 | Schema history | Two migrations in the repo, both applied, nothing applied that the repo lacks. |
 | Extensions | Only the four every new Supabase project starts with. Nothing to carry over. |
 | Server functions, stored secrets, file buckets, preview branches | None. |
-| Sign-ups | Not checked: the dump that would count them also copies password hashes, so it was refused. Very likely empty: no app code signs anyone in, and the settings file is the untouched default. Glance at *Authentication → Users* in the old dashboard to be sure. |
+| Sign-ups | None. Counted on 2026-11-13 without copying any row: 0 sign-ups, 0 linked logins, 0 file buckets, 0 stored files. |
 | Licence for the word text | Read and marked done in the manual-check ledger before the text was loaded. The move does not change what is held, so it does not need reading again. |
 | Who could read it | **The tables were open to the project's public key, for reading and for writing.** Supabase opens every new table that way, and our migrations never closed them. This was read from the table rights and the missing row rules, not tried with the key. The key itself was never written in this repo, which limits who could have had it. The new migration (dated 2026-11-12) closes the tables, and a test now fails if a table is ever added open. **Closed on the old store the same day:** the migration was pushed there, and a fresh schema dump shows row rules on all three tables and no table rights left for the public roles. |
 | The connection password file | Gone from disk: it lived in a worktree that was removed. The new project gets a new one. |
@@ -36,15 +40,49 @@ three migrations and as the same database role step 5 uses. It loaded with no er
 came back, word ids 1 to 83,668 with none missing and no empty word. The backup holds the word
 text, so it stays in that ignored folder, plus a second copy in the owner's iCloud Drive (made
 2026-11-12, checksum matches), because a folder named `.cache` has been cleared on this laptop
-before. The old project was paused the same day, so these two files are the working copies until
-the new store is loaded.
+before. The old project is still running, so once the new store is loaded the two can be compared
+row for row, not only by counts.
+
+## What did the move tighten, and what keeps it tight?
+
+The owner asked (2026-11-13) for the move to improve the store's security, not only copy it.
+The new store differs from the old one in five ways:
+
+| What | Old store | New store |
+| --- | --- | --- |
+| The web door that answers the public key (Supabase's Data API) | On | **Off.** Nothing we run uses it. Our scripts talk to the database directly. |
+| Sign-ups | On, with email confirmation off | **Off.** Nobody signs in to this store. If they are ever turned on, an email must be confirmed, passwords are at least 12 characters, and one-time codes are 8 digits. |
+| Unencrypted connections | Allowed | **Refused.** The three building scripts also ask for encryption themselves. |
+| Tables, now and later | Closed on 2026-11-12, after being open | Closed from the first migration. Tables added later start closed too. |
+| Settings | Whatever the dashboard said | **Written in the repo** (`supabase/config.toml`), so a change shows up in review. |
+
+**What keeps it from drifting back:** `make qul-store-check` asks the live store and fails if any
+table lacks row rules, the public roles hold any right, anyone has signed up, unencrypted
+connections are allowed, or the live settings differ from the repo's settings file. It prints
+counts and settings only, never a row. An offline test also fails if the settings file ever stops
+keeping sign-ups and the web door off.
+
+**Still open to every address:** the store accepts connections from any internet address (with
+the password). Limiting it to a list of addresses is possible, but this laptop's address changes,
+so a fixed list would lock the owner out. Kept as a question for the owner, not changed here.
+
+<details><summary>How the settings got pushed by accident, and why it is fine now</summary>
+
+On 2026-11-13, a preview of the settings push was run with no answer typed. The command asks
+"[Y/n]" for each part and counts no answer as yes, so it pushed the settings file's local
+defaults live: sign-ups on, email confirmation off. Nothing used the store at the time and no one
+signed up (the check above counts 0). The settings file was then tightened and pushed on purpose,
+and the next preview showed every part up to date. To preview safely, pipe "n" into it; the check
+script does exactly that. Written up in `docs/issues/supabase-config-push-answers-yes.md`.
+
+</details>
 
 ## Open questions, and what would answer each
 
 ### ① Has the store moved to the new account, closed to the public key, with the old one retired? · **open**
 
-**What would answer it:** the page-fixture script runs against the new store, and the old
-project is paused. The steps:
+**What would answer it:** the new store holds the same rows as the old one, and the page-fixture
+script runs against it. The first is done (2026-11-13); the second waits on step 6. The steps:
 
 1. **Copy the data out of the old store.** Done 2026-11-12 (above).
 2. **Create the new account and project.** Done 2026-11-12: project `hifth.app`, region
@@ -56,16 +94,18 @@ project is paused. The steps:
    closed to the public key. Done 2026-11-12 (step 3 too): the move worktree is linked through
    the `hifth` profile, all three migrations applied, and a schema dump shows the three tables
    with row rules on, no table rights for the public roles, and later tables starting closed.
-5. **Load the data — later, once the new project is set up.** The owner chose (2026-11-12) to
-   set the new project up first and bring the data over afterwards. Restore the backup into the
-   new project, then compare row counts with 9,046 / 83,668 / 4. The backup is the old project's
-   data as of the day it was paused, so pulling again from the old project would need it
-   restored first and gives the same rows.
-6. **Make a new password file.** Copy the new connection address from the dashboard (use the
-   *session pooler* one, since this laptop has no IPv6). Store it in an encrypted env file the
-   way the scripts expect, and back its key up.
+5. **Load the data, and check every row.** Done 2026-11-13. The load script refuses a store that
+   already has rows, loads the whole backup in one go (so a failure leaves the store empty, not
+   half-filled), then fingerprints each table: a row count and one hash over every row in key
+   order. The compare step fingerprints the old store the same way. All three tables matched:
+   9,046 / 83,668 / 4 rows, with identical hashes. None of this needs a database password; it
+   goes through the command line's own login.
+6. **Make a new password file.** The owner's step, in their own terminal (the password must not
+   pass through a chat). Copy the new connection address from the dashboard (use the *session
+   pooler* one, since this laptop has no IPv6), save it as `SUPABASE_DB_URL` with the repo's
+   hidden-prompt command, and back the key up.
 7. **Prove it works.** Run the page-fixture script against the new store.
-8. **Retire the old project.** Only after step 7. Pause it first, delete later.
+8. **Retire the old project.** Only after step 7. That is item ③.
 
 <details><summary>Commands for each step</summary>
 
@@ -82,7 +122,8 @@ dashboard_url: https://supabase.com/dashboard
 pooler_host: supabase.com
 ```
 
-Every command in steps 3 to 5 takes the same `--profile` flag. Setting `SUPABASE_ACCESS_TOKEN`
+Every command in steps 3 and 4 takes the same `--profile` flag, and the store script in step 5
+takes a profile name (it defaults to `hifth`). Setting `SUPABASE_ACCESS_TOKEN`
 in the shell beats both saved logins, so leave it unset.
 
 ```
@@ -95,10 +136,16 @@ supabase --profile ~/.supabase/profiles/hifth.yaml link --project-ref <new proje
 supabase --profile ~/.supabase/profiles/hifth.yaml migration list   # all three show as not yet applied
 supabase --profile ~/.supabase/profiles/hifth.yaml db push
 
-# 5 — restore the backup (the password-bearing address is yours to supply)
-psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 \
-  -f packages/etl/data/qul/.cache/qul-store-backup/public-data-2026-11-12.sql
-supabase --profile ~/.supabase/profiles/hifth.yaml inspect db table-stats --linked
+# 5 — load into the empty new store, then check every row against the old store
+#     (the old store's folder is a checkout linked to the old project, through the
+#     bytesofpurpose profile)
+make qul-store-load BACKUP=packages/etl/data/qul/.cache/qul-store-backup/public-data-2026-11-12.sql
+make qul-store-compare FROM_PROFILE=bytesofpurpose FROM_WORKDIR=../hifth
+make qul-store-check
+
+# 6 — in your own terminal, not through Claude
+make env-set NAME=SUPABASE_DB_URL
+make env-keys-push
 
 # 7
 dotenvx run -- node packages/etl/scripts/qul-page-fixture.mjs --page 1
@@ -110,20 +157,30 @@ is still in git history and in one agent memory note.
 
 </details>
 
-### ② Did anyone ever sign up on the old store? · **open**
+### ② Did anyone ever sign up on the old store? · **answered**
 
-The audit could not count sign-ups without also copying password hashes, so it did not. No app
-code signs anyone in, so the answer is very likely none.
-
-**What would answer it:** the owner opens the old project's dashboard, *Authentication → Users*,
-and says whether the list is empty. It must be answered before ③, because deleting the old
-project deletes any sign-ups with it.
+No. Counted on 2026-11-13 by a query that returns numbers only: 0 sign-ups, 0 linked logins, 0 file
+buckets, 0 stored files. Deleting the old project loses no one's account.
 
 ### ③ Delete the old project once the new store is proven · **open**
 
-The old project is paused (2026-11-12), not deleted. A paused project can be restored; a deleted
-one cannot.
+The old project is still running, and it stays running until the new store is proven, because
+it is what the new store's rows are compared against. A deleted project cannot be brought back.
 
-**What would answer it:** ① closed (the page-fixture script has run against the new store) and
-② answered. Then delete the old project from the old account's dashboard, and remove its
+**What would answer it:** ① closed (the new store's rows match the old one's and the page-fixture
+script has run against it). Then delete the old project from the old account's dashboard, and remove its
 command-line profile if nothing else uses that account.
+
+### ④ Should the new store accept connections only from listed addresses? · **open**
+
+Today it accepts a connection from any internet address that has the password, the same as the
+old store. Supabase can limit that to a list of addresses.
+
+| | Keep it open (today) | Allow only listed addresses |
+| --- | --- | --- |
+| What it buys | Works from any network, with nothing to keep up | A stolen password is useless from anywhere else |
+| What it costs | A stolen password works from anywhere | This laptop's address changes; each change locks the owner out until the list is updated |
+| What it commits to | Nothing | Updating the list from a known address, or keeping a fixed address (a VPN with a set exit) |
+
+**What would answer it:** the owner's choice. The store check reports which way it is set and
+does not fail either way.

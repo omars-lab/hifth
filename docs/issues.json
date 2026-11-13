@@ -6169,7 +6169,7 @@
       "status": "open",
       "severity": "risk",
       "owner": "user",
-      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up and proved the backup loads, paused the old project, and built the new project's tables already closed, through its own command-line login. Next, the owner makes the new password file; then load the backup, compare the row counts, and run the page-fixture script against the new store."
+      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up, and built the new project's tables already closed. Done 2026-11-13: loaded the backup into the new store and checked every row against the old store (all three tables match), and locked the new store down further (web door off, sign-ups off, unencrypted connections refused, settings kept in the repo, a check that fails if any drifts back). Left: the owner makes the new password file in their own terminal (make env-set NAME=SUPABASE_DB_URL), then the page-fixture script runs against the new store."
     },
     {
       "id": "supabase-old-store-sign-ups",
@@ -6177,10 +6177,10 @@
         "file": "docs/design/supabase-move.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
-      "owner": "user",
-      "note": "Open the old project's dashboard, Authentication → Users, and say whether the list is empty. Very likely it is: no app code signs anyone in. Must be answered before the old project is deleted."
+      "owner": "agent",
+      "note": "No. Counted 2026-11-13 by a query that returns numbers only: 0 sign-ups, 0 linked logins, 0 file buckets, 0 stored files on the old store. Deleting it loses no one's account."
     },
     {
       "id": "supabase-delete-old-project",
@@ -6191,7 +6191,18 @@
       "status": "open",
       "severity": "risk",
       "owner": "user",
-      "note": "The old project is paused, not deleted. Delete it once the new store passes the page-fixture check and the sign-up question is answered; then remove the old account's command-line profile if nothing else uses it."
+      "note": "The old project is still running and stays so until the new store is proven, because the new store's rows are compared against it. Delete it once the rows match and the page-fixture check passes; then remove the old account's command-line profile if nothing else uses it."
+    },
+    {
+      "id": "supabase-network-allow-list",
+      "source": {
+        "file": "docs/design/supabase-move.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Should the new store accept connections only from listed internet addresses? Today it accepts any address that has the password. A list would shut out a stolen password used elsewhere, but this laptop's address changes, so a fixed list would lock the owner out until it is updated. The store check reports it and does not fail on it."
     }
   ]
 }
