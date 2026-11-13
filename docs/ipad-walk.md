@@ -70,4 +70,4 @@ Write here, in any words. The agent turns each line into a test.
 
 ## Where these come from
 
-The pitch steps are the pitch script (`.claude/skills/walk-app/pitch-script.md`); the other checks are items 3, 12, 13, 17, 18 and 19 of the by-hand list (`.claude/skills/manual-testing/checklist.md`); the two drawer settings are the open drawer questions in the issue list (`docs/issues.json`: `drawer-holds-its-tools`, `word-drawer-stacks-on-verse`). When a check here changes, change it there too.
+The pitch steps are the pitch script (`.claude/skills/walk-app/pitch-script.md`); the other checks are items 3, 12, 13, 17, 18, 19 and 22 of the by-hand list (`.claude/skills/manual-testing/checklist.md`); the two drawer settings are the open drawer questions in the issue list (`docs/issues.json`: `drawer-holds-its-tools`, `word-drawer-stacks-on-verse`). When a check here changes, change it there too.

@@ -211,6 +211,16 @@ test now keeps the slide on and counts rest from the end of the slide; the four 
 passed 160 times out of 160 that way, and still fail with the blank space taken out. Write-up:
 `docs/issues/drawer-tools-jumped-after-rising.md`.
 
+### 2026-11-13 — walk-feedback-capture: a screenshot on the iPad keeps what you saw
+
+**Done:** In a build put on from the laptop, a screenshot makes the app keep its own picture,
+where you were, your last ten seconds of touches, the five seconds of video before and a note if
+you add one. The folders show in the Files app. `make walk-pull` copies them off over the cable
+and draws one page of them; `make walk-list` prints them. A release check fails if a build meant
+to ship has any of it, and archiving runs that check first. The walk page and the by-hand list
+(item 22) say how to try it on the real iPad, which is the owner's part still to do. Plan:
+`.claude/plans/refactored-bouncing-cerf.md`.
+
 ### 2026-11-12 to 11-13 — supabase-move: the outside-library store moves to a new account
 
 **Done** (loading the data into the new store is still open; see `docs/design/supabase-move.md` ①):
