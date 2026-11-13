@@ -47,6 +47,25 @@ struct ShellView: View {
                     .frame(width: 1, height: 1)
                     .accessibilityIdentifier("hifth.ready")
             }
+            #if DEBUG
+            // The check card a `check` link opened, top corner, over the page.
+            if let card = model.checkCard {
+                CheckCardView(card: card, onDone: model.finishCheck, onClose: model.closeCheck)
+                    .padding(.top, 56)
+                    .padding(.trailing, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .id(ObjectIdentifier(card))
+            }
+            // "Add a note" after a walk screenshot: bottom middle, clear of the
+            // check card and of the page's own bars at the top.
+            if let capture = model.captureNote {
+                CaptureNoteBanner(model: model, capture: capture)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 24)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .id(capture)
+            }
+            #endif
         }
         #if os(macOS)
         .navigationTitle(model.title)

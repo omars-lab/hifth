@@ -89,12 +89,14 @@ async function turnAhead(page: Page, isMobile: boolean, from: number, to: number
     for (let i = 1; i <= 8; i += 1) await page.mouse.move(box.x + box.width * (0.3 + i * 0.05), y);
     if (during) await during();
     await page.mouse.up();
-    // Landed, not only begun: the page arriving shows for a fifth of a second
-    // beside the one leaving. A swipe that starts then counts too (docs/PLAN.md,
-    // item 86, tested in page-turn), but these tests are about what each swipe
-    // leaves on the page, so each waits for the last to end.
-    await expect(page.locator(`svg[aria-labelledby='page-label-${from}']:visible`)).toHaveCount(0);
   }
+  // Landed, not only begun: the page arriving shows for a fifth of a second
+  // beside the one leaving. A swipe that starts then counts too (docs/PLAN.md,
+  // item 86, tested in page-turn), but these tests are about what each turn
+  // leaves on the page, so each waits for the last to end. On a computer too:
+  // a second arrow press made while the first turn was still going over was
+  // lost in Firefox on a busy laptop (a push run of 2026-11-12).
+  await expect(page.locator(`svg[aria-labelledby='page-label-${from}']:visible`)).toHaveCount(0);
   await expect(page.locator(`svg[aria-labelledby='page-label-${to}']:visible`)).toBeVisible();
 }
 

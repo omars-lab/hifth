@@ -9,6 +9,7 @@ import { defineConfig, type Plugin } from "vite";
 import preact from "@preact/preset-vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { preloadScript } from "./src/lang-preload";
+import { devHubRoute } from "./src/dev/dev-hub";
 import { intentPictureRoute } from "./src/dev/intent-picture";
 import { LOCALE_IDS } from "./src/messages/locales.gen";
 
@@ -40,6 +41,42 @@ function intentPictureDev(): Plugin {
         } catch {
           res.statusCode = 404;
           res.end("<p>No picture yet. Run <code>make intent</code> in the repo, then reload.</p>");
+        }
+      });
+    },
+  };
+}
+
+/**
+ * Serve the features page (`make feature-links`) at /dev-hub/ on the dev server, so it
+ * opens from the local hub and its relative links reach the app on the same server. Dev
+ * only: `apply: "serve"` keeps it out of every build. The route is in src/dev/dev-hub.ts.
+ */
+function devHubDev(): Plugin {
+  const folder = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", ".dev-hub");
+  return {
+    name: "hifth-dev-hub-dev",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url ?? "";
+        const route = devHubRoute(url);
+        if (!route) return next();
+        res.setHeader("Cache-Control", "no-store");
+        if (route.kind === "add-slash") {
+          res.statusCode = 302;
+          res.setHeader("Location", `/dev-hub/${url.slice("/dev-hub".length)}`);
+          res.end();
+          return;
+        }
+        try {
+          const body = readFileSync(join(folder, route.file));
+          res.setHeader("Content-Type", route.file.endsWith(".png") ? "image/png" : "text/html; charset=utf-8");
+          res.end(body);
+        } catch {
+          res.statusCode = 404;
+          res.setHeader("Content-Type", "text/html; charset=utf-8");
+          res.end("<p>No features page yet. Run <code>make feature-links</code> in the repo, then reload.</p>");
         }
       });
     },
@@ -231,6 +268,7 @@ export default defineConfig({
     preloadReaderLanguage(),
     qulFixturesDev(),
     intentPictureDev(),
+    devHubDev(),
     preact(),
     VitePWA({
       registerType: "prompt",

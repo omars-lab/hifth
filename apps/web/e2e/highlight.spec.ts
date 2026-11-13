@@ -17,6 +17,13 @@ import { inkToken, lum, pixelsOf } from "./ink";
 const VERSE = "/#/hafs-kfqc/2:47";
 const OVERLAY = 'svg[aria-labelledby="page-label-7"]:visible #hifth-overlay';
 
+/*
+ * Every style read below is asked until it settles (expect.poll), never once.
+ * Just after the page opens on a busy laptop, Firefox has read back an empty
+ * style on a mark for a moment, even after the same mark had read back its
+ * colour (push runs of 2026-11-12; a run of five repeats caught it after a
+ * one-time wait had passed). So a single wait at the start is not enough.
+ */
 async function openVerse(page: Page): Promise<void> {
   await page.goto(VERSE);
   await expect(page.locator(`${OVERLAY} .hl-sel.hl-ink`)).toHaveCount(2, { timeout: 20_000 });
@@ -136,8 +143,10 @@ test.describe("Hifth · the highlighter on the page", () => {
 
   test("the verse is marked in the verse's own amber", async ({ page }) => {
     await openVerse(page);
-    const fill = await page.locator(`${OVERLAY} .hl-sel.hl-ink`).first().evaluate((el) => getComputedStyle(el).fill);
-    expect(fill).toBe(await inkToken(page, "--ink-sel"));
+    const amber = await inkToken(page, "--ink-sel");
+    await expect
+      .poll(() => page.locator(`${OVERLAY} .hl-sel.hl-ink`).first().evaluate((el) => getComputedStyle(el).fill))
+      .toBe(amber);
   });
 
   test("every mark blends with the page, so the letters under it stay black", async ({ page }) => {
@@ -145,11 +154,10 @@ test.describe("Hifth · the highlighter on the page", () => {
     // does the lightening, and the letters stay as dark as the print made them.
     // Without the blend the same amber would paint straight over the words.
     await openVerse(page);
-    const blends = await page
-      .locator(`${OVERLAY} .hl-ink`)
-      .evaluateAll((els) => els.map((el) => getComputedStyle(el).mixBlendMode));
-    expect(blends.length).toBeGreaterThan(0);
-    for (const b of blends) expect(b).toBe("multiply");
+    const blends = () =>
+      page.locator(`${OVERLAY} .hl-ink`).evaluateAll((els) => els.map((el) => getComputedStyle(el).mixBlendMode));
+    await expect.poll(async () => (await blends()).length).toBeGreaterThan(0);
+    await expect.poll(async () => (await blends()).every((b) => b === "multiply"), { message: "every mark multiplies" }).toBe(true);
 
     // The middle of the band, where the ink always covers the letters.
     const px = await pixelsOf(page, `${OVERLAY} .hl-sel.hl-ink`, { middle: 0.4 });
@@ -161,27 +169,29 @@ test.describe("Hifth · the highlighter on the page", () => {
     await openVerse(page);
     const filterOf = () =>
       page.locator(`${OVERLAY} .hl-band`).first().evaluate((el) => getComputedStyle(el).filter);
-    expect(await filterOf(), "the streaks are on by default").toMatch(/url\(/);
+    await expect.poll(filterOf, { message: "the streaks are on by default" }).toMatch(/url\(/);
 
     // Opened again under each setting, the way a reader who has it set arrives:
     // Firefox under test does not restyle a page already open when the setting
     // is flipped, though it matches the query (found 2026-10-10).
+    // Asked until it settles: just after a reload, on a busy laptop, Firefox
+    // has read back an empty style for a moment (a push run of 2026-11-12).
     await page.emulateMedia({ contrast: "more" });
     await reopen(page);
-    expect(await filterOf(), "more contrast: flat ink").toBe("none");
+    await expect.poll(filterOf, { message: "more contrast: flat ink" }).toBe("none");
 
     await page.emulateMedia({ contrast: "no-preference", forcedColors: "active" });
     await reopen(page);
-    expect(await filterOf(), "forced colours: flat ink").toBe("none");
+    await expect.poll(filterOf, { message: "forced colours: flat ink" }).toBe("none");
   });
 
   test("the ink is simply there for a reader who asks for less motion", async ({ page }) => {
     await openVerse(page);
     const animationOf = () =>
       page.locator(`${OVERLAY} .hl-ink`).first().evaluate((el) => getComputedStyle(el).animationName);
-    expect(await animationOf(), "the pen wipes the line in by default").toBe("hifth-ink");
+    await expect.poll(animationOf, { message: "the pen wipes the line in by default" }).toBe("hifth-ink");
 
     await page.emulateMedia({ reducedMotion: "reduce" });
-    expect(await animationOf(), "less motion: no wipe").toBe("none");
+    await expect.poll(animationOf, { message: "less motion: no wipe" }).toBe("none");
   });
 });

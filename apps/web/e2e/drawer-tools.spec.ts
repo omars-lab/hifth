@@ -1,4 +1,4 @@
-import { test, expect, type Locator, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Locator, type Page } from "@playwright/test";
 import { DRAWER_TOOLS_KEY } from "../src/drawer-tools";
 
 /*
@@ -58,39 +58,165 @@ for (const size of [
     test.use({ viewport: { width: size.width, height: size.height } });
 
     test("with the setting on, Same roots opens inside the drawer, not as its own card, and the verse stays in sight", async ({ page }) => {
-      await page.addInitScript((key) => localStorage.setItem(key, "drawer"), DRAWER_TOOLS_KEY);
-      await page.goto("/#/hafs-kfqc/2:45");
-      await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
-      await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
+      await opensInTheDrawer(page, "2:45");
+    });
 
-      // The list is a part of the drawer, and no card opened beside it.
-      const list = drawer(page).getByRole("region", { name: /^Roots · / });
-      await expect(list).toBeVisible();
-      await expect(page.getByRole("dialog")).toHaveCount(0);
-      // The nearest root opens by itself, its verses ready to go to.
-      await expect(list.getByRole("button", { name: /^Hop to / }).first()).toBeVisible({ timeout: 10_000 });
+    // The page lifts the verse above the drawer, even the last verse on its
+    // page (2026-11-13).
+    test("the last verse on its page stays in sight too, with Same roots open in the drawer", async ({ page }) => {
+      await opensInTheDrawer(page, "2:48");
+    });
 
-      // The drawer grew, and no line of the lit verse is under it.
-      await settle(drawer(page));
-      await expect.poll(async () => (await litLines(page)).length, { message: "a verse is lit" }).toBeGreaterThan(0);
-      // The page slides to keep the verse clear; it may still be moving once the drawer has settled.
-      await expect
-        .poll(
-          async () => {
-            const box = (await drawer(page).boundingBox())!;
-            return (await litLines(page)).filter((line) => overlaps(line, box)).length;
-          },
-          { message: "lines of the verse under the drawer" },
-        )
-        .toBe(0);
-
-      // Pressing Same roots again folds the list away and leaves the drawer.
-      await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
-      await expect(list).toBeHidden();
-      await expect(drawer(page)).toBeVisible();
+    // A verse nine lines long is too tall for the room a full-height list
+    // leaves, however high the page lifts it: the list is cut to the verse's
+    // height, measured once as it opens (2026-11-13).
+    test("a long verse stays in sight too: the roots list is cut to leave it room", async ({ page }) => {
+      await opensInTheDrawer(page, "2:102");
     });
   });
 }
+
+/** Opens `verse`'s drawer, then Same roots inside it; the verse must stay clear of the drawer. */
+async function opensInTheDrawer(page: Page, verse: string): Promise<void> {
+  await page.addInitScript((key) => localStorage.setItem(key, "drawer"), DRAWER_TOOLS_KEY);
+  await page.goto(`/#/hafs-kfqc/${verse}`);
+  await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+  await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
+
+  // The list is a part of the drawer, and no card opened beside it.
+  const list = drawer(page).getByRole("region", { name: /^Roots · / });
+  await expect(list).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  // The nearest root opens by itself, its verses ready to go to.
+  await expect(list.getByRole("button", { name: /^Hop to / }).first()).toBeVisible({ timeout: 10_000 });
+
+  // The drawer grew, and no line of the lit verse is under it.
+  await settle(drawer(page));
+  await expect.poll(async () => (await litLines(page)).length, { message: "a verse is lit" }).toBeGreaterThan(0);
+  // The page slides to keep the verse clear; it may still be moving once the drawer has settled.
+  await expect
+    .poll(
+      async () => {
+        const box = (await drawer(page).boundingBox())!;
+        return (await litLines(page)).filter((line) => overlaps(line, box)).length;
+      },
+      { message: "lines of the verse under the drawer" },
+    )
+    .toBe(0);
+
+  // Pressing Same roots again folds the list away and leaves the drawer.
+  await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
+  await expect(list).toBeHidden();
+  await expect(drawer(page)).toBeVisible();
+}
+
+test.describe("the tools in the drawer keep still once they have risen", () => {
+  // Found 2026-11-13, behind a test that failed now and then. At the
+  // iPad-on-its-side size the row of tools came to rest, then jumped up twice:
+  // once when the look-alikes list arrived a moment after the drawer and the
+  // drawer grew to hold it (336 px), and once 400 ms in, when the drawer
+  // measured again after the page had lifted the verse out of its way and let
+  // its list grow (about 160 px). A press already on its way to Same roots
+  // landed on the list's heading instead, so the roots never opened.
+  test.use({ viewport: { width: 1180, height: 820 } });
+
+  async function watched(browser: Browser, hold: Promise<void> | null, holdPicture: Promise<void> | null): Promise<Page> {
+    // Own the context: the service worker answers fetches itself, where
+    // `page.route` cannot slow them. The drawer slides up as it does for most
+    // readers; a reader who asks for less motion has no slide, which is the
+    // easier case.
+    const context = await browser.newContext({
+      serviceWorkers: "block",
+      locale: "en-US",
+      viewport: { width: 1180, height: 820 },
+    });
+    const page = await context.newPage();
+    if (hold) {
+      await page.route("**/assets/adj/*/2.json", async (route) => {
+        await hold;
+        await route.continue().catch(() => undefined);
+      });
+    }
+    if (holdPicture) {
+      // A look-alike's picture of the shared words is cut from its own page,
+      // and needs that page's word list: held back, the picture comes late.
+      // The two pages open on screen (7 and 8) are let through.
+      await page.route("**/assets/words/*/*.json", async (route) => {
+        const sheet = Number(/\/(\d+)\.json$/.exec(route.request().url())?.[1]);
+        if (sheet < 6 || sheet > 9) await holdPicture;
+        await route.continue().catch(() => undefined);
+      });
+    }
+    await page.addInitScript((key) => {
+      localStorage.setItem(key, "drawer");
+      // Where Same roots stands, every frame it moves: a check from the test
+      // itself polls too slowly to see a jump between two of its looks. Each
+      // look also notes whether the drawer is still sliding up, and how long
+      // since the frame before: a busy moment mid-slide can skip 150 ms of
+      // frames, and a point on the way up then looks like a resting place.
+      const seen: { t: number; y: number; gap: number; sliding: boolean }[] = [];
+      (window as unknown as { __rootsAt: typeof seen }).__rootsAt = seen;
+      let last = performance.now();
+      const look = () => {
+        const now = performance.now();
+        const b = document.querySelector('[data-verse-drawer] button[aria-label^="Same roots"]');
+        if (b) {
+          const y = Math.round(b.getBoundingClientRect().y);
+          const d = b.closest("[data-verse-drawer]");
+          const sliding = !!d?.getAnimations().some((a) => a.playState === "running");
+          if (seen.at(-1)?.y !== y || seen.at(-1)?.sliding !== sliding) seen.push({ t: now, y, gap: Math.round(now - last), sliding });
+        }
+        last = now;
+        requestAnimationFrame(look);
+      };
+      requestAnimationFrame(look);
+    }, DRAWER_TOOLS_KEY);
+    return page;
+  }
+
+  const later = (): Promise<void> => new Promise<void>((r) => setTimeout(r, 1200));
+  const none = (): Promise<void> | null => null;
+  for (const when of [
+    { name: "with the look-alikes on time", hold: none, picture: none },
+    // Long enough for the drawer to finish rising before the list lands, and
+    // shorter than the app's own wait for the list.
+    { name: "with the look-alikes held back", hold: later, picture: none },
+    // Found 2026-11-13, after the fix above: the look-alike's picture of the
+    // shared words came up to 340 ms after the drawer had risen, and the row
+    // it sits in grew by 28 px, moving the tools up under a press.
+    { name: "with the shared words' picture held back", hold: none, picture: later },
+  ]) {
+    test(`${when.name}, Same roots does not move after it first comes to rest, and a press there opens it`, async ({ browser }) => {
+      const page = await watched(browser, when.hold(), when.picture());
+      await page.goto("/#/hafs-kfqc/2:45");
+      await expect(drawer(page).getByRole("region", { name: /^Look-alikes/ })).toBeVisible({ timeout: 20_000 });
+      // Past every late measure the app makes, and past the held picture.
+      await page.waitForTimeout(1500);
+      await expect(drawer(page).locator("[data-shared-words] svg").first()).toBeVisible();
+      const seen = await page.evaluate(
+        () => (window as unknown as { __rootsAt: { t: number; y: number; gap: number; sliding: boolean }[] }).__rootsAt,
+      );
+      // Every look as [ms, where, ms since the frame before, S if sliding], for a failure to show.
+      const record = JSON.stringify(seen.map((at) => [Math.round(at.t), at.y, at.gap, at.sliding ? "S" : "-"]));
+      // At rest: the first look once the drawer has stopped sliding up.
+      const rest = seen.findIndex((at) => !at.sliding);
+      expect(rest, `the drawer stopped sliding ${record}`).toBeGreaterThanOrEqual(0);
+      const restY = seen[rest]!.y;
+      expect(seen.slice(rest).map((at) => at.y), `where Same roots stood after it first came to rest ${record}`).toEqual([restY]);
+      const box = (await drawer(page).getByRole("button", { name: /^Same roots · / }).boundingBox())!;
+      await page.mouse.click(box.x + box.width / 2, restY + box.height / 2);
+      await expect(drawer(page).getByRole("region", { name: /^Roots · / })).toBeVisible();
+      await page.context().close();
+    });
+  }
+
+  test("a look-alikes list that never comes back still lets the drawer rise", async ({ browser }) => {
+    const page = await watched(browser, new Promise(() => undefined), null);
+    await page.goto("/#/hafs-kfqc/2:45");
+    await expect(drawer(page).getByRole("button", { name: /^Same roots · / })).toBeVisible({ timeout: 20_000 });
+    await page.context().close();
+  });
+});
 
 test("with the setting on, Escape folds the roots list away first, and a second Escape puts the drawer away", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

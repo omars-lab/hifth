@@ -2553,6 +2553,16 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
         const list = page.getByRole("dialog");
         await expect(list).toBeVisible({ timeout: 20_000 });
         await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        // Both ways end with the page beside the list. On a busy laptop the page
+        // can sit still for a moment before its slide starts, and a still box
+        // read then was the whole page (491 pixels off, a push run of 2026-11-12).
+        const taken = await stillBoxOf(list);
+        await expect
+          .poll(async () => {
+            const b = await svg.boundingBox();
+            return b !== null && (b.x + b.width <= taken.x + 1 || b.x >= taken.x + taken.width - 1);
+          }, { message: "the page is beside the list, not under it", timeout: 10_000 })
+          .toBe(true);
         return (await stillBoxOf(svg)).width;
       };
       await page.goto(`/#/hafs-kfqc/${at}?view=one`);
@@ -2883,6 +2893,29 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       expect(overlaps, `the chips ${JSON.stringify(chips)} on the book ${JSON.stringify(open)}`).toBe(false);
     });
   }
+
+  test("a drawer that grows after it opens still takes the chips it then covers", async ({ page }) => {
+    // Once in a full run the drawer measured itself while still short, decided
+    // it covered no bar button, and never measured again: the chips stayed in
+    // the bar, half under it (push of 2026-11-12). Hold it short while it
+    // opens, then let it grow.
+    await page.addInitScript(() => {
+      const style = document.createElement("style");
+      style.id = "short-drawer";
+      style.textContent = "section[data-verse-drawer] > :not(header) { display: none !important; }";
+      document.addEventListener("DOMContentLoaded", () => document.head.append(style));
+    });
+    await page.setViewportSize({ width: 1024, height: 1366 });
+    await page.goto("/#/hafs-kfqc/2:49");
+    await expect(pageSvg(page, 8)).toBeVisible({ timeout: 20_000 });
+    const drawer = page.locator("section[data-verse-drawer]");
+    await expect(drawer).toBeVisible();
+    await expect(page.locator("footer").locator("button[data-direction]").first()).toBeVisible();
+    await page.evaluate(() => document.getElementById("short-drawer")?.remove());
+    await expect(drawer.locator("button[data-direction]").first()).toBeVisible();
+    await expect(drawer).toHaveAttribute("data-whole");
+    await expect(page.locator("footer").locator("button[data-direction]")).toHaveCount(0);
+  });
 
   test("the info panel moves the chips between the two rows at once, and remembers the choice", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 1366 });

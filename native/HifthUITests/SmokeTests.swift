@@ -59,6 +59,38 @@ final class SmokeTests: XCTestCase {
     }
 
     #if os(iOS)
+    /// A `check` link opens the card of steps over the page; each step takes a
+    /// ✓ or ✗, and Done closes it. The steps are made up. iOS may ask "Open in
+    /// Hifth?" first; the test presses Open.
+    func testCheckLinkOpensACard() throws {
+        let app = launch(route: "/hafs-kfqc/p7")
+        waitForRoute("#/hafs-kfqc/p7", in: app)
+        let link = "hifth://x-callback-url/check?id=ui-test&title=Made%20up%20check"
+            + "&step=Turn%20the%20page&see=It%20slides%20over&step=Tap%20a%20verse"
+        XCUIDevice.shared.system.open(try XCTUnwrap(URL(string: link)))
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let openButton = springboard.buttons["Open"]
+        if openButton.waitForExistence(timeout: 4) { openButton.tap() }
+
+        let done = app.buttons["hifth.check.done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 10), "the card never opened")
+        XCTAssertTrue(app.staticTexts["Made up check"].waitForExistence(timeout: 3), "the card has no title")
+        XCTAssertTrue(app.staticTexts["You should see: It slides over"].exists)
+        app.buttons["hifth.check.1.pass"].tap()
+        app.buttons["hifth.check.2.fail"].tap()
+        XCTAssertTrue(app.staticTexts["2 of 2 answered"].exists)
+        attach(app, named: "check-card")
+
+        app.buttons["hifth.check.fold"].tap()
+        let unfold = app.buttons["hifth.check.unfold"]
+        XCTAssertTrue(unfold.waitForExistence(timeout: 3), "the card did not fold")
+        attach(app, named: "check-card-folded")
+        unfold.tap()
+
+        done.tap()
+        XCTAssertFalse(done.waitForExistence(timeout: 1), "Done did not close the card")
+    }
+
     /// A finger turns the page inside the app, not only in the browser: the
     /// mus'haf reads to the left, so drawing the page to the right brings the
     /// next one, and drawing it back returns.
@@ -85,6 +117,64 @@ final class SmokeTests: XCTestCase {
         sleep(3)
         XCTAssertEqual(app.state, .runningForeground, "the app closed when a verse was touched")
         XCTAssertTrue(app.staticTexts["hifth.route"].exists)
+    }
+
+    /// A walk capture is whole: the app's picture, the trail with the touch
+    /// made just before, where the reader was (the page answered, with its
+    /// number), and the note typed in the banner. A screenshot cannot be
+    /// pressed from a test, so the app is asked for one at start instead; the
+    /// rest of the path is the same. The note is made up.
+    func testWalkCaptureKeepsPictureTrailPlaceAndNote() throws {
+        let folder = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("walk-capture-ui-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let app = XCUIApplication()
+        app.launchArguments = ["--route=/hafs-kfqc/p7"]
+        app.launchEnvironment["HIFTH_WALK_CAPTURE_AT_START"] = folder.path
+        app.launchEnvironment["HIFTH_SNAPSHOT_DELAY_MS"] = "6000"
+        app.launch()
+        waitForRoute("#/hafs-kfqc/p7", in: app)
+        sleep(1)
+        app.webViews.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+
+        let banner = app.descendants(matching: .any)["hifth.capture.note"]
+        XCTAssertTrue(banner.waitForExistence(timeout: 15), "no note banner after the capture")
+        attach(app, named: "walk-capture-note")
+        banner.tap()
+        banner.typeText("made up note")
+        app.buttons["hifth.capture.done"].tap()
+        XCTAssertFalse(banner.waitForExistence(timeout: 2), "Done did not close the banner")
+        XCTAssertEqual(app.state, .runningForeground)
+
+        let names = try FileManager.default.contentsOfDirectory(atPath: folder.path)
+        XCTAssertEqual(names.count, 1, "one capture, got \(names)")
+        let capture = folder.appendingPathComponent(try XCTUnwrap(names.first))
+        let files = Set(try FileManager.default.contentsOfDirectory(atPath: capture.path))
+        XCTAssertEqual(files, ["picture.png", "trail.jsonl", "where.json", "note.txt"])
+
+        let picture = try Data(contentsOf: capture.appendingPathComponent("picture.png"))
+        XCTAssertEqual(Array(picture.prefix(4)), [0x89, 0x50, 0x4E, 0x47], "the picture is not a PNG")
+        let trail = try String(contentsOf: capture.appendingPathComponent("trail.jsonl"), encoding: .utf8)
+        XCTAssertTrue(trail.contains("\"kind\":\"touch\""), "the tap is not on the trail")
+        XCTAssertTrue(trail.contains("\"route\":\"/hafs-kfqc/p7\""), "the page move is not on the trail")
+
+        let place = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: capture.appendingPathComponent("where.json"))) as? [String: Any]
+        )
+        XCTAssertEqual(place["trigger"] as? String, "launch")
+        XCTAssertEqual(place["pageAnswered"] as? Bool, true, "the page did not answer")
+        XCTAssertNotNil(place["page"] as? Int, "no page number")
+        // The tap selects a verse, so the address moves to it, and the
+        // capture names that verse.
+        let verse = try XCTUnwrap(place["verse"] as? String, "no verse though the tap selected one")
+        XCTAssertEqual(place["route"] as? String, "/hafs-kfqc/\(verse)")
+        XCTAssertNotEqual((place["build"] as? [String: Any])?["commit"] as? String, "unknown", "no build stamp")
+        // Apple's recorder needs a real iPad: here the video is settled as
+        // not recorded, and no before.mp4 (checked in `files` above).
+        XCTAssertEqual(place["video"] as? String, "simulator", "where.json does not say what happened to the video")
+        XCTAssertEqual(
+            try String(contentsOf: capture.appendingPathComponent("note.txt"), encoding: .utf8), "made up note\n"
+        )
     }
 
     /// A pinch only magnifies: it selects no verse and opens no menu. A pinch

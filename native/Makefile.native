@@ -15,6 +15,9 @@
 #   make app-device-install build for a plugged-in iPad, install and launch (DEVICE=…)
 #   make app-release-ipad DEVICE=…   the iPad checks, install, open it watched; fails on a new crash report
 #   make app-crash-logs DEVICE=… [SINCE=<ISO time>]   copy the app's crash reports off the iPad, one line each
+#   make walk-pull DEVICE=… [CLEAR=1]   copy the screenshots kept on a walk off the iPad, and draw them as one page
+#   make walk-gallery · make walk-list [JSON=1]   redraw that page · list the captures, oldest first
+#   make app-release-check   fail if the release iPad build carries any of the walk capture
 #   make app-devices [CSV=1]   the registered devices, and the slots of each kind left this year
 #   make app-device-register DEVICE=…   register a new device with Apple (uses a slot), then install
 # ---------------------------------------------------------------------------
@@ -106,7 +109,8 @@ SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(pats
 
 .PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
         app-run-ipad app-shot app-probe app-open app-test app-walk app-test-mac-ui app-unit-test app-logs app-clean \
-        app-golden app-golden-update app-device-install app-release-ipad app-crash-logs app-devices app-device-register app-archive app-testflight
+        app-golden app-golden-update app-device-install app-device-open app-release-ipad app-crash-logs app-devices app-device-register app-archive app-testflight \
+        walk-pull walk-gallery walk-list
 
 app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
 	python3 $(NATIVE)/scripts/make-appicon.py
@@ -143,6 +147,9 @@ else
 	@test ! -e $(WEB_BUNDLE)/assets/private || { echo "held data reached the public shell bundle"; exit 1; }
 endif
 	@echo "$(FLAVOUR)" > $(WEB_BUNDLE)/.hifth-web-flavour
+	@# The commit, for a walk capture to say which build it came from; its own
+	@# file, because app-golden-public reads the flavour file whole.
+	@echo "$$(git rev-parse --short=8 HEAD 2>/dev/null || echo unknown)$$(git diff --quiet HEAD 2>/dev/null || echo +changes)" > $(WEB_BUNDLE)/.hifth-web-commit
 	@echo "  ✓ $(FLAVOUR) web build in $(WEB_BUNDLE) ($$(find $(WEB_BUNDLE) -type f | wc -l | tr -d ' ') files)"
 
 app-build-mac: app-generate ## Build the Mac app (Debug, ad-hoc signed)
@@ -351,6 +358,30 @@ app-device-install: app-generate ## Build for a plugged-in iPad, install and lau
 	$(if $(filter watch,$(LAUNCH)),node native/scripts/release-watch.mjs --device "$(DEVICE)" --route "$(ROUTE)" \
 	  --log $(RELEASE_LOG) --out $(CRASH_DIR) --watch $(WATCH),DEVICECTL_CHILD_HIFTH_ROUTE=$(ROUTE) xcrun devicectl device process launch --device "$(DEVICE)" $(BUNDLE_ID))
 
+# Hands one link to the app on a plugged-in iPad, the cards' command on the features page
+# (make feature-links). Whether it turns the page of an app already open, or restarts it,
+# is the first open question in docs/design/feature-links.md.
+app-device-open: ## Send one link to the app on a plugged-in iPad (DEVICE=… LINK='hifth://x-callback-url/open?page=7')
+	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@case '$(LINK)' in hifth://*) ;; *) echo "  LINK= must be a hifth:// link, e.g. LINK='hifth://x-callback-url/open?page=7'"; exit 1;; esac
+	xcrun devicectl device process launch --device "$(DEVICE)" --payload-url '$(LINK)' $(BUNDLE_ID)
+
+# ---- a card of things to check, on the app's screen (docs/design/check-card.md).
+# Builds a `check` link from a ledger row (ID=) or a steps file (FILE=) and sends
+# it; Done on the card saves the answers, and check-answers copies them into
+# native/shots/checks/ (ignored by git). Builds from this laptop only.
+CHECK_CARD = node .claude/skills/guided-check/scripts/check-card.mjs
+CHECK_FROM = $(if $(ID),--ledger $(ID))$(if $(FILE),--file $(FILE)) $(if $(FROM),--from $(FROM))
+CHECK_TO   = $(if $(SIM),--sim,--device "$(DEVICE)")
+check-card: ## Put a card of things to check on the app's screen (ID=<ledger row> or FILE=<steps.json>, FROM=13, SIM=1 or DEVICE=…)
+	@test -n "$(ID)$(FILE)" || { echo "  Say what to check: ID=<a row in docs/validation/ledger.json> or FILE=<steps.json>"; exit 1; }
+	@test -n "$(SIM)$(DEVICE)" || { echo ""; echo "  Say where: SIM=1 for the booted simulator, or DEVICE= one of:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@$(CHECK_CARD) send $(CHECK_FROM) $(CHECK_TO)
+
+check-answers: ## Copy the check card's answers off the app into native/shots/checks (SIM=1 or DEVICE=…; ALSO=Documents/<folder> brings a build's own log too)
+	@test -n "$(SIM)$(DEVICE)" || { echo ""; echo "  Say where from: SIM=1 for the booted simulator, or DEVICE= one of:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@$(CHECK_CARD) answers $(CHECK_TO) $(if $(ALSO),--also "$(ALSO)")
+
 # ---- release to the plugged-in iPad, with the checks that would have caught the
 # touch crash (docs/issues/ipad-crash-on-verse-touch.md): the unit tests, the
 # verse-touch test on the iPad's own OS in the simulator, then the install, then
@@ -375,6 +406,35 @@ app-crash-logs: ## Copy the app's crash reports off a plugged-in iPad and say wh
 	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
 	node .claude/skills/crash-logs/scripts/pull-crashes.mjs --device "$(DEVICE)" --out $(CRASH_DIR) $(if $(SINCE),--since $(SINCE))
 
+# ---- walk captures: what the debug app kept each time the owner took a
+# screenshot on the iPad. They land in native/shots/walks/ (gitignored): a pitch
+# capture shows the book's text, so it is never committed or sent anywhere.
+WALK_CAPTURES = node .claude/skills/walk-app/scripts/walk-captures.mjs
+CLEAR        ?=
+JSON         ?=
+walk-pull: ## Copy the walk captures off a plugged-in iPad and draw them as one page (DEVICE=…, CLEAR=1 empties the iPad after a full copy)
+	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
+	$(WALK_CAPTURES) pull --device "$(DEVICE)" $(if $(CLEAR),--clear)
+
+walk-gallery: ## Redraw the walk captures page (native/shots/walks/index.html) from what was pulled
+	@$(WALK_CAPTURES) gallery
+
+walk-list: ## The walk captures pulled so far, oldest first, one line each (JSON=1 for the list as JSON)
+	@$(WALK_CAPTURES) list $(if $(JSON),--json)
+
+# The capture is for builds from this laptop only. Builds the iPad app both
+# ways for a real iPad (unsigned, so no device is needed) and fails if the
+# release build has the Files app settings or any of the capture code.
+RELEASE_CHECK_DD := $(DERIVED)/release-check
+app-release-check: app-generate ## Fail if the release iPad build carries any of the walk capture (builds Debug and Release, a few minutes)
+	@for config in Debug Release; do \
+	  set -o pipefail; xcodebuild -quiet -project $(XCPROJ) -derivedDataPath $(RELEASE_CHECK_DD) -scheme Hifth-iOS \
+	    -configuration $$config -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO build || exit 1; \
+	done
+	node .claude/skills/walk-app/scripts/release-check.mjs \
+	  --debug $(RELEASE_CHECK_DD)/Build/Products/Debug-iphoneos/Hifth.app \
+	  --release $(RELEASE_CHECK_DD)/Build/Products/Release-iphoneos/Hifth.app
+
 # ---- which devices Apple has registered for us, and the slots left (100 of each
 # kind a year). CSV=1 prints a row per device with its full id: keep it off the repo.
 CSV          ?=
@@ -393,6 +453,8 @@ endef
 
 app-archive: app-generate ## Archive the iPad app for upload (refuses until the TestFlight decision is settled)
 	$(TESTFLIGHT_GATE)
+	@# Nothing ships with the walk capture in it.
+	$(MAKE) --no-print-directory app-release-check
 	@echo "  archive: not built yet — the export options, privacy manifest and signing come with the decision (docs/backlog.md)"; exit 1
 
 app-testflight: app-archive ## Upload the archive to TestFlight with an App Store Connect API key from the environment

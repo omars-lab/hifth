@@ -1,6 +1,6 @@
 # What slows down or trips up building and checking the app?
 
-**Short version:** five things got in the way while building features in November 2026. None
+**Short version:** seven things got in the way while building features in November 2026. None
 changes the app a reader sees. Each is small, and each will trip the next session the same
 way until it is fixed once, in the tool or the skill it belongs to.
 
@@ -77,3 +77,32 @@ Yes, since 2026-11-11. Each has a line in the skill a session would be reading a
   does. Now in the walk-app skill.
 - The speed probe is switched on for the laptop's dev server with a setting no command named;
   the only named command builds it for a phone. Now in the optimizing-performance skill.
+
+### ⑥ Does the phone-size test of opening Same roots in the drawer fail on its own some of the time? · **answered**
+
+It did, and the fault was in the app. On 2026-11-12 it failed in two push runs in a row and
+passed each time it was run again. The failing case was the iPad on its side, in the
+phone-size browser.
+
+The drawer's row of tools moved up after it had come to rest, so the test's press landed on
+the wrong thing. A reader's would have too. It moved for three reasons: the look-alikes list
+arrived after the drawer had risen; the tool's list was cut to fit under the verse before
+the page lifted it, then grew; and the small picture of the words a look-alike shares arrived
+late and grew its row. Since 2026-11-13 the drawer waits for the look-alikes (at most two
+seconds), the list is cut from the verse's height and the highest the page can lift it, once,
+as the tool opens, and a blank space holds the picture's place until it comes. The tests now
+record where Same roots stands on every frame, from the end of the slide up, and a long verse
+(2:102) must stay clear of the list. Run 40 times each, the drawer tests passed every time:
+400 out of 400 with the slide off, and the four keep-still tests 160 out of 160 with it on.
+The whole story is in [the issue write-up](../issues/drawer-tools-jumped-after-rising.md).
+
+### ⑦ Can a session started in the main folder check the Cloudflare tokens? · **open**
+
+Not yet. The tokens were saved while working in a second copy of the repo (the walk worktree),
+so the settings file and its key exist only there. The main folder has just the encrypted copy,
+and each session started there says it cannot check the tokens. Nothing deploys from this laptop
+today, so nothing breaks.
+
+**What would close it:** Omar pulls the key from LastPass and rebuilds the settings file in the
+main folder (`make env-keys-pull`, `make env-bootstrap`, then `make env-check`). Claude never
+handles the key itself.

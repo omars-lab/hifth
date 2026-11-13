@@ -1273,6 +1273,65 @@
       "gap": "The gate proves every outstanding check has a followable runbook and that the phone guide was regenerated. It cannot prove the runbook's Expect lines match what the phone shows — only walking it does, which is the point of walking it."
     },
     {
+      "id": "keep-what-i-saw-on-the-ipad-walk",
+      "actor": "validator",
+      "goal": "When something is off while I walk the app on my iPad, take a screenshot and have the app keep its own picture, where I was, what I did in the last ten seconds and a note if I add one, so the fault can be found again without me typing it up.",
+      "feature": "native-shell",
+      "code": [
+        {
+          "file": "native/Hifth/Capture/WalkCapture.swift",
+          "symbol": "captureWalk"
+        },
+        {
+          "file": "native/Hifth/Capture/CapturePage.swift",
+          "symbol": "CapturePage"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.mjs",
+          "symbol": "pull"
+        }
+      ],
+      "proof": [
+        {
+          "file": "native/HifthUITests/SmokeTests.swift",
+          "test": "testWalkCaptureKeepsPictureTrailPlaceAndNote"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "pull copies each capture's own files, and nothing else on the iPad"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "the page and the list show the captures in the order they were taken"
+        },
+        {
+          "file": "native/HifthTests/CaptureStoreTests.swift",
+          "test": "a capture is kept straight away with its trail, even before the page answers"
+        },
+        {
+          "file": "native/HifthTests/CapturePageTests.swift",
+          "test": "it names the page on screen and the verse in the address, and nothing the page says"
+        },
+        {
+          "file": "native/HifthTests/ClipVideoTests.swift",
+          "test": "Apple's errors are sorted into refused, blocked, interrupted and other"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "each reason the app gives for no video is said in words"
+        },
+        {
+          "file": "native/HifthTests/CaptureStoreTests.swift",
+          "test": "the page is written as soon as it answers; a video slow to save does not hold it back"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "a video the app never finished saving is said, apart from a capture made before the video existed"
+        }
+      ],
+      "gap": "The simulator has no screenshot buttons, so the test starts the capture at launch instead; that the real screenshot (the two buttons and the Pencil corner swipe) reaches the app is checked by hand on the iPad. Copying captures to the laptop is tested against a stand-in for Apple's device tool; the first copy off the real iPad, and whether emptying it there works, are still to be seen. Apple's screen recorder only runs on a real iPad, so the five seconds of video before are tested only as far as what the app writes about them; how often iOS asks to record, and whether the video is saved right after a system screenshot, are still to be seen on the iPad."
+    },
+    {
       "id": "bank-a-verdict-so-it-cannot-be-lost",
       "actor": "validator",
       "goal": "Record what I found in one line, and be told immediately what that verdict now obliges us to build.",

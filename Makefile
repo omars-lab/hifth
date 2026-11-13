@@ -146,6 +146,13 @@ pitch-walk: ## The pitch demo walked in the real iPad app on its side, in one st
 	@test -f $(PITCH_DATA) || { echo "  No private pitch data — $(PITCH_DATA)"; exit 1; }
 	@node .claude/skills/walk-app/scripts/pitch-walk.mjs $(if $(STEP),--step $(STEP)) $(if $(NO_BUILD),--no-build)
 
+.PHONY: feature-links
+feature-links: ## The features page for the development hub, at /dev-hub/ on the dev server [PICTURES=1 takes pictures from the public build at BASE, default the preview on 7123]
+	@# One card per place, tool and panel a link can open (docs/design/feature-links.md).
+	@# Pictures refuse a site that hands out the pitch build's private commentary.
+	@# The switch is PICTURES, not SHOTS: native/Makefile.native's SHOTS names a folder, so it is always set.
+	@node .claude/skills/walk-app/scripts/feature-links.mjs $(if $(PICTURES),--shots --base $(or $(BASE),http://127.0.0.1:7123/))
+
 .PHONY: report
 report: ## Open the last e2e run's report — traces, image diffs, the failing screen
 	@# Playwright's own report, not a hand-rolled one. It answers "did the
@@ -966,6 +973,28 @@ ingest-qul: ## Load the held QUL copy into the store: make ingest-qul [PAGES=1] 
 	@SUPABASE_DB_URL="$(SUPABASE_DB_URL)" node packages/etl/scripts/ingest-qul-supabase.mjs \
 	  $(if $(PAGES),--pages,) $(if $(WORDS),--words,) \
 	  $(if $(DRY),--dry-run,) $(if $(LICENCE),--licence-cleared,)
+
+QUL_STORE := node .claude/skills/leverage-qul/scripts/qul-store.mjs
+
+.PHONY: qul-store-check
+qul-store-check: ## Is the store still closed? Row rules, no public rights, no sign-ups, SSL, live settings match supabase/config.toml
+	@# Goes through the Supabase command line's own login (the hifth profile), so
+	@# it needs no database password. Prints counts and settings, never a row.
+	@$(QUL_STORE) posture $(if $(PROFILE),--profile $(PROFILE),)
+
+.PHONY: qul-store-fingerprint
+qul-store-fingerprint: ## Row count and a content fingerprint per store table: make qul-store-fingerprint [PROFILE=hifth] [WORKDIR=.]
+	@$(QUL_STORE) fingerprint $(if $(PROFILE),--profile $(PROFILE),) $(if $(WORKDIR),--workdir $(WORKDIR),)
+
+.PHONY: qul-store-load
+qul-store-load: ## Load a data-only backup into an EMPTY store, in one transaction: make qul-store-load BACKUP=<file.sql>
+	@test -n "$(BACKUP)" || { echo "usage: make qul-store-load BACKUP=<file.sql>" >&2; exit 2; }
+	@$(QUL_STORE) load --backup "$(BACKUP)" $(if $(PROFILE),--profile $(PROFILE),)
+
+.PHONY: qul-store-compare
+qul-store-compare: ## Do two stores hold the same rows? make qul-store-compare FROM_PROFILE=<name> FROM_WORKDIR=<dir>
+	@test -n "$(FROM_PROFILE)" -a -n "$(FROM_WORKDIR)" || { echo "usage: make qul-store-compare FROM_PROFILE=<name> FROM_WORKDIR=<dir>" >&2; exit 2; }
+	@$(QUL_STORE) compare --from-profile $(FROM_PROFILE) --from-workdir "$(FROM_WORKDIR)" $(if $(PROFILE),--profile $(PROFILE),)
 
 # ---------------------------------------------------------------------------
 

@@ -57,6 +57,21 @@ test("switching the app from the pitch build to the public one leaves no private
   assert.equal(readFileSync(join(bundle, ".hifth-web-flavour"), "utf8").trim(), "public");
 });
 
+// A walk capture on the iPad says which build it came from: the flavour, and
+// the commit the web build was made from (with "+changes" when the working
+// tree had changes nobody had committed). The commit has a file of its own,
+// because the comparison above reads the flavour file whole.
+test("the copy leaves the commit it was built from beside the flavour", () => {
+  const dist = mkdtempSync(join(tmpdir(), "dist-"));
+  writeFileSync(join(dist, "index.html"), "<!doctype html>");
+  const bundle = mkdtempSync(join(tmpdir(), "bundle-"));
+  const r = copy("public", { dist, bundle });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  const head = spawnSync("git", ["-C", root, "rev-parse", "--short=8", "HEAD"], { encoding: "utf8" }).stdout.trim();
+  assert.match(readFileSync(join(bundle, ".hifth-web-commit"), "utf8").trim(), new RegExp(`^${head}(\\+changes)?$`));
+  assert.equal(readFileSync(join(bundle, ".hifth-web-flavour"), "utf8"), "public\n", "the flavour file holds the flavour alone");
+});
+
 test("a public build that itself carries the private folder is copied without it", () => {
   const dist = mkdtempSync(join(tmpdir(), "dist-"));
   mkdirSync(join(dist, "assets", "private"), { recursive: true });

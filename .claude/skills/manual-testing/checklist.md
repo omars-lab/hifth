@@ -162,7 +162,16 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     Why not a machine: it uses one of Apple's 100 yearly slots, so it runs only for a device you
     actually want added. When it passes, remove the "not yet run" note in the add-device skill.
 
-22. **The Arabic names of the rarer harakat.** With the app in Arabic, open a word's parts
+22. **A screenshot on the real iPad keeps a capture, with its video.** Put on a build from the
+    laptop dated 2026-11-13 or later (`make app-release-ipad DEVICE=…`). Take one screenshot with
+    the two buttons and one with the Pencil corner swipe, each during a page turn, and count how
+    often iOS asks to record the screen. Then `make walk-pull DEVICE=…`. Right: the page it draws
+    has each capture with its picture, where you were and a five-second video ending at the
+    screenshot; iOS asked once, not on every open; `make walk-pull DEVICE=… CLEAR=1` leaves the
+    iPad's folder empty. Why not a machine: the simulator has no screenshot buttons and Apple's
+    screen recorder runs only on a real device. The simulator test proves the rest (the walk-app
+    skill, "Scripts").
+23. **The Arabic names of the rarer harakat.** With the app in Arabic, open a word's parts
     (`#/hafs-kfqc/p7?tool=word`, tap a word) or the mistake pen's question, on words that carry a
     small waw or yeh, a dagger alef, an iqlab meem, a small seen or noon, or the round and long
     zero signs. Right: each name under a sign is what a hafiz or a teacher would call it. The

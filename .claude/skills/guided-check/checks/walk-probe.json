@@ -1,0 +1,11 @@
+{
+  "id": "walk-probe",
+  "title": "Screenshots and screen recording",
+  "steps": [
+    { "do": "When the app opened just now, did iOS ask to allow screen recording? If it did, you tapped Allow.", "see": "Tick if it asked, cross if it did not." },
+    { "do": "Take a screenshot with the two buttons.", "see": "The usual flash and thumbnail in the corner." },
+    { "do": "Take a screenshot with the Pencil: swipe up from the bottom corner.", "see": "The same flash and thumbnail." },
+    { "do": "Swipe to the Home Screen, wait five seconds, then open the app again.", "see": "Tick if iOS did not ask about recording again, cross if it asked." },
+    { "do": "Take one more screenshot with the two buttons.", "see": "The flash and thumbnail again." }
+  ]
+}

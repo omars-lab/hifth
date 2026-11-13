@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useT } from "../i18n";
 import { spokenName } from "../spoken-name";
 import { watchCover } from "./short-band";
@@ -24,6 +24,13 @@ const CARD_REM = 40;
 /** The gap kept between the lit verse's last line and the drawer's top, in px. */
 const CLEARANCE = 12;
 
+/**
+ * Where the lit verse stands on screen, top of its first line to the foot of
+ * its last (null when none is lit), and the highest the page can lift its
+ * first line.
+ */
+export type VerseClear = { span: { top: number; bottom: number } | null; riseTo: number };
+
 export function VerseDrawer({
   label,
   open,
@@ -35,6 +42,7 @@ export function VerseDrawer({
   onCover,
   keepClear,
   clearKey,
+  panelKey,
   tag,
   children,
 }: {
@@ -56,13 +64,14 @@ export function VerseDrawer({
   /** While a tool is open inside it, where the drawer starts, so the page can lift the verse above it. */
   onCover?: (top: number | null) => void;
   /**
-   * The boxes the drawer must stay below, in window pixels: the lit verse's
-   * lines. A tool open inside it is cut to the room under them, since on a
-   * spread the page cannot move up out of its way. Asked again whenever that
-   * room may have changed; `clearKey` changing (another verse lit) is one.
+   * The verse the drawer must leave room for. A tool open inside it is cut so
+   * the verse fits above it once the page has lifted it.
+   * Asked again when `clearKey` changes (another verse lit).
    */
-  keepClear?: () => DOMRect[];
+  keepClear?: (() => VerseClear) | undefined;
   clearKey?: string | null;
+  /** Which tool is open inside it (listen, share, roots, looks); a new one is cut afresh. */
+  panelKey?: string | null;
   /** Name this drawer's level in its head (drawer-marks.ts, the tag setting). */
   tag?: boolean;
   /** The tool buttons, each with its caption. */
@@ -120,7 +129,23 @@ export function VerseDrawer({
     // without changing the bar's own size.
     const moved = typeof MutationObserver === "undefined" ? null : new MutationObserver(() => fit(false));
     moved?.observe(bar, { childList: true, subtree: true });
+    // The card can grow after it first measured itself, and a short card
+    // covers no bar button: the likely reason the chips once stayed in the
+    // bar, half under it, until the window changed size (a full test run,
+    // 2026-11-12). Its own size changing checks again, but
+    // never turns it back, as for the bar's buttons. A frame later, so the
+    // check's own change of shape is not seen inside the same notice.
+    let frame = 0;
+    const grown = typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(() => {
+          cancelAnimationFrame(frame);
+          frame = requestAnimationFrame(() => fit(false));
+        });
+    grown?.observe(el);
     return () => {
+      cancelAnimationFrame(frame);
+      grown?.disconnect();
       moved?.disconnect();
       seen?.disconnect();
       window.removeEventListener("resize", onResize);
@@ -146,14 +171,41 @@ export function VerseDrawer({
     };
   }, [shown, hasPanel]);
 
-  // The tool's list is cut to the room under the lit verse, never below a
-  // floor a few rows tall: under that the list would be a slot, and the page
-  // is asked to lift instead (above). On a phone the page can move; on a
-  // spread both pages keep their place, so the cut is what keeps the verse in
-  // sight (2026-11-09, found by building it).
+  // The tool's list is cut so the lit verse fits above the drawer once the page
+  // has lifted it (onCover, above), never below a floor a few rows tall. The
+  // cut is worked out from the verse's height and the highest the page can
+  // lift it, not from where the verse stands now: the drawer rises before the
+  // lift, and a cut measured from the verse's place then grew 400 ms later into
+  // the room the lift had made. The row of tools jumped up under a reader's
+  // finger, and a press meant for Same roots landed on the list (2026-11-13).
+  // So the list is measured as each tool opens (`panelKey`), and never grows
+  // after that.
+  //
+  // The verse's wash is redrawn as a tool opens, and is not on the page at that
+  // moment. So its height is noted while the drawer stands with the verse lit
+  // (`noted`), and the tool's list is cut from that note. The drawer can rise
+  // with the look-alikes already open, a frame before the wash is drawn; the
+  // note then arrives a frame or two later, while the drawer is still rising,
+  // and the list is measured that once more.
   const panelRef = useRef<HTMLDivElement>(null);
   const clear = useRef(keepClear);
   clear.current = keepClear;
+  const [noted, setNoted] = useState<number | null>(null);
+  useEffect(() => {
+    setNoted(null);
+    if (!shown) return;
+    let raf = 0;
+    const until = performance.now() + 2000;
+    const note = () => {
+      const span = clear.current?.().span;
+      if (span) setNoted(span.bottom - span.top);
+      else if (performance.now() < until) raf = requestAnimationFrame(note);
+    };
+    note();
+    return () => cancelAnimationFrame(raf);
+  }, [shown, clearKey]);
+  const tallRef = useRef(noted);
+  tallRef.current = noted;
   useLayoutEffect(() => {
     const el = ref.current;
     const box = panelRef.current;
@@ -162,24 +214,22 @@ export function VerseDrawer({
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
       const most = Math.min(window.innerHeight * 0.4, 22 * rem);
       const floor = Math.min(most, 10 * rem);
-      const drawer = el.getBoundingClientRect();
       const rest = el.offsetHeight - box.offsetHeight;
-      // Only lines the drawer could reach across count: a verse on the other
-      // page, wholly beside the card, is in no danger from it.
-      const lines = (clear.current?.() ?? []).filter((r) => r.right > drawer.left && r.left < drawer.right);
-      const lowest = lines.length ? Math.max(...lines.map((r) => r.bottom)) : null;
-      const room = lowest === null ? most : window.innerHeight - lowest - CLEARANCE - rest;
+      const verse = clear.current?.();
+      const span = verse?.span;
+      const tall = span ? span.bottom - span.top : tallRef.current;      if (!verse || tall === null) {
+        box.style.maxBlockSize = `${Math.round(most)}px`;
+        return;
+      }
+      // A verse too tall for the room is lifted until its first line stands
+      // just under the hop chips, or the page's top, and no higher (aboveCover).
+      const room = window.innerHeight - (verse.riseTo + tall) - CLEARANCE - rest;
       box.style.maxBlockSize = `${Math.round(Math.max(floor, Math.min(most, room)))}px`;
     };
     fit();
     window.addEventListener("resize", fit);
-    // The wash lands a moment after the drawer on a fresh verse.
-    const late = window.setTimeout(fit, 400);
-    return () => {
-      window.clearTimeout(late);
-      window.removeEventListener("resize", fit);
-    };
-  }, [shown, hasPanel, clearKey]);
+    return () => window.removeEventListener("resize", fit);
+  }, [shown, hasPanel, clearKey, panelKey, noted]);
 
   const panelOpen = useRef(hasPanel);
   panelOpen.current = hasPanel;

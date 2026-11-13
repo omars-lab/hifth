@@ -4,6 +4,7 @@ import { useT } from "../i18n";
 import { sharedRun, useLookalikePreview } from "../lookalike-preview";
 // Loaded the first time a look-alike list opens (see ./later.tsx).
 import { SharedWords } from "./later";
+import styles from "./SharedPreview.module.css";
 
 /**
  * Under a look-alike row's name, the words the two verses share, as the reader
@@ -31,10 +32,11 @@ export function SharedPreview({
   if (!run || way === "none") return null;
   if (way === "count") return <span className={className}>{t.sharesWords(run.words)}</span>;
   if (open) return null;
+  const hold = <span className={styles.hold} data-shared-words-hold />;
   return (
     <span data-shared-words aria-hidden="true">
-      <Suspense fallback={null}>
-        <SharedWords run={run} edition={edge.to.split("/")[1] ?? "hafs-kfqc"} />
+      <Suspense fallback={hold}>
+        <SharedWords run={run} edition={edge.to.split("/")[1] ?? "hafs-kfqc"} pending={hold} />
       </Suspense>
     </span>
   );

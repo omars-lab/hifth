@@ -266,6 +266,7 @@ struct XCallbackTests {
                 switch r.action {
                 case .open(let hash): actual = "open " + hash
                 case .current: actual = "current"
+                case .check(let c): actual = "check \(c.id) \(c.steps.count) steps"
                 }
             case .failure(let f, _)?:
                 actual = "error " + f.code

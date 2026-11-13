@@ -211,6 +211,11 @@ for (const i of issues) {
     const { file, item } = i.source;
     if (!existsSync(join(ROOT, file))) {
       problems.push(`${where}: ${file} does not exist.`);
+    } else if (item === undefined || item === null || String(item).trim() === "") {
+      // Said plainly: without this it read "has no undefined row".
+      problems.push(
+        `${where}: its source names no item. Add "item": the plan's item number, or the ①②③ mark of ${file}'s row.`,
+      );
     } else if (file.endsWith("PLAN.md")) {
       if (!planItems()?.has(item)) {
         problems.push(`${where}: PLAN.md §Open follow-ups has no item ${item}.`);

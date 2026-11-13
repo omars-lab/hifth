@@ -32,6 +32,7 @@ export interface LinkLists {
 export type LinkOutcome =
   | { kind: "open"; hash: string }
   | { kind: "current" }
+  | { kind: "check"; id: string; steps: number }
   | { kind: "refused" }
   | { kind: "error"; code: string; message: string };
 
@@ -279,9 +280,37 @@ function openRoute(query: Map<string, string>, order: string[], lists: LinkLists
   return hash ? { kind: "open", hash } : bad(`not a route: ${route}`);
 }
 
+/** Most steps on one check card (mirrors `XCallback.Check.mostSteps`). */
+const MOST_CHECK_STEPS = 12;
+
+/** A `check` card: every `step` in order, each `see` on the step before it
+ *  (mirrors `XCallback.check(from:query:)`). Only the outcome matters here:
+ *  the card's name and how many steps, or why it is refused. */
+function checkCard(raw: string | null, query: Map<string, string>): LinkOutcome {
+  const bad = (message: string): LinkOutcome => ({ kind: "error", code: "bad-check", message });
+  const steps: { see: boolean }[] = [];
+  for (const item of raw ? raw.split("&") : []) {
+    const eq = item.indexOf("=");
+    const name = percentDecode(eq < 0 ? item : item.slice(0, eq));
+    const value = (eq < 0 ? "" : percentDecode(item.slice(eq + 1))).trim();
+    if (name === "step") {
+      if (!value) return bad("a step is empty");
+      steps.push({ see: false });
+    } else if (name === "see") {
+      const last = steps[steps.length - 1];
+      if (!last || last.see) return bad("each see goes right after the step it belongs to");
+      last.see = true;
+    }
+  }
+  if (!steps.length) return bad("a check needs at least one step: step=Do this");
+  if (steps.length > MOST_CHECK_STEPS) return bad(`at most ${MOST_CHECK_STEPS} steps on one card, not ${steps.length}`);
+  const id = (query.get("id") ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return { kind: "check", id: id ? id.slice(0, 60) : "check", steps: steps.length };
+}
+
 /** What the shell does with this link: opens a place, answers with the
- *  current one, refuses it in silence (a plain link that is not a route), or
- *  answers an error with a code and a reason. */
+ *  current one, opens a check card, refuses it in silence (a plain link that
+ *  is not a route), or answers an error with a code and a reason. */
 export function predictLink(raw: string, lists: LinkLists): LinkOutcome {
   const p = parts(raw);
   if (!p) return { kind: "refused" };
@@ -293,8 +322,10 @@ export function predictLink(raw: string, lists: LinkLists): LinkOutcome {
         return openRoute(query, order, lists);
       case "current":
         return { kind: "current" };
+      case "check":
+        return checkCard(p.query, query);
       default:
-        return { kind: "error", code: "unknown-action", message: `no action named "${action}"; try open or current` };
+        return { kind: "error", code: "unknown-action", message: `no action named "${action}"; try open, current or check` };
     }
   }
   const hash = plainRoute(p, lists);
@@ -308,6 +339,8 @@ export function describeOutcome(outcome: LinkOutcome): string {
       return "open " + outcome.hash;
     case "current":
       return "current";
+    case "check":
+      return `check ${outcome.id} ${outcome.steps} steps`;
     case "refused":
       return "refused";
     case "error":
