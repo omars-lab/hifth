@@ -15,6 +15,8 @@
 #   make app-device-install build for a plugged-in iPad, install and launch (DEVICE=…)
 #   make app-release-ipad DEVICE=…   the iPad checks, install, open it watched; fails on a new crash report
 #   make app-crash-logs DEVICE=… [SINCE=<ISO time>]   copy the app's crash reports off the iPad, one line each
+#   make walk-pull DEVICE=… [CLEAR=1]   copy the screenshots kept on a walk off the iPad, and draw them as one page
+#   make walk-gallery · make walk-list [JSON=1]   redraw that page · list the captures, oldest first
 #   make app-devices [CSV=1]   the registered devices, and the slots of each kind left this year
 #   make app-device-register DEVICE=…   register a new device with Apple (uses a slot), then install
 # ---------------------------------------------------------------------------
@@ -106,7 +108,8 @@ SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(pats
 
 .PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
         app-run-ipad app-shot app-probe app-open app-test app-walk app-test-mac-ui app-unit-test app-logs app-clean \
-        app-golden app-golden-update app-device-install app-device-open app-release-ipad app-crash-logs app-devices app-device-register app-archive app-testflight
+        app-golden app-golden-update app-device-install app-device-open app-release-ipad app-crash-logs app-devices app-device-register app-archive app-testflight \
+        walk-pull walk-gallery walk-list
 
 app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
 	python3 $(NATIVE)/scripts/make-appicon.py
@@ -401,6 +404,22 @@ SINCE        ?=
 app-crash-logs: ## Copy the app's crash reports off a plugged-in iPad and say what stopped it (DEVICE=…, SINCE=<ISO time>)
 	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
 	node .claude/skills/crash-logs/scripts/pull-crashes.mjs --device "$(DEVICE)" --out $(CRASH_DIR) $(if $(SINCE),--since $(SINCE))
+
+# ---- walk captures: what the debug app kept each time the owner took a
+# screenshot on the iPad. They land in native/shots/walks/ (gitignored): a pitch
+# capture shows the book's text, so it is never committed or sent anywhere.
+WALK_CAPTURES = node .claude/skills/walk-app/scripts/walk-captures.mjs
+CLEAR        ?=
+JSON         ?=
+walk-pull: ## Copy the walk captures off a plugged-in iPad and draw them as one page (DEVICE=…, CLEAR=1 empties the iPad after a full copy)
+	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
+	$(WALK_CAPTURES) pull --device "$(DEVICE)" $(if $(CLEAR),--clear)
+
+walk-gallery: ## Redraw the walk captures page (native/shots/walks/index.html) from what was pulled
+	@$(WALK_CAPTURES) gallery
+
+walk-list: ## The walk captures pulled so far, oldest first, one line each (JSON=1 for the list as JSON)
+	@$(WALK_CAPTURES) list $(if $(JSON),--json)
 
 # ---- which devices Apple has registered for us, and the slots left (100 of each
 # kind a year). CSV=1 prints a row per device with its full id: keep it off the repo.

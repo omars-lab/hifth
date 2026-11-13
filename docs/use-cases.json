@@ -1285,12 +1285,24 @@
         {
           "file": "native/Hifth/Capture/CapturePage.swift",
           "symbol": "CapturePage"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.mjs",
+          "symbol": "pull"
         }
       ],
       "proof": [
         {
           "file": "native/HifthUITests/SmokeTests.swift",
           "test": "testWalkCaptureKeepsPictureTrailPlaceAndNote"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "pull copies each capture's own files, and nothing else on the iPad"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "the page and the list show the captures in the order they were taken"
         },
         {
           "file": "native/HifthTests/CaptureStoreTests.swift",
@@ -1301,7 +1313,7 @@
           "test": "it names the page on screen and the verse in the address, and nothing the page says"
         }
       ],
-      "gap": "The simulator has no screenshot buttons, so the test starts the capture at launch instead; that the real screenshot (the two buttons and the Pencil corner swipe) reaches the app is checked by hand on the iPad. Copying captures to the laptop and the five seconds of video before are not built yet."
+      "gap": "The simulator has no screenshot buttons, so the test starts the capture at launch instead; that the real screenshot (the two buttons and the Pencil corner swipe) reaches the app is checked by hand on the iPad. Copying captures to the laptop is tested against a stand-in for Apple's device tool; the first copy off the real iPad, and whether emptying it there works, are still to be seen. The five seconds of video before are not built yet."
     },
     {
       "id": "bank-a-verdict-so-it-cannot-be-lost",
