@@ -9,7 +9,7 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
-## Sessions of 2026-11-09 to 2026-11-11
+## Sessions of 2026-11-09 to 2026-11-13
 
 These sessions' task numbers started again from 1, so they would clash with the numbers below.
 They are listed here by date instead. What is still open from them is in
@@ -153,6 +153,38 @@ download first, added a little at a time over nineteen merges. The size check no
 start-up download (185 KB; it stands at 171 KB) and prints it on every run. A new open item says
 what would win the 150 ms back. Account: `docs/issues/`, and item ⑳ of `docs/performance.md`.
 PR #595.
+
+### 2026-11-12 to 11-13 — supabase-move: the outside-library store moves to a new account
+
+**Done** (loading the data into the new store is still open; see `docs/design/supabase-move.md` ①):
+- The old store was audited: three tables, two migrations, nothing else to carry over. Its tables
+  had been open to the public key for reading and writing.
+- A migration closes the tables to the public key, with a test that fails if a table is ever
+  added open. It was pushed to the old store the same day, and the owner chose to close it at
+  once.
+- The old store's rows were copied into a git-ignored backup and a second copy in the owner's
+  iCloud Drive. The backup was proven to load into a throwaway Postgres 17 with every row back.
+- The new project (`hifth.app`, US East) was linked through its own command-line login profile,
+  and the three migrations built its tables already closed. A second profile keeps the old
+  account's login beside it, and the skills tell every Supabase command which profile to use.
+- The move page fixed the page-fixture command and says what was tested.
+
+### 2026-11-12 — two landing-page comments (hifth.app)
+
+**Done:** The footer now says the app is open source under the GNU GPL, and the sign-up button
+wears the email box's corners and a lighter weight. Both were checked on the live page and closed
+(comments t_e95585 and t_0fbf74). The page's other comments went to the session building that
+page.
+
+### 2026-11-13 — is-the-privacy-rule-nothing-leaves-or-nothing-that-doesnt-serve: security rules
+
+**Done:** The Security Guidance plugin now reviews every change against hifth's own rules
+(`.claude/claude-security-guidance.md`). The rules say: nothing about a reader leaves their device
+until a button says what goes and to whom; the reader can see who has it and take it back; no
+server keeps reader data before the reader accepts a plain-words agreement; and the sign-up
+emails, the Supabase keys and the book's text never leak. The rules file went to main alone so it
+applies at once (PR #605). Its test, which keeps the file under the plugin's 8 KB limit and checks
+that every file it names exists, rides with the Supabase-move pull request.
 
 ## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)
 

@@ -28,7 +28,7 @@ read. So the ways this project uses QUL are now:
   un-vendored target.
 - **A held copy — the store (option D).** A copy of the page positions and the word text may
   be *held* in the hosted database this project controls (reached through the Supabase
-  command-line tool), populated by `ingest-qul-supabase.mjs` from the same gitignored
+  command-line tool, always with hifth's own profile; the app-setup skill says how), populated by `ingest-qul-supabase.mjs` from the same gitignored
   `.cache/`. It never enters the repository or the shipped bundle, and it is read by the
   building tools alone — whether any reader receives those bytes is a separate open question,
   not settled by D. The text-bearing word export may be held only after its licence is read
@@ -129,6 +129,28 @@ make probe-qul WRITE=1    # also refresh the pin
 A missing cache is not an error — the check returns `{ skipped: ... }`, the section is
 absent from the pin, and exit stays 0. Keep it that way: a probe that fails on a machine
 without the cache would get switched off.
+
+## Scripts — when to use each
+
+The store that holds our copy of the outside library is reached through the Supabase command
+line's own login (the `hifth` profile), so none of these needs a database password.
+
+| Script | What it does | When to reach for it | Command |
+| --- | --- | --- | --- |
+| `scripts/qul-store.mjs posture` | Fails if the store has drifted open: a table without row rules, any right for the public roles (now or for later tables), a sign-up, a stored file, unencrypted connections allowed, or live settings that differ from `supabase/config.toml`. Reports the address allow-list without failing on it | After any change to the store's settings or migrations, and before trusting a store you have not looked at lately | `make qul-store-check` |
+| `scripts/qul-store.mjs fingerprint` | Row count and one hash over every row, per table, in key order. Prints numbers and hashes only | To pin what a store holds before and after a change | `make qul-store-fingerprint [PROFILE=…] [WORKDIR=…]` |
+| `scripts/qul-store.mjs load` | Loads a data-only backup into an empty store in one transaction, then fingerprints it. Refuses a store that has rows | Filling a new store from a backup | `make qul-store-load BACKUP=<file.sql>` |
+| `scripts/qul-store.mjs compare` | Fingerprints two stores and fails unless every table matches | After a load, to prove the new store holds exactly the old one's rows | `make qul-store-compare FROM_PROFILE=<name> FROM_WORKDIR=<dir>` |
+
+`--workdir` (and `WORKDIR=`, `FROM_WORKDIR=`) is a folder whose `supabase/` is linked to the
+project to use; the link is kept in its git-ignored `supabase/.temp`. The old store's link is
+kept outside the repo, at `~/.supabase/workdirs/hifth-old-store`, until that project is deleted.
+
+**Never preview a settings push without answering no.** The settings push asks "[Y/n]" per
+part and counts an empty answer as yes, so a "preview" with no input pushes the file live. Pipe
+the answers in: `printf 'n\nn\nn\nn\n' | supabase --profile ~/.supabase/profiles/hifth.yaml config push`.
+It also prints the project's id, which must not be copied anywhere. Why:
+`docs/issues/supabase-config-push-answers-yes.md`.
 
 ## The guardrails
 

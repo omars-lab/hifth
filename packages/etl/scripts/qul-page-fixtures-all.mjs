@@ -75,6 +75,7 @@ order by p.page;
 let out;
 try {
   out = execFileSync("psql", [DB_URL, "-t", "-A", "-X", "-q", "-F", "\t", "-c", SQL], {
+    env: { ...process.env, PGSSLMODE: process.env.PGSSLMODE || "require" }, // never talk to the store unencrypted
     encoding: "utf8",
     maxBuffer: 512 * 1024 * 1024,
   });

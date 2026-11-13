@@ -925,6 +925,28 @@ ingest-qul: ## Load the held QUL copy into the store: make ingest-qul [PAGES=1] 
 	  $(if $(PAGES),--pages,) $(if $(WORDS),--words,) \
 	  $(if $(DRY),--dry-run,) $(if $(LICENCE),--licence-cleared,)
 
+QUL_STORE := node .claude/skills/leverage-qul/scripts/qul-store.mjs
+
+.PHONY: qul-store-check
+qul-store-check: ## Is the store still closed? Row rules, no public rights, no sign-ups, SSL, live settings match supabase/config.toml
+	@# Goes through the Supabase command line's own login (the hifth profile), so
+	@# it needs no database password. Prints counts and settings, never a row.
+	@$(QUL_STORE) posture $(if $(PROFILE),--profile $(PROFILE),)
+
+.PHONY: qul-store-fingerprint
+qul-store-fingerprint: ## Row count and a content fingerprint per store table: make qul-store-fingerprint [PROFILE=hifth] [WORKDIR=.]
+	@$(QUL_STORE) fingerprint $(if $(PROFILE),--profile $(PROFILE),) $(if $(WORKDIR),--workdir $(WORKDIR),)
+
+.PHONY: qul-store-load
+qul-store-load: ## Load a data-only backup into an EMPTY store, in one transaction: make qul-store-load BACKUP=<file.sql>
+	@test -n "$(BACKUP)" || { echo "usage: make qul-store-load BACKUP=<file.sql>" >&2; exit 2; }
+	@$(QUL_STORE) load --backup "$(BACKUP)" $(if $(PROFILE),--profile $(PROFILE),)
+
+.PHONY: qul-store-compare
+qul-store-compare: ## Do two stores hold the same rows? make qul-store-compare FROM_PROFILE=<name> FROM_WORKDIR=<dir>
+	@test -n "$(FROM_PROFILE)" -a -n "$(FROM_WORKDIR)" || { echo "usage: make qul-store-compare FROM_PROFILE=<name> FROM_WORKDIR=<dir>" >&2; exit 2; }
+	@$(QUL_STORE) compare --from-profile $(FROM_PROFILE) --from-workdir "$(FROM_WORKDIR)" $(if $(PROFILE),--profile $(PROFILE),)
+
 # ---------------------------------------------------------------------------
 
 .PHONY: help
