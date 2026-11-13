@@ -109,7 +109,10 @@ script runs against it. The first is done (2026-11-13); the second waits on step
    the plain file rebuilds the encrypted copy from that one value, dropping the three Cloudflare
    entries. Then copy the new connection address from the dashboard (use the *session pooler*
    one, since this laptop has no IPv6) and save it as `SUPABASE_DB_URL` with the repo's
-   hidden-prompt command.
+   hidden-prompt command. The prompt shows the shape it expects and refuses anything else (the
+   project's web address, the direct address, the placeholder password left in, the wrong port
+   or region), and `make env-check` checks a value already saved. That check was added on
+   2026-11-13, after the web address was saved here by mistake.
 7. **Prove it works.** Run the page-fixture script against the new store.
 8. **Retire the old project.** Only after step 7. That is item ③.
 

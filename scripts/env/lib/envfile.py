@@ -7,7 +7,11 @@ of them can disagree about what a line means.
 
 As a command:
   envfile.py compare <plain> <sidecar>   decrypted copy in $DEC_ENV; names only
-  envfile.py set <NAME> <file>           value on stdin; never printed
+  envfile.py set <NAME> <file>           value on stdin; never printed; refused if
+                                         it is not the shape formats.py expects
+  envfile.py hint <NAME>                 the expected shape, if formats.py has one
+  envfile.py check <NAME> <file>         is the saved value the expected shape? names only
+  envfile.py shapes <file>               check every saved name formats.py has a shape for
 
 As a module: parse(text) -> dict, read(path) -> dict.
 
@@ -17,6 +21,9 @@ import os
 import re
 import sys
 import tempfile
+
+sys.dont_write_bytecode = True  # no __pycache__ folder left beside the scripts
+import formats  # noqa: E402
 
 LINE = re.compile(r'^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$')
 NAME = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*$')
@@ -73,6 +80,14 @@ def cmd_set(name, path):
     if not value:
         print(f"ERROR: no value given for {name}; nothing saved", file=sys.stderr)
         return 1
+    wrong = formats.problems(name, value)
+    if wrong:
+        print(f"ERROR: {name} is not the expected shape; nothing saved:", file=sys.stderr)
+        for w in wrong:
+            print(f"  - {w}", file=sys.stderr)
+        for line in formats.hint(name):
+            print(f"  {line}", file=sys.stderr)
+        return 1
     try:
         line = f"{name}={quote(value)}\n"
     except ValueError as e:
@@ -107,6 +122,32 @@ def cmd_set(name, path):
     return 0
 
 
+def cmd_check(name, path):
+    """The saved value's shape, by name only. Exit 1 when wrong or missing."""
+    value = read(path).get(name) if os.path.exists(path) else None
+    if not value:
+        print(f"  MISSING    {name} is not in {os.path.basename(path)}", file=sys.stderr)
+        return 1
+    wrong = formats.problems(name, value)
+    if wrong:
+        print(f"  WRONG      {name} is not the expected shape:", file=sys.stderr)
+        for w in wrong:
+            print(f"    - {w}", file=sys.stderr)
+        return 1
+    print(f"  ok         {name} is the expected shape" if formats.hint(name)
+          else f"  saved      {name} (no shape on file to check)")
+    return 0
+
+
+def cmd_shapes(path):
+    """Every saved value with a shape on file, checked. A name not saved is not an error."""
+    if not os.path.exists(path):
+        return 0
+    saved = read(path)
+    names = [n for n in formats.FORMATS if n in saved]
+    return max([cmd_check(n, path) for n in names], default=0)
+
+
 def cmd_compare(plain_path, sidecar):
     bad = []
     plain = parse(open(plain_path).read(), bad=bad)
@@ -135,5 +176,13 @@ if __name__ == '__main__':
         sys.exit(cmd_compare(a[1], a[2]))
     if len(a) == 3 and a[0] == 'set':
         sys.exit(cmd_set(a[1], a[2]))
-    print('usage: envfile.py compare <plain> <sidecar> | set <NAME> <file>', file=sys.stderr)
+    if len(a) == 2 and a[0] == 'hint':
+        for line in formats.hint(a[1]):
+            print(line)
+        sys.exit(0)
+    if len(a) == 3 and a[0] == 'check':
+        sys.exit(cmd_check(a[1], a[2]))
+    if len(a) == 2 and a[0] == 'shapes':
+        sys.exit(cmd_shapes(a[1]))
+    print('usage: envfile.py compare <plain> <sidecar> | set <NAME> <file> | hint <NAME> | check <NAME> <file>', file=sys.stderr)
     sys.exit(2)
