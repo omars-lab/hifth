@@ -2457,6 +2457,14 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     marks busy for three seconds as the app opens, marks the jump again, and checks the count,
     the kind and Undo; it failed before the mend, and it and the Mistake pen's test then passed
     fifteen times each.
+123. **The test that a shared link's breadcrumb survives a slow page failed once on Android.**
+    In the same push run it failed in 207 ms and passed on retry: the test holds page 7's
+    picture back to make it arrive late, and that time nothing was held. The app's offline copy
+    takes charge of the page as soon as it installs, and from then on it fetches page pictures
+    itself, where the test's hold cannot see them. Not a fault a reader can meet. **Fixed
+    2026-11-13:** the test runs with the offline copy switched off, as the other tests that slow
+    a fetch already do. Checked by putting the offline copy in charge first: nothing was held
+    and the test failed; with it switched off, the same run held page 7 back and passed.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

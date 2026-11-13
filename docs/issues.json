@@ -5776,6 +5776,18 @@
       "closedBy": "apps/web/e2e/confusions.spec.ts"
     },
     {
+      "id": "breadcrumb-test-hold-missed-by-offline-copy",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "123"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "The test that a shared link's breadcrumb survives a slow page failed once on Android in a full push run (2026-11-13): the app's offline copy had taken charge and fetched page 7 itself, so the test's hold never caught it. The test now runs with the offline copy switched off.",
+      "closedBy": "apps/web/e2e/share-a11y.spec.ts"
+    },
+    {
       "id": "short-screen-loses-the-spread",
       "source": {
         "file": "docs/PLAN.md",
