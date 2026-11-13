@@ -9,15 +9,19 @@
  *           a pick: how much is the first thing it says);
  *   rings   a ring around each date fills as you open more, like an activity ring;
  *   cards   today's tiles, tidied: the date in the corner and a bar along the
- *           bottom for how much.
+ *           bottom for how much;
+ *   dots    the date on plain paper with small marks under it, one kind of mark
+ *           for each kind of thing (the owner, 2026-11-13, from a picture of a
+ *           desktop calendar): teal dots for how much was opened, a tick for a
+ *           day of two pages or more, a red ring when mistakes were marked.
  *
  * Its own module, free of React and CSS, so the e2e tier imports the key.
  */
 
-export type CalendarLook = "shades" | "rings" | "cards";
+export type CalendarLook = "shades" | "rings" | "cards" | "dots";
 
 /** In settings order. */
-export const CALENDAR_LOOKS: readonly CalendarLook[] = ["shades", "rings", "cards"];
+export const CALENDAR_LOOKS: readonly CalendarLook[] = ["shades", "rings", "cards", "dots"];
 
 /** Versioned: a choice that later changes what it does gets a new key. */
 export const CALENDAR_LOOK_KEY = "hifth.record.calendarLook.v1";
@@ -31,6 +35,17 @@ export const DEFAULT_CALENDAR_LOOK: CalendarLook = "shades";
  */
 export function dayLevel(verses: number): 0 | 1 | 2 | 3 | 4 {
   return verses <= 0 ? 0 : verses < 5 ? 1 : verses < 15 ? 2 : verses < 30 ? 3 : 4;
+}
+
+/**
+ * What the dots look puts under a date: up to three teal dots for how much was
+ * opened, a tick instead once the day reached two pages, and a red ring when any
+ * mistake was marked. One mark per kind of thing, as a desktop calendar puts one
+ * dot per kind of event, so a day is read without a number.
+ */
+export function dayMarks(verses: number, mistakes: number): { dots: 0 | 1 | 2 | 3; full: boolean; mistakes: boolean } {
+  const level = dayLevel(verses);
+  return { dots: level === 4 ? 0 : level, full: level === 4, mistakes: mistakes > 0 };
 }
 
 export function savedCalendarLook(): CalendarLook {

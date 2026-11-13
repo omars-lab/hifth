@@ -340,6 +340,7 @@ const CALENDAR_LOOK_NAME: Record<CalendarLook, (t: ReturnType<typeof useT>["t"])
   shades: (t) => t.calendarLookShades,
   rings: (t) => t.calendarLookRings,
   cards: (t) => t.calendarLookCards,
+  dots: (t) => t.calendarLookDots,
 };
 const SHARE_LOOK_NAME: Record<ShareLook, (t: ReturnType<typeof useT>["t"]) => string> = {
   preview: (t) => t.shareLookPreview,

@@ -261,3 +261,74 @@ button.mistake {
   border-block-start: 1px solid var(--hairline);
   min-block-size: 4em;
 }
+/*
+ * Dots (the owner, 2026-11-13, from a desktop calendar): the date on plain paper,
+ * small marks under it, one kind of mark per kind of thing. Teal dots for how much
+ * was opened, a green tick for two pages or more, a red ring for mistakes marked.
+ * Today is the date in the accent colour; the picked day is a soft box.
+ */
+.month[data-look="dots"] .square,
+.month[data-look="dots"] .square[data-state="worked"],
+.month[data-look="dots"] .square[data-state="outside"] {
+  justify-content: flex-start;
+  gap: 4px;
+  padding-block-start: 7px;
+  min-block-size: 44px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: var(--text-md);
+}
+.month[data-look="dots"] .square[data-state="outside"] {
+  opacity: 0.4;
+}
+.month[data-look="dots"] .square[data-today] {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+.month[data-look="dots"] .square[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--paper-raised));
+  box-shadow: none;
+}
+.marks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  block-size: 9px;
+}
+.dot,
+.ring {
+  display: inline-block;
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.ring {
+  inline-size: 7px;
+  block-size: 7px;
+  background: transparent;
+  border: 1.5px solid var(--danger);
+  box-sizing: border-box;
+}
+.tick {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: #2f9e5b;
+}
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-xs, 11px);
+  color: var(--ink-soft);
+}
+.key > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

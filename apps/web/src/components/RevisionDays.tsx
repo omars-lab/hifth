@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { daysOf, editionOf, type DayCount, type DayStamp, type RevisionEvent } from "@hifth/core";
 import { useT } from "../i18n";
-import { dayLevel, savedCalendarLook } from "../calendar-look";
+import { dayLevel, dayMarks, savedCalendarLook } from "../calendar-look";
 import styles from "./RevisionDays.module.css";
 
 /*
@@ -193,7 +193,9 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
               onClick={() => setPicked(stamp)}
             >
               <span>{t.num(i + 1)}</span>
-              {count > 0 && (
+              {look === "dots" ? (
+                <Marks verses={d?.verses ?? 0} mistakes={count} />
+              ) : count > 0 && (
                 <span className={styles.count} aria-hidden="true">
                   {t.num(count)}
                 </span>
@@ -202,6 +204,19 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
           );
         })}
       </div>
+      {look === "dots" && (
+        <p className={styles.key} aria-hidden="true">
+          <span>
+            <span className={styles.dot} /> {t.calendarDotsOpened}
+          </span>
+          <span>
+            <span className={styles.tick}>✓</span> {t.calendarDotsFull}
+          </span>
+          <span>
+            <span className={styles.ring} /> {t.calendarDotsMistakes}
+          </span>
+        </p>
+      )}
       <div className={styles.picked} aria-live="polite">
         {!picked ? (
           <p className={styles.line}>{t.dayPick}</p>
@@ -215,5 +230,23 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
         )}
       </div>
     </>
+  );
+}
+
+/** The dots look's row of marks under a date; the day's own label already says it in words. */
+function Marks({ verses, mistakes }: { verses: number; mistakes: number }): JSX.Element {
+  const m = dayMarks(verses, mistakes);
+  return (
+    <span className={styles.marks} aria-hidden="true">
+      {Array.from({ length: m.dots }, (_, i) => (
+        <span key={i} className={styles.dot} data-mark="dot" />
+      ))}
+      {m.full && (
+        <span className={styles.tick} data-mark="full">
+          ✓
+        </span>
+      )}
+      {m.mistakes && <span className={styles.ring} data-mark="mistakes" />}
+    </span>
   );
 }

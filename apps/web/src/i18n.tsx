@@ -855,6 +855,10 @@ export interface Strings {
   calendarLookShades: string;
   calendarLookRings: string;
   calendarLookCards: string;
+  calendarLookDots: string;
+  calendarDotsOpened: string;
+  calendarDotsFull: string;
+  calendarDotsMistakes: string;
   calendarLookNote: string;
   shareLookTitle: string;
   shareLookPreview: string;

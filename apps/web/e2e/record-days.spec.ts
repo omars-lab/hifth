@@ -218,7 +218,7 @@ test.describe("Hifth · the record, day by day", () => {
     // Rings, picked in the info panel, is what the month draws next time it opens.
     await page.getByRole("button", { name: /About Hifth/ }).click();
     const choices = page.getByRole("dialog").locator('[aria-labelledby="colophon-calendar-look"]').getByRole("radio");
-    await expect(choices).toHaveCount(3);
+    await expect(choices).toHaveCount(4);
     await choices.and(page.locator('[data-calendar-look-choice="rings"]')).click();
     await expect(choices.and(page.locator('[data-calendar-look-choice="rings"]'))).toHaveAttribute("aria-checked", "true");
     await page.keyboard.press("Escape");
@@ -227,6 +227,19 @@ test.describe("Hifth · the record, day by day", () => {
     await expect(month).toHaveAttribute("data-look", "rings");
     const round = await month.locator('[data-day="2026-03-09"]').evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
     expect(round).toBe("50%");
+    await page.keyboard.press("Escape");
+
+    // Dots: marks under the date, one dot for a light day, three for twenty verses, no fill.
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    await choices.and(page.locator('[data-calendar-look-choice="dots"]')).click();
+    await page.keyboard.press("Escape");
+    sheet = await openRecord(page);
+    month = sheet.getByRole("group", { name: "Mar 2026" });
+    await expect(month).toHaveAttribute("data-look", "dots");
+    await expect(month.locator('[data-day="2026-03-10"] [data-mark="dot"]')).toHaveCount(1);
+    await expect(month.locator('[data-day="2026-03-09"] [data-mark="dot"]')).toHaveCount(3);
+    await expect(month.locator('[data-day="2026-03-08"] [data-mark]')).toHaveCount(0);
+    await expect(month.locator('[data-day="2026-03-09"]')).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   });
 
   test("in Arabic the arrow to the earlier month is on the right and points right", async ({ page }) => {
