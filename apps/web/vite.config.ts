@@ -414,6 +414,13 @@ export default defineConfig({
   build: {
     target: "es2022",
     sourcemap: true,
+    // Terser, two passes, rather than Vite's default (esbuild). Measured
+    // 2026-11-13: the shipped scripts went from 209.5 to 195.9 KB gz and the
+    // start-up download from 172.7 to 163.0, for about the same build time.
+    // Nothing in the app reads a function's or class's own name, which is the
+    // one thing terser's renaming could change. See trims.md, "Trimmed 2026-11-13 (2)".
+    minify: "terser",
+    terserOptions: { compress: { passes: 2 }, ecma: 2020 },
     rollupOptions: {
       output: {
         // Fold a tiny shared file (the plural helper every language file

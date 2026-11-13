@@ -2,7 +2,7 @@
 date: 2026-11-13
 repo: hifth
 session: bbb12999
-branch: mistake-kinds (the hifth.app front page), PR not yet opened
+branch: mistake-kinds (the hifth.app front page), PR #610, merged
 folded: no
 ---
 
