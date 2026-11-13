@@ -15,6 +15,40 @@ These sessions' task numbers started again from 1, so they would clash with the 
 They are listed here by date instead. What is still open from them is in
 `.claude/plans/open-work-2026-11.md`. Pushes and merges are folded into the work they shipped.
 
+### 2026-11-11 to 2026-11-13 — hifth.app's front page, and the app redesigns asked from it
+
+Plan: `.claude/plans/floating-swimming-puzzle.md`. Branch `mistake-kinds` (worktree
+`../hifth-landing`). What is still open is on the backlog: the first upload
+(`hifth-app-first-release`), the "Hifth has moved" card (`carry-marks-switched-off`), the owner's
+pick between the built calendar looks (`calendar-looks-plain`), DMARC (`hifth-app-dmarc-spf`) and
+the spam-check key (`hifth-app-turnstile-key`).
+
+**Done:**
+- The Cloudflare keys work on this laptop, and the site project for hifth.app is made (ab634495).
+- A front page and a privacy page for hifth.app (77d23fc7), in English and Arabic, opening on two
+  facing pages and a phone (82326718); what you can do with it and Hifth on each device (eb49ed02);
+  the owner's opening line (d868bc8e); the wordmark in Aref Ruqaa (411249e3); Arabic pictures of
+  the app (61a29221). The contact address the privacy page names is the owner's to give.
+- The email form keeps an address and lets it leave (59bbaa7f); it then moved to Supabase, with a
+  confirm email and a leave button (c46a2519). The mailing-list design came from two researchers
+  and a checker (9daf0cc3, 397b31c4, 95b00cd2, 1809a4df, d2891ab8). Pushing it to the real
+  Supabase project is the owner's.
+- A release tool that refuses anything but the bare minimum (00e63e02, bb68e305, 4a56fbd5). It has
+  not uploaded to Cloudflare yet; that is `hifth-app-first-release`.
+- The app at /read, and readers at the old address can carry their marks (9624325b, fe28976c),
+  where they left off (5bb37c69), their settings (7b8f1ef5, 6a3812f4) and, only when they tick it,
+  what they have opened (6a6c95cd). Switched off until hifth.app is live.
+- The sign-in decision, a roadmap and the CLAUDE.md line for it (e4bdf8bf).
+- hifth.app on this laptop with one command, on the local launcher, with page comments (3411c246,
+  2d535242); the intent picture from the local hub (69eded1b); a Designs button there (e5e0d820).
+- 7.2 KB of room made under the size limit (f0f211c5, 6eeb649f).
+- The Mistake pen asks the kind of mistake first, three ways to choose from (c1b44ac3, 24f786b0),
+  with each harakah named in the reader's language (6763cffc).
+- The record's month shows how much each day held, in three looks (d85e15a9, cc78403e), and a
+  fourth, dots, from the Mac's menu-bar calendar (a9465870, 1b66f945).
+- The share menu in three looks (8a6ab633), kept in sight on a low verse (53e702d4).
+- Two skills: how Hifth is set up today, and the Supabase login check (84b1657d).
+
 ### 2026-11-09 — Installing on our own devices through TestFlight
 
 **Done:** The research page on putting the app on our own devices was written
