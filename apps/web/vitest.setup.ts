@@ -1,5 +1,6 @@
 /// <reference types="@testing-library/jest-dom" />
 import "@testing-library/jest-dom/vitest";
+import { configure } from "@testing-library/preact";
 import { loadStrings } from "./src/i18n";
 import { installInputTiming } from "./src/input-timing";
 import { LOCALE_IDS } from "./src/messages/locales.gen";
@@ -14,6 +15,17 @@ await Promise.all(LOCALE_IDS.map((id) => loadStrings(id)));
 
 // The same timing the app runs on: a tap or a key finishes its work before the next.
 installInputTiming(window);
+
+/**
+ * How long `findBy…` and `waitFor` wait for something to appear. Testing Library's
+ * default is one second. The commit hook runs every package's tests at once, and
+ * there a component that loads through the fake IndexedDB and the Cache Storage
+ * stand-in before it draws (the juz shelf's remove button, 2026-11-13) can take
+ * longer than that: it failed under the hook and passed five times out of five
+ * alone. A longer wait hides nothing. Something that never appears still fails,
+ * only later.
+ */
+configure({ asyncUtilTimeout: 5000 });
 
 /**
  * A unit test that reaches the network is always a bug, but it is a bug that
