@@ -157,7 +157,8 @@ no file called `hifth`. Leave
 `SUPABASE_ACCESS_TOKEN` unset, because it overrides every saved login. The link to a project is
 kept per checkout, in the ignored `supabase/.temp`, so a new worktree links again. The
 building scripts don't use the login at all: they connect with the password-bearing address in
-`SUPABASE_DB_URL`, which is yours to hold.
+`SUPABASE_DB_URL`, which is yours to hold. Where to get it, how to save it, check it and replace it are in the `secrets`
+skill, with every other saved entry.
 
 ## This laptop
 

@@ -59,6 +59,10 @@ your head.
   each with its own label lines. Don't hold a finished feature back to batch it, and a fix
   someone is waiting on still merges alone. A merge that only changes Markdown or the agent
   folder publishes nothing, so it is free. (Owner, 2026-11-11.)
+- **Saved secrets go through `make` only, and Claude never sees a value.** The checks
+  (`make env-check`, `make cf-tokens`) print names, shapes and dates; saving or replacing a value
+  is the owner's, in their own terminal. A guard refuses any command that could print one. The
+  `secrets` skill lists every entry and its commands. (2026-11-13, after a decrypt leaked them.)
 - **Say what the branch is for before the first commit.** `intent start <backlog row's name>`
   once per branch; a hook then ends each commit message with the task, its use case, its
   feature and its plan. `intent status` shows what is set.
