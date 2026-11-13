@@ -35,6 +35,20 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Trimmed 2026-11-13 (2): a different minifier, −13.6 KB, nothing a reader sees changed.** After
+the front-page branch merged, the app was at 209.5 of 210 KB (item ㉒ in `docs/performance.md`,
+backlog row `room-under-the-size-limit`). Deleting what no code reaches took only 0.8 KB: the
+gesture library built with just the drag and pinch the page uses (−0.6), and two messages and a
+helper nobody read any more (−0.2). Then the build itself: Vite shrinks the scripts with esbuild by
+default, and terser with two passes (already installed for the offline worker's build) packs the
+same code 13.6 KB smaller compressed, 209.5 → 195.9 KB in all, and the start-up download 172.7 →
+163.0 KB. Build time is about the same. The one risk is code that reads a function's or class's
+own name, which terser may rename; a search found none (the two `.name` checks read a browser
+error's name, which terser cannot touch). Worth remembering: **try the build settings before
+cutting code** — no earlier trim had, and this one setting freed more than every trim before it
+together. The cap stays at 210 KB, which leaves 14 KB of room; lowering it to bank the gain is the
+owner's call.
+
 **Trimmed again 2026-11-12: −3.1 KB, nothing a reader sees changed.** The calendar and share-menu
 redesigns the owner asked for needed room, and the app was at 209.6 of 210 KB. The size map
 (`.claude/skills/optimizing-performance/scripts/size-by-source.mjs`, now a kept tool) pointed at two things. The offline worker was
@@ -183,7 +197,9 @@ less. Read the per-file lines in the baseline diff, not only the total. After bo
 ## Taking one on — the checklist
 
 1. **Measure first.** `make build`, then `pnpm gate:budget` and `make perf-report`. Write down the
-   total and the part you are trimming.
+   total and the part you are trimming. Before cutting code, check the build settings in
+   `apps/web/vite.config.ts` (minifier, target), each measured alone in a scratch build; the
+   2026-11-13 switch to terser freed 13.6 KB, more than every code trim before it.
 2. **Write the failing test first.** Usually two: a check on the build output that the moved code
    is no longer in the start-up script, and a Playwright test that the moved thing still opens and
    works (desktop and desktop-firefox). Watch both fail before the change.

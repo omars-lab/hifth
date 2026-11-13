@@ -264,8 +264,6 @@ export interface Strings {
   wordHops(matches: number, unjudged: number): string;
   hoppedTo(label: string, page: number): string;
   backTo(label: string, page: number): string;
-  /** Prefix distinguishing "someone sent me here" from "I jumped here". */
-  arrivedVia(origin: "link" | "jump"): string;
   arrivedPage(origin: "link" | "jump", page: number): string;
   arrivedRange(origin: "link" | "jump", ref: string, page: number): string;
   arrivedAyah(origin: "link" | "jump", label: string, page: number): string;
@@ -457,8 +455,6 @@ export interface Strings {
   /** Badge on an OCR-recovered run; `…Note` is its longer tooltip. */
 
   /* ---- side-loading a commentary edition (Colophon) ----------------------- */
-  tafsirImportTitle: string;
-  tafsirImportBody: string;
   tafsirImportButton: string;
   tafsirImportBusy: string;
   /** "The Study Quran loaded · 114 surahs, 6236 entries". */
@@ -1304,7 +1300,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
       m.wordHops({ n: matches, nText: n(matches), u: unjudged, uText: n(unjudged) }),
     hoppedTo: (label, page) => m.hoppedTo({ label, page: n(page) }),
     backTo: (label, page) => m.backTo({ label, page: n(page) }),
-    arrivedVia: via,
     arrivedPage: (origin, page) => m.arrivedPage({ via: via(origin), page: n(page) }),
     arrivedRange: (origin, ref, page) => m.arrivedRange({ via: via(origin), ref, page: n(page) }),
     arrivedAyah: (origin, label, page) => m.arrivedAyah({ via: via(origin), label, page: n(page) }),

@@ -49,6 +49,8 @@ the spam-check key (`hifth-app-turnstile-key`).
   fourth, dots, from the Mac's menu-bar calendar (a9465870, 1b66f945).
 - The share menu in three looks (8a6ab633), kept in sight on a low verse (53e702d4).
 - Two skills: how Hifth is set up today, and the Supabase login check (84b1657d).
+- The branch merged to main with main's latest work, overlaps worked by hand (PR #610, 2bfeca6c,
+  2026-11-13).
 
 ### 2026-11-09 — Installing on our own devices through TestFlight
 
