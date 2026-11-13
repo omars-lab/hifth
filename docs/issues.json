@@ -5907,6 +5907,7 @@
       "next": true,
       "severity": "question",
       "owner": "agent",
+      "useCase": "run-a-check-a-machine-cannot",
       "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11. Slice 0, the throwaway check on the real iPad, ran 2026-11-12 and answered its three questions. (1) The app hears a screenshot taken with the two buttons and with the Pencil corner swipe, so no second way to capture is needed. (2) iOS asked to allow screen recording once, after the install. Apple's recorder kept the last 5 seconds as a clip of 4 to 12 MB each time. (3) The laptop copies files out of the app's Documents folder over the cable. One thing slice 2 must handle: coming back from the Home Screen, the recorder's first start failed with 'interrupted by multitasking' and only a later return started it. So the real build retries the start after a moment. Still to settle with the owner: whether the cross on the card's step 4 meant iOS asked about recording again, since no note was left. Next: slice 1, the picture, where you were, the note and the trail."
     },
     {
@@ -6112,6 +6113,28 @@
       "owner": "agent",
       "note": "Answered 2026-11-11: it was a fault in the app. The strip you grab to turn the page copies its rounded corners from the paper, and sometimes measured a moment before the left page had been told which side it was on, then stopped looking and kept a square corner. It now measures again whenever a page is added or changes side, which also fixes a strip staying square when a page draws more than two seconds late. Both tests ran 25 times each in Firefox with no failure (docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md).",
       "closedBy": "apps/web/e2e/edge-peel.spec.ts"
+    },
+    {
+      "id": "roots-in-drawer-test-fails-on-its-own",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Found 2026-11-12 in two push runs in a row: the phone-size browser test of opening Same roots inside the drawer, in its iPad-on-its-side case, could not find the roots list inside the drawer within 5 seconds, then passed when run again. The cause is not known yet; the failure picture is in a folder git ignores. Being worked on now, on the walk capture branch: run it many times until it fails, find whether the app or the test is slow, fix that, and run it many times again."
+    },
+    {
+      "id": "cloudflare-settings-only-in-one-folder",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "note": "Found 2026-11-13: the Cloudflare settings file and its key were made in the walk worktree, so the main folder only has the encrypted copy. Every session started there says it cannot check the tokens. Nothing deploys today, so it waits. Fix, by Omar: in the main folder, pull the key from LastPass and rebuild the settings file (make env-keys-pull, then make env-bootstrap, then make env-check)."
     },
     {
       "id": "comment-bar-covers-bottom-row-on-phone-width",

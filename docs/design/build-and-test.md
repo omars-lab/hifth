@@ -1,6 +1,6 @@
 # What slows down or trips up building and checking the app?
 
-**Short version:** five things got in the way while building features in November 2026. None
+**Short version:** seven things got in the way while building features in November 2026. None
 changes the app a reader sees. Each is small, and each will trip the next session the same
 way until it is fixed once, in the tool or the skill it belongs to.
 
@@ -77,3 +77,27 @@ Yes, since 2026-11-11. Each has a line in the skill a session would be reading a
   does. Now in the walk-app skill.
 - The speed probe is switched on for the laptop's dev server with a setting no command named;
   the only named command builds it for a phone. Now in the optimizing-performance skill.
+
+### ⑥ Does the phone-size test of opening Same roots in the drawer fail on its own some of the time? · **open**
+
+Yes, twice so far. On 2026-11-12 it failed in two push runs in a row and passed each time it
+was run again. The failing case is the iPad on its side, run in the phone-size browser. The test
+opens the verse's drawer, presses Same roots, and waits for the roots list to show inside the
+drawer. That wait ran out after 5 seconds.
+
+Whether the app or the test is slow is not known yet. A test that fails now and then teaches
+everyone to ignore a red run, so this is being fixed now, before the walk capture work.
+
+**What would close it:** the cause found and fixed, and the test run many times in a row at
+phone size with no failure.
+
+### ⑦ Can a session started in the main folder check the Cloudflare tokens? · **open**
+
+Not yet. The tokens were saved while working in a second copy of the repo (the walk worktree),
+so the settings file and its key exist only there. The main folder has just the encrypted copy,
+and each session started there says it cannot check the tokens. Nothing deploys from this laptop
+today, so nothing breaks.
+
+**What would close it:** Omar pulls the key from LastPass and rebuilds the settings file in the
+main folder (`make env-keys-pull`, `make env-bootstrap`, then `make env-check`). Claude never
+handles the key itself.
