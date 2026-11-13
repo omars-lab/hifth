@@ -201,6 +201,44 @@ final class ShellModel {
         }
     }
 
+    #if DEBUG
+    // MARK: - Walk capture (builds from the laptop only)
+
+    /// The last ten seconds of page moves, touches and Pencil strokes, for a
+    /// walk capture to keep beside its picture.
+    @ObservationIgnored var captureTrail = CaptureTrail()
+    /// Where captures are kept; the tests and the launch flag point it elsewhere.
+    @ObservationIgnored var captureStore = CaptureStore(folder: CaptureStore.defaultFolder)
+    /// The capture the "Add a note" banner is for, while it is up.
+    private(set) var captureNote: URL?
+    /// What has been typed in the banner so far.
+    var captureNoteText = ""
+
+    /// Show the banner for a new capture. One already up is closed first, so
+    /// what was typed there is kept with its own capture.
+    func offerNote(for capture: URL) {
+        closeNote()
+        captureNote = capture
+    }
+
+    /// Close the banner, keeping whatever was typed.
+    func closeNote() {
+        guard let capture = captureNote else { return }
+        do {
+            try captureStore.keepNote(captureNoteText, in: capture)
+        } catch {
+            print("walk capture note not kept \(error)")
+        }
+        captureNote = nil
+        captureNoteText = ""
+    }
+
+    /// The touch, Pencil and page-move trail: the recorder on the iPad feeds it.
+    func noteOnTrail(_ happening: CaptureTrail.Happening) {
+        captureTrail.add(happening, at: Date())
+    }
+    #endif
+
     // MARK: - The check card (builds from the laptop only)
 
     /// The card a `check` link opened, while it is on screen.
@@ -290,6 +328,9 @@ final class ShellModel {
             scheduleSnapshotIfAsked()
         case .route(let hash):
             currentHash = hash
+            #if DEBUG
+            captureTrail.add(.route(hash), at: Date())
+            #endif
             settle(hash)
         case .share(let url, let title, let text):
             Sharing.present(url: url, title: title, text: text, from: webView)

@@ -142,6 +142,69 @@ struct CaptureStoreTests {
         #expect(CaptureWhere.PageAnswer(json: "{}") == CaptureWhere.PageAnswer(page: nil, verse: nil, open: [], settings: [:]))
     }
 
+    private func place(answered: Bool, at date: Date) -> CaptureWhere {
+        CaptureWhere(
+            at: date, trigger: "screenshot", route: "#/hafs-kfqc/p7",
+            answer: answered ? .init(page: 7, verse: nil, open: ["drawer"], settings: [:]) : nil,
+            screen: .init(width: 1180, height: 820, scale: 2, orientation: "sideways"),
+            build: .init(commit: "abc1234", flavour: "public")
+        )
+    }
+
+    @Test("a capture is kept straight away with its trail, even before the page answers")
+    func beginsWithoutThePage() throws {
+        let folder = temporary()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = CaptureStore(folder: folder)
+        let capture = try store.begin(place: place(answered: false, at: at()), trail: Data("{\"kind\":\"touch\"}\n".utf8))
+        let json = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: capture.appendingPathComponent("where.json"))) as? [String: Any])
+        #expect(json["pageAnswered"] as? Bool == false)
+        #expect(try String(contentsOf: capture.appendingPathComponent("trail.jsonl"), encoding: .utf8) == "{\"kind\":\"touch\"}\n")
+        // The page answers later: where.json is written again, now with the page.
+        try store.write(place(answered: true, at: at()).json(), named: "where.json", in: capture)
+        let again = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: capture.appendingPathComponent("where.json"))) as? [String: Any])
+        #expect(again["page"] as? Int == 7)
+    }
+
+    @Test("starting a capture drops the oldest past the limit, never the new one")
+    func beginTrims() throws {
+        let folder = temporary()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = CaptureStore(folder: folder, mostCaptures: 2, mostBytes: 1_000_000)
+        for s in 1...3 { _ = try store.begin(place: place(answered: false, at: at(Double(s))), trail: Data()) }
+        // Made at the earliest time, so by name it is the oldest of all.
+        let newest = try store.begin(place: place(answered: false, at: at(0)), trail: Data())
+        #expect(try names(folder).contains(newest.lastPathComponent))
+        #expect(try names(folder).count == 2)
+    }
+
+    @Test("a picture that came back empty is not kept as a file nobody can open")
+    func emptyPicture() throws {
+        let folder = temporary()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = CaptureStore(folder: folder)
+        let capture = try store.begin(place: place(answered: false, at: at()), trail: Data())
+        #expect(try store.keepPicture(Data(), in: capture) == false)
+        #expect(!FileManager.default.fileExists(atPath: capture.appendingPathComponent("picture.png").path))
+        #expect(try store.keepPicture(Data([0x89, 0x50]), in: capture) == true)
+        #expect(FileManager.default.fileExists(atPath: capture.appendingPathComponent("picture.png").path))
+    }
+
+    @Test("a note is kept beside its capture; a blank one is not, and a capture already dropped is not made again")
+    func notes() throws {
+        let folder = temporary()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = CaptureStore(folder: folder)
+        let capture = try store.begin(place: place(answered: false, at: at()), trail: Data())
+        #expect(try store.keepNote("  \n", in: capture) == false)
+        #expect(!FileManager.default.fileExists(atPath: capture.appendingPathComponent("note.txt").path))
+        #expect(try store.keepNote("the bar jumped", in: capture) == true)
+        #expect(try String(contentsOf: capture.appendingPathComponent("note.txt"), encoding: .utf8) == "the bar jumped\n")
+        try FileManager.default.removeItem(at: capture)
+        #expect(try store.keepNote("too late", in: capture) == false)
+        #expect(!FileManager.default.fileExists(atPath: capture.path))
+    }
+
     @Test("the build's commit and flavour are read from the files the web build leaves beside it")
     func readsTheBuild() throws {
         let folder = temporary()

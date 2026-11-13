@@ -56,6 +56,16 @@ struct CaptureTrailTests {
         #expect(second["x"] == nil, "a page move has no place on the screen")
     }
 
+    @Test("each page move the page reports joins the app's trail")
+    @MainActor
+    func routesReachTheTrail() {
+        let model = ShellModel(launchRoute: nil)
+        model.receive(.route("#/hafs-kfqc/p3"))
+        model.receive(.route("#/hafs-kfqc/p4"))
+        #expect(model.captureTrail.events(before: Date()).map(\.route) == ["/hafs-kfqc/p3", "/hafs-kfqc/p4"])
+        #expect(model.webViewBuilt == false, "keeping the trail never builds the web view")
+    }
+
     @Test("an empty trail writes an empty file, not a broken one")
     func empty() {
         #expect(CaptureTrail(window: 10).jsonl(before: at(0)).isEmpty)

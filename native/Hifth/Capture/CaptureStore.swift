@@ -43,6 +43,38 @@ nonisolated struct CaptureStore {
         try data.write(to: capture.appendingPathComponent(name), options: .atomic)
     }
 
+    /// The first thing done when a screenshot is heard, before anything is
+    /// waited on: the folder, the trail, and where the reader was as far as the
+    /// app knows without asking the page. A page that never answers is the one
+    /// worth keeping most, so nothing here depends on it. The oldest captures
+    /// past the limits go, never this one.
+    func begin(place: CaptureWhere, trail: Data) throws -> URL {
+        let capture = try newCapture(at: place.at)
+        try write(trail, named: "trail.jsonl", in: capture)
+        try write(place.json(), named: "where.json", in: capture)
+        try trim(keeping: [capture.lastPathComponent])
+        return capture
+    }
+
+    /// The app's own picture of the screen. An empty one (the snapshot failed)
+    /// is not kept: a file that opens as nothing would look like a fault.
+    @discardableResult
+    func keepPicture(_ png: Data, in capture: URL) throws -> Bool {
+        guard !png.isEmpty else { return false }
+        try write(png, named: "picture.png", in: capture)
+        return true
+    }
+
+    /// The reader's note. A blank one is not kept, and a capture that has
+    /// already been dropped is not made again just to hold it.
+    @discardableResult
+    func keepNote(_ text: String, in capture: URL) throws -> Bool {
+        let note = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !note.isEmpty, FileManager.default.fileExists(atPath: capture.path) else { return false }
+        try write(Data((note + "\n").utf8), named: "note.txt", in: capture)
+        return true
+    }
+
     /// Drops the oldest captures until both limits hold, never one named in
     /// `keeping` (the one being written). Oldest means the earliest time in the
     /// folder's name: a file's own date changes when it is copied or touched.
@@ -137,7 +169,7 @@ nonisolated struct CaptureWhere: Equatable {
         }
     }
 
-    /// What the page said about itself, from `WalkCapture.pageScript`.
+    /// What the page said about itself, from `CapturePage.script`.
     struct PageAnswer: Equatable {
         var page: Int?
         var verse: String?
