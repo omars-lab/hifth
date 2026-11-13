@@ -56,6 +56,7 @@ function fakeIpad({ grow = false } = {}) {
   put("20261113-100200/trail.jsonl", "");
   put("20261113-100200/scratch.tmp", "not a capture file");
   put("stray.txt", "not a capture");
+  put("current.json", JSON.stringify({ at: "2026-11-13T10:20:00Z", route: "/hafs-kfqc/p9", url: "https://example.invalid/#/hafs-kfqc/p9" }));
   const calls = join(dir, "calls.log");
   const bin = join(dir, "devicectl");
   writeFileSync(
@@ -109,7 +110,8 @@ test("pull copies each capture's own files, and nothing else on the iPad", () =>
   assert.deepEqual(readdirSync(join(out, "20261113-101500")).sort(), ["before.mp4", "note.txt", "picture.png", "trail.jsonl", "where.json"]);
   assert.deepEqual(readdirSync(join(out, "20261113-100200")).sort(), ["trail.jsonl", "where.json"]);
   assert.equal(existsSync(join(out, "stray.txt")), false);
-  assert.match(r.stdout, /ev=done .*captures=2 .*copied=7/);
+  assert.equal(JSON.parse(readFileSync(join(out, "current.json"), "utf8")).route, "/hafs-kfqc/p9", "where the app last said it was comes too");
+  assert.match(r.stdout, /ev=done .*captures=2 .*copied=7 .*current=yes/);
   assert.ok(existsSync(join(out, "index.html")), "a pull also draws the page");
 });
 
@@ -247,6 +249,40 @@ test("a video with no picture beside it is still shown", () => {
   const html = readFileSync(join(out, "index.html"), "utf8");
   assert.ok(html.includes('<video src="20261113-120000/before.mp4" muted'), "no poster, but the video is there");
   assert.ok(!html.includes("No picture was kept."));
+});
+
+test("current copies only where the app is, and prints it", () => {
+  const ipad = fakeIpad();
+  const out = mkdtempSync(join(tmpdir(), "hifth-walks-"));
+  const r = run(["current", "--device", DEVICE, "--dir", out], { HIFTH_DEVICECTL: ipad.bin });
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(JSON.parse(r.stdout).route, "/hafs-kfqc/p9");
+  assert.deepEqual(readdirSync(out), ["current.json"], "no capture is copied");
+});
+
+test("current with no file on the iPad says how to make one", () => {
+  const ipad = fakeIpad();
+  const out = mkdtempSync(join(tmpdir(), "hifth-walks-"));
+  writeFileSync(join(ipad.captures, "current.json"), "");
+  spawnSync("rm", [join(ipad.captures, "current.json")]);
+  const r = run(["current", "--device", DEVICE, "--dir", out], { HIFTH_DEVICECTL: ipad.bin });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /current-to-file/);
+});
+
+test("a capture taken by a link says so, and shows the name the link gave it", () => {
+  const out = mkdtempSync(join(tmpdir(), "hifth-walks-"));
+  mkdirSync(join(out, "20261113-140000"));
+  writeFileSync(join(out, "20261113-140000", "where.json"), where({ trigger: "link", name: "note-tool" }));
+  mkdirSync(join(out, "20261113-090000"));
+  writeFileSync(join(out, "20261113-090000", "where.json"), where({}));
+  assert.equal(run(["gallery", "--dir", out]).status, 0);
+  const html = readFileSync(join(out, "index.html"), "utf8");
+  assert.ok(html.includes("<dt>Taken by</dt><dd>a capture link from the laptop</dd>"));
+  assert.ok(html.includes("<dt>Named</dt><dd>note-tool</dd>"));
+  assert.equal([...html.matchAll(/<dt>Named<\/dt>/g)].length, 1, "a screenshot has no name row");
+  const list = JSON.parse(run(["list", "--json", "--dir", out]).stdout);
+  assert.deepEqual(list.map((c) => c.named), [null, "note-tool"]);
 });
 
 test("the plain list says one line per capture", () => {

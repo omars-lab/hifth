@@ -110,7 +110,7 @@ SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(pats
 .PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
         app-run-ipad app-shot app-probe app-open app-test app-walk app-test-mac-ui app-unit-test app-logs app-clean \
         app-golden app-golden-update app-device-install app-device-open app-release-ipad app-crash-logs app-devices app-device-register app-archive app-testflight \
-        walk-pull walk-gallery walk-list
+        walk-pull walk-gallery walk-list walk-current
 
 app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
 	python3 $(NATIVE)/scripts/make-appicon.py
@@ -421,6 +421,10 @@ walk-gallery: ## Redraw the walk captures page (native/shots/walks/index.html) f
 
 walk-list: ## The walk captures pulled so far, oldest first, one line each (JSON=1 for the list as JSON)
 	@$(WALK_CAPTURES) list $(if $(JSON),--json)
+
+walk-current: ## Where the app on a plugged-in iPad is, as current-to-file last wrote it (DEVICE=…)
+	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
+	@$(WALK_CAPTURES) current --device "$(DEVICE)"
 
 # The capture is for builds from this laptop only. Builds the iPad app both
 # ways for a real iPad (unsigned, so no device is needed) and fails if the
