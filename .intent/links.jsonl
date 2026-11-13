@@ -146,3 +146,4 @@
 {"commit": "17cdcf7053b20356f915372aeea1f091d56f35b4", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "touching a verse no longer closes the iPad app"}
 {"commit": "82371403be7b9689f7b0bee3fddfd0c5a669dc8e", "kind": "feature", "name": "native-shell", "by": "agent", "sure": false, "words": "Let the app start on iPadOS 18 simulators"}
 {"commit": "49d96264338aab7780a781c2494e1e65256660ef", "kind": "task", "name": "is-the-privacy-rule-nothing-leaves-or-nothing-that-doesnt-serve", "by": "hand", "sure": true, "words": "Security reviews check that the reader decides who sees their data"}
+{"commit": "4ce91f2ed9dcaaf91572c5956d593c25fb757d15", "kind": "task", "name": "supabase-move", "by": "hand", "sure": true, "words": "Saving a secret shows the shape it expects and refuses the wrong one"}
