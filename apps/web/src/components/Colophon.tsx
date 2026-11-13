@@ -440,6 +440,9 @@ export function Colophon({
         role="dialog"
         aria-modal="true"
         aria-label={asPage ? t.levelSettings : t.aboutTitle}
+        // The panel's name in a link (`?open=`), for the features-page check;
+        // the settings page drawn from the same sheet is not that panel.
+        data-panel={asPage ? undefined : "about"}
         dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}

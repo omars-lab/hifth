@@ -185,6 +185,8 @@ export function Jumper({ open, onJump, onClose }: JumperProps): JSX.Element | nu
         role="dialog"
         aria-modal="true"
         aria-label={t.goTo}
+        // The panel's name in a link (`?open=`), for the features-page check.
+        data-panel="jump"
         // A sheet is chrome, so it reads in the UI language's direction —
         // including the field, whose query is a place name in either script.
         dir={dir}
