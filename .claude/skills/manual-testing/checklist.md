@@ -171,6 +171,13 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     iPad's folder empty. Why not a machine: the simulator has no screenshot buttons and Apple's
     screen recorder runs only on a real device. The simulator test proves the rest (the walk-app
     skill, "Scripts").
+23. **The Arabic names of the rarer harakat.** With the app in Arabic, open a word's parts
+    (`#/hafs-kfqc/p7?tool=word`, tap a word) or the mistake pen's question, on words that carry a
+    small waw or yeh, a dagger alef, an iqlab meem, a small seen or noon, or the round and long
+    zero signs. Right: each name under a sign is what a hafiz or a teacher would call it. The
+    common ones (fatha, kasra, damma, sukun, shadda, tanween) are settled; these were written
+    without a hafiz to ask. Why not a machine: a test only proves each name is Arabic, not that it
+    is the right Arabic. Corrections go in the word list, and the unit test on sign names keeps them.
 
 ## Done
 

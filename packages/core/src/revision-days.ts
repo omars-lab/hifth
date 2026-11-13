@@ -81,8 +81,9 @@ export function daysOf(events: readonly RevisionEvent[], edition: EditionId): Da
     .sort(([a], [b]) => (a < b ? 1 : a > b ? -1 : 0))
     .map(([day, t]) => {
       const mistakes = t.mistakes.slice().sort((a, b) => a.at - b.at);
-      const kinds = { word: 0, sign: 0, verse: 0 };
-      for (const m of mistakes) kinds[m.what === "sign" || m.what === "verse" ? m.what : "word"]++;
+      const kinds = { word: 0, sign: 0, letter: 0, rule: 0, verse: 0 };
+      // A kind this build does not know (a record from a newer one) counts as the word.
+      for (const m of mistakes) kinds[m.what && m.what in kinds ? m.what : "word"]++;
       return { day, looks: t.looks, verses: t.verses.size, pages: ascending(t.pages), juz: ascending(t.juz), mistakes, kinds, mistakePages: ascending(t.mistakePages) };
     });
 }

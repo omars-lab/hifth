@@ -150,8 +150,8 @@ trusted and not dropped.
 
 **Yes, for the share page, from the first live link. No, for the reading app.**
 
-- **Put the share page on a sub-address of its own**: `hifth.bytesofpurpose.com/share`, chosen by Omar on 2026-11-09 (⑧), served from the Cloudflare setup the project already keeps ready. The server part sits at its own address either way.
-- **Keep the reading app at `blog.bytesofpurpose.com/hifth/`.** Moving it would leave every reader's stored marks behind, because the browser's store belongs to the address. A move is its own later step, with a one-time file carry and a forwarding page.
+- **Put the share page on Hifth's own address**: `hifth.app/share`, on the Cloudflare account that holds hifth.app. Omar first chose `hifth.bytesofpurpose.com/share` "for now" (2026-11-09, ⑧); once hifth.app was bought and live, the plan he approved on 2026-11-11 moved it there, before anything was tied to the old name. The server part sits at its own address either way.
+- **The reading app moves to `hifth.app/read`** (decided 2026-11-11, the hifth-app-site decision). Moving it would leave every reader's stored marks behind, because the browser's store belongs to the address, so the move comes with a one-time carry: the old address offers to send a reader's marks across, and falls back to saving a file.
 - **Why not a folder of the blog:** every page of the blog shares one store with the app; Apple's link file cannot go at the blog's root; and once anyone signs in, the blog's host forbids it and Sign in with Apple needs a server to answer to.
 - **Pick the name once.** A passkey, and the links that open the app, are tied to it for good.
 - **Nothing public changes.** The share page carries verse numbers, word positions and the reader's own words. No Qur'an text, no held commentary.
@@ -202,9 +202,13 @@ Asked by A. Sharing between two people starts its own decision record, by the pr
 
 Asked by both. Recommended: the teacher's view fed by the file first, then the live locked link, then accounts only if a teacher needs all their students. **What would answer it:** your pick, written as a new decision record, with a rough build of the teacher's view so you choose by hand.
 
-### ④ Does the record of when you read ever go with a share, or only your mistakes and notes? · **open**
+### ④ Does the record of when you read ever go with a share, or only your mistakes and notes? · **answered**
 
-Asked by both. Suggested: never by default; if ever, a separate tick the student sees each time. **What would answer it:** your call. A yes means naming one more way out in the privacy check, with its reason.
+Asked by both. Suggested: never by default; if ever, a separate tick the student sees each time. **Answered by the owner, 12 November 2026:** the reader decides who sees their data. The record goes only when the reader presses a button that says it is going and to whom, and they can see who has it and take it back (⑮). Each such way out is still named in the privacy check, with its reason.
+
+### ⑮ Where does a reader see who has their data, and take it back? · **open**
+
+Asked by the owner, 12 November 2026, with the rule that the reader decides who sees their data. Every way a reader's marks or record can reach someone else (a carried copy, a teacher's link, their own iCloud) needs one place that lists who has what since when, with a way to stop each. A file already sent cannot be called back, so that place has to say so plainly rather than promise it. **The first live way out** (12 November 2026) is the card at the old address that carries a reader's marks to hifth.app: it sends the revision record only when the reader ticks its own box, and records the date it went. That copy stays in the same browser under the new address and cannot be called back from the old one; forgetting it is done at hifth.app, like any record kept there. The list belongs beside it once a second way out exists. **What would answer it:** a rough build of that list in the info panel, beside the first live way out, judged by hand.
 
 ### ⑤ Should a shared link stop working by itself after a while, and should the teacher see new mistakes as they are made or only when they reopen it? · **open**
 
@@ -220,19 +224,29 @@ Asked by A, answered by the checker from Cloudflare's own pricing pages: free co
 
 ### ⑧ Which web address should the share page live on? · **answered**
 
-Asked by both. A sub-address such as `hifth.bytesofpurpose.com` or `share.bytesofpurpose.com`; the reading app stays where it is. The name is a one-way choice once links that open the app, or passkeys, depend on it. **Answered by Omar on 2026-11-09: `hifth.bytesofpurpose.com/share`, "for now".** The share page sits under `/share` on a new `hifth` sub-address, served from Cloudflare; the reading app stays at `blog.bytesofpurpose.com/hifth/`. "For now" is honest only until a passkey or a link that opens the app is tied to the name, so that step re-asks whether this is the name for good (⑬).
+Asked by both. A sub-address such as `hifth.bytesofpurpose.com` or `share.bytesofpurpose.com`; the reading app stays where it is. The name is a one-way choice once links that open the app, or passkeys, depend on it. **Answered by Omar on 2026-11-09: `hifth.bytesofpurpose.com/share`, "for now".** The share page sits under `/share` on a new `hifth` sub-address, served from Cloudflare; the reading app stays at `blog.bytesofpurpose.com/hifth/`. "For now" is honest only until a passkey or a link that opens the app is tied to the name, so that step re-asks whether this is the name for good (⑬). **Moved on 2026-11-11, before anything was tied to it: the share page lives at `hifth.app/share`**, on the address Hifth now owns, with the reading app beside it at `hifth.app/read`. Nothing had been built at the old name.
 
-### ⑬ Set up `hifth.bytesofpurpose.com/share` on Cloudflare, with its free database behind it · **open**
+### ⑬ Set up `hifth.app/share` on Cloudflare, with its free database behind it · **open**
 
-Follows from ⑥ and ⑧. Needs: the `hifth` address entry under bytesofpurpose.com in Cloudflare, a small Cloudflare server answering at `/share` with the free database behind it, and a placeholder page there that carries no Qur'an text and no held commentary. What the page shows waits on ③ (which way) and ⑫ (page or list); nothing a reader sends goes live before ② (may a student's mistakes be sent at all) is answered. Before any passkey or link that opens the app is tied to the name, ask once more whether `hifth.bytesofpurpose.com` is the name for good.
+Follows from ⑥ and ⑧. Needs: a small Cloudflare server answering at `hifth.app/share`, beside the site's notify-me form on the same account, with the free database behind it, and a placeholder page there that carries no Qur'an text and no held commentary. What the page shows waits on ③ (which way) and ⑫ (page or list); nothing a reader sends goes live before ② (may a student's mistakes be sent at all) is answered. The name is settled: hifth.app is the address Hifth owns (⑭).
 
-### ⑭ Move `hifth.app`, bought at Namecheap, to a new Cloudflare account of its own · **open**
+### ⑭ Move `hifth.app`, bought at Namecheap, to a new Cloudflare account of its own · **blocked**
 
-Omar bought `hifth.app` at Namecheap on 2026-11-10. It moves in two steps, at two times. **Now:** open a new Cloudflare account for Hifth, apart from the one the EarlBear sites use; add `hifth.app` to it; and enter Cloudflare's two nameservers at Namecheap. The cloudflare-onboarding skill walks each step, makes Claude's tokens, keeps them encrypted, and checks the domain. **After about 2027-01-09**, when Namecheap's 60-day lock on a newly bought domain lifts, move the registration itself to Cloudflare; that only changes who bills. Once the domain is live on the new account, two follow-ups. First, ask whether the share page (⑧, ⑬) should live on `hifth.app` instead of `hifth.bytesofpurpose.com`, before any passkey or link that opens the app is tied to either name. Second, point the site's Cloudflare setup at the new account. **What would answer it:** the skill's domain check saying `hifth.app` is active on the new account.
+Omar bought `hifth.app` at Namecheap on 2026-11-10. It moves in two steps, at two times. **Now:** open a new Cloudflare account for Hifth, apart from the one the EarlBear sites use; add `hifth.app` to it; and enter Cloudflare's two nameservers at Namecheap. The cloudflare-onboarding skill walks each step, makes Claude's tokens, keeps them encrypted, and checks the domain. **After about 2027-01-09**, when Namecheap's 60-day lock on a newly bought domain lifts, move the registration itself to Cloudflare; that only changes who bills. Once the domain is live on the new account, two follow-ups. First, ask whether the share page (⑧, ⑬) should live on `hifth.app` instead of `hifth.bytesofpurpose.com`, before any passkey or link that opens the app is tied to either name. Second, point the site's Cloudflare setup at the new account. **What would answer it:** the skill's domain check saying `hifth.app` is active on the new account. **Active since 2026-11-11.** The first follow-up is answered: the share page, and any sign-in, live on `hifth.app`. The second is in hand: the site publishes to the new account, and the old address's Cloudflare job is retired or repointed once the first upload works.
 
 ### ⑨ If accounts come, which ways of signing in, and do they work inside the iPad and Mac apps? · **blocked**
 
 Asked by both. Suggested: Sign in with Apple and an email link, tried on a throwaway test project in both apps; Google later through the system browser; passkeys once Supabase's support settles. **What would answer it:** waits on the choice of way (③); the live locked link needs no sign-in.
+
+**What we know so far about Sign in with Apple (2026-11-11, from the hifth.app plan).** Nothing built; written down so the decision starts from it.
+
+- **Nothing needs an account today.** Your own iPad and Mac keep in step through your own iCloud; a teacher's copy is a file first and a link with no account next; the notify-me list needs none. So the front page has no "Sign in" button: a button with nothing behind it promises what the page cannot keep.
+- **Where it would live:** `hifth.app`, the address Hifth owns (⑧, ⑭). Apple ties a sign-in to the name it was set up on, so this matters once and is now settled.
+- **In the iPad and Mac apps:** Apple's own sign-in sheet, its answer handed to the page through the bridge the apps already have. No sign-in web pages inside the app's built-in browser.
+- **In a browser:** Apple's web sign-in for hifth.app. Apple sends its answer back by posting a form to a return address, so there has to be a small server part to receive it: a function on the same Cloudflare account as the notify list, or Supabase's ready-made one.
+- **Which server.** Cloudflare's functions and small database sit beside the notify list and never pause. Supabase's sign-in is ready-made, but its free plan pauses a project after a week unused, and it would have to be a new project, never the one holding the outside library.
+- **Apple's rules that come with it.** An app that makes accounts must let you delete yours inside the app. If Google sign-in is ever offered, Sign in with Apple must be too. Apple sends the name and email only the first time someone signs in, so they must be kept then.
+- **What would answer it, once ③ says accounts:** a throwaway trial in both apps on a test sign-in setup for hifth.app. That waits on the apps being signed with the paid Apple team.
 
 ### ⑩ Is sending a share a paid extra, and is opening one always free? · **blocked**
 

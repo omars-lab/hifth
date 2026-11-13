@@ -44,38 +44,48 @@ export function useBookmarks(
   record?: Recorder,
 ): {
   bookmarks: readonly Bookmark[];
+  /** True once the bookmarks saved in this browser have been read in. */
+  loaded: boolean;
   commit: (next: Bookmark[], said: string, how?: CommitHow) => void;
   restore: (set: unknown, said: string) => void;
+  /** Settles once every write asked for so far has reached disk. */
+  saved: () => Promise<unknown>;
 } {
   const [bookmarks, setBookmarksState] = useState<readonly Bookmark[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const latest = useRef<readonly Bookmark[]>([]);
   const setBookmarks = useCallback((next: readonly Bookmark[] | ((now: readonly Bookmark[]) => readonly Bookmark[])) => {
     latest.current = typeof next === "function" ? next(latest.current) : next;
     setBookmarksState(latest.current);
   }, []);
 
+  // Writes go one after another, and the first waits for the read. Each opens
+  // the store on its own, and two opened close together (a drop, then the
+  // rename a moment later) could otherwise finish in either order — and the
+  // older set, landing last, would quietly put the old name back.
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
+
   useEffect(() => {
     let live = true;
-    void readBookmarks().then((set) => {
+    const read = readBookmarks().then((set) => {
       if (!live) return;
       // A drop made in the moment before the read landed is kept, not overwritten.
       setBookmarks((now) => (now.length === 0 ? set : [...set, ...now.filter((b) => !set.some((s) => s.id === b.id))]));
+      setLoaded(true);
     });
+    queue.current = read;
     return () => {
       live = false;
     };
   }, [setBookmarks]);
 
-  // Writes go one after another. Each opens the store on its own, and two
-  // opened close together (a drop, then the rename a moment later) could
-  // otherwise finish in either order — and the older set, landing last, would
-  // quietly put the old name back.
-  const queue = useRef<Promise<unknown>>(Promise.resolve());
   const write = useCallback(
     (next: readonly Bookmark[], said: string) => {
       setBookmarks(next);
+      // The set written is the one held when its turn comes, not the one at the
+      // commit: a commit made before the read landed did not yet hold what was read.
       queue.current = queue.current
-        .then(() => writeBookmarks([...next]))
+        .then(() => writeBookmarks([...latest.current]))
         .then((ok) => announce(ok ? said : notSaved));
     },
     [announce, notSaved, setBookmarks],
@@ -89,7 +99,7 @@ export function useBookmarks(
   );
   const restore = useCallback((set: unknown, said: string) => write(set as readonly Bookmark[], said), [write]);
 
-  return { bookmarks, commit, restore };
+  return { bookmarks, loaded, commit, restore, saved: () => queue.current };
 }
 
 /**
@@ -148,13 +158,18 @@ export function useNotes(
 ): {
   notes: readonly Note[];
   scoped: readonly ScopedNote[];
+  /** True once the saved notes have been read in; nothing is written before. */
+  loaded: boolean;
   commit: (next: Note[], said: string, how?: CommitHow) => void;
   /** Replace the notes that gather verses outright, as joining a note and its Undo do. */
   commitScoped: (next: readonly ScopedNote[], said: string, how?: CommitHow) => void;
   loadFile: (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => number;
   restore: (held: unknown, said: string) => void;
+  /** Settles once every write asked for so far has reached disk. */
+  saved: () => Promise<unknown>;
 } {
   const [held, setHeld] = useState<Held>(EMPTY);
+  const [loaded, setLoaded] = useState(false);
   // The latest notes, for the write: a write queued before the read landed
   // must still write what the reader has now, not what they had then.
   const latest = useRef<Held>(EMPTY);
@@ -182,6 +197,7 @@ export function useNotes(
         scoped: [...kept, ...now.scoped.filter((n) => !got.scoped.some((s) => s.id === n.id))],
         mistakes: [...got.mistakes, ...now.mistakes.filter((n) => !got.mistakes.some((s) => s.id === n.id))],
       });
+      setLoaded(true);
     });
     queue.current = read;
     return () => {
@@ -260,7 +276,7 @@ export function useNotes(
   );
 
   const notes = useMemo(() => [...pinsOf(held.scoped), ...held.mistakes], [held]);
-  return { notes, scoped: held.scoped, commit, commitScoped, loadFile, restore };
+  return { notes, scoped: held.scoped, loaded, commit, commitScoped, loadFile, restore, saved: () => queue.current };
 }
 
 interface Held {
@@ -284,12 +300,17 @@ export function useConfusions(
 ): {
   confusions: readonly Confusion[];
   device: Device | null;
+  /** True once the saved jumps have been read in; nothing is written before. */
+  loaded: boolean;
   commit: (next: readonly Confusion[], said: string, how?: CommitHow) => void;
   loadFile: (fileJumps: readonly Confusion[]) => number;
   restore: (jumps: unknown, said: string) => void;
+  /** Settles once every write asked for so far has reached disk. */
+  saved: () => Promise<unknown>;
 } {
   const [held, setHeld] = useState<readonly Confusion[]>([]);
   const [device, setDevice] = useState<Device | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const latest = useRef<readonly Confusion[]>([]);
   const read = useRef(false);
   const queue = useRef<Promise<unknown>>(Promise.resolve());
@@ -309,6 +330,7 @@ export function useConfusions(
       read.current = true;
       // Jumps marked before the read landed are kept beside what was read.
       hold(mergeConfusions(got, latest.current));
+      setLoaded(true);
     });
     return () => {
       live = false;
@@ -353,5 +375,5 @@ export function useConfusions(
     [hold, save],
   );
 
-  return { confusions: held, device, commit, loadFile, restore };
+  return { confusions: held, device, loaded, commit, loadFile, restore, saved: () => queue.current };
 }

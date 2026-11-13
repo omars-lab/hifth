@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /**
- * CI gate: the revision record does not leave the device unless it is in the
- * reader's interest and under their control (owner, 2026-11-08), and neither
- * does the confusion-jump record, which is the same kind of thing (see RECORDS
- * below). In code that means it never leaves by accident: every way off the
- * device is a deliberate act this gate has to be told about.
+ * CI gate: the reader decides who sees their data (owner, 2026-11-12,
+ * sharpening 2026-11-08's "not unless it is in the reader's interest and under
+ * their control"). The revision record and the confusion-jump record, the same
+ * kind of thing (see RECORDS below), go nowhere until the reader presses a
+ * button that says what goes and to whom. In code that means neither leaves by
+ * accident: every way off the device is a deliberate act this gate has to be
+ * told about.
  *
  * Every other thing this app stores is a preference — a language, a skin, a
  * dismissed notice. The revision record is different in kind: it is a log of
@@ -18,7 +20,7 @@
  * and gets handed one field too many, an analytics call added to measure
  * engagement. Each is one import away, and none of them looks wrong in review.
  *
- * So the promise is a gate. Two invariants:
+ * So the promise is a gate. Three invariants:
  *
  *   1. **Nothing that can reach the network may import the record.** The set of
  *      modules allowed to import `revision.ts` or `revision-store.ts` is listed
@@ -28,6 +30,11 @@
  *   2. **The record's own modules contain no way out.** No `fetch`, no beacon,
  *      no WebSocket, no URL or query-string construction. Even reachable only
  *      from allowed callers, a serialiser inside the store is a loaded gun.
+ *   3. **The record leaves only by the ways the reader chooses, each named in
+ *      WAYS_OUT below.** Today there is one: the card at the old address that
+ *      carries the reader's marks to hifth.app sends the record too, but only
+ *      when the reader ticks the box that says what goes and to whom. The app
+ *      hands the record's reader to that card and to nothing else.
  *
  * Deliberately NOT an ESLint rule. `import/no-restricted-paths` can say "this
  * directory may not import that one", which is the wrong shape: the rule here is
@@ -72,7 +79,7 @@ const RECORDS = [
     files: ["revision", "revision-days", "revision-store"],
     symbols: ["rollUp", "lastSeen", "scopesOf", "dayOf", "daysBetween", "editionOf", "daysOf", "DayCount", "RevisionEvent", "RevisionScope", "DayStamp"],
     allowed: new Map([
-      ["apps/web/src/App.tsx", "where a deliberate tap becomes a recorded look"],
+      ["apps/web/src/App.tsx", "where a deliberate tap becomes a recorded look, and where the carry card is handed the record (WAYS_OUT)"],
       ["apps/web/src/components/RevisionMap.tsx", "the picture; reads the record, sends nothing"],
       ["apps/web/src/components/RevisionDays.tsx", "the record day by day; reads it, sends nothing"],
       ["packages/core/src/revision-days.ts", "the day-by-day count, built on the pure module; part of the record itself"],
@@ -126,6 +133,23 @@ const RECORDS = [
       ["apps/web/src/components/UsageReadout.tsx", "the list in the info panel; reads the counts, sends nothing"],
       ["apps/web/src/usage-store.ts", "the store is built on the pure module"],
     ]),
+  },
+];
+
+/**
+ * The ways the record may leave, each one a choice the reader makes on screen.
+ * `reader` is the store's function that reads the whole record; in `file` it may
+ * appear only in its import and in the `only` spellings, so handing it to a new
+ * part of the app means adding that part here, with the button that guards it.
+ * (The saved file of jumps is the confusion-jump record's way out; it is guarded
+ * by that record's importer list above.)
+ */
+const WAYS_OUT = [
+  {
+    file: "apps/web/src/App.tsx",
+    reader: "readRecord",
+    only: ["readRecord={readRecord}"],
+    why: "the carry to hifth.app, sent only when the reader ticks the box that names it",
   },
 ];
 
@@ -213,6 +237,30 @@ for (const rel of RECORDS.flatMap((r) => r.modules)) {
           `off the device, even one only reachable from an allowed caller.`,
       );
     }
+  }
+}
+
+// ── Invariant 3: the record's reader goes only where the reader chooses ──────
+for (const way of WAYS_OUT) {
+  let code;
+  try {
+    code = readFileSync(join(ROOT, way.file), "utf8");
+  } catch {
+    continue; // a made-up tree without the app; the importer list still holds
+  }
+  code = code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const renamed = new RegExp(`\\b${way.reader}\\s+as\\b`).test(code);
+  let rest = code.replace(/\bimport\s*\{[^}]*\}\s*from\s*["'][^"']*revision-store(\.js)?["']/g, (m) =>
+    m.replace(new RegExp(`\\b${way.reader}\\b,?`), ""),
+  );
+  for (const spelling of way.only) rest = rest.split(spelling).join("");
+  if (renamed || new RegExp(`\\b${way.reader}\\b`).test(rest)) {
+    failures.push(
+      `${way.file} uses ${way.reader} outside the carry card.\n` +
+        `    The whole record goes only by a way the reader chooses on screen:\n` +
+        `    ${way.why}. A new way out needs its own button, saying what goes and\n` +
+        `    to whom, and its own entry in WAYS_OUT in this file.`,
+    );
   }
 }
 

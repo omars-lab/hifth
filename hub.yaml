@@ -15,6 +15,10 @@ runners:
     port: 8767                    # .page-comments/config.json and the Makefile's comments target
     health: /
     start: make comments
+  - id: hifth-app
+    port: 7124                    # .claude/skills/deploy-site/scripts/release-hifth-app.mjs serve
+    health: /
+    start: make hifth-app-serve   # builds, puts the release folder together, then Cloudflare's local server
 
 hubs:
   - id: hifth
@@ -27,6 +31,12 @@ hubs:
     published:
       url: https://blog.bytesofpurpose.com/hifth/
       host: github-pages          # deployed by the GitHub Actions workflow on each push to main
+  - id: hifth-app
+    name: hifth.app
+    description: The front page that announces the Mac app and opens Hifth in the browser at /read/, with the sign-up for word when the Mac app is out.
+    visibility: public
+    use: local                    # not released yet; switch to published once hifth.app is live
+    local: { runner: hifth-app }
   - id: hifth-docs
     name: Hifth design pages
     description: The design notes, option comparisons and review sheets behind Hifth.
@@ -37,6 +47,12 @@ hubs:
     published:
       url: https://blog.bytesofpurpose.com/hifth/docs/
       host: github-pages
+  - id: hifth-intent
+    name: What the work in Hifth is for
+    description: Who each piece of work is for, from the ask to the commit. Drawn by `make intent`; served by the dev server only, never published.
+    visibility: private
+    use: local
+    local: { runner: hifth, path: /intent/ }
   - id: hifth-dev-hub
     name: Hifth features by link
     description: One card per place, tool and panel a link can open, with a picture, a link for this browser and the command that sends it to the iPad.

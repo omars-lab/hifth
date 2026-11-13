@@ -8,6 +8,7 @@ import {
   readRecord,
   recordLook,
   revisionStoreSupported,
+  takeRecord,
 } from "./revision-store.js";
 
 /*
@@ -232,5 +233,80 @@ describe("when there is no storage at all", () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+});
+
+/*
+ * The record carried from the old address, only when the reader ticked the box
+ * that names it. It arrives as a message, so nothing in it is trusted: each look
+ * is checked, filed by its own day, and dropped if the window has passed it.
+ */
+describe("takeRecord: a record carried from the old address", () => {
+  const look = (iso: string, extra: Record<string, unknown> = {}) => ({ key: KEY, page: 7, at: at(iso), tz: 0, ...extra });
+
+  it("adds the looks this address does not have, next to its own, and counts them", async () => {
+    await recordLook({ key: KEY, page: 9 }, at("2026-03-10T12:00:00Z"));
+    const added = await takeRecord(
+      { events: [look("2026-03-09T12:00:00Z"), look("2026-03-11T12:00:00Z", { slip: true, what: "sign" })], since: "2026-03-01" },
+      NOW,
+    );
+    expect(added).toBe(2);
+    const { events, since } = await read();
+    expect(events.map((e) => e.page)).toEqual([7, 9, 7]);
+    expect(events[2]).toMatchObject({ slip: true, what: "sign" });
+    expect(since).toBe("2026-03-01");
+  });
+
+  it("takes a letter or a tajweed rule as the kind of a carried mistake", async () => {
+    const added = await takeRecord(
+      { events: [look("2026-03-09T12:00:00Z", { slip: true, what: "letter" }), look("2026-03-09T12:01:00Z", { slip: true, what: "rule" })] },
+      NOW,
+    );
+    expect(added).toBe(2);
+    expect((await read()).events.map((e) => e.what)).toEqual(["letter", "rule"]);
+  });
+
+  it("taken twice, adds nothing the second time", async () => {
+    const record = { events: [look("2026-03-09T12:00:00Z"), look("2026-03-09T13:00:00Z")], since: "2026-03-01" };
+    expect(await takeRecord(record, NOW)).toBe(2);
+    expect(await takeRecord(record, NOW)).toBe(0);
+    expect((await read()).events).toHaveLength(2);
+  });
+
+  it("drops looks older than the window, even when today's clean-up has already run", async () => {
+    await read(); // the once-a-day clean-up runs here
+    const old = new Date(NOW - (RETENTION_DAYS + 1) * 86_400_000).toISOString();
+    expect(await takeRecord({ events: [look(old), look("2026-03-09T12:00:00Z")], since: "2024-01-01" }, NOW)).toBe(1);
+    const { events, since } = await read();
+    expect(events).toHaveLength(1);
+    // A start date the window has passed is not kept either.
+    expect(since).toBe("2026-03-20");
+  });
+
+  it("drops anything not in the shape this store writes", async () => {
+    const bad = [
+      { ...look("2026-03-09T12:00:00Z"), key: "not a verse" },
+      { ...look("2026-03-09T12:00:00Z"), endKey: 4 },
+      { ...look("2026-03-09T12:00:00Z"), page: 0 },
+      { ...look("2026-03-09T12:00:00Z"), tz: "0" },
+      { ...look("2026-03-09T12:00:00Z"), at: "yesterday" },
+      look("2026-03-09T12:00:00Z", { slip: "yes" }),
+      look("2026-03-09T12:00:00Z", { what: "sign" }),
+      look("2026-03-09T12:00:00Z", { slip: true, what: "tone" }),
+      null,
+      "a look",
+    ];
+    expect(await takeRecord({ events: bad, since: "last spring" }, NOW)).toBe(0);
+    expect(await takeRecord("a record", NOW)).toBe(0);
+    expect(await takeRecord({ events: "all of them" }, NOW)).toBe(0);
+    const { events, since } = await read();
+    expect(events).toEqual([]);
+    expect(since).toBe("2026-03-20");
+  });
+
+  it("files each look by its own clock, whatever day the sender thought it was", async () => {
+    // 23:30 UTC is already the next day three hours east.
+    await takeRecord({ events: [look("2026-03-09T23:30:00Z", { tz: 180 })] }, NOW);
+    expect(dayOf((await read()).events[0]!)).toBe("2026-03-10");
   });
 });

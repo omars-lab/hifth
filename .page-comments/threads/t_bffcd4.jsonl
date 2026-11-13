@@ -1,0 +1,4 @@
+{"v":1,"ev":"thread","id":"t_bffcd4","ts":"2026-11-12T20:18:35Z","author":"omar","page":{"url":"http://127.0.0.1:7124/","path":"/","title":"Hifth — revise on the page you memorised"},"viewport":{"w":1280,"h":857,"dpr":2,"scrollX":0,"scrollY":2132,"scheme":"light"},"anchor":{"type":"element","commentId":null,"css":"main:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(5) > img:nth-of-type(1)","tag":"img","label":"","box":{"fx":0.55,"fy":0.73},"source":[]},"rev":{"bodyHash":"95e565d157af","ts":"2026-11-12T20:18:35Z","git":{"commit":"82326718","dirty":false}},"body":"The share menu compnent needs to be revisited ... to plain "}
+{"v":1,"ts":"2026-11-12T20:18:35Z","ev":"shot","role":"comment","author":"omar","icloud":"CloudDesktop/data/page-comments/hifth/t_bffcd4/comment.png","sha":"42f13b84bc1e"}
+{"v":1,"ts":"2026-11-12T20:18:41Z","ev":"anchor","author":"page","state":"lost"}
+{"v":1,"ts":"2026-11-12T20:18:41Z","ev":"anchor","author":"page","state":"found"}

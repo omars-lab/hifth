@@ -340,15 +340,17 @@ describe("daysOf", () => {
         look({ at: at("2026-03-09T12:00:00Z"), slip: true }),
         look({ at: at("2026-03-09T12:05:00Z"), slip: true, what: "sign", key: key(2, 49) }),
         look({ at: at("2026-03-09T12:10:00Z"), slip: true, what: "verse", key: key(2, 255), page: 42 }),
+        look({ at: at("2026-03-09T12:12:00Z"), slip: true, what: "letter" }),
+        look({ at: at("2026-03-09T12:14:00Z"), slip: true, what: "rule" }),
         look({ at: at("2026-03-09T12:20:00Z") }),
       ],
       EDITION,
     );
     const day = days[0]!;
-    expect(day.mistakes.map((m) => m.what ?? "word")).toEqual(["word", "sign", "verse"]);
-    expect(day.kinds).toEqual({ word: 1, sign: 1, verse: 1 });
+    expect(day.mistakes.map((m) => m.what ?? "word")).toEqual(["word", "sign", "verse", "letter", "rule"]);
+    expect(day.kinds).toEqual({ word: 1, sign: 1, letter: 1, rule: 1, verse: 1 });
     expect(day.mistakePages).toEqual([7, 42]);
-    expect(day.looks).toBe(4);
+    expect(day.looks).toBe(6);
   });
 
   it("drops a look it cannot place rather than guess", () => {

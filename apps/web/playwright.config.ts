@@ -17,6 +17,11 @@ const externalBase = process.env.HIFTH_BASE_URL;
 // that an ordinary run does not have.
 const shots = process.env.HIFTH_SHOTS === "1";
 
+// The front page's pictures (e2e/landing-shots.spec.ts → apps/landing/shots/),
+// made by `make landing-shots` for the same reason, and only from the plain
+// build: the pitch build can show The Study Quran's text, and the front page is public.
+const landingShots = process.env.HIFTH_LANDING_SHOTS === "1";
+
 // The pitch build's own e2e (e2e/pitch.spec.ts). It is not in the ordinary
 // suite for the same reason the pitch layer is not in the public bundle: the
 // commentary sheet only exists when VITE_PITCH=1, and the notes it shows live
@@ -169,6 +174,16 @@ export default defineConfig({
           },
         },
       ]
+    : landingShots
+    ? [
+        {
+          // Each test sets its own screen (a laptop, a phone, an iPad); `isMobile`
+          // stays off, as in `shots`, so a crop lands where it was measured.
+          name: "landing-shots",
+          testMatch: /landing-shots\.spec\.ts/,
+          use: { browserName: "chromium", deviceScaleFactor: 2 },
+        },
+      ]
     : shots
     ? [
         {
@@ -193,7 +208,8 @@ export default defineConfig({
           // up (e2e/chrome-fit.spec.ts), so the runbook can be photographed on
           // the phone most readers are holding.
           name: "shots",
-          testMatch: /shots\.spec\.ts/,
+          // Only the guide's own file: landing-shots.spec.ts belongs to its own run.
+          testMatch: /(?<!landing-)shots\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 390, height: 844 },
@@ -258,7 +274,7 @@ export default defineConfig({
           // bar; it runs on the phones too, from their own bar.
           // `card-foot` tells Chromium there is a home bar and checks a wide
           // screen's cards keep no room for it; the phones are not wide.
-          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows|recitation-keep|pencil|card-foot|spoken-names|drawer-tools|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|pen-guide|record-days|app-pages)\.spec\.ts/,
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows|recitation-keep|pencil|card-foot|spoken-names|drawer-tools|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -284,7 +300,7 @@ export default defineConfig({
           // And `pencil`: the rings at the pencil's tip are placed by script
           // and drawn with layered backgrounds, both worth a second engine.
           name: "desktop-firefox",
-          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|pen-guide|record-days|app-pages)\.spec\.ts/,
+          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },
@@ -312,7 +328,8 @@ export default defineConfig({
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
-          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks)\.spec\.ts/,
+          // The carry runs on the iPhone (WebKit) already; Chromium has it on the desktop.
+          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|carry-marks)\.spec\.ts/,
         },
         {
           // The iPad, the same WebKit the native shell hosts (native/). One

@@ -22,6 +22,8 @@ export default tseslint.config(
       // it is gitignored there and not ours to lint.
       "docs/.obsidian/**",
       "**/dev-dist/**",
+      // wrangler pages dev writes generated code here; ignored by git too.
+      "**/.wrangler/**",
       "**/build/**",
       "**/node_modules/**",
       "**/playwright-report/**",
@@ -120,6 +122,17 @@ export default tseslint.config(
   {
     files: ["apps/web/**/*.{ts,tsx}"],
     languageOptions: { globals: { ...globals.browser } },
+  },
+  // hifth.app's front page: its script runs in the browser as is, with no build step.
+  {
+    files: ["apps/landing/*.js"],
+    languageOptions: { globals: { ...globals.browser } },
+  },
+  // hifth.app's server part runs on Cloudflare, which has the web's Request, Response,
+  // FormData, URL and crypto; its tests run under Node, which has the same.
+  {
+    files: ["apps/landing/functions/**/*.js", "apps/landing/lib/*.mjs"],
+    languageOptions: { globals: { ...globals.serviceworker, ...globals.node } },
   },
   // Config/test files may use dev globals.
   {

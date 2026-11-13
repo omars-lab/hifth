@@ -1,0 +1,11 @@
+# hifth.app on Cloudflare Pages (the new account). Read by `wrangler pages dev` and
+# `wrangler pages deploy`, both run from this folder by the release tool.
+name = "hifth-app"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"
+
+# The "tell me when the Mac app is out" list lives on Supabase, not here
+# (docs/design/hifth-app-mailing-list.md). The form's server part reaches it with four Pages
+# secrets, set once by the owner: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, LIST_KEY and
+# TURNSTILE_SECRET. None of them goes in this file; the release check refuses a Supabase
+# address here.
