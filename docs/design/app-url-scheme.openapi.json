@@ -376,6 +376,92 @@
           }
         }
       }
+    },
+    "/x-callback-url/capture": {
+      "get": {
+        "operationId": "xCapture",
+        "tags": [
+          "x-callback-url"
+        ],
+        "summary": "Keep a walk capture, as a screenshot would",
+        "description": "Only in a build installed from the laptop; a release build answers `not-in-this-build`. Keeps one walk capture, the same as when the reader takes a screenshot: a folder in the app's `Documents/walk-captures/` with the app's picture, the last ten seconds of touches and page moves, the five seconds before (on an iPad that allows recording) and where the app is. It waits for the page: if the app was just launched by this link, until the first page shows; if an `open` came just before, until that page shows, or until an open would have given up. Then it waits a little more, so a page turn has finished drawing. It offers no note banner and leaves one the reader is typing in alone. `make walk-pull` copies the captures off; the gallery says it was taken by a link and shows its name.",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "description": "A name for the capture, kept in its `where.json` and shown in the gallery. Lowercased, anything but letters and digits becomes `-`, at most 60 characters. Default `capture`. The folder itself is still named by the time.",
+            "schema": {
+              "type": "string",
+              "examples": [
+                "note-tool"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/xSuccess"
+          },
+          {
+            "$ref": "#/components/parameters/xError"
+          },
+          {
+            "$ref": "#/components/parameters/xCancel"
+          },
+          {
+            "$ref": "#/components/parameters/xSource"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Nothing comes back on this address. Once the capture is kept, `x-success` is opened with `capture` (its folder's name), `route` and `url`. If nothing could be kept, `x-error` is opened with `capture-not-kept`."
+          }
+        },
+        "callbacks": {
+          "success": {
+            "$ref": "#/components/callbacks/success"
+          },
+          "error": {
+            "$ref": "#/components/callbacks/error"
+          }
+        }
+      }
+    },
+    "/x-callback-url/current-to-file": {
+      "get": {
+        "operationId": "xCurrentToFile",
+        "tags": [
+          "x-callback-url"
+        ],
+        "summary": "Write what the app is showing to a file",
+        "description": "Only in a build installed from the laptop; a release build answers `not-in-this-build`. The same answer as `current`, for a script with no app to call back: writes `current.json` (`at`, `route`, `url`) beside the walk captures in the app's `Documents/walk-captures/`, replacing the last one, and then answers on `x-success` as `current` does. It waits for the page the same way `capture` does. `walk-captures.mjs current` copies the file off an iPad and prints it.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/xSuccess"
+          },
+          {
+            "$ref": "#/components/parameters/xError"
+          },
+          {
+            "$ref": "#/components/parameters/xCancel"
+          },
+          {
+            "$ref": "#/components/parameters/xSource"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Nothing comes back on this address. The answer is one of the callbacks below; `current-not-written` if the file could not be written."
+          }
+        },
+        "callbacks": {
+          "success": {
+            "$ref": "#/components/callbacks/success"
+          },
+          "error": {
+            "$ref": "#/components/callbacks/error"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -512,9 +598,11 @@
           "unknown-action",
           "route-not-shown",
           "bad-check",
-          "not-in-this-build"
+          "not-in-this-build",
+          "capture-not-kept",
+          "current-not-written"
         ],
-        "description": "`missing-route`: open named no page, verse, surah or route. `bad-route`: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. `unknown-action`: the path after x-callback-url is not open, current or check. `route-not-shown`: the place was accepted but the page never showed it. `bad-check`: a check card with no steps, more than 12, an empty step, or a `see` with no step before it. `not-in-this-build`: a check card sent to a release build, which has none."
+        "description": "`missing-route`: open named no page, verse, surah or route. `bad-route`: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. `unknown-action`: the path after x-callback-url is not one of the five actions above. `route-not-shown`: the place was accepted but the page never showed it. `bad-check`: a check card with no steps, more than 12, an empty step, or a `see` with no step before it. `not-in-this-build`: a check card, capture or current-to-file sent to a release build, which has none; the message names which. `capture-not-kept`: the app could not keep the capture (no web view yet, or the folder could not be written). `current-not-written`: current-to-file could not write its file."
       }
     },
     "callbacks": {
@@ -543,6 +631,19 @@
                   "format": "uri",
                   "examples": [
                     "https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/2:255"
+                  ]
+                }
+              },
+              {
+                "name": "capture",
+                "in": "query",
+                "required": false,
+                "description": "Only in the answer to `capture`: the kept capture's folder name, its time (`yyyyMMdd-HHmmss`, with `-2` and on for a second in the same second). It comes before `route` and `url`.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9]{8}-[0-9]{6}(-[0-9]+)?$",
+                  "examples": [
+                    "20261113-101500"
                   ]
                 }
               }
@@ -715,7 +816,7 @@
     {
       "url": "hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
       "result": "error unknown-action",
-      "note": "Only open, current and check exist. Anything else answers errorCode=unknown-action."
+      "note": "Only open, current, check, capture and current-to-file exist. Anything else answers errorCode=unknown-action; its message names only the three a reader's app takes."
     },
     {
       "url": "hifth://x-callback-url/check?id=screens-1&title=Turning%20pages&step=Turn%20to%20the%20next%20page&see=The%20page%20slides%20over&step=Turn%20back&x-success=shortcuts://x-callback-url/run-shortcut?name=Log",
@@ -726,6 +827,21 @@
       "url": "hifth://x-callback-url/check?id=a&see=Something&step=Look&x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure",
       "result": "error bad-check",
       "note": "What you should see came before any step, so the card is refused."
+    },
+    {
+      "url": "hifth://x-callback-url/capture?name=Note%20tool&x-success=shortcuts://x-callback-url/run-shortcut?name=Log",
+      "result": "capture note-tool",
+      "note": "Keeps a walk capture named note-tool and answers with its folder, the route and the url. A release build answers not-in-this-build."
+    },
+    {
+      "url": "hifth://x-callback-url/capture",
+      "result": "capture capture",
+      "note": "No name: the capture is named capture."
+    },
+    {
+      "url": "hifth://x-callback-url/current-to-file",
+      "result": "current-to-file",
+      "note": "Writes current.json beside the walk captures; the laptop copies it off with walk-captures.mjs current."
     },
     {
       "url": "hifth://x-callback-url/current?x-success=hifth://x-callback-url/current",
