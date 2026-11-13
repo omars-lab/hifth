@@ -210,7 +210,7 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
             <span className={styles.dot} /> {t.calendarDotsOpened}
           </span>
           <span>
-            <span className={styles.tick}>✓</span> {t.calendarDotsFull}
+            <span className={styles.tick} /> {t.calendarDotsFull}
           </span>
           <span>
             <span className={styles.ring} /> {t.calendarDotsMistakes}
@@ -242,9 +242,7 @@ function Marks({ verses, mistakes }: { verses: number; mistakes: number }): JSX.
         <span key={i} className={styles.dot} data-mark="dot" />
       ))}
       {m.full && (
-        <span className={styles.tick} data-mark="full">
-          ✓
-        </span>
+        <span className={styles.tick} data-mark="full" />
       )}
       {m.mistakes && <span className={styles.ring} data-mark="mistakes" />}
     </span>

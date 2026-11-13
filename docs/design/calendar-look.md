@@ -3,7 +3,7 @@
 *Asked 2026-11-12, from the owner's comment on the front page: the calendar should be more appealing to look at. Today every day you opened anything is the same flat colour, so a day of two verses and a day of forty-five look alike. There are now four looks, all built into the app; the fourth, dots, was added 2026-11-13 from the owner's picture of the Mac's menu-bar calendar. Pick one in the info panel under "How the calendar shows a day", use it for a while, then tell Claude which one.*
 
 > [!tip] Recommended
-> **Shades.** It answers "which days were light?" before you read a single number, and it keeps the month as short as it is today, so the day you tap still shows below it without scrolling. Rings look the most like a status widget, but they make the month a row taller on a phone.
+> **Shades.** It answers "which days were light?" before you read a single number, and it keeps the month as short as it is today, so the day you tap still shows below it without scrolling. Rings look the most like a status widget, but they make the month a row taller on a phone. Dots, the newest, read like the calendar on a Mac or phone, but no one has lived with them yet, and a day with one mistake looks the same as a day with three until you tap it; shades stays the default until you have tried both.
 
 Until you pick, the app uses **shades**.
 
@@ -21,9 +21,9 @@ Until you pick, the app uses **shades**.
 
 ## The four looks, side by side
 
-A made-up month on a phone, today's look first:
+The same made-up month on a phone, in each look from left to right: today, shades, rings, cards, dots.
 
-![Today, shades, rings, cards](calendar-look/side-by-side.png)
+![The same month in five looks: today, shades, rings, cards, dots](calendar-look/side-by-side.png)
 
 | | Today | Shades | Rings | Cards | Dots |
 | --- | --- | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ A made-up month on a phone, today's look first:
 | How much was opened | Not shown; every day is the same colour | The deeper the teal, the more you opened | A ring round the date fills; full at two pages | A bar along the bottom grows; full at two pages | One to three dots under the date; a green tick at two pages |
 | Mistakes | A red number under the date | A red number in the corner | A red number under the ring | A red number in the corner | A small red ring after the dots; no number |
 | Height on a phone | Same as today | Same as today | One row taller | A little taller | A little taller, plus a one-line key under the month |
-| *For a hafiz* | A light day hides among full ones. | Light days stand out at a glance; the exact amount is four steps, not a count. | The most exact at a glance, and the most like a phone's activity rings. Busier to look at. | Calm and tidy; the bar is small, so how much is the last thing you notice. | The calmest: the month reads like the calendar on your Mac or phone, and a mistake day stands out by its red ring. The count waits for a tap. |
+| *For a hafiz* | A light day hides among full ones. | Light days stand out at a glance; the exact amount is four steps, not a count. | The most exact at a glance, and the most like a phone's activity rings. Busier to look at. | Calm and tidy; the bar is small, so how much is the last thing you notice. | Plain paper with small marks: the month reads like the calendar on your Mac or phone, and a mistake day stands out by its red ring. The count waits for a tap. |
 
 > [!note]- The whole sheet, on an iPad and a computer
 > | | Shades | Rings | Cards | Dots |

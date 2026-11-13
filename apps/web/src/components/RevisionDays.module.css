@@ -312,11 +312,16 @@ button.mistake {
   border: 1.5px solid var(--danger);
   box-sizing: border-box;
 }
+/* Drawn with two borders, not a check-mark character, so it looks the same in every browser's font. */
 .tick {
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1;
-  color: #2f9e5b;
+  display: inline-block;
+  box-sizing: border-box;
+  inline-size: 4px;
+  block-size: 8px;
+  margin-inline: 1px;
+  border: solid #2f9e5b;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg);
 }
 .key {
   display: flex;

@@ -199,6 +199,19 @@ test.describe("Hifth · the record, day by day", () => {
       "2026-03-09",
       Array.from({ length: 20 }, (_, i) => ({ key: `quran/hafs-kfqc/2:${i + 1}`, page: 2 + Math.floor(i / 7), at: at + i, tz })),
     );
+    // Two days before: thirty made-up verses, two pages, one of them marked a mistake.
+    const before = at - 2 * 86_400_000;
+    await seed(
+      page,
+      "2026-03-07",
+      Array.from({ length: 30 }, (_, i) => ({
+        key: `quran/hafs-kfqc/3:${i + 1}`,
+        page: 50 + Math.floor(i / 15),
+        at: before + i,
+        tz,
+        ...(i === 0 ? { slip: true, what: "letter" } : {}),
+      })),
+    );
     await page.reload();
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
 
@@ -229,7 +242,8 @@ test.describe("Hifth · the record, day by day", () => {
     expect(round).toBe("50%");
     await page.keyboard.press("Escape");
 
-    // Dots: marks under the date, one dot for a light day, three for twenty verses, no fill.
+    // Dots: marks under the date, one dot for a light day, three for twenty verses, a tick
+    // and no dots for two pages, a red ring for a day with a mistake, and no fill.
     await page.getByRole("button", { name: /About Hifth/ }).click();
     await choices.and(page.locator('[data-calendar-look-choice="dots"]')).click();
     await page.keyboard.press("Escape");
@@ -238,6 +252,10 @@ test.describe("Hifth · the record, day by day", () => {
     await expect(month).toHaveAttribute("data-look", "dots");
     await expect(month.locator('[data-day="2026-03-10"] [data-mark="dot"]')).toHaveCount(1);
     await expect(month.locator('[data-day="2026-03-09"] [data-mark="dot"]')).toHaveCount(3);
+    await expect(month.locator('[data-day="2026-03-07"] [data-mark="full"]')).toHaveCount(1);
+    await expect(month.locator('[data-day="2026-03-07"] [data-mark="dot"]')).toHaveCount(0);
+    await expect(month.locator('[data-day="2026-03-07"] [data-mark="mistakes"]')).toHaveCount(1);
+    await expect(month.locator('[data-day="2026-03-09"] [data-mark="mistakes"]')).toHaveCount(0);
     await expect(month.locator('[data-day="2026-03-08"] [data-mark]')).toHaveCount(0);
     await expect(month.locator('[data-day="2026-03-09"]')).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   });
