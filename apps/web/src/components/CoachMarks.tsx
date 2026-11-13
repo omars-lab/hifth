@@ -135,6 +135,8 @@ export function CoachMarks({ ready, open, onDismiss }: CoachMarksProps): JSX.Ele
       className={styles.strip}
       role="region"
       aria-label={t.coachRegion}
+      // The panel's name in a link (`?open=`), for the features-page check.
+      data-panel="tips"
       onKeyDown={onKeyDown}
     >
       <span className={styles.glyph} aria-hidden="true">

@@ -153,6 +153,14 @@ feature-links: ## The features page for the development hub, at /dev-hub/ on the
 	@# The switch is PICTURES, not SHOTS: native/Makefile.native's SHOTS names a folder, so it is always set.
 	@node .claude/skills/walk-app/scripts/feature-links.mjs $(if $(PICTURES),--shots --base $(or $(BASE),http://127.0.0.1:7123/))
 
+.PHONY: feature-check
+feature-check: ## Does each link on the features page put the debug app where its card says? SIM=<simulator id> or DEVICE=<iPad id> [ONLY=id,id] [WAIT=seconds]
+	@# One card at a time: the card's link, then a capture link named after it,
+	@# then the capture compared with the card (docs/design/feature-links.md step 4).
+	@# Results, no pictures, in native/shots/feature-check/latest.json (git ignores it).
+	@test -n "$(SIM)$(DEVICE)" || { echo "  Name the app to check: SIM=<simulator id> (xcrun simctl list devices booted) or DEVICE=<iPad id>"; exit 2; }
+	@node .claude/skills/walk-app/scripts/feature-check.mjs $(if $(SIM),--simulator $(SIM),--device $(DEVICE)) $(if $(ONLY),--only $(ONLY)) $(if $(WAIT),--wait $(WAIT))
+
 .PHONY: report
 report: ## Open the last e2e run's report — traces, image diffs, the failing screen
 	@# Playwright's own report, not a hand-rolled one. It answers "did the

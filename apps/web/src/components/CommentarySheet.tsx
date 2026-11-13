@@ -519,6 +519,9 @@ export function CommentarySheet({
         aria-modal={modal}
         aria-label={introOnly ? label : t.commentaryOn(label)}
         data-side={side ?? undefined}
+        // The panel's name in a link (`?open=`), for the features-page check:
+        // `context` leads the note with the surah's introduction.
+        data-panel={entry.intro ? "context" : "commentary"}
         data-tall={tall || undefined}
         data-more={moreBelow ? "below" : undefined}
         style={

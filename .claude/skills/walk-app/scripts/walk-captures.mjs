@@ -20,23 +20,18 @@
 // pitch build shows the book's text, so it is never committed or sent.
 // Exit 0 done · 1 the iPad could not be reached or a copy failed · 2 usage.
 // HIFTH_DEVICECTL swaps Apple's device tool for a stand-in (the tests use one).
-import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+// The capture files and Apple's device tool, shared with feature-check.mjs.
+// Pictures and video never change once written; the text files can (where.json
+// is rewritten when the page answers, the note is added later), so those are
+// copied again on every pull. current.json sits beside the captures: where the
+// app is, rewritten by each current-to-file link (CaptureStore.keepCurrent).
+import { CAPTURE, CURRENT, FILES, ON_IPAD, copyFromIpad, devicectl as tool, domain, listIpad as listFiles } from "./ipad-files.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
-const BUNDLE_ID = "com.bytesofpurpose.hifth";
-const ON_IPAD = "Documents/walk-captures";
-const CAPTURE = /^\d{8}-\d{6}(-\d+)?$/;
-// The files a capture can hold. Pictures and video never change once written;
-// the text files can (where.json is rewritten when the page answers, the note
-// is added later), so those are copied again on every pull.
-const FILES = { "picture.png": "once", "before.mp4": "once", "trail.jsonl": "again", "where.json": "again", "note.txt": "again" };
-// Beside the captures, not in one: where the app is, rewritten by each
-// current-to-file link (CaptureStore.keepCurrent in native/Hifth/Capture/).
-const CURRENT = "current.json";
 
 const [command, ...args] = process.argv.slice(2);
 const opt = (k) => (args.includes(k) ? args[args.indexOf(k) + 1] : undefined);
@@ -46,42 +41,7 @@ const log = (ev, fields = {}) =>
   console.log(`${new Date().toISOString()} pid=${process.pid} ev=${ev} ${Object.entries(fields).map(([k, v]) => `${k}=${v}`).join(" ")}`.trimEnd());
 const quote = (s) => JSON.stringify(String(s ?? "").replace(/\s+/g, " ").trim());
 
-function tool(rest) {
-  const fake = process.env.HIFTH_DEVICECTL;
-  return fake
-    ? spawnSync(fake, rest, { encoding: "utf8", timeout: 120_000 })
-    : spawnSync("xcrun", ["devicectl", ...rest], { encoding: "utf8", timeout: 120_000 });
-}
-const domain = (device) => ["--device", device, "--domain-type", "appDataContainer", "--domain-identifier", BUNDLE_ID];
-
-/** The capture files on the iPad, as { capture: [file, …] }, or null when it cannot be read. */
-function listIpad(device) {
-  const work = mkdtempSync(join(tmpdir(), "hifth-walk-list-"));
-  const listFile = join(work, "list.json");
-  try {
-    const r = tool(["device", "info", "files", ...domain(device), "--subdirectory", ON_IPAD, "--json-output", listFile]);
-    if (r.status !== 0 || !existsSync(listFile)) {
-      log("error", { step: "list", msg: quote((r.stderr || r.error?.message || "").split("\n")[0]) });
-      return null;
-    }
-    const found = {};
-    for (const f of JSON.parse(readFileSync(listFile, "utf8")).result?.files ?? []) {
-      // Apple's tool may give the path from the folder asked for, or from the
-      // app's own folder; both come down to <capture>/<file>.
-      const rel = String(f.relativePath ?? f.name ?? "").replace(/^\/?(Documents\/walk-captures\/)?/, "");
-      if (rel === CURRENT) {
-        Object.defineProperty(found, "hasCurrent", { value: true });
-        continue;
-      }
-      const [capture, file, ...deeper] = rel.split("/");
-      if (deeper.length || !CAPTURE.test(capture) || !(file in FILES)) continue;
-      (found[capture] ??= []).push(file);
-    }
-    return found;
-  } finally {
-    rmSync(work, { recursive: true, force: true });
-  }
-}
+const listIpad = (device) => listFiles(device, { log });
 
 function pull() {
   const device = opt("--device");
@@ -103,9 +63,7 @@ function pull() {
     for (const file of before[capture]) {
       const dest = join(dir, capture, file);
       if (FILES[file] === "once" && existsSync(dest)) continue;
-      const r = tool(["device", "copy", "from", ...domain(device), "--source", `${ON_IPAD}/${capture}/${file}`, "--destination", dest]);
-      if (r.status !== 0 || !existsSync(dest)) {
-        log("error", { step: "copy", capture, file, msg: quote((r.stderr || "").split("\n")[0]) });
+      if (!copyFromIpad(device, `${ON_IPAD}/${capture}/${file}`, dest, { log, fields: { capture, file } })) {
         failed++;
         continue;
       }
@@ -144,13 +102,7 @@ function pull() {
 /** Copy current.json off the iPad into the folder; true when it came. */
 function copyCurrent(device) {
   mkdirSync(dir, { recursive: true });
-  const dest = join(dir, CURRENT);
-  const r = tool(["device", "copy", "from", ...domain(device), "--source", `${ON_IPAD}/${CURRENT}`, "--destination", dest]);
-  if (r.status !== 0 || !existsSync(dest)) {
-    log("error", { step: "copy", file: CURRENT, msg: quote((r.stderr || "").split("\n")[0]) });
-    return false;
-  }
-  return true;
+  return copyFromIpad(device, `${ON_IPAD}/${CURRENT}`, join(dir, CURRENT), { log, fields: { file: CURRENT } });
 }
 
 function current() {

@@ -198,6 +198,9 @@ export function RootLens({
         role={inline ? "region" : "dialog"}
         aria-modal={inline ? undefined : false}
         data-band={band && !inline ? "" : undefined}
+        // The panel's name in a link (`?open=`), for the features-page check;
+        // the roots drawn inside the tools drawer are not that panel.
+        data-panel={inline ? undefined : "roots"}
         aria-label={t.rootsAria(families.length)}
         dir={dir}
         data-side={inline ? undefined : (side ?? undefined)}

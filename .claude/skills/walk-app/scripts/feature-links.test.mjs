@@ -82,3 +82,37 @@ test("a site that hands out the private commentary file counts as the pitch buil
   assert.equal(looksLikePitchBuild({ status: 200, contentType: "text/html; charset=utf-8" }), false);
   assert.equal(looksLikePitchBuild({ status: 404, contentType: "text/plain" }), false);
 });
+
+test("each card says whether make feature-check last found it working in the app, and when", () => {
+  const all = cards(contract);
+  const checks = {
+    at: "2026-11-13T22:00:00.000Z",
+    on: "simulator",
+    results: [
+      { id: "tool-note", result: "pass" },
+      { id: "panel-jump", result: "fail", why: "the jump panel is not open; no panel is" },
+      { id: "place-words", result: "place-only", why: "the verse is right; which words the link picked leaves no mark a capture can read yet" },
+      { id: "panel-commentary", result: "not-in-build", why: "pitch build only" },
+    ],
+  };
+  const html = renderPage(all, { pictures: new Set(), checks });
+  const card = (id) => html.slice(html.indexOf(`id="${id}"`), html.indexOf("</article>", html.indexOf(`id="${id}"`)));
+  assert.match(card("tool-note"), /class="check pass"[^>]*>✓ Works in the app \(simulator, 2026-11-13\)/);
+  assert.match(card("panel-jump"), /class="check fail"[^>]*>✗ Not working in the app \(simulator, 2026-11-13\): the jump panel is not open; no panel is/);
+  assert.match(card("place-words"), /class="check partial"[^>]*>✓ The place works in the app \(simulator, 2026-11-13\); which words the link picked leaves no mark a capture can read yet/);
+  assert.match(card("panel-commentary"), /class="check none"[^>]*>Not checked: the build checked was the public one/);
+  assert.match(card("place-page"), /class="check none"[^>]*>Not checked in the app yet/);
+  assert.match(html, /Checked in the app: 2 of 4 work, 1 does not \(simulator, 2026-11-13\)/);
+});
+
+test("with no check run yet, every card says so and the page says how to run one", () => {
+  const html = renderPage(cards(contract), { pictures: new Set() });
+  assert.match(html, /Not checked in the app yet/);
+  assert.match(html, /make feature-check SIM=/);
+});
+
+test("a check run on an app built from another commit says so above the cards", () => {
+  const checks = { at: "2026-11-13T22:00:00.000Z", on: "simulator", stale: "the app's web pages were built from commit 6ef91b5b, and this checkout is at 2365bc6c: run make app-web (then the app build) first", results: [{ id: "panel-jump", result: "fail", why: "the jump panel is not open; no panel is" }] };
+  assert.match(renderPage(cards(contract), { pictures: new Set(), checks }), /class="stale"[^>]*>The crosses may be wrong: the app's web pages were built from commit 6ef91b5b/);
+  assert.doesNotMatch(renderPage(cards(contract), { pictures: new Set(), checks: { ...checks, stale: undefined } }), /class="stale"/);
+});

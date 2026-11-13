@@ -46,6 +46,13 @@ nonisolated enum CapturePage {
     for (const el of document.querySelectorAll("[aria-expanded=true]")) {
       open.push("expanded:" + markers(el).join(","));
     }
+    // A panel a link can open says its own name (the name in the link), so the
+    // features-page check can tell six alike dialogs apart.
+    for (const el of document.querySelectorAll("[data-panel]")) {
+      if (plain(el.dataset.panel)) open.push("panel=" + el.dataset.panel);
+    }
+    // One page or two: the view cards are told apart by this count.
+    open.push("pages=" + pages.length);
 
     let saved = storage;
     if (saved == null) {

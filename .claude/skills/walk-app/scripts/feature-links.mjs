@@ -138,8 +138,28 @@ const GROUPS = [
   ["panels", "Panels open on arrival"],
 ];
 
-/** The page itself. `pictures` is the set of card ids with a picture on disk. */
-export function renderPage(all, { pictures, takenAt = null }) {
+/**
+ * What the last `make feature-check` found for one card, as a line on the card.
+ * `checks` is its results file (native/shots/feature-check/latest.json), or null.
+ */
+function checkLine(c, checks) {
+  const r = checks?.results?.find((x) => x.id === c.id);
+  if (!r) return `<p class="check none">Not checked in the app yet.</p>`;
+  const when = `(${esc(checks.on ?? "app")}, ${esc(String(checks.at ?? "").slice(0, 10))})`;
+  if (r.result === "pass") return `<p class="check pass">✓ Works in the app ${when}</p>`;
+  if (r.result === "place-only") {
+    const rest = String(r.why ?? "").replace(/^the verse is right;\s*/, "");
+    return `<p class="check partial">✓ The place works in the app ${when}; ${esc(rest)}</p>`;
+  }
+  if (r.result === "not-in-build") return `<p class="check none">Not checked: the build checked was the public one ${when}.</p>`;
+  return `<p class="check fail">✗ Not working in the app ${when}: ${esc(r.why ?? r.result)}</p>`;
+}
+
+/**
+ * The page itself. `pictures` is the set of card ids with a picture on disk;
+ * `checks` is the last `make feature-check` results file, or null.
+ */
+export function renderPage(all, { pictures, takenAt = null, checks = null }) {
   const cardHtml = (c) => {
     const command = `make app-device-open DEVICE="$HIFTH_IPAD" LINK='${c.link}'`;
     const picture = c.pitchOnly
@@ -151,6 +171,7 @@ export function renderPage(all, { pictures, takenAt = null }) {
   ${picture}
   <h3>${esc(c.name)}</h3>
   <p>${esc(c.use)}</p>
+  ${checkLine(c, checks)}
   <div class="links">
     <a href="../#${esc(c.route)}">Open here</a>
     <a href="${esc(c.link)}" title="Works when this page is open on the iPad itself">Open in the iPad app</a>
@@ -163,6 +184,12 @@ export function renderPage(all, { pictures, takenAt = null }) {
     return `<section><h2>${esc(heading)} <span class="n">${inGroup.length}</span></h2><div class="grid">${inGroup.map(cardHtml).join("\n")}</div></section>`;
   }).join("\n");
   const shotCount = all.filter((c) => !c.pitchOnly && pictures.has(c.id)).length;
+  const rs = checks?.results ?? [];
+  const works = rs.filter((r) => r.result === "pass" || r.result === "place-only").length;
+  const broken = rs.filter((r) => !["pass", "place-only", "not-in-build"].includes(r.result)).length;
+  const checkSummary = checks
+    ? `Checked in the app: ${works} of ${rs.length} work, ${broken} ${broken === 1 ? "does" : "do"} not (${esc(checks.on ?? "app")}, ${esc(String(checks.at ?? "").slice(0, 10))}). Run it again with <code>make feature-check SIM=&lt;simulator id&gt;</code> or <code>DEVICE="$HIFTH_IPAD"</code>.`
+    : `Not yet checked in the app. <code>make feature-check SIM=&lt;simulator id&gt;</code> sends every card to the debug app and marks each one here.`;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -171,8 +198,8 @@ export function renderPage(all, { pictures, takenAt = null }) {
 <title>Hifth features by link</title>
 <link rel="icon" href="data:,">
 <style>
-:root { --bg:#f6f3ec; --card:#fffdf8; --ink:#1f1b16; --muted:#6b6257; --line:#e2dccf; --accent:#2f6b4f; --code:#efe9dc; }
-@media (prefers-color-scheme: dark) { :root { --bg:#171513; --card:#211e1a; --ink:#ece6da; --muted:#a59c8f; --line:#38332c; --accent:#7fc3a0; --code:#2b2722; } }
+:root { --bg:#f6f3ec; --card:#fffdf8; --ink:#1f1b16; --muted:#6b6257; --line:#e2dccf; --accent:#2f6b4f; --code:#efe9dc; --bad:#a3322a; }
+@media (prefers-color-scheme: dark) { :root { --bg:#171513; --card:#211e1a; --ink:#ece6da; --muted:#a59c8f; --line:#38332c; --accent:#7fc3a0; --code:#2b2722; --bad:#f08a80; } }
 * { box-sizing: border-box; }
 body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, -apple-system, sans-serif; }
 main { max-width:1200px; margin:0 auto; padding:24px 16px 64px; }
@@ -190,6 +217,12 @@ h2 .n { color:var(--muted); font-weight:400; }
 .shot img { width:100%; height:100%; object-fit:cover; display:block; }
 .shot.none { display:flex; align-items:center; justify-content:center; text-align:center; padding:12px; color:var(--muted); font-size:.85rem; }
 .pitch .shot.none { border:1px dashed var(--line); background:transparent; }
+.check { font-size:.85rem; margin:0; }
+.check.pass { color:var(--accent); }
+.check.partial { color:var(--accent); }
+.check.fail { color:var(--bad); font-weight:600; }
+.check.none { color:var(--muted); }
+.stale { color:var(--bad); font-weight:600; margin:8px 0 0; }
 .links { display:flex; gap:12px; flex-wrap:wrap; font-size:.9rem; }
 .links a { color:var(--accent); }
 .cmd { display:flex; gap:6px; align-items:flex-start; margin-top:auto; }
@@ -211,6 +244,8 @@ button.done { color:var(--accent); }
     <li>Not yet tried on the real iPad: whether the app turns the page or restarts is the first open question in the design note.</li>
   </ol>
   <p class="lead" style="margin:8px 0 0">Pictures: ${shotCount} of ${all.filter((c) => !c.pitchOnly).length}, from the public build${takenAt ? `, taken ${esc(takenAt)}` : ""}. Refresh them with <code>make feature-links PICTURES=1</code>.</p>
+  <p class="lead" style="margin:8px 0 0">${checkSummary}</p>
+  ${checks?.stale ? `<p class="stale">The crosses may be wrong: ${esc(checks.stale)}.</p>` : ""}
 </div>
 ${sections}
 </main>
@@ -290,7 +325,9 @@ async function main(argv) {
   }
   const shotsDir = join(outDir, "shots");
   const pictures = new Set(existsSync(shotsDir) ? readdirSync(shotsDir).filter((f) => f.endsWith(".png")).map((f) => f.slice(0, -4)) : []);
-  writeFileSync(join(outDir, "index.html"), renderPage(all, { pictures, takenAt }));
+  const checksFile = join(repo, "native/shots/feature-check/latest.json");
+  const checks = existsSync(checksFile) ? JSON.parse(readFileSync(checksFile, "utf8")) : null;
+  writeFileSync(join(outDir, "index.html"), renderPage(all, { pictures, takenAt, checks }));
   log("page_written", { path: join(outDir, "index.html"), cards: all.length, pictures: pictures.size });
 }
 

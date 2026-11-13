@@ -18,6 +18,8 @@ struct CapturePageTests {
     <div role="dialog" aria-label="made-up dialog label" data-jump-picker="" data-side="a long value with spaces">made-up note words</div>
     <button aria-expanded="true" data-phone-bar="b">made-up button words</button>
     <button aria-expanded="false" data-closed="">closed</button>
+    <div data-panel="jump" aria-label="made-up panel label">made-up panel words</div>
+    <div data-panel="a long name with spaces"></div>
     """
 
     private func ask(route: String, storage: [String: String]) async throws -> (CaptureWhere.PageAnswer, String) {
@@ -54,6 +56,14 @@ struct CapturePageTests {
         #expect(answer.open.contains("dialog:jump-picker,side"), "the long value with spaces is left out")
         #expect(answer.open.contains("expanded:phone-bar=b"))
         #expect(!answer.open.contains { $0.contains("closed") })
+    }
+
+    @Test("a panel says its own name, and the count of pages on screen is kept")
+    func panelAndPages() async throws {
+        let (answer, _) = try await ask(route: "#/hafs-kfqc/p7", storage: [:])
+        #expect(answer.open.contains("panel=jump"))
+        #expect(answer.open.filter { $0.hasPrefix("panel=") } == ["panel=jump"], "a name that is not a plain word is left out")
+        #expect(answer.open.contains("pages=1"), "one numbered page on screen; the hidden one and the pens do not count")
     }
 
     @Test("settings are the app's own short choices; anything longer, or not the app's, is left out")

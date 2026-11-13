@@ -117,6 +117,8 @@ export function HopPopover({
         role="dialog"
         aria-modal={false}
         data-band={band ? "" : undefined}
+        // The panel's name in a link (`?open=`), for the features-page check.
+        data-panel="lookalikes"
         aria-label={t.hopSheetAria(title, chip.count)}
         // The sheet is chrome, so it reads in the chrome's direction — unlike
         // the rail that opened it, which stays on the mus'haf's side. Its

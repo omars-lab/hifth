@@ -257,6 +257,16 @@ to ship has any of it, and archiving runs that check first. The walk page and th
 (item 22) say how to try it on the real iPad, which is the owner's part still to do. Plan:
 `.claude/plans/refactored-bouncing-cerf.md`.
 
+### 2026-11-13 — feature-links-hub step 3: a link from the laptop keeps a capture and says where the app is
+
+**Done:** In a build put on from the laptop, `hifth://x-callback-url/capture?name=…` keeps a walk
+capture named by the link, and `current-to-file` writes which page the app is on beside the
+captures; `make walk-current` copies that file off the iPad and prints it. Both wait for the page
+the last open asked for. A release build answers both "not in this build", and the release check
+looks for seven signs of the capture code. Proven by unit tests, every example in the link
+contract (run by both the app and the web link builder) and a simulator test that sends both real
+links. Not yet run on the real iPad. PR #609.
+
 ### 2026-11-12 to 11-13 — supabase-move: the outside-library store moves to a new account
 
 **Done** (loading the data into the new store is still open; see `docs/design/supabase-move.md` ①):
