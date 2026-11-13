@@ -143,6 +143,9 @@ else
 	@test ! -e $(WEB_BUNDLE)/assets/private || { echo "held data reached the public shell bundle"; exit 1; }
 endif
 	@echo "$(FLAVOUR)" > $(WEB_BUNDLE)/.hifth-web-flavour
+	@# The commit, for a walk capture to say which build it came from; its own
+	@# file, because app-golden-public reads the flavour file whole.
+	@echo "$$(git rev-parse --short=8 HEAD 2>/dev/null || echo unknown)$$(git diff --quiet HEAD 2>/dev/null || echo +changes)" > $(WEB_BUNDLE)/.hifth-web-commit
 	@echo "  ✓ $(FLAVOUR) web build in $(WEB_BUNDLE) ($$(find $(WEB_BUNDLE) -type f | wc -l | tr -d ' ') files)"
 
 app-build-mac: app-generate ## Build the Mac app (Debug, ad-hoc signed)
