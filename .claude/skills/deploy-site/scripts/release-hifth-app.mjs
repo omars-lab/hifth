@@ -23,6 +23,7 @@ import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { auditShipped, readFolder } from "./shipped.mjs";
 import { verifyLive } from "./live.mjs";
+import { addDevDesigns, commitDates } from "./dev-designs.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "..", "..", "..", "..");
@@ -204,6 +205,15 @@ function prepare({ build }) {
   // What would stop a release (the test key, the placeholder address) is what a
   // local look needs, so it is listed above and served anyway.
   if (!ok) console.log("  (served anyway: those stop a release, not a look on this laptop)");
+  // Added after the check, so the check saw the folder as it would go up. publish rebuilds
+  // the folder from scratch, and the check refuses both if they ever ride along.
+  const listed = addDevDesigns({
+    out,
+    builtDocs: join(APP_DIST, "docs"),
+    notes: join(REPO, "docs", "design"),
+    dates: commitDates(REPO, "docs/design"),
+  });
+  console.log(`  Designs button: ${listed} design pages and notes, on this laptop only (/docs/design/)`);
   if (!wrangler(["d1", "execute", "hifth-notify", "--local", "--file", "schema.sql"])) {
     console.log("\n✗ could not make the local sign-up table.");
     return false;
