@@ -120,9 +120,9 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`packages/core/src/words.ts:120`](../packages/core/src/words.ts#L120) — `class WordIndex` |
 | happens in | [`packages/core/src/gestures.ts:216`](../packages/core/src/gestures.ts#L216) — `heldIntent` |
-| happens in | [`apps/web/src/components/PageStage.tsx:4049`](../apps/web/src/components/PageStage.tsx#L4049) — `applyWords` |
+| happens in | [`apps/web/src/components/PageStage.tsx:4048`](../apps/web/src/components/PageStage.tsx#L4048) — `applyWords` |
 | happens in | [`packages/core/src/adjacency.ts:485`](../packages/core/src/adjacency.ts#L485) — `refineByWords` |
-| happens in | [`apps/web/src/App.tsx:3119`](../apps/web/src/App.tsx#L3119) — `const handleSelectWords` |
+| happens in | [`apps/web/src/App.tsx:3138`](../apps/web/src/App.tsx#L3138) — `const handleSelectWords` |
 | proven by | [`apps/web/e2e/word.spec.ts:120`](../apps/web/e2e/word.spec.ts#L120) — “a hold inside the selected ayah drops to words; a drag extends the run” |
 | proven by | [`apps/web/e2e/word.spec.ts:232`](../apps/web/e2e/word.spec.ts#L232) — “Escape climbs back to the whole ayah, not out of the selection” |
 | proven by | [`apps/web/e2e/word.spec.ts:258`](../apps/web/e2e/word.spec.ts#L258) — “Enter again descends to words; ← carries the run and Shift+← grows it” |
@@ -141,7 +141,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`packages/core/src/adjacency.ts:521`](../packages/core/src/adjacency.ts#L521) — `class Adjacency` |
 | happens in | [`packages/core/src/adjacency.ts:196`](../packages/core/src/adjacency.ts#L196) — `bucketEdges` |
-| happens in | [`apps/web/src/components/PageStage.tsx:3421`](../apps/web/src/components/PageStage.tsx#L3421) — `async navigateTo` |
+| happens in | [`apps/web/src/components/PageStage.tsx:3420`](../apps/web/src/components/PageStage.tsx#L3420) — `async navigateTo` |
 | proven by | [`apps/web/e2e/hop.spec.ts:97`](../apps/web/e2e/hop.spec.ts#L97) — “tap 2:48 → rail → popover → cross-page hop to 2:123 → bead back” |
 | proven by | [`apps/web/e2e/hop.spec.ts:153`](../apps/web/e2e/hop.spec.ts#L153) — “un-vendored hop targets are surfaced but disabled (no ghost pages)” |
 
@@ -337,7 +337,7 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 
 | | |
 |---|---|
-| happens in | [`apps/web/src/components/VerseDrawer.tsx:27`](../apps/web/src/components/VerseDrawer.tsx#L27) — `VerseDrawer` |
+| happens in | [`apps/web/src/components/VerseDrawer.tsx:34`](../apps/web/src/components/VerseDrawer.tsx#L34) — `VerseDrawer` |
 | proven by | [`apps/web/e2e/desktop.spec.ts:2253`](../apps/web/e2e/desktop.spec.ts#L2253) — “a verse tap opens the verse's drawer below the page; Escape closes it” |
 | proven by | [`apps/web/e2e/drawer-tools.spec.ts:60`](../apps/web/e2e/drawer-tools.spec.ts#L60) — “with the setting on, Same roots opens inside the drawer, not as its own card, and the verse stays in sight” |
 | proven by | [`apps/web/e2e/word-stack.spec.ts:41`](../apps/web/e2e/word-stack.spec.ts#L41) — “with the setting on, a second tap on the lit verse opens the word above the verse's drawer, and both stay” |
@@ -366,9 +366,9 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`apps/web/src/components/PenHomes.tsx:285`](../apps/web/src/components/PenHomes.tsx#L285) — `PenHomeAt` |
 | happens in | [`apps/web/src/pencil.ts:25`](../apps/web/src/pencil.ts#L25) — `pencilAction` |
-| proven by | [`apps/web/e2e/pencil.spec.ts:150`](../apps/web/e2e/pencil.spec.ts#L150) — “a squeeze opens the pens at the tip, whole on the screen, and a pick puts that pen in hand” |
-| proven by | [`apps/web/e2e/pencil.spec.ts:275`](../apps/web/e2e/pencil.spec.ts#L275) — “the tools stand in a ring round the tip, in the way the language reads, and a touch in the hole lands on the page” |
-| proven by | [`apps/web/e2e/pencil.spec.ts:194`](../apps/web/e2e/pencil.spec.ts#L194) — “a double-tap swaps between the last tool used and plain selecting” |
+| proven by | [`apps/web/e2e/pencil.spec.ts:151`](../apps/web/e2e/pencil.spec.ts#L151) — “a squeeze opens the pens at the tip, whole on the screen, and a pick puts that pen in hand” |
+| proven by | [`apps/web/e2e/pencil.spec.ts:276`](../apps/web/e2e/pencil.spec.ts#L276) — “the tools stand in a ring round the tip, in the way the language reads, and a touch in the hole lands on the page” |
+| proven by | [`apps/web/e2e/pencil.spec.ts:195`](../apps/web/e2e/pencil.spec.ts#L195) — “a double-tap swaps between the last tool used and plain selecting” |
 
 > **Not proven:** A browser has no pencil and no hand, so the tests stand in for the squeeze and cannot show whether the hand holding the pencil covers the pens. That check is by hand on the iPad, in docs/ipad-walk.md. A reader with no pencil has no way yet to see what the pens are: docs/design/pencil-gestures.md ③.
 
@@ -600,10 +600,10 @@ Whoever is changing the app next, including this project's own future self. Arri
 
 | | |
 |---|---|
-| happens in | [`Makefile:418`](../Makefile#L418) — `commit-labels:` |
-| happens in | [`.intent/config.json:4`](../.intent/config.json#L4) — `kinds` |
+| happens in | [`Makefile:425`](../Makefile#L425) — `commit-labels:` |
+| happens in | [`.intent/config.json:5`](../.intent/config.json#L5) — `kinds` |
 | proven by | [`scripts/gate-gates.test.mjs:143`](../scripts/gate-gates.test.mjs#L143) — “gate:gates passes a third hook that hands what git gave it to its own target” |
-| proven by | [`scripts/gate-issues.test.mjs:170`](../scripts/gate-issues.test.mjs#L170) — “gate:issues passes a row naming a use case and a feature that exist” |
+| proven by | [`scripts/gate-issues.test.mjs:174`](../scripts/gate-issues.test.mjs#L174) — “gate:issues passes a row naming a use case and a feature that exist” |
 
 ### See every promise this app makes, whose promise it is, and which test would fail if I broke it.
 
@@ -723,7 +723,7 @@ The automated judge. An actor rather than scenery: several promises here are kep
 | | |
 |---|---|
 | happens in | [`scripts/gate-budget.mjs:54`](../scripts/gate-budget.mjs#L54) — `BUDGET_GZ` |
-| happens in | [`Makefile:379`](../Makefile#L379) — `pre-push:` |
+| happens in | [`Makefile:386`](../Makefile#L386) — `pre-push:` |
 | proven by | `pnpm gate:budget` |
 
 ## What is promised more than it is proven

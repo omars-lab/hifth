@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   divergentRuns,
   isMarkShard,
@@ -323,8 +323,18 @@ function editionOf(key: string): string {
  * It is for the eye only — the row's own name is what a screen reader hears —
  * and it draws nothing when the page is not to hand or does not carry the verse.
  */
-export function SharedWords({ run, edition }: { run: SharedRun; edition: string }): JSX.Element | null {
-  const [loaded, setLoaded] = useState<{ markup: string; lines: readonly Rect[] } | null>(null);
+export function SharedWords({
+  run,
+  edition,
+  pending = null,
+}: {
+  run: SharedRun;
+  edition: string;
+  /** What stands in the picture's place while its page loads, so the row does not grow when it lands. */
+  pending?: JSX.Element | null;
+}): JSX.Element | null {
+  // `undefined` while the page is on its way; `null` once it is known there is nothing to cut.
+  const [loaded, setLoaded] = useState<{ markup: string; lines: readonly Rect[] } | null | undefined>(undefined);
 
   useEffect(() => {
     let live = true;
@@ -345,6 +355,7 @@ export function SharedWords({ run, edition }: { run: SharedRun; edition: string 
     };
   }, [edition, run.page, run.key, run.from, run.to]);
 
+  if (loaded === undefined) return pending;
   if (!loaded || loaded.lines.length === 0) return null;
   return (
     <span className={styles.strip}>
@@ -357,7 +368,9 @@ export function SharedWords({ run, edition }: { run: SharedRun; edition: string 
 
 function SharedPiece({ markup, line }: { markup: string; line: Rect }): JSX.Element {
   const host = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
+  // Drawn before the frame is shown: an empty host for one frame let the row
+  // shrink and grow back, moving the drawer's tools (2026-11-13).
+  useLayoutEffect(() => {
     const el = host.current;
     if (!el) return;
     const svg = drawCrop(el, markup, line, [line], [[[line], styles.wShare as string]], styles.piece as string);

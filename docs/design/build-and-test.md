@@ -78,18 +78,22 @@ Yes, since 2026-11-11. Each has a line in the skill a session would be reading a
 - The speed probe is switched on for the laptop's dev server with a setting no command named;
   the only named command builds it for a phone. Now in the optimizing-performance skill.
 
-### ⑥ Does the phone-size test of opening Same roots in the drawer fail on its own some of the time? · **open**
+### ⑥ Does the phone-size test of opening Same roots in the drawer fail on its own some of the time? · **answered**
 
-Yes, twice so far. On 2026-11-12 it failed in two push runs in a row and passed each time it
-was run again. The failing case is the iPad on its side, run in the phone-size browser. The test
-opens the verse's drawer, presses Same roots, and waits for the roots list to show inside the
-drawer. That wait ran out after 5 seconds.
+It did, and the fault was in the app. On 2026-11-12 it failed in two push runs in a row and
+passed each time it was run again. The failing case was the iPad on its side, in the
+phone-size browser.
 
-Whether the app or the test is slow is not known yet. A test that fails now and then teaches
-everyone to ignore a red run, so this is being fixed now, before the walk capture work.
-
-**What would close it:** the cause found and fixed, and the test run many times in a row at
-phone size with no failure.
+The drawer's row of tools moved up after it had come to rest, so the test's press landed on
+the wrong thing. A reader's would have too. It moved for three reasons: the look-alikes list
+arrived after the drawer had risen; the tool's list was cut to fit under the verse before
+the page lifted it, then grew; and the small picture of the words a look-alike shares arrived
+late and grew its row. Since 2026-11-13 the drawer waits for the look-alikes (at most two
+seconds), the list is cut from the verse's height and the highest the page can lift it, once,
+as the tool opens, and a blank space holds the picture's place until it comes. The tests now
+record where Same roots stands on every frame, and a long verse (2:102) must stay clear of the
+list. Run 40 times each, the ten drawer tests passed 400 times out of 400.
+The whole story is in [the issue write-up](../issues/drawer-tools-jumped-after-rising.md).
 
 ### ⑦ Can a session started in the main folder check the Cloudflare tokens? · **open**
 

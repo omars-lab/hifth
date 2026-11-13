@@ -195,6 +195,20 @@ start to finish: the card, the answers, the build's own log, and each cross turn
 Two Firefox tests that read too early were fixed on the way. PR #604. Results:
 `docs/design/pitch-walk.md`.
 
+### 2026-11-13 — roots-in-drawer-test-fails-on-its-own: the drawer's tools keep still
+
+**Done:** The phone-size test of opening Same roots in the drawer failed now and then because
+the drawer's row of tools jumped up after it had come to rest. A press, the test's or a reader's,
+landed on the wrong thing. A rising drawer now waits for its surah's look-alikes, at most two
+seconds. The tool's list is cut from the verse's height and the highest the page can lift it,
+not from where the verse stands as the drawer rises, and is measured once, so it never grows.
+Running the tests 40 times found a third, smaller jump: the picture of a look-alike's shared
+words arrived late and grew its row by 28 pixels. A blank space one picture line tall now holds
+its place until it comes. New tests record where Same roots stands on every frame, with the
+look-alikes or the picture held back, and check that a long verse (2:102) stays clear of the
+list. The ten drawer tests then passed 400 times out of 400. Write-up:
+`docs/issues/drawer-tools-jumped-after-rising.md`.
+
 ## #253 — Read Arabic verse numbers in every walk script; walk the short laptop's first screen (PLAN 120)
 
 **Done:** 2026-10-25. The recitation-with-a-note walk read no verse in Arabic; it now reads Arabic digits, and a test checks every walk script for the same slip. The short laptop window's first screen walked in both browsers at both sizes: two pages, feet in sight, Full screen past a small phone's page.
