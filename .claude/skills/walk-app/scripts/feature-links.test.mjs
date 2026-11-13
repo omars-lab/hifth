@@ -110,3 +110,9 @@ test("with no check run yet, every card says so and the page says how to run one
   assert.match(html, /Not checked in the app yet/);
   assert.match(html, /make feature-check SIM=/);
 });
+
+test("a check run on an app built from another commit says so above the cards", () => {
+  const checks = { at: "2026-11-13T22:00:00.000Z", on: "simulator", stale: "the app's web pages were built from commit 6ef91b5b, and this checkout is at 2365bc6c: run make app-web (then the app build) first", results: [{ id: "panel-jump", result: "fail", why: "the jump panel is not open; no panel is" }] };
+  assert.match(renderPage(cards(contract), { pictures: new Set(), checks }), /class="stale"[^>]*>The crosses may be wrong: the app's web pages were built from commit 6ef91b5b/);
+  assert.doesNotMatch(renderPage(cards(contract), { pictures: new Set(), checks: { ...checks, stale: undefined } }), /class="stale"/);
+});

@@ -13,7 +13,7 @@ import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
-import { judge, PANEL_SIGNS } from "./feature-check.mjs";
+import { buildNote, judge, PANEL_SIGNS } from "./feature-check.mjs";
 
 const here = new URL(".", import.meta.url).pathname;
 const script = join(here, "feature-check.mjs");
@@ -205,4 +205,17 @@ test("a run with only place-checked cards still exits 0", async () => {
   assert.equal(got["place-view-two"].result, "pass");
   assert.equal(got["panel-jump"].result, "pass");
   assert.match(r.out, /place_only=1/);
+});
+
+test("an app whose web pages were built from another commit is named, so a failure is not blamed on the link", () => {
+  // The iPad build copies in whatever web pages were built last; on 2026-11-13 nine
+  // panels failed as "no panel is" because the web pages predated the panel names.
+  assert.equal(buildNote({ commit: "2365bc6c", flavour: "public" }, "2365bc6c"), null);
+  assert.equal(buildNote({ commit: "2365bc6c+changes", flavour: "public" }, "2365bc6c"), null);
+  assert.match(
+    buildNote({ commit: "6ef91b5b+changes", flavour: "public" }, "2365bc6c"),
+    /built from commit 6ef91b5b.*this checkout is at 2365bc6c.*make app-web/,
+  );
+  assert.equal(buildNote(null, "2365bc6c"), null);
+  assert.equal(buildNote({ commit: "6ef91b5b" }, null), null);
 });

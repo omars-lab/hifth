@@ -168,6 +168,18 @@ function readJson(path) {
   }
 }
 
+/**
+ * A line saying the app's web pages were built from another commit than this
+ * checkout, or null. The iPad build copies in whatever `make app-web` built
+ * last, so a card can fail for code that is simply not in the app yet.
+ */
+export function buildNote(build, head) {
+  const built = String(build?.commit ?? "").split("+")[0];
+  if (!built || !head) return null;
+  if (built.startsWith(head) || head.startsWith(built)) return null;
+  return `the app's web pages were built from commit ${built}, and this checkout is at ${head}: run make app-web (then the app build) first, or a card may fail for code that is not in the app`;
+}
+
 /** Wait for a capture not in `before` that carries `name`; null after `seconds`. */
 async function waitFor(target, name, before, seconds) {
   const until = Date.now() + seconds * 1000;
@@ -212,6 +224,8 @@ async function main(argv) {
   const out = opt("--out") ?? join(repo, "native/shots/feature-check/latest.json");
 
   log("start", { on: target.kind, cards: all.length });
+  const head = spawnSync("git", ["-C", repo, "rev-parse", "--short=8", "HEAD"], { encoding: "utf8" }).stdout?.trim() || null;
+  let stale = null;
   const results = [];
   for (const card of all) {
     const name = captureName(card);
@@ -234,6 +248,10 @@ async function main(argv) {
       log("card", { id: card.id, result: "no-capture" });
       continue;
     }
+    if (stale === null) {
+      stale = buildNote(got.where.build, head) ?? false;
+      if (stale) log("stale_build", { msg: quote(stale) });
+    }
     const verdict = judge(card, got.where);
     const where = { route: got.where.route ?? null, page: got.where.page ?? null, verse: got.where.verse ?? null, open: got.where.open ?? [] };
     results.push({ id: card.id, ...verdict, where, build: got.where.build ?? null });
@@ -242,8 +260,8 @@ async function main(argv) {
 
   const count = (r) => results.filter((x) => x.result === r).length;
   mkdirSync(dirname(out), { recursive: true });
-  writeFileSync(out, JSON.stringify({ at: new Date().toISOString(), on: target.kind, results }, null, 2) + "\n");
-  log("done", { pass: count("pass"), fail: count("fail"), not_in_build: count("not-in-build"), place_only: count("place-only"), no_capture: count("no-capture"), not_sent: count("not-sent"), out });
+  writeFileSync(out, JSON.stringify({ at: new Date().toISOString(), on: target.kind, ...(stale ? { stale } : {}), results }, null, 2) + "\n");
+  log("done", { pass: count("pass"), fail: count("fail"), not_in_build: count("not-in-build"), place_only: count("place-only"), no_capture: count("no-capture"), not_sent: count("not-sent"), stale_build: stale ? 1 : 0, out });
   return results.every((r) => ["pass", "not-in-build", "place-only"].includes(r.result)) ? 0 : 1;
 }
 

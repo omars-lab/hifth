@@ -222,6 +222,7 @@ h2 .n { color:var(--muted); font-weight:400; }
 .check.partial { color:var(--accent); }
 .check.fail { color:var(--bad); font-weight:600; }
 .check.none { color:var(--muted); }
+.stale { color:var(--bad); font-weight:600; margin:8px 0 0; }
 .links { display:flex; gap:12px; flex-wrap:wrap; font-size:.9rem; }
 .links a { color:var(--accent); }
 .cmd { display:flex; gap:6px; align-items:flex-start; margin-top:auto; }
@@ -244,6 +245,7 @@ button.done { color:var(--accent); }
   </ol>
   <p class="lead" style="margin:8px 0 0">Pictures: ${shotCount} of ${all.filter((c) => !c.pitchOnly).length}, from the public build${takenAt ? `, taken ${esc(takenAt)}` : ""}. Refresh them with <code>make feature-links PICTURES=1</code>.</p>
   <p class="lead" style="margin:8px 0 0">${checkSummary}</p>
+  ${checks?.stale ? `<p class="stale">The crosses may be wrong: ${esc(checks.stale)}.</p>` : ""}
 </div>
 ${sections}
 </main>
