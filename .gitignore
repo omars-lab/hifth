@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# wrangler pages dev keeps its local state here (apps/landing/.wrangler/)
+.wrangler/
 apps/web/dist-native/
 .turbo/
 *.tsbuildinfo

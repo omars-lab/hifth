@@ -22,8 +22,9 @@ Who: **you** = the owner, Omar, signed in to the account. **agent** = Claude, fr
 | The name shown to testers | "Hifth - The Huffaz Toolkit", published by Omar Eid | App Store Connect record |
 | The App Store Connect record (iOS and macOS) | Apple ID `6832642191`, made 2026-11-09 | <https://appstoreconnect.apple.com/apps/6832642191> |
 | iCloud container (proposed, not made yet) | `iCloud.com.bytesofpurpose.hifth` | made in ④ below; [icloud-sync.md](../../../docs/design/icloud-sync.md) |
-| The reading site | `blog.bytesofpurpose.com/hifth/` | the build |
-| The share page (for now) | `hifth.bytesofpurpose.com/share` | Cloudflare, ⑥ below |
+| The front page and the reading app | `hifth.app`, the app at `hifth.app/read` | Cloudflare Pages on Hifth's own account; the deploy-site skill |
+| The reading site (old address, and the design pages) | `blog.bytesofpurpose.com/hifth/` | the build |
+| The share page | `hifth.app/share` | Cloudflare, ⑥ below |
 
 ## Apple: the iPhone, iPad and Mac app
 
@@ -117,7 +118,7 @@ first time it archives; nothing to do by hand.
 
 | step | who | what | link | tracked as |
 |---|---|---|---|---|
-| ⑥ `hifth.bytesofpurpose.com/share` | you sign in; agent writes the server | the address entry, a small Cloudflare server at `/share`, its free database. Nothing goes live before the consent question is answered. | <https://dash.cloudflare.com/> | `sharing-cloudflare-setup` |
+| ⑥ `hifth.app/share` | agent writes the server, with the saved keys for Hifth's own Cloudflare account (never the EarlBear one) | a small Cloudflare server at `/share` beside the notify-me form, its free database. Nothing goes live before the consent question is answered. | <https://dash.cloudflare.com/> | `sharing-cloudflare-setup` |
 
 ## The outside-library store (Supabase)
 

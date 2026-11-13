@@ -640,6 +640,12 @@ tasks: ## What is still open, by whose turn it is:  make tasks
 .PHONY: backlog
 backlog: tasks-doc ## Rebuild docs/backlog.md — every open item in full, on one page
 
+.PHONY: roadmap
+roadmap: ## Rebuild docs/roadmap.md: the backlog sorted now, next and later (later = waiting on something)
+	@command -v intent >/dev/null || { echo "✗ the intent tool is not installed (intent-manager plugin)"; exit 1; }
+	@intent roadmap --print > docs/roadmap.md
+	@echo "docs/roadmap.md: $$(grep -m1 'open task' docs/roadmap.md)"
+
 .PHONY: tasks-doc
 tasks-doc: ## Re-render docs/backlog.md, every open item in full, and docs/waiting-on-you.md, what only you can move
 	@node scripts/build-tasks-doc.mjs
@@ -813,6 +819,37 @@ deploy-cloudflare: ## Publish to Cloudflare Pages from this machine (GitHub Page
 	$(WEB) build
 	cd apps/web && $(PNPM) dlx wrangler pages deploy dist --project-name hifth
 
+# hifth.app: the front page at the root, the app under /read/, on the Cloudflare account
+# that holds the domain. The script and its tests live in the deploy-site skill.
+RELEASE := node .claude/skills/deploy-site/scripts/release-hifth-app.mjs
+
+.PHONY: hifth-app-check hifth-app-serve hifth-app-publish hifth-app-verify hifth-app-list-count
+hifth-app-serve: ## Serve hifth.app on this laptop at http://127.0.0.1:7124, with page comments (the app at /read/, the form with test keys); ARGS=--no-build reuses the last build
+	@$(RELEASE) prepare $(ARGS)
+	@echo "hifth.app on this laptop, with comments: http://127.0.0.1:7124/ (the app is at /read/)"
+	@.page-comments/run serve --port 7124 --behind '$(RELEASE) serve --port {port}'
+
+hifth-app-check: ## Build hifth.app's release folder and refuse it if anything but the bare minimum is in it
+	@$(RELEASE) check $(ARGS)
+
+hifth-app-publish: ## Check, upload to hifth.app with the saved keys, then look at the live site
+	@dotenvx run --quiet -- $(RELEASE) publish
+
+hifth-app-verify: ## Look at live hifth.app: pages answer, the app is this commit, no development address serves anything
+	@$(RELEASE) verify $(ARGS)
+
+hifth-app-list-count: ## How many people are on hifth.app's Mac-app list, and how many still to confirm; never shows an address. ARGS=--local counts the copy on this laptop
+	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/list-count.mjs $(ARGS)
+
+# The list's database part (supabase/migrations/*notify_list.sql), checked against a local
+# copy as the public key sees it. Needs `supabase start` first. Other servers on this laptop
+# can hold Supabase's usual ports; run a copy elsewhere and name its folder with
+# SUPABASE_WORKDIR (the deploy-site skill says how).
+SUPABASE_WORKDIR ?= .
+.PHONY: notify-db-test
+notify-db-test: ## Check the sign-up list's database rules against the local Supabase copy (supabase start first)
+	@supabase --workdir $(SUPABASE_WORKDIR) test db
+
 .PHONY: shots
 shots: ## Recapture the guide's screenshots from the real app into docs/validation/shots/
 	@# Two passes, because the perf probe is a build-time flag and not a URL
@@ -829,6 +866,18 @@ shots: ## Recapture the guide's screenshots from the real app into docs/validati
 	@echo ""
 	@echo "  Screenshots refreshed. Review them before committing — they are"
 	@echo "  documentation, so a wrong one teaches a wrong expectation."
+	@echo ""
+
+.PHONY: landing-shots
+landing-shots: ## Retake the front page's pictures from the plain app into apps/landing/shots/
+	@# The plain build only: the pitch build can show The Study Quran's text,
+	@# and hifth.app is public. The release refuses a picture named for the pitch.
+	$(CORE) build
+	$(WEB) build
+	HIFTH_LANDING_SHOTS=1 $(WEB) exec playwright test --project=landing-shots --retries=0
+	@ls -l apps/landing/shots/
+	@echo ""
+	@echo "  Look at every picture before using it on the front page."
 	@echo ""
 
 .PHONY: source-offer

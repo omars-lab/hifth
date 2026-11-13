@@ -199,8 +199,6 @@ describe("repairShellCache", () => {
   });
 });
 
-vi.mock("virtual:pwa-register", () => ({ registerSW: () => () => undefined }));
-
 describe("initPwa", () => {
   it("asks the browser to keep the pages the moment the app is installed", async () => {
     // Installing is the strongest sign the browser weighs when it decides

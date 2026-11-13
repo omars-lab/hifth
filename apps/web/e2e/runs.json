@@ -22,6 +22,11 @@
     "card-foot.spec.ts": [
       "desktop"
     ],
+    "carry-marks.spec.ts": [
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "chrome-fit.spec.ts": [
       "android",
       "iphone"
@@ -107,6 +112,15 @@
     "ipad.spec.ts": [
       "ipad"
     ],
+    "landing-pages.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "landing-shots.spec.ts": [
+      "landing-shots"
+    ],
     "lang-load.spec.ts": [
       "android",
       "iphone"
@@ -144,7 +158,8 @@
       "iphone"
     ],
     "mistakes.spec.ts": [
-      "desktop"
+      "desktop",
+      "desktop-firefox"
     ],
     "notes.spec.ts": [
       "desktop"

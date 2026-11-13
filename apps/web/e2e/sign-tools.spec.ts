@@ -272,3 +272,22 @@ test.describe("Hifth · the harakat and word tools", () => {
     expect(kept[0]!.mark).toBe(kept[0]!.marks![0]);
   });
 });
+
+test.describe("Hifth · the word's parts in Arabic", () => {
+  test.use({ locale: "ar" });
+
+  test("each harakah is named in Arabic, not in English", async ({ page }) => {
+    // The front page's Arabic pictures showed "fatha", "kasra" under the signs
+    // with the app in Arabic (2026-11-12). The names now come from the word list.
+    await page.goto("/#/hafs-kfqc/p7?tool=word");
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    const signs = page.locator('[data-part="sign"]:visible');
+    await expect(signs.nth(1)).toBeVisible();
+    const names = await signs.allInnerTexts();
+    expect(names.length).toBeGreaterThan(1);
+    for (const name of names) {
+      expect(name.trim(), name).toMatch(/^[^A-Za-z]*[؀-ۿ][^A-Za-z]*$/);
+    }
+  });
+});

@@ -610,13 +610,23 @@ test.describe("Hifth · the Mistake pen on an iPad mini on its side", () => {
     const at = await foot();
     await page.mouse.click(at.x, at.y);
     await expect(ask).toBeVisible();
+    // Where the question is too tall for the room beside the word it docks at the
+    // top and slides down into place; measured mid-slide it stands 11 px above the
+    // screen (2026-11-13, once the question also asked about letters and tajweed).
+    await ask.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
     const placed = await ask.evaluate((el, tap) => {
       const b = el.getBoundingClientRect();
       const buttons = [...el.querySelectorAll("button")];
       return {
         whole: b.left >= 0 && b.top >= 0 && b.right <= innerWidth && b.bottom <= innerHeight,
         buttons: buttons.length,
-        onTop: buttons.filter((x) => { const r = x.getBoundingClientRect(); return x.contains(document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2)); }).length,
+        // A question taller than its room scrolls its rows (and the tajweed row
+        // scrolls sideways), so each button is scrolled to first, as a reader would.
+        onTop: buttons.filter((x) => {
+          x.scrollIntoView({ block: "nearest", inline: "nearest" });
+          const r = x.getBoundingClientRect();
+          return x.contains(document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2));
+        }).length,
         coversTap: tap.x >= b.left && tap.x <= b.right && tap.y >= b.top && tap.y <= b.bottom,
       };
     }, at);

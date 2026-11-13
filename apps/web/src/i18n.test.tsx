@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { afterEach, describe, expect, it } from "vitest";
+import { DIACRITICS } from "@hifth/core";
 import { Colophon } from "./components/Colophon";
 import { LangProvider, stringsFor, useT } from "./i18n";
 import { LANG_STORAGE_KEY, LOCALES, detectLang, dirOf } from "./lang";
@@ -63,6 +64,23 @@ describe("the bundles", () => {
     // widen a list here.
     expect(LOCALE_IDS.length).toBeGreaterThan(1);
     for (const id of LOCALE_IDS) expect(stringsFor(id)).toBeDefined();
+  });
+
+  it("hands every plain message across in its own language, not another's", async () => {
+    // The bundle takes the catalog's messages as they are and adapts only a few.
+    // Each language's plain sentences must be its own catalog's, word for word.
+    const { default: enMessages } = await import("./messages/en.gen");
+    const { default: arMessages } = await import("./messages/ar.gen");
+    let checked = 0;
+    for (const [bundle, messages] of [[EN, enMessages], [AR, arMessages]] as const) {
+      for (const [k, v] of Object.entries(messages)) {
+        const got = (bundle as unknown as Record<string, unknown>)[k];
+        if (typeof v !== "string" || typeof got !== "string") continue;
+        expect(got, k).toBe(v);
+        checked++;
+      }
+    }
+    expect(checked).toBeGreaterThan(400);
   });
 
   it("carries the same keys in every language", () => {
@@ -178,6 +196,16 @@ describe("the bundles", () => {
     expect(ar.primary).toBe("إدغام");
     expect(en.secondary).toBe("إدغام");
     expect(en.primary).toBe("idgham");
+  });
+
+  it("names every harakah in the reader's language", () => {
+    // The mistake question showed "fatha", "kasra" under each sign with the app
+    // in Arabic (seen in the front page's Arabic pictures, 2026-11-12).
+    for (const name of DIACRITICS) {
+      expect(AR.signName(name), name).toMatch(ARABIC);
+      expect(EN.signName(name)).toBe(name);
+    }
+    expect(AR.signName("not a sign")).toBe("not a sign");
   });
 });
 

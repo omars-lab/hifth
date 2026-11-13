@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { daysOf, editionOf, type DayCount, type DayStamp, type RevisionEvent } from "@hifth/core";
 import { useT } from "../i18n";
+import { dayLevel, dayMarks, savedCalendarLook } from "../calendar-look";
 import styles from "./RevisionDays.module.css";
 
 /*
@@ -40,12 +41,23 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
   const first = [since, oldest, today].filter((d): d is DayStamp => !!d).sort()[0]!;
   const [month, setMonth] = useState(today.slice(0, 7));
   const [picked, setPicked] = useState<DayStamp | null>(null);
+  // How the month draws a day (the info panel's "How the calendar looks"); read
+  // when the sheet opens, which is the only time the month is on screen.
+  const [look] = useState(savedCalendarLook);
 
   const headline = (d: DayCount): string =>
     d.mistakes.length > 0 ? t.mapCellSlips(t.dayLong(d.day), d.mistakes.length) : t.dayOpened(d.day);
 
   const kindOf = (m: RevisionEvent): string =>
-    m.what === "sign" ? t.toolSign : m.what === "verse" ? t.dayKindVerse : t.mistakeWholeWord;
+    m.what === "sign"
+      ? t.toolSign
+      : m.what === "letter"
+        ? t.mistakeKindLetter
+        : m.what === "rule"
+          ? t.mistakeKindRule
+          : m.what === "verse"
+            ? t.dayKindVerse
+            : t.mistakeWholeWord;
 
   const body = (d: DayCount): JSX.Element => (
     <>
@@ -68,6 +80,8 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
             {[
               d.kinds.word > 0 && `${t.mistakeWholeWord} ${t.num(d.kinds.word)}`,
               d.kinds.sign > 0 && `${t.toolSign} ${t.num(d.kinds.sign)}`,
+              d.kinds.letter > 0 && `${t.mistakeKindLetter} ${t.num(d.kinds.letter)}`,
+              d.kinds.rule > 0 && `${t.mistakeKindRule} ${t.num(d.kinds.rule)}`,
               d.kinds.verse > 0 && `${t.dayKindVerse} ${t.num(d.kinds.verse)}`,
               ...d.mistakePages.map((p) => t.pageN(p)),
             ]
@@ -148,7 +162,7 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
           ›
         </button>
       </div>
-      <div className={styles.month} role="group" aria-label={t.monthLong(year, mon)}>
+      <div className={styles.month} role="group" aria-label={t.monthLong(year, mon)} data-look={look}>
         {t.weekdays.map((name) => (
           <span key={name} className={styles.weekday} aria-hidden="true">
             {name}
@@ -164,10 +178,14 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
               key={stamp}
               type="button"
               className={styles.square}
-              style={i === 0 ? { gridColumnStart: lead + 1 } : undefined}
+              style={{
+                gridColumnStart: i === 0 ? lead + 1 : undefined,
+                ["--fill" as string]: d ? Math.min(d.verses / 30, 1) : 0,
+              }}
               data-day={stamp}
               data-state={outside ? "outside" : d ? "worked" : "idle"}
               data-mistakes={count > 0 ? count : undefined}
+              data-level={d ? dayLevel(d.verses) : undefined}
               data-today={stamp === today ? "" : undefined}
               aria-pressed={picked === stamp}
               aria-label={outside ? t.dayOutside(stamp) : d ? headline(d) : t.dayNothing(stamp)}
@@ -175,7 +193,9 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
               onClick={() => setPicked(stamp)}
             >
               <span>{t.num(i + 1)}</span>
-              {count > 0 && (
+              {look === "dots" ? (
+                <Marks verses={d?.verses ?? 0} mistakes={count} />
+              ) : count > 0 && (
                 <span className={styles.count} aria-hidden="true">
                   {t.num(count)}
                 </span>
@@ -184,6 +204,19 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
           );
         })}
       </div>
+      {look === "dots" && (
+        <p className={styles.key} aria-hidden="true">
+          <span>
+            <span className={styles.dot} /> {t.calendarDotsOpened}
+          </span>
+          <span>
+            <span className={styles.tick} /> {t.calendarDotsFull}
+          </span>
+          <span>
+            <span className={styles.ring} /> {t.calendarDotsMistakes}
+          </span>
+        </p>
+      )}
       <div className={styles.picked} aria-live="polite">
         {!picked ? (
           <p className={styles.line}>{t.dayPick}</p>
@@ -197,5 +230,21 @@ export function RevisionDays({ layout, events, since, today, edition, onGoToVers
         )}
       </div>
     </>
+  );
+}
+
+/** The dots look's row of marks under a date; the day's own label already says it in words. */
+function Marks({ verses, mistakes }: { verses: number; mistakes: number }): JSX.Element {
+  const m = dayMarks(verses, mistakes);
+  return (
+    <span className={styles.marks} aria-hidden="true">
+      {Array.from({ length: m.dots }, (_, i) => (
+        <span key={i} className={styles.dot} data-mark="dot" />
+      ))}
+      {m.full && (
+        <span className={styles.tick} data-mark="full" />
+      )}
+      {m.mistakes && <span className={styles.ring} data-mark="mistakes" />}
+    </span>
   );
 }

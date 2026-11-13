@@ -153,7 +153,8 @@ The record is different in kind from everything else this app stores. A language
 skin, a dismissed notice are preferences. This is a log of **when a particular
 person was reading Qur'an, at what time of night, and which passages they kept
 going back to.** That is a record of someone's worship, and the promise attached to
-it is that it is theirs alone.
+it is that **the reader decides who sees it**: no one does until they say so, by a button
+that names what goes and to whom, and they can see who has it and take it back.
 
 A promise like that written in a doc comment is a promise until the first refactor.
 The failure mode is not malice, it is convenience: a share sheet that wants to
@@ -212,9 +213,9 @@ depend on how many times something was opened, only on when it last was.
 - **Any goal, target or completion percentage.** The record cannot see recitation,
   so a progress bar over it would be a number about worship that the data does not
   support.
-- **Export or sync, unless it serves the reader.** The rule is that nothing leaves the
-  device unless it is in the reader's interest and under their control (owner,
-  2026-11-08). Both are ways off the device, and `gate:revision-privacy` exists to make
+- **Export or sync the reader did not ask for.** The rule is that the reader decides who
+  sees their data (owner, 2026-11-12, sharpening 2026-11-08's "nothing leaves unless it is
+  in the reader's interest and under their control"). Both are ways off the device, and `gate:revision-privacy` exists to make
   adding one a deliberate act rather than a convenient one.
 
 ## Open questions, and what would answer each
@@ -358,6 +359,15 @@ it serves the reader rather than refused by reflex. The confusion-map export dec
 this is being applied; this item exists so the revision-record framing is revisited against it
 rather than left standing as an absolute the app no longer holds.
 
+**Put the reader first (owner, 12 November 2026).** Asked whether the record should go along when
+a reader carries their marks to hifth.app, the owner answered with the rule itself: the reader
+decides who sees their data. They opt in by pressing a button that says so, they choose to
+publish it, and they can manage who has access. So the question is no longer "does it serve the
+reader?", weighed by us, but "did the reader choose it, knowing what goes and to whom?", and can
+they take it back. The privacy check is unchanged in what it does: every way out is still named in
+it, with its reason. What the rule adds is a duty the check cannot see, a place where the reader
+sees who has their data and withdraws it (sharing page, item ⑮).
+
 **Owner, 2026-11-08: the second.** Nothing leaves unless it is in the reader's interest and under
 their control. The wording is now used above and in the check's own description; the check
 itself is unchanged, so anything leaving is still a deliberate act.
@@ -416,3 +426,20 @@ layouts, that a day with nothing the book can place shows no line of noughts, an
 the earlier-month arrow sits on the right with no turn of our own; by eye in English and Arabic
 at laptop and phone width; and in the iPad app, both ways up, with the walk-app skill's
 record-days script.
+
+### ⑥ How should the month and day views look, so they are pleasant to open? · **open**
+
+**Asked by the owner, 2026-11-12** (a comment on the front page's picture of the month view):
+"our calendar needs to be revisited, how do we make more aesthetically appealing calendar
+status widgets".
+
+**What it changes for a hafiz:** a record that is pleasant to look at gets opened, and a
+record that is opened is the one that shows what has been left too long. The numbers stay the
+same; the look is what is being asked about.
+
+**What the app does today:** Month is a plain grid of squares, tinted on a day with work and
+with a red number on a day with mistakes; Days is a list with the numbers written out.
+
+**What would answer it:** look at how well-made habit and streak calendars draw a day's
+status (rings, dots, shades), then build two or three versions into the real sheet, the owner
+picks, and the others stay as a setting.

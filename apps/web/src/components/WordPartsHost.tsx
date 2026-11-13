@@ -1,4 +1,5 @@
-import type { AssetManifest } from "@hifth/core";
+import type { AssetManifest, MistakeAnswer } from "@hifth/core";
+import type { MistakeAsk } from "../mistake-ask";
 import { pageUrl } from "../assets";
 import type { WordRect } from "./PageStage";
 import { WordParts, useWordParts } from "./WordParts";
@@ -20,7 +21,9 @@ export function WordPartsHost({
   stackAbove,
   onCover,
   marks,
-  chosen,
+  answered,
+  ask,
+  onAnswer,
   onPick,
   onPickMany,
   onPickLetter,
@@ -42,7 +45,11 @@ export function WordPartsHost({
   onCover?: (top: number | null) => void;
   /** Stacked, how it shows the drawer under it (see WordParts). */
   marks?: "path" | "tag" | undefined;
-  chosen?: number | null;
+  /** Mistake mode: what the mark says so far, and how the question is laid out. */
+  answered?: MistakeAnswer;
+  ask?: MistakeAsk;
+  /** Mistake mode: an answer picked, its name, and where on the page its note would pin. */
+  onAnswer?: (answer: MistakeAnswer, name: string | null, at: { x: number; y: number }) => void;
   /** The part picked, its name, and where on the page a note on it is pinned. */
   onPick: (mark: number | null, name: string | null, at: { x: number; y: number }) => void;
   /** Several signs picked for one note; it is pinned over the first of them. */
@@ -81,7 +88,13 @@ export function WordPartsHost({
       stackAbove={stackAbove}
       onCover={onCover}
       marks={marks}
-      chosen={chosen}
+      answered={answered}
+      ask={ask}
+      onAnswer={
+        onAnswer &&
+        ((a, name) =>
+          onAnswer(a, name, a.what === "sign" ? pinOver(a.mark) : a.what === "letter" && a.letter !== undefined ? pinOverLetter(a.letter) : pinOver(null)))
+      }
       onPick={(mark, name) => onPick(mark, name, pinOver(mark))}
       onPickMany={
         onPickMany && ((marks) => onPickMany(marks, pinOver(Math.min(...marks))))

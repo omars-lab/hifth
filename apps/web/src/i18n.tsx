@@ -106,6 +106,9 @@ import {
 import type { Catalog } from "./messages/catalog.gen";
 import { CATALOG_LOADERS } from "./messages/catalogs.gen";
 
+/** The cases of the harakah-name message: the sign list's names, underscored. */
+type SignCase = Parameters<Catalog["signName"]>[0]["sign"];
+
 export type { EditionCopy };
 
 /** A hop rail bucket, and a root-lens/edition row. Kept structural on purpose:
@@ -376,6 +379,8 @@ export interface Strings {
   shareSiteAria: string;
   shareApp: string;
   shareAppAria: string;
+  shareSiteHint: string;
+  shareAppHint: string;
 
   /* ---- coach marks -------------------------------------------------------- */
   coachRegion: string;
@@ -711,6 +716,19 @@ export interface Strings {
   bmLoad: string;
   bmLoaded(n: number): string;
   bmLoadBad: string;
+  movedTitle: string;
+  movedBody: string;
+  movedCarry: string;
+  movedLater: string;
+  movedWaiting: string;
+  movedCarried(n: number): string;
+  movedOpen: string;
+  movedFailed: string;
+  carryArrived(n: number): string;
+  movedRecordBox: string;
+  movedRecordSend: string;
+  movedRecordSent: string;
+  carryRecordArrived(n: number): string;
   toolbarLabel: string;
   toolSelect: string;
   toolHighlight: string;
@@ -804,11 +822,49 @@ export interface Strings {
   mistakeAnother: string;
   /** Said when a sign is picked, named by the sign ("fatha"). */
   mistakeSignPicked(name: string): string;
+  /** A harakah's name in the reader's language, from the sign list's English
+   *  name ("fatha"). A name the list does not know comes back as it is. */
+  signName(name: string): string;
   mistakeWordPicked: string;
   mistakeNoSigns: string;
   mistakeClear: string;
   mistakeCleared: string;
   mistakeRestored: string;
+  /** The kinds the question offers, besides the whole word and another verse. */
+  mistakeKindSign: string;
+  mistakeKindLetter: string;
+  mistakeKindRule: string;
+  /** Over each kind's choices. */
+  mistakeSignWhich: string;
+  mistakeLetterWhich: string;
+  mistakeRuleWhich: string;
+  /** A letter kind whose letter is not said, for a word the print was not cut into letters. */
+  mistakeAnyLetter: string;
+  mistakeBack: string;
+  /** Said when a letter is picked, by its place from the right (1 = first). */
+  mistakeLetterPicked(n: number): string;
+  mistakeAnyLetterPicked: string;
+  /** Said when a tajweed rule is picked, by the rule's name. */
+  mistakeRulePicked(name: string): string;
+  mistakeAskTitle: string;
+  mistakeAskSteps: string;
+  mistakeAskTabs: string;
+  mistakeAskList: string;
+  mistakeAskNote: string;
+  calendarLookTitle: string;
+  calendarLookShades: string;
+  calendarLookRings: string;
+  calendarLookCards: string;
+  calendarLookDots: string;
+  calendarDotsOpened: string;
+  calendarDotsFull: string;
+  calendarDotsMistakes: string;
+  calendarLookNote: string;
+  shareLookTitle: string;
+  shareLookPreview: string;
+  shareLookTiles: string;
+  shareLookPlain: string;
+  shareLookNote: string;
   toolSign: string;
   toolSignHint: string;
   toolRead: string;
@@ -1211,6 +1267,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     m.arrivedVia({ origin: origin === "jump" ? "jump" : "other" });
 
   return {
+    // Every message whose name and shape are already what a screen asks for comes
+    // across as it is; only the ones below are adapted (digits, names, choices).
+    ...m,
     num: n,
     sep: LOCALES[lang].sep,
     names: surahNames(lang),
@@ -1221,44 +1280,16 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     rangeLabel: (a, b) => fmtRangeLabel(a, b, lang),
 
     langName: locale.name,
-    langSectionTitle: m.langSectionTitle,
-    langSectionNote: m.langSectionNote,
     langSwitchTo: (other) => m.langSwitchTo({ other }),
 
-    pagebarSectionTitle: m.pagebarSectionTitle,
-    pagebarFisheyeLabel: m.pagebarFisheyeLabel,
-    pagebarFisheyeNote: m.pagebarFisheyeNote,
-    turnSectionTitle: m.turnSectionTitle,
-    turnStyleSeam: m.turnStyleSeam,
-    turnStyleCurl: m.turnStyleCurl,
-    turnStyleLift: m.turnStyleLift,
-    turnStyleNote: m.turnStyleNote,
-    tipsSectionTitle: m.tipsSectionTitle,
-    tipsShow: m.tipsShow,
-    tipsNote: m.tipsNote,
-    stateOn: m.stateOn,
-    stateOff: m.stateOff,
 
-    about: m.about,
-    wordmark: m.wordmark,
-    tagline: m.tagline,
-    pageWord: m.pageWord,
     pageN: (page) => m.pageN({ page: n(page) }),
-    goTo: m.goTo,
-    goToLong: m.goToLong,
-    mushaf: m.mushaf,
-    close: m.close,
-    trail: m.trail,
 
-    pageBar: m.pageBar,
-    pageChoose: m.pageChoose,
     pageOfTotal: (page, total) => m.pageOfTotal({ page: n(page), total: n(total) }),
     // Not swapped for a left-to-right chrome. "Previous" and "next" here mean
     // earlier and later in the mus'haf, and the mus'haf runs right to left in
     // every UI language — the bar is scripture furniture, so its edges keep the
     // book's direction. That is why this is one message and not two.
-    prevPage: m.prevPage,
-    nextPage: m.nextPage,
     pagesVendored: (have, total) => m.pagesVendored({ haveText: n(have), totalText: n(total) }),
 
     firstPage: (page) => m.firstPage({ page: n(page) }),
@@ -1267,8 +1298,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     // Full speed is spelled `other`: ICU requires one, and a fifth case that
     // repeats it could drift from it.
     scrubSpeed: (speed) => m.scrubSpeed({ speed: speed === "full" ? "other" : speed }),
-    scrubSlowHint: m.scrubSlowHint,
-    selectionCleared: m.selectionCleared,
     selected: (label) => m.selected({ label }),
     highlighted: (span) => m.highlighted({ span }),
     wordHops: (matches, unjudged) =>
@@ -1279,16 +1308,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     arrivedPage: (origin, page) => m.arrivedPage({ via: via(origin), page: n(page) }),
     arrivedRange: (origin, ref, page) => m.arrivedRange({ via: via(origin), ref, page: n(page) }),
     arrivedAyah: (origin, label, page) => m.arrivedAyah({ via: via(origin), label, page: n(page) }),
-    rangeUnavailable: m.rangeUnavailable,
-    ayahUnavailable: m.ayahUnavailable,
-    noConcordance: m.noConcordance,
     railSummary: (surah, links) => m.railSummary({ surah, n: links, linksText: n(links) }),
 
     ayahAria: (label) => m.ayahAria({ label }),
-    stageLoading: m.stageLoading,
     stageFailed: (page) => m.stageFailed({ pageText: n(page) }),
 
-    railGroup: m.railGroup,
     railDirection: {
       loop: m["railDirection.loop"],
       earlier: m["railDirection.earlier"],
@@ -1303,75 +1327,32 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     },
     chipAria: (direction, count) => m.chipAria({ direction, countText: n(count) }),
     hopSheetAria: (title, count) => m.hopSheetAria({ title, count }),
-    lookalikesTitle: m.lookalikesTitle,
     lookalikesAria: (count) => m.lookalikesAria({ count: n(count) }),
-    lookalikesNone: m.lookalikesNone,
     hopTo: (label) => m.hopTo({ label }),
     commentaryOn: (label) => m.commentaryOn({ label }),
     commentaryBy: (source) => m.commentaryBy({ source }),
     tapForNote: (source) => m.tapForNote({ source }),
     clickForNote: (source) => m.clickForNote({ source }),
-    noteShowAll: m.noteShowAll,
-    noteShowLess: m.noteShowLess,
-    surahIntro: m.surahIntro,
-    relatedVerses: m.relatedVerses,
     relatedLede: (source) => m.relatedLede({ source }),
     relatedLedeClick: (source) => m.relatedLedeClick({ source }),
     relatedMore: (count) => m.relatedMore({ n: count, nText: n(count) }),
     sharesWords: (count) => m.sharesWords({ n: count, nText: n(count) }),
     goToVerse: (label) => m.goToVerse({ label }),
-    keyFrom: m.keyFrom,
     keyAlso: (name) => m.keyAlso({ name }),
-    twin: m.twin,
-    matchLoose: m.matchLoose,
     likeVerse: (ref) => m.likeVerse({ ref }),
-    matchRepeat: m.matchRepeat,
-    nextTellsApart: m.nextTellsApart,
-    pageUnavailable: m.pageUnavailable,
-    openOnQul: m.openOnQul,
     openOnQulAria: (label) => m.openOnQulAria({ label }),
-    wordLevelPending: m.wordLevelPending,
-    hereTag: m.hereTag,
 
     playAyah: (label) => m.playAyah({ label }),
     pauseAyah: (label) => m.pauseAyah({ label }),
-    audioUnavailable: m.audioUnavailable,
     qulVerse: (label) => m.qulVerse({ label }),
 
     rangeAria: (title, links) => m.rangeAria({ title, n: links, linksText: n(links) }),
-    rangeEmpty: m.rangeEmpty,
     rangeFrom: (refs) => m.rangeFrom({ refs }),
-    refJoin: m.refJoin,
-    clearSelection: m.clearSelection,
 
-    tapHint: m.tapHint,
-    clickHint: m.clickHint,
     beadBack: (label) => m.beadBack({ label }),
     beadCurrent: (label) => m.beadCurrent({ label }),
     beadCurrentClick: (label) => m.beadCurrentClick({ label }),
-    shareTitle: m.shareTitle,
-    shareTextTrail: m.shareTextTrail,
-    shareTextRange: m.shareTextRange,
-    shareTextAyah: m.shareTextAyah,
-    shareAriaTrail: m.shareAriaTrail,
-    shareAriaRange: m.shareAriaRange,
-    shareAriaAyah: m.shareAriaAyah,
-    shareLabel: m.shareLabel,
-    shareLabelTrail: m.shareLabelTrail,
-    shared: m.shared,
-    copied: m.copied,
-    copyFailed: m.copyFailed,
-    shareOpenWith: m.shareOpenWith,
-    shareAsIs: m.shareAsIs,
-    shareLookalikes: m.shareLookalikes,
-    shareRoots: m.shareRoots,
-    shareCommentary: m.shareCommentary,
-    shareSite: m.shareSite,
-    shareSiteAria: m.shareSiteAria,
-    shareApp: m.shareApp,
-    shareAppAria: m.shareAppAria,
 
-    coachRegion: m.coachRegion,
     // Numbered rather than an array in the catalog: a translator editing JSON
     // has no way to see that element 2 of an array is the drag card, and a
     // reordered array would silently pair one language's title with another's
@@ -1381,34 +1362,16 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
       { title: m["coachSteps.2.title"], body: m["coachSteps.2.body"] },
       { title: m["coachSteps.3.title"], titleClick: m["coachSteps.3.titleClick"], body: m["coachSteps.3.body"] },
     ],
-    coachNext: m.coachNext,
-    coachDone: m.coachDone,
-    coachSkip: m.coachSkip,
-    coachDoneAria: m.coachDoneAria,
     coachNextAria: (next, total) => m.coachNextAria({ nextText: n(next), totalText: n(total) }),
 
-    jumpInput: m.jumpInput,
-    jumpPlaceholder: m.jumpPlaceholder,
-    jumpEmpty: m.jumpEmpty,
-    jumpResults: m.jumpResults,
-    juzGroup: m.juzGroup,
     juzN: (juz) => m.juzN({ juzText: n(juz) }),
     juzBoth: (running, beginsHere) => m.juzBoth({ aText: n(running), bText: n(beginsHere) }),
     surahN: (surah) => m.surahN({ surahText: n(surah) }),
     jumpStartsAt: (label) => m.jumpStartsAt({ label }),
 
-    editionCurrent: m.editionCurrent,
-    editionNoTable: m.editionNoTable,
-    editionNoCounterpart: m.editionNoCounterpart,
     editionMapsTo: (ref) => m.editionMapsTo({ ref }),
-    editionFoot: m.editionFoot,
     editionCopy: EDITION_COPY[lang],
 
-    skinGroup: m.skinGroup,
-    tajweed: m.tajweed,
-    beta: m.beta,
-    legendAria: m.legendAria,
-    legendTitle: m.legendTitle,
     // Three messages and not one, because the middle third is inside a <strong>.
     // Markup in a translatable string is markup a translator can break.
     legendCaveat: {
@@ -1416,12 +1379,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
       strong: m["legendCaveat.strong"],
       rest: m["legendCaveat.rest"],
     },
-    legendNoneOnPage: m.legendNoneOnPage,
     legendCountOnPage: (count, page) =>
       m.legendCountOnPage({ n: count, nText: n(count), pageText: n(page) }),
-    legendSelection: m.legendSelection,
-    legendNoRules: m.legendNoRules,
-    tajweedCredit: m.tajweedCredit,
     // A rule has one name written two ways — «إدغام» and "idgham" — and both
     // ship in both languages. Only the order changes, so this is a property of
     // the locale and never a string to translate.
@@ -1430,7 +1389,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         ? { primary: latin, secondary: label }
         : { primary: label, secondary: latin },
 
-    rootsTitle: m.rootsTitle,
     rootsAria: (count) => m.rootsAria({ countText: n(count) }),
     rootsTrigger: (count, curated) =>
       m.rootsTrigger({
@@ -1438,29 +1396,14 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         countText: n(count),
         curatedText: n(curated),
       }),
-    rootsEmpty: m.rootsEmpty,
-    rootsPicked: m.rootsPicked,
-    rootsPickedNote: m.rootsPickedNote,
-    rootsSharedRoot: m.rootsSharedRoot,
-    rootsHapax: m.rootsHapax,
     rootsStats: (ayahs, words) =>
       m.rootsStats({ ayahs, words, ayahsText: n(ayahs), wordsText: n(words) }),
     rootsTruncated: (shown) => m.rootsTruncated({ shownText: n(shown) }),
     rootsOccurrences: (count) => m.rootsOccurrences({ count, countText: n(count) }),
-    rootsUnavailable: m.rootsUnavailable,
-    rootsCredit: m.rootsCredit,
-    commentaryTitle: m.commentaryTitle,
-    pitchCredit: m.pitchCredit,
-    tafsirImportTitle: m.tafsirImportTitle,
-    tafsirImportBody: m.tafsirImportBody,
-    tafsirImportButton: m.tafsirImportButton,
-    tafsirImportBusy: m.tafsirImportBusy,
     tafsirImportOk: (label, surahs, entries) =>
       m.tafsirImportOk({ label, nText: n(surahs), eText: n(entries) }),
     tafsirImportError: (reason) => m.tafsirImportError({ reason }),
     tafsirImportLoaded: (label) => m.tafsirImportLoaded({ label }),
-    tafsirImportRemove: m.tafsirImportRemove,
-    tafsirImportUnsupported: m.tafsirImportUnsupported,
     // Three messages, because they are three different jobs: the zero case is a
     // whole sentence, the count agrees with a number, and "before/after" wraps
     // the result. Composing them here is what lets a language put the direction
@@ -1490,28 +1433,9 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         action: m["notices.install-prompt.action"],
       },
     },
-    dismissNotice: m.dismissNotice,
-    dismiss: m.dismiss,
 
-    aboutTitle: m.aboutTitle,
-    aboutLede: m.aboutLede,
-    aboutCaveat: m.aboutCaveat,
-    licenceHead: m.licenceHead,
-    licenceBody: m.licenceBody,
-    sourceLink: m.sourceLink,
-    designsLink: m.designsLink,
-    devBuild: m.devBuild,
-    devBuildNote: m.devBuildNote,
-    sourcesHead: m.sourcesHead,
-    aboutFoot: m.aboutFoot,
 
-    mapTitle: m.mapTitle,
-    mapCaveat: m.mapCaveat,
     mapOpen: (page) => m.mapOpen({ page: n(page) }),
-    mapScopeGroup: m.mapScopeGroup,
-    scopePage: m.scopePage,
-    scopeHizb: m.scopeHizb,
-    scopeJuz: m.scopeJuz,
     hizbN: (hizb) => m.hizbN({ hizbText: n(hizb) }),
     // "juz" is spelled `other` for the same reason "link" is above: ICU requires
     // an `other` case, and a fourth case that merely repeats the third is a
@@ -1526,38 +1450,17 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     // into the date a reader recognises as theirs: "Sept 1st, 2026" / «١ سبتمبر
     // ٢٠٢٦», in the reader's own month names and digits.
     mapSince: (day) => m.mapSince({ dayText: longDay(day, lang) }),
-    mapRangeGroup: m.mapRangeGroup,
-    mapRangeAll: m.mapRangeAll,
-    mapRangeThisMonth: m.mapRangeThisMonth,
-    mapRangeLastMonth: m.mapRangeLastMonth,
     // `longMonth` names the month in the reader's own month names and digits —
     // "Sept 2026" / «سبتمبر ٢٠٢٦» — the same table `longDay` draws from.
     mapActiveIn: (year, month) => m.mapActiveIn({ monthText: longMonth(year, month, lang) }),
-    mapGrid: m.mapGrid,
-    mapNoStore: m.mapNoStore,
-    mapLoading: m.mapLoading,
-    mapLegend: m.mapLegend,
-    mapAbsent: m.mapAbsent,
-    mapNeverOpened: m.mapNeverOpened,
-    mapRecent: m.mapRecent,
-    mapSlips: m.mapSlips,
     mapCellSlips: (cell, count) => m.mapCellSlips({ cell, n: count, nText: n(count) }),
-    mapViewGroup: m.mapViewGroup,
-    mapViewMap: m.mapViewMap,
-    mapViewMonth: m.mapViewMonth,
-    mapViewDays: m.mapViewDays,
     dayLong: (day) => longDay(day, lang),
     monthLong: (year, month) => longMonth(year, month, lang),
     ...weekOf(lang),
     pagesN: (count) => m.distancePages({ n: count, nText: n(count) }),
-    dayKindVerse: m.dayKindVerse,
-    daysNone: m.daysNone,
     dayOutside: (day) => m.dayOutside({ dayText: longDay(day, lang) }),
     dayNothing: (day) => m.dayNothing({ dayText: longDay(day, lang) }),
     dayOpened: (day) => m.dayOpened({ dayText: longDay(day, lang) }),
-    monthEarlier: m.monthEarlier,
-    monthLater: m.monthLater,
-    dayPick: m.dayPick,
     mapCellAbsent: (label) => m.mapCellAbsent({ label }),
     mapCellNever: (label) => m.mapCellNever({ label }),
     // Not a plural: "today" and "yesterday" are not categories any CLDR rule
@@ -1572,63 +1475,30 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
       }),
     mapWentTo: (label, page) => m.mapWentTo({ label, page: n(page) }),
 
-    packsHead: m.packsHead,
-    packsHint: m.packsHint,
-    packsUnsupported: m.packsUnsupported,
-    packsLoading: m.packsLoading,
-    packsNone: m.packsNone,
     packKeep: (juz) => m.packKeep({ juzText: n(juz) }),
     packKeeping: (juz, done, total) =>
       m.packKeeping({ juzText: n(juz), doneText: n(done), totalText: n(total) }),
-    packStop: m.packStop,
     // `tenths` rather than `n`: the size is the one fraction the chrome prints,
     // and Arabic writes it «٥٫٨» with U+066B rather than with a full stop.
     packWhole: (juz, mb) => m.packWhole({ juzText: n(juz), sizeText: tenths(mb, lang) }),
     packTorn: (juz, present, total) =>
       m.packTorn({ juzText: n(juz), presentText: n(present), totalText: n(total) }),
     packGone: (juz) => m.packGone({ juzText: n(juz) }),
-    packRepin: m.packRepin,
-    packRemove: m.packRemove,
     packRemoveJuz: (juz) => m.packRemoveJuz({ juzText: n(juz) }),
     packAbsent: (ayahs) => m.packAbsent({ n: ayahs, nText: n(ayahs) }),
 
-    facingPage: m.facingPage,
     facingAbsent: (page) => m.facingAbsent({ page: n(page) }),
-    keyPages: m.keyPages,
-    keyJump: m.keyJump,
-    spreadSectionTitle: m.spreadSectionTitle,
-    spreadOne: m.spreadOne,
-    spreadTwo: m.spreadTwo,
-    spreadOneAria: m.spreadOneAria,
-    spreadTwoAria: m.spreadTwoAria,
-    zoomSectionTitle: m.zoomSectionTitle,
-    zoomIn: m.zoomIn,
-    zoomOut: m.zoomOut,
     zoomLevel: (percent) => m.zoomLevel({ pctText: n(percent) }),
     arrivedZoom: (percent) => m.arrivedZoom({ pctText: n(percent) }),
     arrivedJuz: (juz, page) => m.arrivedJuz({ juzText: n(juz), page: n(page) }),
     juzEdge: (juz) => m.juzEdge({ juzText: n(juz) }),
 
-    bmDrop: m.bmDrop,
-    bmSeam: m.bmSeam,
     bmUnfold: (count) => m.bmUnfold({ count, countText: n(count) }),
     bmUnfolded: (count) => m.bmUnfolded({ count, countText: n(count) }),
-    bmUndo: m.bmUndo,
-    markUndo: m.markUndo,
-    markRedo: m.markRedo,
     markUndone: (said) => (said ? m.markUndone({ said }) : m.markUndoneBare),
     markRedone: (said) => (said ? m.markRedone({ said }) : m.markRedoneBare),
-    markNothingToUndo: m.markNothingToUndo,
-    markNothingToRedo: m.markNothingToRedo,
-    bmRestored: m.bmRestored,
     bmRibbon: (name) => m.bmRibbon({ name }),
-    bmDrawerTitle: m.bmDrawerTitle,
-    bmNameLabel: m.bmNameLabel,
-    bmSaveName: m.bmSaveName,
     bmMoveTo: (label) => m.bmMoveTo({ label }),
-    bmLift: m.bmLift,
-    bmAddAnother: m.bmAddAnother,
-    bmHistory: m.bmHistory,
     // "opened" is spelled `other` for the same reason "link" is in `via`.
     bmEvent: (what, at, page) =>
       m.bmEvent({
@@ -1640,67 +1510,33 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     bmLifted: (name) => m.bmLifted({ name }),
     bmRenamed: (name) => m.bmRenamed({ name }),
     bmMoved: (name, page) => m.bmMoved({ name, page: n(page) }),
-    bmNotSaved: m.bmNotSaved,
-    bmHead: m.bmHead,
     bmCount: (count) => m.bmCount({ n: count, nText: n(count) }),
     bmGroup: (surah, count) =>
       m.bmGroup({ surah: fmtSurahName(surah, lang), nText: n(count) }),
     bmOpen: (name, page) => m.bmOpen({ name, page: n(page) }),
-    bmClear: m.bmClear,
     bmClearSurahAria: (surah) => m.bmClearSurahAria({ surah: fmtSurahName(surah, lang) }),
-    bmClearAll: m.bmClearAll,
     bmConfirmAll: (count) => m.bmConfirmAll({ n: count, nText: n(count) }),
     bmConfirmSurah: (count, surah) =>
       m.bmConfirmSurah({ n: count, nText: n(count), surah: fmtSurahName(surah, lang) }),
-    bmCancel: m.bmCancel,
     bmCleared: (count) => m.bmCleared({ n: count, nText: n(count) }),
-    bmSave: m.bmSave,
-    bmLoad: m.bmLoad,
     bmLoaded: (count) => m.bmLoaded({ n: count, nText: n(count) }),
-    bmLoadBad: m.bmLoadBad,
-    toolbarLabel: m.toolbarLabel,
-    toolSelect: m.toolSelect,
-    toolHighlight: m.toolHighlight,
-    penLabel: m.penLabel,
-    penWordsLabel: m.penWordsLabel,
-    penGreen: m.penGreen,
-    penBlue: m.penBlue,
-    penYellow: m.penYellow,
-    penPink: m.penPink,
-    toolBookmark: m.toolBookmark,
+    movedCarried: (count) => m.movedCarried({ n: count, nText: n(count) }),
+    carryArrived: (count) => m.carryArrived({ n: count, nText: n(count) }),
+    carryRecordArrived: (count) => m.carryRecordArrived({ n: count, nText: n(count) }),
     toolOn: (name) => m.toolOn({ name }),
     toolLocked: (name) => m.toolLocked({ name }),
     toolLockedHint: (name) => m.toolLockedHint({ name }),
     toolLockedHintTouch: (name) => m.toolLockedHintTouch({ name }),
-    toolBookmarkHint: m.toolBookmarkHint,
-    toolBookmarkHintClick: m.toolBookmarkHintClick,
-    toolNote: m.toolNote,
-    toolNoteHint: m.toolNoteHint,
-    toolNoteHintClick: m.toolNoteHintClick,
     notePin: (label) => m.notePin({ label }),
     noteBox: (label) => m.noteBox({ label }),
-    noteDone: m.noteDone,
-    noteDelete: m.noteDelete,
-    noteSaved: m.noteSaved,
-    noteDeleted: m.noteDeleted,
-    noteRestored: m.noteRestored,
     noteLoaded: (count) => m.noteLoaded({ n: count, nText: n(count) }),
-    noteAddTo: m.noteAddTo,
-    noteMore: m.noteMore,
     noteJoined: (label) => m.noteJoined({ label }),
     noteVerses: (count) => m.noteVerses({ n: count, nText: n(count) }),
-    noteWhole: m.noteWhole,
     noteWordOf: (label) => m.noteWordOf({ label }),
     noteHarakahOf: (label) => m.noteHarakahOf({ label }),
-    noteTierHarakah: m.noteTierHarakah,
-    noteTierWord: m.noteTierWord,
-    noteTierAyah: m.noteTierAyah,
-    noteTierWhole: m.noteTierWhole,
-    noteAboutAsk: m.noteAboutAsk,
     noteAboutChange: (scope) => m.noteAboutChange({ scope }),
     noteOutside: (label, count, scope) => m.noteOutside({ n: count, nText: n(count), label, scope }),
     noteAboutNow: (scope) => m.noteAboutNow({ scope }),
-    noteUntitled: m.noteUntitled,
     verseMenu: (key) => m.verseMenu({ keyText: fmtAyahRef(key, lang) ?? key }),
     verseInNotes: (key, count) => {
       return m.verseInNotes({ keyText: fmtAyahRef(key, lang) ?? key, n: count, nText: n(count) });
@@ -1710,329 +1546,51 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     jumpArrowLabel: (key) => m.jumpArrowLabel({ keyText: fmtAyahRef(key, lang) ?? key }),
     jumpArrowEnd: (to, times) =>
       to === null ? m.jumpArrowUnnamed : m.jumpArrowEnd({ keyText: fmtAyahRef(to, lang) ?? to, n: times, nText: n(times) }),
-    noteVerseOut: m.noteVerseOut,
-    noteVerseTakenOut: m.noteVerseTakenOut,
-    noteShelfHead: m.noteShelfHead,
-    noteShelfEmpty: m.noteShelfEmpty,
-    noteShelfEmptyClick: m.noteShelfEmptyClick,
-    noteFollowing: m.noteFollowing,
     noteFollowAt: (at, count) => m.noteFollowAt({ atText: n(at), nText: n(count) }),
-    noteFollowPrev: m.noteFollowPrev,
-    noteFollowNext: m.noteFollowNext,
-    noteFollowStop: m.noteFollowStop,
-    toolMistake: m.toolMistake,
-    toolMistakeHint: m.toolMistakeHint,
-    toolErase: m.toolErase,
-    toolEraseHint: m.toolEraseHint,
-    toolEraseHintClick: m.toolEraseHintClick,
     jumpsErased: (from) => m.jumpsErased({ fromText: fmtAyahRef(from, lang) ?? from }),
-    toolMistakeHintClick: m.toolMistakeHintClick,
     mistakeMarked: (label) => m.mistakeMarked({ label }),
     mistakePicker: (label) => m.mistakePicker({ label }),
-    mistakeWholeWord: m.mistakeWholeWord,
-    mistakeAnother: m.mistakeAnother,
     mistakeSignPicked: (name) => m.mistakeSignPicked({ name }),
-    mistakeWordPicked: m.mistakeWordPicked,
-    mistakeNoSigns: m.mistakeNoSigns,
-    mistakeClear: m.mistakeClear,
-    mistakeCleared: m.mistakeCleared,
-    mistakeRestored: m.mistakeRestored,
-    toolSign: m.toolSign,
-    toolSignHint: m.toolSignHint,
-    toolRead: m.toolRead,
-    toolReadHint: m.toolReadHint,
-    toolReadHintClick: m.toolReadHintClick,
+    signName: (name) => {
+      // The sign list's names are the select's cases with spaces as underscores;
+      // a name it does not know falls to `other`, and is then kept as it came.
+      const said = m.signName({ sign: name.replace(/ /g, "_") as SignCase });
+      return said === m.signName({ sign: "other" }) ? name : said;
+    },
+    mistakeLetterPicked: (count) => m.mistakeLetterPicked({ nText: n(count) }),
+    mistakeRulePicked: (name) => m.mistakeRulePicked({ name }),
     verseTools: (label) => m.verseTools({ label }),
-    vdListen: m.vdListen,
-    vdPause: m.vdPause,
-    vdListenOffline: m.vdListenOffline,
-    vdRoots: m.vdRoots,
-    vdCommentary: m.vdCommentary,
-    vdQul: m.vdQul,
-    vdShare: m.vdShare,
-    vdBookmark: m.vdBookmark,
     vdBookmarkAria: (label) => m.vdBookmarkAria({ label }),
-    verseGesturesTitle: m.verseGesturesTitle,
-    verseGesturesA: m.verseGesturesA,
-    verseGesturesB: m.verseGesturesB,
-    verseGesturesC: m.verseGesturesC,
-    verseGesturesNote: m.verseGesturesNote,
-    drawerToolsTitle: m.drawerToolsTitle,
-    drawerToolsSheet: m.drawerToolsSheet,
-    drawerToolsDrawer: m.drawerToolsDrawer,
-    drawerToolsNote: m.drawerToolsNote,
-    toolHelpTitle: m.toolHelpTitle,
-    toolHelpLine: m.toolHelpLine,
-    toolHelpHover: m.toolHelpHover,
-    toolHelpNote: m.toolHelpNote,
-    settingsDrawer: m.settingsDrawer,
-    settingsAtTitle: m.settingsAtTitle,
-    settingsAtBar: m.settingsAtBar,
-    settingsAtDrawer: m.settingsAtDrawer,
-    settingsAtNote: m.settingsAtNote,
-    appPagesNav: m.appPagesNav,
-    appPagesTitle: m.appPagesTitle,
-    appPagesNote: m.appPagesNote,
     drawerBack: (label) => m.drawerBack({ label }),
-    drawerWord: m.drawerWord,
-    levelSettings: m.levelSettings,
-    levelVerse: m.levelVerse,
-    levelWord: m.levelWord,
-    drawerMarksTitle: m.drawerMarksTitle,
-    drawerMarksPath: m.drawerMarksPath,
-    drawerMarksTag: m.drawerMarksTag,
-    drawerMarksNote: m.drawerMarksNote,
-    wordTapTitle: m.wordTapTitle,
-    wordTapOff: m.wordTapOff,
-    wordTapWord: m.wordTapWord,
-    wordTapNote: m.wordTapNote,
-    runMarkTitle: m.runMarkTitle,
-    runMarkLight: m.runMarkLight,
-    runMarkRing: m.runMarkRing,
-    runMarkNote: m.runMarkNote,
-    runFollowTitle: m.runFollowTitle,
-    runFollowStay: m.runFollowStay,
-    runFollowBack: m.runFollowBack,
-    runFollowNote: m.runFollowNote,
-    zoomAnchorTitle: m.zoomAnchorTitle,
-    zoomAnchorVerse: m.zoomAnchorVerse,
-    zoomAnchorMiddle: m.zoomAnchorMiddle,
-    zoomAnchorNote: m.zoomAnchorNote,
-    zoomAcrossTitle: m.zoomAcrossTitle,
-    zoomAcrossStarts: m.zoomAcrossStarts,
-    zoomAcrossFold: m.zoomAcrossFold,
-    zoomAcrossNote: m.zoomAcrossNote,
-    noteLeaveTitle: m.noteLeaveTitle,
-    noteLeaveSlide: m.noteLeaveSlide,
-    noteLeaveAtOnce: m.noteLeaveAtOnce,
-    noteLeaveNote: m.noteLeaveNote,
-    runAheadTitle: m.runAheadTitle,
-    runAheadHold: m.runAheadHold,
-    runAheadAsk: m.runAheadAsk,
-    runAheadOff: m.runAheadOff,
-    runAheadNote: m.runAheadNote,
-    jumpArrowsTitle: m.jumpArrowsTitle,
-    jumpArrowsStays: m.jumpArrowsStays,
-    jumpArrowsAsked: m.jumpArrowsAsked,
-    jumpArrowsNote: m.jumpArrowsNote,
-    cardEdgeTitle: m.cardEdgeTitle,
-    cardEdgeCovers: m.cardEdgeCovers,
-    cardEdgeClear: m.cardEdgeClear,
-    cardEdgeTurns: m.cardEdgeTurns,
-    cardEdgeNote: m.cardEdgeNote,
-    openingTextTitle: m.openingTextTitle,
-    openingTextLarge: m.openingTextLarge,
-    openingTextEven: m.openingTextEven,
-    openingTextNote: m.openingTextNote,
-    useTitle: m.useTitle,
-    useNote: m.useNote,
     useSince: (day) => m.useSince({ dayText: longDay(day, lang) }),
     useTimes: (count) => m.useTimes({ n: count, nText: n(count) }),
     useLast: (day) => m.useLast({ dayText: longDay(day, lang) }),
     useNeverHead: (count) => m.useNeverHead({ n: count, nText: n(count) }),
     usePen: (name) => m.usePen({ name }),
-    useStripAria: m.useStripAria,
-    useForget: m.useForget,
-    useEmpty: m.useEmpty,
-    useTurnPage: m.useTurnPage,
-    useLookalikes: m.useLookalikes,
-    useCommentary: m.useCommentary,
-    useRoots: m.useRoots,
-    useListen: m.useListen,
-    useShare: m.useShare,
-    useGoTo: m.useGoTo,
-    useZoom: m.useZoom,
-    useVerseMenu: m.useVerseMenu,
-    useWordParts: m.useWordParts,
-    useOpenedMap: m.useOpenedMap,
-    useTajweedKey: m.useTajweedKey,
-    useEdition: m.useEdition,
-    useInfoPanel: m.useInfoPanel,
-    longVerseTitle: m.longVerseTitle,
-    longVerseSmaller: m.longVerseSmaller,
-    longVerseShorter: m.longVerseShorter,
-    longVerseNote: m.longVerseNote,
-    lookalikeCompareTitle: m.lookalikeCompareTitle,
-    lookalikeCompareEvery: m.lookalikeCompareEvery,
-    lookalikeComparePlain: m.lookalikeComparePlain,
-    lookalikeCompareNote: m.lookalikeCompareNote,
-    passageRowsTitle: m.passageRowsTitle,
-    passageRowsBoth: m.passageRowsBoth,
-    passageRowsGroup: m.passageRowsGroup,
-    passageRowsDrop: m.passageRowsDrop,
-    passageRowsNote: m.passageRowsNote,
-    passageHopTitle: m.passageHopTitle,
-    passageHopAlike: m.passageHopAlike,
-    passageHopFirst: m.passageHopFirst,
-    passageHopNote: m.passageHopNote,
-    lookalikeArrowsTitle: m.lookalikeArrowsTitle,
-    lookalikeArrowsBook: m.lookalikeArrowsBook,
-    lookalikeArrowsReading: m.lookalikeArrowsReading,
-    lookalikeArrowsNote: m.lookalikeArrowsNote,
-    turnLandingTitle: m.turnLandingTitle,
-    turnLandingTop: m.turnLandingTop,
-    turnLandingSame: m.turnLandingSame,
-    turnLandingNote: m.turnLandingNote,
-    openSizeTitle: m.openSizeTitle,
-    openSizeCloser: m.openSizeCloser,
-    openSizeWhole: m.openSizeWhole,
-    openSizeNote: m.openSizeNote,
-    uprightAgainTitle: m.uprightAgainTitle,
-    uprightAgainOpening: m.uprightAgainOpening,
-    uprightAgainWhole: m.uprightAgainWhole,
-    uprightAgainNote: m.uprightAgainNote,
-    ribbonLengthTitle: m.ribbonLengthTitle,
-    ribbonLengthShort: m.ribbonLengthShort,
-    ribbonLengthLong: m.ribbonLengthLong,
-    ribbonLengthNote: m.ribbonLengthNote,
-    lookalikePreviewTitle: m.lookalikePreviewTitle,
-    lookalikePreviewPicture: m.lookalikePreviewPicture,
-    lookalikePreviewCount: m.lookalikePreviewCount,
-    lookalikePreviewNone: m.lookalikePreviewNone,
-    lookalikePreviewNote: m.lookalikePreviewNote,
-    relatedListTitle: m.relatedListTitle,
-    relatedListLine: m.relatedListLine,
-    relatedListAll: m.relatedListAll,
-    relatedListNote: m.relatedListNote,
-    penMarkUp: m.penMarkUp,
-    penDone: m.penDone,
-    penGrip: m.penGrip,
-    penHomeTitle: m.penHomeTitle,
-    penHomeStrip: m.penHomeStrip,
-    penHomeFloat: m.penHomeFloat,
-    penHomeBottom: m.penHomeBottom,
-    penHomeSide: m.penHomeSide,
-    penHomeNote: m.penHomeNote,
-    tipPensTitle: m.tipPensTitle,
-    tipPensRings: m.tipPensRings,
-    tipPensRow: m.tipPensRow,
-    tipPensNote: m.tipPensNote,
-    toolSelectHint: m.toolSelectHint,
-    toolSelectHintClick: m.toolSelectHintClick,
-    toolHighlightHint: m.toolHighlightHint,
-    penGuideSection: m.penGuideSection,
-    penGuideOpen: m.penGuideOpen,
-    penGuideNote: m.penGuideNote,
-    penGuideBack: m.penGuideBack,
-    penGuideHowTitle: m.penGuideHowTitle,
-    penGuideHowSqueeze: m.penGuideHowSqueeze,
-    penGuideHowDoubleTap: m.penGuideHowDoubleTap,
-    penGuideHowSettings: m.penGuideHowSettings,
-    penGuideTryTitle: m.penGuideTryTitle,
-    penGuideTry: m.penGuideTry,
-    penGuideListTitle: m.penGuideListTitle,
-    penGuideWhenRead: m.penGuideWhenRead,
-    penGuideWhenSelect: m.penGuideWhenSelect,
-    penGuideWhenHighlight: m.penGuideWhenHighlight,
-    penGuideWhenBookmark: m.penGuideWhenBookmark,
-    penGuideWhenNote: m.penGuideWhenNote,
-    penGuideWhenSign: m.penGuideWhenSign,
-    penGuideWhenWord: m.penGuideWhenWord,
-    penGuideWhenMistake: m.penGuideWhenMistake,
-    penGuideWhenCrop: m.penGuideWhenCrop,
-    penGuideWhenJump: m.penGuideWhenJump,
-    penGuidePens: m.penGuidePens,
-    penGuideWordPens: m.penGuideWordPens,
-    penSideTitle: m.penSideTitle,
-    penSideRight: m.penSideRight,
-    penSideLeft: m.penSideLeft,
-    penSideNote: m.penSideNote,
-    markToolsTitle: m.markToolsTitle,
-    markToolsThree: m.markToolsThree,
-    markToolsOne: m.markToolsOne,
-    markToolsNote: m.markToolsNote,
-    eraserPlaceTitle: m.eraserPlaceTitle,
-    eraserPlaceTools: m.eraserPlaceTools,
-    eraserPlaceUndo: m.eraserPlaceUndo,
-    eraserPlaceNote: m.eraserPlaceNote,
-    mistakeTapTitle: m.mistakeTapTitle,
-    mistakeTapAsk: m.mistakeTapAsk,
-    mistakeTapQuiet: m.mistakeTapQuiet,
-    mistakeTapNote: m.mistakeTapNote,
-    markAimsLabel: m.markAimsLabel,
-    railHomeTitle: m.railHomeTitle,
-    railHomeBar: m.railHomeBar,
-    railHomeTools: m.railHomeTools,
-    railHomeNote: m.railHomeNote,
-    cardRoomTitle: m.cardRoomTitle,
-    cardRoomAside: m.cardRoomAside,
-    cardRoomSmaller: m.cardRoomSmaller,
-    cardRoomNote: m.cardRoomNote,
-    scopeLookTitle: m.scopeLookTitle,
-    scopeLookSide: m.scopeLookSide,
-    scopeLookLines: m.scopeLookLines,
-    scopeLookTall: m.scopeLookTall,
-    scopeLookSlim: m.scopeLookSlim,
-    scopeLookSteps: m.scopeLookSteps,
-    scopeLookTrail: m.scopeLookTrail,
-    scopeLookNote: m.scopeLookNote,
-    vdPlayTo: m.vdPlayTo,
     vdPlayToAria: (label) => m.vdPlayToAria({ label }),
     listenOptionsAria: (label) => m.listenOptionsAria({ label }),
-    listenRepeatTitle: m.listenRepeatTitle,
-    listenOnce: m.listenOnce,
     listenTimes: (count) => m.listenTimes({ n: n(count) }),
-    listenUntilStop: m.listenUntilStop,
-    listenSpeedTitle: m.listenSpeedTitle,
-    listenSlower: m.listenSlower,
-    listenAsRecited: m.listenAsRecited,
-    listenFaster: m.listenFaster,
-    vdMark: m.vdMark,
     vdMarkAria: (label) => m.vdMarkAria({ label }),
-    vdNote: m.vdNote,
     vdNoteAria: (label) => m.vdNoteAria({ label }),
-    vdCopy: m.vdCopy,
     vdCopyAria: (label) => m.vdCopyAria({ label }),
-    vdJump: m.vdJump,
     vdJumpAria: (label) => m.vdJumpAria({ label }),
     verseMore: (label) => m.verseMore({ label }),
-    playToPick: m.playToPick,
-    playToPickClick: m.playToPickClick,
     playingRun: (from, to) => m.playingRun({ from, to }),
     copiedLink: (label) => m.copiedLink({ label }),
-    cornerPlay: m.cornerPlay,
-    cornerStart: m.cornerStart,
     cornerNotes: (count) => m.cornerNotes({ nText: n(count) }),
-    cornerNewNote: m.cornerNewNote,
     cornerNotesHead: (which, name) => m.cornerNotesHead({ which: which === "page" ? "page" : "other", name }),
-    recKeep: m.recKeep,
     recKeeping: (done, total) => m.recKeeping({ doneText: n(done), totalText: n(total) }),
     recRemove: (mb) => m.recRemove({ sizeText: tenths(mb, lang) }),
-    recShelfHead: m.recShelfHead,
-    recShelfHint: m.recShelfHint,
-    recShelfNone: m.recShelfNone,
-    recShelfUnsupported: m.recShelfUnsupported,
     recSaving: (name, done, total) => m.recSaving({ name, doneText: n(done), totalText: n(total) }),
     recWhole: (name, mb) => m.recWhole({ name, sizeText: tenths(mb, lang) }),
     recTorn: (name, present, total) => m.recTorn({ name, presentText: n(present), totalText: n(total) }),
-    recRepin: m.recRepin,
     recGone: (name) => m.recGone({ name }),
     recRemoveSurah: (name) => m.recRemoveSurah({ name }),
     recKeptSaid: (name) => m.recKeptSaid({ name }),
-    keepWhenTitle: m.keepWhenTitle,
-    keepWhenAsked: m.keepWhenAsked,
-    keepWhenHeard: m.keepWhenHeard,
     keepWhenNote: (mb) => m.keepWhenNote({ sizeText: tenths(mb, lang) }),
-    fullScreen: m.fullScreen,
-    showBars: m.showBars,
-    fullScreenOn: m.fullScreenOn,
-    fullScreenOff: m.fullScreenOff,
-    toolWord: m.toolWord,
-    toolWordHint: m.toolWordHint,
-    toolWordHintClick: m.toolWordHintClick,
     wordParts: (label) => m.wordParts({ label }),
-    wordPartsHint: m.wordPartsHint,
-    wordPartsHintMany: m.wordPartsHintMany,
     wordPartsLetter: (count) => m.wordPartsLetter({ nText: n(count) }),
-    toolSignHintTouch: m.toolSignHintTouch,
-    toolCrop: m.toolCrop,
-    toolCropHint: m.toolCropHint,
-    toolJump: m.toolJump,
-    toolJumpHint: m.toolJumpHint,
     jumpWhere: (from) => m.jumpWhere({ fromText: fmtAyahRef(from, lang) ?? from }),
-    jumpNotSure: m.jumpNotSure,
-    jumpAnother: m.jumpAnother,
-    jumpTwin: m.jumpTwin,
     jumpMarked: (from, to, times) =>
       m.jumpMarked({
         fromText: fmtAyahRef(from, lang) ?? from,
@@ -2050,38 +1608,20 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         nText: n(times),
       }),
     slipMarkedUnsure: (from) => m.slipMarkedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
-    jumpSlip: m.jumpSlip,
     jumpList: (from) => m.jumpList({ fromText: fmtAyahRef(from, lang) ?? from }),
     jumpTimes: (times, when) => m.jumpTimes({ n: times, nText: n(times), whenText: when }),
-    jumpToday: m.jumpToday,
-    jumpYesterday: m.jumpYesterday,
     jumpOnDay: (day) => m.jumpOnDay({ dayText: day }),
-    jumpGo: m.jumpGo,
-    jumpCompare: m.jumpCompare,
-    jumpAgain: m.jumpAgain,
-    jumpBeaten: m.jumpBeaten,
-    jumpDelete: m.jumpDelete,
-    jumpSayWhere: m.jumpSayWhere,
     jumpDeleted: (from, to) => m.jumpDeleted({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
     jumpDeletedUnsure: (from) => m.jumpDeletedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
-    jumpDismiss: m.jumpDismiss,
     jumpDismissed: (from, to) => m.jumpDismissed({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
     jumpDismissedUnsure: (from) => m.jumpDismissedUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
     jumpShelfDismissed: (count) => m.jumpShelfDismissed({ nText: n(count) }),
-    jumpBringBack: m.jumpBringBack,
     jumpLoaded: (count) => m.jumpLoaded({ n: count, nText: n(count) }),
-    jumpShelfHead: m.jumpShelfHead,
-    jumpShelfEmpty: m.jumpShelfEmpty,
     jumpPair: (from, to) => m.jumpPair({ fromText: fmtAyahRef(from, lang) ?? from, toText: fmtAyahRef(to, lang) ?? to }),
     jumpPairUnsure: (from) => m.jumpPairUnsure({ fromText: fmtAyahRef(from, lang) ?? from }),
     cropTitle: (page) => m.cropTitle({ page: n(page) }),
     cropCaption: (page) => m.cropCaption({ page: n(page) }),
-    cropShare: m.cropShare,
-    cropSave: m.cropSave,
-    cropClose: m.cropClose,
-    cropShared: m.cropShared,
     phoneTools: (name) => m.phoneTools({ name }),
-    phoneToolsClose: m.phoneToolsClose,
     wordPartsMany: (count) => m.wordPartsMany({ n: count, nText: n(count) }),
   };
 }

@@ -3221,7 +3221,9 @@
       "status": "blocked",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["testflight-sign-with-paid-team"],
+      "blockedBy": [
+        "testflight-sign-with-paid-team"
+      ],
       "note": "Install on the owner's own iPhone with the paid team, the same way as the iPad."
     },
     {
@@ -3255,7 +3257,9 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["recitation-plays-in-background"],
+      "blockedBy": [
+        "recitation-plays-in-background"
+      ],
       "note": "Show the verse and reciter on the lock screen and answer its play, pause and next buttons, and AirPods presses."
     },
     {
@@ -3267,7 +3271,9 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["recitation-plays-in-background"],
+      "blockedBy": [
+        "recitation-plays-in-background"
+      ],
       "note": "An AirPlay button so recitation plays on a HomePod or other speaker. Needs nothing from Apple."
     },
     {
@@ -3279,7 +3285,9 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["recitation-plays-in-background"],
+      "blockedBy": [
+        "recitation-plays-in-background"
+      ],
       "note": "Answer \"Hey Siri, play al-Kahf in Hifth\" on the iPhone and iPad. The Siri box on the app's ID allows it."
     },
     {
@@ -3291,7 +3299,9 @@
       "status": "blocked",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["siri-play-recitation"],
+      "blockedBy": [
+        "siri-play-recitation"
+      ],
       "note": "Ask Apple, signed in, to let a HomePod pass Siri play requests to Hifth: https://developer.apple.com/contact/request/sirikit-media-intent-for-homepod/ . A separate approval from the Siri box; send it once Siri plays recitation on the phone. The agent drafts the answers."
     },
     {
@@ -3878,10 +3888,10 @@
         "file": "docs/design/sharing-between-readers.md",
         "item": "④"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Decide whether the record of when you read ever goes with a share; suggested never by default, and only as a separate tick each time, which means naming one more way out in the privacy check."
+      "note": "Answered by the owner 2026-11-12: the reader decides who sees their data. The record goes only when the reader presses a button that says it is going and to whom; each such way out is named in the privacy check, and the reader can see who has it and take it back (sharing-who-has-my-data)."
     },
     {
       "id": "sharing-link-ending",
@@ -3925,7 +3935,7 @@
       "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Pick the sub-address for the share page (such as hifth.bytesofpurpose.com or share.bytesofpurpose.com) and add its address entry; the reading app stays on the blog's address. Answered by Omar on 2026-11-09: hifth.bytesofpurpose.com/share, for now."
+      "note": "Pick the sub-address for the share page (such as hifth.bytesofpurpose.com or share.bytesofpurpose.com) and add its address entry; the reading app stays on the blog's address. Answered by Omar on 2026-11-09: hifth.bytesofpurpose.com/share, for now. Moved on 2026-11-11, before anything was tied to the old name: the share page lives at hifth.app/share, beside the reading app at hifth.app/read (the hifth-app-site decision)."
     },
     {
       "id": "sharing-cloudflare-setup",
@@ -3936,7 +3946,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Set up hifth.bytesofpurpose.com/share on Cloudflare with its free database behind it: the address entry, a small server at /share, a placeholder page with no Qur'an text. What it shows waits on ③ and ⑫; nothing goes live before ②; re-ask whether the name is for good before a passkey or app link is tied to it."
+      "note": "Set up hifth.app/share on Cloudflare with its free database behind it: a small server at /share on the account that holds hifth.app, a placeholder page with no Qur'an text. What it shows waits on ③ and ⑫; nothing goes live before ②. The name is settled (2026-11-11): hifth.app, not hifth.bytesofpurpose.com."
     },
     {
       "id": "hifth-app-domain",
@@ -3944,10 +3954,13 @@
         "file": "docs/design/sharing-between-readers.md",
         "item": "⑭"
       },
-      "status": "open",
+      "status": "blocked",
+      "blockedBy": [
+        "Namecheap's 60-day lock on a new domain, which lifts about 2027-01-09"
+      ],
       "severity": "question",
       "owner": "user",
-      "note": "hifth.app, bought at Namecheap on 2026-11-10: a new Cloudflare account, the domain added, its nameservers moved now (cloudflare-onboarding skill); the registration moved after about 2027-01-09 when the 60-day lock lifts. Then re-ask whether the share page lives on hifth.app, and point the site's Cloudflare setup at the new account. 2026-11-11: Cloudflare says the domain is active; a read-only token is saved encrypted and its key is backed up in LastPass. Later that day: the account ID and one token that edits hifth.app's DNS and publishes static pages (Pages) on the new account are saved encrypted too, as CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (it ends 2027-11-12), and checked against Cloudflare: it reads the domain's 7 DNS records and reaches the account's Pages, which has no projects yet. Next: decide whether the share page lives on hifth.app; nothing is published there yet."
+      "note": "hifth.app, bought at Namecheap on 2026-11-10: a new Cloudflare account, the domain added, its nameservers moved now (cloudflare-onboarding skill); the registration moved after about 2027-01-09 when the 60-day lock lifts. Then re-ask whether the share page lives on hifth.app, and point the site's Cloudflare setup at the new account. 2026-11-11: Cloudflare says the domain is active; a read-only token is saved encrypted and its key is backed up in LastPass. Later that day: the account ID and one token that edits hifth.app's DNS and publishes static pages (Pages) on the new account are saved encrypted too, as CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (it ends 2027-11-12), and checked against Cloudflare: it reads the domain's 7 DNS records and reaches the account's Pages, which has no projects yet. Next: decide whether the share page lives on hifth.app; nothing is published there yet. Answered 2026-11-11 in the plan the owner approved: the share page and any future sign-in live on hifth.app, and the reading app moves to hifth.app/read (the hifth-app-site decision). What is left here is moving the registration to Cloudflare after about 2027-01-09."
     },
     {
       "id": "kanban-board-for-users",
@@ -3972,7 +3985,7 @@
       "blockedBy": [
         "sharing-which-way"
       ],
-      "note": "If accounts come: try Sign in with Apple and an email link inside the iPad and Mac apps on a throwaway test project; Google later through the system browser. The live locked link needs no sign-in."
+      "note": "If accounts come: try Sign in with Apple and an email link inside the iPad and Mac apps on a throwaway test project; Google later through the system browser. The live locked link needs no sign-in. 2026-11-11: what is known about Sign in with Apple is written into ⑨ (where it lives, the server it needs, Apple's rules, the trial); still blocked on ③."
     },
     {
       "id": "sharing-paid",
@@ -4001,6 +4014,17 @@
         "testflight-sign-with-paid-team"
       ],
       "note": "Test whether a teacher with no Apple device can open an iCloud share, and whether Apple's web library works in Firefox; only worth doing if iCloud sharing is picked."
+    },
+    {
+      "id": "sharing-who-has-my-data",
+      "source": {
+        "file": "docs/design/sharing-between-readers.md",
+        "item": "⑮"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The reader decides who sees their data (owner, 2026-11-12), so every way out needs one place listing who has what since when, with a way to stop each, and a plain word that a sent file cannot be called back. Build it rough in the info panel beside the first live way out."
     },
     {
       "id": "sharing-teacher-view",
@@ -6185,6 +6209,344 @@
       "owner": "agent",
       "feature": "performance",
       "note": "The app downloads 171 KB before the first page can be used, and start-up drops from about 2290 ms to about 2140 ms once that is under about 160 KB. Next step: load the laptop's page-edge strips (about 3 KB) and the zoom and edge-turn parts of the page stage later, one at a time, measuring each beside the last, then lower the start-up limit to just above the new size."
+    },
+    {
+      "id": "hifth-app-site",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "hifth.app has no front page yet, and the web app still lives only at the blog address. The front page and privacy page are drawn; the email form's server part, the app under /read, a tested way to publish and the 'Hifth has moved' sheet are still to build. Plan: .claude/plans/hifth-app-site.md. 2026-11-11: the release tool is built and tested; the first upload waits on the owner's keys (hifth-app-first-release). 2026-11-12: the email form's server part is built and tried on Cloudflare's local server (sign up, repeat, bad address, leave); going live waits on making the database and the spam-check secret (hifth-app-first-release). Later that day: the app runs under /read (its offline helper covers /read/ only), and carrying marks from the old address is built and tested in Chrome, Firefox and iPhone Safari, switched off until hifth.app is live (design item ⑦)."
+    },
+    {
+      "id": "intent-picture-on-local-hub",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "②"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "closedBy": "apps/web/src/dev/intent-picture.test.ts",
+      "note": "The 'what each commit was for' picture opened only as a file on disk, so the local hub could not list it. The development server now serves it at /intent/ (never in a production build), and the hub lists it as a private, local page."
+    },
+    {
+      "id": "privacy-page-contact-address",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "note": "The privacy page needs an address the owner reads, so a reader can ask to be taken off the list without the link in the email. It shows a placeholder until then, and the site does not go live with the placeholder."
+    },
+    {
+      "id": "hifth-app-first-release",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. Done 2026-11-12: the keys work on this laptop, and the site project (hifth-app) is made on the new account. Still needed: hifth.app attached to that project after the first upload, the email list's database, the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id. 2026-11-12: this is the top item for the front page; it waits on three things from the owner: the email list's database, the contact address the privacy page names, and the real spam-check key. 2026-11-12: the email list moves to Supabase (owner's choice), so the Cloudflare database step above no longer applies; see notify-function-on-d1. 2026-11-13: still the next thing for the front page once the calendar's dots look was added. Readers cannot reach hifth.app at all until this first upload runs, and the upload waits only on the owner: pushing the email list's table to Supabase, the four site keys, the contact address and the real spam-check key."
+    },
+    {
+      "id": "hifth-app-arabic-pictures",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑯"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "closedBy": "apps/web/e2e/landing-shots.spec.ts",
+      "note": "Fixed 2026-11-12: all eight taken again with the app in Arabic and the Arabic page points at them. Taking them showed the harakat under each sign named in English inside the Arabic app; they now come from the word list, held by a unit test and a browser test (sign-tools spec). Was: the Arabic front page shows the app in Arabic only in its opening pictures; the five feature pictures and three device pictures are the English ones. Take each again with the app in Arabic, from the plain public build, and point the Arabic page at them."
+    },
+    {
+      "id": "hifth-app-turnstile-key",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "note": "The front page carries Cloudflare's test key for the spam check, which lets every robot through, and the release check refuses it. Either the owner makes the Turnstile widget for hifth.app on the new account, or adds Turnstile edit to the saved token and the agent makes it, so the secret is never pasted anywhere. The site key goes in the page and the secret goes in as a Pages secret."
+    },
+    {
+      "id": "carry-marks-switched-off",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The 'Hifth has moved' card and the way to carry marks across are built and tested in Chrome, Firefox and iPhone Safari, but switched off, so readers at the old address are not told yet. Looked at 2026-11-12 at phone and iPad width: the card had covered the page bar and the trail, and is now a row of its own above them, with a test. Next, once hifth.app/read is live and checked: turn the switch on (MOVED_SHEET_ON in apps/web/src/moved.ts) in a change of its own that merges alone, then make three marks at the old address in Firefox and Chrome, carry them, and see three at hifth.app/read."
+    },
+    {
+      "id": "notify-list-not-live",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "note": "The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key and secret are not in. On 2026-11-12 the saved Cloudflare token was refused for databases (it can reach the site project, not D1), so the owner adds D1 edit to that token. Next: make the database on the new account and put its id in apps/landing/wrangler.toml, push the spam-check secret, then sign up once with a throwaway address on the live page and see make hifth-app-list-count say 1. 2026-11-12: the owner chose Supabase, not Cloudflare's database, for the list, so the database steps above are replaced by notify-function-on-d1; the sender and the rest are in docs/design/hifth-app-mailing-list.md. 2026-11-13: the form's side is done and proven on this laptop (notify-function-on-d1). What is left is the owner's, in order: push the list's database part to the real Supabase project and add the real site key's hash (manage-database skill; needs the database password); set the four Pages secrets SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, LIST_KEY and TURNSTILE_SECRET; choose and set up the sender (notify-list-sender); then sign up once with a throwaway address on the live page and see make hifth-app-list-count count it."
+    },
+    {
+      "id": "carry-leaves-settings-behind",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑧"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "closedBy": "apps/web/e2e/carry-marks.spec.ts",
+      "note": "Carrying marks to hifth.app brings bookmarks, notes and look-alike jumps, where the reader left off, and their settings (each name sorted by hand into goes or stays, checked by a unit test). The revision record comes only when the reader ticks its own unticked box on the card, which stays offered after the marks have gone (owner, 2026-11-12: the reader decides who sees their data). Each look is checked and filed by its own day at the new address, and never counted twice; the privacy check names this as the record's one way out. Browser tests in Chrome, Firefox and iPhone Safari. Closed 2026-11-12."
+    },
+    {
+      "id": "hifth-app-link-file",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑨"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "the apps signed with the paid Apple team"
+      ],
+      "note": "The small file at hifth.app/.well-known/apple-app-site-association that lets a tapped link open the app. Needs the paid team's ID in it, so it waits on the apps being signed with the paid team."
+    },
+    {
+      "id": "hifth-app-launch-email",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑩"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "the Mac app shipping"
+      ],
+      "note": "Choose a mail service and write the one email to the notify list when the Mac app is out, with the leave link in it. Cloudflare cannot send mail to any address by itself. 2026-11-12: what sends it is now an open decision (notify-list-sender) with Resend's free plan recommended, in docs/design/hifth-app-mailing-list.md."
+    },
+    {
+      "id": "hifth-app-store-wording",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑪"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "the licence reading (testflight-plan ⑥)"
+      ],
+      "note": "Name the App Store and add Apple's badge to the front page once Hifth is listed there. The badge is meant to link to a live listing."
+    },
+    {
+      "id": "hifth-app-builds-itself",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑫"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "hifth-app-first-release"
+      ],
+      "note": "Let Cloudflare build and publish hifth.app on each merge instead of from the laptop, keeping the private pitch folder out and running the same checks."
+    },
+    {
+      "id": "design-pages-to-hifth-app",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑬"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "hifth-app-first-release"
+      ],
+      "note": "Move the design pages from the old address to hifth.app; every decision link and the decision check's site address change with them."
+    },
+    {
+      "id": "retire-old-app-address",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑭"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "carry-marks-switched-off"
+      ],
+      "note": "Stop serving the app at the old address once readers have carried their marks across; until then the old address offers the carry."
+    },
+    {
+      "id": "hifth-paid-features",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑮"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "blockedBy": [
+        "the owner choosing which features are paid"
+      ],
+      "note": "Hifth will have paid features too (owner, 2026-11-12, a comment on the front page). Which ones, at what price and how a reader pays are not chosen; until then the front page says only that Hifth is open source, and promises nothing about price either way."
+    },
+    {
+      "id": "mistake-kinds-beyond-the-word",
+      "source": {
+        "file": "docs/design/confusion-points.md",
+        "item": "⑩"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Owner, 2026-11-12 (page comment t_2413cf): the Mistake pen should ask the kind of mistake first (harakah, makharij, a tajweed rule left out such as idgham, a hop into another verse), then the detail that kind needs. Build it two or three ways into the real question and let the owner choose by using them; the losing shapes stay as a setting. Built 2026-11-12: three layouts (kind first, kinds as tabs, everything at once) in the info panel, everything at once by default; the side-by-side note is docs/design/mistake-ask.md. Waiting on the owner to pick one by using it."
+    },
+    {
+      "id": "share-menu-too-plain",
+      "source": {
+        "file": "docs/design/app-links-editions-and-builder.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-12 (page comment t_bffcd4): the share menu looks too plain. Build two or three better-looking versions into the real sheet, try them at phone size, the owner picks, the others stay as a setting. Built 2026-11-12 as three looks in the info panel (preview card, the default; tiles; plain), drawn in docs/design/share-look.md; waiting on the owner's pick. Also seen while testing, older than the looks: in the iPhone test run the menu reopened on the last choice (its roots, say). The choice is kept only while the share button stays on screen and is saved nowhere; whether a computer does the same is not yet checked. Settle whether the menu should remember the choice, and make every device do it."
+    },
+    {
+      "id": "calendar-looks-plain",
+      "source": {
+        "file": "docs/design/revision-record.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "revision-record",
+      "note": "Owner, 2026-11-12 (page comment t_476e84): the month and day views should look more appealing. Look at how good habit and streak calendars draw a day's status, build two or three versions into the record sheet, the owner picks, the others stay as a setting. Built 2026-11-12 as three looks in the info panel (shades, the default; rings; cards), drawn in docs/design/calendar-look.md. A fourth look, dots, added 2026-11-13 from the owner's picture of the Mac's menu-bar calendar: one to three dots for how much was opened, a tick at two pages, a red ring for a day with mistakes, and a key under the month. Waiting on the owner's pick."
+    },
+    {
+      "id": "notify-function-on-d1",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "①"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/landing/lib/notify.test.mjs",
+      "feature": "hifth-app-site",
+      "note": "The sign-up server code (apps/landing/lib/notify.mjs) still writes to Cloudflare's database, but the owner chose Supabase for the list on 2026-11-12. Move it to call a Supabase add function with the publishable key, with the table in a schema the web interface does not serve; a paused project must answer try again later, never success. The locked-down database setup is on the unmerged supabase-move branch. Fixed 2026-11-13: the form calls the list's three database functions (add, confirm, leave) with the publishable key and a site key; the table sits in a schema the web interface does not serve (supabase/migrations/20261113000001_notify_list.sql, checked by make notify-db-test); an asleep or unreachable list answers try again later and sends nothing. Proven on this laptop against a local copy: sign up, confirm by the button, leave, with make hifth-app-list-count ARGS=--local counting 0, then 1 waiting, then 1 on the list, then 0."
+    },
+    {
+      "id": "notify-leave-on-visit",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "②"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/landing/lib/notify.test.mjs",
+      "feature": "hifth-app-site",
+      "note": "The leave link (apps/landing/functions/api/unsubscribe.js) deletes the row on a plain visit, so a mail scanner opening every link would remove people. Make it a page with a Leave the list button that sends a POST, add a separate POST address for the one-click leave headers (no redirect), and a test that a plain visit removes nobody. The confirm link works the same way. Fixed 2026-11-13: opening the leave link (and the confirm link) shows a page with one button and changes nothing; only the button's POST, or a mail program's one-click leave, removes the address."
+    },
+    {
+      "id": "privacy-page-names-d1",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The privacy page (apps/landing/privacy.html and its Arabic twin) says the list is kept in Cloudflare's database and that only two things are kept. Name Supabase, name Resend as the sender and that it keeps logs in the US, and list what a row keeps (address, signed-up and confirmed dates, language, leave code). Waits on the sender choice (decision notify-list-sender). 2026-11-13: half done. Both privacy pages now name the Supabase database, say an address counts only once confirmed, list what a row keeps, and say an unconfirmed one is deleted after 7 days. Still owed: naming the sending service and where it keeps its logs, once the decision notify-list-sender is made."
+    },
+    {
+      "id": "hifth-app-dmarc-spf",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "feature": "hifth-app-site",
+      "note": "hifth.app has no DMARC record, and its root SPF record still includes the registrar's old mail-forwarding servers, left over from before Apple held the mail. Owner adds a watch-only DMARC record (p=none) at the root with reports to an address they read; once the registrar's forwarding is confirmed off, remove its include. Apple's records stay as they are."
+    },
+    {
+      "id": "notify-form-promise",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "⑤"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/landing/lib/pages.test.mjs",
+      "feature": "hifth-app-site",
+      "note": "The form says Nothing else, and the privacy page says the address is used to write when the apps ship. With a confirmation email the promise becomes one email to confirm, then one when the app ships. Change the wording on the English and Arabic pages in the same change as the confirmation email. Fixed 2026-11-13: both front pages now say one email to confirm, then one when the apps ship; a test holds both languages to it."
+    },
+    {
+      "id": "notify-form-reveals-member",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "⑥"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/landing/lib/notify.test.mjs",
+      "feature": "hifth-app-site",
+      "note": "A repeat sign-up answers already on the list, which tells anyone whether an address is signed up. The form should always answer check your inbox, with a test that a repeat sign-up gets the same answer as a new one. Fixed 2026-11-13: a new and a repeat sign-up get the same answer (check your inbox), and the database's add answers nothing either way."
+    },
+    {
+      "id": "notify-list-keep-awake",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "Supabase's free plan puts the list's project to sleep after 7 quiet days, after which the form can only answer try again later until the owner wakes it by hand; and an unconfirmed address is only deleted when someone else signs up, so the privacy page's deleted-after-7-days is not yet kept on a quiet week. Build the daily timer from the design note: a small separate Cloudflare Worker that calls the database once a day and deletes unconfirmed rows in the same run, tested for what it asks, then checked after its first real run. Putting it live needs the owner's OK; it goes once the list is live (notify-list-not-live)."
     },
     {
       "id": "supabase-move",

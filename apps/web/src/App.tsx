@@ -13,7 +13,9 @@ import {
   editNote,
   markMistake,
   mistakeOn,
-  pickMistakeSign,
+  answerMistake as setMistakeAnswer,
+  mistakeKindOf,
+  type MistakeAnswer,
   removeNote,
   restoreNote,
   addVerse,
@@ -119,7 +121,7 @@ import {
   loadTajweedVocabulary,
 } from "./assets";
 import { applyFieldToDocument, fieldFromHash } from "./field";
-import { recordLook } from "./revision-store";
+import { readRecord, recordLook, takeRecord } from "./revision-store";
 import { countUse } from "./usage-store";
 import { useCountChange, useCountUse } from "./use-count";
 import { USE_PENS } from "./usage";
@@ -185,6 +187,9 @@ import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
 import { NoteFollow } from "./components/NoteFollow";
 import { useBookmarks, useConfusions, useNotes, useSeam } from "./useBookmarks";
+import { readSeam, writeSeam } from "./bookmark-store";
+import { useCarryIn } from "./useCarryIn";
+import { MovedSheet } from "./components/MovedSheet";
 import {
   NO_HISTORY,
   recordStep,
@@ -275,6 +280,9 @@ import { usePageDestination } from "./page-destination";
 import { isMarkAim, rememberMarkTools, savedMarkTools, toolsFor, type MarkAim, type MarkTools } from "./mark-tools";
 import { rememberEraserPlace, savedEraserPlace, type EraserPlace } from "./eraser-place";
 import { rememberMistakeTap, savedMistakeTap, type MistakeTap } from "./mistake-tap";
+import { rememberMistakeAsk, savedMistakeAsk, type MistakeAsk } from "./mistake-ask";
+import { rememberCalendarLook, savedCalendarLook, type CalendarLook } from "./calendar-look";
+import { rememberShareLook, savedShareLook, type ShareLook } from "./share-look";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberPenSide, savedPenSide, type PenSide } from "./pen-side";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
@@ -290,6 +298,9 @@ import styles from "./App.module.css";
 // build instead opens on page 1 — al-Fātiḥah, the surah the demo is built around
 // — so the first thing in the room is the page we polished.
 const START_PAGE = PITCH ? 1 : 7;
+
+/** Where the reader left off, as the carry to hifth.app reads and lays it. */
+const CARRY_PLACE = { read: readSeam, write: writeSeam };
 
 // How long a rising verse drawer waits for its surah's look-alikes before it
 // rises without them (see `waitingForLooks`). From the device the list takes a
@@ -1815,8 +1826,10 @@ export function App(): JSX.Element {
   }, [keepHistory]);
   const {
     bookmarks,
+    loaded: bookmarksLoaded,
     commit: commitBookmarks,
     restore: restoreBookmarks,
+    saved: bookmarksSaved,
   } = useBookmarks(announce, t.bmNotSaved, recorders.bookmarks);
   // The red seam: where the reader left off, following the last page they stayed on.
   const seamPage = useSeam(page);
@@ -1885,6 +1898,24 @@ export function App(): JSX.Element {
     rememberMistakeTap(choice);
     setMistakeTap(choice);
   }, []);
+  // How the question asks the kind of mistake: the kinds first, as tabs, or all at once (mistake-ask).
+  const [mistakeAsk, setMistakeAsk] = useState<MistakeAsk>(() => savedMistakeAsk());
+  // How the record's month draws a day; the month reads it itself when it opens.
+  const [calendarLook, setCalendarLook] = useState<CalendarLook>(() => savedCalendarLook());
+  const chooseCalendarLook = useCallback((choice: CalendarLook) => {
+    rememberCalendarLook(choice);
+    setCalendarLook(choice);
+  }, []);
+  // How the share menu looks; the menu reads it itself each time it opens.
+  const [shareLook, setShareLook] = useState<ShareLook>(() => savedShareLook());
+  const chooseShareLook = useCallback((choice: ShareLook) => {
+    rememberShareLook(choice);
+    setShareLook(choice);
+  }, []);
+  const chooseMistakeAsk = useCallback((choice: MistakeAsk) => {
+    rememberMistakeAsk(choice);
+    setMistakeAsk(choice);
+  }, []);
   const [lastAim, setLastAim] = useState<MarkAim>("note");
   // The last tool other than plain selecting, for the pencil's double-tap swap.
   const lastToolRef = useRef<PageTool | null>(null);
@@ -1951,10 +1982,12 @@ export function App(): JSX.Element {
   const {
     notes,
     scoped,
+    loaded: notesLoaded,
     commit: commitNotes,
     commitScoped,
     loadFile: loadNotesFile,
     restore: restoreNotes,
+    saved: notesSaved,
   } = useNotes(announce, t.bmNotSaved, recorders.notes);
   const [noteOpenId, setNoteOpenId] = useState<string | null>(null);
   const openNote = notes.find((n) => n.id === noteOpenId) ?? null;
@@ -2007,9 +2040,11 @@ export function App(): JSX.Element {
   const {
     confusions,
     device,
+    loaded: jumpsLoaded,
     commit: commitConfusions,
     loadFile: loadConfusionsFile,
     restore: restoreConfusions,
+    saved: jumpsSaved,
   } = useConfusions(announce, t.bmNotSaved, recorders.jumps);
   const confusionMarks = useMemo(() => countConfusionMarks(confusions), [confusions]);
   // And the smaller one at the next pause sign after where each jump left
@@ -2324,26 +2359,36 @@ export function App(): JSX.Element {
     whole?: ScopedNote;
   } | null>(null);
 
+  // The file carries the notes that gather verses and, apart from them, the
+  // marked mistakes, which are still the old kind of note, and the jumps. The
+  // same text is what the carry to hifth.app sends (moved.ts).
+  const bookmarkFileText = useCallback(
+    () =>
+      JSON.stringify(
+        toBookmarkFile(bookmarks, Date.now(), notes.filter(isMistake), [...scoped], confusions),
+        null,
+        2,
+      ),
+    [bookmarks, notes, scoped, confusions],
+  );
+
   const saveBookmarkFile = useCallback(() => {
-    // The file carries the notes that gather verses and, apart from them, the
-    // marked mistakes, which are still the old kind of note, and the jumps.
-    const mistakes = notes.filter(isMistake);
-    const file = toBookmarkFile(bookmarks, Date.now(), mistakes, [...scoped], confusions);
-    const blob = new Blob([JSON.stringify(file, null, 2)], { type: "application/json" });
+    const blob = new Blob([bookmarkFileText()], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = "hifth-bookmarks.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, [bookmarks, notes, scoped, confusions]);
+  }, [bookmarkFileText]);
 
+  // Returns how many items the file added, or null when it was not a bookmark file.
   const loadBookmarkFile = useCallback(
-    (text: string) => {
+    (text: string, from: "file" | "carry" = "file"): number | null => {
       const file = parseBookmarkFile(text);
       if (!file) {
         announce(t.bmLoadBad);
-        return;
+        return null;
       }
       const merged = mergeBookmarks(bookmarks, file.bookmarks);
       const newBookmarks = merged.length - bookmarks.length;
@@ -2355,10 +2400,33 @@ export function App(): JSX.Element {
         ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
         ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
       ];
+      const added = Math.max(0, newBookmarks) + newNotes + newJumps;
+      const said =
+        from === "carry" ? t.carryArrived(added) : parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0);
       // A file loaded is not a step: its notes and jumps are not either.
-      commitBookmarks(merged, parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0), { unrecorded: true });
+      commitBookmarks(merged, said, { unrecorded: true });
+      return added;
     },
     [announce, bookmarks, commitBookmarks, loadNotesFile, loadConfusionsFile, t],
+  );
+  // Opened by the old address to carry the reader's marks here (moved.ts).
+  // Ready only once all three kinds of mark are read in: the notes and the jumps
+  // refuse to save before their own read lands, and a carried file loaded then
+  // would stay in memory and never reach disk.
+  useCarryIn(
+    // The page list too: a place carried before the pages are known would be
+    // refused as a page this edition does not have.
+    bookmarksLoaded && notesLoaded && jumpsLoaded && pageTurns.pages.length > 0,
+    (text) => loadBookmarkFile(text, "carry"),
+    (p) => {
+      if (!pageTurns.anchors.has(p)) return false;
+      goToPage(p);
+      return true;
+    },
+    CARRY_PLACE,
+    () => Promise.all([bookmarksSaved(), notesSaved(), jumpsSaved()]),
+    (n, looks) => announce(looks === null ? t.carryArrived(n) : `${t.carryArrived(n)}${t.sep}${t.carryRecordArrived(looks)}`),
+    takeRecord,
   );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
@@ -2651,8 +2719,21 @@ export function App(): JSX.Element {
     },
     [notes, commitNotes, t, mistakeTap],
   );
+  /** What is said once an answer is picked: which sign, which letter, which rule. */
+  const saidForMistake = (a: MistakeAnswer, name: string | null) =>
+    a.what === "sign"
+      ? name
+        ? t.mistakeSignPicked(name)
+        : t.mistakeWordPicked
+      : a.what === "letter"
+        ? a.letter !== undefined
+          ? t.mistakeLetterPicked(a.letter + 1)
+          : t.mistakeAnyLetterPicked
+        : a.what === "rule"
+          ? t.mistakeRulePicked(name ?? a.rule)
+          : t.mistakeWordPicked;
   // The question answered for a word not marked yet: one change, one Undo.
-  const answerMistake = (mark: number | null, name: string | null) => {
+  const answerFreshMistake = (answer: MistakeAnswer, name: string | null) => {
     const a = askingMistake;
     setAskingMistake(null);
     if (!a) return;
@@ -2660,9 +2741,12 @@ export function App(): JSX.Element {
     const now = Date.now();
     let next = markMistake(notes, where, now);
     const made = mistakeOn(next, a.page, a.key, a.word);
-    if (made && mark !== null) next = pickMistakeSign(next, made.id, mark, now);
-    commitNotes(next, name ? t.mistakeSignPicked(name) : t.mistakeMarked(t.ayahLabel(a.key) ?? a.key));
-    void recordLook({ key: a.key, page: a.page, slip: true, ...(mark !== null ? { what: "sign" as const } : {}) });
+    if (made) next = setMistakeAnswer(next, made.id, answer, now);
+    commitNotes(
+      next,
+      answer.what === "word" ? t.mistakeMarked(t.ayahLabel(a.key) ?? a.key) : saidForMistake(answer, name),
+    );
+    void recordLook({ key: a.key, page: a.page, slip: true, ...(answer.what !== "word" ? { what: answer.what } : {}) });
   };
   // "Went into another verse…": no red on the word, which was read right;
   // the mistake is the turn, said the way a jump is, look-alikes first.
@@ -2684,14 +2768,20 @@ export function App(): JSX.Element {
     commitNotes(removeNote(notes, n.id), t.mistakeCleared);
     mistakeIntoAnother(n.key, n.page, n.word, false);
   };
-  const pickSign = (mark: number | null, name: string | null) => {
+  // The question answered again for a word already marked: what went wrong is changed.
+  const answerMarkedMistake = (answer: MistakeAnswer, name: string | null) => {
     const n = picking;
     setPickingId(null);
     if (!n) return;
-    commitNotes(
-      pickMistakeSign(notes, n.id, mark, Date.now()),
-      name ? t.mistakeSignPicked(name) : t.mistakeWordPicked,
-    );
+    commitNotes(setMistakeAnswer(notes, n.id, answer, Date.now()), saidForMistake(answer, name));
+  };
+  /** What a mark already says, in the question's own terms, so it opens at that kind. */
+  const answeredOf = (n: Note): MistakeAnswer => {
+    const kind = mistakeKindOf(n);
+    if (kind === "sign" && n.mark !== null && n.mark !== undefined) return { what: "sign", mark: n.mark };
+    if (kind === "letter") return { what: "letter", letter: n.letter };
+    if (kind === "rule" && n.rule) return { what: "rule", rule: n.rule };
+    return { what: "word" };
   };
   const clearMistake = () => {
     const n = picking;
@@ -4758,6 +4848,12 @@ export function App(): JSX.Element {
             onEraserPlace={desktop ? chooseEraserPlace : undefined}
             mistakeTap={mistakeTap}
             onMistakeTap={chooseMistakeTap}
+            mistakeAsk={mistakeAsk}
+            onMistakeAsk={chooseMistakeAsk}
+            calendarLook={calendarLook}
+            onCalendarLook={chooseCalendarLook}
+            shareLook={shareLook}
+            onShareLook={chooseShareLook}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
             // Only the iPad app has a pencil to squeeze.
@@ -4861,6 +4957,9 @@ export function App(): JSX.Element {
           onStop={stopFollowing}
         />
       )}
+      {/* "Hifth has moved": a row of its own above the trail, like the note
+          bar, so it covers neither the page bar nor the trail. */}
+      <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} readPlace={readSeam} readRecord={readRecord} />
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
         {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
@@ -5264,8 +5363,10 @@ export function App(): JSX.Element {
               return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
             }}
             mode="mistake"
-            chosen={picking.mark ?? null}
-            onPick={(mark, name) => pickSign(mark, name)}
+            answered={answeredOf(picking)}
+            ask={mistakeAsk}
+            onAnswer={(answer, name) => answerMarkedMistake(answer, name)}
+            onPick={(mark, name) => answerMarkedMistake(mark === null ? { what: "word" } : { what: "sign", mark }, name)}
             onClear={clearMistake}
             onAnother={turnMistakeIntoAnother}
             onClose={() => setPickingId(null)}
@@ -5283,7 +5384,9 @@ export function App(): JSX.Element {
             label={t.ayahLabel(askingMistake.key) ?? askingMistake.key}
             anchor={() => askingMistake.rect}
             mode="mistake"
-            onPick={(mark, name) => answerMistake(mark, name)}
+            ask={mistakeAsk}
+            onAnswer={(answer, name) => answerFreshMistake(answer, name)}
+            onPick={(mark, name) => answerFreshMistake(mark === null ? { what: "word" } : { what: "sign", mark }, name)}
             onAnother={answerAnother}
             onClose={() => setAskingMistake(null)}
           />

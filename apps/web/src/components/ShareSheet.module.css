@@ -261,10 +261,184 @@
   }
 }
 
+/*
+ * Three looks for what the sheet holds, chosen in the info panel (share-look.ts).
+ * The body is no box of its own, so its rows stay rows of the sheet.
+ */
+.body {
+  display: contents;
+}
+
+.linkText {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+/* Preview card: the link as a message would show it, then the choices as one
+   row, and the website link as the main button. */
+.preview {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-inline-start: 4px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: 0 1px 3px rgb(38 32 26 / 0.08);
+  min-inline-size: 0;
+}
+
+.previewSite {
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+  font-weight: 650;
+}
+
+.previewTitle {
+  font-size: var(--text-md);
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.previewOpens {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.previewUrl {
+  overflow: hidden;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: start;
+}
+
+.body[data-share-look="preview"] .panels {
+  gap: 4px;
+}
+
+.body[data-share-look="preview"] .panel {
+  flex: 1 1 0;
+  justify-content: center;
+  min-inline-size: max-content;
+  border-color: transparent;
+  background: var(--paper-sunk);
+  color: var(--ink-soft);
+}
+
+.body[data-share-look="preview"] .panel:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--paper);
+  color: var(--accent-strong);
+  font-weight: 650;
+  box-shadow: 0 1px 2px rgb(38 32 26 / 0.12);
+}
+
+.body[data-share-look="preview"] .link[data-main] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+  font-weight: 650;
+}
+
+.body[data-share-look="preview"] .link[data-main]:hover {
+  background: var(--accent-strong);
+}
+
+/* Tiles: each choice and each link a tile with a sign; a link says where it opens. */
+.body[data-share-look="tiles"] .panel {
+  flex: 1 1 0;
+  min-inline-size: 5.5rem;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-block-size: 4.25rem;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.sign {
+  font-size: var(--text-lg, 1.25rem);
+  line-height: 1;
+  color: var(--accent);
+}
+
+.body[data-share-look="tiles"] .link {
+  justify-content: flex-start;
+  gap: var(--space-3);
+  min-block-size: 4.25rem;
+  padding: var(--space-2) var(--space-3);
+  border-color: var(--paper-sunk);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  text-align: start;
+  line-height: 1.25;
+}
+
+.body[data-share-look="tiles"] .link .glyph {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border-radius: 50%;
+  background: var(--accent-tint);
+}
+
+.hint {
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
 /* Inside the verse's drawer (a setting): no card of its own, the drawer is the card. */
 .inDrawer {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
+}
+
+/* A phone on its side, for the looks: after them in the file so these win. */
+@media (min-width: 40rem) and (max-height: 499.98px) {
+  /* The preview keeps one line, the verse's name; the buttons need the room. */
+  .preview {
+    grid-auto-flow: column;
+    justify-content: start;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding-block: var(--space-1);
+  }
+
+  .previewOpens,
+  .previewUrl {
+    display: none;
+  }
+}
+
+/* Inside the verse's drawer on a phone the room under the tools row is short
+   (about 170px), and the preview card and the tall tiles pushed the links out
+   of reach until you scrolled. The drawer's own heading already names the
+   verse, so the card goes, and tiles sit one line high. */
+.inDrawer .preview,
+.inDrawer .hint {
+  display: none;
+}
+
+.inDrawer .body[data-share-look="tiles"] .panel,
+.inDrawer .body[data-share-look="tiles"] .link {
+  flex-direction: row;
+  gap: var(--space-2);
+  min-block-size: var(--touch-min);
+  padding-block: 0;
+}
+
+.inDrawer .body[data-share-look="tiles"] .link .glyph {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
 }

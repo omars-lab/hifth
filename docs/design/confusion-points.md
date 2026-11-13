@@ -635,6 +635,28 @@ before it calls one cut off.
 
 ---
 
+### ⑩ Should the Mistake pen ask what *kind* of mistake it was, beyond the word, its harakat or a hop? · **open**
+
+**Asked by the owner, 2026-11-12** (a comment on the front page's picture of the pen): "the
+mistake might not be a hop … it might be getting the harakah wrong, it might be mispronouncing
+the letter (makharij), it might be getting the tajweed rule wrong (not doing idgham, etc)".
+The question should start with a choice of kind, and then ask the detail that kind needs.
+
+**What it changes for a hafiz:** today a slip in how a letter is said, or a rule of tajweed
+left out, has no place to go, so it gets marked as "the word" and the record cannot tell a
+forgotten word from a mispronounced one. A teacher reviewing the record, and the hafiz
+revising it, need to know which it was, because each is fixed a different way.
+
+**What the app does today:** a tap under the Mistake pen asks one question with three
+answers: one of the word's harakat (pick the sign), the whole word, or going on into another
+verse.
+
+**What would answer it:** build the kind-first question two or three ways (for example, a row
+of kinds that opens the detail underneath, against today's single question with more answers
+added), with makharij naming the letter and tajweed naming the rule, and let the owner choose
+by using them. The losing shapes stay as a setting. The kinds and rule names need a list we
+own; the rule names in our tajweed colouring are the place to start.
+
 ## A rough plan, in order — not yet costed
 
 An implementer would likely proceed in these phases. Ordered by dependency, not committed to

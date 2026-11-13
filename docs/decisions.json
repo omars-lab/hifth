@@ -1994,6 +1994,91 @@
       "decided": "A",
       "by": "omar",
       "date": "2026-11-10"
+    },
+    {
+      "id": "hifth-app-site",
+      "question": "Where should the reading app live once hifth.app has a front page?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Where it is today, with the front page linking to it"
+        },
+        {
+          "id": "B",
+          "label": "Moved under the new address now, as its reading page"
+        },
+        {
+          "id": "C",
+          "label": "The front page at the old address, and the new address unused for now"
+        }
+      ],
+      "doc": "docs/decisions/hifth-app-site.md#so-what-was-decided",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-11-11",
+      "related": [
+        "notify-list-store",
+        "notify-list-sender"
+      ]
+    },
+    {
+      "id": "notify-list-store",
+      "question": "Where does the notify list keep its emails?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "In Supabase, on the project hifth.app already has"
+        },
+        {
+          "id": "B",
+          "label": "In a database on the Cloudflare account that runs the site"
+        }
+      ],
+      "doc": "docs/design/hifth-app-mailing-list.md#where-does-the-list-live-and-who-can-read-it",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-11-12",
+      "related": [
+        "hifth-app-site",
+        "notify-list-sender"
+      ]
+    },
+    {
+      "id": "notify-list-sender",
+      "question": "What sends the notify list's emails?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Resend on its free plan, from a separate news address, with the list kept only in Supabase (recommended)"
+        },
+        {
+          "id": "B",
+          "label": "Amazon's mail service, with the list kept only in Supabase"
+        },
+        {
+          "id": "C",
+          "label": "A newsletter service that holds its own copy of the list"
+        },
+        {
+          "id": "D",
+          "label": "Cloudflare's paid sending service"
+        },
+        {
+          "id": "E",
+          "label": "The owner's own Apple mail on hifth.app"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/hifth-app-mailing-list.html",
+      "page": "docs/design/hifth-app-mailing-list.html",
+      "builtBy": "scripts/build-hifth-app-mailing-list.mjs",
+      "doc": "docs/design/hifth-app-mailing-list.md#what-sends-the-launch-email",
+      "related": [
+        "hifth-app-site",
+        "notify-list-store"
+      ]
     }
   ]
 }
