@@ -2041,6 +2041,7 @@ export function App(): JSX.Element {
     confusions,
     device,
     loaded: jumpsLoaded,
+    ready: jumpsReady,
     commit: commitConfusions,
     loadFile: loadConfusionsFile,
     restore: restoreConfusions,
@@ -2075,10 +2076,18 @@ export function App(): JSX.Element {
   // A "not sure yet" jump being named from its row in the list: the next
   // destination picked fills it in rather than marking a new jump.
   const [jumpRenaming, setJumpRenaming] = useState<string | null>(null);
+  // A jump marked before the saved ones have been read in waits for them, so it
+  // is counted against them: the message says the right number of times, and a
+  // mistake is not turned back into a plain jump when the saved record lands.
+  const waitingJumps = useRef<[JumpEnd, string | null, ConfusionKind][]>([]);
   const saveJump = useCallback(
     (from: JumpEnd, to: string | null, kind: ConfusionKind = "jump") => {
       setJumpAsking(null);
       setJumpNaming(null);
+      if (!jumpsReady) {
+        waitingJumps.current.push([from, to, kind]);
+        return;
+      }
       setJumpRenaming(null);
       const now = Date.now();
       const unsure = jumpRenaming ? confusions.find((c) => c.id === jumpRenaming) : undefined;
@@ -2104,8 +2113,13 @@ export function App(): JSX.Element {
       commitConfusions(next, said);
       setJumpUndo({ said, undo: (s) => removeLastTime(s, mine.id, Date.now()) });
     },
-    [confusions, device, commitConfusions, t, jumpRenaming],
+    [confusions, device, commitConfusions, t, jumpRenaming, jumpsReady],
   );
+  // One waiting jump per pass: each save changes the list the next counts on.
+  useEffect(() => {
+    const first = jumpsReady ? waitingJumps.current.shift() : undefined;
+    if (first) saveJump(...first);
+  }, [jumpsReady, saveJump]);
   const undoJump = () => {
     if (!jumpUndo) return;
     commitConfusions(jumpUndo.undo(confusions), "");

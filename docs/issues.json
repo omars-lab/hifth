@@ -5764,6 +5764,18 @@
       "closedBy": "apps/web/e2e/carry-marks.spec.ts"
     },
     {
+      "id": "jump-marked-before-saved-jumps-load",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "122"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "A jump marked in the moment after opening the app, before the saved jumps were read in, was counted against an empty list: the message said a new jump instead of a mistake made two times, the kind could flip back to a plain jump, and Undo pointed at a record that no longer stood. Found when the Mistake pen's test passed only on retry (2026-11-13). Such a jump now waits for the read.",
+      "closedBy": "apps/web/e2e/confusions.spec.ts"
+    },
+    {
       "id": "short-screen-loses-the-spread",
       "source": {
         "file": "docs/PLAN.md",

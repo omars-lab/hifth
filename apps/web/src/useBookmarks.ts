@@ -302,6 +302,8 @@ export function useConfusions(
   device: Device | null;
   /** True once the saved jumps have been read in; nothing is written before. */
   loaded: boolean;
+  /** True once the read has finished, whether it found the store or not. */
+  ready: boolean;
   commit: (next: readonly Confusion[], said: string, how?: CommitHow) => void;
   loadFile: (fileJumps: readonly Confusion[]) => number;
   restore: (jumps: unknown, said: string) => void;
@@ -311,6 +313,7 @@ export function useConfusions(
   const [held, setHeld] = useState<readonly Confusion[]>([]);
   const [device, setDevice] = useState<Device | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [ready, setReady] = useState(false);
   const latest = useRef<readonly Confusion[]>([]);
   const read = useRef(false);
   const queue = useRef<Promise<unknown>>(Promise.resolve());
@@ -326,7 +329,9 @@ export function useConfusions(
       if (live) setDevice(d);
     });
     queue.current = readConfusions().then((got) => {
-      if (!live || !got) return;
+      if (!live) return;
+      setReady(true);
+      if (!got) return;
       read.current = true;
       // Jumps marked before the read landed are kept beside what was read.
       hold(mergeConfusions(got, latest.current));
@@ -375,5 +380,5 @@ export function useConfusions(
     [hold, save],
   );
 
-  return { confusions: held, device, loaded, commit, loadFile, restore, saved: () => queue.current };
+  return { confusions: held, device, loaded, ready, commit, loadFile, restore, saved: () => queue.current };
 }

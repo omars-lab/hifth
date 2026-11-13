@@ -588,6 +588,54 @@ test.describe("Hifth · the list behind a jump mark", () => {
     await expect(page).toHaveURL(/7:160/);
   });
 
+  // A slow device reads its saved jumps in a moment after the page shows. A jump
+  // marked in that moment was counted against nothing: the message said a new
+  // jump, a mistake already marked turned back into a plain jump when the saved
+  // one came in, and Undo pointed at a record that no longer stood. Found by the
+  // full run before a push on 2026-11-13, when one run's read came in late.
+  test("a jump marked before the saved jumps are read in counts with them, and a mistake stays one", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p9?tool=mistake");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    const at = await ayahTarget(page, verse(65)); // 2:58
+    await page.mouse.click(at.x, at.y);
+    await page.getByRole("dialog", { name: /^What went wrong in / }).getByRole("button", { name: "Went into another verse…" }).click();
+    await page.getByRole("dialog", { name: "Where did 2:58 pull you?" }).getByRole("button", { name: /7:161/ }).click();
+    await expect(undoBar(page)).toContainText("Mistake marked: 2:58 went into 7:161");
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+
+    // From the next page load on, the saved marks are kept busy for 3 s, so the
+    // app's read of them waits: made-up work on a store the test opens itself.
+    await page.addInitScript(() => {
+      const open = indexedDB.open("hifth.bookmarks.v1", 1);
+      open.onupgradeneeded = () => open.result.createObjectStore("sets", { keyPath: "id" });
+      open.onsuccess = () => {
+        const sets = open.result.transaction("sets", "readwrite").objectStore("sets");
+        const until = Date.now() + 3_000;
+        const spin = () => {
+          if (Date.now() < until) sets.get("nothing").onsuccess = spin;
+          else open.result.close();
+        };
+        spin();
+      };
+    });
+    await page.goto("/#/hafs-kfqc/p9");
+    await page.reload();
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await jumpFrom(page, 65, "2:58", (l) => l.getByRole("button", { name: /7:161/ }).click());
+    await expect(undoBar(page)).toContainText("Mistake marked: 2:58 went into 7:161, 2 times now", { timeout: 10_000 });
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+    await mark(page, "2:58").click();
+    const r = row(jumps(page, "2:58"), "7:161");
+    await expect(r).toContainText("2 times");
+    await expect(r.getByRole("button", { name: "A mistake" })).toHaveAttribute("aria-pressed", "true");
+
+    // Undo takes back this time only, from the one record.
+    await page.keyboard.press("Escape");
+    await undoBar(page).getByRole("button", { name: "Undo" }).click();
+    await mark(page, "2:58").click();
+    await expect(row(jumps(page, "2:58"), "7:161")).toContainText("1 time");
+  });
+
   test("the Mistake pen's \"went into another verse\" marks a mistake, and the list and the page map say so", async ({ page }) => {
     // One way in for every mistake (docs/PLAN.md, item 103, the owner on
     // 2026-10-13): the Mistake pen, a tap on the word, then what went wrong.

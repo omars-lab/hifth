@@ -2445,6 +2445,18 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     the app does, making the table when it is missing. A new test writes the place on a page of
     the site that runs none of the app, then opens the app and finds it; it stalled in Chrome
     and Firefox before the mend. The whole file then passed three times over in both.
+122. **A jump marked in the first moment after opening the app was counted as new.** In the
+    same push run, the Mistake pen's test passed only on its second try: after a reload it
+    marked "went into another verse" a second time, and the app said a plain jump had been
+    marked, not a mistake made two times. The app reads the saved jumps in a moment after the
+    page shows; a jump marked inside that moment was counted against an empty list. The saved
+    one was merged in afterwards, so no time was lost, but the message gave the wrong count, a
+    mistake could turn back into a plain jump, and Undo pointed at a record that no longer
+    stood. A slow device makes that moment longer. **Fixed 2026-11-13:** a jump marked before
+    the read waits for it, then is saved against the real list. A new test keeps the saved
+    marks busy for three seconds as the app opens, marks the jump again, and checks the count,
+    the kind and Undo; it failed before the mend, and it and the Mistake pen's test then passed
+    fifteen times each.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
