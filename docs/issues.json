@@ -3221,7 +3221,9 @@
       "status": "blocked",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["testflight-sign-with-paid-team"],
+      "blockedBy": [
+        "testflight-sign-with-paid-team"
+      ],
       "note": "Install on the owner's own iPhone with the paid team, the same way as the iPad."
     },
     {
@@ -3255,7 +3257,9 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["recitation-plays-in-background"],
+      "blockedBy": [
+        "recitation-plays-in-background"
+      ],
       "note": "Show the verse and reciter on the lock screen and answer its play, pause and next buttons, and AirPods presses."
     },
     {
@@ -3267,7 +3271,9 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["recitation-plays-in-background"],
+      "blockedBy": [
+        "recitation-plays-in-background"
+      ],
       "note": "An AirPlay button so recitation plays on a HomePod or other speaker. Needs nothing from Apple."
     },
     {
@@ -3279,7 +3285,9 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "blockedBy": ["recitation-plays-in-background"],
+      "blockedBy": [
+        "recitation-plays-in-background"
+      ],
       "note": "Answer \"Hey Siri, play al-Kahf in Hifth\" on the iPhone and iPad. The Siri box on the app's ID allows it."
     },
     {
@@ -3291,7 +3299,9 @@
       "status": "blocked",
       "severity": "question",
       "owner": "user",
-      "blockedBy": ["siri-play-recitation"],
+      "blockedBy": [
+        "siri-play-recitation"
+      ],
       "note": "Ask Apple, signed in, to let a HomePod pass Siri play requests to Hifth: https://developer.apple.com/contact/request/sirikit-media-intent-for-homepod/ . A separate approval from the Siri box; send it once Siri plays recitation on the phone. The agent drafts the answers."
     },
     {
@@ -3945,7 +3955,9 @@
         "item": "⑭"
       },
       "status": "blocked",
-      "blockedBy": ["Namecheap's 60-day lock on a new domain, which lifts about 2027-01-09"],
+      "blockedBy": [
+        "Namecheap's 60-day lock on a new domain, which lifts about 2027-01-09"
+      ],
       "severity": "question",
       "owner": "user",
       "note": "hifth.app, bought at Namecheap on 2026-11-10: a new Cloudflare account, the domain added, its nameservers moved now (cloudflare-onboarding skill); the registration moved after about 2027-01-09 when the 60-day lock lifts. Then re-ask whether the share page lives on hifth.app, and point the site's Cloudflare setup at the new account. 2026-11-11: Cloudflare says the domain is active; a read-only token is saved encrypted and its key is backed up in LastPass. Later that day: the account ID and one token that edits hifth.app's DNS and publishes static pages (Pages) on the new account are saved encrypted too, as CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN (it ends 2027-11-12), and checked against Cloudflare: it reads the domain's 7 DNS records and reaches the account's Pages, which has no projects yet. Next: decide whether the share page lives on hifth.app; nothing is published there yet. Answered 2026-11-11 in the plan the owner approved: the share page and any future sign-in live on hifth.app, and the reading app moves to hifth.app/read (the hifth-app-site decision). What is left here is moving the registration to Cloudflare after about 2027-01-09."
@@ -5333,6 +5345,18 @@
       "note": "On a large iPad upright (1024 to 1112 wide) the verse's drawer stood as a middle card over the bottom bar and the verse's name slid half under it, the bar's far end wider than the room beside the card. The drawer now covers the whole bar whenever a bar button would be cut, and the look-alike buttons ride its head meanwhile. iPad test at 1032 by 1376 and 1024 by 700 in both languages, watched failing first."
     },
     {
+      "id": "verse-drawer-grows-after-measuring",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "94"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "closedBy": "apps/web/e2e/desktop.spec.ts",
+      "note": "Found 2026-11-12 when a browser test failed once in a full run and passed on its retry; its picture showed the look-alike buttons left in the bar, half under the drawer. The likely cause, never made to happen again by slowing the CPU: on a large iPad upright the verse's drawer measured its own height once, when it opened. If it was still short then, it decided it covered no bar button, and when it grew it never checked again. The drawer now checks again whenever its own size changes, still never turning back into a card, which closes that hole for certain. The test holds the drawer short while it opens and then lets it grow; watched failing first. Still not covered: the bar's buttons moving without the bar changing size or gaining a button (a late font, say). If the test fails that way again, look there next."
+    },
+    {
       "id": "pens-left-in-arabic-setting",
       "source": {
         "file": "docs/PLAN.md",
@@ -5908,7 +5932,71 @@
       "severity": "question",
       "owner": "user",
       "useCase": "keep-what-i-saw-on-the-ipad-walk",
-      "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11. Slice 0, the throwaway check on the real iPad, ran 2026-11-12 and answered its three questions. (1) The app hears a screenshot taken with the two buttons and with the Pencil corner swipe, so no second way to capture is needed. (2) iOS asked to allow screen recording once, after the install. Apple's recorder kept the last 5 seconds as a clip of 4 to 12 MB each time. (3) The laptop copies files out of the app's Documents folder over the cable. One thing slice 2 must handle: coming back from the Home Screen, the recorder's first start failed with 'interrupted by multitasking' and only a later return started it. So the real build retries the start after a moment. Still to settle with the owner: whether the cross on the card's step 4 meant iOS asked about recording again, since no note was left. Slice 1 built 2026-11-13 and working in the iPad simulator. On a screenshot, the debug build keeps a folder: the app's own picture of the page (the web view only, so the note banner and other native pieces are not in it), the last ten seconds of touches, Pencil strokes and page moves, where the reader was (page, verse, what was open, which settings, which build), and a note typed or dictated into a banner that goes after 6 seconds if left alone. The folders show in the Files app, under Hifth, in the debug build only; the release build's settings file was compared before and after and is unchanged. Tests: the folder, trail, note and page-question suites on the Mac, and SmokeTests testWalkCaptureKeepsPictureTrailPlaceAndNote in the simulator, each seen failing for a deliberate break. Also built 2026-11-13: the laptop side (make walk-pull copies the captures off the iPad and draws a page of them, checked at laptop and phone width and in Firefox; make walk-list prints them) and slice 2, the 5 seconds of video before each screenshot, with the start retried after the 'interrupted by multitasking' failure. The page and verse are saved before the video, so closing the app mid-save loses only the video. A release check builds the app both ways and fails if the release build has any of five signs of the capture code or the Files app settings; make app-archive runs it first. Left, and the owner's: the first real screenshot and pull off the iPad, and how often iOS asks to record (item 22 of the by-hand list, and the walk page's check)."
+      "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11. Slice 0, the throwaway check on the real iPad, ran 2026-11-12 and answered its three questions. (1) The app hears a screenshot taken with the two buttons and with the Pencil corner swipe, so no second way to capture is needed. (2) iOS asked to allow screen recording once, after the install. Apple's recorder kept the last 5 seconds as a clip of 4 to 12 MB each time. (3) The laptop copies files out of the app's Documents folder over the cable. One thing slice 2 must handle: coming back from the Home Screen, the recorder's first start failed with 'interrupted by multitasking' and only a later return started it. So the real build retries the start after a moment. Still to settle with the owner: whether the cross on the card's step 4 meant iOS asked about recording again, since no note was left. Slice 1 built 2026-11-13 and working in the iPad simulator. On a screenshot, the debug build keeps a folder: the app's own picture of the page (the web view only, so the note banner and other native pieces are not in it), the last ten seconds of touches, Pencil strokes and page moves, where the reader was (page, verse, what was open, which settings, which build), and a note typed or dictated into a banner that goes after 6 seconds if left alone. The folders show in the Files app, under Hifth, in the debug build only; the release build's settings file was compared before and after and is unchanged. Tests: the folder, trail, note and page-question suites on the Mac, and SmokeTests testWalkCaptureKeepsPictureTrailPlaceAndNote in the simulator, each seen failing for a deliberate break. Also built 2026-11-13: the laptop side (make walk-pull copies the captures off the iPad and draws a page of them, checked at laptop and phone width and in Firefox; make walk-list prints them) and slice 2, the 5 seconds of video before each screenshot, with the start retried after the 'interrupted by multitasking' failure. The page and verse are saved before the video, so closing the app mid-save loses only the video. A release check builds the app both ways and fails if the release build has any of seven signs of the capture code or the Files app settings; make app-archive runs it first. Also built 2026-11-13 (feature-links-hub step 3): a link sent from the laptop can take a named capture and write which page the app is on (make walk-current), so a walk can be checked from the laptop without anyone holding the iPad. Still the top item for the pitch (stop-hook check, 2026-11-13): every tool for the walk is now built, so what is left is the walk itself. Left, and the owner's: the first real screenshot and pull off the iPad, and how often iOS asks to record (item 22 of the by-hand list, and the walk page's check)."
+    },
+    {
+      "id": "check-card-link",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/check-card.md",
+        "item": "①"
+      },
+      "status": "fixed",
+      "severity": "question",
+      "owner": "agent",
+      "useCase": "run-a-check-a-machine-cannot",
+      "feature": "validation",
+      "closedBy": ".claude/skills/guided-check/scripts/check-card.test.mjs",
+      "note": "Owner's ask of 2026-11-12, holding the iPad: a link that opens a small card in the app listing what to check, so the steps for a check on the device are not typed into the chat. Each step is answered with a tick or a cross, the answers are saved on the iPad and copied off by the laptop. Debug build only. Design note: docs/design/check-card.md. Built 2026-11-12 and working in the iPad simulator: make check-card sends a card (from a row of the by-hand checks list or a steps file) and make check-answers copies the answers back; a UI test in the app (SmokeTests testCheckLinkOpensACard) and the script's own test hold it. Ran on the real iPad the same evening, for the screenshot check of walk-feedback-capture (FILE=.claude/skills/guided-check/checks/walk-probe.json): the card arrived, the owner answered it, and make check-answers copied the answers back. One lesson from that run: a step that asked the owner to 'note whether' something came back as a cross with no note, which nobody could read. The script now names any step worded that way, and every step is a tick-or-cross question. How to run one of these is now its own skill, guided-check."
+    },
+    {
+      "id": "feature-links-hub",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/feature-links.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "useCase": "see-what-a-link-did-on-the-ipad",
+      "note": "Owner's ask of 2026-11-12: links that open and test each feature of the app on the real iPad, and a page on the development hub that shows each feature with a picture and the link that opens it. The app already answers links that open a page, a verse, a tool or a panel, and the laptop can hand the app a link over the cable. Design note: docs/design/feature-links.md. Pictures only from the build with no Qur'an text. Hub entry agreed with the session doing hifth.app, which owns the hub list. Step 2, the features page, is built (make feature-links). Step 3 built 2026-11-13: in the debug build only, the link capture?name=… keeps a walk capture named by the link (no note banner), and current-to-file writes where the app is to current.json, which make walk-current copies off; both wait for the page an open just asked for. A release build answers them not-in-this-build, and the release check fails if their code is in it. Proven in the simulator (SmokeTests testCaptureLinkKeepsANamedCaptureAndCurrentToFileWritesThePlace) and by unit tests; not yet sent to the real iPad. Next: step 4, make feature-check, which sends each card's link, captures and compares."
+    },
+    {
+      "id": "link-to-running-app",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/feature-links.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "First step of feature-links-hub and of walking the iPad together: send one page link to the app on the real iPad while it is open, once without and once with the option that closes it first, with a note on the page beforehand, and write down whether the page turns or the app restarts. Under an hour, no app change; waits only on the owner's iPad being on the cable and unlocked."
+    },
+    {
+      "id": "app-reaches-laptop-over-tailscale",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/walk-together.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "For walking the iPad together: the page inside the app comes from a private address, and it may need extra settings before it may call the laptop's comment server at its Tailscale https address. Answered by step 2 of the walk-together note, with the server's log showing the app's first request."
+    },
+    {
+      "id": "walk-the-ipad-together",
+      "pitch": true,
+      "source": {
+        "file": "docs/design/walk-together.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner's ask of 2026-11-12: while he holds the iPad, Claude opens pages and marks spots for him to look at, and he leaves comments with a button. Design note: docs/design/walk-together.md, which recommends putting the existing comment bar into the debug app, loaded from the laptop over Tailscale. First check, about an hour and no app change: open the laptop's dev site in Safari on the iPad over Tailscale and trade one comment each way. Before any pitch walk uses it, comments must go to a folder git ignores, with comments on selected words off and pictures kept on the laptop, because the selected words would be the book's text."
     },
     {
       "id": "pitch-walk-18-60-link-count",
@@ -6050,6 +6138,30 @@
       "owner": "agent",
       "note": "Answered 2026-11-11: it was a fault in the app. The strip you grab to turn the page copies its rounded corners from the paper, and sometimes measured a moment before the left page had been told which side it was on, then stopped looking and kept a square corner. It now measures again whenever a page is added or changes side, which also fixes a strip staying square when a page draws more than two seconds late. Both tests ran 25 times each in Firefox with no failure (docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md).",
       "closedBy": "apps/web/e2e/edge-peel.spec.ts"
+    },
+    {
+      "id": "roots-in-drawer-test-fails-on-its-own",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "⑥"
+      },
+      "status": "answered",
+      "severity": "defect",
+      "owner": "agent",
+      "useCase": "find-everything-about-my-verse-in-one-place",
+      "note": "Answered 2026-11-13: it was a fault in the app. The drawer's row of tools moved up after it had come to rest, so a press meant for Same roots landed on something else, for the test and for a reader alike. It moved twice: the surah's look-alikes list arrived after the drawer had risen and pushed it up, and the tool's list was cut to fit under the verse before the page lifted it, then grew 400 ms later. A rising drawer now waits for the look-alikes, at most two seconds, and the list is cut from the verse's height and the highest the page can lift it, measured once as the tool opens, so it never grows. Running the tests 40 times then found a third, smaller jump: the picture of the words a look-alike shares came after the drawer had risen and grew its row by 28 px. A blank space one picture line tall now holds its place, and the picture is drawn before the frame is shown. The tests record where Same roots stands on every frame, with the look-alikes or the picture held back, and a long verse (2:102) must stay clear of the list; 400 repeats passed (docs/issues/drawer-tools-jumped-after-rising.md).",
+      "closedBy": "apps/web/e2e/drawer-tools.spec.ts"
+    },
+    {
+      "id": "cloudflare-settings-only-in-one-folder",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "note": "Found 2026-11-13: the Cloudflare settings file and its key were made in the walk worktree, so the main folder only has the encrypted copy. Every session started there says it cannot check the tokens. Nothing deploys today, so it waits. Fix, by Omar: in the main folder, pull the key from LastPass and rebuild the settings file (make env-keys-pull, then make env-bootstrap, then make env-check)."
     },
     {
       "id": "comment-bar-covers-bottom-row-on-phone-width",
@@ -6435,105 +6547,6 @@
       "owner": "agent",
       "feature": "hifth-app-site",
       "note": "Supabase's free plan puts the list's project to sleep after 7 quiet days, after which the form can only answer try again later until the owner wakes it by hand; and an unconfirmed address is only deleted when someone else signs up, so the privacy page's deleted-after-7-days is not yet kept on a quiet week. Build the daily timer from the design note: a small separate Cloudflare Worker that calls the database once a day and deletes unconfirmed rows in the same run, tested for what it asks, then checked after its first real run. Putting it live needs the owner's OK; it goes once the list is live (notify-list-not-live)."
-    },
-    {
-      "id": "verse-drawer-grows-after-measuring",
-      "source": {
-        "file": "docs/PLAN.md",
-        "item": "94"
-      },
-      "status": "fixed",
-      "severity": "defect",
-      "owner": "agent",
-      "closedBy": "apps/web/e2e/desktop.spec.ts",
-      "note": "Found 2026-11-12 when a browser test failed once in a full run and passed on its retry; its picture showed the look-alike buttons left in the bar, half under the drawer. The likely cause, never made to happen again by slowing the CPU: on a large iPad upright the verse's drawer measured its own height once, when it opened. If it was still short then, it decided it covered no bar button, and when it grew it never checked again. The drawer now checks again whenever its own size changes, still never turning back into a card, which closes that hole for certain. The test holds the drawer short while it opens and then lets it grow; watched failing first. Still not covered: the bar's buttons moving without the bar changing size or gaining a button (a late font, say). If the test fails that way again, look there next."
-    },
-    {
-      "id": "check-card-link",
-      "pitch": true,
-      "source": {
-        "file": "docs/design/check-card.md",
-        "item": "①"
-      },
-      "status": "fixed",
-      "severity": "question",
-      "owner": "agent",
-      "useCase": "run-a-check-a-machine-cannot",
-      "feature": "validation",
-      "closedBy": ".claude/skills/guided-check/scripts/check-card.test.mjs",
-      "note": "Owner's ask of 2026-11-12, holding the iPad: a link that opens a small card in the app listing what to check, so the steps for a check on the device are not typed into the chat. Each step is answered with a tick or a cross, the answers are saved on the iPad and copied off by the laptop. Debug build only. Design note: docs/design/check-card.md. Built 2026-11-12 and working in the iPad simulator: make check-card sends a card (from a row of the by-hand checks list or a steps file) and make check-answers copies the answers back; a UI test in the app (SmokeTests testCheckLinkOpensACard) and the script's own test hold it. Ran on the real iPad the same evening, for the screenshot check of walk-feedback-capture (FILE=.claude/skills/guided-check/checks/walk-probe.json): the card arrived, the owner answered it, and make check-answers copied the answers back. One lesson from that run: a step that asked the owner to 'note whether' something came back as a cross with no note, which nobody could read. The script now names any step worded that way, and every step is a tick-or-cross question. How to run one of these is now its own skill, guided-check."
-    },
-    {
-      "id": "feature-links-hub",
-      "pitch": true,
-      "source": {
-        "file": "docs/design/feature-links.md",
-        "item": "①"
-      },
-      "status": "open",
-      "severity": "question",
-      "owner": "agent",
-      "note": "Owner's ask of 2026-11-12: links that open and test each feature of the app on the real iPad, and a page on the development hub that shows each feature with a picture and the link that opens it. The app already answers links that open a page, a verse, a tool or a panel, and the laptop can hand the app a link over the cable; nothing yet tells the laptop what happened, so a debug-only 'capture' link is the missing piece, shared with walk-feedback-capture. Design note being written: docs/design/feature-links.md. Pictures only from the build with no Qur'an text. Hub entry agreed with the session doing hifth.app, which owns the hub list."
-    },
-    {
-      "id": "link-to-running-app",
-      "pitch": true,
-      "source": {
-        "file": "docs/design/feature-links.md",
-        "item": "②"
-      },
-      "status": "open",
-      "severity": "question",
-      "owner": "agent",
-      "note": "First step of feature-links-hub and of walking the iPad together: send one page link to the app on the real iPad while it is open, once without and once with the option that closes it first, with a note on the page beforehand, and write down whether the page turns or the app restarts. Under an hour, no app change; waits only on the owner's iPad being on the cable and unlocked."
-    },
-    {
-      "id": "app-reaches-laptop-over-tailscale",
-      "pitch": true,
-      "source": {
-        "file": "docs/design/walk-together.md",
-        "item": "②"
-      },
-      "status": "open",
-      "severity": "question",
-      "owner": "agent",
-      "note": "For walking the iPad together: the page inside the app comes from a private address, and it may need extra settings before it may call the laptop's comment server at its Tailscale https address. Answered by step 2 of the walk-together note, with the server's log showing the app's first request."
-    },
-    {
-      "id": "walk-the-ipad-together",
-      "pitch": true,
-      "source": {
-        "file": "docs/design/walk-together.md",
-        "item": "①"
-      },
-      "status": "open",
-      "severity": "question",
-      "owner": "agent",
-      "note": "Owner's ask of 2026-11-12: while he holds the iPad, Claude opens pages and marks spots for him to look at, and he leaves comments with a button. Design note: docs/design/walk-together.md, which recommends putting the existing comment bar into the debug app, loaded from the laptop over Tailscale. First check, about an hour and no app change: open the laptop's dev site in Safari on the iPad over Tailscale and trade one comment each way. Before any pitch walk uses it, comments must go to a folder git ignores, with comments on selected words off and pictures kept on the laptop, because the selected words would be the book's text."
-    },
-    {
-      "id": "roots-in-drawer-test-fails-on-its-own",
-      "source": {
-        "file": "docs/design/build-and-test.md",
-        "item": "⑥"
-      },
-      "status": "answered",
-      "severity": "defect",
-      "owner": "agent",
-      "useCase": "find-everything-about-my-verse-in-one-place",
-      "note": "Answered 2026-11-13: it was a fault in the app. The drawer's row of tools moved up after it had come to rest, so a press meant for Same roots landed on something else, for the test and for a reader alike. It moved twice: the surah's look-alikes list arrived after the drawer had risen and pushed it up, and the tool's list was cut to fit under the verse before the page lifted it, then grew 400 ms later. A rising drawer now waits for the look-alikes, at most two seconds, and the list is cut from the verse's height and the highest the page can lift it, measured once as the tool opens, so it never grows. Running the tests 40 times then found a third, smaller jump: the picture of the words a look-alike shares came after the drawer had risen and grew its row by 28 px. A blank space one picture line tall now holds its place, and the picture is drawn before the frame is shown. The tests record where Same roots stands on every frame, with the look-alikes or the picture held back, and a long verse (2:102) must stay clear of the list; 400 repeats passed (docs/issues/drawer-tools-jumped-after-rising.md).",
-      "closedBy": "apps/web/e2e/drawer-tools.spec.ts"
-    },
-    {
-      "id": "cloudflare-settings-only-in-one-folder",
-      "source": {
-        "file": "docs/design/build-and-test.md",
-        "item": "⑦"
-      },
-      "status": "open",
-      "severity": "risk",
-      "owner": "user",
-      "note": "Found 2026-11-13: the Cloudflare settings file and its key were made in the walk worktree, so the main folder only has the encrypted copy. Every session started there says it cannot check the tokens. Nothing deploys today, so it waits. Fix, by Omar: in the main folder, pull the key from LastPass and rebuild the settings file (make env-keys-pull, then make env-bootstrap, then make env-check)."
     },
     {
       "id": "supabase-move",

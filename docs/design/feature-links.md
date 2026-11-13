@@ -102,19 +102,19 @@ the precedent the features page follows.
 
 - press, hold or drag: drawing, the mistake pen, a page turn halfway through;
 - change a setting in the info panel, such as switching to a runner-up option;
-- tell the laptop where the app is (the `current` answer goes to another iPad app);
-- take a picture;
+- tell the laptop where the app is without a capture (`current-to-file` now writes it to a file the laptop copies off);
 - clear notes and marks, so each check starts clean.
 
 ## Which debug-only links should the app answer?
 
-Each is added only when Swift's debug switch is on. The release build refuses them as unknown,
-the way it refuses any other action today, and a test checks that.
+Each is added only when Swift's debug switch is on. The release build answers them with
+`not-in-this-build`, naming the link, as it already does for a check card; a unit test checks
+that, and the release check fails if the code behind them is in a release build.
 
 | Link | What it does | Why a hafiz's app needs it checked |
 | --- | --- | --- |
-| `capture?name=…` | saves a picture and `where.json` (page, verse, tool, panel, settings, build) to the capture folder | the laptop sees what the reader would see, without a person holding the camera |
-| `current-to-file` | writes the `current` answer to the capture folder | the laptop can tell "the link worked" from "the link was ignored" |
+| `capture?name=…` (**built** 2026-11-13) | saves a picture and `where.json` (page, verse, tool, panel, settings, build) to the capture folder, as a screenshot does, after the page has shown; no note banner | the laptop sees what the reader would see, without a person holding the camera |
+| `current-to-file` (**built** 2026-11-13) | writes the `current` answer to `current.json` in the capture folder; `make walk-current` copies it off and prints it | the laptop can tell "the link worked" from "the link was ignored" |
 | `set?key=…&value=…` | changes one info-panel setting | the runner-up options stay reachable and checked |
 | `reset` | clears notes, marks and mistakes | each check starts from the same page |
 | `point?x=…&y=…` | outlines a spot on the screen | shared with [walking the iPad together](walk-together.md) |
@@ -199,7 +199,9 @@ because C covers the same ground on the real device.
 2. **The features page, pictures from A.** The generator script, its make target, the dev-server
    route under `/dev-hub/`, and a test that every tool and panel in the app's lists has a card.
 3. **The capture link**, sharing the walk capture's folder and `where.json`, plus
-   `current-to-file`. A test checks the release build refuses both.
+   `current-to-file`. A test checks the release build refuses both. **Done 2026-11-13**: both
+   wait for the page an `open` just asked for, and a simulator test sends each link and reads
+   what landed. Not yet run on the real iPad.
 4. **`make feature-check`**: for each card, send the link, capture, copy back, and check
    `where.json` says the app is where the link said. The result goes on the card as a tick or a
    cross with the date.

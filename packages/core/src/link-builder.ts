@@ -33,6 +33,9 @@ export type LinkOutcome =
   | { kind: "open"; hash: string }
   | { kind: "current" }
   | { kind: "check"; id: string; steps: number }
+  /** Only in a build from the laptop; a release build answers not-in-this-build. */
+  | { kind: "capture"; name: string }
+  | { kind: "current-to-file" }
   | { kind: "refused" }
   | { kind: "error"; code: string; message: string };
 
@@ -304,8 +307,16 @@ function checkCard(raw: string | null, query: Map<string, string>): LinkOutcome 
   }
   if (!steps.length) return bad("a check needs at least one step: step=Do this");
   if (steps.length > MOST_CHECK_STEPS) return bad(`at most ${MOST_CHECK_STEPS} steps on one card, not ${steps.length}`);
-  const id = (query.get("id") ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  return { kind: "check", id: id ? id.slice(0, 60) : "check", steps: steps.length };
+  return { kind: "check", id: safeName(query.get("id"), "check"), steps: steps.length };
+}
+
+/** A check's or capture's name cut down to a safe word (mirrors
+ *  `XCallback.safeName`): lowercase, anything but letters and digits becomes
+ *  `-`, at most 60 characters, or `fallback` when nothing is left. */
+function safeName(raw: string | undefined, fallback: string): string {
+  const trim = (s: string) => s.replace(/^-+|-+$/g, "");
+  const name = trim(trim((raw ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-")).slice(0, 60));
+  return name || fallback;
 }
 
 /** What the shell does with this link: opens a place, answers with the
@@ -324,6 +335,10 @@ export function predictLink(raw: string, lists: LinkLists): LinkOutcome {
         return { kind: "current" };
       case "check":
         return checkCard(p.query, query);
+      case "capture":
+        return { kind: "capture", name: safeName(query.get("name"), "capture") };
+      case "current-to-file":
+        return { kind: "current-to-file" };
       default:
         return { kind: "error", code: "unknown-action", message: `no action named "${action}"; try open, current or check` };
     }
@@ -341,6 +356,10 @@ export function describeOutcome(outcome: LinkOutcome): string {
       return "current";
     case "check":
       return `check ${outcome.id} ${outcome.steps} steps`;
+    case "capture":
+      return "capture " + outcome.name;
+    case "current-to-file":
+      return "current-to-file";
     case "refused":
       return "refused";
     case "error":

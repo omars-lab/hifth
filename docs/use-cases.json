@@ -1332,6 +1332,57 @@
       "gap": "The simulator has no screenshot buttons, so the test starts the capture at launch instead; that the real screenshot (the two buttons and the Pencil corner swipe) reaches the app is checked by hand on the iPad. Copying captures to the laptop is tested against a stand-in for Apple's device tool; the first copy off the real iPad, and whether emptying it there works, are still to be seen. Apple's screen recorder only runs on a real iPad, so the five seconds of video before are tested only as far as what the app writes about them; how often iOS asks to record, and whether the video is saved right after a system screenshot, are still to be seen on the iPad."
     },
     {
+      "id": "see-what-a-link-did-on-the-ipad",
+      "actor": "maintainer",
+      "goal": "After sending the app on my iPad a link from the laptop, find out from the laptop what the app then showed, as a capture named by the link and a file saying where it is, without anyone holding the iPad.",
+      "feature": "native-shell",
+      "code": [
+        {
+          "file": "native/Hifth/Web/ShellModel.swift",
+          "symbol": "keepCaptureForLink"
+        },
+        {
+          "file": "native/Hifth/Web/ShellModel.swift",
+          "symbol": "writeCurrentToFile"
+        },
+        {
+          "file": "native/Hifth/Capture/CaptureStore.swift",
+          "symbol": "keepCurrent"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.mjs",
+          "symbol": "current"
+        }
+      ],
+      "proof": [
+        {
+          "file": "native/HifthUITests/SmokeTests.swift",
+          "test": "testCaptureLinkKeepsANamedCaptureAndCurrentToFileWritesThePlace"
+        },
+        {
+          "file": "native/HifthTests/CaptureLinkTests.swift",
+          "test": "a capture sent just after an open waits for that page, not the one before"
+        },
+        {
+          "file": "native/HifthTests/CaptureLinkTests.swift",
+          "test": "a release build refuses the laptop's links by name, and does the reader's"
+        },
+        {
+          "file": "native/HifthTests/CaptureLinkTests.swift",
+          "test": "current-to-file writes where the app is beside the captures, and answers like current"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "current copies only where the app is, and prints it"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "a capture taken by a link says so, and shows the name the link gave it"
+        }
+      ],
+      "gap": "Proven in the iPad simulator with links sent the way iOS hands them over; not yet sent to the real iPad over the cable, so whether the capture lands before the page has settled there is still to be seen. Nothing yet sends a link, captures and compares for every feature in one go (step 4 of the feature-links plan)."
+    },
+    {
       "id": "bank-a-verdict-so-it-cannot-be-lost",
       "actor": "validator",
       "goal": "Record what I found in one line, and be told immediately what that verdict now obliges us to build.",
