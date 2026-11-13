@@ -82,6 +82,7 @@ function psqlExec(sql) {
   if (DRY) return;
   if (!DB_URL) die("set SUPABASE_DB_URL to a Postgres connection string (or pass --dry-run)");
   execFileSync("psql", [DB_URL, "-v", "ON_ERROR_STOP=1", "-q", "-f", "-"], {
+    env: { ...process.env, PGSSLMODE: process.env.PGSSLMODE || "require" }, // never talk to the store unencrypted
     input: sql,
     stdio: ["pipe", "inherit", "inherit"],
   });

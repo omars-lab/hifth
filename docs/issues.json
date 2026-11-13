@@ -6184,6 +6184,50 @@
       "owner": "agent",
       "feature": "performance",
       "note": "The app downloads 171 KB before the first page can be used, and start-up drops from about 2290 ms to about 2140 ms once that is under about 160 KB. Next step: load the laptop's page-edge strips (about 3 KB) and the zoom and edge-turn parts of the page stage later, one at a time, measuring each beside the last, then lower the start-up limit to just above the new size."
+    },
+    {
+      "id": "supabase-move",
+      "source": {
+        "file": "docs/design/supabase-move.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up, and built the new project's tables already closed. Done 2026-11-13: loaded the backup into the new store and checked every row against the old store (all three tables match), and locked the new store down further (web door off, sign-ups off, unencrypted connections refused, settings kept in the repo, a check that fails if any drifts back). Left: the owner makes the new password file in their own terminal (make env-set NAME=SUPABASE_DB_URL), then the page-fixture script runs against the new store."
+    },
+    {
+      "id": "supabase-old-store-sign-ups",
+      "source": {
+        "file": "docs/design/supabase-move.md",
+        "item": "②"
+      },
+      "status": "answered",
+      "severity": "question",
+      "owner": "agent",
+      "note": "No. Counted 2026-11-13 by a query that returns numbers only: 0 sign-ups, 0 linked logins, 0 file buckets, 0 stored files on the old store. Deleting it loses no one's account."
+    },
+    {
+      "id": "supabase-delete-old-project",
+      "source": {
+        "file": "docs/design/supabase-move.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "note": "The old project is still running and stays so until the new store is proven, because the new store's rows are compared against it. Delete it once the rows match and the page-fixture check passes; then remove the old account's command-line profile if nothing else uses it."
+    },
+    {
+      "id": "supabase-network-allow-list",
+      "source": {
+        "file": "docs/design/supabase-move.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Should the new store accept connections only from listed internet addresses? Today it accepts any address that has the password. A list would shut out a stolen password used elsewhere, but this laptop's address changes, so a fixed list would lock the owner out until it is updated. The store check reports it and does not fail on it."
     }
   ]
 }

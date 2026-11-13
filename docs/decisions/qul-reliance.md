@@ -196,7 +196,7 @@ mechanism and per-resource licence posture are in the `leverage-qul` skill and t
 `qul-licensing` memory.
 
 *Under option D (2026-09-07):* the held copy lives in a hosted database reached through the
-Supabase command-line tool (project ref `zbkqfstkjmgzsrraodez`), populated by an ingest
+Supabase command-line tool, populated by an ingest
 step on branch `qul-etl-supabase` (off `qul-integration`); its source inputs stay in a
 gitignored `.cache/` so nothing lands in the tree. The no-text guarantee `gate:scripture` /
 `gate:notext` now reads as *the repository and the shipped bundle carry no Qur'an text* — the
