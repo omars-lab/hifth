@@ -6211,6 +6211,20 @@
       "note": "The app downloads 171 KB before the first page can be used, and start-up drops from about 2290 ms to about 2140 ms once that is under about 160 KB. Next step: load the laptop's page-edge strips (about 3 KB) and the zoom and edge-turn parts of the page stage later, one at a time, measuring each beside the last, then lower the start-up limit to just above the new size."
     },
     {
+      "id": "room-under-the-size-limit",
+      "source": {
+        "file": "docs/performance.md",
+        "item": "㉒"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "performance",
+      "note": "After the hifth.app front-page branch merged (2026-11-13) the app is 209.6 KB against its 210 KB size limit, 0.4 KB of room, so the next feature of any size cannot go in. Goal: free 3 to 4 KB with nothing a reader sees changed, first by deleting what no code reaches any more (messages and code), then by looking at the gesture library. Shorter setting explanations, or counting only one language toward the limit, are the owner's call and are only offered, not done. Fixed 2026-11-13: 195.9 KB (14 KB of room) after switching the minifier to terser (-13.6 KB) and deleting unused code (-0.8 KB); the recorded size refuses a build that goes back. Fixed 2026-11-13: 195.9 KB (14 KB of room) after switching the minifier to terser (-13.6 KB) and deleting unused code (-0.8 KB); the recorded size refuses a build that goes back.",
+      "useCase": "refuse-a-bundle-that-would-not-load-on-a-phone",
+      "closedBy": "scripts/gate-budget.mjs"
+    },
+    {
       "id": "hifth-app-site",
       "source": {
         "file": "docs/design/hifth-app-site.md",

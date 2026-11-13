@@ -11,7 +11,7 @@ import {
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
-import { useGesture } from "@use-gesture/react";
+import { createUseGesture, dragAction, pinchAction } from "@use-gesture/react";
 import {
   bboxToScreen,
   clampView,
@@ -648,6 +648,14 @@ function drawMistakes(
 }
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+
+/*
+ * The page answers two gestures through the library: a drag and a pinch. The
+ * library's ready-made hook carries all six it knows (wheel, scroll, move and
+ * hover too), so this one is built with only the two; the wheel has its own
+ * listener below. 2026-11-13, to make room under the size limit.
+ */
+const useGesture = createUseGesture([dragAction, pinchAction]);
 
 /**
  * Draw a page's note pins, replacing whatever pins it had. The pin's tip sits on

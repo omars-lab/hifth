@@ -589,6 +589,10 @@ laptop (about 3 KB, which a phone never uses) and the zoom and edge-turn parts o
 stage (part of 15 KB). They do not lower the total the size cap counts, which is why they were
 passed over; they do lower start-up, which is what this item is about.
 
+**2026-11-13: 163.0 KB.** Switching the minifier to terser (item ㉒) took 9.7 KB off start-up
+with no code moved. About 3 to 5 KB more is left to reach the step; the page-edge strips alone
+may be enough. Measure start-up again before taking one.
+
 **Why it matters.** A hafiz opening the app on a slow connection waits 2.3 seconds where it
 was 2.1. The goal is 2.5, so this is margin, not a broken promise.
 
@@ -599,6 +603,29 @@ size so it cannot drift back.
 
 **Done when:** start-up reads about 2140 ms in the lower group of five, and the start-up limit
 sits just above the new size.
+
+### ㉒ Is there room left under the size limit for the next feature? · **fixed**
+
+**Fixed (2026-11-13): 195.9 KB, 14 KB of room.** Deleting unused code freed 0.8 KB. Shrinking
+the scripts with terser instead of Vite's default freed 13.6 KB with no code changed, and cut
+the start-up download from 172.7 to 163.0 KB, most of the way to item ㉑'s step. The recorded
+size is the test: a build that went back to the old minifier comes out 13.6 KB bigger, and the
+size check refuses it. Details are in the trims list's "Trimmed 2026-11-13 (2)" entry.
+
+**Where it stood (2026-11-13).** After the hifth.app front-page work merged, the app was 209.6
+KB against its 210 KB limit: 0.4 KB of room. The next feature of any size could not go in.
+
+**Why it matters.** Every redesign the owner asks for (a look for the calendar, the share menu,
+the mistake question) adds a little. With no room, each one waits on a trim first.
+
+**What to do.** Free 3 to 4 KB with nothing a reader sees changed: first delete what no code
+reaches any more (unused messages, unused code), then look at whether the gesture library can
+ship only the gestures the app uses. Shorter setting explanations, or counting only one
+language toward the limit, change what a reader sees or what the check measures, so they are
+offered to the owner, not done.
+
+**Done when:** the size check shows at least 3 KB of room, the baseline is recorded, and the
+trims list has a dated entry saying what was taken.
 
 ---
 

@@ -644,14 +644,12 @@ export interface Catalog {
   readonly stateOn: string;
   readonly surahIntro: string;
   readonly surahN: (d: { readonly surahText: string | number }) => string;
-  readonly tafsirImportBody: string;
   readonly tafsirImportBusy: string;
   readonly tafsirImportButton: string;
   readonly tafsirImportError: (d: { readonly reason: string | number }) => string;
   readonly tafsirImportLoaded: (d: { readonly label: string | number }) => string;
   readonly tafsirImportOk: (d: { readonly label: string | number; readonly nText: string | number; readonly eText: string | number }) => string;
   readonly tafsirImportRemove: string;
-  readonly tafsirImportTitle: string;
   readonly tafsirImportUnsupported: string;
   readonly tagline: string;
   readonly tajweed: string;
