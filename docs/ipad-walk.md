@@ -2,6 +2,10 @@
 
 Everything that only the real iPad can show, in one list. Started 2026-11-10, when the pitch build was put on the iPad and the walk waited for an unlock that never came.
 
+> [!tip] When something looks off, take a screenshot
+> Press the two buttons, or swipe up from a bottom corner with the Pencil. The app keeps its own picture, where you were, your last ten seconds of taps and the five seconds of video before. A banner offers a note; ignore it if you like.
+> I copy them all off afterwards (`make walk-pull`), so there is no need to type up what you saw. The first time, iOS asks whether Hifth may record the screen: say yes for the video.
+
 Tick a box as you go, and write what you saw under it in your own words. Anything wrong becomes a test and a new line on the walk checklist, and the agent updates the pitch numbers.
 
 > [!tip] Before you start (two minutes)

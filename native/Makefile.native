@@ -17,6 +17,7 @@
 #   make app-crash-logs DEVICE=… [SINCE=<ISO time>]   copy the app's crash reports off the iPad, one line each
 #   make walk-pull DEVICE=… [CLEAR=1]   copy the screenshots kept on a walk off the iPad, and draw them as one page
 #   make walk-gallery · make walk-list [JSON=1]   redraw that page · list the captures, oldest first
+#   make app-release-check   fail if the release iPad build carries any of the walk capture
 #   make app-devices [CSV=1]   the registered devices, and the slots of each kind left this year
 #   make app-device-register DEVICE=…   register a new device with Apple (uses a slot), then install
 # ---------------------------------------------------------------------------
@@ -421,6 +422,19 @@ walk-gallery: ## Redraw the walk captures page (native/shots/walks/index.html) f
 walk-list: ## The walk captures pulled so far, oldest first, one line each (JSON=1 for the list as JSON)
 	@$(WALK_CAPTURES) list $(if $(JSON),--json)
 
+# The capture is for builds from this laptop only. Builds the iPad app both
+# ways for a real iPad (unsigned, so no device is needed) and fails if the
+# release build has the Files app settings or any of the capture code.
+RELEASE_CHECK_DD := $(DERIVED)/release-check
+app-release-check: app-generate ## Fail if the release iPad build carries any of the walk capture (builds Debug and Release, a few minutes)
+	@for config in Debug Release; do \
+	  set -o pipefail; xcodebuild -quiet -project $(XCPROJ) -derivedDataPath $(RELEASE_CHECK_DD) -scheme Hifth-iOS \
+	    -configuration $$config -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO build || exit 1; \
+	done
+	node .claude/skills/walk-app/scripts/release-check.mjs \
+	  --debug $(RELEASE_CHECK_DD)/Build/Products/Debug-iphoneos/Hifth.app \
+	  --release $(RELEASE_CHECK_DD)/Build/Products/Release-iphoneos/Hifth.app
+
 # ---- which devices Apple has registered for us, and the slots left (100 of each
 # kind a year). CSV=1 prints a row per device with its full id: keep it off the repo.
 CSV          ?=
@@ -439,6 +453,8 @@ endef
 
 app-archive: app-generate ## Archive the iPad app for upload (refuses until the TestFlight decision is settled)
 	$(TESTFLIGHT_GATE)
+	@# Nothing ships with the walk capture in it.
+	$(MAKE) --no-print-directory app-release-check
 	@echo "  archive: not built yet — the export options, privacy manifest and signing come with the decision (docs/backlog.md)"; exit 1
 
 app-testflight: app-archive ## Upload the archive to TestFlight with an App Store Connect API key from the environment
