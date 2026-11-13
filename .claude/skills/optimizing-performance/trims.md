@@ -37,7 +37,7 @@ is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-
 
 **Trimmed again 2026-11-12: −3.1 KB, nothing a reader sees changed.** The calendar and share-menu
 redesigns the owner asked for needed room, and the app was at 209.6 of 210 KB. The size map
-(`scripts/size-by-source.mjs`, now a kept tool) pointed at two things. The offline worker was
+(`.claude/skills/optimizing-performance/scripts/size-by-source.mjs`, now a kept tool) pointed at two things. The offline worker was
 registered through the plugin's helper, which fetches a 2.3 KB library to watch for a waiting
 update; nothing asked it to show one, so a plain register call does the same (−2.7 KB with its
 loader). And the info panel had one settings block copied 35 times; a shared piece took 0.4 KB,
