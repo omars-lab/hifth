@@ -18,6 +18,11 @@ folded: no
 - `make app-run-ipad` does not rebuild the web pages; it copies in whatever `make app-web` built
   last. A full run failed all nine panels for that reason alone. The check now names an app
   built from another commit; run `make app-web app-run-ipad FLAVOUR=…` together.
+- Once the private notes were copied in, the push ran the pitch tests here for the first time,
+  and one found a real fault for every reader on a computer: zoomed in, the page-edge grab
+  strips reached up over the toolbar and took the press meant for Zoom out. Fixed in
+  `EdgeGrabRails.tsx`, with a public test in `e2e/edge-peel.spec.ts`. When checking a fix by
+  eye, clear the app's offline copy first, or the page runs the old script.
 
 ## Worth copying
 - Sending each card's link and then a capture link named after the card, one card at a time
