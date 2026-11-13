@@ -13,7 +13,8 @@ commit or design-doc item for the actual reasoning.
 
 These sessions' task numbers started again from 1, so they would clash with the numbers below.
 They are listed here by date instead. What is still open from them is in
-`.claude/plans/open-work-2026-11.md`. Pushes and merges are folded into the work they shipped.
+`.claude/plans/open-work-2026-11.md`, and from 2026-11-12 on in `docs/backlog.md`. Pushes and
+merges are folded into the work they shipped.
 
 ### 2026-11-09 — Installing on our own devices through TestFlight
 
@@ -153,6 +154,72 @@ download first, added a little at a time over nineteen merges. The size check no
 start-up download (185 KB; it stands at 171 KB) and prints it on every run. A new open item says
 what would win the 150 ms back. Account: `docs/issues/`, and item ⑳ of `docs/performance.md`.
 PR #595.
+
+### 2026-11-11 — hifth-app-domain: hifth.app on a Cloudflare account of its own
+
+**Done:** A new Cloudflare account for Hifth, with `hifth.app` added and its nameservers moved
+from Namecheap. Two tokens are saved encrypted in the repo: one that only reads, and one that
+edits the domain's addresses and publishes static pages. Both were checked against Cloudflare.
+The onboarding skill that walks these steps lives in the owner's own skills folder, not in this
+repo; PR #601 installed its scripts and checks here. Still open: moving the registration after
+the 60-day lock, and where the share page lives (`docs/design/sharing-between-readers.md` ⑭).
+The settings file exists only in the walk worktree so far (backlog:
+`cloudflare-settings-only-in-one-folder`).
+
+### 2026-11-11 — walk-feedback-capture: the plan, and the row that tracks it
+
+**Done:** The plan for reporting a fault from the iPad walk with one screenshot was written and
+approved, and its backlog row added (PR #601). The plan said a use case and a feature on the
+code map would come too; they did not. The row now names the existing use case for checks done
+by hand on a device, and the feature on the code map comes with the first code. Design:
+`docs/design/pitch-walk.md` ②.
+
+### 2026-11-11 — the features page on the local development hub
+
+**Done:** One page on the local hub lists every place, tool and panel in the app, each with a
+picture taken from the public build and a link that opens it. PR #602.
+
+### 2026-11-12 — check-card-link: a card in the app that says what to check
+
+**Done:** A link opens a card of steps inside the debug app, each with a tick, a cross and a
+note. Done saves the answers in the app's own folder. The link is in the app-link contract and
+its page. A laptop script sends a card and copies the answers off, with make targets. PR #603.
+Design: `docs/design/check-card.md`.
+
+### 2026-11-12 — walk-feedback-capture slice 0, and the guided-check skill
+
+**Done:** A throwaway build on the real iPad answered three questions. The app hears a
+screenshot taken either way. iOS asked about screen recording once. The laptop can copy the
+app's files off over the cable. The guided-check skill now covers a check done by hand from
+start to finish: the card, the answers, the build's own log, and each cross turned into work.
+Two Firefox tests that read too early were fixed on the way. PR #604. Results:
+`docs/design/pitch-walk.md`.
+
+### 2026-11-13 — roots-in-drawer-test-fails-on-its-own: the drawer's tools keep still
+
+**Done:** The phone-size test of opening Same roots in the drawer failed now and then because
+the drawer's row of tools jumped up after it had come to rest. A press, the test's or a reader's,
+landed on the wrong thing. A rising drawer now waits for its surah's look-alikes, at most two
+seconds. The tool's list is cut from the verse's height and the highest the page can lift it,
+not from where the verse stands as the drawer rises, and is measured once, so it never grows.
+Running the tests 40 times found a third, smaller jump: the picture of a look-alike's shared
+words arrived late and grew its row by 28 pixels. A blank space one picture line tall now holds
+its place until it comes. New tests record where Same roots stands on every frame, with the
+look-alikes or the picture held back, and check that a long verse (2:102) stays clear of the
+list. The ten drawer tests then passed 400 times out of 400 with the drawer's slide up off. The
+test now keeps the slide on and counts rest from the end of the slide; the four keep-still tests
+passed 160 times out of 160 that way, and still fail with the blank space taken out. Write-up:
+`docs/issues/drawer-tools-jumped-after-rising.md`.
+
+### 2026-11-13 — walk-feedback-capture: a screenshot on the iPad keeps what you saw
+
+**Done:** In a build put on from the laptop, a screenshot makes the app keep its own picture,
+where you were, your last ten seconds of touches, the five seconds of video before and a note if
+you add one. The folders show in the Files app. `make walk-pull` copies them off over the cable
+and draws one page of them; `make walk-list` prints them. A release check fails if a build meant
+to ship has any of it, and archiving runs that check first. The walk page and the by-hand list
+(item 22) say how to try it on the real iPad, which is the owner's part still to do. Plan:
+`.claude/plans/refactored-bouncing-cerf.md`.
 
 ### 2026-11-12 to 11-13 — supabase-move: the outside-library store moves to a new account
 

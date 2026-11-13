@@ -140,8 +140,10 @@ had finished starting the app; it is now built on first use (fixed 2026-11-10, n
 None of these exist today. Do not run them; they are what the research page recommends.
 
 - Collecting the recent device log in the same command as the crash reports.
-- The app saving Apple's crash summary (MetricKit) as a file on the next launch, to copy with
-  `--domain-type appDataContainer --domain-identifier com.bytesofpurpose.hifth`.
+- The app saving Apple's crash summary (MetricKit) as a file on the next launch. Copying a
+  file out of the app's own folder is built (the walk-app skill's `walk-captures.mjs pull`
+  does it with `--domain-type appDataContainer --domain-identifier com.bytesofpurpose.hifth`),
+  so only the saving is left.
 - The app logging through the system log (one subsystem, `com.bytesofpurpose.hifth`) instead
   of `print`.
 - A make target that runs a UI test on the plugged-in iPad.

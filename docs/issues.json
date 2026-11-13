@@ -5894,7 +5894,7 @@
       "owner": "agent",
       "useCase": "find-everything-about-my-verse-in-one-place",
       "feature": "select-an-ayah",
-      "note": "Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets. Asked again three times the same day, once each for Same roots, Listen (open the play options in the drawer) and Share (the share-as-a-link options in the drawer). Next up (2026-11-07): it is what the owner asked for most today, and the drawer is where The Study Quran's commentary would sit beside its verse in the pitch. Built 2026-11-09 for Same roots, as a setting in the info panel (the separate card stays the default until the owner tries it): the list opens under the drawer's buttons, cut to the room under the lit verse, since on a two-page spread the page cannot move up. Share and Listen followed the same day, the same way: Listen's press also opens its play options (play on to a verse, repeat each verse, speed), kept on the device. The commentary stays a card for now. Left: the owner tries the setting and says whether it becomes the default."
+      "note": "Owner's page comment of 2026-11-07 asked for Share, Same roots and the commentary to open as sections inside the verse drawer instead of their own sheets. Asked again three times the same day, once each for Same roots, Listen (open the play options in the drawer) and Share (the share-as-a-link options in the drawer). Next up (2026-11-07): it is what the owner asked for most today, and the drawer is where The Study Quran's commentary would sit beside its verse in the pitch. Built 2026-11-09 for Same roots, as a setting in the info panel (the separate card stays the default until the owner tries it): the list opens under the drawer's buttons, cut to the room under the lit verse, since on a two-page spread the page cannot move up (changed 2026-11-13: the open book lifts the verse too, and the cut made the tools jump; it is now worked out from the verse's height, once; see roots-in-drawer-test-fails-on-its-own). Share and Listen followed the same day, the same way: Listen's press also opens its play options (play on to a verse, repeat each verse, speed), kept on the device. The commentary stays a card for now. Left: the owner tries the setting and says whether it becomes the default."
     },
     {
       "id": "walk-feedback-capture",
@@ -5906,8 +5906,9 @@
       "status": "open",
       "next": true,
       "severity": "question",
-      "owner": "agent",
-      "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11. Slice 0, the throwaway check on the real iPad, ran 2026-11-12 and answered its three questions. (1) The app hears a screenshot taken with the two buttons and with the Pencil corner swipe, so no second way to capture is needed. (2) iOS asked to allow screen recording once, after the install. Apple's recorder kept the last 5 seconds as a clip of 4 to 12 MB each time. (3) The laptop copies files out of the app's Documents folder over the cable. One thing slice 2 must handle: coming back from the Home Screen, the recorder's first start failed with 'interrupted by multitasking' and only a later return started it. So the real build retries the start after a moment. Still to settle with the owner: whether the cross on the card's step 4 meant iOS asked about recording again, since no note was left. Next: slice 1, the picture, where you were, the note and the trail."
+      "owner": "user",
+      "useCase": "keep-what-i-saw-on-the-ipad-walk",
+      "note": "Next up (2026-11-11): the owner's walk of the pitch on the real iPad is what tells us whether the demo feels right, and today a fault he sees there reaches us only as typed words. Moved above drawer-holds-its-tools, whose building is done and which now waits only on the owner trying its setting. Plan written and approved 2026-11-11. Slice 0, the throwaway check on the real iPad, ran 2026-11-12 and answered its three questions. (1) The app hears a screenshot taken with the two buttons and with the Pencil corner swipe, so no second way to capture is needed. (2) iOS asked to allow screen recording once, after the install. Apple's recorder kept the last 5 seconds as a clip of 4 to 12 MB each time. (3) The laptop copies files out of the app's Documents folder over the cable. One thing slice 2 must handle: coming back from the Home Screen, the recorder's first start failed with 'interrupted by multitasking' and only a later return started it. So the real build retries the start after a moment. Still to settle with the owner: whether the cross on the card's step 4 meant iOS asked about recording again, since no note was left. Slice 1 built 2026-11-13 and working in the iPad simulator. On a screenshot, the debug build keeps a folder: the app's own picture of the page (the web view only, so the note banner and other native pieces are not in it), the last ten seconds of touches, Pencil strokes and page moves, where the reader was (page, verse, what was open, which settings, which build), and a note typed or dictated into a banner that goes after 6 seconds if left alone. The folders show in the Files app, under Hifth, in the debug build only; the release build's settings file was compared before and after and is unchanged. Tests: the folder, trail, note and page-question suites on the Mac, and SmokeTests testWalkCaptureKeepsPictureTrailPlaceAndNote in the simulator, each seen failing for a deliberate break. Also built 2026-11-13: the laptop side (make walk-pull copies the captures off the iPad and draws a page of them, checked at laptop and phone width and in Firefox; make walk-list prints them) and slice 2, the 5 seconds of video before each screenshot, with the start retried after the 'interrupted by multitasking' failure. The page and verse are saved before the video, so closing the app mid-save loses only the video. A release check builds the app both ways and fails if the release build has any of five signs of the capture code or the Files app settings; make app-archive runs it first. Left, and the owner's: the first real screenshot and pull off the iPad, and how often iOS asks to record (item 22 of the by-hand list, and the walk page's check)."
     },
     {
       "id": "check-card-link",
@@ -6112,6 +6113,30 @@
       "owner": "agent",
       "note": "Answered 2026-11-11: it was a fault in the app. The strip you grab to turn the page copies its rounded corners from the paper, and sometimes measured a moment before the left page had been told which side it was on, then stopped looking and kept a square corner. It now measures again whenever a page is added or changes side, which also fixes a strip staying square when a page draws more than two seconds late. Both tests ran 25 times each in Firefox with no failure (docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md).",
       "closedBy": "apps/web/e2e/edge-peel.spec.ts"
+    },
+    {
+      "id": "roots-in-drawer-test-fails-on-its-own",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "⑥"
+      },
+      "status": "answered",
+      "severity": "defect",
+      "owner": "agent",
+      "useCase": "find-everything-about-my-verse-in-one-place",
+      "note": "Answered 2026-11-13: it was a fault in the app. The drawer's row of tools moved up after it had come to rest, so a press meant for Same roots landed on something else, for the test and for a reader alike. It moved twice: the surah's look-alikes list arrived after the drawer had risen and pushed it up, and the tool's list was cut to fit under the verse before the page lifted it, then grew 400 ms later. A rising drawer now waits for the look-alikes, at most two seconds, and the list is cut from the verse's height and the highest the page can lift it, measured once as the tool opens, so it never grows. Running the tests 40 times then found a third, smaller jump: the picture of the words a look-alike shares came after the drawer had risen and grew its row by 28 px. A blank space one picture line tall now holds its place, and the picture is drawn before the frame is shown. The tests record where Same roots stands on every frame, with the look-alikes or the picture held back, and a long verse (2:102) must stay clear of the list; 400 repeats passed (docs/issues/drawer-tools-jumped-after-rising.md).",
+      "closedBy": "apps/web/e2e/drawer-tools.spec.ts"
+    },
+    {
+      "id": "cloudflare-settings-only-in-one-folder",
+      "source": {
+        "file": "docs/design/build-and-test.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "note": "Found 2026-11-13: the Cloudflare settings file and its key were made in the walk worktree, so the main folder only has the encrypted copy. Every session started there says it cannot check the tokens. Nothing deploys today, so it waits. Fix, by Omar: in the main folder, pull the key from LastPass and rebuild the settings file (make env-keys-pull, then make env-bootstrap, then make env-check)."
     },
     {
       "id": "comment-bar-covers-bottom-row-on-phone-width",

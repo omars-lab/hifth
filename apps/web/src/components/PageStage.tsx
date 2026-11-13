@@ -568,7 +568,7 @@ function bareAyah(key: string): string {
  * first line is the path up to its first close, measured on its own.
  */
 /** Air between the lowest hop chip and the first line a lift puts beneath it, in CSS px. */
-const RAIL_CLEARANCE = 8;
+export const RAIL_CLEARANCE = 8;
 
 /** Room kept free below a verse drawn smaller to fit above a note: its wash runs a little past its letters. */
 const LIFT_SLACK = 12;
@@ -3388,8 +3388,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       verseSpan() {
         const key = selectedKeyRef.current;
         const cur = pagesRef.current.get(currentPageRef.current);
-        const ids = key && cur ? cur.hl.resolve(key)?.elementIds : undefined;
-        if (!cur || !ids?.length) return null;
+        const ids = key && cur ? cur.hl.resolve(key)?.elementIds : undefined;        if (!cur || !ids?.length) return null;
         let top = Infinity;
         let bottom = -Infinity;
         // The verse's own shapes, and the highlight drawn over them, which

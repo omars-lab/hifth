@@ -136,6 +136,7 @@ import { spanOfAll, type CardSpan } from "./components/short-band";
 import {
   PageStage,
   pageSpan,
+  RAIL_CLEARANCE,
   type Corner,
   type Erased,
   type PageStageHandle,
@@ -198,7 +199,7 @@ import { FullScreenContext, MarkUndoContext } from "./components/UndoRedo";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger, listenCaption, listenGlyph } from "./components/PlayTrigger";
-import { DrawerTool, VerseDrawer } from "./components/VerseDrawer";
+import { DrawerTool, VerseDrawer, type VerseClear } from "./components/VerseDrawer";
 import { VerseMenu, type VerseMenuItem } from "./components/VerseMenu";
 import { QulTrigger } from "./components/QulTrigger";
 import { useVerseAudio, versesBetween } from "./audio";
@@ -290,15 +291,33 @@ import styles from "./App.module.css";
 // — so the first thing in the room is the page we polished.
 const START_PAGE = PITCH ? 1 : 7;
 
-/** `quran/…/2:47` → its spec-§7 ref, or null if it is not a bare ayah key. */
-/** Whichever sheet over the foot of a phone reaches highest, or null when none does. */
-/** The lit verse's lines on the page in view, as window boxes; none drawn, none. */
-function litVerseLines(): DOMRect[] {
-  return [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")]
+// How long a rising verse drawer waits for its surah's look-alikes before it
+// rises without them (see `waitingForLooks`). From the device the list takes a
+// few milliseconds; this only bounds a list that is slow or never comes.
+const LOOKS_WAIT_MS = 2000;
+
+/**
+ * Where the lit verse's wash stands on screen, top of its first line to the
+ * foot of its last (null while none is drawn), and the highest the page can
+ * lift the verse's first line: just under the hop chips, or the page's own top
+ * when there are none (PageStage's `aboveCover`).
+ */
+function litVerse(railBottom: number | null): VerseClear {
+  const lines = [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")]
     .map((el) => el.getBoundingClientRect())
-    .filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth);
+    .filter((r) => r.width > 0 && r.height > 0 && r.right > 0 && r.left < window.innerWidth);
+  const span = lines.length
+    ? { top: Math.min(...lines.map((r) => r.top)), bottom: Math.max(...lines.map((r) => r.bottom)) }
+    : null;
+  const pages = [...document.querySelectorAll<HTMLElement>("[data-tool][data-page]")]
+    .map((el) => el.getBoundingClientRect())
+    .filter((r) => r.right > 0 && r.left < window.innerWidth)
+    .map((r) => Math.max(0, r.top));
+  const riseTo = railBottom !== null ? railBottom + RAIL_CLEARANCE : pages.length ? Math.min(...pages) : 0;
+  return { span, riseTo };
 }
 
+/** Whichever sheet over the foot of a phone reaches highest, or null when none does. */
 function highestTop(...tops: readonly (number | null)[]): number | null {
   const open = tops.filter((top): top is number => top !== null);
   return open.length === 0 ? null : Math.min(...open);
@@ -4013,7 +4032,28 @@ export function App(): JSX.Element {
   // from the verse it started on; it is then named for the verse being recited.
   const drawerKey = selectedKey ?? audio.runKey;
   const [drawerWhole, setDrawerWhole] = useState(false);
+  // With the tools in the drawer, the look-alikes open inside it, and their
+  // list arrives a moment after the verse is lit, on the first verse of a
+  // surah. Risen before it, the drawer grew upward when it landed and its row
+  // of tools jumped out from under a reader's finger: a press on its way to
+  // Same roots hit the list's heading instead (found 2026-11-13, 336 px on an
+  // iPad on its side). So a rising drawer waits for that surah's list, which
+  // is quick from the device, and stops waiting after a short while, so a list
+  // that never comes back cannot keep the tools away. A drawer already up
+  // stays up: moving to another verse changes its size anyway.
+  const lookSurah = toolsInDrawer && selectedKey ? (parseAyahKey(selectedKey)?.surah ?? 0) : 0;
+  const lookSettled = lookSurah !== 0 && settledShards.has(lookSurah);
+  const [looksWaitOver, setLooksWaitOver] = useState<number | null>(null);
+  useEffect(() => {
+    // Keyed on this surah's list alone: another surah's landing must not start the wait again.
+    if (!lookSurah || lookSettled) return;
+    const stop = window.setTimeout(() => setLooksWaitOver(lookSurah), LOOKS_WAIT_MS);
+    return () => window.clearTimeout(stop);
+  }, [lookSurah, lookSettled]);
+  const drawerWasUp = useRef(false);
+  const waitingForLooks = lookSurah !== 0 && !lookSettled && looksWaitOver !== lookSurah && !drawerWasUp.current;
   const drawerUp =
+    !waitingForLooks &&
     drawerKey !== null &&
     !drawerAway &&
     !full &&
@@ -4026,6 +4066,9 @@ export function App(): JSX.Element {
   // Only under the plain pointer: the highlighter keeps its own second tap.
   const openWordsOf = wordTap === "word" && drawerUp && tool === "select" ? selectedKey : null;
   openWordsOfRef.current = openWordsOf;
+  useEffect(() => {
+    drawerWasUp.current = drawerUp;
+  }, [drawerUp]);
   // The address moving the verse on (the back button, a link from another app)
   // takes no tap on the page, so nothing else closed a stacked word's drawer:
   // it was left over the next verse's, or over no drawer at all (2026-11-10).
@@ -4921,8 +4964,19 @@ export function App(): JSX.Element {
           setListenInDrawer(false);
         }}
         onCover={setDrawerTop}
-        keepClear={litVerseLines}
+        keepClear={() => litVerse(railBottom)}
         clearKey={selectedKey}
+        panelKey={
+          toolsInDrawer && listenInDrawer && selectedKey
+            ? "listen"
+            : toolsInDrawer && shareInDrawer
+              ? "share"
+              : toolsInDrawer && rootFamilies !== null
+                ? "roots"
+                : looksInDrawer && selectedKey
+                  ? "looks"
+                  : null
+        }
       >
         {/* While a "Play to" run lasts, the button speaks for the verse being
             recited, not the one the run started from. */}

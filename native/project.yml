@@ -72,6 +72,14 @@ targets:
         # the developer certificate for a plugged-in iPad (make app-device-install).
         DEVELOPMENT_TEAM: ""
         CODE_SIGN_STYLE: Automatic
+        # The plist goes through the C preprocessor, so a block in it can be
+        # Debug only (Xcode's own per-key settings skip UIFileSharingEnabled).
+        INFOPLIST_PREPROCESS: YES
+      configs:
+        Debug:
+          # Walk captures show in the Files app, under Hifth: the build
+          # installed from the laptop, never a release.
+          INFOPLIST_PREPROCESSOR_DEFINITIONS: HIFTH_WALK_FILES=1
 
   Hifth-macOS:
     templates: [HifthApp]

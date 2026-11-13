@@ -201,6 +201,56 @@ final class ShellModel {
         }
     }
 
+    #if DEBUG
+    // MARK: - Walk capture (builds from the laptop only)
+
+    /// The last ten seconds of page moves, touches and Pencil strokes, for a
+    /// walk capture to keep beside its picture.
+    @ObservationIgnored var captureTrail = CaptureTrail()
+    /// Where captures are kept; the tests and the launch flag point it elsewhere.
+    @ObservationIgnored var captureStore = CaptureStore(folder: CaptureStore.defaultFolder)
+    /// The capture the "Add a note" banner is for, while it is up.
+    private(set) var captureNote: URL?
+    /// What has been typed in the banner so far.
+    var captureNoteText = ""
+
+    /// Show the banner for a new capture. One already up is closed first, so
+    /// what was typed there is kept with its own capture.
+    func offerNote(for capture: URL) {
+        closeNote()
+        captureNote = capture
+    }
+
+    /// Close the banner, keeping whatever was typed.
+    func closeNote() {
+        guard let capture = captureNote else { return }
+        do {
+            try captureStore.keepNote(captureNoteText, in: capture)
+        } catch {
+            print("walk capture note not kept \(error)")
+        }
+        captureNote = nil
+        captureNoteText = ""
+    }
+
+    /// The touch, Pencil and page-move trail: the recorder on the iPad feeds it.
+    func noteOnTrail(_ happening: CaptureTrail.Happening) {
+        captureTrail.add(happening, at: Date())
+    }
+
+    /// Set by `startWalkCaptureOnce` (WalkCapture.swift), which runs at the
+    /// first `ready` only, though the page says it is ready after every reload.
+    @ObservationIgnored var walkCaptureStarted = false
+    @ObservationIgnored var walkCaptureObserver: NSObjectProtocol?
+    #if os(iOS)
+    @ObservationIgnored var touchTrailRecorder: UIGestureRecognizer?
+    /// Apple's recorder of the last few seconds, and what starts and stops it
+    /// as the app comes to the front and goes to the back.
+    @ObservationIgnored var clipRecorder: ClipRecorder?
+    @ObservationIgnored var clipObservers: [NSObjectProtocol] = []
+    #endif
+    #endif
+
     // MARK: - The check card (builds from the laptop only)
 
     /// The card a `check` link opened, while it is on screen.
@@ -288,8 +338,14 @@ final class ShellModel {
             if let pendingHash { show(pendingHash) }
             probeIfAsked()
             scheduleSnapshotIfAsked()
+            #if DEBUG
+            startWalkCaptureOnce()
+            #endif
         case .route(let hash):
             currentHash = hash
+            #if DEBUG
+            captureTrail.add(.route(hash), at: Date())
+            #endif
             settle(hash)
         case .share(let url, let title, let text):
             Sharing.present(url: url, title: title, text: text, from: webView)
@@ -648,7 +704,7 @@ final class ShellModel {
     /// The PNG, and its size in points, to check against the page's own.
     /// On the Mac the web view runs on under the title bar, so the view is
     /// taller than the page; only the page's own area is photographed.
-    private static func snapshotPNG(of webView: WKWebView, page: CGSize) async -> (Data, CGSize) {
+    static func snapshotPNG(of webView: WKWebView, page: CGSize) async -> (Data, CGSize) {
         let configuration = WKSnapshotConfiguration()
         configuration.rect = CGRect(origin: .zero, size: page)
         return await withCheckedContinuation { continuation in
