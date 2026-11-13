@@ -82,10 +82,12 @@ IPv6 only). That address carries the password, so it is the owner's to hold and 
 ## How a Pages Function writes to it
 
 The owner decided on 2026-11-12 that the notify list lives here, not in Cloudflare's own
-database. The function in `apps/landing/functions/api/` is still written for Cloudflare's
-database and has to move (issue `notify-function-on-d1`). The table and the function's shape
-are in `docs/design/hifth-app-mailing-list.md`, under "Where does the list live, and who can
-read it?".
+database. Since 2026-11-13 the function in `apps/landing/functions/api/` calls it. The table and
+the three functions are in `supabase/migrations/20261113000001_notify_list.sql`, checked by
+`make notify-db-test` against a local copy; the reasons are in
+`docs/design/hifth-app-mailing-list.md`, under "Where does the list live, and who can read it?".
+Pushing it to the real project, and storing the real site key's hash, are the owner's (issue
+`notify-list-not-live`).
 
 What any version must keep:
 

@@ -171,26 +171,36 @@ Still resting on a snippet, or not checked at all:
 
 ## Open questions, and what would answer each
 
-### ① The form's server code still writes to Cloudflare's database · **open**
+### ① The form's server code still writes to Cloudflare's database · **fixed**
 
 Answered by moving it to call the Supabase "add" function with the publishable key, with a test that a paused project answers "try again later".
 
-### ② The leave link removes someone on a plain visit · **open**
+Done 2026-11-13. The form calls three database functions (add, confirm, leave); the table is out of the web interface's reach, and the database's own rules are checked against a local copy. Tried end to end on this laptop: sign up, confirm by the button, leave.
+
+### ② The leave link removes someone on a plain visit · **fixed**
 
 Answered by a page with a "Leave the list" button that sends a POST, a separate POST address for one-click leave, and a test that a plain visit removes nobody.
+
+Done 2026-11-13, for the confirm link too: opening either link shows a page with one button and changes nothing.
 
 ### ③ The privacy page names Cloudflare's database · **open**
 
 Answered by naming Supabase and Resend, where each keeps data, and what a row holds, in both languages.
 
+Half done 2026-11-13: both pages name Supabase and say what a row holds. The sending service is named once it is chosen.
+
 ### ④ No mail-checking record (DMARC), and a leftover include in the sender record · **open**
 
 Answered by the owner adding a "watch only" DMARC record at the root and, once the registrar's forwarding is confirmed off, removing its include.
 
-### ⑤ The form promises "Nothing else" · **open**
+### ⑤ The form promises "Nothing else" · **fixed**
 
 Answered by wording that says one email to confirm, then one when the app ships, on the English and Arabic pages.
 
-### ⑥ A repeat sign-up shows the address is already on the list · **open**
+### ⑥ A repeat sign-up shows the address is already on the list · **fixed**
 
 Answered by the form always saying "check your inbox", with a test that a repeat sign-up gets the same answer as a new one.
+
+### ⑦ Nothing keeps the free database awake, or deletes unconfirmed addresses on time · **open**
+
+Supabase's free plan puts a project to sleep after 7 quiet days, and then the form can only say "try again later" until the owner wakes it by hand. And an address nobody confirms is only deleted when someone else signs up, so the privacy page's "deleted after 7 days" is not yet true on a quiet week. Answered by the daily timer described above: a small separate Cloudflare Worker that calls the database once a day and deletes unconfirmed rows in the same run, with a test of what it asks the database and a check after its first real run. Putting the Worker live needs the owner's OK.

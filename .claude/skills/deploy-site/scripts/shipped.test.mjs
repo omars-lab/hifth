@@ -128,6 +128,8 @@ test("a development feature named in a shipped file is refused, each with its re
     ["http://127.0.0.1:7122/", /this laptop/],
     ["http://localhost:4190/", /this laptop/],
     ["<span class=\"contact\">[contact address to come]</span>", /placeholder/],
+    ["https://made-up-project.supabase.co/rest/v1", /Supabase/],
+    ["local-list-key-made-up-not-secret", /made-up site key/],
   ];
   for (const [text, why] of cases) {
     const files = cleanFolder().map((f) => (f.path === "read/assets/index-abc.css" ? { ...f, text } : f));

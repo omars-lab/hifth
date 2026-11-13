@@ -80,20 +80,28 @@ make hifth-app-verify ARGS="--url http://localhost:8788 --commit <the commit the
 ```
 
 **The email form** has a server part. Its code is `apps/landing/lib/notify.mjs`, with Cloudflare's
-two entry files in `apps/landing/functions/api/`. Its database is described in
-`apps/landing/wrangler.toml`, with the table in `schema.sql`. The upload runs from
-`apps/landing/`, so wrangler finds all of these. None of them is copied into the release folder.
+three entry files in `apps/landing/functions/api/` (sign up, confirm, leave). The list itself is on
+Supabase: the table and the three database functions the form calls are in
+`supabase/migrations/20261113000001_notify_list.sql`, with their checks in
+`supabase/tests/notify_list.test.sql`. The upload runs from `apps/landing/`; none of this is
+copied into the release folder, and `wrangler.toml` names no database (the check refuses one).
 
-- **Once, on the new account** (through dotenvx, like the upload):
-  1. `wrangler d1 create hifth-notify`, then put the id it prints in `wrangler.toml`. Until
-     then the check refuses the stand-in id.
-  2. `wrangler d1 execute hifth-notify --remote --file schema.sql`.
-  3. Put the spam check's secret in as a Pages secret, `TURNSTILE_SECRET`.
-- **To try the form locally:** `make hifth-app-serve`, then open http://127.0.0.1:7124/ (press C to
-  leave a comment on the page). It makes
-  the local table and starts the server with Cloudflare's published test secret, which always
-  passes. Once any setting is given with `--binding`, the database has to be named with `--d1`
-  too; the script does both.
+- **Once, by the owner** (it needs the database password; the `manage-database` skill's login
+  check first):
+  1. Push the migration to the real Supabase project, and store the hash of a new, real site key
+     in the list's key table, as `supabase/seed.sql` does for the made-up local one.
+  2. Put four Pages secrets in: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `LIST_KEY` (that real
+     site key) and `TURNSTILE_SECRET`. Also the sender's settings, once the decision
+     `notify-list-sender` is made.
+  3. Add `SUPABASE_DB_URL` to the saved keys, so `make hifth-app-list-count` can count.
+- **To try the form locally:** `supabase start` (in a scratch copy if the repo's own is busy, named
+  by `SUPABASE_WORKDIR`), then `make hifth-app-serve`, and open http://127.0.0.1:7124/ (press C to
+  leave a comment on the page). It reads the local list's address and key from `supabase status`
+  and starts the server with Cloudflare's always-pass spam-check secret and a stand-in mailer that
+  logs the confirm link (`ev=notify_confirm_link`), never the address. Count with
+  `make hifth-app-list-count ARGS=--local`. Without a local Supabase the form says the list is
+  not open yet.
+- **To check the database's own rules:** `make notify-db-test` against the local copy.
 
 The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch-all rule under
 `/read/` as an endless loop, and the app needs none, since it keeps its place after the `#`.
@@ -113,12 +121,13 @@ Cloudflare also serves `privacy.html` at `/privacy`, so `_headers` names that ad
 | Script | What it does | When to reach for it | Command |
 |---|---|---|---|
 | `scripts/release-hifth-app.mjs check` | Builds (make site), puts the release folder together in `apps/landing/dist/`, and refuses it if it holds anything extra or the commit is not releasable | Before every release; to see what would go up | `make hifth-app-check` (`ARGS=--no-build` checks the last build) |
-| `scripts/release-hifth-app.mjs prepare` | Builds and checks the release folder like `check`, without asking for a merged commit (what would stop a release is listed, not refused), and makes the local sign-up table. After the check, it adds the **Designs** button (bottom left of the front pages, never in the app) and every design page and written note under `/docs/design/` | First half of looking at hifth.app on this laptop | `make hifth-app-serve` runs it (`ARGS=--no-build` reuses the last build) |
-| `scripts/release-hifth-app.mjs serve --port N` | Serves the prepared folder with Cloudflare's local server and the spam check's always-pass test keys | Second half; `make hifth-app-serve` has the comment server start it behind itself, so http://127.0.0.1:7124 has the Comment button | `make hifth-app-serve` |
+| `scripts/release-hifth-app.mjs prepare` | Builds and checks the release folder like `check`, without asking for a merged commit (what would stop a release is listed, not refused). After the check, it adds the **Designs** button (bottom left of the front pages, never in the app) and every design page and written note under `/docs/design/` | First half of looking at hifth.app on this laptop | `make hifth-app-serve` runs it (`ARGS=--no-build` reuses the last build) |
+| `scripts/release-hifth-app.mjs serve --port N` | Serves the prepared folder with Cloudflare's local server, the spam check's always-pass test keys, and the local Supabase list when one is running | Second half; `make hifth-app-serve` has the comment server start it behind itself, so http://127.0.0.1:7124 has the Comment button | `make hifth-app-serve` |
 | `scripts/release-hifth-app.mjs publish` | The check, then `wrangler pages deploy` with the saved keys, then verify | To release hifth.app | `make hifth-app-publish` |
 | `scripts/release-hifth-app.mjs verify` | Looks at the live site as a reader's browser does | After a release; when someone asks if hifth.app is live | `make hifth-app-verify` (`ARGS="--url https://x.pages.dev"` for a preview) |
 | `apps/web/e2e/landing-shots.spec.ts` (a Playwright file, not a script here) | Builds the plain public app and photographs it for the front page: the laptop, phone and iPad-with-pen views and one picture per feature, into `apps/landing/shots/` as JPEGs. Each picture checks the screen shows what it is meant to before it is taken. Never from the pitch build | After a change to how the app looks that the front page's pictures show; before a release that changes the front page | `make landing-shots` |
-| `scripts/list-count.mjs` | Asks Cloudflare how many people are on the Mac-app list, and prints that number only; an answer holding anything else is refused | When someone asks how many signed up; after a sign-up test on the live site | `make hifth-app-list-count` |
+| `scripts/list-count.mjs` | Asks the Supabase database how many people are on the Mac-app list and how many still have to confirm, and prints those two numbers only; an answer holding anything else is refused. The password goes in the environment, never on the command line | When someone asks how many signed up; after a sign-up test on the live site | `make hifth-app-list-count` (`ARGS=--local` for the copy on this laptop) |
+| `supabase/tests/notify_list.test.sql` (database checks, not a script here) | Proves the public key alone cannot read the list or the keys, the site key is needed, a repeat sign-up answers the same, only the latest confirm code works, and leaving removes the row | After changing the list's database part | `make notify-db-test` (`supabase start` first) |
 | `scripts/shipped.mjs` | The lists of what may and may not go up, and the folder check | Changing what the site may hold | imported; tests: `node --test .claude/skills/deploy-site/scripts/shipped.test.mjs` |
 | `scripts/dev-designs.mjs` | The **Designs** button for the local site: lists every options page and written note, newest commit first, and draws each note (its pictures, diagrams and highlighted boxes) as a page. The release check refuses the button and `docs/` if either ever reaches a folder going up | Changing the button or how notes are drawn; a new design page needs nothing, the list is read from the folders | imported by `prepare`; tests: `node --test .claude/skills/deploy-site/scripts/dev-designs.test.mjs` |
 | `scripts/live.mjs` | The look at the live site | Changing what verify asks for | imported; tests: `node --test .claude/skills/deploy-site/scripts/live.test.mjs` |

@@ -67,20 +67,23 @@ export function assemble({ landing = LANDING, app = APP_DIST, out = OUT } = {}) 
 
 /**
  * What is wrong with the site's Cloudflare settings (apps/landing/wrangler.toml), which the
- * upload reads for the email list's database. Until the database is made on the new account,
- * its id is a stand-in, and an upload would put up a form that saves nothing.
+ * upload reads. The email list lives on Supabase and the form reaches it through Pages
+ * secrets, so this file must name no database and hold no Supabase address or key: a
+ * Supabase project's address in a checked-in file is one this repo keeps out of sight, and a
+ * leftover Cloudflare database block would put up a form the code no longer uses.
  */
 export function configProblems(text) {
   const path = "apps/landing/wrangler.toml";
   if (typeof text !== "string") return [{ path, why: "the site's Cloudflare settings are missing" }];
-  const id = /^\s*database_id\s*=\s*"([^"]*)"/m.exec(text)?.[1];
-  if (!/^\s*binding\s*=\s*"DB"/m.test(text) || !id) {
-    return [{ path, why: "names no database for the email list, so the form would save nothing" }];
+  const lines = text.split("\n").filter((l) => !/^\s*#/.test(l)).join("\n");
+  const problems = [];
+  if (/\[\[\s*d1_databases\s*\]\]/.test(lines)) {
+    problems.push({ path, why: "still names a Cloudflare database; the email list is on Supabase now, so take the block out" });
   }
-  if (!/^[0-9a-f-]{32,36}$/i.test(id)) {
-    return [{ path, why: `the email list's database is not made yet (its id is "${id}"); make it on the new account and put its id here` }];
+  if (/supabase\.co|SUPABASE_|LIST_KEY|TURNSTILE_SECRET/i.test(lines)) {
+    problems.push({ path, why: "holds a Supabase address or one of the form's secret settings; those go in as Pages secrets, never in this file" });
   }
-  return [];
+  return problems;
 }
 
 function readConfig() {
@@ -180,22 +183,64 @@ function publish() {
 /** Cloudflare's published test secret for the spam check: every answer passes, and says it came from example.com. */
 export const TEST_TURNSTILE_SECRET = "1x0000000000000000000000000000000AA";
 
-/** What `wrangler pages dev` is run with to serve the release folder on this laptop, form and all. */
-export function serveArgs(port) {
-  return [
+/**
+ * The made-up site key the local list accepts (supabase/seed.sql stores its hash). It is not a
+ * secret: it only opens a copy of the list on this laptop.
+ */
+export const LOCAL_LIST_KEY = "local-list-key-made-up-not-secret";
+
+/**
+ * The local list's address and public key, from `supabase status -o json`, or null when the
+ * answer is not one. Only a list on this laptop is accepted, so serve can never be pointed at
+ * the real one.
+ */
+export function localListFrom(statusJson) {
+  let j;
+  try {
+    j = JSON.parse(statusJson);
+  } catch {
+    return null;
+  }
+  const url = j?.API_URL;
+  const key = j?.PUBLISHABLE_KEY || j?.ANON_KEY;
+  if (typeof url !== "string" || typeof key !== "string" || !key) return null;
+  let host;
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    return null;
+  }
+  if (host !== "127.0.0.1" && host !== "localhost") return null;
+  return { url, key };
+}
+
+/**
+ * What `wrangler pages dev` is run with to serve the release folder on this laptop, form and
+ * all. With a local list, the form signs up against it and "sends" the confirm email by
+ * writing its link to this server's log; without one, the form says the list is not open yet.
+ */
+export function serveArgs(port, list = null) {
+  const args = [
     "pages", "dev", "dist", "--ip", "127.0.0.1", "--port", String(port),
-    // Once any setting is given with --binding, the database has to be named too.
-    "--d1", "DB=not-made-yet",
     "--binding", `TURNSTILE_SECRET=${TEST_TURNSTILE_SECRET}`,
     "--binding", "TURNSTILE_HOSTNAMES=localhost,127.0.0.1,example.com",
   ];
+  if (list) {
+    args.push(
+      "--binding", `SUPABASE_URL=${list.url}`,
+      "--binding", `SUPABASE_PUBLISHABLE_KEY=${list.key}`,
+      "--binding", `LIST_KEY=${LOCAL_LIST_KEY}`,
+      "--binding", "MAIL_SENDER=dev-log",
+    );
+  }
+  return args;
 }
 
 const wrangler = (args) => spawnSync("wrangler", args, { cwd: LANDING, stdio: "inherit" }).status === 0;
 
 /**
  * hifth.app on this laptop, first half: the same folder a release would upload,
- * checked, and the local table the sign-up form writes to. The second half,
+ * checked, with the Designs button added. The second half,
  * `serve`, only starts the server, so the comment server can start it behind
  * itself without waiting on a build.
  */
@@ -214,24 +259,29 @@ function prepare({ build }) {
     dates: commitDates(REPO, "docs/design"),
   });
   console.log(`  Designs button: ${listed} design pages and notes, on this laptop only (/docs/design/)`);
-  if (!wrangler(["d1", "execute", "hifth-notify", "--local", "--file", "schema.sql"])) {
-    console.log("\n✗ could not make the local sign-up table.");
-    return false;
-  }
   return true;
 }
 
 /**
  * hifth.app on this laptop, second half: Cloudflare's own local server on the
- * prepared folder, with the sign-up list in a local database and the spam
- * check's always-pass test keys. Nothing here reaches Cloudflare.
+ * prepared folder, with the spam check's always-pass test keys and, when a local
+ * Supabase is running, the sign-up list on it. Nothing here reaches Cloudflare or
+ * the real list. SUPABASE_WORKDIR names the folder to ask `supabase status` in,
+ * for a local copy run from somewhere other than this repo (other servers on the
+ * laptop can hold Supabase's usual ports).
  */
 function serve({ port }) {
   if (!existsSync(OUT)) {
     console.log("✗ nothing to serve yet: run prepare first.");
     return false;
   }
-  return wrangler(serveArgs(port));
+  const workdir = process.env.SUPABASE_WORKDIR || REPO;
+  const status = spawnSync("supabase", ["--workdir", workdir, "status", "-o", "json"], { encoding: "utf8" });
+  const list = status.status === 0 ? localListFrom(status.stdout) : null;
+  console.log(list
+    ? `  Sign-up list: the local copy at ${list.url}; confirm links are written to this log`
+    : "  Sign-up list: no local Supabase running, so the form says the list is not open yet (supabase start, then serve again)");
+  return wrangler(serveArgs(port, list));
 }
 
 async function main(argv) {

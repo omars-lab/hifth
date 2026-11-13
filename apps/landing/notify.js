@@ -8,14 +8,14 @@ const WORDS = {
   en: {
     badEmail: "That doesn't look like an email address.",
     sending: "Sending…",
-    joined: "You're on the list.",
+    inbox: "Check your inbox for one email to confirm.",
     failed: "That didn't go through. Please try again.",
     offline: "That didn't go through. Check your connection and try again.",
   },
   ar: {
     badEmail: "لا يبدو هذا عنوان بريد إلكتروني.",
     sending: "جار الإرسال…",
-    joined: "أضفناك إلى القائمة.",
+    inbox: "راجع بريدك، فيه رسالة واحدة للتأكيد.",
     failed: "لم يصل طلبك. حاول مرة أخرى.",
     offline: "لم يصل طلبك. تأكد من اتصالك ثم حاول مرة أخرى.",
   },
@@ -38,7 +38,7 @@ form?.addEventListener("submit", async (event) => {
       body: data,
     });
     const body = await res.json().catch(() => ({}));
-    status.textContent = body.message || (res.ok ? say.joined : say.failed);
+    status.textContent = body.message || (res.ok ? say.inbox : say.failed);
     if (res.ok) form.reset();
   } catch {
     status.textContent = say.offline;

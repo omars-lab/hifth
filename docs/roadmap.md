@@ -1,10 +1,10 @@
 # What is still open
 
-*This is a draft, written by `intent roadmap` on 2026-11-12. Running the command again writes over it.*
+*This is a draft, written by `intent roadmap` on 2026-11-13. Running the command again writes over it.*
 
-142 open tasks: 7 now, 74 next, 61 later. 10 name a use case, 17 name only a part of the product, 115 are tied to nothing yet.
+148 open tasks: 7 now, 80 next, 61 later. 10 name a use case, 21 name only a part of the product, 117 are tied to nothing yet.
 
-132 of 142 open tasks name nobody they are for.
+138 of 148 open tasks name nobody they are for.
 
 ## Now
 
@@ -87,8 +87,17 @@ Typing hifth.app shows what Hifth is for, opens the app, and lets a reader leave
 - **hifth-app-turnstile-key**: The front page carries Cloudflare's test key for the spam check, which lets every robot through, and the release check refuses it.
 - **carry-marks-switched-off**: The 'Hifth has moved' card and the way to carry marks across are built and tested in Chrome, Firefox and iPhone Safari, but switched off, so readers at the old…
 - **notify-list-not-live**: The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key…
+- **privacy-page-names-d1**: The privacy page (apps/landing/privacy.html and its Arabic twin) says the list is kept in Cloudflare's database and that only two things are kept.
+- **hifth-app-dmarc-spf**: hifth.app has no DMARC record, and its root SPF record still includes the registrar's old mail-forwarding servers, left over from before Apple held the mail.
+- **notify-list-keep-awake**: Supabase's free plan puts the list's project to sleep after 7 quiet days, after which the form can only answer try again later until the owner wakes it by…
 
-### Tied to nothing yet (61)
+### Part of the product: revision-record
+
+What the reader has opened, by day and by page, hizb or juz — the log, and the picture drawn from it. Never leaves the device.
+
+- **calendar-looks-plain**: Owner, 2026-11-12 (page comment t_476e84): the month and day views should look more appealing.
+
+### Tied to nothing yet (63)
 
 - **does-a-real-fore-edge-stack-vary**: Curiosity, not a blocker — SS4.6 fixes it constant here regardless. But if the reference does vary it, that is a design it got wrong for a memoriser.
 - **check-perf-verdict-on-device**
@@ -151,6 +160,8 @@ Typing hifth.app shows what Hifth is for, opens the app, and lets a reader leave
 - **full-screen-keeps-tools**: Owner's page comment of 2026-11-07: 'Where is the side tool bar?' Full screen hides every bar, the tools too, so marking means leaving it.
 - **verse-glows-on-drawer-hover**: Owner's page comment of 2026-11-07 asked for the lit verse to glow while the pointer rests on its drawer.
 - **comment-bar-covers-bottom-row-on-phone-width**: On the dev server at phone width the comment tool's bar lies over the bottom of the app, so a bottom row of icons cannot be pressed until the bar is hidden.
+- **mistake-kinds-beyond-the-word**: Owner, 2026-11-12 (page comment t_2413cf): the Mistake pen should ask the kind of mistake first (harakah, makharij, a tajweed rule left out such as idgham, a…
+- **share-menu-too-plain**: Owner, 2026-11-12 (page comment t_bffcd4): the share menu looks too plain.
 
 ## Later, waiting on something
 

@@ -831,8 +831,17 @@ hifth-app-publish: ## Check, upload to hifth.app with the saved keys, then look 
 hifth-app-verify: ## Look at live hifth.app: pages answer, the app is this commit, no development address serves anything
 	@$(RELEASE) verify $(ARGS)
 
-hifth-app-list-count: ## How many people are on hifth.app's Mac-app list; never shows an address
-	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/list-count.mjs
+hifth-app-list-count: ## How many people are on hifth.app's Mac-app list, and how many still to confirm; never shows an address. ARGS=--local counts the copy on this laptop
+	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/list-count.mjs $(ARGS)
+
+# The list's database part (supabase/migrations/*notify_list.sql), checked against a local
+# copy as the public key sees it. Needs `supabase start` first. Other servers on this laptop
+# can hold Supabase's usual ports; run a copy elsewhere and name its folder with
+# SUPABASE_WORKDIR (the deploy-site skill says how).
+SUPABASE_WORKDIR ?= .
+.PHONY: notify-db-test
+notify-db-test: ## Check the sign-up list's database rules against the local Supabase copy (supabase start first)
+	@supabase --workdir $(SUPABASE_WORKDIR) test db
 
 .PHONY: shots
 shots: ## Recapture the guide's screenshots from the real app into docs/validation/shots/

@@ -95,20 +95,24 @@ is in [the notify list's design](hifth-app-mailing-list.md), with its own open q
 The answers never repeat the address. The tests use made-up addresses only.
 
 The code is in `apps/landing/lib/notify.mjs`, with its tests next to it. Cloudflare's
-two small entry files are in `apps/landing/functions/api/`, the table in
-`apps/landing/schema.sql`, and the site's Cloudflare settings in `apps/landing/wrangler.toml`.
+small entry files are in `apps/landing/functions/api/`, the list's table and database functions
+in `supabase/migrations/20261113000001_notify_list.sql`, and the site's Cloudflare settings in
+`apps/landing/wrangler.toml`.
 
 What is left before it is live:
 
-- make the database on the new account, put its id in the settings, and make its table;
-- put the spam check's secret in as a Pages secret (⑤);
+- push the list's database part to the real Supabase project, with the real site key's hash;
+- put the four Pages secrets in: the project's address, its public key, the site key and the
+  spam check's secret (⑤);
+- choose the service that sends the confirm email (decision `notify-list-sender`);
 - sign up on the live site with a made-up address, see `make hifth-app-list-count` go up by one,
   leave with the link, and see it go back down.
 
-The count is built: `make hifth-app-list-count` asks Cloudflare for the number alone and refuses
-an answer that holds anything else, so it can never put an address on the screen.
+The count is built: `make hifth-app-list-count` asks the database for two numbers alone (on the
+list, and still to confirm) and refuses an answer that holds anything else, so it can never put an
+address on the screen. On this laptop, `ARGS=--local` counts the local copy.
 
-Until the database is made, the release check refuses to publish.
+Until the secrets are set, the live form says the list is not open yet.
 
 ### ⑦ Can a reader at the old address bring their marks to hifth.app? · **open**
 

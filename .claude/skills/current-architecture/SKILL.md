@@ -29,7 +29,7 @@ flowchart LR
   end
   earl[Cloudflare: the older EarlBear account<br/>never for Hifth]
   subgraph sb[Supabase: Hifth's own account]
-    store[(Project hifth.app<br/>outside-library copy;<br/>notify list to come)]
+    store[(Project hifth.app<br/>outside-library copy;<br/>notify list, once pushed)]
   end
   oldsb[(Supabase: the older bytesofpurpose account<br/>old Hifth project, being paused)]
   icloud[iCloud+ mail<br/>on hifth.app]
@@ -39,7 +39,7 @@ flowchart LR
   web --> shell
   pitch -. room only .-> shell
   pages --- fn
-  fn -- today: Cloudflare D1, moving --> store
+  fn -- three database functions --> store
   etl -- make ingest-qul --> store
   keys -- loads tokens for --> pages
   dns -- mail records --> icloud
@@ -65,9 +65,11 @@ flowchart LR
 
 - **Settled 2026-11-12 by the owner, in chat:** the notify list's data lives in Supabase, not in
   Cloudflare's own database (D1). Recorded as decision `notify-list-store`.
-- **Not done yet:** the notify function in `apps/landing/functions/api/` and
-  `apps/landing/wrangler.toml` are still written against D1. They have to move to Supabase
-  before the first release (issue `notify-function-on-d1`).
+- **Done 2026-11-13, on this laptop:** the notify function calls the list's three Supabase
+  database functions (`supabase/migrations/20261113000001_notify_list.sql`), tried end to end
+  against a local copy. **Not live yet:** pushing that to the real project and setting the Pages
+  secrets are the owner's (issue `notify-list-not-live`); the daily keep-awake timer is not built
+  (issue `notify-list-keep-awake`).
 - **Still open:** what sends the mail to the list, decision `notify-list-sender`, with Resend's
   free plan from news.hifth.app recommended. The design is `docs/design/hifth-app-mailing-list.md`
   (its page, `docs/design/hifth-app-mailing-list.html`, is rebuilt by

@@ -6193,7 +6193,7 @@
       "severity": "risk",
       "owner": "user",
       "feature": "hifth-app-site",
-      "note": "The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key and secret are not in. On 2026-11-12 the saved Cloudflare token was refused for databases (it can reach the site project, not D1), so the owner adds D1 edit to that token. Next: make the database on the new account and put its id in apps/landing/wrangler.toml, push the spam-check secret, then sign up once with a throwaway address on the live page and see make hifth-app-list-count say 1. 2026-11-12: the owner chose Supabase, not Cloudflare's database, for the list, so the database steps above are replaced by notify-function-on-d1; the sender and the rest are in docs/design/hifth-app-mailing-list.md."
+      "note": "The 'tell me when the Mac app is out' form works on this laptop but keeps no address yet: Cloudflare's database for it is not made, and the real spam-check key and secret are not in. On 2026-11-12 the saved Cloudflare token was refused for databases (it can reach the site project, not D1), so the owner adds D1 edit to that token. Next: make the database on the new account and put its id in apps/landing/wrangler.toml, push the spam-check secret, then sign up once with a throwaway address on the live page and see make hifth-app-list-count say 1. 2026-11-12: the owner chose Supabase, not Cloudflare's database, for the list, so the database steps above are replaced by notify-function-on-d1; the sender and the rest are in docs/design/hifth-app-mailing-list.md. 2026-11-13: the form's side is done and proven on this laptop (notify-function-on-d1). What is left is the owner's, in order: push the list's database part to the real Supabase project and add the real site key's hash (manage-database skill; needs the database password); set the four Pages secrets SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, LIST_KEY and TURNSTILE_SECRET; choose and set up the sender (notify-list-sender); then sign up once with a throwaway address on the live page and see make hifth-app-list-count count it."
     },
     {
       "id": "carry-leaves-settings-behind",
@@ -6353,11 +6353,12 @@
         "file": "docs/design/hifth-app-mailing-list.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
+      "closedBy": "apps/landing/lib/notify.test.mjs",
       "feature": "hifth-app-site",
-      "note": "The sign-up server code (apps/landing/lib/notify.mjs) still writes to Cloudflare's database, but the owner chose Supabase for the list on 2026-11-12. Move it to call a Supabase add function with the publishable key, with the table in a schema the web interface does not serve; a paused project must answer try again later, never success. The locked-down database setup is on the unmerged supabase-move branch."
+      "note": "The sign-up server code (apps/landing/lib/notify.mjs) still writes to Cloudflare's database, but the owner chose Supabase for the list on 2026-11-12. Move it to call a Supabase add function with the publishable key, with the table in a schema the web interface does not serve; a paused project must answer try again later, never success. The locked-down database setup is on the unmerged supabase-move branch. Fixed 2026-11-13: the form calls the list's three database functions (add, confirm, leave) with the publishable key and a site key; the table sits in a schema the web interface does not serve (supabase/migrations/20261113000001_notify_list.sql, checked by make notify-db-test); an asleep or unreachable list answers try again later and sends nothing. Proven on this laptop against a local copy: sign up, confirm by the button, leave, with make hifth-app-list-count ARGS=--local counting 0, then 1 waiting, then 1 on the list, then 0."
     },
     {
       "id": "notify-leave-on-visit",
@@ -6365,11 +6366,12 @@
         "file": "docs/design/hifth-app-mailing-list.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
+      "closedBy": "apps/landing/lib/notify.test.mjs",
       "feature": "hifth-app-site",
-      "note": "The leave link (apps/landing/functions/api/unsubscribe.js) deletes the row on a plain visit, so a mail scanner opening every link would remove people. Make it a page with a Leave the list button that sends a POST, add a separate POST address for the one-click leave headers (no redirect), and a test that a plain visit removes nobody. The confirm link works the same way."
+      "note": "The leave link (apps/landing/functions/api/unsubscribe.js) deletes the row on a plain visit, so a mail scanner opening every link would remove people. Make it a page with a Leave the list button that sends a POST, add a separate POST address for the one-click leave headers (no redirect), and a test that a plain visit removes nobody. The confirm link works the same way. Fixed 2026-11-13: opening the leave link (and the confirm link) shows a page with one button and changes nothing; only the button's POST, or a mail program's one-click leave, removes the address."
     },
     {
       "id": "privacy-page-names-d1",
@@ -6381,7 +6383,7 @@
       "severity": "defect",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "The privacy page (apps/landing/privacy.html and its Arabic twin) says the list is kept in Cloudflare's database and that only two things are kept. Name Supabase, name Resend as the sender and that it keeps logs in the US, and list what a row keeps (address, signed-up and confirmed dates, language, leave code). Waits on the sender choice (decision notify-list-sender)."
+      "note": "The privacy page (apps/landing/privacy.html and its Arabic twin) says the list is kept in Cloudflare's database and that only two things are kept. Name Supabase, name Resend as the sender and that it keeps logs in the US, and list what a row keeps (address, signed-up and confirmed dates, language, leave code). Waits on the sender choice (decision notify-list-sender). 2026-11-13: half done. Both privacy pages now name the Supabase database, say an address counts only once confirmed, list what a row keeps, and say an unconfirmed one is deleted after 7 days. Still owed: naming the sending service and where it keeps its logs, once the decision notify-list-sender is made."
     },
     {
       "id": "hifth-app-dmarc-spf",
@@ -6401,11 +6403,12 @@
         "file": "docs/design/hifth-app-mailing-list.md",
         "item": "⑤"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
+      "closedBy": "apps/landing/lib/pages.test.mjs",
       "feature": "hifth-app-site",
-      "note": "The form says Nothing else, and the privacy page says the address is used to write when the apps ship. With a confirmation email the promise becomes one email to confirm, then one when the app ships. Change the wording on the English and Arabic pages in the same change as the confirmation email."
+      "note": "The form says Nothing else, and the privacy page says the address is used to write when the apps ship. With a confirmation email the promise becomes one email to confirm, then one when the app ships. Change the wording on the English and Arabic pages in the same change as the confirmation email. Fixed 2026-11-13: both front pages now say one email to confirm, then one when the apps ship; a test holds both languages to it."
     },
     {
       "id": "notify-form-reveals-member",
@@ -6413,11 +6416,24 @@
         "file": "docs/design/hifth-app-mailing-list.md",
         "item": "⑥"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
+      "closedBy": "apps/landing/lib/notify.test.mjs",
       "feature": "hifth-app-site",
-      "note": "A repeat sign-up answers already on the list, which tells anyone whether an address is signed up. The form should always answer check your inbox, with a test that a repeat sign-up gets the same answer as a new one."
+      "note": "A repeat sign-up answers already on the list, which tells anyone whether an address is signed up. The form should always answer check your inbox, with a test that a repeat sign-up gets the same answer as a new one. Fixed 2026-11-13: a new and a repeat sign-up get the same answer (check your inbox), and the database's add answers nothing either way."
+    },
+    {
+      "id": "notify-list-keep-awake",
+      "source": {
+        "file": "docs/design/hifth-app-mailing-list.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "Supabase's free plan puts the list's project to sleep after 7 quiet days, after which the form can only answer try again later until the owner wakes it by hand; and an unconfirmed address is only deleted when someone else signs up, so the privacy page's deleted-after-7-days is not yet kept on a quiet week. Build the daily timer from the design note: a small separate Cloudflare Worker that calls the database once a day and deletes unconfirmed rows in the same run, tested for what it asks, then checked after its first real run. Putting it live needs the owner's OK; it goes once the list is live (notify-list-not-live)."
     }
   ]
 }

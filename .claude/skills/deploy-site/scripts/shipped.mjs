@@ -47,6 +47,10 @@ export const MARKERS = [
   [/\b[123]x0{20}[A-Z]{2}\b/, "Cloudflare's test key for the spam check, which lets every robot through"],
   [/\blocalhost\b|127\.0\.0\.1/, "an address on this laptop, which no reader can reach"],
   [/\[contact address to come\]/, "the privacy page's placeholder, still waiting on a real contact address"],
+  // The form reaches the list from the server side only; a page naming the project's address
+  // would hand every reader the way to the list's door, and this repo keeps it out of sight.
+  [/[\w-]+\.supabase\.co\b/, "a Supabase project's address, which only the form's server part may know (as a Pages secret)"],
+  [/local-list-key-made-up-not-secret/, "the made-up site key that opens the list on this laptop only"],
 ];
 
 /** The reason for each development sign found in a text, as "it mentions ..." lines. */

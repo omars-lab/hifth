@@ -11,10 +11,10 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { TEST_TURNSTILE_SECRET, assemble, configProblems, serveArgs } from "./release-hifth-app.mjs";
+import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, configProblems, localListFrom, serveArgs } from "./release-hifth-app.mjs";
 import { auditShipped, readFolder } from "./shipped.mjs";
 
 function tree(root, files) {
@@ -45,7 +45,6 @@ function fixture(appExtra = {}) {
     "_redirects": "/read/*  /read/index.html  200\n",
     "package.json": "{}",
     "wrangler.toml": "name = 'x'",
-    "schema.sql": "create table t (x)",
     "notify.test.mjs": "",
     "functions/api/notify.js": "export {}",
     "lib/notify.js": "",
@@ -101,12 +100,25 @@ test("putting it together again starts from an empty folder", () => {
   assert.ok(!readFolder(out).files.some((f) => f.path === "left-over.txt"));
 });
 
-test("the site's Cloudflare settings are refused until the email list's database is made", () => {
-  const settings = (id) => `name = "hifth-app"\npages_build_output_dir = "dist"\n[[d1_databases]]\nbinding = "DB"\ndatabase_name = "hifth-notify"\ndatabase_id = "${id}"\n`;
-  assert.match(configProblems(settings("not-made-yet")).map((p) => p.why).join(" "), /database/);
-  assert.deepEqual(configProblems(settings("0f8b1c2e-0000-4000-8000-000000000000")), []);
-  assert.match(configProblems('name = "hifth-app"\n').map((p) => p.why).join(" "), /database/);
+test("the site's Cloudflare settings name no database and hold no list address or secret", () => {
+  const base = 'name = "hifth-app"\npages_build_output_dir = "dist"\n';
+  assert.deepEqual(configProblems(base), []);
+  // Talking about the settings in a comment is fine; only real lines count.
+  assert.deepEqual(configProblems(base + "# SUPABASE_URL and LIST_KEY are Pages secrets\n"), []);
+  assert.match(configProblems(base + '[[d1_databases]]\nbinding = "DB"\n').map((p) => p.why).join(" "), /database/);
+  assert.match(configProblems(base + '[vars]\nSUPABASE_URL = "https://made-up.supabase.co"\n').map((p) => p.why).join(" "), /secret/);
+  assert.match(configProblems(base + '[vars]\nLIST_KEY = "x"\n').map((p) => p.why).join(" "), /secret/);
   assert.match(configProblems(null).map((p) => p.why).join(" "), /settings/);
+});
+
+test("only a list on this laptop is taken from supabase status", () => {
+  const status = (o) => JSON.stringify(o);
+  assert.deepEqual(localListFrom(status({ API_URL: "http://127.0.0.1:56321", PUBLISHABLE_KEY: "made-up" })), { url: "http://127.0.0.1:56321", key: "made-up" });
+  assert.deepEqual(localListFrom(status({ API_URL: "http://localhost:54321", ANON_KEY: "made-up" })), { url: "http://localhost:54321", key: "made-up" });
+  assert.equal(localListFrom(status({ API_URL: "https://made-up.supabase.co", PUBLISHABLE_KEY: "made-up" })), null);
+  assert.equal(localListFrom(status({ API_URL: "http://127.0.0.1:56321" })), null);
+  assert.equal(localListFrom("not json"), null);
+  assert.equal(localListFrom(""), null);
 });
 
 test("serving on this laptop listens only here, uses the always-pass test secret, and never the real database", () => {
@@ -117,4 +129,17 @@ test("serving on this laptop listens only here, uses the always-pass test secret
   assert.ok(args.includes(`TURNSTILE_SECRET=${TEST_TURNSTILE_SECRET}`));
   assert.ok(!args.includes("--remote"));
   assert.equal(TEST_TURNSTILE_SECRET, "1x0000000000000000000000000000000AA");
+  // No local list: no list settings, so the form says the list is not open yet.
+  assert.ok(!args.some((a) => /^(SUPABASE_|LIST_KEY|MAIL_SENDER)/.test(a)));
+  assert.ok(!args.includes("--d1"));
+});
+
+test("with a local list, serving hands it the local address, the made-up site key and the log-only sender", () => {
+  const args = serveArgs(7124, { url: "http://127.0.0.1:56321", key: "made-up" });
+  assert.ok(args.includes("SUPABASE_URL=http://127.0.0.1:56321"));
+  assert.ok(args.includes("SUPABASE_PUBLISHABLE_KEY=made-up"));
+  assert.ok(args.includes(`LIST_KEY=${LOCAL_LIST_KEY}`));
+  assert.ok(args.includes("MAIL_SENDER=dev-log"));
+  // The same made-up key supabase/seed.sql stores the hash of.
+  assert.match(readFileSync(new URL("../../../../supabase/seed.sql", import.meta.url), "utf8"), new RegExp(LOCAL_LIST_KEY));
 });

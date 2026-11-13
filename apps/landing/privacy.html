@@ -24,12 +24,16 @@
       hifth.app/read stores them in your browser. Nothing you mark is sent to us.</p>
 
     <h2>The "tell me when the apps are out" list</h2>
-    <p>If you leave your email on the front page, we keep two things: the email and the date
-      you left it. We use it for one thing: to write when the Mac and iPhone apps ship, and
-      perhaps to invite you to try them early. We do not share it or sell it, and we do not add you to
-      anything else.</p>
-    <p>It is stored in Cloudflare's database, on the account that runs hifth.app. Only the
-      person who runs Hifth can read it.</p>
+    <p>If you leave your email on the front page, we send one email with a button to confirm
+      it. You are only on the list once you press it. We use the list for one thing: to write
+      when the Mac and iPhone apps ship, and perhaps to invite you to try them early. We do not
+      share it or sell it, and we do not add you to anything else.</p>
+    <p>For each address we keep the email, when you left it, when you confirmed it, the
+      language you used, and the code in your leave link. An address nobody confirms is
+      deleted after 7 days.</p>
+    <p>The list is stored in a Supabase database that only the person who runs Hifth can
+      read. The website itself can only add, confirm or remove an address; it cannot read the
+      list. The service that sends the emails will be named here before the list opens.</p>
     <p>Every email we send has a link that takes you off the list at once. To leave before
       then, write to <span class="contact">[contact address to come]</span>.</p>
 

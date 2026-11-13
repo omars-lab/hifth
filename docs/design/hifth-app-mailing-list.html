@@ -299,18 +299,23 @@ Free up to 100 emails a day; a bigger launch day is spread over a few days or co
 <li>The privacy page&#39;s full rewrite; this names what it must say, not its words.</li>
 </ul>
 <h2>Open questions, and what would answer each</h2>
-<h3>① The form&#39;s server code still writes to Cloudflare&#39;s database · <strong>open</strong></h3>
+<h3>① The form&#39;s server code still writes to Cloudflare&#39;s database · <strong>fixed</strong></h3>
 <p>Answered by moving it to call the Supabase &quot;add&quot; function with the publishable key, with a test that a paused project answers &quot;try again later&quot;.</p>
-<h3>② The leave link removes someone on a plain visit · <strong>open</strong></h3>
+<p>Done 2026-11-13. The form calls three database functions (add, confirm, leave); the table is out of the web interface&#39;s reach, and the database&#39;s own rules are checked against a local copy. Tried end to end on this laptop: sign up, confirm by the button, leave.</p>
+<h3>② The leave link removes someone on a plain visit · <strong>fixed</strong></h3>
 <p>Answered by a page with a &quot;Leave the list&quot; button that sends a POST, a separate POST address for one-click leave, and a test that a plain visit removes nobody.</p>
+<p>Done 2026-11-13, for the confirm link too: opening either link shows a page with one button and changes nothing.</p>
 <h3>③ The privacy page names Cloudflare&#39;s database · <strong>open</strong></h3>
 <p>Answered by naming Supabase and Resend, where each keeps data, and what a row holds, in both languages.</p>
+<p>Half done 2026-11-13: both pages name Supabase and say what a row holds. The sending service is named once it is chosen.</p>
 <h3>④ No mail-checking record (DMARC), and a leftover include in the sender record · <strong>open</strong></h3>
 <p>Answered by the owner adding a &quot;watch only&quot; DMARC record at the root and, once the registrar&#39;s forwarding is confirmed off, removing its include.</p>
-<h3>⑤ The form promises &quot;Nothing else&quot; · <strong>open</strong></h3>
+<h3>⑤ The form promises &quot;Nothing else&quot; · <strong>fixed</strong></h3>
 <p>Answered by wording that says one email to confirm, then one when the app ships, on the English and Arabic pages.</p>
-<h3>⑥ A repeat sign-up shows the address is already on the list · <strong>open</strong></h3>
+<h3>⑥ A repeat sign-up shows the address is already on the list · <strong>fixed</strong></h3>
 <p>Answered by the form always saying &quot;check your inbox&quot;, with a test that a repeat sign-up gets the same answer as a new one.</p>
+<h3>⑦ Nothing keeps the free database awake, or deletes unconfirmed addresses on time · <strong>open</strong></h3>
+<p>Supabase&#39;s free plan puts a project to sleep after 7 quiet days, and then the form can only say &quot;try again later&quot; until the owner wakes it by hand. And an address nobody confirms is only deleted when someone else signs up, so the privacy page&#39;s &quot;deleted after 7 days&quot; is not yet true on a quiet week. Answered by the daily timer described above: a small separate Cloudflare Worker that calls the database once a day and deletes unconfirmed rows in the same run, with a test of what it asks the database and a check after its first real run. Putting the Worker live needs the owner&#39;s OK.</p>
 
 </main>
 </body>

@@ -1595,20 +1595,28 @@
         },
         {
           "file": "apps/landing/lib/notify.mjs",
-          "symbol": "export async function handleUnsubscribe"
+          "symbol": "export function handleConfirm"
+        },
+        {
+          "file": "apps/landing/lib/notify.mjs",
+          "symbol": "export function handleUnsubscribe"
         }
       ],
       "proof": [
         {
           "file": "apps/landing/lib/notify.test.mjs",
-          "test": "a new email is kept with its date and a way to leave"
+          "test": "a new sign-up is kept waiting for its confirmation, and one email is sent to confirm it"
         },
         {
           "file": "apps/landing/lib/notify.test.mjs",
-          "test": "the leave link takes the email off the list"
+          "test": "pressing the button confirms, with the list key and the code"
+        },
+        {
+          "file": "apps/landing/lib/notify.test.mjs",
+          "test": "pressing it, or the mail program's one-click leave, takes the address off the list"
         }
       ],
-      "gap": "The list keeps nothing live yet: its database is not made and the real spam-check key is not in (docs/issues.json, notify-list-not-live)."
+      "gap": "The list keeps nothing live yet: its database part is not pushed to the real Supabase project, the Pages secrets are not set, and no service sends the confirm email (docs/issues.json, notify-list-not-live; decision notify-list-sender)."
     },
     {
       "id": "bring-my-marks-to-the-new-address",
