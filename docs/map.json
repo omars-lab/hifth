@@ -2386,6 +2386,16 @@
           "note": "The Apple Pencil's double-tap and squeeze, heard on the iPad and handed to the page's lent `window.__HIFTH_PAGE__.pencil` with the reader's own pencil setting and, when it hovers, the tip. The shell only names the setting; what it means in Hifth is apps/web/src/pencil.ts. PencilTests.swift reads what reaches the page."
         },
         {
+          "file": "native/Hifth/Capture/WalkCapture.swift",
+          "symbol": "captureWalk",
+          "note": "Debug build only: a screenshot on the iPad keeps a folder in the app's Documents under walk-captures/ — the app's own picture of the web view (not the system screenshot, which iOS does not hand over, so native pieces such as the note banner are not in it), the last ten seconds of touches, Pencil strokes and page moves (TouchTrailRecorder watches the window and never takes a touch), and where.json, then offers a note (CaptureNoteBanner.swift). The folder is written before anything waits, so a page that never answers still leaves a capture. HIFTH_WALK_CAPTURE_AT_START takes one at launch, which is how SmokeTests testWalkCaptureKeepsPictureTrailPlaceAndNote proves it whole."
+        },
+        {
+          "file": "native/Hifth/Capture/CapturePage.swift",
+          "symbol": "CapturePage",
+          "note": "The question a capture asks the page — page, verse, what is open, which settings — run from Swift so nothing new ships in the web build. It reads data-* names and roles only, never labels or text, and keeps only plain short values, so a capture's where.json cannot carry the book's words. CaptureStore.swift names, caps and writes the folders; CaptureTrail.swift keeps the ten seconds. Their tests are CapturePageTests, CaptureStoreTests, CaptureTrailTests and CaptureNoteTests. Info-iOS.plist shows the folders in the Files app in Debug only (HIFTH_WALK_FILES)."
+        },
+        {
           "file": "apps/web/src/pencil.ts",
           "symbol": "pencilAction",
           "note": "What each pencil setting does in Hifth (swap the pen in hand, open the pens beside the tip, open the highlighter's pens, or nothing), the check on the app's message, and where the pens stand beside the tip so they are whole on the screen. e2e/pencil.spec.ts plays the app's side on an iPad both ways up."

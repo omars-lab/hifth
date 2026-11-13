@@ -1273,6 +1273,37 @@
       "gap": "The gate proves every outstanding check has a followable runbook and that the phone guide was regenerated. It cannot prove the runbook's Expect lines match what the phone shows — only walking it does, which is the point of walking it."
     },
     {
+      "id": "keep-what-i-saw-on-the-ipad-walk",
+      "actor": "validator",
+      "goal": "When something is off while I walk the app on my iPad, take a screenshot and have the app keep its own picture, where I was, what I did in the last ten seconds and a note if I add one, so the fault can be found again without me typing it up.",
+      "feature": "native-shell",
+      "code": [
+        {
+          "file": "native/Hifth/Capture/WalkCapture.swift",
+          "symbol": "captureWalk"
+        },
+        {
+          "file": "native/Hifth/Capture/CapturePage.swift",
+          "symbol": "CapturePage"
+        }
+      ],
+      "proof": [
+        {
+          "file": "native/HifthUITests/SmokeTests.swift",
+          "test": "testWalkCaptureKeepsPictureTrailPlaceAndNote"
+        },
+        {
+          "file": "native/HifthTests/CaptureStoreTests.swift",
+          "test": "a capture is kept straight away with its trail, even before the page answers"
+        },
+        {
+          "file": "native/HifthTests/CapturePageTests.swift",
+          "test": "it names the page on screen and the verse in the address, and nothing the page says"
+        }
+      ],
+      "gap": "The simulator has no screenshot buttons, so the test starts the capture at launch instead; that the real screenshot (the two buttons and the Pencil corner swipe) reaches the app is checked by hand on the iPad. Copying captures to the laptop and the five seconds of video before are not built yet."
+    },
+    {
       "id": "bank-a-verdict-so-it-cannot-be-lost",
       "actor": "validator",
       "goal": "Record what I found in one line, and be told immediately what that verdict now obliges us to build.",
