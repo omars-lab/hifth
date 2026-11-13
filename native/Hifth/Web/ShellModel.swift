@@ -244,6 +244,10 @@ final class ShellModel {
     @ObservationIgnored var walkCaptureObserver: NSObjectProtocol?
     #if os(iOS)
     @ObservationIgnored var touchTrailRecorder: UIGestureRecognizer?
+    /// Apple's recorder of the last few seconds, and what starts and stops it
+    /// as the app comes to the front and goes to the back.
+    @ObservationIgnored var clipRecorder: ClipRecorder?
+    @ObservationIgnored var clipObservers: [NSObjectProtocol] = []
     #endif
     #endif
 

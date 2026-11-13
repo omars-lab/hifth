@@ -205,10 +205,13 @@ nonisolated struct CaptureWhere: Equatable {
     /// False when the page did not answer in time; the picture and trail are
     /// still kept.
     let pageAnswered: Bool
+    /// What happened to the five seconds before; `nil` (written as `null`)
+    /// until it is settled, which is after the capture begins.
+    let video: ClipVideo?
 
     init(
         at: Date, trigger: String, route: String, page: Int?, verse: String?, open: [String],
-        settings: [String: String], screen: Screen, build: Build, pageAnswered: Bool
+        settings: [String: String], screen: Screen, build: Build, pageAnswered: Bool, video: ClipVideo? = nil
     ) {
         self.at = at
         self.trigger = trigger
@@ -220,13 +223,17 @@ nonisolated struct CaptureWhere: Equatable {
         self.screen = screen
         self.build = build
         self.pageAnswered = pageAnswered
+        self.video = video
     }
 
-    init(at: Date, trigger: String, route: String, answer: PageAnswer?, screen: Screen, build: Build) {
+    init(
+        at: Date, trigger: String, route: String, answer: PageAnswer?, screen: Screen, build: Build,
+        video: ClipVideo? = nil
+    ) {
         self.init(
             at: at, trigger: trigger, route: route, page: answer?.page, verse: answer?.verse,
             open: answer?.open ?? [], settings: answer?.settings ?? [:], screen: screen, build: build,
-            pageAnswered: answer != nil
+            pageAnswered: answer != nil, video: video
         )
     }
 
@@ -242,6 +249,7 @@ nonisolated struct CaptureWhere: Equatable {
             "open": open,
             "settings": settings,
             "pageAnswered": pageAnswered,
+            "video": video.map { $0.word as Any } ?? NSNull(),
         ]
         object["screen"] = [
             "width": screen.width, "height": screen.height, "scale": screen.scale, "orientation": screen.orientation,

@@ -117,7 +117,8 @@ struct CaptureStoreTests {
             pageAnswered: false
         )
         let json = try #require(try JSONSerialization.jsonObject(with: place.json()) as? [String: Any])
-        #expect(Set(json.keys) == ["at", "trigger", "route", "page", "verse", "open", "settings", "screen", "build", "pageAnswered"])
+        #expect(Set(json.keys) == ["at", "trigger", "route", "page", "verse", "open", "settings", "screen", "build", "pageAnswered", "video"])
+        #expect(json["video"] is NSNull, "the five seconds before are settled after the capture begins")
         #expect(json["at"] as? String == "2027-01-15T08:00:00Z")
         #expect(json["route"] as? String == "/hafs-kfqc/p7", "written as callers write it, without the #")
         #expect(json["page"] is NSNull)

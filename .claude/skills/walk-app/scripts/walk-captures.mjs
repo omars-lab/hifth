@@ -179,6 +179,9 @@ function captures() {
         note: existsSync(at("note.txt")) ? readFileSync(at("note.txt"), "utf8").trim() : null,
         picture: existsSync(at("picture.png")) ? `${name}/picture.png` : null,
         video: existsSync(at("before.mp4")) ? `${name}/before.mp4` : null,
+        // What the app said happened to the five seconds before; null when it
+        // never finished, or the capture is from before the video existed.
+        videoWas: place.video ?? null,
         trail: { touch: count("touch"), pencil: count("pencil"), route: count("route") },
         reopen: route ? `hifth://${route}` : null,
       };
@@ -190,6 +193,25 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 // What the app writes as the trigger (native/Hifth/Capture/WalkCapture.swift), in words.
 const TAKEN_BY = { screenshot: "a screenshot", launch: "the launch switch (a test, not the owner)" };
 
+// Why there is no video of the five seconds before, from the word the app
+// writes (ClipVideo.word in native/Hifth/Capture/ClipRecorder.swift).
+const NO_VIDEO = {
+  off: "recording was switched off for that launch",
+  simulator: "the simulator cannot record the screen",
+  "not-on-this-device": "the Mac app does not record the screen",
+  refused: "you said no when iOS asked to record the screen",
+  blocked: "screen recording is turned off on this iPad (Screen Time)",
+  interrupted: "another app, the screen changing size or the iPad sleeping stopped the recording",
+  "not-recording": "the recorder was not running yet",
+  kept: "the iPad saved it, but it has not been copied here (pull again)",
+};
+
+function noVideo(word) {
+  const failed = /^failed (-?\d+)$/.exec(word);
+  if (failed) return `not kept: Apple's recorder failed (code ${failed[1]})`;
+  return `not kept: ${NO_VIDEO[word] ?? word}`;
+}
+
 function card(c) {
   const rows = [
     ["Page", c.page],
@@ -200,13 +222,15 @@ function card(c) {
     ["Last 10 s", `${c.trail.touch} touches, ${c.trail.pencil} Pencil, ${c.trail.route} page moves`],
     ["Build", c.build ? `${c.build.flavour} · ${c.build.commit}` : null],
     ["Taken by", TAKEN_BY[c.trigger] ?? c.trigger],
+    // A kept video is shown above; only a missing one is explained.
+    ["5 s before", c.videoWas && !c.video ? noVideo(c.videoWas) : null],
   ].filter(([, v]) => v !== null && v !== undefined);
   const when = c.at ? new Date(c.at).toISOString().replace("T", " ").replace(/\.\d+Z$/, " UTC") : c.name;
-  const media = c.picture
-    ? c.video
-      ? `<video src="${esc(c.video)}" poster="${esc(c.picture)}" muted loop playsinline preload="metadata"></video>`
-      : `<a href="${esc(c.picture)}"><img src="${esc(c.picture)}" alt="The app's picture at ${esc(when)}" loading="lazy"></a>`
-    : `<div class="missing">No picture was kept.</div>`;
+  const media = c.video
+    ? `<video src="${esc(c.video)}"${c.picture ? ` poster="${esc(c.picture)}"` : ""} muted loop playsinline preload="metadata"></video>`
+    : c.picture
+      ? `<a href="${esc(c.picture)}"><img src="${esc(c.picture)}" alt="The app's picture at ${esc(when)}" loading="lazy"></a>`
+      : `<div class="missing">No picture was kept.</div>`;
   return `<article id="${esc(c.name)}">
   <header><h2>${esc(when)}</h2><span class="name">${esc(c.name)}</span></header>
   ${media}

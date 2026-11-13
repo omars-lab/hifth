@@ -169,6 +169,9 @@ final class SmokeTests: XCTestCase {
         let verse = try XCTUnwrap(place["verse"] as? String, "no verse though the tap selected one")
         XCTAssertEqual(place["route"] as? String, "/hafs-kfqc/\(verse)")
         XCTAssertNotEqual((place["build"] as? [String: Any])?["commit"] as? String, "unknown", "no build stamp")
+        // Apple's recorder needs a real iPad: here the video is settled as
+        // not recorded, and no before.mp4 (checked in `files` above).
+        XCTAssertEqual(place["video"] as? String, "simulator", "where.json does not say what happened to the video")
         XCTAssertEqual(
             try String(contentsOf: capture.appendingPathComponent("note.txt"), encoding: .utf8), "made up note\n"
         )

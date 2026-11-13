@@ -36,8 +36,39 @@ extension ShellModel {
         } else {
             print("walk capture: no window yet, so touches are not on the trail")
         }
+        startClipRecorder()
         #endif
         captureAtLaunchIfAsked()
+    }
+
+    #if os(iOS)
+    /// Keep the last few seconds while the app is in front. iOS stops any
+    /// recording when the app goes to the back, so it is stopped there and
+    /// started again on the way back.
+    private func startClipRecorder() {
+        let recorder = ClipRecorder()
+        clipRecorder = recorder
+        recorder.start()
+        let center = NotificationCenter.default
+        clipObservers = [
+            center.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
+                MainActor.assumeIsolated { recorder.start() }
+            },
+            center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
+                MainActor.assumeIsolated { recorder.stop() }
+            },
+        ]
+    }
+    #endif
+
+    /// Save the five seconds before into `capture`, or say why not.
+    private func keepClip(in capture: URL) async -> ClipVideo {
+        #if os(iOS)
+        guard let clipRecorder else { return .notRecording }
+        return await clipRecorder.export(into: capture)
+        #else
+        return .notOnThisDevice
+        #endif
     }
 
     /// One capture. Returns its folder, or `nil` when nothing could be kept.
@@ -63,6 +94,9 @@ extension ShellModel {
             return nil
         }
         offerNote(for: capture)
+        // Asked for first, before the picture: every moment waited here is a
+        // moment after the screenshot that the five seconds no longer cover.
+        async let clip = keepClip(in: capture)
 
         let (png, _) = await Self.snapshotPNG(of: webView, page: webView.bounds.size)
         do {
@@ -71,13 +105,15 @@ extension ShellModel {
             print("walk capture picture not kept \(error)")
         }
 
-        if let answer = await askPageWhere(route: route) {
-            let place = CaptureWhere(at: now, trigger: trigger, route: route, answer: answer, screen: screen, build: build)
-            do {
-                try store.write(place.json(), named: "where.json", in: capture)
-            } catch {
-                print("walk capture where.json not updated \(error)")
-            }
+        // Written again once the page and the video are settled, whatever
+        // they said, so where.json always says what happened to the video.
+        let answer = await askPageWhere(route: route)
+        let video = await clip
+        let place = CaptureWhere(at: now, trigger: trigger, route: route, answer: answer, screen: screen, build: build, video: video)
+        do {
+            try store.write(place.json(), named: "where.json", in: capture)
+        } catch {
+            print("walk capture where.json not updated \(error)")
         }
         print("walk capture kept \(capture.lastPathComponent)")
         return capture

@@ -1311,9 +1311,17 @@
         {
           "file": "native/HifthTests/CapturePageTests.swift",
           "test": "it names the page on screen and the verse in the address, and nothing the page says"
+        },
+        {
+          "file": "native/HifthTests/ClipVideoTests.swift",
+          "test": "Apple's errors are sorted into refused, blocked, interrupted and other"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "each reason the app gives for no video is said in words"
         }
       ],
-      "gap": "The simulator has no screenshot buttons, so the test starts the capture at launch instead; that the real screenshot (the two buttons and the Pencil corner swipe) reaches the app is checked by hand on the iPad. Copying captures to the laptop is tested against a stand-in for Apple's device tool; the first copy off the real iPad, and whether emptying it there works, are still to be seen. The five seconds of video before are not built yet."
+      "gap": "The simulator has no screenshot buttons, so the test starts the capture at launch instead; that the real screenshot (the two buttons and the Pencil corner swipe) reaches the app is checked by hand on the iPad. Copying captures to the laptop is tested against a stand-in for Apple's device tool; the first copy off the real iPad, and whether emptying it there works, are still to be seen. Apple's screen recorder only runs on a real iPad, so the five seconds of video before are tested only as far as what the app writes about them; how often iOS asks to record, and whether the video is saved right after a system screenshot, are still to be seen on the iPad."
     },
     {
       "id": "bank-a-verdict-so-it-cannot-be-lost",
