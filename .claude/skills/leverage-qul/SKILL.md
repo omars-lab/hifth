@@ -142,8 +142,9 @@ line's own login (the `hifth` profile), so none of these needs a database passwo
 | `scripts/qul-store.mjs load` | Loads a data-only backup into an empty store in one transaction, then fingerprints it. Refuses a store that has rows | Filling a new store from a backup | `make qul-store-load BACKUP=<file.sql>` |
 | `scripts/qul-store.mjs compare` | Fingerprints two stores and fails unless every table matches | After a load, to prove the new store holds exactly the old one's rows | `make qul-store-compare FROM_PROFILE=<name> FROM_WORKDIR=<dir>` |
 
-`--workdir` (and `WORKDIR=`, `FROM_WORKDIR=`) is a checkout whose `supabase/` is linked to the
-project to use; the link is kept in its git-ignored `supabase/.temp`.
+`--workdir` (and `WORKDIR=`, `FROM_WORKDIR=`) is a folder whose `supabase/` is linked to the
+project to use; the link is kept in its git-ignored `supabase/.temp`. The old store's link is
+kept outside the repo, at `~/.supabase/workdirs/hifth-old-store`, until that project is deleted.
 
 **Never preview a settings push without answering no.** The settings push asks "[Y/n]" per
 part and counts an empty answer as yes, so a "preview" with no input pushes the file live. Pipe

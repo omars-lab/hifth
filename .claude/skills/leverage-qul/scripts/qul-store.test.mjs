@@ -18,6 +18,7 @@ import {
   compareFingerprints,
   configProblems,
   fingerprintSql,
+  folder,
   parseQueryOutput,
   postureProblems,
 } from "./qul-store.mjs";
@@ -93,4 +94,24 @@ test("the settings check catches the defaults Supabase writes into a new setting
   assert.equal(problems.length, 4);
   assert.match(problems.join("\n"), /\[api\] enabled should be false/);
   assert.match(problems.join("\n"), /\[auth\.email\] enable_confirmations should be true/);
+});
+
+test("every building script that talks to the store asks for an encrypted connection", () => {
+  // The store refuses unencrypted connections; the scripts ask for encryption too, so a store
+  // whose setting drifted back would still not be spoken to in the clear.
+  const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
+  for (const name of ["qul-page-fixture.mjs", "qul-page-fixtures-all.mjs", "ingest-qul-supabase.mjs"]) {
+    const src = readFileSync(join(ROOT, "packages", "etl", "scripts", name), "utf8");
+    const calls = src.split('execFileSync("psql"').slice(1);
+    assert.ok(calls.length > 0, `${name} still calls psql`);
+    for (const call of calls) {
+      assert.match(call.slice(0, 400), /PGSSLMODE: process\.env\.PGSSLMODE \|\| "require"/, `${name} asks for encryption`);
+    }
+  }
+});
+
+test("a folder given as ~/... is read from the home folder", async () => {
+  const { homedir } = await import("node:os");
+  assert.equal(folder("~/.supabase/workdirs/x"), join(homedir(), ".supabase", "workdirs", "x"));
+  assert.equal(folder("/tmp/a~b"), "/tmp/a~b");
 });

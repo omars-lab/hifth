@@ -12,7 +12,7 @@
  *       Loads a data-only backup into an EMPTY store, in one transaction, then fingerprints it.
  *       Refuses if any table already has rows, so it can never double a load.
  *
- *   node .claude/skills/leverage-qul/scripts/qul-store.mjs compare --from-profile bytesofpurpose --from-workdir ../hifth
+ *   node .claude/skills/leverage-qul/scripts/qul-store.mjs compare --from-profile bytesofpurpose --from-workdir ~/.supabase/workdirs/hifth-old-store
  *       [--profile hifth] [--workdir .]
  *       Fingerprints both stores and fails unless every table matches row for row.
  *
@@ -157,6 +157,9 @@ function die(msg) {
   process.exit(2);
 }
 
+/** A folder path, with a leading ~ meaning the home folder (make passes it quoted, unexpanded). */
+export const folder = (dir) => resolve(dir.replace(/^~(?=$|\/)/, homedir()));
+
 const profilePath = (name) => join(homedir(), ".supabase", "profiles", `${name}.yaml`);
 
 /** Run the supabase command line with a profile and workdir; stdout only, never echoed. */
@@ -165,7 +168,7 @@ function supabase(args, { profile, workdir, input } = {}) {
   delete env.SUPABASE_ACCESS_TOKEN; // it would beat the profile's login
   return execFileSync(
     "supabase",
-    ["--profile", profilePath(profile), "--workdir", resolve(workdir), ...args],
+    ["--profile", profilePath(profile), "--workdir", folder(workdir), ...args],
     { encoding: "utf8", env, input, stdio: ["pipe", "pipe", "pipe"], maxBuffer: 64 * 1024 * 1024 },
   );
 }
@@ -174,7 +177,7 @@ function supabase(args, { profile, workdir, input } = {}) {
 function supabaseAll(args, { profile, workdir, input } = {}) {
   const env = { ...process.env };
   delete env.SUPABASE_ACCESS_TOKEN;
-  const r = spawnSync("supabase", ["--profile", profilePath(profile), "--workdir", resolve(workdir), ...args], {
+  const r = spawnSync("supabase", ["--profile", profilePath(profile), "--workdir", folder(workdir), ...args], {
     encoding: "utf8",
     env,
     input,
@@ -250,7 +253,7 @@ function main() {
     // Answer no to every prompt: this only reads the difference, it never pushes.
     const configText = supabaseAll(["config", "push"], { ...here, input: "n\n".repeat(10) });
     const netText = supabaseAll(["network-restrictions", "get", "--experimental"], here);
-    const tomlProblems = configProblems(readFileSync(join(resolve(opts.workdir), "supabase", "config.toml"), "utf8"));
+    const tomlProblems = configProblems(readFileSync(join(folder(opts.workdir), "supabase", "config.toml"), "utf8"));
     const problems = [...tomlProblems, ...postureProblems({ rows, sslText, configText })];
     for (const r of rows) console.log(`  ${r.check_name.padEnd(50)} ${r.found}`);
     console.log(`  ${"unencrypted connections refused".padEnd(50)} ${/SSL is being enforced/.test(sslText) ? "yes" : "NO"}`);

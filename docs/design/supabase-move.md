@@ -46,21 +46,24 @@ row for row, not only by counts.
 ## What did the move tighten, and what keeps it tight?
 
 The owner asked (2026-11-13) for the move to improve the store's security, not only copy it.
-The new store differs from the old one in five ways:
+The new store differs from the old one in five ways. The old store's column was read from its
+live settings on 2026-11-13 (a preview that answers no to every change, so nothing was pushed):
 
 | What | Old store | New store |
 | --- | --- | --- |
 | The web door that answers the public key (Supabase's Data API) | On | **Off.** Nothing we run uses it. Our scripts talk to the database directly. |
-| Sign-ups | On, with email confirmation off | **Off.** Nobody signs in to this store. If they are ever turned on, an email must be confirmed, passwords are at least 12 characters, and one-time codes are 8 digits. |
+| Sign-ups | On (Supabase's default), with email confirmation on | **Off.** Nobody signs in to this store. If they are ever turned on, an email must be confirmed, passwords are at least 12 characters, and one-time codes are 8 digits. |
 | Unencrypted connections | Allowed | **Refused.** The three building scripts also ask for encryption themselves. |
-| Tables, now and later | Closed on 2026-11-12, after being open | Closed from the first migration. Tables added later start closed too. |
-| Settings | Whatever the dashboard said | **Written in the repo** (`supabase/config.toml`), so a change shows up in review. |
+| Tables, now and later | Closed on 2026-11-12, after being open | Closed by the migrations before any data went in. Tables added later start closed too. |
+| Settings | Supabase's defaults, kept only in the dashboard | **Written in the repo** (`supabase/config.toml`), so a change shows up in review. |
 
 **What keeps it from drifting back:** `make qul-store-check` asks the live store and fails if any
 table lacks row rules, the public roles hold any right, anyone has signed up, unencrypted
 connections are allowed, or the live settings differ from the repo's settings file. It prints
-counts and settings only, never a row. An offline test also fails if the settings file ever stops
-keeping sign-ups and the web door off.
+counts and settings only, never a row. It runs only when someone runs it; nothing watches the
+store on a schedule. An offline test, which does run with every commit, fails if the settings
+file ever stops keeping sign-ups and the web door off, or if a building script stops asking for
+encryption.
 
 **Still open to every address:** the store accepts connections from any internet address (with
 the password). Limiting it to a list of addresses is possible, but this laptop's address changes,
@@ -100,10 +103,13 @@ script runs against it. The first is done (2026-11-13); the second waits on step
    order. The compare step fingerprints the old store the same way. All three tables matched:
    9,046 / 83,668 / 4 rows, with identical hashes. None of this needs a database password; it
    goes through the command line's own login.
-6. **Make a new password file.** The owner's step, in their own terminal (the password must not
-   pass through a chat). Copy the new connection address from the dashboard (use the *session
-   pooler* one, since this laptop has no IPv6), save it as `SUPABASE_DB_URL` with the repo's
-   hidden-prompt command, and back the key up.
+6. **Make a new password file.** The owner's step, in their own terminal in the main checkout
+   (the password must not pass through a chat). **First bring back the plain settings file**
+   from its encrypted copy: this laptop has only the encrypted one, and saving a value without
+   the plain file rebuilds the encrypted copy from that one value, dropping the three Cloudflare
+   entries. Then copy the new connection address from the dashboard (use the *session pooler*
+   one, since this laptop has no IPv6) and save it as `SUPABASE_DB_URL` with the repo's
+   hidden-prompt command.
 7. **Prove it works.** Run the page-fixture script against the new store.
 8. **Retire the old project.** Only after step 7. That is item ③.
 
@@ -137,15 +143,16 @@ supabase --profile ~/.supabase/profiles/hifth.yaml migration list   # all three 
 supabase --profile ~/.supabase/profiles/hifth.yaml db push
 
 # 5 — load into the empty new store, then check every row against the old store
-#     (the old store's folder is a checkout linked to the old project, through the
-#     bytesofpurpose profile)
+#     (the old store's folder holds only its link, kept outside the repo so the
+#     main checkout can be linked to the new project)
 make qul-store-load BACKUP=packages/etl/data/qul/.cache/qul-store-backup/public-data-2026-11-12.sql
-make qul-store-compare FROM_PROFILE=bytesofpurpose FROM_WORKDIR=../hifth
+make qul-store-compare FROM_PROFILE=bytesofpurpose FROM_WORKDIR=~/.supabase/workdirs/hifth-old-store
 make qul-store-check
 
-# 6 — in your own terminal, not through Claude
+# 6 — in your own terminal, in the main checkout, not through Claude
+make env-keys-pull      # the key that opens the encrypted copy, from LastPass
+make env-bootstrap      # the plain settings file, rebuilt with the Cloudflare entries in it
 make env-set NAME=SUPABASE_DB_URL
-make env-keys-push
 
 # 7
 dotenvx run -- node packages/etl/scripts/qul-page-fixture.mjs --page 1

@@ -266,7 +266,7 @@ test that would fail if it came back; the gate refuses the word without one.
 | [Whether a spacing-aware comparison is worth building](design/mark-labels.md#-whether-a-spacing-aware-comparison-is-worth-building--answered) | answered | — |
 | [Zoomed in on the open book, a verse's first words go off the screen's right edge](PLAN.md#open-follow-ups) | answered | docs/PLAN.md |
 | [Structural metadata reaches the adjacency shards and nothing names it](design/what-we-depend-on.md#-structural-metadata-reaches-the-adjacency-shards-and-nothing-names-it--answered) | answered | — |
-| [?](design/supabase-move.md#---) | answered | — |
+| [Did anyone ever sign up on the old store?](design/supabase-move.md#-did-anyone-ever-sign-up-on-the-old-store--answered) | answered | — |
 | [Word-granular tajweed painting needs a third text, not a second baking pass](design/word-indexing.md#-word-granular-tajweed-painting-needs-a-third-text-not-a-second-baking-pass--answered) | answered | — |
 | [Write the brief for the licence reader](design/testflight-plan.md#-write-the-brief-for-the-licence-reader--answered) | answered | — |
 | [Is the Apple membership active, and what is the team ID?](design/testflight-plan.md#-is-the-apple-membership-active-and-what-is-the-team-id--answered) | answered | — |
