@@ -96,7 +96,7 @@ extension ShellModel {
         offerNote(for: capture)
         // Asked for first, before the picture: every moment waited here is a
         // moment after the screenshot that the five seconds no longer cover.
-        async let clip = keepClip(in: capture)
+        let clip = Task { await keepClip(in: capture) }
 
         let (png, _) = await Self.snapshotPNG(of: webView, page: webView.bounds.size)
         do {
@@ -105,13 +105,13 @@ extension ShellModel {
             print("walk capture picture not kept \(error)")
         }
 
-        // Written again once the page and the video are settled, whatever
-        // they said, so where.json always says what happened to the video.
+        // Written again as soon as the page answers, and once more when the
+        // video is settled, so a slow export never costs the page and verse
+        // and where.json always ends up saying what happened to the video.
         let answer = await askPageWhere(route: route)
-        let video = await clip
-        let place = CaptureWhere(at: now, trigger: trigger, route: route, answer: answer, screen: screen, build: build, video: video)
+        let place = CaptureWhere(at: now, trigger: trigger, route: route, answer: answer, screen: screen, build: build)
         do {
-            try store.write(place.json(), named: "where.json", in: capture)
+            try await store.settle(place, in: capture) { await clip.value }
         } catch {
             print("walk capture where.json not updated \(error)")
         }

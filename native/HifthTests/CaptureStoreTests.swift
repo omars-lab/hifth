@@ -167,6 +167,31 @@ struct CaptureStoreTests {
         #expect(again["page"] as? Int == 7)
     }
 
+    @Test("the page is written as soon as it answers; a video slow to save does not hold it back")
+    func pageBeforeVideo() async throws {
+        let folder = temporary()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let store = CaptureStore(folder: folder)
+        let capture = try store.begin(place: place(answered: false, at: at()), trail: Data())
+        let whereJSON = capture.appendingPathComponent("where.json")
+        func read() throws -> [String: Any] {
+            try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: whereJSON)) as? [String: Any])
+        }
+        let answered = place(answered: true, at: at())
+        var whileSaving: [String: Any] = [:]
+        try await store.settle(answered, in: capture) {
+            // Apple's export has no time limit: what is on disk while it runs
+            // is all there is if the app is closed now.
+            whileSaving = (try? read()) ?? [:]
+            return .kept
+        }
+        #expect(whileSaving["page"] as? Int == 7)
+        #expect(whileSaving["video"] is NSNull)
+        let settled = try read()
+        #expect(settled["page"] as? Int == 7)
+        #expect(settled["video"] as? String == "kept")
+    }
+
     @Test("starting a capture drops the oldest past the limit, never the new one")
     func beginTrims() throws {
         let folder = temporary()

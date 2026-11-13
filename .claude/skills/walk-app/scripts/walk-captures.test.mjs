@@ -223,6 +223,21 @@ test("each reason the app gives for no video is said in words", () => {
   assert.equal(new Set(said).size, said.length, "no two reasons read the same");
 });
 
+test("a video the app never finished saving is said, apart from a capture made before the video existed", () => {
+  const out = mkdtempSync(join(tmpdir(), "hifth-walks-"));
+  // The app writes video: null until Apple's recorder answers; closed before then, it stays null.
+  mkdirSync(join(out, "20261113-130000"));
+  writeFileSync(join(out, "20261113-130000", "where.json"), where({ video: null }));
+  mkdirSync(join(out, "20261113-090000"));
+  writeFileSync(join(out, "20261113-090000", "where.json"), where({}));
+  assert.equal(run(["gallery", "--dir", out]).status, 0);
+  const html = readFileSync(join(out, "index.html"), "utf8");
+  const said = [...html.matchAll(/<dt>5 s before<\/dt><dd>([^<]*)<\/dd>/g)].map((m) => m[1]);
+  assert.deepEqual(said, ["not kept: the app was closed before the video finished saving"]);
+  const list = JSON.parse(run(["list", "--json", "--dir", out]).stdout);
+  assert.deepEqual(list.map((c) => c.videoWas), [null, "unsettled"]);
+});
+
 test("a video with no picture beside it is still shown", () => {
   const out = mkdtempSync(join(tmpdir(), "hifth-walks-"));
   mkdirSync(join(out, "20261113-120000"));

@@ -179,9 +179,10 @@ function captures() {
         note: existsSync(at("note.txt")) ? readFileSync(at("note.txt"), "utf8").trim() : null,
         picture: existsSync(at("picture.png")) ? `${name}/picture.png` : null,
         video: existsSync(at("before.mp4")) ? `${name}/before.mp4` : null,
-        // What the app said happened to the five seconds before; null when it
-        // never finished, or the capture is from before the video existed.
-        videoWas: place.video ?? null,
+        // What the app said happened to the five seconds before. The app
+        // writes null until Apple's recorder answers, so a null that stayed is
+        // "unsettled"; no key at all is a capture from before the video existed.
+        videoWas: "video" in place ? (place.video ?? "unsettled") : null,
         trail: { touch: count("touch"), pencil: count("pencil"), route: count("route") },
         reopen: route ? `hifth://${route}` : null,
       };
@@ -204,6 +205,7 @@ const NO_VIDEO = {
   interrupted: "another app, the screen changing size or the iPad sleeping stopped the recording",
   "not-recording": "the recorder was not running yet",
   kept: "the iPad saved it, but it has not been copied here (pull again)",
+  unsettled: "the app was closed before the video finished saving",
 };
 
 function noVideo(word) {

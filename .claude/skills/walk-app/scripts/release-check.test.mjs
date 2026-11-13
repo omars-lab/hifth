@@ -76,6 +76,12 @@ test("a debug build missing a sign fails too: looking for it in release would pr
   assert.ok(r.stdout.includes(first));
 });
 
+test("no string sign is short enough for an optimized build to hide it in the machine code", () => {
+  const strings = SIGNS.filter(([, , kind]) => kind === "string");
+  assert.ok(strings.length > 0);
+  for (const [, text] of strings) assert.ok(Buffer.byteLength(text) > 15, `"${text}" is 15 bytes or less`);
+});
+
 test("the web pages inside the app are not searched: only the app's own code", () => {
   const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
   const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: everySign } });

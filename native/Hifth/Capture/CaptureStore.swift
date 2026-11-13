@@ -56,6 +56,16 @@ nonisolated struct CaptureStore {
         return capture
     }
 
+    /// Once the page has answered (or given up): where.json is written straight
+    /// away with the page and no word on the video yet, and again once the
+    /// video is settled. Apple's export has no time limit, so the page and
+    /// verse must not wait on it: an app closed mid-export still has them.
+    func settle(_ place: CaptureWhere, in capture: URL, video: () async -> ClipVideo) async throws {
+        try write(place.with(video: nil).json(), named: "where.json", in: capture)
+        let settled = await video()
+        try write(place.with(video: settled).json(), named: "where.json", in: capture)
+    }
+
     /// The app's own picture of the screen. An empty one (the snapshot failed)
     /// is not kept: a file that opens as nothing would look like a fault.
     @discardableResult
@@ -234,6 +244,14 @@ nonisolated struct CaptureWhere: Equatable {
             at: at, trigger: trigger, route: route, page: answer?.page, verse: answer?.verse,
             open: answer?.open ?? [], settings: answer?.settings ?? [:], screen: screen, build: build,
             pageAnswered: answer != nil, video: video
+        )
+    }
+
+    /// The same place, with what happened to the video.
+    func with(video: ClipVideo?) -> CaptureWhere {
+        CaptureWhere(
+            at: at, trigger: trigger, route: route, page: page, verse: verse, open: open, settings: settings,
+            screen: screen, build: build, pageAnswered: pageAnswered, video: video
         )
     }
 
