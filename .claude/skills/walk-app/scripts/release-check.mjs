@@ -29,7 +29,8 @@ export const KEYS = ["UIFileSharingEnabled", "LSSupportsOpeningDocumentsInPlace"
 /**
  * What each sign means, the text that is in the app's code when it is there,
  * and what kind of text it is. Each was seen to fire on a real Release build
- * with the capture forced in (2026-11-13). A string of 15 bytes or less is not
+ * with the capture forced in (2026-11-13; the capture-folder switch was added
+ * after that run, and is held by the same rule). A string of 15 bytes or less is not
  * a sign: an optimized Swift build packs a string that short into the machine
  * code itself, so the folder name and the video's file name were found in
  * Debug and missed in Release. A type's name is kept whole whatever its length.
@@ -37,9 +38,11 @@ export const KEYS = ["UIFileSharingEnabled", "LSSupportsOpeningDocumentsInPlace"
 export const SIGNS = [
   ["the launch switch that takes a capture in a test", "HIFTH_WALK_CAPTURE_AT_START", "string"],
   ["the launch switch that turns the video off", "HIFTH_WALK_VIDEO", "string"],
+  ["the launch switch that moves where captures go", "HIFTH_WALK_CAPTURE_FOLDER", "string"],
   ["the video recorder", "ClipRecorder", "type"],
   ["the touch trail", "TouchTrailRecorder", "type"],
   ["Apple's screen recorder library", "ReplayKit.framework", "library"],
+  ["the code behind the capture and current-to-file links", "CaptureLinkWaiting", "type"],
 ];
 
 const log = (ev, fields = {}) =>

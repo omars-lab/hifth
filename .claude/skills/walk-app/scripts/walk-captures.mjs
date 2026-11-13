@@ -8,6 +8,10 @@
 //       time, since a note can be added after a first pull), then draw the page.
 //       --clear empties the iPad's captures afterwards, but only when every
 //       file copied and no capture was taken meanwhile.
+//       A pull also brings back current.json, where the app last said it was.
+//   walk-captures.mjs current --device <id> [--dir <folder>]
+//       copy only current.json (written by the hifth://x-callback-url/current-to-file
+//       link) and print it: where the app is, without a whole pull.
 //   walk-captures.mjs gallery [--dir <folder>]   draw index.html and index.json
 //   walk-captures.mjs list [--json] [--dir <folder>]   the captures, oldest first
 //   walk-captures.mjs dir                          print the folder used
@@ -30,6 +34,9 @@ const CAPTURE = /^\d{8}-\d{6}(-\d+)?$/;
 // the text files can (where.json is rewritten when the page answers, the note
 // is added later), so those are copied again on every pull.
 const FILES = { "picture.png": "once", "before.mp4": "once", "trail.jsonl": "again", "where.json": "again", "note.txt": "again" };
+// Beside the captures, not in one: where the app is, rewritten by each
+// current-to-file link (CaptureStore.keepCurrent in native/Hifth/Capture/).
+const CURRENT = "current.json";
 
 const [command, ...args] = process.argv.slice(2);
 const opt = (k) => (args.includes(k) ? args[args.indexOf(k) + 1] : undefined);
@@ -62,6 +69,10 @@ function listIpad(device) {
       // Apple's tool may give the path from the folder asked for, or from the
       // app's own folder; both come down to <capture>/<file>.
       const rel = String(f.relativePath ?? f.name ?? "").replace(/^\/?(Documents\/walk-captures\/)?/, "");
+      if (rel === CURRENT) {
+        Object.defineProperty(found, "hasCurrent", { value: true });
+        continue;
+      }
       const [capture, file, ...deeper] = rel.split("/");
       if (deeper.length || !CAPTURE.test(capture) || !(file in FILES)) continue;
       (found[capture] ??= []).push(file);
@@ -102,6 +113,11 @@ function pull() {
     }
     log("capture", { name: capture, files: before[capture].length });
   }
+  let current = "no";
+  if (before.hasCurrent) {
+    if (copyCurrent(device)) current = "yes";
+    else failed++;
+  }
 
   if (args.includes("--clear")) {
     if (failed) log("clear_skipped", { reason: "copy_failed", failed });
@@ -121,8 +137,40 @@ function pull() {
   }
 
   const drawn = gallery();
-  log("done", { captures: names.length, copied, failed, page: quote(drawn) });
+  log("done", { captures: names.length, copied, failed, current, page: quote(drawn) });
   return failed ? 1 : 0;
+}
+
+/** Copy current.json off the iPad into the folder; true when it came. */
+function copyCurrent(device) {
+  mkdirSync(dir, { recursive: true });
+  const dest = join(dir, CURRENT);
+  const r = tool(["device", "copy", "from", ...domain(device), "--source", `${ON_IPAD}/${CURRENT}`, "--destination", dest]);
+  if (r.status !== 0 || !existsSync(dest)) {
+    log("error", { step: "copy", file: CURRENT, msg: quote((r.stderr || "").split("\n")[0]) });
+    return false;
+  }
+  return true;
+}
+
+function current() {
+  const device = opt("--device");
+  if (!device) {
+    console.error("usage: walk-captures.mjs current --device <id> [--dir <folder>]");
+    return 2;
+  }
+  const found = listIpad(device);
+  if (!found) {
+    console.error("could not list the app's walk captures on the iPad. Is it plugged in, unlocked and trusted, with the debug build installed?");
+    return 1;
+  }
+  if (!found.hasCurrent) {
+    console.error(`no ${CURRENT} on the iPad yet: open hifth://x-callback-url/current-to-file on it first`);
+    return 1;
+  }
+  if (!copyCurrent(device)) return 1;
+  process.stdout.write(readFileSync(join(dir, CURRENT), "utf8").trimEnd() + "\n");
+  return 0;
 }
 
 // Captures sort by the time in their name; -10 comes after -9 in one second.
@@ -168,6 +216,8 @@ function captures() {
         name,
         at: place.at ?? null,
         trigger: place.trigger ?? null,
+        // The name a capture link gave it; a screenshot has none.
+        named: typeof place.name === "string" ? place.name : null,
         route,
         page: place.page ?? null,
         verse: place.verse ?? null,
@@ -192,7 +242,11 @@ function captures() {
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
 // What the app writes as the trigger (native/Hifth/Capture/WalkCapture.swift), in words.
-const TAKEN_BY = { screenshot: "a screenshot", launch: "the launch switch (a test, not the owner)" };
+const TAKEN_BY = {
+  screenshot: "a screenshot",
+  launch: "the launch switch (a test, not the owner)",
+  link: "a capture link from the laptop",
+};
 
 // Why there is no video of the five seconds before, from the word the app
 // writes (ClipVideo.word in native/Hifth/Capture/ClipRecorder.swift).
@@ -224,6 +278,7 @@ function card(c) {
     ["Last 10 s", `${c.trail.touch} touches, ${c.trail.pencil} Pencil, ${c.trail.route} page moves`],
     ["Build", c.build ? `${c.build.flavour} · ${c.build.commit}` : null],
     ["Taken by", TAKEN_BY[c.trigger] ?? c.trigger],
+    ["Named", c.named],
     // A kept video is shown above; only a missing one is explained.
     ["5 s before", c.videoWas && !c.video ? noVideo(c.videoWas) : null],
   ].filter(([, v]) => v !== null && v !== undefined);
@@ -306,12 +361,13 @@ function list() {
 
 const commands = {
   pull,
+  current,
   gallery: () => (console.log(gallery()), 0),
   list,
   dir: () => (console.log(dir), 0),
 };
 if (!commands[command]) {
-  console.error("usage: walk-captures.mjs pull --device <id> [--clear] | gallery | list [--json] | dir   (each takes --dir <folder>)");
+  console.error("usage: walk-captures.mjs pull --device <id> [--clear] | current --device <id> | gallery | list [--json] | dir   (each takes --dir <folder>)");
   process.exit(2);
 }
 process.exit(commands[command]());

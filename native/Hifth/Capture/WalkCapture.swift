@@ -71,9 +71,16 @@ extension ShellModel {
         #endif
     }
 
+    /// Whether a capture taken this way offers the note banner. A capture
+    /// link comes from a script on the laptop, with nobody at the iPad to
+    /// type, and its banner would close one the reader is typing in.
+    static func offersNote(trigger: String) -> Bool {
+        trigger != "link"
+    }
+
     /// One capture. Returns its folder, or `nil` when nothing could be kept.
     @discardableResult
-    func captureWalk(trigger: String) async -> URL? {
+    func captureWalk(trigger: String, name: String? = nil) async -> URL? {
         guard webViewBuilt else { return nil }
         // Everything up to `begin` happens with no waiting, so the trail ends
         // at the screenshot and a page that never answers still leaves a capture.
@@ -86,14 +93,14 @@ extension ShellModel {
         let capture: URL
         do {
             capture = try store.begin(
-                place: CaptureWhere(at: now, trigger: trigger, route: route, answer: nil, screen: screen, build: build),
+                place: CaptureWhere(at: now, trigger: trigger, route: route, answer: nil, screen: screen, build: build, name: name),
                 trail: trail
             )
         } catch {
             print("walk capture not kept \(error)")
             return nil
         }
-        offerNote(for: capture)
+        if Self.offersNote(trigger: trigger) { offerNote(for: capture) }
         // Asked for first, before the picture: every moment waited here is a
         // moment after the screenshot that the five seconds no longer cover.
         let clip = Task { await keepClip(in: capture) }
@@ -109,7 +116,7 @@ extension ShellModel {
         // video is settled, so a slow export never costs the page and verse
         // and where.json always ends up saying what happened to the video.
         let answer = await askPageWhere(route: route)
-        let place = CaptureWhere(at: now, trigger: trigger, route: route, answer: answer, screen: screen, build: build)
+        let place = CaptureWhere(at: now, trigger: trigger, route: route, answer: answer, screen: screen, build: build, name: name)
         do {
             try await store.settle(place, in: capture) { await clip.value }
         } catch {
@@ -150,8 +157,13 @@ extension ShellModel {
     /// With `HIFTH_WALK_CAPTURE_AT_START` set to a folder, take one capture
     /// there once the page has settled, as if a screenshot had been taken. How
     /// the simulator test proves a capture is whole without pressing buttons.
+    /// `HIFTH_WALK_CAPTURE_FOLDER` only moves where captures go, so a test can
+    /// read what a capture link kept.
     private func captureAtLaunchIfAsked() {
         let environment = ProcessInfo.processInfo.environment
+        if let path = environment["HIFTH_WALK_CAPTURE_FOLDER"], !path.isEmpty {
+            captureStore = CaptureStore(folder: URL(fileURLWithPath: path, isDirectory: true))
+        }
         guard let path = environment["HIFTH_WALK_CAPTURE_AT_START"], !path.isEmpty else { return }
         captureStore = CaptureStore(folder: URL(fileURLWithPath: path, isDirectory: true))
         let delayMs = Int(environment["HIFTH_SNAPSHOT_DELAY_MS"] ?? "") ?? 1500

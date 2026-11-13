@@ -117,8 +117,9 @@ struct CaptureStoreTests {
             pageAnswered: false
         )
         let json = try #require(try JSONSerialization.jsonObject(with: place.json()) as? [String: Any])
-        #expect(Set(json.keys) == ["at", "trigger", "route", "page", "verse", "open", "settings", "screen", "build", "pageAnswered", "video"])
+        #expect(Set(json.keys) == ["at", "trigger", "name", "route", "page", "verse", "open", "settings", "screen", "build", "pageAnswered", "video"])
         #expect(json["video"] is NSNull, "the five seconds before are settled after the capture begins")
+        #expect(json["name"] is NSNull, "only a capture link names its capture")
         #expect(json["at"] as? String == "2027-01-15T08:00:00Z")
         #expect(json["route"] as? String == "/hafs-kfqc/p7", "written as callers write it, without the #")
         #expect(json["page"] is NSNull)
@@ -127,6 +128,18 @@ struct CaptureStoreTests {
         #expect(screen["orientation"] as? String == "sideways")
         let build = try #require(json["build"] as? [String: Any])
         #expect(build["commit"] as? String == "abc1234")
+    }
+
+    @Test("a capture link's name is kept in where you were, and survives the video settling")
+    func whereKeepsTheLinkName() throws {
+        let place = CaptureWhere(
+            at: at(), trigger: "link", route: "#/hafs-kfqc/p7", answer: nil,
+            screen: .init(width: 1180, height: 820, scale: 2, orientation: "sideways"),
+            build: .init(commit: "abc1234", flavour: "public"), name: "note-tool"
+        )
+        let json = try #require(try JSONSerialization.jsonObject(with: place.with(video: .simulator).json()) as? [String: Any])
+        #expect(json["name"] as? String == "note-tool")
+        #expect(json["trigger"] as? String == "link")
     }
 
     @Test("what the page says about itself is read into where you were")

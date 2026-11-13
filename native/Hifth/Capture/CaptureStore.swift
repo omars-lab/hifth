@@ -20,6 +20,24 @@ nonisolated struct CaptureStore {
     var mostCaptures = 300
     var mostBytes: Int64 = 1_000_000_000
 
+    /// Where the app is, for a current-to-file link: `current.json` beside the
+    /// captures, replaced each time, so `make walk-pull` brings it back too.
+    @discardableResult
+    func keepCurrent(route hash: String, publicBase: String, at date: Date) throws -> URL {
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let object: [String: Any] = [
+            "at": CheckRecord.time(date),
+            "route": hash.hasPrefix("#") ? String(hash.dropFirst()) : hash,
+            "url": publicBase + hash,
+        ]
+        let file = folder.appendingPathComponent(Self.currentFile)
+        try JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+            .write(to: file, options: .atomic)
+        return file
+    }
+
+    static let currentFile = "current.json"
+
     /// A new, empty folder for one capture.
     func newCapture(at date: Date) throws -> URL {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -203,8 +221,11 @@ nonisolated struct CaptureWhere: Equatable {
     }
 
     let at: Date
-    /// `screenshot`, or `launch` when a test asked for one at start.
+    /// `screenshot`; `launch` when a test asked for one at start; `link` when
+    /// a script on the laptop sent a capture link.
     let trigger: String
+    /// The name a capture link gave; `nil` (written as `null`) otherwise.
+    let name: String?
     let route: String
     let page: Int?
     let verse: String?
@@ -221,10 +242,12 @@ nonisolated struct CaptureWhere: Equatable {
 
     init(
         at: Date, trigger: String, route: String, page: Int?, verse: String?, open: [String],
-        settings: [String: String], screen: Screen, build: Build, pageAnswered: Bool, video: ClipVideo? = nil
+        settings: [String: String], screen: Screen, build: Build, pageAnswered: Bool, video: ClipVideo? = nil,
+        name: String? = nil
     ) {
         self.at = at
         self.trigger = trigger
+        self.name = name
         self.route = route
         self.page = page
         self.verse = verse
@@ -238,12 +261,12 @@ nonisolated struct CaptureWhere: Equatable {
 
     init(
         at: Date, trigger: String, route: String, answer: PageAnswer?, screen: Screen, build: Build,
-        video: ClipVideo? = nil
+        video: ClipVideo? = nil, name: String? = nil
     ) {
         self.init(
             at: at, trigger: trigger, route: route, page: answer?.page, verse: answer?.verse,
             open: answer?.open ?? [], settings: answer?.settings ?? [:], screen: screen, build: build,
-            pageAnswered: answer != nil, video: video
+            pageAnswered: answer != nil, video: video, name: name
         )
     }
 
@@ -251,7 +274,7 @@ nonisolated struct CaptureWhere: Equatable {
     func with(video: ClipVideo?) -> CaptureWhere {
         CaptureWhere(
             at: at, trigger: trigger, route: route, page: page, verse: verse, open: open, settings: settings,
-            screen: screen, build: build, pageAnswered: pageAnswered, video: video
+            screen: screen, build: build, pageAnswered: pageAnswered, video: video, name: name
         )
     }
 
@@ -261,6 +284,7 @@ nonisolated struct CaptureWhere: Equatable {
         var object: [String: Any] = [
             "at": CheckRecord.time(at),
             "trigger": trigger,
+            "name": name.map { $0 as Any } ?? NSNull(),
             "route": route.hasPrefix("#") ? String(route.dropFirst()) : route,
             "page": page.map { $0 as Any } ?? NSNull(),
             "verse": verse.map { $0 as Any } ?? NSNull(),
