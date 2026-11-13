@@ -8,7 +8,10 @@ reader uses touches it. The app and the site never call it; only three building 
 **What does a hafiz notice?** Nothing. The store feeds the tools that make and check pages, not
 the app.
 
-**Status:** started 2026-11-12. Tracked as the `supabase-move` row in the issue register.
+**Status:** started 2026-11-12. As of 2026-11-13 the new project is built and closed, and the
+old one is paused. The data is not loaded yet: that waits on the owner making the new password
+file (step 6). Tracked as the `supabase-move` row in the issue register, with two smaller items
+after it (② and ③).
 
 ## What is in the old store? (audited 2026-11-12)
 
@@ -106,3 +109,21 @@ had been written into two published decision records and is now removed from tho
 is still in git history and in one agent memory note.
 
 </details>
+
+### ② Did anyone ever sign up on the old store? · **open**
+
+The audit could not count sign-ups without also copying password hashes, so it did not. No app
+code signs anyone in, so the answer is very likely none.
+
+**What would answer it:** the owner opens the old project's dashboard, *Authentication → Users*,
+and says whether the list is empty. It must be answered before ③, because deleting the old
+project deletes any sign-ups with it.
+
+### ③ Delete the old project once the new store is proven · **open**
+
+The old project is paused (2026-11-12), not deleted. A paused project can be restored; a deleted
+one cannot.
+
+**What would answer it:** ① closed (the page-fixture script has run against the new store) and
+② answered. Then delete the old project from the old account's dashboard, and remove its
+command-line profile if nothing else uses that account.

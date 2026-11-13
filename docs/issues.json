@@ -6169,7 +6169,29 @@
       "status": "open",
       "severity": "risk",
       "owner": "user",
-      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, copied its rows into a git-ignored backup (counts match), and wrote the migration that closes its tables to the public key (they were open for reading and writing). Next, the owner creates the new project; then link, push the migrations, restore the backup, make a new password file, run the page-fixture script against it, and retire the old project."
+      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up and proved the backup loads, paused the old project, and built the new project's tables already closed, through its own command-line login. Next, the owner makes the new password file; then load the backup, compare the row counts, and run the page-fixture script against the new store."
+    },
+    {
+      "id": "supabase-old-store-sign-ups",
+      "source": {
+        "file": "docs/design/supabase-move.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Open the old project's dashboard, Authentication → Users, and say whether the list is empty. Very likely it is: no app code signs anyone in. Must be answered before the old project is deleted."
+    },
+    {
+      "id": "supabase-delete-old-project",
+      "source": {
+        "file": "docs/design/supabase-move.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "note": "The old project is paused, not deleted. Delete it once the new store passes the page-fixture check and the sign-up question is answered; then remove the old account's command-line profile if nothing else uses it."
     }
   ]
 }
