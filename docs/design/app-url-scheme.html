@@ -210,6 +210,8 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
 <tr><td><code class="url">hifth://x-callback-url/capture?name=Note%20tool&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Log</code><div class="faint"><p>Keeps a walk capture named note-tool and answers with its folder, the route and the url. A release build answers not-in-this-build.</p></div></td><td><code>capture note-tool</code></td></tr>
 <tr><td><code class="url">hifth://x-callback-url/capture</code><div class="faint"><p>No name: the capture is named capture.</p></div></td><td><code>capture capture</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/capture?name=..%2F..%2Fevil</code><div class="faint"><p>A name cannot reach outside the capture folder: everything but letters and digits becomes a dash, and dashes at either end go.</p></div></td><td><code>capture evil</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/capture?name=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%20b</code><div class="faint"><p>A name is cut to 60 characters, and a dash left at the cut goes too.</p></div></td><td><code>capture aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</code></td></tr>
 </tbody></table>
 </section>
 <section id="xCurrentToFile">

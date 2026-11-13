@@ -839,6 +839,16 @@
       "note": "No name: the capture is named capture."
     },
     {
+      "url": "hifth://x-callback-url/capture?name=..%2F..%2Fevil",
+      "result": "capture evil",
+      "note": "A name cannot reach outside the capture folder: everything but letters and digits becomes a dash, and dashes at either end go."
+    },
+    {
+      "url": "hifth://x-callback-url/capture?name=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%20b",
+      "result": "capture aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "note": "A name is cut to 60 characters, and a dash left at the cut goes too."
+    },
+    {
       "url": "hifth://x-callback-url/current-to-file",
       "result": "current-to-file",
       "note": "Writes current.json beside the walk captures; the laptop copies it off with walk-captures.mjs current."
