@@ -177,6 +177,59 @@ final class SmokeTests: XCTestCase {
         )
     }
 
+    /// A capture link from the laptop keeps a capture the way a screenshot
+    /// does, named by the link and marked as taken by one, with no note
+    /// banner; current-to-file writes where the app is beside it. The links
+    /// are sent as the laptop sends them (iOS may ask "Open in Hifth?" first).
+    func testCaptureLinkKeepsANamedCaptureAndCurrentToFileWritesThePlace() throws {
+        let folder = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("capture-link-ui-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let app = XCUIApplication()
+        app.launchArguments = ["--route=/hafs-kfqc/p7"]
+        app.launchEnvironment["HIFTH_WALK_CAPTURE_FOLDER"] = folder.path
+        app.launch()
+        waitForRoute("#/hafs-kfqc/p7", in: app)
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        func send(_ link: String) throws {
+            XCUIDevice.shared.system.open(try XCTUnwrap(URL(string: link)))
+            if springboard.buttons["Open"].waitForExistence(timeout: 4) { springboard.buttons["Open"].tap() }
+        }
+
+        try send("hifth://x-callback-url/capture?name=UI%20test")
+        let whereFile = { () -> URL? in
+            let names = (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []
+            return names.filter { $0 != "current.json" }.first.map {
+                folder.appendingPathComponent($0).appendingPathComponent("where.json")
+            }
+        }
+        let kept = expectation(for: NSPredicate { _, _ in
+            whereFile().map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        }, evaluatedWith: nil)
+        wait(for: [kept], timeout: 20)
+        XCTAssertFalse(
+            app.descendants(matching: .any)["hifth.capture.note"].waitForExistence(timeout: 2),
+            "a capture link offered the note banner"
+        )
+        let place = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: try XCTUnwrap(whereFile()))) as? [String: Any]
+        )
+        XCTAssertEqual(place["trigger"] as? String, "link")
+        XCTAssertEqual(place["name"] as? String, "ui-test")
+        XCTAssertEqual(place["route"] as? String, "/hafs-kfqc/p7")
+
+        try send("hifth://x-callback-url/current-to-file")
+        let current = folder.appendingPathComponent("current.json")
+        let written = expectation(for: NSPredicate { _, _ in
+            FileManager.default.fileExists(atPath: current.path)
+        }, evaluatedWith: nil)
+        wait(for: [written], timeout: 20)
+        let answer = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: current)) as? [String: Any])
+        XCTAssertEqual(answer["route"] as? String, "/hafs-kfqc/p7")
+        XCTAssertEqual(answer["url"] as? String, "https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/p7")
+        XCTAssertEqual(app.state, .runningForeground)
+    }
+
     /// A pinch only magnifies: it selects no verse and opens no menu. A pinch
     /// that ended on a verse once selected it, because the second finger's lift
     /// counted as a tap, so the page jumped to that verse and its hold menu

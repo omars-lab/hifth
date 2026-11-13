@@ -37,9 +37,11 @@ export const KEYS = ["UIFileSharingEnabled", "LSSupportsOpeningDocumentsInPlace"
 export const SIGNS = [
   ["the launch switch that takes a capture in a test", "HIFTH_WALK_CAPTURE_AT_START", "string"],
   ["the launch switch that turns the video off", "HIFTH_WALK_VIDEO", "string"],
+  ["the launch switch that moves where captures go", "HIFTH_WALK_CAPTURE_FOLDER", "string"],
   ["the video recorder", "ClipRecorder", "type"],
   ["the touch trail", "TouchTrailRecorder", "type"],
   ["Apple's screen recorder library", "ReplayKit.framework", "library"],
+  ["the code behind the capture and current-to-file links", "CaptureLinkWaiting", "type"],
 ];
 
 const log = (ev, fields = {}) =>
