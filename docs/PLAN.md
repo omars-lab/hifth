@@ -2435,6 +2435,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     leave the verse clear, and a note's reference thread goes out and back. The walk script was
     mended where it could mislead: it once measured the note as if it were the tajweed key, and
     counted the look-alike buttons on the Share card's own top row as buttons the card covers.
+121. **Two tests about carrying marks to hifth.app stalled for a minute in Firefox.** In the
+    full run before a push on 2026-11-13, both failed their first try and passed their second,
+    each stuck at the step where the test writes the reader's place straight into the app's
+    saved marks. When the test got there before the app had made that store, it made an empty
+    one; the app then never added the table it keeps marks in, and the test's write failed in a
+    way it never reported, so it waited out the clock. Not a fault a reader can meet, since only
+    the test writes there from outside the app. **Fixed 2026-11-13:** the test opens the store as
+    the app does, making the table when it is missing. A new test writes the place on a page of
+    the site that runs none of the app, then opens the app and finds it; it stalled in Chrome
+    and Firefox before the mend. The whole file then passed three times over in both.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

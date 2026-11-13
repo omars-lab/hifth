@@ -5752,6 +5752,18 @@
       "closedBy": "apps/web/e2e/audio.spec.ts"
     },
     {
+      "id": "carry-marks-test-made-an-empty-store",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "121"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Two Firefox tests about carrying marks to hifth.app stalled for a minute in a full push run (2026-11-13) and passed on retry. When the test wrote the reader's place before the app had made its saved-marks store, it made an empty one the app never filled in, and its own write failed without saying so. The test now opens the store as the app does.",
+      "closedBy": "apps/web/e2e/carry-marks.spec.ts"
+    },
+    {
       "id": "short-screen-loses-the-spread",
       "source": {
         "file": "docs/PLAN.md",
