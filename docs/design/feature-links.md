@@ -103,7 +103,9 @@ the precedent the features page follows.
 - press, hold or drag: drawing, the mistake pen, a page turn halfway through;
 - change a setting in the info panel, such as switching to a runner-up option;
 - tell the laptop where the app is without a capture (`current-to-file` now writes it to a file the laptop copies off);
-- clear notes and marks, so each check starts clean.
+- clear notes and marks, so each check starts clean;
+- show which words a link picked (`?w=3-7`) in a way a capture can read, so the word-range card
+  is checked for its verse only.
 
 ## Which debug-only links should the app answer?
 
@@ -204,7 +206,12 @@ because C covers the same ground on the real device.
    what landed. Not yet run on the real iPad.
 4. **`make feature-check`**: for each card, send the link, capture, copy back, and check
    `where.json` says the app is where the link said. The result goes on the card as a tick or a
-   cross with the date.
+   cross with the date. **Built 2026-11-13.** One card at a time: close the app, send the card's
+   link, send a capture link named after the card, wait for that capture to be finished, and
+   compare. The place is checked by its address, a tool by the tool in hand, a panel by the name
+   its sheet carries (each panel a link opens now says its own link name), one or two pages by
+   how many show. The features page reads the last results and marks each card. Results so far
+   are in the backlog row for ①. Not yet run on the real iPad.
 5. **`set` and `reset`**, then cards for the info-panel settings.
 
 ## Open questions, and what would answer each
