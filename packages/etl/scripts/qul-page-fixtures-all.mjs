@@ -16,6 +16,7 @@
  *   dotenvx run -- node packages/etl/scripts/qul-page-fixtures-all.mjs
  */
 import { execFileSync } from "node:child_process";
+import { findPsql } from "./lib/psql.mjs";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -74,7 +75,7 @@ order by p.page;
 
 let out;
 try {
-  out = execFileSync("psql", [DB_URL, "-t", "-A", "-X", "-q", "-F", "\t", "-c", SQL], {
+  out = execFileSync(findPsql(), [DB_URL, "-t", "-A", "-X", "-q", "-F", "\t", "-c", SQL], {
     env: { ...process.env, PGSSLMODE: process.env.PGSSLMODE || "require" }, // never talk to the store unencrypted
     encoding: "utf8",
     maxBuffer: 512 * 1024 * 1024,

@@ -102,7 +102,7 @@ test("every building script that talks to the store asks for an encrypted connec
   const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
   for (const name of ["qul-page-fixture.mjs", "qul-page-fixtures-all.mjs", "ingest-qul-supabase.mjs"]) {
     const src = readFileSync(join(ROOT, "packages", "etl", "scripts", name), "utf8");
-    const calls = src.split('execFileSync("psql"').slice(1);
+    const calls = src.split('execFileSync(findPsql()').slice(1);
     assert.ok(calls.length > 0, `${name} still calls psql`);
     for (const call of calls) {
       assert.match(call.slice(0, 400), /PGSSLMODE: process\.env\.PGSSLMODE \|\| "require"/, `${name} asks for encryption`);

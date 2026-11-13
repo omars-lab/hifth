@@ -25,6 +25,7 @@
  * the script says so and exits non-zero, but writes nothing.
  */
 import { execFileSync } from "node:child_process";
+import { findPsql } from "./lib/psql.mjs";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -94,7 +95,7 @@ select coalesce(json_build_object(
 
 let out;
 try {
-  out = execFileSync("psql", [DB_URL, "-t", "-A", "-X", "-q", "-c", SQL], {
+  out = execFileSync(findPsql(), [DB_URL, "-t", "-A", "-X", "-q", "-c", SQL], {
     env: { ...process.env, PGSSLMODE: process.env.PGSSLMODE || "require" }, // never talk to the store unencrypted
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
@@ -104,7 +105,7 @@ try {
   // would leak the connection string. Say what to do and stop.
   console.error(
     "qul-page-fixture — the store read failed (see psql's message above). Common causes: " +
-      "psql not on PATH (brew install libpq), or the IPv6-only direct host — use the session " +
+      "psql not installed (brew install libpq), or the IPv6-only direct host — use the session " +
       "pooler URL. The page map + word text must be ingested first.",
   );
   process.exit(1);
