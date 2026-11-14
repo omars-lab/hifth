@@ -2,7 +2,7 @@
 date: 2026-11-13
 repo: hifth
 session: 2b1703dd (Supabase move; two landing-page comments; security rules)
-branch: supabase-move, and security-rules (the rules file alone)
+branch: supabase-move, security-rules (the rules file alone), env-set-formats (PR #608)
 folded: no
 ---
 
@@ -20,3 +20,8 @@ folded: no
 - Moving the store through the command line's own login (`supabase db query --linked`) needed no database password at all, and a per-table hash over every row in key order proved the copy, not only the counts. `.claude/skills/leverage-qul/scripts/qul-store.mjs`.
 - Splitting the landing-page comments by thread with the other session working on that page, then telling the comment dispatcher who holds which, kept two sessions from committing over each other's work on the same files.
 - Shipping the `.claude/claude-security-guidance.md` rules file alone on a `.claude/`-only branch (no paid publish run), while its test rides on the feature branch, put the rules in force at once without an extra paid merge.
+- A secrets guard is tested by refusing what *names* the file, not by a list of reading commands; a reviewer found six ways round the list in minutes. `.claude/skills/secrets/scripts/guard-secrets.py`, and its live test ran a fresh session against a made-up `.env` and counted the marker in the output (0).
+
+## Didn't work
+- Redirecting a decrypt's normal output to hide the values: through `npx`, `dotenvx decrypt` writes them to the error stream, and every saved value reached the chat. No by-hand decrypt, ever; the guard now refuses it. `docs/issues/secrets-printed-into-chat.md`.
+- A reset reported in chat ("dbpass reset too") was not yet a closed leak: the saved address still connected with the printed password. After any reset, check the new value works and the old one is refused before marking a leak closed.

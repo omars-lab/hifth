@@ -45,6 +45,7 @@
  * real (non-dry-run) ingest.
  */
 import { execFileSync } from "node:child_process";
+import { findPsql } from "./lib/psql.mjs";
 import { existsSync, readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -81,7 +82,7 @@ function die(msg) {
 function psqlExec(sql) {
   if (DRY) return;
   if (!DB_URL) die("set SUPABASE_DB_URL to a Postgres connection string (or pass --dry-run)");
-  execFileSync("psql", [DB_URL, "-v", "ON_ERROR_STOP=1", "-q", "-f", "-"], {
+  execFileSync(findPsql(), [DB_URL, "-v", "ON_ERROR_STOP=1", "-q", "-f", "-"], {
     env: { ...process.env, PGSSLMODE: process.env.PGSSLMODE || "require" }, // never talk to the store unencrypted
     input: sql,
     stdio: ["pipe", "inherit", "inherit"],

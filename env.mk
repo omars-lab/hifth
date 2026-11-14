@@ -18,10 +18,11 @@ env-set:
 env-encrypt:
 	@bash $(ENV_SCRIPTS)/env-sync.sh encrypt
 
-## env-check        no plaintext secret is tracked, and .env matches its encrypted copy
+## env-check        no plaintext secret is tracked, .env matches its encrypted copy, and each saved value is the shape expected
 env-check:
 	@sh $(ENV_SCRIPTS)/check-env-encrypted.sh
 	@bash $(ENV_SCRIPTS)/env-sync.sh check
+	@python3 $(ENV_SCRIPTS)/lib/envfile.py shapes .env
 
 ## env-check-staged no plaintext secret is about to be committed (for the pre-commit hook)
 env-check-staged:
