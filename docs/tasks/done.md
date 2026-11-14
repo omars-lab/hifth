@@ -51,6 +51,11 @@ the spam-check key (`hifth-app-turnstile-key`).
 - Two skills: how Hifth is set up today, and the Supabase login check (84b1657d).
 - The branch merged to main with main's latest work, overlaps worked by hand (PR #610, 2bfeca6c,
   2026-11-13).
+- 14 KB of room made under the size limit: a stronger minifier (terser) and code nothing used;
+  start-up download 172.7 → 163.0 KB (PR #611, 56b3bd67, 2026-11-13).
+- The release check no longer counts the page-comment files as uncommitted work, which had refused
+  every release (727ea5f3, on branch release-ignores-comments, to merge with the release's own
+  changes).
 
 ### 2026-11-09 — Installing on our own devices through TestFlight
 
