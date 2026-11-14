@@ -2435,6 +2435,59 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     leave the verse clear, and a note's reference thread goes out and back. The walk script was
     mended where it could mislead: it once measured the note as if it were the tajweed key, and
     counted the look-alike buttons on the Share card's own top row as buttons the card covers.
+121. **Two tests about carrying marks to hifth.app stalled for a minute in Firefox.** In the
+    full run before a push on 2026-11-13, both failed their first try and passed their second,
+    each stuck at the step where the test writes the reader's place straight into the app's
+    saved marks. When the test got there before the app had made that store, it made an empty
+    one; the app then never added the table it keeps marks in, and the test's write failed in a
+    way it never reported, so it waited out the clock. Not a fault a reader can meet, since only
+    the test writes there from outside the app. **Fixed 2026-11-13:** the test opens the store as
+    the app does, making the table when it is missing. A new test writes the place on a page of
+    the site that runs none of the app, then opens the app and finds it; it stalled in Chrome
+    and Firefox before the mend. The whole file then passed three times over in both.
+122. **A jump marked in the first moment after opening the app was counted as new.** In the
+    same push run, the Mistake pen's test passed only on its second try: after a reload it
+    marked "went into another verse" a second time, and the app said a plain jump had been
+    marked, not a mistake made two times. The app reads the saved jumps in a moment after the
+    page shows; a jump marked inside that moment was counted against an empty list. The saved
+    one was merged in afterwards, so no time was lost, but the message gave the wrong count, a
+    mistake could turn back into a plain jump, and Undo pointed at a record that no longer
+    stood. A slow device makes that moment longer. **Fixed 2026-11-13:** a jump marked before
+    the read waits for it, then is saved against the real list. A new test keeps the saved
+    marks busy for three seconds as the app opens, marks the jump again, and checks the count,
+    the kind and Undo; it failed before the mend, and it and the Mistake pen's test then passed
+    fifteen times each.
+123. **The test that a shared link's breadcrumb survives a slow page failed once on Android.**
+    In the same push run it failed in 207 ms and passed on retry: the test holds page 7's
+    picture back to make it arrive late, and that time nothing was held. The app's offline copy
+    takes charge of the page as soon as it installs, and from then on it fetches page pictures
+    itself, where the test's hold cannot see them. Not a fault a reader can meet. **Fixed
+    2026-11-13:** the test runs with the offline copy switched off, as the other tests that slow
+    a fetch already do. Checked by putting the offline copy in charge first: nothing was held
+    and the test failed; with it switched off, the same run held page 7 back and passed.
+
+124. **A link that named words in a verse never showed them.** The address `?w=3-7` was read
+    and kept, but the app only selected the verse: no words were marked, so the link said the
+    same as one without `?w`. Found while making the feature check read which words a link
+    picked. **Fixed 2026-11-13:** the words the link names are laid as word ink, the band a
+    hold-and-drag lays, and the page carries the numbers of the words it marked, which the
+    walk capture now reads. A link naming words the verse does not have selects the verse and
+    marks nothing. Tests: two in the word tests (seen failing first), one capture test in the
+    Mac unit tests, and the feature check now fails the word card unless the app shows those
+    very words; in the iPad simulator it passes.
+
+125. **Marked words vanish when the book is laid out again.** Open a link that names words
+    (`?w=3-5`) in one-page view, then widen the window, or turn an iPad, so the book shows two
+    pages: the verse is still selected, but its words are no longer marked. Going from one page
+    to two puts the page inside the two-page wrapper, which rebuilds the page component, and
+    the marked words lived only inside it; the selection survives because the app above keeps
+    it (checked: the page component after widening is a new one). Seen in Chrome and Firefox
+    (2026-11-13); words marked by a hold went the same way. **Fixed:** the app now keeps the
+    marked words beside the selection and hands them to both pages; each page that is built
+    holding the verse marks them again, and a new selection or Escape ends them. Tests: a
+    link's words survive one page to two and back, a hold's words survive, and words let go
+    with Escape do not come back. Escape also lets go of words a link marked, and of words
+    a hold marked before the book went to two pages (both had been ignored, found 2026-11-13).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

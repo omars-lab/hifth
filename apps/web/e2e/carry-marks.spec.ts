@@ -56,7 +56,8 @@ async function putMarks(page: Page, marks: Marks): Promise<void> {
   await page.evaluate(
     ({ db, marks }) =>
       new Promise<void>((resolve, reject) => {
-        const open = indexedDB.open(db);
+        const open = indexedDB.open(db, 1); // the app's own version: see bookmark-store.ts
+        open.onupgradeneeded = () => open.result.createObjectStore("sets", { keyPath: "id" });
         open.onerror = () => reject(open.error);
         open.onsuccess = () => {
           const tx = open.result.transaction("sets", "readwrite");
@@ -80,7 +81,8 @@ async function savedIds(page: Page): Promise<{ bookmarks: string[]; notes: strin
   return page.evaluate(
     (db) =>
       new Promise((resolve, reject) => {
-        const open = indexedDB.open(db);
+        const open = indexedDB.open(db, 1); // the app's own version: see bookmark-store.ts
+        open.onupgradeneeded = () => open.result.createObjectStore("sets", { keyPath: "id" });
         open.onerror = () => reject(open.error);
         open.onsuccess = () => {
           if (!open.result.objectStoreNames.contains("sets")) {
@@ -117,7 +119,8 @@ async function putSeam(page: Page, seam: Seam): Promise<void> {
   await page.evaluate(
     ({ db, seam }) =>
       new Promise<void>((resolve, reject) => {
-        const open = indexedDB.open(db);
+        const open = indexedDB.open(db, 1); // the app's own version: see bookmark-store.ts
+        open.onupgradeneeded = () => open.result.createObjectStore("sets", { keyPath: "id" });
         open.onerror = () => reject(open.error);
         open.onsuccess = () => {
           const tx = open.result.transaction("sets", "readwrite");
@@ -137,7 +140,8 @@ async function savedSeam(page: Page): Promise<Seam | null> {
   return page.evaluate(
     (db) =>
       new Promise<Seam | null>((resolve, reject) => {
-        const open = indexedDB.open(db);
+        const open = indexedDB.open(db, 1); // the app's own version: see bookmark-store.ts
+        open.onupgradeneeded = () => open.result.createObjectStore("sets", { keyPath: "id" });
         open.onerror = () => reject(open.error);
         open.onsuccess = () => {
           if (!open.result.objectStoreNames.contains("sets")) {
@@ -458,7 +462,8 @@ test("a slow carry still opens where the reader left off", async ({ page, contex
   await page.evaluate(
     (db) =>
       new Promise<void>((resolve) => {
-        const open = indexedDB.open(db);
+        const open = indexedDB.open(db, 1); // the app's own version: see bookmark-store.ts
+        open.onupgradeneeded = () => open.result.createObjectStore("sets", { keyPath: "id" });
         open.onsuccess = () => {
           const sets = open.result.transaction("sets", "readwrite").objectStore("sets");
           const until = Date.now() + 8_000;
@@ -479,6 +484,18 @@ test("a slow carry still opens where the reader left off", async ({ page, contex
 
   await expect(arrived).toHaveURL(/#\/hafs-kfqc\/p250$/, { timeout: 15_000 });
   await expect.poll(async () => (await savedSeam(arrived))?.page).toBe(250);
+});
+
+// The helpers above write straight to the app's store. Reaching it before the app
+// has made it must not leave an empty store behind that the app can never use: a
+// slow browser (Firefox, 2026-11-13) got there first and the test hung for a minute.
+test("a place written before the app has made its store is still found", async ({ page, context, baseURL }) => {
+  const { old } = await standIns(context, baseURL);
+  await page.goto(`${old}/favicon.svg`); // this site, but none of the app's code runs
+  await putSeam(page, { page: 250, at: 2_000 });
+  await page.goto(`${old}/#/hafs-kfqc/p250`);
+  await expect(page.getByTestId("moved-sheet")).toBeVisible();
+  expect(await savedSeam(page)).toEqual({ page: 250, at: 2_000 });
 });
 
 test("a place on a page this edition does not have is not kept", async ({ page, context, baseURL }) => {

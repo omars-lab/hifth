@@ -110,6 +110,7 @@ import {
   type TajweedShard,
   type TajweedVocabulary,
   type WordIndex,
+  parseWordKey,
 } from "@hifth/core";
 import {
   loadManifest,
@@ -141,6 +142,7 @@ import {
   RAIL_CLEARANCE,
   type Corner,
   type Erased,
+  type MarkedWords,
   type PageStageHandle,
   type PageTool,
   type VerseSpot,
@@ -466,6 +468,14 @@ export function App(): JSX.Element {
   }, [commentaryOpen]);
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // Words marked inside the selected verse, by a hold or a link's `?w=`. Kept
+  // here, not in the page, because the page is built afresh when the book goes
+  // from one page to two; a new selection ends them (the effect below).
+  const [markedWords, setMarkedWords] = useState<MarkedWords | null>(null);
+  useEffect(() => {
+    if (markedWords && markedWords.key !== selectedKey) setMarkedWords(null);
+  }, [markedWords, selectedKey]);
+  const clearMarkedWords = useCallback(() => setMarkedWords(null), []);
   // The drag-highlighted passage: its ayah keys in reading order (spec §3's
   // `onRangeSelect` payload), or null. Mutually exclusive with `selectedKey` —
   // a highlight replaces a selection and vice versa, so exactly one hop list
@@ -737,7 +747,7 @@ export function App(): JSX.Element {
        * With one page, the reader can ask for the whole page too (docs/PLAN.md,
        * item 98), so nothing slides on an upright iPad.
        */
-      navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number }) => {
+      navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number; words?: readonly [number, number] }) => {
         const zoom = opts?.zoom ?? (bookOpenRef.current ? 1 : openZoom(savedOpenSize()));
         return settle(
           stageRef.current?.navigateTo(key, { ...opts, ...(zoom === undefined ? {} : { zoom }) }),
@@ -2041,6 +2051,7 @@ export function App(): JSX.Element {
     confusions,
     device,
     loaded: jumpsLoaded,
+    ready: jumpsReady,
     commit: commitConfusions,
     loadFile: loadConfusionsFile,
     restore: restoreConfusions,
@@ -2075,10 +2086,18 @@ export function App(): JSX.Element {
   // A "not sure yet" jump being named from its row in the list: the next
   // destination picked fills it in rather than marking a new jump.
   const [jumpRenaming, setJumpRenaming] = useState<string | null>(null);
+  // A jump marked before the saved ones have been read in waits for them, so it
+  // is counted against them: the message says the right number of times, and a
+  // mistake is not turned back into a plain jump when the saved record lands.
+  const waitingJumps = useRef<[JumpEnd, string | null, ConfusionKind][]>([]);
   const saveJump = useCallback(
     (from: JumpEnd, to: string | null, kind: ConfusionKind = "jump") => {
       setJumpAsking(null);
       setJumpNaming(null);
+      if (!jumpsReady) {
+        waitingJumps.current.push([from, to, kind]);
+        return;
+      }
       setJumpRenaming(null);
       const now = Date.now();
       const unsure = jumpRenaming ? confusions.find((c) => c.id === jumpRenaming) : undefined;
@@ -2104,8 +2123,13 @@ export function App(): JSX.Element {
       commitConfusions(next, said);
       setJumpUndo({ said, undo: (s) => removeLastTime(s, mine.id, Date.now()) });
     },
-    [confusions, device, commitConfusions, t, jumpRenaming],
+    [confusions, device, commitConfusions, t, jumpRenaming, jumpsReady],
   );
+  // One waiting jump per pass: each save changes the list the next counts on.
+  useEffect(() => {
+    const first = jumpsReady ? waitingJumps.current.shift() : undefined;
+    if (first) saveJump(...first);
+  }, [jumpsReady, saveJump]);
   const undoJump = () => {
     if (!jumpUndo) return;
     commitConfusions(jumpUndo.undo(confusions), "");
@@ -3226,7 +3250,9 @@ export function App(): JSX.Element {
    * what the run actually matched.
    */
   const handleSelectWords = useCallback(
-    (wordKey: string) => {
+    (wordKey: string, ayahKey: string) => {
+      const words = parseWordKey(wordKey);
+      setMarkedWords(words ? { key: ayahKey, from: words.from, to: words.to } : null);
       if (!adjacency || toolRef.current === "read") return;
       const hops = adjacency.hopsForWords(
         wordKey,
@@ -3651,9 +3677,13 @@ export function App(): JSX.Element {
       }
       setSelectedRange(null);
       setSelectedKey(key);
+      const words = origin === "link" && state.word ? state.word : null;
+      setMarkedWords(words ? { key, from: words[0], to: words[1] } : null);
       setPage(loc.page);
       announce(t.arrivedAyah(origin, t.ayahLabel(key) ?? key, loc.page));
-      void stage.navigateTo(key, { pulse: true });
+      // Words the link names (`?w=3-7`) are laid as word ink on arrival. The
+      // address then names the verse only, as it does after `?tool=`.
+      void stage.navigateTo(key, { pulse: true, ...(origin === "link" && state.word ? { words: state.word } : {}) });
     },
     [resolver, announce, t, chooseTool, handlePageMode],
   );
@@ -4511,6 +4541,8 @@ export function App(): JSX.Element {
                      about the ayah that is selected, and on a spread that ayah
                      is as often printed on this leaf as on the other one. */
                   onSelectWords={handleSelectWords}
+                  markedWords={markedWords}
+                  onClearWords={clearMarkedWords}
                   onTurn={stepPage}
                   onPinchZoom={pinchedFacing}
                   onPan={pannedFacing}
@@ -4597,6 +4629,8 @@ export function App(): JSX.Element {
                 onCornerHold={setCornerMenu}
                 onSelectRange={handleSelectRange}
                 onSelectWords={handleSelectWords}
+                markedWords={markedWords}
+                onClearWords={clearMarkedWords}
                 /* Every turn ends where the arrow keys end — one `stepPage`, so
                    a wheel turn, a dragged turn and a keyed turn cannot drift
                    apart. Both stages get it: on a spread the facing leaf is as

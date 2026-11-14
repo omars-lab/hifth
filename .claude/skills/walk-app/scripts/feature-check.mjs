@@ -19,7 +19,7 @@
 // Prints one ev= line per card and writes the results (no picture, no text off
 // the page: places, tools and panels by name) to --out, by default
 // native/shots/feature-check/latest.json, which git ignores.
-// Exit 0 every card passed, is not in this build or had only its place checked · 1 a card failed or no
+// Exit 0 every card passed or is not in this build · 1 a card failed or no
 // capture came · 2 usage. HIFTH_SIMCTL and HIFTH_DEVICECTL swap Apple's tools for
 // stand-ins (the tests use them).
 import { spawnSync } from "node:child_process";
@@ -49,7 +49,8 @@ const placeOf = (route) => String(route ?? "").replace(/^#/, "").split("?")[0];
  * What a capture must say for each panel card: each sheet a link can open
  * carries its link name (`data-panel`), which the capture lists as
  * `panel=<name>`. A tool card's tool shows as `tool=<name>`; places are
- * compared by address; the view cards by the count of pages on screen.
+ * compared by address; the view cards by the count of pages on screen; the
+ * word card by the words the page says it laid (`words=3-7`).
  */
 export const PANEL_SIGNS = Object.fromEntries(
   ["jump", "about", "record", "shelf", "key", "editions", "tips", "lookalikes", "roots", "commentary", "context"].map((n) => [n, `panel=${n}`]),
@@ -60,9 +61,9 @@ const TOOL_IN_CODE = { harakat: "sign" };
 
 /**
  * Does the capture say the app is where the card's link said?
- * Returns { result: "pass" | "fail" | "not-in-build" | "place-only", why }.
- * "place-only": the place is right, and the rest of the link (a word range)
- * leaves no mark a capture can read yet, so only the place was checked.
+ * Returns { result: "pass" | "fail" | "not-in-build", why }.
+ * A word-range card (`?w=3-7`) passes only when the page says it laid those
+ * very words (`words=3-7` in the capture's open list).
  */
 export function judge(card, where) {
   const flavour = where?.build?.flavour ?? null;
@@ -86,7 +87,13 @@ export function judge(card, where) {
     if (!sign) misses.push(`no sign is known for the ${card.key} panel yet`);
     else if (!open.includes(sign)) misses.push(`the ${card.key} panel is not open; ${shown.length ? `${shown.join(", ")} is` : "no panel is"}`);
   }
-  const view = new URLSearchParams(String(card.route).split("?")[1] ?? "").get("view");
+  const query = new URLSearchParams(String(card.route).split("?")[1] ?? "");
+  if (query.has("w")) {
+    const [from, to = from] = String(query.get("w")).split("-");
+    const laid = open.find((o) => o.startsWith("words="))?.slice(6);
+    if (laid !== `${from}-${to}`) misses.push(laid ? `words ${laid} are laid, not ${from}-${to}` : `no words are laid on the verse, not ${from}-${to}`);
+  }
+  const view = query.get("view");
   if (view) {
     const want = view === "two" ? 2 : 1;
     const count = open.find((o) => o.startsWith("pages="));
@@ -94,9 +101,6 @@ export function judge(card, where) {
     else if (Number(count.slice(6)) !== want) misses.push(`${count.slice(6)} page on screen, not ${want}`);
   }
   if (misses.length) return { result: "fail", why: misses.join("; ") };
-  if (new URLSearchParams(String(card.route).split("?")[1] ?? "").has("w")) {
-    return { result: "place-only", why: "the verse is right; which words the link picked leaves no mark a capture can read yet" };
-  }
   return { result: "pass", why: "" };
 }
 
@@ -261,8 +265,8 @@ async function main(argv) {
   const count = (r) => results.filter((x) => x.result === r).length;
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, JSON.stringify({ at: new Date().toISOString(), on: target.kind, ...(stale ? { stale } : {}), results }, null, 2) + "\n");
-  log("done", { pass: count("pass"), fail: count("fail"), not_in_build: count("not-in-build"), place_only: count("place-only"), no_capture: count("no-capture"), not_sent: count("not-sent"), stale_build: stale ? 1 : 0, out });
-  return results.every((r) => ["pass", "not-in-build", "place-only"].includes(r.result)) ? 0 : 1;
+  log("done", { pass: count("pass"), fail: count("fail"), not_in_build: count("not-in-build"), no_capture: count("no-capture"), not_sent: count("not-sent"), stale_build: stale ? 1 : 0, out });
+  return results.every((r) => ["pass", "not-in-build"].includes(r.result)) ? 0 : 1;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

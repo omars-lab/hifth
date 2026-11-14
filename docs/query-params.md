@@ -70,7 +70,7 @@ caller is waiting for an answer it can act on; the site has nobody to answer.
 
 | Key | Shape | What it does | If the value is wrong | Failure mode |
 | --- | --- | --- | --- | --- |
-| `w` | `3-7`, or `5` for one word | Pulses a word span inside the selection (spec §7) | The whole link is refused | reject |
+| `w` | `3-7`, or `5` for one word | Lays the words as word ink inside the selected verse, as a hold-and-drag does; a range the verse does not have marks nothing (spec §7) | The whole link is refused | reject |
 | `skin` | `tajweed` | Turns on the tajweed colouring (spec §8) | The whole link is refused | reject |
 | `field` | one of the ids below | Paints the desk the mus'haf lies on | The value is dropped; the link opens on the default field | fall back |
 | `via` | `2:48` | The breadcrumb origin — the single ayah this hop came from | The whole link is refused | reject |
@@ -97,7 +97,7 @@ or `http://localhost:5173/` (a laptop running it).
 | `#/hafs-kfqc/2:47-2:48` | opens | 2:47 to 2:48 highlighted |
 | `#/hafs-kfqc/2:47-48` | opens as `#/hafs-kfqc/2:47-2:48` | the same range, from an older link |
 | `#/hafs-kfqc/p7` | opens | page 7, nothing selected |
-| `#/hafs-kfqc/2:255?w=3-7` | opens | 2:255 with words 3 to 7 pulsing |
+| `#/hafs-kfqc/2:255?w=3-7` | opens | 2:255 with words 3 to 7 marked |
 | `#/hafs-kfqc/2:255?w=abc` | refuses | the app's default view |
 | `#/hafs-kfqc/2:255?w=3-7&skin=tajweed` | opens | the same, in tajweed colours |
 | `#/hafs-kfqc/p7?field=dark` | opens | page 7 on the night desk |

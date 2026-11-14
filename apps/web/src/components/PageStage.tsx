@@ -184,6 +184,17 @@ interface PageStageProps {
    * the words themselves.
    */
   onSelectWords?: (wordKey: string, ayahKey: string) => void;
+  /**
+   * The words marked inside the selected verse, as App keeps them. The stage
+   * itself is built afresh when the book goes from one page to two (an iPad
+   * turned, a window widened), so it cannot be what remembers them: each page
+   * that mounts holding this verse marks them again, as it does the breadcrumb.
+   * Drawn only while `key` is the selected verse, so a new selection ends them
+   * with no word from the stage.
+   */
+  markedWords?: MarkedWords | null;
+  /** The reader let go of the words but kept the verse (Escape). */
+  onClearWords?: () => void;
   /** Human label for an ayah key (surah name), for per-polygon aria-label. */
   labelFor: (key: string) => string;
   /** Fired with the selected ayah's on-screen bbox so the rail can position. */
@@ -989,7 +1000,15 @@ function foldEdgeOf(page: number, total: number): FoldEdge | null {
 /** What App can drive imperatively on the stage. */
 export interface PageStageHandle {
   /** Pan/zoom to an ayah, mounting its page if needed. Resolves when landed. */
-  navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number }) => Promise<void>;
+  navigateTo: (
+    key: string,
+    opts?: {
+      pulse?: boolean;
+      zoom?: number;
+      /** Words of the verse to lay as word ink on arrival, in the print's own count, inclusive. */
+      words?: readonly [number, number];
+    },
+  ) => Promise<void>;
   /**
    * Show a whole page, centered and unzoomed, mounting it if needed.
    *
@@ -1228,6 +1247,8 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     onSelect,
     onSelectRange,
     onSelectWords,
+    markedWords,
+    onClearWords,
     labelFor,
     onSelectionRect,
     onTurn,
@@ -1340,6 +1361,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   onSelectWordsRef.current = onSelectWords;
   const selectedKeyRef = useRef(selectedKey);
   selectedKeyRef.current = selectedKey;
+  const markedWordsRef = useRef(markedWords ?? null);
+  markedWordsRef.current = markedWords ?? null;
+  const onClearWordsRef = useRef(onClearWords);
+  onClearWordsRef.current = onClearWords;
   const heardKeyRef = useRef(heardKey);
   heardKeyRef.current = heardKey;
   const runMarkRef = useRef(runMark);
@@ -1638,6 +1663,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * anything, and both ends stay meaningful if the drag runs backwards.
    */
   const wordRunRef = useRef<WordRun | null>(null);
+  /** Lays a link's words on its verse; set beside `landWords`, read by `navigateTo`. */
+  const showWordsRef = useRef<
+    (page: number, key: string, words: readonly [number, number], still: () => boolean) => void
+  >(() => {});
   /**
    * `<edition>/<page>` → its word shard, once fetched; `null` marks a page whose
    * shard missed, so a second long-press does not re-ask the network for a file
@@ -2314,6 +2343,26 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     });
   }, []);
 
+  /**
+   * Mark App's words again on `page`, if it holds the selected verse they sit
+   * in. Asked after the page is drawn and after the selection is redrawn, both
+   * of which start from no words; the band is re-checked when the word shard
+   * lands, in case the selection or the words moved on meanwhile.
+   */
+  const remarkWords = useCallback(
+    (page: number, mp: { hl: Highlighter; svg: SVGSVGElement }) => {
+      const words = markedWordsRef.current;
+      if (!resolver || !words || words.key !== selectedKeyRef.current) return;
+      if (resolver.resolve(words.key)?.page !== page) return;
+      void ensureWords(resolver.edition, page).then((idx) => {
+        if (!idx || markedWordsRef.current !== words || selectedKeyRef.current !== words.key) return;
+        if (!mp.svg.isConnected) return;
+        inkWords(mp, idx.bandsFor(words.key, words.from, words.to), words.from, words.to);
+      });
+    },
+    [resolver],
+  );
+
   const mountPage = useCallback(
     async (targetPage: number): Promise<MountedPage | null> => {
       const layer = layerRef.current;
@@ -2400,6 +2449,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // Pins, for the same reason as the crumb: the effect that redraws them
       // runs on a change of notes, not on a page arriving.
       const svg = svgEl as unknown as SVGSVGElement;
+      // And the marked words, for the same reason: a page laid out again (an
+      // iPad turned, one page to two) mounts after the words were marked.
+      remarkWords(targetPage, { hl, svg });
       drawNotePins(svg, targetPage, notesRef.current, (n) => noteLabelRef.current?.(n) ?? n.key);
       paintMistakesRef.current(targetPage, svg);
       paintDotsRef.current(targetPage, svg);
@@ -2410,7 +2462,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       wireNotes(svg, targetPage, hl);
       return mp;
     },
-    [resolver, wireNotes],
+    [resolver, wireNotes, remarkWords],
   );
 
   /** Fetch + mount a page's SVG, returning its Highlighter (or null if unvendored). */
@@ -3518,6 +3570,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           mp.hl.highlight(key, "sel", "selection");
           pulse(mp.svg);
         }
+        // A link that names words (`?w=3-7`): drawn last, once the verse is lit,
+        // so nothing that settles the selection afterwards can wipe it.
+        if (opts?.words) showWordsRef.current(loc.page, key, opts.words, () => ticket === relocateRef.current);
         emitSelectionRect();
       },
       async showPage(next) {
@@ -3697,7 +3752,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    */
   const clearWords = useCallback(() => {
     wordRunRef.current = null;
-    for (const mp of pagesRef.current.values()) mp.hl.clear("word");
+    for (const mp of pagesRef.current.values()) {
+      mp.hl.clear("word");
+      delete mp.svg.dataset.words;
+    }
   }, []);
 
   // Reflect the controlled selection into the current page's 'selection' group.
@@ -3713,6 +3771,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     clearWords();
     if (selectedKey) {
       cur.hl.highlight(selectedKey, "sel", "selection");
+      // Words App still holds for this verse come back with it: this step runs
+      // again on every change of status, as when the stage is built afresh.
+      remarkWords(currentPageRef.current, cur);
       // A tap replaces a highlight (App keeps the two mutually exclusive), so
       // the range ink goes with it — otherwise the page would show two answers.
       cur.hl.clear("phrase");
@@ -3720,7 +3781,21 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       cur.hl.clear("selection");
     }
     emitSelectionRect();
-  }, [selectedKey, status, emitSelectionRect, clearWords]);
+  }, [selectedKey, status, emitSelectionRect, clearWords, remarkWords]);
+
+  // App let go of the words (Escape on either page of two, or a new
+  // selection): every page this component holds drops their ink, not only the
+  // one whose Escape handler happened to hear the key first.
+  const hadWordsRef = useRef(false);
+  useEffect(() => {
+    if (markedWords) {
+      hadWordsRef.current = true;
+      return;
+    }
+    if (!hadWordsRef.current) return;
+    hadWordsRef.current = false;
+    clearWords();
+  }, [markedWords, clearWords]);
 
   // Show the verse a run is reciting. Its own step, after the selection's, so
   // the light can move without the word band, the swept passage or the drawer's
@@ -4036,7 +4111,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     run.cursor = at;
     const from = Math.min(run.anchor, at);
     const to = Math.max(run.anchor, at);
-    cur.hl.highlightRects(idx.bandsFor(run.key, from, to), "run", "word");
+    inkWords(cur, idx.bandsFor(run.key, from, to), from, to);
     if (!commit) return;
     const parsed = parseAyahKey(run.key);
     if (!parsed) return;
@@ -4045,6 +4120,21 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       run.key,
     );
   }, []);
+
+  /*
+   * A link's words (`?w=3-7`): the same band a hold lays, on the verse the link
+   * just landed on. It paints and says nothing more — no word menu, because the
+   * reader did not ask for one — and it starts no run, so the next hold begins
+   * fresh. Words the verse does not have draw nothing, and so mark nothing.
+   */
+  showWordsRef.current = (page, key, [from, to], still) => {
+    if (!resolver) return;
+    void ensureWords(resolver.edition, page).then((idx) => {
+      const mp = pagesRef.current.get(page);
+      if (!idx || !mp || !still()) return;
+      inkWords(mp, idx.bandsFor(key, from, to), from, to);
+    });
+  };
 
   /**
    * The finger's way in: the word nearest where it is now.
@@ -4137,10 +4227,14 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
-      if (!wordRunRef.current) return;
+      // Words are in hand when this page made them by a hold, or when App
+      // handed them in (a link's ?w=, or a hold made on a page since rebuilt).
+      const handed = markedWordsRef.current;
+      if (!wordRunRef.current && !(handed && handed.key === selectedKeyRef.current)) return;
       if (document.querySelector('[role="dialog"]')) return;
       e.preventDefault();
       clearWords();
+      onClearWordsRef.current?.();
     };
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
@@ -4894,6 +4988,27 @@ function SignLoupe({ loupe, src }: { loupe: Loupe; src: string }): JSX.Element {
       <span className={styles.loupeName}>{sign.name}</span>
     </div>
   );
+}
+
+/**
+ * Lay word ink on one page, and say on the page which words it is.
+ *
+ * `data-words="3-7"` is set only when a band was actually drawn, so whatever
+ * reads it (the debug build's capture, a test) learns what the reader can see,
+ * not what was asked for. It is numbers only: the words themselves never leave
+ * the page this way.
+ */
+/** Words marked inside a verse, by the print's numbers for them. */
+export interface MarkedWords {
+  readonly key: string;
+  readonly from: number;
+  readonly to: number;
+}
+
+function inkWords(mp: { hl: Highlighter; svg: SVGSVGElement }, bands: Rect[], from: number, to: number): void {
+  mp.hl.highlightRects(bands, "run", "word");
+  if (bands.length > 0) mp.svg.dataset.words = `${from}-${to}`;
+  else delete mp.svg.dataset.words;
 }
 
 /**
