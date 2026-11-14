@@ -52,6 +52,7 @@ export interface Catalog {
   readonly bmNameLabel: string;
   readonly bmNotSaved: string;
   readonly bmOpen: (d: { readonly name: string | number; readonly page: string | number }) => string;
+  readonly bmPutBack: (d: { readonly name: string | number }) => string;
   readonly bmRenamed: (d: { readonly name: string | number }) => string;
   readonly bmRestored: string;
   readonly bmRibbon: (d: { readonly name: string | number }) => string;
@@ -62,6 +63,12 @@ export interface Catalog {
   readonly bmUndo: string;
   readonly bmUnfold: (d: { readonly count: number; readonly countText: string | number }) => string;
   readonly bmUnfolded: (d: { readonly count: number; readonly countText: string | number }) => string;
+  readonly bookmarkHandBoth: string;
+  readonly bookmarkHandClicks: string;
+  readonly bookmarkHandCorner: string;
+  readonly bookmarkHandNote: string;
+  readonly bookmarkHandPull: string;
+  readonly bookmarkHandTitle: string;
   readonly calendarDotsFull: string;
   readonly calendarDotsMistakes: string;
   readonly calendarDotsOpened: string;

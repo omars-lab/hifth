@@ -2486,7 +2486,9 @@ export function App(): JSX.Element {
   // Unfolding a corner lifts every bookmark on the page at once, with no
   // question first; the bookmarks it lifted wait here for a few seconds so one
   // tap on "Undo" puts them back (docs/decisions/bookmark-fold.md, 2026-09-25).
-  const [unfolded, setUnfolded] = useState<{ lifted: Bookmark[]; said: string } | null>(null);
+  // A ribbon pushed back up by hand (bookmark-hand.ts) waits here the same way,
+  // and says its own name when it is put back.
+  const [unfolded, setUnfolded] = useState<{ lifted: Bookmark[]; said: string; restored?: string } | null>(null);
   const unfold = useCallback(
     (p: number) => {
       const lifted = bookmarksOnPage(bookmarks, p);
@@ -2505,8 +2507,16 @@ export function App(): JSX.Element {
   const undoUnfold = () => {
     if (!unfolded) return;
     const held = new Set(bookmarks.map((b) => b.id));
-    commitBookmarks([...bookmarks, ...unfolded.lifted.filter((b) => !held.has(b.id))], t.bmRestored);
+    commitBookmarks([...bookmarks, ...unfolded.lifted.filter((b) => !held.has(b.id))], unfolded.restored ?? t.bmRestored);
     setUnfolded(null);
+  };
+  const pushUp = (id: string) => {
+    const b = bookmarks.find((x) => x.id === id);
+    if (!b) return;
+    const said = t.bmLifted(b.name);
+    commitBookmarks(liftBookmark(bookmarks, id), said);
+    if (drawerId === id) setDrawerId(null);
+    setUnfolded({ lifted: [b], said, restored: t.bmPutBack(b.name) });
   };
   const endUndo = useCallback(() => setUnfolded(null), []);
 
@@ -2855,6 +2865,7 @@ export function App(): JSX.Element {
       onDrop={() => dropOn(p)}
       onUnfold={() => unfold(p)}
       onOpen={tool === "erase" ? liftRibbon : setDrawerId}
+      onLift={pushUp}
       freshId={freshId}
       seam={seamPage === p}
       aside={pointsAtWords}

@@ -1781,6 +1781,37 @@
         }
       ],
       "gap": "Switched off until hifth.app/read is live (docs/issues.json, carry-marks-switched-off); reader settings are not carried (carry-leaves-settings-behind)."
+    },
+    {
+      "id": "mark-a-page-to-come-back-to",
+      "actor": "hafiz",
+      "goal": "Let me mark this page the way I would mark a mus'haf, with a ribbon I can pull out and push back, and find it there tomorrow.",
+      "feature": "bookmarks",
+      "code": [
+        {
+          "file": "apps/web/src/components/BookmarkRibbons.tsx",
+          "symbol": "BookmarkRibbons"
+        },
+        {
+          "file": "packages/core/src/bookmarks.ts",
+          "symbol": "dropBookmark"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/bookmarks.spec.ts",
+          "test": "a folded corner drops a named ribbon that is still there after a reload"
+        },
+        {
+          "file": "apps/web/e2e/bookmark-pull.spec.ts",
+          "test": "pulling the top corner down drops a bookmark, with a ribbon following the hand"
+        },
+        {
+          "file": "apps/web/e2e/bookmark-pull.spec.ts",
+          "test": "pushing a bookmark up lifts it, and Undo puts it back"
+        }
+      ],
+      "gap": "A pull by a finger is tested on a phone in Chromium only; on the iPad it waits for the owner's walk."
     }
   ]
 }

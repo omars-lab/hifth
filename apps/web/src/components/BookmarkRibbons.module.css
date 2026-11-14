@@ -150,6 +150,55 @@
   background: linear-gradient(225deg, var(--paper-sunk) 45%, var(--paper-raised) 100%);
 }
 
+/* Pulling by hand (bookmark-hand.ts). A finger on the corner or a ribbon
+   pulls it, not the page under it, so the browser does not take the press as
+   a scroll. */
+.overlay[data-hand="pull"] .fold,
+.overlay[data-hand="pull"] .ribbon {
+  touch-action: none;
+}
+
+.overlay[data-hand="pull"] .ribbon {
+  cursor: grab;
+}
+
+/* While the corner is pulled down, it folds further, and a new ribbon comes
+   out of it as far as the hand has come (--pull, set by the component). */
+.fold[data-pulling] {
+  --dog-ear: 36px;
+  cursor: grabbing;
+}
+
+.pullRibbon {
+  display: none;
+  position: absolute;
+  top: calc(var(--touch-min) / 2);
+  left: 50%;
+  inline-size: clamp(10px, calc(14px * var(--leaf-z, 1)), 18px);
+  block-size: var(--pull, 0px);
+  transform: translateX(-50%);
+  background: var(--rib-1);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 5px), 0 100%);
+  pointer-events: none;
+}
+
+.fold[data-pulling] .pullRibbon {
+  display: block;
+}
+
+/* A ribbon pushed up draws back into the head of the page with the hand
+   (--push, the share still hanging), and, let go short, falls back. */
+.ribbon {
+  transition: transform var(--dur-fast) ease;
+}
+
+.ribbon[data-pulling] {
+  transform: scaleY(var(--push, 1));
+  transition: none;
+  cursor: grabbing;
+}
+
 .fold:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;

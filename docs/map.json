@@ -2613,6 +2613,39 @@
         "offline-pwa",
         "share-links"
       ]
+    },
+    {
+      "id": "bookmarks",
+      "what": "Bookmarks: fold a page's top outer corner (by a tap, or by pulling a ribbon out of it) to drop a named ribbon; push a ribbon back up, or unfold the corner, to lift it, with Undo.",
+      "layer": "L2 web",
+      "entry": [
+        {
+          "file": "packages/core/src/bookmarks.ts",
+          "symbol": "dropBookmark",
+          "note": "What a bookmark is and every change to the set: drop, rename, move, lift. Pure, with its own tests."
+        },
+        {
+          "file": "apps/web/src/components/BookmarkRibbons.tsx",
+          "symbol": "BookmarkRibbons",
+          "note": "The folded corner and the ribbons on the page; presses are read on the overlay itself, so a tap, a pull and a push are told apart here."
+        },
+        {
+          "file": "apps/web/src/bookmark-hand.ts",
+          "symbol": "pullVerdict",
+          "note": "How far a pull or a push must go before it counts, and the setting with the four ways to drop and lift a bookmark (decision bookmark-fold, question 2)."
+        }
+      ],
+      "extend": [
+        "A new way to drop or lift a bookmark is one more value in bookmark-hand.ts, a label in Colophon.tsx and a test in apps/web/e2e/bookmark-pull.spec.ts; the tap must keep working in every way."
+      ],
+      "gates": [
+        "pnpm test",
+        "pnpm gate:use-cases"
+      ],
+      "seeAlso": [
+        "page-notes",
+        "settings"
+      ]
     }
   ]
 }
