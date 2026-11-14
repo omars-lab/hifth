@@ -580,7 +580,18 @@ comparing two times, because a time flips between groups and a size does not.
 
 ---
 
-### ㉑ Moving about 12 KB out of start-up would make the app usable 150 ms sooner · **open**
+### ㉑ Moving about 12 KB out of start-up would make the app usable 150 ms sooner · **fixed**
+
+**Fixed (2026-11-14): 159.7 KB, about 2107 ms.** Moved out of start-up:
+- the laptop's page-edge strips and pen homes, into a file a phone never asks for;
+- the highlight menu and the moved-address card, which now load when they are first shown;
+- the commentary's styles, which the public build shipped though it shows no commentary.
+
+Measured beside the old build, 7 rounds each: the new build read 2105 to 2111 ms in 6 of 7
+rounds, and the old one 2255 to 2259 in 6 of 7. The start-up limit is now 161 KB, between this
+build and 162.6 KB, the size that still read the slower step. A test refuses 163 KB. A part
+whose file fails to load now shows nothing in its place instead of blanking the app. Details are
+in the trims list's "Trimmed 2026-11-14" entry.
 
 **Where it stands (2026-11-11).** The start-up download is 171 KB and the step down is near
 160 KB (somewhere between 158 and 160). So about 12 KB has to load later, not at start-up, and

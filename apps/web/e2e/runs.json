@@ -368,6 +368,12 @@
       "android",
       "iphone"
     ],
+    "wide-screen-later.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "word-stack.spec.ts": [
       "desktop",
       "desktop-firefox"

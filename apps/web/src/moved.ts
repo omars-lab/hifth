@@ -1,7 +1,7 @@
 /**
  * Hifth has moved from the blog address to hifth.app/read — the rules, with no
- * window in them (the page parts are in `components/MovedSheet.tsx` and
- * `useCarryIn.ts`).
+ * window in them (the page parts are in `components/MovedSheet.tsx`,
+ * `components/MovedCard.tsx` and `useCarryIn.ts`).
  *
  * A reader's marks live in their browser, under the address they were made at,
  * so a new address starts empty. The old page carries them across: it opens the

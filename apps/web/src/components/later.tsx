@@ -1,4 +1,4 @@
-import { lazy, useState, type ComponentType } from "react";
+import { Component, lazy, Suspense, useState, type ComponentType, type ReactNode } from "react";
 
 /*
  * Tools that load the first time one is opened, not with the first page.
@@ -18,6 +18,20 @@ import { lazy, useState, type ComponentType } from "react";
  */
 
 const tools = () => import("./rarely-used");
+const wide = () => import("./wide-screen");
+
+// A screen bigger than a phone both ways (so not a phone on its side) fetches
+// the wide-screen file once the page is up, without being asked. An iPad held
+// upright draws no page-edge strips, so
+// otherwise the first squeeze of the Pencil would wait for the file before its
+// ring of pens showed. A phone never fetches it (e2e/wide-screen-later.spec.ts).
+if (typeof window !== "undefined" && window.matchMedia?.("(min-width: 600px) and (min-height: 600px)").matches) {
+  const fetchIt = () => void wide().catch(() => undefined);
+  const whenIdle = () =>
+    "requestIdleCallback" in window ? requestIdleCallback(fetchIt, { timeout: 2000 }) : setTimeout(fetchIt, 1000);
+  if (document.readyState === "complete") whenIdle();
+  else addEventListener("load", whenIdle, { once: true });
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- React.lazy's own bound
 function later<T extends ComponentType<any>>(load: () => Promise<T>) {
@@ -39,6 +53,43 @@ export const WordPartsHost = later(() => tools().then((m) => m.WordPartsHost));
 export const BookmarkDrawer = later(() => tools().then((m) => m.BookmarkDrawer));
 export const DiffView = later(() => tools().then((m) => m.DiffView));
 export const SharedWords = later(() => tools().then((m) => m.SharedWords));
+export const HighlightMenu = later(() => tools().then((m) => m.HighlightMenu));
+export const MovedCard = later(() => tools().then((m) => m.MovedCard));
+
+/* Only on a computer-sized screen, or by an iPad's Pencil: a phone never fetches ./wide-screen.ts. */
+export const PenHomeAt = later(() => wide().then((m) => m.PenHomeAt));
+export const EdgeGrabRails = later(() => wide().then((m) => m.EdgeGrabRails));
+export const PenHomeBottom = later(() => wide().then((m) => m.PenHomeBottom));
+export const PenHomeFloat = later(() => wide().then((m) => m.PenHomeFloat));
+export const PenHomeSide = later(() => wide().then((m) => m.PenHomeSide));
+
+/**
+ * Where a later-loaded part goes: nothing while its file is on the way, and
+ * nothing if the file never comes.
+ *
+ * A file can fail to come: the reader is offline before the service worker has
+ * it, or a publish renamed it while an old copy of the app was open. Without
+ * this, the failed load would throw past every part of the app and leave a
+ * blank screen; with it, only the one tool is missing, and the page still reads
+ * and turns (e2e/lazy-tools.spec.ts aborts the request to check).
+ */
+export function Later({ children }: { children: ReactNode }): JSX.Element {
+  return (
+    <Missing>
+      <Suspense fallback={null}>{children}</Suspense>
+    </Missing>
+  );
+}
+
+class Missing extends Component<{ children: ReactNode }, { failed: boolean }> {
+  override state = { failed: false };
+  static getDerivedStateFromError(): { failed: boolean } {
+    return { failed: true };
+  }
+  override render(): ReactNode {
+    return this.state.failed ? null : this.props.children;
+  }
+}
 
 /**
  * True from the first time `open` is true, and from then on.

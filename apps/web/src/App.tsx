@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { lazy, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { spokenName } from "./spoken-name";
 import {
   Adjacency,
@@ -150,12 +150,13 @@ import {
   type WordRect,
 } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, TOOLS, toolHint, toolName } from "./components/PageToolbar";
-import { PenHomeAt, PenHomeBottom, PenHomeFloat, PenHomeSide, useSideRoom } from "./components/PenHomes";
+import { useSideRoom } from "./components/useSideRoom";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 import { rememberArrowShowing, savedArrowShowing } from "./jump-arrows";
 // Opened by few readers and never before the page is up: loaded on first open.
 import {
   useOpenedOnce,
+  Later,
   BookmarkDrawer,
   BookmarkShelf,
   Colophon,
@@ -169,17 +170,22 @@ import {
   RevisionMap,
   RootLens,
   WordPartsHost,
+  HighlightMenu,
+  PenHomeAt,
+  EdgeGrabRails,
+  PenHomeBottom,
+  PenHomeFloat,
+  PenHomeSide,
 } from "./components/later";
 import type { CropBox } from "./components/CropSheet";
 import type { NoteAbout } from "./components/NoteBox";
 import { PageSpread } from "./components/PageSpread";
-import { EdgeGrabRails, type EdgeTurnDriver, type PeelPages } from "./components/EdgeGrabRails";
+import type { EdgeTurnDriver, PeelPages } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
 import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
 import { LookalikeSections } from "./components/LookalikeSections";
 import { DrawerTabs } from "./components/DrawerTabs";
-import { HighlightMenu } from "./components/HighlightMenu";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareInDrawer, ShareSheet } from "./components/ShareSheet";
 import { ListenOptions } from "./components/ListenOptions";
@@ -4160,6 +4166,7 @@ export function App(): JSX.Element {
   // so their files are not fetched before anyone asks and a sheet that keeps
   // state between openings still does (see components/later.tsx).
   const rootsMounted = useOpenedOnce(rootFamilies !== null);
+  const highlightMounted = useOpenedOnce(selectedRange !== null && selectedRange.length > 0);
   const editionMounted = useOpenedOnce(editionOpen);
   const settingsPage = appPages === "row" && appPage === "settings";
   const colophonMounted = useOpenedOnce(colophonOpen || settingsPage);
@@ -4365,7 +4372,7 @@ export function App(): JSX.Element {
     ) : tab === "share" ? (
       <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
     ) : tab === "roots" && rootFamilies !== null ? (
-      <Suspense fallback={null}>
+      <Later>
         <RootLens
           inline
           families={rootFamilies}
@@ -4376,7 +4383,7 @@ export function App(): JSX.Element {
           onHopEdge={handleHop}
           onClose={() => closeTab("roots")}
         />
-      </Suspense>
+      </Later>
     ) : tab === "looks" && selectedKey ? (
       <LookalikeSections chips={railChips} fromKey={selectedKey} canHop={canHop} onHop={handleHop} onClose={() => closeTab("looks")} />
     ) : null;
@@ -4564,6 +4571,7 @@ export function App(): JSX.Element {
         />
       )}
       {resolver && pencilPens && (
+        <Later>
         <PenHomeAt
           at={pencilPens}
           onClose={closePencilPens}
@@ -4576,9 +4584,10 @@ export function App(): JSX.Element {
           tools={barTools}
           aim={markAim}
         />
+        </Later>
       )}
-      {resolver && desktop && homeNow === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
-      {resolver && desktop && homeNow === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} full={keepTools ? fullTools : undefined} />}
+      {resolver && desktop && homeNow === "float" && <Later><PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} /></Later>}
+      {resolver && desktop && homeNow === "side" && <Later><PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} full={keepTools ? fullTools : undefined} /></Later>}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
       <main
         ref={roomRef}
@@ -4627,6 +4636,7 @@ export function App(): JSX.Element {
               besideSide={besideSide}
               edgeRails={
                 desktop ? (
+                  <Later>
                   <EdgeGrabRails
                     driver={edgeTurn}
                     aside={pointsAtWords}
@@ -4644,6 +4654,7 @@ export function App(): JSX.Element {
                       else setCommentaryOpen(false);
                     }}
                   />
+                  </Later>
                 ) : undefined
               }
               renderFacing={(facing) => (
@@ -4851,6 +4862,8 @@ export function App(): JSX.Element {
               onCover={setListTop}
               onSide={setListSide}
             />
+            {highlightMounted && (
+            <Later>
             <HighlightMenu
               rangeKeys={selectedRange}
               hops={rangeHops}
@@ -4863,8 +4876,10 @@ export function App(): JSX.Element {
               // menu would be a dead end (nothing re-opens it but a fresh drag).
               onClose={() => setSelectedRange(null)}
             />
+            </Later>
+            )}
             {rootsMounted && !toolsInDrawer && (
-              <Suspense fallback={null}>
+              <Later>
                 <RootLens
                   families={rootFamilies}
                   loading={rootsLoading}
@@ -4877,7 +4892,7 @@ export function App(): JSX.Element {
                   onCover={setListTop}
                   onSide={setListSide}
                 />
-              </Suspense>
+              </Later>
             )}
             {COMMENTARY && (
               <CommentarySheet
@@ -4977,7 +4992,7 @@ export function App(): JSX.Element {
         onClose={() => setLegendOpen(false)}
       />
       {editionMounted && (
-        <Suspense fallback={null}>
+        <Later>
           <EditionPicker
             open={editionOpen}
             current={manifest?.edition ?? ""}
@@ -4986,10 +5001,10 @@ export function App(): JSX.Element {
             onSelect={handleEditionSelect}
             onClose={() => setEditionOpen(false)}
           />
-        </Suspense>
+        </Later>
       )}
       {colophonMounted && (
-        <Suspense fallback={null}>
+        <Later>
           <Colophon
             open={colophonOpen || settingsPage}
             asPage={settingsPage && !colophonOpen}
@@ -5057,7 +5072,7 @@ export function App(): JSX.Element {
               setCoachUp(true);
             }}
           />
-        </Suspense>
+        </Later>
       )}
       {/* `onGoToPage` is the app's own page-turner, handed over unchanged: a
           press on a map cell is a jump, and everything a jump owes — refusing an
@@ -5065,7 +5080,7 @@ export function App(): JSX.Element {
           already lives in `goToPage`. A second route to a page would be a second
           announcer, and the two would drift. */}
       {revisionMounted && (
-        <Suspense fallback={null}>
+        <Later>
           <RevisionMap
             open={revisionOpen}
             onClose={() => setRevisionOpen(false)}
@@ -5092,11 +5107,11 @@ export function App(): JSX.Element {
             <NoteShelf notes={noteShelf} onFollow={openNoteOf} />
             <JumpShelf jumps={jumpShelf} dismissed={jumpsDismissed} onGo={goToJumpFrom} onBringBack={bringBackJump} />
           </RevisionMap>
-        </Suspense>
+        </Later>
       )}
 
       {drawerMounted && (
-        <Suspense fallback={null}>
+        <Later>
           <BookmarkDrawer
             bookmark={drawerBookmark}
             moveLabel={moveTarget ? (t.ayahLabel(moveTarget.key) ?? t.pageN(moveTarget.page)) : null}
@@ -5126,7 +5141,7 @@ export function App(): JSX.Element {
             }}
             onClose={() => setDrawerId(null)}
           />
-        </Suspense>
+        </Later>
       )}
 
       {/* Pinned RTL with the stage, and for the same reason: the trail reads
@@ -5148,7 +5163,7 @@ export function App(): JSX.Element {
           bar, so it covers neither the page bar nor the trail. */}
       <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} readPlace={readSeam} readRecord={readRecord} />
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="" data-full-keep={touchFullNow === "row" || undefined}>
-        {resolver && desktop && homeNow === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
+        {resolver && desktop && homeNow === "bottom" && <Later><PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} /></Later>}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
         {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
         {railAt === "bar" && !railOnDrawer && hopRail(undefined, "bar")}
@@ -5237,7 +5252,7 @@ export function App(): JSX.Element {
           ) : toolsInDrawer && shareInDrawer ? (
             <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
           ) : toolsInDrawer && rootFamilies !== null ? (
-            <Suspense fallback={null}>
+            <Later>
               <RootLens
                 inline
                 families={rootFamilies}
@@ -5248,7 +5263,7 @@ export function App(): JSX.Element {
                 onHopEdge={handleHop}
                 onClose={() => setRootsOpen(false)}
               />
-            </Suspense>
+            </Later>
           ) : looksInDrawer && selectedKey ? (
             <LookalikeSections
               chips={railChips}
@@ -5451,7 +5466,7 @@ export function App(): JSX.Element {
       )}
 
       {verseNotesAt && verseNotes.length > 0 && (
-        <Suspense fallback={null}>
+        <Later>
           <VerseNotes
             head={t.verseInNotes(verseNotesAt.key, verseNotes.length)}
             notes={verseNotes}
@@ -5463,11 +5478,11 @@ export function App(): JSX.Element {
             }}
             onClose={closeVerseNotes}
           />
-        </Suspense>
+        </Later>
       )}
 
       {jumpsAt && jumpRows.length > 0 && (
-        <Suspense fallback={null}>
+        <Later>
           <JumpList
             head={t.jumpList(jumpsAt.key)}
             fromKey={jumpsAt.key}
@@ -5492,11 +5507,11 @@ export function App(): JSX.Element {
             }}
             onClose={closeJumps}
           />
-        </Suspense>
+        </Later>
       )}
 
       {labelNotes && (
-        <Suspense fallback={null}>
+        <Later>
           <VerseNotes
             head={labelNotes.head}
             notes={notesAbout(scoped, labelNotes.scope, pageOfKey).map(shelfItem)}
@@ -5507,10 +5522,10 @@ export function App(): JSX.Element {
             }}
             onClose={closeLabelNotes}
           />
-        </Suspense>
+        </Later>
       )}
       {labelNote && (
-        <Suspense fallback={null}>
+        <Later>
           <NoteBox
             key={labelNote.id}
             note={labelNote}
@@ -5520,10 +5535,10 @@ export function App(): JSX.Element {
             onClose={closeLabelNote}
             onDelete={deleteLabelNote}
           />
-        </Suspense>
+        </Later>
       )}
       {openNote && (
-        <Suspense fallback={null}>
+        <Later>
           <NoteBox
             key={openNote.id}
             note={openNote}
@@ -5541,15 +5556,15 @@ export function App(): JSX.Element {
                 : null
             }
           />
-        </Suspense>
+        </Later>
       )}
       {crop && manifest && (
-        <Suspense fallback={null}>
+        <Later>
           <CropHost key={`${crop.page}:${crop.x}:${crop.y}`} manifest={manifest} box={crop} onClose={() => setCrop(null)} />
-        </Suspense>
+        </Later>
       )}
       {wordOpen && manifest && (
-        <Suspense fallback={null}>
+        <Later>
           <WordPartsHost
             key={`${wordOpen.key}#${wordOpen.word}`}
             manifest={manifest}
@@ -5568,10 +5583,10 @@ export function App(): JSX.Element {
             onPickLetter={(letter, at) => pickWordPart({ ...at, letter })}
             onClose={() => setWordOpen(null)}
           />
-        </Suspense>
+        </Later>
       )}
       {picking && manifest && picking.word !== null && (
-        <Suspense fallback={null}>
+        <Later>
           <WordPartsHost
             key={picking.id}
             manifest={manifest}
@@ -5594,10 +5609,10 @@ export function App(): JSX.Element {
             onAnother={turnMistakeIntoAnother}
             onClose={() => setPickingId(null)}
           />
-        </Suspense>
+        </Later>
       )}
       {askingMistake && manifest && (
-        <Suspense fallback={null}>
+        <Later>
           <WordPartsHost
             key={`${askingMistake.key}#${askingMistake.word}`}
             manifest={manifest}
@@ -5613,7 +5628,7 @@ export function App(): JSX.Element {
             onAnother={answerAnother}
             onClose={() => setAskingMistake(null)}
           />
-        </Suspense>
+        </Later>
       )}
       {unfolded ? (
         <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />
@@ -5623,9 +5638,9 @@ export function App(): JSX.Element {
         deletedNote && <UndoBar said={deletedNote.said} onUndo={undoDelete} onDone={endNoteUndo} />
       )}
       {DeveloperPage && appPages === "row" && appPage === "developer" && (
-        <Suspense fallback={null}>
+        <Later>
           <DeveloperPage onClose={() => setAppPage("mushaf")} />
-        </Suspense>
+        </Later>
       )}
       {appPages === "row" && (
         <PageRow page={appPage} onPage={setAppPage} developer={DeveloperPage ? "Developer" : undefined} />
