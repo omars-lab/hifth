@@ -35,6 +35,13 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Checked again 2026-11-13 (3), nothing taken.** 200.6 KB against the 210 KB cap, after pulling
+a bookmark out of the corner and pushing it back, built four ways as a setting (+1.2 KB). 0.8 KB
+of it is in the start-up script: the pull has to answer the first press on the page, so it
+cannot load later. 0.4 KB is its words in the two languages. The start-up download is 167.2 of
+185 KB. 9.4 KB of room is left, so nothing is worth a new loading path yet; the next feature
+over about 5 KB should look here first.
+
 **Trimmed 2026-11-13 (2): a different minifier, −13.6 KB, nothing a reader sees changed.** After
 the front-page branch merged, the app was at 209.5 of 210 KB (item ㉒ in `docs/performance.md`,
 backlog row `room-under-the-size-limit`). Deleting what no code reaches took only 0.8 KB: the
