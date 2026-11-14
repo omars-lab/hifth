@@ -2476,6 +2476,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     Mac unit tests, and the feature check now fails the word card unless the app shows those
     very words; in the iPad simulator it passes.
 
+125. **Marked words vanish when the book is laid out again.** Open a link that names words
+    (`?w=3-5`) in one-page view, then widen the window, or turn an iPad, so the book shows two
+    pages: the verse is still selected, but its words are no longer marked. Going from one page
+    to two puts the page inside the two-page wrapper, which rebuilds the page component, and
+    the marked words lived only inside it; the selection survives because the app above keeps
+    it. Seen in Chrome and Firefox (2026-11-13). Words marked by a hold most likely go the same
+    way, not yet checked. **Open:** the app should keep the marked words, as it keeps the
+    selection, and hand them to the page each time it is built. The test that proves it is
+    written and parked as known-failing in the word tests.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source

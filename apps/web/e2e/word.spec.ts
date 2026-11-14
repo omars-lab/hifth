@@ -409,4 +409,21 @@ test.describe("Hifth · word selection", () => {
     await expect(wordInk(page)).toHaveCount(0);
     await expect(page.locator("[data-words]")).toHaveCount(0);
   });
+
+  // Known to fail: going from one page to two rebuilds the page component, and
+  // the marked words lived only inside it. Fixed when the app itself keeps
+  // them (docs/PLAN.md item 125, issues row words-lost-when-the-book-is-laid-out-again);
+  // flip fixme back to test then.
+  test.fixme("a link's words stay marked when the book goes from one page to two", async ({ page }) => {
+    // Turning an iPad, or widening a window, lays the pages out again. The
+    // selection comes back on the new page; the words must too.
+    await openApp(page, "/#/hafs-kfqc/2:39?w=3-5");
+    await expect(page.locator("[data-words]")).toHaveAttribute("data-words", "3-5");
+    const before = await page.locator("svg[role='group']").count();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await expect.poll(() => page.locator("svg[role='group']").count()).toBeGreaterThan(before);
+    await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+    await expect(page.locator("[data-words]")).toHaveAttribute("data-words", "3-5");
+    await expect(wordInk(page)).not.toHaveCount(0);
+  });
 });
