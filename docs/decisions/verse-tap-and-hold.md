@@ -70,3 +70,66 @@ look-alike without leaving it, which breaks the reading they went full screen fo
 - full screen stays as it is, for reading only.
 
 **If nobody decides:** full screen stays for reading only, and marking means leaving it.
+
+**Built 2026-11-13, the first three and today's way, as a setting** in the info panel, under
+"In full screen, the tools", on a computer and a sideways iPad:
+- **Stay down the side** (the default for now): the tools stand down the side of the window in
+  full screen, on whichever side the pens stand. The book keeps clear of them at their widest,
+  with the highlighter's pens out, so the page does not shrink under the hand each time a pen
+  tool is picked. On a 1024-wide screen that makes the book about 4% narrower than full screen
+  was before; on a wider one it only moves the book a little off centre.
+- **Hide at the edge until the pointer comes:** the tools slide out of sight and come back while
+  the pointer rests at that side of the window, then go a moment after it leaves, like the Mac's
+  Dock set to hide itself. They come over the page while shown, and keep no room.
+- **A small dock that opens out:** the same icons at half size, opening out under the pointer.
+  On a touch screen the first tap only opens it and picks nothing, since the icons are too small
+  to aim at; a tap elsewhere shuts it.
+- **Go away with the bars:** full screen as it was, for reading only.
+
+In full screen the tools' corner button reads "Leave full screen" and leaves it. Tested in
+`apps/web/e2e/full-screen-tools.spec.ts` on laptop Chrome and Firefox, which marks a mistake
+without leaving full screen and checks the tools cover no page at five screen sizes. Left: the
+owner tries the four and says which becomes the default.
+
+**Built 2026-11-14 for a phone and an upright iPad, three ways, as a second setting** under the
+same heading in the info panel, shown only on those screens (there is no room down the side, and
+no pointer to rest at an edge):
+- **A Tools button in the corner** (the default for now): a round button stays in the bottom
+  corner, across from "Show the bars", and shows the tool in hand. It opens the same tray of
+  tools the bottom line has; picking a tool folds the tray back to the button, so the tray never
+  lies on the page's last lines while you mark them. This is the phone's answer to the dock.
+- **The bottom line stays:** full screen puts away only the top bar and the page slider; the
+  bottom line, tools and all, stays, with its own "Show the bars".
+- **Go away with the bars:** as before.
+
+Looked at on a 390-wide phone and a 768-wide upright iPad, in English and Arabic: the button and
+"Show the bars" sit apart at the foot, below the page. Tested in
+`apps/web/e2e/touch-full-screen.spec.ts` on the iPhone and Android runs, which marks a mistake on
+the last line without leaving full screen. Those tests found two faults the same day, both
+fixed: on a 664-tall iPhone in Safari the button lay on the page's bottom corner, where a line
+ends in Arabic, so upright the page now keeps a strip the button's height at its foot and is
+held to the height left, with Safari's install notice up too (on its side the page stands clear
+of the corner and keeps its size); and picking the highlighter folded the tray before its colours could be picked, so
+a tool with a second row now keeps the tray up until that choice is made. A third, found by eye
+the next morning: the strip kept for the button showed the app's paler colour and read as a bar,
+so the surface the page lies on now runs to the foot of the screen under the button. A sheet
+opened in full screen (the look-alikes list) still covers the whole foot of the screen and the
+button; both are tested. Looked at in the iPad app on an iPad mini simulator, upright: the button
+sits clear of the home bar (a 25-point gap there), off the page and apart from "Show the bars",
+and the page is the same size as before. Not yet looked at in Safari on an iPhone simulator,
+because full screen cannot be opened there by link. Left: the owner tries the three on the phone and the iPad and says
+which becomes the default.
+
+### ② Should full screen fold away the "Install Hifth" notice too? · **fixed**
+
+**Found 2026-11-14** while testing the Tools button in full screen. On an iPhone in Safari, before
+the app is installed, the notice "Install Hifth so it stays with you offline" stayed at the top
+in full screen. It took about 160 points above the page, so the page the reader had asked to see
+whole was pushed down or made smaller until they hid the notice.
+
+**What was done (2026-11-14).** Full screen now folds the notice away, the same way the
+first-visit tips already held it, and it comes back when the bars do. It is a notice the reader
+can act on, so it is moved out of the way while reading, not dismissed. Looked at in a
+phone-sized window: the page now starts near the top of the screen instead of under the notice.
+Tested on the iPhone run in `apps/web/e2e/touch-full-screen.spec.ts` ("full screen folds the
+install notice away"), watched failing first.

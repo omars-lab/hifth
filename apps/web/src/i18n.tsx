@@ -299,6 +299,9 @@ export interface Strings {
   clickForNote(source: string): string;
   noteShowAll: string;
   noteShowLess: string;
+  /** The button under a phone note's translation cut to two lines (phone-note.ts). */
+  noteWholeTranslation: string;
+  noteShorterTranslation: string;
   surahIntro: string;
   relatedVerses: string;
   relatedLede(source: string): string;
@@ -668,6 +671,7 @@ export interface Strings {
   bmDrop: string;
   /** The red seam's name: where the reader left off. */
   bmSeam: string;
+  bmSeamShort: string;
   /** A folded corner's name: tapping it unfolds the corner and lifts the page's bookmarks. */
   bmUnfold(count: number): string;
   bmUnfolded(count: number): string;
@@ -694,6 +698,8 @@ export interface Strings {
   bmEvent(what: "dropped" | "renamed" | "moved" | "opened", at: number, page: number): string;
   bmDropped(name: string): string;
   bmLifted(name: string): string;
+  /** Said when a bookmark pushed back up by hand is put back with Undo. */
+  bmPutBack(name: string): string;
   bmRenamed(name: string): string;
   bmMoved(name: string, page: number): string;
   bmNotSaved: string;
@@ -886,7 +892,30 @@ export interface Strings {
   drawerToolsTitle: string;
   drawerToolsSheet: string;
   drawerToolsDrawer: string;
+  drawerToolsTabs: string;
+  drawerTabsLabel: string;
+  closeTab(name: string): string;
   drawerToolsNote: string;
+  drawerGlowTitle: string;
+  drawerGlowBrighten: string;
+  drawerGlowRing: string;
+  drawerGlowNone: string;
+  drawerGlowNote: string;
+  beatenOfferTitle: string;
+  beatenOfferSixWeeks: string;
+  beatenOfferThreeMonths: string;
+  beatenOfferNever: string;
+  beatenOfferNote: string;
+  fullScreenToolsTitle: string;
+  fullScreenToolsSide: string;
+  fullScreenToolsEdge: string;
+  fullScreenToolsDock: string;
+  fullScreenToolsNone: string;
+  fullScreenToolsNote: string;
+  touchFullToolsButton: string;
+  touchFullToolsRow: string;
+  touchFullToolsNote: string;
+  leaveFullScreen: string;
   toolHelpTitle: string;
   toolHelpLine: string;
   toolHelpHover: string;
@@ -987,6 +1016,16 @@ export interface Strings {
   longVerseSmaller: string;
   longVerseShorter: string;
   longVerseNote: string;
+  /** How the note sits on a phone (phone-note.ts). */
+  noteLeadTitle: string;
+  noteLeadClamp: string;
+  noteLeadWhole: string;
+  noteLeadTall: string;
+  noteLeadNote: string;
+  noteSidewaysTitle: string;
+  noteSidewaysBeside: string;
+  noteSidewaysFoot: string;
+  noteSidewaysNote: string;
   lookalikeCompareTitle: string;
   lookalikeCompareEvery: string;
   lookalikeComparePlain: string;
@@ -1020,6 +1059,18 @@ export interface Strings {
   ribbonLengthShort: string;
   ribbonLengthLong: string;
   ribbonLengthNote: string;
+  bookmarkHandTitle: string;
+  bookmarkHandBoth: string;
+  bookmarkHandPull: string;
+  bookmarkHandCorner: string;
+  bookmarkHandClicks: string;
+  bookmarkHandNote: string;
+  leftOffTitle: string;
+  leftOffLabel: string;
+  leftOffMark: string;
+  leftOffTabs: string;
+  leftOffRibbons: string;
+  leftOffNote: string;
   lookalikePreviewTitle: string;
   lookalikePreviewPicture: string;
   lookalikePreviewCount: string;
@@ -1195,6 +1246,8 @@ export interface Strings {
   jumpCompare: string;
   jumpAgain: string;
   jumpBeaten: string;
+  /** The quiet line on a jump not made in a long while, offering Beaten. */
+  jumpOfferBeaten: string;
   jumpDelete: string;
   jumpSayWhere: string;
   jumpDeleted(from: string, to: string): string;
@@ -1503,6 +1556,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
       }),
     bmDropped: (name) => m.bmDropped({ name }),
     bmLifted: (name) => m.bmLifted({ name }),
+    bmPutBack: (name) => m.bmPutBack({ name }),
     bmRenamed: (name) => m.bmRenamed({ name }),
     bmMoved: (name, page) => m.bmMoved({ name, page: n(page) }),
     bmCount: (count) => m.bmCount({ n: count, nText: n(count) }),
@@ -1555,6 +1609,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mistakeLetterPicked: (count) => m.mistakeLetterPicked({ nText: n(count) }),
     mistakeRulePicked: (name) => m.mistakeRulePicked({ name }),
     verseTools: (label) => m.verseTools({ label }),
+    closeTab: (name) => m.closeTab({ name }),
     vdBookmarkAria: (label) => m.vdBookmarkAria({ label }),
     drawerBack: (label) => m.drawerBack({ label }),
     useSince: (day) => m.useSince({ dayText: longDay(day, lang) }),

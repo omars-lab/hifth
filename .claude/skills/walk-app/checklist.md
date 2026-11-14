@@ -50,6 +50,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Turn by swiping, by the arrow keys, and at a desk by grabbing the outer edge. · any · The
   page follows the hand; a drag in the middle of a page never turns it. · tests: page-turn,
   desktop, edge-peel specs
+- [ ] On a first visit at a desk or on a big iPad, grab the outer edge within a second of the page
+  showing: the edge is there and turns the page. Since 2026-11-14 it comes in a file of its own,
+  a moment after the page. · desktop, ipad · test: wide-screen-later spec
 - [ ] Walk swipes with `swipe=` (a finger), not `drag=` (a mouse). A phone turns under a swipe
   both ways; an open book on an iPad on its side turns only from its outer edge, a finger in the
   middle never turns it. · phone, phone-side, ipad-side · test: drive-touch spec, "swipe="
@@ -247,7 +250,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   look-alike buttons; a choice reached by keyboard keeps its label readable. · phone, phone on its
   side · `make drive DEVICE=phone-side HASH=/hafs-kfqc/2:48 "ACT=settle=2500;evalfile=.claude/skills/walk-app/scripts/mistake-ask-walk.js"` ·
   test: e2e/phone-toolbar.spec.ts ("the Mistake pen's question stays on the screen") · found 2026-10-16
-  · walked 2026-10-16 in the real iPhone app too, upright only (the iPhone app does not turn):
+  · walked 2026-10-16 in the real iPhone app too, upright only (the iPhone app did not turn then; it does since 2026-11-14):
   `make app-probe TARGET=ipad IPAD="iPhone 17" LOCALE=en ROUTE=/hafs-kfqc/2:48 EVALFILE=…/mistake-ask-walk.js`.
   The question docks at the foot, whole, clear of its word. A tap near the top of an enlarged page
   lands on the title bar, not a word, so the walk asks nothing there.
@@ -272,12 +275,33 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   tool cannot make Firefox a phone, so look at those by hand. · desktop (Firefox), laptop
   (Firefox) · `make drive BROWSER=firefox DEVICE=desktop` · test: the `pitch-firefox` run,
   `docs/issues/firefox-pitch-run-laptop-only.md`
+- [ ] Open 2:255's note on a phone, upright and on its side: before any scroll, at least two lines
+  of The Study Quran's commentary are in sight, and every line of the verse is clear of the note.
+  Upright, the translation shows two lines with a "Whole translation" button; on its side, the
+  note stands the full height of the screen beside the page (on the left in Arabic). Try the
+  other ways in the info panel ("What a note on a phone shows first", "Where a note stands on a
+  phone on its side"). · phone, phone-side, iphone · decisions: `phone-note-lead`,
+  `phone-note-sideways` · tests: pitch spec, "the short note shows the commentary and leaves the
+  verse in sight" · found 2026-11-14: the short card showed no commentary at all on a long verse
+- [ ] On a phone on its side, tap 2:255 and look at the page at once and a second later: the lit
+  verse is in sight straight away (not the page's foot), and the bars at the foot of the screen
+  cover none of its lines. A check that only asks about the note misses this. · phone-side,
+  iphone · issues: `phone-side-foot-bars-cover-verse` · tests: pitch spec, "every line of a
+  six-line verse is in sight beside its note, none under the bars at the foot" and "closing the
+  standing note brings the bars at the foot back" · found 2026-11-14 in the walk's pictures
+  of steps 3 and 4
+- [ ] On a phone on its side, with the note standing beside the page, open a verse with
+  look-alikes (35:44): the look-alike chips sit in a row on the note's own top row, clear of its
+  close button, and not hidden behind the note. · phone-side, iphone · tests: pitch spec, "the
+  look-alike chips stay in sight, clear of the note's close button" · found 2026-11-14: the
+  standing note covered the corner the chips rest in
 - [ ] Open a verse's note: it never covers its own verse, also after turning the phone. · phone,
   phone-side · issue: `note-covers-verse-after-turn`
 - [ ] On a phone on its side in the pitch build, open 2:255's note: all six of its lines and its
   number show between the header and the note, the page drawn smaller; then set the info panel
   to "Note a little shorter" and open it again: the note comes down to the foot of the page and
-  the verse still shows whole. Browser only: the apps do not run on a phone. · phone-side ·
+  the verse still shows whole. Also in the iPhone app on its side since 2026-11-14 (`make
+  pitch-walk ON="iPhone 17"`). · phone-side ·
   `make drive DEVICE=phone-side HASH='#/hafs-kfqc/2:255?open=commentary'` · issue:
   `sideways-phone-long-verse-under-note` · test: `e2e/pitch.spec.ts`
 - [ ] Tap a verse that is not on the demo path, as a visitor will: its note opens like any
@@ -524,6 +548,18 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the row of tools, every tool in sight: on one page the page stands clear of it, on two pages it lies
   over the facing page (2:48 and 2:49, `?view=one` and two pages, in English and in Arabic). · laptop,
   desktop · issue: `share-card-covers-page-laptop`
+- [ ] Press Share, pick "Its roots", close it, and press Share again (2:48), then the same with the
+  tools set to open inside the verse's drawer: it opens on "The ayah as it is" each time, never on the
+  last choice. · phone, laptop, desktop in Firefox · issue: `share-menu-too-plain`
+- [ ] With the tools set to open "As tabs in the verse's drawer", open Same roots, scroll its list,
+  open Share, then tap the Same roots tab (2:45): the list is back where it was left, the tabs read
+  Look-alikes, Same roots, Share in that order, no line of the lit verse is under the drawer, and
+  Escape closes the tab in front, one at a time. · laptop, desktop in Firefox, iPad on its side,
+  English and Arabic · issue: `drawer-holds-its-tools`
+- [ ] Open the list behind a jump mark on a verse whose jump was last made over six weeks ago, beside
+  one made this week: only the old row carries the dotted line "Mark it beaten?", it changes nothing
+  until pressed, and pressing it lights Beaten. In the info panel, "Never" takes the line away. ·
+  phone, laptop, desktop in Firefox · issue: `who-sets-a-confusion-seams-state`
 - [ ] On a phone on its side, close the note and press Share (2:48, English and Arabic): every line
   of the verse shows, its last line included, and stays so a second later; the look-alike buttons
   sit on the card's top row, clear of its close button. · phone-side · issue:
@@ -664,6 +700,24 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
 - [ ] The page slider's two end arrows are the same shape and size, the right one pointing right
   and the left one left, in English and in Arabic. · any, Firefox especially · issue:
   `slider-arrows-mismatch` · test: slider-arrows spec
+- [ ] In full screen on a phone and an upright iPad, a round Tools button stays in the bottom
+  corner, across from "Show the bars", in English and in Arabic, clear of the page altogether,
+  on a short phone too (a 664-tall iPhone in Safari): the page's last line ends in that corner
+  in Arabic, and is not cut, with Safari's install notice up too. On its side the page is no
+  smaller in full screen than with the bars. It opens the tools' tray; picking a tool folds the tray back, and
+  the button shows that tool. Picking the highlighter keeps the tray up until a colour is picked.
+  Mark a mistake on the last line without leaving full screen. In the info panel, "The bottom
+  line stays" keeps the bottom line in full screen instead, with one "Show the bars" in it. ·
+  phone, ipad-tall · issue: `full-screen-keeps-tools` · test: touch-full-screen spec
+- [ ] In full screen on a phone and an upright iPad, the surface the page lies on runs to the foot
+  of the screen, under the Tools button, with no paler band there that reads as a bar. Open the
+  look-alikes list in full screen: it covers the whole foot of the screen and the button. ·
+  phone, ipad-tall · issue: `full-screen-keeps-tools` · test: touch-full-screen spec, "runs to the
+  foot of the screen" and "a sheet opened in full screen"
+- [ ] In iPhone Safari before installing, with the "Install Hifth" notice up, go full screen: the
+  notice folds away and the page moves up into its room; "Show the bars" brings the notice back. ·
+  phone · issue: `full-screen-install-notice` · test: touch-full-screen spec, "folds the install
+  notice away"
 - [ ] Pick the highlighter: both colour rows show, the passage circles and the held-words bands,
   with nothing cut off or off the screen; on a phone they get their own line in the tray, down
   an iPad's side two columns. At a 1024-wide window the tools do not slide when the highlighter
@@ -753,6 +807,16 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
 
 ## The Mac and iPad apps
 
+- [ ] Walk the pitch **in the iPhone app**, upright and on its side: turned on its side, the page
+  turns with the phone (wider than tall), one page shows, and each note opens in a card at the
+  foot that scrolls to The Study Quran's commentary below the verse's own translation. ·
+  `make pitch-walk ON="iPhone 17"` and `make pitch-walk ON="iPhone 17" UPRIGHT=1 NO_BUILD=1` ·
+  tests: `scripts/ios-orientations.test.mjs` (the app's settings let an iPhone turn) and the
+  skill's `walk-spread.test.mjs` (the walk counts one page or two by the app's own rule) · found
+  2026-11-14: the iPhone app stayed upright when the phone turned, because only the iPad was
+  allowed to turn; fixed. On a phone the commentary started below the card's fold (question ③
+  of `docs/design/iphone-app.md`); since 2026-11-14 it starts inside the short card (see "The
+  note (pitch)": the commentary in sight on a phone)
 - [ ] Open the note and a look-alike list **in the iPad app on its side**, both sizes, and
   upright on the large one: each card ends about 24 points below its last row, not 44, and the
   note's fade sits on its edge (native-shell ㉜). · `make app-probe TARGET=ipad SIDEWAYS=1

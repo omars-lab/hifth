@@ -103,6 +103,22 @@
   fill: var(--ink-sel);
 }
 
+/* While a pointer rests on the verse's drawer (selection-drawer ②, a setting):
+   the page's root says which of the three the reader chose, and App marks the
+   resting pointer. Only the lit verse changes; a word run or a passage inside
+   it keeps its own ink. A finger never sets the mark (drawer-glow.ts). */
+#hifth-overlay .hl-sel.hl-ink {
+  transition: fill 160ms ease-out;
+}
+:root[data-drawer-glow="brighten"][data-drawer-hover] #hifth-overlay .hl-sel.hl-ink {
+  fill: var(--ink-sel-glow);
+}
+:root[data-drawer-glow="ring"][data-drawer-hover] #hifth-overlay .hl-sel.hl-ink .hl-band {
+  stroke: var(--ink-sel-ring);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
 /* Selection, fallback rendering: the pre-ink wash and ring, unchanged. This is
    what an ayah gets when ink.ts does not recognise its geometry, and it is
    deliberately still here rather than deleted — Loop 4b vendors 601 more pages

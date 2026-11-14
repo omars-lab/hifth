@@ -43,9 +43,13 @@
 	     and the desktop layout never appears. An empty dictionary is enough. -->
 	<key>UILaunchScreen</key>
 	<dict/>
+	<!-- An iPhone turns on its side too (2026-11-14): the web app has a layout for
+	     it, and a long verse or note reads better that way. Not upside down. -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>

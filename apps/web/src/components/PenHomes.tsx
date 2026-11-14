@@ -4,9 +4,10 @@ import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import { isMarkAim, MARK_AIMS, type MarkAim } from "../mark-tools";
 import { PENS, type Pen } from "../pen";
 import type { PenSide } from "../pen-side";
+import { nearTheirEdge, stillOnThem, type FullScreenTools } from "../full-screen-tools";
 import { besideTip } from "../pencil";
 import { innerSpot, outerSpots, ringCentre, RING_REACH, spotStyle, type TipPens } from "../pen-ring";
-import { rememberPenFloat, savedPenFloat, sideFits, snapToEdge, type FloatSpot } from "../pen-home";
+import { rememberPenFloat, savedPenFloat, snapToEdge, type FloatSpot } from "../pen-home";
 import type { PageTool } from "./PageStage";
 import { AimPicker, LockMark, TOOLS, ToolIcon, toolHint, toolName, useToolPress, type ToolEntry } from "./PageToolbar";
 import styles from "./PenHomes.module.css";
@@ -406,64 +407,119 @@ export function PenHomeHere(
   );
 }
 
-/** How wide the side rail is, for the room it needs beside the book. */
-export const SIDE_RAIL = 56;
-
-/**
- * Whether the margin beside the open book holds the side rail, measured from
- * the pages as laid out (offsetWidth, so a zoom in progress does not count):
- * null until the pages are there to measure.
- */
-export function useSideRoom(on: boolean): boolean | null {
-  const [fits, setFits] = useState<boolean | null>(null);
-  useEffect(() => {
-    if (!on) return;
-    const main = document.querySelector("main");
-    if (!main) return;
-    let frame = 0;
-    const measure = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const leaves = [...main.querySelectorAll<HTMLElement>("[data-page]")].filter((el) => el.offsetWidth > 0);
-        if (leaves.length === 0) return;
-        const book = leaves.reduce((sum, el) => sum + el.offsetWidth, 0);
-        setFits(sideFits(main.clientWidth, book, SIDE_RAIL));
-      });
-    };
-    const sizes = new ResizeObserver(measure);
-    sizes.observe(main);
-    const pages = new MutationObserver(measure);
-    pages.observe(main, { childList: true, subtree: true });
-    measure();
-    return () => {
-      cancelAnimationFrame(frame);
-      sizes.disconnect();
-      pages.disconnect();
-    };
-  }, [on]);
-  return on ? fits : null;
-}
-
 /**
  * C · the tools standing in the margin beside the book, on the right, the
  * side the reader's hand holds an iPad by, or on the left, mirrored, where the
  * reader set it (docs/PLAN.md, 95). App shows B instead where
  * `useSideRoom` says the margin is too narrow.
  */
-export function PenHomeSide(props: PenHomeProps): JSX.Element {
-  const { tool, onTool } = props;
+/** How long hidden tools wait, once the pointer has left them, before going. */
+const EDGE_LINGER_MS = 350;
+
+/**
+ * In full screen (full-screen-tools.ts), the ways the side rail can stay:
+ * hidden at the window's edge until the pointer comes, or a small dock that
+ * opens out. Returns what the rail carries for each, nothing for "side".
+ */
+function useFullScreenRail(full: FullScreenTools | undefined, side: PenSide, rail: React.RefObject<HTMLDivElement | null>) {
+  const [shown, setShown] = useState(false);
+  const [open, setOpen] = useState(false);
+  // Hidden at the edge: the pointer resting at that side of the window brings
+  // them back, and they stay while it is on them or just round them.
+  useEffect(() => {
+    if (full !== "edge") return;
+    let linger = 0;
+    const onPointer = (e: PointerEvent) => {
+      const el = rail.current;
+      if (nearTheirEdge(e.clientX, window.innerWidth, side)) {
+        window.clearTimeout(linger);
+        linger = 0;
+        setShown(true);
+        return;
+      }
+      const box = el?.getBoundingClientRect();
+      if (box && stillOnThem(e.clientX, e.clientY, box)) {
+        window.clearTimeout(linger);
+        linger = 0;
+        return;
+      }
+      if (linger === 0) linger = window.setTimeout(() => {
+        linger = 0;
+        setShown(false);
+      }, EDGE_LINGER_MS);
+    };
+    window.addEventListener("pointermove", onPointer);
+    window.addEventListener("pointerdown", onPointer);
+    return () => {
+      window.clearTimeout(linger);
+      window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("pointerdown", onPointer);
+      setShown(false);
+    };
+  }, [full, side, rail]);
+  // The dock: a finger, with nothing to hover, opens it with a tap, and a tap
+  // anywhere else shuts it again.
+  useEffect(() => {
+    if (full !== "dock" || !open) return;
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType === "touch" && !rail.current?.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [full, open, rail]);
+  useEffect(() => {
+    if (full !== "dock") setOpen(false);
+  }, [full]);
+  if (full === "edge") return { "data-edge": shown ? "shown" : "hidden" } as const;
+  if (full !== "dock") return {};
+  return {
+    "data-dock": open ? "open" : "shut",
+    onPointerEnter: (e: React.PointerEvent) => {
+      if (e.pointerType !== "touch") setOpen(true);
+    },
+    onPointerLeave: (e: React.PointerEvent) => {
+      if (e.pointerType !== "touch") setOpen(false);
+    },
+    // A key that reaches a button opens it; a tap's focus does not, or the
+    // tap would open it and pick in one go.
+    onFocus: (e: React.FocusEvent) => {
+      if ((e.target as Element).matches(":focus-visible")) setOpen(true);
+    },
+    onBlur: (e: React.FocusEvent) => {
+      if (!rail.current?.contains(e.relatedTarget as Node | null)) setOpen(false);
+    },
+    // While shut, a tap only opens it: the tool under the finger is too small
+    // to aim at, so nothing is picked and nothing is held on.
+    onPointerDownCapture: (e: React.PointerEvent) => {
+      if (!open) e.stopPropagation();
+    },
+    onClickCapture: (e: React.MouseEvent) => {
+      if (open) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setOpen(true);
+    },
+  } as const;
+}
+
+export function PenHomeSide(props: PenHomeProps & { full?: FullScreenTools | undefined }): JSX.Element {
+  const { full, ...home } = props;
+  const { tool, onTool } = home;
   const { t } = useT();
-  const pens = tool === "highlight" || (props.aim && isMarkAim(tool));
+  const pens = tool === "highlight" || (home.aim && isMarkAim(tool));
+  const rail = useRef<HTMLDivElement | null>(null);
+  const stays = useFullScreenRail(full, home.side ?? "right", rail);
   return (
     // Laid out left to right in both languages, so the tools keep to the
     // window's edge and the pens to the book's side; the buttons are icons.
-    <div className={styles.side} role="toolbar" aria-label={t.toolbarLabel} dir="ltr" data-pen-home="side" data-pen-side={props.side ?? "right"} data-tool={tool} data-keep-clear="">
+    // In full screen they stay (data-full-keep), the one bar that does.
+    <div ref={rail} className={styles.side} role="toolbar" aria-label={t.toolbarLabel} dir="ltr" data-pen-home="side" data-pen-side={home.side ?? "right"} data-tool={tool} data-keep-clear="" data-full-keep={full} {...stays}>
       {/* Undo and redo stand at the foot of the pens' side, in the room the
           pens leave under them, so the rail grows no taller than the tools. */}
       <div className={styles.sideNear} data-pens={pens || undefined}>
         {pens && (
           <div className={styles.sidePens}>
-            <Offered {...props} />
+            <Offered {...home} />
           </div>
         )}
         <div className={styles.sideUndo}>
@@ -472,7 +528,7 @@ export function PenHomeSide(props: PenHomeProps): JSX.Element {
       </div>
       <div className={styles.sideColumn}>
         <DoneTick onDone={() => onTool("select")} />
-        <ToolRow {...props} upright />
+        <ToolRow {...home} upright />
       </div>
     </div>
   );

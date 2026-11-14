@@ -660,6 +660,13 @@
 .stage {
   --dog-ear: 16px;
 }
+/* The clearer corner (bookmark-hand.ts): a page with no bookmark rests a
+   little further folded, so the corner reads as something to take hold of
+   (the owner, 2026-11-07: "how do I pull it down?"). Below the rules after
+   it in strength, so a folded, hovered or focused corner still wins. */
+.stage:has([data-clear-corner]) {
+  --dog-ear: 24px;
+}
 /* A page that holds a bookmark keeps its corner folded well down — deep enough
    to tell from the small curl every page has, at a glance. */
 .stage:has([data-bookmark-fold][data-folded]) {

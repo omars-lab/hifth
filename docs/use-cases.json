@@ -745,6 +745,41 @@
       "gap": "Proven on made-up notes only. Whether a real book's notes match its print, passage by passage, is checked by hand in the private build, and no test here can hold that book's words."
     },
     {
+      "id": "mark-a-mistake-in-full-screen",
+      "actor": "hafiz",
+      "goal": "When I read in full screen, keep my tools where I can reach them, so I can mark a mistake without leaving it.",
+      "feature": "pens-and-pencil",
+      "code": [
+        {
+          "file": "apps/web/src/components/PenHomes.tsx",
+          "symbol": "PenHomeSide"
+        },
+        {
+          "file": "apps/web/src/full-screen-tools.ts",
+          "symbol": "savedFullScreenTools"
+        },
+        {
+          "file": "apps/web/src/touch-full-tools.ts",
+          "symbol": "savedTouchFullTools"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/full-screen-tools.spec.ts",
+          "test": "by default the tools stay down the side in full screen, and a mistake can be marked without leaving it"
+        },
+        {
+          "file": "apps/web/e2e/full-screen-tools.spec.ts",
+          "test": "the tools cover no page, in full screen, on a laptop, a wide screen and a narrow one, with the pens out too"
+        },
+        {
+          "file": "apps/web/e2e/touch-full-screen.spec.ts",
+          "test": "by default a Tools button stays, and a mistake on the last line is marked without leaving full screen"
+        }
+      ],
+      "gap": "The owner has not yet picked which way is the default, on a computer or on a phone."
+    },
+    {
       "id": "pick-a-pen-without-leaving-the-verse",
       "actor": "hafiz",
       "goal": "When I squeeze my pencil, give me the pens right where I am writing, so I can mark a mistake without looking away from the verse.",
@@ -1754,6 +1789,68 @@
         }
       ],
       "gap": "Switched off until hifth.app/read is live (docs/issues.json, carry-marks-switched-off); reader settings are not carried (carry-leaves-settings-behind)."
+    },
+    {
+      "id": "mark-a-page-to-come-back-to",
+      "actor": "hafiz",
+      "goal": "Let me mark this page the way I would mark a mus'haf, with a ribbon I can pull out and push back, and find it there tomorrow.",
+      "feature": "bookmarks",
+      "code": [
+        {
+          "file": "apps/web/src/components/BookmarkRibbons.tsx",
+          "symbol": "BookmarkRibbons"
+        },
+        {
+          "file": "packages/core/src/bookmarks.ts",
+          "symbol": "dropBookmark"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/bookmarks.spec.ts",
+          "test": "a folded corner drops a named ribbon that is still there after a reload"
+        },
+        {
+          "file": "apps/web/e2e/bookmark-pull.spec.ts",
+          "test": "pulling the top corner down drops a bookmark, with a ribbon following the hand"
+        },
+        {
+          "file": "apps/web/e2e/bookmark-pull.spec.ts",
+          "test": "pushing a bookmark up lifts it, and Undo puts it back"
+        }
+      ],
+      "gap": "A pull by a finger is tested on a phone in Chromium only; on the iPad it waits for the owner's walk."
+    },
+    {
+      "id": "know-which-look-alikes-still-pull-me",
+      "actor": "hafiz",
+      "goal": "When my memory runs from one verse into its look-alike, let me mark it where it happened, see later which ones still pull me, and say myself when I have beaten one; a quiet nudge is fine, a score is not.",
+      "feature": "confusion-jumps",
+      "code": [
+        {
+          "file": "apps/web/src/components/JumpList.tsx",
+          "symbol": "JumpList"
+        },
+        {
+          "file": "apps/web/src/beaten-offer.ts",
+          "symbol": "offersBeaten"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/confusions.spec.ts",
+          "test": "a tap on the mark lists where you went; Again, Beaten, Delete and Undo work from it"
+        },
+        {
+          "file": "apps/web/e2e/confusions.spec.ts",
+          "test": "offers, in one line, to mark it beaten; a recent one and a beaten one do not"
+        },
+        {
+          "file": "apps/web/e2e/confusions.spec.ts",
+          "test": "the info panel can make it wait three months, or never offer"
+        }
+      ],
+      "gap": "The jump tests run on a laptop in Chrome and on the phones, not in Firefox; the iPad waits for the owner's walk."
     }
   ]
 }

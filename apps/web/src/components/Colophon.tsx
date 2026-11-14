@@ -8,6 +8,10 @@ import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
+import { DRAWER_GLOWS, type DrawerGlow } from "../drawer-glow";
+import { BEATEN_OFFERS, type BeatenOffer } from "../beaten-offer";
+import { FULL_SCREEN_TOOLS, type FullScreenTools } from "../full-screen-tools";
+import { TOUCH_FULL_TOOLS, type TouchFullTools } from "../touch-full-tools";
 import { TOOL_HELPS, type ToolHelp } from "../tool-help";
 import { SETTINGS_ATS, type SettingsAt } from "../settings-at";
 import { APP_PAGES, type AppPages } from "../app-pages";
@@ -21,6 +25,7 @@ import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PITCH } from "../pitch/pitch";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
+import { NOTE_LEADS, NOTE_SIDEWAYS, rememberNoteLead, rememberNoteSideways, useNoteLead, useNoteSideways } from "../phone-note";
 import { CARD_ROOMS, rememberCardRoom, useCardRoom } from "../card-room";
 import { LOOKALIKE_COMPARES, rememberLookalikeCompare, useLookalikeCompare } from "../lookalike-compare";
 import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-rows";
@@ -30,6 +35,8 @@ import { TURN_LANDINGS, rememberTurnLanding, useTurnLanding } from "../turn-land
 import { OPEN_SIZES, rememberOpenSize, useOpenSize } from "../open-size";
 import { UPRIGHT_AGAINS, rememberUprightAgain, useUprightAgain } from "../upright-again";
 import { RIBBON_LENGTHS, rememberRibbonLength, useRibbonLength } from "../ribbon-length";
+import { LEFT_OFF_LOOKS, rememberLeftOffLook, useLeftOffLook } from "../left-off-look";
+import { BOOKMARK_HANDS, rememberBookmarkHand, useBookmarkHand } from "../bookmark-hand";
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { MARK_TOOLS, type MarkTools } from "../mark-tools";
@@ -68,6 +75,16 @@ interface ColophonProps {
   /** Where a verse's tools open, a card or inside its drawer; remembered on this device. */
   drawerTools?: DrawerTools;
   onDrawerTools?: (choice: DrawerTools) => void;
+  /** When a jump not made in a long while offers Beaten; remembered on this device. */
+  beatenOffer?: BeatenOffer;
+  onBeatenOffer?: (choice: BeatenOffer) => void;
+  drawerGlow?: DrawerGlow;
+  onDrawerGlow?: (choice: DrawerGlow) => void;
+  fullScreenTools?: FullScreenTools | undefined;
+  onFullScreenTools?: (choice: FullScreenTools) => void;
+  /** The same on a phone or an upright iPad (touch-full-tools.ts); remembered on this device. */
+  touchFullTools?: TouchFullTools | undefined;
+  onTouchFullTools?: (choice: TouchFullTools) => void;
   /** Whether the line beside the page tools stays, or only each tool's label; remembered on this device. */
   toolHelp?: ToolHelp;
   onToolHelp?: (choice: ToolHelp) => void;
@@ -382,6 +399,14 @@ export function Colophon({
   onVerseGestures,
   drawerTools,
   onDrawerTools,
+  beatenOffer,
+  onBeatenOffer,
+  drawerGlow,
+  onDrawerGlow,
+  fullScreenTools,
+  onFullScreenTools,
+  touchFullTools,
+  onTouchFullTools,
   toolHelp,
   onToolHelp,
   settingsAt,
@@ -428,6 +453,8 @@ export function Colophon({
   const openingText = useOpeningText();
   const relatedList = useRelatedList();
   const longVerse = useLongVerse();
+  const noteLead = useNoteLead();
+  const noteSideways = useNoteSideways();
   const cardRoom = useCardRoom();
   const lookalikeCompare = useLookalikeCompare();
   const passageRows = usePassageRows();
@@ -437,6 +464,8 @@ export function Colophon({
   const openSize = useOpenSize();
   const uprightAgain = useUprightAgain();
   const ribbonLength = useRibbonLength();
+  const leftOffLook = useLeftOffLook();
+  const bookmarkHand = useBookmarkHand();
   const runFollow = useRunFollow();
   const runAhead = useRunAhead();
   const zoomAnchor = useZoomAnchor();
@@ -624,10 +653,31 @@ export function Colophon({
           <Choice id="gestures" title={t.verseGesturesTitle} note={t.verseGesturesNote} value={verseGestures} options={VERSE_GESTURES} label={(choice) => choice === "a" ? t.verseGesturesA : choice === "b" ? t.verseGesturesB : t.verseGesturesC} data="verse-gestures" onPick={onVerseGestures} />
         )}
 
-        {/* Where a verse's tools open (selection-drawer ③): both built, the
-            card by default until the owner has tried the drawer by hand. */}
+        {/* Where a verse's tools open (selection-drawer ③): all three built,
+            the card by default until the owner has tried the others by hand. */}
         {drawerTools && onDrawerTools && (
-          <Choice id="drawer-tools" title={t.drawerToolsTitle} note={t.drawerToolsNote} value={drawerTools} options={DRAWER_TOOLS} label={(choice) => choice === "sheet" ? t.drawerToolsSheet : t.drawerToolsDrawer} data="drawer-tools" onPick={onDrawerTools} />
+          <Choice id="drawer-tools" title={t.drawerToolsTitle} note={t.drawerToolsNote} value={drawerTools} options={DRAWER_TOOLS} label={(choice) => choice === "sheet" ? t.drawerToolsSheet : choice === "drawer" ? t.drawerToolsDrawer : t.drawerToolsTabs} data="drawer-tools" onPick={onDrawerTools} />
+        )}
+
+        {/* When a jump not made in a long while offers Beaten (confusion-points
+            ⑤): after six weeks by default, three months, or never. */}
+        {beatenOffer && onBeatenOffer && (
+          <Choice id="beaten-offer" title={t.beatenOfferTitle} note={t.beatenOfferNote} value={beatenOffer} options={BEATEN_OFFERS} label={(choice) => choice === "six-weeks" ? t.beatenOfferSixWeeks : choice === "three-months" ? t.beatenOfferThreeMonths : t.beatenOfferNever} data="beaten-offer" onPick={onBeatenOffer} />
+        )}
+
+        {/* What the lit verse does while the pointer rests on its drawer
+            (selection-drawer ②): three built, the deeper colour by default. */}
+        {drawerGlow && onDrawerGlow && (
+          <Choice id="drawer-glow" title={t.drawerGlowTitle} note={t.drawerGlowNote} value={drawerGlow} options={DRAWER_GLOWS} label={(choice) => choice === "brighten" ? t.drawerGlowBrighten : choice === "ring" ? t.drawerGlowRing : t.drawerGlowNone} data="drawer-glow" onPick={onDrawerGlow} />
+        )}
+
+        {/* Where the tools go in full screen (verse-tap-and-hold ①, the
+            notes-style toolbar's ⑤): four built, down the side by default. */}
+        {touchFullTools && onTouchFullTools && (
+          <Choice id="touch-full-tools" title={t.fullScreenToolsTitle} note={t.touchFullToolsNote} value={touchFullTools} options={TOUCH_FULL_TOOLS} label={(choice) => choice === "button" ? t.touchFullToolsButton : choice === "row" ? t.touchFullToolsRow : t.fullScreenToolsNone} data="touch-full-tools" onPick={onTouchFullTools} />
+        )}
+        {fullScreenTools && onFullScreenTools && (
+          <Choice id="full-screen-tools" title={t.fullScreenToolsTitle} note={t.fullScreenToolsNote} value={fullScreenTools} options={FULL_SCREEN_TOOLS} label={(choice) => choice === "side" ? t.fullScreenToolsSide : choice === "edge" ? t.fullScreenToolsEdge : choice === "dock" ? t.fullScreenToolsDock : t.fullScreenToolsNone} data="full-screen-tools" onPick={onFullScreenTools} />
         )}
 
         {/* The help for the page tools (ayah-drawer ①): each tool's label
@@ -741,6 +791,18 @@ export function Colophon({
           <Choice id="long-verse" title={t.longVerseTitle} note={t.longVerseNote} value={longVerse} options={LONG_VERSES} label={(choice) => choice === "smaller" ? t.longVerseSmaller : t.longVerseShorter} data="long-verse" onPick={rememberLongVerse} />
         )}
 
+        {/* How the note sits on a phone (docs/design/iphone-app.md, item 3):
+            the translation cut to two lines is the default, the whole
+            translation and the note opened full kept as choices; on its side
+            the note stands beside the page, lying across the foot kept as a
+            choice. Only the private build has notes. */}
+        {PITCH && (
+          <Choice id="note-lead" title={t.noteLeadTitle} note={t.noteLeadNote} value={noteLead} options={NOTE_LEADS} label={(choice) => choice === "clamp" ? t.noteLeadClamp : choice === "whole" ? t.noteLeadWhole : t.noteLeadTall} data="note-lead" onPick={rememberNoteLead} />
+        )}
+        {PITCH && (
+          <Choice id="note-sideways" title={t.noteSidewaysTitle} note={t.noteSidewaysNote} value={noteSideways} options={NOTE_SIDEWAYS} label={(choice) => choice === "beside" ? t.noteSidewaysBeside : t.noteSidewaysFoot} data="note-sideways" onPick={rememberNoteSideways} />
+        )}
+
         {/* How a look-alike whose shared words come more than once is compared
             (knowledge-graph-commentary.md, item 49): every shared stretch
             marked is the default, the two side by side unmarked kept as a
@@ -799,6 +861,8 @@ export function Colophon({
         {/* How long a bookmark's ribbon hangs (docs/PLAN.md, item 49): short,
             above the first line, is the default; the long one stays. */}
         <Choice id="ribbon-length" title={t.ribbonLengthTitle} note={t.ribbonLengthNote} value={ribbonLength} options={RIBBON_LENGTHS} label={(choice) => choice === "short" ? t.ribbonLengthShort : t.ribbonLengthLong} data="ribbon-length" onPick={rememberRibbonLength} />
+        <Choice id="left-off-look" title={t.leftOffTitle} note={t.leftOffNote} value={leftOffLook} options={LEFT_OFF_LOOKS} label={(choice) => choice === "label" ? t.leftOffLabel : choice === "mark" ? t.leftOffMark : choice === "tabs" ? t.leftOffTabs : t.leftOffRibbons} data="left-off-look" onPick={rememberLeftOffLook} />
+        <Choice id="bookmark-hand" title={t.bookmarkHandTitle} note={t.bookmarkHandNote} value={bookmarkHand} options={BOOKMARK_HANDS} label={(choice) => choice === "both" ? t.bookmarkHandBoth : choice === "pull" ? t.bookmarkHandPull : choice === "corner" ? t.bookmarkHandCorner : t.bookmarkHandClicks} data="bookmark-hand" onPick={rememberBookmarkHand} />
 
         {/* What a closed look-alike row shows of the words the pair shares
             (docs/design/lookalike-rows.md, item 6): every way built, the picture

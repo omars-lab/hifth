@@ -73,6 +73,16 @@ it does not; never raise just to make a red check go green without looking at th
   over the cap.
 - **Build core before the web app.** The web app uses `packages/core/dist`, so `make build` (not
   `pnpm build` in `apps/web`) is what a size measurement must follow.
+- **A part dropped as unused still ships its style sheet.** If a part's code is never called,
+  the build drops the code but keeps the part's CSS. To drop both, point the import at an empty
+  stand-in at build time (`commentaryOnlyWhenShown` in `apps/web/vite.config.ts`, 2026-11-14).
+- **A part that loads later goes inside `<Later>`** (`apps/web/src/components/later.tsx`), not
+  a bare `Suspense`. If its file fails to arrive, `Later` shows nothing in that part's place,
+  where a bare `Suspense` would blank the whole app.
+- **Find the step before trimming.** Swap candidate parts for empty stand-ins, measure with
+  `make perf-compare`, and the readings show how many KB the next step needs. That is cheaper
+  than trimming one part at a time and measuring after each (2026-11-14: 157.1 KB crossed,
+  162.6 KB did not).
 - **Nothing here is limited by processor speed yet.** Start-up is dominated by downloads, so kilobytes
   are the right thing to count. One exception: expanding the page index on load costs about 85 ms
   of blocking time. If blocking time grows, measure processor work too, not only size.

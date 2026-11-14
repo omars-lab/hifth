@@ -37,12 +37,15 @@ export function VerseDrawer({
   onClose,
   end,
   onWhole,
+  onPointerRest,
+  onPointerAway,
   panel,
   onPanelClose,
   onCover,
   keepClear,
   clearKey,
   panelKey,
+  tabbed,
   tag,
   children,
 }: {
@@ -54,6 +57,13 @@ export function VerseDrawer({
   end?: ReactNode;
   /** Told whether the drawer covers the whole bar, so what lives in the bar can ride its head instead. */
   onWhole?: (whole: boolean) => void;
+  /**
+   * A pointer came to rest on the drawer, and left it (selection-drawer ②: the
+   * lit verse glows meanwhile). Away is also told when the drawer goes, since a
+   * drawer that slides off under a still pointer is never left.
+   */
+  onPointerRest?: (e: { pointerType: string }) => void;
+  onPointerAway?: () => void;
   /**
    * A tool opened inside the drawer, under the row of tools (selection-drawer
    * ③, a setting): today, the roots list. Null or absent when none is open.
@@ -72,6 +82,8 @@ export function VerseDrawer({
   clearKey?: string | null;
   /** Which tool is open inside it (listen, share, roots, looks); a new one is cut afresh. */
   panelKey?: string | null;
+  /** The tools below stand as tabs: the box keeps its height and the tab in front scrolls. */
+  tabbed?: boolean;
   /** Name this drawer's level in its head (drawer-marks.ts, the tag setting). */
   tag?: boolean;
   /** The tool buttons, each with its caption. */
@@ -89,6 +101,14 @@ export function VerseDrawer({
   // room beside the card, and the verse's name slid half under it (plan item
   // 94). Which buttons the bar holds, and how long their words are, decide it,
   // not the width alone, so the card's place is worked out and checked.
+  // A drawer that goes away under a still pointer never hears it leave.
+  const away = useRef(onPointerAway);
+  away.current = onPointerAway;
+  useEffect(() => {
+    if (!open) away.current?.();
+  }, [open]);
+  useEffect(() => () => away.current?.(), []);
+
   const cardHeight = useRef(0);
   const told = useRef(onWhole);
   told.current = onWhole;
@@ -254,7 +274,14 @@ export function VerseDrawer({
 
   if (!shown) return null;
   return (
-    <section ref={ref} className={styles.drawer} aria-label={t.verseTools(label)} data-verse-drawer>
+    <section
+      ref={ref}
+      className={styles.drawer}
+      aria-label={t.verseTools(label)}
+      data-verse-drawer
+      onPointerEnter={onPointerRest}
+      onPointerLeave={onPointerAway}
+    >
       <header className={styles.head}>
         <span className={styles.title}>
           {tag && <span className={styles.level}>{t.levelVerse}</span>}
@@ -267,7 +294,7 @@ export function VerseDrawer({
       </header>
       <div className={styles.tools}>{children}</div>
       {hasPanel && (
-        <div ref={panelRef} className={styles.panel}>
+        <div ref={panelRef} className={styles.panel} data-tabbed={tabbed || undefined}>
           {panel}
         </div>
       )}

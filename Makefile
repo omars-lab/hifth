@@ -138,13 +138,13 @@ pitch-script: core ## The pitch demo, one test per step: prints how many of its 
 	  echo ""; echo "  Steps written in .claude/skills/walk-app/pitch-script.md; count the ✓ lines above."
 
 .PHONY: pitch-walk
-pitch-walk: ## The pitch demo walked in the real iPad app on its side, in one start of the app [STEP=3,4] [NO_BUILD=1] (local only — needs the note file)
+pitch-walk: ## The pitch demo walked in the real iPad app on its side, in one start of the app [STEP=3,4] [NO_BUILD=1] [ON="iPhone 17"] [UPRIGHT=1] (local only — needs the note file)
 	@# The same steps and checks as pitch-script, asked inside the iPad app
 	@# (its WebKit is not Playwright's). Builds the private bundle into the app
 	@# first; pictures and answers go to a dated folder in native/shots, which
 	@# git never sees, because they show the book's text.
 	@test -f $(PITCH_DATA) || { echo "  No private pitch data — $(PITCH_DATA)"; exit 1; }
-	@node .claude/skills/walk-app/scripts/pitch-walk.mjs $(if $(STEP),--step $(STEP)) $(if $(NO_BUILD),--no-build)
+	@node .claude/skills/walk-app/scripts/pitch-walk.mjs $(if $(STEP),--step $(STEP)) $(if $(NO_BUILD),--no-build) $(if $(ON),--ipad "$(ON)") $(if $(UPRIGHT),--upright)
 
 .PHONY: feature-links
 feature-links: ## The features page for the development hub, at /dev-hub/ on the dev server [PICTURES=1 takes pictures from the public build at BASE, default the preview on 7123]

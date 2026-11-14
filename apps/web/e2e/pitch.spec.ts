@@ -1,5 +1,6 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { LONG_VERSE_KEY } from "../src/long-verse";
+import { NOTE_SIDEWAYS_KEY } from "../src/phone-note";
 import { ZOOM_ANCHOR_KEY } from "../src/zoom-anchor";
 import { ayahTarget } from "./ayah";
 import { fakePlayer } from "./player";
@@ -604,6 +605,67 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
       .toBeNull();
     await context.close();
   });
+
+  for (const screen of [
+    { name: "a phone held upright", width: 402, height: 874, standing: false },
+    { name: "a phone on its side", width: 874, height: 402, standing: true },
+    { name: "a large phone on its side", width: 956, height: 440, standing: true },
+  ]) {
+    test(`on ${screen.name}, the short note shows the commentary and leaves the verse in sight`, async ({
+      browser,
+    }) => {
+      // Measured on 2:255, the longest verse on the pitch's path: the short
+      // note on an iPhone held its title and the whole translation and not one
+      // line of the commentary, upright or on its side, and on its side it lay
+      // across the verse (docs/design/iphone-app.md, item 3). Now the
+      // translation is cut to two lines, and on its side the note stands
+      // beside the page. Numbers only: no word of the note is read.
+      const context = await browser.newContext({
+        viewport: { width: screen.width, height: screen.height },
+        hasTouch: true,
+      });
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+      const page = await context.newPage();
+      await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+      const note = sheet(page);
+      await expect(note).toBeVisible({ timeout: 20_000 });
+      await settle(note);
+      await expect(note, "the note opens short, not grown").not.toHaveAttribute("data-tall", "true");
+      if (screen.standing) await expect(note).toHaveAttribute("data-standing", "true");
+      else await expect(note).not.toHaveAttribute("data-standing", "true");
+
+      const linesInSight = await note.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const commentary = el.querySelector('section[aria-label="Commentary"]');
+        const para = commentary?.querySelector("p");
+        if (!commentary || !para) return 0;
+        const line = parseFloat(getComputedStyle(para).lineHeight);
+        const c = commentary.getBoundingClientRect();
+        const shown = Math.min(box.bottom, innerHeight, c.bottom) - Math.max(box.top, c.top);
+        return Math.max(0, Math.floor(shown / line));
+      });
+      expect(linesInSight, "lines of the commentary in sight before any scroll").toBeGreaterThanOrEqual(2);
+
+      const card = (await note.boundingBox())!;
+      const header = (await page.locator("header").first().boundingBox())!;
+      await expect
+        .poll(
+          async () => {
+            const lines = await litLineBoxes(page);
+            return (
+              lines.length > 0 &&
+              lines.every(
+                (line) =>
+                  !overlaps(line, card) && line.y >= header.y + header.height - 1 && line.y + line.height <= screen.height,
+              )
+            );
+          },
+          { timeout: 5_000, message: "every line of the verse is in sight, clear of the note and the header" },
+        )
+        .toBe(true);
+      await context.close();
+    });
+  }
 
   test("with one page showing, a note in the corner beside it leaves the page where it was", async ({ page }) => {
     // The note reported itself as covering the foot of the window whenever it
@@ -2027,12 +2089,15 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     // Paragraphs moved into a shared note are read for slant on the page they
     // were printed on, not only the page the note starts on (9:37's, 2026-10-10).
     const movedIn = [["9:37", 8]] as const;
+    // The unread notes on the pages the demo shows, and 18:62–82, read by eye
+    // at full size (2026-11-14). These two gain the most slanted words.
+    const demoPages = [["17:110", 17], ["19:54", 9]] as const;
     // Each goto only changes the link's hash, so the last verse's note is
     // still up, "Related verses" and all, while the next one loads: counted
     // then, a note read as having no slant at all (6:80 in Firefox, after
     // 54:49). So wait for the note itself to have changed.
     let was = "";
-    for (const [verse, least] of [...slanted, ...oneTapAway, ...twoTapsAway, ...restTwoTapsAway, ...lastTwoTapsAway, ...movedIn]) {
+    for (const [verse, least] of [...slanted, ...oneTapAway, ...twoTapsAway, ...restTwoTapsAway, ...lastTwoTapsAway, ...movedIn, ...demoPages]) {
       await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
       await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
       await expect
@@ -2049,11 +2114,12 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
   });
 
   test("a note nobody read by hand slants the Arabic terms the book writes with marks", async ({ page }) => {
-    // 2:37's note is far from the demo, so no hand-read row slants it. Its two
-    // transliterated words, written with long-vowel marks, are slanted on its
-    // printed page, and a rule now finds them by their marks
-    // (docs/issues/italics-from-transliteration-marks.md).
-    await page.goto("/#/hafs-kfqc/2:37?open=commentary");
+    // 3:63's note is far from the demo, so no hand-read row slants it. Its
+    // transliterated words, written with long-vowel marks, are slanted by a
+    // rule that finds them by their marks
+    // (docs/issues/italics-from-transliteration-marks.md). This was 2:37 until
+    // 2:37, on a page the demo shows, was read by hand (2026-11-14).
+    await page.goto("/#/hafs-kfqc/3:63?open=commentary");
     const note = sheet(page).getByRole("region", { name: "Commentary" });
     await expect(note).toBeVisible({ timeout: 20_000 });
     await expect.poll(() => note.locator("em").count(), { timeout: 20_000 }).toBeGreaterThanOrEqual(2);
@@ -2932,6 +2998,9 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
 
 test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
   test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+  test.beforeEach(async ({ context }) => {
+    await context.addInitScript((key) => localStorage.setItem(key, "foot"), NOTE_SIDEWAYS_KEY);
+  });
 
   test("on a phone held sideways, the look-alike chips lie in a row on the note's top row, clear of its close button", async ({ page }) => {
     // Held sideways the phone is wider than the width the chips lie flat at
@@ -3120,6 +3189,145 @@ test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
         const boxes = await lines.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().bottom));
         expect(boxes.length).toBeGreaterThan(1);
         for (const bottom of boxes) expect(bottom, "a line of the verse is under the list").toBeLessThanOrEqual(top);
+      });
+    }
+  });
+});
+
+test.describe("Hifth · the pitch commentary on a phone on its side, the note standing beside the page", () => {
+  // The default since 2026-11-14 (docs/decisions/phone-note.md): the note stands
+  // the full height of the screen beside the page, not across its foot. The
+  // group above keeps the same promises for the foot, which stays a setting.
+  test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+
+  test("the look-alike chips stay in sight, clear of the note's close button", async ({ page }) => {
+    // The note standing beside the page is narrower than one lying across the
+    // foot, and the chips seated on its top row came down onto its close button.
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const rail = page.getByRole("group", { name: "Links from this ayah" });
+    await expect(rail).toBeVisible();
+    await settle(rail);
+    const chips = await rail.getByRole("button").all();
+    expect(chips.length).toBe(2);
+    const close = (await sheet(page).getByRole("button", { name: "Close" }).boundingBox())!;
+    for (const chip of chips) {
+      const box = (await chip.boundingBox())!;
+      expect(overlaps(box, close), `the chip ${JSON.stringify(box)} is on the close button ${JSON.stringify(close)}`).toBe(false);
+      expect(box.y, "the chip is below the top of the screen").toBeGreaterThanOrEqual(0);
+      expect(box.y + box.height, "the chip is above the foot of the screen").toBeLessThanOrEqual(390);
+    }
+  });
+
+  test("turning a phone on its side with a note open leaves every line of the verse clear of the note", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    await settle(page.locator("#hifth-overlay .hl-sel").first());
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    await settle(page.locator("#hifth-overlay .hl-sel").first());
+    await page.waitForTimeout(600);
+    const note = (await sheet(page).boundingBox())!;
+    const boxes = await litLineBoxes(page);
+    expect(boxes.length).toBeGreaterThan(1);
+    for (const b of boxes) expect(overlaps(b, note), "a line of the verse is under the note").toBe(false);
+  });
+
+  for (const size of [
+    { name: "a 6.3-inch phone", width: 844, height: 390 },
+    { name: "the smallest phone", width: 667, height: 375 },
+  ]) {
+    test(`on ${size.name} on its side, every line of a six-line verse is in sight beside its note, none under the bars at the foot`, async ({
+      page,
+    }) => {
+      // docs/design/iphone-app.md, item 11. The note stands beside the page, but
+      // the bars at the foot of the screen (the line with Full screen, and the
+      // page slider) took about the lower 40% of this short screen, and the
+      // last lines of 2:255 sat under them: 2 of its 6 on the smallest phone.
+      await page.setViewportSize({ width: size.width, height: size.height });
+      await page.goto("/#/hafs-kfqc/p1");
+      await page.goto("/#/hafs-kfqc/2:255");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+      await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const lines = page.locator("#hifth-overlay .hl-sel");
+      await settle(lines.first());
+      await settle(lines.last());
+      await page.waitForTimeout(600);
+      const note = (await sheet(page).boundingBox())!;
+      const boxes = await litLineBoxes(page);
+      expect(boxes.length).toBeGreaterThan(4);
+      const { bars, pageFoot } = await page.evaluate(() => {
+        const main = document.querySelector("main")!;
+        const shown = (el: Element) => getComputedStyle(el).display !== "none" && el.getClientRects().length > 0;
+        const bars = [...main.parentElement!.children]
+          .filter((el) => el.matches("footer, nav, [role='toolbar']") && shown(el))
+          .map((el) => {
+            const r = el.getBoundingClientRect();
+            return { x: r.x, y: r.y, width: r.width, height: r.height };
+          });
+        return { bars, pageFoot: Math.min(main.getBoundingClientRect().bottom, window.innerHeight) };
+      });
+      const header = (await page.locator("header").first().boundingBox())!;
+      for (const b of boxes) {
+        expect(overlaps(b, note), "a line of the verse is under the note").toBe(false);
+        for (const bar of bars) expect(overlaps(b, bar), `a line of the verse ${JSON.stringify(b)} is under a bar ${JSON.stringify(bar)}`).toBe(false);
+        expect(b.y + b.height, "a line of the verse runs past the foot of the page's room").toBeLessThanOrEqual(pageFoot + 1);
+        expect(b.y, "a line of the verse is above the header's foot").toBeGreaterThanOrEqual(header.y + header.height - 1);
+      }
+    });
+  }
+
+  test("closing the standing note brings the bars at the foot back", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+    await sheet(page).getByRole("button", { name: "Close" }).click();
+    await expect(sheet(page)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Full screen" })).toBeVisible();
+  });
+
+  test.describe("read upright first", () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+    test.beforeEach(async ({ context }) => {
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    });
+
+    for (const open of ["roots", "look-alikes"] as const) {
+      test(`turned on its side, the note closed and a list opened, no line of the verse is under the list: ${open}`, async ({
+        page,
+      }) => {
+        // The note stood beside the page once the phone was turned, and the page
+        // moved aside for it. Closed, and a list opened at the foot, the verse
+        // was left under the list.
+        await page.goto("/#/hafs-kfqc/35:44");
+        await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+        await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        await settle(page.locator("#hifth-overlay .hl-sel").first());
+        await page.setViewportSize({ width: 844, height: 390 });
+        await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+        await sheet(page).getByRole("button", { name: "Close" }).click();
+        const tools = page.getByRole("region", { name: "Tools for Fatir · 35:44" });
+        await expect(tools).toBeVisible();
+        await tools.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        const lines = page.locator("#hifth-overlay .hl-sel");
+        await settle(lines.first());
+        if (open === "roots") await tools.getByRole("button", { name: /^Same roots/ }).click();
+        else await page.getByRole("button", { name: /^Similar verses in later surahs/ }).click();
+        const list = page.getByRole("dialog");
+        await expect(list).toHaveCount(1);
+        await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        await settle(lines.first());
+        await page.waitForTimeout(600);
+        const box = (await list.boundingBox())!;
+        const boxes = await litLineBoxes(page);
+        expect(boxes.length).toBeGreaterThan(1);
+        for (const b of boxes) expect(overlaps(b, box), "a line of the verse is under the list").toBe(false);
       });
     }
   });

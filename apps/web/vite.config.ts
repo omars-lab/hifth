@@ -206,6 +206,26 @@ function dropPrivateUnlessPitch(): Plugin {
 }
 
 /**
+ * In a build with no commentary to show (neither the pitch nor a live service:
+ * the public site), App.tsx's import of the commentary sheet gets an empty
+ * stand-in instead (src/components/CommentarySheet.off.tsx). The switch below
+ * is App.tsx's own `COMMENTARY`, read from the same two settings as `__PITCH__`
+ * and `__LIVE_TAFSIR__`. Builds only: tests and the dev server keep the real one.
+ */
+function commentaryOnlyWhenShown(): Plugin {
+  const shown = Boolean(process.env.VITE_PITCH) || Boolean(process.env.VITE_TAFSIR_QF_BASE && process.env.VITE_TAFSIR_QF_ID);
+  return {
+    name: "hifth-commentary-only-when-shown",
+    apply: "build",
+    enforce: "pre",
+    resolveId(source, importer) {
+      if (shown || source !== "./components/CommentarySheet" || !importer?.endsWith("/src/App.tsx")) return null;
+      return resolve(import.meta.dirname, "src/components/CommentarySheet.off.tsx");
+    },
+  };
+}
+
+/**
  * Start the reader's interface language downloading as soon as index.html is
  * read, in parallel with the app's main script. Each language is its own file
  * (see `messages/catalogs.gen.ts`), and without this the app would only ask for
@@ -265,6 +285,7 @@ export default defineConfig({
   },
   plugins: [pageComments(), 
     dropPrivateUnlessPitch(),
+    commentaryOnlyWhenShown(),
     preloadReaderLanguage(),
     qulFixturesDev(),
     intentPictureDev(),

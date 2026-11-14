@@ -176,3 +176,10 @@
   margin-block-start: var(--space-2);
   border-block-start: 1px solid var(--hairline);
 }
+
+/* As tabs (a setting): the strip stays and each tab scrolls on its own. */
+.panel[data-tabbed] {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}

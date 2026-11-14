@@ -11,6 +11,12 @@
       "android",
       "iphone"
     ],
+    "bookmark-pull.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "bookmarks.spec.ts": [
       "android",
       "iphone"
@@ -59,6 +65,10 @@
     "detent-live.spec.ts": [
       "desktop"
     ],
+    "drawer-glow.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
     "drawer-marks.spec.ts": [
       "desktop",
       "desktop-firefox"
@@ -66,6 +76,7 @@
     "drawer-tools.spec.ts": [
       "android",
       "desktop",
+      "desktop-firefox",
       "iphone"
     ],
     "drive-device.spec.ts": [
@@ -87,6 +98,10 @@
       "desktop-firefox"
     ],
     "eraser.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "full-screen-tools.spec.ts": [
       "desktop",
       "desktop-firefox"
     ],
@@ -130,6 +145,10 @@
       "iphone"
     ],
     "lazy-tools.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
+    "left-off-look.spec.ts": [
       "desktop",
       "desktop-firefox"
     ],
@@ -269,6 +288,12 @@
       "android",
       "iphone"
     ],
+    "share-menu-fresh.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "share-sheet.spec.ts": [
       "android",
       "iphone"
@@ -317,6 +342,10 @@
       "desktop",
       "desktop-firefox"
     ],
+    "touch-full-screen.spec.ts": [
+      "android",
+      "iphone"
+    ],
     "turn-style.spec.ts": [
       "android",
       "iphone"
@@ -337,6 +366,12 @@
     ],
     "wayfinding.spec.ts": [
       "android",
+      "iphone"
+    ],
+    "wide-screen-later.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
       "iphone"
     ],
     "word-stack.spec.ts": [

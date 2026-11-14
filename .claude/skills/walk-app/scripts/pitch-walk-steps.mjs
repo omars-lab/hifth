@@ -1,4 +1,4 @@
-// The pitch demo's steps, as the iPad app walks them (make pitch-walk).
+// The pitch demo's steps, as the iPad or iPhone app walks them (make pitch-walk).
 //
 // One entry per step of .claude/skills/walk-app/pitch-script.md that a made-up
 // tap can do; steps 2 (a turn by the page's edge) and 14 (the surah playing)
@@ -94,6 +94,37 @@ export function helpers() {
       }
     return null;
   };
+  /**
+   * Whether the window has room for two pages: the web app's own rule for the open
+   * book (DESKTOP_QUERY in useMediaQuery.ts; walk-spread.test.mjs keeps them equal). A phone, upright or on its side, shows one page.
+   */
+  const spread = () => matchMedia("(min-width: 1024px) and (min-height: 775px), (min-width: 1024px) and (min-height: 600px) and (hover: hover)").matches;
+  /**
+   * The open note's commentary, brought into sight. It should already be in
+   * sight: on an iPad beside the verse, and on a phone since 2026-11-14, when the
+   * translation was cut to two lines (upright) and the note stood beside the page
+   * (on its side), because the walk found the short card hid it (docs/design/
+   * iphone-app.md ③). With `firstLook`, a check records whether two lines' worth
+   * of it showed before any scroll; either way it is then scrolled into the card,
+   * never the page, so the later checks still run.
+   */
+  const commentary = async (ms = 20000, { firstLook = false } = {}) => {
+    const named = () => dialogs().map((d) => all("[role=region], section[aria-label]", d).find((e) => e.getAttribute("aria-label") === "Commentary")).find(Boolean);
+    const el = await until(named, ms);
+    if (!el) return null;
+    if (firstLook) {
+      await wait(600);
+      const r = box(el);
+      const card = box(el.closest("[role=dialog]"));
+      const room = r && card ? Math.min(innerHeight, card.bottom, r.bottom) - Math.max(r.top, card.top, 0) : 0;
+      check("two lines of the commentary in sight before any scroll", room >= 40, Math.round(room));
+    }
+    if (!shown(el)) {
+      el.scrollIntoView({ block: "start" });
+      await wait(400);
+    }
+    return shown(el) ? el : null;
+  };
   const checks = [];
   const check = (what, ok, got) => {
     checks.push({ what, ok: !!ok, got: got === undefined ? null : got });
@@ -108,18 +139,19 @@ export function helpers() {
     const under = lines.filter((l) => overlaps(l, c)).length;
     check("no line of the verse is under the card", under === 0, { under, card: f(c) });
   };
-  return { wait, box, shown, inView, overlaps, f, named, all, dialogs, dialog, buttons, region, pageSvg, pages, rows, lit, until, settle, tap, pointIn, checks, check, verseClear };
+  return { wait, box, shown, inView, overlaps, f, named, all, dialogs, dialog, buttons, region, pageSvg, pages, rows, lit, until, settle, tap, pointIn, spread, commentary, checks, check, verseClear };
 }
 
 
 export const STEPS = [
   {
     n: 1,
-    title: "the app opens on two pages of the mus'haf with nothing over them",
+    title: "the app opens on the mus'haf (two pages where there is room) with nothing over them",
     route: "/hafs-kfqc/p42",
     run: async (h) => {
       h.check("page 42 is in sight", await h.until(() => h.pageSvg(42), 20000));
-      h.check("two pages are open", h.pages().length === 2, h.pages().length);
+      const want = h.spread() ? 2 : 1; // a phone has room for one
+      h.check(want === 2 ? "two pages are open" : "one page is open, as on a phone", h.pages().length === want, h.pages().length);
       h.check("no card stands over the pages", h.dialogs().length === 0, h.dialogs().length);
     },
   },
@@ -143,7 +175,7 @@ export const STEPS = [
     title: "2:255's note reads in its ten printed paragraphs, to its end",
     route: "/hafs-kfqc/2:255?open=commentary",
     run: async (h) => {
-      const note = await h.until(() => h.dialogs().map((d) => h.region(d, "Commentary")).find(Boolean), 20000);
+      const note = await h.commentary(20000, { firstLook: true });
       if (!h.check("the note is open", note)) return;
       const ps = h.all("p", note);
       h.check("the note has ten paragraphs", ps.length === 10, ps.length);
@@ -272,7 +304,7 @@ export const STEPS = [
     title: "18:10's note opens, with the book's slanted words slanted",
     route: "/hafs-kfqc/18:10?open=commentary",
     run: async (h) => {
-      const note = await h.until(() => h.dialogs().map((d) => h.region(d, "Commentary")).find(Boolean), 20000);
+      const note = await h.commentary(20000);
       if (!h.check("the note is open", note)) return;
       const slanted = h.all("em, i", note).length;
       h.check("the note has slanted words", slanted > 0, slanted);
@@ -283,7 +315,7 @@ export const STEPS = [
     title: "18:60's note covers the whole story, and its link lands on 18:65",
     route: "/hafs-kfqc/18:60?open=commentary",
     run: async (h) => {
-      const note = await h.until(() => h.dialogs().map((d) => h.region(d, "Commentary")).find(Boolean), 20000);
+      const note = await h.commentary(20000);
       if (!h.check("the note is open", note)) return;
       const card = h.dialogs().find((d) => d.contains(note));
       // The note names six places past itself, each one card: 18:65, the runs
@@ -356,7 +388,7 @@ export const STEPS = [
     title: "a verse nobody planned for (2:37) opens its note like the others",
     route: "/hafs-kfqc/2:37?open=commentary",
     run: async (h) => {
-      const note = await h.until(() => h.dialogs().map((d) => h.region(d, "Commentary")).find(Boolean), 10000);
+      const note = await h.commentary(10000);
       if (!h.check("the note is open", note)) return;
       const ps = h.all("p", note).length;
       h.check("the note has paragraphs", ps > 0, ps);
