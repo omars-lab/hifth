@@ -1,5 +1,6 @@
 import { Suspense, useLayoutEffect, useRef, useState } from "react";
 import { parseAyahKey, type Edge } from "@hifth/core";
+import { offersBeaten, type BeatenOffer } from "../beaten-offer";
 import { useT, type Strings } from "../i18n";
 import type { Lang } from "../lang";
 import { DiffView } from "./DiffView";
@@ -96,6 +97,12 @@ interface JumpListProps {
   onGo: (to: string) => void;
   onAgain: (id: string) => void;
   onBeaten: (id: string, beaten: boolean) => void;
+  /**
+   * How long a jump must go unmade before its row offers Beaten in one quiet
+   * line, or never (confusion-points ⑤); the reader's setting. Six weeks when
+   * not given.
+   */
+  offerAfter?: BeatenOffer;
   /** Say it was a slip, or take that back. */
   onSlip: (id: string, slip: boolean) => void;
   /** Hide it from the page; the page map keeps it, to bring back. */
@@ -123,6 +130,7 @@ export function JumpList({
   onGo,
   onAgain,
   onBeaten,
+  offerAfter = "six-weeks",
   onSlip,
   onDismiss,
   onDelete,
@@ -177,6 +185,11 @@ export function JumpList({
             <li key={r.id} className={own.row} data-beaten={r.beaten || undefined}>
               <span className={rows.title}>{r.label}</span>
               <span className={rows.about}>{t.jumpTimes(r.times, lastWhen(r.lastAt, now, lang, t))}</span>
+              {offersBeaten(r, now, offerAfter) && (
+                <button type="button" className={own.offer} onClick={() => onBeaten(r.id, true)}>
+                  {t.jumpOfferBeaten}
+                </button>
+              )}
               <span className={own.actions}>
                 {r.to ? (
                   <>

@@ -9,6 +9,7 @@ import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
 import { DRAWER_GLOWS, type DrawerGlow } from "../drawer-glow";
+import { BEATEN_OFFERS, type BeatenOffer } from "../beaten-offer";
 import { FULL_SCREEN_TOOLS, type FullScreenTools } from "../full-screen-tools";
 import { TOOL_HELPS, type ToolHelp } from "../tool-help";
 import { SETTINGS_ATS, type SettingsAt } from "../settings-at";
@@ -72,6 +73,9 @@ interface ColophonProps {
   /** Where a verse's tools open, a card or inside its drawer; remembered on this device. */
   drawerTools?: DrawerTools;
   onDrawerTools?: (choice: DrawerTools) => void;
+  /** When a jump not made in a long while offers Beaten; remembered on this device. */
+  beatenOffer?: BeatenOffer;
+  onBeatenOffer?: (choice: BeatenOffer) => void;
   drawerGlow?: DrawerGlow;
   onDrawerGlow?: (choice: DrawerGlow) => void;
   fullScreenTools?: FullScreenTools | undefined;
@@ -390,6 +394,8 @@ export function Colophon({
   onVerseGestures,
   drawerTools,
   onDrawerTools,
+  beatenOffer,
+  onBeatenOffer,
   drawerGlow,
   onDrawerGlow,
   fullScreenTools,
@@ -642,6 +648,12 @@ export function Colophon({
             card by default until the owner has tried the drawer by hand. */}
         {drawerTools && onDrawerTools && (
           <Choice id="drawer-tools" title={t.drawerToolsTitle} note={t.drawerToolsNote} value={drawerTools} options={DRAWER_TOOLS} label={(choice) => choice === "sheet" ? t.drawerToolsSheet : t.drawerToolsDrawer} data="drawer-tools" onPick={onDrawerTools} />
+        )}
+
+        {/* When a jump not made in a long while offers Beaten (confusion-points
+            ⑤): after six weeks by default, three months, or never. */}
+        {beatenOffer && onBeatenOffer && (
+          <Choice id="beaten-offer" title={t.beatenOfferTitle} note={t.beatenOfferNote} value={beatenOffer} options={BEATEN_OFFERS} label={(choice) => choice === "six-weeks" ? t.beatenOfferSixWeeks : choice === "three-months" ? t.beatenOfferThreeMonths : t.beatenOfferNever} data="beaten-offer" onPick={onBeatenOffer} />
         )}
 
         {/* What the lit verse does while the pointer rests on its drawer

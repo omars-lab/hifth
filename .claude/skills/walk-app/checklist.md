@@ -524,6 +524,13 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   the row of tools, every tool in sight: on one page the page stands clear of it, on two pages it lies
   over the facing page (2:48 and 2:49, `?view=one` and two pages, in English and in Arabic). · laptop,
   desktop · issue: `share-card-covers-page-laptop`
+- [ ] Press Share, pick "Its roots", close it, and press Share again (2:48), then the same with the
+  tools set to open inside the verse's drawer: it opens on "The ayah as it is" each time, never on the
+  last choice. · phone, laptop, desktop in Firefox · issue: `share-menu-too-plain`
+- [ ] Open the list behind a jump mark on a verse whose jump was last made over six weeks ago, beside
+  one made this week: only the old row carries the dotted line "Mark it beaten?", it changes nothing
+  until pressed, and pressing it lights Beaten. In the info panel, "Never" takes the line away. ·
+  phone, laptop, desktop in Firefox · issue: `who-sets-a-confusion-seams-state`
 - [ ] On a phone on its side, close the note and press Share (2:48, English and Arabic): every line
   of the verse shows, its last line included, and stays so a second later; the look-alike buttons
   sit on the card's top row, clear of its close button. · phone-side · issue:
