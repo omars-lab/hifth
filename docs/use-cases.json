@@ -745,6 +745,33 @@
       "gap": "Proven on made-up notes only. Whether a real book's notes match its print, passage by passage, is checked by hand in the private build, and no test here can hold that book's words."
     },
     {
+      "id": "mark-a-mistake-in-full-screen",
+      "actor": "hafiz",
+      "goal": "When I read in full screen, keep my tools where I can reach them, so I can mark a mistake without leaving it.",
+      "feature": "pens-and-pencil",
+      "code": [
+        {
+          "file": "apps/web/src/components/PenHomes.tsx",
+          "symbol": "PenHomeSide"
+        },
+        {
+          "file": "apps/web/src/full-screen-tools.ts",
+          "symbol": "savedFullScreenTools"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/full-screen-tools.spec.ts",
+          "test": "by default the tools stay down the side in full screen, and a mistake can be marked without leaving it"
+        },
+        {
+          "file": "apps/web/e2e/full-screen-tools.spec.ts",
+          "test": "the tools cover no page, in full screen, on a laptop, a wide screen and a narrow one, with the pens out too"
+        }
+      ],
+      "gap": "Only on a computer or a sideways iPad. On a phone, and an upright iPad, full screen still puts the tools away, and what they should do there is not found yet."
+    },
+    {
       "id": "pick-a-pen-without-leaving-the-verse",
       "actor": "hafiz",
       "goal": "When I squeeze my pencil, give me the pens right where I am writing, so I can mark a mistake without looking away from the verse.",

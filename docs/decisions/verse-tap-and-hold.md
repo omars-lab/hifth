@@ -70,3 +70,24 @@ look-alike without leaving it, which breaks the reading they went full screen fo
 - full screen stays as it is, for reading only.
 
 **If nobody decides:** full screen stays for reading only, and marking means leaving it.
+
+**Built 2026-11-13, the first three and today's way, as a setting** in the info panel, under
+"In full screen, the tools", on a computer and a sideways iPad:
+- **Stay down the side** (the default for now): the tools stand down the side of the window in
+  full screen, on whichever side the pens stand. The book keeps clear of them at their widest,
+  with the highlighter's pens out, so the page does not shrink under the hand each time a pen
+  tool is picked. On a 1024-wide screen that makes the book about 4% narrower than full screen
+  was before; on a wider one it only moves the book a little off centre.
+- **Hide at the edge until the pointer comes:** the tools slide out of sight and come back while
+  the pointer rests at that side of the window, then go a moment after it leaves, like the Mac's
+  Dock set to hide itself. They come over the page while shown, and keep no room.
+- **A small dock that opens out:** the same icons at half size, opening out under the pointer.
+  On a touch screen the first tap only opens it and picks nothing, since the icons are too small
+  to aim at; a tap elsewhere shuts it.
+- **Go away with the bars:** full screen as it was, for reading only.
+
+In full screen the tools' corner button reads "Leave full screen" and leaves it. A phone and an
+upright iPad still put the tools away in full screen; their way is still to be found. Tested in
+`apps/web/e2e/full-screen-tools.spec.ts` on laptop Chrome and Firefox, which marks a mistake
+without leaving full screen and checks the tools cover no page at five screen sizes. Left: the
+owner tries the four and says which becomes the default.
