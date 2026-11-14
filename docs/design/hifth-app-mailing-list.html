@@ -119,6 +119,7 @@ Free up to 100 emails a day; a bigger launch day is spread over a few days or co
 <li><strong>What a row keeps:</strong> the address, when it signed up, when it confirmed, which language page it came from, and its leave code. Rows never confirmed are deleted after 7 days.</li>
 <li><strong>Supabase&#39;s free plan pauses a project after 7 quiet days</strong>, and a paused project answers every call with a &quot;paused&quot; error until the owner resumes it by hand. A daily timer on a small separate Cloudflare Worker pokes it awake and, in the same run, deletes unconfirmed rows. (Cloudflare&#39;s free plan allows five timers; the site&#39;s own server code cannot hold one.)</li>
 <li><strong>If Supabase is paused anyway</strong>, the form says &quot;please try again later&quot;, never &quot;you are on the list&quot;.</li>
+<li><strong>Every function also asks for the site&#39;s own key</strong>, which only the site&#39;s server holds, so the public key alone cannot add or confirm an address. Every value a visitor sends, how each is checked, and who can read, add or delete is laid out in <a href="hifth-app-security.md">the site&#39;s security page</a>.</li>
 </ul>
 <h2>What changes on hifth.app&#39;s DNS?</h2>
 <p>All in Cloudflare&#39;s DNS, all set to &quot;DNS only&quot; (not proxied).</p>

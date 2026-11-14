@@ -17,6 +17,9 @@ place to hear when the Mac app is out. The pages, marks and look-alike jumps are
   sign-in button.
 - It is hosted on Cloudflare Pages, on the new account that holds hifth.app.
 
+**How it is kept safe** (what a visitor can send, what is checked, who can read the email list,
+where the keys live, and what is still open) is in [the site's security page](hifth-app-security.md).
+
 ## Open questions, and what would answer each
 
 ### ① Is hifth.app live, with the app at /read and the email form working? · **open**

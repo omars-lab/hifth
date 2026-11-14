@@ -81,6 +81,7 @@ In Supabase, on the hifth.app project. The owner decided this on 2026-11-12, in 
 - **What a row keeps:** the address, when it signed up, when it confirmed, which language page it came from, and its leave code. Rows never confirmed are deleted after 7 days.
 - **Supabase's free plan pauses a project after 7 quiet days**, and a paused project answers every call with a "paused" error until the owner resumes it by hand. A daily timer on a small separate Cloudflare Worker pokes it awake and, in the same run, deletes unconfirmed rows. (Cloudflare's free plan allows five timers; the site's own server code cannot hold one.)
 - **If Supabase is paused anyway**, the form says "please try again later", never "you are on the list".
+- **Every function also asks for the site's own key**, which only the site's server holds, so the public key alone cannot add or confirm an address. Every value a visitor sends, how each is checked, and who can read, add or delete is laid out in [the site's security page](hifth-app-security.md).
 
 ## What changes on hifth.app's DNS?
 
