@@ -61,7 +61,9 @@ The lists live in `scripts/shipped.mjs`. A new kind of file has to be added ther
   address with the front page, so a mistyped link looks like it worked.
 - **The wrong commit:** the app must carry the commit being released, because its source-code
   offer names that commit (the app's licence is the GPL).
-- **The tree:** uncommitted changes, or a commit not on origin/main.
+- **The tree:** uncommitted changes, or a commit not on origin/main. Changes to the page-comment
+  files (`.page-comments/`) do not count: the comment tool writes to them after every commit, and
+  none of them is in the site.
 
 When the check refuses, fix the cause. Don't widen a list to make the refusal go away, unless the
 file really belongs on the site. If it does, say so in the commit.

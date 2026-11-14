@@ -14,7 +14,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, configProblems, localListFrom, serveArgs } from "./release-hifth-app.mjs";
+import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, changesThatShip, configProblems, localListFrom, serveArgs } from "./release-hifth-app.mjs";
 import { auditShipped, readFolder } from "./shipped.mjs";
 
 function tree(root, files) {
@@ -142,4 +142,20 @@ test("with a local list, serving hands it the local address, the made-up site ke
   assert.ok(args.includes("MAIL_SENDER=dev-log"));
   // The same made-up key supabase/seed.sql stores the hash of.
   assert.match(readFileSync(new URL("../../../../supabase/seed.sql", import.meta.url), "utf8"), new RegExp(LOCAL_LIST_KEY));
+});
+
+test("a change to the page-comment files does not stop a release; any other change does", () => {
+  // The comment tool adds a line to its thread files after every commit, and none of them
+  // ships, so counting them would refuse every release until someone committed them.
+  const porcelain = [
+    " M .page-comments/threads/t_000001.jsonl",
+    "?? .page-comments/threads/t_000002.jsonl",
+  ].join("\n");
+  assert.deepEqual(changesThatShip(porcelain), []);
+  assert.deepEqual(changesThatShip(`${porcelain}\n M apps/landing/index.html`), [" M apps/landing/index.html"]);
+  // A file merely named like the folder, elsewhere, still counts.
+  assert.deepEqual(changesThatShip(" M docs/.page-comments-notes.md"), [" M docs/.page-comments-notes.md"]);
+  assert.deepEqual(changesThatShip(""), []);
+  // git() trims its output, so the first line can arrive without its leading space.
+  assert.deepEqual(changesThatShip("M .page-comments/threads/t_000001.jsonl\n M apps/web/src/App.tsx"), [" M apps/web/src/App.tsx"]);
 });

@@ -4,8 +4,9 @@
  *
  *   check     build the site (make site, with its gates), put the release folder together,
  *             and refuse it if it holds anything but the bare minimum (shipped.mjs). Also
- *             refuses a tree with uncommitted changes, or a commit that is not on origin/main,
- *             because the app's source-code offer names the commit it was built from.
+ *             refuses a tree with uncommitted changes (the page-comment files aside), or a
+ *             commit that is not on origin/main, because the app's source-code offer names the
+ *             commit it was built from.
  *             --no-build checks the last build instead of making a new one.
  *   publish   check, then upload the folder to the hifth.app Cloudflare Pages project, then
  *             verify. Must run inside dotenvx (make hifth-app-publish does), and refuses
@@ -99,9 +100,23 @@ function git(...args) {
   return { ok: r.status === 0, out: (r.stdout ?? "").trim() };
 }
 
+/**
+ * The lines of `git status --porcelain` that could change what ships. The page-comment tool
+ * adds a line to its thread files after every commit (.page-comments/), and none of them is
+ * in the site, so counting them would refuse every release until somebody committed them.
+ */
+export function changesThatShip(porcelain) {
+  return porcelain
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    // Each line is a one- or two-letter status, then the path. The first line's leading space
+    // may already be trimmed away (git() trims its output), so read the path by pattern.
+    .filter((line) => !/^\S{1,2}\s+\.page-comments\//.test(line.trimStart()));
+}
+
 function gitProblems() {
   const problems = [];
-  if (git("status", "--porcelain").out) {
+  if (changesThatShip(git("status", "--porcelain").out).length > 0) {
     problems.push({ path: "(working tree)", why: "has uncommitted changes, so the app would name a commit that is not what it was built from; commit or put them aside" });
   }
   git("fetch", "--quiet", "origin", "main");
