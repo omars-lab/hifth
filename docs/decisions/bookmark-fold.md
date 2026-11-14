@@ -340,3 +340,24 @@ told.
 
 **If nobody decides:** bookmarks stay click-only, and a reader who tries to pull one finds
 nothing happens.
+
+**Built 2026-11-13, all of them, as a setting** in the info panel, under "How you drop and lift
+a bookmark":
+- **Pull it out, push it back, and a clearer corner** (the default for now): press the top
+  corner and draw it down, and a ribbon comes out with your hand; let go past a short way and
+  the bookmark drops and its name box opens, as a tap does. Press a ribbon and push it up
+  past half its length, and it lifts; the Undo bar puts it back. A shorter pull or push lets
+  go and does nothing. The corner also rests a little further folded (24 instead of 16
+  points), so it is easier to find in full screen.
+- **Pull it out and push it back:** the same, with the corner as small as before.
+- **Taps only, with a clearer corner.**
+- **Tap only,** as before.
+
+A tap still does what it did in every way, so nothing a reader already knows stops working. On
+a touch screen, a finger on the corner or on a ribbon pulls it instead of moving the page; a
+finger anywhere else still moves the page. Looked at on the laptop at 1280 and 500 wide: the
+pulled ribbon hangs from the corner and follows the hand. The browser tests hold the pull, the
+push, the short ones that do nothing, the four ways and a finger pull on a phone.
+
+**Left:** the owner tries the four on the laptop and the iPad and says which becomes the
+default.

@@ -695,6 +695,8 @@ export interface Strings {
   bmEvent(what: "dropped" | "renamed" | "moved" | "opened", at: number, page: number): string;
   bmDropped(name: string): string;
   bmLifted(name: string): string;
+  /** Said when a bookmark pushed back up by hand is put back with Undo. */
+  bmPutBack(name: string): string;
   bmRenamed(name: string): string;
   bmMoved(name: string, page: number): string;
   bmNotSaved: string;
@@ -1033,6 +1035,12 @@ export interface Strings {
   ribbonLengthShort: string;
   ribbonLengthLong: string;
   ribbonLengthNote: string;
+  bookmarkHandTitle: string;
+  bookmarkHandBoth: string;
+  bookmarkHandPull: string;
+  bookmarkHandCorner: string;
+  bookmarkHandClicks: string;
+  bookmarkHandNote: string;
   leftOffTitle: string;
   leftOffLabel: string;
   leftOffMark: string;
@@ -1522,6 +1530,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
       }),
     bmDropped: (name) => m.bmDropped({ name }),
     bmLifted: (name) => m.bmLifted({ name }),
+    bmPutBack: (name) => m.bmPutBack({ name }),
     bmRenamed: (name) => m.bmRenamed({ name }),
     bmMoved: (name, page) => m.bmMoved({ name, page: n(page) }),
     bmCount: (count) => m.bmCount({ n: count, nText: n(count) }),

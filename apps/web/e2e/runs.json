@@ -11,6 +11,12 @@
       "android",
       "iphone"
     ],
+    "bookmark-pull.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "bookmarks.spec.ts": [
       "android",
       "iphone"
