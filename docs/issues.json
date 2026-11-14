@@ -6526,7 +6526,9 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner, 2026-11-12 (page comment t_bffcd4): the share menu looks too plain. Build two or three better-looking versions into the real sheet, try them at phone size, the owner picks, the others stay as a setting. Built 2026-11-12 as three looks in the info panel (preview card, the default; tiles; plain), drawn in docs/design/share-look.md; waiting on the owner's pick. Also seen while testing, older than the looks: in the iPhone test run the menu reopened on the last choice (its roots, say). The choice is kept only while the share button stays on screen and is saved nowhere; whether a computer does the same is not yet checked. Settle whether the menu should remember the choice, and make every device do it."
+      "useCase": "send-someone-what-i-am-looking-at",
+      "feature": "share-links",
+      "note": "Owner, 2026-11-12 (page comment t_bffcd4): the share menu looks too plain. Build two or three better-looking versions into the real sheet, try them at phone size, the owner picks, the others stay as a setting. Built 2026-11-12 as three looks in the info panel (preview card, the default; tiles; plain), drawn in docs/design/share-look.md; waiting on the owner's pick. Also seen while testing, older than the looks: the menu reopened on the last choice (its roots, say) while the share button stayed on screen, on a phone and on a laptop alike, but never in the verse's drawer. Settled 2026-11-13: every opening starts on the ayah as it is, everywhere (apps/web/e2e/share-menu-fresh.spec.ts, on the phones and laptop Chrome and Firefox, watched failing first). Left: the owner picks the look."
     },
     {
       "id": "calendar-looks-plain",

@@ -167,6 +167,9 @@ export function ShareSheet({
     else if (inDrawer) inDrawer.onToggle();
     else {
       setFeedback(null);
+      // Every opening starts on the ayah as it is, as the drawer's does: a
+      // choice kept from the last link would quietly ride on the next one.
+      if (!open) share.setPanel("");
       setOpen((o) => !o);
     }
   }

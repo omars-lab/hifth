@@ -287,6 +287,12 @@
       "android",
       "iphone"
     ],
+    "share-menu-fresh.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "share-sheet.spec.ts": [
       "android",
       "iphone"
