@@ -17,11 +17,22 @@ NAME="${1:-}"
 FILE="${2:-.env}"
 [ -n "$NAME" ] || { echo "usage: $0 NAME [file]   (then type the value at the hidden prompt)" >&2; exit 2; }
 
+# Only the encrypted copy here (a new machine, before env-bootstrap): saving now
+# would write a one-line .env and rebuild the encrypted copy from it, dropping
+# every entry already in it. Refuse before asking for anything.
+if [ ! -e "$FILE" ] && [ -e "$FILE.encrypted" ]; then
+  echo "ERROR: there is no $FILE here, only $FILE.encrypted; saving now would drop its other entries." >&2
+  echo "       Bring the plain file back first: make env-keys-pull, then make env-bootstrap" >&2
+  exit 1
+fi
+
 # Check Node before asking for or writing anything: otherwise the value lands in
 # .env and the encrypt step then refuses, leaving the committed copy behind.
 # shellcheck source=lib/dotenvx.sh
 . "$HERE/lib/dotenvx.sh"
 need_dotenvx
+
+python3 "$HERE/lib/envfile.py" hint "$NAME" >&2
 
 if [ -t 0 ]; then
   printf 'Paste the value for %s (it will not show), then press Return: ' "$NAME" >&2

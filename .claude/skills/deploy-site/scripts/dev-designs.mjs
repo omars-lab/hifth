@@ -1,5 +1,5 @@
 /**
- * The "Designs" button on hifth.app served on this laptop, and the design pages it opens.
+ * The design pages on hifth.app served on this laptop, which the developer side bar lists.
  *
  * Owner, 2026-11-13: "when we are running the landing hub in localhost mode, there is a tab for
  * designs for devs (floating menu button in localhost mode?) that will take us to pages like
@@ -11,22 +11,18 @@
  *   docs/                     the design pages the app build already stages (apps/web/dist/docs)
  *   docs/design/<name>.md.html  each written note in docs/design/*.md, drawn as a page
  *   docs/design/index.html    every design page and note, newest first
- *   a floating Designs button on the front pages (not on the app under read/)
+ *
+ * The side bar (dev-sidebar.mjs) lists them; it replaced a floating Designs button on 2026-11-14.
  *
  * publish always rebuilds the folder from scratch, so none of it can ride along. If it ever did,
- * the release check refuses it: docs/ is not a file hifth.app needs, and the button carries a
- * word only it uses (shipped.mjs, NEVER and MARKERS). Tests: dev-designs.test.mjs.
+ * the release check refuses it: docs/ is not a file hifth.app needs (shipped.mjs, NEVER).
+ * Tests: dev-designs.test.mjs.
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { basename, join } from "node:path";
 import { createRequire } from "node:module";
 import { marked } from "marked";
-
-/** The word the release check looks for; only this button puts it in a page. */
-export const BUTTON_MARK = "data-dev-designs";
-
-const FRONT_PAGES = ["index.html", "privacy.html", "404.html", "ar/index.html", "ar/privacy.html"];
 
 const escape = (s) =>
   String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -133,40 +129,6 @@ function indexPage(list) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Design pages</title><style>${NOTE_STYLE} li{margin:.3rem 0} small{opacity:.65}</style></head><body><main><h1>Design pages</h1><p>Every options page and written note, newest first. Served on this laptop only; the public copies are at blog.bytesofpurpose.com/hifth/docs/.</p><p><a href="/docs/">The design front door</a></p><ul>${list.map(row).join("")}</ul></main></body></html>`;
 }
 
-const BUTTON_STYLE = `
-[data-dev-designs]{position:fixed;left:16px;bottom:16px;z-index:2147483000;font:14px/1.4 system-ui,sans-serif}
-[data-dev-designs]>button{border:0;border-radius:999px;padding:.55rem .95rem;background:#2b2a26;color:#f6f1e6;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer;font:inherit;font-weight:600}
-[data-dev-designs]>button small{opacity:.7;font-weight:400;margin-left:.35rem}
-[data-dev-designs] nav{position:absolute;left:0;bottom:calc(100% + 8px);width:min(22rem,calc(100vw - 32px));max-height:min(28rem,70vh);overflow:auto;background:#fffdf8;color:#1d1b17;border:1px solid #d9d2c3;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2);padding:.5rem}
-[data-dev-designs] nav[hidden]{display:none}
-[data-dev-designs] input{box-sizing:border-box;width:100%;padding:.45rem .6rem;border:1px solid #d9d2c3;border-radius:8px;font:inherit;margin-bottom:.35rem}
-[data-dev-designs] a{display:block;padding:.35rem .5rem;border-radius:6px;color:#1d1b17;text-decoration:none}
-[data-dev-designs] a:hover,[data-dev-designs] a:focus{background:#efe8d8}
-[data-dev-designs] a small{display:block;opacity:.6;font-size:.78em}
-[data-dev-designs] .all{font-weight:600;border-top:1px solid #d9d2c3;margin-top:.35rem;padding-top:.5rem}
-@media (max-width:720px){[data-dev-designs]{bottom:84px}}`;
-
-/** The floating button and its menu, as one block of HTML to put before </body>. */
-export function buttonHtml(list) {
-  const items = list
-    .map(
-      (d) =>
-        `<a href="${escape(d.href)}">${escape(d.title)}<small>${d.kind === "note" ? "written note" : "page"} · ${new Date(d.mtime).toISOString().slice(0, 10)}</small></a>`,
-    )
-    .join("");
-  return `
-<!-- Designs button: added on this laptop only by the deploy-site skill's prepare step; a release refuses it. -->
-<div ${BUTTON_MARK} dir="ltr" lang="en"><style>${BUTTON_STYLE}</style>
-<nav id="dev-designs-menu" hidden aria-label="Design pages"><input type="search" placeholder="Find a design page" aria-label="Find a design page">${items}<a class="all" href="/docs/design/index.html">All design pages</a><a class="all" href="/docs/">The design front door</a></nav>
-<button type="button" aria-expanded="false" aria-controls="dev-designs-menu">Designs<small>${list.length}</small></button>
-<script>(()=>{const r=document.currentScript.parentElement,b=r.querySelector("button"),n=r.querySelector("nav"),f=n.querySelector("input");
-b.addEventListener("click",()=>{n.hidden=!n.hidden;b.setAttribute("aria-expanded",String(!n.hidden));if(!n.hidden)f.focus()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!n.hidden){n.hidden=true;b.setAttribute("aria-expanded","false");b.focus()}});
-f.addEventListener("input",()=>{const q=f.value.toLowerCase();for(const a of n.querySelectorAll("a:not(.all)"))a.hidden=q&&!a.textContent.toLowerCase().includes(q)})})()</script>
-</div>
-`;
-}
-
 function mermaidFile() {
   try {
     return createRequire(import.meta.url).resolve("mermaid/dist/mermaid.min.js");
@@ -176,9 +138,9 @@ function mermaidFile() {
 }
 
 /**
- * Put the design pages and the Designs button into a local copy of the release folder.
- * @param {{out: string, builtDocs: string, notes: string}} dirs
- * @returns {number} how many design pages and notes the button lists
+ * Put the design pages into a local copy of the release folder.
+ * @param {{out: string, builtDocs: string, notes: string, dates?: Map<string, number>}} dirs
+ * @returns {ReturnType<typeof designList>} the pages and notes, newest first, for the side bar
  */
 export function addDevDesigns({ out, builtDocs, notes, dates }) {
   const docs = join(out, "docs");
@@ -201,15 +163,7 @@ export function addDevDesigns({ out, builtDocs, notes, dates }) {
   }
   if (mermaid && anyDiagram) cpSync(mermaid, join(design, "_mermaid.min.js"));
   writeFileSync(join(design, "index.html"), indexPage(list));
-
-  const button = buttonHtml(list);
-  for (const page of FRONT_PAGES) {
-    const file = join(out, page);
-    if (!existsSync(file)) continue;
-    const html = readFileSync(file, "utf8");
-    writeFileSync(file, /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `${button}</body>`) : html + button);
-  }
-  return list.length;
+  return list;
 }
 
 /**

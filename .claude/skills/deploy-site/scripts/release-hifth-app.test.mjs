@@ -11,10 +11,11 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { spawn } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, configProblems, localListFrom, serveArgs } from "./release-hifth-app.mjs";
+import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, changesThatShip, configProblems, localListFrom, serveArgs } from "./release-hifth-app.mjs";
 import { auditShipped, readFolder } from "./shipped.mjs";
 
 function tree(root, files) {
@@ -100,6 +101,24 @@ test("putting it together again starts from an empty folder", () => {
   assert.ok(!readFolder(out).files.some((f) => f.path === "left-over.txt"));
 });
 
+// Finder writes a .DS_Store into a folder it has open, and it can do so while the old folder
+// is being deleted, so the delete fails with "directory not empty" (seen 2026-11-14 on
+// apps/landing/dist/read). Another process writing in a loop stands in for Finder.
+test("putting it together again works while another program keeps writing into the old folder", async () => {
+  const { landing, app, out } = fixture();
+  assemble({ landing, app, out });
+  const read = join(out, "read");
+  const writer = spawn(process.execPath, ["-e",
+    `const fs=require("fs");const end=Date.now()+800;while(Date.now()<end){try{fs.writeFileSync(${JSON.stringify(join(read, ".DS_Store"))},"x")}catch{}}`]);
+  await new Promise((r) => setTimeout(r, 100));
+  try {
+    assert.doesNotThrow(() => assemble({ landing, app, out }));
+  } finally {
+    await new Promise((r) => writer.on("exit", r));
+  }
+  assert.ok(existsSync(join(out, "read", "index.html")));
+});
+
 test("the site's Cloudflare settings name no database and hold no list address or secret", () => {
   const base = 'name = "hifth-app"\npages_build_output_dir = "dist"\n';
   assert.deepEqual(configProblems(base), []);
@@ -142,4 +161,20 @@ test("with a local list, serving hands it the local address, the made-up site ke
   assert.ok(args.includes("MAIL_SENDER=dev-log"));
   // The same made-up key supabase/seed.sql stores the hash of.
   assert.match(readFileSync(new URL("../../../../supabase/seed.sql", import.meta.url), "utf8"), new RegExp(LOCAL_LIST_KEY));
+});
+
+test("a change to the page-comment files does not stop a release; any other change does", () => {
+  // The comment tool adds a line to its thread files after every commit, and none of them
+  // ships, so counting them would refuse every release until someone committed them.
+  const porcelain = [
+    " M .page-comments/threads/t_000001.jsonl",
+    "?? .page-comments/threads/t_000002.jsonl",
+  ].join("\n");
+  assert.deepEqual(changesThatShip(porcelain), []);
+  assert.deepEqual(changesThatShip(`${porcelain}\n M apps/landing/index.html`), [" M apps/landing/index.html"]);
+  // A file merely named like the folder, elsewhere, still counts.
+  assert.deepEqual(changesThatShip(" M docs/.page-comments-notes.md"), [" M docs/.page-comments-notes.md"]);
+  assert.deepEqual(changesThatShip(""), []);
+  // git() trims its output, so the first line can arrive without its leading space.
+  assert.deepEqual(changesThatShip("M .page-comments/threads/t_000001.jsonl\n M apps/web/src/App.tsx"), [" M apps/web/src/App.tsx"]);
 });

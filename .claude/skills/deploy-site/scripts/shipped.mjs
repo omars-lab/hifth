@@ -34,12 +34,13 @@ const NEVER = [
   [/^shots\/[^/]*pitch/, "a picture from a pitch build, which can show The Study Quran's text and never goes on the public site"],
   [/(^|\/)pitch\//, "part of a pitch build, which holds The Study Quran's text and never goes on the public site"],
   [/^read\/docs\//, "a design page; those stay at blog.bytesofpurpose.com/hifth/docs/"],
-  [/^docs\//, "a design page, added on this laptop only for the Designs button; those stay at blog.bytesofpurpose.com/hifth/docs/"],
+  [/^docs\//, "a design page, added on this laptop only for the developer side bar; those stay at blog.bytesofpurpose.com/hifth/docs/"],
+  [/^dev-hub\//, "the features page, copied in on this laptop only for the developer side bar"],
   [/^(functions|lib)\//, "the server's own code, which would be readable as a plain file"],
 ];
 
 export const MARKERS = [
-  [/data-dev-designs/, "the Designs button, which opens the design pages on this laptop only"],
+  [/data-dev-sidebar/, "the developer side bar, which opens the features page and the design pages on this laptop only"],
   [/\/@vite\/client/, "the development server's live reload"],
   [/page-?comments/i, "the page-comment button, a development tool"],
   [/\/intent\/|\.intent\/|intent-picture/, "the 'what each commit was for' picture, which is served on this laptop only"],

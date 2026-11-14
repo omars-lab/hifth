@@ -63,6 +63,27 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Read|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/skills/secrets/scripts/guard-secrets.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(make env-check)",
+      "Bash(make cf-tokens)",
+      "Bash(make cf-zone)",
+      "Bash(make env-keys-status)",
+      "Bash(make env-check-staged)"
     ]
   }
 }

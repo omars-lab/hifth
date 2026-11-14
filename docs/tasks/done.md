@@ -51,6 +51,16 @@ the spam-check key (`hifth-app-turnstile-key`).
 - Two skills: how Hifth is set up today, and the Supabase login check (84b1657d).
 - The branch merged to main with main's latest work, overlaps worked by hand (PR #610, 2bfeca6c,
   2026-11-13).
+- 14 KB of room made under the size limit: a stronger minifier (terser) and code nothing used;
+  start-up download 172.7 → 163.0 KB (PR #611, 56b3bd67, 2026-11-13).
+- The release check no longer counts the page-comment files as uncommitted work, which had refused
+  every release (727ea5f3, on branch release-ignores-comments, to merge with the release's own
+  changes).
+- A side bar on the local copy of hifth.app, never on the live site: the front pages, each section
+  of the features page with its cards, and every design page, the page you are on lit; folds to
+  icons on a laptop, a Menu drawer on a phone (branch release-ignores-comments, 2026-11-14). The
+  release folder is now cleared by moving it aside first, because Finder could write into it
+  while it was being deleted (`docs/issues/old-folder-written-to-while-deleted.md`).
 
 ### 2026-11-09 — Installing on our own devices through TestFlight
 

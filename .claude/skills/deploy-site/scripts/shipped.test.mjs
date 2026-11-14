@@ -100,6 +100,8 @@ test("debug copies of the source, the design pages and hidden files are refused"
     { path: "read/sw.js.map", text: "{}" },
     { path: "read/assets/index-abc.js.map", text: "{}" },
     { path: "read/docs/index.html", text: "<html>" },
+    { path: "dev-hub/index.html", text: "<html>" },
+    { path: "dev-hub/shots/panel-jump.png", text: null },
     { path: ".intent/picture/index.html", text: "<html>" },
     { path: "read/.DS_Store", text: null },
   ];
@@ -107,6 +109,8 @@ test("debug copies of the source, the design pages and hidden files are refused"
     "read/sw.js.map",
     "read/assets/index-abc.js.map",
     "read/docs/index.html",
+    "dev-hub/index.html",
+    "dev-hub/shots/panel-jump.png",
     ".intent/picture/index.html",
     "read/.DS_Store",
   ]);
@@ -130,6 +134,7 @@ test("a development feature named in a shipped file is refused, each with its re
     ["<span class=\"contact\">[contact address to come]</span>", /placeholder/],
     ["https://made-up-project.supabase.co/rest/v1", /Supabase/],
     ["local-list-key-made-up-not-secret", /made-up site key/],
+    ['<nav data-dev-sidebar="">', /side bar/],
   ];
   for (const [text, why] of cases) {
     const files = cleanFolder().map((f) => (f.path === "read/assets/index-abc.css" ? { ...f, text } : f));
