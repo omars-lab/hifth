@@ -152,9 +152,9 @@ moment before it moves to the verse.
 
 **What was done (2026-11-14):** while a note stands beside the page on a phone held on its side,
 the bars at the foot are hidden; the header stays, and closing the note brings them back. On both
-the smallest phone and a 6.3-inch one, every line of 2:255 is now in sight beside the note. The
-moment after the tap is the page moving to the verse, about half a second, and it settles on it;
-that part needed no change. Tests: the pitch spec's "every line of a six-line verse is in sight
+the smallest phone and a 6.3-inch one, every line of 2:255 is now in sight beside the note. In
+the iPhone app on its side, the picture taken just after the tap shows the verse at once, with no
+bar at the foot, so the page's foot no longer shows first. Tests: the pitch spec's "every line of a six-line verse is in sight
 beside its note" on both sizes, and "closing the standing note brings the bars at the foot back".
 
 ## What the app's ID allows, and what else may be needed
