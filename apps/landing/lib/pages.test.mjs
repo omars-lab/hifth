@@ -27,3 +27,13 @@ test("both privacy pages say an address is on the list only once its owner confi
   assert.match(page("privacy.html").replace(/\s+/g, " "), /confirm/i);
   assert.match(page("ar/privacy.html"), /تأكيد|تؤكد|أكدت/);
 });
+
+// The owner picked hello@hifth.app as the address a reader writes to (2026-11-14). Until then
+// the pages showed a placeholder, which the release check refuses (docs/design/hifth-app-site.md ③).
+test("both privacy pages give hello@hifth.app to write to, and no placeholder", () => {
+  for (const path of ["privacy.html", "ar/privacy.html"]) {
+    const html = page(path);
+    assert.match(html, /href="mailto:hello@hifth\.app"/, path);
+    assert.doesNotMatch(html, /contact address to come/, path);
+  }
+});

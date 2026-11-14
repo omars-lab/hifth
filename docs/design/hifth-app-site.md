@@ -37,11 +37,15 @@ and the hub lists it as a private, local-only page. A production build never inc
 the route serves that one page and nothing else from the repository. Draw or redraw it with
 `make intent`.
 
-### ③ What contact address does the privacy page give? · **open**
+### ③ What contact address does the privacy page give? · **fixed**
 
 The privacy page tells a reader how to have their email removed without the link in the email.
-It needs an address the owner reads. Until the owner picks one, the page shows a placeholder,
-and the site does not go live with it.
+It needs an address the owner reads. Until the owner picked one, the page showed a placeholder,
+and the release check refused it.
+
+Done 2026-11-14: the owner picked hello@hifth.app. Both privacy pages, English and Arabic, link
+to it, and a test holds both to it. The address has to exist in the owner's iCloud+ mail for
+hifth.app before the site goes live.
 
 ### ④ Has the release tool ever put hifth.app up? · **open**
 
