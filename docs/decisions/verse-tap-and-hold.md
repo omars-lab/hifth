@@ -86,8 +86,24 @@ look-alike without leaving it, which breaks the reading they went full screen fo
   to aim at; a tap elsewhere shuts it.
 - **Go away with the bars:** full screen as it was, for reading only.
 
-In full screen the tools' corner button reads "Leave full screen" and leaves it. A phone and an
-upright iPad still put the tools away in full screen; their way is still to be found. Tested in
+In full screen the tools' corner button reads "Leave full screen" and leaves it. Tested in
 `apps/web/e2e/full-screen-tools.spec.ts` on laptop Chrome and Firefox, which marks a mistake
 without leaving full screen and checks the tools cover no page at five screen sizes. Left: the
 owner tries the four and says which becomes the default.
+
+**Built 2026-11-14 for a phone and an upright iPad, three ways, as a second setting** under the
+same heading in the info panel, shown only on those screens (there is no room down the side, and
+no pointer to rest at an edge):
+- **A Tools button in the corner** (the default for now): a round button stays in the bottom
+  corner, across from "Show the bars", and shows the tool in hand. It opens the same tray of
+  tools the bottom line has; picking a tool folds the tray back to the button, so the tray never
+  lies on the page's last lines while you mark them. This is the phone's answer to the dock.
+- **The bottom line stays:** full screen puts away only the top bar and the page slider; the
+  bottom line, tools and all, stays, with its own "Show the bars".
+- **Go away with the bars:** as before.
+
+Looked at on a 390-wide phone and a 768-wide upright iPad, in English and Arabic: the button and
+"Show the bars" sit apart at the foot, below the page. Tested in
+`apps/web/e2e/touch-full-screen.spec.ts` on the iPhone and Android runs, which marks a mistake on
+the last line without leaving full screen. Left: the owner tries the three on the phone and the
+iPad and says which becomes the default.

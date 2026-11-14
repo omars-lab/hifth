@@ -757,6 +757,10 @@
         {
           "file": "apps/web/src/full-screen-tools.ts",
           "symbol": "savedFullScreenTools"
+        },
+        {
+          "file": "apps/web/src/touch-full-tools.ts",
+          "symbol": "savedTouchFullTools"
         }
       ],
       "proof": [
@@ -767,9 +771,13 @@
         {
           "file": "apps/web/e2e/full-screen-tools.spec.ts",
           "test": "the tools cover no page, in full screen, on a laptop, a wide screen and a narrow one, with the pens out too"
+        },
+        {
+          "file": "apps/web/e2e/touch-full-screen.spec.ts",
+          "test": "by default a Tools button stays, and a mistake on the last line is marked without leaving full screen"
         }
       ],
-      "gap": "Only on a computer or a sideways iPad. On a phone, and an upright iPad, full screen still puts the tools away, and what they should do there is not found yet."
+      "gap": "The owner has not yet picked which way is the default, on a computer or on a phone."
     },
     {
       "id": "pick-a-pen-without-leaving-the-verse",

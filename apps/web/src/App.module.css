@@ -297,8 +297,31 @@
 
 /* Full screen (docs/design/verse-tap-and-hold.md): every bar goes, and the
    page takes the room they leave. */
-.app[data-full] > :is(header, footer, nav, [role="toolbar"]:not([data-full-keep])) {
+.app[data-full] > :is(header, footer:not([data-full-keep]), nav, [role="toolbar"]:not([data-full-keep])) {
   display: none;
+}
+
+/* On a phone or an upright iPad (touch-full-tools.ts) the bottom line's Tools
+   button stays on its own, in the corner across from the way back. Below the
+   sheets and drawers, as the tray is, so a card that opens is never under it;
+   while its tray is open, above the way back, whose corner the tray's close
+   button shares. It carries the home bar's inset itself, since the bottom
+   line that did is away. */
+.fullTouchTools {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: calc(var(--z-sheet) - 1);
+  display: flex;
+  padding: var(--space-2);
+  padding-block-end: calc(var(--space-2) + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+.fullTouchTools:has([aria-expanded="true"]) {
+  z-index: 31;
+}
+.fullTouchTools > * {
+  pointer-events: auto;
 }
 
 /* Unless the tools stay (full-screen-tools.ts): down the side, the book keeps

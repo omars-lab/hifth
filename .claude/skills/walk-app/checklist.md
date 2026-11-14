@@ -671,6 +671,12 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
 - [ ] The page slider's two end arrows are the same shape and size, the right one pointing right
   and the left one left, in English and in Arabic. · any, Firefox especially · issue:
   `slider-arrows-mismatch` · test: slider-arrows spec
+- [ ] In full screen on a phone and an upright iPad, a round Tools button stays in the bottom
+  corner, across from "Show the bars", in English and in Arabic, off the page's last line. It
+  opens the tools' tray; picking a tool folds the tray back, and the button shows that tool.
+  Mark a mistake on the last line without leaving full screen. In the info panel, "The bottom
+  line stays" keeps the bottom line in full screen instead, with one "Show the bars" in it. ·
+  phone, ipad-tall · issue: `full-screen-keeps-tools` · test: touch-full-screen spec
 - [ ] Pick the highlighter: both colour rows show, the passage circles and the held-words bands,
   with nothing cut off or off the screen; on a phone they get their own line in the tray, down
   an iPad's side two columns. At a 1024-wide window the tools do not slide when the highlighter

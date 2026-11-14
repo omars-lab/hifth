@@ -139,24 +139,40 @@ export function PhoneToolbarB({ tool, locked, onTool }: PhoneToolbarProps): JSX.
  * over that row, where the thumb already is, and they stay up — with what the
  * tool on is for — until the tray is closed. Closing it puts the page back to
  * plain reading.
+ *
+ * In full screen on a phone or an upright iPad (touch-full-tools.ts) the
+ * button stands alone in a corner, and the tray `foldOnPick`: there is no
+ * bottom line for it to cover, only the page, so once a tool or a pen is
+ * picked it folds back to the button, which shows the tool on.
  */
 export function PhoneToolbarC({
   tool,
   locked,
-  onTool,
+  onTool: pick,
   pen,
-  onPen,
+  onPen: pickPen,
   tools,
   aim,
+  foldOnPick = false,
 }: PhoneToolbarProps & {
   pen: Pen;
   onPen: (pen: Pen) => void;
   /** Note, Harakat and Word as one button, when the reader set it (mark-tools.ts). */
   tools?: readonly ToolEntry[] | undefined;
   aim?: MarkAim | undefined;
+  /** Fold the tray back to the button once something in it is picked. */
+  foldOnPick?: boolean;
 }): JSX.Element {
   const { t, dir } = useT();
   const [open, setOpen] = useState(false);
+  const onTool = (next: PageTool, lock?: boolean): void => {
+    pick(next, lock);
+    if (foldOnPick) setOpen(false);
+  };
+  const onPen = (next: Pen): void => {
+    pickPen(next);
+    if (foldOnPick) setOpen(false);
+  };
   return (
     <div className={styles.trayHost} data-phone-bar="c" data-tool={tool}>
       <button
