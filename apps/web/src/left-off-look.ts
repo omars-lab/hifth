@@ -65,3 +65,20 @@ export function useLeftOffLook(): LeftOffLook {
   }, []);
   return choice;
 }
+
+/**
+ * How far the "Left off" label slides along the red ribbon to stay on the
+ * screen, in screen pixels. Centred on the ribbon when there is room; where the
+ * page runs to the screen's edge, as on a phone (walking it at 390 wide,
+ * 2026-11-13, a centred label hung half off and read "off"), it slides inward
+ * until it is `margin` inside — but never off the ribbon itself, so it always
+ * touches it: at most half its width, plus half the ribbon's, either way.
+ */
+export function labelNudge(seamCentre: number, labelWidth: number, screenWidth: number, seamWidth = 0, margin = 4): number {
+  const half = labelWidth / 2;
+  const reach = half + seamWidth / 2;
+  const fromLeft = margin - (seamCentre - half);
+  const fromRight = screenWidth - margin - (seamCentre + half);
+  const want = fromLeft > 0 ? fromLeft : fromRight < 0 ? fromRight : 0;
+  return Math.max(-reach, Math.min(reach, want));
+}

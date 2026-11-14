@@ -184,12 +184,19 @@
    owner, 2026-11-07: "these bookmarks are confusing with the red one").
 
    label: the red ribbon says what it is, in a small red label at its head,
-   centred on it, in the band above the first line. */
+   centred on it, in the band above the first line.
+
+   Where the page runs to the screen's edge, as on a phone, a centred label
+   hung half off it and read "off" (walking it at 390 wide, 2026-11-13). So it
+   slides along the ribbon by --label-nudge, which the component measures
+   against the screen (labelNudge in left-off-look.ts): never past the ribbon
+   itself. Measured in script because this overlay is the page's own box, not
+   the screen, and on a spread the ribbon sits on that box's edge. */
 .seamLabel {
   position: absolute;
   inset-block-start: calc(var(--leaf-y, 0px) + 6px * var(--leaf-z, 1));
   left: calc(var(--leaf-x, 0px) + var(--leaf-w, 100%));
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + var(--label-nudge, 0px)));
   padding: 1px 6px;
   border-radius: 3px;
   background: var(--seam);

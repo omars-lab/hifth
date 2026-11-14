@@ -115,3 +115,30 @@ test("the info panel offers the four looks and keeps the one picked", async ({ p
   await choice.getByRole("radio", { name: "Bookmarks become named tabs" }).click();
   expect(await page.evaluate((key) => localStorage.getItem(key), LEFT_OFF_LOOK_KEY)).toBe("tabs");
 });
+
+test.describe("on a phone, where one page fills the screen", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  // Walking it at 390 wide (2026-11-13): the page ran to the screen's edge, so
+  // a label centred on the ribbon hung half off it and read "off". It slides
+  // along the ribbon onto the screen instead, as far as its inner edge, and so
+  // still touches it.
+  for (const p of [7, 8]) {
+    test(`page ${p}: the whole label is on the screen, on the ribbon, and covers no writing`, async ({ page }) => {
+      test.slow();
+      await page.goto(`/#/hafs-kfqc/p${p}`);
+      await expect(page.locator(`svg[aria-labelledby="page-label-${p}"]`)).toBeVisible();
+      await expect(seam(page)).toHaveCount(1, { timeout: 15_000 });
+      await expect(label(page)).toBeVisible();
+      const at = await page.evaluate(() => {
+        const s = document.querySelector("[data-bookmark-seam]")!.getBoundingClientRect();
+        const l = document.querySelector("[data-left-off-label]")!.getBoundingClientRect();
+        return { width: innerWidth, left: l.left, right: l.right, seamLeft: s.left, seamRight: s.right };
+      });
+      expect(at.left, "not cut by the screen's left edge").toBeGreaterThanOrEqual(0);
+      expect(at.right, "not cut by the screen's right edge").toBeLessThanOrEqual(at.width);
+      expect(at.left <= at.seamRight && at.right >= at.seamLeft, "still touching the ribbon").toBe(true);
+      expect(await overlapWithInk(page, "[data-left-off-label]"), "the label is clear of the writing").toBeLessThan(0);
+    });
+  }
+});

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { LEFT_OFF_LOOKS, LEFT_OFF_LOOK_KEY, rememberLeftOffLook, savedLeftOffLook } from "./left-off-look";
+import { LEFT_OFF_LOOKS, LEFT_OFF_LOOK_KEY, labelNudge, rememberLeftOffLook, savedLeftOffLook } from "./left-off-look";
 
 describe("how the red ribbon is told apart from the bookmarks, as the reader set it", () => {
   afterEach(() => {
@@ -34,5 +34,30 @@ describe("how the red ribbon is told apart from the bookmarks, as the reader set
     });
     expect(savedLeftOffLook()).toBe("label");
     expect(() => rememberLeftOffLook("tabs")).not.toThrow();
+  });
+});
+
+describe("keeping the left-off label on the screen", () => {
+  it("stays centred on the ribbon when there is room", () => {
+    expect(labelNudge(700, 44, 1440)).toBe(0);
+  });
+
+  it("slides right when the ribbon is at the screen's left edge, by no more than half its width", () => {
+    expect(labelNudge(0, 44, 390)).toBe(22);
+    expect(labelNudge(10, 44, 390)).toBe(16);
+  });
+
+  it("slides left when the ribbon is at the screen's right edge", () => {
+    expect(labelNudge(390, 44, 390)).toBe(-22);
+    expect(labelNudge(380, 44, 390)).toBe(-16);
+  });
+
+  it("may slide as far as the ribbon's inner edge, so a ribbon half off the screen still has the whole label on it", () => {
+    expect(labelNudge(0, 44, 390, 9)).toBe(26);
+    expect(labelNudge(390, 44, 390, 9)).toBe(-26);
+  });
+
+  it("a ribbon off the screen leaves the label touching it rather than chasing the edge", () => {
+    expect(labelNudge(-200, 44, 390)).toBe(22);
   });
 });
