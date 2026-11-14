@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { spokenName } from "./spoken-name";
 import {
   Adjacency,
@@ -177,6 +177,7 @@ import { DesktopChrome } from "./components/DesktopChrome";
 import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
 import { LookalikeSections } from "./components/LookalikeSections";
+import { DrawerTabs } from "./components/DrawerTabs";
 import { HighlightMenu } from "./components/HighlightMenu";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareInDrawer, ShareSheet } from "./components/ShareSheet";
@@ -263,7 +264,7 @@ import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import { savedZoomAnchor, verseToGrowFrom } from "./zoom-anchor";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
-import { rememberDrawerTools, savedDrawerTools, type DrawerTools } from "./drawer-tools";
+import { DRAWER_TABS, frontTab, pressTab, rememberDrawerTools, savedDrawerTools, type DrawerTab, type DrawerTools } from "./drawer-tools";
 import { rememberBeatenOffer, savedBeatenOffer, type BeatenOffer } from "./beaten-offer";
 import { canRest, rememberDrawerGlow, savedDrawerGlow, type DrawerGlow } from "./drawer-glow";
 import { rememberToolHelp, savedToolHelp, type ToolHelp } from "./tool-help";
@@ -513,7 +514,11 @@ export function App(): JSX.Element {
     rememberDrawerTools(choice);
     setDrawerTools(choice);
   }, []);
-  const toolsInDrawer = drawerTools === "drawer";
+  const toolsInDrawer = drawerTools !== "sheet";
+  // The third way: each tool opened in the drawer stays open as a tab, and the
+  // tab the reader last picked is in front (selection-drawer ③, 2026-11-14).
+  const tabsInDrawer = drawerTools === "tabs";
+  const [pickedTab, setPickedTab] = useState<DrawerTab | null>(null);
   // When a jump not made in a long while offers Beaten in its row (confusion-points ⑤).
   const [beatenOffer, setBeatenOffer] = useState<BeatenOffer>(() => savedBeatenOffer());
   const chooseBeatenOffer = useCallback((choice: BeatenOffer) => {
@@ -568,13 +573,15 @@ export function App(): JSX.Element {
     rememberDrawerMarks(choice);
     setDrawerMarks(choice);
   }, []);
-  // Show the look-alikes in the drawer: fold whatever other tool is open there.
+  // Show the look-alikes in the drawer: fold whatever other tool is open there,
+  // or, as tabs, bring their tab to the front.
   const showLooksInDrawer = useCallback(() => {
+    setLooksFolded(false);
+    if (tabsInDrawer) return setPickedTab("looks");
     setRootsOpen(false);
     setShareInDrawer(false);
     setListenInDrawer(false);
-    setLooksFolded(false);
-  }, []);
+  }, [tabsInDrawer]);
   // The verse drawer's ×: put away until another verse is lit (selection = D).
   const [drawerAway, setDrawerAway] = useState(false);
   const putDrawerAway = useCallback(() => {
@@ -1219,6 +1226,7 @@ export function App(): JSX.Element {
     setShareInDrawer(false);
     setListenInDrawer(false);
     setLooksFolded(false);
+    setPickedTab(null);
   }, [selectedKey]);
   // Moving the selection also stops any recitation: the ▶ belongs to the verse
   // you are on, so a hop or a fresh tap should not leave the last one sounding.
@@ -1349,15 +1357,44 @@ export function App(): JSX.Element {
   // The drawer shows the look-alikes when it holds the verse's tools and no
   // other tool is open in it, once the verse's surah has loaded (so a section
   // never says "None" only because its list has not arrived yet).
+  // As tabs, they stay open beside the others.
   const looksInDrawer =
     toolsInDrawer &&
     !looksFolded &&
-    !listenInDrawer &&
-    !shareInDrawer &&
-    rootFamilies === null &&
+    (tabsInDrawer || (!listenInDrawer && !shareInDrawer && rootFamilies === null)) &&
     selectedKey !== null &&
     settledShards.has(parseAyahKey(selectedKey)?.surah ?? 0);
   const looksShowing = looksInDrawer;
+  // The tools open as tabs, in the order their tabs stand, and the one in front.
+  const openTabs: DrawerTab[] = tabsInDrawer
+    ? DRAWER_TABS.filter((tab) =>
+        tab === "looks"
+          ? looksInDrawer
+          : tab === "listen"
+            ? listenInDrawer && selectedKey !== null
+            : tab === "roots"
+              ? rootFamilies !== null
+              : shareInDrawer,
+      )
+    : [];
+  const tabInFront = frontTab(openTabs, pickedTab);
+  const setTabOpen = (tab: DrawerTab, open: boolean) => {
+    if (tab === "looks") setLooksFolded(!open);
+    else if (tab === "listen") setListenInDrawer(open);
+    else if (tab === "roots") setRootsOpen(open);
+    else setShareInDrawer(open);
+  };
+  const closeTab = (tab: DrawerTab) => {
+    setTabOpen(tab, false);
+    setPickedTab(null);
+  };
+  // A tool's own button, with tabs: opens it, brings it forward, or closes it.
+  const pressToolTab = (tab: DrawerTab) => {
+    const does = pressTab(openTabs, pickedTab, tab);
+    if (does === "close") return closeTab(tab);
+    if (does === "open") setTabOpen(tab, true);
+    setPickedTab(tab);
+  };
   // A link's `?open=lookalikes` or `?open=roots`, held until the verse it names
   // is selected and its data has arrived. It is placed after the effect above
   // that closes the roots on every new selection, so on the render that
@@ -4299,6 +4336,37 @@ export function App(): JSX.Element {
   useCountUse(editionOpen ? "edition" : null);
   useCountUse(colophonOpen ? "info-panel" : null);
 
+  // What each tool shows inside the verse's drawer, as a tab.
+  const drawerTool = (tab: DrawerTab): ReactNode =>
+    tab === "listen" && selectedKey ? (
+      <ListenOptions
+        label={t.ayahLabel(selectedKey) ?? selectedKey}
+        way={listenWay}
+        onWay={(way) => {
+          setListenWay(way);
+          rememberListenWay(way);
+        }}
+        onPlayTo={() => startPlayTo(selectedKey)}
+      />
+    ) : tab === "share" ? (
+      <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
+    ) : tab === "roots" && rootFamilies !== null ? (
+      <Suspense fallback={null}>
+        <RootLens
+          inline
+          families={rootFamilies}
+          loading={rootsLoading}
+          curated={curatedRoots}
+          canHop={canHop}
+          onHop={handleRootHop}
+          onHopEdge={handleHop}
+          onClose={() => closeTab("roots")}
+        />
+      </Suspense>
+    ) : tab === "looks" && selectedKey ? (
+      <LookalikeSections chips={railChips} fromKey={selectedKey} canHop={canHop} onHop={handleHop} onClose={() => closeTab("looks")} />
+    ) : null;
+
   return (
     // The chrome reads in the UI language's direction — every offset in the
     // stylesheet is a logical property, so the flip is the whole change. What
@@ -5121,8 +5189,22 @@ export function App(): JSX.Element {
         onWhole={setDrawerWhole}
         onPointerRest={restOnDrawer}
         onPointerAway={leaveDrawer}
+        tabbed={tabsInDrawer}
         panel={
-          toolsInDrawer && listenInDrawer && selectedKey ? (
+          tabsInDrawer ? (
+            tabInFront && (
+              <DrawerTabs
+                tabs={openTabs.map((tab) => ({
+                  key: tab,
+                  name: tab === "looks" ? t.lookalikesTitle : tab === "listen" ? t.vdListen : tab === "roots" ? t.vdRoots : t.vdShare,
+                  content: drawerTool(tab),
+                }))}
+                front={tabInFront}
+                onPick={setPickedTab}
+                onClose={closeTab}
+              />
+            )
+          ) : toolsInDrawer && listenInDrawer && selectedKey ? (
             <ListenOptions
               label={t.ayahLabel(selectedKey) ?? selectedKey}
               way={listenWay}
@@ -5158,6 +5240,8 @@ export function App(): JSX.Element {
           ) : null
         }
         onPanelClose={() => {
+          // As tabs, Escape closes the tab in front, one at a time.
+          if (tabsInDrawer) return tabInFront && closeTab(tabInFront);
           // Escape folds the tool on show: another tool first, then the look-alikes.
           if (looksShowing) setLooksFolded(true);
           setRootsOpen(false);
@@ -5168,7 +5252,9 @@ export function App(): JSX.Element {
         keepClear={() => litVerse(railBottom)}
         clearKey={selectedKey}
         panelKey={
-          toolsInDrawer && listenInDrawer && selectedKey
+          tabsInDrawer
+            ? tabInFront
+            : toolsInDrawer && listenInDrawer && selectedKey
             ? "listen"
             : toolsInDrawer && shareInDrawer
               ? "share"
@@ -5189,7 +5275,10 @@ export function App(): JSX.Element {
             audio.toggle(k);
             // With the setting on, the press also opens the play options
             // under the drawer's buttons, folding any other tool open there.
-            if (toolsInDrawer && !listenInDrawer) {
+            if (tabsInDrawer) {
+              setListenInDrawer(true);
+              setPickedTab("listen");
+            } else if (toolsInDrawer && !listenInDrawer) {
               setRootsOpen(false);
               setShareInDrawer(false);
               setListenInDrawer(true);
@@ -5212,6 +5301,7 @@ export function App(): JSX.Element {
           curated={curatedRoots.length}
           open={rootsOpen}
           onToggle={() => {
+            if (tabsInDrawer) return pressToolTab("roots");
             setShareInDrawer(false);
             setListenInDrawer(false);
             setRootsOpen((o) => !o);
@@ -5231,6 +5321,7 @@ export function App(): JSX.Element {
               ? {
                   open: shareInDrawer,
                   onToggle: () => {
+                    if (tabsInDrawer) return pressToolTab("share");
                     setRootsOpen(false);
                     setListenInDrawer(false);
                     setShareInDrawer((o) => !o);

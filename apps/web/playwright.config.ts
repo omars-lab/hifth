@@ -300,7 +300,7 @@ export default defineConfig({
           // And `pencil`: the rings at the pencil's tip are placed by script
           // and drawn with layered backgrounds, both worth a second engine.
           name: "desktop-firefox",
-          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|drawer-glow|left-off-look|full-screen-tools|bookmark-pull|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes|share-menu-fresh)\.spec\.ts/,
+          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|drawer-tools|tool-help|settings-drawer|drawer-marks|drawer-glow|left-off-look|full-screen-tools|bookmark-pull|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes|share-menu-fresh)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },

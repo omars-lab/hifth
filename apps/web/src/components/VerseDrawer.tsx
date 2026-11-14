@@ -45,6 +45,7 @@ export function VerseDrawer({
   keepClear,
   clearKey,
   panelKey,
+  tabbed,
   tag,
   children,
 }: {
@@ -81,6 +82,8 @@ export function VerseDrawer({
   clearKey?: string | null;
   /** Which tool is open inside it (listen, share, roots, looks); a new one is cut afresh. */
   panelKey?: string | null;
+  /** The tools below stand as tabs: the box keeps its height and the tab in front scrolls. */
+  tabbed?: boolean;
   /** Name this drawer's level in its head (drawer-marks.ts, the tag setting). */
   tag?: boolean;
   /** The tool buttons, each with its caption. */
@@ -291,7 +294,7 @@ export function VerseDrawer({
       </header>
       <div className={styles.tools}>{children}</div>
       {hasPanel && (
-        <div ref={panelRef} className={styles.panel}>
+        <div ref={panelRef} className={styles.panel} data-tabbed={tabbed || undefined}>
           {panel}
         </div>
       )}

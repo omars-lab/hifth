@@ -650,10 +650,10 @@ export function Colophon({
           <Choice id="gestures" title={t.verseGesturesTitle} note={t.verseGesturesNote} value={verseGestures} options={VERSE_GESTURES} label={(choice) => choice === "a" ? t.verseGesturesA : choice === "b" ? t.verseGesturesB : t.verseGesturesC} data="verse-gestures" onPick={onVerseGestures} />
         )}
 
-        {/* Where a verse's tools open (selection-drawer ③): both built, the
-            card by default until the owner has tried the drawer by hand. */}
+        {/* Where a verse's tools open (selection-drawer ③): all three built,
+            the card by default until the owner has tried the others by hand. */}
         {drawerTools && onDrawerTools && (
-          <Choice id="drawer-tools" title={t.drawerToolsTitle} note={t.drawerToolsNote} value={drawerTools} options={DRAWER_TOOLS} label={(choice) => choice === "sheet" ? t.drawerToolsSheet : t.drawerToolsDrawer} data="drawer-tools" onPick={onDrawerTools} />
+          <Choice id="drawer-tools" title={t.drawerToolsTitle} note={t.drawerToolsNote} value={drawerTools} options={DRAWER_TOOLS} label={(choice) => choice === "sheet" ? t.drawerToolsSheet : choice === "drawer" ? t.drawerToolsDrawer : t.drawerToolsTabs} data="drawer-tools" onPick={onDrawerTools} />
         )}
 
         {/* When a jump not made in a long while offers Beaten (confusion-points

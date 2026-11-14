@@ -527,6 +527,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Press Share, pick "Its roots", close it, and press Share again (2:48), then the same with the
   tools set to open inside the verse's drawer: it opens on "The ayah as it is" each time, never on the
   last choice. · phone, laptop, desktop in Firefox · issue: `share-menu-too-plain`
+- [ ] With the tools set to open "As tabs in the verse's drawer", open Same roots, scroll its list,
+  open Share, then tap the Same roots tab (2:45): the list is back where it was left, the tabs read
+  Look-alikes, Same roots, Share in that order, no line of the lit verse is under the drawer, and
+  Escape closes the tab in front, one at a time. · laptop, desktop in Firefox, iPad on its side,
+  English and Arabic · issue: `drawer-holds-its-tools`
 - [ ] Open the list behind a jump mark on a verse whose jump was last made over six weeks ago, beside
   one made this week: only the old row carries the dotted line "Mark it beaten?", it changes nothing
   until pressed, and pressing it lights Beaten. In the info panel, "Never" takes the line away. ·
