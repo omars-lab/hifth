@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import type { Edge, TafsirSource } from "@hifth/core";
 import { LANG_STORAGE_KEY } from "../lang";
@@ -7,6 +7,8 @@ import type { CommentaryNote } from "../tafsir/commentary";
 import { CommentarySheet, overLeaf } from "./CommentarySheet";
 import { RELATED_LIST_KEY } from "../related-list";
 import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
+import { NOTE_LEAD_KEY, NOTE_SIDEWAYS_KEY } from "../phone-note";
+import { PHONE_QUERY, SIDEWAYS_QUERY } from "../useMediaQuery";
 
 /*
  * The one commentary drawer, in both of the app's languages and with sources in
@@ -332,5 +334,108 @@ describe("a look-alike with no note of its own, in the related verses", () => {
   it("gives a row the book wrote a line for nothing more", () => {
     drawer(note("en"), { roads: [{ ...passage, note: "a line from the book" }] });
     expect(screen.getByRole("button", { name: /3:4/ }).textContent).not.toContain("Most alike");
+  });
+});
+
+/*
+ * The note on a phone (docs/design/iphone-app.md, item 3). Measured on the
+ * pitch's longest verse, the short note showed its title and the translation
+ * and not one line of the commentary, upright or on its side. So the
+ * translation is cut to two lines there, with a button for the rest, and on a
+ * phone on its side the note stands beside the page instead of across its
+ * foot. Both ways it was before stay as settings.
+ */
+describe("the note on a phone", () => {
+  beforeEach(() => localStorage.setItem(LANG_STORAGE_KEY, "en"));
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    localStorage.removeItem(NOTE_LEAD_KEY);
+    localStorage.removeItem(NOTE_SIDEWAYS_KEY);
+  });
+
+  /** A screen matching exactly these of the app's rules. */
+  function screenIs(...matching: string[]) {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((media: string) => ({
+        matches: matching.includes(media),
+        media,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      })),
+    );
+  }
+
+  /** A translation taller than the two lines it is cut to. */
+  function longTranslation() {
+    vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockReturnValue(120);
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(48);
+  }
+
+  const translation = (sheet: HTMLElement) => sheet.querySelector("blockquote");
+  const whole = () => screen.queryByRole("button", { name: /whole translation/i });
+
+  it("cuts the translation to two lines on a phone, with a button for the rest", () => {
+    screenIs(PHONE_QUERY);
+    longTranslation();
+    const sheet = drawer(note("en"));
+    expect(translation(sheet)?.hasAttribute("data-cut")).toBe(true);
+    const button = whole();
+    expect(button?.getAttribute("aria-expanded")).toBe("false");
+    if (button) fireEvent.click(button);
+    expect(translation(sheet)?.hasAttribute("data-cut")).toBe(false);
+    const shorter = screen.getByRole("button", { name: /shorter translation/i });
+    expect(shorter.getAttribute("aria-expanded")).toBe("true");
+    fireEvent.click(shorter);
+    expect(translation(sheet)?.hasAttribute("data-cut")).toBe(true);
+  });
+
+  it("has no button when the translation fits in its two lines", () => {
+    screenIs(PHONE_QUERY);
+    drawer(note("en"));
+    expect(whole()).toBeNull();
+  });
+
+  it("leaves the translation whole off a phone, as on an iPad", () => {
+    longTranslation();
+    const sheet = drawer(note("en"));
+    expect(translation(sheet)?.hasAttribute("data-cut")).toBe(false);
+    expect(whole()).toBeNull();
+  });
+
+  it("leaves it whole for a reader who set it so", () => {
+    localStorage.setItem(NOTE_LEAD_KEY, "whole");
+    screenIs(PHONE_QUERY);
+    longTranslation();
+    const sheet = drawer(note("en"));
+    expect(translation(sheet)?.hasAttribute("data-cut")).toBe(false);
+    expect(whole()).toBeNull();
+  });
+
+  it("opens grown to the full height for a reader who set it so", () => {
+    localStorage.setItem(NOTE_LEAD_KEY, "tall");
+    screenIs(PHONE_QUERY);
+    const sheet = drawer(note("en"));
+    expect(sheet.hasAttribute("data-tall")).toBe(true);
+    expect(translation(sheet)?.hasAttribute("data-cut")).toBe(false);
+  });
+
+  it("stands beside the page on a phone on its side, with nothing to grow and nothing dimmed", () => {
+    screenIs(SIDEWAYS_QUERY);
+    const sheet = drawer(note("en"));
+    expect(sheet.hasAttribute("data-standing")).toBe(true);
+    expect(screen.queryByRole("button", { name: /show all|show less/i })).toBeNull();
+    sheet.scrollTop = 40;
+    fireEvent.scroll(sheet);
+    expect(sheet.hasAttribute("data-tall")).toBe(false);
+    expect(sheet.getAttribute("aria-modal")).toBe("false");
+  });
+
+  it("lies across the foot on its side for a reader who set it so", () => {
+    localStorage.setItem(NOTE_SIDEWAYS_KEY, "foot");
+    screenIs(SIDEWAYS_QUERY);
+    const sheet = drawer(note("en"));
+    expect(sheet.hasAttribute("data-standing")).toBe(false);
   });
 });

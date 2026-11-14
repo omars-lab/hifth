@@ -54,16 +54,17 @@ gets a test and a line on the walk checklist (the `walk-app` skill).
 - **Found and fixed: the iPhone app did not turn.** Held on its side, the page stayed upright,
   because the app's settings let only the iPad turn. The iPhone now turns to either side (not
   upside down); a test reads the settings (`scripts/ios-orientations.test.mjs`).
-- **Upright and on its side, all 14 pitch steps pass**: one page, each note in a card at the foot, the verse
-  whole above it, the look-alike lists, the roots list, the surah introduction and the Mistake
-  pen all clear of the verse.
+- **Upright and on its side, all 14 pitch steps pass**: one page; a tap opens the note in a short
+  card at the foot with the verse whole above it; the look-alike lists, the roots list, the surah
+  introduction and the Mistake pen all clear of the verse. Reading a note to its end grows the
+  card to the full screen, over the page (the pictures of step 4, both ways up).
 - **The walk's own checks were iPad-shaped**: they wanted two pages and the commentary in sight
   at once. On a phone the card shows the verse's translation first and the commentary below its
   fold, a scroll away. The checks now expect one page on a narrow screen and scroll the card to
   the commentary. Whether the commentary should start lower like that is ③.
 - **Not walked yet:** a page turned by hand and a bookmark, which the pitch path does not cover.
 
-### ③ Where does The Study Quran's note go on a phone? · **open**
+### ③ Where does The Study Quran's note go on a phone? · **answered**
 
 The agent's, built to find out rather than argued. On the iPad the note sits beside the verse;
 a phone has no room beside. Likely shapes: a sheet that rises from the bottom over half the
@@ -75,6 +76,25 @@ the best as the default and the others as a setting.
 bottom. Held sideways, the card leaves a strip about 150 points tall for the note: the title and
 one line of the verse's translation. The commentary itself starts below that, a scroll away, and
 upright the long translation of 2:255 pushes it about 200 points below the screen's foot.
+
+**What was built (2026-11-14):** each way was built, and the first of each is the default. Which way stays is still an open choice for the owner (below).
+The others are settings in the pitch build's info panel.
+
+- **Upright**, the note leads with two lines of the translation and a "Whole translation" button.
+  The commentary starts inside the short card. The other settings are the whole translation
+  first (as before) or the note opened full.
+- **On its side**, the note stands the full height of the screen beside the page, and the page
+  moves over. The other setting is lying across the foot (as before).
+
+Measured on 2:255, before any scroll: 3 lines of the commentary in sight upright, 4 on a
+6.3-inch phone on its side and 5 on the largest. Every line of the verse stays clear of the note.
+On its side, though, the bars at the foot of the screen cover the end of the verse: the last 2 of
+its 6 lines on the smallest phone (375 points tall), and the walk's picture shows the same on the
+6.3-inch one. That was already so before this change; it is the backlog row
+`phone-side-foot-bars-cover-verse` (⑪ below). The two choices are the open decisions `phone-note-lead`
+and `phone-note-sideways`, drawn on
+[the options page](https://blog.bytesofpurpose.com/hifth/docs/design/phone-note-options.html)
+and argued in [the decision record](../decisions/phone-note.md).
 
 ### ④ Install it on the owner's own iPhone with the paid team · **blocked**
 
@@ -121,6 +141,15 @@ Yours, once ⑨ works. A separate approval: a form at
 form is behind Apple's sign-in, so I did not read what it asks; Apple's general rule is that it
 is granted to an app that already answers Siri's play requests, so asking before ⑨ works would
 likely be turned down. The agent drafts the answers when the time comes.
+
+### ⑪ On a phone on its side, the bars at the foot cover the end of the verse · **open**
+
+The agent's, found while measuring ③ (2026-11-14), and already so before it. With a note open
+on a phone held on its side, the bars at the foot of the screen take about the lower 40% of the
+height. On the smallest phone they cover the last 2 of 2:255's 6 lines, and the walk's picture
+shows the same on a 6.3-inch phone. Just after the tap, the page also shows its own foot for a
+moment before it moves to the verse. Likely fix: hide or shrink those bars while a note stands
+beside the page on a short screen.
 
 ## What the app's ID allows, and what else may be needed
 

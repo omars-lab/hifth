@@ -133,7 +133,8 @@ import { exposeToShell, isNative, nativeInfo, nativeShare, shareBase } from "./n
 import { rememberTipPens, savedTipPens, type TipPens } from "./pen-ring";
 import { pencilAction, pencilGesture, swapTool } from "./pencil";
 import { linksFor } from "./share-links";
-import { CARD_QUERY, DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
+import { CARD_QUERY, DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, PHONE_QUERY, SIDEWAYS_QUERY, useMediaQuery } from "./useMediaQuery";
+import { useNoteSideways } from "./phone-note";
 import { useRoomForCards } from "./components/over-leaf";
 import { spanOfAll, type CardSpan } from "./components/short-band";
 import {
@@ -440,6 +441,9 @@ export function App(): JSX.Element {
   // Where the open share sheet starts at any width: the card in a sideways
   // phone's corner is where the look-alike chips ride.
   const [shareCardTop, setShareCardTop] = useState<number | null>(null);
+  // Where the note starts while it stands beside the page on a phone on its
+  // side: it stands over the chips' corner, so they ride its top row.
+  const [noteStandTop, setNoteStandTop] = useState<number | null>(null);
   // Where an open roots or similar-verses list starts on a phone: it takes the
   // note's place, so the page lifts the verse above it the same way.
   const [listTop, setListTop] = useState<number | null>(null);
@@ -667,6 +671,10 @@ export function App(): JSX.Element {
   const upright = useMediaQuery(UPRIGHT_QUERY);
   const phone = useMediaQuery(PHONE_QUERY);
   const cardWide = useMediaQuery(CARD_QUERY);
+  // A phone on its side, where the note stands beside the page unless the
+  // reader set it to lie across the foot (phone-note.ts).
+  const sidewaysPhone = useMediaQuery(SIDEWAYS_QUERY);
+  const noteSideways = useNoteSideways();
   const touchScreen = useMediaQuery(TOUCH_QUERY);
   const [pageMode, setPageMode] = useState<"one" | "two">(() => (upright ? "one" : "two"));
   const pageModePickedRef = useRef(false);
@@ -4189,7 +4197,8 @@ export function App(): JSX.Element {
       seat={
         beside || home || noteTall
           ? null
-          : (highestTop(coverTop, shareTop, listTop) ?? (shareCorner !== null ? shareCardTop : null))
+          : (highestTop(coverTop, shareTop, listTop) ??
+            (shareCorner !== null ? shareCardTop : listCorner === null ? noteStandTop : null))
       }
       onCard={
         (highestTop(coverTop, shareTop, listTop) === null && shareCorner !== null) ||
@@ -4227,7 +4236,12 @@ export function App(): JSX.Element {
   // A verse too long to lift whole above the freshly opened note (2:255) is the
   // same: the page moves aside at once, rather than leave the ends of its lines
   // under the card until the note is read to its end (plan item 92).
-  const noteCorner = !desktop && !upright && cardWide && (noteTall || noteShort) && commentaryOpen ? noteSide : null;
+  // On a phone on its side the note stands beside the page from the start, the
+  // full height of the screen, so the page moves clear of it at once
+  // (docs/design/iphone-app.md, item 3).
+  const noteStanding = sidewaysPhone && noteSideways === "beside";
+  const noteCorner =
+    !desktop && !upright && ((cardWide && (noteTall || noteShort)) || noteStanding) && commentaryOpen ? noteSide : null;
   // The roots list stands there the full height of its corner from the start,
   // and lay over its verse the same way: the lift above its top is no lift on
   // a card that tall. A look-alike list is shorter, but in the iPad app, whose
@@ -4887,6 +4901,7 @@ export function App(): JSX.Element {
                 onCover={setCoverTop}
                 onSide={setNoteSide}
                 onTall={setNoteTall}
+                onStandTop={setNoteStandTop}
                 onClose={() => (introSheet ? setIntroSurah(null) : setCommentaryOpen(false))}
                 creditNote={PITCH ? t.pitchCredit : undefined}
                 sigla={pitchKey}

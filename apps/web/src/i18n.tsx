@@ -299,6 +299,9 @@ export interface Strings {
   clickForNote(source: string): string;
   noteShowAll: string;
   noteShowLess: string;
+  /** The button under a phone note's translation cut to two lines (phone-note.ts). */
+  noteWholeTranslation: string;
+  noteShorterTranslation: string;
   surahIntro: string;
   relatedVerses: string;
   relatedLede(source: string): string;
@@ -1013,6 +1016,16 @@ export interface Strings {
   longVerseSmaller: string;
   longVerseShorter: string;
   longVerseNote: string;
+  /** How the note sits on a phone (phone-note.ts). */
+  noteLeadTitle: string;
+  noteLeadClamp: string;
+  noteLeadWhole: string;
+  noteLeadTall: string;
+  noteLeadNote: string;
+  noteSidewaysTitle: string;
+  noteSidewaysBeside: string;
+  noteSidewaysFoot: string;
+  noteSidewaysNote: string;
   lookalikeCompareTitle: string;
   lookalikeCompareEvery: string;
   lookalikeComparePlain: string;

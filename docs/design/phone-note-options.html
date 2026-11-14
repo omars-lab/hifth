@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The note on a phone</title>
+<style>
+  :root{
+    --paper:#f4efe6; --paper-raised:#fbf8f2; --paper-sunk:#e2d8c6;
+    --ink:#26201a; --ink-soft:#5c5347; --ink-faint:#9a8f80;
+    --accent:#1f6f66; --accent-strong:#17544d; --accent-tint:#d7e7e3;
+    --radius-md:10px; --radius-lg:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1c1915; --paper-raised:#25211c; --paper-sunk:#3a332b;
+      --ink:#efe8dc; --ink-soft:#c9bfb0; --ink-faint:#7d7466;
+      --accent:#5fb3a8; --accent-strong:#8fd0c6; --accent-tint:#23403c;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  main{max-width:78rem;margin:0 auto;padding:2rem 1rem 5rem;}
+  h1{font-size:1.9rem;line-height:1.2;margin:.2rem 0 .4rem;}
+  h2{font-size:1.28rem;margin:2.4rem 0 .5rem;}
+  p,li{max-width:40rem;} .lead{font-size:1.12rem;color:var(--ink-soft);}
+  a{color:var(--accent-strong);}
+  .hafiz{background:var(--accent-tint);border-radius:var(--radius-md);padding:.7rem 1rem;max-width:40rem;}
+  .glossary{background:var(--paper-raised);border:1px solid var(--paper-sunk);
+    border-radius:var(--radius-md);padding:.8rem 1rem;margin:1.2rem 0;font-size:.95rem;max-width:40rem;}
+  .glossary dt{font-weight:650;} .glossary dd{margin:0 0 .5rem;color:var(--ink-soft);}
+  .phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));gap:1.4rem;margin:1.4rem 0;}
+  .phones.wide{grid-template-columns:repeat(auto-fit,minmax(min(100%,26rem),1fr));}
+  .opt{display:flex;flex-direction:column;background:var(--paper-raised);border:1px solid var(--paper-sunk);border-radius:var(--radius-lg);padding:1rem;}
+  .opt h3{margin:0 0 .2rem;font-size:1.05rem;}
+  .opt .gist{margin:0 0 .8rem;color:var(--ink-soft);font-size:.95rem;}
+  .opt.rec{border-color:var(--accent);}
+  .rec-tag{display:inline-block;font-size:.75rem;font-weight:650;color:var(--accent-strong);
+    background:var(--accent-tint);border-radius:999px;padding:.05rem .55rem;margin-left:.4rem;}
+  figure{margin:auto 0 0;} figure svg{display:block;width:100%;max-height:30rem;}
+  figcaption{font-size:.88rem;color:var(--ink-soft);margin-top:.5rem;}
+  table{border-collapse:collapse;width:100%;font-size:.93rem;margin:1rem 0;}
+  th,td{border:1px solid var(--paper-sunk);padding:.5rem .6rem;vertical-align:top;text-align:left;}
+  th{background:var(--paper-raised);}
+  td ul{margin:0;padding-left:1.1rem;}
+  .scroll{overflow-x:auto;}
+</style>
+</head>
+<body>
+<main>
+<h1>How should The Study Quran's note sit on a phone?</h1>
+<p class="lead">On an iPad the note sits beside the verse it is about. A phone has no room beside, so the note rises as a
+card from the foot of the screen. Measured on the longest verse on the demo's path, that card showed the note's title and
+the translation, and not one line of the book's commentary, whether the phone was upright or on its side. Each way of
+fixing it was built into the app. The first of each pair is the default; the others are a setting in the info panel.</p>
+
+<p class="hafiz"><b>What it changes for a hafiz:</b> tapping a verse on a phone shows the book's commentary on it at once,
+with the verse still whole in sight, instead of a translation that has to be scrolled past first.</p>
+
+<dl class="glossary">
+  <dt>The note</dt><dd>The Study Quran's translation of a verse and its commentary on it, opened by tapping the verse.</dd>
+  <dt>The commentary</dt><dd>the book's explanation of the verse, under the translation.</dd>
+  <dt>Upright, on its side</dt><dd>the phone held tall (portrait) or wide (landscape).</dd>
+</dl>
+<p>In the drawings the orange bands are the verse's lines on the page, the grey bars are the translation's words, and the
+green bars are the commentary's. No words are drawn.</p>
+
+<h2>What should the note lead with, held upright?</h2>
+<div class="phones">
+  <section class="opt rec">
+    <h3>A · Two lines of the translation, then the commentary<span class="rec-tag">the default</span></h3>
+    <p class="gist">The translation is cut to two lines with a button for the rest; the commentary starts inside the short note.</p>
+    <figure><svg viewBox="-10 -10 422 894" role="img" xmlns="http://www.w3.org/2000/svg"><rect x="-8" y="-8" width="418" height="890" fill="var(--ink)" rx="44"/><rect x="0" y="0" width="402" height="874" fill="var(--paper)" rx="38"/><rect x="0" y="0" width="402" height="64" fill="var(--paper-sunk)" rx="0"/><rect x="16" y="80" width="370" height="450" fill="#fffdf7" stroke="var(--paper-sunk)"/><rect x="26" y="90" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="112" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="134" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="156" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="178" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="200" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="216" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="222" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="238" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="244" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="260" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="266" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="282" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="288" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="304" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="310" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="326" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="332" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="354" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="376" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="398" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="420" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="442" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="464" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="486" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="508" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="0" y="542" width="402" height="332" fill="var(--paper-raised)" rx="18" stroke="var(--paper-sunk)" stroke-width="2"/><rect x="20" y="566" width="180.9" height="10" fill="var(--ink)" rx="4"/><rect x="30" y="600" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="620" width="205.2" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="648" width="110" height="8" fill="var(--accent-strong)" rx="3"/><rect x="20" y="682" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="704" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="726" width="217.2" height="7" fill="var(--accent)" rx="3"/></svg><figcaption><b>Measured:</b> 3 lines of the commentary in sight, the verse whole above the note.</figcaption></figure>
+  </section>
+  <section class="opt">
+    <h3>B · The whole translation first, as it was</h3>
+    <p class="gist">The note shows the whole translation, and the commentary starts below it.</p>
+    <figure><svg viewBox="-10 -10 422 894" role="img" xmlns="http://www.w3.org/2000/svg"><rect x="-8" y="-8" width="418" height="890" fill="var(--ink)" rx="44"/><rect x="0" y="0" width="402" height="874" fill="var(--paper)" rx="38"/><rect x="0" y="0" width="402" height="64" fill="var(--paper-sunk)" rx="0"/><rect x="16" y="80" width="370" height="450" fill="#fffdf7" stroke="var(--paper-sunk)"/><rect x="26" y="90" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="112" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="134" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="156" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="178" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="200" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="216" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="222" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="238" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="244" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="260" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="266" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="282" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="288" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="304" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="310" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="326" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="332" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="354" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="376" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="398" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="420" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="442" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="464" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="486" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="508" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="0" y="542" width="402" height="332" fill="var(--paper-raised)" rx="18" stroke="var(--paper-sunk)" stroke-width="2"/><rect x="20" y="566" width="180.9" height="10" fill="var(--ink)" rx="4"/><rect x="30" y="600" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="620" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="640" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="660" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="680" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="700" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="720" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="740" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="760" width="205.2" height="6" fill="var(--ink-faint)" rx="3"/></svg><figcaption><b>Measured:</b> 0 lines of the commentary in sight on a long verse; it starts about 200 points below the screen's foot.</figcaption></figure>
+  </section>
+  <section class="opt">
+    <h3>C · The note opens grown to the full height</h3>
+    <p class="gist">The note rises over the whole screen at once, showing the translation and much of the commentary.</p>
+    <figure><svg viewBox="-10 -10 422 894" role="img" xmlns="http://www.w3.org/2000/svg"><rect x="-8" y="-8" width="418" height="890" fill="var(--ink)" rx="44"/><rect x="0" y="0" width="402" height="874" fill="var(--paper)" rx="38"/><rect x="0" y="0" width="402" height="64" fill="var(--paper-sunk)" rx="0"/><rect x="16" y="80" width="370" height="450" fill="#fffdf7" stroke="var(--paper-sunk)"/><rect x="26" y="90" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="112" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="134" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="156" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="178" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="200" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="216" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="222" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="238" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="244" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="260" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="266" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="282" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="288" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="304" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="310" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="22" y="326" width="358" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="26" y="332" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="354" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="376" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="398" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="420" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="442" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="464" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="486" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="26" y="508" width="350" height="5" fill="#b9ad9a" rx="2"/><rect x="0" y="72" width="402" height="802" fill="var(--paper-raised)" rx="18" stroke="var(--paper-sunk)" stroke-width="2"/><rect x="20" y="96" width="180.9" height="10" fill="var(--ink)" rx="4"/><rect x="30" y="130" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="150" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="170" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="190" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="210" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="230" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="250" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="270" width="342" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="290" width="205.2" height="6" fill="var(--ink-faint)" rx="3"/><rect x="20" y="318" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="340" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="362" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="384" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="406" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="428" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="450" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="472" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="494" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="516" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="538" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="560" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="582" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="604" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="626" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="648" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="670" width="362" height="7" fill="var(--accent)" rx="3"/><rect x="20" y="692" width="217.2" height="7" fill="var(--accent)" rx="3"/></svg><figcaption><b>Measured:</b> Most of the commentary in sight, and the verse covered.</figcaption></figure>
+  </section>
+</div>
+<div class="scroll"><table>
+  <tr><th></th><th>What it buys</th><th>What it costs</th><th>What it commits us to</th></tr>
+  <tr><th>A · Two lines of the translation, then the commentary</th><td><ul><li>The reader sees the book's own words on the verse at once, without a scroll.</li><li>The verse stays whole and clear above the note.</li><li>The whole translation is one tap away, and the tap is undone the same way.</li></ul></td><td><ul><li>The translation is cut mid-sentence until the reader asks for it.</li><li>One more button in the note.</li></ul></td><td>The note leads with the commentary on a phone, while the iPad keeps leading with the whole translation.</td></tr>
+  <tr><th>B · The whole translation first, as it was</th><td><ul><li>Nothing is cut: the translation reads whole.</li><li>The same order as on the iPad.</li></ul></td><td><ul><li>On a long verse the commentary is out of sight until the reader scrolls, so a first look shows no commentary at all.</li></ul></td><td>A phone reader has to learn to scroll the note before the book's commentary appears.</td></tr>
+  <tr><th>C · The note opens grown to the full height</th><td><ul><li>The most commentary in sight at once.</li><li>Nothing is cut.</li></ul></td><td><ul><li>The verse it is about is hidden under it, so the reader loses the page while reading about it.</li><li>Closing the note is needed to see the page again.</li></ul></td><td>A phone reads the note as a page of its own, not beside the verse.</td></tr>
+</table></div>
+
+<h2>Where should the note stand with the phone on its side?</h2>
+<div class="phones wide">
+  <section class="opt rec">
+    <h3>A · Standing beside the page, the full height of the screen<span class="rec-tag">the default</span></h3>
+    <p class="gist">Held on its side, the note stands at the side of the screen and the page moves over to make room.</p>
+    <figure><svg viewBox="-10 -10 894 422" role="img" xmlns="http://www.w3.org/2000/svg"><rect x="-8" y="-8" width="890" height="418" fill="var(--ink)" rx="44"/><rect x="0" y="0" width="874" height="402" fill="var(--paper)" rx="38"/><rect x="0" y="0" width="874" height="64" fill="var(--paper-sunk)" rx="0"/><rect x="175" y="72" width="238" height="200" fill="#fffdf7" stroke="var(--paper-sunk)"/><rect x="185" y="82" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="181" y="98" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="185" y="104" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="181" y="120" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="185" y="126" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="181" y="142" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="185" y="148" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="181" y="164" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="185" y="170" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="181" y="186" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="185" y="192" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="181" y="208" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="185" y="214" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="185" y="236" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="566" y="77" width="300" height="317" fill="var(--paper-raised)" rx="18" stroke="var(--paper-sunk)" stroke-width="2"/><rect x="586" y="101" width="135" height="10" fill="var(--ink)" rx="4"/><rect x="596" y="135" width="240" height="6" fill="var(--ink-faint)" rx="3"/><rect x="596" y="155" width="144" height="6" fill="var(--ink-faint)" rx="3"/><rect x="596" y="183" width="110" height="8" fill="var(--accent-strong)" rx="3"/><rect x="586" y="217" width="260" height="7" fill="var(--accent)" rx="3"/><rect x="586" y="239" width="260" height="7" fill="var(--accent)" rx="3"/><rect x="586" y="261" width="260" height="7" fill="var(--accent)" rx="3"/><rect x="586" y="283" width="260" height="7" fill="var(--accent)" rx="3"/><rect x="586" y="305" width="156" height="7" fill="var(--accent)" rx="3"/></svg><figcaption><b>Measured:</b> 4 lines of the commentary in sight on a 6.3-inch phone, 5 on the largest, 3 on the smallest; no line of the verse under the note.</figcaption></figure>
+  </section>
+  <section class="opt">
+    <h3>B · Lying across the foot of the screen, as it was</h3>
+    <p class="gist">The note lies across the bottom of the screen, under the page.</p>
+    <figure><svg viewBox="-10 -10 894 422" role="img" xmlns="http://www.w3.org/2000/svg"><rect x="-8" y="-8" width="890" height="418" fill="var(--ink)" rx="44"/><rect x="0" y="0" width="874" height="402" fill="var(--paper)" rx="38"/><rect x="0" y="0" width="874" height="64" fill="var(--paper-sunk)" rx="0"/><rect x="318" y="72" width="238" height="160" fill="#fffdf7" stroke="var(--paper-sunk)"/><rect x="328" y="82" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="324" y="98" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="328" y="104" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="324" y="120" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="328" y="126" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="324" y="142" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="328" y="148" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="324" y="164" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="328" y="170" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="324" y="186" width="226" height="18" fill="#f0b85a" rx="4" opacity=".75"/><rect x="328" y="192" width="218" height="5" fill="#b9ad9a" rx="2"/><rect x="0" y="233" width="874" height="169" fill="var(--paper-raised)" rx="18" stroke="var(--paper-sunk)" stroke-width="2"/><rect x="20" y="257" width="393.3" height="10" fill="var(--ink)" rx="4"/><rect x="30" y="291" width="814" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="311" width="488.4" height="6" fill="var(--ink-faint)" rx="3"/><rect x="30" y="339" width="110" height="8" fill="var(--accent-strong)" rx="3"/></svg><figcaption><b>Measured:</b> 0 lines of the commentary in sight: a strip about 150 points tall holds the title and the translation.</figcaption></figure>
+  </section>
+</div>
+<div class="scroll"><table>
+  <tr><th></th><th>What it buys</th><th>What it costs</th><th>What it commits us to</th></tr>
+  <tr><th>A · Standing beside the page, the full height of the screen</th><td><ul><li>The verse and the commentary are both in sight, side by side, as on the iPad.</li><li>The note is as tall as the screen allows, which on its side is the scarce direction.</li></ul></td><td><ul><li>It covers the right-hand end of the page strip and the chip at the foot while it is open.</li><li>On the smallest phones (375 points tall) the bars at the foot still cover the end of a long verse.</li></ul></td><td>A phone on its side behaves like a small iPad: the note beside the page, not over it.</td></tr>
+  <tr><th>B · Lying across the foot of the screen, as it was</th><td><ul><li>The same place as when the phone is upright.</li><li>The whole page strip at the foot is covered alike, so nothing is half hidden.</li></ul></td><td><ul><li>No commentary in sight until the reader scrolls the strip.</li><li>The strip is too short to read in.</li></ul></td><td>A phone reader turns the phone upright to read a note.</td></tr>
+</table></div>
+
+<h2>Who decides, and what happens if nobody does?</h2>
+<p>The owner, by trying each in the pitch build on a phone (the info panel: "What a note on a phone shows first" and "Where a note stands on a phone on its side"). Until then the app
+shows the first of each, and nothing else changes: the iPad and the computer are not touched by either choice.</p>
+
+<h2>Where are the reasons?</h2>
+<p>In <a href="../decisions/phone-note.md">the decision record</a>, with how each was measured, what else was looked at,
+and what would change the answer.</p>
+</main>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// The pitch demo's steps, as the iPad app walks them (make pitch-walk).
+// The pitch demo's steps, as the iPad or iPhone app walks them (make pitch-walk).
 //
 // One entry per step of .claude/skills/walk-app/pitch-script.md that a made-up
 // tap can do; steps 2 (a turn by the page's edge) and 14 (the surah playing)
@@ -96,19 +96,29 @@ export function helpers() {
   };
   /**
    * Whether the window has room for two pages: the web app's own rule for the open
-   * book (App.module.css). A phone, upright or on its side, shows one page.
+   * book (DESKTOP_QUERY in useMediaQuery.ts; walk-spread.test.mjs keeps them equal). A phone, upright or on its side, shows one page.
    */
-  const spread = () => matchMedia("(min-width: 1024px) and ((min-height: 775px) or ((min-height: 600px) and (hover: hover)))").matches;
+  const spread = () => matchMedia("(min-width: 1024px) and (min-height: 775px), (min-width: 1024px) and (min-height: 600px) and (hover: hover)").matches;
   /**
-   * The open note's commentary, brought into sight. On an iPad it sits in sight
-   * already; on a phone the verse's own translation comes first in the card, so
-   * the commentary starts below the card's fold and a reader scrolls the card to
-   * it (found walking the iPhone app, 2026-11-14). Never the page: only the card.
+   * The open note's commentary, brought into sight. It should already be in
+   * sight: on an iPad beside the verse, and on a phone since 2026-11-14, when the
+   * translation was cut to two lines (upright) and the note stood beside the page
+   * (on its side), because the walk found the short card hid it (docs/design/
+   * iphone-app.md ③). With `firstLook`, a check records whether two lines' worth
+   * of it showed before any scroll; either way it is then scrolled into the card,
+   * never the page, so the later checks still run.
    */
-  const commentary = async (ms = 20000) => {
+  const commentary = async (ms = 20000, { firstLook = false } = {}) => {
     const named = () => dialogs().map((d) => all("[role=region], section[aria-label]", d).find((e) => e.getAttribute("aria-label") === "Commentary")).find(Boolean);
     const el = await until(named, ms);
     if (!el) return null;
+    if (firstLook) {
+      await wait(600);
+      const r = box(el);
+      const card = box(el.closest("[role=dialog]"));
+      const room = r && card ? Math.min(innerHeight, card.bottom, r.bottom) - Math.max(r.top, card.top, 0) : 0;
+      check("two lines of the commentary in sight before any scroll", room >= 40, Math.round(room));
+    }
     if (!shown(el)) {
       el.scrollIntoView({ block: "start" });
       await wait(400);
@@ -136,7 +146,7 @@ export function helpers() {
 export const STEPS = [
   {
     n: 1,
-    title: "the app opens on two pages of the mus'haf with nothing over them",
+    title: "the app opens on the mus'haf (two pages where there is room) with nothing over them",
     route: "/hafs-kfqc/p42",
     run: async (h) => {
       h.check("page 42 is in sight", await h.until(() => h.pageSvg(42), 20000));
@@ -165,7 +175,7 @@ export const STEPS = [
     title: "2:255's note reads in its ten printed paragraphs, to its end",
     route: "/hafs-kfqc/2:255?open=commentary",
     run: async (h) => {
-      const note = await h.commentary(20000);
+      const note = await h.commentary(20000, { firstLook: true });
       if (!h.check("the note is open", note)) return;
       const ps = h.all("p", note);
       h.check("the note has ten paragraphs", ps.length === 10, ps.length);
