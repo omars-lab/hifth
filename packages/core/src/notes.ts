@@ -61,6 +61,18 @@ export interface Note {
    * letter 0 (the word tool's letters, letter-parts = A). Absent: no one letter.
    */
   readonly letter?: number;
+  /**
+   * A mistake only: what went wrong, as the reader said it (mistake-kinds,
+   * 2026-11-12). "word" the whole word, "sign" a harakah (`mark` says which),
+   * "letter" a letter said from the wrong place, makharij (`letter` says which,
+   * when the word could be cut into letters), "rule" a tajweed rule left out
+   * (`rule` says which). Absent on a mistake marked before this existed: read
+   * it from `mark` then (see {@link mistakeKindOf}). An app that does not know
+   * this field still shows the mark, as the whole word.
+   */
+  readonly what?: MistakeKind;
+  /** A "rule" mistake: the tajweed rule left out, by its id ("idgham"). */
+  readonly rule?: string;
   readonly kind: NoteKind;
   readonly text: string;
   readonly createdAt: number;
@@ -158,6 +170,45 @@ export function isMistake(note: Note): boolean {
   return note.kind === "correction";
 }
 
+/** What a mistake can say went wrong on its word; see `Note.what`. */
+export type MistakeKind = "word" | "sign" | "letter" | "rule";
+
+const MISTAKE_KINDS: readonly MistakeKind[] = ["word", "sign", "letter", "rule"];
+
+/** One answer to "what went wrong in this word?", with the detail its kind needs. */
+export type MistakeAnswer =
+  | { readonly what: "word" }
+  | { readonly what: "sign"; readonly mark: number }
+  | { readonly what: "letter"; readonly letter?: number | undefined }
+  | { readonly what: "rule"; readonly rule: string };
+
+/** What a mistake says went wrong, reading a mark made before kinds were kept as a sign or the word. */
+export function mistakeKindOf(note: Note): MistakeKind {
+  if (note.what !== undefined) return MISTAKE_KINDS.includes(note.what) ? note.what : "word";
+  return note.mark !== undefined && note.mark !== null ? "sign" : "word";
+}
+
+/**
+ * Set what went wrong on a marked mistake. The detail of any other kind is
+ * taken off, so a mistake changed from a sign to a letter does not keep
+ * pointing at the sign.
+ */
+export function answerMistake(set: readonly Note[], id: string, answer: MistakeAnswer, now: number): Note[] {
+  return set.map((x) => {
+    if (x.id !== id) return x;
+    const { mark: _m, marks: _ms, letter: _l, rule: _r, what: _w, ...rest } = x;
+    return {
+      ...rest,
+      what: answer.what,
+      mark: answer.what === "sign" ? answer.mark : null,
+      onHarakah: answer.what === "sign",
+      ...(answer.what === "letter" && answer.letter !== undefined ? { letter: answer.letter } : {}),
+      ...(answer.what === "rule" ? { rule: answer.rule } : {}),
+      updatedAt: now,
+    };
+  });
+}
+
 /** The mistake already marked on this word, if there is one. */
 export function mistakeOn(set: readonly Note[], page: number, key: string, word: number): Note | undefined {
   return set.find((x) => isMistake(x) && x.page === page && x.key === key && x.word === word);
@@ -215,6 +266,9 @@ export function isNote(x: unknown): x is Note {
       (Array.isArray(n.marks) &&
         (n.marks as unknown[]).every((m) => typeof m === "number" && Number.isInteger(m) && m >= 0))) &&
     (n.letter === undefined || (typeof n.letter === "number" && Number.isInteger(n.letter) && n.letter >= 0)) &&
+    // A kind this build does not know (a file from a newer one) is kept and read as the word.
+    (n.what === undefined || (typeof n.what === "string" && n.what.length <= 32)) &&
+    (n.rule === undefined || (typeof n.rule === "string" && /^[a-z-]{1,32}$/.test(n.rule))) &&
     KINDS.includes(n.kind as NoteKind) &&
     typeof n.text === "string" &&
     typeof n.createdAt === "number" &&

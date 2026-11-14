@@ -46,32 +46,42 @@ test.describe("Hifth · share links (spec §7)", () => {
     ).toBeAttached();
   });
 
-  test("the breadcrumb survives its page arriving late", async ({ page }) => {
-    // The test above is a witness, not a proof: on a fast machine page 7 mounts
-    // before the breadcrumb is computed, which is the order that works. The
-    // order that broke is the other one, and it is not reachable by asking
-    // nicely — so hold page 7's SVG back until the effect that draws the crumb
-    // has certainly run and found nothing to draw on.
-    //
-    // 400 ms is chosen against the assertion, not the machine: whatever the
-    // fetch would have taken, the effect fires on the render that follows the
-    // hash parse, and that is not 400 ms away. Under the bug the crumb is then
-    // gone for good — nothing re-runs the effect, because it reads the mounted
-    // set through a ref and no render is owed. This is the container failure
-    // reproduced on purpose instead of waited for.
-    let held = 0;
-    await page.route("**/assets/pages/hafs-kfqc/7.svg", async (route) => {
-      held += 1;
-      await new Promise((r) => setTimeout(r, 400));
-      await route.continue();
+  test.describe(() => {
+    // The app's offline copy takes charge of the page as soon as it is installed,
+    // and from then on it fetches page pictures itself, where the hold below never
+    // sees them: page 7 then arrives at once and nothing was held back. That beat
+    // the hold once on Android in a full run (2026-11-13, held 0, 207 ms), so this
+    // test runs with the offline copy switched off.
+    // Checked 2026-11-13: with the offline copy put in charge first, held was 0;
+    // with it switched off, the same run held page 7 back and passed.
+    test.use({ serviceWorkers: "block" });
+    test("the breadcrumb survives its page arriving late", async ({ page }) => {
+      // The test above is a witness, not a proof: on a fast machine page 7 mounts
+      // before the breadcrumb is computed, which is the order that works. The
+      // order that broke is the other one, and it is not reachable by asking
+      // nicely — so hold page 7's SVG back until the effect that draws the crumb
+      // has certainly run and found nothing to draw on.
+      //
+      // 400 ms is chosen against the assertion, not the machine: whatever the
+      // fetch would have taken, the effect fires on the render that follows the
+      // hash parse, and that is not 400 ms away. Under the bug the crumb is then
+      // gone for good — nothing re-runs the effect, because it reads the mounted
+      // set through a ref and no render is owed. This is the container failure
+      // reproduced on purpose instead of waited for.
+      let held = 0;
+      await page.route("**/assets/pages/hafs-kfqc/7.svg", async (route) => {
+        held += 1;
+        await new Promise((r) => setTimeout(r, 400));
+        await route.continue();
+      });
+      await page.goto("/#/hafs-kfqc/2:123?via=2:48");
+      await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
+      await expect(
+        page.locator('svg[aria-labelledby="page-label-7"] #hifth-overlay .hl-crumb'),
+      ).toBeAttached();
+      // The page really was held back; a page that came another way proves nothing.
+      expect(held).toBeGreaterThan(0);
     });
-    await page.goto("/#/hafs-kfqc/2:123?via=2:48");
-    await expect(page.locator("header .numeric")).toHaveText(pageNumber(19));
-    await expect(
-      page.locator('svg[aria-labelledby="page-label-7"] #hifth-overlay .hl-crumb'),
-    ).toBeAttached();
-    // The page really was held back; a page that came another way proves nothing.
-    expect(held).toBeGreaterThan(0);
   });
 
   test("a full trail link restores the whole chain of beads", async ({ page }) => {

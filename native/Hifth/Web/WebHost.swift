@@ -56,6 +56,15 @@ struct ShellView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .id(ObjectIdentifier(card))
             }
+            // "Add a note" after a walk screenshot: bottom middle, clear of the
+            // check card and of the page's own bars at the top.
+            if let capture = model.captureNote {
+                CaptureNoteBanner(model: model, capture: capture)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 24)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .id(capture)
+            }
             #endif
         }
         #if os(macOS)

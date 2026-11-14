@@ -345,16 +345,17 @@ export function EdgeGrabRails({
   // with its rounded corners, not the book's (owner, 2026-11-07: the shading
   // began below the head of the book and ran on under the pages). Measured
   // again whenever the book or a leaf changes size.
-  const [paperBox, setPaperBox] = useState<{ top: number; h: number; look: Partial<Record<PeelSide, PaperLook>> } | null>(null);
+  const [paperBox, setPaperBox] = useState<StripBox | null>(null);
   useEffect(() => {
     const book = railsEl.current?.parentElement;
     if (!book) return;
     const measure = (): void => {
       const p = measurePaper(book);
+      const bookH = book.getBoundingClientRect().height;
       setPaperBox((was) =>
-        was && was.top === p.top && was.h === p.h && JSON.stringify(was.look) === JSON.stringify(p.look)
+        was && was.top === p.top && was.h === p.h && was.bookH === bookH && JSON.stringify(was.look) === JSON.stringify(p.look)
           ? was
-          : { top: p.top, h: p.h, look: p.look },
+          : { top: p.top, h: p.h, bookH, look: p.look },
       );
     };
     // The page drawings arrive a moment after the book, one side at a time,
@@ -632,25 +633,39 @@ export function EdgeGrabRails({
   );
 }
 
+/** Where a strip's paper stands in the book, and how tall the book is. */
+interface StripBox {
+  top: number;
+  h: number;
+  bookH: number;
+  look: Partial<Record<PeelSide, PaperLook>>;
+}
+
 /**
  * A strip stands on its own leaf's paper: from the paper's head to its foot,
  * rounded on its outer corners as the paper is. Before the paper is measured it
  * falls back to the whole book.
+ *
+ * It never reaches past the book. Zoomed in, the paper stands taller than the
+ * book, and a strip running the paper's height reached up over the toolbar and
+ * took the press meant for Zoom out (2026-11-13). Where the paper runs on past
+ * the book, that end of the strip is square, since the paper's corner is not there.
  */
-function railStyle(
-  side: "left" | "right",
-  box: { top: number; h: number; look: Partial<Record<PeelSide, PaperLook>> } | null,
-): CSSProperties | undefined {
+function railStyle(side: "left" | "right", box: StripBox | null): CSSProperties | undefined {
   if (!box) return undefined;
   const r = (box.look[side]?.borderRadius ?? "0px").split(" ");
   // The paper's radius on its free side: top-right and bottom-right of a
   // right-hand leaf, top-left and bottom-left of a left-hand one.
   const radius = side === "left" ? (r[0] ?? "0px") : (r[1] ?? r[0] ?? "0px");
+  const top = Math.max(0, box.top);
+  const foot = box.bookH > 0 ? Math.min(box.bookH, box.top + box.h) : box.top + box.h;
+  const head = top > box.top ? "0" : radius;
+  const tail = foot < box.top + box.h ? "0" : radius;
   return {
-    top: box.top,
-    height: box.h,
+    top,
+    height: Math.max(0, foot - top),
     bottom: "auto",
-    borderRadius: side === "left" ? `${radius} 0 0 ${radius}` : `0 ${radius} ${radius} 0`,
+    borderRadius: side === "left" ? `${head} 0 0 ${tail}` : `0 ${head} ${tail} 0`,
   };
 }
 

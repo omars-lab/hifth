@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hifth — revise on the page you memorised</title>
+  <meta name="description" content="Hifth is a mus'haf for huffaz: the same 604 pages, line for line, with look-alike verses one tap apart and a place to mark where you slipped. Open it in your browser; the Mac and iPhone apps are coming soon." />
+  <meta name="theme-color" content="#f4efe6" />
+  <link rel="icon" href="/read/favicon.svg" type="image/svg+xml" />
+  <link rel="preload" href="/fonts/aref-ruqaa-wordmark.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="alternate" hreflang="en" href="https://hifth.app/" />
+  <link rel="alternate" hreflang="ar" href="https://hifth.app/ar/" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="/notify.js" defer></script>
+</head>
+<body>
+  <nav class="lang-bar" aria-label="Language">
+    <a href="/" hreflang="en" lang="en" aria-current="page">English</a>
+    <a href="/ar/" hreflang="ar" lang="ar">العربية</a>
+  </nav>
+  <main>
+    <section class="hero">
+      <div class="hero-text">
+        <p class="wordmark" lang="ar" dir="rtl">حفظ</p>
+        <h1>Hifth</h1>
+        <p class="lead">A memorization toolkit, built by huffath for huffath (and aspiring huffath!).</p>
+        <p class="actions">
+          <a class="button primary" href="/read/">Open Hifth in your browser</a>
+        </p>
+        <p class="mac">Mac and iPhone apps — coming soon</p>
+      </div>
+      <figure class="hero-picture">
+        <img class="spread" src="/shots/hero-spread.jpg" width="1428" height="1132"
+             alt="Two facing pages of the mus'haf in Hifth on a computer, with one verse highlighted." />
+        <img class="phone" src="/shots/hero-phone.jpg" width="780" height="1688"
+             alt="The same verse on a phone, one page at a time." />
+      </figure>
+    </section>
+
+    <section class="features" aria-labelledby="features-title">
+      <h2 id="features-title" class="section-title">What you can do with it</h2>
+      <p class="section-lead">The 604-page mus'haf, line for line, so a verse sits where your memory puts it.
+         Everything else is built around that page.</p>
+
+      <div class="feature">
+        <img src="/shots/feature-mistakes.jpg" width="1470" height="1522" loading="lazy"
+             alt="A word tapped on the page, and Hifth asking what went wrong: one of its harakat, the whole word, or going on into another verse." />
+        <div>
+          <h3>Mark your mistakes</h3>
+          <p>Tap the word you slipped on and say what went wrong: the word itself, its harakat, or
+             going on into another verse.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <img src="/shots/feature-lookalikes.jpg" width="1738" height="1250" loading="lazy"
+             alt="Two facing pages with a verse highlighted, and beside them its look-alike verses, the words they share marked." />
+        <div>
+          <h3>Look-alike verses, one tap apart</h3>
+          <p>Verses that are easy to mix up are linked. Jump between them and see the words that differ.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <img src="/shots/feature-notes.jpg" width="968" height="1260" loading="lazy"
+             alt="A note pinned to a word on the page and open over it, reminding the reader to hold a madd." />
+        <div>
+          <h3>Drop notes</h3>
+          <p>Leave a note on a word, a verse or a whole passage, and find them all again on one page.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <img src="/shots/feature-record.jpg" width="1240" height="986" loading="lazy"
+             alt="A month's calendar of the days the mus'haf was opened, with the mistakes marked on each day counted." />
+        <div>
+          <h3>Review your progress</h3>
+          <p>A month's calendar of the days you opened the mus'haf and the mistakes you marked on each,
+             and a map of every ayah showing how long since you last opened it. It counts what you opened; whether you
+             revised it is yours to say.</p>
+        </div>
+      </div>
+
+      <div class="feature">
+        <img class="tall" src="/shots/feature-share.jpg" width="780" height="1688" loading="lazy"
+             alt="A verse highlighted on a phone, and the sheet that shares it as a link: the verse alone, or with its look-alikes or its roots." />
+        <div>
+          <h3>Share a verse</h3>
+          <p>Send family or a friend a link that opens the exact verse or passage you were reading, on
+             its own or with its look-alikes.</p>
+        </div>
+      </div>
+
+      <div class="coming">
+        <h3>Coming next</h3>
+        <ul>
+          <li><strong>Share with your teacher.</strong> Send your teacher where you slipped, only when you
+              choose to, and see who can still open it.</li>
+          <li><strong>Reflect on each verse.</strong> Commentary beside the verse you are on, so you can
+              stop and think about what you recite.</li>
+          <li><strong>Open Hifth from other apps.</strong> Links that open a verse from Shortcuts, a reminder
+              or your notes, with the Mac and iPhone apps.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="devices" aria-labelledby="devices-title">
+      <h2 id="devices-title" class="section-title">On your devices</h2>
+      <fieldset class="device-tabs">
+        <legend class="visually-hidden">Choose your device</legend>
+        <input type="radio" name="device" id="device-desktop" checked />
+        <label for="device-desktop">Desktop</label>
+        <input type="radio" name="device" id="device-mobile" />
+        <label for="device-mobile">Phone</label>
+        <input type="radio" name="device" id="device-ipad" />
+        <label for="device-ipad">iPad</label>
+        <input type="radio" name="device" id="device-iphone" />
+        <label for="device-iphone">iPhone app</label>
+        <input type="radio" name="device" id="device-mac" />
+        <label for="device-mac">Mac app</label>
+
+        <div class="device-panels">
+          <div class="device-panel" id="panel-desktop">
+            <img src="/shots/device-desktop.jpg" width="2560" height="1600" loading="lazy"
+                 alt="Hifth in a desktop browser, showing two facing pages of the mus'haf." />
+            <p>In any browser on your computer, the mus'haf opens as two facing pages, the way the book lies open.</p>
+            <p><a class="button primary" href="/read/">Open Hifth in your browser</a></p>
+          </div> <!-- /panel -->
+          <div class="device-panel" id="panel-mobile">
+            <img class="tall" src="/shots/device-phone.jpg" width="780" height="1688" loading="lazy"
+                 alt="Hifth in a phone's browser, showing one page of the mus'haf." />
+            <p>On a phone, one page at a time, turned with your thumb. Add it to your home screen and it opens
+               like an app, and keeps working offline.</p>
+            <p><a class="button primary" href="/read/">Open Hifth on your phone</a></p>
+          </div> <!-- /panel -->
+          <div class="device-panel" id="panel-ipad">
+            <img src="/shots/device-ipad-pen.jpg" width="1640" height="2360" loading="lazy"
+                 alt="Hifth in an iPad's browser: a word touched with the stylus, and Hifth asking what went wrong in it." />
+            <p>In the browser on an iPad, the page is held like the book, and a stylus marks a mistake
+               straight on the word.</p>
+            <p><a class="button primary" href="/read/">Open Hifth on your iPad</a></p>
+          </div> <!-- /panel -->
+          <div class="device-panel" id="panel-iphone">
+            <p><strong>iPhone app — coming soon.</strong> Until then, Hifth works in your phone's browser.</p>
+            <p><a class="button" href="#notify">Tell me when it's out</a></p>
+          </div> <!-- /panel -->
+          <div class="device-panel" id="panel-mac">
+            <p><strong>Mac app — coming soon.</strong> Until then, Hifth works in your Mac's browser.</p>
+            <p><a class="button" href="#notify">Tell me when it's out</a></p>
+          </div> <!-- /panel -->
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="notify" id="notify">
+      <h2>Hear when the Mac and iPhone apps are out</h2>
+      <p>Leave your email. We send one email to confirm it, then one more when they ship. Nothing else.
+         <a href="/privacy.html">What we keep, and how to leave.</a></p>
+      <form id="notify-form" action="/api/notify" method="post" novalidate>
+        <input type="hidden" name="lang" value="en" />
+        <label for="notify-email" class="visually-hidden">Email</label>
+        <input id="notify-email" name="email" type="email" autocomplete="email"
+               placeholder="you@example.com" required />
+        <button class="button" type="submit">Tell me</button>
+        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-action="notify"></div>
+        <p class="notify-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>Hifth is open source, under the GNU GPL.
+      <a href="https://github.com/omars-lab/hifth">Source code</a> ·
+      <a href="/privacy.html">Privacy</a> ·
+      <a href="https://blog.bytesofpurpose.com/hifth/docs/">How it was designed</a></p>
+  </footer>
+</body>
+</html>

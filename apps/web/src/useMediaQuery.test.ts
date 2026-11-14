@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/preact";
-import { CARD_QUERY, DESKTOP_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
+import { CARD_QUERY, DESKTOP_QUERY, PHONE_QUERY, SIDEWAYS_QUERY, useMediaQuery } from "./useMediaQuery";
 
 /**
  * A controllable `matchMedia`. jsdom does not implement one, which is itself the
@@ -86,6 +86,30 @@ describe("CARD_QUERY", () => {
     // reason above.
     const css = readFileSync(resolve(process.cwd(), "src/components/CommentarySheet.module.css"), "utf8");
     expect(css).toContain(`@media ${CARD_QUERY}`);
+  });
+});
+
+describe("SIDEWAYS_QUERY", () => {
+  it("is the same screen the note's stylesheet stands it beside the page on", () => {
+    // A phone on its side: wider than a phone held upright, too short for an
+    // iPad. There the note can stand the full height of the screen beside the
+    // page instead of lying across its foot (docs/design/iphone-app.md, item 3).
+    // If the two drift apart, the note stands beside a page that did not move
+    // for it, or the page moves for a note lying across its foot. Read off disk
+    // for the reason above.
+    const css = readFileSync(resolve(process.cwd(), "src/components/CommentarySheet.module.css"), "utf8");
+    expect(css).toContain(`@media ${SIDEWAYS_QUERY}`);
+  });
+
+  it("takes in every phone on its side and no iPad", () => {
+    // Read as numbers, not by a browser: each screen's width and height in
+    // CSS pixels, against the query's two bounds.
+    const [wide = NaN, short = NaN] = [...SIDEWAYS_QUERY.matchAll(/(\d+)px/g)].map((m) => Number(m[1]));
+    const fits = ([w, h]: readonly [number, number]) => w >= wide && h <= short;
+    const phones = [[667, 375], [844, 390], [874, 402], [932, 430], [956, 440]] as const;
+    const others = [[1133, 744], [1180, 820], [1366, 1024], [402, 874], [1280, 800]] as const;
+    for (const size of phones) expect(fits(size)).toBe(true);
+    for (const size of others) expect(fits(size)).toBe(false);
   });
 });
 

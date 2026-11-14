@@ -76,6 +76,16 @@ export const PHONE_QUERY = "(max-width: 600px)";
  */
 export const CARD_QUERY = "(min-width: 900px)";
 
+/**
+ * A phone on its side: wider than a phone held upright, shorter than any iPad.
+ * There the note stands the full height of the screen beside the page, unless
+ * the reader set it to lie across the foot (docs/design/iphone-app.md, item 3).
+ * The same rule as CommentarySheet.module.css's, which a media query cannot
+ * read from here; the two must agree. The shortest iPad on its side, the mini,
+ * is 744 tall; the tallest phone on its side, 440.
+ */
+export const SIDEWAYS_QUERY = "(min-width: 640px) and (max-height: 500px)";
+
 /** A screen taller than it is wide, as an iPad held upright: one page reads larger than two. */
 export const UPRIGHT_QUERY = "(orientation: portrait)";
 

@@ -96,6 +96,42 @@ test.describe("Hifth · lifting a page by its corner", () => {
     await context.close();
   });
 
+  test("zoomed in, the grab strips stay inside the book and never cover the zoom buttons", async ({ page }) => {
+    // Found 2026-11-13 by a pitch test: zoomed in, the paper stands taller than
+    // the book, and a strip measured then ran the paper's height, up over the
+    // toolbar, so the reader could not press Zoom out. The strips are measured
+    // again when anything is added to the book (a page drawing arriving late, a
+    // verse lit), which is what the element added below stands in for.
+    await openAt8(page);
+    // The chrome may be in either language here.
+    const zoom = page.getByRole("group", { name: /^(التكبير|Zoom)$/ });
+    for (let i = 0; i < 3; i++) await zoom.getByRole("button", { name: /^(تكبير|Zoom in)$/ }).click();
+    await expect(zoom).toContainText(/200|٢٠٠/);
+    await page.getByTestId("edge-grab-right").evaluate((rail) => {
+      const book = rail.parentElement!;
+      const leaf = book.querySelector("[data-leaf]") ?? book;
+      leaf.appendChild(document.createElement("span"));
+    });
+    for (const side of ["left", "right"] as const) {
+      await expect
+        .poll(
+          () =>
+            page.getByTestId(`edge-grab-${side}`).evaluate((rail) => {
+              const r = rail.getBoundingClientRect();
+              const b = rail.parentElement!.getBoundingClientRect();
+              const above = Math.max(0, Math.round(b.top - r.top));
+              const below = Math.max(0, Math.round(r.bottom - b.bottom));
+              return `${above}px above the book, ${below}px below it`;
+            }),
+          { message: `${side} strip stays inside the book, zoomed in` },
+        )
+        .toBe("0px above the book, 0px below it");
+    }
+    const zoomOut = zoom.getByRole("button", { name: /^(تصغير|Zoom out)$/ });
+    for (let i = 0; i < 3; i++) await zoomOut.click({ timeout: 5000 });
+    await expect(zoom).toContainText(/100|١٠٠/);
+  });
+
   test("mid-grab the corner lifts with the hand and the next pages show beneath", async ({
     page,
   }) => {

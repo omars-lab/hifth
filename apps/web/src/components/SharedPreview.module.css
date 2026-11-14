@@ -1,0 +1,10 @@
+/* The shared words' picture is cut from the look-alike's own page, which
+   arrives a moment after the row. Until then this stands in its place, as tall
+   as one line of the picture (DiffView.module.css, .strip and .piece), so the
+   row does not grow when the picture lands. In the verse's drawer that growth
+   moved the row of tools up under a reader's press (2026-11-13). */
+.hold {
+  display: block;
+  margin-block-start: 2px;
+  block-size: 1.75rem;
+}

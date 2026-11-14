@@ -24,10 +24,11 @@ export const MarkUndoContext = createContext<MarkUndo | null>(null);
 
 /**
  * Set by App where full screen belongs in the tool bar (a desktop): the way to
- * put the bars away. Unset, the row has no full-screen button, and the bottom
- * line keeps its own.
+ * put the bars away and, when the tools stay in full screen
+ * (full-screen-tools.ts), the way to bring them back. Unset, the row has no
+ * full-screen button, and the bottom line keeps its own.
  */
-export const FullScreenContext = createContext<(() => void) | null>(null);
+export const FullScreenContext = createContext<{ full: boolean; toggle: () => void } | null>(null);
 
 const MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
@@ -42,7 +43,7 @@ const MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator
 export function UndoRedo({ upright = false }: { upright?: boolean }): JSX.Element | null {
   const { t } = useT();
   const u = useContext(MarkUndoContext);
-  const goFull = useContext(FullScreenContext);
+  const fullScreen = useContext(FullScreenContext);
   if (!u) return null;
   const key = MAC ? "⌘" : "Ctrl+";
   return (
@@ -82,16 +83,16 @@ export function UndoRedo({ upright = false }: { upright?: boolean }): JSX.Elemen
       >
         <Arrow redo />
       </button>
-      {goFull && (
+      {fullScreen && (
         <button
           type="button"
           className={styles.button}
-          aria-label={t.fullScreen}
+          aria-label={fullScreen.full ? t.leaveFullScreen : t.fullScreen}
           aria-keyshortcuts="F"
-          title={`${t.fullScreen} (F)`}
-          onClick={goFull}
+          title={`${fullScreen.full ? t.leaveFullScreen : t.fullScreen} (F)`}
+          onClick={fullScreen.toggle}
         >
-          <Corners />
+          <Corners inward={fullScreen.full} />
         </button>
       )}
     </div>
@@ -149,7 +150,8 @@ function Arrow({ redo = false }: { redo?: boolean }): JSX.Element {
 }
 
 /** Four corners pushed out to the window's edges: the page takes the whole screen. */
-function Corners(): JSX.Element {
+/** Out to the corners to go full screen; in from them to leave it. */
+function Corners({ inward = false }: { inward?: boolean }): JSX.Element {
   return (
     <svg
       width="22"
@@ -162,7 +164,7 @@ function Corners(): JSX.Element {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
+      <path d={inward ? "M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5" : "M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"} />
     </svg>
   );
 }

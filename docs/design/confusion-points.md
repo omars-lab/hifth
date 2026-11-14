@@ -525,7 +525,7 @@ it went to; the hop rail does not show your own jumps. So the question is now on
 **Owner, 2026-11-08: no.** Your jumps stay in the list, with Go; the side strip of links keeps
 only the book's own sourced links.
 
-### ⑤ Who sets a seam's state — the reader, or the app's guess from the data? · **open**
+### ⑤ Who sets a seam's state — the reader, or the app's guess from the data? · **fixed**
 
 **Where it stands (2026-10-13):** the reader owns it, and that is built: a row can be marked
 Beaten or Dismissed, and nothing changes it but the reader. What is still open is only whether
@@ -545,7 +545,12 @@ settle, and it echoes the durability and score stances above.
 
 **Owner, 2026-11-08: a quiet suggestion, yours to accept.** A row not hit in a long while may
 carry one quiet line offering to mark it Beaten. Never a pop-up, and nothing changes until the
-reader taps it. Not built yet; on the backlog.
+reader taps it. **Built 2026-11-13.** A jump with a known destination, not beaten, and not made in
+six weeks carries one dotted-underlined line under its count in the list behind the mark: "It has
+not happened in a long while. Mark it beaten?" Pressing it is the same as pressing Beaten, and
+pressing Beaten again takes it back. The info panel holds how long "a long while" is: six weeks
+(the default, this section's own example), three months, or never. The page map's list of jumps
+does not offer it, since it has no Beaten button to offer.
 
 ### ⑥ Should a student be able to hand their confusion map to a teacher? · **open**
 
@@ -634,6 +639,28 @@ heights, and the walk script now measures the word's own edges and scrolls each 
 before it calls one cut off.
 
 ---
+
+### ⑩ Should the Mistake pen ask what *kind* of mistake it was, beyond the word, its harakat or a hop? · **open**
+
+**Asked by the owner, 2026-11-12** (a comment on the front page's picture of the pen): "the
+mistake might not be a hop … it might be getting the harakah wrong, it might be mispronouncing
+the letter (makharij), it might be getting the tajweed rule wrong (not doing idgham, etc)".
+The question should start with a choice of kind, and then ask the detail that kind needs.
+
+**What it changes for a hafiz:** today a slip in how a letter is said, or a rule of tajweed
+left out, has no place to go, so it gets marked as "the word" and the record cannot tell a
+forgotten word from a mispronounced one. A teacher reviewing the record, and the hafiz
+revising it, need to know which it was, because each is fixed a different way.
+
+**What the app does today:** a tap under the Mistake pen asks one question with three
+answers: one of the word's harakat (pick the sign), the whole word, or going on into another
+verse.
+
+**What would answer it:** build the kind-first question two or three ways (for example, a row
+of kinds that opens the detail underneath, against today's single question with more answers
+added), with makharij naming the letter and tajweed naming the rule, and let the owner choose
+by using them. The losing shapes stay as a setting. The kinds and rule names need a list we
+own; the rule names in our tajweed colouring are the place to start.
 
 ## A rough plan, in order — not yet costed
 

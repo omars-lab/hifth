@@ -9,7 +9,7 @@ import Foundation
 /// opens when it is done. That is the whole x-callback-url convention
 /// (http://x-callback-url.com/specifications/), and nothing here goes beyond it.
 ///
-/// Three actions today:
+/// Three actions for anyone, and two more for a script on the laptop:
 ///  - `open`     — a place, said plainly: `page=45`, `verse=2:255`
 ///                 (`verse=2:47-48` for a run) with optional `words=3-7`, or
 ///                 `surah=2` (its first verse, the surah's context open); an
@@ -27,6 +27,13 @@ import Foundation
 ///                 at most 12), with an `id` and a `title`. Shown only in a
 ///                 build from the laptop; a release build answers
 ///                 `not-in-this-build`. Answers on Done with `id` and `result`.
+///  - `capture`  — `name=…`. Keeps a walk capture as a screenshot would, with
+///                 no note banner. Answers with `capture` (its folder), `route`
+///                 and `url`. Only in a build from the laptop.
+///  - `current-to-file` — no parameters. Writes `current.json` (`at`, `route`,
+///                 `url`) beside the captures, for a laptop that cannot hear an
+///                 answer, then answers as `current` does. Only in a build from
+///                 the laptop.
 ///
 /// Errors follow the convention too: `x-error` is opened with `errorCode` and
 /// `errorMessage`. No action here can be cancelled, so `x-cancel` is accepted
@@ -58,7 +65,44 @@ nonisolated enum XCallback {
         case current
         /// A card of steps to check by hand; shown only in a build from the laptop.
         case check(Check)
+        /// Keep a walk capture, as if a screenshot had been taken, under this
+        /// name; only in a build from the laptop.
+        case capture(name: String)
+        /// Write where the app is to `current.json` beside the captures, for a
+        /// laptop that cannot hear an answer; only in a build from the laptop.
+        case currentToFile
+
+        /// What the action is called in a link, for a refusal to name it.
+        var linkName: String {
+            switch self {
+            case .open: "open"
+            case .current: "current"
+            case .check: "check"
+            case .capture: "capture"
+            case .currentToFile: "current-to-file"
+            }
+        }
+
+        /// The actions a script on the laptop sends to a build from the laptop.
+        /// A release build refuses them by name.
+        var laptopOnly: Bool {
+            switch self {
+            case .open, .current: false
+            case .check, .capture, .currentToFile: true
+            }
+        }
     }
+
+    /// Why this build will not do `action`, or `nil` when it will. Kept apart
+    /// from the shell so a test can ask what a release build answers, which a
+    /// test (always a laptop build) could not otherwise see.
+    static func refusal(for action: Action, laptopBuild: Bool) -> Failure? {
+        guard action.laptopOnly, !laptopBuild else { return nil }
+        return .notInThisBuild(action)
+    }
+
+    /// The name a capture link without one gets.
+    static let defaultCaptureName = "capture"
 
     /// One thing to do on the device, and what you should see when you do it.
     struct CheckStep: Equatable, Codable {
@@ -96,8 +140,16 @@ nonisolated enum XCallback {
         static func badCheck(_ why: String) -> Failure {
             Failure(code: "bad-check", message: why)
         }
-        /// A build for the App Store or TestFlight has no check card.
-        static let notInThisBuild = Failure(code: "not-in-this-build", message: "check cards are only in a build installed from the laptop")
+        /// A build for the App Store or TestFlight has no check card, capture
+        /// link or current-to-file.
+        static func notInThisBuild(_ action: Action) -> Failure {
+            Failure(code: "not-in-this-build", message: "\(action.linkName) is only in a build installed from the laptop")
+        }
+        /// A capture link the app could not keep (no page drawn yet, or a
+        /// folder it could not write).
+        static let captureNotKept = Failure(code: "capture-not-kept", message: "the app could not keep a capture")
+        /// current-to-file could not write its file.
+        static let currentNotWritten = Failure(code: "current-not-written", message: "the app could not write current.json")
         static func routeNotShown(_ hash: String) -> Failure {
             Failure(code: "route-not-shown", message: "the page did not open \(hash.dropFirst())")
         }
@@ -129,6 +181,16 @@ nonisolated enum XCallback {
         func errorURL(_ failure: Failure) -> URL? {
             guard let error else { return nil }
             return Self.appending([("errorCode", failure.code), ("errorMessage", failure.message)], to: error)
+        }
+
+        /// `x-success` once a capture link's capture is kept: the capture's
+        /// folder name, then `route` and `url` as `successURL` gives them.
+        func captureURL(folder: String, route hash: String, publicBase: String) -> URL? {
+            guard let success else { return nil }
+            return Self.appending(
+                [("capture", folder), ("route", String(hash.dropFirst())), ("url", publicBase + hash)],
+                to: success
+            )
         }
 
         /// `x-success` once a check card's Done is pressed: which check, and
@@ -208,6 +270,11 @@ nonisolated enum XCallback {
             case .failure(let failure):
                 return .failure(failure, callbacks)
             }
+        case "capture":
+            let name = safeName(query["name"])
+            return .request(Request(action: .capture(name: name.isEmpty ? defaultCaptureName : name), callbacks: callbacks))
+        case "current-to-file":
+            return .request(Request(action: .currentToFile, callbacks: callbacks))
         default:
             return .failure(.unknownAction(action), callbacks)
         }
@@ -295,15 +362,23 @@ nonisolated enum XCallback {
         guard steps.count <= Check.mostSteps else {
             return .failure(.badCheck("at most \(Check.mostSteps) steps on one card, not \(steps.count)"))
         }
-        let rawID = (query["id"] ?? "").lowercased()
-            .replacingOccurrences(of: "[^a-z0-9]+", with: "-", options: .regularExpression)
-            .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
+        let rawID = safeName(query["id"])
         let title = (query["title"] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         return .success(Check(
-            id: rawID.isEmpty ? Check.defaultID : String(rawID.prefix(60)),
+            id: rawID.isEmpty ? Check.defaultID : rawID,
             title: title.isEmpty ? Check.defaultTitle : title,
             steps: steps
         ))
+    }
+
+    /// A name a caller gave, cut down to lowercase letters, digits and single
+    /// dashes, at most 60 long, so it is safe in a file name. Empty when
+    /// nothing usable was given.
+    private static func safeName(_ raw: String?) -> String {
+        let name = (raw ?? "").lowercased()
+            .replacingOccurrences(of: "[^a-z0-9]+", with: "-", options: .regularExpression)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
+        return String(name.prefix(60)).trimmingCharacters(in: CharacterSet(charactersIn: "-"))
     }
 
     /// What the route grammar lets through unencoded; the rest is percent-encoded.

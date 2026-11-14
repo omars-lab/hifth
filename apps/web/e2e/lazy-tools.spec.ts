@@ -31,6 +31,13 @@ const LATER = [
   "components/WordPartsHost.tsx",
   "components/BookmarkDrawer.tsx",
   "components/DiffView.tsx",
+  // The wide-screen parts and the menus a first visit never opens (item 21).
+  "components/EdgeGrabRails.tsx",
+  "components/PenHomes.tsx",
+  "components/HighlightMenu.tsx",
+  "components/MovedCard.tsx",
+  // Swapped for an empty stand-in when the build shows no commentary.
+  "components/CommentarySheet.tsx",
 ];
 
 /**

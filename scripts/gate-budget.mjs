@@ -197,8 +197,10 @@ if (totalGz > BUDGET_GZ) {
 // from a late-loading file into start-up, and start-up time does not grow
 // smoothly: it goes up about 150 ms at a time (docs/performance.md ⑳). Measured
 // 2026-11-11: the step from about 2140 ms to about 2290 ms is near 160 KB, the
-// app is at 170 KB, and 190 KB still read 2290 ms. 185 leaves a little under that.
-const STARTUP_GZ = 185 * 1024;
+// app is at 170 KB, and 190 KB still read 2290 ms, so the limit was 185. Measured
+// 2026-11-14 (item ㉑): 159.5 KB reads about 2107 ms and 162.6 KB about 2257, so
+// the step sits between them. 161 keeps the app on the lower step.
+const STARTUP_GZ = 161 * 1024;
 const startupFiles = walk(DIST)
   .map((f) => f.replace(DIST + "/", ""))
   .filter((n) => /^assets\/(index|en\.gen)-[A-Za-z0-9_-]{8}\.(js|css)$/.test(n));

@@ -49,6 +49,14 @@ describe("the builder's guess agrees with the shell on every example in the cont
     const unknown = predictLink("hifth://x-callback-url/open?route=/hafs/2:255", lists);
     if (unknown.kind === "error") expect(unknown.message).toContain("no mus'haf named");
   });
+  it("a capture's name is cut down to a safe word, as the app cuts it", () => {
+    const name = (raw: string) => describeOutcome(predictLink("hifth://x-callback-url/capture" + raw, lists));
+    expect(name("?name=Note%20tool")).toBe("capture note-tool");
+    expect(name("?name=..%2F..%2Fevil")).toBe("capture evil");
+    expect(name("?name=%2F%2F")).toBe("capture capture");
+    expect(name("?name=" + "a".repeat(59) + "%20b")).toBe("capture " + "a".repeat(59));
+    expect(describeOutcome(predictLink("hifth://x-callback-url/Current-To-File/", lists))).toBe("current-to-file");
+  });
   it("something that is not a URL at all is refused, not thrown", () => {
     expect(predictLink("not a link", lists)).toEqual({ kind: "refused" });
     expect(predictLink("", lists)).toEqual({ kind: "refused" });

@@ -60,8 +60,11 @@ is what lets a reader learn it once.
 
 ## What have we already decided that touches this?
 
-- **Nothing leaves unless it serves the reader, and stays under their control** — the stance the
-  app sharpened from a flat *nothing leaves the phone*. Both halves of this model obey it: the
+- **The reader decides who sees their data** — the stance the app sharpened from a flat
+  *nothing leaves the phone* (2026-11-08: nothing leaves unless it serves the reader and stays under
+  their control), and then put the reader first (owner, 2026-11-12): nothing is seen by anyone
+  else until the reader presses a button that says what goes and to whom, and they can see who has
+  it and take it back. Both halves of this model obey it: the
   saved file is a deliberate act, and the cloud file is the reader's own, off until they sign in.
 - **A private record stays private by construction** — the revision record's privacy is a gate,
   not a good intention. The cloud file passes through the same gate: it is the reader's, not a

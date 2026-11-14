@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test && pnpm test:scripts",
-    "test:scripts": "node --test \"scripts/*.test.mjs\" \".claude/skills/*/scripts/*.test.mjs\"",
+    "test:scripts": "node --test \"scripts/*.test.mjs\" \".claude/skills/*/scripts/*.test.mjs\" \"apps/landing/lib/*.test.mjs\"",
     "test:e2e": "pnpm --filter @hifth/web test:e2e",
     "etl": "pnpm --filter @hifth/etl etl",
     "audit:corpus": "node packages/etl/scripts/audit-corpus.mjs",
@@ -114,6 +114,7 @@
     "eslint-plugin-import": "^2.31.0",
     "fontkit": "^2.0.4",
     "globals": "^15.14.0",
+    "marked": "16.4.2",
     "mermaid": "^12.0.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.19.0"

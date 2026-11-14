@@ -3,11 +3,13 @@ import { dropBookmark, parseBookmarkFile, toBookmarkFile } from "./bookmarks.js"
 import {
   NOTE_TEXT_MAX,
   addNote,
+  answerMistake,
   editNote,
   isMistake,
   isNote,
   markMistake,
   mergeNotes,
+  mistakeKindOf,
   mistakeOn,
   notesOnPage,
   pickMistakeSign,
@@ -158,5 +160,39 @@ describe("marked mistakes", () => {
 
   it("refuses a sign number that is not a whole number", () => {
     expect(isNote({ ...markMistake([], at, T)[0]!, mark: 1.5 })).toBe(false);
+  });
+
+  it("reads a mark from before kinds were kept as the sign or the whole word", () => {
+    const set = markMistake([], at, T);
+    expect(mistakeKindOf(set[0]!)).toBe("word");
+    expect(mistakeKindOf(pickMistakeSign(set, set[0]!.id, 2, T + 1)[0]!)).toBe("sign");
+  });
+
+  it("keeps the kind and its detail, and drops the old detail when the kind changes", () => {
+    const set = markMistake([], at, T);
+    const id = set[0]!.id;
+    const onSign = answerMistake(set, id, { what: "sign", mark: 3 }, T + 1);
+    expect(onSign[0]).toMatchObject({ what: "sign", mark: 3, onHarakah: true });
+    const onLetter = answerMistake(onSign, id, { what: "letter", letter: 2 }, T + 2);
+    expect(onLetter[0]).toMatchObject({ what: "letter", mark: null, onHarakah: false, letter: 2 });
+    expect(mistakeKindOf(onLetter[0]!)).toBe("letter");
+    const onRule = answerMistake(onLetter, id, { what: "rule", rule: "idgham" }, T + 3);
+    expect(onRule[0]).toMatchObject({ what: "rule", rule: "idgham", mark: null });
+    expect(onRule[0]).not.toHaveProperty("letter");
+    const whole = answerMistake(onRule, id, { what: "word" }, T + 4);
+    expect(whole[0]).not.toHaveProperty("rule");
+    expect(mistakeKindOf(whole[0]!)).toBe("word");
+    for (const n of [onSign, onLetter, onRule, whole]) expect(isNote(n[0])).toBe(true);
+  });
+
+  it("keeps a mistake from a newer build with a kind this one does not know, as the whole word", () => {
+    const newer = { ...markMistake([], at, T)[0]!, what: "breath" };
+    expect(isNote(newer)).toBe(true);
+    expect(mistakeKindOf(newer as never)).toBe("word");
+  });
+
+  it("refuses a rule that is not a plain id", () => {
+    expect(isNote({ ...markMistake([], at, T)[0]!, what: "rule", rule: "<b>" })).toBe(false);
+    expect(isNote({ ...markMistake([], at, T)[0]!, what: "rule", rule: 4 })).toBe(false);
   });
 });

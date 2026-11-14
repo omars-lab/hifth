@@ -298,6 +298,23 @@ brightness, and the shot comparison only counted a pixel as changed past a colou
 of 0.25; at 0.05 every unchanged shot still passes and only these four fail, so that is
 the tolerance now, and the four baselines are re-taken with the passage in them.
 
+### ④ The share menu looks too plain · **open**
+
+**Asked by the owner, 2026-11-12** (a comment on the front page's picture of the share menu):
+"the share menu component needs to be revisited … too plain".
+
+**What it changes for a hafiz:** barely, for what the link does; a lot, for whether a hafiz
+reaches for it. A menu that looks like a settings form does not invite sending a verse to
+family or a teacher.
+
+**What the app does today:** a sheet with a heading, three plain choices for what the link
+opens on (the verse alone, with its look-alikes, with its roots), and two buttons, the website
+link and the app link.
+
+**What would answer it:** two or three better-looking versions built into the real sheet
+(for example, a preview card of the verse being sent, and choices drawn as pictures rather
+than words), tried at phone size, the owner picks, and the others stay as a setting.
+
 ## What this is not settling
 
 The share sheet's design (open question ①). Whether links carry the app's language. And the still-open question on the native-shell page of driving one app request

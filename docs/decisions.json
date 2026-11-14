@@ -268,7 +268,9 @@
       "related": [
         "tafseer-source",
         "tafsir-provider",
-        "desktop-vs-mobile"
+        "desktop-vs-mobile",
+        "phone-note-lead",
+        "phone-note-sideways"
       ]
     },
     {
@@ -369,7 +371,9 @@
         "boundary-juz",
         "page-bar-numberline",
         "phone-toolbar",
-        "share-sheet-builder"
+        "share-sheet-builder",
+        "phone-note-lead",
+        "phone-note-sideways"
       ],
       "decided": "A",
       "by": "omar",
@@ -660,7 +664,9 @@
         "page-bar-numberline",
         "page-bar-phone-scrub",
         "phone-toolbar",
-        "page-labels-desktop-size"
+        "page-labels-desktop-size",
+        "phone-note-lead",
+        "phone-note-sideways"
       ]
     },
     {
@@ -1546,6 +1552,60 @@
       ]
     },
     {
+      "id": "phone-note-lead",
+      "question": "When a reader taps a verse on a phone held upright, should The Study Quran's note show its commentary at once, or the whole translation first?",
+      "status": "open",
+      "options": [
+        {
+          "id": "clamp",
+          "label": "Two lines of the translation, then the commentary"
+        },
+        {
+          "id": "whole",
+          "label": "The whole translation first, as it was"
+        },
+        {
+          "id": "tall",
+          "label": "The note opens grown to the full height, over the verse"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/phone-note-options.html",
+      "page": "docs/design/phone-note-options.html",
+      "builtBy": "scripts/build-phone-note-options.mjs",
+      "doc": "docs/decisions/phone-note.md#what-should-the-note-lead-with-held-upright",
+      "related": [
+        "phone-note-sideways",
+        "tafseer-reading",
+        "desktop-vs-mobile",
+        "graduation-losers"
+      ]
+    },
+    {
+      "id": "phone-note-sideways",
+      "question": "With a phone on its side, should The Study Quran's note stand beside the page, or lie across the foot of the screen?",
+      "status": "open",
+      "options": [
+        {
+          "id": "beside",
+          "label": "Standing beside the page, the full height of the screen"
+        },
+        {
+          "id": "foot",
+          "label": "Lying across the foot of the screen, as it was"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/phone-note-options.html",
+      "page": "docs/design/phone-note-options.html",
+      "builtBy": "scripts/build-phone-note-options.mjs",
+      "doc": "docs/decisions/phone-note.md#where-should-the-note-stand-with-the-phone-on-its-side",
+      "related": [
+        "phone-note-lead",
+        "tafseer-reading",
+        "desktop-vs-mobile",
+        "graduation-losers"
+      ]
+    },
+    {
       "id": "word-drawer-placement",
       "question": "When the word drawer would cover the word, where should it go?",
       "status": "decided",
@@ -1994,6 +2054,91 @@
       "decided": "A",
       "by": "omar",
       "date": "2026-11-10"
+    },
+    {
+      "id": "hifth-app-site",
+      "question": "Where should the reading app live once hifth.app has a front page?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Where it is today, with the front page linking to it"
+        },
+        {
+          "id": "B",
+          "label": "Moved under the new address now, as its reading page"
+        },
+        {
+          "id": "C",
+          "label": "The front page at the old address, and the new address unused for now"
+        }
+      ],
+      "doc": "docs/decisions/hifth-app-site.md#so-what-was-decided",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-11-11",
+      "related": [
+        "notify-list-store",
+        "notify-list-sender"
+      ]
+    },
+    {
+      "id": "notify-list-store",
+      "question": "Where does the notify list keep its emails?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "In Supabase, on the project hifth.app already has"
+        },
+        {
+          "id": "B",
+          "label": "In a database on the Cloudflare account that runs the site"
+        }
+      ],
+      "doc": "docs/design/hifth-app-mailing-list.md#where-does-the-list-live-and-who-can-read-it",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-11-12",
+      "related": [
+        "hifth-app-site",
+        "notify-list-sender"
+      ]
+    },
+    {
+      "id": "notify-list-sender",
+      "question": "What sends the notify list's emails?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Resend on its free plan, from a separate news address, with the list kept only in Supabase (recommended)"
+        },
+        {
+          "id": "B",
+          "label": "Amazon's mail service, with the list kept only in Supabase"
+        },
+        {
+          "id": "C",
+          "label": "A newsletter service that holds its own copy of the list"
+        },
+        {
+          "id": "D",
+          "label": "Cloudflare's paid sending service"
+        },
+        {
+          "id": "E",
+          "label": "The owner's own Apple mail on hifth.app"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/hifth-app-mailing-list.html",
+      "page": "docs/design/hifth-app-mailing-list.html",
+      "builtBy": "scripts/build-hifth-app-mailing-list.mjs",
+      "doc": "docs/design/hifth-app-mailing-list.md#what-sends-the-launch-email",
+      "related": [
+        "hifth-app-site",
+        "notify-list-store"
+      ]
     }
   ]
 }

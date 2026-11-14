@@ -315,3 +315,9 @@ still bring them back.
 
 **What would answer it:** a rough build where full screen keeps the side tool bar on the chosen
 edge, with a hide switch, tried by the owner on the laptop.
+
+**Built 2026-11-13**, together with ① of the verse tap-and-hold record, which asked the same
+thing: a setting in the info panel, "In full screen, the tools", with four ways. The tools stay
+down the side (the default), hide at the edge until the pointer rests there (the Dock's way), sit
+as a small dock that opens out, or go away with the bars as before. They keep the side chosen in
+④. The record there has the details.

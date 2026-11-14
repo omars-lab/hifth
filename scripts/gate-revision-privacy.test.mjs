@@ -151,3 +151,33 @@ test("gate:revision-privacy refuses a way off the device inside the usage store"
     assert.match(r.out, /usage-store\.ts contains `fetch\(`/);
   });
 });
+
+// The record leaves the device one way the reader chooses: the carry to
+// hifth.app, sent only when they tick the box that names it. The app hands the
+// record's reader to that card and to nothing else.
+const readerImport = "import { readRecord, recordLook } " + "from " + '"./revision-store";\n';
+const toCard = "<MovedSheet readRecord={readRecord} />";
+
+test("gate:revision-privacy passes when the app hands the record only to the carry card", () => {
+  withFixture({ ...clean, "apps/web/src/App.tsx": readerImport + toCard }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 0, r.out);
+  });
+});
+
+test("gate:revision-privacy refuses the app handing the record anywhere else", () => {
+  withFixture({ ...clean, "apps/web/src/App.tsx": readerImport + toCard + "\n<ShareSheet read={readRecord} />" }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /App\.tsx uses readRecord outside the carry card/);
+  });
+});
+
+test("gate:revision-privacy refuses the record's reader under another name", () => {
+  const renamed = "import { readRecord as everything } " + "from " + '"./revision-store";\n';
+  withFixture({ ...clean, "apps/web/src/App.tsx": renamed + "<ShareSheet read={everything} />" }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /App\.tsx uses readRecord outside the carry card/);
+  });
+});

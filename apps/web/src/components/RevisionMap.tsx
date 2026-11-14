@@ -589,6 +589,9 @@ export function RevisionMap({
         role="dialog"
         aria-modal="true"
         aria-label={t.mapTitle}
+        // The panel's name in a link (`?open=`), for the features-page check:
+        // the shelf is the record opened at juz scope.
+        data-panel={openAt === "juz" ? "shelf" : "record"}
         dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}

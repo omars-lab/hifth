@@ -160,9 +160,180 @@ button.mistake {
   font-weight: 600;
 }
 
+/*
+ * Three looks for a day, chosen in the info panel (calendar-look.ts). Each says
+ * how much was opened that day from `data-level` (1 to 4, by verses) or `--fill`
+ * (0 to 1), and keeps the mistake count as a number.
+ */
+
+/* Shades: the more you opened, the deeper the teal. */
+.month[data-look="shades"] .square[data-state="worked"] {
+  position: relative;
+  background: color-mix(in srgb, var(--accent) var(--mix, 18%), var(--paper-raised));
+}
+.month[data-look="shades"] .square[data-level="2"] { --mix: 38%; }
+.month[data-look="shades"] .square[data-level="3"] { --mix: 55%; }
+.month[data-look="shades"] .square[data-level="4"] { --mix: 88%; color: var(--paper); }
+.month[data-look="shades"] .square[data-state="idle"] {
+  background: var(--paper-raised);
+  border-color: var(--hairline);
+}
+/* The picked day: a paper gap and an ink ring, so it shows on the deepest shade too. */
+.month[data-look="shades"] .square[aria-pressed="true"] {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
+}
+.month[data-look="shades"] .count,
+.month[data-look="cards"] .count {
+  position: absolute;
+  inset-block-start: -5px;
+  inset-inline-end: -5px;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+/* Rings: a ring round each date fills as you open more, a full ring at two pages. */
+.month[data-look="rings"] .square {
+  position: relative;
+  aspect-ratio: 1;
+  min-block-size: 0;
+  max-inline-size: 52px;
+  justify-self: center;
+  inline-size: 100%;
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, var(--paper) 76%, transparent 78%),
+    conic-gradient(var(--accent) calc(var(--fill, 0) * 1turn), var(--paper-sunk) 0);
+}
+.month[data-look="rings"] .square[data-state="worked"] {
+  font-weight: 600;
+}
+.month[data-look="rings"] .square[data-state="outside"] {
+  background: transparent;
+  border-style: none;
+}
+.month[data-look="rings"] .square[data-today] {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--ink-soft);
+}
+.month[data-look="rings"] .square[aria-pressed="true"] {
+  box-shadow: 0 0 0 2px var(--accent-strong);
+}
+.month[data-look="rings"] .count {
+  position: absolute;
+  inset-block-end: -4px;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+
+/* Cards: the date in the corner and a bar along the bottom for how much. */
+.month[data-look="cards"] .square {
+  position: relative;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 5px 6px;
+  min-block-size: 46px;
+  background: var(--paper-raised);
+  border-color: var(--hairline);
+}
+.month[data-look="cards"] .square[data-state="worked"] {
+  box-shadow: 0 1px 2px rgb(38 32 26 / 0.12);
+  font-weight: 600;
+}
+.month[data-look="cards"] .square[data-state="worked"]::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 6px;
+  inset-block-end: 6px;
+  block-size: 4px;
+  inline-size: calc((100% - 12px) * max(var(--fill, 0), 0.12));
+  border-radius: 2px;
+  background: var(--accent);
+}
+.month[data-look="cards"] .square[data-state="outside"] {
+  background: transparent;
+}
+.month[data-look="cards"] .square[data-today] {
+  border-color: var(--ink-soft);
+}
+
 .picked {
   margin-block-start: var(--space-3);
   padding-block-start: var(--space-2);
   border-block-start: 1px solid var(--hairline);
   min-block-size: 4em;
+}
+/*
+ * Dots (the owner, 2026-11-13, from a desktop calendar): the date on plain paper,
+ * small marks under it, one kind of mark per kind of thing. Teal dots for how much
+ * was opened, a green tick for two pages or more, a red ring for mistakes marked.
+ * Today is the date in the accent colour; the picked day is a soft box.
+ */
+.month[data-look="dots"] .square,
+.month[data-look="dots"] .square[data-state="worked"],
+.month[data-look="dots"] .square[data-state="outside"] {
+  justify-content: flex-start;
+  gap: 4px;
+  padding-block-start: 7px;
+  min-block-size: 44px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: var(--text-md);
+}
+.month[data-look="dots"] .square[data-state="outside"] {
+  opacity: 0.4;
+}
+.month[data-look="dots"] .square[data-today] {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+.month[data-look="dots"] .square[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--paper-raised));
+  box-shadow: none;
+}
+.marks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  block-size: 9px;
+}
+.dot,
+.ring {
+  display: inline-block;
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.ring {
+  inline-size: 7px;
+  block-size: 7px;
+  background: transparent;
+  border: 1.5px solid var(--danger);
+  box-sizing: border-box;
+}
+/* Drawn with two borders, not a check-mark character, so it looks the same in every browser's font. */
+.tick {
+  display: inline-block;
+  box-sizing: border-box;
+  inline-size: 4px;
+  block-size: 8px;
+  margin-inline: 1px;
+  border: solid #2f9e5b;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg);
+}
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-xs, 11px);
+  color: var(--ink-soft);
+}
+.key > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }

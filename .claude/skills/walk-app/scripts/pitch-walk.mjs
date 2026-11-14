@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 /**
- * The pitch demo walked in the real iPad app, on its side, in one go
+ * The pitch demo walked in the real iPad or iPhone app, on its side or upright, in one go
  * (make pitch-walk).
  *
- *   node .claude/skills/walk-app/scripts/pitch-walk.mjs [--step 3,4] [--no-build]
+ *   node .claude/skills/walk-app/scripts/pitch-walk.mjs [--step 3,4] [--no-build] [--ipad name] [--upright]
  *
  * --step      only these steps of the pitch script, by number (default: all
  *             that a made-up tap can do; 2 and 14 are walked by hand)
  * --no-build  walk the bundle already in the app, without building the
  *             private pitch bundle first
- * --ipad      the simulator, default the one make app-probe picks
+ * --ipad      the simulator, default the one make app-probe picks; an iPhone's
+ *             name ("iPhone 17") walks the phone
+ * --upright   hold it upright instead of on its side (no UI test is needed then)
  *
  * The app is started once, turned on its side, and handed the list of steps;
  * it opens each step's link fresh, asks that step's questions, keeps a
@@ -67,7 +69,7 @@ const make = (args) =>
   });
 
 log("walk_start", { steps: steps.length, dir });
-console.log(`  Walking ${steps.length} pitch steps in the iPad app; pictures and answers go to ${dir}`);
+console.log(`  Walking ${steps.length} pitch steps in the app; pictures and answers go to ${dir}`);
 
 if (!flag("no-build")) {
   console.log("  Building the private pitch bundle into the app…");
@@ -87,11 +89,12 @@ const list = steps.map((s) => ({ id: stepId(s.n), route: s.route, delayMs: 2500,
 const listPath = join(dir, "steps.json");
 writeFileSync(listPath, JSON.stringify(list, null, 2));
 
-console.log("  Starting the iPad app on its side (a restart of the simulator first, about a minute)…");
+const upright = flag("upright");
+console.log(upright ? "  Starting the app upright…" : "  Starting the app on its side (a restart of the simulator first, about a minute)…");
 const probe = [
   "app-probe",
   "TARGET=ipad",
-  "SIDEWAYS=1",
+  ...(upright ? [] : ["SIDEWAYS=1"]),
   "LOCALE=en",
   `ROUTE=${steps[0].route}`,
   `STEPS=${listPath}`,
@@ -127,7 +130,7 @@ for (const s of steps) {
 }
 
 console.log("");
-console.log(`  ${passed} of ${steps.length} steps pass in the iPad app (2 and 14 are walked by hand).`);
+console.log(`  ${passed} of ${steps.length} steps pass in the app (2 and 14 are walked by hand).`);
 console.log(`  Pictures: ${dir} (they show the book's text: look, never commit)`);
 if (walked.code !== 0) console.log(`  The app's walk ended badly; its output is ${walked.out}, its log ${join(dir, "walk.log")}`);
 log("walk_done", { passed, steps: steps.length, make: walked.code });

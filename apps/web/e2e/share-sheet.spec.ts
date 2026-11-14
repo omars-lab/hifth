@@ -118,6 +118,44 @@ test.describe("Hifth · the share sheet builds a link", () => {
     await expect(page.getByRole("dialog", { name: "Share this ayah as a link" })).toHaveCount(0);
     await expect.poll(() => copied(page)).toEqual([siteLink(page, "#/hafs-kfqc/2:48")]);
   });
+
+  // The owner on the front page, 2026-11-12: the share menu is too plain.
+  // Three looks, the same choices and links in each; the info panel switches.
+  test("the menu opens as a preview of the link, and the info panel switches its look", async ({ page }) => {
+    await catchClipboard(page);
+    await page.goto("/?share=c&lang=en#/hafs-kfqc/2:48");
+    const share = page.getByRole("button", { name: "Share this ayah as a link" });
+    await share.click();
+    let sheet = page.getByRole("dialog", { name: "Share this ayah as a link" });
+    await expect(sheet.locator("[data-share-look]")).toHaveAttribute("data-share-look", "preview");
+    // The preview names the verse and says what the link opens with, and follows the choice.
+    const preview = sheet.locator("[data-share-preview]");
+    await expect(preview).toContainText("Al-Baqarah · 2:48");
+    await expect(preview).toContainText("The ayah as it is");
+    await sheet.getByRole("radio", { name: "Its roots" }).check();
+    await expect(preview).toContainText("Its roots");
+    await expect(preview).toContainText("open=roots");
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    const choices = page.getByRole("dialog").locator('[aria-labelledby="colophon-share-look"]').getByRole("radio");
+    await expect(choices).toHaveCount(3);
+    const tiles = choices.and(page.locator('[data-share-look-choice="tiles"]'));
+    await tiles.click();
+    await expect(tiles).toHaveAttribute("aria-checked", "true");
+    await page.keyboard.press("Escape");
+
+    await share.click();
+    sheet = page.getByRole("dialog", { name: "Share this ayah as a link" });
+    await expect(sheet.locator("[data-share-look]")).toHaveAttribute("data-share-look", "tiles");
+    await expect(sheet.locator("[data-share-preview]")).toHaveCount(0);
+    await expect(sheet.getByText("Opens in any browser")).toBeVisible();
+    // The links still do what they did: the look only changes how they are drawn.
+    await sheet.getByRole("radio", { name: "The ayah as it is" }).check();
+    await sheet.getByRole("button", { name: "Copy the app link" }).click();
+    await expect.poll(() => copied(page)).toEqual(["hifth:///hafs-kfqc/2:48"]);
+  });
 });
 
 test.describe("Hifth · the share card on a phone held sideways", () => {
@@ -126,8 +164,12 @@ test.describe("Hifth · the share card on a phone held sideways", () => {
   for (const [lang, shareName, dialogName] of [
     ["en", "Share this ayah as a link", "Share this ayah as a link"],
     ["ar", "شارك", "شارك"],
-  ] as const) {
-    test(`held sideways (${lang}), the share card covers no line of the verse it shares, and the look-alike buttons cover none either`, async ({ page }) => {
+  ] as const)
+  // Every look the info panel offers has to fit (share-look.ts); the preview
+  // card at full height pushed the card's own buttons out of sight.
+  for (const look of ["preview", "tiles", "plain"] as const) {
+    test(`held sideways (${lang}, ${look}), the share card covers no line of the verse it shares, and the look-alike buttons cover none either`, async ({ page }) => {
+      await page.addInitScript((l) => localStorage.setItem("hifth.share.look.v1", l), look);
       // Sideways the phone is wide enough for the card to stand in a corner, as
       // on a laptop, but not tall enough to be a laptop: the page stayed where
       // it was and the card lay over half of the verse, with the look-alike

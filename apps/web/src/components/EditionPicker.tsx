@@ -156,6 +156,8 @@ export function EditionPicker({
         role="dialog"
         aria-modal="true"
         aria-label={t.mushaf}
+        // The panel's name in a link (`?open=`), for the features-page check.
+        data-panel="editions"
         dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}

@@ -1,4 +1,4 @@
-import { test, expect, type Locator, type Page } from "@playwright/test";
+import { test, expect, type Browser, type Locator, type Page } from "@playwright/test";
 import { DRAWER_TOOLS_KEY } from "../src/drawer-tools";
 
 /*
@@ -58,39 +58,165 @@ for (const size of [
     test.use({ viewport: { width: size.width, height: size.height } });
 
     test("with the setting on, Same roots opens inside the drawer, not as its own card, and the verse stays in sight", async ({ page }) => {
-      await page.addInitScript((key) => localStorage.setItem(key, "drawer"), DRAWER_TOOLS_KEY);
-      await page.goto("/#/hafs-kfqc/2:45");
-      await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
-      await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
+      await opensInTheDrawer(page, "2:45");
+    });
 
-      // The list is a part of the drawer, and no card opened beside it.
-      const list = drawer(page).getByRole("region", { name: /^Roots · / });
-      await expect(list).toBeVisible();
-      await expect(page.getByRole("dialog")).toHaveCount(0);
-      // The nearest root opens by itself, its verses ready to go to.
-      await expect(list.getByRole("button", { name: /^Hop to / }).first()).toBeVisible({ timeout: 10_000 });
+    // The page lifts the verse above the drawer, even the last verse on its
+    // page (2026-11-13).
+    test("the last verse on its page stays in sight too, with Same roots open in the drawer", async ({ page }) => {
+      await opensInTheDrawer(page, "2:48");
+    });
 
-      // The drawer grew, and no line of the lit verse is under it.
-      await settle(drawer(page));
-      await expect.poll(async () => (await litLines(page)).length, { message: "a verse is lit" }).toBeGreaterThan(0);
-      // The page slides to keep the verse clear; it may still be moving once the drawer has settled.
-      await expect
-        .poll(
-          async () => {
-            const box = (await drawer(page).boundingBox())!;
-            return (await litLines(page)).filter((line) => overlaps(line, box)).length;
-          },
-          { message: "lines of the verse under the drawer" },
-        )
-        .toBe(0);
-
-      // Pressing Same roots again folds the list away and leaves the drawer.
-      await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
-      await expect(list).toBeHidden();
-      await expect(drawer(page)).toBeVisible();
+    // A verse nine lines long is too tall for the room a full-height list
+    // leaves, however high the page lifts it: the list is cut to the verse's
+    // height, measured once as it opens (2026-11-13).
+    test("a long verse stays in sight too: the roots list is cut to leave it room", async ({ page }) => {
+      await opensInTheDrawer(page, "2:102");
     });
   });
 }
+
+/** Opens `verse`'s drawer, then Same roots inside it; the verse must stay clear of the drawer. */
+async function opensInTheDrawer(page: Page, verse: string): Promise<void> {
+  await page.addInitScript((key) => localStorage.setItem(key, "drawer"), DRAWER_TOOLS_KEY);
+  await page.goto(`/#/hafs-kfqc/${verse}`);
+  await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+  await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
+
+  // The list is a part of the drawer, and no card opened beside it.
+  const list = drawer(page).getByRole("region", { name: /^Roots · / });
+  await expect(list).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  // The nearest root opens by itself, its verses ready to go to.
+  await expect(list.getByRole("button", { name: /^Hop to / }).first()).toBeVisible({ timeout: 10_000 });
+
+  // The drawer grew, and no line of the lit verse is under it.
+  await settle(drawer(page));
+  await expect.poll(async () => (await litLines(page)).length, { message: "a verse is lit" }).toBeGreaterThan(0);
+  // The page slides to keep the verse clear; it may still be moving once the drawer has settled.
+  await expect
+    .poll(
+      async () => {
+        const box = (await drawer(page).boundingBox())!;
+        return (await litLines(page)).filter((line) => overlaps(line, box)).length;
+      },
+      { message: "lines of the verse under the drawer" },
+    )
+    .toBe(0);
+
+  // Pressing Same roots again folds the list away and leaves the drawer.
+  await drawer(page).getByRole("button", { name: /^Same roots · / }).click();
+  await expect(list).toBeHidden();
+  await expect(drawer(page)).toBeVisible();
+}
+
+test.describe("the tools in the drawer keep still once they have risen", () => {
+  // Found 2026-11-13, behind a test that failed now and then. At the
+  // iPad-on-its-side size the row of tools came to rest, then jumped up twice:
+  // once when the look-alikes list arrived a moment after the drawer and the
+  // drawer grew to hold it (336 px), and once 400 ms in, when the drawer
+  // measured again after the page had lifted the verse out of its way and let
+  // its list grow (about 160 px). A press already on its way to Same roots
+  // landed on the list's heading instead, so the roots never opened.
+  test.use({ viewport: { width: 1180, height: 820 } });
+
+  async function watched(browser: Browser, hold: Promise<void> | null, holdPicture: Promise<void> | null): Promise<Page> {
+    // Own the context: the service worker answers fetches itself, where
+    // `page.route` cannot slow them. The drawer slides up as it does for most
+    // readers; a reader who asks for less motion has no slide, which is the
+    // easier case.
+    const context = await browser.newContext({
+      serviceWorkers: "block",
+      locale: "en-US",
+      viewport: { width: 1180, height: 820 },
+    });
+    const page = await context.newPage();
+    if (hold) {
+      await page.route("**/assets/adj/*/2.json", async (route) => {
+        await hold;
+        await route.continue().catch(() => undefined);
+      });
+    }
+    if (holdPicture) {
+      // A look-alike's picture of the shared words is cut from its own page,
+      // and needs that page's word list: held back, the picture comes late.
+      // The two pages open on screen (7 and 8) are let through.
+      await page.route("**/assets/words/*/*.json", async (route) => {
+        const sheet = Number(/\/(\d+)\.json$/.exec(route.request().url())?.[1]);
+        if (sheet < 6 || sheet > 9) await holdPicture;
+        await route.continue().catch(() => undefined);
+      });
+    }
+    await page.addInitScript((key) => {
+      localStorage.setItem(key, "drawer");
+      // Where Same roots stands, every frame it moves: a check from the test
+      // itself polls too slowly to see a jump between two of its looks. Each
+      // look also notes whether the drawer is still sliding up, and how long
+      // since the frame before: a busy moment mid-slide can skip 150 ms of
+      // frames, and a point on the way up then looks like a resting place.
+      const seen: { t: number; y: number; gap: number; sliding: boolean }[] = [];
+      (window as unknown as { __rootsAt: typeof seen }).__rootsAt = seen;
+      let last = performance.now();
+      const look = () => {
+        const now = performance.now();
+        const b = document.querySelector('[data-verse-drawer] button[aria-label^="Same roots"]');
+        if (b) {
+          const y = Math.round(b.getBoundingClientRect().y);
+          const d = b.closest("[data-verse-drawer]");
+          const sliding = !!d?.getAnimations().some((a) => a.playState === "running");
+          if (seen.at(-1)?.y !== y || seen.at(-1)?.sliding !== sliding) seen.push({ t: now, y, gap: Math.round(now - last), sliding });
+        }
+        last = now;
+        requestAnimationFrame(look);
+      };
+      requestAnimationFrame(look);
+    }, DRAWER_TOOLS_KEY);
+    return page;
+  }
+
+  const later = (): Promise<void> => new Promise<void>((r) => setTimeout(r, 1200));
+  const none = (): Promise<void> | null => null;
+  for (const when of [
+    { name: "with the look-alikes on time", hold: none, picture: none },
+    // Long enough for the drawer to finish rising before the list lands, and
+    // shorter than the app's own wait for the list.
+    { name: "with the look-alikes held back", hold: later, picture: none },
+    // Found 2026-11-13, after the fix above: the look-alike's picture of the
+    // shared words came up to 340 ms after the drawer had risen, and the row
+    // it sits in grew by 28 px, moving the tools up under a press.
+    { name: "with the shared words' picture held back", hold: none, picture: later },
+  ]) {
+    test(`${when.name}, Same roots does not move after it first comes to rest, and a press there opens it`, async ({ browser }) => {
+      const page = await watched(browser, when.hold(), when.picture());
+      await page.goto("/#/hafs-kfqc/2:45");
+      await expect(drawer(page).getByRole("region", { name: /^Look-alikes/ })).toBeVisible({ timeout: 20_000 });
+      // Past every late measure the app makes, and past the held picture.
+      await page.waitForTimeout(1500);
+      await expect(drawer(page).locator("[data-shared-words] svg").first()).toBeVisible();
+      const seen = await page.evaluate(
+        () => (window as unknown as { __rootsAt: { t: number; y: number; gap: number; sliding: boolean }[] }).__rootsAt,
+      );
+      // Every look as [ms, where, ms since the frame before, S if sliding], for a failure to show.
+      const record = JSON.stringify(seen.map((at) => [Math.round(at.t), at.y, at.gap, at.sliding ? "S" : "-"]));
+      // At rest: the first look once the drawer has stopped sliding up.
+      const rest = seen.findIndex((at) => !at.sliding);
+      expect(rest, `the drawer stopped sliding ${record}`).toBeGreaterThanOrEqual(0);
+      const restY = seen[rest]!.y;
+      expect(seen.slice(rest).map((at) => at.y), `where Same roots stood after it first came to rest ${record}`).toEqual([restY]);
+      const box = (await drawer(page).getByRole("button", { name: /^Same roots · / }).boundingBox())!;
+      await page.mouse.click(box.x + box.width / 2, restY + box.height / 2);
+      await expect(drawer(page).getByRole("region", { name: /^Roots · / })).toBeVisible();
+      await page.context().close();
+    });
+  }
+
+  test("a look-alikes list that never comes back still lets the drawer rise", async ({ browser }) => {
+    const page = await watched(browser, new Promise(() => undefined), null);
+    await page.goto("/#/hafs-kfqc/2:45");
+    await expect(drawer(page).getByRole("button", { name: /^Same roots · / })).toBeVisible({ timeout: 20_000 });
+    await page.context().close();
+  });
+});
 
 test("with the setting on, Escape folds the roots list away first, and a second Escape puts the drawer away", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -192,6 +318,45 @@ test.describe("Share inside the drawer", () => {
 });
 
 /*
+ * Inside the drawer a tool's panel is cut to the room left under the lit
+ * verse, never shorter than a floor of 10rem (VerseDrawer's fit). A verse low
+ * on the page gets only that floor. The preview card and the tall tiles of the
+ * share menu (share-look.ts) were taller than it, so on such a verse the links
+ * sat below the cut until you scrolled (seen 2026-11-12 on 2:48). Every look
+ * now fits inside the floor, so both links are in sight wherever the verse is.
+ *
+ * Watched failing before the fix: preview 263px and tiles 200px, floor 160px.
+ */
+test.describe("Share inside the drawer on a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  for (const look of ["plain", "preview", "tiles"]) {
+    test(`fits inside the shortest the drawer's panel can be (${look})`, async ({ page }) => {
+      await page.addInitScript(
+        ([key, l]) => {
+          localStorage.setItem(key!, "drawer");
+          localStorage.setItem("hifth.share.look.v1", l!);
+        },
+        [DRAWER_TOOLS_KEY, look],
+      );
+      await page.goto("/#/hafs-kfqc/2:48");
+      await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+      await drawer(page).getByRole("button", { name: "Share this ayah as a link" }).click();
+      const links = drawer(page).getByRole("region", { name: "Share this ayah as a link" });
+      await expect(links.getByRole("button", { name: "Copy the app link" })).toBeVisible();
+      await expect(links.getByRole("button", { name: "Share the website link" })).toBeVisible();
+
+      const [height, floor] = await links.evaluate((region) => {
+        const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        const most = Math.min(innerHeight * 0.4, 22 * rem);
+        return [region.getBoundingClientRect().height, Math.min(most, 10 * rem)];
+      });
+      expect(height, `the share section's height, against the floor of ${floor}px`).toBeLessThanOrEqual(floor);
+    });
+  }
+});
+
+/*
  * Listen, the third tool moved (owner, 2026-11-07: "clicking play should
  * expand drawer as well with additional play options"). With the setting on, a
  * press plays the verse and opens its play options under the drawer's buttons:
@@ -272,5 +437,115 @@ test.describe("Listen inside the drawer", () => {
     await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
     await drawer(page).getByRole("button", { name: /^Listen to .*2:45/ }).click();
     await expect(page.getByRole("region", { name: /^Play options/ })).toHaveCount(0);
+  });
+});
+
+/*
+ * The second shape the decision names (selection-drawer ③): each tool opened
+ * inside the drawer stays open as a tab along the top of its section, so going
+ * back to one is a tap on its tab and finds it as it was left. A third choice
+ * of the same setting, "As tabs in the verse's drawer".
+ *
+ * Written before the build (2026-11-14) and watched failing: no tabs, and Share
+ * folded the roots list.
+ */
+test.describe("the verse's tools as tabs in its drawer", () => {
+  test.use({ viewport: { width: 1440, height: 900 }, serviceWorkers: "block" });
+
+  test.beforeEach(async ({ page }) => {
+    await page.route("https://verses.quran.com/**", (route) =>
+      route.fulfill({ status: 200, contentType: "audio/mpeg", body: "" }),
+    );
+    await page.addInitScript((key) => localStorage.setItem(key, "tabs"), DRAWER_TOOLS_KEY);
+    await page.goto("/#/hafs-kfqc/2:45");
+    await expect(drawer(page)).toBeVisible({ timeout: 20_000 });
+  });
+
+  const tabs = (page: Page): Locator => drawer(page).getByRole("tablist", { name: "Tools open in this drawer" });
+  const rootsButton = (page: Page): Locator => drawer(page).getByRole("button", { name: /^Same roots · / });
+  const shareButton = (page: Page): Locator => drawer(page).getByRole("button", { name: "Share this ayah as a link" });
+
+  test("each tool opened stays as a tab, and its tab brings it back as it was left", async ({ page }) => {
+    // The look-alikes are open from the start, as with the drawer choice.
+    await expect(tabs(page).getByRole("tab", { name: "Look-alikes" })).toBeVisible();
+    await rootsButton(page).click();
+    const rootsTab = tabs(page).getByRole("tab", { name: "Same roots" });
+    await expect(rootsTab).toHaveAttribute("aria-selected", "true");
+    const roots = drawer(page).getByRole("tabpanel", { name: "Same roots" });
+    await expect(roots.getByRole("button", { name: /^Hop to / }).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+
+    // Scrolled down the roots list, then over to Share and back.
+    const scrolled = await roots.evaluate((el) => {
+      el.scrollTop = 80;
+      return el.scrollTop;
+    });
+    expect(scrolled, "the roots list is long enough to scroll").toBeGreaterThan(40);
+    await shareButton(page).click();
+    await expect(tabs(page).getByRole("tab", { name: "Share" })).toHaveAttribute("aria-selected", "true");
+    await expect(drawer(page).getByRole("region", { name: "Share this ayah as a link" })).toBeVisible();
+    await expect(roots).toBeHidden();
+    await expect(tabs(page).getByRole("tab")).toHaveText(["Look-alikes", "Same roots", "Share"]);
+
+    await rootsTab.click();
+    await expect(roots).toBeVisible();
+    expect(await roots.evaluate((el) => el.scrollTop), "the roots list where it was left").toBe(scrolled);
+
+    // No line of the lit verse is under the grown drawer.
+    await settle(drawer(page));
+    await expect
+      .poll(async () => {
+        const box = (await drawer(page).boundingBox())!;
+        return (await litLines(page)).filter((line) => overlaps(line, box)).length;
+      }, { message: "lines of the verse under the drawer" })
+      .toBe(0);
+  });
+
+  test("a tool's button brings its tab forward, and pressed on the tab in front closes it", async ({ page }) => {
+    await rootsButton(page).click();
+    await shareButton(page).click();
+    // Same roots is open behind Share: its button brings it forward, not shut.
+    await rootsButton(page).click();
+    await expect(tabs(page).getByRole("tab", { name: "Same roots" })).toHaveAttribute("aria-selected", "true");
+    await expect(rootsButton(page)).toHaveAttribute("aria-expanded", "true");
+    // In front, it closes, and the last tab still open comes forward.
+    await rootsButton(page).click();
+    await expect(tabs(page).getByRole("tab", { name: "Same roots" })).toHaveCount(0);
+    await expect(tabs(page).getByRole("tab", { name: "Share" })).toHaveAttribute("aria-selected", "true");
+  });
+
+  test("a tab's × closes that tool alone, and Escape closes the tab in front, one at a time, then the drawer", async ({ page }) => {
+    await drawer(page).getByRole("button", { name: /^Listen to .*2:45/ }).click();
+    await expect(drawer(page).getByRole("region", { name: /^Play options/ })).toBeVisible();
+    await rootsButton(page).click();
+    await shareButton(page).click();
+    await tabs(page).getByRole("button", { name: "Close Same roots" }).click();
+    await expect(tabs(page).getByRole("tab")).toHaveText(["Look-alikes", "Listen", "Share"]);
+    await expect(tabs(page).getByRole("tab", { name: "Share" })).toHaveAttribute("aria-selected", "true");
+
+    await page.keyboard.press("Escape");
+    await expect(tabs(page).getByRole("tab")).toHaveText(["Look-alikes", "Listen"]);
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Escape");
+    await expect(tabs(page)).toHaveCount(0);
+    await expect(drawer(page)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(drawer(page)).toBeHidden();
+  });
+
+  test("lighting another verse closes the tools opened for the last", async ({ page }) => {
+    await rootsButton(page).click();
+    await shareButton(page).click();
+    await page.evaluate(() => { location.hash = "#/hafs-kfqc/2:46"; });
+    await expect(drawer(page)).toHaveAccessibleName(/2:46/);
+    await expect(tabs(page).getByRole("tab", { name: "Same roots" })).toHaveCount(0);
+    await expect(tabs(page).getByRole("tab", { name: "Share" })).toHaveCount(0);
+  });
+
+  test("it is the third choice in the info panel", async ({ page }) => {
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    const group = page.getByRole("dialog", { name: /About Hifth/ }).getByRole("radiogroup", { name: "Where a verse's tools open" });
+    await expect(group.getByRole("radio")).toHaveText(["In a card of their own", "Inside the verse's drawer", "As tabs in the verse's drawer"]);
+    await expect(group.getByRole("radio", { name: "As tabs in the verse's drawer" })).toHaveAttribute("aria-checked", "true");
   });
 });

@@ -13,7 +13,54 @@ commit or design-doc item for the actual reasoning.
 
 These sessions' task numbers started again from 1, so they would clash with the numbers below.
 They are listed here by date instead. What is still open from them is in
-`.claude/plans/open-work-2026-11.md`. Pushes and merges are folded into the work they shipped.
+`.claude/plans/open-work-2026-11.md`, and from 2026-11-12 on in `docs/backlog.md`. Pushes and
+merges are folded into the work they shipped.
+
+### 2026-11-11 to 2026-11-13 — hifth.app's front page, and the app redesigns asked from it
+
+Plan: `.claude/plans/floating-swimming-puzzle.md`. Branch `mistake-kinds` (worktree
+`../hifth-landing`). What is still open is on the backlog: the first upload
+(`hifth-app-first-release`), the "Hifth has moved" card (`carry-marks-switched-off`), the owner's
+pick between the built calendar looks (`calendar-looks-plain`), DMARC (`hifth-app-dmarc-spf`) and
+the spam-check key (`hifth-app-turnstile-key`).
+
+**Done:**
+- The Cloudflare keys work on this laptop, and the site project for hifth.app is made (ab634495).
+- A front page and a privacy page for hifth.app (77d23fc7), in English and Arabic, opening on two
+  facing pages and a phone (82326718); what you can do with it and Hifth on each device (eb49ed02);
+  the owner's opening line (d868bc8e); the wordmark in Aref Ruqaa (411249e3); Arabic pictures of
+  the app (61a29221). The contact address the privacy page names is the owner's to give.
+- The email form keeps an address and lets it leave (59bbaa7f); it then moved to Supabase, with a
+  confirm email and a leave button (c46a2519). The mailing-list design came from two researchers
+  and a checker (9daf0cc3, 397b31c4, 95b00cd2, 1809a4df, d2891ab8). Pushing it to the real
+  Supabase project is the owner's.
+- A release tool that refuses anything but the bare minimum (00e63e02, bb68e305, 4a56fbd5). It has
+  not uploaded to Cloudflare yet; that is `hifth-app-first-release`.
+- The app at /read, and readers at the old address can carry their marks (9624325b, fe28976c),
+  where they left off (5bb37c69), their settings (7b8f1ef5, 6a3812f4) and, only when they tick it,
+  what they have opened (6a6c95cd). Switched off until hifth.app is live.
+- The sign-in decision, a roadmap and the CLAUDE.md line for it (e4bdf8bf).
+- hifth.app on this laptop with one command, on the local launcher, with page comments (3411c246,
+  2d535242); the intent picture from the local hub (69eded1b); a Designs button there (e5e0d820).
+- 7.2 KB of room made under the size limit (f0f211c5, 6eeb649f).
+- The Mistake pen asks the kind of mistake first, three ways to choose from (c1b44ac3, 24f786b0),
+  with each harakah named in the reader's language (6763cffc).
+- The record's month shows how much each day held, in three looks (d85e15a9, cc78403e), and a
+  fourth, dots, from the Mac's menu-bar calendar (a9465870, 1b66f945).
+- The share menu in three looks (8a6ab633), kept in sight on a low verse (53e702d4).
+- Two skills: how Hifth is set up today, and the Supabase login check (84b1657d).
+- The branch merged to main with main's latest work, overlaps worked by hand (PR #610, 2bfeca6c,
+  2026-11-13).
+- 14 KB of room made under the size limit: a stronger minifier (terser) and code nothing used;
+  start-up download 172.7 → 163.0 KB (PR #611, 56b3bd67, 2026-11-13).
+- The release check no longer counts the page-comment files as uncommitted work, which had refused
+  every release (727ea5f3, on branch release-ignores-comments, to merge with the release's own
+  changes).
+- A side bar on the local copy of hifth.app, never on the live site: the front pages, each section
+  of the features page with its cards, and every design page, the page you are on lit; folds to
+  icons on a laptop, a Menu drawer on a phone (branch release-ignores-comments, 2026-11-14). The
+  release folder is now cleared by moving it aside first, because Finder could write into it
+  while it was being deleted (`docs/issues/old-folder-written-to-while-deleted.md`).
 
 ### 2026-11-09 — Installing on our own devices through TestFlight
 
@@ -153,6 +200,82 @@ download first, added a little at a time over nineteen merges. The size check no
 start-up download (185 KB; it stands at 171 KB) and prints it on every run. A new open item says
 what would win the 150 ms back. Account: `docs/issues/`, and item ⑳ of `docs/performance.md`.
 PR #595.
+
+### 2026-11-11 — hifth-app-domain: hifth.app on a Cloudflare account of its own
+
+**Done:** A new Cloudflare account for Hifth, with `hifth.app` added and its nameservers moved
+from Namecheap. Two tokens are saved encrypted in the repo: one that only reads, and one that
+edits the domain's addresses and publishes static pages. Both were checked against Cloudflare.
+The onboarding skill that walks these steps lives in the owner's own skills folder, not in this
+repo; PR #601 installed its scripts and checks here. Still open: moving the registration after
+the 60-day lock, and where the share page lives (`docs/design/sharing-between-readers.md` ⑭).
+The settings file exists only in the walk worktree so far (backlog:
+`cloudflare-settings-only-in-one-folder`).
+
+### 2026-11-11 — walk-feedback-capture: the plan, and the row that tracks it
+
+**Done:** The plan for reporting a fault from the iPad walk with one screenshot was written and
+approved, and its backlog row added (PR #601). The plan said a use case and a feature on the
+code map would come too; they did not. The row now names the existing use case for checks done
+by hand on a device, and the feature on the code map comes with the first code. Design:
+`docs/design/pitch-walk.md` ②.
+
+### 2026-11-11 — the features page on the local development hub
+
+**Done:** One page on the local hub lists every place, tool and panel in the app, each with a
+picture taken from the public build and a link that opens it. PR #602.
+
+### 2026-11-12 — check-card-link: a card in the app that says what to check
+
+**Done:** A link opens a card of steps inside the debug app, each with a tick, a cross and a
+note. Done saves the answers in the app's own folder. The link is in the app-link contract and
+its page. A laptop script sends a card and copies the answers off, with make targets. PR #603.
+Design: `docs/design/check-card.md`.
+
+### 2026-11-12 — walk-feedback-capture slice 0, and the guided-check skill
+
+**Done:** A throwaway build on the real iPad answered three questions. The app hears a
+screenshot taken either way. iOS asked about screen recording once. The laptop can copy the
+app's files off over the cable. The guided-check skill now covers a check done by hand from
+start to finish: the card, the answers, the build's own log, and each cross turned into work.
+Two Firefox tests that read too early were fixed on the way. PR #604. Results:
+`docs/design/pitch-walk.md`.
+
+### 2026-11-13 — roots-in-drawer-test-fails-on-its-own: the drawer's tools keep still
+
+**Done:** The phone-size test of opening Same roots in the drawer failed now and then because
+the drawer's row of tools jumped up after it had come to rest. A press, the test's or a reader's,
+landed on the wrong thing. A rising drawer now waits for its surah's look-alikes, at most two
+seconds. The tool's list is cut from the verse's height and the highest the page can lift it,
+not from where the verse stands as the drawer rises, and is measured once, so it never grows.
+Running the tests 40 times found a third, smaller jump: the picture of a look-alike's shared
+words arrived late and grew its row by 28 pixels. A blank space one picture line tall now holds
+its place until it comes. New tests record where Same roots stands on every frame, with the
+look-alikes or the picture held back, and check that a long verse (2:102) stays clear of the
+list. The ten drawer tests then passed 400 times out of 400 with the drawer's slide up off. The
+test now keeps the slide on and counts rest from the end of the slide; the four keep-still tests
+passed 160 times out of 160 that way, and still fail with the blank space taken out. Write-up:
+`docs/issues/drawer-tools-jumped-after-rising.md`.
+
+### 2026-11-13 — walk-feedback-capture: a screenshot on the iPad keeps what you saw
+
+**Done:** In a build put on from the laptop, a screenshot makes the app keep its own picture,
+where you were, your last ten seconds of touches, the five seconds of video before and a note if
+you add one. The folders show in the Files app. `make walk-pull` copies them off over the cable
+and draws one page of them; `make walk-list` prints them. A release check fails if a build meant
+to ship has any of it, and archiving runs that check first. The walk page and the by-hand list
+(item 22) say how to try it on the real iPad, which is the owner's part still to do. Plan:
+`.claude/plans/refactored-bouncing-cerf.md`.
+
+### 2026-11-13 — feature-links-hub step 3: a link from the laptop keeps a capture and says where the app is
+
+**Done:** In a build put on from the laptop, `hifth://x-callback-url/capture?name=…` keeps a walk
+capture named by the link, and `current-to-file` writes which page the app is on beside the
+captures; `make walk-current` copies that file off the iPad and prints it. Both wait for the page
+the last open asked for. A release build answers both "not in this build", and the release check
+looks for seven signs of the capture code. Proven by unit tests, every example in the link
+contract (run by both the app and the web link builder) and a simulator test that sends both real
+links. Not yet run on the real iPad. PR #609.
 
 ### 2026-11-12 to 11-13 — supabase-move: the outside-library store moves to a new account
 

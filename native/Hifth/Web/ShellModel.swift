@@ -62,6 +62,8 @@ final class ShellModel {
     private var awaitingRoute: [AwaitingRoute] = []
     /// `current` requests made before anything was on screen.
     private var awaitingCurrent: [XCallback.Callbacks] = []
+    /// The place the last link asked the page to show, until it shows it.
+    private var askedHash: String?
 
     private struct AwaitingRoute {
         let id = UUID()
@@ -172,7 +174,19 @@ final class ShellModel {
 
     // MARK: - x-callback-url
 
+    /// A build installed from the laptop (Swift's debug switch on). Only these
+    /// take the laptop's links: check cards, capture links, current-to-file.
+    #if DEBUG
+    static let laptopBuild = true
+    #else
+    static let laptopBuild = false
+    #endif
+
     private func perform(_ request: XCallback.Request) {
+        if let refusal = XCallback.refusal(for: request.action, laptopBuild: Self.laptopBuild) {
+            answer(request.callbacks.errorURL(refusal))
+            return
+        }
         switch request.action {
         case .open(let hash):
             show(hash)
@@ -196,10 +210,152 @@ final class ShellModel {
             if let old = checkCard, old.touched { save(old) }
             checkCard = CheckCard(check: check, callbacks: request.callbacks)
             #else
-            answer(request.callbacks.errorURL(.notInThisBuild))
+            _ = check
             #endif
+        case .capture(let name):
+            #if DEBUG
+            keepCaptureForLink(name, answering: request.callbacks)
+            #else
+            _ = name
+            #endif
+        case .currentToFile:
+            #if DEBUG
+            writeCurrentToFile(answering: request.callbacks)
+            #endif
+            break
         }
     }
+
+    #if DEBUG
+    // MARK: - Walk capture (builds from the laptop only)
+
+    /// The last ten seconds of page moves, touches and Pencil strokes, for a
+    /// walk capture to keep beside its picture.
+    @ObservationIgnored var captureTrail = CaptureTrail()
+    /// Where captures are kept; the tests and the launch flag point it elsewhere.
+    @ObservationIgnored var captureStore = CaptureStore(folder: CaptureStore.defaultFolder)
+    /// The capture the "Add a note" banner is for, while it is up.
+    private(set) var captureNote: URL?
+    /// What has been typed in the banner so far.
+    var captureNoteText = ""
+
+    /// Show the banner for a new capture. One already up is closed first, so
+    /// what was typed there is kept with its own capture.
+    func offerNote(for capture: URL) {
+        closeNote()
+        captureNote = capture
+    }
+
+    /// Close the banner, keeping whatever was typed.
+    func closeNote() {
+        guard let capture = captureNote else { return }
+        do {
+            try captureStore.keepNote(captureNoteText, in: capture)
+        } catch {
+            print("walk capture note not kept \(error)")
+        }
+        captureNote = nil
+        captureNoteText = ""
+    }
+
+    /// The touch, Pencil and page-move trail: the recorder on the iPad feeds it.
+    func noteOnTrail(_ happening: CaptureTrail.Happening) {
+        captureTrail.add(happening, at: Date())
+    }
+
+    /// Set by `startWalkCaptureOnce` (WalkCapture.swift), which runs at the
+    /// first `ready` only, though the page says it is ready after every reload.
+    @ObservationIgnored var walkCaptureStarted = false
+    @ObservationIgnored var walkCaptureObserver: NSObjectProtocol?
+    #if os(iOS)
+    @ObservationIgnored var touchTrailRecorder: UIGestureRecognizer?
+    /// Apple's recorder of the last few seconds, and what starts and stops it
+    /// as the app comes to the front and goes to the back.
+    @ObservationIgnored var clipRecorder: ClipRecorder?
+    @ObservationIgnored var clipObservers: [NSObjectProtocol] = []
+    #endif
+
+    // MARK: - Capture links (builds from the laptop only)
+
+    /// How a capture link keeps its capture: as a screenshot would, named, with
+    /// no note banner. The tests put a collector here, as there is no web view.
+    @ObservationIgnored lazy var captureByLink: (String) async -> URL? = { [weak self] name in
+        await self?.captureWalk(trigger: "link", name: name)
+    }
+    /// How long a capture link waits once the page shows its place, so a page
+    /// turn has finished drawing before the picture is taken.
+    @ObservationIgnored var captureSettle: Duration = .milliseconds(600)
+    /// Capture links and current-to-file requests waiting for the page.
+    @ObservationIgnored private var awaitingPage: [CaptureLinkWaiting] = []
+
+    private struct CaptureLinkWaiting {
+        let id = UUID()
+        /// The place an `open` just asked for, if the page is not showing it
+        /// yet; `nil` once any place will do.
+        var hash: String?
+        let run: () -> Void
+    }
+
+    private func keepCaptureForLink(_ name: String, answering callbacks: XCallback.Callbacks) {
+        whenPageShows { [weak self] in
+            guard let self else { return }
+            Task {
+                try? await Task.sleep(for: self.captureSettle)
+                let route = self.currentHash
+                if let folder = await self.captureByLink(name) {
+                    self.answer(callbacks.captureURL(folder: folder.lastPathComponent, route: route, publicBase: Self.publicBase))
+                } else {
+                    self.answer(callbacks.errorURL(.captureNotKept))
+                }
+            }
+        }
+    }
+
+    private func writeCurrentToFile(answering callbacks: XCallback.Callbacks) {
+        whenPageShows { [weak self] in
+            guard let self else { return }
+            let hash = currentHash
+            do {
+                let file = try captureStore.keepCurrent(route: hash, publicBase: Self.publicBase, at: Date())
+                print("current written \(file.lastPathComponent) \(hash)")
+                answer(callbacks.successURL(route: hash, publicBase: Self.publicBase))
+            } catch {
+                print("current not written \(error)")
+                answer(callbacks.errorURL(.currentNotWritten))
+            }
+        }
+    }
+
+    /// Run `job` once the page is ready and showing a place, and, if an `open`
+    /// was just sent, that place: a capture right after an open is of the new
+    /// page, not the one before. An open the page never shows stops holding
+    /// the job back after the same wait `open` gives its own answer.
+    private func whenPageShows(_ job: @escaping () -> Void) {
+        let wanted = askedHash.flatMap { $0 == currentHash ? nil : $0 }
+        let waiting = CaptureLinkWaiting(hash: wanted, run: job)
+        awaitingPage.append(waiting)
+        runCaptureLinkWaiting()
+        guard wanted != nil else { return }
+        Task { [weak self, timeout = callbackTimeout] in
+            try? await Task.sleep(for: timeout)
+            self?.stopWaitingForPlace(waiting.id)
+        }
+    }
+
+    private func stopWaitingForPlace(_ id: UUID) {
+        guard let index = awaitingPage.firstIndex(where: { $0.id == id }) else { return }
+        if awaitingPage[index].hash == askedHash { askedHash = nil }
+        awaitingPage[index].hash = nil
+        runCaptureLinkWaiting()
+    }
+
+    private func runCaptureLinkWaiting() {
+        guard ready, !currentHash.isEmpty, !awaitingPage.isEmpty else { return }
+        let due = awaitingPage.filter { $0.hash == nil || $0.hash == currentHash }
+        awaitingPage.removeAll { job in due.contains { $0.id == job.id } }
+        for job in due { job.run() }
+    }
+    #endif
 
     // MARK: - The check card (builds from the laptop only)
 
@@ -259,6 +415,7 @@ final class ShellModel {
 
     /// Turn the page to `hash` now if the app is ready, else as soon as it is.
     func show(_ hash: String) {
+        askedHash = hash
         guard ready else {
             pendingHash = hash
             return
@@ -288,9 +445,19 @@ final class ShellModel {
             if let pendingHash { show(pendingHash) }
             probeIfAsked()
             scheduleSnapshotIfAsked()
+            #if DEBUG
+            startWalkCaptureOnce()
+            #endif
         case .route(let hash):
             currentHash = hash
+            if hash == askedHash { askedHash = nil }
+            #if DEBUG
+            captureTrail.add(.route(hash), at: Date())
+            #endif
             settle(hash)
+            #if DEBUG
+            runCaptureLinkWaiting()
+            #endif
         case .share(let url, let title, let text):
             Sharing.present(url: url, title: title, text: text, from: webView)
         }
@@ -648,7 +815,7 @@ final class ShellModel {
     /// The PNG, and its size in points, to check against the page's own.
     /// On the Mac the web view runs on under the title bar, so the view is
     /// taller than the page; only the page's own area is photographed.
-    private static func snapshotPNG(of webView: WKWebView, page: CGSize) async -> (Data, CGSize) {
+    static func snapshotPNG(of webView: WKWebView, page: CGSize) async -> (Data, CGSize) {
         let configuration = WKSnapshotConfiguration()
         configuration.rect = CGRect(origin: .zero, size: page)
         return await withCheckedContinuation { continuation in

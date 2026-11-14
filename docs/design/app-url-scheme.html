@@ -46,7 +46,7 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <p>The app is not a web server. These are <code>hifth://</code> links the operating system hands to the installed app: from a tapped link, from Shortcuts, from a script (<code>open</code>, <code>xcrun simctl openurl</code>). OpenAPI is used here as a way to write the contract down in one place that both people and tests read: <code>native/HifthTests/XCallbackTests.swift</code> runs every example under <code>x-examples</code> through the real parser, and <code>docs/design/app-url-scheme.html</code> is rendered from this file by <code>scripts/build-app-url-scheme.mjs</code>.</p>
 <p>Two kinds of address. A <strong>plain link</strong> (<code>hifth:///hafs-kfqc/2:255</code>) turns the page and says nothing back; a bad one is ignored. An <strong>x-callback-url request</strong> (<code>hifth://x-callback-url/open?route=…&amp;x-success=…</code>) does one action and then opens the caller's own address with the result, following the x-callback-url convention (x-callback-url.com): <code>x-success</code>, <code>x-error</code> and <code>x-cancel</code> name where to answer, and an error answer carries <code>errorCode</code> and <code>errorMessage</code>.</p>
 <p>The route grammar is the web app's own hash, unchanged: <code>/&lt;edition&gt;/&lt;target&gt;[?query]</code>. The app only checks its shape; the web app decides what it means (<code>docs/query-params.md</code> lists the query keys).</p>
-<nav><a href="#openLink">Plain link</a><a href="#xOpen">Open the app at a route, then tell the caller</a><a href="#xCurrent">Ask what the app is showing</a><a href="#xCheck">Show a card of things to check</a><a href="#builder">Build a link</a><a href="#editions">Editions</a><a href="#errors">Error codes</a></nav>
+<nav><a href="#openLink">Plain link</a><a href="#xOpen">Open the app at a route, then tell the caller</a><a href="#xCurrent">Ask what the app is showing</a><a href="#xCheck">Show a card of things to check</a><a href="#xCapture">Keep a walk capture, as a screenshot would</a><a href="#xCurrentToFile">Write what the app is showing to a file</a><a href="#builder">Build a link</a><a href="#editions">Editions</a><a href="#errors">Error codes</a></nav>
 <section id="openLink">
 <h2>Plain link: open the app at a verse, a page or a run of verses</h2>
 <p class="path"><code>hifth://{edition}/{target}</code></p>
@@ -96,11 +96,12 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
 <tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td>string, matching <code>^/[a-z0-9-]+/(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)(\?[A-Za-z0-9\-_.~%:,=&amp;+]*)?$</code></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
 <tr><td><code>url</code> <span class="req">required</span></td><td>query</td><td>string, uri</td><td><p>The same place on the public site, ready to share.</p></td></tr>
+<tr><td><code>capture</code></td><td>query</td><td>string, matching <code>^[0-9]{8}-[0-9]{6}(-[0-9]+)?$</code></td><td><p>Only in the answer to <code>capture</code>: the kept capture's folder name, its time (<code>yyyyMMdd-HHmmss</code>, with <code>-2</code> and on for a second in the same second). It comes before <code>route</code> and <code>url</code>.</p></td></tr>
 </tbody></table>
 <h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
 <p>Opened by the app when the action failed</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code></td><td><p></p></td></tr>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code></td><td><p></p></td></tr>
 <tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
@@ -143,6 +144,7 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
 <tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td>string, matching <code>^/[a-z0-9-]+/(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)(\?[A-Za-z0-9\-_.~%:,=&amp;+]*)?$</code></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
 <tr><td><code>url</code> <span class="req">required</span></td><td>query</td><td>string, uri</td><td><p>The same place on the public site, ready to share.</p></td></tr>
+<tr><td><code>capture</code></td><td>query</td><td>string, matching <code>^[0-9]{8}-[0-9]{6}(-[0-9]+)?$</code></td><td><p>Only in the answer to <code>capture</code>: the kept capture's folder name, its time (<code>yyyyMMdd-HHmmss</code>, with <code>-2</code> and on for a second in the same second). It comes before <code>route</code> and <code>url</code>.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
 <table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
@@ -169,13 +171,77 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
 <p>Opened by the app when the action failed</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code></td><td><p></p></td></tr>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code></td><td><p></p></td></tr>
 <tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
 <table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
 <tr><td><code class="url">hifth://x-callback-url/check?id=screens-1&amp;title=Turning%20pages&amp;step=Turn%20to%20the%20next%20page&amp;see=The%20page%20slides%20over&amp;step=Turn%20back&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Log</code><div class="faint"><p>A card of two steps; the first says what you should see. Done answers with id=screens-1 and result=pass or fail.</p></div></td><td><code>check screens-1 2 steps</code></td></tr>
 <tr><td><code class="url">hifth://x-callback-url/check?id=a&amp;see=Something&amp;step=Look&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>What you should see came before any step, so the card is refused.</p></div></td><td><code>error bad-check</code></td></tr>
+</tbody></table>
+</section>
+<section id="xCapture">
+<h2>Keep a walk capture, as a screenshot would</h2>
+<p class="path"><code>hifth://x-callback-url/capture</code></p>
+<p>Only in a build installed from the laptop; a release build answers <code>not-in-this-build</code>. Keeps one walk capture, the same as when the reader takes a screenshot: a folder in the app's <code>Documents/walk-captures/</code> with the app's picture, the last ten seconds of touches and page moves, the five seconds before (on an iPad that allows recording) and where the app is. It waits for the page: if the app was just launched by this link, until the first page shows; if an <code>open</code> came just before, until that page shows, or until an open would have given up. Then it waits a little more, so a page turn has finished drawing. It offers no note banner and leaves one the reader is typing in alone. <code>make walk-pull</code> copies the captures off; the gallery says it was taken by a link and shows its name.</p>
+<h3>Parameters</h3>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td>query</td><td>string</td><td><p>A name for the capture, kept in its <code>where.json</code> and shown in the gallery. Lowercased, anything but letters and digits becomes <code>-</code>, at most 60 characters. Default <code>capture</code>. The folder itself is still named by the time.</p></td></tr>
+<tr><td><code>x-success</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action worked. Any app's address (<code>shortcuts://…</code>, <code>drafts://…</code>, <code>https://…</code>). The answer's parameters are added to its query. Ignored if it points back into this app, or at a file or a script.</p></td></tr>
+<tr><td><code>x-error</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action failed. Opened with <code>errorCode</code> and <code>errorMessage</code> added, as the x-callback-url convention names them. Same safety rule as x-success.</p></td></tr>
+<tr><td><code>x-cancel</code></td><td>query</td><td>string, uri</td><td><p>Accepted for completeness and never opened: neither action here can be cancelled by the reader.</p></td></tr>
+<tr><td><code>x-source</code></td><td>query</td><td>string</td><td><p>The calling app's name, per the convention. Accepted and not used; the app shows no 'back to' button.</p></td></tr>
+</tbody></table>
+<h3>What comes back</h3>
+<h4>success <span class="faint">— opens <code>{$request.query.x-success}</code></span></h4>
+<p>Opened by the app when the action worked</p>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td>string, matching <code>^/[a-z0-9-]+/(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)(\?[A-Za-z0-9\-_.~%:,=&amp;+]*)?$</code></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
+<tr><td><code>url</code> <span class="req">required</span></td><td>query</td><td>string, uri</td><td><p>The same place on the public site, ready to share.</p></td></tr>
+<tr><td><code>capture</code></td><td>query</td><td>string, matching <code>^[0-9]{8}-[0-9]{6}(-[0-9]+)?$</code></td><td><p>Only in the answer to <code>capture</code>: the kept capture's folder name, its time (<code>yyyyMMdd-HHmmss</code>, with <code>-2</code> and on for a second in the same second). It comes before <code>route</code> and <code>url</code>.</p></td></tr>
+</tbody></table>
+<h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
+<p>Opened by the app when the action failed</p>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code></td><td><p></p></td></tr>
+<tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
+</tbody></table>
+<h3>Examples</h3>
+<table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
+<tr><td><code class="url">hifth://x-callback-url/capture?name=Note%20tool&amp;x-success=shortcuts://x-callback-url/run-shortcut?name=Log</code><div class="faint"><p>Keeps a walk capture named note-tool and answers with its folder, the route and the url. A release build answers not-in-this-build.</p></div></td><td><code>capture note-tool</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/capture</code><div class="faint"><p>No name: the capture is named capture.</p></div></td><td><code>capture capture</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/capture?name=..%2F..%2Fevil</code><div class="faint"><p>A name cannot reach outside the capture folder: everything but letters and digits becomes a dash, and dashes at either end go.</p></div></td><td><code>capture evil</code></td></tr>
+<tr><td><code class="url">hifth://x-callback-url/capture?name=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%20b</code><div class="faint"><p>A name is cut to 60 characters, and a dash left at the cut goes too.</p></div></td><td><code>capture aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</code></td></tr>
+</tbody></table>
+</section>
+<section id="xCurrentToFile">
+<h2>Write what the app is showing to a file</h2>
+<p class="path"><code>hifth://x-callback-url/current-to-file</code></p>
+<p>Only in a build installed from the laptop; a release build answers <code>not-in-this-build</code>. The same answer as <code>current</code>, for a script with no app to call back: writes <code>current.json</code> (<code>at</code>, <code>route</code>, <code>url</code>) beside the walk captures in the app's <code>Documents/walk-captures/</code>, replacing the last one, and then answers on <code>x-success</code> as <code>current</code> does. It waits for the page the same way <code>capture</code> does. <code>walk-captures.mjs current</code> copies the file off an iPad and prints it.</p>
+<h3>Parameters</h3>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>x-success</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action worked. Any app's address (<code>shortcuts://…</code>, <code>drafts://…</code>, <code>https://…</code>). The answer's parameters are added to its query. Ignored if it points back into this app, or at a file or a script.</p></td></tr>
+<tr><td><code>x-error</code></td><td>query</td><td>string, uri</td><td><p>Where to answer when the action failed. Opened with <code>errorCode</code> and <code>errorMessage</code> added, as the x-callback-url convention names them. Same safety rule as x-success.</p></td></tr>
+<tr><td><code>x-cancel</code></td><td>query</td><td>string, uri</td><td><p>Accepted for completeness and never opened: neither action here can be cancelled by the reader.</p></td></tr>
+<tr><td><code>x-source</code></td><td>query</td><td>string</td><td><p>The calling app's name, per the convention. Accepted and not used; the app shows no 'back to' button.</p></td></tr>
+</tbody></table>
+<h3>What comes back</h3>
+<h4>success <span class="faint">— opens <code>{$request.query.x-success}</code></span></h4>
+<p>Opened by the app when the action worked</p>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>route</code> <span class="req">required</span></td><td>query</td><td>string, matching <code>^/[a-z0-9-]+/(p[1-9][0-9]*|[1-9][0-9]*:[1-9][0-9]*(-([1-9][0-9]*:)?[1-9][0-9]*)?)(\?[A-Za-z0-9\-_.~%:,=&amp;+]*)?$</code></td><td><p>What is on screen, in the same shape the caller sends (no <code>#</code>).</p></td></tr>
+<tr><td><code>url</code> <span class="req">required</span></td><td>query</td><td>string, uri</td><td><p>The same place on the public site, ready to share.</p></td></tr>
+<tr><td><code>capture</code></td><td>query</td><td>string, matching <code>^[0-9]{8}-[0-9]{6}(-[0-9]+)?$</code></td><td><p>Only in the answer to <code>capture</code>: the kept capture's folder name, its time (<code>yyyyMMdd-HHmmss</code>, with <code>-2</code> and on for a second in the same second). It comes before <code>route</code> and <code>url</code>.</p></td></tr>
+</tbody></table>
+<h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
+<p>Opened by the app when the action failed</p>
+<table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code></td><td><p></p></td></tr>
+<tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
+</tbody></table>
+<h3>Examples</h3>
+<table><thead><tr><th>link</th><th>the app does</th></tr></thead><tbody>
+<tr><td><code class="url">hifth://x-callback-url/current-to-file</code><div class="faint"><p>Writes current.json beside the walk captures; the laptop copies it off with walk-captures.mjs current.</p></div></td><td><code>current-to-file</code></td></tr>
 </tbody></table>
 </section>
 <section id="builder">
@@ -466,8 +532,15 @@ function checkCard(raw, query) {
         return bad("a check needs at least one step: step=Do this");
     if (steps.length > MOST_CHECK_STEPS)
         return bad(`at most ${MOST_CHECK_STEPS} steps on one card, not ${steps.length}`);
-    const id = (query.get("id") ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    return { kind: "check", id: id ? id.slice(0, 60) : "check", steps: steps.length };
+    return { kind: "check", id: safeName(query.get("id"), "check"), steps: steps.length };
+}
+/** A check's or capture's name cut down to a safe word (mirrors
+ *  `XCallback.safeName`): lowercase, anything but letters and digits becomes
+ *  `-`, at most 60 characters, or `fallback` when nothing is left. */
+function safeName(raw, fallback) {
+    const trim = (s) => s.replace(/^-+|-+$/g, "");
+    const name = trim(trim((raw ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-")).slice(0, 60));
+    return name || fallback;
 }
 /** What the shell does with this link: opens a place, answers with the
  *  current one, opens a check card, refuses it in silence (a plain link that
@@ -486,6 +559,10 @@ export function predictLink(raw, lists) {
                 return { kind: "current" };
             case "check":
                 return checkCard(p.query, query);
+            case "capture":
+                return { kind: "capture", name: safeName(query.get("name"), "capture") };
+            case "current-to-file":
+                return { kind: "current-to-file" };
             default:
                 return { kind: "error", code: "unknown-action", message: `no action named "${action}"; try open, current or check` };
         }
@@ -502,6 +579,10 @@ export function describeOutcome(outcome) {
             return "current";
         case "check":
             return `check ${outcome.id} ${outcome.steps} steps`;
+        case "capture":
+            return "capture " + outcome.name;
+        case "current-to-file":
+            return "current-to-file";
         case "refused":
             return "refused";
         case "error":
@@ -588,10 +669,10 @@ update();
 </section>
 <section id="errors">
 <h2>Error codes</h2>
-<p>An <code>x-error</code> answer carries <code>errorCode</code>, one of <code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, and a plain <code>errorMessage</code>.</p>
-<p><code>missing-route</code>: open named no page, verse, surah or route. <code>bad-route</code>: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. <code>unknown-action</code>: the path after x-callback-url is not open, current or check. <code>route-not-shown</code>: the place was accepted but the page never showed it. <code>bad-check</code>: a check card with no steps, more than 12, an empty step, or a <code>see</code> with no step before it. <code>not-in-this-build</code>: a check card sent to a release build, which has none.</p>
+<p>An <code>x-error</code> answer carries <code>errorCode</code>, one of <code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code>, and a plain <code>errorMessage</code>.</p>
+<p><code>missing-route</code>: open named no page, verse, surah or route. <code>bad-route</code>: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. <code>unknown-action</code>: the path after x-callback-url is not one of the five actions above. <code>route-not-shown</code>: the place was accepted but the page never showed it. <code>bad-check</code>: a check card with no steps, more than 12, an empty step, or a <code>see</code> with no step before it. <code>not-in-this-build</code>: a check card, capture or current-to-file sent to a release build, which has none; the message names which. <code>capture-not-kept</code>: the app could not keep the capture (no web view yet, or the folder could not be written). <code>current-not-written</code>: current-to-file could not write its file.</p>
 </section>
-<section id="more"><h2>Other examples</h2><table><tbody><tr><td><code class="url">hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Only open, current and check exist. Anything else answers errorCode=unknown-action.</p></div></td><td><code>error unknown-action</code></td></tr></tbody></table></section>
+<section id="more"><h2>Other examples</h2><table><tbody><tr><td><code class="url">hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Only open, current, check, capture and current-to-file exist. Anything else answers errorCode=unknown-action; its message names only the three a reader's app takes.</p></div></td><td><code>error unknown-action</code></td></tr></tbody></table></section>
 </main>
 </body>
 </html>

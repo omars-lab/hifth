@@ -22,7 +22,7 @@ describe("the full-screen button in the tool bar", () => {
     const goFull = vi.fn();
     const { container } = render(
       <MarkUndoContext.Provider value={marks}>
-        <FullScreenContext.Provider value={goFull}>
+        <FullScreenContext.Provider value={{ full: false, toggle: goFull }}>
           <UndoRedo />
         </FullScreenContext.Provider>
       </MarkUndoContext.Provider>,
@@ -35,6 +35,35 @@ describe("the full-screen button in the tool bar", () => {
     expect(button.querySelector("svg")).not.toBeNull();
     fireEvent.click(button);
     expect(goFull).toHaveBeenCalledOnce();
+  });
+
+  // Full screen keeping the tools (full-screen-tools.ts): the same button is
+  // then the way back, and says so.
+  it("in full screen, is named for leaving it, and leaves", () => {
+    const toggle = vi.fn();
+    const named = (full: boolean) => {
+      const { container, unmount } = render(
+        <MarkUndoContext.Provider value={marks}>
+          <FullScreenContext.Provider value={{ full, toggle }}>
+            <UndoRedo />
+          </FullScreenContext.Provider>
+        </MarkUndoContext.Provider>,
+      );
+      const name = container.querySelector('button[aria-keyshortcuts="F"]')!.getAttribute("aria-label");
+      unmount();
+      return name;
+    };
+    expect(named(true), "the same name in and out of full screen").not.toBe(named(false));
+    const { container } = render(
+      <MarkUndoContext.Provider value={marks}>
+        <FullScreenContext.Provider value={{ full: true, toggle }}>
+          <UndoRedo />
+        </FullScreenContext.Provider>
+      </MarkUndoContext.Provider>,
+    );
+    const button = container.querySelector<HTMLButtonElement>('button[aria-keyshortcuts="F"]')!;
+    fireEvent.click(button);
+    expect(toggle).toHaveBeenCalledOnce();
   });
 
   it("is not there when App does not offer it", () => {

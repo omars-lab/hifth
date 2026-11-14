@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { spokenName } from "./spoken-name";
 import {
   Adjacency,
@@ -13,7 +13,9 @@ import {
   editNote,
   markMistake,
   mistakeOn,
-  pickMistakeSign,
+  answerMistake as setMistakeAnswer,
+  mistakeKindOf,
+  type MistakeAnswer,
   removeNote,
   restoreNote,
   addVerse,
@@ -108,6 +110,7 @@ import {
   type TajweedShard,
   type TajweedVocabulary,
   type WordIndex,
+  parseWordKey,
 } from "@hifth/core";
 import {
   loadManifest,
@@ -119,7 +122,7 @@ import {
   loadTajweedVocabulary,
 } from "./assets";
 import { applyFieldToDocument, fieldFromHash } from "./field";
-import { recordLook } from "./revision-store";
+import { readRecord, recordLook, takeRecord } from "./revision-store";
 import { countUse } from "./usage-store";
 import { useCountChange, useCountUse } from "./use-count";
 import { USE_PENS } from "./usage";
@@ -130,26 +133,30 @@ import { exposeToShell, isNative, nativeInfo, nativeShare, shareBase } from "./n
 import { rememberTipPens, savedTipPens, type TipPens } from "./pen-ring";
 import { pencilAction, pencilGesture, swapTool } from "./pencil";
 import { linksFor } from "./share-links";
-import { CARD_QUERY, DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, PHONE_QUERY, useMediaQuery } from "./useMediaQuery";
+import { CARD_QUERY, DESKTOP_QUERY, TOUCH_QUERY, UPRIGHT_QUERY, PHONE_QUERY, SIDEWAYS_QUERY, useMediaQuery } from "./useMediaQuery";
+import { useNoteSideways } from "./phone-note";
 import { useRoomForCards } from "./components/over-leaf";
 import { spanOfAll, type CardSpan } from "./components/short-band";
 import {
   PageStage,
   pageSpan,
+  RAIL_CLEARANCE,
   type Corner,
   type Erased,
+  type MarkedWords,
   type PageStageHandle,
   type PageTool,
   type VerseSpot,
   type WordRect,
 } from "./components/PageStage";
 import { PageToolbar, TOOL_KEYS, TOOLS, toolHint, toolName } from "./components/PageToolbar";
-import { PenHomeAt, PenHomeBottom, PenHomeFloat, PenHomeSide, useSideRoom } from "./components/PenHomes";
+import { useSideRoom } from "./components/useSideRoom";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 import { rememberArrowShowing, savedArrowShowing } from "./jump-arrows";
 // Opened by few readers and never before the page is up: loaded on first open.
 import {
   useOpenedOnce,
+  Later,
   BookmarkDrawer,
   BookmarkShelf,
   Colophon,
@@ -163,16 +170,22 @@ import {
   RevisionMap,
   RootLens,
   WordPartsHost,
+  HighlightMenu,
+  PenHomeAt,
+  EdgeGrabRails,
+  PenHomeBottom,
+  PenHomeFloat,
+  PenHomeSide,
 } from "./components/later";
 import type { CropBox } from "./components/CropSheet";
 import type { NoteAbout } from "./components/NoteBox";
 import { PageSpread } from "./components/PageSpread";
-import { EdgeGrabRails, type EdgeTurnDriver, type PeelPages } from "./components/EdgeGrabRails";
+import type { EdgeTurnDriver, PeelPages } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
 import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
 import { LookalikeSections } from "./components/LookalikeSections";
-import { HighlightMenu } from "./components/HighlightMenu";
+import { DrawerTabs } from "./components/DrawerTabs";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
 import { ShareInDrawer, ShareSheet } from "./components/ShareSheet";
 import { ListenOptions } from "./components/ListenOptions";
@@ -184,6 +197,9 @@ import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
 import { NoteFollow } from "./components/NoteFollow";
 import { useBookmarks, useConfusions, useNotes, useSeam } from "./useBookmarks";
+import { readSeam, writeSeam } from "./bookmark-store";
+import { useCarryIn } from "./useCarryIn";
+import { MovedSheet } from "./components/MovedSheet";
 import {
   NO_HISTORY,
   recordStep,
@@ -195,10 +211,12 @@ import {
   type Recorder,
 } from "./mark-history";
 import { FullScreenContext, MarkUndoContext } from "./components/UndoRedo";
+import { rememberFullScreenTools, savedFullScreenTools, type FullScreenTools } from "./full-screen-tools";
+import { rememberTouchFullTools, savedTouchFullTools, type TouchFullTools } from "./touch-full-tools";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger, listenCaption, listenGlyph } from "./components/PlayTrigger";
-import { DrawerTool, VerseDrawer } from "./components/VerseDrawer";
+import { DrawerTool, VerseDrawer, type VerseClear } from "./components/VerseDrawer";
 import { VerseMenu, type VerseMenuItem } from "./components/VerseMenu";
 import { QulTrigger } from "./components/QulTrigger";
 import { useVerseAudio, versesBetween } from "./audio";
@@ -253,7 +271,9 @@ import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
 import { savedZoomAnchor, verseToGrowFrom } from "./zoom-anchor";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
-import { rememberDrawerTools, savedDrawerTools, type DrawerTools } from "./drawer-tools";
+import { DRAWER_TABS, frontTab, pressTab, rememberDrawerTools, savedDrawerTools, type DrawerTab, type DrawerTools } from "./drawer-tools";
+import { rememberBeatenOffer, savedBeatenOffer, type BeatenOffer } from "./beaten-offer";
+import { canRest, rememberDrawerGlow, savedDrawerGlow, type DrawerGlow } from "./drawer-glow";
 import { rememberToolHelp, savedToolHelp, type ToolHelp } from "./tool-help";
 import { rememberSettingsAt, savedSettingsAt, type SettingsAt } from "./settings-at";
 import { rememberDrawerMarks, savedDrawerMarks, type DrawerMarks } from "./drawer-marks";
@@ -274,6 +294,9 @@ import { usePageDestination } from "./page-destination";
 import { isMarkAim, rememberMarkTools, savedMarkTools, toolsFor, type MarkAim, type MarkTools } from "./mark-tools";
 import { rememberEraserPlace, savedEraserPlace, type EraserPlace } from "./eraser-place";
 import { rememberMistakeTap, savedMistakeTap, type MistakeTap } from "./mistake-tap";
+import { rememberMistakeAsk, savedMistakeAsk, type MistakeAsk } from "./mistake-ask";
+import { rememberCalendarLook, savedCalendarLook, type CalendarLook } from "./calendar-look";
+import { rememberShareLook, savedShareLook, type ShareLook } from "./share-look";
 import { deskHoldsRail, rememberRailHome, savedRailHome, type RailHome } from "./rail-home";
 import { rememberPenSide, savedPenSide, type PenSide } from "./pen-side";
 import { rememberScopeLook, savedScopeLook, type ScopeLook } from "./scope-look";
@@ -290,15 +313,36 @@ import styles from "./App.module.css";
 // — so the first thing in the room is the page we polished.
 const START_PAGE = PITCH ? 1 : 7;
 
-/** `quran/…/2:47` → its spec-§7 ref, or null if it is not a bare ayah key. */
-/** Whichever sheet over the foot of a phone reaches highest, or null when none does. */
-/** The lit verse's lines on the page in view, as window boxes; none drawn, none. */
-function litVerseLines(): DOMRect[] {
-  return [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")]
+/** Where the reader left off, as the carry to hifth.app reads and lays it. */
+const CARRY_PLACE = { read: readSeam, write: writeSeam };
+
+// How long a rising verse drawer waits for its surah's look-alikes before it
+// rises without them (see `waitingForLooks`). From the device the list takes a
+// few milliseconds; this only bounds a list that is slow or never comes.
+const LOOKS_WAIT_MS = 2000;
+
+/**
+ * Where the lit verse's wash stands on screen, top of its first line to the
+ * foot of its last (null while none is drawn), and the highest the page can
+ * lift the verse's first line: just under the hop chips, or the page's own top
+ * when there are none (PageStage's `aboveCover`).
+ */
+function litVerse(railBottom: number | null): VerseClear {
+  const lines = [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")]
     .map((el) => el.getBoundingClientRect())
-    .filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth);
+    .filter((r) => r.width > 0 && r.height > 0 && r.right > 0 && r.left < window.innerWidth);
+  const span = lines.length
+    ? { top: Math.min(...lines.map((r) => r.top)), bottom: Math.max(...lines.map((r) => r.bottom)) }
+    : null;
+  const pages = [...document.querySelectorAll<HTMLElement>("[data-tool][data-page]")]
+    .map((el) => el.getBoundingClientRect())
+    .filter((r) => r.right > 0 && r.left < window.innerWidth)
+    .map((r) => Math.max(0, r.top));
+  const riseTo = railBottom !== null ? railBottom + RAIL_CLEARANCE : pages.length ? Math.min(...pages) : 0;
+  return { span, riseTo };
 }
 
+/** Whichever sheet over the foot of a phone reaches highest, or null when none does. */
 function highestTop(...tops: readonly (number | null)[]): number | null {
   const open = tops.filter((top): top is number => top !== null);
   return open.length === 0 ? null : Math.min(...open);
@@ -403,6 +447,9 @@ export function App(): JSX.Element {
   // Where the open share sheet starts at any width: the card in a sideways
   // phone's corner is where the look-alike chips ride.
   const [shareCardTop, setShareCardTop] = useState<number | null>(null);
+  // Where the note starts while it stands beside the page on a phone on its
+  // side: it stands over the chips' corner, so they ride its top row.
+  const [noteStandTop, setNoteStandTop] = useState<number | null>(null);
   // Where an open roots or similar-verses list starts on a phone: it takes the
   // note's place, so the page lifts the verse above it the same way.
   const [listTop, setListTop] = useState<number | null>(null);
@@ -436,6 +483,14 @@ export function App(): JSX.Element {
   }, [commentaryOpen]);
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // Words marked inside the selected verse, by a hold or a link's `?w=`. Kept
+  // here, not in the page, because the page is built afresh when the book goes
+  // from one page to two; a new selection ends them (the effect below).
+  const [markedWords, setMarkedWords] = useState<MarkedWords | null>(null);
+  useEffect(() => {
+    if (markedWords && markedWords.key !== selectedKey) setMarkedWords(null);
+  }, [markedWords, selectedKey]);
+  const clearMarkedWords = useCallback(() => setMarkedWords(null), []);
   // The drag-highlighted passage: its ayah keys in reading order (spec §3's
   // `onRangeSelect` payload), or null. Mutually exclusive with `selectedKey` —
   // a highlight replaces a selection and vice versa, so exactly one hop list
@@ -469,7 +524,33 @@ export function App(): JSX.Element {
     rememberDrawerTools(choice);
     setDrawerTools(choice);
   }, []);
-  const toolsInDrawer = drawerTools === "drawer";
+  const toolsInDrawer = drawerTools !== "sheet";
+  // The third way: each tool opened in the drawer stays open as a tab, and the
+  // tab the reader last picked is in front (selection-drawer ③, 2026-11-14).
+  const tabsInDrawer = drawerTools === "tabs";
+  const [pickedTab, setPickedTab] = useState<DrawerTab | null>(null);
+  // When a jump not made in a long while offers Beaten in its row (confusion-points ⑤).
+  const [beatenOffer, setBeatenOffer] = useState<BeatenOffer>(() => savedBeatenOffer());
+  const chooseBeatenOffer = useCallback((choice: BeatenOffer) => {
+    rememberBeatenOffer(choice);
+    setBeatenOffer(choice);
+  }, []);
+  // What the lit verse does while a pointer rests on its drawer (selection-drawer ②).
+  // The page's root carries the choice and the resting pointer; highlight.css paints it.
+  const [drawerGlow, setDrawerGlow] = useState<DrawerGlow>(() => savedDrawerGlow());
+  const chooseDrawerGlow = useCallback((choice: DrawerGlow) => {
+    rememberDrawerGlow(choice);
+    setDrawerGlow(choice);
+  }, []);
+  useEffect(() => {
+    document.documentElement.dataset.drawerGlow = drawerGlow;
+  }, [drawerGlow]);
+  const restOnDrawer = useCallback((e: { pointerType: string }) => {
+    if (canRest(e.pointerType)) document.documentElement.dataset.drawerHover = "";
+  }, []);
+  const leaveDrawer = useCallback(() => {
+    delete document.documentElement.dataset.drawerHover;
+  }, []);
   // Whether the line beside the page tools stays now each tool has its own
   // label (ayah-drawer ①; a setting since 2026-11-10, the line unless chosen).
   const [toolHelp, setToolHelp] = useState<ToolHelp>(() => savedToolHelp());
@@ -502,13 +583,15 @@ export function App(): JSX.Element {
     rememberDrawerMarks(choice);
     setDrawerMarks(choice);
   }, []);
-  // Show the look-alikes in the drawer: fold whatever other tool is open there.
+  // Show the look-alikes in the drawer: fold whatever other tool is open there,
+  // or, as tabs, bring their tab to the front.
   const showLooksInDrawer = useCallback(() => {
+    setLooksFolded(false);
+    if (tabsInDrawer) return setPickedTab("looks");
     setRootsOpen(false);
     setShareInDrawer(false);
     setListenInDrawer(false);
-    setLooksFolded(false);
-  }, []);
+  }, [tabsInDrawer]);
   // The verse drawer's ×: put away until another verse is lit (selection = D).
   const [drawerAway, setDrawerAway] = useState(false);
   const putDrawerAway = useCallback(() => {
@@ -594,6 +677,10 @@ export function App(): JSX.Element {
   const upright = useMediaQuery(UPRIGHT_QUERY);
   const phone = useMediaQuery(PHONE_QUERY);
   const cardWide = useMediaQuery(CARD_QUERY);
+  // A phone on its side, where the note stands beside the page unless the
+  // reader set it to lie across the foot (phone-note.ts).
+  const sidewaysPhone = useMediaQuery(SIDEWAYS_QUERY);
+  const noteSideways = useNoteSideways();
   const touchScreen = useMediaQuery(TOUCH_QUERY);
   const [pageMode, setPageMode] = useState<"one" | "two">(() => (upright ? "one" : "two"));
   const pageModePickedRef = useRef(false);
@@ -707,7 +794,7 @@ export function App(): JSX.Element {
        * With one page, the reader can ask for the whole page too (docs/PLAN.md,
        * item 98), so nothing slides on an upright iPad.
        */
-      navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number }) => {
+      navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number; words?: readonly [number, number] }) => {
         const zoom = opts?.zoom ?? (bookOpenRef.current ? 1 : openZoom(savedOpenSize()));
         return settle(
           stageRef.current?.navigateTo(key, { ...opts, ...(zoom === undefined ? {} : { zoom }) }),
@@ -1153,6 +1240,7 @@ export function App(): JSX.Element {
     setShareInDrawer(false);
     setListenInDrawer(false);
     setLooksFolded(false);
+    setPickedTab(null);
   }, [selectedKey]);
   // Moving the selection also stops any recitation: the ▶ belongs to the verse
   // you are on, so a hop or a fresh tap should not leave the last one sounding.
@@ -1283,15 +1371,44 @@ export function App(): JSX.Element {
   // The drawer shows the look-alikes when it holds the verse's tools and no
   // other tool is open in it, once the verse's surah has loaded (so a section
   // never says "None" only because its list has not arrived yet).
+  // As tabs, they stay open beside the others.
   const looksInDrawer =
     toolsInDrawer &&
     !looksFolded &&
-    !listenInDrawer &&
-    !shareInDrawer &&
-    rootFamilies === null &&
+    (tabsInDrawer || (!listenInDrawer && !shareInDrawer && rootFamilies === null)) &&
     selectedKey !== null &&
     settledShards.has(parseAyahKey(selectedKey)?.surah ?? 0);
   const looksShowing = looksInDrawer;
+  // The tools open as tabs, in the order their tabs stand, and the one in front.
+  const openTabs: DrawerTab[] = tabsInDrawer
+    ? DRAWER_TABS.filter((tab) =>
+        tab === "looks"
+          ? looksInDrawer
+          : tab === "listen"
+            ? listenInDrawer && selectedKey !== null
+            : tab === "roots"
+              ? rootFamilies !== null
+              : shareInDrawer,
+      )
+    : [];
+  const tabInFront = frontTab(openTabs, pickedTab);
+  const setTabOpen = (tab: DrawerTab, open: boolean) => {
+    if (tab === "looks") setLooksFolded(!open);
+    else if (tab === "listen") setListenInDrawer(open);
+    else if (tab === "roots") setRootsOpen(open);
+    else setShareInDrawer(open);
+  };
+  const closeTab = (tab: DrawerTab) => {
+    setTabOpen(tab, false);
+    setPickedTab(null);
+  };
+  // A tool's own button, with tabs: opens it, brings it forward, or closes it.
+  const pressToolTab = (tab: DrawerTab) => {
+    const does = pressTab(openTabs, pickedTab, tab);
+    if (does === "close") return closeTab(tab);
+    if (does === "open") setTabOpen(tab, true);
+    setPickedTab(tab);
+  };
   // A link's `?open=lookalikes` or `?open=roots`, held until the verse it names
   // is selected and its data has arrived. It is placed after the effect above
   // that closes the roots on every new selection, so on the render that
@@ -1528,6 +1645,26 @@ export function App(): JSX.Element {
   }, []);
   // Full screen: every bar hidden, the page alone (the same note, all options).
   const [full, setFull] = useState(false);
+  // Where the tools go in full screen (full-screen-tools.ts): down the side by
+  // default, so a mistake can be marked without leaving it; on a desktop or a
+  // sideways iPad only, since a phone's tools live in its bottom line.
+  const [fullTools, setFullTools] = useState<FullScreenTools>(() => savedFullScreenTools());
+  const chooseFullTools = useCallback((choice: FullScreenTools) => {
+    rememberFullScreenTools(choice);
+    setFullTools(choice);
+  }, []);
+  const keepTools = full && desktop && fullTools !== "none";
+  // The same on a phone or an upright iPad (touch-full-tools.ts): a Tools
+  // button in the corner by default, or the bottom line kept, or nothing.
+  const [touchFull, setTouchFull] = useState<TouchFullTools>(() => savedTouchFullTools());
+  const chooseTouchFull = useCallback((choice: TouchFullTools) => {
+    rememberTouchFullTools(choice);
+    setTouchFull(choice);
+  }, []);
+  const touchFullNow: TouchFullTools | null = full && !desktop ? touchFull : null;
+  // The tools' home as drawn: in full screen, kept tools stand down the side
+  // whichever home they have outside it, since the bars they sit in are away.
+  const homeNow: PenHome | null = keepTools ? "side" : penAt;
   // The verse a hold opened the small menu on (option C), and where it is.
   const [verseMenu, setVerseMenu] = useState<{ key: string; around: DOMRect } | null>(null);
   const closeVerseMenu = useCallback(() => setVerseMenu(null), []);
@@ -1796,8 +1933,10 @@ export function App(): JSX.Element {
   }, [keepHistory]);
   const {
     bookmarks,
+    loaded: bookmarksLoaded,
     commit: commitBookmarks,
     restore: restoreBookmarks,
+    saved: bookmarksSaved,
   } = useBookmarks(announce, t.bmNotSaved, recorders.bookmarks);
   // The red seam: where the reader left off, following the last page they stayed on.
   const seamPage = useSeam(page);
@@ -1866,6 +2005,24 @@ export function App(): JSX.Element {
     rememberMistakeTap(choice);
     setMistakeTap(choice);
   }, []);
+  // How the question asks the kind of mistake: the kinds first, as tabs, or all at once (mistake-ask).
+  const [mistakeAsk, setMistakeAsk] = useState<MistakeAsk>(() => savedMistakeAsk());
+  // How the record's month draws a day; the month reads it itself when it opens.
+  const [calendarLook, setCalendarLook] = useState<CalendarLook>(() => savedCalendarLook());
+  const chooseCalendarLook = useCallback((choice: CalendarLook) => {
+    rememberCalendarLook(choice);
+    setCalendarLook(choice);
+  }, []);
+  // How the share menu looks; the menu reads it itself each time it opens.
+  const [shareLook, setShareLook] = useState<ShareLook>(() => savedShareLook());
+  const chooseShareLook = useCallback((choice: ShareLook) => {
+    rememberShareLook(choice);
+    setShareLook(choice);
+  }, []);
+  const chooseMistakeAsk = useCallback((choice: MistakeAsk) => {
+    rememberMistakeAsk(choice);
+    setMistakeAsk(choice);
+  }, []);
   const [lastAim, setLastAim] = useState<MarkAim>("note");
   // The last tool other than plain selecting, for the pencil's double-tap swap.
   const lastToolRef = useRef<PageTool | null>(null);
@@ -1932,10 +2089,12 @@ export function App(): JSX.Element {
   const {
     notes,
     scoped,
+    loaded: notesLoaded,
     commit: commitNotes,
     commitScoped,
     loadFile: loadNotesFile,
     restore: restoreNotes,
+    saved: notesSaved,
   } = useNotes(announce, t.bmNotSaved, recorders.notes);
   const [noteOpenId, setNoteOpenId] = useState<string | null>(null);
   const openNote = notes.find((n) => n.id === noteOpenId) ?? null;
@@ -1988,9 +2147,12 @@ export function App(): JSX.Element {
   const {
     confusions,
     device,
+    loaded: jumpsLoaded,
+    ready: jumpsReady,
     commit: commitConfusions,
     loadFile: loadConfusionsFile,
     restore: restoreConfusions,
+    saved: jumpsSaved,
   } = useConfusions(announce, t.bmNotSaved, recorders.jumps);
   const confusionMarks = useMemo(() => countConfusionMarks(confusions), [confusions]);
   // And the smaller one at the next pause sign after where each jump left
@@ -2021,10 +2183,18 @@ export function App(): JSX.Element {
   // A "not sure yet" jump being named from its row in the list: the next
   // destination picked fills it in rather than marking a new jump.
   const [jumpRenaming, setJumpRenaming] = useState<string | null>(null);
+  // A jump marked before the saved ones have been read in waits for them, so it
+  // is counted against them: the message says the right number of times, and a
+  // mistake is not turned back into a plain jump when the saved record lands.
+  const waitingJumps = useRef<[JumpEnd, string | null, ConfusionKind][]>([]);
   const saveJump = useCallback(
     (from: JumpEnd, to: string | null, kind: ConfusionKind = "jump") => {
       setJumpAsking(null);
       setJumpNaming(null);
+      if (!jumpsReady) {
+        waitingJumps.current.push([from, to, kind]);
+        return;
+      }
       setJumpRenaming(null);
       const now = Date.now();
       const unsure = jumpRenaming ? confusions.find((c) => c.id === jumpRenaming) : undefined;
@@ -2050,8 +2220,13 @@ export function App(): JSX.Element {
       commitConfusions(next, said);
       setJumpUndo({ said, undo: (s) => removeLastTime(s, mine.id, Date.now()) });
     },
-    [confusions, device, commitConfusions, t, jumpRenaming],
+    [confusions, device, commitConfusions, t, jumpRenaming, jumpsReady],
   );
+  // One waiting jump per pass: each save changes the list the next counts on.
+  useEffect(() => {
+    const first = jumpsReady ? waitingJumps.current.shift() : undefined;
+    if (first) saveJump(...first);
+  }, [jumpsReady, saveJump]);
   const undoJump = () => {
     if (!jumpUndo) return;
     commitConfusions(jumpUndo.undo(confusions), "");
@@ -2305,26 +2480,36 @@ export function App(): JSX.Element {
     whole?: ScopedNote;
   } | null>(null);
 
+  // The file carries the notes that gather verses and, apart from them, the
+  // marked mistakes, which are still the old kind of note, and the jumps. The
+  // same text is what the carry to hifth.app sends (moved.ts).
+  const bookmarkFileText = useCallback(
+    () =>
+      JSON.stringify(
+        toBookmarkFile(bookmarks, Date.now(), notes.filter(isMistake), [...scoped], confusions),
+        null,
+        2,
+      ),
+    [bookmarks, notes, scoped, confusions],
+  );
+
   const saveBookmarkFile = useCallback(() => {
-    // The file carries the notes that gather verses and, apart from them, the
-    // marked mistakes, which are still the old kind of note, and the jumps.
-    const mistakes = notes.filter(isMistake);
-    const file = toBookmarkFile(bookmarks, Date.now(), mistakes, [...scoped], confusions);
-    const blob = new Blob([JSON.stringify(file, null, 2)], { type: "application/json" });
+    const blob = new Blob([bookmarkFileText()], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = "hifth-bookmarks.json";
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, [bookmarks, notes, scoped, confusions]);
+  }, [bookmarkFileText]);
 
+  // Returns how many items the file added, or null when it was not a bookmark file.
   const loadBookmarkFile = useCallback(
-    (text: string) => {
+    (text: string, from: "file" | "carry" = "file"): number | null => {
       const file = parseBookmarkFile(text);
       if (!file) {
         announce(t.bmLoadBad);
-        return;
+        return null;
       }
       const merged = mergeBookmarks(bookmarks, file.bookmarks);
       const newBookmarks = merged.length - bookmarks.length;
@@ -2336,16 +2521,41 @@ export function App(): JSX.Element {
         ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
         ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
       ];
+      const added = Math.max(0, newBookmarks) + newNotes + newJumps;
+      const said =
+        from === "carry" ? t.carryArrived(added) : parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0);
       // A file loaded is not a step: its notes and jumps are not either.
-      commitBookmarks(merged, parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0), { unrecorded: true });
+      commitBookmarks(merged, said, { unrecorded: true });
+      return added;
     },
     [announce, bookmarks, commitBookmarks, loadNotesFile, loadConfusionsFile, t],
+  );
+  // Opened by the old address to carry the reader's marks here (moved.ts).
+  // Ready only once all three kinds of mark are read in: the notes and the jumps
+  // refuse to save before their own read lands, and a carried file loaded then
+  // would stay in memory and never reach disk.
+  useCarryIn(
+    // The page list too: a place carried before the pages are known would be
+    // refused as a page this edition does not have.
+    bookmarksLoaded && notesLoaded && jumpsLoaded && pageTurns.pages.length > 0,
+    (text) => loadBookmarkFile(text, "carry"),
+    (p) => {
+      if (!pageTurns.anchors.has(p)) return false;
+      goToPage(p);
+      return true;
+    },
+    CARRY_PLACE,
+    () => Promise.all([bookmarksSaved(), notesSaved(), jumpsSaved()]),
+    (n, looks) => announce(looks === null ? t.carryArrived(n) : `${t.carryArrived(n)}${t.sep}${t.carryRecordArrived(looks)}`),
+    takeRecord,
   );
 
   // Unfolding a corner lifts every bookmark on the page at once, with no
   // question first; the bookmarks it lifted wait here for a few seconds so one
   // tap on "Undo" puts them back (docs/decisions/bookmark-fold.md, 2026-09-25).
-  const [unfolded, setUnfolded] = useState<{ lifted: Bookmark[]; said: string } | null>(null);
+  // A ribbon pushed back up by hand (bookmark-hand.ts) waits here the same way,
+  // and says its own name when it is put back.
+  const [unfolded, setUnfolded] = useState<{ lifted: Bookmark[]; said: string; restored?: string } | null>(null);
   const unfold = useCallback(
     (p: number) => {
       const lifted = bookmarksOnPage(bookmarks, p);
@@ -2364,8 +2574,16 @@ export function App(): JSX.Element {
   const undoUnfold = () => {
     if (!unfolded) return;
     const held = new Set(bookmarks.map((b) => b.id));
-    commitBookmarks([...bookmarks, ...unfolded.lifted.filter((b) => !held.has(b.id))], t.bmRestored);
+    commitBookmarks([...bookmarks, ...unfolded.lifted.filter((b) => !held.has(b.id))], unfolded.restored ?? t.bmRestored);
     setUnfolded(null);
+  };
+  const pushUp = (id: string) => {
+    const b = bookmarks.find((x) => x.id === id);
+    if (!b) return;
+    const said = t.bmLifted(b.name);
+    commitBookmarks(liftBookmark(bookmarks, id), said);
+    if (drawerId === id) setDrawerId(null);
+    setUnfolded({ lifted: [b], said, restored: t.bmPutBack(b.name) });
   };
   const endUndo = useCallback(() => setUnfolded(null), []);
 
@@ -2632,8 +2850,21 @@ export function App(): JSX.Element {
     },
     [notes, commitNotes, t, mistakeTap],
   );
+  /** What is said once an answer is picked: which sign, which letter, which rule. */
+  const saidForMistake = (a: MistakeAnswer, name: string | null) =>
+    a.what === "sign"
+      ? name
+        ? t.mistakeSignPicked(name)
+        : t.mistakeWordPicked
+      : a.what === "letter"
+        ? a.letter !== undefined
+          ? t.mistakeLetterPicked(a.letter + 1)
+          : t.mistakeAnyLetterPicked
+        : a.what === "rule"
+          ? t.mistakeRulePicked(name ?? a.rule)
+          : t.mistakeWordPicked;
   // The question answered for a word not marked yet: one change, one Undo.
-  const answerMistake = (mark: number | null, name: string | null) => {
+  const answerFreshMistake = (answer: MistakeAnswer, name: string | null) => {
     const a = askingMistake;
     setAskingMistake(null);
     if (!a) return;
@@ -2641,9 +2872,12 @@ export function App(): JSX.Element {
     const now = Date.now();
     let next = markMistake(notes, where, now);
     const made = mistakeOn(next, a.page, a.key, a.word);
-    if (made && mark !== null) next = pickMistakeSign(next, made.id, mark, now);
-    commitNotes(next, name ? t.mistakeSignPicked(name) : t.mistakeMarked(t.ayahLabel(a.key) ?? a.key));
-    void recordLook({ key: a.key, page: a.page, slip: true, ...(mark !== null ? { what: "sign" as const } : {}) });
+    if (made) next = setMistakeAnswer(next, made.id, answer, now);
+    commitNotes(
+      next,
+      answer.what === "word" ? t.mistakeMarked(t.ayahLabel(a.key) ?? a.key) : saidForMistake(answer, name),
+    );
+    void recordLook({ key: a.key, page: a.page, slip: true, ...(answer.what !== "word" ? { what: answer.what } : {}) });
   };
   // "Went into another verse…": no red on the word, which was read right;
   // the mistake is the turn, said the way a jump is, look-alikes first.
@@ -2665,14 +2899,20 @@ export function App(): JSX.Element {
     commitNotes(removeNote(notes, n.id), t.mistakeCleared);
     mistakeIntoAnother(n.key, n.page, n.word, false);
   };
-  const pickSign = (mark: number | null, name: string | null) => {
+  // The question answered again for a word already marked: what went wrong is changed.
+  const answerMarkedMistake = (answer: MistakeAnswer, name: string | null) => {
     const n = picking;
     setPickingId(null);
     if (!n) return;
-    commitNotes(
-      pickMistakeSign(notes, n.id, mark, Date.now()),
-      name ? t.mistakeSignPicked(name) : t.mistakeWordPicked,
-    );
+    commitNotes(setMistakeAnswer(notes, n.id, answer, Date.now()), saidForMistake(answer, name));
+  };
+  /** What a mark already says, in the question's own terms, so it opens at that kind. */
+  const answeredOf = (n: Note): MistakeAnswer => {
+    const kind = mistakeKindOf(n);
+    if (kind === "sign" && n.mark !== null && n.mark !== undefined) return { what: "sign", mark: n.mark };
+    if (kind === "letter") return { what: "letter", letter: n.letter };
+    if (kind === "rule" && n.rule) return { what: "rule", rule: n.rule };
+    return { what: "word" };
   };
   const clearMistake = () => {
     const n = picking;
@@ -2692,6 +2932,7 @@ export function App(): JSX.Element {
       onDrop={() => dropOn(p)}
       onUnfold={() => unfold(p)}
       onOpen={tool === "erase" ? liftRibbon : setDrawerId}
+      onLift={pushUp}
       freshId={freshId}
       seam={seamPage === p}
       aside={pointsAtWords}
@@ -3117,7 +3358,9 @@ export function App(): JSX.Element {
    * what the run actually matched.
    */
   const handleSelectWords = useCallback(
-    (wordKey: string) => {
+    (wordKey: string, ayahKey: string) => {
+      const words = parseWordKey(wordKey);
+      setMarkedWords(words ? { key: ayahKey, from: words.from, to: words.to } : null);
       if (!adjacency || toolRef.current === "read") return;
       const hops = adjacency.hopsForWords(
         wordKey,
@@ -3542,9 +3785,13 @@ export function App(): JSX.Element {
       }
       setSelectedRange(null);
       setSelectedKey(key);
+      const words = origin === "link" && state.word ? state.word : null;
+      setMarkedWords(words ? { key, from: words[0], to: words[1] } : null);
       setPage(loc.page);
       announce(t.arrivedAyah(origin, t.ayahLabel(key) ?? key, loc.page));
-      void stage.navigateTo(key, { pulse: true });
+      // Words the link names (`?w=3-7`) are laid as word ink on arrival. The
+      // address then names the verse only, as it does after `?tool=`.
+      void stage.navigateTo(key, { pulse: true, ...(origin === "link" && state.word ? { words: state.word } : {}) });
     },
     [resolver, announce, t, chooseTool, handlePageMode],
   );
@@ -3849,8 +4096,8 @@ export function App(): JSX.Element {
   // On a desktop, full screen is an icon at the end of the tool bar, beside
   // undo and redo (owner's page comment, 2026-11-07); a phone keeps the word in
   // the bottom line. Gesture option A has no button either way.
-  const goFull = useCallback(() => setFull(true), []);
-  const fullInBar = desktop && verseGestures !== "a" ? goFull : null;
+  const toggleFull = useCallback(() => setFull((f) => !f), []);
+  const fullInBar = useMemo(() => (desktop && verseGestures !== "a" ? { full, toggle: toggleFull } : null), [desktop, verseGestures, full, toggleFull]);
   const fullSaid = useRef(false);
   useEffect(() => {
     if (full === fullSaid.current) return;
@@ -3919,6 +4166,7 @@ export function App(): JSX.Element {
   // so their files are not fetched before anyone asks and a sheet that keeps
   // state between openings still does (see components/later.tsx).
   const rootsMounted = useOpenedOnce(rootFamilies !== null);
+  const highlightMounted = useOpenedOnce(selectedRange !== null && selectedRange.length > 0);
   const editionMounted = useOpenedOnce(editionOpen);
   const settingsPage = appPages === "row" && appPage === "settings";
   const colophonMounted = useOpenedOnce(colophonOpen || settingsPage);
@@ -3956,7 +4204,8 @@ export function App(): JSX.Element {
       seat={
         beside || home || noteTall
           ? null
-          : (highestTop(coverTop, shareTop, listTop) ?? (shareCorner !== null ? shareCardTop : null))
+          : (highestTop(coverTop, shareTop, listTop) ??
+            (shareCorner !== null ? shareCardTop : listCorner === null ? noteStandTop : null))
       }
       onCard={
         (highestTop(coverTop, shareTop, listTop) === null && shareCorner !== null) ||
@@ -3994,7 +4243,12 @@ export function App(): JSX.Element {
   // A verse too long to lift whole above the freshly opened note (2:255) is the
   // same: the page moves aside at once, rather than leave the ends of its lines
   // under the card until the note is read to its end (plan item 92).
-  const noteCorner = !desktop && !upright && cardWide && (noteTall || noteShort) && commentaryOpen ? noteSide : null;
+  // On a phone on its side the note stands beside the page from the start, the
+  // full height of the screen, so the page moves clear of it at once
+  // (docs/design/iphone-app.md, item 3).
+  const noteStanding = sidewaysPhone && noteSideways === "beside";
+  const noteCorner =
+    !desktop && !upright && ((cardWide && (noteTall || noteShort)) || noteStanding) && commentaryOpen ? noteSide : null;
   // The roots list stands there the full height of its corner from the start,
   // and lay over its verse the same way: the lift above its top is no lift on
   // a card that tall. A look-alike list is shorter, but in the iPad app, whose
@@ -4013,7 +4267,28 @@ export function App(): JSX.Element {
   // from the verse it started on; it is then named for the verse being recited.
   const drawerKey = selectedKey ?? audio.runKey;
   const [drawerWhole, setDrawerWhole] = useState(false);
+  // With the tools in the drawer, the look-alikes open inside it, and their
+  // list arrives a moment after the verse is lit, on the first verse of a
+  // surah. Risen before it, the drawer grew upward when it landed and its row
+  // of tools jumped out from under a reader's finger: a press on its way to
+  // Same roots hit the list's heading instead (found 2026-11-13, 336 px on an
+  // iPad on its side). So a rising drawer waits for that surah's list, which
+  // is quick from the device, and stops waiting after a short while, so a list
+  // that never comes back cannot keep the tools away. A drawer already up
+  // stays up: moving to another verse changes its size anyway.
+  const lookSurah = toolsInDrawer && selectedKey ? (parseAyahKey(selectedKey)?.surah ?? 0) : 0;
+  const lookSettled = lookSurah !== 0 && settledShards.has(lookSurah);
+  const [looksWaitOver, setLooksWaitOver] = useState<number | null>(null);
+  useEffect(() => {
+    // Keyed on this surah's list alone: another surah's landing must not start the wait again.
+    if (!lookSurah || lookSettled) return;
+    const stop = window.setTimeout(() => setLooksWaitOver(lookSurah), LOOKS_WAIT_MS);
+    return () => window.clearTimeout(stop);
+  }, [lookSurah, lookSettled]);
+  const drawerWasUp = useRef(false);
+  const waitingForLooks = lookSurah !== 0 && !lookSettled && looksWaitOver !== lookSurah && !drawerWasUp.current;
   const drawerUp =
+    !waitingForLooks &&
     drawerKey !== null &&
     !drawerAway &&
     !full &&
@@ -4026,6 +4301,9 @@ export function App(): JSX.Element {
   // Only under the plain pointer: the highlighter keeps its own second tap.
   const openWordsOf = wordTap === "word" && drawerUp && tool === "select" ? selectedKey : null;
   openWordsOfRef.current = openWordsOf;
+  useEffect(() => {
+    drawerWasUp.current = drawerUp;
+  }, [drawerUp]);
   // The address moving the verse on (the back button, a link from another app)
   // takes no tap on the page, so nothing else closed a stacked word's drawer:
   // it was left over the next verse's, or over no drawer at all (2026-11-10).
@@ -4079,6 +4357,37 @@ export function App(): JSX.Element {
   useCountUse(editionOpen ? "edition" : null);
   useCountUse(colophonOpen ? "info-panel" : null);
 
+  // What each tool shows inside the verse's drawer, as a tab.
+  const drawerTool = (tab: DrawerTab): ReactNode =>
+    tab === "listen" && selectedKey ? (
+      <ListenOptions
+        label={t.ayahLabel(selectedKey) ?? selectedKey}
+        way={listenWay}
+        onWay={(way) => {
+          setListenWay(way);
+          rememberListenWay(way);
+        }}
+        onPlayTo={() => startPlayTo(selectedKey)}
+      />
+    ) : tab === "share" ? (
+      <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
+    ) : tab === "roots" && rootFamilies !== null ? (
+      <Later>
+        <RootLens
+          inline
+          families={rootFamilies}
+          loading={rootsLoading}
+          curated={curatedRoots}
+          canHop={canHop}
+          onHop={handleRootHop}
+          onHopEdge={handleHop}
+          onClose={() => closeTab("roots")}
+        />
+      </Later>
+    ) : tab === "looks" && selectedKey ? (
+      <LookalikeSections chips={railChips} fromKey={selectedKey} canHop={canHop} onHop={handleHop} onClose={() => closeTab("looks")} />
+    ) : null;
+
   return (
     // The chrome reads in the UI language's direction — every offset in the
     // stylesheet is a logical property, so the flip is the whole change. What
@@ -4086,7 +4395,7 @@ export function App(): JSX.Element {
     // RTL because they are furniture around a mus'haf, not around a sentence.
     <MarkUndoContext.Provider value={markUndo}>
     <FullScreenContext.Provider value={fullInBar}>
-    <div className={styles.app} dir={dir} data-full={full || undefined} data-pages={appPages === "row" ? "" : undefined}>
+    <div className={styles.app} dir={dir} data-full={full || undefined} data-full-tools={keepTools ? fullTools : undefined} data-full-side={keepTools ? penSide : undefined} data-full-touch={touchFullNow ?? undefined} data-pages={appPages === "row" ? "" : undefined} data-note-stands={(noteStanding && noteCorner !== null) || undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to
@@ -4219,9 +4528,14 @@ export function App(): JSX.Element {
 
           Always held in the pitch build: it is shown to visitors in a room,
           who are judging the page, and storage that may be cleared next week is
-          nothing they need to hear about. */}
+          nothing they need to hear about.
+
+          Held in full screen too (2026-11-14, backlog full-screen-install-notice):
+          on an iPhone before install it took about 160 points of the page the
+          reader had asked to see whole. It is a notice they can act on, so it
+          comes back with the bars rather than being dismissed. */}
       <OfflineNotice
-        hold={coachUp || PITCH}
+        hold={coachUp || PITCH || full}
         onShowPacks={() => {
           setRevisionAt("juz");
           setRevisionOpen(true);
@@ -4243,7 +4557,7 @@ export function App(): JSX.Element {
           argue with the page. */}
       {/* Its own row above the book, not floated over it: floated, it sat on
           the page's first line. */}
-      {resolver && desktop && penAt === "strip" && (
+      {resolver && desktop && homeNow === "strip" && (
         <PageToolbar
           tool={tool}
           locked={locked}
@@ -4257,6 +4571,7 @@ export function App(): JSX.Element {
         />
       )}
       {resolver && pencilPens && (
+        <Later>
         <PenHomeAt
           at={pencilPens}
           onClose={closePencilPens}
@@ -4269,9 +4584,10 @@ export function App(): JSX.Element {
           tools={barTools}
           aim={markAim}
         />
+        </Later>
       )}
-      {resolver && desktop && penAt === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
-      {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
+      {resolver && desktop && homeNow === "float" && <Later><PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} /></Later>}
+      {resolver && desktop && homeNow === "side" && <Later><PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} full={keepTools ? fullTools : undefined} /></Later>}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
       <main
         ref={roomRef}
@@ -4320,6 +4636,7 @@ export function App(): JSX.Element {
               besideSide={besideSide}
               edgeRails={
                 desktop ? (
+                  <Later>
                   <EdgeGrabRails
                     driver={edgeTurn}
                     aside={pointsAtWords}
@@ -4337,6 +4654,7 @@ export function App(): JSX.Element {
                       else setCommentaryOpen(false);
                     }}
                   />
+                  </Later>
                 ) : undefined
               }
               renderFacing={(facing) => (
@@ -4378,6 +4696,8 @@ export function App(): JSX.Element {
                      about the ayah that is selected, and on a spread that ayah
                      is as often printed on this leaf as on the other one. */
                   onSelectWords={handleSelectWords}
+                  markedWords={markedWords}
+                  onClearWords={clearMarkedWords}
                   onTurn={stepPage}
                   onPinchZoom={pinchedFacing}
                   onPan={pannedFacing}
@@ -4464,6 +4784,8 @@ export function App(): JSX.Element {
                 onCornerHold={setCornerMenu}
                 onSelectRange={handleSelectRange}
                 onSelectWords={handleSelectWords}
+                markedWords={markedWords}
+                onClearWords={clearMarkedWords}
                 /* Every turn ends where the arrow keys end — one `stepPage`, so
                    a wheel turn, a dragged turn and a keyed turn cannot drift
                    apart. Both stages get it: on a spread the facing leaf is as
@@ -4540,6 +4862,8 @@ export function App(): JSX.Element {
               onCover={setListTop}
               onSide={setListSide}
             />
+            {highlightMounted && (
+            <Later>
             <HighlightMenu
               rangeKeys={selectedRange}
               hops={rangeHops}
@@ -4552,8 +4876,10 @@ export function App(): JSX.Element {
               // menu would be a dead end (nothing re-opens it but a fresh drag).
               onClose={() => setSelectedRange(null)}
             />
+            </Later>
+            )}
             {rootsMounted && !toolsInDrawer && (
-              <Suspense fallback={null}>
+              <Later>
                 <RootLens
                   families={rootFamilies}
                   loading={rootsLoading}
@@ -4566,7 +4892,7 @@ export function App(): JSX.Element {
                   onCover={setListTop}
                   onSide={setListSide}
                 />
-              </Suspense>
+              </Later>
             )}
             {COMMENTARY && (
               <CommentarySheet
@@ -4590,6 +4916,7 @@ export function App(): JSX.Element {
                 onCover={setCoverTop}
                 onSide={setNoteSide}
                 onTall={setNoteTall}
+                onStandTop={setNoteStandTop}
                 onClose={() => (introSheet ? setIntroSurah(null) : setCommentaryOpen(false))}
                 creditNote={PITCH ? t.pitchCredit : undefined}
                 sigla={pitchKey}
@@ -4665,7 +4992,7 @@ export function App(): JSX.Element {
         onClose={() => setLegendOpen(false)}
       />
       {editionMounted && (
-        <Suspense fallback={null}>
+        <Later>
           <EditionPicker
             open={editionOpen}
             current={manifest?.edition ?? ""}
@@ -4674,10 +5001,10 @@ export function App(): JSX.Element {
             onSelect={handleEditionSelect}
             onClose={() => setEditionOpen(false)}
           />
-        </Suspense>
+        </Later>
       )}
       {colophonMounted && (
-        <Suspense fallback={null}>
+        <Later>
           <Colophon
             open={colophonOpen || settingsPage}
             asPage={settingsPage && !colophonOpen}
@@ -4695,6 +5022,14 @@ export function App(): JSX.Element {
             onVerseGestures={chooseVerseGestures}
             drawerTools={drawerTools}
             onDrawerTools={chooseDrawerTools}
+            beatenOffer={beatenOffer}
+            onBeatenOffer={chooseBeatenOffer}
+            drawerGlow={drawerGlow}
+            onDrawerGlow={chooseDrawerGlow}
+            fullScreenTools={desktop ? fullTools : undefined}
+            onFullScreenTools={chooseFullTools}
+            touchFullTools={desktop ? undefined : touchFull}
+            onTouchFullTools={chooseTouchFull}
             toolHelp={toolHelp}
             onToolHelp={chooseToolHelp}
             settingsAt={settingsAt}
@@ -4715,6 +5050,12 @@ export function App(): JSX.Element {
             onEraserPlace={desktop ? chooseEraserPlace : undefined}
             mistakeTap={mistakeTap}
             onMistakeTap={chooseMistakeTap}
+            mistakeAsk={mistakeAsk}
+            onMistakeAsk={chooseMistakeAsk}
+            calendarLook={calendarLook}
+            onCalendarLook={chooseCalendarLook}
+            shareLook={shareLook}
+            onShareLook={chooseShareLook}
             penHome={desktop ? penHome : undefined}
             onPenHome={desktop ? choosePenHome : undefined}
             // Only the iPad app has a pencil to squeeze.
@@ -4731,7 +5072,7 @@ export function App(): JSX.Element {
               setCoachUp(true);
             }}
           />
-        </Suspense>
+        </Later>
       )}
       {/* `onGoToPage` is the app's own page-turner, handed over unchanged: a
           press on a map cell is a jump, and everything a jump owes — refusing an
@@ -4739,7 +5080,7 @@ export function App(): JSX.Element {
           already lives in `goToPage`. A second route to a page would be a second
           announcer, and the two would drift. */}
       {revisionMounted && (
-        <Suspense fallback={null}>
+        <Later>
           <RevisionMap
             open={revisionOpen}
             onClose={() => setRevisionOpen(false)}
@@ -4766,11 +5107,11 @@ export function App(): JSX.Element {
             <NoteShelf notes={noteShelf} onFollow={openNoteOf} />
             <JumpShelf jumps={jumpShelf} dismissed={jumpsDismissed} onGo={goToJumpFrom} onBringBack={bringBackJump} />
           </RevisionMap>
-        </Suspense>
+        </Later>
       )}
 
       {drawerMounted && (
-        <Suspense fallback={null}>
+        <Later>
           <BookmarkDrawer
             bookmark={drawerBookmark}
             moveLabel={moveTarget ? (t.ayahLabel(moveTarget.key) ?? t.pageN(moveTarget.page)) : null}
@@ -4800,7 +5141,7 @@ export function App(): JSX.Element {
             }}
             onClose={() => setDrawerId(null)}
           />
-        </Suspense>
+        </Later>
       )}
 
       {/* Pinned RTL with the stage, and for the same reason: the trail reads
@@ -4818,8 +5159,11 @@ export function App(): JSX.Element {
           onStop={stopFollowing}
         />
       )}
-      <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
-        {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
+      {/* "Hifth has moved": a row of its own above the trail, like the note
+          bar, so it covers neither the page bar nor the trail. */}
+      <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} readPlace={readSeam} readRecord={readRecord} />
+      <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="" data-full-keep={touchFullNow === "row" || undefined}>
+        {resolver && desktop && homeNow === "bottom" && <Later><PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} /></Later>}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
         {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
         {railAt === "bar" && !railOnDrawer && hopRail(undefined, "bar")}
@@ -4849,8 +5193,9 @@ export function App(): JSX.Element {
           }
         />
         {verseGestures !== "a" && !desktop && (
-          <button type="button" className={styles.fullBtn} onClick={() => setFull(true)}>
-            {t.fullScreen}
+          // With the bottom line kept in full screen, its own button is the way back.
+          <button type="button" className={styles.fullBtn} data-full-enter="" onClick={() => setFull((f) => !f)}>
+            {full ? t.showBars : t.fullScreen}
           </button>
         )}
         {/* Screen-reader-only summary of what the rail is offering. It used to
@@ -4877,8 +5222,24 @@ export function App(): JSX.Element {
         onClose={putDrawerAway}
         end={(!desktop && railAt === "tools") || railOnDrawer ? hopRail(undefined, "tools") : undefined}
         onWhole={setDrawerWhole}
+        onPointerRest={restOnDrawer}
+        onPointerAway={leaveDrawer}
+        tabbed={tabsInDrawer}
         panel={
-          toolsInDrawer && listenInDrawer && selectedKey ? (
+          tabsInDrawer ? (
+            tabInFront && (
+              <DrawerTabs
+                tabs={openTabs.map((tab) => ({
+                  key: tab,
+                  name: tab === "looks" ? t.lookalikesTitle : tab === "listen" ? t.vdListen : tab === "roots" ? t.vdRoots : t.vdShare,
+                  content: drawerTool(tab),
+                }))}
+                front={tabInFront}
+                onPick={setPickedTab}
+                onClose={closeTab}
+              />
+            )
+          ) : toolsInDrawer && listenInDrawer && selectedKey ? (
             <ListenOptions
               label={t.ayahLabel(selectedKey) ?? selectedKey}
               way={listenWay}
@@ -4891,7 +5252,7 @@ export function App(): JSX.Element {
           ) : toolsInDrawer && shareInDrawer ? (
             <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
           ) : toolsInDrawer && rootFamilies !== null ? (
-            <Suspense fallback={null}>
+            <Later>
               <RootLens
                 inline
                 families={rootFamilies}
@@ -4902,7 +5263,7 @@ export function App(): JSX.Element {
                 onHopEdge={handleHop}
                 onClose={() => setRootsOpen(false)}
               />
-            </Suspense>
+            </Later>
           ) : looksInDrawer && selectedKey ? (
             <LookalikeSections
               chips={railChips}
@@ -4914,6 +5275,8 @@ export function App(): JSX.Element {
           ) : null
         }
         onPanelClose={() => {
+          // As tabs, Escape closes the tab in front, one at a time.
+          if (tabsInDrawer) return tabInFront && closeTab(tabInFront);
           // Escape folds the tool on show: another tool first, then the look-alikes.
           if (looksShowing) setLooksFolded(true);
           setRootsOpen(false);
@@ -4921,8 +5284,21 @@ export function App(): JSX.Element {
           setListenInDrawer(false);
         }}
         onCover={setDrawerTop}
-        keepClear={litVerseLines}
+        keepClear={() => litVerse(railBottom)}
         clearKey={selectedKey}
+        panelKey={
+          tabsInDrawer
+            ? tabInFront
+            : toolsInDrawer && listenInDrawer && selectedKey
+            ? "listen"
+            : toolsInDrawer && shareInDrawer
+              ? "share"
+              : toolsInDrawer && rootFamilies !== null
+                ? "roots"
+                : looksInDrawer && selectedKey
+                  ? "looks"
+                  : null
+        }
       >
         {/* While a "Play to" run lasts, the button speaks for the verse being
             recited, not the one the run started from. */}
@@ -4934,7 +5310,10 @@ export function App(): JSX.Element {
             audio.toggle(k);
             // With the setting on, the press also opens the play options
             // under the drawer's buttons, folding any other tool open there.
-            if (toolsInDrawer && !listenInDrawer) {
+            if (tabsInDrawer) {
+              setListenInDrawer(true);
+              setPickedTab("listen");
+            } else if (toolsInDrawer && !listenInDrawer) {
               setRootsOpen(false);
               setShareInDrawer(false);
               setListenInDrawer(true);
@@ -4957,6 +5336,7 @@ export function App(): JSX.Element {
           curated={curatedRoots.length}
           open={rootsOpen}
           onToggle={() => {
+            if (tabsInDrawer) return pressToolTab("roots");
             setShareInDrawer(false);
             setListenInDrawer(false);
             setRootsOpen((o) => !o);
@@ -4976,6 +5356,7 @@ export function App(): JSX.Element {
               ? {
                   open: shareInDrawer,
                   onToggle: () => {
+                    if (tabsInDrawer) return pressToolTab("share");
                     setRootsOpen(false);
                     setListenInDrawer(false);
                     setShareInDrawer((o) => !o);
@@ -5039,10 +5420,19 @@ export function App(): JSX.Element {
         />
       )}
       {/* The way back from full screen, for B and C; A's way back is a tap. */}
-      {full && verseGestures !== "a" && (
-        <button type="button" className={styles.showBars} onClick={() => setFull(false)}>
+      {full && verseGestures !== "a" && touchFullNow !== "row" && (
+        <button type="button" className={styles.showBars} data-show-bars="" onClick={() => setFull(false)}>
           {t.showBars}
         </button>
+      )}
+      {/* The tools kept in full screen on a phone or an upright iPad: the
+          bottom line's Tools button on its own, in the corner across from the
+          way back. Its tray folds back once a tool is picked, since the line
+          it covers outside full screen is not there to cover. */}
+      {resolver && touchFullNow === "button" && phoneBar === "c" && (
+        <div className={styles.fullTouchTools} data-full-touch-tools="" data-keep-clear="">
+          <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} foldOnPick />
+        </div>
       )}
 
       {/* The bottom-most chrome, and the second way through the book after the
@@ -5076,7 +5466,7 @@ export function App(): JSX.Element {
       )}
 
       {verseNotesAt && verseNotes.length > 0 && (
-        <Suspense fallback={null}>
+        <Later>
           <VerseNotes
             head={t.verseInNotes(verseNotesAt.key, verseNotes.length)}
             notes={verseNotes}
@@ -5088,11 +5478,11 @@ export function App(): JSX.Element {
             }}
             onClose={closeVerseNotes}
           />
-        </Suspense>
+        </Later>
       )}
 
       {jumpsAt && jumpRows.length > 0 && (
-        <Suspense fallback={null}>
+        <Later>
           <JumpList
             head={t.jumpList(jumpsAt.key)}
             fromKey={jumpsAt.key}
@@ -5105,6 +5495,7 @@ export function App(): JSX.Element {
             }}
             onAgain={againJump}
             onBeaten={beatJump}
+            offerAfter={beatenOffer}
             onSlip={slipJump}
             onDismiss={dismissJump}
             onDelete={deleteJump}
@@ -5116,11 +5507,11 @@ export function App(): JSX.Element {
             }}
             onClose={closeJumps}
           />
-        </Suspense>
+        </Later>
       )}
 
       {labelNotes && (
-        <Suspense fallback={null}>
+        <Later>
           <VerseNotes
             head={labelNotes.head}
             notes={notesAbout(scoped, labelNotes.scope, pageOfKey).map(shelfItem)}
@@ -5131,10 +5522,10 @@ export function App(): JSX.Element {
             }}
             onClose={closeLabelNotes}
           />
-        </Suspense>
+        </Later>
       )}
       {labelNote && (
-        <Suspense fallback={null}>
+        <Later>
           <NoteBox
             key={labelNote.id}
             note={labelNote}
@@ -5144,10 +5535,10 @@ export function App(): JSX.Element {
             onClose={closeLabelNote}
             onDelete={deleteLabelNote}
           />
-        </Suspense>
+        </Later>
       )}
       {openNote && (
-        <Suspense fallback={null}>
+        <Later>
           <NoteBox
             key={openNote.id}
             note={openNote}
@@ -5165,15 +5556,15 @@ export function App(): JSX.Element {
                 : null
             }
           />
-        </Suspense>
+        </Later>
       )}
       {crop && manifest && (
-        <Suspense fallback={null}>
+        <Later>
           <CropHost key={`${crop.page}:${crop.x}:${crop.y}`} manifest={manifest} box={crop} onClose={() => setCrop(null)} />
-        </Suspense>
+        </Later>
       )}
       {wordOpen && manifest && (
-        <Suspense fallback={null}>
+        <Later>
           <WordPartsHost
             key={`${wordOpen.key}#${wordOpen.word}`}
             manifest={manifest}
@@ -5192,10 +5583,10 @@ export function App(): JSX.Element {
             onPickLetter={(letter, at) => pickWordPart({ ...at, letter })}
             onClose={() => setWordOpen(null)}
           />
-        </Suspense>
+        </Later>
       )}
       {picking && manifest && picking.word !== null && (
-        <Suspense fallback={null}>
+        <Later>
           <WordPartsHost
             key={picking.id}
             manifest={manifest}
@@ -5210,16 +5601,18 @@ export function App(): JSX.Element {
               return r ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
             }}
             mode="mistake"
-            chosen={picking.mark ?? null}
-            onPick={(mark, name) => pickSign(mark, name)}
+            answered={answeredOf(picking)}
+            ask={mistakeAsk}
+            onAnswer={(answer, name) => answerMarkedMistake(answer, name)}
+            onPick={(mark, name) => answerMarkedMistake(mark === null ? { what: "word" } : { what: "sign", mark }, name)}
             onClear={clearMistake}
             onAnother={turnMistakeIntoAnother}
             onClose={() => setPickingId(null)}
           />
-        </Suspense>
+        </Later>
       )}
       {askingMistake && manifest && (
-        <Suspense fallback={null}>
+        <Later>
           <WordPartsHost
             key={`${askingMistake.key}#${askingMistake.word}`}
             manifest={manifest}
@@ -5229,11 +5622,13 @@ export function App(): JSX.Element {
             label={t.ayahLabel(askingMistake.key) ?? askingMistake.key}
             anchor={() => askingMistake.rect}
             mode="mistake"
-            onPick={(mark, name) => answerMistake(mark, name)}
+            ask={mistakeAsk}
+            onAnswer={(answer, name) => answerFreshMistake(answer, name)}
+            onPick={(mark, name) => answerFreshMistake(mark === null ? { what: "word" } : { what: "sign", mark }, name)}
             onAnother={answerAnother}
             onClose={() => setAskingMistake(null)}
           />
-        </Suspense>
+        </Later>
       )}
       {unfolded ? (
         <UndoBar said={unfolded.said} onUndo={undoUnfold} onDone={endUndo} />
@@ -5243,9 +5638,9 @@ export function App(): JSX.Element {
         deletedNote && <UndoBar said={deletedNote.said} onUndo={undoDelete} onDone={endNoteUndo} />
       )}
       {DeveloperPage && appPages === "row" && appPage === "developer" && (
-        <Suspense fallback={null}>
+        <Later>
           <DeveloperPage onClose={() => setAppPage("mushaf")} />
-        </Suspense>
+        </Later>
       )}
       {appPages === "row" && (
         <PageRow page={appPage} onPage={setAppPage} developer={DeveloperPage ? "Developer" : undefined} />

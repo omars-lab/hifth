@@ -120,6 +120,32 @@ letter of a word the print sets upright. That row was mended in the private book
 The others were not hunted for: the measurement above counts whole words, so slips like this
 one barely move it.
 
+## Read by eye for the pages the demo shows, 2026-11-14
+
+The demo opens nine verses, and the team may tap any verse on the pages those verses sit on.
+The notes on those pages that nobody had read, and the own notes of 18:62–82, were read off the
+page pictures by hand: 108 verses, nine readers of twelve verses each.
+
+- **What they found:** 602 slanted runs. Six verses have no slant in print. Today's rules had
+  already slanted most of these words. The hand reading adds 165 words they left upright, and
+  drops 18 they slanted.
+- **Were the readers consistent?** 45 of the paragraphs they read are shared with notes read
+  before. All 45 came out slanted the same way.
+- **Were they right?** The readers read at half size, so a checker re-read at full size:
+  - 11 doubtful calls: one start was a word late, and it was fixed.
+  - 141 runs in a sample of 27 verses: no errors.
+  - All 18 dropped words: 17 are upright in print, and one was a miss, now fixed.
+- **What else changed:** 20 verses that share a paragraph with one of the 108 changed with them.
+  No other verse changed. No note's words changed, and no verse lost all its slant.
+- **The measure:** with these notes added, 1,144 notes are read by hand. On them the pictures
+  find 19,125 of the 20,909 slanted words, about 91 in 100; on the earlier 1,012 it was 94. The
+  new notes are harder for the pictures, not worse than before: nothing the pictures do changed.
+  They wrongly slant 224 of the 153,315 upright words.
+
+The pitch test now also opens 17:110 and 19:54, the two of these verses that gain the most
+slanted words. It was watched failing on 17:110 before the rows went in. The test of a note
+nobody read moved from 2:37, now read by hand, to 3:63.
+
 ## What was tried before this
 
 - A list of the words the hand-read notes always slant (24 words, each seen at least three

@@ -55,6 +55,8 @@ export {
 export {
   NOTE_TEXT_MAX,
   addNote,
+  answerMistake,
+  mistakeKindOf,
   signsOfNote,
   editNote,
   isMistake,
@@ -66,6 +68,8 @@ export {
   pickMistakeSign,
   removeNote,
   restoreNote,
+  type MistakeAnswer,
+  type MistakeKind,
   type Note,
   type NoteKind,
 } from "./notes.js";
@@ -520,6 +524,7 @@ export {
   scopesOf,
   slipsIn,
   type DayStamp,
+  MISTAKE_WHATS,
   type MistakeWhat,
   type RevisionEvent,
   type RevisionScope,

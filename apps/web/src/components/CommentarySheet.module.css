@@ -232,6 +232,37 @@ button.grip {
   font-style: italic;
 }
 
+/* On a phone the translation is cut to two lines, so the commentary starts
+   inside the short note (docs/design/iphone-app.md, item 3; phone-note.ts). */
+.translation[data-cut] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  margin-block-end: 0;
+}
+
+.whole {
+  display: block;
+  min-block-size: var(--touch-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--accent-strong);
+  text-align: start;
+  cursor: pointer;
+}
+.whole:hover {
+  text-decoration: underline;
+}
+.whole:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .commentary {
   margin-block-start: var(--space-3);
 }
@@ -494,6 +525,45 @@ button.grip {
   .sheet:not([data-side]) {
     inset-inline: var(--space-5);
     inline-size: auto;
+  }
+}
+
+/* A phone on its side (SIDEWAYS_QUERY in useMediaQuery.ts): the note stands
+   the full height of the screen beside the page, from under the header to the
+   screen's foot, instead of lying across the page's foot with no room for a
+   line of the commentary (docs/design/iphone-app.md, item 3). It stands at the
+   chrome's end, clear of the notch on whichever side it is. A reader who set it
+   to lie across the foot gets no data-standing, and none of this. */
+@media (min-width: 640px) and (max-height: 500px) {
+  .sheet[data-standing]:not([data-side]) {
+    inset-block-start: calc(100vh - var(--room-foot, 0px) - var(--room-block, 100vh) + var(--space-2));
+    inset-block-end: calc(var(--space-2) + env(safe-area-inset-bottom));
+    inline-size: min(300px, 42vw);
+    max-block-size: none;
+    padding-block-end: var(--space-4);
+    border-radius: var(--radius-lg);
+  }
+
+  .sheet[data-standing][dir="ltr"] {
+    left: auto;
+    right: calc(var(--space-2) + env(safe-area-inset-right));
+  }
+
+  .sheet[data-standing][dir="rtl"] {
+    right: auto;
+    left: calc(var(--space-2) + env(safe-area-inset-left));
+  }
+
+  .sheet[data-standing][data-more="below"]::after {
+    inset-block-end: calc(-1 * var(--space-4));
+  }
+
+  /* The look-alike chips ride the standing note's top row (HopRail's
+     `onCard`), as on the share card's, and the note is narrower than the
+     share card: on its title row they sat on its close button. So the title
+     starts a row lower, only when there are chips. */
+  :root:has([data-seated][data-card]) .sheet[data-standing] .top {
+    padding-block-start: calc(var(--space-3) + 36px);
   }
 }
 

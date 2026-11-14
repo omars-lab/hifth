@@ -165,6 +165,15 @@ test("gate:budget refuses a start-up download over its limit while the total is 
   assert.doesNotMatch(r.out, /KB budget/);
 });
 
+test("gate:budget refuses a start-up download back on the slower step (2026-11-14)", () => {
+  // At 162.6 KB start-up read about 2257 ms; at 159.5 KB, about 2107
+  // (docs/performance.md ㉑). The limit sits between them so the app cannot
+  // drift back up a step unnoticed.
+  const r = checkStartup({ script: heavy(143), style: heavy(20) });
+  assert.equal(r.status, 1, r.out);
+  assert.match(r.out, /start-up download: 16[2-4]\.\d KB/);
+});
+
 test("gate:budget does not count a late-loading file against the start-up limit", () => {
   const r = checkStartup({ script: heavy(100), late: heavy(95) });
   assert.equal(r.status, 0, r.out);

@@ -58,7 +58,11 @@ async function openRecord(page: Page): Promise<Locator> {
  * the page could make (a verse the book cannot place). Done once the app has
  * made its own stores, so nothing here creates them.
  */
-function seed(page: Page, day: string, events: { key: string; page: number; at: number; tz: number }[]): Promise<void> {
+function seed(
+  page: Page,
+  day: string,
+  events: { key: string; page: number; at: number; tz: number; slip?: boolean; what?: string }[],
+): Promise<void> {
   return page.evaluate(
     ({ day, events }) =>
       new Promise<void>((resolve, reject) => {
@@ -148,6 +152,112 @@ test.describe("Hifth · the record, day by day", () => {
     // The heading and nothing under it: no "0 pages", no "no verses yet".
     await expect(days.nth(1).locator("p")).toHaveCount(0);
     await expect(days.nth(0).locator("p")).toHaveCount(1);
+  });
+
+  test("a day's line counts letter and rule mistakes, not only words, harakat and hops", async ({ page, hasTouch }) => {
+    await page.clock.setFixedTime(DAY_TWO);
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    if (hasTouch) await tapAyah(page, "#verse-55");
+    else {
+      const at = await ayahTarget(page, "#verse-55");
+      await page.mouse.click(at.x, at.y);
+    }
+    await expect.poll(() => saved(page)).toEqual({ looks: 1, mistakes: 0 });
+    const at = DAY_ONE.getTime();
+    const tz = -DAY_ONE.getTimezoneOffset();
+    await seed(page, "2026-03-09", [
+      { key: "quran/hafs-kfqc/2:46", page: 7, at, tz, slip: true, what: "letter" },
+      { key: "quran/hafs-kfqc/2:47", page: 7, at: at + 1, tz, slip: true, what: "rule" },
+    ]);
+    await page.reload();
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+
+    const sheet = await openRecord(page);
+    await sheet.getByRole("radio", { name: "Days", exact: true }).click();
+    const day = sheet.getByRole("list", { name: "Days" }).locator("> li").nth(1);
+    await expect(day).toContainText("Mar 9th, 2026 · 2 mistakes marked");
+    await expect(day).toContainText("A letter (makharij) 1");
+    await expect(day).toContainText("A tajweed rule 1");
+  });
+
+  test("the month shows how much each day held, in the look chosen in the info panel", async ({ page, hasTouch }) => {
+    await page.clock.setFixedTime(DAY_TWO);
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    if (hasTouch) await tapAyah(page, "#verse-55");
+    else {
+      const at = await ayahTarget(page, "#verse-55");
+      await page.mouse.click(at.x, at.y);
+    }
+    await expect.poll(() => saved(page)).toEqual({ looks: 1, mistakes: 0 });
+    // The day before: twenty made-up verses, more than a page.
+    const at = DAY_ONE.getTime();
+    const tz = -DAY_ONE.getTimezoneOffset();
+    await seed(
+      page,
+      "2026-03-09",
+      Array.from({ length: 20 }, (_, i) => ({ key: `quran/hafs-kfqc/2:${i + 1}`, page: 2 + Math.floor(i / 7), at: at + i, tz })),
+    );
+    // Two days before: thirty made-up verses, two pages, one of them marked a mistake.
+    const before = at - 2 * 86_400_000;
+    await seed(
+      page,
+      "2026-03-07",
+      Array.from({ length: 30 }, (_, i) => ({
+        key: `quran/hafs-kfqc/3:${i + 1}`,
+        page: 50 + Math.floor(i / 15),
+        at: before + i,
+        tz,
+        ...(i === 0 ? { slip: true, what: "letter" } : {}),
+      })),
+    );
+    await page.reload();
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+
+    let sheet = await openRecord(page);
+    await sheet.getByRole("radio", { name: "Month", exact: true }).click();
+    let month = sheet.getByRole("group", { name: "Mar 2026" });
+    // Shades when nobody chose; one verse is the lowest step, twenty the third.
+    await expect(month).toHaveAttribute("data-look", "shades");
+    await expect(month.locator('[data-day="2026-03-10"]')).toHaveAttribute("data-level", "1");
+    await expect(month.locator('[data-day="2026-03-09"]')).toHaveAttribute("data-level", "3");
+    const light = await month.locator('[data-day="2026-03-10"]').evaluate((el) => getComputedStyle(el).backgroundColor);
+    const deep = await month.locator('[data-day="2026-03-09"]').evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(deep, "the busier day is a deeper shade").not.toBe(light);
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+
+    // Rings, picked in the info panel, is what the month draws next time it opens.
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    const choices = page.getByRole("dialog").locator('[aria-labelledby="colophon-calendar-look"]').getByRole("radio");
+    await expect(choices).toHaveCount(4);
+    await choices.and(page.locator('[data-calendar-look-choice="rings"]')).click();
+    await expect(choices.and(page.locator('[data-calendar-look-choice="rings"]'))).toHaveAttribute("aria-checked", "true");
+    await page.keyboard.press("Escape");
+    sheet = await openRecord(page);
+    month = sheet.getByRole("group", { name: "Mar 2026" });
+    await expect(month).toHaveAttribute("data-look", "rings");
+    const round = await month.locator('[data-day="2026-03-09"]').evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
+    expect(round).toBe("50%");
+    await page.keyboard.press("Escape");
+
+    // Dots: marks under the date, one dot for a light day, three for twenty verses, a tick
+    // and no dots for two pages, a red ring for a day with a mistake, and no fill.
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    await choices.and(page.locator('[data-calendar-look-choice="dots"]')).click();
+    await page.keyboard.press("Escape");
+    sheet = await openRecord(page);
+    month = sheet.getByRole("group", { name: "Mar 2026" });
+    await expect(month).toHaveAttribute("data-look", "dots");
+    await expect(month.locator('[data-day="2026-03-10"] [data-mark="dot"]')).toHaveCount(1);
+    await expect(month.locator('[data-day="2026-03-09"] [data-mark="dot"]')).toHaveCount(3);
+    await expect(month.locator('[data-day="2026-03-07"] [data-mark="full"]')).toHaveCount(1);
+    await expect(month.locator('[data-day="2026-03-07"] [data-mark="dot"]')).toHaveCount(0);
+    await expect(month.locator('[data-day="2026-03-07"] [data-mark="mistakes"]')).toHaveCount(1);
+    await expect(month.locator('[data-day="2026-03-09"] [data-mark="mistakes"]')).toHaveCount(0);
+    await expect(month.locator('[data-day="2026-03-08"] [data-mark]')).toHaveCount(0);
+    await expect(month.locator('[data-day="2026-03-09"]')).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   });
 
   test("in Arabic the arrow to the earlier month is on the right and points right", async ({ page }) => {

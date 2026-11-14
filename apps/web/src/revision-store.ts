@@ -42,7 +42,7 @@
  */
 
 import type { DayStamp, MistakeWhat, RevisionEvent } from "@hifth/core";
-import { dayOf, daysBetween } from "@hifth/core";
+import { MISTAKE_WHATS, dayOf, daysBetween, parseAyahKey } from "@hifth/core";
 
 const DB_NAME = "hifth.revision.v1";
 const DB_VERSION = 1;
@@ -284,6 +284,78 @@ export async function forgetRecord(): Promise<void> {
     lastPrunedDay = null;
   } catch {
     // Nothing to report: the caller asked us to have no record, and we have none.
+  } finally {
+    db?.close();
+  }
+}
+
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+const isVerse = (x: unknown): x is string => typeof x === "string" && parseAyahKey(x) !== null;
+
+/** One carried look, rebuilt in the shape this store writes, or null if it is not one. */
+function carriedLook(x: unknown): RevisionEvent | null {
+  const e = x as Record<string, unknown> | null;
+  if (!e || typeof e !== "object") return null;
+  const { key, endKey, page, at, tz, slip, what } = e;
+  if (!isVerse(key) || (endKey !== undefined && !isVerse(endKey))) return null;
+  if (!Number.isInteger(page) || (page as number) < 1 || !Number.isFinite(at)) return null;
+  if (!Number.isInteger(tz) || Math.abs(tz as number) > 14 * 60) return null;
+  if ((slip !== undefined && slip !== true) || (what !== undefined && (!slip || !MISTAKE_WHATS.includes(what as MistakeWhat))))
+    return null;
+  return {
+    key,
+    ...(endKey ? { endKey } : {}),
+    page: page as number,
+    at: at as number,
+    tz: tz as number,
+    ...(slip ? { slip: true as const } : {}),
+    ...(what ? { what: what as MistakeWhat } : {}),
+  };
+}
+
+const sameLook = (e: RevisionEvent) => `${e.at}|${e.key}|${e.endKey ?? ""}`;
+
+/**
+ * Take a record carried from the old address, sent only because the reader ticked
+ * the box that names it. Nothing in it is trusted: each look is rebuilt, filed by
+ * its own day, dropped if the window has passed it or this address already has
+ * it, and an earlier start date is kept only if the window still covers it.
+ * Returns how many looks it added. Never throws, like every other entry here.
+ */
+export async function takeRecord(incoming: unknown, now: number = Date.now()): Promise<number> {
+  const r = incoming as { events?: unknown; since?: unknown } | null;
+  if (!revisionStoreSupported() || !r || typeof r !== "object" || !Array.isArray(r.events)) return 0;
+  const asOf = today(now);
+  const byDay = new Map<DayStamp, RevisionEvent[]>();
+  for (const x of r.events) {
+    const look = carriedLook(x);
+    const day = look && dayOf(look);
+    if (look && day && expiredDays([day], asOf).length === 0) byDay.set(day, [...(byDay.get(day) ?? []), look]);
+  }
+  let db: IDBDatabase | null = null;
+  try {
+    db = await openDb();
+    const tx = db.transaction([DAYS, META], "readwrite");
+    const days = tx.objectStore(DAYS);
+    const meta = tx.objectStore(META);
+    let added = 0;
+    for (const [day, looks] of byDay) {
+      const had = (await request<DayRecord | undefined>(days.get(day)))?.events ?? [];
+      const seen = new Set(had.map(sameLook));
+      const fresh = looks.filter((l) => !seen.has(sameLook(l)) && Boolean(seen.add(sameLook(l))));
+      if (fresh.length === 0) continue;
+      days.put({ day, events: [...had, ...fresh].sort((a, b) => a.at - b.at) } satisfies DayRecord);
+      added += fresh.length;
+    }
+    await stampSince(meta, asOf);
+    const since = typeof r.since === "string" && DAY_RE.test(r.since) ? r.since : null;
+    const current = await request<{ id: string; day: DayStamp } | undefined>(meta.get(SINCE_KEY));
+    if (since && current && since < current.day && expiredDays([since], asOf).length === 0)
+      meta.put({ id: SINCE_KEY, day: since });
+    await done(tx);
+    return added;
+  } catch {
+    return 0;
   } finally {
     db?.close();
   }

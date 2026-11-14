@@ -2,6 +2,11 @@
 
 Everything that only the real iPad can show, in one list. Started 2026-11-10, when the pitch build was put on the iPad and the walk waited for an unlock that never came.
 
+> [!tip] When something looks off, take a screenshot
+> Press the two buttons, or swipe up from a bottom corner with the Pencil. The app keeps its own picture, where you were, your last ten seconds of taps and the five seconds of video before. A banner offers a note; ignore it if you like.
+> I copy them all off afterwards (`make walk-pull`), so there is no need to type up what you saw. The first time, iOS asks whether Hifth may record the screen: say yes for the video.
+> This needs a build put on from the laptop on or after 2026-11-13. The one on the iPad now is older, so put a newer one on first (step 2 below).
+
 Tick a box as you go, and write what you saw under it in your own words. Anything wrong becomes a test and a new line on the walk checklist, and the agent updates the pitch numbers.
 
 > [!tip] Before you start (two minutes)
@@ -36,6 +41,7 @@ The same steps the simulator walks by machine. The real iPad is the only place t
 
 Each is parked on the by-hand list because the simulator cannot show it. Do any you have time for.
 
+- [ ] **The screenshot keeps a capture, with its video.** Take one screenshot with the two buttons and one with the Pencil corner swipe, each during a page turn. Count how often iOS asks to record the screen: once, or every time the app opens. Right: after `make walk-pull`, the page it draws has each capture with its picture and a five-second video ending at the screenshot; then `make walk-pull CLEAR=1` leaves the iPad's folder empty.
 - [ ] **The first Play, just after installing.** Hold the surah corner on any page and press Play, counting to the first sound. Right: under half a second. About a second means the app should start its sound sooner.
 - [ ] **Turn the iPad with a note open, and back.** Tap a demo verse so its note opens, stand the iPad upright, then lay it on its side again. Right: the note stays open each way up, with every line of its verse in sight.
 - [ ] **Feel the page shrink when a note opens.** Open 2:255's note. The page is drawn a little smaller so the whole verse stands beside the note. Right: it reads as the page making room, not as the app undoing your zoom.
@@ -64,4 +70,4 @@ Write here, in any words. The agent turns each line into a test.
 
 ## Where these come from
 
-The pitch steps are the pitch script (`.claude/skills/walk-app/pitch-script.md`); the other checks are items 3, 12, 13, 17, 18 and 19 of the by-hand list (`.claude/skills/manual-testing/checklist.md`); the two drawer settings are the open drawer questions in the issue list (`docs/issues.json`: `drawer-holds-its-tools`, `word-drawer-stacks-on-verse`). When a check here changes, change it there too.
+The pitch steps are the pitch script (`.claude/skills/walk-app/pitch-script.md`); the other checks are items 3, 12, 13, 17, 18, 19 and 22 of the by-hand list (`.claude/skills/manual-testing/checklist.md`); the two drawer settings are the open drawer questions in the issue list (`docs/issues.json`: `drawer-holds-its-tools`, `word-drawer-stacks-on-verse`). When a check here changes, change it there too.

@@ -5,9 +5,13 @@ import {
   isWordShard,
   lettersOfWord,
   signsOfWord,
+  TAJWEED_RULES,
   WordIndex,
+  type MistakeAnswer,
+  type MistakeKind,
   type ReachedSign,
 } from "@hifth/core";
+import type { MistakeAsk } from "../mistake-ask";
 import { loadLetterShard, loadMarkShard, loadWordShard } from "../assets";
 import { useT } from "../i18n";
 import type { WordRect } from "./PageStage";
@@ -87,10 +91,21 @@ interface WordPartsProps {
    */
   marks?: "path" | "tag" | undefined;
   /**
-   * The sign picked so far (mistake mode); null for the whole word. Left out
-   * when nothing is marked yet, so nothing is shown pressed.
+   * Mistake mode: what the mark says went wrong so far, shown pressed, and the
+   * kind the question opens at. Left out when nothing is marked yet.
    */
-  chosen?: number | null | undefined;
+  answered?: MistakeAnswer | undefined;
+  /**
+   * Mistake mode: how the question is laid out (the reader's setting): the
+   * kinds first, the kinds as tabs, or every choice at once.
+   */
+  ask?: MistakeAsk | undefined;
+  /**
+   * Mistake mode: an answer was picked, with the name to say for it (the
+   * sign's, the rule's). Without it a sign or the whole word falls back to
+   * `onPick`, as the question was before it asked the kind.
+   */
+  onAnswer?: ((answer: MistakeAnswer, name: string | null) => void) | undefined;
   /** Mistake mode: the reader went into another verse; asking where is App's. */
   onAnother?: (() => void) | undefined;
   /** A part was picked: a sign's place in its verse's list, or null for the whole word. */
@@ -130,6 +145,24 @@ const MAX_ZOOM = 3.4;
  */
 const DOCKED_COPY_PX = 52;
 
+/** The kinds of mistake that have choices of their own: which sign, which letter, which rule. */
+type DetailKind = Exclude<MistakeKind, "word">;
+const DETAIL_KINDS: readonly DetailKind[] = ["sign", "letter", "rule"];
+
+/** The kind a mark already says, when that kind has choices to open at. */
+function detailOf(answered: MistakeAnswer | undefined): DetailKind | null {
+  return answered && answered.what !== "word" ? answered.what : null;
+}
+
+/** Whether the mark so far says this answer; false when nothing is marked yet. */
+function says(answered: MistakeAnswer | undefined, a: MistakeAnswer): boolean {
+  if (!answered || answered.what !== a.what) return false;
+  if (a.what === "sign") return answered.what === "sign" && answered.mark === a.mark;
+  if (a.what === "letter") return answered.what === "letter" && answered.letter === a.letter;
+  if (a.what === "rule") return answered.what === "rule" && answered.rule === a.rule;
+  return true;
+}
+
 /**
  * The word tool's row of parts: the fuller version of A that the harakah-pick
  * decision chose (D). The tapped word opens into one enlarged copy of itself
@@ -153,7 +186,9 @@ export function WordParts({
   stackAbove,
   onCover,
   marks,
-  chosen,
+  answered,
+  ask = "list",
+  onAnswer,
   onPick,
   onPickMany,
   onPickLetter,
@@ -162,6 +197,9 @@ export function WordParts({
   onClose,
 }: WordPartsProps): JSX.Element {
   const { t } = useT();
+  // Mistake mode, kind first or as tabs: which kind's choices are showing. Null is the
+  // list of kinds (kind first); a word already marked opens at its own kind's choices.
+  const [open, setOpen] = useState<DetailKind | null>(() => detailOf(answered));
   // Beside its word, it docks when it fits neither under nor over it: on a phone a long word's
   // question stood the whole screen tall over the word it asked about (2026-10-16).
   const [noRoom, setNoRoom] = useState(false);
@@ -265,7 +303,7 @@ export function WordParts({
       cancelAnimationFrame(frame);
       stopFollowing();
     };
-  }, [data, docked]);
+  }, [data, docked, open]);
 
   // Stand below the word, or above it when there is no room; measured a frame
   // late so the row has its size.
@@ -289,12 +327,12 @@ export function WordParts({
       setAt({ left, top });
     });
     return () => cancelAnimationFrame(frame);
-  }, [data, docked]);
+  }, [data, docked, open]);
 
   const placed = docked ? dockTop !== undefined : at !== null;
   useEffect(() => {
     if (placed) boxRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
-  }, [placed]);
+  }, [placed, open]);
 
   // Escape closes it from the moment it is drawn, not only once it holds the
   // keyboard: it is placed a frame late and focused after that, and an Escape
@@ -337,6 +375,166 @@ export function WordParts({
     />
   );
   const heading = mode === "mistake" ? t.mistakePicker(label) : t.wordParts(label);
+  const mistake = mode === "mistake";
+  /** Mistake mode: say the answer, by the new callback where App gave one, else as before. */
+  const answer = (a: MistakeAnswer, name: string | null) => {
+    if (onAnswer) onAnswer(a, name);
+    else if (a.what === "word") onPick(null, null);
+    else if (a.what === "sign") onPick(a.mark, name);
+  };
+  const kindName: Record<DetailKind, string> = {
+    sign: t.mistakeKindSign,
+    letter: t.mistakeKindLetter,
+    rule: t.mistakeKindRule,
+  };
+  const whichName: Record<DetailKind, string> = {
+    sign: t.mistakeSignWhich,
+    letter: t.mistakeLetterWhich,
+    rule: t.mistakeRuleWhich,
+  };
+
+  const wordButton = (
+    <button
+      type="button"
+      className={styles.part}
+      aria-pressed={mistake ? says(answered, { what: "word" }) : undefined}
+      data-part="word"
+      onClick={() => (mistake ? answer({ what: "word" }, null) : onPick(null, null))}
+    >
+      <span className={styles.copy} style={{ width: cw, height: ch }} aria-hidden="true">
+        {print()}
+      </span>
+      <span className={styles.name}>{t.mistakeWholeWord}</span>
+    </button>
+  );
+  const signButtons = signs.map((s) => {
+    // The sign's own window on the print, in the copy's pixels.
+    const sx = (s.r[0] - 0.6 - x0) * ZOOM;
+    const sy = (s.r[1] - 0.6 - y0) * ZOOM;
+    const sw = (s.r[2] + 1.2) * ZOOM;
+    const sh = (s.r[3] + 1.2) * ZOOM;
+    return (
+      <button
+        key={s.index}
+        type="button"
+        className={styles.part}
+        aria-pressed={
+          mistake
+            ? says(answered, { what: "sign", mark: s.index })
+            : several.length > 0
+              ? several.includes(s.index)
+              : undefined
+        }
+        data-part="sign"
+        data-sign={s.index}
+        onClick={(e) =>
+          mistake ? answer({ what: "sign", mark: s.index }, t.signName(s.name)) : takeSign(e, s.index, t.signName(s.name))
+        }
+      >
+        <span className={styles.copy} style={{ width: cw, height: ch }} aria-hidden="true">
+          <span className={styles.faint}>{print()}</span>
+          <span className={styles.solid} style={{ left: sx, top: sy, width: sw, height: sh }}>
+            {print(sx, sy)}
+          </span>
+          <span className={styles.ring} style={{ left: sx - 2, top: sy - 2, width: sw + 4, height: sh + 4 }} />
+        </span>
+        <span className={styles.name}>{t.signName(s.name)}</span>
+      </button>
+    );
+  });
+  /** One letter of the word, cut from the print along the letter's own outline. */
+  const letterButton = (i: number, onClick: () => void) => {
+    const clip = `polygon(${(letters[i] ?? [])
+      .map(([x, y]) => `${((x - x0) * ZOOM).toFixed(1)}px ${((y - y0) * ZOOM).toFixed(1)}px`)
+      .join(", ")})`;
+    const name = t.wordPartsLetter(i + 1);
+    return (
+      <button
+        key={i}
+        type="button"
+        className={styles.part}
+        aria-pressed={mistake ? says(answered, { what: "letter", letter: i }) : undefined}
+        data-part="letter"
+        data-letter={i}
+        aria-label={name}
+        onClick={onClick}
+      >
+        <span className={styles.copy} style={{ width: cw, height: ch }} aria-hidden="true">
+          <span className={styles.faint}>{print()}</span>
+          <span className={styles.letter} style={{ clipPath: clip }}>
+            {print()}
+          </span>
+        </span>
+        <span className={styles.name}>{name}</span>
+      </button>
+    );
+  };
+  /** Mistake mode: the choices one kind of mistake needs. */
+  const choicesOf = (kind: DetailKind) => {
+    if (kind === "sign")
+      return signs.length > 0 ? (
+        <div className={styles.row}>{signButtons}</div>
+      ) : (
+        <p className={styles.none}>{t.mistakeNoSigns}</p>
+      );
+    if (kind === "letter")
+      return (
+        <div className={styles.row} data-letters={letters.length}>
+          {letters.length > 1 &&
+            letters.map((_, i) => letterButton(i, () => answer({ what: "letter", letter: i }, t.wordPartsLetter(i + 1))))}
+          <button
+            type="button"
+            className={styles.rule}
+            data-part="letter-any"
+            aria-pressed={says(answered, { what: "letter" })}
+            onClick={() => answer({ what: "letter" }, null)}
+          >
+            {t.mistakeAnyLetter}
+          </button>
+        </div>
+      );
+    return (
+      <div className={styles.rules}>
+        {TAJWEED_RULES.map((rule) => {
+          const name = t.ruleName(rule.label, rule.latin);
+          return (
+            <button
+              key={rule.id}
+              type="button"
+              className={styles.rule}
+              data-part="rule"
+              data-rule={rule.id}
+              aria-pressed={says(answered, { what: "rule", rule: rule.id })}
+              onClick={() => answer({ what: "rule", rule: rule.id }, name.primary)}
+            >
+              <span className={styles.ruleMark} style={{ color: `var(--tj-${rule.id})` }} aria-hidden="true">
+                {rule.mark}
+              </span>
+              <span>{name.primary}</span>
+              <span className={styles.ruleLatin}>{name.secondary}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+  const anotherButton = onAnother && (
+    <button type="button" className={styles.another} data-part="another" onClick={onAnother}>
+      {t.mistakeAnother}
+    </button>
+  );
+  const clearButton = onClear && (
+    <button type="button" className={styles.clear} onClick={onClear}>
+      {t.mistakeClear}
+    </button>
+  );
+  const clearRow = clearButton && <div className={styles.actions}>{clearButton}</div>;
+  const actionsRow = (anotherButton || clearButton) && (
+    <div className={styles.actions}>
+      {anotherButton}
+      {clearButton}
+    </div>
+  );
 
   return (
     <div
@@ -398,100 +596,103 @@ export function WordParts({
           {gathering && <span className={styles.hintMany}>{t.sep}{t.wordPartsHintMany}</span>}
         </div>
       )}
-      <div className={styles.row}>
-        <button
-          type="button"
-          className={styles.part}
-          aria-pressed={mode === "mistake" ? chosen === null : undefined}
-          data-part="word"
-          onClick={() => onPick(null, null)}
-        >
-          <span className={styles.copy} style={{ width: cw, height: ch }} aria-hidden="true">
-            {print()}
-          </span>
-          <span className={styles.name}>{t.mistakeWholeWord}</span>
-        </button>
-        {signs.map((s) => {
-          // The sign's own window on the print, in the copy's pixels.
-          const sx = (s.r[0] - 0.6 - x0) * ZOOM;
-          const sy = (s.r[1] - 0.6 - y0) * ZOOM;
-          const sw = (s.r[2] + 1.2) * ZOOM;
-          const sh = (s.r[3] + 1.2) * ZOOM;
-          return (
-            <button
-              key={s.index}
-              type="button"
-              className={styles.part}
-              aria-pressed={
-                mode === "mistake" ? chosen === s.index : several.length > 0 ? several.includes(s.index) : undefined
-              }
-              data-part="sign"
-              data-sign={s.index}
-              onClick={(e) => takeSign(e, s.index, s.name)}
-            >
-              <span className={styles.copy} style={{ width: cw, height: ch }} aria-hidden="true">
-                <span className={styles.faint}>{print()}</span>
-                <span className={styles.solid} style={{ left: sx, top: sy, width: sw, height: sh }}>
-                  {print(sx, sy)}
-                </span>
-                <span className={styles.ring} style={{ left: sx - 2, top: sy - 2, width: sw + 4, height: sh + 4 }} />
-              </span>
-              <span className={styles.name}>{s.name}</span>
-            </button>
-          );
-        })}
-      </div>
-      {mode === "note" && onPickLetter && letters.length > 1 && (
-        <div className={styles.row} data-letters={letters.length}>
-          {letters.map((outline, i) => {
-            // The letter's own outline on the print, in the copy's pixels.
-            const clip = `polygon(${outline
-              .map(([x, y]) => `${((x - x0) * ZOOM).toFixed(1)}px ${((y - y0) * ZOOM).toFixed(1)}px`)
-              .join(", ")})`;
-            const name = t.wordPartsLetter(i + 1);
-            return (
-              <button
-                key={i}
-                type="button"
-                className={styles.part}
-                data-part="letter"
-                data-letter={i}
-                aria-label={name}
-                onClick={() => onPickLetter(i)}
-              >
-                <span className={styles.copy} style={{ width: cw, height: ch }} aria-hidden="true">
-                  <span className={styles.faint}>{print()}</span>
-                  <span className={styles.letter} style={{ clipPath: clip }}>
-                    {print()}
-                  </span>
-                </span>
-                <span className={styles.name}>{name}</span>
+      {mode === "note" ? (
+        <>
+          <div className={styles.row}>
+            {wordButton}
+            {signButtons}
+          </div>
+          {onPickLetter && letters.length > 1 && (
+            <div className={styles.row} data-letters={letters.length}>
+              {letters.map((_, i) => letterButton(i, () => onPickLetter(i)))}
+            </div>
+          )}
+          {gathering && several.length > 0 && (
+            <div className={styles.actions}>
+              <button type="button" className={styles.many} data-note-many onClick={() => onPickMany!(several)}>
+                {t.wordPartsMany(several.length)}
               </button>
-            );
-          })}
-        </div>
-      )}
-      {gathering && several.length > 0 && (
-        <div className={styles.actions}>
-          <button type="button" className={styles.many} data-note-many onClick={() => onPickMany!(several)}>
-            {t.wordPartsMany(several.length)}
-          </button>
-        </div>
-      )}
-      {mode === "mistake" && signs.length === 0 && <p className={styles.none}>{t.mistakeNoSigns}</p>}
-      {mode === "mistake" && (onAnother || onClear) && (
-        <div className={styles.actions}>
-          {onAnother && (
-            <button type="button" className={styles.another} data-part="another" onClick={onAnother}>
-              {t.mistakeAnother}
-            </button>
+            </div>
           )}
-          {onClear && (
-            <button type="button" className={styles.clear} onClick={onClear}>
-              {t.mistakeClear}
-            </button>
-          )}
-        </div>
+        </>
+      ) : ask === "steps" ? (
+        // A: the kinds first, then the picked kind's choices, with a way back.
+        open === null ? (
+          <>
+            <div className={styles.kinds} data-ask="steps">
+              {wordButton}
+              {DETAIL_KINDS.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  className={styles.kind}
+                  data-kind={k}
+                  aria-pressed={answered?.what === k}
+                  onClick={() => setOpen(k)}
+                >
+                  {kindName[k]}
+                  <span aria-hidden="true"> ›</span>
+                </button>
+              ))}
+              {anotherButton}
+            </div>
+            {clearRow}
+          </>
+        ) : (
+          <>
+            <div className={styles.which} data-ask="steps" data-open={open}>
+              <button type="button" className={styles.back} data-ask-back onClick={() => setOpen(null)}>
+                <span aria-hidden="true">‹ </span>
+                {t.mistakeBack}
+              </button>
+              <span>{whichName[open]}</span>
+            </div>
+            <div className={styles.choices}>{choicesOf(open)}</div>
+            {clearRow}
+          </>
+        )
+      ) : ask === "tabs" ? (
+        // B: the kinds as tabs, the picked one's choices under them; the whole word and
+        // another verse stay where they always are.
+        <>
+          {/* The whole word as one full-width row, as in A: alone in a row of cards it
+              left most of the panel empty beside it (seen 2026-11-12, wide and iPad). */}
+          <div className={styles.kinds}>{wordButton}</div>
+          <div className={styles.tabs} role="tablist" data-ask="tabs">
+            {DETAIL_KINDS.map((k) => (
+              <button
+                key={k}
+                type="button"
+                role="tab"
+                className={styles.tab}
+                data-kind={k}
+                aria-selected={(open ?? "sign") === k}
+                onClick={() => setOpen(k)}
+              >
+                {kindName[k]}
+              </button>
+            ))}
+          </div>
+          <div role="tabpanel" data-open={open ?? "sign"}>
+            <div className={styles.choices}>{choicesOf(open ?? "sign")}</div>
+          </div>
+          {actionsRow}
+        </>
+      ) : (
+        // C: every choice at once, grouped by kind: the question as it was, then the
+        // letters and the rules under it.
+        <>
+          <div className={styles.row} data-ask="list">
+            {wordButton}
+            {signButtons}
+          </div>
+          {signs.length === 0 && <p className={styles.none}>{t.mistakeNoSigns}</p>}
+          <div className={styles.group}>{kindName.letter}</div>
+          {choicesOf("letter")}
+          <div className={styles.group}>{kindName.rule}</div>
+          {choicesOf("rule")}
+          {actionsRow}
+        </>
       )}
     </div>
   );

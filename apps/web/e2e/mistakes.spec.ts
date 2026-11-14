@@ -1,6 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
 import { MISTAKE_TAP_KEY } from "../src/mistake-tap";
+import { MISTAKE_ASK_KEY } from "../src/mistake-ask";
 
 /*
  * The mistake tool, step 3 of docs/design/page-toolbar-plan.md, as the owner
@@ -222,5 +223,130 @@ test.describe("Hifth · the mistake tool", () => {
     await choices.nth(1).click();
     await expect(choices.nth(1)).toHaveAttribute("aria-checked", "true");
     expect(await page.evaluate((k) => localStorage.getItem(k), MISTAKE_TAP_KEY)).toBe("quiet");
+  });
+});
+
+/*
+ * The question asks the kind of mistake too (the owner, 2026-11-12, on the
+ * front page): the harakat, a letter said from the wrong place (makharij), a
+ * tajweed rule left out, the whole word, or another verse. Three layouts of
+ * the same question, built to be picked by hand; each must reach every kind.
+ */
+const ASK_LAYOUTS = ["steps", "tabs", "list"] as const;
+async function useLayout(page: Page, layout: (typeof ASK_LAYOUTS)[number]): Promise<void> {
+  await page.addInitScript(
+    ([k, v]) => {
+      try {
+        localStorage.setItem(k, v);
+      } catch {
+        /* private mode */
+      }
+    },
+    [MISTAKE_ASK_KEY, layout] as const,
+  );
+}
+/** Open the kind's choices, the way each layout does it. */
+async function openKind(page: Page, layout: (typeof ASK_LAYOUTS)[number], kind: "sign" | "letter" | "rule") {
+  if (layout === "steps") await picker(page).locator(`[data-kind="${kind}"]`).click();
+  if (layout === "tabs") await picker(page).locator(`[role="tab"][data-kind="${kind}"]`).click();
+}
+
+test.describe("Hifth · the mistake question asks the kind of mistake", () => {
+  for (const layout of ASK_LAYOUTS) {
+    test(`${layout}: a tajweed rule left out is marked, and the question reopens on it`, async ({ page }) => {
+      await useLayout(page, layout);
+      await page.goto("/#/hafs-kfqc/p7?tool=mistake");
+      await expect(pageSvg(page, 7)).toBeVisible();
+      const at = await ayahTarget(page, "#verse-46");
+      await page.mouse.click(at.x, at.y);
+      await expect(picker(page).locator(`[data-ask="${layout}"]`).first()).toBeVisible();
+      // Every way in offers the whole word and the turn into another verse.
+      await expect(picker(page).getByRole("button", { name: "The whole word" })).toBeVisible();
+      await expect(picker(page).getByRole("button", { name: "Went into another verse…" })).toBeVisible();
+      await openKind(page, layout, "rule");
+      const rules = picker(page).locator('[data-part="rule"]');
+      expect(await rules.count()).toBe(7);
+      const id = await rules.first().getAttribute("data-rule");
+      await rules.first().click();
+      await expect(picker(page)).toHaveCount(0);
+      await expect(washes(page)).toHaveCount(1);
+      await expect(said(page)).toHaveText(/^Tajweed rule marked: /);
+
+      await page.reload();
+      await expect(pageSvg(page, 7)).toBeVisible();
+      await expect(washes(page)).toHaveCount(1);
+      await page.keyboard.press("KeyM");
+      const again = await ayahTarget(page, "#verse-46");
+      await page.mouse.click(again.x, again.y);
+      // A word already marked opens on its own kind, with its rule pressed.
+      await expect(picker(page).locator(`[data-part="rule"][data-rule="${id}"]`)).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      // Only that rule: not the whole word too.
+      await expect(picker(page).locator('[aria-pressed="true"]')).toHaveCount(1);
+    });
+
+    test(`${layout}: a letter said wrong is marked, then changed to the harakat`, async ({ page }) => {
+      await useLayout(page, layout);
+      await page.goto("/#/hafs-kfqc/p7?tool=mistake");
+      await expect(pageSvg(page, 7)).toBeVisible();
+      const at = await ayahTarget(page, "#verse-46");
+      await page.mouse.click(at.x, at.y);
+      await openKind(page, layout, "letter");
+      await picker(page).locator('[data-part="letter-any"]').click();
+      await expect(picker(page)).toHaveCount(0);
+      await expect(said(page)).toHaveText("Wrong letter marked");
+      await expect(washes(page)).toHaveCount(1);
+
+      await page.mouse.click(at.x, at.y);
+      await expect(picker(page).locator('[data-part="letter-any"]')).toHaveAttribute("aria-pressed", "true");
+      if (layout === "steps") {
+        // From a kind's choices, Back shows the kinds again.
+        await picker(page).locator("[data-ask-back]").click();
+        await expect(picker(page).locator('[data-kind="letter"]')).toHaveAttribute("aria-pressed", "true");
+      }
+      await openKind(page, layout, "sign");
+      await picker(page).locator("[data-sign]").first().click();
+      await expect(picker(page)).toHaveCount(0);
+      await expect(said(page)).toHaveText(/^Wrong harakat marked: the /);
+      // Changed, not added: still one mistake, now on a sign.
+      await expect(washes(page)).toHaveCount(1);
+      await expect(signRings(page)).toHaveCount(1);
+    });
+  }
+
+  test("a kind's choices sit in the middle of the question, not bunched to one side", async ({ page }) => {
+    // Seen 2026-11-12 on a phone: in the tabs layout the harakat cards wrapped from
+    // the right and left an empty column down the left of the question.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await useLayout(page, "tabs");
+    await page.goto("/#/hafs-kfqc/p7?tool=mistake");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    const at = await ayahTarget(page, "#verse-46");
+    await page.mouse.click(at.x, at.y);
+    // The row the harakat cards sit in.
+    const row = picker(page).locator('[role="tabpanel"] [data-sign]').first().locator("..");
+    await expect(row).toBeVisible();
+    const gaps = await row.evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      const cards = [...el.children].map((c) => c.getBoundingClientRect());
+      const left = Math.min(...cards.map((c) => c.left)) - box.left;
+      const right = box.right - Math.max(...cards.map((c) => c.right));
+      return { left, right };
+    });
+    expect(Math.abs(gaps.left - gaps.right)).toBeLessThanOrEqual(2);
+  });
+
+  test("the layout is a setting in the info panel, everything at once until chosen, and remembered", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    await expect(pageSvg(page, 7)).toBeVisible();
+    await page.getByRole("button", { name: /About Hifth/ }).click();
+    const choices = page.getByRole("dialog").locator('[aria-labelledby="colophon-mistake-ask"]').getByRole("radio");
+    await expect(choices).toHaveText(["Kind first, then which", "Kinds as tabs", "Everything at once"]);
+    await expect(choices.nth(2)).toHaveAttribute("aria-checked", "true");
+    await choices.first().click();
+    await expect(choices.first()).toHaveAttribute("aria-checked", "true");
+    expect(await page.evaluate((k) => localStorage.getItem(k), MISTAKE_ASK_KEY)).toBe("steps");
   });
 });

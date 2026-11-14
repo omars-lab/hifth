@@ -89,6 +89,9 @@ export function locate(file, symbol) {
  * title that has drifted by one word is exactly the drift worth catching, and
  * it is invisible to a substring search for the shared prefix.
  *
+ * The app's Swift tests count too: a Swift Testing `@Test("title")`, and an
+ * XCTest method, which has no title, named by itself (`testSwipeTurnsThePage`).
+ *
  * @returns {{ok: true, line: number} | {ok: false, why: string}}
  */
 export function locateTest(file, title) {
@@ -96,8 +99,14 @@ export function locateTest(file, title) {
   if (!existsSync(abs)) return { ok: false, why: `spec file does not exist` };
   const lines = readFileSync(abs, "utf8").split("\n");
 
+  if (file.endsWith(".swift") && /^test\w+$/.test(title)) {
+    const method = new RegExp(`^\\s*(@MainActor\\s+)?func\\s+${title}\\s*\\(`);
+    const at = lines.findIndex((line) => method.test(line));
+    if (at >= 0) return { ok: true, line: at + 1 };
+  }
+
   const quoted = [`"${title}"`, `'${title}'`, `\`${title}\``];
-  const opensATest = /\b(test|it)(\.\w+)*\s*\(\s*$|\b(test|it)(\.\w+)*\s*\(\s*["'`]/;
+  const opensATest = /\b(test|it)(\.\w+)*\s*\(\s*$|\b(test|it)(\.\w+)*\s*\(\s*["'`]|@Test\s*\(\s*"/;
 
   for (let i = 0; i < lines.length; i++) {
     if (!quoted.some((q) => lines[i].includes(q))) continue;

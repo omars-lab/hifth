@@ -10,7 +10,42 @@ import preact from "@preact/preset-vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { preloadScript } from "./src/lang-preload";
 import { devHubRoute } from "./src/dev/dev-hub";
+import { intentPictureRoute } from "./src/dev/intent-picture";
 import { LOCALE_IDS } from "./src/messages/locales.gen";
+
+/**
+ * Serve the "what each commit was for" picture (`make intent`) at /intent/ on the dev
+ * server, so it opens from the local hub instead of as a file:// page. Dev only:
+ * `apply: "serve"` keeps it out of every build. The route is in src/dev/intent-picture.ts.
+ */
+function intentPictureDev(): Plugin {
+  const page = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", ".intent", "picture", "index.html");
+  return {
+    name: "hifth-intent-picture-dev",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url ?? "";
+        const route = intentPictureRoute(url);
+        if (!route) return next();
+        res.setHeader("Cache-Control", "no-store");
+        if (route === "add-slash") {
+          res.statusCode = 302;
+          res.setHeader("Location", `/intent/${url.slice("/intent".length)}`);
+          res.end();
+          return;
+        }
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        try {
+          res.end(readFileSync(page, "utf8"));
+        } catch {
+          res.statusCode = 404;
+          res.end("<p>No picture yet. Run <code>make intent</code> in the repo, then reload.</p>");
+        }
+      });
+    },
+  };
+}
 
 /**
  * Serve the features page (`make feature-links`) at /dev-hub/ on the dev server, so it
@@ -171,6 +206,26 @@ function dropPrivateUnlessPitch(): Plugin {
 }
 
 /**
+ * In a build with no commentary to show (neither the pitch nor a live service:
+ * the public site), App.tsx's import of the commentary sheet gets an empty
+ * stand-in instead (src/components/CommentarySheet.off.tsx). The switch below
+ * is App.tsx's own `COMMENTARY`, read from the same two settings as `__PITCH__`
+ * and `__LIVE_TAFSIR__`. Builds only: tests and the dev server keep the real one.
+ */
+function commentaryOnlyWhenShown(): Plugin {
+  const shown = Boolean(process.env.VITE_PITCH) || Boolean(process.env.VITE_TAFSIR_QF_BASE && process.env.VITE_TAFSIR_QF_ID);
+  return {
+    name: "hifth-commentary-only-when-shown",
+    apply: "build",
+    enforce: "pre",
+    resolveId(source, importer) {
+      if (shown || source !== "./components/CommentarySheet" || !importer?.endsWith("/src/App.tsx")) return null;
+      return resolve(import.meta.dirname, "src/components/CommentarySheet.off.tsx");
+    },
+  };
+}
+
+/**
  * Start the reader's interface language downloading as soon as index.html is
  * read, in parallel with the app's main script. Each language is its own file
  * (see `messages/catalogs.gen.ts`), and without this the app would only ask for
@@ -230,8 +285,10 @@ export default defineConfig({
   },
   plugins: [pageComments(), 
     dropPrivateUnlessPitch(),
+    commentaryOnlyWhenShown(),
     preloadReaderLanguage(),
     qulFixturesDev(),
+    intentPictureDev(),
     devHubDev(),
     preact(),
     VitePWA({
@@ -378,6 +435,13 @@ export default defineConfig({
   build: {
     target: "es2022",
     sourcemap: true,
+    // Terser, two passes, rather than Vite's default (esbuild). Measured
+    // 2026-11-13: the shipped scripts went from 209.5 to 195.9 KB gz and the
+    // start-up download from 172.7 to 163.0, for about the same build time.
+    // Nothing in the app reads a function's or class's own name, which is the
+    // one thing terser's renaming could change. See trims.md, "Trimmed 2026-11-13 (2)".
+    minify: "terser",
+    terserOptions: { compress: { passes: 2 }, ecma: 2020 },
     rollupOptions: {
       output: {
         // Fold a tiny shared file (the plural helper every language file

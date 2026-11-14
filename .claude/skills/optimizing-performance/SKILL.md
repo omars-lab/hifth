@@ -73,6 +73,16 @@ it does not; never raise just to make a red check go green without looking at th
   over the cap.
 - **Build core before the web app.** The web app uses `packages/core/dist`, so `make build` (not
   `pnpm build` in `apps/web`) is what a size measurement must follow.
+- **A part dropped as unused still ships its style sheet.** If a part's code is never called,
+  the build drops the code but keeps the part's CSS. To drop both, point the import at an empty
+  stand-in at build time (`commentaryOnlyWhenShown` in `apps/web/vite.config.ts`, 2026-11-14).
+- **A part that loads later goes inside `<Later>`** (`apps/web/src/components/later.tsx`), not
+  a bare `Suspense`. If its file fails to arrive, `Later` shows nothing in that part's place,
+  where a bare `Suspense` would blank the whole app.
+- **Find the step before trimming.** Swap candidate parts for empty stand-ins, measure with
+  `make perf-compare`, and the readings show how many KB the next step needs. That is cheaper
+  than trimming one part at a time and measuring after each (2026-11-14: 157.1 KB crossed,
+  162.6 KB did not).
 - **Nothing here is limited by processor speed yet.** Start-up is dominated by downloads, so kilobytes
   are the right thing to count. One exception: expanding the page index on load costs about 85 ms
   of blocking time. If blocking time grows, measure processor work too, not only size.
@@ -138,6 +148,7 @@ each finding. It only reads files and the command's own output; it never builds 
 | `make perf-report` | draws the charts into `docs/performance/bundle-report.html` | `.claude/skills/optimizing-performance/scripts/perf-report.mjs` |
 | `make perf-sweep` | measures start-up at +0/+25/+50/+100 KB (`ADD=0,50` to choose) and writes `docs/performance/sweep.json` | `.claude/skills/optimizing-performance/scripts/perf-sweep.mjs` |
 | `make perf-compare COPIES=old=<folder>,new=<folder> OUT=<file>` | measures built copies of the app in turns (`ROUNDS=5`), keeps every run and, with `KEEP=<folder>`, every full report. Use it to tell whether a change made start-up slower: build each side, copy `apps/web/dist` to a folder outside the repo, and compare the lower group of readings, not the middle, since one build can read two values 400 ms apart | `.claude/skills/optimizing-performance/scripts/perf-sweep.mjs` |
+| `node .claude/skills/optimizing-performance/scripts/size-by-source.mjs [--top 40] [--chunk index] [--no-build --out <dir>]` | which source files the shipped scripts are made of, each with its gzipped share. Builds with source maps into a scratch folder (never `apps/web/dist`). **The first look before any trim**: it found the words table, the info panel's copied setting blocks and the worker's helper library, none of which guessing had | `.claude/skills/optimizing-performance/scripts/size-by-source.mjs` |
 | `make lighthouse` | the start-up check itself | `.lighthouserc.json` |
 | `pnpm gate:budget` / `make budget-update` | the size cap / accept a new size | `scripts/gate-budget.mjs`, `scripts/budget-baseline.json` |
 

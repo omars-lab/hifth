@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 
 // A link can open a panel on arrival (`?open=`), so a test, a checks-guide
@@ -168,6 +169,25 @@ test.describe("Hifth · a link that opens a panel", () => {
     await page.goto("/#/hafs-kfqc/2:48?open=about");
     await expect(PANELS.about!(page)).toBeVisible({ timeout: 20_000 });
     await expect(page).toHaveURL(/#\/hafs-kfqc\/2:48$/);
+  });
+
+  // The features-page check (walk-app's feature-check) asks the iPad app what
+  // is open and can only read the app's own markers, never a label: so each
+  // panel a link opens says its name, the name in the link. Before this, six
+  // panels read alike as a bare dialog and the check could not tell them apart.
+  test.describe("each panel says which it is", () => {
+    const contract = JSON.parse(readFileSync(new URL("../../../docs/design/app-url-scheme.openapi.json", import.meta.url), "utf8"));
+    const names: string[] = contract.paths["/x-callback-url/open"].get.parameters.find((p: { name: string }) => p.name === "open").schema.enum;
+    // Commentary and context are drawn only in the private pitch build.
+    const PITCH_ONLY = new Set(["commentary", "context"]);
+    const VERSE_PANELS = new Set(["lookalikes", "roots"]);
+    for (const name of names.filter((n) => !PITCH_ONLY.has(n))) {
+      test(`?open=${name} is marked ${name}, and nothing else is`, async ({ page }) => {
+        await page.goto(`/#/hafs-kfqc/${VERSE_PANELS.has(name) ? "2:48" : "p19"}?open=${name}`);
+        await expect(page.locator(`[data-panel="${name}"]`)).toBeVisible({ timeout: 20_000 });
+        await expect(page.locator("[data-panel]")).toHaveCount(1);
+      });
+    }
   });
 
   test.describe("?tool=", () => {

@@ -197,6 +197,8 @@ export function TajweedLegend({
         role="dialog"
         aria-modal="true"
         aria-label={t.legendAria}
+        // The panel's name in a link (`?open=`), for the features-page check.
+        data-panel="key"
         dir={dir}
         tabIndex={-1}
         onKeyDown={onKeyDown}

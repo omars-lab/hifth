@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { ayahTarget } from "./ayah";
 import { JUMP_ARROWS_KEY } from "../src/jump-arrows";
+import { BEATEN_OFFER_KEY } from "../src/beaten-offer";
 
 /*
  * Confusion jumps, step 3 (docs/design/confusion-jumps.md): a verse you have
@@ -60,6 +61,27 @@ async function seed(page: Page, confusions: readonly unknown[], notes: readonly 
         };
       }),
     [confusions, notes] as const,
+  );
+}
+
+/** A saved jump's state as it stands on disk, or null while it is not there. */
+function savedState(page: Page, id: string): Promise<string | null> {
+  return page.evaluate(
+    (id) =>
+      new Promise<string | null>((resolve, reject) => {
+        const open = indexedDB.open("hifth.bookmarks.v1");
+        open.onerror = () => reject(open.error);
+        open.onsuccess = () => {
+          const get = open.result.transaction("sets", "readonly").objectStore("sets").get("confusions");
+          get.onsuccess = () => {
+            open.result.close();
+            const all = (get.result?.confusions ?? []) as { id: string; state: string }[];
+            resolve(all.find((c) => c.id === id)?.state ?? null);
+          };
+          get.onerror = () => reject(get.error);
+        };
+      }),
+    id,
   );
 }
 
@@ -548,8 +570,8 @@ test.describe("Hifth · the list behind a jump mark", () => {
     await expect(r).toContainText("2 times · last today");
     await expect(undoBar(page)).toContainText("2 times now");
 
-    await r.getByRole("button", { name: "Beaten" }).click();
-    await expect(r.getByRole("button", { name: "Beaten" })).toHaveAttribute("aria-pressed", "true");
+    await r.getByRole("button", { name: "Beaten", exact: true }).click();
+    await expect(r.getByRole("button", { name: "Beaten", exact: true })).toHaveAttribute("aria-pressed", "true");
     await expect(mark(page, "2:58")).toHaveAttribute("data-beaten", "");
 
     await r.getByRole("button", { name: "Delete" }).click();
@@ -559,6 +581,84 @@ test.describe("Hifth · the list behind a jump mark", () => {
     await expect(undoBar(page)).toContainText("Jump from 2:58 to 7:161 deleted");
     await undoBar(page).getByRole("button", { name: "Undo" }).click();
     await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+  });
+
+  /*
+   * A quiet offer to mark a jump beaten (docs/design/confusion-points.md ⑤;
+   * owner, 2026-11-08): a jump not made in a long while carries one line in
+   * its row offering Beaten. Never a pop-up, and nothing changes until the
+   * reader presses it. Written before the build and watched failing.
+   */
+  test.describe("a jump not made in a long while", () => {
+    const DAYS = 24 * 60 * 60 * 1000;
+    const ago = (days: number) => Date.now() - days * DAYS;
+    const offer = (r: Locator) => r.getByRole("button", { name: "It has not happened in a long while. Mark it beaten?" });
+    const beaten = (r: Locator) => r.getByRole("button", { name: "Beaten", exact: true });
+    const SEEDS = [
+      jump("old", "2:58", "7:161", [ago(70), ago(60)]),
+      jump("new", "2:58", "2:35", [ago(3)]),
+      jump("done", "2:58", "3:112", [ago(200)], "beaten"),
+    ];
+
+    async function openList(page: Page, choice?: string): Promise<Locator> {
+      if (choice) await page.evaluate(([key, v]) => localStorage.setItem(key, v), [BEATEN_OFFER_KEY, choice] as const);
+      await seed(page, SEEDS);
+      await page.reload();
+      await mark(page, "2:58").click();
+      const list = jumps(page, "2:58");
+      await expect(row(list, "7:161")).toBeVisible();
+      return list;
+    }
+
+    test("offers, in one line, to mark it beaten; a recent one and a beaten one do not", async ({ page }) => {
+      const list = await openList(page);
+      await expect(offer(row(list, "7:161"))).toBeVisible();
+      await expect(offer(row(list, "2:35"))).toHaveCount(0);
+      await expect(offer(row(list, "3:112"))).toHaveCount(0);
+      // Only an offer: the row is not beaten until the reader says so.
+      await expect(beaten(row(list, "7:161"))).toHaveAttribute("aria-pressed", "false");
+      if (SHOTS) await page.screenshot({ path: `${SHOTS}/jump-offer-${test.info().project.name}.png` });
+
+      await offer(row(list, "7:161")).click();
+      await expect(beaten(row(list, "7:161"))).toHaveAttribute("aria-pressed", "true");
+      await expect(offer(row(list, "7:161"))).toHaveCount(0);
+      // Pressing Beaten again takes it back, as it always has; the choice is kept.
+      // The save lands a moment after the press, so wait for it before the
+      // reload: on the Android phone a reload straight away came first.
+      await expect.poll(() => savedState(page, "old")).toBe("beaten");
+      await page.keyboard.press("Escape");
+      await page.reload();
+      await mark(page, "2:58").click();
+      await expect(beaten(row(jumps(page, "2:58"), "7:161"))).toHaveAttribute("aria-pressed", "true");
+      await expect(offer(row(jumps(page, "2:58"), "7:161"))).toHaveCount(0);
+    });
+
+    test("the info panel can make it wait three months, or never offer", async ({ page }) => {
+      let list = await openList(page, "three-months");
+      await expect(row(list, "2:35")).toBeVisible();
+      await expect(list.getByRole("button", { name: /Mark it beaten\?/ })).toHaveCount(0);
+      await page.keyboard.press("Escape");
+
+      await seed(page, [jump("older", "2:58", "7:161", [ago(100)])]);
+      await page.reload();
+      await mark(page, "2:58").click();
+      list = jumps(page, "2:58");
+      await expect(offer(row(list, "7:161"))).toBeVisible();
+      await page.keyboard.press("Escape");
+
+      list = await openList(page, "never");
+      await expect(list.getByRole("button", { name: /Mark it beaten\?/ })).toHaveCount(0);
+    });
+
+    test("the setting is in the info panel, six weeks chosen until the reader picks", async ({ page }) => {
+      await page.getByRole("button", { name: /About Hifth/ }).click();
+      const group = page
+        .getByRole("dialog", { name: /About Hifth/ })
+        .getByRole("radiogroup", { name: "Offer to mark a jump beaten" });
+      await expect(group.getByRole("radio", { name: "After six weeks without it" })).toHaveAttribute("aria-checked", "true");
+      await group.getByRole("radio", { name: "Never" }).click();
+      expect(await page.evaluate((key) => localStorage.getItem(key), BEATEN_OFFER_KEY)).toBe("never");
+    });
   });
 
   test("Go turns to the verse you went to, and Compare shows the two side by side", async ({ page }) => {
@@ -586,6 +686,54 @@ test.describe("Hifth · the list behind a jump mark", () => {
     await r.getByRole("button", { name: "Go" }).click();
     await expect(jumps(page, "2:60")).toHaveCount(0);
     await expect(page).toHaveURL(/7:160/);
+  });
+
+  // A slow device reads its saved jumps in a moment after the page shows. A jump
+  // marked in that moment was counted against nothing: the message said a new
+  // jump, a mistake already marked turned back into a plain jump when the saved
+  // one came in, and Undo pointed at a record that no longer stood. Found by the
+  // full run before a push on 2026-11-13, when one run's read came in late.
+  test("a jump marked before the saved jumps are read in counts with them, and a mistake stays one", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p9?tool=mistake");
+    await expect(pageSvg(page, 9)).toBeVisible();
+    const at = await ayahTarget(page, verse(65)); // 2:58
+    await page.mouse.click(at.x, at.y);
+    await page.getByRole("dialog", { name: /^What went wrong in / }).getByRole("button", { name: "Went into another verse…" }).click();
+    await page.getByRole("dialog", { name: "Where did 2:58 pull you?" }).getByRole("button", { name: /7:161/ }).click();
+    await expect(undoBar(page)).toContainText("Mistake marked: 2:58 went into 7:161");
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+
+    // From the next page load on, the saved marks are kept busy for 3 s, so the
+    // app's read of them waits: made-up work on a store the test opens itself.
+    await page.addInitScript(() => {
+      const open = indexedDB.open("hifth.bookmarks.v1", 1);
+      open.onupgradeneeded = () => open.result.createObjectStore("sets", { keyPath: "id" });
+      open.onsuccess = () => {
+        const sets = open.result.transaction("sets", "readwrite").objectStore("sets");
+        const until = Date.now() + 3_000;
+        const spin = () => {
+          if (Date.now() < until) sets.get("nothing").onsuccess = spin;
+          else open.result.close();
+        };
+        spin();
+      };
+    });
+    await page.goto("/#/hafs-kfqc/p9");
+    await page.reload();
+    await expect(pageSvg(page, 9)).toBeVisible();
+    await jumpFrom(page, 65, "2:58", (l) => l.getByRole("button", { name: /7:161/ }).click());
+    await expect(undoBar(page)).toContainText("Mistake marked: 2:58 went into 7:161, 2 times now", { timeout: 10_000 });
+    await expect(mark(page, "2:58")).toHaveAttribute("aria-label", "From 2:58 you have jumped to 1 other verse");
+    await mark(page, "2:58").click();
+    const r = row(jumps(page, "2:58"), "7:161");
+    await expect(r).toContainText("2 times");
+    await expect(r.getByRole("button", { name: "A mistake" })).toHaveAttribute("aria-pressed", "true");
+
+    // Undo takes back this time only, from the one record.
+    await page.keyboard.press("Escape");
+    await undoBar(page).getByRole("button", { name: "Undo" }).click();
+    await mark(page, "2:58").click();
+    await expect(row(jumps(page, "2:58"), "7:161")).toContainText("1 time");
   });
 
   test("the Mistake pen's \"went into another verse\" marks a mistake, and the list and the page map say so", async ({ page }) => {

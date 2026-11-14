@@ -745,6 +745,41 @@
       "gap": "Proven on made-up notes only. Whether a real book's notes match its print, passage by passage, is checked by hand in the private build, and no test here can hold that book's words."
     },
     {
+      "id": "mark-a-mistake-in-full-screen",
+      "actor": "hafiz",
+      "goal": "When I read in full screen, keep my tools where I can reach them, so I can mark a mistake without leaving it.",
+      "feature": "pens-and-pencil",
+      "code": [
+        {
+          "file": "apps/web/src/components/PenHomes.tsx",
+          "symbol": "PenHomeSide"
+        },
+        {
+          "file": "apps/web/src/full-screen-tools.ts",
+          "symbol": "savedFullScreenTools"
+        },
+        {
+          "file": "apps/web/src/touch-full-tools.ts",
+          "symbol": "savedTouchFullTools"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/full-screen-tools.spec.ts",
+          "test": "by default the tools stay down the side in full screen, and a mistake can be marked without leaving it"
+        },
+        {
+          "file": "apps/web/e2e/full-screen-tools.spec.ts",
+          "test": "the tools cover no page, in full screen, on a laptop, a wide screen and a narrow one, with the pens out too"
+        },
+        {
+          "file": "apps/web/e2e/touch-full-screen.spec.ts",
+          "test": "by default a Tools button stays, and a mistake on the last line is marked without leaving full screen"
+        }
+      ],
+      "gap": "The owner has not yet picked which way is the default, on a computer or on a phone."
+    },
+    {
       "id": "pick-a-pen-without-leaving-the-verse",
       "actor": "hafiz",
       "goal": "When I squeeze my pencil, give me the pens right where I am writing, so I can mark a mistake without looking away from the verse.",
@@ -1273,6 +1308,116 @@
       "gap": "The gate proves every outstanding check has a followable runbook and that the phone guide was regenerated. It cannot prove the runbook's Expect lines match what the phone shows — only walking it does, which is the point of walking it."
     },
     {
+      "id": "keep-what-i-saw-on-the-ipad-walk",
+      "actor": "validator",
+      "goal": "When something is off while I walk the app on my iPad, take a screenshot and have the app keep its own picture, where I was, what I did in the last ten seconds and a note if I add one, so the fault can be found again without me typing it up.",
+      "feature": "native-shell",
+      "code": [
+        {
+          "file": "native/Hifth/Capture/WalkCapture.swift",
+          "symbol": "captureWalk"
+        },
+        {
+          "file": "native/Hifth/Capture/CapturePage.swift",
+          "symbol": "CapturePage"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.mjs",
+          "symbol": "pull"
+        }
+      ],
+      "proof": [
+        {
+          "file": "native/HifthUITests/SmokeTests.swift",
+          "test": "testWalkCaptureKeepsPictureTrailPlaceAndNote"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "pull copies each capture's own files, and nothing else on the iPad"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "the page and the list show the captures in the order they were taken"
+        },
+        {
+          "file": "native/HifthTests/CaptureStoreTests.swift",
+          "test": "a capture is kept straight away with its trail, even before the page answers"
+        },
+        {
+          "file": "native/HifthTests/CapturePageTests.swift",
+          "test": "it names the page on screen and the verse in the address, and nothing the page says"
+        },
+        {
+          "file": "native/HifthTests/ClipVideoTests.swift",
+          "test": "Apple's errors are sorted into refused, blocked, interrupted and other"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "each reason the app gives for no video is said in words"
+        },
+        {
+          "file": "native/HifthTests/CaptureStoreTests.swift",
+          "test": "the page is written as soon as it answers; a video slow to save does not hold it back"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "a video the app never finished saving is said, apart from a capture made before the video existed"
+        }
+      ],
+      "gap": "The simulator has no screenshot buttons, so the test starts the capture at launch instead; that the real screenshot (the two buttons and the Pencil corner swipe) reaches the app is checked by hand on the iPad. Copying captures to the laptop is tested against a stand-in for Apple's device tool; the first copy off the real iPad, and whether emptying it there works, are still to be seen. Apple's screen recorder only runs on a real iPad, so the five seconds of video before are tested only as far as what the app writes about them; how often iOS asks to record, and whether the video is saved right after a system screenshot, are still to be seen on the iPad."
+    },
+    {
+      "id": "see-what-a-link-did-on-the-ipad",
+      "actor": "maintainer",
+      "goal": "After sending the app on my iPad a link from the laptop, find out from the laptop what the app then showed, as a capture named by the link and a file saying where it is, without anyone holding the iPad.",
+      "feature": "native-shell",
+      "code": [
+        {
+          "file": "native/Hifth/Web/ShellModel.swift",
+          "symbol": "keepCaptureForLink"
+        },
+        {
+          "file": "native/Hifth/Web/ShellModel.swift",
+          "symbol": "writeCurrentToFile"
+        },
+        {
+          "file": "native/Hifth/Capture/CaptureStore.swift",
+          "symbol": "keepCurrent"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.mjs",
+          "symbol": "current"
+        }
+      ],
+      "proof": [
+        {
+          "file": "native/HifthUITests/SmokeTests.swift",
+          "test": "testCaptureLinkKeepsANamedCaptureAndCurrentToFileWritesThePlace"
+        },
+        {
+          "file": "native/HifthTests/CaptureLinkTests.swift",
+          "test": "a capture sent just after an open waits for that page, not the one before"
+        },
+        {
+          "file": "native/HifthTests/CaptureLinkTests.swift",
+          "test": "a release build refuses the laptop's links by name, and does the reader's"
+        },
+        {
+          "file": "native/HifthTests/CaptureLinkTests.swift",
+          "test": "current-to-file writes where the app is beside the captures, and answers like current"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "current copies only where the app is, and prints it"
+        },
+        {
+          "file": ".claude/skills/walk-app/scripts/walk-captures.test.mjs",
+          "test": "a capture taken by a link says so, and shows the name the link gave it"
+        }
+      ],
+      "gap": "Proven in the iPad simulator with links sent the way iOS hands them over; not yet sent to the real iPad over the cable, so whether the capture lands before the page has settled there is still to be seen. Nothing yet sends a link, captures and compares for every feature in one go (step 4 of the feature-links plan)."
+    },
+    {
       "id": "bank-a-verdict-so-it-cannot-be-lost",
       "actor": "validator",
       "goal": "Record what I found in one line, and be told immediately what that verdict now obliges us to build.",
@@ -1555,6 +1700,157 @@
           "gate": "gate:budget"
         }
       ]
+    },
+    {
+      "id": "find-hifth-and-open-it",
+      "actor": "hafiz",
+      "goal": "Type one short address, see what Hifth is for, and open it in my browser.",
+      "feature": "hifth-app-site",
+      "code": [
+        {
+          "file": "apps/landing/index.html",
+          "symbol": "Open Hifth in your browser"
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/release-hifth-app.mjs",
+          "symbol": "export function assemble"
+        }
+      ],
+      "proof": [
+        {
+          "file": ".claude/skills/deploy-site/scripts/release-hifth-app.test.mjs",
+          "test": "the front page goes at the root and the app under read/, and nothing the site never needs"
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/shipped.test.mjs",
+          "test": "a release missing a page the site needs is refused"
+        }
+      ],
+      "gap": "Proven on this laptop only: hifth.app is not published yet (docs/issues.json, hifth-app-first-release)."
+    },
+    {
+      "id": "hear-when-the-mac-app-is-out",
+      "actor": "hafiz",
+      "goal": "Leave my email once, hear when the Mac app is out, and be able to take it off the list.",
+      "feature": "hifth-app-site",
+      "code": [
+        {
+          "file": "apps/landing/lib/notify.mjs",
+          "symbol": "export async function handleNotify"
+        },
+        {
+          "file": "apps/landing/lib/notify.mjs",
+          "symbol": "export function handleConfirm"
+        },
+        {
+          "file": "apps/landing/lib/notify.mjs",
+          "symbol": "export function handleUnsubscribe"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/landing/lib/notify.test.mjs",
+          "test": "a new sign-up is kept waiting for its confirmation, and one email is sent to confirm it"
+        },
+        {
+          "file": "apps/landing/lib/notify.test.mjs",
+          "test": "pressing the button confirms, with the list key and the code"
+        },
+        {
+          "file": "apps/landing/lib/notify.test.mjs",
+          "test": "pressing it, or the mail program's one-click leave, takes the address off the list"
+        }
+      ],
+      "gap": "The list keeps nothing live yet: its database part is not pushed to the real Supabase project, the Pages secrets are not set, and no service sends the confirm email (docs/issues.json, notify-list-not-live; decision notify-list-sender)."
+    },
+    {
+      "id": "bring-my-marks-to-the-new-address",
+      "actor": "hafiz",
+      "goal": "My bookmarks, notes and jumps are at the old address. Carry them to hifth.app without losing the ones already there.",
+      "feature": "hifth-app-site",
+      "code": [
+        {
+          "file": "apps/web/src/moved.ts",
+          "symbol": "MOVED_SHEET_ON"
+        },
+        {
+          "file": "apps/web/src/useCarryIn.ts",
+          "symbol": "export function useCarryIn"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/carry-marks.spec.ts",
+          "test": "the old address carries bookmarks, notes and jumps to the new one, keeping what the new one had"
+        },
+        {
+          "file": "apps/web/e2e/carry-marks.spec.ts",
+          "test": "a page at any other address that opens the new one cannot hand it marks"
+        }
+      ],
+      "gap": "Switched off until hifth.app/read is live (docs/issues.json, carry-marks-switched-off); reader settings are not carried (carry-leaves-settings-behind)."
+    },
+    {
+      "id": "mark-a-page-to-come-back-to",
+      "actor": "hafiz",
+      "goal": "Let me mark this page the way I would mark a mus'haf, with a ribbon I can pull out and push back, and find it there tomorrow.",
+      "feature": "bookmarks",
+      "code": [
+        {
+          "file": "apps/web/src/components/BookmarkRibbons.tsx",
+          "symbol": "BookmarkRibbons"
+        },
+        {
+          "file": "packages/core/src/bookmarks.ts",
+          "symbol": "dropBookmark"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/bookmarks.spec.ts",
+          "test": "a folded corner drops a named ribbon that is still there after a reload"
+        },
+        {
+          "file": "apps/web/e2e/bookmark-pull.spec.ts",
+          "test": "pulling the top corner down drops a bookmark, with a ribbon following the hand"
+        },
+        {
+          "file": "apps/web/e2e/bookmark-pull.spec.ts",
+          "test": "pushing a bookmark up lifts it, and Undo puts it back"
+        }
+      ],
+      "gap": "A pull by a finger is tested on a phone in Chromium only; on the iPad it waits for the owner's walk."
+    },
+    {
+      "id": "know-which-look-alikes-still-pull-me",
+      "actor": "hafiz",
+      "goal": "When my memory runs from one verse into its look-alike, let me mark it where it happened, see later which ones still pull me, and say myself when I have beaten one; a quiet nudge is fine, a score is not.",
+      "feature": "confusion-jumps",
+      "code": [
+        {
+          "file": "apps/web/src/components/JumpList.tsx",
+          "symbol": "JumpList"
+        },
+        {
+          "file": "apps/web/src/beaten-offer.ts",
+          "symbol": "offersBeaten"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/confusions.spec.ts",
+          "test": "a tap on the mark lists where you went; Again, Beaten, Delete and Undo work from it"
+        },
+        {
+          "file": "apps/web/e2e/confusions.spec.ts",
+          "test": "offers, in one line, to mark it beaten; a recent one and a beaten one do not"
+        },
+        {
+          "file": "apps/web/e2e/confusions.spec.ts",
+          "test": "the info panel can make it wait three months, or never offer"
+        }
+      ],
+      "gap": "The jump tests run on a laptop in Chrome and on the phones, not in Firefox; the iPad waits for the owner's walk."
     }
   ]
 }
