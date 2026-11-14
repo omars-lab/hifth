@@ -110,6 +110,12 @@ fixed: on a 664-tall iPhone in Safari the button lay on the page's bottom corner
 ends in Arabic, so upright the page now keeps a strip the button's height at its foot and is
 held to the height left, with Safari's install notice up too (on its side the page stands clear
 of the corner and keeps its size); and picking the highlighter folded the tray before its colours could be picked, so
-a tool with a second row now keeps the tray up until that choice is made. Not yet looked at in
-the iPhone or iPad simulator. Left: the owner tries the three on the phone and the iPad and says
+a tool with a second row now keeps the tray up until that choice is made. A third, found by eye
+the next morning: the strip kept for the button showed the app's paler colour and read as a bar,
+so the surface the page lies on now runs to the foot of the screen under the button. A sheet
+opened in full screen (the look-alikes list) still covers the whole foot of the screen and the
+button; both are tested. Looked at in the iPad app on an iPad mini simulator, upright: the button
+sits clear of the home bar (a 25-point gap there), off the page and apart from "Show the bars",
+and the page is the same size as before. Not yet looked at in Safari on an iPhone simulator,
+because full screen cannot be opened there by link. Left: the owner tries the three on the phone and the iPad and says
 which becomes the default.

@@ -21,6 +21,11 @@ folded: no
   not after it fails.
 - A height limit meant for an upright phone shrank the page by a third on its side; check a
   layout change with the phone on its side before calling it done.
+- The page's offline cache kept serving the old style sheet after a rebuild, so a fixed band
+  still showed in the browser. Unregister the offline worker and clear its caches before judging
+  a picture of a style change.
+- `make app-probe ... PROBE_SHOT=x.png` writes the picture into the worktree root, where it could
+  be staged; move it to the scratchpad straight away (it shows the page).
 
 ## Worth copying
 - Writing the "off the page" and "highlighter keeps the tray" tests before the fix found two

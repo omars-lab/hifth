@@ -680,6 +680,11 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   Mark a mistake on the last line without leaving full screen. In the info panel, "The bottom
   line stays" keeps the bottom line in full screen instead, with one "Show the bars" in it. ·
   phone, ipad-tall · issue: `full-screen-keeps-tools` · test: touch-full-screen spec
+- [ ] In full screen on a phone and an upright iPad, the surface the page lies on runs to the foot
+  of the screen, under the Tools button, with no paler band there that reads as a bar. Open the
+  look-alikes list in full screen: it covers the whole foot of the screen and the button. ·
+  phone, ipad-tall · issue: `full-screen-keeps-tools` · test: touch-full-screen spec, "runs to the
+  foot of the screen" and "a sheet opened in full screen"
 - [ ] Pick the highlighter: both colour rows show, the passage circles and the held-words bands,
   with nothing cut off or off the screen; on a phone they get their own line in the tray, down
   an iPad's side two columns. At a 1024-wide window the tools do not slide when the highlighter

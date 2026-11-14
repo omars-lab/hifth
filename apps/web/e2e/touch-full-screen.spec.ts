@@ -102,6 +102,25 @@ for (const where of [
       expect(apart(a, written), "the button is off the page").toBe(true);
     });
 
+    test("the surface the page lies on runs to the foot of the screen, under the button", async ({ page }) => {
+      // The strip kept for the button showed the app's paler colour, which
+      // read as a bar in full screen. One surface paints beside the page and
+      // under the button.
+      await openInFullScreen(page);
+      const b = (await button(page).boundingBox())!;
+      const painter = (x: number, y: number) => page.evaluate(({ x, y }) => {
+        const e = document.elementsFromPoint(x, y).find((el) => { const s = getComputedStyle(el); return s.backgroundImage !== "none" || s.backgroundColor !== "rgba(0, 0, 0, 0)"; });
+        return e ? `${e.tagName}.${e.className}` : null;
+      }, { x, y });
+      const written = (await page.locator('svg[aria-labelledby="page-label-7"]').boundingBox())!;
+      // Beside the page on whichever side has room: the bound side runs to the edge.
+      const right = written.x + written.width;
+      const besideX = written.x > 4 ? written.x / 2 : (right + page.viewportSize()!.width) / 2;
+      const beside = await painter(besideX, written.y + written.height / 2);
+      const foot = await painter(page.viewportSize()!.width / 2, b.y + b.height / 2);
+      expect(foot, "the foot of the screen").toBe(beside);
+    });
+
     test("picking the highlighter keeps the tray up for its colours, and a colour folds it", async ({ page }) => {
       await openInFullScreen(page);
       await button(page).click();
@@ -167,6 +186,26 @@ test.describe("in full screen on a phone on its side", () => {
     expect(after.width, "the page in full screen").toBeGreaterThanOrEqual(before.width - 1);
     expect(apart((await button(page).boundingBox())!, after), "the button is off the page").toBe(true);
   });
+});
+
+test("a sheet opened in full screen still covers the foot of the screen and the Tools button", async ({ page }) => {
+  // The page area is sized as its own box in full screen. A sheet drawn
+  // inside it (the look-alikes list here) must still be placed against the
+  // screen, not that box, and stand over the corner button; on the iPhone
+  // run Safari's install notice pushes the page area down, which is where a
+  // sheet placed against it would show.
+  await openInFullScreen(page);
+  await page.evaluate(() => { location.hash = "#/hafs-kfqc/2:48?open=lookalikes"; });
+  const sheet = page.locator("main [role=dialog]").first();
+  await expect(sheet).toBeVisible();
+  await settled(sheet);
+  const box = (await sheet.boundingBox())!;
+  const size = page.viewportSize()!;
+  expect(Math.abs(box.y + box.height - size.height), "the sheet ends at the foot of the screen").toBeLessThanOrEqual(1);
+  expect(box.width, "the sheet is the screen's width").toBeGreaterThanOrEqual(size.width - 1);
+  const b = (await button(page).boundingBox())!;
+  const over = await page.evaluate(({ x, y }) => !!document.elementFromPoint(x, y)?.closest("[role=dialog]"), { x: b.x + b.width / 2, y: b.y + b.height / 2 });
+  expect(over, "the sheet stands over the Tools button").toBe(true);
 });
 
 test("the setting is in the info panel, the button chosen until the reader picks", async ({ page }) => {

@@ -342,11 +342,17 @@
 
    Upright only. On its side a phone's page stands in the middle, well clear
    of the corner, and there the cap made full screen shrink the page to two
-   thirds of its size with the bars up. */
+   thirds of its size with the bars up.
+
+   The field the page lies on is drawn here, over the strip too, and the
+   stage's own is taken away (as a spread does): the strip showed the app's
+   paler colour and read as a bar, in a mode meant to have none. */
 @media (orientation: portrait) {
   .app[data-full-touch="button"] > main {
     --full-touch-strip: calc(var(--touch-min) + 2 * var(--space-2) + env(safe-area-inset-bottom));
     padding-block-end: var(--full-touch-strip);
+    background: var(--field-wash);
+    --stage-field: transparent;
     container-type: size;
     --stage-page-cap: min(62vh, calc((100cqh - 2 * var(--space-4)) * 0.57998));
   }
