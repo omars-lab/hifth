@@ -119,3 +119,17 @@ sits clear of the home bar (a 25-point gap there), off the page and apart from "
 and the page is the same size as before. Not yet looked at in Safari on an iPhone simulator,
 because full screen cannot be opened there by link. Left: the owner tries the three on the phone and the iPad and says
 which becomes the default.
+
+### ② Should full screen fold away the "Install Hifth" notice too? · **fixed**
+
+**Found 2026-11-14** while testing the Tools button in full screen. On an iPhone in Safari, before
+the app is installed, the notice "Install Hifth so it stays with you offline" stayed at the top
+in full screen. It took about 160 points above the page, so the page the reader had asked to see
+whole was pushed down or made smaller until they hid the notice.
+
+**What was done (2026-11-14).** Full screen now folds the notice away, the same way the
+first-visit tips already held it, and it comes back when the bars do. It is a notice the reader
+can act on, so it is moved out of the way while reading, not dismissed. Looked at in a
+phone-sized window: the page now starts near the top of the screen instead of under the notice.
+Tested on the iPhone run in `apps/web/e2e/touch-full-screen.spec.ts` ("full screen folds the
+install notice away"), watched failing first.

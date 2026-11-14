@@ -690,6 +690,10 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   look-alikes list in full screen: it covers the whole foot of the screen and the button. ·
   phone, ipad-tall · issue: `full-screen-keeps-tools` · test: touch-full-screen spec, "runs to the
   foot of the screen" and "a sheet opened in full screen"
+- [ ] In iPhone Safari before installing, with the "Install Hifth" notice up, go full screen: the
+  notice folds away and the page moves up into its room; "Show the bars" brings the notice back. ·
+  phone · issue: `full-screen-install-notice` · test: touch-full-screen spec, "folds the install
+  notice away"
 - [ ] Pick the highlighter: both colour rows show, the passage circles and the held-words bands,
   with nothing cut off or off the screen; on a phone they get their own line in the tray, down
   an iPad's side two columns. At a 1024-wide window the tools do not slide when the highlighter

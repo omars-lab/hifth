@@ -4507,9 +4507,14 @@ export function App(): JSX.Element {
 
           Always held in the pitch build: it is shown to visitors in a room,
           who are judging the page, and storage that may be cleared next week is
-          nothing they need to hear about. */}
+          nothing they need to hear about.
+
+          Held in full screen too (2026-11-14, backlog full-screen-install-notice):
+          on an iPhone before install it took about 160 points of the page the
+          reader had asked to see whole. It is a notice they can act on, so it
+          comes back with the bars rather than being dismissed. */}
       <OfflineNotice
-        hold={coachUp || PITCH}
+        hold={coachUp || PITCH || full}
         onShowPacks={() => {
           setRevisionAt("juz");
           setRevisionOpen(true);

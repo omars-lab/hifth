@@ -87,9 +87,9 @@ for (const where of [
     });
 
     test("the Tools button and Show the bars sit apart, and off the page", async ({ page }) => {
-      // On the iPhone run Safari's "Install Hifth" notice is up, as it is for
-      // any reader who has not installed the app: it takes ~160px above the
-      // page, which must still clear the button (backlog full-screen-install-notice).
+      // On the iPhone run Safari's "Install Hifth" notice was up here, taking
+      // ~160px above the page; full screen now folds it away (its own test
+      // below), and the button must clear the page either way.
       await openInFullScreen(page);
       const a = (await button(page).boundingBox())!;
       const b = (await showBars(page).boundingBox())!;
@@ -191,9 +191,9 @@ test.describe("in full screen on a phone on its side", () => {
 test("a sheet opened in full screen still covers the foot of the screen and the Tools button", async ({ page }) => {
   // The page area is sized as its own box in full screen. A sheet drawn
   // inside it (the look-alikes list here) must still be placed against the
-  // screen, not that box, and stand over the corner button; on the iPhone
-  // run Safari's install notice pushes the page area down, which is where a
-  // sheet placed against it would show.
+  // screen, not that box, and stand over the corner button. On the iPhone
+  // run Safari's install notice used to push the page area down, which is
+  // where a sheet placed against it showed; full screen now folds it away.
   await openInFullScreen(page);
   await page.evaluate(() => { location.hash = "#/hafs-kfqc/2:48?open=lookalikes"; });
   const sheet = page.locator("main [role=dialog]").first();
@@ -206,6 +206,25 @@ test("a sheet opened in full screen still covers the foot of the screen and the 
   const b = (await button(page).boundingBox())!;
   const over = await page.evaluate(({ x, y }) => !!document.elementFromPoint(x, y)?.closest("[role=dialog]"), { x: b.x + b.width / 2, y: b.y + b.height / 2 });
   expect(over, "the sheet stands over the Tools button").toBe(true);
+});
+
+test("full screen folds the install notice away, and the bars bring it back", async ({ page, browserName }) => {
+  // Before the app is installed, iPhone Safari shows the "Install Hifth"
+  // notice above the page. It took about 160 points of the page in full
+  // screen (backlog full-screen-install-notice). It is a notice the reader can
+  // act on, so it is moved out of the way while reading, not lost.
+  test.skip(browserName !== "webkit", "the install notice is iPhone Safari's");
+  await page.goto("/#/hafs-kfqc/p7");
+  const written = page.locator('svg[aria-labelledby="page-label-7"]');
+  await expect(written).toBeVisible();
+  const notice = page.locator('[data-notice="install-ios"]');
+  await expect(notice, "up before full screen").toBeVisible();
+  await page.locator("[data-full-enter]").click();
+  await expect(page.locator("[data-full]")).toHaveCount(1);
+  await expect(notice, "folded away in full screen").toHaveCount(0);
+  await showBars(page).click();
+  await expect(page.locator("header")).toBeVisible();
+  await expect(notice, "back with the bars").toBeVisible();
 });
 
 test("the setting is in the info panel, the button chosen until the reader picks", async ({ page }) => {
