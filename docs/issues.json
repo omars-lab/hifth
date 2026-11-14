@@ -5917,7 +5917,8 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner's page comment of 2026-11-07: the navy bookmark tabs and the red 'where you left off' ribbon look alike, so it is not clear which is which. Next step is a rough build of the three options in the bookmark-fold record, to try on the laptop."
+      "useCase": "get-back-to-where-i-was",
+      "note": "Owner's page comment of 2026-11-07: the navy bookmark tabs and the red 'where you left off' ribbon look alike, so it is not clear which is which. Built 2026-11-13 as a setting in the info panel, four ways: the red ribbon carries a small 'Left off' label at its head (the default), the red ribbon shrinks to a small red mark at the head of the fold, the bookmarks become small tabs with their names on them, or both stay ribbons as before. Looked at on the laptop at 1440 on pages 7 and 42: the label, the mark and the tabs all sit clear of the writing. Tested in apps/web/e2e/left-off-look.spec.ts on laptop Chrome and Firefox. Left: the owner tries the four on the laptop and the iPad and says which becomes the default."
     },
     {
       "id": "bookmark-pull-by-hand",

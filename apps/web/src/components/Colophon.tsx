@@ -31,6 +31,7 @@ import { TURN_LANDINGS, rememberTurnLanding, useTurnLanding } from "../turn-land
 import { OPEN_SIZES, rememberOpenSize, useOpenSize } from "../open-size";
 import { UPRIGHT_AGAINS, rememberUprightAgain, useUprightAgain } from "../upright-again";
 import { RIBBON_LENGTHS, rememberRibbonLength, useRibbonLength } from "../ribbon-length";
+import { LEFT_OFF_LOOKS, rememberLeftOffLook, useLeftOffLook } from "../left-off-look";
 import { LOOKALIKE_PREVIEWS, rememberLookalikePreview, useLookalikePreview } from "../lookalike-preview";
 import { RELATED_LISTS, rememberRelatedList, useRelatedList } from "../related-list";
 import { MARK_TOOLS, type MarkTools } from "../mark-tools";
@@ -442,6 +443,7 @@ export function Colophon({
   const openSize = useOpenSize();
   const uprightAgain = useUprightAgain();
   const ribbonLength = useRibbonLength();
+  const leftOffLook = useLeftOffLook();
   const runFollow = useRunFollow();
   const runAhead = useRunAhead();
   const zoomAnchor = useZoomAnchor();
@@ -810,6 +812,7 @@ export function Colophon({
         {/* How long a bookmark's ribbon hangs (docs/PLAN.md, item 49): short,
             above the first line, is the default; the long one stays. */}
         <Choice id="ribbon-length" title={t.ribbonLengthTitle} note={t.ribbonLengthNote} value={ribbonLength} options={RIBBON_LENGTHS} label={(choice) => choice === "short" ? t.ribbonLengthShort : t.ribbonLengthLong} data="ribbon-length" onPick={rememberRibbonLength} />
+        <Choice id="left-off-look" title={t.leftOffTitle} note={t.leftOffNote} value={leftOffLook} options={LEFT_OFF_LOOKS} label={(choice) => choice === "label" ? t.leftOffLabel : choice === "mark" ? t.leftOffMark : choice === "tabs" ? t.leftOffTabs : t.leftOffRibbons} data="left-off-look" onPick={rememberLeftOffLook} />
 
         {/* What a closed look-alike row shows of the words the pair shares
             (docs/design/lookalike-rows.md, item 6): every way built, the picture

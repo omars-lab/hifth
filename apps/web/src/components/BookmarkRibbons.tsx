@@ -1,6 +1,7 @@
-import { useEffect, useRef, type MouseEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, type MouseEvent } from "react";
 import type { Bookmark } from "@hifth/core";
 import { useT } from "../i18n";
+import { labelNudge, useLeftOffLook } from "../left-off-look";
 import { useRibbonLength } from "../ribbon-length";
 import styles from "./BookmarkRibbons.module.css";
 
@@ -52,6 +53,9 @@ export function BookmarkRibbons({
 }: BookmarkRibbonsProps): JSX.Element {
   const { t } = useT();
   const ribbonLength = useRibbonLength();
+  // How the red ribbon is told from the reader's own bookmarks (left-off-look.ts).
+  // With tabs, every bookmark is a named tab whatever ribbon length is set.
+  const leftOffLook = useLeftOffLook();
   const rootRef = useRef<HTMLDivElement>(null);
   const act = useRef<(button: HTMLButtonElement) => void>(() => {});
   // A page that holds a bookmark keeps its corner folded down until the reader
@@ -92,6 +96,36 @@ export function BookmarkRibbons({
     };
   }, []);
 
+  // Keep the "Left off" label on the screen: where the page runs to the
+  // screen's edge it slides along the ribbon (labelNudge). Set on the element,
+  // not in state, and measured again whenever the window or the page resizes.
+  const labelRef = useRef<HTMLSpanElement>(null);
+  const showLabel = seam && leftOffLook === "label";
+  useLayoutEffect(() => {
+    const label = labelRef.current;
+    const root = rootRef.current;
+    if (!showLabel || !label || !root) return;
+    const seamEl = root.querySelector<HTMLElement>("[data-bookmark-seam]");
+    if (!seamEl) return;
+    const place = () => {
+      const s = seamEl.getBoundingClientRect();
+      const width = label.getBoundingClientRect().width;
+      // The stage may be magnified: the nudge is in the label's own pixels.
+      const scale = label.offsetWidth > 0 ? width / label.offsetWidth : 1;
+      const nudge = labelNudge((s.left + s.right) / 2, width, document.documentElement.clientWidth, s.width);
+      label.style.setProperty("--label-nudge", `${nudge / (scale || 1)}px`);
+    };
+    place();
+    const sizes = new ResizeObserver(place);
+    sizes.observe(root);
+    sizes.observe(label);
+    window.addEventListener("resize", place);
+    return () => {
+      sizes.disconnect();
+      window.removeEventListener("resize", place);
+    };
+  }, [showLabel]);
+
   // Only a click no pointer made: a pointer has already acted on its lift.
   const onKeyClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (e.detail === 0) act.current(e.currentTarget);
@@ -99,9 +133,13 @@ export function BookmarkRibbons({
 
   return (
     <div ref={rootRef} className={styles.overlay} data-bookmark-overlay="" data-aside={aside ? "" : undefined}
-      data-ribbon={ribbonLength}
+      data-ribbon={leftOffLook === "tabs" ? "tab" : ribbonLength}
+      data-left-off={leftOffLook}
     >
       {seam && <span className={styles.seam} role="img" aria-label={t.bmSeam} title={t.bmSeam} data-bookmark-seam="" />}
+      {showLabel && (
+        <span ref={labelRef} className={styles.seamLabel} aria-hidden="true" data-left-off-label="">{t.bmSeamShort}</span>
+      )}
       <button
         type="button"
         className={styles.fold}

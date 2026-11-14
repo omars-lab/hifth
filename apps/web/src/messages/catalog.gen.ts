@@ -58,6 +58,7 @@ export interface Catalog {
   readonly bmSave: string;
   readonly bmSaveName: string;
   readonly bmSeam: string;
+  readonly bmSeamShort: string;
   readonly bmUndo: string;
   readonly bmUnfold: (d: { readonly count: number; readonly countText: string | number }) => string;
   readonly bmUnfolded: (d: { readonly count: number; readonly countText: string | number }) => string;
@@ -235,6 +236,12 @@ export interface Catalog {
   readonly langSectionTitle: string;
   readonly langSwitchTo: (d: { readonly other: string | number }) => string;
   readonly lastPage: (d: { readonly page: string | number }) => string;
+  readonly leftOffLabel: string;
+  readonly leftOffMark: string;
+  readonly leftOffNote: string;
+  readonly leftOffRibbons: string;
+  readonly leftOffTabs: string;
+  readonly leftOffTitle: string;
   readonly legendAria: string;
   readonly "legendCaveat.lead": string;
   readonly "legendCaveat.rest": string;

@@ -137,6 +137,10 @@
       "desktop",
       "desktop-firefox"
     ],
+    "left-off-look.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
     "link-builder.spec.ts": [
       "android",
       "desktop",
