@@ -18,6 +18,25 @@ title = "Hifth gitleaks config"
 [extend]
 useDefault = true
 
+# A Supabase project's own address names the project (its 20-letter ID). The repo is
+# public, and the rule is that project IDs stay out of it: the code reads the address
+# from the keys file or `supabase status`, never from a checked-in line. The shared
+# connection hosts (aws-0-<region>.pooler.supabase.com) name no project and do not match.
+# Added 2026-11-14 after the security review found a memory note naming the project.
+[[rules]]
+id = "supabase-project-address"
+description = "A Supabase project's address (it names the project's ID)"
+regex = '''\b[a-z]{20}\.supabase\.(?:co|in)\b'''
+keywords = ["supabase.co", "supabase.in"]
+
+# The same ID given to the CLI, where it travels as a flag, not an address.
+[[rules]]
+id = "supabase-project-ref"
+description = "A Supabase project ID passed to the CLI"
+regex = '''(?:--project-ref[ =]|project-ref:\s*|project_ref\s*=\s*["']?)([a-z]{20})\b'''
+secretGroup = 1
+keywords = ["project-ref", "project_ref"]
+
 [allowlist]
 description = "Mushaf SVG assets are glyph geometry (numeric path data), not secrets."
 paths = [
