@@ -3234,6 +3234,60 @@ test.describe("Hifth · the pitch commentary on a phone on its side, the note st
     for (const b of boxes) expect(overlaps(b, note), "a line of the verse is under the note").toBe(false);
   });
 
+  for (const size of [
+    { name: "a 6.3-inch phone", width: 844, height: 390 },
+    { name: "the smallest phone", width: 667, height: 375 },
+  ]) {
+    test(`on ${size.name} on its side, every line of a six-line verse is in sight beside its note, none under the bars at the foot`, async ({
+      page,
+    }) => {
+      // docs/design/iphone-app.md, item 11. The note stands beside the page, but
+      // the bars at the foot of the screen (the line with Full screen, and the
+      // page slider) took about the lower 40% of this short screen, and the
+      // last lines of 2:255 sat under them: 2 of its 6 on the smallest phone.
+      await page.setViewportSize({ width: size.width, height: size.height });
+      await page.goto("/#/hafs-kfqc/p1");
+      await page.goto("/#/hafs-kfqc/2:255");
+      await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+      await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+      await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const lines = page.locator("#hifth-overlay .hl-sel");
+      await settle(lines.first());
+      await settle(lines.last());
+      await page.waitForTimeout(600);
+      const note = (await sheet(page).boundingBox())!;
+      const boxes = await litLineBoxes(page);
+      expect(boxes.length).toBeGreaterThan(4);
+      const { bars, pageFoot } = await page.evaluate(() => {
+        const main = document.querySelector("main")!;
+        const shown = (el: Element) => getComputedStyle(el).display !== "none" && el.getClientRects().length > 0;
+        const bars = [...main.parentElement!.children]
+          .filter((el) => el.matches("footer, nav, [role='toolbar']") && shown(el))
+          .map((el) => {
+            const r = el.getBoundingClientRect();
+            return { x: r.x, y: r.y, width: r.width, height: r.height };
+          });
+        return { bars, pageFoot: Math.min(main.getBoundingClientRect().bottom, window.innerHeight) };
+      });
+      const header = (await page.locator("header").first().boundingBox())!;
+      for (const b of boxes) {
+        expect(overlaps(b, note), "a line of the verse is under the note").toBe(false);
+        for (const bar of bars) expect(overlaps(b, bar), `a line of the verse ${JSON.stringify(b)} is under a bar ${JSON.stringify(bar)}`).toBe(false);
+        expect(b.y + b.height, "a line of the verse runs past the foot of the page's room").toBeLessThanOrEqual(pageFoot + 1);
+        expect(b.y, "a line of the verse is above the header's foot").toBeGreaterThanOrEqual(header.y + header.height - 1);
+      }
+    });
+  }
+
+  test("closing the standing note brings the bars at the foot back", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+    await sheet(page).getByRole("button", { name: "Close" }).click();
+    await expect(sheet(page)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Full screen" })).toBeVisible();
+  });
+
   test.describe("read upright first", () => {
     test.use({ viewport: { width: 390, height: 844 } });
     test.beforeEach(async ({ context }) => {

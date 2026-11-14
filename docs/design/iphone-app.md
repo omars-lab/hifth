@@ -88,10 +88,10 @@ The others are settings in the pitch build's info panel.
 
 Measured on 2:255, before any scroll: 3 lines of the commentary in sight upright, 4 on a
 6.3-inch phone on its side and 5 on the largest. Every line of the verse stays clear of the note.
-On its side, though, the bars at the foot of the screen cover the end of the verse: the last 2 of
-its 6 lines on the smallest phone (375 points tall), and the walk's picture shows the same on the
-6.3-inch one. That was already so before this change; it is the backlog row
-`phone-side-foot-bars-cover-verse` (⑪ below). The two choices are the open decisions `phone-note-lead`
+On its side, the bars at the foot of the screen used to cover the end of the verse: the last 2 of
+its 6 lines on the smallest phone (375 points tall), and the walk's picture showed the same on the
+6.3-inch one. That was already so before this change. Those bars now step aside while the note
+stands beside the page (⑪ below, the backlog row `phone-side-foot-bars-cover-verse`). The two choices are the open decisions `phone-note-lead`
 and `phone-note-sideways`, drawn on
 [the options page](https://blog.bytesofpurpose.com/hifth/docs/design/phone-note-options.html)
 and argued in [the decision record](../decisions/phone-note.md).
@@ -142,14 +142,20 @@ form is behind Apple's sign-in, so I did not read what it asks; Apple's general 
 is granted to an app that already answers Siri's play requests, so asking before ⑨ works would
 likely be turned down. The agent drafts the answers when the time comes.
 
-### ⑪ On a phone on its side, the bars at the foot cover the end of the verse · **open**
+### ⑪ On a phone on its side, the bars at the foot cover the end of the verse · **fixed**
 
 The agent's, found while measuring ③ (2026-11-14), and already so before it. With a note open
 on a phone held on its side, the bars at the foot of the screen take about the lower 40% of the
 height. On the smallest phone they cover the last 2 of 2:255's 6 lines, and the walk's picture
 shows the same on a 6.3-inch phone. Just after the tap, the page also shows its own foot for a
-moment before it moves to the verse. Likely fix: hide or shrink those bars while a note stands
-beside the page on a short screen.
+moment before it moves to the verse.
+
+**What was done (2026-11-14):** while a note stands beside the page on a phone held on its side,
+the bars at the foot are hidden; the header stays, and closing the note brings them back. On both
+the smallest phone and a 6.3-inch one, every line of 2:255 is now in sight beside the note. The
+moment after the tap is the page moving to the verse, about half a second, and it settles on it;
+that part needed no change. Tests: the pitch spec's "every line of a six-line verse is in sight
+beside its note" on both sizes, and "closing the standing note brings the bars at the foot back".
 
 ## What the app's ID allows, and what else may be needed
 

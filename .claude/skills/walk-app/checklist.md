@@ -283,7 +283,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] On a phone on its side, tap 2:255 and look at the page at once and a second later: the lit
   verse is in sight straight away (not the page's foot), and the bars at the foot of the screen
   cover none of its lines. A check that only asks about the note misses this. · phone-side,
-  iphone · issues: `phone-side-foot-bars-cover-verse` · found 2026-11-14 in the walk's pictures
+  iphone · issues: `phone-side-foot-bars-cover-verse` · tests: pitch spec, "every line of a
+  six-line verse is in sight beside its note, none under the bars at the foot" and "closing the
+  standing note brings the bars at the foot back" · found 2026-11-14 in the walk's pictures
   of steps 3 and 4
 - [ ] On a phone on its side, with the note standing beside the page, open a verse with
   look-alikes (35:44): the look-alike chips sit in a row on the note's own top row, clear of its
