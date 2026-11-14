@@ -224,8 +224,25 @@ the verse number in the drawer's head.
 - a soft glow rings the verse while the pointer is on the drawer;
 - no change, as today.
 
-**If nobody decides:** the verse stays lit as it is. A phone has no pointer to rest, so this is for
-the laptop and iPad with a mouse.
+**If nobody decides:** the deeper colour stays the default (see below). A phone has no pointer to
+rest, so this is for the laptop, and the iPad with a trackpad, a mouse or a Pencil held just above
+the screen.
+
+**Built 2026-11-13, all three, as a setting** in the info panel, under "While the pointer rests on a
+verse's drawer":
+- **Its verse deepens** (the default): the verse's amber turns a shade darker while the pointer is
+  on the drawer, and back when it leaves.
+- **A ring round its lines:** each line of the verse gets a darker amber edge; the fill stays.
+- **No change:** as before.
+
+A tap with a finger sets none of them off, so a tap in the drawer never leaves the verse looking
+different. The first build of the deeper colour was too close to the resting one to notice on the
+laptop; the shade was darkened until it read at a glance, and the letters stay black under it, as
+they do under every highlight. The "where you left off" ribbon in the gutter shows at the same time
+on a page you stay on; it is not part of this.
+
+**Left:** the owner tries it with a mouse on the laptop and with a trackpad or Pencil on the iPad,
+and says which becomes the default. The browser tests are in the app's drawer-glow test file.
 
 ### ③ Should a tool open inside the drawer, instead of in its own sheet? · **open**
 

@@ -132,6 +132,11 @@ export interface Catalog {
   readonly distanceRelative: (d: { readonly dir: "later" | "other"; readonly pages: string | number }) => string;
   readonly distanceSame: string;
   readonly drawerBack: (d: { readonly label: string | number }) => string;
+  readonly drawerGlowBrighten: string;
+  readonly drawerGlowNone: string;
+  readonly drawerGlowNote: string;
+  readonly drawerGlowRing: string;
+  readonly drawerGlowTitle: string;
   readonly drawerMarksNote: string;
   readonly drawerMarksPath: string;
   readonly drawerMarksTag: string;

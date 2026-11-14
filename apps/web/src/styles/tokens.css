@@ -98,6 +98,11 @@
      (scripture stays legible while the finger crosses it) and a dashed ring,
      the universal "this is a lasso, not a result". */
   --ink-sel: #e8a13a;
+  /* The same verse while the pointer rests on its drawer (selection-drawer ②):
+     the amber a shade deeper, or its edge, so a glance finds which verse the
+     drawer's buttons are for. */
+  --ink-sel-glow: #c96f0a;
+  --ink-sel-ring: #b06a0e;
   /* A passage and a word run each take their own colour, blended with the
      amber verse where they cross (highlight-texture decision, 2026-09-30).
      The highlighter's four pens, pastels the owner chose on 2026-09-30 from

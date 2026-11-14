@@ -59,6 +59,10 @@
     "detent-live.spec.ts": [
       "desktop"
     ],
+    "drawer-glow.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
     "drawer-marks.spec.ts": [
       "desktop",
       "desktop-firefox"

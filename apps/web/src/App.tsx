@@ -262,6 +262,7 @@ import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style"
 import { savedZoomAnchor, verseToGrowFrom } from "./zoom-anchor";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberDrawerTools, savedDrawerTools, type DrawerTools } from "./drawer-tools";
+import { canRest, rememberDrawerGlow, savedDrawerGlow, type DrawerGlow } from "./drawer-glow";
 import { rememberToolHelp, savedToolHelp, type ToolHelp } from "./tool-help";
 import { rememberSettingsAt, savedSettingsAt, type SettingsAt } from "./settings-at";
 import { rememberDrawerMarks, savedDrawerMarks, type DrawerMarks } from "./drawer-marks";
@@ -510,6 +511,22 @@ export function App(): JSX.Element {
     setDrawerTools(choice);
   }, []);
   const toolsInDrawer = drawerTools === "drawer";
+  // What the lit verse does while a pointer rests on its drawer (selection-drawer ②).
+  // The page's root carries the choice and the resting pointer; highlight.css paints it.
+  const [drawerGlow, setDrawerGlow] = useState<DrawerGlow>(() => savedDrawerGlow());
+  const chooseDrawerGlow = useCallback((choice: DrawerGlow) => {
+    rememberDrawerGlow(choice);
+    setDrawerGlow(choice);
+  }, []);
+  useEffect(() => {
+    document.documentElement.dataset.drawerGlow = drawerGlow;
+  }, [drawerGlow]);
+  const restOnDrawer = useCallback((e: { pointerType: string }) => {
+    if (canRest(e.pointerType)) document.documentElement.dataset.drawerHover = "";
+  }, []);
+  const leaveDrawer = useCallback(() => {
+    delete document.documentElement.dataset.drawerHover;
+  }, []);
   // Whether the line beside the page tools stays now each tool has its own
   // label (ayah-drawer ①; a setting since 2026-11-10, the line unless chosen).
   const [toolHelp, setToolHelp] = useState<ToolHelp>(() => savedToolHelp());
@@ -4862,6 +4879,8 @@ export function App(): JSX.Element {
             onVerseGestures={chooseVerseGestures}
             drawerTools={drawerTools}
             onDrawerTools={chooseDrawerTools}
+            drawerGlow={drawerGlow}
+            onDrawerGlow={chooseDrawerGlow}
             toolHelp={toolHelp}
             onToolHelp={chooseToolHelp}
             settingsAt={settingsAt}
@@ -5053,6 +5072,8 @@ export function App(): JSX.Element {
         onClose={putDrawerAway}
         end={(!desktop && railAt === "tools") || railOnDrawer ? hopRail(undefined, "tools") : undefined}
         onWhole={setDrawerWhole}
+        onPointerRest={restOnDrawer}
+        onPointerAway={leaveDrawer}
         panel={
           toolsInDrawer && listenInDrawer && selectedKey ? (
             <ListenOptions
