@@ -2089,12 +2089,15 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     // Paragraphs moved into a shared note are read for slant on the page they
     // were printed on, not only the page the note starts on (9:37's, 2026-10-10).
     const movedIn = [["9:37", 8]] as const;
+    // The unread notes on the pages the demo shows, and 18:62–82, read by eye
+    // at full size (2026-11-14). These two gain the most slanted words.
+    const demoPages = [["17:110", 17], ["19:54", 9]] as const;
     // Each goto only changes the link's hash, so the last verse's note is
     // still up, "Related verses" and all, while the next one loads: counted
     // then, a note read as having no slant at all (6:80 in Firefox, after
     // 54:49). So wait for the note itself to have changed.
     let was = "";
-    for (const [verse, least] of [...slanted, ...oneTapAway, ...twoTapsAway, ...restTwoTapsAway, ...lastTwoTapsAway, ...movedIn]) {
+    for (const [verse, least] of [...slanted, ...oneTapAway, ...twoTapsAway, ...restTwoTapsAway, ...lastTwoTapsAway, ...movedIn, ...demoPages]) {
       await page.goto(`/#/hafs-kfqc/${verse}?open=commentary`);
       await expect(sheet(page)).toContainText("Related verses", { timeout: 20_000 });
       await expect
@@ -2111,11 +2114,12 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
   });
 
   test("a note nobody read by hand slants the Arabic terms the book writes with marks", async ({ page }) => {
-    // 2:37's note is far from the demo, so no hand-read row slants it. Its two
-    // transliterated words, written with long-vowel marks, are slanted on its
-    // printed page, and a rule now finds them by their marks
-    // (docs/issues/italics-from-transliteration-marks.md).
-    await page.goto("/#/hafs-kfqc/2:37?open=commentary");
+    // 3:63's note is far from the demo, so no hand-read row slants it. Its
+    // transliterated words, written with long-vowel marks, are slanted by a
+    // rule that finds them by their marks
+    // (docs/issues/italics-from-transliteration-marks.md). This was 2:37 until
+    // 2:37, on a page the demo shows, was read by hand (2026-11-14).
+    await page.goto("/#/hafs-kfqc/3:63?open=commentary");
     const note = sheet(page).getByRole("region", { name: "Commentary" });
     await expect(note).toBeVisible({ timeout: 20_000 });
     await expect.poll(() => note.locator("em").count(), { timeout: 20_000 }).toBeGreaterThanOrEqual(2);
