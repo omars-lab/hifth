@@ -300,6 +300,9 @@ for (const [held, view] of [["sideways", SIDEWAYS], ["upright", UPRIGHT]] as con
         // With room all round, then in a corner, where the outer ring must still be whole.
         for (const at of [TIP, { x: view.width - 40, y: view.height - 40 }]) {
           await pencil(page, { kind: "squeeze", pref: "palette", ...at });
+          // The ring comes from a file fetched after the page (wide-screen-later.spec);
+          // a squeeze straight after opening may beat it there by a moment.
+          await expect(tools(page).first()).toBeVisible();
           const before = await boxes(tools(page));
           await expect(choices(page)).toHaveCount(0);
           await palette(page).locator("[role=radio][aria-keyshortcuts=H]").click();

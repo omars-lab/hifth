@@ -35,6 +35,39 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Trimmed 2026-11-14: start-up 169.9 → 159.7 KB, and 2257 → 2107 ms.** This is item ㉑ in
+`docs/performance.md`, backlog row `move-12-kb-out-of-startup`. A stand-in build came first and
+found the step. With parts swapped for empty stand-ins, 157.1 KB read the lower step and 162.6 KB
+did not, so nearly all of the trim below was needed. What moved out of start-up:
+
+- **The wide-screen parts and the highlight menu (−6.6 KB together).**
+  - The page-edge strips and the pens' homes went into a file of their own, `wide-screen`
+    (`components/wide-screen.ts`). A phone never asks for it. A screen bigger than a phone
+    both ways fetches it once the page is idle. An iPad held upright draws no strips, so
+    without that its first Pencil squeeze waited for the file before showing the ring of pens.
+  - The highlight menu went into the rarely-used file, and it now mounts only once a reader
+    selects words.
+- **The commentary's styles (−1.4 KB).** The public build shows no commentary, and its code was
+  already dropped, but **a module's style sheet still ships when its code is dropped as unused.**
+  A build-only switch in `vite.config.ts` now points the import at an empty stand-in
+  (`CommentarySheet.off.tsx`). It does not apply to the pitch build or to a build with a
+  commentary service.
+- **The moved-address card and styles nothing names any more (−1.0 KB).** The card was split in
+  two. The part that decides whether it shows stays in start-up, and the card itself loads when
+  it shows.
+
+**The app had no guard against a later file that never arrives.** Until now, a file that failed
+to load blanked the whole app. Every part that loads later now sits inside `Later`
+(`components/later.tsx`), which shows nothing in that part's place instead. Tests:
+- `e2e/wide-screen-later.spec.ts` blocks the file, and the page still reads and turns.
+- `e2e/lazy-tools.spec.ts` lists every moved file.
+
+What it cost and how it was measured:
+- The total went up 2.4 KB, 203.8 → 206.2 KB, because split files compress a little worse.
+- The start-up limit went down from 185 to 161 KB, between the two measured sizes.
+- Measured beside the old build, 7 rounds each: the new one read 2105–2111 ms in 6 of 7 rounds,
+  and the old one 2255–2259 in 6 of 7.
+
 **Checked again 2026-11-13 (3), nothing taken.** 200.6 KB against the 210 KB cap, after pulling
 a bookmark out of the corner and pushing it back, built four ways as a setting (+1.2 KB). 0.8 KB
 of it is in the start-up script: the pull has to answer the first press on the page, so it

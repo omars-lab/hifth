@@ -50,6 +50,9 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] Turn by swiping, by the arrow keys, and at a desk by grabbing the outer edge. · any · The
   page follows the hand; a drag in the middle of a page never turns it. · tests: page-turn,
   desktop, edge-peel specs
+- [ ] On a first visit at a desk or on a big iPad, grab the outer edge within a second of the page
+  showing: the edge is there and turns the page. Since 2026-11-14 it comes in a file of its own,
+  a moment after the page. · desktop, ipad · test: wide-screen-later spec
 - [ ] Walk swipes with `swipe=` (a finger), not `drag=` (a mouse). A phone turns under a swipe
   both ways; an open book on an iPad on its side turns only from its outer edge, a finger in the
   middle never turns it. · phone, phone-side, ipad-side · test: drive-touch spec, "swipe="

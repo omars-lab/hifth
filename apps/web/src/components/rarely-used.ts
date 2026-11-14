@@ -21,3 +21,5 @@ export { CropSheet } from "./CropSheet";
 export { WordPartsHost } from "./WordPartsHost";
 export { BookmarkDrawer } from "./BookmarkDrawer";
 export { DiffView, SharedWords } from "./DiffView";
+export { HighlightMenu } from "./HighlightMenu";
+export { MovedCard } from "./MovedCard";
