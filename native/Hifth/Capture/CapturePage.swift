@@ -51,6 +51,10 @@ nonisolated enum CapturePage {
     for (const el of document.querySelectorAll("[data-panel]")) {
       if (plain(el.dataset.panel)) open.push("panel=" + el.dataset.panel);
     }
+    // Words laid as word ink (a link's `?w=`, or a hold), by their numbers in
+    // the verse; the page sets this only while the band is drawn.
+    const words = document.querySelector("[data-words]")?.dataset.words;
+    if (typeof words === "string" && /^\\d+-\\d+$/.test(words)) open.push("words=" + words);
     // One page or two: the view cards are told apart by this count.
     open.push("pages=" + pages.length);
 

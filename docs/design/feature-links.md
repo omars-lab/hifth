@@ -103,9 +103,11 @@ the precedent the features page follows.
 - press, hold or drag: drawing, the mistake pen, a page turn halfway through;
 - change a setting in the info panel, such as switching to a runner-up option;
 - tell the laptop where the app is without a capture (`current-to-file` now writes it to a file the laptop copies off);
-- clear notes and marks, so each check starts clean;
-- show which words a link picked (`?w=3-7`) in a way a capture can read, so the word-range card
-  is checked for its verse only.
+- clear notes and marks, so each check starts clean.
+
+A link naming words (`?w=3-7`) once selected only the verse. Since 2026-11-13 it lays those
+words as word ink, and the capture names them (`words=3-7`), so the word card is checked for
+its words as well as its verse.
 
 ## Which debug-only links should the app answer?
 

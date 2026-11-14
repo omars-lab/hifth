@@ -23,7 +23,7 @@ const UDID = "00000000-FAKE-4000-8000-0000000000AA";
  * The made-up app. `wrongTool` makes it put a different tool in hand;
  * `silent` lists card ids whose capture never comes.
  */
-function fakeApp(dir, { flavour = "public", wrongTool = false, silent = [] } = {}) {
+function fakeApp(dir, { flavour = "public", wrongTool = false, silent = [], noWords = false } = {}) {
   const state = join(dir, "state.json");
   writeFileSync(state, JSON.stringify({ last: null, n: 0 }));
   const body = `
@@ -58,6 +58,7 @@ const open = [];
 const tool = o.get("tool");
 if (tool) open.push("tool=" + (${wrongTool} ? "crop" : tool === "harakat" ? "sign" : tool));
 if (o.get("open")) open.push("dialog:", "panel=" + o.get("open"));
+if (o.get("words") && !${noWords}) { const [f, t = f] = o.get("words").split("-"); open.push("words=" + f + "-" + t); }
 open.push("pages=" + (o.get("view") === "two" ? 2 : 1));
 state.n += 1;
 fs.writeFileSync(stateFile, JSON.stringify(state));
@@ -185,15 +186,19 @@ test("judge: the one-page and two-page cards are told apart by the pages on scre
   assert.match(judge(one, where({ open: [] })).why, /no count of pages/);
 });
 
-test("judge: the word-range card is checked for its place only, and says so", () => {
+test("judge: the word-range card passes only when the page shows those words", () => {
   const words = card({ key: "words", route: "/hafs-kfqc/2:255?w=3-7" });
-  const ok = judge(words, where({ route: "/hafs-kfqc/2:255" }));
-  assert.equal(ok.result, "place-only");
-  assert.match(ok.why, /words/);
-  assert.equal(judge(words, where({ route: "/hafs-kfqc/p7" })).result, "fail");
+  assert.equal(judge(words, where({ route: "/hafs-kfqc/2:255", open: ["words=3-7"] })).result, "pass");
+  const none = judge(words, where({ route: "/hafs-kfqc/2:255", open: [] }));
+  assert.equal(none.result, "fail");
+  assert.match(none.why, /no words are laid on the verse, not 3-7/);
+  assert.match(judge(words, where({ route: "/hafs-kfqc/2:255", open: ["words=3-6"] })).why, /words 3-6 are laid, not 3-7/);
+  assert.equal(judge(words, where({ route: "/hafs-kfqc/p7", open: ["words=3-7"] })).result, "fail");
+  const one = card({ key: "word", route: "/hafs-kfqc/2:255?w=5" });
+  assert.equal(judge(one, where({ route: "/hafs-kfqc/2:255", open: ["words=5-5"] })).result, "pass");
 });
 
-test("a run with only place-checked cards still exits 0", async () => {
+test("a run where the word card shows its words exits 0; one where it does not, 1", async () => {
   const dir = mkdtempSync(join(tmpdir(), "hifth-feature-check-"));
   const out = join(dir, "out.json");
   const r = await run(["--simulator", UDID, "--only", "place-words,place-view-two,panel-jump", "--wait", "10", "--out", out], {
@@ -201,10 +206,17 @@ test("a run with only place-checked cards still exits 0", async () => {
   });
   assert.equal(r.status, 0, r.out);
   const got = results(out);
-  assert.equal(got["place-words"].result, "place-only");
+  assert.equal(got["place-words"].result, "pass");
   assert.equal(got["place-view-two"].result, "pass");
   assert.equal(got["panel-jump"].result, "pass");
-  assert.match(r.out, /place_only=1/);
+
+  const dir2 = mkdtempSync(join(tmpdir(), "hifth-feature-check-"));
+  const out2 = join(dir2, "out.json");
+  const r2 = await run(["--simulator", UDID, "--only", "place-words", "--wait", "10", "--out", out2], {
+    HIFTH_SIMCTL: fakeApp(dir2, { noWords: true }),
+  });
+  assert.equal(r2.status, 1, r2.out);
+  assert.equal(results(out2)["place-words"].result, "fail");
 });
 
 test("an app whose web pages were built from another commit is named, so a failure is not blamed on the link", () => {
