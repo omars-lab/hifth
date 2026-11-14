@@ -849,6 +849,9 @@ hifth-app-verify: ## Look at live hifth.app: pages answer, the app is this commi
 hifth-app-list-count: ## How many people are on hifth.app's Mac-app list, and how many still to confirm; never shows an address. ARGS=--local counts the copy on this laptop
 	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/list-count.mjs $(ARGS)
 
+hifth-app-turnstile: ## Does hifth.app's spam-check widget exist? Prints its public site key. ARGS=--make makes it and saves its secret; never prints the secret or the token
+	@python3 .claude/skills/deploy-site/scripts/turnstile-widget.py $(ARGS)
+
 # The list's database part (supabase/migrations/*notify_list.sql), checked against a local
 # copy as the public key sees it. Needs `supabase start` first. Other servers on this laptop
 # can hold Supabase's usual ports; run a copy elsewhere and name its folder with
