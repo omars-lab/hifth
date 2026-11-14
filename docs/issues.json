@@ -6725,6 +6725,18 @@
       "feature": "hifth-app-site",
       "useCase": "find-hifth-and-open-it",
       "note": "On this laptop, hifth.app gets a side bar like the earlbear workflow site's: hifth.app's pages, each section and card of the features page, and the design pages, folding to icons and a drawer on a phone. Local copy only; the release check refuses it. Replaces the floating Designs button."
+    },
+    {
+      "id": "hifth-app-csp-for-the-app",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑱"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The app at hifth.app/read/ does not yet tell the browser where its scripts may come from; the front, privacy and email pages do since 2026-11-14. Write the rule for /read/ in apps/landing/_headers, try the app with it in Chrome, Firefox and the iPad simulator (page pictures, sounds, the service worker, the native apps' bridge), fix what the browser refuses, and add /read/ to the test in apps/landing/lib/pages.test.mjs."
     }
   ]
 }

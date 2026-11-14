@@ -4,17 +4,36 @@
 # Cloudflare serves a page at its address without .html (privacy.html at /privacy, the app's
 # index.html at /read/), so the rules name those addresses.
 
+# Every address, the app's included: another site may not put a page in a frame, and the
+# browser may not guess a file's type. A link to another site carries this site's name only,
+# never the page (the confirm and leave pages, which are made by the server code, send none
+# at all). No rule that keeps other tabs away (the "opener" one): the release refuses it, as it would cut the old
+# address's tab off from this one and readers could not carry their marks across.
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# The front pages name every place a script, frame, picture or font may come from: this site,
+# and Cloudflare's spam check (its script, and the frame it draws the check in). Nothing is
+# written into the pages themselves, so nothing needs 'unsafe-inline'. The "no page here" page
+# is served at every unknown address, so it has only the rule above. The app under /read/ has
+# no script rule yet (backlog: hifth-app-csp-for-the-app).
 /
   Cache-Control: no-cache
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'
 
 /privacy
   Cache-Control: no-cache
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'
 
 /ar/
   Cache-Control: no-cache
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'
 
 /ar/privacy
   Cache-Control: no-cache
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'
 
 /read/assets/*
   Cache-Control: public, max-age=31536000, immutable

@@ -19,7 +19,7 @@
  * releasing our site / ensuring the bare minimum is deployed (in prod, no dev functionality)".
  */
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, statSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -279,6 +279,16 @@ export function serveArgs(port, list = null) {
 const wrangler = (args) => spawnSync("wrangler", args, { cwd: LANDING, stdio: "inherit" }).status === 0;
 
 /**
+ * The site's headers with the front pages' script rule left out, for the copy on this laptop
+ * only. The side bar and the comment button are written into each page as they are served, and
+ * that rule refuses any script written into a page, which is the point of it on the live site.
+ * Every other header stays. A release never uses this: publish rebuilds the folder from scratch.
+ */
+export function withoutScriptRule(headersText) {
+  return headersText.split("\n").filter((line) => !/^\s+Content-Security-Policy:/i.test(line)).join("\n");
+}
+
+/**
  * hifth.app on this laptop, first half: the same folder a release would upload,
  * checked, with the developer side bar added. The second half,
  * `serve`, only starts the server, so the comment server can start it behind
@@ -301,7 +311,10 @@ function prepare({ build }) {
   const hub = findFeaturesPage({ repo: REPO });
   const features = hub ? copyFeaturesPage({ from: hub.dir, out }) : null;
   const pages = addDevSidebar({ out, designs, features });
+  const headers = join(out, "_headers");
+  writeFileSync(headers, withoutScriptRule(readFileSync(headers, "utf8")));
   console.log(`  Side bar, on this laptop only: ${pages.length} pages carry it; ${designs.length} design pages and notes (/docs/design/)`);
+  console.log("  Script rule left out of the headers here, so the side bar and comment button run (make hifth-app-check serves it whole)");
   console.log(hub
     ? `  Features page: copied from ${relative(REPO, hub.dir) || "."}${hub.takenAt ? `, pictures taken ${hub.takenAt}` : ""} (/dev-hub/)`
     : "  Features page: none built yet in any worktree; run make feature-links, then serve again");

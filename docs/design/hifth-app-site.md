@@ -300,3 +300,22 @@ Done 2026-11-14 and looked at in Chrome and Firefox, on a laptop and a phone. Lo
 faults, each now held by a test. The panels group showed 9 of the page's 11 cards, missing the two
 marked pitch-only; they are now listed with a "pitch only" tag. A long group name was cut off; it
 now wraps. And on a phone the Menu button sat under the comment bar, so it moved to the top left.
+
+### ⑱ Does the app at hifth.app/read say where its scripts may come from? · **open**
+
+Not yet. Since 2026-11-14 the front pages, the privacy pages and the email pages each tell the
+browser that scripts may come only from hifth.app itself (and, on the front pages, from
+Cloudflare's spam check). If someone ever slipped a line of their own into one of those pages,
+the browser would refuse to run it. Every page, the app included, also refuses to be shown inside
+another site's frame and refuses a guessed file type.
+
+The app at /read/ does not carry the script rule yet. It loads the pictures of the pages, its
+sounds and its service worker, and it talks to the iPad and Mac apps through their own web views,
+so a rule written without trying each of those could quietly break one. What would answer it:
+write the rule for /read/, open the app with it in Chrome, Firefox and the iPad simulator, and
+fix each thing the browser refuses, with a test that the rule stays on.
+
+On this laptop the script rule is left out of every page, because the local side bar and the
+comment button are written into each page directly. The release check serves the folder going up
+with the rule in place, and that is where it was looked at (front page, Arabic page, privacy page,
+the form sending, the spam check loading: no refusals).

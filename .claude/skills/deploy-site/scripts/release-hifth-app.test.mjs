@@ -15,7 +15,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { spawn } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, changesThatShip, configProblems, localListFrom, serveArgs } from "./release-hifth-app.mjs";
+import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, changesThatShip, configProblems, localListFrom, serveArgs, withoutScriptRule } from "./release-hifth-app.mjs";
 import { auditShipped, readFolder } from "./shipped.mjs";
 
 function tree(root, files) {
@@ -177,4 +177,16 @@ test("a change to the page-comment files does not stop a release; any other chan
   assert.deepEqual(changesThatShip(""), []);
   // git() trims its output, so the first line can arrive without its leading space.
   assert.deepEqual(changesThatShip("M .page-comments/threads/t_000001.jsonl\n M apps/web/src/App.tsx"), [" M apps/web/src/App.tsx"]);
+});
+
+// The copy on this laptop writes the side bar and the comment button into each page, which the
+// front pages' script rule refuses. Only that rule is left out there; every other header stays.
+test("the laptop's copy leaves out only the script rule from the site's headers", () => {
+  const live = readFileSync(join(dirname(new URL(import.meta.url).pathname), "../../../../apps/landing/_headers"), "utf8");
+  assert.match(live, /Content-Security-Policy:/);
+  const local = withoutScriptRule(live);
+  assert.doesNotMatch(local, /Content-Security-Policy/i);
+  const others = (t) => t.split("\n").filter((l) => !/Content-Security-Policy/i.test(l));
+  assert.deepEqual(others(local), others(live));
+  assert.match(local, /X-Frame-Options: DENY/);
 });

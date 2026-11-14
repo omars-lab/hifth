@@ -401,3 +401,25 @@ test("any other language, or none, is answered in English", async () => {
     assert.match((await res.json()).message, /Check your inbox/);
   }
 });
+
+// The security review of 2026-11-14: another site could put the confirm and leave pages in a
+// frame. Using them still needs the code from the reader's own email, but nothing on them
+// should run a script or be framed, so every answer says so (docs/design/hifth-app-security.md).
+test("every answer refuses to be framed, runs no script, and is not stored or passed on", async () => {
+  const answers = [
+    (await signUp(OK_FORM, { json: false })).res,
+    (await signUp(OK_FORM)).res,
+    await handleConfirm(confirmAt("GET"), ENV, { fetch: world().fetch }),
+  ];
+  for (const res of answers) {
+    const csp = res.headers.get("content-security-policy") || "";
+    assert.match(csp, /default-src 'none'/);
+    assert.match(csp, /frame-ancestors 'none'/);
+    assert.match(csp, /form-action 'self'/);
+    assert.doesNotMatch(csp, /script-src/);
+    assert.equal(res.headers.get("x-frame-options"), "DENY");
+    assert.equal(res.headers.get("x-content-type-options"), "nosniff");
+    assert.equal(res.headers.get("cache-control"), "no-store");
+    assert.equal(res.headers.get("referrer-policy"), "no-referrer");
+  }
+});
