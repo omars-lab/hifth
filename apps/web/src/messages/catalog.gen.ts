@@ -734,6 +734,9 @@ export interface Catalog {
   readonly toolWordHint: string;
   readonly toolWordHintClick: string;
   readonly toolbarLabel: string;
+  readonly touchFullToolsButton: string;
+  readonly touchFullToolsNote: string;
+  readonly touchFullToolsRow: string;
   readonly trail: string;
   readonly turnLandingNote: string;
   readonly turnLandingSame: string;

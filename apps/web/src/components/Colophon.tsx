@@ -11,6 +11,7 @@ import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
 import { DRAWER_GLOWS, type DrawerGlow } from "../drawer-glow";
 import { BEATEN_OFFERS, type BeatenOffer } from "../beaten-offer";
 import { FULL_SCREEN_TOOLS, type FullScreenTools } from "../full-screen-tools";
+import { TOUCH_FULL_TOOLS, type TouchFullTools } from "../touch-full-tools";
 import { TOOL_HELPS, type ToolHelp } from "../tool-help";
 import { SETTINGS_ATS, type SettingsAt } from "../settings-at";
 import { APP_PAGES, type AppPages } from "../app-pages";
@@ -80,6 +81,9 @@ interface ColophonProps {
   onDrawerGlow?: (choice: DrawerGlow) => void;
   fullScreenTools?: FullScreenTools | undefined;
   onFullScreenTools?: (choice: FullScreenTools) => void;
+  /** The same on a phone or an upright iPad (touch-full-tools.ts); remembered on this device. */
+  touchFullTools?: TouchFullTools | undefined;
+  onTouchFullTools?: (choice: TouchFullTools) => void;
   /** Whether the line beside the page tools stays, or only each tool's label; remembered on this device. */
   toolHelp?: ToolHelp;
   onToolHelp?: (choice: ToolHelp) => void;
@@ -400,6 +404,8 @@ export function Colophon({
   onDrawerGlow,
   fullScreenTools,
   onFullScreenTools,
+  touchFullTools,
+  onTouchFullTools,
   toolHelp,
   onToolHelp,
   settingsAt,
@@ -664,6 +670,9 @@ export function Colophon({
 
         {/* Where the tools go in full screen (verse-tap-and-hold ①, the
             notes-style toolbar's ⑤): four built, down the side by default. */}
+        {touchFullTools && onTouchFullTools && (
+          <Choice id="touch-full-tools" title={t.fullScreenToolsTitle} note={t.touchFullToolsNote} value={touchFullTools} options={TOUCH_FULL_TOOLS} label={(choice) => choice === "button" ? t.touchFullToolsButton : choice === "row" ? t.touchFullToolsRow : t.fullScreenToolsNone} data="touch-full-tools" onPick={onTouchFullTools} />
+        )}
         {fullScreenTools && onFullScreenTools && (
           <Choice id="full-screen-tools" title={t.fullScreenToolsTitle} note={t.fullScreenToolsNote} value={fullScreenTools} options={FULL_SCREEN_TOOLS} label={(choice) => choice === "side" ? t.fullScreenToolsSide : choice === "edge" ? t.fullScreenToolsEdge : choice === "dock" ? t.fullScreenToolsDock : t.fullScreenToolsNone} data="full-screen-tools" onPick={onFullScreenTools} />
         )}

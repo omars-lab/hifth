@@ -204,6 +204,7 @@ import {
 } from "./mark-history";
 import { FullScreenContext, MarkUndoContext } from "./components/UndoRedo";
 import { rememberFullScreenTools, savedFullScreenTools, type FullScreenTools } from "./full-screen-tools";
+import { rememberTouchFullTools, savedTouchFullTools, type TouchFullTools } from "./touch-full-tools";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger, listenCaption, listenGlyph } from "./components/PlayTrigger";
@@ -1602,6 +1603,14 @@ export function App(): JSX.Element {
     setFullTools(choice);
   }, []);
   const keepTools = full && desktop && fullTools !== "none";
+  // The same on a phone or an upright iPad (touch-full-tools.ts): a Tools
+  // button in the corner by default, or the bottom line kept, or nothing.
+  const [touchFull, setTouchFull] = useState<TouchFullTools>(() => savedTouchFullTools());
+  const chooseTouchFull = useCallback((choice: TouchFullTools) => {
+    rememberTouchFullTools(choice);
+    setTouchFull(choice);
+  }, []);
+  const touchFullNow: TouchFullTools | null = full && !desktop ? touchFull : null;
   // The tools' home as drawn: in full screen, kept tools stand down the side
   // whichever home they have outside it, since the bars they sit in are away.
   const homeNow: PenHome | null = keepTools ? "side" : penAt;
@@ -4297,7 +4306,7 @@ export function App(): JSX.Element {
     // RTL because they are furniture around a mus'haf, not around a sentence.
     <MarkUndoContext.Provider value={markUndo}>
     <FullScreenContext.Provider value={fullInBar}>
-    <div className={styles.app} dir={dir} data-full={full || undefined} data-full-tools={keepTools ? fullTools : undefined} data-full-side={keepTools ? penSide : undefined} data-pages={appPages === "row" ? "" : undefined}>
+    <div className={styles.app} dir={dir} data-full={full || undefined} data-full-tools={keepTools ? fullTools : undefined} data-full-side={keepTools ? penSide : undefined} data-full-touch={touchFullNow ?? undefined} data-pages={appPages === "row" ? "" : undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to
@@ -4916,6 +4925,8 @@ export function App(): JSX.Element {
             onDrawerGlow={chooseDrawerGlow}
             fullScreenTools={desktop ? fullTools : undefined}
             onFullScreenTools={chooseFullTools}
+            touchFullTools={desktop ? undefined : touchFull}
+            onTouchFullTools={chooseTouchFull}
             toolHelp={toolHelp}
             onToolHelp={chooseToolHelp}
             settingsAt={settingsAt}
@@ -5048,7 +5059,7 @@ export function App(): JSX.Element {
       {/* "Hifth has moved": a row of its own above the trail, like the note
           bar, so it covers neither the page bar nor the trail. */}
       <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} readPlace={readSeam} readRecord={readRecord} />
-      <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
+      <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="" data-full-keep={touchFullNow === "row" || undefined}>
         {resolver && desktop && homeNow === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
         {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
@@ -5079,8 +5090,9 @@ export function App(): JSX.Element {
           }
         />
         {verseGestures !== "a" && !desktop && (
-          <button type="button" className={styles.fullBtn} onClick={() => setFull(true)}>
-            {t.fullScreen}
+          // With the bottom line kept in full screen, its own button is the way back.
+          <button type="button" className={styles.fullBtn} data-full-enter="" onClick={() => setFull((f) => !f)}>
+            {full ? t.showBars : t.fullScreen}
           </button>
         )}
         {/* Screen-reader-only summary of what the rail is offering. It used to
@@ -5282,10 +5294,19 @@ export function App(): JSX.Element {
         />
       )}
       {/* The way back from full screen, for B and C; A's way back is a tap. */}
-      {full && verseGestures !== "a" && (
-        <button type="button" className={styles.showBars} onClick={() => setFull(false)}>
+      {full && verseGestures !== "a" && touchFullNow !== "row" && (
+        <button type="button" className={styles.showBars} data-show-bars="" onClick={() => setFull(false)}>
           {t.showBars}
         </button>
+      )}
+      {/* The tools kept in full screen on a phone or an upright iPad: the
+          bottom line's Tools button on its own, in the corner across from the
+          way back. Its tray folds back once a tool is picked, since the line
+          it covers outside full screen is not there to cover. */}
+      {resolver && touchFullNow === "button" && phoneBar === "c" && (
+        <div className={styles.fullTouchTools} data-full-touch-tools="" data-keep-clear="">
+          <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} foldOnPick />
+        </div>
       )}
 
       {/* The bottom-most chrome, and the second way through the book after the

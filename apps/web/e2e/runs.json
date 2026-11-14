@@ -341,6 +341,10 @@
       "desktop",
       "desktop-firefox"
     ],
+    "touch-full-screen.spec.ts": [
+      "android",
+      "iphone"
+    ],
     "turn-style.spec.ts": [
       "android",
       "iphone"

@@ -86,8 +86,36 @@ look-alike without leaving it, which breaks the reading they went full screen fo
   to aim at; a tap elsewhere shuts it.
 - **Go away with the bars:** full screen as it was, for reading only.
 
-In full screen the tools' corner button reads "Leave full screen" and leaves it. A phone and an
-upright iPad still put the tools away in full screen; their way is still to be found. Tested in
+In full screen the tools' corner button reads "Leave full screen" and leaves it. Tested in
 `apps/web/e2e/full-screen-tools.spec.ts` on laptop Chrome and Firefox, which marks a mistake
 without leaving full screen and checks the tools cover no page at five screen sizes. Left: the
 owner tries the four and says which becomes the default.
+
+**Built 2026-11-14 for a phone and an upright iPad, three ways, as a second setting** under the
+same heading in the info panel, shown only on those screens (there is no room down the side, and
+no pointer to rest at an edge):
+- **A Tools button in the corner** (the default for now): a round button stays in the bottom
+  corner, across from "Show the bars", and shows the tool in hand. It opens the same tray of
+  tools the bottom line has; picking a tool folds the tray back to the button, so the tray never
+  lies on the page's last lines while you mark them. This is the phone's answer to the dock.
+- **The bottom line stays:** full screen puts away only the top bar and the page slider; the
+  bottom line, tools and all, stays, with its own "Show the bars".
+- **Go away with the bars:** as before.
+
+Looked at on a 390-wide phone and a 768-wide upright iPad, in English and Arabic: the button and
+"Show the bars" sit apart at the foot, below the page. Tested in
+`apps/web/e2e/touch-full-screen.spec.ts` on the iPhone and Android runs, which marks a mistake on
+the last line without leaving full screen. Those tests found two faults the same day, both
+fixed: on a 664-tall iPhone in Safari the button lay on the page's bottom corner, where a line
+ends in Arabic, so upright the page now keeps a strip the button's height at its foot and is
+held to the height left, with Safari's install notice up too (on its side the page stands clear
+of the corner and keeps its size); and picking the highlighter folded the tray before its colours could be picked, so
+a tool with a second row now keeps the tray up until that choice is made. A third, found by eye
+the next morning: the strip kept for the button showed the app's paler colour and read as a bar,
+so the surface the page lies on now runs to the foot of the screen under the button. A sheet
+opened in full screen (the look-alikes list) still covers the whole foot of the screen and the
+button; both are tested. Looked at in the iPad app on an iPad mini simulator, upright: the button
+sits clear of the home bar (a 25-point gap there), off the page and apart from "Show the bars",
+and the page is the same size as before. Not yet looked at in Safari on an iPhone simulator,
+because full screen cannot be opened there by link. Left: the owner tries the three on the phone and the iPad and says
+which becomes the default.

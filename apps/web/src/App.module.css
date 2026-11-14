@@ -297,8 +297,65 @@
 
 /* Full screen (docs/design/verse-tap-and-hold.md): every bar goes, and the
    page takes the room they leave. */
-.app[data-full] > :is(header, footer, nav, [role="toolbar"]:not([data-full-keep])) {
+.app[data-full] > :is(header, footer:not([data-full-keep]), nav, [role="toolbar"]:not([data-full-keep])) {
   display: none;
+}
+
+/* On a phone or an upright iPad (touch-full-tools.ts) the bottom line's Tools
+   button stays on its own, in the corner across from the way back. Below the
+   sheets and drawers, as the tray is, so a card that opens is never under it;
+   while its tray is open, above the way back, whose corner the tray's close
+   button shares. It carries the home bar's inset itself, since the bottom
+   line that did is away. */
+.fullTouchTools {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: calc(var(--z-sheet) - 1);
+  display: flex;
+  padding: var(--space-2);
+  padding-block-end: calc(var(--space-2) + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+.fullTouchTools:has([aria-expanded="true"]) {
+  z-index: 31;
+}
+.fullTouchTools > * {
+  pointer-events: auto;
+}
+/* The book keeps clear of that corner. Where Safari's own bars leave a phone
+   664 points tall, the page fills the screen and the button lay on its
+   bottom corner, which in Arabic is where the last line ends. A strip the
+   button's height is kept at the foot instead: the page is a little smaller
+   there, and nothing lies on it.
+
+   The strip alone is not enough: on a phone the page is sized by the screen's
+   width, so at 390×664 it ran 10px into the strip and the last line was cut.
+   So the page is also held to the height left, as the open book on a computer
+   is (PageSpread.module.css): 345/594.85 of it, the page's shape with its
+   bands, less the stage's gutter above and below. The height is the page
+   area's own (`cqh`, main is the container), not the screen's: Safari's
+   "Install Hifth" notice, until hidden, takes ~160 points above it, and a cap
+   worked from the screen left the page running under the button. Where the
+   width already binds (a tall phone, an iPad) this is larger than the page and
+   changes nothing.
+
+   Upright only. On its side a phone's page stands in the middle, well clear
+   of the corner, and there the cap made full screen shrink the page to two
+   thirds of its size with the bars up.
+
+   The field the page lies on is drawn here, over the strip too, and the
+   stage's own is taken away (as a spread does): the strip showed the app's
+   paler colour and read as a bar, in a mode meant to have none. */
+@media (orientation: portrait) {
+  .app[data-full-touch="button"] > main {
+    --full-touch-strip: calc(var(--touch-min) + 2 * var(--space-2) + env(safe-area-inset-bottom));
+    padding-block-end: var(--full-touch-strip);
+    background: var(--field-wash);
+    --stage-field: transparent;
+    container-type: size;
+    --stage-page-cap: min(62vh, calc((100cqh - 2 * var(--space-4)) * 0.57998));
+  }
 }
 
 /* Unless the tools stay (full-screen-tools.ts): down the side, the book keeps

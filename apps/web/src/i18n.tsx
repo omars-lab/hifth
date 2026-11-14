@@ -906,6 +906,9 @@ export interface Strings {
   fullScreenToolsDock: string;
   fullScreenToolsNone: string;
   fullScreenToolsNote: string;
+  touchFullToolsButton: string;
+  touchFullToolsRow: string;
+  touchFullToolsNote: string;
   leaveFullScreen: string;
   toolHelpTitle: string;
   toolHelpLine: string;
