@@ -6371,9 +6371,10 @@
       },
       "status": "open",
       "severity": "risk",
-      "owner": "agent",
+      "owner": "user",
       "feature": "hifth-app-site",
-      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. Done 2026-11-12: the keys work on this laptop, and the site project (hifth-app) is made on the new account. Still needed: hifth.app attached to that project after the first upload, the email list's database, the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id. 2026-11-12: this is the top item for the front page; it waits on three things from the owner: the email list's database, the contact address the privacy page names, and the real spam-check key. 2026-11-12: the email list moves to Supabase (owner's choice), so the Cloudflare database step above no longer applies; see notify-function-on-d1. 2026-11-13: still the next thing for the front page once the calendar's dots look was added. Readers cannot reach hifth.app at all until this first upload runs, and the upload waits only on the owner: pushing the email list's table to Supabase, the four site keys, the contact address and the real spam-check key."
+      "useCase": "find-hifth-and-open-it",
+      "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. Done 2026-11-12: the keys work on this laptop, and the site project (hifth-app) is made on the new account. Still needed: hifth.app attached to that project after the first upload, the email list's database, the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id. 2026-11-12: this is the top item for the front page; it waits on three things from the owner: the email list's database, the contact address the privacy page names, and the real spam-check key. 2026-11-12: the email list moves to Supabase (owner's choice), so the Cloudflare database step above no longer applies; see notify-function-on-d1. 2026-11-13: still the next thing for the front page once the calendar's dots look was added. Readers cannot reach hifth.app at all until this first upload runs, and the upload waits only on the owner: pushing the email list's table to Supabase, the four site keys, the contact address and the real spam-check key. 2026-11-13: the release check counted the page-comment files as uncommitted work and so refused every release; it now leaves them aside, with a test. 2026-11-14: still the most important thing for the front page, after the local side bar shipped; nothing an agent can do moves it, so it now shows as waiting on the owner."
     },
     {
       "id": "hifth-app-arabic-pictures",
@@ -6709,6 +6710,20 @@
       "severity": "question",
       "owner": "user",
       "note": "Should the new store accept connections only from listed internet addresses? Today it accepts any address that has the password. A list would shut out a stolen password used elsewhere, but this laptop's address changes, so a fixed list would lock the owner out until it is updated. The store check reports it and does not fail on it."
+    },
+    {
+      "id": "hifth-app-dev-sidebar",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑰"
+      },
+      "status": "fixed",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": ".claude/skills/deploy-site/scripts/dev-sidebar.test.mjs",
+      "feature": "hifth-app-site",
+      "useCase": "find-hifth-and-open-it",
+      "note": "On this laptop, hifth.app gets a side bar like the earlbear workflow site's: hifth.app's pages, each section and card of the features page, and the design pages, folding to icons and a drawer on a phone. Local copy only; the release check refuses it. Replaces the floating Designs button."
     }
   ]
 }

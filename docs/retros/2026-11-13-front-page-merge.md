@@ -12,6 +12,10 @@ folded: no
 - `scripts/gate-budget.mjs` after a merge of main: each side was under the 1.0 KB quiet margin, but together they moved the size 1.5 KB, so the push failed even though neither branch had. A merge that brings in a lot of main should run `pnpm gate:budget` before pushing, and expect to run `make budget-update`.
 - `.claude/skills/optimizing-performance/trims.md`: named the size map tool by a path that did not exist (`scripts/size-by-source.mjs`); it lives in the skill's own scripts folder. Fixed in the same commit as this note.
 - `pnpm test:scripts` after merging: the app-links page test failed until `make app-links-doc` rebuilt the shared link code. The rebuilt page was unchanged, so a stale build of the shared package, not the page, caused it.
+- `git push` run in the background without Node 22 on PATH: the push hook stopped at once on the Node check (v18). Every background command needs the same PATH line as the foreground ones.
+- `.claude/plans/floating-swimming-puzzle.md` names `make site-hifth-app` and `make deploy-hifth-app`; the targets are `make hifth-app-check` and `make hifth-app-publish`. Read `make help` before running a plan's commands.
+- `.claude/skills/deploy-site/scripts/release-hifth-app.mjs`: its clean-tree rule counted the page-comment files, which the comment tool writes to after every commit, so no release could ever pass. Fixed with a test; found only by running the check on a real clean checkout.
 
 ## Worth copying
+- `.claude/skills/optimizing-performance/trims.md`: trying the build settings first (the minifier) freed 13.6 KB where cutting code had freed 0.8. Measure each setting alone before cutting code.
 - `docs/issues.json` conflicts (both sides only added rows at the end): rebuilding the file row by row from the common ancestor, ours and theirs (keep whichever side changed a row, and flag rows both changed) resolved three conflict blocks with no hand-picking and no rows lost. Then rebuild the generated pages from the merged file, never resolve them by hand.

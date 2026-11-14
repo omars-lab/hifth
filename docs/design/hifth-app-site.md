@@ -281,3 +281,18 @@ even in Arabic. Those names now come from the app's word list in both languages,
 test opens a word's parts in Arabic and fails on any Latin letter under a sign. The two-page
 opening picture is the same file in both languages on purpose: it shows only the mus'haf pages,
 with no buttons or labels.
+
+### ⑰ On this laptop, can one side bar open every page a developer checks? · **fixed**
+
+Asked 2026-11-14: "a side bar that only appears in local host mode", reaching pages like the
+features page's panels section, and modelled on the side bar of the earlbear workflow site. It
+holds hifth.app's own pages, each section and card of the features page (the one `make
+feature-links` builds), and the design pages. It folds to a strip of icons, remembers that, and is
+a drawer on a phone. It replaces the floating Designs button, whose list it now carries. Like that
+button, it is added to the local copy only, after the release check, and the check refuses it and
+the copied features page if they ever reach a folder going up.
+
+Done 2026-11-14 and looked at in Chrome and Firefox, on a laptop and a phone. Looking found three
+faults, each now held by a test. The panels group showed 9 of the page's 11 cards, missing the two
+marked pitch-only; they are now listed with a "pitch only" tag. A long group name was cut off; it
+now wraps. And on a phone the Menu button sat under the comment bar, so it moved to the top left.
