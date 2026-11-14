@@ -5808,7 +5808,7 @@
       "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Words marked on a verse, from a ?w= link or a hold, vanished when the book went from one page to two, as when an iPad is turned or a window widened: the page component is built afresh inside the two-page wrapper and the words lived only in it. The app now keeps the marked words beside the selection and hands them to both pages, which mark them again as they are built; a new selection or Escape ends them.",
+      "note": "Words marked on a verse, from a ?w= link or a hold, vanished when the book went from one page to two, as when an iPad is turned or a window widened: the page component is built afresh inside the two-page wrapper and the words lived only in it. The app now keeps the marked words beside the selection and hands them to both pages, which mark them again as they are built; a new selection or Escape ends them. Escape now also lets go of words a link marked, and of words a hold marked before the book was laid out again; both had been ignored.",
       "closedBy": "apps/web/e2e/word.spec.ts"
     },
     {

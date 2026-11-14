@@ -461,6 +461,40 @@ test.describe("Hifth · word selection", () => {
     await expect(wordInk(page)).toHaveCount(0);
     await expect(page.locator("[data-words]")).toHaveCount(0);
   });
+
+  test("Escape lets go of words a hold marked, after the book went from one page to two", async ({ page }) => {
+    // The page built for two pages never saw the hold, so it must still hear
+    // Escape for the words it was handed: the first Escape leaves the words
+    // and keeps the verse.
+    await openApp(page);
+    await tapAyah(page, "#verse-46");
+    const at = await ayahTarget(page, "#verse-46");
+    await holdThen(page, at, async () => {
+      await expect(wordInk(page)).not.toHaveCount(0);
+    });
+    await page.mouse.up();
+    await toTwoPages(page);
+    await expect(wordInk(page)).not.toHaveCount(0);
+
+    await page.keyboard.press("Escape");
+    await expect(wordInk(page)).toHaveCount(0);
+    await expect(page.locator("[data-words]")).toHaveCount(0);
+    await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+  });
+
+  test("Escape lets go of words a link marked, and keeps the verse", async ({ page }) => {
+    await openApp(page, "/#/hafs-kfqc/2:39?w=3-5");
+    await expect(page.locator("[data-words]")).toHaveAttribute("data-words", "3-5");
+    await page.keyboard.press("Escape");
+    await expect(wordInk(page)).toHaveCount(0);
+    await expect(page.locator("[data-words]")).toHaveCount(0);
+    await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+
+    // And they stay gone when the book is laid out again.
+    await toTwoPages(page);
+    await page.waitForTimeout(1000);
+    await expect(wordInk(page)).toHaveCount(0);
+  });
 });
 
 /** Widen the window until the book shows two pages, as turning an iPad does. */

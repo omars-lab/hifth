@@ -3783,6 +3783,20 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     emitSelectionRect();
   }, [selectedKey, status, emitSelectionRect, clearWords, remarkWords]);
 
+  // App let go of the words (Escape on either page of two, or a new
+  // selection): every page this component holds drops their ink, not only the
+  // one whose Escape handler happened to hear the key first.
+  const hadWordsRef = useRef(false);
+  useEffect(() => {
+    if (markedWords) {
+      hadWordsRef.current = true;
+      return;
+    }
+    if (!hadWordsRef.current) return;
+    hadWordsRef.current = false;
+    clearWords();
+  }, [markedWords, clearWords]);
+
   // Show the verse a run is reciting. Its own step, after the selection's, so
   // the light can move without the word band, the swept passage or the drawer's
   // anchor following it: those belong to the chosen verse, which stays put.
@@ -4213,7 +4227,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
-      if (!wordRunRef.current) return;
+      // Words are in hand when this page made them by a hold, or when App
+      // handed them in (a link's ?w=, or a hold made on a page since rebuilt).
+      const handed = markedWordsRef.current;
+      if (!wordRunRef.current && !(handed && handed.key === selectedKeyRef.current)) return;
       if (document.querySelector('[role="dialog"]')) return;
       e.preventDefault();
       clearWords();

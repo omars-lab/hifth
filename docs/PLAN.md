@@ -2486,7 +2486,8 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     marked words beside the selection and hands them to both pages; each page that is built
     holding the verse marks them again, and a new selection or Escape ends them. Tests: a
     link's words survive one page to two and back, a hold's words survive, and words let go
-    with Escape do not come back.
+    with Escape do not come back. Escape also lets go of words a link marked, and of words
+    a hold marked before the book went to two pages (both had been ignored, found 2026-11-13).
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
