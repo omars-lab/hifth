@@ -107,8 +107,9 @@ Looked at on a 390-wide phone and a 768-wide upright iPad, in English and Arabic
 `apps/web/e2e/touch-full-screen.spec.ts` on the iPhone and Android runs, which marks a mistake on
 the last line without leaving full screen. Those tests found two faults the same day, both
 fixed: on a 664-tall iPhone in Safari the button lay on the page's bottom corner, where a line
-ends in Arabic, so the page now keeps a strip the button's height at its foot and is held to the
-height left; and picking the highlighter folded the tray before its colours could be picked, so
+ends in Arabic, so upright the page now keeps a strip the button's height at its foot and is
+held to the height left, with Safari's install notice up too (on its side the page stands clear
+of the corner and keeps its size); and picking the highlighter folded the tray before its colours could be picked, so
 a tool with a second row now keeps the tray up until that choice is made. Not yet looked at in
 the iPhone or iPad simulator. Left: the owner tries the three on the phone and the iPad and says
 which becomes the default.

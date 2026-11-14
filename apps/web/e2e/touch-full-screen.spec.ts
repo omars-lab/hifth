@@ -87,11 +87,9 @@ for (const where of [
     });
 
     test("the Tools button and Show the bars sit apart, and off the page", async ({ page }) => {
-      // Safari's "Install Hifth" notice, until hidden, pushes the page ~160px
-      // down and past the foot of a phone screen, whatever the button does; a
-      // reader who has hidden it is the case this checks (backlog
-      // full-screen-install-notice).
-      await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
+      // On the iPhone run Safari's "Install Hifth" notice is up, as it is for
+      // any reader who has not installed the app: it takes ~160px above the
+      // page, which must still clear the button (backlog full-screen-install-notice).
       await openInFullScreen(page);
       const a = (await button(page).boundingBox())!;
       const b = (await showBars(page).boundingBox())!;
@@ -112,6 +110,13 @@ for (const where of [
       const colours = tray(page).getByRole("radiogroup", { name: "Highlighter colour" });
       await expect(colours).toBeVisible();
       await colours.getByRole("radio").nth(1).click();
+      await expect(tray(page)).toHaveCount(0);
+      await expect(button(page)).toHaveAccessibleName(/Highlight/);
+      // A reader happy with the colour already on taps it, and the tray folds
+      // with the highlighter still on; the close button would put it away.
+      await button(page).click();
+      await settled(tray(page));
+      await colours.locator('[role="radio"][aria-checked="true"]').click();
       await expect(tray(page)).toHaveCount(0);
       await expect(button(page)).toHaveAccessibleName(/Highlight/);
     });
@@ -146,6 +151,23 @@ for (const where of [
     });
   });
 }
+
+test.describe("in full screen on a phone on its side", () => {
+  test.use({ viewport: { width: 664, height: 390 } });
+
+  test("the page is no smaller than with the bars, since it stands clear of the corner button", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p7");
+    const written = page.locator('svg[aria-labelledby="page-label-7"]');
+    await expect(written).toBeVisible();
+    const before = (await written.boundingBox())!;
+    await page.locator("[data-full-enter]").click();
+    await expect(page.locator("[data-full]")).toHaveCount(1);
+    await expect(button(page)).toBeVisible();
+    const after = (await written.boundingBox())!;
+    expect(after.width, "the page in full screen").toBeGreaterThanOrEqual(before.width - 1);
+    expect(apart((await button(page).boundingBox())!, after), "the button is off the page").toBe(true);
+  });
+});
 
 test("the setting is in the info panel, the button chosen until the reader picks", async ({ page }) => {
   await page.goto("/#/hafs-kfqc/p7");
