@@ -110,6 +110,7 @@ import {
   type TajweedShard,
   type TajweedVocabulary,
   type WordIndex,
+  parseWordKey,
 } from "@hifth/core";
 import {
   loadManifest,
@@ -141,6 +142,7 @@ import {
   RAIL_CLEARANCE,
   type Corner,
   type Erased,
+  type MarkedWords,
   type PageStageHandle,
   type PageTool,
   type VerseSpot,
@@ -466,6 +468,14 @@ export function App(): JSX.Element {
   }, [commentaryOpen]);
   const [page, setPage] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // Words marked inside the selected verse, by a hold or a link's `?w=`. Kept
+  // here, not in the page, because the page is built afresh when the book goes
+  // from one page to two; a new selection ends them (the effect below).
+  const [markedWords, setMarkedWords] = useState<MarkedWords | null>(null);
+  useEffect(() => {
+    if (markedWords && markedWords.key !== selectedKey) setMarkedWords(null);
+  }, [markedWords, selectedKey]);
+  const clearMarkedWords = useCallback(() => setMarkedWords(null), []);
   // The drag-highlighted passage: its ayah keys in reading order (spec §3's
   // `onRangeSelect` payload), or null. Mutually exclusive with `selectedKey` —
   // a highlight replaces a selection and vice versa, so exactly one hop list
@@ -3240,7 +3250,9 @@ export function App(): JSX.Element {
    * what the run actually matched.
    */
   const handleSelectWords = useCallback(
-    (wordKey: string) => {
+    (wordKey: string, ayahKey: string) => {
+      const words = parseWordKey(wordKey);
+      setMarkedWords(words ? { key: ayahKey, from: words.from, to: words.to } : null);
       if (!adjacency || toolRef.current === "read") return;
       const hops = adjacency.hopsForWords(
         wordKey,
@@ -3665,6 +3677,8 @@ export function App(): JSX.Element {
       }
       setSelectedRange(null);
       setSelectedKey(key);
+      const words = origin === "link" && state.word ? state.word : null;
+      setMarkedWords(words ? { key, from: words[0], to: words[1] } : null);
       setPage(loc.page);
       announce(t.arrivedAyah(origin, t.ayahLabel(key) ?? key, loc.page));
       // Words the link names (`?w=3-7`) are laid as word ink on arrival. The
@@ -4527,6 +4541,8 @@ export function App(): JSX.Element {
                      about the ayah that is selected, and on a spread that ayah
                      is as often printed on this leaf as on the other one. */
                   onSelectWords={handleSelectWords}
+                  markedWords={markedWords}
+                  onClearWords={clearMarkedWords}
                   onTurn={stepPage}
                   onPinchZoom={pinchedFacing}
                   onPan={pannedFacing}
@@ -4613,6 +4629,8 @@ export function App(): JSX.Element {
                 onCornerHold={setCornerMenu}
                 onSelectRange={handleSelectRange}
                 onSelectWords={handleSelectWords}
+                markedWords={markedWords}
+                onClearWords={clearMarkedWords}
                 /* Every turn ends where the arrow keys end — one `stepPage`, so
                    a wheel turn, a dragged turn and a keyed turn cannot drift
                    apart. Both stages get it: on a spread the facing leaf is as

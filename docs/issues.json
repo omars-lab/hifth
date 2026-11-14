@@ -5805,10 +5805,11 @@
         "file": "docs/PLAN.md",
         "item": "125"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "Words marked on a verse (from a ?w= link, and most likely from a hold too, not yet checked) vanish when the book goes from one page to two, as when an iPad is turned or a window widened: the page component is rebuilt inside the two-page wrapper and the words lived only in it. The selection survives because the app keeps it. Fix: the app keeps the marked words and hands them to each page as it is built. The proving test is parked as known-failing in apps/web/e2e/word.spec.ts."
+      "note": "Words marked on a verse, from a ?w= link or a hold, vanished when the book went from one page to two, as when an iPad is turned or a window widened: the page component is built afresh inside the two-page wrapper and the words lived only in it. The app now keeps the marked words beside the selection and hands them to both pages, which mark them again as they are built; a new selection or Escape ends them.",
+      "closedBy": "apps/web/e2e/word.spec.ts"
     },
     {
       "id": "short-screen-loses-the-spread",

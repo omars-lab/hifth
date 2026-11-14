@@ -2481,10 +2481,12 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     pages: the verse is still selected, but its words are no longer marked. Going from one page
     to two puts the page inside the two-page wrapper, which rebuilds the page component, and
     the marked words lived only inside it; the selection survives because the app above keeps
-    it. Seen in Chrome and Firefox (2026-11-13). Words marked by a hold most likely go the same
-    way, not yet checked. **Open:** the app should keep the marked words, as it keeps the
-    selection, and hand them to the page each time it is built. The test that proves it is
-    written and parked as known-failing in the word tests.
+    it (checked: the page component after widening is a new one). Seen in Chrome and Firefox
+    (2026-11-13); words marked by a hold went the same way. **Fixed:** the app now keeps the
+    marked words beside the selection and hands them to both pages; each page that is built
+    holding the verse marks them again, and a new selection or Escape ends them. Tests: a
+    link's words survive one page to two and back, a hold's words survive, and words let go
+    with Escape do not come back.
 
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and

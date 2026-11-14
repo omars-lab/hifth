@@ -410,20 +410,61 @@ test.describe("Hifth · word selection", () => {
     await expect(page.locator("[data-words]")).toHaveCount(0);
   });
 
-  // Known to fail: going from one page to two rebuilds the page component, and
-  // the marked words lived only inside it. Fixed when the app itself keeps
-  // them (docs/PLAN.md item 125, issues row words-lost-when-the-book-is-laid-out-again);
-  // flip fixme back to test then.
-  test.fixme("a link's words stay marked when the book goes from one page to two", async ({ page }) => {
+  test("a link's words stay marked when the book goes from one page to two", async ({ page }) => {
     // Turning an iPad, or widening a window, lays the pages out again. The
     // selection comes back on the new page; the words must too.
     await openApp(page, "/#/hafs-kfqc/2:39?w=3-5");
     await expect(page.locator("[data-words]")).toHaveAttribute("data-words", "3-5");
-    const before = await page.locator("svg[role='group']").count();
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await expect.poll(() => page.locator("svg[role='group']").count()).toBeGreaterThan(before);
+    const narrow = page.viewportSize()!;
+    await toTwoPages(page);
     await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
     await expect(page.locator("[data-words]")).toHaveAttribute("data-words", "3-5");
     await expect(wordInk(page)).not.toHaveCount(0);
+
+    // And back again, as an iPad turned the other way.
+    await page.setViewportSize(narrow);
+    await expect.poll(() => page.locator("svg[role='group']").count()).toBe(1);
+    await expect(page.locator("[data-words]")).toHaveAttribute("data-words", "3-5");
+    await expect(wordInk(page)).not.toHaveCount(0);
+  });
+
+  test("words marked by a hold stay marked when the book goes from one page to two", async ({ page }) => {
+    await openApp(page);
+    await tapAyah(page, "#verse-46");
+    const at = await ayahTarget(page, "#verse-46");
+    await holdThen(page, at, async () => {
+      await expect(page.locator("[data-words]")).toHaveCount(1);
+    });
+    await page.mouse.up();
+    const marked = await page.locator("[data-words]").getAttribute("data-words");
+    expect(marked, "the hold marked some words").toMatch(/^\d+-\d+$/);
+
+    await toTwoPages(page);
+    await expect(page.locator("[data-words]")).toHaveAttribute("data-words", marked!);
+    await expect(wordInk(page)).not.toHaveCount(0);
+  });
+
+  test("words let go with Escape do not come back when the book goes from one page to two", async ({ page }) => {
+    await openApp(page);
+    await tapAyah(page, "#verse-46");
+    const at = await ayahTarget(page, "#verse-46");
+    await holdThen(page, at, async () => {
+      await expect(wordInk(page)).not.toHaveCount(0);
+    });
+    await page.mouse.up();
+    await page.keyboard.press("Escape");
+    await expect(wordInk(page)).toHaveCount(0);
+
+    await toTwoPages(page);
+    await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+    await page.waitForTimeout(1000);
+    await expect(wordInk(page)).toHaveCount(0);
+    await expect(page.locator("[data-words]")).toHaveCount(0);
   });
 });
+
+/** Widen the window until the book shows two pages, as turning an iPad does. */
+async function toTwoPages(page: Page): Promise<void> {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect.poll(() => page.locator("svg[role='group']").count()).toBe(2);
+}
