@@ -295,6 +295,16 @@
   --safe-bottom: 0px;
 }
 
+/* A note standing beside the page on a phone on its side (CommentarySheet's
+   `standing`): the bars at the foot took about the lower 40% of that short
+   screen and covered the end of a long verse, 2 of 2:255's 6 lines on the
+   smallest phone (docs/design/iphone-app.md, item 11). They go while the note
+   stands, as in full screen, and the page takes their room; the header stays,
+   and closing the note brings them back. */
+.app[data-note-stands] > :is(footer, nav, [role="toolbar"]) {
+  display: none;
+}
+
 /* Full screen (docs/design/verse-tap-and-hold.md): every bar goes, and the
    page takes the room they leave. */
 .app[data-full] > :is(header, footer:not([data-full-keep]), nav, [role="toolbar"]:not([data-full-keep])) {

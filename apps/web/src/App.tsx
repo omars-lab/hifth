@@ -4388,7 +4388,7 @@ export function App(): JSX.Element {
     // RTL because they are furniture around a mus'haf, not around a sentence.
     <MarkUndoContext.Provider value={markUndo}>
     <FullScreenContext.Provider value={fullInBar}>
-    <div className={styles.app} dir={dir} data-full={full || undefined} data-full-tools={keepTools ? fullTools : undefined} data-full-side={keepTools ? penSide : undefined} data-full-touch={touchFullNow ?? undefined} data-pages={appPages === "row" ? "" : undefined}>
+    <div className={styles.app} dir={dir} data-full={full || undefined} data-full-tools={keepTools ? fullTools : undefined} data-full-side={keepTools ? penSide : undefined} data-full-touch={touchFullNow ?? undefined} data-pages={appPages === "row" ? "" : undefined} data-note-stands={(noteStanding && noteCorner !== null) || undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to

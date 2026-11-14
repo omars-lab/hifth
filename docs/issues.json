@@ -3225,12 +3225,13 @@
         "file": "docs/design/iphone-app.md",
         "item": "⑪"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "useCase": "read-the-commentary-beside-my-verse",
       "feature": "tafsir-seam",
-      "note": "On phones held on their side, with 2:255's note open, the bars at the foot of the screen (Full screen, the page strip and its chip) take about the lower 40% of the height and cover the end of the verse: the last 2 of its 6 lines on the smallest phone (667 by 375 points), and the walk's picture of step 4 on the 6.3-inch phone (874 by 402) shows the same. Also, in the picture taken just after the tap (step 3), the page shows its own foot, not the verse; it moves to the verse a moment later. Both were so before the note moved beside the page (seen while measuring that change, 2026-11-14); the note itself covers no line of the verse. The walk's check only asks whether the note covers the verse, not the foot bars, which is why it passes. Likely fix: hide or shrink the foot bars while a note stands beside the page on a short screen, and widen the walk's check to every bar. Test first: the pitch spec's phone-size loop with a 667 by 375 screen, which fails today."
+      "note": "Fixed 2026-11-14: while a note stands beside the page on a phone held on its side, the bars at the foot of the screen (Full screen, the page strip and its chip) are hidden; the header stays, and closing the note brings them back. Tests in the pitch spec, written first and seen failing (a line of 2:255 under a bar on the smallest phone, 667 by 375, and on an 844 by 390 phone): every line of the six-line verse is in sight beside the note and none is under a bar, on both sizes, and closing the note brings the bars back. The moment after the tap: the picture taken then shows the page before it moves to the verse, about half a second later; that is the page bringing the verse into sight, not a fault, and the tests check where it settles. The note lying across the foot (the other setting) is unchanged.",
+      "closedBy": "apps/web/e2e/pitch.spec.ts"
     },
     {
       "id": "iphone-own-device-install",
