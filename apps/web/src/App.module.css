@@ -297,8 +297,28 @@
 
 /* Full screen (docs/design/verse-tap-and-hold.md): every bar goes, and the
    page takes the room they leave. */
-.app[data-full] > :is(header, footer, nav, [role="toolbar"]) {
+.app[data-full] > :is(header, footer, nav, [role="toolbar"]:not([data-full-keep])) {
   display: none;
+}
+
+/* Unless the tools stay (full-screen-tools.ts): down the side, the book keeps
+   clear of them by the rail's width on their side, at its widest, with the
+   pens out (149px on a 1024 screen, and the gap). Kept at its widest, not
+   followed, so the page does not shrink under the reader's hand each time a
+   pen tool is picked. A shut dock needs about half the narrow rail. Hidden at
+   the edge the tools take no room, and come over the page only while the
+   pointer brings them. */
+.app[data-full-tools="side"] {
+  --full-tools-room: 168px;
+}
+.app[data-full-tools="dock"] {
+  --full-tools-room: 48px;
+}
+.app[data-full-tools][data-full-side="right"] > main {
+  padding-right: var(--full-tools-room, 0px);
+}
+.app[data-full-tools][data-full-side="left"] > main {
+  padding-left: var(--full-tools-room, 0px);
 }
 
 /* The bottom line's way into full screen, for options B and C. It fills the

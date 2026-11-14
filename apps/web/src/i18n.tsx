@@ -893,6 +893,13 @@ export interface Strings {
   drawerGlowRing: string;
   drawerGlowNone: string;
   drawerGlowNote: string;
+  fullScreenToolsTitle: string;
+  fullScreenToolsSide: string;
+  fullScreenToolsEdge: string;
+  fullScreenToolsDock: string;
+  fullScreenToolsNone: string;
+  fullScreenToolsNote: string;
+  leaveFullScreen: string;
   toolHelpTitle: string;
   toolHelpLine: string;
   toolHelpHover: string;

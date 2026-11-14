@@ -94,6 +94,10 @@
       "desktop",
       "desktop-firefox"
     ],
+    "full-screen-tools.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
     "golden.spec.ts": [
       "golden"
     ],

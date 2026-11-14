@@ -9,6 +9,7 @@ import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
 import { DRAWER_GLOWS, type DrawerGlow } from "../drawer-glow";
+import { FULL_SCREEN_TOOLS, type FullScreenTools } from "../full-screen-tools";
 import { TOOL_HELPS, type ToolHelp } from "../tool-help";
 import { SETTINGS_ATS, type SettingsAt } from "../settings-at";
 import { APP_PAGES, type AppPages } from "../app-pages";
@@ -72,6 +73,8 @@ interface ColophonProps {
   onDrawerTools?: (choice: DrawerTools) => void;
   drawerGlow?: DrawerGlow;
   onDrawerGlow?: (choice: DrawerGlow) => void;
+  fullScreenTools?: FullScreenTools | undefined;
+  onFullScreenTools?: (choice: FullScreenTools) => void;
   /** Whether the line beside the page tools stays, or only each tool's label; remembered on this device. */
   toolHelp?: ToolHelp;
   onToolHelp?: (choice: ToolHelp) => void;
@@ -388,6 +391,8 @@ export function Colophon({
   onDrawerTools,
   drawerGlow,
   onDrawerGlow,
+  fullScreenTools,
+  onFullScreenTools,
   toolHelp,
   onToolHelp,
   settingsAt,
@@ -641,6 +646,12 @@ export function Colophon({
             (selection-drawer ②): three built, the deeper colour by default. */}
         {drawerGlow && onDrawerGlow && (
           <Choice id="drawer-glow" title={t.drawerGlowTitle} note={t.drawerGlowNote} value={drawerGlow} options={DRAWER_GLOWS} label={(choice) => choice === "brighten" ? t.drawerGlowBrighten : choice === "ring" ? t.drawerGlowRing : t.drawerGlowNone} data="drawer-glow" onPick={onDrawerGlow} />
+        )}
+
+        {/* Where the tools go in full screen (verse-tap-and-hold ①, the
+            notes-style toolbar's ⑤): four built, down the side by default. */}
+        {fullScreenTools && onFullScreenTools && (
+          <Choice id="full-screen-tools" title={t.fullScreenToolsTitle} note={t.fullScreenToolsNote} value={fullScreenTools} options={FULL_SCREEN_TOOLS} label={(choice) => choice === "side" ? t.fullScreenToolsSide : choice === "edge" ? t.fullScreenToolsEdge : choice === "dock" ? t.fullScreenToolsDock : t.fullScreenToolsNone} data="full-screen-tools" onPick={onFullScreenTools} />
         )}
 
         {/* The help for the page tools (ayah-drawer ①): each tool's label

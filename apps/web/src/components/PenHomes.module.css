@@ -270,6 +270,39 @@
   flex-direction: row-reverse;
 }
 
+/* In full screen, hidden at the edge (full-screen-tools.ts): slid out past the
+   window's side until the pointer rests there; a key that reaches a button
+   inside brings them back too. */
+.side[data-edge] {
+  transition: transform 180ms ease-out;
+}
+.side[data-edge="hidden"]:not(:focus-within) {
+  transform: translate(calc(100% + 16px), -50%);
+}
+.side[data-pen-side="left"][data-edge="hidden"]:not(:focus-within) {
+  transform: translate(calc(-100% - 16px), -50%);
+}
+
+/* Or a small dock of the same icons, that opens out from the window's edge
+   under the pointer or a tap. */
+.side[data-dock] {
+  transform-origin: right center;
+  transition: transform 160ms ease-out;
+}
+.side[data-pen-side="left"][data-dock] {
+  transform-origin: left center;
+}
+.side[data-dock="shut"] {
+  transform: translateY(-50%) scale(0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side[data-edge],
+  .side[data-dock] {
+    transition: none;
+  }
+}
+
 .sideColumn {
   display: flex;
   flex-direction: column;

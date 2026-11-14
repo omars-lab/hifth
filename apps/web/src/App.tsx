@@ -203,6 +203,7 @@ import {
   type Recorder,
 } from "./mark-history";
 import { FullScreenContext, MarkUndoContext } from "./components/UndoRedo";
+import { rememberFullScreenTools, savedFullScreenTools, type FullScreenTools } from "./full-screen-tools";
 import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger, listenCaption, listenGlyph } from "./components/PlayTrigger";
@@ -1585,6 +1586,18 @@ export function App(): JSX.Element {
   }, []);
   // Full screen: every bar hidden, the page alone (the same note, all options).
   const [full, setFull] = useState(false);
+  // Where the tools go in full screen (full-screen-tools.ts): down the side by
+  // default, so a mistake can be marked without leaving it; on a desktop or a
+  // sideways iPad only, since a phone's tools live in its bottom line.
+  const [fullTools, setFullTools] = useState<FullScreenTools>(() => savedFullScreenTools());
+  const chooseFullTools = useCallback((choice: FullScreenTools) => {
+    rememberFullScreenTools(choice);
+    setFullTools(choice);
+  }, []);
+  const keepTools = full && desktop && fullTools !== "none";
+  // The tools' home as drawn: in full screen, kept tools stand down the side
+  // whichever home they have outside it, since the bars they sit in are away.
+  const homeNow: PenHome | null = keepTools ? "side" : penAt;
   // The verse a hold opened the small menu on (option C), and where it is.
   const [verseMenu, setVerseMenu] = useState<{ key: string; around: DOMRect } | null>(null);
   const closeVerseMenu = useCallback(() => setVerseMenu(null), []);
@@ -4005,8 +4018,8 @@ export function App(): JSX.Element {
   // On a desktop, full screen is an icon at the end of the tool bar, beside
   // undo and redo (owner's page comment, 2026-11-07); a phone keeps the word in
   // the bottom line. Gesture option A has no button either way.
-  const goFull = useCallback(() => setFull(true), []);
-  const fullInBar = desktop && verseGestures !== "a" ? goFull : null;
+  const toggleFull = useCallback(() => setFull((f) => !f), []);
+  const fullInBar = useMemo(() => (desktop && verseGestures !== "a" ? { full, toggle: toggleFull } : null), [desktop, verseGestures, full, toggleFull]);
   const fullSaid = useRef(false);
   useEffect(() => {
     if (full === fullSaid.current) return;
@@ -4266,7 +4279,7 @@ export function App(): JSX.Element {
     // RTL because they are furniture around a mus'haf, not around a sentence.
     <MarkUndoContext.Provider value={markUndo}>
     <FullScreenContext.Provider value={fullInBar}>
-    <div className={styles.app} dir={dir} data-full={full || undefined} data-pages={appPages === "row" ? "" : undefined}>
+    <div className={styles.app} dir={dir} data-full={full || undefined} data-full-tools={keepTools ? fullTools : undefined} data-full-side={keepTools ? penSide : undefined} data-pages={appPages === "row" ? "" : undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to
@@ -4423,7 +4436,7 @@ export function App(): JSX.Element {
           argue with the page. */}
       {/* Its own row above the book, not floated over it: floated, it sat on
           the page's first line. */}
-      {resolver && desktop && penAt === "strip" && (
+      {resolver && desktop && homeNow === "strip" && (
         <PageToolbar
           tool={tool}
           locked={locked}
@@ -4450,8 +4463,8 @@ export function App(): JSX.Element {
           aim={markAim}
         />
       )}
-      {resolver && desktop && penAt === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
-      {resolver && desktop && penAt === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
+      {resolver && desktop && homeNow === "float" && <PenHomeFloat tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
+      {resolver && desktop && homeNow === "side" && <PenHomeSide tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} full={keepTools ? fullTools : undefined} />}
       {resolver && !desktop && phoneBar === "a" && <PhoneToolbarA tool={tool} locked={locked} onTool={chooseTool} />}
       <main
         ref={roomRef}
@@ -4881,6 +4894,8 @@ export function App(): JSX.Element {
             onDrawerTools={chooseDrawerTools}
             drawerGlow={drawerGlow}
             onDrawerGlow={chooseDrawerGlow}
+            fullScreenTools={desktop ? fullTools : undefined}
+            onFullScreenTools={chooseFullTools}
             toolHelp={toolHelp}
             onToolHelp={chooseToolHelp}
             settingsAt={settingsAt}
@@ -5014,7 +5029,7 @@ export function App(): JSX.Element {
           bar, so it covers neither the page bar nor the trail. */}
       <MovedSheet file={bookmarkFileText} onSave={saveBookmarkFile} readPlace={readSeam} readRecord={readRecord} />
       <footer className={styles.trail} aria-label={t.trail} dir="rtl" data-keep-clear="">
-        {resolver && desktop && penAt === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
+        {resolver && desktop && homeNow === "bottom" && <PenHomeBottom tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} side={penSide} />}
         {resolver && !desktop && phoneBar === "b" && <PhoneToolbarB tool={tool} locked={locked} onTool={chooseTool} />}
         {resolver && !desktop && phoneBar === "c" && <PhoneToolbarC tool={tool} locked={locked} onTool={chooseTool} pen={pen} onPen={choosePen} tools={barTools} aim={markAim} />}
         {railAt === "bar" && !railOnDrawer && hopRail(undefined, "bar")}

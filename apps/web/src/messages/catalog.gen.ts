@@ -162,6 +162,12 @@ export interface Catalog {
   readonly fullScreen: string;
   readonly fullScreenOff: string;
   readonly fullScreenOn: string;
+  readonly fullScreenToolsDock: string;
+  readonly fullScreenToolsEdge: string;
+  readonly fullScreenToolsNone: string;
+  readonly fullScreenToolsNote: string;
+  readonly fullScreenToolsSide: string;
+  readonly fullScreenToolsTitle: string;
   readonly goTo: string;
   readonly goToLong: string;
   readonly goToVerse: (d: { readonly label: string | number }) => string;
@@ -236,6 +242,7 @@ export interface Catalog {
   readonly langSectionTitle: string;
   readonly langSwitchTo: (d: { readonly other: string | number }) => string;
   readonly lastPage: (d: { readonly page: string | number }) => string;
+  readonly leaveFullScreen: string;
   readonly leftOffLabel: string;
   readonly leftOffMark: string;
   readonly leftOffNote: string;
