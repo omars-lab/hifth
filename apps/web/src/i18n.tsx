@@ -887,6 +887,11 @@ export interface Strings {
   drawerToolsSheet: string;
   drawerToolsDrawer: string;
   drawerToolsNote: string;
+  drawerGlowTitle: string;
+  drawerGlowBrighten: string;
+  drawerGlowRing: string;
+  drawerGlowNone: string;
+  drawerGlowNote: string;
   toolHelpTitle: string;
   toolHelpLine: string;
   toolHelpHover: string;

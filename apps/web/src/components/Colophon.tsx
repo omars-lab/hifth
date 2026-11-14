@@ -8,6 +8,7 @@ import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
+import { DRAWER_GLOWS, type DrawerGlow } from "../drawer-glow";
 import { TOOL_HELPS, type ToolHelp } from "../tool-help";
 import { SETTINGS_ATS, type SettingsAt } from "../settings-at";
 import { APP_PAGES, type AppPages } from "../app-pages";
@@ -68,6 +69,8 @@ interface ColophonProps {
   /** Where a verse's tools open, a card or inside its drawer; remembered on this device. */
   drawerTools?: DrawerTools;
   onDrawerTools?: (choice: DrawerTools) => void;
+  drawerGlow?: DrawerGlow;
+  onDrawerGlow?: (choice: DrawerGlow) => void;
   /** Whether the line beside the page tools stays, or only each tool's label; remembered on this device. */
   toolHelp?: ToolHelp;
   onToolHelp?: (choice: ToolHelp) => void;
@@ -382,6 +385,8 @@ export function Colophon({
   onVerseGestures,
   drawerTools,
   onDrawerTools,
+  drawerGlow,
+  onDrawerGlow,
   toolHelp,
   onToolHelp,
   settingsAt,
@@ -628,6 +633,12 @@ export function Colophon({
             card by default until the owner has tried the drawer by hand. */}
         {drawerTools && onDrawerTools && (
           <Choice id="drawer-tools" title={t.drawerToolsTitle} note={t.drawerToolsNote} value={drawerTools} options={DRAWER_TOOLS} label={(choice) => choice === "sheet" ? t.drawerToolsSheet : t.drawerToolsDrawer} data="drawer-tools" onPick={onDrawerTools} />
+        )}
+
+        {/* What the lit verse does while the pointer rests on its drawer
+            (selection-drawer ②): three built, the deeper colour by default. */}
+        {drawerGlow && onDrawerGlow && (
+          <Choice id="drawer-glow" title={t.drawerGlowTitle} note={t.drawerGlowNote} value={drawerGlow} options={DRAWER_GLOWS} label={(choice) => choice === "brighten" ? t.drawerGlowBrighten : choice === "ring" ? t.drawerGlowRing : t.drawerGlowNone} data="drawer-glow" onPick={onDrawerGlow} />
         )}
 
         {/* The help for the page tools (ayah-drawer ①): each tool's label

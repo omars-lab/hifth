@@ -5964,7 +5964,8 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner's page comment of 2026-11-07 asked for the lit verse to glow while the pointer rests on its drawer. Next step is a rough build of a brighter wash and a ring, looked at on the laptop."
+      "useCase": "find-everything-about-my-verse-in-one-place",
+      "note": "Owner's page comment of 2026-11-07 asked for the lit verse to glow while the pointer rests on its drawer. Built 2026-11-13 as a setting in the info panel, all three ways: the verse's amber deepens (the default), a darker edge round each of its lines, or no change. Only a mouse, a trackpad or a Pencil held above the screen sets it off; a finger tap changes nothing. Looked at on the laptop at 1280: the first, lighter shade of amber could hardly be told from the resting one, so the deeper shade is a step darker; the letters stay black under both. Tested in apps/web/e2e/drawer-glow.spec.ts on laptop Chrome and Firefox. Left: the owner tries it with a mouse and on the iPad with a trackpad or Pencil, and says which becomes the default."
     },
     {
       "id": "drawer-holds-its-tools",
