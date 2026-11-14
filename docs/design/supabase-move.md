@@ -18,8 +18,8 @@ queries, so that was wrong.) Tracked as the `supabase-move` row in the issue reg
 smaller items after it (③, ④, ⑤); ② is answered.
 
 **A leak on the way (2026-11-13).** While checking the saved settings, a Claude session printed
-every saved value into its chat. The two Cloudflare tokens were replaced the same day; the
-database password is replaced the same way (the secrets skill's table says how). What happened,
+every saved value into its chat. The two Cloudflare tokens were replaced the same day, and the
+database password the next (2026-11-14): the new address connects and the old one is refused. What happened,
 and the guard that now refuses such commands, is in
 [docs/issues/secrets-printed-into-chat.md](../issues/secrets-printed-into-chat.md).
 

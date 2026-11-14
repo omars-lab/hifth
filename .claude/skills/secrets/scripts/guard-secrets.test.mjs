@@ -1,8 +1,8 @@
 // The guard that stops a Claude session from printing a saved secret.
 //
 // On 2026-11-13 a hand-run decrypt printed every saved value into a chat: the command sent
-// stdout away, but the tool wrote the values to stderr. The two Cloudflare tokens were replaced
-// (the database password too, if the owner reset it). The guard refuses the ways a session could show a value, and lets the
+// stdout away, but the tool wrote the values to stderr. The two Cloudflare tokens and the database
+// password were replaced. The guard refuses the ways a session could show a value, and lets the
 // name-only commands through. Every command below is made up; none carries a real value.
 import { test } from "node:test";
 import assert from "node:assert/strict";

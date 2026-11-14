@@ -12,8 +12,12 @@ counts as leaked.
 
 - The owner rolled both Cloudflare tokens. `make cf-tokens` confirmed the new ones work and end
   on 2027-11-12.
-- The database password is replaced the same way, by resetting it in the Supabase dashboard and
-  saving the new address. The `secrets` skill's table gives the steps for every entry.
+- The owner reset the database password on 2026-11-14 and saved the new address. The new one
+  connects and the page check passes; the old one is refused. The first save that day held the
+  same address again (the old password went back into the `[YOUR-PASSWORD]` gap), which a
+  fingerprint comparison caught: `.claude/skills/secrets/scripts/db-connects.mjs` prints
+  `connects` or `refused` and 8 characters that match only when two saved copies are the same.
+  The `secrets` skill's table gives the steps for every entry.
 - The key that unlocks the encrypted copy was **not** printed, so it was not changed.
 
 **Why the redirection did not help.** Sending one stream away says nothing about the other.
