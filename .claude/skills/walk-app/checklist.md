@@ -285,6 +285,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   cover none of its lines. A check that only asks about the note misses this. · phone-side,
   iphone · issues: `phone-side-foot-bars-cover-verse` · found 2026-11-14 in the walk's pictures
   of steps 3 and 4
+- [ ] On a phone on its side, with the note standing beside the page, open a verse with
+  look-alikes (35:44): the look-alike chips sit in a row on the note's own top row, clear of its
+  close button, and not hidden behind the note. · phone-side, iphone · tests: pitch spec, "the
+  look-alike chips stay in sight, clear of the note's close button" · found 2026-11-14: the
+  standing note covered the corner the chips rest in
 - [ ] Open a verse's note: it never covers its own verse, also after turning the phone. · phone,
   phone-side · issue: `note-covers-verse-after-turn`
 - [ ] On a phone on its side in the pitch build, open 2:255's note: all six of its lines and its

@@ -1,5 +1,6 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
 import { LONG_VERSE_KEY } from "../src/long-verse";
+import { NOTE_SIDEWAYS_KEY } from "../src/phone-note";
 import { ZOOM_ANCHOR_KEY } from "../src/zoom-anchor";
 import { ayahTarget } from "./ayah";
 import { fakePlayer } from "./player";
@@ -2993,6 +2994,9 @@ test.describe("Hifth · the pitch commentary on a phone", () => {
 
 test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
   test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+  test.beforeEach(async ({ context }) => {
+    await context.addInitScript((key) => localStorage.setItem(key, "foot"), NOTE_SIDEWAYS_KEY);
+  });
 
   test("on a phone held sideways, the look-alike chips lie in a row on the note's top row, clear of its close button", async ({ page }) => {
     // Held sideways the phone is wider than the width the chips lie flat at
@@ -3181,6 +3185,91 @@ test.describe("Hifth · the pitch commentary on a phone held sideways", () => {
         const boxes = await lines.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().bottom));
         expect(boxes.length).toBeGreaterThan(1);
         for (const bottom of boxes) expect(bottom, "a line of the verse is under the list").toBeLessThanOrEqual(top);
+      });
+    }
+  });
+});
+
+test.describe("Hifth · the pitch commentary on a phone on its side, the note standing beside the page", () => {
+  // The default since 2026-11-14 (docs/decisions/phone-note.md): the note stands
+  // the full height of the screen beside the page, not across its foot. The
+  // group above keeps the same promises for the foot, which stays a setting.
+  test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+
+  test("the look-alike chips stay in sight, clear of the note's close button", async ({ page }) => {
+    // The note standing beside the page is narrower than one lying across the
+    // foot, and the chips seated on its top row came down onto its close button.
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const rail = page.getByRole("group", { name: "Links from this ayah" });
+    await expect(rail).toBeVisible();
+    await settle(rail);
+    const chips = await rail.getByRole("button").all();
+    expect(chips.length).toBe(2);
+    const close = (await sheet(page).getByRole("button", { name: "Close" }).boundingBox())!;
+    for (const chip of chips) {
+      const box = (await chip.boundingBox())!;
+      expect(overlaps(box, close), `the chip ${JSON.stringify(box)} is on the close button ${JSON.stringify(close)}`).toBe(false);
+      expect(box.y, "the chip is below the top of the screen").toBeGreaterThanOrEqual(0);
+      expect(box.y + box.height, "the chip is above the foot of the screen").toBeLessThanOrEqual(390);
+    }
+  });
+
+  test("turning a phone on its side with a note open leaves every line of the verse clear of the note", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/#/hafs-kfqc/35:44");
+    await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    await settle(page.locator("#hifth-overlay .hl-sel").first());
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    await settle(page.locator("#hifth-overlay .hl-sel").first());
+    await page.waitForTimeout(600);
+    const note = (await sheet(page).boundingBox())!;
+    const boxes = await litLineBoxes(page);
+    expect(boxes.length).toBeGreaterThan(1);
+    for (const b of boxes) expect(overlaps(b, note), "a line of the verse is under the note").toBe(false);
+  });
+
+  test.describe("read upright first", () => {
+    test.use({ viewport: { width: 390, height: 844 } });
+    test.beforeEach(async ({ context }) => {
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+    });
+
+    for (const open of ["roots", "look-alikes"] as const) {
+      test(`turned on its side, the note closed and a list opened, no line of the verse is under the list: ${open}`, async ({
+        page,
+      }) => {
+        // The note stood beside the page once the phone was turned, and the page
+        // moved aside for it. Closed, and a list opened at the foot, the verse
+        // was left under the list.
+        await page.goto("/#/hafs-kfqc/35:44");
+        await expect(sheet(page)).toBeVisible({ timeout: 20_000 });
+        await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        await settle(page.locator("#hifth-overlay .hl-sel").first());
+        await page.setViewportSize({ width: 844, height: 390 });
+        await expect(sheet(page)).toHaveAttribute("data-standing", "true");
+        await sheet(page).getByRole("button", { name: "Close" }).click();
+        const tools = page.getByRole("region", { name: "Tools for Fatir · 35:44" });
+        await expect(tools).toBeVisible();
+        await tools.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        const lines = page.locator("#hifth-overlay .hl-sel");
+        await settle(lines.first());
+        if (open === "roots") await tools.getByRole("button", { name: /^Same roots/ }).click();
+        else await page.getByRole("button", { name: /^Similar verses in later surahs/ }).click();
+        const list = page.getByRole("dialog");
+        await expect(list).toHaveCount(1);
+        await list.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+        await settle(lines.first());
+        await page.waitForTimeout(600);
+        const box = (await list.boundingBox())!;
+        const boxes = await litLineBoxes(page);
+        expect(boxes.length).toBeGreaterThan(1);
+        for (const b of boxes) expect(overlaps(b, box), "a line of the verse is under the list").toBe(false);
       });
     }
   });

@@ -557,6 +557,14 @@ button.grip {
   .sheet[data-standing][data-more="below"]::after {
     inset-block-end: calc(-1 * var(--space-4));
   }
+
+  /* The look-alike chips ride the standing note's top row (HopRail's
+     `onCard`), as on the share card's, and the note is narrower than the
+     share card: on its title row they sat on its close button. So the title
+     starts a row lower, only when there are chips. */
+  :root:has([data-seated][data-card]) .sheet[data-standing] .top {
+    padding-block-start: calc(var(--space-3) + 36px);
+  }
 }
 
 @keyframes rise {

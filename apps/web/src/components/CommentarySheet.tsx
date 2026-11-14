@@ -165,6 +165,7 @@ export function CommentarySheet({
   onCover,
   onSide,
   onTall,
+  onStandTop,
   back = null,
   listen = null,
   creditNote,
@@ -214,6 +215,13 @@ export function CommentarySheet({
    * is all the reader is looking at, so they step back under it.
    */
   onTall?: (tall: boolean) => void;
+  /**
+   * Where the note starts while it stands beside the page on a phone on its
+   * side, or null otherwise. It stands over the page's top corner, where the
+   * look-alike chips rest, so they ride its own top row instead, as on the
+   * share card's; left at rest, they were hidden behind it.
+   */
+  onStandTop?: (top: number | null) => void;
   /**
    * The verse the reader came from, when they arrived by following a road — the
    * last bead on the trail. On a phone the note covers the trail bar, so without
@@ -408,6 +416,21 @@ export function CommentarySheet({
     return watchCover(sheet, () => Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE - room), onCover);
   }, [open, still, verseKey, onCover, room]);
   useEffect(() => () => onCover?.(null), [onCover]);
+  useLayoutEffect(() => {
+    if (!onStandTop) return;
+    const sheet = sheetRef.current;
+    if (!open || !standing || !sheet) {
+      onStandTop(null);
+      return;
+    }
+    // Its place at rest, not where the rise has carried it so far: a box read
+    // mid-rise sits lower, and the chips would ride a row that is not there.
+    const report = () => onStandTop(sheet.offsetTop);
+    report();
+    window.addEventListener("resize", report);
+    return () => window.removeEventListener("resize", report);
+  }, [open, standing, onStandTop]);
+  useEffect(() => () => onStandTop?.(null), [onStandTop]);
   useSideCover(open, beside, sheetRef, onSide);
 
   // Beside a spread, lie over the facing page.

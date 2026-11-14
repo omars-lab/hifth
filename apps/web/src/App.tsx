@@ -441,6 +441,9 @@ export function App(): JSX.Element {
   // Where the open share sheet starts at any width: the card in a sideways
   // phone's corner is where the look-alike chips ride.
   const [shareCardTop, setShareCardTop] = useState<number | null>(null);
+  // Where the note starts while it stands beside the page on a phone on its
+  // side: it stands over the chips' corner, so they ride its top row.
+  const [noteStandTop, setNoteStandTop] = useState<number | null>(null);
   // Where an open roots or similar-verses list starts on a phone: it takes the
   // note's place, so the page lifts the verse above it the same way.
   const [listTop, setListTop] = useState<number | null>(null);
@@ -4194,7 +4197,8 @@ export function App(): JSX.Element {
       seat={
         beside || home || noteTall
           ? null
-          : (highestTop(coverTop, shareTop, listTop) ?? (shareCorner !== null ? shareCardTop : null))
+          : (highestTop(coverTop, shareTop, listTop) ??
+            (shareCorner !== null ? shareCardTop : listCorner === null ? noteStandTop : null))
       }
       onCard={
         (highestTop(coverTop, shareTop, listTop) === null && shareCorner !== null) ||
@@ -4897,6 +4901,7 @@ export function App(): JSX.Element {
                 onCover={setCoverTop}
                 onSide={setNoteSide}
                 onTall={setNoteTall}
+                onStandTop={setNoteStandTop}
                 onClose={() => (introSheet ? setIntroSurah(null) : setCommentaryOpen(false))}
                 creditNote={PITCH ? t.pitchCredit : undefined}
                 sigla={pitchKey}
