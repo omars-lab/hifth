@@ -1,0 +1,71 @@
+/* The verse's tools as tabs inside its drawer. The drawer's own section box
+   sets the height (VerseDrawer's fit); here the strip stays put and only the
+   tab in front scrolls, so each tab can keep its own place. */
+.strip {
+  flex: none;
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  padding-block: var(--space-1);
+  border-block-end: 1px solid var(--hairline);
+  font-family: var(--font-chrome);
+  scrollbar-width: none;
+}
+
+.item {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline);
+  background: transparent;
+}
+
+.item[data-front] {
+  background: var(--accent-tint);
+  border-color: var(--accent-strong);
+}
+
+.tab,
+.close {
+  min-block-size: var(--touch-min);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.tab {
+  padding-inline: var(--space-3) var(--space-1);
+}
+
+.item[data-front] .tab {
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.close {
+  min-inline-size: var(--touch-min);
+  padding: 0;
+  color: var(--ink-soft);
+}
+
+.tab:focus-visible,
+.close:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: -2px;
+  border-radius: inherit;
+}
+
+.panel {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.panel[hidden] {
+  display: none;
+}

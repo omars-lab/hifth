@@ -16,16 +16,16 @@
  * than retyping it — the discipline `verse-gestures.ts` keeps.
  */
 
-export type DrawerTools = "sheet" | "drawer";
+export type DrawerTools = "sheet" | "drawer" | "tabs";
 
 /** In settings order. */
-export const DRAWER_TOOLS: readonly DrawerTools[] = ["sheet", "drawer"];
+export const DRAWER_TOOLS: readonly DrawerTools[] = ["sheet", "drawer", "tabs"];
 
 /** Versioned: an option that later changes what it does gets a new key. */
 export const DRAWER_TOOLS_KEY = "hifth.drawer.tools.v1";
 
 function isDrawerTools(value: unknown): value is DrawerTools {
-  return value === "sheet" || value === "drawer";
+  return value === "sheet" || value === "drawer" || value === "tabs";
 }
 
 /** The option this device chose, or the sheet when it never chose. */
@@ -46,4 +46,28 @@ export function rememberDrawerTools(choice: DrawerTools): void {
   } catch {
     /* nothing to do — see savedDrawerTools */
   }
+}
+
+/** A tool that opens inside the drawer, and so can be a tab. */
+export type DrawerTab = "looks" | "listen" | "roots" | "share";
+
+/** The order the tabs stand in, whatever order they were opened in. */
+export const DRAWER_TABS: readonly DrawerTab[] = ["looks", "listen", "roots", "share"];
+
+/**
+ * The tab in front: the one the reader last picked while it stays open, or
+ * else the last one open, so closing the front tab brings another forward.
+ */
+export function frontTab(open: readonly DrawerTab[], picked: DrawerTab | null): DrawerTab | null {
+  if (picked && open.includes(picked)) return picked;
+  return open.length ? open[open.length - 1]! : null;
+}
+
+/**
+ * What pressing a tool's own button does with tabs: a closed tool opens in
+ * front, an open one behind comes forward, and the one in front closes.
+ */
+export function pressTab(open: readonly DrawerTab[], picked: DrawerTab | null, tool: DrawerTab): "open" | "front" | "close" {
+  if (!open.includes(tool)) return "open";
+  return frontTab(open, picked) === tool ? "close" : "front";
 }

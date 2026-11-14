@@ -889,6 +889,9 @@ export interface Strings {
   drawerToolsTitle: string;
   drawerToolsSheet: string;
   drawerToolsDrawer: string;
+  drawerToolsTabs: string;
+  drawerTabsLabel: string;
+  closeTab(name: string): string;
   drawerToolsNote: string;
   drawerGlowTitle: string;
   drawerGlowBrighten: string;
@@ -1593,6 +1596,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     mistakeLetterPicked: (count) => m.mistakeLetterPicked({ nText: n(count) }),
     mistakeRulePicked: (name) => m.mistakeRulePicked({ name }),
     verseTools: (label) => m.verseTools({ label }),
+    closeTab: (name) => m.closeTab({ name }),
     vdBookmarkAria: (label) => m.vdBookmarkAria({ label }),
     drawerBack: (label) => m.drawerBack({ label }),
     useSince: (day) => m.useSince({ dayText: longDay(day, lang) }),

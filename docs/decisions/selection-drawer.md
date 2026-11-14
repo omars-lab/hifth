@@ -288,6 +288,18 @@ run included. A hafiz drilling a hard verse sets it to three times, or until the
 pressing Play again after every pass. With the setting off, Listen only plays, as before, and the
 repeat and speed stay at once and as recited. The commentary is the one tool still in its own card.
 
+**As tabs, the second shape (2026-11-14).** A third choice of the same setting, *As tabs in the
+verse's drawer*. Each tool opened inside the drawer stays open as a tab along the top of its
+section, in a fixed order (look-alikes, Listen, Same roots, Share), and the one last picked is in
+front. Going from Same roots to Share and back is one tap on the Same roots tab, and the list is
+where it was left, scrolled as it was left. A tool's own button opens it, brings its tab forward if
+it is open behind another, or closes it if it is in front; each tab also has its own ×. Escape
+closes the tab in front, one at a time, then puts the drawer away. Lighting another verse closes
+them all. The build found one cost no list had: the strip of tabs takes a row of the room under the
+verse, so on a two-page spread each tab shows a few rows fewer than the one-at-a-time drawer.
+Checked by the "as tabs" tests in `apps/web/e2e/drawer-tools.spec.ts` (now run in Firefox too)
+and the tab rules in `apps/web/src/drawer-tools.test.ts`; the strip is `DrawerTabs.tsx`.
+
 How it is checked: the browser test `apps/web/e2e/drawer-tools.spec.ts` (a laptop and an iPad on
 its side; it failed first with the roots card opening beside the drawer), and the setting's own
 test `apps/web/src/drawer-tools.test.ts`. The code is `VerseDrawer.tsx` (the `panel` it holds and
@@ -299,7 +311,7 @@ so going from the words that share a root back to Listen is one tap, not close-t
 
 **Options to build and try, each a setting if it loses:**
 - the drawer grows upward and the tool's contents open as a section under its buttons;
-- the drawer grows, and each opened tool is a tab along its top;
+- the drawer grows, and each opened tool is a tab along its top (built 2026-11-14, the third choice);
 - each tool keeps its own sheet, as today.
 
 **If nobody decides:** each tool keeps its own sheet. The drawer must still never cover the verse

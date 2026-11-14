@@ -99,6 +99,7 @@ export interface Catalog {
   readonly clickForNote: (d: { readonly source: string | number }) => string;
   readonly clickHint: string;
   readonly close: string;
+  readonly closeTab: (d: { readonly name: string | number }) => string;
   readonly coachDone: string;
   readonly coachDoneAria: string;
   readonly coachNext: string;
@@ -154,9 +155,11 @@ export interface Catalog {
   readonly drawerMarksPath: string;
   readonly drawerMarksTag: string;
   readonly drawerMarksTitle: string;
+  readonly drawerTabsLabel: string;
   readonly drawerToolsDrawer: string;
   readonly drawerToolsNote: string;
   readonly drawerToolsSheet: string;
+  readonly drawerToolsTabs: string;
   readonly drawerToolsTitle: string;
   readonly drawerWord: string;
   readonly editionCurrent: string;

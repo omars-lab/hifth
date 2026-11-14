@@ -76,6 +76,7 @@
     "drawer-tools.spec.ts": [
       "android",
       "desktop",
+      "desktop-firefox",
       "iphone"
     ],
     "drive-device.spec.ts": [
