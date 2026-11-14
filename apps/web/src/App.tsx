@@ -263,6 +263,7 @@ import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style"
 import { savedZoomAnchor, verseToGrowFrom } from "./zoom-anchor";
 import { rememberVerseGestures, savedVerseGestures, type VerseGestures } from "./verse-gestures";
 import { rememberDrawerTools, savedDrawerTools, type DrawerTools } from "./drawer-tools";
+import { rememberBeatenOffer, savedBeatenOffer, type BeatenOffer } from "./beaten-offer";
 import { canRest, rememberDrawerGlow, savedDrawerGlow, type DrawerGlow } from "./drawer-glow";
 import { rememberToolHelp, savedToolHelp, type ToolHelp } from "./tool-help";
 import { rememberSettingsAt, savedSettingsAt, type SettingsAt } from "./settings-at";
@@ -512,6 +513,12 @@ export function App(): JSX.Element {
     setDrawerTools(choice);
   }, []);
   const toolsInDrawer = drawerTools === "drawer";
+  // When a jump not made in a long while offers Beaten in its row (confusion-points ⑤).
+  const [beatenOffer, setBeatenOffer] = useState<BeatenOffer>(() => savedBeatenOffer());
+  const chooseBeatenOffer = useCallback((choice: BeatenOffer) => {
+    rememberBeatenOffer(choice);
+    setBeatenOffer(choice);
+  }, []);
   // What the lit verse does while a pointer rests on its drawer (selection-drawer ②).
   // The page's root carries the choice and the resting pointer; highlight.css paints it.
   const [drawerGlow, setDrawerGlow] = useState<DrawerGlow>(() => savedDrawerGlow());
@@ -4903,6 +4910,8 @@ export function App(): JSX.Element {
             onVerseGestures={chooseVerseGestures}
             drawerTools={drawerTools}
             onDrawerTools={chooseDrawerTools}
+            beatenOffer={beatenOffer}
+            onBeatenOffer={chooseBeatenOffer}
             drawerGlow={drawerGlow}
             onDrawerGlow={chooseDrawerGlow}
             fullScreenTools={desktop ? fullTools : undefined}
@@ -5339,6 +5348,7 @@ export function App(): JSX.Element {
             }}
             onAgain={againJump}
             onBeaten={beatJump}
+            offerAfter={beatenOffer}
             onSlip={slipJump}
             onDismiss={dismissJump}
             onDelete={deleteJump}

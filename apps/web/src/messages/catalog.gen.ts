@@ -25,6 +25,11 @@ export interface Catalog {
   readonly beadBack: (d: { readonly label: string | number }) => string;
   readonly beadCurrent: (d: { readonly label: string | number }) => string;
   readonly beadCurrentClick: (d: { readonly label: string | number }) => string;
+  readonly beatenOfferNever: string;
+  readonly beatenOfferNote: string;
+  readonly beatenOfferSixWeeks: string;
+  readonly beatenOfferThreeMonths: string;
+  readonly beatenOfferTitle: string;
   readonly beta: string;
   readonly bmAddAnother: string;
   readonly bmCancel: string;
@@ -214,6 +219,7 @@ export interface Catalog {
   readonly jumpMarked: (d: { readonly fromText: string | number; readonly toText: string | number; readonly n: number; readonly nText: string | number }) => string;
   readonly jumpMarkedUnsure: (d: { readonly fromText: string | number }) => string;
   readonly jumpNotSure: string;
+  readonly jumpOfferBeaten: string;
   readonly jumpOnDay: (d: { readonly dayText: string | number }) => string;
   readonly jumpPair: (d: { readonly fromText: string | number; readonly toText: string | number }) => string;
   readonly jumpPairUnsure: (d: { readonly fromText: string | number }) => string;

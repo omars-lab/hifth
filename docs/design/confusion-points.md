@@ -525,7 +525,7 @@ it went to; the hop rail does not show your own jumps. So the question is now on
 **Owner, 2026-11-08: no.** Your jumps stay in the list, with Go; the side strip of links keeps
 only the book's own sourced links.
 
-### ⑤ Who sets a seam's state — the reader, or the app's guess from the data? · **open**
+### ⑤ Who sets a seam's state — the reader, or the app's guess from the data? · **fixed**
 
 **Where it stands (2026-10-13):** the reader owns it, and that is built: a row can be marked
 Beaten or Dismissed, and nothing changes it but the reader. What is still open is only whether
@@ -545,7 +545,12 @@ settle, and it echoes the durability and score stances above.
 
 **Owner, 2026-11-08: a quiet suggestion, yours to accept.** A row not hit in a long while may
 carry one quiet line offering to mark it Beaten. Never a pop-up, and nothing changes until the
-reader taps it. Not built yet; on the backlog.
+reader taps it. **Built 2026-11-13.** A jump with a known destination, not beaten, and not made in
+six weeks carries one dotted-underlined line under its count in the list behind the mark: "It has
+not happened in a long while. Mark it beaten?" Pressing it is the same as pressing Beaten, and
+pressing Beaten again takes it back. The info panel holds how long "a long while" is: six weeks
+(the default, this section's own example), three months, or never. The page map's list of jumps
+does not offer it, since it has no Beaten button to offer.
 
 ### ⑥ Should a student be able to hand their confusion map to a teacher? · **open**
 

@@ -1956,10 +1956,13 @@
         "file": "docs/design/confusion-points.md",
         "item": "⑤"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "Each confusion point carries a state — every-pass, sometimes, used-to, dismissed — that drives warning weight, list grouping and map colour. The question is who writes it. The design's bet is the reader owns it, because the store sees captures, not recitation: silence at a seam could mean 'I beat it' or 'I stopped logging', and a state the app computed would be the very score this feature refused. The counter-pull is friction — a reader who never marks a seam beaten leaves conquered seams warning forever. What would answer it: a human's call on how strong the nudge may be, whether the app may suggest a state change from count + recency (and how loudly) while the write stays an explicit act, or whether even a suggestion leans too far toward measuring worship. Leaning reader-owned-with-a-quiet-nudge; the line between nudge and assertion is the thing to settle. Where it stands 2026-10-13: reader-owned is built (Beaten, Dismissed); only whether the app may suggest a change, and how loudly, is open. Owner, 2026-11-08: a quiet suggestion, the reader's to accept: one line on a row not hit in a long while, offering Beaten; never a pop-up. To build."
+      "note": "Each confusion point carries a state — every-pass, sometimes, used-to, dismissed — that drives warning weight, list grouping and map colour. The question is who writes it. The design's bet is the reader owns it, because the store sees captures, not recitation: silence at a seam could mean 'I beat it' or 'I stopped logging', and a state the app computed would be the very score this feature refused. The counter-pull is friction — a reader who never marks a seam beaten leaves conquered seams warning forever. What would answer it: a human's call on how strong the nudge may be, whether the app may suggest a state change from count + recency (and how loudly) while the write stays an explicit act, or whether even a suggestion leans too far toward measuring worship. Leaning reader-owned-with-a-quiet-nudge; the line between nudge and assertion is the thing to settle. Where it stands 2026-10-13: reader-owned is built (Beaten, Dismissed); only whether the app may suggest a change, and how loudly, is open. Owner, 2026-11-08: a quiet suggestion, the reader's to accept: one line on a row not hit in a long while, offering Beaten; never a pop-up. To build. Built 2026-11-13: a jump not made in six weeks carries one quiet line in the list behind its mark, offering Beaten; the info panel sets six weeks, three months or never. Tests: apps/web/e2e/confusions.spec.ts, 'a jump not made in a long while'; apps/web/src/beaten-offer.test.ts.",
+      "useCase": "know-which-look-alikes-still-pull-me",
+      "feature": "confusion-jumps",
+      "closedBy": "apps/web/e2e/confusions.spec.ts"
     },
     {
       "id": "should-a-student-share-a-map-with-a-teacher",

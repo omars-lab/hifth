@@ -1812,6 +1812,37 @@
         }
       ],
       "gap": "A pull by a finger is tested on a phone in Chromium only; on the iPad it waits for the owner's walk."
+    },
+    {
+      "id": "know-which-look-alikes-still-pull-me",
+      "actor": "hafiz",
+      "goal": "When my memory runs from one verse into its look-alike, let me mark it where it happened, see later which ones still pull me, and say myself when I have beaten one; a quiet nudge is fine, a score is not.",
+      "feature": "confusion-jumps",
+      "code": [
+        {
+          "file": "apps/web/src/components/JumpList.tsx",
+          "symbol": "JumpList"
+        },
+        {
+          "file": "apps/web/src/beaten-offer.ts",
+          "symbol": "offersBeaten"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/confusions.spec.ts",
+          "test": "a tap on the mark lists where you went; Again, Beaten, Delete and Undo work from it"
+        },
+        {
+          "file": "apps/web/e2e/confusions.spec.ts",
+          "test": "offers, in one line, to mark it beaten; a recent one and a beaten one do not"
+        },
+        {
+          "file": "apps/web/e2e/confusions.spec.ts",
+          "test": "the info panel can make it wait three months, or never offer"
+        }
+      ],
+      "gap": "The jump tests run on a laptop in Chrome and on the phones, not in Firefox; the iPad waits for the owner's walk."
     }
   ]
 }

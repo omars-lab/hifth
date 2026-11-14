@@ -895,6 +895,11 @@ export interface Strings {
   drawerGlowRing: string;
   drawerGlowNone: string;
   drawerGlowNote: string;
+  beatenOfferTitle: string;
+  beatenOfferSixWeeks: string;
+  beatenOfferThreeMonths: string;
+  beatenOfferNever: string;
+  beatenOfferNote: string;
   fullScreenToolsTitle: string;
   fullScreenToolsSide: string;
   fullScreenToolsEdge: string;
@@ -1222,6 +1227,8 @@ export interface Strings {
   jumpCompare: string;
   jumpAgain: string;
   jumpBeaten: string;
+  /** The quiet line on a jump not made in a long while, offering Beaten. */
+  jumpOfferBeaten: string;
   jumpDelete: string;
   jumpSayWhere: string;
   jumpDeleted(from: string, to: string): string;
