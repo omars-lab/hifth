@@ -807,6 +807,16 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
 
 ## The Mac and iPad apps
 
+- [ ] Every card on the features page puts **the real iPad** where it says, upright and on its
+  side. First make sure the iPad holds this checkout's debug build (`make app-web`, then
+  `make app-release-ipad DEVICE=…`): an older or test build has no capture folder, and the
+  check now stops at the first card saying so. Upright, the two-page card comes back "screen too
+  narrow", since the book opens only on a screen 1024 points wide; on its side it must show two
+  pages. · `make feature-check DEVICE=…` · test: the skill's `feature-check.test.mjs` · found
+  2026-11-14: the first run read all 26 cards as "no capture" because the iPad held the Nov 12
+  test build; on the current build 25 of 26 passed upright, and the 26th was the two-page card
+  on an upright screen (fixed in the check, not the app). On its side: not run yet
+
 - [ ] Walk the pitch **in the iPhone app**, upright and on its side: turned on its side, the page
   turns with the phone (wider than tall), one page shows, and each note opens in a card at the
   foot that scrolls to The Study Quran's commentary below the verse's own translation. ·
