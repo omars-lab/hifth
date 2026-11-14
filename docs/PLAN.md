@@ -2466,6 +2466,16 @@ in for that. `pnpm gate:issues` checks the number still exists and reads no furt
     a fetch already do. Checked by putting the offline copy in charge first: nothing was held
     and the test failed; with it switched off, the same run held page 7 back and passed.
 
+124. **A link that named words in a verse never showed them.** The address `?w=3-7` was read
+    and kept, but the app only selected the verse: no words were marked, so the link said the
+    same as one without `?w`. Found while making the feature check read which words a link
+    picked. **Fixed 2026-11-13:** the words the link names are laid as word ink, the band a
+    hold-and-drag lays, and the page carries the numbers of the words it marked, which the
+    walk capture now reads. A link naming words the verse does not have selects the verse and
+    marks nothing. Tests: two in the word tests (seen failing first), one capture test in the
+    Mac unit tests, and the feature check now fails the word card unless the app shows those
+    very words; in the iPad simulator it passes.
+
 **The half of these a machine cannot run now has a register — and a runbook.** Follow-ups
 ① (the phone), ② (the browser glance) and ④ (VoiceOver/TalkBack) still wait on a human, and
 prose cannot answer "is that still true, on what device, and when?" — ⑤ (does the source

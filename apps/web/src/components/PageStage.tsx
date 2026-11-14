@@ -989,7 +989,15 @@ function foldEdgeOf(page: number, total: number): FoldEdge | null {
 /** What App can drive imperatively on the stage. */
 export interface PageStageHandle {
   /** Pan/zoom to an ayah, mounting its page if needed. Resolves when landed. */
-  navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number }) => Promise<void>;
+  navigateTo: (
+    key: string,
+    opts?: {
+      pulse?: boolean;
+      zoom?: number;
+      /** Words of the verse to lay as word ink on arrival, in the print's own count, inclusive. */
+      words?: readonly [number, number];
+    },
+  ) => Promise<void>;
   /**
    * Show a whole page, centered and unzoomed, mounting it if needed.
    *
@@ -1638,6 +1646,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    * anything, and both ends stay meaningful if the drag runs backwards.
    */
   const wordRunRef = useRef<WordRun | null>(null);
+  /** Lays a link's words on its verse; set beside `landWords`, read by `navigateTo`. */
+  const showWordsRef = useRef<
+    (page: number, key: string, words: readonly [number, number], still: () => boolean) => void
+  >(() => {});
   /**
    * `<edition>/<page>` → its word shard, once fetched; `null` marks a page whose
    * shard missed, so a second long-press does not re-ask the network for a file
@@ -3518,6 +3530,9 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
           mp.hl.highlight(key, "sel", "selection");
           pulse(mp.svg);
         }
+        // A link that names words (`?w=3-7`): drawn last, once the verse is lit,
+        // so nothing that settles the selection afterwards can wipe it.
+        if (opts?.words) showWordsRef.current(loc.page, key, opts.words, () => ticket === relocateRef.current);
         emitSelectionRect();
       },
       async showPage(next) {
@@ -3697,7 +3712,10 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
    */
   const clearWords = useCallback(() => {
     wordRunRef.current = null;
-    for (const mp of pagesRef.current.values()) mp.hl.clear("word");
+    for (const mp of pagesRef.current.values()) {
+      mp.hl.clear("word");
+      delete mp.svg.dataset.words;
+    }
   }, []);
 
   // Reflect the controlled selection into the current page's 'selection' group.
@@ -4036,7 +4054,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
     run.cursor = at;
     const from = Math.min(run.anchor, at);
     const to = Math.max(run.anchor, at);
-    cur.hl.highlightRects(idx.bandsFor(run.key, from, to), "run", "word");
+    inkWords(cur, idx.bandsFor(run.key, from, to), from, to);
     if (!commit) return;
     const parsed = parseAyahKey(run.key);
     if (!parsed) return;
@@ -4045,6 +4063,21 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       run.key,
     );
   }, []);
+
+  /*
+   * A link's words (`?w=3-7`): the same band a hold lays, on the verse the link
+   * just landed on. It paints and says nothing more — no word menu, because the
+   * reader did not ask for one — and it starts no run, so the next hold begins
+   * fresh. Words the verse does not have draw nothing, and so mark nothing.
+   */
+  showWordsRef.current = (page, key, [from, to], still) => {
+    if (!resolver) return;
+    void ensureWords(resolver.edition, page).then((idx) => {
+      const mp = pagesRef.current.get(page);
+      if (!idx || !mp || !still()) return;
+      inkWords(mp, idx.bandsFor(key, from, to), from, to);
+    });
+  };
 
   /**
    * The finger's way in: the word nearest where it is now.
@@ -4894,6 +4927,20 @@ function SignLoupe({ loupe, src }: { loupe: Loupe; src: string }): JSX.Element {
       <span className={styles.loupeName}>{sign.name}</span>
     </div>
   );
+}
+
+/**
+ * Lay word ink on one page, and say on the page which words it is.
+ *
+ * `data-words="3-7"` is set only when a band was actually drawn, so whatever
+ * reads it (the debug build's capture, a test) learns what the reader can see,
+ * not what was asked for. It is numbers only: the words themselves never leave
+ * the page this way.
+ */
+function inkWords(mp: { hl: Highlighter; svg: SVGSVGElement }, bands: Rect[], from: number, to: number): void {
+  mp.hl.highlightRects(bands, "run", "word");
+  if (bands.length > 0) mp.svg.dataset.words = `${from}-${to}`;
+  else delete mp.svg.dataset.words;
 }
 
 /**

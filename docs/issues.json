@@ -5788,6 +5788,18 @@
       "closedBy": "apps/web/e2e/share-a11y.spec.ts"
     },
     {
+      "id": "word-link-never-drew-its-words",
+      "source": {
+        "file": "docs/PLAN.md",
+        "item": "124"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "A link naming words in a verse (?w=3-7) selected the verse and marked no words, so it said nothing a plain verse link did not. Found 2026-11-13 while teaching the feature check to read which words a link picked. The named words are now laid as word ink, and the page carries their numbers for the walk capture; a range the verse does not have marks nothing.",
+      "closedBy": "apps/web/e2e/word.spec.ts"
+    },
+    {
       "id": "short-screen-loses-the-spread",
       "source": {
         "file": "docs/PLAN.md",
@@ -5996,7 +6008,7 @@
       "severity": "question",
       "owner": "agent",
       "useCase": "see-what-a-link-did-on-the-ipad",
-      "note": "Owner's ask of 2026-11-12: links that open and test each feature of the app on the real iPad, and a page on the development hub that shows each feature with a picture and the link that opens it. The app already answers links that open a page, a verse, a tool or a panel, and the laptop can hand the app a link over the cable. Design note: docs/design/feature-links.md. Pictures only from the build with no Qur'an text. Hub entry agreed with the session doing hifth.app, which owns the hub list. Step 2, the features page, is built (make feature-links). Step 3 built 2026-11-13: in the debug build only, the link capture?name=… keeps a walk capture named by the link (no note banner), and current-to-file writes where the app is to current.json, which make walk-current copies off; both wait for the page an open just asked for. A release build answers them not-in-this-build, and the release check fails if their code is in it. Proven in the simulator (SmokeTests testCaptureLinkKeepsANamedCaptureAndCurrentToFileWritesThePlace) and by unit tests; not yet sent to the real iPad. Step 4 built 2026-11-13: make feature-check sends each card's link to the debug app, then a capture link named after the card, and compares where the app landed with what the card says; the features page marks each card with the result. In the iPad simulator, a public build: 23 of 26 cards work, the word-range card works for its verse (which words were picked leaves no mark a capture can read yet), and the two panels only the pitch build has (commentary and context) are not in it; a pitch build in the simulator passes both. A first run failed all nine panels because the app held web pages from an older commit; the check now says when that happens. Next: run it on the real iPad (DEVICE=…), and give the word-range link a mark a capture can read."
+      "note": "Owner's ask of 2026-11-12: links that open and test each feature of the app on the real iPad, and a page on the development hub that shows each feature with a picture and the link that opens it. The app already answers links that open a page, a verse, a tool or a panel, and the laptop can hand the app a link over the cable. Design note: docs/design/feature-links.md. Pictures only from the build with no Qur'an text. Hub entry agreed with the session doing hifth.app, which owns the hub list. Step 2, the features page, is built (make feature-links). Step 3 built 2026-11-13: in the debug build only, the link capture?name=… keeps a walk capture named by the link (no note banner), and current-to-file writes where the app is to current.json, which make walk-current copies off; both wait for the page an open just asked for. A release build answers them not-in-this-build, and the release check fails if their code is in it. Proven in the simulator (SmokeTests testCaptureLinkKeepsANamedCaptureAndCurrentToFileWritesThePlace) and by unit tests; not yet sent to the real iPad. Step 4 built 2026-11-13: make feature-check sends each card's link to the debug app, then a capture link named after the card, and compares where the app landed with what the card says; the features page marks each card with the result. In the iPad simulator, a public build: 23 of 26 cards work, the word-range card works for its verse, and the two panels only the pitch build has (commentary and context) are not in it; a pitch build in the simulator passes both. A first run failed all nine panels because the app held web pages from an older commit; the check now says when that happens. Word range done 2026-11-13: the link now lays its words as word ink and the capture names them, so the word card is checked for its words too (it passes in the simulator). Next: run it on the real iPad (DEVICE=…)."
     },
     {
       "id": "link-to-running-app",

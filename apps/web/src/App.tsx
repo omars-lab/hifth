@@ -737,7 +737,7 @@ export function App(): JSX.Element {
        * With one page, the reader can ask for the whole page too (docs/PLAN.md,
        * item 98), so nothing slides on an upright iPad.
        */
-      navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number }) => {
+      navigateTo: (key: string, opts?: { pulse?: boolean; zoom?: number; words?: readonly [number, number] }) => {
         const zoom = opts?.zoom ?? (bookOpenRef.current ? 1 : openZoom(savedOpenSize()));
         return settle(
           stageRef.current?.navigateTo(key, { ...opts, ...(zoom === undefined ? {} : { zoom }) }),
@@ -3667,7 +3667,9 @@ export function App(): JSX.Element {
       setSelectedKey(key);
       setPage(loc.page);
       announce(t.arrivedAyah(origin, t.ayahLabel(key) ?? key, loc.page));
-      void stage.navigateTo(key, { pulse: true });
+      // Words the link names (`?w=3-7`) are laid as word ink on arrival. The
+      // address then names the verse only, as it does after `?tool=`.
+      void stage.navigateTo(key, { pulse: true, ...(origin === "link" && state.word ? { words: state.word } : {}) });
     },
     [resolver, announce, t, chooseTool, handlePageMode],
   );

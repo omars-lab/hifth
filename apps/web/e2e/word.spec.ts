@@ -19,7 +19,7 @@ import { inkLightness, inkToken, pixelsOf } from "./ink";
  */
 
 /** Open the app as a reader who has been here before — see `marquee.spec.ts`. */
-async function openApp(page: Page): Promise<void> {
+async function openApp(page: Page, at = "/"): Promise<void> {
   await page.addInitScript((coachKey: string) => {
     try {
       localStorage.setItem(coachKey, "1");
@@ -35,8 +35,8 @@ async function openApp(page: Page): Promise<void> {
       },
     });
   }, COACH_STORAGE_KEY);
-  await page.goto("/");
-  await expect(page.locator("svg[role='group']")).toBeVisible();
+  await page.goto(at);
+  await expect(page.locator("svg[role='group']").first()).toBeVisible();
 }
 
 /** Every band of word ink currently on the page. */
@@ -374,5 +374,39 @@ test.describe("Hifth · word selection", () => {
     await expect(wordInk(page)).not.toHaveCount(0);
 
     expect(await stage.ariaSnapshot(), "word ink is decorative and must stay so").toBe(before);
+  });
+
+  /*
+   * A link that names words (`?w=3-5`) lays the same band a reader's own hold
+   * would, and the page says which words it drew (`data-words`), so a capture
+   * can check them without reading any text. The mark follows the ink, not the
+   * address: words the verse does not have draw nothing and say nothing.
+   */
+  test("a link that names words lays them as word ink, and the page says which", async ({ page }) => {
+    await openApp(page, "/#/hafs-kfqc/2:39?w=3-5");
+    await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+    await expect(wordInk(page)).not.toHaveCount(0);
+    await expect(page.locator("[data-words]")).toHaveCount(1);
+    await expect(page.locator("[data-words]")).toHaveAttribute("data-words", "3-5");
+    const three = await wordInkLength(page);
+    expect(three).toBeGreaterThan(0);
+
+    // A second link in the running app, one word wide: the band shrinks, the mark follows.
+    await page.evaluate(() => (location.hash = "#/hafs-kfqc/2:39?w=4"));
+    await expect(page.locator("[data-words]")).toHaveAttribute("data-words", "4-4");
+    await expect.poll(() => wordInkLength(page)).toBeLessThan(three);
+
+    // A plain tap on another verse is a new selection: the words and the mark go.
+    await tapAyah(page, "#verse-47");
+    await expect(wordInk(page)).toHaveCount(0);
+    await expect(page.locator("[data-words]")).toHaveCount(0);
+  });
+
+  test("a link naming words the verse does not have selects the verse and marks nothing", async ({ page }) => {
+    await openApp(page, "/#/hafs-kfqc/2:39?w=900-905");
+    await expect(page.locator("#hifth-overlay [data-hl-group='selection']")).not.toHaveCount(0);
+    await page.waitForTimeout(1500);
+    await expect(wordInk(page)).toHaveCount(0);
+    await expect(page.locator("[data-words]")).toHaveCount(0);
   });
 });
