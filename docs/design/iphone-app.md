@@ -49,6 +49,20 @@ only been photographed on a few pages, never walked as a reader would: turning p
 look-alike chips, the drawers, a bookmark, a mistake noted, the commentary. Every fault found
 gets a test and a line on the walk checklist (the `walk-app` skill).
 
+**Walked 2026-11-14, the pitch path** (`make pitch-walk ON="iPhone 17"`, and `UPRIGHT=1`):
+
+- **Found and fixed: the iPhone app did not turn.** Held on its side, the page stayed upright,
+  because the app's settings let only the iPad turn. The iPhone now turns to either side (not
+  upside down); a test reads the settings (`scripts/ios-orientations.test.mjs`).
+- **Upright and on its side, all 14 pitch steps pass**: one page, each note in a card at the foot, the verse
+  whole above it, the look-alike lists, the roots list, the surah introduction and the Mistake
+  pen all clear of the verse.
+- **The walk's own checks were iPad-shaped**: they wanted two pages and the commentary in sight
+  at once. On a phone the card shows the verse's translation first and the commentary below its
+  fold, a scroll away. The checks now expect one page on a narrow screen and scroll the card to
+  the commentary. Whether the commentary should start lower like that is ③.
+- **Not walked yet:** a page turned by hand and a bookmark, which the pitch path does not cover.
+
 ### ③ Where does The Study Quran's note go on a phone? · **open**
 
 The agent's, built to find out rather than argued. On the iPad the note sits beside the verse;
@@ -56,6 +70,11 @@ a phone has no room beside. Likely shapes: a sheet that rises from the bottom ov
 page, a full-screen note with a way back to the verse, or the page shrinking above the note.
 Build the main ones as switchable options on the pitch build, try them on the simulator, keep
 the best as the default and the others as a setting.
+
+**What the iPhone walk showed (2026-11-14):** today it is the first shape, a card from the
+bottom. Held sideways, the card leaves a strip about 150 points tall for the note: the title and
+one line of the verse's translation. The commentary itself starts below that, a scroll away, and
+upright the long translation of 2:255 pushes it about 200 points below the screen's foot.
 
 ### ④ Install it on the owner's own iPhone with the paid team · **blocked**
 

@@ -247,7 +247,7 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   look-alike buttons; a choice reached by keyboard keeps its label readable. · phone, phone on its
   side · `make drive DEVICE=phone-side HASH=/hafs-kfqc/2:48 "ACT=settle=2500;evalfile=.claude/skills/walk-app/scripts/mistake-ask-walk.js"` ·
   test: e2e/phone-toolbar.spec.ts ("the Mistake pen's question stays on the screen") · found 2026-10-16
-  · walked 2026-10-16 in the real iPhone app too, upright only (the iPhone app does not turn):
+  · walked 2026-10-16 in the real iPhone app too, upright only (the iPhone app did not turn then; it does since 2026-11-14):
   `make app-probe TARGET=ipad IPAD="iPhone 17" LOCALE=en ROUTE=/hafs-kfqc/2:48 EVALFILE=…/mistake-ask-walk.js`.
   The question docks at the foot, whole, clear of its word. A tap near the top of an enlarged page
   lands on the title bar, not a word, so the walk asks nothing there.
@@ -277,7 +277,8 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 - [ ] On a phone on its side in the pitch build, open 2:255's note: all six of its lines and its
   number show between the header and the note, the page drawn smaller; then set the info panel
   to "Note a little shorter" and open it again: the note comes down to the foot of the page and
-  the verse still shows whole. Browser only: the apps do not run on a phone. · phone-side ·
+  the verse still shows whole. Also in the iPhone app on its side since 2026-11-14 (`make
+  pitch-walk ON="iPhone 17"`). · phone-side ·
   `make drive DEVICE=phone-side HASH='#/hafs-kfqc/2:255?open=commentary'` · issue:
   `sideways-phone-long-verse-under-note` · test: `e2e/pitch.spec.ts`
 - [ ] Tap a verse that is not on the demo path, as a visitor will: its note opens like any
@@ -690,6 +691,10 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   look-alikes list in full screen: it covers the whole foot of the screen and the button. ·
   phone, ipad-tall · issue: `full-screen-keeps-tools` · test: touch-full-screen spec, "runs to the
   foot of the screen" and "a sheet opened in full screen"
+- [ ] In iPhone Safari before installing, with the "Install Hifth" notice up, go full screen: the
+  notice folds away and the page moves up into its room; "Show the bars" brings the notice back. ·
+  phone · issue: `full-screen-install-notice` · test: touch-full-screen spec, "folds the install
+  notice away"
 - [ ] Pick the highlighter: both colour rows show, the passage circles and the held-words bands,
   with nothing cut off or off the screen; on a phone they get their own line in the tray, down
   an iPad's side two columns. At a 1024-wide window the tools do not slide when the highlighter
@@ -779,6 +784,14 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
 
 ## The Mac and iPad apps
 
+- [ ] Walk the pitch **in the iPhone app**, upright and on its side: turned on its side, the page
+  turns with the phone (wider than tall), one page shows, and each note opens in a card at the
+  foot that scrolls to The Study Quran's commentary below the verse's own translation. ·
+  `make pitch-walk ON="iPhone 17"` and `make pitch-walk ON="iPhone 17" UPRIGHT=1 NO_BUILD=1` ·
+  test: `scripts/ios-orientations.test.mjs` (the app's settings let an iPhone turn) · found
+  2026-11-14: the iPhone app stayed upright when the phone turned, because only the iPad was
+  allowed to turn; fixed. On a phone the commentary starts below the card's fold, which is
+  question ③ of `docs/design/iphone-app.md`, not a fault yet
 - [ ] Open the note and a look-alike list **in the iPad app on its side**, both sizes, and
   upright on the large one: each card ends about 24 points below its last row, not 44, and the
   note's fade sits on its edge (native-shell ㉜). · `make app-probe TARGET=ipad SIDEWAYS=1
