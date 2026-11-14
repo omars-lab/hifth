@@ -672,8 +672,10 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   and the left one left, in English and in Arabic. · any, Firefox especially · issue:
   `slider-arrows-mismatch` · test: slider-arrows spec
 - [ ] In full screen on a phone and an upright iPad, a round Tools button stays in the bottom
-  corner, across from "Show the bars", in English and in Arabic, off the page's last line. It
-  opens the tools' tray; picking a tool folds the tray back, and the button shows that tool.
+  corner, across from "Show the bars", in English and in Arabic, clear of the page altogether,
+  on a short phone too (a 664-tall iPhone in Safari): the page's last line ends in that corner
+  in Arabic, and is not cut. It opens the tools' tray; picking a tool folds the tray back, and
+  the button shows that tool. Picking the highlighter keeps the tray up until a colour is picked.
   Mark a mistake on the last line without leaving full screen. In the info panel, "The bottom
   line stays" keeps the bottom line in full screen instead, with one "Show the bars" in it. ·
   phone, ipad-tall · issue: `full-screen-keeps-tools` · test: touch-full-screen spec

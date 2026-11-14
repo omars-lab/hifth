@@ -63,6 +63,7 @@ function apart(a: { x: number; y: number; width: number; height: number }, b: { 
 
 for (const where of [
   { name: "a phone", use: {} },
+  { name: "a short phone", use: { viewport: { width: 375, height: 667 } } },
   { name: "an upright iPad", use: { viewport: { width: 768, height: 1024 } } },
 ]) {
   test.describe(`in full screen on ${where.name}`, () => {
@@ -79,23 +80,40 @@ for (const where of [
       await expect(tray(page)).toHaveCount(0);
       await expect(button(page)).toHaveAccessibleName(/Mistake is on$/);
       const at = await lastLineWord(page);
-      expect(
-        await page.evaluate(([x, y]) => !!document.elementFromPoint(x!, y!)?.closest("[data-full-touch-tools]"), [at.x, at.y]),
-        "the button is not on the last line's word",
-      ).toBe(false);
       await page.mouse.click(at.x, at.y);
       await picker(page).getByRole("button", { name: "The whole word" }).click();
       await expect(washes(page)).toHaveCount(1);
       await expect(page.locator("header"), "still full screen").toBeHidden();
     });
 
-    test("the Tools button and Show the bars sit apart", async ({ page }) => {
+    test("the Tools button and Show the bars sit apart, and off the page", async ({ page }) => {
+      // Safari's "Install Hifth" notice, until hidden, pushes the page ~160px
+      // down and past the foot of a phone screen, whatever the button does; a
+      // reader who has hidden it is the case this checks (backlog
+      // full-screen-install-notice).
+      await page.addInitScript(() => localStorage.setItem("hifth.notice.install-ios", "1"));
       await openInFullScreen(page);
       const a = (await button(page).boundingBox())!;
       const b = (await showBars(page).boundingBox())!;
       expect(apart(a, b), "English").toBe(true);
       const size = page.viewportSize()!;
       expect(a.y + a.height, "on the screen").toBeLessThanOrEqual(size.height);
+      // The corner is where a line ends in Arabic, so the button must not lie
+      // on the page at all, not only off its middle.
+      const written = (await page.locator('svg[aria-labelledby="page-label-7"]').boundingBox())!;
+      expect(apart(a, written), "the button is off the page").toBe(true);
+    });
+
+    test("picking the highlighter keeps the tray up for its colours, and a colour folds it", async ({ page }) => {
+      await openInFullScreen(page);
+      await button(page).click();
+      await settled(tray(page));
+      await tray(page).getByRole("radio", { name: "Highlight", exact: true }).click();
+      const colours = tray(page).getByRole("radiogroup", { name: "Highlighter colour" });
+      await expect(colours).toBeVisible();
+      await colours.getByRole("radio").nth(1).click();
+      await expect(tray(page)).toHaveCount(0);
+      await expect(button(page)).toHaveAccessibleName(/Highlight/);
     });
 
     test("the Tools button and the way back sit apart in Arabic too", async ({ page }) => {

@@ -323,6 +323,24 @@
 .fullTouchTools > * {
   pointer-events: auto;
 }
+/* The book keeps clear of that corner. Where Safari's own bars leave a phone
+   664 points tall, the page fills the screen and the button lay on its
+   bottom corner, which in Arabic is where the last line ends. A strip the
+   button's height is kept at the foot instead: the page is a little smaller
+   there, and nothing lies on it.
+
+   The strip alone is not enough: on a phone the page is sized by the screen's
+   width, so at 390×664 it ran 10px into the strip and the last line was cut.
+   So the page is also held to the height left, as the open book on a computer
+   is (PageSpread.module.css): 345/594.85 of it, the page's shape with its
+   bands, less the stage's gutter above and below. Where the width already
+   binds (a tall phone, an iPad) this is larger than the page and changes
+   nothing. */
+.app[data-full-touch="button"] > main {
+  --full-touch-strip: calc(var(--touch-min) + 2 * var(--space-2) + env(safe-area-inset-bottom));
+  padding-block-end: var(--full-touch-strip);
+  --stage-page-cap: min(62vh, calc((100dvh - var(--full-touch-strip) - 2 * var(--space-4)) * 0.57998));
+}
 
 /* Unless the tools stay (full-screen-tools.ts): down the side, the book keeps
    clear of them by the rail's width on their side, at its widest, with the

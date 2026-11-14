@@ -12,6 +12,11 @@
  *           page slider go
  *   none    full screen puts them away with the other bars, as before
  *
+ * Only the bottom line the app shows (C, the Tools tray) has a button to keep.
+ * The two layouts that lost the phone-toolbar decision, A and B, are reached
+ * only through the design page's own address (`?phonebar=a|b`), never by a
+ * reader's setting; there "button" simply puts the tools away, as "none" does.
+ *
  * Its own module, free of React and CSS, so the e2e tier imports the key rather
  * than retyping it — the discipline `drawer-tools.ts` keeps.
  */
