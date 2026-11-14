@@ -212,7 +212,7 @@ endif
 	@sips -g pixelWidth $(SHOT_OUT) | awk '/pixelWidth/ { exit !($$2 > 0) }' || { echo "  ✗ $(SHOT_OUT) has no pixels"; exit 1; }
 	@echo "  ✓ $(SHOT_OUT)"
 
-app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1 [TURNS=12,24] [STEPS=/abs/steps.json], iPad only] [PROBE_SHOT=file.png]
+app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1 [TURNS=12,24]] [STEPS=/abs/steps.json, iPad only, either way up] [PROBE_SHOT=file.png]
 ifneq ($(TURNS),)
 ifneq ($(TARGET)$(SIDEWAYS),ipad1)
 	@echo "  ✗ TURNS needs TARGET=ipad SIDEWAYS=1: only the sideways UI test can turn the iPad"; exit 1
@@ -242,6 +242,17 @@ ifeq ($(TARGET)$(SIDEWAYS),ipad1)
 else ifeq ($(TARGET),ipad)
 	$(MAKE) app-build-ipad
 	xcrun simctl bootstatus $(IPAD_UDID) -b
+ifneq ($(STEPS),)
+	@# Upright, a list of steps (make pitch-walk UPRIGHT=1) needs no UI test:
+	@# a fresh app walks the list, keeps each answer beside it, and quits.
+	-xcrun simctl uninstall $(IPAD_UDID) $(BUNDLE_ID)
+	@rm -f '$(abspath $(PROBE_OUT))'
+	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
+	SIMCTL_CHILD_HIFTH_PROBE=1 SIMCTL_CHILD_HIFTH_ROUTE='$(ROUTE)' SIMCTL_CHILD_HIFTH_PROBE_STEPS='$(STEPS)' \
+	  SIMCTL_CHILD_HIFTH_PROBE_PATH='$(abspath $(PROBE_OUT))' \
+	  xcrun simctl launch --console-pty --terminate-running-process $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS) > /dev/null
+	@python3 -m json.tool $(PROBE_OUT)
+else
 	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
 	SIMCTL_CHILD_HIFTH_PROBE=1 SIMCTL_CHILD_HIFTH_ROUTE='$(ROUTE)' SIMCTL_CHILD_HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
@@ -249,6 +260,7 @@ else ifeq ($(TARGET),ipad)
 	  xcrun simctl launch --console-pty --terminate-running-process $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS) \
 	  | grep '^probe {' | sed 's/^probe //' | python3 -m json.tool
 	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
+endif
 else
 	$(MAKE) app-build-mac
 	@: > $(MAC_LOG)

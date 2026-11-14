@@ -3200,9 +3200,10 @@
         "item": "②"
       },
       "status": "open",
+      "useCase": "read-the-commentary-beside-my-verse",
       "severity": "risk",
       "owner": "agent",
-      "note": "Walk the pitch build in the iPhone simulator app, upright and on its side, as a reader would; every fault found gets a test and a walk-checklist line."
+      "note": "Walk the pitch build in the iPhone simulator app, upright and on its side, as a reader would; every fault found gets a test and a walk-checklist line. Walked 2026-11-14 over the pitch path: the iPhone app stayed upright when turned (only the iPad was allowed to turn), fixed with scripts/ios-orientations.test.mjs; then all 14 pitch steps passed upright and on its side, once the walk expected one page and scrolled the note card to the commentary. Left: a page turned by hand and a bookmark."
     },
     {
       "id": "iphone-commentary-shape",
@@ -3213,7 +3214,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "A phone has no room beside the verse for the commentary. Build the main shapes (a sheet from the bottom, a full-screen note, the page shrinking above it) as switchable options, try them in the simulator, keep the best as the default."
+      "note": "A phone has no room beside the verse for the commentary. Build the main shapes (a sheet from the bottom, a full-screen note, the page shrinking above it) as switchable options, try them in the simulator, keep the best as the default. The iPhone walk (2026-11-14) found today's card shows only the title and one line of the translation on its side, with the commentary a scroll below."
     },
     {
       "id": "iphone-own-device-install",
