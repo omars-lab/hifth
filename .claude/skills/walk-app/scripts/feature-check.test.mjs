@@ -23,7 +23,7 @@ const UDID = "00000000-FAKE-4000-8000-0000000000AA";
  * The made-up app. `wrongTool` makes it put a different tool in hand;
  * `silent` lists card ids whose capture never comes.
  */
-function fakeApp(dir, { flavour = "public", wrongTool = false, silent = [], noWords = false } = {}) {
+function fakeApp(dir, { flavour = "public", wrongTool = false, silent = [], noWords = false, noCaptureFolder = false } = {}) {
   const state = join(dir, "state.json");
   writeFileSync(state, JSON.stringify({ last: null, n: 0 }));
   const body = `
@@ -36,6 +36,9 @@ const link = a.includes("openurl") ? a[a.length - 1] : a.includes("--payload-url
 if (a[0] === "get_app_container") { console.log(container); process.exit(0); }
 if (a.includes("info")) {
   const base = path.join(container, at("--subdirectory"));
+  // An app built without the walk capture has no such folder, and Apple's tool
+  // fails on a folder that is not there (the real iPad, 2026-11-14).
+  if (${noCaptureFolder}) { console.error("ERROR: The operation couldn\u2019t be completed. (CoreDevice.ActionError error 3.)"); process.exit(1); }
   const files = [];
   const walk = (d) => { for (const n of fs.readdirSync(d)) { const p = path.join(d, n);
     if (fs.statSync(p).isDirectory()) walk(p); else files.push({ name: n, relativePath: path.relative(base, p) }); } };
@@ -124,6 +127,22 @@ test("a capture that never comes is reported, and the next card still runs", asy
   assert.equal(results(out)["place-verse"].result, "pass");
 });
 
+test("an iPad app with no capture folder stops the run at the first card, saying to install the debug build", async () => {
+  // Seen 2026-11-14: the iPad held an older test build with no capture code.
+  // Every card waited its full time and the log filled with 1,722 errors.
+  const dir = mkdtempSync(join(tmpdir(), "hifth-feature-check-"));
+  const out = join(dir, "out.json");
+  const r = await run(["--device", "FAKE-IPAD", "--only", "place-page,place-verse", "--wait", "2", "--out", out], {
+    HIFTH_DEVICECTL: fakeApp(dir, { noCaptureFolder: true }),
+  });
+  assert.equal(r.status, 1, r.out);
+  assert.match(r.out, /ev=no_capture_folder/);
+  assert.match(r.out, /make app-release-ipad/);
+  const launches = readFileSync(join(dir, "calls.log"), "utf8").split("\n").filter((l) => l.includes("--payload-url"));
+  assert.equal(launches.length, 2, "only the first card's two links were sent");
+  assert.equal(JSON.parse(readFileSync(out, "utf8")).stopped, "no-capture-folder");
+});
+
 test("on an iPad, only the card's own link restarts the app", async () => {
   const dir = mkdtempSync(join(tmpdir(), "hifth-feature-check-"));
   const out = join(dir, "out.json");
@@ -184,6 +203,21 @@ test("judge: the one-page and two-page cards are told apart by the pages on scre
   const one = card({ key: "view-one", route: "/hafs-kfqc/p7?view=one" });
   assert.equal(judge(one, where({ open: ["pages=1"] })).result, "pass");
   assert.match(judge(one, where({ open: [] })).why, /no count of pages/);
+});
+
+test("judge: on an upright iPad the two-page card says the screen is too narrow, not that the app failed", () => {
+  // The app opens the book only on a screen at least 1024 points wide and 775
+  // tall (the desktop rule), so an upright iPad shows one page by design.
+  const two = card({ key: "view-two", route: "/hafs-kfqc/p7?view=two" });
+  const upright = where({ open: ["pages=1"], screen: { width: 834, height: 1210, orientation: "upright" } });
+  const got = judge(two, upright);
+  assert.equal(got.result, "screen-too-narrow");
+  assert.match(got.why, /834 points wide/);
+  assert.match(got.why, /on its side/);
+  const sideways = where({ open: ["pages=1"], screen: { width: 1210, height: 834, orientation: "sideways" } });
+  assert.equal(judge(two, sideways).result, "fail", "sideways, one page is a real fault");
+  const one = card({ key: "view-one", route: "/hafs-kfqc/p7?view=one" });
+  assert.equal(judge(one, upright).result, "pass");
 });
 
 test("judge: the word-range card passes only when the page shows those words", () => {
