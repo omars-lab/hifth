@@ -268,7 +268,9 @@
       "related": [
         "tafseer-source",
         "tafsir-provider",
-        "desktop-vs-mobile"
+        "desktop-vs-mobile",
+        "phone-note-lead",
+        "phone-note-sideways"
       ]
     },
     {
@@ -369,7 +371,9 @@
         "boundary-juz",
         "page-bar-numberline",
         "phone-toolbar",
-        "share-sheet-builder"
+        "share-sheet-builder",
+        "phone-note-lead",
+        "phone-note-sideways"
       ],
       "decided": "A",
       "by": "omar",
@@ -660,7 +664,9 @@
         "page-bar-numberline",
         "page-bar-phone-scrub",
         "phone-toolbar",
-        "page-labels-desktop-size"
+        "page-labels-desktop-size",
+        "phone-note-lead",
+        "phone-note-sideways"
       ]
     },
     {
@@ -1543,6 +1549,60 @@
         "desktop-vs-mobile",
         "graduation-losers",
         "share-sheet-builder"
+      ]
+    },
+    {
+      "id": "phone-note-lead",
+      "question": "When a reader taps a verse on a phone held upright, should The Study Quran's note show its commentary at once, or the whole translation first?",
+      "status": "open",
+      "options": [
+        {
+          "id": "clamp",
+          "label": "Two lines of the translation, then the commentary"
+        },
+        {
+          "id": "whole",
+          "label": "The whole translation first, as it was"
+        },
+        {
+          "id": "tall",
+          "label": "The note opens grown to the full height, over the verse"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/phone-note-options.html",
+      "page": "docs/design/phone-note-options.html",
+      "builtBy": "scripts/build-phone-note-options.mjs",
+      "doc": "docs/decisions/phone-note.md#what-should-the-note-lead-with-held-upright",
+      "related": [
+        "phone-note-sideways",
+        "tafseer-reading",
+        "desktop-vs-mobile",
+        "graduation-losers"
+      ]
+    },
+    {
+      "id": "phone-note-sideways",
+      "question": "With a phone on its side, should The Study Quran's note stand beside the page, or lie across the foot of the screen?",
+      "status": "open",
+      "options": [
+        {
+          "id": "beside",
+          "label": "Standing beside the page, the full height of the screen"
+        },
+        {
+          "id": "foot",
+          "label": "Lying across the foot of the screen, as it was"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/phone-note-options.html",
+      "page": "docs/design/phone-note-options.html",
+      "builtBy": "scripts/build-phone-note-options.mjs",
+      "doc": "docs/decisions/phone-note.md#where-should-the-note-stand-with-the-phone-on-its-side",
+      "related": [
+        "phone-note-lead",
+        "tafseer-reading",
+        "desktop-vs-mobile",
+        "graduation-losers"
       ]
     },
     {

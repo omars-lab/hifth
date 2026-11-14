@@ -25,6 +25,7 @@ import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PITCH } from "../pitch/pitch";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
+import { NOTE_LEADS, NOTE_SIDEWAYS, rememberNoteLead, rememberNoteSideways, useNoteLead, useNoteSideways } from "../phone-note";
 import { CARD_ROOMS, rememberCardRoom, useCardRoom } from "../card-room";
 import { LOOKALIKE_COMPARES, rememberLookalikeCompare, useLookalikeCompare } from "../lookalike-compare";
 import { PASSAGE_ROWS, rememberPassageRows, usePassageRows } from "../passage-rows";
@@ -452,6 +453,8 @@ export function Colophon({
   const openingText = useOpeningText();
   const relatedList = useRelatedList();
   const longVerse = useLongVerse();
+  const noteLead = useNoteLead();
+  const noteSideways = useNoteSideways();
   const cardRoom = useCardRoom();
   const lookalikeCompare = useLookalikeCompare();
   const passageRows = usePassageRows();
@@ -786,6 +789,18 @@ export function Colophon({
             choice. Only the private build has notes. */}
         {PITCH && (
           <Choice id="long-verse" title={t.longVerseTitle} note={t.longVerseNote} value={longVerse} options={LONG_VERSES} label={(choice) => choice === "smaller" ? t.longVerseSmaller : t.longVerseShorter} data="long-verse" onPick={rememberLongVerse} />
+        )}
+
+        {/* How the note sits on a phone (docs/design/iphone-app.md, item 3):
+            the translation cut to two lines is the default, the whole
+            translation and the note opened full kept as choices; on its side
+            the note stands beside the page, lying across the foot kept as a
+            choice. Only the private build has notes. */}
+        {PITCH && (
+          <Choice id="note-lead" title={t.noteLeadTitle} note={t.noteLeadNote} value={noteLead} options={NOTE_LEADS} label={(choice) => choice === "clamp" ? t.noteLeadClamp : choice === "whole" ? t.noteLeadWhole : t.noteLeadTall} data="note-lead" onPick={rememberNoteLead} />
+        )}
+        {PITCH && (
+          <Choice id="note-sideways" title={t.noteSidewaysTitle} note={t.noteSidewaysNote} value={noteSideways} options={NOTE_SIDEWAYS} label={(choice) => choice === "beside" ? t.noteSidewaysBeside : t.noteSidewaysFoot} data="note-sideways" onPick={rememberNoteSideways} />
         )}
 
         {/* How a look-alike whose shared words come more than once is compared

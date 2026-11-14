@@ -3211,12 +3211,26 @@
         "file": "docs/design/iphone-app.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "agent",
       "useCase": "read-the-commentary-beside-my-verse",
       "feature": "tafsir-seam",
-      "note": "A phone has no room beside the verse for the commentary. Build the main shapes (a sheet from the bottom, a full-screen note, the page shrinking above it) as switchable options, try them in the simulator, keep the best as the default. The iPhone walk (2026-11-14) found today's card shows only the title and one line of the translation on its side, with the commentary a scroll below."
+      "closedBy": "apps/web/e2e/pitch.spec.ts",
+      "note": "A phone has no room beside the verse for the commentary. The iPhone walk (2026-11-14) found the short card showed no line of the commentary on 2:255, upright or on its side. Answered the same day by building every way and keeping the first as the default: upright, the translation is cut to two lines with a 'Whole translation' button, so the commentary starts inside the short card (3 lines in sight); on its side, the note stands the full height of the screen beside the page (4 lines on a 6.3-inch phone, 5 on the largest), the verse clear. The other ways are settings in the info panel. Which one stays is the owner's call: the open decisions phone-note-lead and phone-note-sideways (docs/decisions/phone-note.md). Tests: the pitch spec's 'the short note shows the commentary and leaves the verse in sight', on three phone sizes."
+    },
+    {
+      "id": "phone-side-foot-bars-cover-verse",
+      "source": {
+        "file": "docs/design/iphone-app.md",
+        "item": "⑪"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "useCase": "read-the-commentary-beside-my-verse",
+      "feature": "tafsir-seam",
+      "note": "On phones held on their side, with 2:255's note open, the bars at the foot of the screen (Full screen, the page strip and its chip) take about the lower 40% of the height and cover the end of the verse: the last 2 of its 6 lines on the smallest phone (667 by 375 points), and the walk's picture of step 4 on the 6.3-inch phone (874 by 402) shows the same. Also, in the picture taken just after the tap (step 3), the page shows its own foot, not the verse; it moves to the verse a moment later. Both were so before the note moved beside the page (seen while measuring that change, 2026-11-14); the note itself covers no line of the verse. The walk's check only asks whether the note covers the verse, not the foot bars, which is why it passes. Likely fix: hide or shrink the foot bars while a note stands beside the page on a short screen, and widen the walk's check to every bar. Test first: the pitch spec's phone-size loop with a 667 by 375 screen, which fails today."
     },
     {
       "id": "iphone-own-device-install",

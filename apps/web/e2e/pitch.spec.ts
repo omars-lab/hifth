@@ -605,6 +605,67 @@ test.describe("Hifth · the pitch build's Study Quran commentary", () => {
     await context.close();
   });
 
+  for (const screen of [
+    { name: "a phone held upright", width: 402, height: 874, standing: false },
+    { name: "a phone on its side", width: 874, height: 402, standing: true },
+    { name: "a large phone on its side", width: 956, height: 440, standing: true },
+  ]) {
+    test(`on ${screen.name}, the short note shows the commentary and leaves the verse in sight`, async ({
+      browser,
+    }) => {
+      // Measured on 2:255, the longest verse on the pitch's path: the short
+      // note on an iPhone held its title and the whole translation and not one
+      // line of the commentary, upright or on its side, and on its side it lay
+      // across the verse (docs/design/iphone-app.md, item 3). Now the
+      // translation is cut to two lines, and on its side the note stands
+      // beside the page. Numbers only: no word of the note is read.
+      const context = await browser.newContext({
+        viewport: { width: screen.width, height: screen.height },
+        hasTouch: true,
+      });
+      await context.addInitScript(() => localStorage.setItem("hifth.coach.v1", "1"));
+      const page = await context.newPage();
+      await page.goto("/#/hafs-kfqc/2:255?open=commentary");
+      const note = sheet(page);
+      await expect(note).toBeVisible({ timeout: 20_000 });
+      await settle(note);
+      await expect(note, "the note opens short, not grown").not.toHaveAttribute("data-tall", "true");
+      if (screen.standing) await expect(note).toHaveAttribute("data-standing", "true");
+      else await expect(note).not.toHaveAttribute("data-standing", "true");
+
+      const linesInSight = await note.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const commentary = el.querySelector('section[aria-label="Commentary"]');
+        const para = commentary?.querySelector("p");
+        if (!commentary || !para) return 0;
+        const line = parseFloat(getComputedStyle(para).lineHeight);
+        const c = commentary.getBoundingClientRect();
+        const shown = Math.min(box.bottom, innerHeight, c.bottom) - Math.max(box.top, c.top);
+        return Math.max(0, Math.floor(shown / line));
+      });
+      expect(linesInSight, "lines of the commentary in sight before any scroll").toBeGreaterThanOrEqual(2);
+
+      const card = (await note.boundingBox())!;
+      const header = (await page.locator("header").first().boundingBox())!;
+      await expect
+        .poll(
+          async () => {
+            const lines = await litLineBoxes(page);
+            return (
+              lines.length > 0 &&
+              lines.every(
+                (line) =>
+                  !overlaps(line, card) && line.y >= header.y + header.height - 1 && line.y + line.height <= screen.height,
+              )
+            );
+          },
+          { timeout: 5_000, message: "every line of the verse is in sight, clear of the note and the header" },
+        )
+        .toBe(true);
+      await context.close();
+    });
+  }
+
   test("with one page showing, a note in the corner beside it leaves the page where it was", async ({ page }) => {
     // The note reported itself as covering the foot of the window whenever it
     // was not on a facing leaf, so the page slid up about 300px under the

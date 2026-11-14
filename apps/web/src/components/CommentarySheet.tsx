@@ -10,10 +10,11 @@ import {
 } from "@hifth/core";
 import { edgeNote } from "../edge-note";
 import { useT } from "../i18n";
-import { TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
+import { PHONE_QUERY, SIDEWAYS_QUERY, TOUCH_QUERY, useMediaQuery } from "../useMediaQuery";
 import type { Commentator } from "../pitch/pitch";
 import { useNoteRoom } from "../long-verse";
 import { useRelatedList } from "../related-list";
+import { useNoteLead, useNoteSideways } from "../phone-note";
 import { splitSigla, type Siglum } from "../tafsir/sigla";
 import { isIntroOnly, textDir, type CommentaryNote } from "../tafsir/commentary";
 import styles from "./CommentarySheet.module.css";
@@ -288,13 +289,46 @@ export function CommentarySheet({
   // it: no veil dims the page, and a tap on the next verse turns the note to it.
   // A phone has no facing leaf, so there it stays a sheet over the page.
   const beside = side !== null;
+  // How the note sits on a phone, as the reader set it (docs/design/iphone-app.md,
+  // item 3). On a phone on its side it stands the full height of the screen
+  // beside the page, unless set to lie across the foot: standing, like a note
+  // beside a spread, it neither grows nor dims the page.
+  const phoneUpright = useMediaQuery(PHONE_QUERY);
+  const phoneSideways = useMediaQuery(SIDEWAYS_QUERY);
+  const lead = useNoteLead();
+  const sideways = useNoteSideways();
+  const onPhone = (phoneUpright || phoneSideways) && !beside;
+  const standing = onPhone && phoneSideways && sideways === "beside";
+  const still = beside || standing;
   // A phone opens the note short, on the lower part of the screen, so the verse
   // it is about stays in sight above it and nothing dims the page. Reading on —
   // a scroll inside the note, or a tap on its handle — grows it to the full
-  // height, and only then does it cover the page like a sheet.
-  const [tall, setTall] = useState(false);
+  // height, and only then does it cover the page like a sheet. A reader who set
+  // it so has each note open grown.
+  const startsTall = onPhone && !standing && lead === "tall";
+  const [tall, setTall] = useState(startsTall);
   const verseKey = entry?.ayahKey ?? null;
-  useEffect(() => setTall(false), [verseKey]);
+  useEffect(() => setTall(startsTall), [verseKey, startsTall]);
+  // The translation cut to two lines, so the commentary starts inside the short
+  // note; the reader's button shows the rest, for this verse only.
+  const cutLead = onPhone && lead === "clamp";
+  const [wholeFor, setWholeFor] = useState<string | null>(null);
+  const cut = cutLead && wholeFor !== verseKey;
+  const translationRef = useRef<HTMLQuoteElement>(null);
+  const [cutsOff, setCutsOff] = useState(false);
+  useLayoutEffect(() => {
+    const quote = translationRef.current;
+    if (!cut || !quote) {
+      setCutsOff(false);
+      return;
+    }
+    const measure = () => setCutsOff(quote.scrollHeight > quote.clientHeight + 1);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const watch = new ResizeObserver(measure);
+    watch.observe(quote);
+    return () => watch.disconnect();
+  }, [cut, verseKey, entry?.translation]);
   useEffect(() => setKeyOpen(null), [verseKey]);
 
   // The card stands under the initials it explains, inside the note's edges,
@@ -333,7 +367,7 @@ export function CommentarySheet({
   useLayoutEffect(() => {
     if (sheetRef.current) sheetRef.current.scrollTop = 0;
   }, [verseKey]);
-  const modal = !beside && tall;
+  const modal = !still && tall;
   const grown = open && modal;
   useEffect(() => onTall?.(grown), [grown, onTall]);
   useEffect(() => () => onTall?.(false), [onTall]);
@@ -365,14 +399,14 @@ export function CommentarySheet({
   useLayoutEffect(() => {
     if (!onCover) return;
     const sheet = sheetRef.current;
-    if (!open || beside || !sheet) {
+    if (!open || still || !sheet) {
       onCover(null);
       return;
     }
     // The short height is worked out, not read off the box: the box may still be
     // easing down from the previous verse's grown note.
     return watchCover(sheet, () => Math.min(sheet.scrollHeight, window.innerHeight * SHORT_SHARE - room), onCover);
-  }, [open, beside, verseKey, onCover, room]);
+  }, [open, still, verseKey, onCover, room]);
   useEffect(() => () => onCover?.(null), [onCover]);
   useSideCover(open, beside, sheetRef, onSide);
 
@@ -523,9 +557,10 @@ export function CommentarySheet({
         // `context` leads the note with the surah's introduction.
         data-panel={entry.intro ? "context" : "commentary"}
         data-tall={tall || undefined}
+        data-standing={standing || undefined}
         data-more={moreBelow ? "below" : undefined}
         style={
-          room > 0 && !side && !tall && !place
+          room > 0 && !side && !standing && !tall && !place
             ? { maxBlockSize: `calc(${SHORT_SHARE * 100}vh - ${room}px)` }
             : leafStyle(place)
         }
@@ -533,7 +568,7 @@ export function CommentarySheet({
         tabIndex={-1}
         onKeyDown={onKeyDown}
         onScroll={(e) => {
-          if (!beside && !tall && e.currentTarget.scrollTop > 0) setTall(true);
+          if (!still && !tall && e.currentTarget.scrollTop > 0) setTall(true);
           measureMore();
         }}
       >
@@ -542,7 +577,7 @@ export function CommentarySheet({
             which verse it is on, and can close it or shrink it. */}
         <div className={styles.top}>
           {/* Beside a page nothing drags or grows, so it has no handle. */}
-          {beside ? null : (
+          {still ? null : (
             <button
               type="button"
               className={styles.grip}
@@ -601,9 +636,19 @@ export function CommentarySheet({
           )}
 
           {entry.translation && (
-            <blockquote className={styles.translation} {...own}>
+            <blockquote ref={translationRef} className={styles.translation} data-cut={cut || undefined} {...own}>
               {entry.translation}
             </blockquote>
+          )}
+          {entry.translation && cutLead && (cutsOff || !cut) && (
+            <button
+              type="button"
+              className={styles.whole}
+              aria-expanded={!cut}
+              onClick={() => setWholeFor(cut ? verseKey : null)}
+            >
+              {cut ? t.noteWholeTranslation : t.noteShorterTranslation}
+            </button>
           )}
 
           {!introOnly && (

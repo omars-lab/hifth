@@ -100,15 +100,25 @@ export function helpers() {
    */
   const spread = () => matchMedia("(min-width: 1024px) and (min-height: 775px), (min-width: 1024px) and (min-height: 600px) and (hover: hover)").matches;
   /**
-   * The open note's commentary, brought into sight. On an iPad it sits in sight
-   * already; on a phone the verse's own translation comes first in the card, so
-   * the commentary starts below the card's fold and a reader scrolls the card to
-   * it (found walking the iPhone app, 2026-11-14). Never the page: only the card.
+   * The open note's commentary, brought into sight. It should already be in
+   * sight: on an iPad beside the verse, and on a phone since 2026-11-14, when the
+   * translation was cut to two lines (upright) and the note stood beside the page
+   * (on its side), because the walk found the short card hid it (docs/design/
+   * iphone-app.md ③). With `firstLook`, a check records whether two lines' worth
+   * of it showed before any scroll; either way it is then scrolled into the card,
+   * never the page, so the later checks still run.
    */
-  const commentary = async (ms = 20000) => {
+  const commentary = async (ms = 20000, { firstLook = false } = {}) => {
     const named = () => dialogs().map((d) => all("[role=region], section[aria-label]", d).find((e) => e.getAttribute("aria-label") === "Commentary")).find(Boolean);
     const el = await until(named, ms);
     if (!el) return null;
+    if (firstLook) {
+      await wait(600);
+      const r = box(el);
+      const card = box(el.closest("[role=dialog]"));
+      const room = r && card ? Math.min(innerHeight, card.bottom, r.bottom) - Math.max(r.top, card.top, 0) : 0;
+      check("two lines of the commentary in sight before any scroll", room >= 40, Math.round(room));
+    }
     if (!shown(el)) {
       el.scrollIntoView({ block: "start" });
       await wait(400);
@@ -165,7 +175,7 @@ export const STEPS = [
     title: "2:255's note reads in its ten printed paragraphs, to its end",
     route: "/hafs-kfqc/2:255?open=commentary",
     run: async (h) => {
-      const note = await h.commentary(20000);
+      const note = await h.commentary(20000, { firstLook: true });
       if (!h.check("the note is open", note)) return;
       const ps = h.all("p", note);
       h.check("the note has ten paragraphs", ps.length === 10, ps.length);

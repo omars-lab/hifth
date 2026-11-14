@@ -272,6 +272,19 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   tool cannot make Firefox a phone, so look at those by hand. · desktop (Firefox), laptop
   (Firefox) · `make drive BROWSER=firefox DEVICE=desktop` · test: the `pitch-firefox` run,
   `docs/issues/firefox-pitch-run-laptop-only.md`
+- [ ] Open 2:255's note on a phone, upright and on its side: before any scroll, at least two lines
+  of The Study Quran's commentary are in sight, and every line of the verse is clear of the note.
+  Upright, the translation shows two lines with a "Whole translation" button; on its side, the
+  note stands the full height of the screen beside the page (on the left in Arabic). Try the
+  other ways in the info panel ("What a note on a phone shows first", "Where a note stands on a
+  phone on its side"). · phone, phone-side, iphone · decisions: `phone-note-lead`,
+  `phone-note-sideways` · tests: pitch spec, "the short note shows the commentary and leaves the
+  verse in sight" · found 2026-11-14: the short card showed no commentary at all on a long verse
+- [ ] On a phone on its side, tap 2:255 and look at the page at once and a second later: the lit
+  verse is in sight straight away (not the page's foot), and the bars at the foot of the screen
+  cover none of its lines. A check that only asks about the note misses this. · phone-side,
+  iphone · issues: `phone-side-foot-bars-cover-verse` · found 2026-11-14 in the walk's pictures
+  of steps 3 and 4
 - [ ] Open a verse's note: it never covers its own verse, also after turning the phone. · phone,
   phone-side · issue: `note-covers-verse-after-turn`
 - [ ] On a phone on its side in the pitch build, open 2:255's note: all six of its lines and its
@@ -791,8 +804,9 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   tests: `scripts/ios-orientations.test.mjs` (the app's settings let an iPhone turn) and the
   skill's `walk-spread.test.mjs` (the walk counts one page or two by the app's own rule) · found
   2026-11-14: the iPhone app stayed upright when the phone turned, because only the iPad was
-  allowed to turn; fixed. On a phone the commentary starts below the card's fold, which is
-  question ③ of `docs/design/iphone-app.md`, not a fault yet
+  allowed to turn; fixed. On a phone the commentary started below the card's fold (question ③
+  of `docs/design/iphone-app.md`); since 2026-11-14 it starts inside the short card (see "The
+  note (pitch)": the commentary in sight on a phone)
 - [ ] Open the note and a look-alike list **in the iPad app on its side**, both sizes, and
   upright on the large one: each card ends about 24 points below its last row, not 44, and the
   note's fade sits on its edge (native-shell ㉜). · `make app-probe TARGET=ipad SIDEWAYS=1

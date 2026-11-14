@@ -415,6 +415,11 @@ export interface Catalog {
   readonly noteFollowing: string;
   readonly noteHarakahOf: (d: { readonly label: string | number }) => string;
   readonly noteJoined: (d: { readonly label: string | number }) => string;
+  readonly noteLeadClamp: string;
+  readonly noteLeadNote: string;
+  readonly noteLeadTall: string;
+  readonly noteLeadTitle: string;
+  readonly noteLeadWhole: string;
   readonly noteLeaveAtOnce: string;
   readonly noteLeaveNote: string;
   readonly noteLeaveSlide: string;
@@ -428,8 +433,13 @@ export interface Catalog {
   readonly noteShelfEmpty: string;
   readonly noteShelfEmptyClick: string;
   readonly noteShelfHead: string;
+  readonly noteShorterTranslation: string;
   readonly noteShowAll: string;
   readonly noteShowLess: string;
+  readonly noteSidewaysBeside: string;
+  readonly noteSidewaysFoot: string;
+  readonly noteSidewaysNote: string;
+  readonly noteSidewaysTitle: string;
   readonly noteTierAyah: string;
   readonly noteTierHarakah: string;
   readonly noteTierWhole: string;
@@ -439,6 +449,7 @@ export interface Catalog {
   readonly noteVerseTakenOut: string;
   readonly noteVerses: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly noteWhole: string;
+  readonly noteWholeTranslation: string;
   readonly noteWordOf: (d: { readonly label: string | number }) => string;
   readonly "notices.capped.body": string;
   readonly "notices.capped.title": string;
