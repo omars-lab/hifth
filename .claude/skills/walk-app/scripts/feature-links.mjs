@@ -181,7 +181,7 @@ export function renderPage(all, { pictures, takenAt = null, checks = null }) {
   };
   const sections = GROUPS.map(([g, heading]) => {
     const inGroup = all.filter((c) => c.group === g);
-    return `<section><h2>${esc(heading)} <span class="n">${inGroup.length}</span></h2><div class="grid">${inGroup.map(cardHtml).join("\n")}</div></section>`;
+    return `<section id="${g}"><h2>${esc(heading)} <span class="n">${inGroup.length}</span></h2><div class="grid">${inGroup.map(cardHtml).join("\n")}</div></section>`;
   }).join("\n");
   const shotCount = all.filter((c) => !c.pitchOnly && pictures.has(c.id)).length;
   const rs = checks?.results ?? [];

@@ -56,6 +56,11 @@ the spam-check key (`hifth-app-turnstile-key`).
 - The release check no longer counts the page-comment files as uncommitted work, which had refused
   every release (727ea5f3, on branch release-ignores-comments, to merge with the release's own
   changes).
+- A side bar on the local copy of hifth.app, never on the live site: the front pages, each section
+  of the features page with its cards, and every design page, the page you are on lit; folds to
+  icons on a laptop, a Menu drawer on a phone (branch release-ignores-comments, 2026-11-14). The
+  release folder is now cleared by moving it aside first, because Finder could write into it
+  while it was being deleted (`docs/issues/old-folder-written-to-while-deleted.md`).
 
 ### 2026-11-09 — Installing on our own devices through TestFlight
 

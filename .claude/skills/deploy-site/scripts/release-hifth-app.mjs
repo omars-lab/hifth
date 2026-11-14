@@ -19,12 +19,14 @@
  * releasing our site / ensuring the bare minimum is deployed (in prod, no dev functionality)".
  */
 import { spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
-import { dirname, extname, join, resolve } from "node:path";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, statSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { auditShipped, readFolder } from "./shipped.mjs";
 import { verifyLive } from "./live.mjs";
 import { addDevDesigns, commitDates } from "./dev-designs.mjs";
+import { addDevSidebar, copyFeaturesPage, findFeaturesPage } from "./dev-sidebar.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "..", "..", "..", "..");
@@ -41,9 +43,32 @@ const LANDING_DIRS = { ar: /^(index|privacy)\.html$/, shots: /^[\w-]+\.(png|jpg|
 /** What every app build writes and the site never needs. */
 const APP_SKIP = (rel) => rel === "docs" || rel === "_headers" || rel === "_redirects" || extname(rel) === ".map";
 
+/**
+ * Empty the release folder. Finder writes a .DS_Store into a folder it has open, and can do so
+ * mid-delete, which fails the delete with "directory not empty" (2026-11-14). So the old folder
+ * is moved aside first and deleted there; if that delete loses the same race, the leftover sits
+ * in the system temp folder, not in the build. Moving fails only across disks, and then the
+ * folder is deleted where it is.
+ */
+function clearAway(out) {
+  if (!existsSync(out)) return;
+  const aside = join(mkdtempSync(join(tmpdir(), "hifth-old-dist-")), "dist");
+  try {
+    renameSync(out, aside);
+  } catch {
+    rmSync(out, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    return;
+  }
+  try {
+    rmSync(aside, { recursive: true, force: true });
+  } catch {
+    // Still being written into; the system clears its temp folder.
+  }
+}
+
 /** Put the release folder together from the front page and the app's build. */
 export function assemble({ landing = LANDING, app = APP_DIST, out = OUT } = {}) {
-  rmSync(out, { recursive: true, force: true });
+  clearAway(out);
   mkdirSync(join(out, "read"), { recursive: true });
   for (const name of readdirSync(landing)) {
     const full = join(landing, name);
@@ -255,7 +280,7 @@ const wrangler = (args) => spawnSync("wrangler", args, { cwd: LANDING, stdio: "i
 
 /**
  * hifth.app on this laptop, first half: the same folder a release would upload,
- * checked, with the Designs button added. The second half,
+ * checked, with the developer side bar added. The second half,
  * `serve`, only starts the server, so the comment server can start it behind
  * itself without waiting on a build.
  */
@@ -267,13 +292,19 @@ function prepare({ build }) {
   if (!ok) console.log("  (served anyway: those stop a release, not a look on this laptop)");
   // Added after the check, so the check saw the folder as it would go up. publish rebuilds
   // the folder from scratch, and the check refuses both if they ever ride along.
-  const listed = addDevDesigns({
+  const designs = addDevDesigns({
     out,
     builtDocs: join(APP_DIST, "docs"),
     notes: join(REPO, "docs", "design"),
     dates: commitDates(REPO, "docs/design"),
   });
-  console.log(`  Designs button: ${listed} design pages and notes, on this laptop only (/docs/design/)`);
+  const hub = findFeaturesPage({ repo: REPO });
+  const features = hub ? copyFeaturesPage({ from: hub.dir, out }) : null;
+  const pages = addDevSidebar({ out, designs, features });
+  console.log(`  Side bar, on this laptop only: ${pages.length} pages carry it; ${designs.length} design pages and notes (/docs/design/)`);
+  console.log(hub
+    ? `  Features page: copied from ${relative(REPO, hub.dir) || "."}${hub.takenAt ? `, pictures taken ${hub.takenAt}` : ""} (/dev-hub/)`
+    : "  Features page: none built yet in any worktree; run make feature-links, then serve again");
   return true;
 }
 

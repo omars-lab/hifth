@@ -6710,6 +6710,20 @@
       "severity": "question",
       "owner": "user",
       "note": "Should the new store accept connections only from listed internet addresses? Today it accepts any address that has the password. A list would shut out a stolen password used elsewhere, but this laptop's address changes, so a fixed list would lock the owner out until it is updated. The store check reports it and does not fail on it."
+    },
+    {
+      "id": "hifth-app-dev-sidebar",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑰"
+      },
+      "status": "fixed",
+      "severity": "question",
+      "owner": "agent",
+      "closedBy": ".claude/skills/deploy-site/scripts/dev-sidebar.test.mjs",
+      "feature": "hifth-app-site",
+      "useCase": "find-hifth-and-open-it",
+      "note": "On this laptop, hifth.app gets a side bar like the earlbear workflow site's: hifth.app's pages, each section and card of the features page, and the design pages, folding to icons and a drawer on a phone. Local copy only; the release check refuses it. Replaces the floating Designs button."
     }
   ]
 }

@@ -1,10 +1,11 @@
 /**
- * The "Designs" button on hifth.app served on this laptop.
+ * The design pages on hifth.app served on this laptop, which the developer side bar lists.
  *
  * Owner, 2026-11-13: "when we are running the landing hub in localhost mode, there is a tab for
  * designs for devs ... that will take us to pages like docs/design/hifth-app-mailing-list.html".
- * The button and the design pages are added to the local folder only, after the release check
- * has looked at it, and the check refuses both if they ever reach a folder about to go up.
+ * The design pages are added to the local folder only, after the release check has looked at
+ * it, and the check refuses them if they ever reach a folder about to go up. Since 2026-11-14
+ * the developer side bar lists them (dev-sidebar.mjs), in place of a floating Designs button.
  * Written before dev-designs.mjs and seen failing.
  *
  * Run with: pnpm test:scripts
@@ -53,26 +54,22 @@ function fixture() {
   return { out, built, notes };
 }
 
-test("every front page gets the Designs button; the app under read/ does not", () => {
+test("the list holds the option pages and the written notes, newest first", () => {
   const { out, built, notes } = fixture();
-  addDevDesigns({ out, builtDocs: built, notes });
-  for (const page of ["index.html", "ar/index.html", "privacy.html", "404.html"]) {
-    assert.match(readFileSync(join(out, page), "utf8"), /data-dev-designs/, page);
-  }
-  assert.doesNotMatch(readFileSync(join(out, "read/index.html"), "utf8"), /data-dev-designs/);
+  const list = addDevDesigns({ out, builtDocs: built, notes });
+  const titles = list.map((d) => d.title);
+  assert.ok(titles.includes("Hifth notify list"));
+  assert.ok(titles.includes("How should the share menu look?"));
+  const note = list.find((d) => d.title === "How should the share menu look?");
+  assert.equal(note.href, "/docs/design/share-look.md.html");
+  assert.equal(note.kind, "note");
+  assert.ok(titles.indexOf("Hifth notify list") < titles.indexOf("Page bar options"), "a page changed recently is listed before an old one");
 });
 
-test("the button lists the option pages and the written notes, newest first, and links the full list", () => {
+test("the front pages are left alone; the side bar, not this, puts a menu on them", () => {
   const { out, built, notes } = fixture();
   addDevDesigns({ out, builtDocs: built, notes });
-  const html = readFileSync(join(out, "index.html"), "utf8");
-  assert.match(html, /href="\/docs\/design\/hifth-app-mailing-list\.html"[^>]*>Hifth notify list/);
-  assert.match(html, /href="\/docs\/design\/share-look\.md\.html"[^>]*>How should the share menu look\?/);
-  assert.match(html, /href="\/docs\/design\/index\.html"/);
-  assert.ok(
-    html.indexOf("Hifth notify list") < html.indexOf("Page bar options"),
-    "a page changed recently is listed before an old one",
-  );
+  assert.equal(readFileSync(join(out, "index.html"), "utf8"), "<html><body><h1>Hifth</h1></body></html>");
 });
 
 test("the pages themselves are copied in, and a written note is drawn as a page with its pictures", () => {
@@ -89,12 +86,11 @@ test("the pages themselves are copied in, and a written note is drawn as a page 
   assert.match(index, /How should hifth\.app's mailing list work\?/);
 });
 
-test("the release check refuses the button and the design pages if they ever reach a folder going up", () => {
+test("the release check refuses the design pages if they ever reach a folder going up", () => {
   const { out, built, notes } = fixture();
   addDevDesigns({ out, builtDocs: built, notes });
   const { problems } = auditShipped(readFolder(out).files);
   const why = (path) => problems.filter((p) => p.path === path).map((p) => p.why).join(" | ");
-  assert.match(why("index.html"), /Designs button/);
   assert.match(why("docs/design/hifth-app-mailing-list.html"), /design page/);
 });
 

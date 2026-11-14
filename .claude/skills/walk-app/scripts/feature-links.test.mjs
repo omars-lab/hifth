@@ -116,3 +116,12 @@ test("a check run on an app built from another commit says so above the cards", 
   assert.match(renderPage(cards(contract), { pictures: new Set(), checks }), /class="stale"[^>]*>The crosses may be wrong: the app's web pages were built from commit 6ef91b5b/);
   assert.doesNotMatch(renderPage(cards(contract), { pictures: new Set(), checks: { ...checks, stale: undefined } }), /class="stale"/);
 });
+
+test("each section has an id a link can jump to, such as #panels", () => {
+  // Owner, 2026-11-14, linked straight to ".dev-hub/index.html#panels"; the local side bar on
+  // hifth.app links each section the same way.
+  const html = renderPage(cards(contract), { pictures: new Set() });
+  for (const [id, heading] of [["places", "Places and layouts"], ["tools", "Tools in hand"], ["panels", "Panels open on arrival"]]) {
+    assert.match(html, new RegExp(`<section id="${id}"><h2>${heading} `), id);
+  }
+});

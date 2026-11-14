@@ -11,7 +11,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { spawn } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, changesThatShip, configProblems, localListFrom, serveArgs } from "./release-hifth-app.mjs";
@@ -98,6 +99,24 @@ test("putting it together again starts from an empty folder", () => {
   writeFileSync(join(out, "left-over.txt"), "from last time");
   assemble({ landing, app, out });
   assert.ok(!readFolder(out).files.some((f) => f.path === "left-over.txt"));
+});
+
+// Finder writes a .DS_Store into a folder it has open, and it can do so while the old folder
+// is being deleted, so the delete fails with "directory not empty" (seen 2026-11-14 on
+// apps/landing/dist/read). Another process writing in a loop stands in for Finder.
+test("putting it together again works while another program keeps writing into the old folder", async () => {
+  const { landing, app, out } = fixture();
+  assemble({ landing, app, out });
+  const read = join(out, "read");
+  const writer = spawn(process.execPath, ["-e",
+    `const fs=require("fs");const end=Date.now()+800;while(Date.now()<end){try{fs.writeFileSync(${JSON.stringify(join(read, ".DS_Store"))},"x")}catch{}}`]);
+  await new Promise((r) => setTimeout(r, 100));
+  try {
+    assert.doesNotThrow(() => assemble({ landing, app, out }));
+  } finally {
+    await new Promise((r) => writer.on("exit", r));
+  }
+  assert.ok(existsSync(join(out, "read", "index.html")));
 });
 
 test("the site's Cloudflare settings name no database and hold no list address or secret", () => {
