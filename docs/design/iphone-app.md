@@ -54,9 +54,10 @@ gets a test and a line on the walk checklist (the `walk-app` skill).
 - **Found and fixed: the iPhone app did not turn.** Held on its side, the page stayed upright,
   because the app's settings let only the iPad turn. The iPhone now turns to either side (not
   upside down); a test reads the settings (`scripts/ios-orientations.test.mjs`).
-- **Upright and on its side, all 14 pitch steps pass**: one page, each note in a card at the foot, the verse
-  whole above it, the look-alike lists, the roots list, the surah introduction and the Mistake
-  pen all clear of the verse.
+- **Upright and on its side, all 14 pitch steps pass**: one page; a tap opens the note in a short
+  card at the foot with the verse whole above it; the look-alike lists, the roots list, the surah
+  introduction and the Mistake pen all clear of the verse. Reading a note to its end grows the
+  card to the full screen, over the page (the pictures of step 4, both ways up).
 - **The walk's own checks were iPad-shaped**: they wanted two pages and the commentary in sight
   at once. On a phone the card shows the verse's translation first and the commentary below its
   fold, a scroll away. The checks now expect one page on a narrow screen and scroll the card to

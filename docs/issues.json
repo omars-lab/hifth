@@ -3214,6 +3214,8 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
+      "useCase": "read-the-commentary-beside-my-verse",
+      "feature": "tafsir-seam",
       "note": "A phone has no room beside the verse for the commentary. Build the main shapes (a sheet from the bottom, a full-screen note, the page shrinking above it) as switchable options, try them in the simulator, keep the best as the default. The iPhone walk (2026-11-14) found today's card shows only the title and one line of the translation on its side, with the commentary a scroll below."
     },
     {

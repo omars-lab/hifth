@@ -1,4 +1,4 @@
-// The pitch demo's steps, as the iPad app walks them (make pitch-walk).
+// The pitch demo's steps, as the iPad or iPhone app walks them (make pitch-walk).
 //
 // One entry per step of .claude/skills/walk-app/pitch-script.md that a made-up
 // tap can do; steps 2 (a turn by the page's edge) and 14 (the surah playing)
@@ -96,9 +96,9 @@ export function helpers() {
   };
   /**
    * Whether the window has room for two pages: the web app's own rule for the open
-   * book (App.module.css). A phone, upright or on its side, shows one page.
+   * book (DESKTOP_QUERY in useMediaQuery.ts; walk-spread.test.mjs keeps them equal). A phone, upright or on its side, shows one page.
    */
-  const spread = () => matchMedia("(min-width: 1024px) and ((min-height: 775px) or ((min-height: 600px) and (hover: hover)))").matches;
+  const spread = () => matchMedia("(min-width: 1024px) and (min-height: 775px), (min-width: 1024px) and (min-height: 600px) and (hover: hover)").matches;
   /**
    * The open note's commentary, brought into sight. On an iPad it sits in sight
    * already; on a phone the verse's own translation comes first in the card, so
@@ -136,7 +136,7 @@ export function helpers() {
 export const STEPS = [
   {
     n: 1,
-    title: "the app opens on two pages of the mus'haf with nothing over them",
+    title: "the app opens on the mus'haf (two pages where there is room) with nothing over them",
     route: "/hafs-kfqc/p42",
     run: async (h) => {
       h.check("page 42 is in sight", await h.until(() => h.pageSvg(42), 20000));

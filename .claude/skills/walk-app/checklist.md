@@ -788,7 +788,8 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   turns with the phone (wider than tall), one page shows, and each note opens in a card at the
   foot that scrolls to The Study Quran's commentary below the verse's own translation. ·
   `make pitch-walk ON="iPhone 17"` and `make pitch-walk ON="iPhone 17" UPRIGHT=1 NO_BUILD=1` ·
-  test: `scripts/ios-orientations.test.mjs` (the app's settings let an iPhone turn) · found
+  tests: `scripts/ios-orientations.test.mjs` (the app's settings let an iPhone turn) and the
+  skill's `walk-spread.test.mjs` (the walk counts one page or two by the app's own rule) · found
   2026-11-14: the iPhone app stayed upright when the phone turned, because only the iPad was
   allowed to turn; fixed. On a phone the commentary starts below the card's fold, which is
   question ③ of `docs/design/iphone-app.md`, not a fault yet
