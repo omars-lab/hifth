@@ -1,6 +1,7 @@
 import { useEffect, useRef, type MouseEvent } from "react";
 import type { Bookmark } from "@hifth/core";
 import { useT } from "../i18n";
+import { useLeftOffLook } from "../left-off-look";
 import { useRibbonLength } from "../ribbon-length";
 import styles from "./BookmarkRibbons.module.css";
 
@@ -52,6 +53,9 @@ export function BookmarkRibbons({
 }: BookmarkRibbonsProps): JSX.Element {
   const { t } = useT();
   const ribbonLength = useRibbonLength();
+  // How the red ribbon is told from the reader's own bookmarks (left-off-look.ts).
+  // With tabs, every bookmark is a named tab whatever ribbon length is set.
+  const leftOffLook = useLeftOffLook();
   const rootRef = useRef<HTMLDivElement>(null);
   const act = useRef<(button: HTMLButtonElement) => void>(() => {});
   // A page that holds a bookmark keeps its corner folded down until the reader
@@ -99,9 +103,13 @@ export function BookmarkRibbons({
 
   return (
     <div ref={rootRef} className={styles.overlay} data-bookmark-overlay="" data-aside={aside ? "" : undefined}
-      data-ribbon={ribbonLength}
+      data-ribbon={leftOffLook === "tabs" ? "tab" : ribbonLength}
+      data-left-off={leftOffLook}
     >
       {seam && <span className={styles.seam} role="img" aria-label={t.bmSeam} title={t.bmSeam} data-bookmark-seam="" />}
+      {seam && leftOffLook === "label" && (
+        <span className={styles.seamLabel} aria-hidden="true" data-left-off-label="">{t.bmSeamShort}</span>
+      )}
       <button
         type="button"
         className={styles.fold}

@@ -668,6 +668,7 @@ export interface Strings {
   bmDrop: string;
   /** The red seam's name: where the reader left off. */
   bmSeam: string;
+  bmSeamShort: string;
   /** A folded corner's name: tapping it unfolds the corner and lifts the page's bookmarks. */
   bmUnfold(count: number): string;
   bmUnfolded(count: number): string;
@@ -1025,6 +1026,12 @@ export interface Strings {
   ribbonLengthShort: string;
   ribbonLengthLong: string;
   ribbonLengthNote: string;
+  leftOffTitle: string;
+  leftOffLabel: string;
+  leftOffMark: string;
+  leftOffTabs: string;
+  leftOffRibbons: string;
+  leftOffNote: string;
   lookalikePreviewTitle: string;
   lookalikePreviewPicture: string;
   lookalikePreviewCount: string;

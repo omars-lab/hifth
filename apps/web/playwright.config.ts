@@ -274,7 +274,7 @@ export default defineConfig({
           // bar; it runs on the phones too, from their own bar.
           // `card-foot` tells Chromium there is a home bar and checks a wide
           // screen's cards keep no room for it; the phones are not wide.
-          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows|recitation-keep|pencil|card-foot|spoken-names|drawer-tools|drawer-glow|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes)\.spec\.ts/,
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows|recitation-keep|pencil|card-foot|spoken-names|drawer-tools|drawer-glow|left-off-look|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -300,7 +300,7 @@ export default defineConfig({
           // And `pencil`: the rings at the pencil's tip are placed by script
           // and drawn with layered backgrounds, both worth a second engine.
           name: "desktop-firefox",
-          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|drawer-glow|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes)\.spec\.ts/,
+          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|drawer-glow|left-off-look|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },
@@ -323,13 +323,13 @@ export default defineConfig({
         {
           name: "iphone",
           use: { ...devices["iPhone 13"] },
-          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|drawer-glow)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|drawer-glow|left-off-look)\.spec\.ts/,
         },
         {
           name: "android",
           use: { ...devices["Pixel 7"] },
           // The carry runs on the iPhone (WebKit) already; Chromium has it on the desktop.
-          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|drawer-glow|carry-marks)\.spec\.ts/,
+          testIgnore: /(golden|ipad|shots|desktop|pen-homes|edge-peel|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|(?<!scoped-)notes|mistakes|undo-redo|eraser|sign-tools|lazy-tools|pitch|drive-video|drive-touch|drive-device|card-foot|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|drawer-glow|left-off-look|carry-marks)\.spec\.ts/,
         },
         {
           // The iPad, the same WebKit the native shell hosts (native/). One

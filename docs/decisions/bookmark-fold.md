@@ -296,6 +296,25 @@ they stopped, and not mistake it for a page they bookmarked on purpose, or the o
 **If nobody decides:** both stay ribbons, and the reader has to learn that red means "where you
 left off".
 
+**Built 2026-11-13, all of them, as a setting** in the info panel, under "Telling where you left
+off from your bookmarks":
+- **The red ribbon says "Left off"** (the default for now): it keeps its place down the fold, and
+  a small red label at its head says what it is. It changes the least about the look the owner
+  chose on 2026-09-25.
+- **A small red mark, not a ribbon:** the red one shrinks to a short pointed mark at the head of
+  the fold.
+- **Bookmarks become named tabs:** each bookmark is a small tab at the head of its page with its
+  name written on it, so only the red one is a ribbon. This look sets the bookmarks' length
+  itself, so the ribbon-length setting does nothing while it is on.
+- **Both stay ribbons,** as before.
+
+One change from the options above, made without asking: the label is always shown, not only on
+hover with a first-time hint. A hover does nothing on the iPad, and a hint shown once is gone by
+the second time the reader is confused. All three new looks were checked by eye on the laptop at
+1440 and sit clear of the writing; the browser tests hold that.
+
+**Left:** the owner tries the four on the laptop and the iPad and says which becomes the default.
+
 ### ② Should a reader be able to pull a ribbon down, or push it back up? · **open**
 
 **What would answer it:** a rough build of a pull-down and a push-up on the laptop and on the
