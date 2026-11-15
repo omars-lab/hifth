@@ -4,7 +4,7 @@ Written 2026-11-15 by researcher B, working apart from researcher A, whose files
 
 > [!tip] The short version
 > - **Where we are.** The Apple account side is mostly ready. The paid membership is active, the app's Apple id has Sign in with Apple turned on, and the iPad app is signed with the paid team. **None of the code exists yet.** No build carries the Sign in with Apple permission. The page inside the app cannot yet ask the shell a question and wait for the answer. And there is no server that checks who someone is or keeps an account.
-> - **What is left.** About 17 of 20 steps: two decisions for the owner, a handful of dashboard steps (Apple, then Cloudflare), and roughly two to three weeks of code. The full list is [the table below](#how-close-are-we-step-by-step).
+> - **What is left.** 14 of 20 steps are left, and 3 more sit in Apple's developer site where this research could not see; the owner should confirm them. The rest is two decisions for the owner, a few short dashboard steps, and roughly two to three weeks of code. The full list is [the table below](#how-close-are-we-step-by-step).
 > - **The finding that matters most.** Today there is nothing online for a signed-in reader to use. Testers do not need an account: TestFlight brings its own invitations and its own feedback button. So the first decision is what sign-in unlocks, not how the button works.
 > - **Recommendation, in one line.** Build the plumbing now and show it to no one. When the first online feature is picked, sign readers in with Apple's own sheet in the apps, checked by a small piece of code on hifth.app that runs on Cloudflare with its free database. Then add a typed email code for readers in Firefox or without an Apple account.
 
@@ -38,6 +38,26 @@ Each of those is a new way for the record to leave the device. That record shows
 
 **The risk to weigh.** An account means we hold the person's email, or an Apple relay address, and a user number. If the practice record reaches our server in a form we can read, the App Store label has to declare it. It may even count as "sensitive", a category Apple's own page says covers religious beliefs. So the safest first feature sends nothing about their memorisation that we can read, or it says plainly that we can.
 
+## What is the smallest first thing worth signing in for?
+
+**Researcher B's pick: a copy of the reader's own saved file on hifth.app, so their marks and record follow them to Firefox or an Android phone.** It is one button: "Keep a copy of my marks on hifth.app". The reader can also open that copy from another browser, or delete it.
+
+Why this one:
+
+- **It is already the plan.** The storage decision names it as what happens "on the day there is sign-in": the reader's own cloud copy, written all at once.
+- **It fills the one gap iCloud leaves.** Own-device sync already covers the iPad, iPhone and Mac, but it cannot reach Firefox or Android. Today those readers carry a file by hand.
+- **It involves one reader and one record.** Nobody else sees it, so it raises none of the consent questions that sharing between people raises.
+- **The file already exists.** The app can already write it and read it back.
+
+What it costs:
+
+- It is a new way for the record to leave the device. So it is added to the privacy check on purpose, and the button says what goes and to whom.
+- In its first form we could read the copy. The button has to say that plainly, unless it is locked with a key kept on the reader's devices (see [what this is not settling](#what-is-this-not-settling)).
+
+**The runner-up is the teacher link.** It waits on which way sharing goes, and it might need no account at all.
+
+**If the owner wants neither yet, the honest answer is "not yet":** build the hidden plumbing and stop there.
+
 ## Why is this being asked now?
 
 On 2026-11-15 the owner said: "i want to do proper auth, especially if we open this up for testers ... how close are we to adding sign in with apple to use the online experience?" Two things changed that week:
@@ -46,6 +66,12 @@ On 2026-11-15 the owner said: "i want to do proper auth, especially if we open t
 - the iPad was signed with the paid team on 2026-11-10.
 
 Sign in with Apple needs both.
+
+**What we have already decided that constrains it.**
+
+- The storage decision says that on the day there is sign-in, the reader's own record goes to their own cloud copy, written all at once. It also ties when sign-in comes to the licensing question, and says "not this year".
+- The sharing page says there is no Sign in button with nothing behind it. It also says the apps use Apple's own sheet, never a web sign-in page inside the app.
+- The owner chose Cloudflare's free database for shared things on 2026-11-09.
 
 **What happens if nobody decides.** Nothing breaks. Testers can still be invited through TestFlight once the licence reading clears the upload, and they can send feedback through TestFlight's own button. Own-device sync goes through iCloud with no account. The cost of waiting is only that the online features stay unbuilt: the teacher link, the record in Firefox and the shared look-alike counts.
 
@@ -76,12 +102,12 @@ Sign in with Apple needs both.
 | 19 | Update the privacy page and the App Store privacy label; add the new way out to the privacy check | left | agent drafts; owner approves | half a day |
 | 20 | Testers: a TestFlight upload, plus a test login for Apple's beta reviewers | held by the licence reading | owner | — |
 
-**Headline: 3 of 20 steps are done, all of them on Apple's side.** The remaining 17 break down as:
+**Headline: 3 of 20 steps are done, all of them on Apple's side. 14 are left and 3 are not checked.** They break down as:
 
 - 2 decisions for the owner;
-- 4 dashboard steps for the owner, each under an hour;
+- 3 Apple-site steps not checked (the key file, the mail sender, the website's Services ID), each under an hour for the owner;
 - 1 step held by the licence reading;
-- 10 code steps, about two to three weeks of agent work in all.
+- 11 code steps (6 to 9, 11 to 15, 18 and 19), about two to three weeks of agent work in all. A few need a short owner step too: the Mac signing, the Cloudflare limit and the mail sender.
 
 ## In what order do the steps have to happen?
 
@@ -104,7 +130,7 @@ flowchart TD
     P --> TF[Owner: TestFlight, once the licence reading clears]
 ```
 
-The left side needs no decision and can start today: the entitlement, the bridge reply and the native sheet. Deletion has to exist before any reader outside the owner signs in, because Apple will reject a build that creates accounts without it.
+Three steps need no decision and can start today: the entitlement in each build, letting the page ask the shell and wait, and Apple's sheet in the shell. Deletion has to exist before any reader outside the owner signs in, because Apple will reject a build that creates accounts without it.
 
 ## How does one sign-in actually go?
 

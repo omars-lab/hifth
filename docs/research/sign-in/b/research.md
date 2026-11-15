@@ -10,7 +10,7 @@ Each source says how it was seen:
 
 Apple's documentation pages come back empty to a plain reader, so they were read through Apple's data address, the one ending in `.json` under `developer.apple.com/tutorials/data/documentation/`.
 
-The outside research was split into five topics. Each topic's notes follow below, after what the repository already says. Each topic has its own source list at the top, with its own short labels (A1, S1 and so on). The labels are local to that topic: S1 in one topic is not S1 in another.
+The outside research was split into five topics. Each topic's notes follow below, after what the repository already says. Every source in every topic was read on 2026-11-15. Topics 1, 2 and 3 open with a list of their sources, each marked fetched or snippet. Topics 1 and 2 give their sources short labels (A1, S1 and so on), and those labels belong to that topic only: S1 in one topic is not S1 in another. Topics 4 and 5 mark each claim fetched or snippet where it is made, with its link beside it. Topic 5 also ends with a list sorting its sources into fetched and snippet.
 
 ## What does the repository already say?
 
