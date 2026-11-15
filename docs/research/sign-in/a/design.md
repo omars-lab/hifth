@@ -3,7 +3,7 @@
 > [!tip] The short version
 > **Where we are.** The paid Apple membership is active. The app's Apple ID has Sign in with Apple ticked, and the iPad build is signed with the paid team. hifth.app already runs small server functions on Cloudflare. No sign-in code exists yet: no sign-in button, no message between the page and the app for it, no server that checks a sign-in, and no accounts store.
 >
-> **What is left.** 6 steps are done and 18 are left (the table below counts them). About 5 of the 18 are the owner's, in the Apple and Cloudflare dashboards, and each takes minutes. The rest is code, about two to three weeks of agent work. Testers stay blocked on the licence question whatever we build.
+> **What is left.** 6 steps are done and 18 are left (the table below counts them). Five of the 18 are the owner's, in Xcode and the Apple and Cloudflare dashboards, each between five minutes and an hour. The rest is code, about two to three weeks of agent work. Testers stay blocked on the licence question whatever we build.
 >
 > **The recommendation in one line.** In the iPad and Mac apps, use Apple's own sign-in sheet and pass the result to the page. On hifth.app, send the browser to Apple and back as a full page, which works in Firefox. Check every sign-in on one small server of our own on Cloudflare, next to the shared copies and the mailing list. Offer a six-digit email code as the second way in. Make the first thing sign-in unlocks **your own marks following you to Firefox and to a phone**, locked on your device before they leave it.
 
@@ -63,7 +63,7 @@ What it changes for a hafiz: revising on the iPad in the morning and on the fami
 | 11 | Make an accounts database on Cloudflare | left | owner in the Cloudflare dashboard, or the agent with the owner's yes | 5 minutes |
 | 12 | Register the mail sender with Apple, so mail reaches hidden emails (its sending checks must match exactly) | left | owner in the Apple dashboard and the domain's DNS; waits on the mail sender choice | 30 minutes |
 | 13 | The sign-in button in the app: Apple's sheet, the nonce, and a new message from the app to the page carrying the result | left | agent | 1 to 2 days |
-| 14 | The server: check Apple's identity token, make an account, hand out a session, sign out | left | agent | 2 days |
+| 14 | The server: check Apple's identity token, make an account, hand out a session, sign out, and take Apple's notices that a reader has left | left | agent | 2 days |
 | 15 | Website sign-in on hifth.app, as a full trip to Apple and back (not a popup) | left | agent | 1 to 2 days |
 | 16 | Delete my account, from inside the app: ask Apple once more, revoke, delete everything | left | agent | 1 day |
 | 17 | A second way in: a six-digit code by email | left | agent, after the owner picks the mail sender (an open decision already) | 1 to 2 days |
@@ -79,7 +79,7 @@ What it changes for a hafiz: revising on the iPad in the morning and on the fami
 
 ### What can be built and tried now, without testers?
 
-All of steps 7, 13, 14, 16, 19, 20 and 22 run on the owner's own iPad with a development build. Apple's sheet appears for any build signed with the paid team that carries the permission; no App Store listing is needed. The server runs on the laptop against a local copy of the database. Website sign-in (step 15) needs one real https address on hifth.app registered as a return address. A preview address works if it is registered, and each one counts toward the ten Apple allows.
+All of steps 7, 13, 14, 16, 19, 20 and 22 run on the owner's own iPad with a development build. Step 16 also needs the key file from step 9, because revoking is signed with it. Apple's sheet appears for any build signed with the paid team that carries the permission; no App Store listing is needed. The server runs on the laptop against a local copy of the database. Website sign-in (step 15) needs one real https address on hifth.app registered as a return address. A preview address works if it is registered, and each one counts toward the ten Apple allows.
 
 ```mermaid
 flowchart TD
@@ -102,7 +102,7 @@ The app shows its page from its own address inside the app, not from an https si
 | | **Apple's own sheet, result passed to the page** (recommended) | Website sign-in in a browser panel the app opens | Apple's web button inside the app's page |
 | --- | --- | --- | --- |
 | What happens | The page asks the app; the app shows Apple's sheet; Face ID; the app hands the identity token to our server and the session to the page | The app opens a browser panel at hifth.app; the person signs in to Apple there; the panel closes and returns to the app | The page draws Apple's web button itself |
-| Pros | Apple's own look; Face ID; no password typing; works offline-first; Apple's reviewers expect it | Same code as the website | No app code |
+| Pros | Apple's own look; Face ID; no password typing; Apple's reviewers expect it | Same code as the website | No app code |
 | Cons | New app code and a new app-to-page message | Asks for the Apple Account password even on the person's own device; matching an https return needs iPadOS 17.4 and macOS 14.4 | Apple's return address must be https, and our page is not; an Apple engineer says use the app's sheet or a browser panel instead; it broke inside app pages on iOS 17.1 |
 | Implications | The server must accept two names for us (the app and the website) | Two sign-in paths to maintain on Apple devices | Ruled out |
 | For a hafiz | One look at the iPad and you are in | A password prompt mid-revision | Would not work |
@@ -154,7 +154,7 @@ The money is not what decides this. Supabase's free projects pause after a week 
 | --- | --- | --- | --- | --- |
 | What it is | About 300 lines on Cloudflare Functions, using a small, well-known library for checking signed notes, plus tables in the free database | Better Auth, which since February 2026 takes the free database directly and has Apple, email-link and passkey add-ons | Supabase's sign-in service: the app hands it Apple's token; it makes the account and the session | The iCloud plan, extended: records go to each reader's private iCloud; CloudKit's web version for the browser |
 | Pros | Everything next to the shared copies and the mailing list; every line is ours to read; no hidden behaviour; the "reader decides" button and the privacy check sit in our own code | Less code; sessions and add-ons come built | Sign-in, sessions and email codes are done and widely used; the app's sign-in needs no key file | No server and no accounts to secure; nothing pauses; Apple holds the records |
-| Cons | We own sessions, guessing limits and email codes; a fault is ours | Its Apple website sign-in had exactly the cookie bug above, closed and reportedly reverted, now locked; its add-ons are not shown tested on the free database; on our app's address it needs its "no cookie" add-on, which it says is for APIs | A second home for reader data, away from ⑥; the existing project must never hold accounts, so this is a new one, and a second free project may need the old one deleted first (an owner check); Supabase's public key ships in every app, and only rules on each table keep readers apart; a scan reported 16,000 Supabase databases readable because those rules were missing | Firefox, Windows and Android are the very readers sign-in is for, and Apple's web sign-in there is shaky; sources disagree on whether the browser can read locked fields; a reset iCloud Keychain loses locked records for good |
+| Cons | We own sessions, guessing limits and email codes; a fault is ours | Its Apple website sign-in had exactly the cookie bug above, closed and reportedly reverted, now locked; its add-ons are not shown tested on the free database; on our app's address it needs its "no cookie" add-on, which it says is for APIs | A second home for reader data, away from ⑥; the existing project must never hold accounts, so this is a new one, and a second free project may need the old one deleted first (an owner check); Supabase's public key ships in every app, and only rules on each table keep readers apart; a summary of a security scan (the scan itself was not read, so unconfirmed) says 16,000 Supabase databases were readable because those rules were missing | Firefox, Windows and Android are the very readers sign-in is for, and Apple's web sign-in there is shaky; sources disagree on whether the browser can read locked fields; a reset iCloud Keychain loses locked records for good |
 | Implications | Commits us to writing the security parts carefully, with tests for each; sharing plan ⑨ can be built on the same tables | Ties our session shape to the library's next release | Splits reader data across two providers; the deletion step must delete in both | Answers only the Apple-devices half; the iCloud plan stays the right answer for that half anyway |
 | For a hafiz | Signs in once; their marks live beside their shared links | The same, if the library behaves | The same; their data sits with a second company | Seamless on iPad and Mac, little help on the laptop in Firefox |
 
@@ -209,6 +209,8 @@ sequenceDiagram
   A->>A: clear the Keychain, sign out
 ```
 
+A reader who signed in on hifth.app does the same, but through the trip to Apple and back instead of the sheet. The server then swaps the code under the website's name, with a client secret made for the website, because Apple wants one secret per name. A reader who only ever used the email code has no Apple link to revoke, so deletion just asks for a fresh code and deletes.
+
 If the swap fails (the code was used, or Apple is down), the server still deletes everything and tells the reader how to remove the app from their Apple settings themselves. Apple's technote says exactly that.
 
 Apple can also tell our server when someone stops using Sign in with Apple, deletes their Apple Account, or switches off their hidden email. One https address on hifth.app handles all four. It is worth adding with the server, because it is how we hear that a reader is gone.
@@ -239,7 +241,7 @@ Passkeys are the better second way in a year from now. They need a test first, a
 
 | App | Ways in | Can you use it without one? |
 | --- | --- | --- |
-| [Quran.com](https://quran.com/product-updates/centralized-accounts-across-quran-foundation) | Google, Facebook, Apple, email; one account across its apps since November 2025 | yes, for reading |
+| [Quran.com](https://quran.com/product-updates/centralized-accounts-across-quran-foundation) | Google, Facebook, Apple, email; one account across its apps since November 2025 | not stated on the page read |
 | [Tarteel](https://support.tarteel.ai/en/articles/12168720-how-to-create-a-tarteel-account) | email and password, Apple, Google; mistake history is paid | not stated |
 | [Muslim Pro](https://support.muslimpro.com/hc/en-us/articles/4648775233549-Setting-Up-A-Muslim-Pro-Profile) | email, Google, Apple | yes, but nothing is kept |
 | [Mofassal](https://apps.apple.com/us/app/mofassal-quran-hifz-review/id1584188020) | not stated; guest first; teacher groups with roles | yes |
@@ -255,7 +257,7 @@ Four quick trials on the owner's devices settle the things no page could. Each o
 | --- | --- | --- |
 | Does one person get the same account id in the app and on hifth.app? | One account, as designed | Link the two by email the first time, or ask the reader to sign in both ways once |
 | What origin does the app's page send, and can it use the browser's locking code? | Locking could live in shared page code | As planned: the app keeps the session and locks in Swift |
-| Is the one-use code still usable after the identity token is checked? | Deletion as drawn | Deletion falls back to "deleted, and here is how to remove us from your Apple settings" |
+| Only if accounts go to a new Supabase project: is Apple's one-use code still usable after Supabase has taken the identity token? (Under the recommended server this never comes up, because our server checks the token itself and keeps the code.) | Deletion with Supabase works as drawn | With Supabase, deletion falls back to "deleted, and here is how to remove us from your Apple settings" |
 | Does website sign-in work before the app is in the App Store? (One Apple page says it needs an existing app there; another does not) | Build the website sign-in now | The website sign-in waits for the first App Store release; the app goes first |
 
 Other things that would change it:
