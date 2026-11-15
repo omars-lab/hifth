@@ -6673,10 +6673,10 @@
         "file": "docs/design/supabase-move.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "done",
       "severity": "risk",
       "owner": "user",
-      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up, and built the new project's tables already closed. Done 2026-11-13: loaded the backup into the new store and checked every row against the old store (all three tables match), and locked the new store down further (web door off, sign-ups off, unencrypted connections refused, settings kept in the repo, a check that fails if any drifts back). Done 2026-11-13: the owner saved the new password file, and the page-fixture script ran against the new store (pages 1 and 604). Done 2026-11-14: the database password printed into a chat on 2026-11-13 was reset and the new address saved; it connects, the page check passes, and the old address is refused. Left: delete the old project (③). Kept open until then, because the item asks for the old one retired."
+      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up, and built the new project's tables already closed. Done 2026-11-13: loaded the backup into the new store and checked every row against the old store (all three tables match), and locked the new store down further (web door off, sign-ups off, unencrypted connections refused, settings kept in the repo, a check that fails if any drifts back). Done 2026-11-13: the owner saved the new password file, and the page-fixture script ran against the new store (pages 1 and 604). Done 2026-11-14: the database password printed into a chat on 2026-11-13 was reset and the new address saved; it connects, the page check passes, and the old address is refused. Done 2026-11-15: the owner chose to pause the old project and keep it, not delete it (③), so the move is finished."
     },
     {
       "id": "supabase-old-store-sign-ups",
@@ -6695,10 +6695,10 @@
         "file": "docs/design/supabase-move.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "risk",
       "owner": "user",
-      "note": "The old project is still running and stays so until the new store is proven, because the new store's rows are compared against it. Delete it once the rows match and the page-fixture check passes; then remove the old account's command-line profile if nothing else uses it."
+      "note": "Owner, 2026-11-15: pause the old project and keep it for now, not delete it. A paused project keeps its data and can be started again; its old password is the one printed into a chat on 2026-11-13, so reset it first if it is ever started. Deleting it later needs nothing else first."
     },
     {
       "id": "supabase-network-allow-list",
