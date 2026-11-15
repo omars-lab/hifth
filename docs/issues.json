@@ -4006,7 +4006,84 @@
       "blockedBy": [
         "sharing-which-way"
       ],
-      "note": "If accounts come: try Sign in with Apple and an email link inside the iPad and Mac apps on a throwaway test project; Google later through the system browser. The live locked link needs no sign-in. 2026-11-11: what is known about Sign in with Apple is written into ⑨ (where it lives, the server it needs, Apple's rules, the trial); still blocked on ③."
+      "note": "If accounts come: try Sign in with Apple and an email link inside the iPad and Mac apps on a throwaway test project; Google later through the system browser. The live locked link needs no sign-in. 2026-11-11: what is known about Sign in with Apple is written into ⑨ (where it lives, the server it needs, Apple's rules, the trial); still blocked on ③. 2026-11-15: the owner asked for proper sign-in, especially once testers use the app. This is the next thing for this stretch of work: two researchers and a checker are writing docs/design/sign-in.md (what sign-in would unlock first, Apple's sign-in in the apps and on the web, where accounts live, a second way in, and what testers need beyond the button). That page then asks the owner to choose, which may answer ③ too. Later on 2026-11-15: the page is written, docs/design/sign-in.md, and is ready for the owner to choose from. It merges both researchers' work and re-checks their sources, and it splits what is left into a first real sign-in on the owner's own iPad and being ready for testers. The owner's questions are its ① (what sign-in unlocks first), ② (where accounts live) and ③ (whether the copy on our server is locked so we cannot read it)."
+    },
+    {
+      "id": "sign-in-first-unlock",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "What should sign-in unlock first? Both researchers picked the reader's own marks following them to Firefox and a phone, behind one button that says what goes and to whom; the alternatives are switching off a teacher link from anywhere, or nothing yet. Until the owner picks, the hidden plumbing (steps 6 to 15 on the page) can be built and tried on the owner's iPad."
+    },
+    {
+      "id": "sign-in-accounts-home",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Where should reader accounts live? Recommended: our own small code on hifth.app's Cloudflare account with its free database, next to the notify list and the planned shared copies. Alternatives on the page: the same with a ready-made library, a new Supabase project (never the existing store), Firebase, or no accounts. The sharing page's ⑥ chose Cloudflare for shared copies only, so this is still open for accounts."
+    },
+    {
+      "id": "sign-in-locked-copy",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Should the reader's copy on our server be locked on their device so we cannot read it, at the cost that losing the recovery code loses the synced copy? Or kept with the server's own encryption and a plain note that we could read it? Researcher A said locked; researcher B left it as a separate choice. Needed before the first unlock ships, not before the first sign-in on the owner's iPad."
+    },
+    {
+      "id": "sign-in-same-account",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Does one reader get the same Apple account number in the app and on hifth.app? Apple's developer support says yes for one team; a 2019 forum thread says no, with no cause. Trial: sign in with the same Apple account on the iPad and on a hifth.app preview address and compare. Needs the website's Apple setup first."
+    },
+    {
+      "id": "sign-in-page-waits",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Can the page inside the app get a waiting answer from the app, what address does it say it comes from when it calls hifth.app, and can it use the browser's scrambling code? No Apple page says; WebKit bugs from 2021 show such a page reporting its address as null. An hour on the owner's iPad answers all three, and decides whether the app or the page calls the server (the page recommends the app)."
+    },
+    {
+      "id": "sign-in-web-before-store",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Does Sign in with Apple on hifth.app work before the app is in the App Store? Apple's help page does not require it; Apple's set-up page says an existing App Store app is needed. Trial: set up the website's Apple name and sign in on a preview address. Website sign-in comes after testers in the plan, so this does not hold anything up yet."
+    },
+    {
+      "id": "notify-list-data-door",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑦"
+      },
+      "status": "suspected",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "The notify list's server code calls Supabase's data door with the public key, but the checked-in Supabase settings switch that door off, and the Supabase move page says nothing uses it. Found by researcher A on 2026-11-15 and confirmed in the files by the checker; the live project was not looked at. Either the settings file is out of date or the list does not work. Answer with the store check (prints settings, never a row) against the settings file, then one test sign-up on the notify form."
     },
     {
       "id": "sharing-paid",
@@ -6673,10 +6750,10 @@
         "file": "docs/design/supabase-move.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "done",
       "severity": "risk",
       "owner": "user",
-      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up, and built the new project's tables already closed. Done 2026-11-13: loaded the backup into the new store and checked every row against the old store (all three tables match), and locked the new store down further (web door off, sign-ups off, unencrypted connections refused, settings kept in the repo, a check that fails if any drifts back). Done 2026-11-13: the owner saved the new password file, and the page-fixture script ran against the new store (pages 1 and 604). Done 2026-11-14: the database password printed into a chat on 2026-11-13 was reset and the new address saved; it connects, the page check passes, and the old address is refused. Left: delete the old project (③). Kept open until then, because the item asks for the old one retired."
+      "note": "The outside-library store is moving to a new Supabase account. Done 2026-11-12: audited the old store, closed its tables to the public key (they were open for reading and writing), backed its rows up, and built the new project's tables already closed. Done 2026-11-13: loaded the backup into the new store and checked every row against the old store (all three tables match), and locked the new store down further (web door off, sign-ups off, unencrypted connections refused, settings kept in the repo, a check that fails if any drifts back). Done 2026-11-13: the owner saved the new password file, and the page-fixture script ran against the new store (pages 1 and 604). Done 2026-11-14: the database password printed into a chat on 2026-11-13 was reset and the new address saved; it connects, the page check passes, and the old address is refused. Done 2026-11-15: the owner chose to pause the old project and keep it, not delete it (③), so the move is finished."
     },
     {
       "id": "supabase-old-store-sign-ups",
@@ -6695,10 +6772,10 @@
         "file": "docs/design/supabase-move.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "risk",
       "owner": "user",
-      "note": "The old project is still running and stays so until the new store is proven, because the new store's rows are compared against it. Delete it once the rows match and the page-fixture check passes; then remove the old account's command-line profile if nothing else uses it."
+      "note": "Owner, 2026-11-15: pause the old project and keep it for now, not delete it. A paused project keeps its data and can be started again; its old password is the one printed into a chat on 2026-11-13, so reset it first if it is ever started. Deleting it later needs nothing else first."
     },
     {
       "id": "supabase-network-allow-list",
