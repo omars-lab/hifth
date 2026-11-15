@@ -58,7 +58,7 @@ Two things changed in the week before the owner asked: the paid Apple membership
 
 Both researchers counted steps, and their counts differed: A said 6 done and 18 left, B said 3 done and 20 in all. The difference is bookkeeping, not disagreement. A counted three things on our side as done; B counted only Apple's side. Checked against the files on 2026-11-15:
 
-- hifth.app does run server functions on Cloudflare today (the notify list's three). **Done.**
+- hifth.app has server functions on Cloudflare checked in (the notify list's three). **Done** as far as the files show; the live site was not looked at, and question ⑦ asks whether the list really works.
 - The privacy check exists. **Done**, though it still has to be told about the new way out (step 16).
 - "Cloudflare's free database chosen" was chosen for shared copies, not accounts, and no database is connected to hifth.app's server yet. **Not done for accounts**; moved to the owner's question ②.
 - B's three "not checked" steps (the key file, the mail sender, the website's Apple name) are steps nobody has done; neither researcher could see Apple's dashboard. They are listed as left.
@@ -71,7 +71,7 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 1 | Paid Apple Developer membership, individual | done 2026-11-08 | — | — |
 | 2 | The app's Apple ID registered with Sign in with Apple switched on (also Associated Domains, iCloud and Push) | done 2026-11-09 | — | — |
 | 3 | iPad build signed with the paid team | done 2026-11-10 | — | — |
-| 4 | hifth.app on Cloudflare, already running small server functions for the notify list | done | — | — |
+| 4 | hifth.app on Cloudflare, with small server functions for the notify list checked in (the live site was not looked at; see ⑦) | done | — | — |
 | 5 | A privacy check that refuses any way off the device it does not name | done | — | — |
 | **Your answers first** | | | | |
 | A | What sign-in unlocks first (① below) | left | you, one conversation | — |
@@ -223,10 +223,10 @@ Recommended because the parts that make sign-in "proper" (deletion that really d
 | --- | --- | --- |
 | Pros | Avoids two things nobody could confirm: whether the page's private address can use the browser's scrambling code, and what address the page says it comes from when it calls hifth.app (it has been seen to say "null"); the session never sits where page code can read it | Same code as the website; less Swift |
 | Cons | One more kind of message between page and app ("send this for me") | Rests on those two unconfirmed things; anything running in the page can read the session |
-| Implications | Trial ⑤ can move the work to the page later if both turn out fine | A failed trial means rewriting it the other way |
+| Implications | Still needs the page to wait for the app's answer, which is unconfirmed too; if that fails, the app pushes "signed in" to the page instead, which it can already do today. Trial ⑤ can move the work to the page later if everything turns out fine | A failed trial means rewriting it the other way |
 | For a hafiz | No difference when it works | No difference when it works; a random sign-out if the page's storage is wiped |
 
-This was a real difference between the researchers (A: the app; B: the page). Recommended the app's way because it does not depend on anything unconfirmed.
+This was a real difference between the researchers (A: the app; B: the page). Recommended the app's way because it rests on one unconfirmed thing instead of three, and that one has a fallback that needs no trial. Apple's page for the reply handler, re-read on 2026-11-15, says only that it "returns a reply to your JavaScript code"; it does not say how the page receives it.
 
 ### How should "delete my account" cut the link with Apple?
 
@@ -245,13 +245,21 @@ A recommended the second; B the first. Apple's note settles it for the first (se
 | --- | --- | --- |
 | Pros | No messages between windows to fail; less for Firefox's tracking protection to block | The page does not reload |
 | Cons | One page reload; needs the server's own random value instead of a cookie | Forum reports of popups that never came back; Apple's staff say the popup's return address must be on the same site as the page |
+| Implications | The server keeps a short-lived record of each sign-in it started, in its database | Commits us to Apple's sign-in script on hifth.app and to messages between windows |
 | For a hafiz | One extra page load, once a month | A window that may do nothing |
 
 No source settled this outright. The full-page trip is the safer default, and a ten-minute trial in Firefox settles it when website sign-in is built.
 
 ### What is the second way in, for readers without Apple? (later)
 
-Both researchers recommend **a six-digit code by email**. It works in every browser and inside the app's page, and a school's mail scanner cannot use it up the way it can a link. Apple's rule about offering Apple sign-in applies only to other companies' logins, such as Google; our own email code is exempt. Passkeys come a year later, after a test, because the page's private address probably cannot use them. Google is left out: it blocks its sign-in inside app pages.
+| | **A six-digit code by email** (recommended by both) | A one-time link by email | A passkey | Google |
+| --- | --- | --- | --- | --- |
+| Pros | Works in every browser, on Android and inside the app's page; nothing has to open the app from Mail; ours, so Apple's rule on other companies' logins does not apply | One tap | No email at all; Face ID or a fingerprint | Familiar to Android readers |
+| Cons | Needs a real mail sender (Supabase's built-in one sends 2 an hour, only to team members); each code needs a limit on retries | Workplace and school mail scanners open the link first and use it up; the link must reopen the app, which needs set-up we do not have | The page's private address probably cannot use passkeys, so they would go through the app, and hifth.app would need an Apple link file it does not have today | Google blocks its sign-in inside app pages, so it needs a browser panel; one more company |
+| Implications | Shares the mail sender with the notify list (its open sender decision) | — | A good second step a year from now, after a test | Only if Android readers ask for it |
+| For a hafiz | Type six digits once, then stay signed in | Tap, unless the school's mail filter got there first | Fastest of all, once it works | Familiar |
+
+Apple's rule that an app offering another company's login must also offer Apple's (or an equal) applies to logins like Google; our own email code is exempt.
 
 ### What else could be considered, and why is it not here?
 
@@ -288,7 +296,6 @@ The checker re-opened the sources behind every claim that would change the recom
 | How should deletion cut the link with Apple? | Ask the reader to sign in again at deletion, then cut it; "Apple's own technote gives two ways" | Keep Apple's long-lived token from the first sign-in | **Apple's technical note (TN3194, first published 2025-10-03, re-read in full) backs B.** It says to trade the code at sign-in and "securely store the token response". It never mentions signing in again; its fallback, when no token exists, is to delete the data and send the reader to Apple's support page to remove the app by hand. A's route rests on Firebase's documentation, not Apple's |
 | Who makes the one-off word and calls the server? | The app, keeping the session in the Keychain | The page, with the app only showing the sheet | Not settled by sources. WebKit's own bug list shows a page on an app's private address was given a secure standing in 2021, but nothing says the browser's scrambling code works there. A second WebKit bug (2021) shows such a page calling a website said it came from "null"; marked fixed, then reported back in a beta, with no later word. Recommended the app's way, with trial ⑤ |
 | On the website, a full-page trip or a popup? | Full-page trip | Popup (in its drawing) | Not settled by sources. Apple's staff say the popup's return address must be on the page's own site; the one Firefox failure in that thread was a setup mistake, not Firefox. Full-page trip is the safer default |
-| Where does the Mac stand? | Sign it with the paid team | It must go through TestFlight or the Mac App Store, because Sign in with Apple does not work for Mac apps sold outside the store | **B is right.** Apple's table of Mac capabilities (raw page read) shows Sign in with Apple only for the paid program, not for outside-the-store distribution; Apple's developer support said "Sign in with Apple is not supported for Developer ID apps" (forum, July 2025). That a home-signed build cannot use it either is an inference from the same table |
 | Should the synced copy be locked so we cannot read it? | Yes, locked on the device with a recovery code | It is a separate decision; in its first form we could read it, and the button must say so | A real choice for the owner, not a source question. Question ③ below |
 
 ### What did only one of them find?
@@ -306,7 +313,8 @@ The checker re-opened the sources behind every claim that would change the recom
 | Testers do not need an account: TestFlight brings invitations and feedback | Not contested; the TestFlight plan agrees |
 | An invite code to keep it to testers; a working test login for Apple's beta reviewers | Beta-reviewer failures rest on forum snippets; the test login is cheap insurance |
 | Safari wipes a website's stored data after 7 days without a visit; whether that also happens inside an app's page is not confirmed | Not re-opened. The Keychain avoids the question either way |
-| Apple sends no notice when a whole Apple account is deleted from inside an app, so check at each launch | From Apple's page on account changes; A has the launch check too |
+| When a reader deletes their whole Apple account, our server gets a notice from Apple, but the app on the device does not; so the app checks at each launch whether the reader is still signed in | From Apple's page on account changes; A has the launch check too |
+| The Mac app must go through TestFlight or the Mac App Store, because Sign in with Apple does not work for Mac apps sold outside the store (A only said to sign the Mac with the paid team) | **Confirmed.** Apple's table of Mac capabilities (raw page read) shows Sign in with Apple only for the paid program, not for outside-the-store distribution; Apple's developer support said "Sign in with Apple is not supported for Developer ID apps" (forum, July 2025). That today's home-signed build cannot use it either is an inference from the same table |
 | Cloudflare's per-address limit on the free plan | **Not confirmed.** Cloudflare's pricing page does not mention it; only third parties say it is on the free plan. If not, the "are you a person" check and a database counter do the job |
 | The database can be restored to any minute of the last week | Not re-opened |
 
@@ -332,6 +340,8 @@ The checker re-opened the sources behind every claim that would change the recom
 - **The pitch build.** This is for the shipped app and its testers.
 
 ## Open questions, and what would answer each
+
+These are tracked in the issue register, one row each, the way the sharing page's questions are. There is no row in the decision register yet: that needs a drawn options page, which is worth making once the owner has answered ① and ②.
 
 ### ① What should sign-in unlock first? · **open**
 
