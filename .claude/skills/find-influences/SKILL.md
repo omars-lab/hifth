@@ -13,7 +13,7 @@ This skill is how the catalog grows without filling up with guesses.
 1. Write the question down as one plain sentence, and list which catalog apps already answer part of it.
 2. Start two researchers who cannot see each other's work, each with the same question and the rubric in [what-to-look-for.md](what-to-look-for.md).
 3. When both finish, start one checker that opens the sources again and marks each claim.
-4. Fold the checker's result into the catalog, tie the commits to the backlog row, and send one Markdown-only pull request.
+4. Fold the checker's result into the catalog, tie the commits to the backlog row, and send one pull request.
 
 ```mermaid
 flowchart LR
@@ -22,7 +22,7 @@ flowchart LR
   a --> c["Checker<br/>opens the sources again"]
   b --> c
   c --> cat["catalog.md updated"]
-  cat --> pr["One pull request,<br/>Markdown only"]
+  cat --> pr["One pull request"]
 ```
 
 ## What must never happen
@@ -71,11 +71,11 @@ Read the checker's catalog yourself before going on. Check a handful of its link
 
 ### 4. Write it down and send it
 
-- **The backlog row.** The research is tracked by the row `influence-catalog` in the backlog, whose source is the folder's front page (`docs/research/influences/README.md`). A new round that opens new work adds a numbered item to that page's "Open questions" section and a row for it.
-- **Say what the branch is for before the first commit:** `intent start influence-catalog` in the checker's working copy. The push check refuses any commit that names no task. The first round of this research lost an hour here: both researchers' pushes were refused, and the fix the check suggests makes a new commit that is itself refused. Researchers therefore do not push; the checker's branch carries everything.
-- **Tie the researchers' commits to the row** with `intent answer <commit> influence-catalog`, run from inside the checker's working copy (the tool writes into whatever folder it is run from).
+- **The backlog row.** Each round has one row in the backlog, whose source is a numbered item in the "Open questions" section of the folder's front page (`docs/research/influences/README.md`). The first round's row is `influence-catalog`. If the last round's row is closed, add a new numbered item and a new row for this round.
+- **Say what the branch is for before the first commit:** `intent start <this round's row>` in the checker's working copy. The push check refuses any commit that names no task. The first round of this research lost an hour here: both researchers' pushes were refused, and the fix the check suggests makes a new commit that is itself refused. Researchers therefore do not push; the checker's branch carries everything.
+- **Tie the researchers' commits to the row** with `intent answer <commit> <this round's row>`, run from inside the checker's working copy (the tool writes into whatever folder it is run from).
 - **Redraw the backlog pages and run their two checks** (the `issues` skill has the commands).
-- **One pull request, Markdown only.** It publishes nothing, so it costs no build minutes.
+- **One pull request.** The backlog row and the record of commits are not Markdown, so merging it alone makes the site publish, which uses paid minutes. Unless someone is waiting on it, let it ride on the next feature's merge.
 - **Fold what changed into the plan it affects.** A finding that changes an open design item is added to that item, with a link back to the catalog. Do it in the same round, or leave an open item on the front page saying it is owed.
 - **Clean up.** Remove the two researchers' working copies and local branches once the pull request has merged.
 
