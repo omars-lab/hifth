@@ -6737,6 +6737,18 @@
       "owner": "agent",
       "feature": "hifth-app-site",
       "note": "The app at hifth.app/read/ does not yet tell the browser where its scripts may come from; the front, privacy and email pages do since 2026-11-14. Write the rule for /read/ in apps/landing/_headers, try the app with it in Chrome, Firefox and the iPad simulator (page pictures, sounds, the service worker, the native apps' bridge), fix what the browser refuses, and add /read/ to the test in apps/landing/lib/pages.test.mjs."
+    },
+    {
+      "id": "hifth-app-support-page",
+      "source": {
+        "file": "docs/design/hifth-app-site.md",
+        "item": "⑲"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "The App Store asks every listing for a support page. hifth.app has none; hello@hifth.app is named only on the privacy page. Add hifth.app/support in English and Arabic (how to reach us, what to include when something goes wrong, a link to the privacy page), with the front pages' safety headers in apps/landing/_headers, a place in the release check's must-have list (.claude/skills/deploy-site/scripts/shipped.mjs), and a test in apps/landing/lib/pages.test.mjs. The App Store launch plan (another session, 2026-11-15) may take this over."
     }
   ]
 }

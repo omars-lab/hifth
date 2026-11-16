@@ -322,3 +322,13 @@ On this laptop the script rule is left out of every page, because the local side
 comment button are written into each page directly. The release check serves the folder going up
 with the rule in place, and that is where it was looked at (front page, Arabic page, privacy page,
 the form sending, the spam check loading: no refusals).
+
+### ⑲ Is there a support page the App Store can link to? · **open**
+
+Not yet. Apple asks every app listing for a support address, a web page where a reader can find
+help or reach whoever makes the app. hifth.app names hello@hifth.app only on its privacy page.
+What would answer it: a short page at hifth.app/support, in English and Arabic like the others,
+that says how to get in touch, what to include when something goes wrong (the device, the page
+and what happened), and links the privacy page; with the same safety headers as the front pages,
+a place in the release check's list of pages that must be there, and a test. The plan for the
+App Store launch (a separate session, 2026-11-15) may take this over.
