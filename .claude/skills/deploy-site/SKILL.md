@@ -73,7 +73,10 @@ that the app carries this commit (in its main script or a script that one loads)
 for every development address (`live.mjs`, `DEV_PATHS`). Each must answer with an error, or with
 the same page as an address that cannot exist, never with content.
 
-**Try it before publishing** on Cloudflare's own local server, which behaves like the real host:
+**Try it before publishing** on Cloudflare's own local server, which behaves like the real host.
+This copy has no comment bar and no side bar. To look at the site or comment on it, use
+`make hifth-app-serve` (7124) instead. The `run-app` skill's "Which way to run it?" table sets
+every local way side by side.
 
 ```
 make hifth-app-check ARGS=--no-build

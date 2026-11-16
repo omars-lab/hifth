@@ -1,6 +1,6 @@
 ---
 name: run-app
-description: Launch the actual Hifth app and open it in a browser — the real navigation instrument, not a picture of it. Use when asked to run, start, open, or screenshot "the app", "Hifth", or "the desktop/mobile UI", or to confirm a change works in the running app. For a GIF or video, use record-demo; to walk every device and build down a checklist, use walk-app. The project's answer to the built-in `run` skill.
+description: Launch the actual Hifth app and open it in a browser — the real navigation instrument, not a picture of it. Use when asked to run, start, open, or screenshot "the app", "Hifth", "the site", hifth.app on this laptop, or "the desktop/mobile UI"; to choose between the ways to run it locally (dev, pitch, built preview, phone, hifth.app with comments, the pre-publish copy); when a local page has no comment bar; or to confirm a change works in the running app. For a GIF or video, use record-demo; to walk every device and build down a checklist, use walk-app. The project's answer to the built-in `run` skill.
 ---
 
 # Running Hifth
@@ -13,6 +13,27 @@ open http://localhost:7122/
 ```
 
 Leave `pnpm dev` running in the background; it hot-reloads.
+
+## Which way to run it, and when?
+
+Each way has its own fixed port, so two can run at once. A taken port fails loudly instead of
+moving.
+
+| Command | Address | What you get | Comment bar? | Use it when |
+|---|---|---|---|---|
+| `make dev` | 127.0.0.1:7122 | The app from source, reloading on each save. Runs everything twice on purpose (StrictMode), so some faults are development-only | Yes | Making and checking a change. The everyday one |
+| `make pitch` | 127.0.0.1:7122 | The same, plus The Study Quran's notes (the private pitch build) | Yes | Working on the pitch. Never share it or take pictures of it for the repo |
+| `make preview` | 127.0.0.1:7123 | The built public app, as readers get it. Saves itself for offline use (see 4 below) | No | Checking the built app, offline behaviour, or a fault the dev server does not show |
+| `make phone` | your laptop's Wi-Fi address, port 7123 | The built app, reachable from a phone on the same Wi-Fi | No | Trying it on a real phone |
+| `make hifth-app-serve` | 127.0.0.1:7124 | All of hifth.app: the front page, the app under `/read/`, the sign-up form with test keys, plus a side bar and the design pages that only the laptop copy has. `ARGS=--no-build` reuses the last build | Yes (press C) | Looking at or commenting on the site, or trying the form |
+| `make hifth-app-check ARGS=--no-build`, then `(cd apps/landing && wrangler pages dev dist --port 8788)` | localhost:8788 | Exactly the folder that would be published, on Cloudflare's own local server. No side bar, no comments | No | Only right before publishing, to run `make hifth-app-verify ARGS="--url http://localhost:8788 --commit <commit>"` against it (the `deploy-site` skill) |
+| `make comments` | 127.0.0.1:8767 | The comment server in front of the dev server on 7122 | Yes | When the dev server's own comment bar is not loading |
+| (the browser tests) | 127.0.0.1:4173 | The tests' own copy of the built app | No | Never by hand. Free the port if a test run refuses to start (see 3 below) |
+
+**To comment on a page, use 7122 or 7124.** The bar is added only by the dev server or by the
+comment server in front of something. A built copy served on its own (7123, 8788) never has it.
+Comments are saved in `.page-comments/threads/` of the folder the server was started from, so
+start it from the checkout whose comments you want answered.
 
 ## The PATH gotcha
 
