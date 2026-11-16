@@ -178,12 +178,18 @@ pages and mail open in the browser or the mail app; a file, a script, a phone nu
 app's address is dropped. A window the page opens goes the same way, and the web part has no
 embedded frames. So the store answer to "can the app reach any web page" is no.
 
-### ⑮ An error the page does not catch leaves a blank screen · **open**
+### ⑮ An error the page does not catch leaves a blank screen · **fixed**
 
-Only one part of the page catches its own errors.
+Only one part of the page caught its own errors.
 
-*What would answer it:* an error screen for the whole page with a "Report a problem" button, a
-handler for errors nothing else caught, and a test that throws one and sees the screen.
+*What answered it (2026-11-16):* the whole page now sits inside one catcher. If any part throws
+while drawing, the reader sees a card: the page stopped working, their notes and marks are kept
+on this device, and a button opens the page again. A browser test breaks the built page on
+purpose, sees the card, presses the button and sees the mus'haf come back. With the catcher taken
+out, the same test saw an empty page, so it checks the real thing. Errors nothing else catches
+are kept in memory, the last twenty, for the reader's own report; nothing is stored or sent. In
+the apps, if the system ends the process that draws the page, the app loads it again instead of
+staying blank, and a test holds that. The "Report a problem" button on the card comes with ⑱.
 
 ### ⑯ Nobody has used the apps with the screen reader · **open**
 

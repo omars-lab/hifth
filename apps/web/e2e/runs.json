@@ -201,6 +201,12 @@
       "desktop",
       "iphone"
     ],
+    "page-stopped.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "page-turn.spec.ts": [
       "android",
       "iphone"

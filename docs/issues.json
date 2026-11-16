@@ -7010,11 +7010,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑮"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "Only one part of the page catches its own errors; anything else leaves a blank screen."
+      "closedBy": "apps/web/e2e/page-stopped.spec.ts",
+      "note": "The whole page now sits inside one catcher: a part that throws while drawing shows a card saying the page stopped, that notes and marks are kept on this device, and a button that opens the page again. The browser test feeds the built page a start-up file it cannot use, sees the card (and went red with the catcher taken out), then presses the button and sees the mus'haf back. Errors nothing else catches are kept in memory, the last twenty, for the reader's own report (launch item 18); nothing is stored or sent. In the apps, when the system ends the process that draws the page, the shell loads the page again instead of staying blank (native/HifthTests/PageCrashTests.swift). The 'Report a problem' button on the card comes with item 18."
     },
     {
       "id": "launch-screen-reader-walk",

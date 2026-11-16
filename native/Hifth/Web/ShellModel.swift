@@ -924,6 +924,17 @@ final class NavigationPolicy: NSObject, WKNavigationDelegate, WKUIDelegate {
         onLoaded()
     }
 
+    /// The system ended the process that draws the page (low memory, a fault
+    /// inside WebKit). Left alone the view stays blank until the app is quit, so
+    /// load the page again; the reader's notes and marks are in the page's own
+    /// storage and come back with it (launch item 15). A var so a test can watch.
+    var reloadAfterCrash: (WKWebView) -> Void = { $0.reload() }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        print("page process ended, loading the page again")
+        reloadAfterCrash(webView)
+    }
+
     func webView(
         _ webView: WKWebView,
         createWebViewWith configuration: WKWebViewConfiguration,

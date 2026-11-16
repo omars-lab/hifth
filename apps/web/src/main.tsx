@@ -1,6 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import { PageStopped } from "./components/PageStopped";
+import { installFaultLog } from "./fault-log";
 import { applyFieldToDocument, fieldFromHash } from "./field";
 import { LangProvider, loadStrings } from "./i18n";
 import { applyLangToDocument, detectLang } from "./lang";
@@ -16,6 +18,10 @@ import "./styles/tajweed.css";
 
 // Before anything is drawn: a tap or a key finishes its work before the next one.
 installInputTiming(window);
+
+// Errors nothing else catches are kept in memory for a later report; they do
+// not stop the page, so they get no screen (see fault-log.ts).
+installFaultLog(window);
 
 const root = document.getElementById("root");
 if (!root) throw new Error("missing #root");
@@ -52,7 +58,10 @@ void loadStrings(lang).then(() => {
   createRoot(root).render(
     <StrictMode>
       <LangProvider>
-        <App />
+        {/* A part that throws while drawing shows the stopped screen, not a blank page. */}
+        <PageStopped>
+          <App />
+        </PageStopped>
       </LangProvider>
     </StrictMode>,
   );

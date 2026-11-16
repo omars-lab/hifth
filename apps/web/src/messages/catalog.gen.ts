@@ -490,6 +490,9 @@ export interface Catalog {
   readonly pageChoose: string;
   readonly pageN: (d: { readonly page: string | number }) => string;
   readonly pageOfTotal: (d: { readonly page: string | number; readonly total: string | number }) => string;
+  readonly pageStoppedBody: string;
+  readonly pageStoppedReload: string;
+  readonly pageStoppedTitle: string;
   readonly pageUnavailable: string;
   readonly pageWord: string;
   readonly pagebarFisheyeLabel: string;

@@ -492,6 +492,11 @@ export interface Strings {
   dismissNotice: string;
   dismiss: string;
 
+  /* ---- the page stopped (components/PageStopped.tsx) ---------------------- */
+  pageStoppedTitle: string;
+  pageStoppedBody: string;
+  pageStoppedReload: string;
+
   /* ---- colophon ----------------------------------------------------------- */
   aboutTitle: string;
   aboutLede: string;
