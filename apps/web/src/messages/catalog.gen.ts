@@ -601,6 +601,17 @@ export interface Catalog {
   readonly relatedListTitle: string;
   readonly relatedMore: (d: { readonly n: number; readonly nText: string | number }) => string;
   readonly relatedVerses: string;
+  readonly reportBody: string;
+  readonly reportClose: string;
+  readonly reportCopied: string;
+  readonly reportCopy: string;
+  readonly reportMailIntro: string;
+  readonly reportOpen: string;
+  readonly reportSectionTitle: string;
+  readonly reportSend: string;
+  readonly reportTextLabel: string;
+  readonly reportTitle: string;
+  readonly reportTo: string;
   readonly ribbonLengthLong: string;
   readonly ribbonLengthNote: string;
   readonly ribbonLengthShort: string;

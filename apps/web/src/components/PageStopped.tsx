@@ -1,6 +1,7 @@
 import { Component, type ReactNode } from "react";
 import { noteFault } from "../fault-log";
 import { useT } from "../i18n";
+import { ReportProblem } from "./ReportProblem";
 import styles from "./PageStopped.module.css";
 
 /**
@@ -10,8 +11,9 @@ import styles from "./PageStopped.module.css";
  * screen with nothing to press (launch item 15). This says the page stopped,
  * says the reader's notes and marks are safe (they are kept on the device as
  * they are made, not in the page), and offers the one thing that helps:
- * opening the page again. "Report a problem" joins it when that button exists
- * (launch item 18); what went wrong is already kept for it in `fault-log.ts`.
+ * opening the page again. Under it, "Report a problem" (launch item 18) shows
+ * the reader a report that already holds what went wrong (kept for it in
+ * `fault-log.ts`), and sends nothing unless they choose to mail it.
  *
  * It sits inside the language provider, so it speaks the reader's language.
  * A part that only fails to load (a tool's file missing offline) is caught
@@ -47,6 +49,7 @@ function StoppedScreen({ reload }: { reload: () => void }): JSX.Element {
         <button type="button" className={styles.reload} onClick={reload}>
           {t.pageStoppedReload}
         </button>
+        <ReportProblem headingLevel={2} />
       </div>
     </main>
   );

@@ -7047,11 +7047,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑱"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "The reader sees the whole report before it is sent and sends it themselves; never their notes or marks. Drawn as a design page first."
+      "closedBy": "apps/web/e2e/report-problem.spec.ts",
+      "note": "A 'Report a problem' button in the info panel and on the error card shows the reader the whole report and the address (hello@hifth.app), then offers to open their own mail app with it filled in, or to copy it. It holds the app and version, the build, the device, the screen, the language, the time and the last five errors; never notes, marks or a list of pages read. The browser test puts a made-up note on the device and checks it is in neither the report nor the mail link, and that the error card's report names the error. Design page: docs/design/report-a-problem.md. 'The last few steps by name' waits on launch-logging (item 19)."
     },
     {
       "id": "launch-logging",

@@ -281,6 +281,12 @@
       "desktop-firefox",
       "iphone"
     ],
+    "report-problem.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "revision.spec.ts": [
       "android",
       "iphone"

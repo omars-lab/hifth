@@ -57,6 +57,7 @@ import { ZOOM_ANCHORS, rememberZoomAnchor, useZoomAnchor } from "../zoom-anchor"
 import { NOTE_LEAVES, rememberNoteLeave, useNoteLeave } from "../note-leave";
 import { UsageReadout } from "./UsageReadout";
 import { RecitationShelf } from "./RecitationShelf";
+import { ReportProblem } from "./ReportProblem";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -1014,6 +1015,15 @@ export function Colophon({
             <p className={styles.note}>{t.tipsNote}</p>
           </section>
         )}
+
+        {/* Report a problem (launch item 18, docs/design/report-a-problem.md):
+            the reader sees the whole report before their own mail app sends it. */}
+        <section className={styles.block} aria-labelledby="colophon-report">
+          <h3 className={styles.subhead} id="colophon-report">
+            {t.reportSectionTitle}
+          </h3>
+          <ReportProblem headingLevel={4} />
+        </section>
 
         {/* The owner's own count of what gets used, kept on this device only
             (docs/design/feature-usage.md). */}

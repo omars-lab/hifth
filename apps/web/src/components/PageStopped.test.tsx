@@ -60,6 +60,18 @@ describe("when a part of the page throws while it draws", () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
+  it("offers a problem report that already holds the error", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    render(
+      <PageStopped>
+        <Throws />
+      </PageStopped>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: AR.reportOpen }));
+    const box = screen.getByRole("textbox", { name: AR.reportTextLabel }) as HTMLTextAreaElement;
+    expect(box.value).toContain("made-up fault while drawing");
+  });
+
   it("draws the page as usual when nothing throws", () => {
     render(
       <PageStopped>

@@ -189,7 +189,7 @@ purpose, sees the card, presses the button and sees the mus'haf come back. With 
 out, the same test saw an empty page, so it checks the real thing. Errors nothing else catches
 are kept in memory, the last twenty, for the reader's own report; nothing is stored or sent. In
 the apps, if the system ends the process that draws the page, the app loads it again instead of
-staying blank, and a test holds that. The "Report a problem" button on the card comes with ⑱.
+staying blank, and a test holds that. The card also has the "Report a problem" button from ⑱.
 
 ### ⑯ Nobody has used the apps with the screen reader · **open**
 
@@ -204,12 +204,15 @@ Today a crash is read only from a device on a cable.
 so they can go into a reader's report, and a command lists the crashes Apple has collected. A
 crash forced on a test device shows up in that list.
 
-### ⑱ A reader has no way to tell us something is wrong · **open**
+### ⑱ A reader has no way to tell us something is wrong · **fixed**
 
-*What would answer it:* a "Report a problem" button in the info panel and on the error screen. It
-builds a short report (app version, device, the last errors, the last few steps by name), shows
-the whole report to the reader, and only then lets them send it by mail. It never includes their
-notes or marks. Drawn as a design page first.
+*What answered it (2026-11-16):* a "Report a problem" button in the info panel and on the error
+card. It shows the reader the whole report and the address it goes to, and only then offers to
+open their own mail app with it filled in, or to copy it. The report names the app and version,
+the build, the device, the screen, the language, the time and the last five errors. It never
+holds their notes, marks or a list of the pages they read; a browser test puts a made-up note on
+the device and checks it is not in the report or the mail. The [design page](report-a-problem.md)
+has the picture and the reasons. "The last few steps by name" waits on ⑲, the app's own log.
 
 ### ⑲ The shell writes its log with bare prints, and the web part keeps none · **open**
 

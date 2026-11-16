@@ -42,14 +42,26 @@ final class Bridge: NSObject, WKScriptMessageHandler {
 
     /// Runs at document start, main frame only, so `isNative()` is already
     /// true when the app's first module evaluates.
-    static func bootScript(platform: String, publicBase: String) -> WKUserScript {
-        let payload: [String: String] = ["platform": platform, "publicBase": publicBase]
+    /// `appVersion` goes only into the reader's own problem report, which they
+    /// see in full before choosing to send it; empty leaves it out.
+    static func bootScript(platform: String, publicBase: String, appVersion: String = "") -> WKUserScript {
+        var payload: [String: String] = ["platform": platform, "publicBase": publicBase]
+        if !appVersion.isEmpty { payload["appVersion"] = appVersion }
         let json = (try? JSONSerialization.data(withJSONObject: payload)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
         return WKUserScript(
             source: "window.__HIFTH_NATIVE__ = Object.freeze(\(json));",
             injectionTime: .atDocumentStart,
             forMainFrameOnly: true
         )
+    }
+
+    /// The version as a reader would quote it: `0.1.0 (7)`, the version and the
+    /// build number Apple counts, from the app's Info.plist.
+    static func versionLine(info: [String: Any]) -> String {
+        let version = info["CFBundleShortVersionString"] as? String ?? ""
+        let build = info["CFBundleVersion"] as? String ?? ""
+        if version.isEmpty { return "" }
+        return build.isEmpty ? version : "\(version) (\(build))"
     }
 
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {

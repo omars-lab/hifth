@@ -276,7 +276,7 @@ export default defineConfig({
           // bar; it runs on the phones too, from their own bar.
           // `card-foot` tells Chromium there is a home bar and checks a wide
           // screen's cards keep no room for it; the phones are not wide.
-          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows|recitation-keep|pencil|card-foot|spoken-names|drawer-tools|drawer-glow|left-off-look|full-screen-tools|reading-bars|bookmark-pull|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes|share-menu-fresh|wide-screen-later|slider-back|page-stopped)\.spec\.ts/,
+          testMatch: /(desktop|edge-peel|stage-fit|spread-fit|detent-live|pagebar-detents|pagebar-fisheye|notes|mistakes|sign-tools|crop|open-link|lazy-tools|drive-video|drive-evalfile|drive-touch|drive-device|link-builder|pen-colours|pen-homes|mark-tools|verse-gestures|page-library|confusions|undo-redo|eraser|slider-arrows|recitation-keep|pencil|card-foot|spoken-names|drawer-tools|drawer-glow|left-off-look|full-screen-tools|reading-bars|bookmark-pull|word-stack|lookalikes-in-drawer|tool-help|settings-drawer|drawer-marks|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes|share-menu-fresh|wide-screen-later|slider-back|page-stopped|report-problem)\.spec\.ts/,
           use: {
             browserName: "chromium",
             viewport: { width: 1440, height: 900 },
@@ -303,8 +303,9 @@ export default defineConfig({
           // and drawn with layered backgrounds, both worth a second engine.
           // And `page-stopped`: the card shown when the page throws while
           // drawing; Firefox is the owner's browser, so a blank page there counts.
+          // And `report-problem`: the reader's own report and its mail link.
           name: "desktop-firefox",
-          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|drawer-tools|tool-help|settings-drawer|drawer-marks|drawer-glow|left-off-look|full-screen-tools|reading-bars|bookmark-pull|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes|share-menu-fresh|wide-screen-later|slider-back|page-stopped)\.spec\.ts/,
+          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|drawer-tools|tool-help|settings-drawer|drawer-marks|drawer-glow|left-off-look|full-screen-tools|reading-bars|bookmark-pull|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes|share-menu-fresh|wide-screen-later|slider-back|page-stopped|report-problem)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },

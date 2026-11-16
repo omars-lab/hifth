@@ -110,7 +110,11 @@ final class ShellModel {
         }
         configuration.userContentController.add(bridge, name: Bridge.handlerName)
         configuration.userContentController.addUserScript(
-            Bridge.bootScript(platform: platform, publicBase: Self.publicBase)
+            Bridge.bootScript(
+                platform: platform,
+                publicBase: Self.publicBase,
+                appVersion: Bridge.versionLine(info: Bundle.main.infoDictionary ?? [:])
+            )
         )
         #if os(iOS)
         configuration.allowsInlineMediaPlayback = true

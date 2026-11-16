@@ -497,6 +497,19 @@ export interface Strings {
   pageStoppedBody: string;
   pageStoppedReload: string;
 
+  /* ---- report a problem (components/ReportProblem.tsx) -------------------- */
+  reportSectionTitle: string;
+  reportOpen: string;
+  reportTitle: string;
+  reportBody: string;
+  reportTo: string;
+  reportTextLabel: string;
+  reportSend: string;
+  reportCopy: string;
+  reportCopied: string;
+  reportClose: string;
+  reportMailIntro: string;
+
   /* ---- colophon ----------------------------------------------------------- */
   aboutTitle: string;
   aboutLede: string;
