@@ -6984,11 +6984,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑬"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "Apple turns down apps that only wrap a website. The review notes and a first launch with no connection answer it."
+      "closedBy": "apps/web/e2e/offline.spec.ts",
+      "note": "Apple turns down apps that only wrap a website. The review notes are drafted in docs/design/store-listing.md, each claim tied to the test or code that holds it. A browser test refuses every outside address and still sees a page drawn and a verse selected; the one outside request is the selected verse's recitation, fetched ahead on purpose. A fresh install in the iPad simulator agreed. A first launch in Airplane Mode on a real device belongs to the store-build walk the walk-app skill still lacks."
     },
     {
       "id": "launch-links-open-outside",

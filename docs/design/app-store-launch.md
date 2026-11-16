@@ -153,14 +153,20 @@ apps' music alone until a verse plays. A test on the Mac holds the choice, and t
 the simulator reports it back. The simulator has no silent switch, so hearing it on a real
 device is on the by-hand checks list; if it turns out silent, this item reopens.
 
-### ⑬ Nothing yet shows Apple's reviewers the app is more than a website · **open**
+### ⑬ Nothing yet shows Apple's reviewers the app is more than a website · **fixed**
 
 Apple turns down apps that only wrap a website. Hifth does more (it works offline, takes the
-pencil, opens from links in other apps, saves files), but the review notes do not say so, and a
-first launch with no connection has not been checked.
+pencil, opens from links in other apps, saves files), but the review notes did not say so, and a
+first launch with no connection had not been checked.
 
-*What would answer it:* the review notes written, and a test of a first launch with no
-connection.
+*What answered it (2026-11-16):* the review notes are drafted in
+[store-listing.md](store-listing.md), and each claim in them names the test or code that holds
+it. A browser test opens the app with every outside address refused and still sees a page drawn
+and a verse selected. It found one outside request, on purpose: selecting a verse fetches its
+recitation ahead so Play starts at once. With no connection that fails quietly and only the
+sound is missing. A fresh install in the iPad simulator agreed: three pages drawn, every file
+inside the app, and that one recitation request. The notes say so plainly. A first launch in
+Airplane Mode on a real device goes in the store-build walk.
 
 ### ⑭ A link inside the app might open any website inside it · **fixed**
 

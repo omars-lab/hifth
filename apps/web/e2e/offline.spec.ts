@@ -144,6 +144,59 @@ test.describe("Hifth · offline", () => {
 });
 
 /*
+ * The App Store's first launch (docs/design/app-store-launch.md, item 13).
+ *
+ * The iPad, iPhone and Mac apps carry the web part inside them and serve it
+ * from the bundle, so a reader who installs the app on a plane must still get a
+ * mus'haf on the very first launch. Apple also turns down apps that are only a
+ * website, and one that shows nothing without a connection is exactly that.
+ *
+ * Nothing here can cut the network inside the app, but the claim underneath is
+ * checkable in any browser: opening the app asks nothing of any address but
+ * its own. Every request elsewhere is refused and counted, with no service
+ * worker (the app has none), so the page has to draw from what it carries.
+ *
+ * One outside request is on purpose: selecting a verse fetches that verse's
+ * recitation ahead, so Play starts at once (the "fetch ahead" setting, on by
+ * default). With no connection it must fail quietly, ask for nothing else, and
+ * leave the page working. This test was first written claiming nothing at all
+ * leaves before Play, and went red on exactly that fetch.
+ */
+test.describe("Hifth · a first launch with no connection", () => {
+  test.use({ serviceWorkers: "block" });
+
+  test("draws a page from what it carries, and a tap asks only for that verse's sound", async ({
+    page,
+    baseURL,
+  }) => {
+    const own = new URL(baseURL ?? "http://localhost").origin;
+    const outside: string[] = [];
+    await page.route("**/*", (route) => {
+      const url = route.request().url();
+      if (url.startsWith("data:") || url.startsWith("blob:") || new URL(url).origin === own) {
+        return route.continue();
+      }
+      outside.push(url);
+      return route.abort("internetdisconnected");
+    });
+
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await expect(page.locator("header .numeric")).toHaveText(pageNumber(7));
+    await page.waitForLoadState("networkidle");
+    expect(outside).toEqual([]);
+
+    // #verse-54 is 2:47, so its recitation is file 002047.
+    await tapAyah(page, "#verse-54:visible");
+    await expect(page.getByRole("button", { name: /الآية الحالية/ })).toBeVisible();
+    await expect.poll(() => outside.length).toBe(1);
+    expect(new URL(outside[0] ?? "about:blank").pathname).toMatch(/\/002047\.mp3$/);
+    // Refused, and nothing says so: the reader has not pressed Play yet.
+    await expect(page.getByRole("alert")).toHaveCount(0);
+  });
+});
+
+/*
  * Research follow-up ④ (docs/research/2026-07-27-unattended-validation.md §3.3).
  *
  * The ledger's `offline-survival-8-day` check asks a human to leave a phone
