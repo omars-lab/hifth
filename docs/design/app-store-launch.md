@@ -128,12 +128,15 @@ Sign in with Apple and links from hifth.app that open the app both need it.
 
 *What would answer it:* the file added, and a link on hifth.app opening the app on a device.
 
-### ⑩ The version is fixed at 0.1.0, build 1 · **open**
+### ⑩ The version is fixed at 0.1.0, build 1 · **fixed**
 
 Every upload needs a higher build number.
 
-*What would answer it:* one command that sets the version and raises the build number, with a
-test.
+*What answered it (2026-11-16):* `make app-version` says the version and build number.
+`VERSION=1.0.0` sets the version and raises the build number; `NEXT_BUILD=1` raises the build
+number alone. A version lower than today's, or one Apple would refuse, is refused and nothing is
+written. It lives in the new release skill, which the rest of the release joins as it is built.
+Raising the build as part of the archive comes with ⑪.
 
 ### ⑪ The commands to make and upload a store build only print an error · **open**
 

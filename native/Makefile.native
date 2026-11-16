@@ -464,6 +464,15 @@ CSV          ?=
 app-devices: ## List the registered devices and how many slots of each kind are left this year (CSV=1 for a spreadsheet)
 	@node .claude/skills/add-device/scripts/device-list.mjs $(if $(CSV),--csv)
 
+# ---- The version and build number, from native/project.yml
+# Every upload needs a build number Apple has not seen, so setting a version
+# raises the build too. A version lower than today's is refused.
+VERSION      ?=
+NEXT_BUILD   ?=
+.PHONY: app-version
+app-version: ## Say the app's version and build number; VERSION=1.0.0 sets the version and raises the build, NEXT_BUILD=1 raises the build only
+	@node .claude/skills/release-app/scripts/app-version.mjs $(if $(VERSION),--version $(VERSION)) $(if $(NEXT_BUILD),--next-build)
+
 # ---- A build for upload: two locks, and both must open
 # 1. Which build it is. The web part is the private pitch by default, and the
 #    pitch carries The Study Quran's commentary, so an archive is only ever

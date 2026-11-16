@@ -41,7 +41,8 @@ site; `FLAVOUR=public` copies the build without `assets/private` and refuses if 
 unless the web build in the app says it is the public one (`make app-store-flavour` is that
 check alone), and checks the built release app again before anything is packed. So for a store
 build, run `make app-web FLAVOUR=public` first. Builds for the owner's own iPad
-(`make app-release-ipad`, `make app-device-install`) take either build.
+(`make app-release-ipad`, `make app-device-install`) take either build. The version, the
+build number and the rest of a store release are the `release-app` skill.
 
 ## Routes: the one deep-link language
 

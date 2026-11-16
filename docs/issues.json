@@ -6938,11 +6938,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑩"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "Every upload needs a higher build number than the last."
+      "closedBy": ".claude/skills/release-app/scripts/app-version.test.mjs",
+      "note": "make app-version says the version and build; VERSION=x.y.z sets the version and raises the build, NEXT_BUILD=1 raises the build only. A version lower than today's, or one Apple would refuse, is refused with nothing written. Raising it as part of the release itself comes with the real archive (⑪)."
     },
     {
       "id": "launch-archive-upload",

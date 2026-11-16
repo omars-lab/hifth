@@ -54,7 +54,7 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **31** of 33: 29 of the 31 on the launch page (the store-build guard and the privacy file closed), and the two older App Store rows on the licence | 2026-11-16 |
+| Launch blockers open | **30** of 33: 28 of the 31 on the launch page (the store-build guard, the privacy file and the version command closed), and the two older App Store rows on the licence | 2026-11-16 |
 | Owner steps waiting | **6**: two permission emails and a fallback date; delete 134 merged branches and ask GitHub to purge; three sign-in choices; the hifth.app first upload steps; the EU trader answer; the Mac keyboard test permission | 2026-11-15 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet | 2026-11-15 |
@@ -116,7 +116,7 @@ The plan has the detail of each step.
 
 | What | Tool | Why |
 |---|---|---|
-| Version, archive, upload, review, staged release | new `release-app` skill | No skill covers the release today |
+| Archive, upload, review, staged release | the `release-app` skill, started 2026-11-16 with the version command | The rest of the release has no command yet |
 | Reading crashes, reports and reviews; the fix-in-a-hurry path | new `operate-app` skill | Nothing covers running the app once it is out |
 | The numbers kept up to date | the loop, `.claude/loop-prompts/operational-readiness.md` | A table nobody updates is worse than none |
 
