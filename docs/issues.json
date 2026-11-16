@@ -6953,7 +6953,7 @@
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "The upload step stays locked until ③ and ④ are answered."
+      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made."
     },
     {
       "id": "launch-silent-switch-audio",
