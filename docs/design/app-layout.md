@@ -183,6 +183,36 @@ A small card at the top corner on a computer, at the top on a phone and iPad, cl
 
 **Wording.** Buttons say what happens ("Go to a page", "Show the tour", "Skip the tour"). A message uses the same word as the button that caused it. No arrows on buttons, no capitals for labels, no strings of facts joined by dots.
 
+## What do people outside this project do?
+
+**We did not look before writing this plan.** The first version drew only on the owner's comments and on what the app already had. Two independent research passes on open-source apps with a Mac, an iPhone and a web version were started on 2026-11-16; their checked catalog will sit in `docs/research/influences/`, and what it changes here will be written into the items below.
+
+## What did a second design check change?
+
+On 2026-11-16 the owner asked to try Hallmark, an outside design skill (MIT licence, by Together AI) with a written list of rules and a checker that opens the page in a browser. It was run as a report only: no file in the app changed.
+
+**What the checker measured.** On the reader app at 1440 wide it found no failures and raised two soft flags. Both are about the mus'haf page itself, which it mistook for a decorative drawing, so neither counts. On hifth.app's front page it found real faults, listed under ⑩.
+
+**What its rules for a screen you work in say about this plan.**
+
+| Its rule | What this plan says | Keep or change |
+| --- | --- | --- |
+| A top bar first; a side list only for more than about seven places | Two bars, and a side list only inside settings, which has twelve rows | Keep |
+| The accent colour marks only the main action, what is selected, and what is on | Teal for the one thing that is on, or the one button to press | Keep |
+| No capitals for labels, no arrows on buttons, no facts joined by dots | The same, under Wording | Keep |
+| The screen has one object it is known by | The bottom bar as the single ruler of the book | Keep |
+| A window over the page is the last answer, after changing things in place | Settings is drawn as a panel with a close button | **Change ④:** on a phone settings is a page of its own; on a wider screen it opens beside the page, not over it |
+| Where you are lives in the address | Not said | **Change ④:** settings, and each subject in it, has its own link, like the app's other links |
+| Every part that loads something has four looks: loading, empty, broken, full | Only the full look is drawn | **Change ④ and ⑤:** a search that finds nothing says so and offers to clear it; a page that fails to load says what broke and offers to try again |
+| A control is 32 to 40 points tall with at least 44 points to hit | Not said | **Change ② and ③:** a test measures every control on both bars |
+| Anything that destroys work can be undone or is confirmed | Messages offer Undo "where there is one" | **Change ⑤:** the eraser and "reset settings" always offer Undo |
+| Every colour comes from one named list | A table of six values | **Change:** the new pieces use the app's named colours only; a check refuses a new colour value written in place |
+| Movement shows a change, never decorates | A message slides in; the tour lights a control | **Change ⑥:** the tour's light moves only when the reader does the step, with no movement of its own |
+
+**How it differs from the first pass.** The first pass (the frontend-design skill) asked *does this look like us and nobody else*, and gave the plan its one bold move and its wording. Hallmark asks *can each rule be measured*, and gave the plan six things to test. Neither changed the three moves or the order.
+
+**What was left off.** Its optional check on every file save (a settings change) and its picture maker (which sends a request to an outside company) were not installed.
+
 ## In what order?
 
 ```mermaid
@@ -313,6 +343,17 @@ Left on 2026-11-12. They ask for:
 - the name's Arabic lettering tried in Aref Ruqaa;
 - tabs for iPad, iPhone, Mac and the web, with "coming soon" where an app is not out;
 - a picture of two pages side by side, and a language choice across the whole site.
+
+The design check of 2026-11-16 added these, measured on the served page and not yet looked at by eye:
+
+- the ring that shows which control the keyboard is on is too faint against the page, and one control shows none;
+- the edge of the email box is too faint to see where to type;
+- "Open Hifth in your browser" breaks onto two lines on an iPad held upright;
+- one heading leaves a single word alone on its last line on a phone;
+- the copy uses a long dash and a row of facts joined by dots, and four weights of the type where three would do;
+- four shadow colours are written in place instead of coming from the page's named colours.
+
+It also flagged that the page ends on the email sign-up. That is on purpose while the apps are not out, so it is not a fault.
 
 *What would answer it:* the front-page work takes each one, since that work has changes of its own not yet merged and this plan should not edit the same page under it.
 
