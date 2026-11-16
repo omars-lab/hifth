@@ -158,11 +158,15 @@ first launch with no connection has not been checked.
 *What would answer it:* the review notes written, and a test of a first launch with no
 connection.
 
-### ⑭ A link inside the app might open any website inside it · **suspected**
+### ⑭ A link inside the app might open any website inside it · **fixed**
 
 Apple's age questions ask whether the app can reach any page on the web. It should not.
 
-*What would answer it:* a test that every outside link opens in the browser, not in the app.
+*What answered it (2026-11-16):* it was already true, and now a test holds it. Only the app's
+own pages and a blank page load inside it. Every other address leaves the app. Of those, only web
+pages and mail open in the browser or the mail app; a file, a script, a phone number or another
+app's address is dropped. A window the page opens goes the same way, and the web part has no
+embedded frames. So the store answer to "can the app reach any web page" is no.
 
 ### ⑮ An error the page does not catch leaves a blank screen · **open**
 

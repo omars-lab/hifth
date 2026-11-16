@@ -939,8 +939,16 @@ final class NavigationPolicy: NSObject, WKNavigationDelegate, WKUIDelegate {
 /// shared link to the platform's share sheet.
 enum Sharing {
     static func openExternally(_ url: URL) {
-        guard let scheme = url.scheme, scheme == "http" || scheme == "https" || scheme == "mailto" else { return }
+        guard opensInAnotherApp(url) else { return }
         openCallback(url)
+    }
+
+    /// Only web pages and mail leave for another app. Anything else a link
+    /// points at (a file, a script, a phone number, another app's address) is
+    /// dropped, so a page can never hand the reader to something unexpected.
+    nonisolated static func opensInAnotherApp(_ url: URL) -> Bool {
+        guard let scheme = url.scheme?.lowercased() else { return false }
+        return scheme == "http" || scheme == "https" || scheme == "mailto"
     }
 
     /// An x-callback answer: the caller's own address, in whatever app owns

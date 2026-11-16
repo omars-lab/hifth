@@ -6987,11 +6987,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑭"
       },
-      "status": "suspected",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "Apple's age questions ask whether the app can reach any web page. A test should prove every outside link opens in the browser."
+      "closedBy": "native/HifthTests/OutsideLinkTests.swift",
+      "note": "Already true in the shell, now held by a test: only the app's own bundled pages and a blank page load inside it; every other address leaves, and of those only web pages and mail open in another app, the rest (files, scripts, phone numbers, other apps' addresses) are dropped. A window the page opens goes the same way, and the web part has no frames. So the honest answer to Apple's web-access question is no."
     },
     {
       "id": "launch-error-screen",
