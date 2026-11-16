@@ -614,7 +614,8 @@
       "blockedBy": [
         "a licensing opinion"
       ],
-      "note": "Track B's blocker is a licence Hifth does not own. A GPL'd binary on Apple's App Store conflicts with the per-device and DRM terms GPL §6 and §10 do not let a distributor add; the projects that ship anyway (Signal, OsmAnd) do it by having EVERY copyright holder grant an additional permission under §7. Hifth cannot assemble that grant. The Quranic Arabic Corpus header — quoted verbatim in SOURCES.md and pinned into the colophon by gate:license-copy — grants the GPL and then says copies may be distributed but 'CHANGING IT IS NOT ALLOWED'; SOURCES.md already records that tension and resolves it for a website by vendoring verbatim and deriving at build time, but a §7 additional permission IS a change to the licensing terms and only the copyright holder can grant it. quran-tajweed's CC BY 4.0 §2(a)(5)(B) separately forbids applying Effective Technological Measures, which FairPlay is — narrower, because the skin is one edition and could be omitted from a store build, where the QAC-derived data cannot (see adj-shards-have-two-upstreams). And KFGQPC's own terms are still unread by a human (board item #55), which a store submission is exactly the context that stops making deferrable. All of this is argued from licence text by a non-lawyer, and 'I read the licence' is not the standard this repo holds gates to. What would answer it: a licensing opinion from someone qualified, scoped to the three upstreams by name. Until then Track B stays gated and docs/design/track-b-native.md stays the reason."
+      "note": "Track B's blocker is a licence Hifth does not own. A GPL'd binary on Apple's App Store conflicts with the per-device and DRM terms GPL §6 and §10 do not let a distributor add; the projects that ship anyway (Signal, OsmAnd) do it by having EVERY copyright holder grant an additional permission under §7. Hifth cannot assemble that grant. The Quranic Arabic Corpus header — quoted verbatim in SOURCES.md and pinned into the colophon by gate:license-copy — grants the GPL and then says copies may be distributed but 'CHANGING IT IS NOT ALLOWED'; SOURCES.md already records that tension and resolves it for a website by vendoring verbatim and deriving at build time, but a §7 additional permission IS a change to the licensing terms and only the copyright holder can grant it. quran-tajweed's CC BY 4.0 §2(a)(5)(B) separately forbids applying Effective Technological Measures, which FairPlay is — narrower, because the skin is one edition and could be omitted from a store build, where the QAC-derived data cannot (see adj-shards-have-two-upstreams). And KFGQPC's own terms are still unread by a human (board item #55), which a store submission is exactly the context that stops making deferrable. All of this is argued from licence text by a non-lawyer, and 'I read the licence' is not the standard this repo holds gates to. What would answer it: a licensing opinion from someone qualified, scoped to the three upstreams by name. Until then Track B stays gated and docs/design/track-b-native.md stays the reason.",
+      "launch": true
     },
     {
       "id": "track-b-order-is-unachievable",
@@ -2323,7 +2324,8 @@
       "blockedBy": [
         "gpl-and-the-app-store"
       ],
-      "note": "The shell carries the same GPL-derived data as the site; a store listing waits on the licensing opinion. TestFlight for named testers is the narrower question the native-testflight-licence decision holds."
+      "note": "The shell carries the same GPL-derived data as the site; a store listing waits on the licensing opinion. TestFlight for named testers is the narrower question the native-testflight-licence decision holds.",
+      "launch": true
     },
     {
       "id": "first-route-is-page-one",
@@ -6812,6 +6814,392 @@
       "feature": "hifth-app-site",
       "useCase": "find-hifth-and-open-it",
       "note": "On this laptop, hifth.app gets a side bar like the earlbear workflow site's: hifth.app's pages, each section and card of the features page, and the design pages, folding to icons and a drawer on a phone. Local copy only; the release check refuses it. Replaces the floating Designs button."
+    },
+    {
+      "id": "launch-store-build-private",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "The archive step should read the flavour stamp the copy step writes and refuse anything but the public build. Test first: archiving a private build fails."
+    },
+    {
+      "id": "launch-citations-page",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "One page in the app and at hifth.app naming every source in the source and licence files, each with its licence and a link back; a check refuses a source left off. The owner chose this on 2026-11-15."
+    },
+    {
+      "id": "launch-corpus-permission",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "③"
+      },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "the owner sending email 1"
+      ],
+      "launch": true,
+      "note": "Draft written 2026-11-15 in docs/design/store-permission-emails.md, not sent. A written yes is kept word for word in the source register."
+    },
+    {
+      "id": "launch-tajweed-permission",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "④"
+      },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "the owner sending email 2"
+      ],
+      "launch": true,
+      "note": "Draft written 2026-11-15 in docs/design/store-permission-emails.md, not sent. Fallback: leave the tajweed colours out of the store build."
+    },
+    {
+      "id": "launch-page-artwork-terms",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "The same reading the old board item 55 asked for, now for a store app. May need a third email."
+    },
+    {
+      "id": "launch-recitation-audio-terms",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "The recitation is fetched from another site with no licence note in the source register."
+    },
+    {
+      "id": "launch-privacy-file",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Apple refuses uploads that use saved settings and similar features without a privacy file giving the reason."
+    },
+    {
+      "id": "launch-mac-sandbox",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "The Mac app's permissions file is empty and the app is signed for this laptop only."
+    },
+    {
+      "id": "launch-ios-entitlements",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Needed for Sign in with Apple and for hifth.app links that open the app."
+    },
+    {
+      "id": "launch-version-numbers",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑩"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Every upload needs a higher build number than the last."
+    },
+    {
+      "id": "launch-archive-upload",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑪"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "The upload step stays locked until ③ and ④ are answered."
+    },
+    {
+      "id": "launch-silent-switch-audio",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑫"
+      },
+      "status": "suspected",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Not seen yet on a device; suspected because the app does not set its sound to play as media."
+    },
+    {
+      "id": "launch-more-than-a-website",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑬"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "Apple turns down apps that only wrap a website. The review notes and a first launch with no connection answer it."
+    },
+    {
+      "id": "launch-links-open-outside",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑭"
+      },
+      "status": "suspected",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "Apple's age questions ask whether the app can reach any web page. A test should prove every outside link opens in the browser."
+    },
+    {
+      "id": "launch-error-screen",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑮"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Only one part of the page catches its own errors; anything else leaves a blank screen."
+    },
+    {
+      "id": "launch-screen-reader-walk",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑯"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "Walk with VoiceOver on iPad, iPhone and Mac; by-hand parts go on the manual-testing list."
+    },
+    {
+      "id": "launch-readers-crashes",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑰"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "Today a crash is read only from a device on a cable. Apple's own daily reports, kept on the device, are the owner's choice from 2026-11-15; no outside company."
+    },
+    {
+      "id": "launch-report-a-problem",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑱"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "The reader sees the whole report before it is sent and sends it themselves; never their notes or marks. Drawn as a design page first."
+    },
+    {
+      "id": "launch-logging",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑲"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Each line should carry the app version and the build's commit, so a report can be matched to the code."
+    },
+    {
+      "id": "launch-support-page",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑳"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Apple requires a support address with working contact details. Takes over the hifth.app front-page work's support-page item; that session was told on 2026-11-15."
+    },
+    {
+      "id": "launch-remote-switch",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉑"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "The store has no undo and a paused release recalls nothing, so a small file at hifth.app read at launch is the only fast lever."
+    },
+    {
+      "id": "launch-release-command",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉒"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "Goes in a new release-app skill, with the faster-review request text ready to paste."
+    },
+    {
+      "id": "launch-site-undo",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉓"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "A put-back command in the site-publishing skill, tested by publishing, putting back and checking the live commit."
+    },
+    {
+      "id": "launch-browser-new-version",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉔"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "A page cached before an update can ask for files the update removed."
+    },
+    {
+      "id": "launch-retry-tests-hidden",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉕"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "The push should list every test that needed a second try, so each one is fixed."
+    },
+    {
+      "id": "launch-sign-in",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉖"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "sign-in-first-unlock",
+        "sign-in-accounts-home",
+        "sign-in-locked-copy"
+      ],
+      "launch": true,
+      "note": "The owner chose sign-in at launch on 2026-11-15. The building is the sign-in work's; this row only counts it toward the launch."
+    },
+    {
+      "id": "launch-account-deletion",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉗"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "blockedBy": [
+        "launch-sign-in"
+      ],
+      "launch": true,
+      "note": "Apple requires deletion inside the app for any app with accounts, and it must also cancel the Apple sign-in."
+    },
+    {
+      "id": "launch-backups",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉘"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "A backup on a schedule kept off the database's own host, a message when one fails, and one restore into a scratch database with its rows counted."
+    },
+    {
+      "id": "launch-app-privacy-policy",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉙"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "The privacy pages cover the notify-me list only."
+    },
+    {
+      "id": "launch-store-answers",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉚"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "All drafted in the repository; the EU trader answer is the owner's."
+    },
+    {
+      "id": "launch-store-screenshots",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉛"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Of the public build only, in English and Arabic."
     }
   ]
 }
