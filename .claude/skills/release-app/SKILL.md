@@ -17,8 +17,9 @@ them. Each is a `make` target from `native/Makefile.native`.
 | 2. set the version for this release | `make app-version VERSION=1.0.0` | sets it and raises the build number; a lower version is refused |
 | 2b. or only a new build of the same version | `make app-version NEXT_BUILD=1` | raises the build number by one |
 | 3. put the public build in the app | `make app-web FLAVOUR=public` | the store build is never the private one |
-| 4. archive | `make app-archive` | refuses unless the web part is public, the release build has no walk capture and carries Apple's privacy file, and the licence decision allows an upload; the archive itself is not built yet |
-| 5. upload | `make app-testflight` | not built yet, and locked behind the licence decision |
+| 4. archive | `make app-archive` | refuses unless the web part is public; checks the release build, then makes the Xcode archive and checks the app inside it again (no walk capture, the public build, Apple's privacy file). Stays on the laptop, so the licence does not hold it |
+| 5. sign it for the store | `make app-export` | signs the archive for the App Store into `native/build/store/export`. The first run has Xcode make the team's App Store certificate in the Apple account, so ask the owner before that first run |
+| 6. upload | `make app-testflight` | locked behind the licence decision, checked before anything is built; the upload itself is not built yet |
 
 Commit the change to `native/project.yml` that step 2 makes, in the same commit as the release
 it belongs to, so the build number in the repo is always the one last sent.

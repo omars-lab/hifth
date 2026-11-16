@@ -6976,7 +6976,7 @@
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made. Next (2026-11-16): the launch item the agent takes next, because it adds no code to the web app, and the web app has no room left under its size limit (room-under-the-size-limit-again)."
+      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made. Next (2026-11-16): the launch item the agent takes next, because it adds no code to the web app, and the web app has no room left under its size limit (room-under-the-size-limit-again). Half done 2026-11-16: make app-archive makes a real Xcode archive of the public build and runs the release check on the app inside it (first run clean), and only the upload waits on the licence, checked before anything is built (scripts/native-store-flavour.test.mjs). Left: make app-export, whose first run has Xcode make the team's App Store certificate in the Apple account, waits for the owner's go; Apple's own check of the exported app needs an App Store Connect key the owner makes; and the upload should take only an archive this command made."
     },
     {
       "id": "launch-silent-switch-audio",

@@ -110,7 +110,7 @@ SHOT_NAME     = $(TARGET)-$(subst /,_,$(subst ?,_,$(subst =,-,$(subst :,-,$(pats
 
 .PHONY: app-icon app-generate app-web app-build-mac app-build-ipad app-run-mac app-run-mac-stdout app-callback-check \
         app-run-ipad app-shot app-probe app-open app-test app-walk app-test-mac-ui app-unit-test app-logs app-clean \
-        app-golden app-golden-update app-device-install app-device-open app-release-ipad app-crash-logs app-devices app-device-register app-archive app-testflight \
+        app-golden app-golden-update app-device-install app-device-open app-release-ipad app-crash-logs app-devices app-device-register app-archive app-export app-testflight \
         walk-pull walk-gallery walk-list walk-current
 
 app-icon: ## Cut every Mac and iPad icon size from the web app's own icon (apps/web/public/icons)
@@ -481,9 +481,11 @@ app-version: ## Say the app's version and build number; VERSION=1.0.0 sets the v
 #    check below, because that is what would be uploaded. If a private build
 #    is ever sent to named testers, it gets a target of its own, not this one.
 # 2. The licence. Even the public build carries data whose licence may not
-#    allow the App Store, so both targets refuse until docs/decisions.json
+#    allow the App Store, so the upload refuses until docs/decisions.json
 #    settles `native-testflight-licence` on an upload option (A or B). Settled
-#    on C, own devices only, they still refuse.
+#    on C, own devices only, it still refuses. The archive and the export stay
+#    on this laptop, so they do not wait on it (2026-11-16): the store build
+#    can be made and checked while the rights holders are asked.
 .PHONY: app-store-flavour
 app-store-flavour: ## Fail unless the web build in the app is the public one (the only build that may be archived)
 	@test "$$(cat $(WEB_BUNDLE)/.hifth-web-flavour 2>/dev/null)" = public || { \
@@ -498,13 +500,40 @@ define TESTFLIGHT_GATE
 	  echo "  docs/decisions/native-testflight-licence.md must say A or B; today it does not."; echo ""; exit 1; }
 endef
 
-app-archive: app-store-flavour app-generate ## Archive the iPad app for upload (public build only; refuses until the licence decision is settled)
-	$(TESTFLIGHT_GATE)
+ARCHIVE_PATH   ?= $(DERIVED)/store/Hifth.xcarchive
+EXPORT_PATH    ?= $(DERIVED)/store/export
+EXPORT_OPTIONS := $(NATIVE)/ExportOptions.plist
+ARCHIVE_DD     := $(DERIVED)/store/derived
+
+app-archive: app-store-flavour app-generate ## Archive the iPad and iPhone app for the store: public build only, checked inside the archive; nothing leaves the laptop
+	@test -n "$(TEAM)" || { echo "  no Apple Development identity in the keychain (TEAM= to override)"; exit 1; }
+	@sh native/scripts/xcode-account.sh
 	@# Nothing ships with the walk capture in it, or as anything but the public build.
 	$(MAKE) --no-print-directory app-release-check RELEASE_FLAVOUR=public
-	@echo "  archive: not built yet. The export options, privacy manifest and signing come with the decision (docs/backlog.md)"; exit 1
+	rm -rf $(ARCHIVE_PATH)
+	set -o pipefail; xcodebuild -project $(XCPROJ) -derivedDataPath $(ARCHIVE_DD) -scheme Hifth-iOS \
+	  -configuration Release -destination generic/platform=iOS -archivePath $(ARCHIVE_PATH) \
+	  -allowProvisioningUpdates DEVELOPMENT_TEAM=$(TEAM) archive | $(XCPRETTY)
+	@# The same check again, on the app inside the archive, because that is what would be uploaded.
+	node .claude/skills/walk-app/scripts/release-check.mjs \
+	  --debug $(RELEASE_CHECK_DD)/Build/Products/Debug-iphoneos/Hifth.app \
+	  --release $(ARCHIVE_PATH)/Products/Applications/Hifth.app --flavour public
+	@echo "  archive: $(ARCHIVE_PATH)"
 
-app-testflight: app-archive ## Upload the archive to TestFlight with an App Store Connect API key from the environment
+# The export signs the archive for the App Store. The first time, Xcode asks
+# Apple to make the team's App Store signing certificate, which changes the
+# Apple account, so it is run only with the owner's go.
+app-export: ## Sign the archive for the App Store, ready to upload (the first run makes the team's App Store certificate in the Apple account)
+	@test -d $(ARCHIVE_PATH) || { echo "  no archive at $(ARCHIVE_PATH). Run: make app-archive"; exit 1; }
+	rm -rf $(EXPORT_PATH)
+	set -o pipefail; xcodebuild -exportArchive -archivePath $(ARCHIVE_PATH) -exportPath $(EXPORT_PATH) \
+	  -exportOptionsPlist $(EXPORT_OPTIONS) -allowProvisioningUpdates | $(XCPRETTY)
+	@echo "  export: $(EXPORT_PATH)"
+
+app-testflight: app-store-flavour ## Upload the archive to TestFlight with an App Store Connect API key from the environment (locked until the licence decision allows it)
+	$(TESTFLIGHT_GATE)
+	$(MAKE) --no-print-directory app-archive
+	$(MAKE) --no-print-directory app-export
 	@echo "  upload: not built yet"; exit 1
 
 app-logs: ## Stream the app's console output (Mac or simulator)

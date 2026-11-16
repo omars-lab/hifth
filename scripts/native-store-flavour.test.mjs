@@ -54,3 +54,46 @@ test("archiving the pitch build stops at the flavour, before anything else is tr
   assert.match(said, REFUSAL);
   assert.doesNotMatch(said, /Not yet/, "the licence lock was reached first");
 });
+
+// The two tests below ask make what it would run (`make -n`) and run none of
+// it, so no build is made. Only the upload sends anything to Apple, so only the
+// upload waits on the licence answer; an archive stays on the laptop.
+function plan(target, flavour) {
+  const r = spawnSync("make", ["-n", "-C", root, target, `WEB_BUNDLE=${bundle(flavour)}`, "TEAM=ABCDE12345"], {
+    encoding: "utf8",
+  });
+  // A command split over lines with a backslash is printed that way; join it.
+  return (r.stdout + r.stderr).replace(/\\\n\s*/g, " ");
+}
+
+test("the archive is a real Xcode archive of the public build, not held by the licence lock", () => {
+  const said = plan("app-archive", "public");
+  assert.match(said, /xcodebuild .*-archivePath .*archive/);
+  assert.match(said, /DEVELOPMENT_TEAM=ABCDE12345/);
+  assert.doesNotMatch(said, /Not yet/);
+  assert.doesNotMatch(said, /not built yet/);
+  // The release check reads the app inside the archive, which is what would be uploaded.
+  assert.match(said, /release-check\.mjs[^\n]*--release [^\n]*Hifth\.xcarchive\/Products\/Applications\/Hifth\.app[^\n]*--flavour public/);
+});
+
+// The export settings: for the App Store, kept on the laptop, and the build
+// number left as the repo says, so the one in native/project.yml is the one sent.
+test("the export signs for the App Store and keeps the result on this laptop", () => {
+  const r = spawnSync("plutil", ["-convert", "json", "-o", "-", join(root, "native/ExportOptions.plist")], {
+    encoding: "utf8",
+  });
+  assert.equal(r.status, 0, r.stderr);
+  const o = JSON.parse(r.stdout);
+  assert.equal(o.method, "app-store-connect");
+  assert.equal(o.destination, "export");
+  assert.equal(o.manageAppVersionAndBuildNumber, false);
+  assert.equal(o.teamID, undefined, "the team id is read from the keychain, never written in the repo");
+});
+
+test("the upload meets the licence lock before it archives or exports anything", () => {
+  const said = plan("app-testflight", "public");
+  const lock = said.indexOf("Not yet");
+  assert.ok(lock >= 0, "the upload has no licence lock");
+  const firstBuild = said.search(/xcodebuild|xcodegen/);
+  assert.ok(firstBuild === -1 || lock < firstBuild, "the upload builds before it checks the licence");
+});

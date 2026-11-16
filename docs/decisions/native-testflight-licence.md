@@ -46,7 +46,8 @@ question the note did not ask, and the pitch wants it answered before the first 
 ## What happens if nobody decides?
 
 Option C, by default. The app runs on the owner's Mac and iPad, the pitch is shown in
-person, and `make app-archive` and `make app-testflight` refuse to run while this row is open.
+person, and `make app-testflight` refuses to run while this row is open. (Until 2026-11-16
+`make app-archive` refused too; an archive stays on the laptop, so now only the upload waits.)
 Nothing breaks. The moment a tester asks to keep the app, this question is back.
 
 ## What does the app do today, and what does it cost?
