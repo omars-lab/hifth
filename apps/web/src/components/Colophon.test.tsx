@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { describe, expect, it, vi } from "vitest";
 import { Colophon } from "./Colophon";
+import { stringsFor } from "../i18n";
 import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 import { CARD_EDGE_KEY } from "../card-edge";
 import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
@@ -324,5 +325,15 @@ describe("what zooming in keeps on the screen, in settings", () => {
     expect(way("fold")).toHaveAttribute("aria-checked", "true");
     expect(localStorage.getItem(ZOOM_ACROSS_KEY)).toBe("fold");
     localStorage.removeItem(ZOOM_ACROSS_KEY);
+  });
+});
+
+describe("report a problem, in the info panel", () => {
+  it("puts the report's own heading one level under its section's", () => {
+    const AR = stringsFor("ar");
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    expect(screen.getByRole("heading", { name: AR.reportSectionTitle, level: 3 })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: AR.reportOpen }));
+    expect(screen.getByRole("heading", { name: AR.reportTitle, level: 4 })).toBeTruthy();
   });
 });

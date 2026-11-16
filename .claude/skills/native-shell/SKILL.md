@@ -37,6 +37,13 @@ Without `make app-web` the app boots to a page that says "No web build in this a
 pitch flavour carries the private Study Quran commentary and must never reach the public
 site; `FLAVOUR=public` copies the build without `assets/private` and refuses if any got in.
 
+**A build for the App Store is the public build, always.** `make app-archive` stops at once
+unless the web build in the app says it is the public one (`make app-store-flavour` is that
+check alone), and checks the built release app again before anything is packed. So for a store
+build, run `make app-web FLAVOUR=public` first. Builds for the owner's own iPad
+(`make app-release-ipad`, `make app-device-install`) take either build. The version, the
+build number and the rest of a store release are the `release-app` skill.
+
 ## Routes: the one deep-link language
 
 The web app's hash **is** the route: `#/<edition>/<target>?k=v`, e.g. `/hafs-kfqc/2:255`,

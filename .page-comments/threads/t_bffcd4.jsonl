@@ -2,3 +2,4 @@
 {"v":1,"ts":"2026-11-12T20:18:35Z","ev":"shot","role":"comment","author":"omar","icloud":"CloudDesktop/data/page-comments/hifth/t_bffcd4/comment.png","sha":"42f13b84bc1e"}
 {"v":1,"ts":"2026-11-12T20:18:41Z","ev":"anchor","author":"page","state":"lost"}
 {"v":1,"ts":"2026-11-12T20:18:41Z","ev":"anchor","author":"page","state":"found"}
+{"v":1,"ts":"2026-11-16T13:47:43Z","ev":"reply","author":"claude","body":"Built on 2026-11-12 as three looks (preview card, tiles, plain), in the info panel under \"How the share menu looks\" and drawn side by side in `docs/design/share-look.md`. Waiting on your pick; the front page's picture follows once you choose."}

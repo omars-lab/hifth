@@ -201,6 +201,12 @@
       "desktop",
       "iphone"
     ],
+    "page-stopped.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "page-turn.spec.ts": [
       "android",
       "iphone"
@@ -260,12 +266,22 @@
       "android",
       "iphone"
     ],
+    "reading-bars.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
     "recitation-keep.spec.ts": [
       "android",
       "desktop",
       "iphone"
     ],
     "record-days.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "report-problem.spec.ts": [
       "android",
       "desktop",
       "desktop-firefox",
@@ -309,6 +325,12 @@
       "iphone"
     ],
     "slider-arrows.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "slider-back.spec.ts": [
       "android",
       "desktop",
       "desktop-firefox",

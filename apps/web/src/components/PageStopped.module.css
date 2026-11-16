@@ -1,0 +1,59 @@
+/* The page that stopped. Quiet paper, one card, one button: the reader is
+   already worried, and the only thing on the screen should be the way back. No
+   colour of its own beyond the accent on the button, the same as the offline
+   notice's primary action. */
+
+.screen {
+  display: grid;
+  place-items: center;
+  min-block-size: 100dvh;
+  padding: var(--space-6) var(--space-4);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  max-inline-size: 28rem;
+  padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--paper-raised);
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.body {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+/* 44px target, like every button the reader presses. */
+.reload {
+  min-height: var(--touch-min);
+  padding-inline: var(--space-5);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--paper-raised);
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-1);
+}
+
+.reload:hover {
+  background: var(--accent-strong);
+}
+
+.reload:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 3px;
+}

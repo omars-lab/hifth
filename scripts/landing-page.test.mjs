@@ -292,6 +292,20 @@ test("the Arabic pages carry no vowel marks", () => {
 });
 
 /*
+ * No long dash anywhere on a page, the tab's title included (owner, 2026-11-16, on "Mac and
+ * iPhone apps, coming soon": a long dash "is a tell that AI was involved"). A comma, a colon or
+ * a full stop says the same thing.
+ */
+test("no landing page uses a long dash", () => {
+  // The pages, and the files that write words onto one: the sign-up form's answers, the confirm
+  // and leave pages with their emails, and the stylesheet. Typed as itself or as an HTML code.
+  for (const name of [...PAGES, "lib/notify.mjs", "notify.js", "styles.css"]) {
+    const dashed = read(name).split("\n").filter((line) => /[–—]|&[mn]dash;|&#821[12];/.test(line));
+    assert.deepEqual(dashed, [], name);
+  }
+});
+
+/*
  * The opening picture shows the book both ways (owner, 2026-11-12: "i want to see two pages view
  * as well"): two facing pages as on a computer, and one page on a phone in front of it, each in
  * the language of the page around it.

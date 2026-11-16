@@ -178,6 +178,16 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     common ones (fatha, kasra, damma, sukun, shadda, tanween) are settled; these were written
     without a hafiz to ask. Why not a machine: a test only proves each name is Arabic, not that it
     is the right Arabic. Corrections go in the word list, and the unit test on sign names keeps them.
+24. **Reading with the bars hidden, and the Back button, on a real iPad and phone.** In the info
+    panel switch "Bars while reading" to "Hide while I read" and "Back button beside the page
+    slider" to "On", then recite a page or two (`#/hafs-kfqc/p7`). Right for the bars: they leave
+    after a few quiet seconds, a tap brings them back, a swipe turns the page without bringing
+    them back, they stay with a pen in hand, and you find the slider again without thinking about
+    it. Say whether the page changing size as they come and go is welcome or throws your eye off
+    the line. Right for Back: after a jump by the slider, a juz mark or Go to, the button beside
+    the slider names the page you left and returns to it. Why not a machine: the tests prove the
+    rules; whether it feels right mid-recitation is a judgement. The findings so far are in
+    `docs/design/app-layout.md`, items ② and ⑪.
 
 ## Done
 

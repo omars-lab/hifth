@@ -38,6 +38,12 @@ const LATER = [
   "components/MovedCard.tsx",
   // Swapped for an empty stand-in when the build shows no commentary.
   "components/CommentarySheet.tsx",
+  // "Report a problem" (launch item 18): the "page stopped" card loads with the
+  // page, but its report panel is only needed once the card shows.
+  "components/ReportProblem.tsx",
+  "problem-report.ts",
+  // The go-to box draws nothing until "/" or its button opens it.
+  "components/Jumper.tsx",
 ];
 
 /**
@@ -95,6 +101,11 @@ test.describe("Hifth · rarely used tools load when first opened", () => {
       name: "the edition picker",
       open: (p) => p.getByRole("button", { name: "المصحف", exact: true }).click(),
       sheet: (p) => p.getByRole("dialog", { name: "المصحف" }),
+    },
+    {
+      name: "the go-to box",
+      open: (p) => p.keyboard.press("/"),
+      sheet: (p) => p.getByRole("dialog", { name: "اذهب إلى" }),
     },
   ];
 

@@ -200,6 +200,8 @@ report: ## Open the last e2e run's report — traces, image diffs, the failing s
 #     ACT='step=1|Hold a verse; hold=#verse-52|900; step=2|Let go; settle=800'
 #     # a finger mark and step labels, saved as sharp screenshots; the record-demo
 #     # skill's make-gif.sh turns FRAMES/frames.txt into the GIF a note embeds
+#   make drive ACT='clickrole=button|About Hifth' CLIP=0,135,390,476 OUT=/abs/panel.png
+#     # only that part of the screen (x,y,width,height): one panel for a design page
 #
 # Flags map 1:1 to the driver (apps/web/e2e/tools/drive.mjs). OUT is relative to
 # apps/web; the run prints the path to open. --expect makes a silently-wrong
@@ -220,6 +222,7 @@ drive: node-ok ## Open the running app at a deep link, do a few steps, save a PN
 	  $(if $(SEEN_COACH),--seen-coach,) \
 	  $(if $(BROWSER),--browser '$(BROWSER)',) \
 	  $(if $(FULL),--full,) \
+	  $(if $(CLIP),--clip '$(CLIP)',) \
 	  $(if $(MOUSE),--mouse,) \
 	  $(if $(VIDEO),--video '$(VIDEO)',) \
 	  $(if $(MARKS),--marks,) \
@@ -607,7 +610,7 @@ use-cases-doc: ## Re-render docs/use-cases.md (the mermaid map) from docs/use-ca
 	@node scripts/build-use-cases.mjs
 
 .PHONY: issues
-issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id>
+issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id>  ·  PITCH=1 or LAUNCH=1 for one goal's items
 	@# docs/issues.json is the source, and it is an index: no titles, no
 	@# descriptions, no reproductions. Those live in PLAN.md's follow-ups,
 	@# performance.md, a design doc's open-questions section, or the validation
@@ -619,6 +622,8 @@ issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id
 	  node scripts/gate-issues.mjs --id "$(ID)"; \
 	elif [ -n "$(PITCH)" ]; then \
 	  node scripts/gate-issues.mjs --list --pitch; \
+	elif [ -n "$(LAUNCH)" ]; then \
+	  node scripts/gate-issues.mjs --list --launch; \
 	else \
 	  node scripts/gate-issues.mjs --list; \
 	fi

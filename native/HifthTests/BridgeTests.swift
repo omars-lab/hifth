@@ -32,4 +32,17 @@ struct BridgeTests {
         #expect(script.injectionTime == .atDocumentStart)
         #expect(script.isForMainFrameOnly)
     }
+
+    @Test("the boot script hands the page the app's version, for the reader's problem report")
+    func bootVersion() {
+        let script = Bridge.bootScript(platform: "macos", publicBase: "https://example.invalid/", appVersion: "0.2.0 (3)")
+        #expect(script.source.contains("\"appVersion\":\"0.2.0 (3)\""))
+    }
+
+    @Test("the app's version reads as the version, then the build in brackets")
+    func versionLine() {
+        #expect(Bridge.versionLine(info: ["CFBundleShortVersionString": "0.1.0", "CFBundleVersion": "7"]) == "0.1.0 (7)")
+        #expect(Bridge.versionLine(info: ["CFBundleShortVersionString": "0.1.0"]) == "0.1.0")
+        #expect(Bridge.versionLine(info: [:]) == "")
+    }
 }

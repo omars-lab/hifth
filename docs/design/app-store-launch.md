@@ -1,0 +1,306 @@
+# What stands between Hifth and the App Store, and between a reader's problem and our fix?
+
+*Written 2026-11-15, when the owner asked to harden the app before the App Store and to be ready
+to hear about problems and fix them fast. The plan is `.claude/plans/launch-readiness.md`;
+the goal and its numbers are `.claude/goals/app-store-launch.md`; what other teams check, with
+sources, is [research.md](../research/app-launch/research.md).*
+
+## The short version
+
+- **What:** put Hifth on the App Store for iPad, iPhone and Mac, with optional sign-in, and be
+  able to hear about a problem, find its cause and ship a fix within days.
+- **What it changes for a hafiz:** the app installs from the store like any other, keeps working
+  with no connection, and has a button to tell us when something is wrong. Nothing they write in
+  the app leaves the device unless they choose to send it.
+- **What blocks it:** two data sources' licences clash with Apple's store terms. We are asking
+  both rights holders for written permission. Until they answer, nothing is uploaded; everything
+  else goes ahead.
+- **What makes fixes slow:** the web part is packed inside the app, so every fix is a new build
+  through Apple's review (half are reviewed within a day). The only fast levers are a small
+  settings file the app reads at launch, and a release path we have practised.
+
+Each open item below has a row in the backlog (`docs/issues.json`, tagged `"launch": true`).
+
+## Words used here
+
+- **Hafiz** (plural *huffaz*): someone who has memorised the Qur'an.
+- **The private build:** the one made for the pitch, with The Study Quran's notes. It never goes
+  to the store.
+- **The public build:** the one with no held text, the same as the public site.
+- **Staged release:** Apple offers an update to a growing share of readers over seven days, and
+  it can be paused. A pause does not take the update back from those who have it.
+
+## What does the work look like, in order?
+
+```mermaid
+flowchart TD
+  s0["Write it down"] --> s1["Clear the licence"]
+  s0 --> s2["A store build is never the private build"]
+  s2 --> s3["What Apple requires"]
+  s2 --> s4["Hearing about problems"]
+  s2 --> s5["Shipping a fix fast"]
+  s3 --> s6["Accounts and the server"]
+  s4 --> s7["Listing and test flight"]
+  s5 --> s7
+  s6 --> s7
+  s1 -- "permission in hand" --> s8["Upload and release"]
+  s7 --> s8
+```
+
+## Open questions, and what would answer each
+
+### ① A build for the store could be the private build · **fixed**
+
+The command that packs the web part into the app builds the private flavour unless told
+otherwise, and nothing stopped an archive of it. A store build carrying The Study Quran's notes
+would publish them.
+
+*What answered it (2026-11-16):* the archive step now refuses anything but the public build, in
+two places. Before anything else runs, it reads the one-word file the copy step leaves in the web
+folder and stops if that does not say "public". Later, the check on the built release app reads
+the same file from inside the app, the thing that would be uploaded, and also refuses a private
+folder there whatever the file says. Tests try to archive a private build and watch it fail with
+that message, not with the licence lock's.
+
+*Still true:* building for the owner's own iPad keeps accepting the private build, as it must.
+A private build for named testers, if that is ever chosen, would need a command of its own.
+
+### ② No page names every source with its licence and a link back · **open**
+
+The credits sit in the colophon and in our source files. Apple's reviewers and the rights holders
+will both look for one place that names them all.
+
+*What would answer it:* a citations page in the app and on hifth.app, listing every source the
+source and licence files name, with a check that refuses a source left off.
+
+### ③ The word-root data's owners have not given permission for the store · **blocked**
+
+Their licence is the GPL, and its terms cannot sit beside Apple's store terms without the owners'
+added permission. Only they can give it.
+
+*What would answer it:* their written permission, kept in the repository. The owner sends the
+email; the draft is email 1 in [store-permission-emails.md](store-permission-emails.md).
+
+### ④ The tajweed colouring data's author has not given permission for the store · **blocked**
+
+Its licence forbids the copy protection Apple puts on every store app.
+
+*What would answer it:* the author's written permission, or leaving that data out of the store
+build. The owner sends the email; the draft is email 2 in
+[store-permission-emails.md](store-permission-emails.md).
+
+### ⑤ Nobody has read the page artwork's own terms · **open**
+
+The mus'haf page artwork comes from the King Fahd Complex. Its terms have never been read for a
+store app.
+
+*What would answer it:* the terms read, quoted in the source file, and the reading recorded here.
+
+### ⑥ The recitation audio comes from another site with no licence note · **open**
+
+*What would answer it:* that site's terms found and recorded, and the source added to the
+citations page; or the recitation switched off in the store build.
+
+### ⑦ The app has no privacy file · **fixed**
+
+Apple refuses an upload without a privacy file, and refuses one that uses certain system features
+(saved settings, file dates, the time since start-up, free disk space, the keyboard list) without
+saying why.
+
+*What answered it (2026-11-16):* the iPad, iPhone and Mac apps now carry the file. It says the
+app tracks nobody, names no tracking address and collects nothing. This page used to say the
+shell uses saved settings; a search of the shell's code found none of the five features, so the
+file lists none. The web part keeps its settings in the web view's own storage, which Apple does
+not count. A store build's release check fails if the file is missing, says the app tracks people,
+names a tracking address, or lists a feature with no reason. Apple's own check of the file runs
+on the first real archive, so it belongs to ⑪.
+
+### ⑧ The Mac app is not sandboxed or signed for the store · **open**
+
+The Mac store accepts only sandboxed apps signed by a paid team.
+
+*What would answer it:* the sandbox on, the app signed by the team, and a walk of the Mac app
+that finds nothing the sandbox broke (opening and saving files, links, the web part).
+
+### ⑨ The iPad and iPhone app has no list of what it is allowed to do · **open**
+
+Sign in with Apple and links from hifth.app that open the app both need it.
+
+*What would answer it:* the file added, and a link on hifth.app opening the app on a device.
+
+### ⑩ The version is fixed at 0.1.0, build 1 · **fixed**
+
+Every upload needs a higher build number.
+
+*What answered it (2026-11-16):* `make app-version` says the version and build number.
+`VERSION=1.0.0` sets the version and raises the build number; `NEXT_BUILD=1` raises the build
+number alone. A version lower than today's, or one Apple would refuse, is refused and nothing is
+written. It lives in the new release skill, which the rest of the release joins as it is built.
+Raising the build as part of the archive comes with ⑪.
+
+### ⑪ The commands to make and upload a store build only print an error · **open**
+
+*What would answer it:* a real archive and export that runs clean, and Apple's own check of it
+(the privacy file from ⑦ included) passing, with the upload step still locked until ③ and ④
+are answered.
+
+### ⑫ A recitation may be silent when the phone's silent switch is on · **fixed**
+
+*What answered it (2026-11-16):* the iPad and iPhone app now tells the phone at launch that its
+sound is media, which the silent switch does not mute, and spoken words, so a call or spoken
+directions pause it instead of being talked over. Setting this starts no sound and leaves other
+apps' music alone until a verse plays. A test on the Mac holds the choice, and the iPad app in
+the simulator reports it back. The simulator has no silent switch, so hearing it on a real
+device is on the by-hand checks list; if it turns out silent, this item reopens.
+
+### ⑬ Nothing yet shows Apple's reviewers the app is more than a website · **fixed**
+
+Apple turns down apps that only wrap a website. Hifth does more (it works offline, takes the
+pencil, opens from links in other apps, saves files), but the review notes did not say so, and a
+first launch with no connection had not been checked.
+
+*What answered it (2026-11-16):* the review notes are drafted in
+[store-listing.md](store-listing.md), and each claim in them names the test or code that holds
+it. A browser test opens the app with every outside address refused and still sees a page drawn
+and a verse selected. It found one outside request, on purpose: selecting a verse fetches its
+recitation ahead so Play starts at once. With no connection that fails quietly and only the
+sound is missing. A fresh install in the iPad simulator agreed: three pages drawn, every file
+inside the app, and that one recitation request. The notes say so plainly. A first launch in
+Airplane Mode on a real device goes in the store-build walk.
+
+### ⑭ A link inside the app might open any website inside it · **fixed**
+
+Apple's age questions ask whether the app can reach any page on the web. It should not.
+
+*What answered it (2026-11-16):* it was already true, and now a test holds it. Only the app's
+own pages and a blank page load inside it. Every other address leaves the app. Of those, only web
+pages and mail open in the browser or the mail app; a file, a script, a phone number or another
+app's address is dropped. A window the page opens goes the same way, and the web part has no
+embedded frames. So the store answer to "can the app reach any web page" is no.
+
+### ⑮ An error the page does not catch leaves a blank screen · **fixed**
+
+Only one part of the page caught its own errors.
+
+*What answered it (2026-11-16):* the whole page now sits inside one catcher. If any part throws
+while drawing, the reader sees a card: the page stopped working, their notes and marks are kept
+on this device, and a button opens the page again. A browser test breaks the built page on
+purpose, sees the card, presses the button and sees the mus'haf come back. With the catcher taken
+out, the same test saw an empty page, so it checks the real thing. Errors nothing else catches
+are kept in memory, the last twenty, for the reader's own report; nothing is stored or sent. In
+the apps, if the system ends the process that draws the page, the app loads it again instead of
+staying blank, and a test holds that. The card also has the "Report a problem" button from ⑱.
+
+### ⑯ Nobody has used the apps with the screen reader · **open**
+
+*What would answer it:* a walk with VoiceOver on iPad, iPhone and Mac, its faults fixed with
+tests, and the by-hand parts parked on the manual-testing list.
+
+### ⑰ We cannot see crashes on readers' devices · **open**
+
+Today a crash is read only from a device on a cable.
+
+*What would answer it:* the app keeps Apple's daily crash and performance reports on the device,
+so they can go into a reader's report, and a command lists the crashes Apple has collected. A
+crash forced on a test device shows up in that list.
+
+### ⑱ A reader has no way to tell us something is wrong · **fixed**
+
+*What answered it (2026-11-16):* a "Report a problem" button in the info panel and on the error
+card. It shows the reader the whole report and the address it goes to, and only then offers to
+open their own mail app with it filled in, or to copy it. The report names the app and version,
+the build, the device, the screen, the language, the time and the last five errors. It never
+holds their notes, marks or a list of the pages they read; a browser test puts a made-up note on
+the device and checks it is not in the report or the mail. The [design page](report-a-problem.md)
+has the picture and the reasons. "The last few steps by name" waits on ⑲, the app's own log.
+
+### ⑲ The shell writes its log with bare prints, and the web part keeps none · **open**
+
+*What would answer it:* the shell writes to the system log, the web part keeps a short log in
+memory for the report, and each line carries the app version and the build's commit.
+
+### ⑳ There is no support page · **open**
+
+Apple requires a support address with working contact details.
+
+*What would answer it:* a support and known-issues page at hifth.app/support, linked from the
+app, with its own entry in hifth.app's safety settings, which list each page by name. (Takes
+over the landing page's support-page row.)
+
+### ㉑ Once a bad version is out, we cannot stop it or warn readers · **open**
+
+The store has no undo, and a pause only stops an update spreading.
+
+*What would answer it:* a small public file at hifth.app that the app reads at launch, with the
+lowest version still allowed, a message to show, and switches for risky features. With no
+connection the app carries on as before. A test changes the file and sees the message.
+
+### ㉒ There is no one command to release, and no written fix-in-a-hurry page · **open**
+
+*What would answer it:* one release command, from version to a checked build, and a page that
+says how to reproduce, patch, build, upload and ask Apple for a faster review, with the request
+text ready to paste.
+
+### ㉓ A bad publish of the site cannot be put back · **open**
+
+*What would answer it:* a "put the previous release back" command in the site-publishing skill,
+tested by publishing, putting back and checking the live commit.
+
+### ㉔ The browser version never says a new version is ready · **open**
+
+A page cached from before an update can ask for files the update removed, and break.
+
+*What would answer it:* a "new version ready" prompt, the previous release's files kept for one
+release, and a test that loads an old page after an update.
+
+### ㉕ A test that passes only on its second try still counts as a pass · **open**
+
+*What would answer it:* the push reports every test that needed a second try, so each one is
+fixed rather than hidden.
+
+### ㉖ Sign-in waits on three choices · **blocked**
+
+The sign-in page sets out what sign-in unlocks first, where reader accounts live, and whether a
+reader's copy is locked so we cannot read it.
+
+*What would answer it:* the owner's three choices, then sign in with Apple through Apple's own
+sheet.
+
+### ㉗ A reader could not delete their account inside the app · **open**
+
+Apple requires it for any app with accounts, and the deletion must also cancel the Apple sign-in.
+
+*What would answer it:* a "delete my account" button that removes the account and everything
+stored with it, cancels the Apple sign-in, and says when it is done; and a place to see what is
+stored. Waits on ㉖.
+
+### ㉘ Nothing that holds reader data is backed up, and no restore has been tried · **open**
+
+*What would answer it:* a backup on a schedule, kept off the database's own host, a message when
+one fails, and a restore into a scratch database with its rows counted.
+
+### ㉙ The apps have no privacy policy of their own · **open**
+
+The privacy pages cover the notify-me list only.
+
+*What would answer it:* a policy that says what stays on the device, what an account stores, what
+the recitation fetch sends, and what a reader's report holds, linked from the app and the store.
+
+### ㉚ The store's questions are not answered yet · **open**
+
+Privacy labels, age questions, the export question, the EU trader question, the description and
+the review notes.
+
+*What would answer it:* every answer drafted in the repository, the EU trader answer from the
+owner, and the labels checked against what the app really sends.
+
+### ㉛ There are no screenshots at Apple's sizes · **open**
+
+*What would answer it:* a command that takes the public build's screenshots at Apple's iPhone,
+iPad and Mac sizes, in English and Arabic.
+
+## What does this leave alone?
+
+- The pitch build and its walk: the pitch goal still governs them.
+- Sending a build to named testers: that is its own open item on the native-shell page.
+- The first upload of hifth.app: the landing-page work owns it.

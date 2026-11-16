@@ -614,7 +614,8 @@
       "blockedBy": [
         "a licensing opinion"
       ],
-      "note": "Track B's blocker is a licence Hifth does not own. A GPL'd binary on Apple's App Store conflicts with the per-device and DRM terms GPL §6 and §10 do not let a distributor add; the projects that ship anyway (Signal, OsmAnd) do it by having EVERY copyright holder grant an additional permission under §7. Hifth cannot assemble that grant. The Quranic Arabic Corpus header — quoted verbatim in SOURCES.md and pinned into the colophon by gate:license-copy — grants the GPL and then says copies may be distributed but 'CHANGING IT IS NOT ALLOWED'; SOURCES.md already records that tension and resolves it for a website by vendoring verbatim and deriving at build time, but a §7 additional permission IS a change to the licensing terms and only the copyright holder can grant it. quran-tajweed's CC BY 4.0 §2(a)(5)(B) separately forbids applying Effective Technological Measures, which FairPlay is — narrower, because the skin is one edition and could be omitted from a store build, where the QAC-derived data cannot (see adj-shards-have-two-upstreams). And KFGQPC's own terms are still unread by a human (board item #55), which a store submission is exactly the context that stops making deferrable. All of this is argued from licence text by a non-lawyer, and 'I read the licence' is not the standard this repo holds gates to. What would answer it: a licensing opinion from someone qualified, scoped to the three upstreams by name. Until then Track B stays gated and docs/design/track-b-native.md stays the reason."
+      "note": "Track B's blocker is a licence Hifth does not own. A GPL'd binary on Apple's App Store conflicts with the per-device and DRM terms GPL §6 and §10 do not let a distributor add; the projects that ship anyway (Signal, OsmAnd) do it by having EVERY copyright holder grant an additional permission under §7. Hifth cannot assemble that grant. The Quranic Arabic Corpus header — quoted verbatim in SOURCES.md and pinned into the colophon by gate:license-copy — grants the GPL and then says copies may be distributed but 'CHANGING IT IS NOT ALLOWED'; SOURCES.md already records that tension and resolves it for a website by vendoring verbatim and deriving at build time, but a §7 additional permission IS a change to the licensing terms and only the copyright holder can grant it. quran-tajweed's CC BY 4.0 §2(a)(5)(B) separately forbids applying Effective Technological Measures, which FairPlay is — narrower, because the skin is one edition and could be omitted from a store build, where the QAC-derived data cannot (see adj-shards-have-two-upstreams). And KFGQPC's own terms are still unread by a human (board item #55), which a store submission is exactly the context that stops making deferrable. All of this is argued from licence text by a non-lawyer, and 'I read the licence' is not the standard this repo holds gates to. What would answer it: a licensing opinion from someone qualified, scoped to the three upstreams by name. Until then Track B stays gated and docs/design/track-b-native.md stays the reason.",
+      "launch": true
     },
     {
       "id": "track-b-order-is-unachievable",
@@ -921,6 +922,14 @@
       "id": "check-screen-reader-walkthrough",
       "source": {
         "ledger": "screen-reader-walkthrough"
+      },
+      "severity": "risk",
+      "owner": "user"
+    },
+    {
+      "id": "check-silent-switch-recitation-heard",
+      "source": {
+        "ledger": "silent-switch-recitation-heard"
       },
       "severity": "risk",
       "owner": "user"
@@ -2323,7 +2332,8 @@
       "blockedBy": [
         "gpl-and-the-app-store"
       ],
-      "note": "The shell carries the same GPL-derived data as the site; a store listing waits on the licensing opinion. TestFlight for named testers is the narrower question the native-testflight-licence decision holds."
+      "note": "The shell carries the same GPL-derived data as the site; a store listing waits on the licensing opinion. TestFlight for named testers is the narrower question the native-testflight-licence decision holds.",
+      "launch": true
     },
     {
       "id": "first-route-is-page-one",
@@ -6404,6 +6414,19 @@
       "closedBy": "scripts/gate-budget.mjs"
     },
     {
+      "id": "room-under-the-size-limit-again",
+      "source": {
+        "file": "docs/performance.md",
+        "item": "㉓"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "performance",
+      "note": "The error card and \"Report a problem\" took the app to 210.0 KB against its 210 KB size limit (2026-11-16), so the three launch items that still add web code (the app's log, the remote off-switch, the new-version prompt) cannot land. Two ways out: a trim that shrinks the total with nothing a reader sees changed, or measuring start-up again with nothing else running, since it is about 150 ms faster than when the limit was set. Done when the size check shows at least 3 KB of room.",
+      "useCase": "refuse-a-bundle-that-would-not-load-on-a-phone"
+    },
+    {
       "id": "hifth-app-site",
       "source": {
         "file": "docs/design/hifth-app-site.md",
@@ -6813,6 +6836,525 @@
       "feature": "hifth-app-site",
       "useCase": "find-hifth-and-open-it",
       "note": "On this laptop, hifth.app gets a side bar like the earlbear workflow site's: hifth.app's pages, each section and card of the features page, and the design pages, folding to icons and a drawer on a phone. Local copy only; the release check refuses it. Replaces the floating Designs button."
+    },
+    {
+      "id": "launch-store-build-private",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "①"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "closedBy": "scripts/native-store-flavour.test.mjs",
+      "note": "The archive step refuses anything but the public build: first on the web folder, before anything else runs, then on the built release app, where a private folder is refused whatever the label says. Building for the owner's own iPad still accepts the private build."
+    },
+    {
+      "id": "launch-citations-page",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "One page in the app and at hifth.app naming every source in the source and licence files, each with its licence and a link back; a check refuses a source left off. The owner chose this on 2026-11-15."
+    },
+    {
+      "id": "launch-corpus-permission",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "③"
+      },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "the owner sending email 1"
+      ],
+      "launch": true,
+      "note": "Draft written 2026-11-15 in docs/design/store-permission-emails.md, not sent. A written yes is kept word for word in the source register."
+    },
+    {
+      "id": "launch-tajweed-permission",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "④"
+      },
+      "status": "blocked",
+      "severity": "risk",
+      "owner": "user",
+      "blockedBy": [
+        "the owner sending email 2"
+      ],
+      "launch": true,
+      "note": "Draft written 2026-11-15 in docs/design/store-permission-emails.md, not sent. Fallback: leave the tajweed colours out of the store build."
+    },
+    {
+      "id": "launch-page-artwork-terms",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "The same reading the old board item 55 asked for, now for a store app. May need a third email."
+    },
+    {
+      "id": "launch-recitation-audio-terms",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "The recitation is fetched from another site with no licence note in the source register."
+    },
+    {
+      "id": "launch-privacy-file",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑦"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "closedBy": ".claude/skills/walk-app/scripts/release-check.test.mjs",
+      "note": "The iPad, iPhone and Mac apps now carry Apple's privacy file: no tracking, no tracking addresses, nothing collected, and none of the system features Apple asks a reason for (the shell was searched for each). A store build's release check fails without the file, if it says the app tracks people, names a tracking address, or lists a feature with no reason. It changes when sign-in or the reader-sent report arrives."
+    },
+    {
+      "id": "launch-mac-sandbox",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "The Mac app's permissions file is empty and the app is signed for this laptop only."
+    },
+    {
+      "id": "launch-ios-entitlements",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Needed for Sign in with Apple and for hifth.app links that open the app."
+    },
+    {
+      "id": "launch-version-numbers",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑩"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "closedBy": ".claude/skills/release-app/scripts/app-version.test.mjs",
+      "note": "make app-version says the version and build; VERSION=x.y.z sets the version and raises the build, NEXT_BUILD=1 raises the build only. A version lower than today's, or one Apple would refuse, is refused with nothing written. Raising it as part of the release itself comes with the real archive (⑪)."
+    },
+    {
+      "id": "launch-archive-upload",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑪"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made. Next (2026-11-16): the launch item the agent takes next, because it adds no code to the web app, and the web app has no room left under its size limit (room-under-the-size-limit-again)."
+    },
+    {
+      "id": "launch-silent-switch-audio",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑫"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "closedBy": "native/HifthTests/SoundTests.swift",
+      "note": "The app now tells the system at launch that its sound is media, spoken words, so the silent switch does not mute a recitation and the system pauses it for a call. A Mac test holds the choice, and the iPad app in the simulator reports the setting back. Hearing it with the switch on needs a real device, since the simulator has no switch: that is parked as the by-hand check silent-switch-recitation-heard, and a silent result reopens this row."
+    },
+    {
+      "id": "launch-more-than-a-website",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑬"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "closedBy": "apps/web/e2e/offline.spec.ts",
+      "note": "Apple turns down apps that only wrap a website. The review notes are drafted in docs/design/store-listing.md, each claim tied to the test or code that holds it. A browser test refuses every outside address and still sees a page drawn and a verse selected; the one outside request is the selected verse's recitation, fetched ahead on purpose. A fresh install in the iPad simulator agreed. A first launch in Airplane Mode on a real device belongs to the store-build walk the walk-app skill still lacks."
+    },
+    {
+      "id": "launch-links-open-outside",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑭"
+      },
+      "status": "fixed",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "closedBy": "native/HifthTests/OutsideLinkTests.swift",
+      "note": "Already true in the shell, now held by a test: only the app's own bundled pages and a blank page load inside it; every other address leaves, and of those only web pages and mail open in another app, the rest (files, scripts, phone numbers, other apps' addresses) are dropped. A window the page opens goes the same way, and the web part has no frames. So the honest answer to Apple's web-access question is no."
+    },
+    {
+      "id": "launch-error-screen",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑮"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "closedBy": "apps/web/e2e/page-stopped.spec.ts",
+      "note": "The whole page now sits inside one catcher: a part that throws while drawing shows a card saying the page stopped, that notes and marks are kept on this device, and a button that opens the page again. The browser test feeds the built page a start-up file it cannot use, sees the card (and went red with the catcher taken out), then presses the button and sees the mus'haf back. Errors nothing else catches are kept in memory, the last twenty, for the reader's own report (launch item 18); nothing is stored or sent. In the apps, when the system ends the process that draws the page, the shell loads the page again instead of staying blank (native/HifthTests/PageCrashTests.swift). The 'Report a problem' button on the card comes with item 18."
+    },
+    {
+      "id": "launch-screen-reader-walk",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑯"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "Walk with VoiceOver on iPad, iPhone and Mac; by-hand parts go on the manual-testing list."
+    },
+    {
+      "id": "launch-readers-crashes",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑰"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "Today a crash is read only from a device on a cable. Apple's own daily reports, kept on the device, are the owner's choice from 2026-11-15; no outside company."
+    },
+    {
+      "id": "launch-report-a-problem",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑱"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "closedBy": "apps/web/e2e/report-problem.spec.ts",
+      "note": "A 'Report a problem' button in the info panel and on the error card shows the reader the whole report and the address (hello@hifth.app), then offers to open their own mail app with it filled in, or to copy it. It holds the app and version, the build, the device, the screen, the language, the time and the last five errors; never notes, marks or a list of pages read. The browser test puts a made-up note on the device and checks it is in neither the report nor the mail link, and that the error card's report names the error. Design page: docs/design/report-a-problem.md. 'The last few steps by name' waits on launch-logging (item 19)."
+    },
+    {
+      "id": "launch-logging",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑲"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Each line should carry the app version and the build's commit, so a report can be matched to the code."
+    },
+    {
+      "id": "launch-support-page",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑳"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Apple requires a support address with working contact details. Takes over the hifth.app front-page work's support-page item; that session was told on 2026-11-15. The page needs its own entry in hifth.app's safety settings (apps/landing/_headers), as each page there is listed by name."
+    },
+    {
+      "id": "launch-remote-switch",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉑"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "The store has no undo and a paused release recalls nothing, so a small file at hifth.app read at launch is the only fast lever."
+    },
+    {
+      "id": "launch-release-command",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉒"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "Goes in a new release-app skill, with the faster-review request text ready to paste."
+    },
+    {
+      "id": "launch-site-undo",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉓"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "A put-back command in the site-publishing skill, tested by publishing, putting back and checking the live commit."
+    },
+    {
+      "id": "launch-browser-new-version",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉔"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "A page cached before an update can ask for files the update removed. When fixing it, also add the go-to box to a test that blocks the rarely used tools' file: today no test opens the go-to box with that file missing (it moved there 2026-11-16)."
+    },
+    {
+      "id": "launch-retry-tests-hidden",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉕"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "The push should list every test that needed a second try, so each one is fixed."
+    },
+    {
+      "id": "launch-sign-in",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉖"
+      },
+      "status": "blocked",
+      "severity": "question",
+      "owner": "user",
+      "blockedBy": [
+        "sign-in-first-unlock",
+        "sign-in-accounts-home",
+        "sign-in-locked-copy"
+      ],
+      "launch": true,
+      "note": "The owner chose sign-in at launch on 2026-11-15. The building is the sign-in work's; this row only counts it toward the launch."
+    },
+    {
+      "id": "launch-account-deletion",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉗"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "blockedBy": [
+        "launch-sign-in"
+      ],
+      "launch": true,
+      "note": "Apple requires deletion inside the app for any app with accounts, and it must also cancel the Apple sign-in."
+    },
+    {
+      "id": "launch-backups",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉘"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "A backup on a schedule kept off the database's own host, a message when one fails, and one restore into a scratch database with its rows counted."
+    },
+    {
+      "id": "launch-app-privacy-policy",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉙"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "The privacy pages cover the notify-me list only."
+    },
+    {
+      "id": "launch-store-answers",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉚"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "All drafted in the repository; the EU trader answer is the owner's."
+    },
+    {
+      "id": "launch-store-screenshots",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉛"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "Of the public build only, in English and Arabic."
+    },
+    {
+      "id": "layout-pages-line-only-when-missing",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-16 (page comment t_13550d): all 604 pages are always there, so why print the count. Plan: draw the line only when pages are missing, and keep it as what a screen reader hears for the slider. Test first: no line with every page present, the line with one page missing."
+    },
+    {
+      "id": "layout-bottom-bar-moving-and-viewing",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-16 (page comments t_3b503f and t_f9e931): Go to, the size buttons and one page or two belong on the page bar at the bottom, and its turn buttons should look like the keyboard keys drawn in the top bar. Those two keys are pictures, not buttons. Plan: a rough build behind one switch, \"The new layout\"; the slider itself does not change. Tried on the iPad and a laptop, in Chrome and Firefox, before anything is chosen."
+    },
+    {
+      "id": "layout-pens-in-the-top-bar",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Follows the bottom-bar row: once the top bar is emptied, the pens fit in it and the page gains a row of height on a computer and an iPad. Built under the same switch. To check by hand: the pens are still easy to hit with the pencil."
+    },
+    {
+      "id": "layout-settings-sorted-by-subject",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "useCase": "have-it-my-way-and-keep-it",
+      "feature": "settings",
+      "note": "Owner, 2026-11-16 (page comment t_1fe0f7): one settings button like the phone's own Settings, for which mus'haf, tajweed on or off, language and the rest. Measured that day: the info panel holds 47 groups of settings and 118 controls and is about eleven screens tall. Plan: one list sorted by subject with those three first, built on the settings page that already exists (the row app-pages-settings-and-developer), with one way in instead of three. A test counts that no setting was lost."
+    },
+    {
+      "id": "layout-messages-not-a-help-row",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-16 (page comment t_21e97a): is the row above the page bar adding value, and could its lines be notices like a Mac's. Plan: the row shows only while there is a way back after a jump; on a phone the pen switch and Full screen stay; what the app has to say becomes a short message that leaves by itself. First step is a list of every line the app prints, each marked as a message, a first-use tip, or dropped."
+    },
+    {
+      "id": "layout-tour-with-a-link-per-step",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-16 (page comment t_a03692): a guided tour of the menus and pens that can be turned off, each step reachable by one of the app's links. Plan: two shapes built rough, a spotlight in order and a checklist in any order, over the real page; each step gets a web link and an app link, which adds a kind of link to the list kept in step in four places. Built after the controls have stopped moving."
+    },
+    {
+      "id": "layout-where-losing-options-go",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "feature": "settings",
+      "note": "Most of the 47 groups of settings are options that lost a choice and were kept as a switch, by the owner's rule. A short settings list needs a place for them. Three choices are set out on the page; folded under each subject is assumed until the owner picks."
+    },
+    {
+      "id": "layout-tour-starts-by-itself",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "On 2026-09-25 the owner chose that tips wait until asked for. A tour that starts by itself reverses that. Three choices are set out on the page; offered once and not started is assumed until the owner picks."
+    },
+    {
+      "id": "layout-messages-in-app-or-device",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "\"Notices like a Mac's\" can mean a card the app draws, or the device's own notifications, which need permission and suit reminders more than \"Bookmark kept\". Drawn inside the app is assumed until the owner picks."
+    },
+    {
+      "id": "front-page-comments-of-nov-12",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑩"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "Eight page comments the owner left on hifth.app's front page on 2026-11-12 (t_c21ede, t_594286, t_016a29, t_0f5ddd, t_37714b, t_7a13cc, t_7b53cc, t_9200ae): a features section, a new line under the name, Aref Ruqaa for the name's lettering, device tabs with \"coming soon\", a two-page picture and a site-wide language choice. They belong to the front-page work, which has unmerged changes of its own; listed here so they are not lost."
+    },
+    {
+      "id": "hide-bars-while-reading",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑪"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "The layout plan first set aside hiding the bars until the page is tapped. The research on other open apps (docs/research/influences/catalog.md, findings 1, 2, 8 and 10) found it in four reading apps, three of them by both researchers, so it is now a rough build to try: bars hide while reading, stay while a pen is in hand, behind a switch. Answered by trying it on an iPad and a phone."
     },
     {
       "id": "hifth-app-csp-for-the-app",

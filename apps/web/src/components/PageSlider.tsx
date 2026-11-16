@@ -124,6 +124,13 @@ interface PageSliderProps {
    * clear beside the card, stay.
    */
   behind?: boolean;
+  /**
+   * The Back button (slider-back.ts): the page it returns to, null when there
+   * is nowhere to go back to (drawn greyed out), and left out when the reader
+   * has the button switched off.
+   */
+  back?: number | null | undefined;
+  onBack?: () => void;
 }
 
 /**
@@ -188,6 +195,8 @@ export function PageSlider({
   onJuzTap,
   fisheye = true,
   behind = false,
+  back,
+  onBack,
 }: PageSliderProps): JSX.Element {
   const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -923,6 +932,23 @@ export function PageSlider({
         <EdgeArrow points="left" />
       </button>
 
+      {/* Back, after a jump (slider-back.ts): beside the slider, never on it.
+          It names the page it returns to, and is greyed out while there is
+          nowhere to go back to, so the row does not shift when a place appears. */}
+      {back !== undefined && onBack && (
+        <button
+          type="button"
+          className={styles.back}
+          data-slider-back=""
+          onClick={onBack}
+          disabled={back === null}
+          aria-label={back === null ? t.sliderBack : t.sliderBackTo(back)}
+        >
+          <BackArrow />
+          {back !== null && <span dir="auto">{t.pageNumber(back)}</span>}
+        </button>
+      )}
+
       {/* Visible, small and permanent: how much of the book is here. It reads
           «٦٠٤ من ٦٠٤» now, and it stays — it is not a warning that disappears
           when the news is good, it is the bar saying what is behind it, and the
@@ -935,6 +961,18 @@ export function PageSlider({
         {t.pagesVendored(available.length, total)}
       </span>
     </nav>
+  );
+}
+
+/** An arrow that turns round: the way back to where the reader was. */
+function BackArrow() {
+  return (
+    <span aria-hidden="true" className={styles.arrow}>
+      <svg width="16" height="14" viewBox="0 0 16 14" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 1L1.5 4.5L5 8" />
+        <path d="M1.5 4.5H10a4.25 4.25 0 0 1 0 8.5H6" />
+      </svg>
+    </span>
   );
 }
 

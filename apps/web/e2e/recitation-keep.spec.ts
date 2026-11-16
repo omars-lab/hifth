@@ -56,7 +56,7 @@ test("a surah kept from its menu plays from the device, and the info panel lists
   await menu(page).getByRole("menuitem", { name: "Keep its recitation on this device" }).click();
   // The line stays where the reader pressed it and says how far it has got.
   await expect(menu(page)).toBeVisible();
-  await expect(menu(page).getByRole("menuitem", { name: /^(Saving its recitation — .* of 286 · Stop|Remove its kept recitation · 0\.3 MB)$/ })).toBeVisible();
+  await expect(menu(page).getByRole("menuitem", { name: /^(Saving its recitation: .* of 286 · Stop|Remove its kept recitation · 0\.3 MB)$/ })).toBeVisible();
   await expect(menu(page).getByRole("menuitem", { name: "Remove its kept recitation · 0.3 MB" })).toBeVisible({ timeout: 20_000 });
   await page.keyboard.press("Escape");
 

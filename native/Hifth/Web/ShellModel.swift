@@ -72,7 +72,7 @@ final class ShellModel {
     }
 
     var title: String {
-        currentHash.isEmpty ? "Hifth" : "Hifth — \(currentHash.dropFirst())"
+        currentHash.isEmpty ? "Hifth" : "Hifth: \(currentHash.dropFirst())"
     }
 
     init(
@@ -110,7 +110,11 @@ final class ShellModel {
         }
         configuration.userContentController.add(bridge, name: Bridge.handlerName)
         configuration.userContentController.addUserScript(
-            Bridge.bootScript(platform: platform, publicBase: Self.publicBase)
+            Bridge.bootScript(
+                platform: platform,
+                publicBase: Self.publicBase,
+                appVersion: Bridge.versionLine(info: Bundle.main.infoDictionary ?? [:])
+            )
         )
         #if os(iOS)
         configuration.allowsInlineMediaPlayback = true
@@ -924,6 +928,17 @@ final class NavigationPolicy: NSObject, WKNavigationDelegate, WKUIDelegate {
         onLoaded()
     }
 
+    /// The system ended the process that draws the page (low memory, a fault
+    /// inside WebKit). Left alone the view stays blank until the app is quit, so
+    /// load the page again; the reader's notes and marks are in the page's own
+    /// storage and come back with it (launch item 15). A var so a test can watch.
+    var reloadAfterCrash: (WKWebView) -> Void = { $0.reload() }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        print("page process ended, loading the page again")
+        reloadAfterCrash(webView)
+    }
+
     func webView(
         _ webView: WKWebView,
         createWebViewWith configuration: WKWebViewConfiguration,
@@ -939,8 +954,16 @@ final class NavigationPolicy: NSObject, WKNavigationDelegate, WKUIDelegate {
 /// shared link to the platform's share sheet.
 enum Sharing {
     static func openExternally(_ url: URL) {
-        guard let scheme = url.scheme, scheme == "http" || scheme == "https" || scheme == "mailto" else { return }
+        guard opensInAnotherApp(url) else { return }
         openCallback(url)
+    }
+
+    /// Only web pages and mail leave for another app. Anything else a link
+    /// points at (a file, a script, a phone number, another app's address) is
+    /// dropped, so a page can never hand the reader to something unexpected.
+    nonisolated static func opensInAnotherApp(_ url: URL) -> Bool {
+        guard let scheme = url.scheme?.lowercased() else { return false }
+        return scheme == "http" || scheme == "https" || scheme == "mailto"
     }
 
     /// An x-callback answer: the caller's own address, in whatever app owns

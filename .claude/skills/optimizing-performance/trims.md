@@ -35,6 +35,24 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Trimmed 2026-11-16: start-up 163.0 → 159.8 KB, back under the 161 KB limit.** The error card
+(launch item 15) and "Report a problem" (item 18) are needed from the first second, and took the
+start-up download to 163.0 KB, over the limit that marks the ~150 ms step. Two parts moved out:
+- **The report panel (−1.2 KB).** The "page stopped" card stays in start-up, because it has to
+  show when everything else has failed. Its report panel loads once the card shows. If that file
+  cannot come, the card still offers to open the page again (`e2e/page-stopped.spec.ts`).
+- **The go-to box (−2.0 KB).** It draws nothing until "/" or its button opens it, and it takes the
+  keyboard in the step it is drawn, so a key pressed as it arrives still lands in it. It mounts
+  only once first opened.
+
+The share sheet (1.7 KB) was looked at and left: it draws its own button in the verse's tool row,
+so loading it later would make the button pop in after the first tap. The total went up 2.3 KB,
+207.7 → 210.0 KB, because the error card,
+the report and their words are new code. That leaves 0.0 KB of room under the 210 KB cap. The
+next feature needs room in all, not code moved between files: a trim that shrinks the total, or a
+fresh measurement, since start-up is about 150 ms faster than when the cap was set
+(`docs/performance.md` ㉓).
+
 **Trimmed 2026-11-14: start-up 169.9 → 159.7 KB, and 2257 → 2107 ms.** This is item ㉑ in
 `docs/performance.md`, backlog row `move-12-kb-out-of-startup`. A stand-in build came first and
 found the step. With parts swapped for empty stand-ins, 157.1 KB read the lower step and 162.6 KB

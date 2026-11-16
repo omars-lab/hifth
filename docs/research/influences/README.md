@@ -28,5 +28,7 @@ It says what to look for, where to write it, and what never to send to an outsid
 
 ### ① Has the layout plan taken in what the catalog found? · **open**
 
-Not yet. The layout plan (`docs/design/app-layout.md`) has items on moving around, pens, settings and first-run teaching that were written before anyone had looked outside.
+Written, but not on main yet. On 2026-11-16 the findings went into the layout plan on the launch branch: each of its items now has a "What other apps do" paragraph, and hiding the bars while reading became its open item ⑪. This item closes when that branch merges.
+
+Before that, the layout plan (`docs/design/app-layout.md`) had items on moving around, pens, settings and first-run teaching that were written before anyone had looked outside.
 Each finding that changes an item there should be added to that item's "what would answer it" line, with a link back to the catalog.

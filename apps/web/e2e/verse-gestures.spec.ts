@@ -352,7 +352,7 @@ test.describe("Hifth · holding the page's corners", () => {
     await expect(said(page)).toHaveText("Copied a link to Page 7");
     const copied = await page.evaluate(() => (window as unknown as { copied: string[] }).copied);
     expect(copied).toHaveLength(1);
-    expect(copied[0]).toMatch(/^Page 7 — http.*#\/hafs-kfqc\/p7$/);
+    expect(copied[0]).toMatch(/^Page 7: http.*#\/hafs-kfqc\/p7$/);
 
     await holdCorner(page, "page");
     await menu(page).getByRole("menuitem", { name: "Share" }).click();
@@ -403,7 +403,7 @@ test.describe("Hifth · holding the page's corners", () => {
     await holdCorner(page, "juz");
     await menu(page).getByRole("menuitem", { name: "Copy" }).click();
     const copied = await page.evaluate(() => (window as unknown as { copied: string[] }).copied);
-    expect(copied[0]).toMatch(/^Juz 1 — http.*#\/hafs-kfqc\/1:1$/);
+    expect(copied[0]).toMatch(/^Juz 1: http.*#\/hafs-kfqc\/1:1$/);
 
     await holdCorner(page, "surah");
     await menu(page).getByRole("menuitem", { name: "Go to the start" }).click();
@@ -649,7 +649,7 @@ test.describe("Hifth · the four new verse buttons", () => {
     await expect(small(page)).toHaveCount(0);
     const copied = await page.evaluate(() => (window as unknown as { copied: string[] }).copied);
     expect(copied).toHaveLength(1);
-    expect(copied[0]).toMatch(/^Al-Baqarah · 2:39 — http.*#\/hafs-kfqc\/2:39/);
+    expect(copied[0]).toMatch(/^Al-Baqarah · 2:39: http.*#\/hafs-kfqc\/2:39/);
     await expect(page.locator('[role="status"][aria-live="polite"]')).toHaveText("Copied a link to Al-Baqarah · 2:39");
   });
 

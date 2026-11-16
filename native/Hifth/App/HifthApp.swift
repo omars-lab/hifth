@@ -4,6 +4,10 @@ import SwiftUI
 struct HifthApp: App {
     @State private var model = ShellModel()
 
+    init() {
+        Sound.setUp()
+    }
+
     var body: some Scene {
         WindowGroup {
             ShellView(model: model)

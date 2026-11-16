@@ -2,3 +2,4 @@
 {"v":1,"ts":"2026-11-12T19:34:31Z","ev":"shot","role":"comment","author":"omar","icloud":"CloudDesktop/data/page-comments/hifth/t_0f5ddd/comment.png","sha":"de176a53aa8f"}
 {"v":1,"ts":"2026-11-12T19:59:13Z","ev":"anchor","author":"page","state":"lost"}
 {"v":1,"ts":"2026-11-12T19:59:14Z","ev":"anchor","author":"page","state":"found"}
+{"v":1,"ts":"2026-11-16T13:47:47Z","ev":"reply","author":"claude","body":"Not done yet. This is one of eight comments on the front page from 2026-11-12, now listed together in the backlog (`front-page-comments-of-nov-12`, item ⑩ in `docs/design/app-layout.md`) for the front-page work to take, since that work has changes of its own not merged yet."}

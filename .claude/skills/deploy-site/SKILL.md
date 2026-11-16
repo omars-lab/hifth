@@ -73,7 +73,10 @@ that the app carries this commit (in its main script or a script that one loads)
 for every development address (`live.mjs`, `DEV_PATHS`). Each must answer with an error, or with
 the same page as an address that cannot exist, never with content.
 
-**Try it before publishing** on Cloudflare's own local server, which behaves like the real host:
+**Try it before publishing** on Cloudflare's own local server, which behaves like the real host.
+This copy has no comment bar and no side bar. To look at the site or comment on it, use
+`make hifth-app-serve` (7124) instead. The `run-app` skill's "Which way to run it?" table sets
+every local way side by side.
 
 ```
 make hifth-app-check ARGS=--no-build
@@ -116,6 +119,21 @@ Cloudflare also serves `privacy.html` at `/privacy`, so `_headers` names that ad
   because otherwise wrangler would fall back to its own login, which is the other account.
 - **First time on a laptop:** `lpass login` (the owner), then
   `make env-keys-pull && make env-bootstrap`. Prove the keys with `make cf-tokens`.
+- **Commands typed by hand use the `hifth` sign-in.** The publish scripts use the saved keys.
+  Any other `wrangler` command (looking at a deployment, reading logs) uses a sign-in, and
+  wrangler's own `default` sign-in is the other account. So this laptop has a second sign-in
+  named `hifth` (made 2026-11-16 with `wrangler auth create hifth`, which opens the browser for
+  the owner), tied to folders. Things to know, each checked on wrangler 4.131:
+  - It is tied one folder at a time. A new working copy beside the main checkout does **not**
+    pick it up and silently uses `default`. Tie each new one:
+    `wrangler auth activate hifth <folder>`. `wrangler auth list` shows which folders are tied.
+  - `wrangler auth …` refuses to run while a saved key is loaded ("Cannot manage auth profiles
+    while CLOUDFLARE_API_TOKEN is set"). The main checkout's `.env` loads one, so run those
+    commands from a folder with no `.env`, with the key unset in that shell, and pass the
+    folder to tie as the last word.
+  - To see which sign-in a folder uses: `wrangler whoami` there prints "Active profile: hifth".
+    In the main checkout the saved key wins over the sign-in, which is what the scripts want.
+  - Cloudflare marks these commands experimental, so check `wrangler auth --help` if one fails.
 - **The Cloudflare Pages project** is `hifth-app` unless `HIFTH_APP_PAGES_PROJECT` says otherwise.
 
 ## Scripts — when to use each

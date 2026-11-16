@@ -1394,6 +1394,65 @@
         "unlocks": "The vowel-sign placement fix",
         "diagram": "flowchart TD\n  M[Look at the mark and its box] --> Q{Anything wrong?}\n  Q -- No --> N[Nothing wrong]\n  Q -- Yes --> K{What kind?}\n  K --> P[On the wrong mark:<br/>tap the right one]\n  K --> Z[Wrong size or shape]\n  K --> D[Ink with no box:<br/>draw one]\n  K --> R[The print itself looks odd:<br/>say what you see]\n  K --> B[None of these:<br/>catch-all]"
       }
+    },
+    {
+      "id": "silent-switch-recitation-heard",
+      "title": "A recitation is heard on a real iPhone or iPad with the silent switch on",
+      "why": "Since 2026-11-16 the app tells the system its sound is media, spoken words, and the iPad app in the simulator reports exactly that back. What no test here can do is listen: the simulator has no silent switch, and the Mac has no such setting at all. The rule that media plays with the switch on is Apple's, and the only proof that the web part's recitation player follows the app's setting, rather than one of its own, is a person pressing play on a device with the switch on and hearing it.",
+      "how": "Install the app on a real iPhone or iPad (the app-setup skill), turn the silent switch on (or silent mode in Control Centre on a device with no switch), open any verse, press play, and listen. Then take a call or start spoken directions while it plays, and see that the recitation pauses rather than plays over it.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": ["launch-silent-switch-audio"],
+      "runbook": {
+        "needs": [
+          "A real iPhone or iPad with the app installed from this laptop (the app-setup skill puts it there).",
+          "Two minutes, and the sound turned up."
+        ],
+        "steps": [
+          {
+            "id": "switch-on-and-play",
+            "do": "Turn the silent switch on (on a device with no switch, turn on silent mode in Control Centre). Open any verse in the app and press play.",
+            "expect": "The recitation is heard through the speaker, at the volume the side buttons set.",
+            "why": "This is the whole point of the change: a reader who silenced the phone to stop it ringing still meant to hear the verse they pressed play on. The simulator cannot answer it because it has no switch.",
+            "short": "Silent switch on, open a verse, press play: you hear it.",
+            "noLink": {
+              "why": "This happens in the installed app on a device, not in a browser, so there is no address to open.",
+              "add": "None is needed."
+            }
+          },
+          {
+            "id": "pauses-for-a-call",
+            "do": "While it plays, have someone call the device, or start spoken directions in Maps.",
+            "expect": "The recitation pauses or goes quiet for the call or the directions, rather than playing over them.",
+            "why": "The app says its sound is spoken words for this reason. If it plays over a call, the setting did not reach the player.",
+            "short": "Take a call while it plays: the recitation pauses.",
+            "noLink": {
+              "why": "This happens in the installed app on a device, not in a browser, so there is no address to open.",
+              "add": "None is needed."
+            }
+          }
+        ],
+        "reading": [
+          "Heard with the switch on, and paused for the call: nothing changes; record the device and the date.",
+          "Silent with the switch on: the web part's player is not following the app's setting; reopen the launch row and look at how the web view starts its sound.",
+          "Heard, but it plays over the call: the setting reached the player only in part; reopen the launch row."
+        ],
+        "record": "make record CHECK=silent-switch-recitation-heard RESULT='<device>, <date>: heard with the switch on, paused for a call'"
+      },
+      "tunes": [
+        "native/HifthTests/SoundTests.swift: if the setting proves wrong on a device, this test changes with it",
+        "docs/design/app-store-launch.md item 12: the launch item this answers"
+      ],
+      "record": "docs/design/app-store-launch.md",
+      "brief": {
+        "label": "Recitation with the silent switch on",
+        "ask": "On a real iPhone or iPad with the silent switch on, can you still hear a recitation you pressed play on?",
+        "what": "The app now tells the phone its sound is media, which the silent switch does not mute. Only a real device has the switch, so only a person can hear it.",
+        "need": "A real iPhone or iPad with the app installed from this laptop.",
+        "time": "2 minutes",
+        "done": "You heard the recitation with the switch on, and it paused for a call.",
+        "unlocks": "The silent switch item on the App Store launch list"
+      }
     }
   ]
 }

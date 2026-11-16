@@ -44,6 +44,8 @@
  *   node scripts/gate-issues.mjs --id <id>      one item's full picture
  *   node scripts/gate-issues.mjs --list --pitch only the open items a scholar would hit
  *                                               in the pitch demo (rows tagged "pitch": true)
+ *   node scripts/gate-issues.mjs --list --launch only the open items between us and the
+ *                                               App Store (rows tagged "launch": true)
  */
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -146,14 +148,23 @@ if (flag("--id") !== null) {
 if (argv.includes("--list") || argv.includes("--all")) {
   const all = argv.includes("--all");
   const pitch = argv.includes("--pitch");
+  const launch = argv.includes("--launch");
   const open = issues.filter((i) => !["answered", "fixed", "done"].includes(statusOf(i)));
-  const shown = all ? issues : pitch ? open.filter((i) => i.pitch === true) : open;
+  const shown = all
+    ? issues
+    : pitch
+      ? open.filter((i) => i.pitch === true)
+      : launch
+        ? open.filter((i) => i.launch === true)
+        : open;
   console.log(
     all
       ? `\nEvery item this repo has written down — ${issues.length} of them.\n`
       : pitch
         ? `\nOn the pitch path — ${shown.length} still open (.claude/goals/study-quran-pitch.md).\n`
-        : `\nWhat is still open — ${shown.length} of ${issues.length}. \`make issues ID=<id>\` for one.\n`,
+        : launch
+          ? `\nBefore the App Store — ${shown.length} still open (.claude/goals/app-store-launch.md).\n`
+          : `\nWhat is still open — ${shown.length} of ${issues.length}. \`make issues ID=<id>\` for one.\n`,
   );
   if (!shown.length) process.exit(0);
   const width = Math.max(...shown.map((i) => i.id.length));
@@ -183,8 +194,10 @@ for (const i of issues) {
   if (!SEVERITIES.includes(i.severity)) {
     problems.push(`${where}: severity "${i.severity}" is not one of ${SEVERITIES.join(", ")}.`);
   }
-  if ("pitch" in i && i.pitch !== true) {
-    problems.push(`${where}: "pitch" is true or left out, not ${JSON.stringify(i.pitch)}.`);
+  for (const tag of ["pitch", "launch"]) {
+    if (tag in i && i[tag] !== true) {
+      problems.push(`${where}: "${tag}" is true or left out, not ${JSON.stringify(i[tag])}.`);
+    }
   }
   if (!["agent", "user"].includes(i.owner)) {
     problems.push(`${where}: owner is "agent" or "user", not "${i.owner}".`);

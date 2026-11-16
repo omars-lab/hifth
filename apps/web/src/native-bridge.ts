@@ -37,6 +37,12 @@ export interface NativeInfo {
   readonly platform: "ios" | "macos";
   /** The public site's base, e.g. `https://blog.bytesofpurpose.com/hifth/`. */
   readonly publicBase: string;
+  /**
+   * The app's version and build, e.g. `0.1.0 (1)`, for the reader's problem
+   * report (`problem-report.ts`). Optional: an app built before it was added
+   * leaves it out, and the report then says no version.
+   */
+  readonly appVersion?: string;
 }
 
 export type NativeMessage =
@@ -63,10 +69,12 @@ export interface PageApi {
 export function nativeInfo(): NativeInfo | null {
   const raw = (window as Shelled).__HIFTH_NATIVE__;
   if (!raw || typeof raw !== "object") return null;
-  const { platform, publicBase } = raw as Partial<NativeInfo>;
+  const { platform, publicBase, appVersion } = raw as Partial<NativeInfo>;
   if (platform !== "ios" && platform !== "macos") return null;
   if (typeof publicBase !== "string" || publicBase === "") return null;
-  return { platform, publicBase };
+  return typeof appVersion === "string" && appVersion !== ""
+    ? { platform, publicBase, appVersion }
+    : { platform, publicBase };
 }
 
 export function isNative(): boolean {

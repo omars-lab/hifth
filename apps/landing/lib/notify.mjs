@@ -123,7 +123,7 @@ const page = (lang, title, message, action) => `<!doctype html>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
-  <title>${title} — Hifth</title>
+  <title>Hifth: ${title}</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>

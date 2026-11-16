@@ -757,7 +757,7 @@ export function CommentarySheet({
           {/* The book's credit is in the book's language, on a line of its own,
               so an English credit in the Arabic app wraps from the left. */}
           <span className={styles.creditSource} {...own}>
-            {entry.source.label} — {entry.source.license}.
+            {entry.source.label}. {entry.source.license}.
           </span>
           {creditNote && <span className={styles.creditNote}>{creditNote}</span>}
         </footer>
