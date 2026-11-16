@@ -1031,7 +1031,7 @@ export function App(): JSX.Element {
   // under Listen in the drawer (selection-drawer ③), kept on this device.
   const [listenWay, setListenWay] = useState(() => savedListenWay());
   const audio = useVerseAudio(
-    (k) => announce(`${t.ayahLabel(k) ?? k} — ${t.audioUnavailable}`),
+    (k) => announce(`${t.ayahLabel(k) ?? k}: ${t.audioUnavailable}`),
     (k, n) => runEndRef.current?.(k, n),
     runAhead,
     DEVICE_RECITATION,
@@ -3669,7 +3669,7 @@ export function App(): JSX.Element {
     (key: string) => {
       if (!currentState) return;
       const name = t.ayahLabel(key) ?? key;
-      const text = `${name} — ${linksFor(currentState, "", shareBase()).site}`;
+      const text = `${name}: ${linksFor(currentState, "", shareBase()).site}`;
       void navigator.clipboard?.writeText(text).then(
         () => announce(t.copiedLink(name)),
         () => undefined,
@@ -3862,7 +3862,7 @@ export function App(): JSX.Element {
         which === "page" ? { edition, select: null, page } : { edition, select: first };
       const url = linksFor(state, "", shareBase()).site;
       const copy = () =>
-        void navigator.clipboard?.writeText(`${name} — ${url}`).then(
+        void navigator.clipboard?.writeText(`${name}: ${url}`).then(
           () => announce(t.copiedLink(name)),
           () => undefined,
         );

@@ -39,12 +39,12 @@ export const EDITION_COPY: Readonly<Record<Lang, Readonly<Record<string, Edition
     "warsh-libya": {
       label: "Warsh · Libyan Endowments",
       riwayah: "Riwayat Warsh 'an Nafi'",
-      reason: "Licensed for non-commercial use only — needs permission first",
+      reason: "Licensed for non-commercial use only, so it needs permission first",
     },
     "qalun-libya": {
       label: "Qalun · Libyan Endowments",
       riwayah: "Riwayat Qalun 'an Nafi'",
-      reason: "Licensed for non-commercial use only — needs permission first",
+      reason: "Licensed for non-commercial use only, so it needs permission first",
     },
     "hafs-indopak": {
       label: "Hafs · Indo-Pak script",

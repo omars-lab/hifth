@@ -269,7 +269,7 @@ test.describe("Hifth · wayfinding", () => {
     await expect(sheet).toBeVisible();
 
     await expect(sheet.getByText("الحالي")).toBeVisible();
-    await expect(sheet.getByText("ترخيصها غير تجاري — تحتاج إذنًا قبل إضافتها").first()).toBeVisible();
+    await expect(sheet.getByText("ترخيصها غير تجاري، وتحتاج إذنًا قبل إضافتها").first()).toBeVisible();
     // Surfaced but disabled — never a ghost, never an offer we cannot keep.
     const rows = sheet.getByRole("button", { name: /رواية|حفص|ورش|قالون/ });
     const count = await rows.count();

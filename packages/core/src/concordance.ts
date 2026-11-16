@@ -77,14 +77,14 @@ export const EDITIONS: readonly EditionMeta[] = [
     status: "unvendored",
     // PLAN follow-up ②: the Libyan Endowments editions are licensed for
     // non-commercial use only, so they cannot be vendored without approval.
-    reason: "ترخيصها غير تجاري — تحتاج إذنًا قبل إضافتها",
+    reason: "ترخيصها غير تجاري، وتحتاج إذنًا قبل إضافتها",
   },
   {
     id: "qalun-libya",
     label: "قالون · أوقاف ليبيا",
     riwayah: "رواية قالون عن نافع",
     status: "unvendored",
-    reason: "ترخيصها غير تجاري — تحتاج إذنًا قبل إضافتها",
+    reason: "ترخيصها غير تجاري، وتحتاج إذنًا قبل إضافتها",
   },
   {
     id: "hafs-indopak",

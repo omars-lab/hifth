@@ -72,7 +72,7 @@ final class ShellModel {
     }
 
     var title: String {
-        currentHash.isEmpty ? "Hifth" : "Hifth — \(currentHash.dropFirst())"
+        currentHash.isEmpty ? "Hifth" : "Hifth: \(currentHash.dropFirst())"
     }
 
     init(

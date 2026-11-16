@@ -87,7 +87,7 @@ describe("RecitationShelf", () => {
     vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>(() => {})));
     render(<RecitationShelf />);
     act(() => void startKeeping(1));
-    await screen.findByText(/^جارٍ حفظ .+ — ٠ من ٧$/);
+    await screen.findByText(/^جارٍ حفظ .+: ٠ من ٧$/);
     fireEvent.click(screen.getByRole("button", { name: "إيقاف" }));
     await screen.findByText("لم تُحفظ تلاوة أي سورة هنا بعد.");
   });

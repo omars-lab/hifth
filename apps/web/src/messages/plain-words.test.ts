@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { EDITIONS } from "@hifth/core";
+import { EDITION_COPY } from "../editions";
 import ar from "./ar.json";
 import en from "./en.json";
 
@@ -43,6 +45,24 @@ describe("the words a reader sees", () => {
         .filter(([, text]) => PLUMBING[locale].test(text))
         .map(([key, text]) => `${key}: ${text}`);
       expect(offending).toEqual([]);
+    });
+
+    // The owner, 2026-11-16: a long dash "is a tell that AI was involved". A
+    // comma, a colon or a full stop says the same thing.
+    it(`${locale}: never use a long dash`, () => {
+      const offending = Object.entries(catalog as Record<string, string>)
+        .filter(([, text]) => /[–—]/.test(text))
+        .map(([key, text]) => `${key}: ${text}`);
+      expect(offending).toEqual([]);
+    });
+
+    // The reason an edition cannot be opened yet is read in the editions list.
+    it(`${locale}: the editions list never uses a long dash`, () => {
+      const lines =
+        locale === "ar"
+          ? EDITIONS.flatMap((e) => [e.label, e.riwayah, e.reason ?? ""])
+          : Object.values(EDITION_COPY.en).flatMap((e) => Object.values(e) as string[]);
+      expect(lines.filter((text) => /[–—]/.test(text))).toEqual([]);
     });
   }
 });

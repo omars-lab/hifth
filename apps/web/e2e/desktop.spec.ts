@@ -2196,7 +2196,7 @@ test.describe("Hifth · the page tools bar", () => {
     await expect(pageSvg(page, 7)).toBeVisible();
     const at = await ayahTarget(page, "#verse-46");
     await page.mouse.click(at.x, at.y);
-    await expect(page.getByRole("button", { name: /^Current ayah .* — click to clear$/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Current ayah .*, click to clear$/ })).toBeVisible();
   });
 
   test("the first tips tell a mouse to click", async ({ page }) => {
