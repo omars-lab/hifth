@@ -48,8 +48,10 @@ start-up download to 163.0 KB, over the limit that marks the ~150 ms step. Two p
 The share sheet (1.7 KB) was looked at and left: it draws its own button in the verse's tool row,
 so loading it later would make the button pop in after the first tap. The total went up 2.3 KB,
 207.7 → 210.0 KB, because the error card,
-the report and their words are new code. That leaves 0.0 KB of room under the 210 KB cap: the
-next feature needs a trim that frees room in all, not one that moves code between files.
+the report and their words are new code. That leaves 0.0 KB of room under the 210 KB cap. The
+next feature needs room in all, not code moved between files: a trim that shrinks the total, or a
+fresh measurement, since start-up is about 150 ms faster than when the cap was set
+(`docs/performance.md` ㉓).
 
 **Trimmed 2026-11-14: start-up 169.9 → 159.7 KB, and 2257 → 2107 ms.** This is item ㉑ in
 `docs/performance.md`, backlog row `move-12-kb-out-of-startup`. A stand-in build came first and

@@ -638,6 +638,26 @@ offered to the owner, not done.
 **Done when:** the size check shows at least 3 KB of room, the baseline is recorded, and the
 trims list has a dated entry saying what was taken.
 
+### ㉓ The size limit is full again, and the launch still has code to add · **open**
+
+**Where it stands (2026-11-16).** The error card and "Report a problem" took the app to 210.0 KB
+against its 210 KB limit: no room. Moving parts out of start-up kept the first download under its
+own limit (159.8 of 161 KB), but moving code between files never lowers the total.
+
+**Why it matters.** Three launch items still add code to the web app: the app's own log, the
+remote off-switch and the new-version prompt. None of them can land until there is room.
+
+**What to do.** One of two ways, or both:
+- **A trim that makes the app smaller overall**, with nothing a reader sees changed (the
+  checklist in the optimizing-performance skill).
+- **Measure start-up again, with nothing else running on the laptop.** The 2026-11-10 entry in
+  the trims list allowed the next raise after "a trim or a faster start first", and start-up has
+  since dropped from about 2257 to about 2107 ms. If the sweep still meets the 2.5 s goal with
+  room to spare, the limit can go up by the skill's rule.
+
+**Done when:** the size check shows at least 3 KB of room, and the trims list says which way it
+was found.
+
 ---
 
 ---
