@@ -607,7 +607,7 @@ use-cases-doc: ## Re-render docs/use-cases.md (the mermaid map) from docs/use-ca
 	@node scripts/build-use-cases.mjs
 
 .PHONY: issues
-issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id>
+issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id>  ·  PITCH=1 or LAUNCH=1 for one goal's items
 	@# docs/issues.json is the source, and it is an index: no titles, no
 	@# descriptions, no reproductions. Those live in PLAN.md's follow-ups,
 	@# performance.md, a design doc's open-questions section, or the validation
@@ -619,6 +619,8 @@ issues: ## What is still open, worst first:  make issues  ·  make issues ID=<id
 	  node scripts/gate-issues.mjs --id "$(ID)"; \
 	elif [ -n "$(PITCH)" ]; then \
 	  node scripts/gate-issues.mjs --list --pitch; \
+	elif [ -n "$(LAUNCH)" ]; then \
+	  node scripts/gate-issues.mjs --list --launch; \
 	else \
 	  node scripts/gate-issues.mjs --list; \
 	fi

@@ -210,3 +210,26 @@ test("make issues PITCH=1 lists only the open items on the demo path, and counts
 test("gate:issues refuses a pitch tag that is anything but true", () => {
   refuses(files(patched("late-turn", { pitch: "yes" })), /late-turn: "pitch" is true or left out, not "yes"/);
 });
+
+// The App Store launch has its own tag, counted the same way (.claude/goals/app-store-launch.md).
+const listLaunch = (root) => {
+  const r = spawnSync(process.execPath, [new URL("gate-issues.mjs", import.meta.url).pathname, "--list", "--launch"], {
+    encoding: "utf8",
+    env: { ...fixtureEnv(), HIFTH_GATE_ROOT: root },
+  });
+  return { status: r.status, out: `${r.stdout}${r.stderr}` };
+};
+
+test("make issues LAUNCH=1 lists only the open items standing between us and the App Store, and counts them", () => {
+  withTree(files(patched("late-turn", { launch: true }).map((i) => (i.id === "fade-in" ? { ...i, launch: true } : i))), (root) => {
+    const r = listLaunch(root);
+    assert.equal(r.status, 0, r.out);
+    assert.match(r.out, /Before the App Store — 1 still open/);
+    assert.match(r.out, /late-turn/);
+    assert.doesNotMatch(r.out, /fade-in|plan-licence|on-device/);
+  });
+});
+
+test("gate:issues refuses a launch tag that is anything but true", () => {
+  refuses(files(patched("late-turn", { launch: "yes" })), /late-turn: "launch" is true or left out, not "yes"/);
+});
