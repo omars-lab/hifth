@@ -151,10 +151,13 @@ passed: the public build, no walk capture, the privacy file in place. The archiv
 laptop, so it no longer waits on the licence answer; only the upload does, and the upload now
 checks the licence before it builds anything. Tests hold both.
 
-Two steps are left. `make app-export` signs the archive for the App Store, and its first run has
-Xcode make the team's App Store certificate in the Apple account, so it waits for the owner's
-go. Apple's own check of the exported app needs an App Store Connect key, which is the owner's
-to make.
+`make app-export` signs the archive for the App Store. The owner said yes to its first run on
+2026-11-16, which had Xcode make the team's App Store certificate in the Apple account, and it
+passed: the app inside the export is signed for distribution, is the public build, carries the
+privacy file and has no private folder. The export stays on the laptop.
+
+One step is left. Apple's own check of the exported app needs an App Store Connect key, which
+is the owner's to make.
 
 ### ⑫ A recitation may be silent when the phone's silent switch is on · **fixed**
 
