@@ -10,12 +10,18 @@ the app.
 
 **Status:** started 2026-11-12. On 2026-11-13 the data was loaded into the new store, and every
 row was checked against the old store: the same rows in all three tables. The new store was
-also locked down further than the old one (below). One step is left: the page-fixture script
-has to run against the new store, and that needs the new password file, which only the owner
-can make. The old project is still running, and stays running until then. (This page said on
+also locked down further than the old one (below). Later that day the owner saved the new
+password file and the page-fixture script ran against the new store, so the move is proven.
+On 2026-11-15 the owner chose to pause the old project and keep it for now, not delete it (③). (This page said on
 2026-11-12 that the old one was paused; on 2026-11-13 it showed as running and answered
-queries, so that was wrong.) Tracked as the `supabase-move` row in the issue register, with one
-smaller item after it (③); ② is answered.
+queries, so that was wrong.) Tracked as the `supabase-move` row in the issue register, with
+smaller items after it (④, ⑤); ② and ③ are answered.
+
+**A leak on the way (2026-11-13).** While checking the saved settings, a Claude session printed
+every saved value into its chat. The two Cloudflare tokens were replaced the same day, and the
+database password the next (2026-11-14): the new address connects and the old one is refused. What happened,
+and the guard that now refuses such commands, is in
+[docs/issues/secrets-printed-into-chat.md](../issues/secrets-printed-into-chat.md).
 
 ## What is in the old store? (audited 2026-11-12)
 
@@ -82,10 +88,11 @@ script does exactly that. Written up in `docs/issues/supabase-config-push-answer
 
 ## Open questions, and what would answer each
 
-### ① Has the store moved to the new account, closed to the public key, with the old one retired? · **open**
+### ① Has the store moved to the new account, closed to the public key, with the old one retired? · **done**
 
 **What would answer it:** the new store holds the same rows as the old one, and the page-fixture
-script runs against it. The first is done (2026-11-13); the second waits on step 6. The steps:
+script runs against it. Both are done (2026-11-13). What is left is step 8, deleting the old
+project. The steps:
 
 1. **Copy the data out of the old store.** Done 2026-11-12 (above).
 2. **Create the new account and project.** Done 2026-11-12: project `hifth.app`, region
@@ -109,8 +116,14 @@ script runs against it. The first is done (2026-11-13); the second waits on step
    the plain file rebuilds the encrypted copy from that one value, dropping the three Cloudflare
    entries. Then copy the new connection address from the dashboard (use the *session pooler*
    one, since this laptop has no IPv6) and save it as `SUPABASE_DB_URL` with the repo's
-   hidden-prompt command.
-7. **Prove it works.** Run the page-fixture script against the new store.
+   hidden-prompt command. The prompt shows the shape it expects and refuses anything else (the
+   project's web address, the direct address, the placeholder password left in, the wrong port
+   or region), and `make env-check` checks a value already saved. That check was added on
+   2026-11-13, after the web address was saved here by mistake. Done 2026-11-13. Every saved
+   entry, where its value comes from and the commands for it are in the `secrets` skill.
+7. **Prove it works.** Run the page-fixture script against the new store. Done 2026-11-13:
+   page 1 (8 lines, 36 words) and page 604 (15 lines, 73 words). It first failed because
+   Homebrew keeps `psql` in its own folder, off the path; the store scripts now look there too.
 8. **Retire the old project.** Only after step 7. That is item ③.
 
 <details><summary>Commands for each step</summary>
@@ -169,14 +182,17 @@ is still in git history and in one agent memory note.
 No. Counted on 2026-11-13 by a query that returns numbers only: 0 sign-ups, 0 linked logins, 0 file
 buckets, 0 stored files. Deleting the old project loses no one's account.
 
-### ③ Delete the old project once the new store is proven · **open**
+### ③ Delete the old project once the new store is proven · **answered**
 
-The old project is still running, and it stays running until the new store is proven, because
-it is what the new store's rows are compared against. A deleted project cannot be brought back.
+The old project stayed running until the new store was proven, because it is what the new
+store's rows were compared against. A deleted project cannot be brought back.
 
-**What would answer it:** ① closed (the new store's rows match the old one's and the page-fixture
-script has run against it). Then delete the old project from the old account's dashboard, and remove its
-command-line profile if nothing else uses that account.
+**Answered by the owner, 2026-11-15:** "i will pause old project, lets keep for now." The new
+store is proven (①), so the old one is no longer needed, but it is paused rather than deleted.
+A paused project holds its data and can be started again from the old account's dashboard. Its
+old database password is the one printed into a chat on 2026-11-13, so if it is ever started
+again, reset that password first. Deleting it, and removing its command-line profile, is left
+for later and needs nothing else first.
 
 ### ④ Should the new store accept connections only from listed addresses? · **open**
 
@@ -190,4 +206,22 @@ old store. Supabase can limit that to a list of addresses.
 | What it commits to | Nothing | Updating the list from a known address, or keeping a fixed address (a VPN with a set exit) |
 
 **What would answer it:** the owner's choice. The store check reports which way it is set and
-does not fail either way.
+does not fail either way. The leak on 2026-11-13 printed the database password into a chat; a
+list would have made that password useless from anywhere but this laptop.
+
+**Not the same as readers signing in.** Asked on 2026-11-15, the owner said they want proper
+sign-in, especially once testers use the app. This item is only about who may connect straight
+to the database with its password, which is this laptop's tools. Readers signing in to an
+online part of the app is a separate question, researched in
+[sign-in.md](sign-in.md). This item stays open.
+
+### ⑤ Will reinstalling the Cloudflare setup keep the format checks? · **open**
+
+The saving and checking commands (`make env-set`, `make env-check` and the scripts under
+`scripts/env/`) are written into this repo by the global `cloudflare-onboarding` skill, and its
+installer overwrites them when rerun. The checks added here on 2026-11-13 (the shape each value
+must have, the refusal to save when only the encrypted copy exists) are not in the installer
+yet, so a reinstall would quietly drop them.
+
+**What would answer it:** the same checks carried into the `cloudflare-onboarding` skill's own
+copies, with their tests, so every repo it sets up gets them.

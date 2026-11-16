@@ -213,7 +213,9 @@ because C covers the same ground on the real device.
    compare. The place is checked by its address, a tool by the tool in hand, a panel by the name
    its sheet carries (each panel a link opens now says its own link name), one or two pages by
    how many show. The features page reads the last results and marks each card. Results so far
-   are in the backlog row for ①. Not yet run on the real iPad.
+   are in the backlog row for ①. Run on the real iPad on 2026-11-14, upright: 25 of 26 cards
+   pass, and the two-page card says the screen is too narrow, since the book opens only from
+   1024 points wide. On its side: not run yet.
 5. **`set` and `reset`**, then cards for the info-panel settings.
 
 ## Open questions, and what would answer each
@@ -221,17 +223,23 @@ because C covers the same ground on the real device.
 ### ① How should the laptop open and check every feature on the real iPad? · **open**
 
 The plan above says: send a link with Apple's install tool, have a debug-only capture link save
-a picture and the app's position, copy it back, and show it on the features page. Nothing of it
-has run on the real iPad yet.
+a picture and the app's position, copy it back, and show it on the features page. It ran on the
+real iPad on 2026-11-14 with the iPad upright: 25 of the 26 cards put the app where they say,
+and the 26th, two pages, cannot show on an upright screen. What is left is one run with the iPad
+on its side.
 
 **What would answer it:** step 1 above, then step 4 run once over every card. If sending a link
 to the running app does not work, the fallback is the install step's page to open on, one
 restart per card.
 
-### ② Does sending a link restart the app? · **open**
+### ② Does sending a link restart the app? · **answered**
 
 Apple's tool starts the app to hand it the link. If it restarts a running app, the notes and the
 page in hand are lost between checks.
 
 **What would answer it:** step 1, run once without and once with `--terminate-existing`, with a
 note on the page beforehand.
+
+**Answer (2026-11-14, on the real iPad):** no. A page link sent to the open app turned the page
+in the same running app; its process was the same before and after. Only `--terminate-existing`
+closes it, and the feature check uses that on purpose so each card starts from the same place.

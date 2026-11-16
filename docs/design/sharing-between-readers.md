@@ -248,6 +248,8 @@ Asked by both. Suggested: Sign in with Apple and an email link, tried on a throw
 - **Apple's rules that come with it.** An app that makes accounts must let you delete yours inside the app. If Google sign-in is ever offered, Sign in with Apple must be too. Apple sends the name and email only the first time someone signs in, so they must be kept then.
 - **What would answer it, once ③ says accounts:** a throwaway trial in both apps on a test sign-in setup for hifth.app. That waits on the apps being signed with the paid Apple team.
 
+**2026-11-15:** the full answer, with how close we are, the choices and the owner's questions, is now its own page: [How close are we to letting a reader sign in with Apple?](sign-in.md)
+
 ### ⑩ Is sending a share a paid extra, and is opening one always free? · **blocked**
 
 Asked by both. A teacher who has to pay to see a student's mistakes would mostly not look. A purchase on the web would not need the App Store. **What would answer it:** the list of what is paid, on the paid-features page.

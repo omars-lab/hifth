@@ -61,7 +61,7 @@ const TOOL_IN_CODE = { harakat: "sign" };
 
 /**
  * Does the capture say the app is where the card's link said?
- * Returns { result: "pass" | "fail" | "not-in-build", why }.
+ * Returns { result: "pass" | "fail" | "not-in-build" | "screen-too-narrow", why }.
  * A word-range card (`?w=3-7`) passes only when the page says it laid those
  * very words (`words=3-7` in the capture's open list).
  */
@@ -97,8 +97,19 @@ export function judge(card, where) {
   if (view) {
     const want = view === "two" ? 2 : 1;
     const count = open.find((o) => o.startsWith("pages="));
+    // The app opens the book only on a screen at least 1024 points wide and
+    // 775 tall (DESKTOP_QUERY in apps/web/src/useMediaQuery.ts), so an upright
+    // iPad shows one page whatever the link asks for. That is the design, not
+    // a fault: say what to do instead of failing the card.
+    const screen = where.screen;
+    const narrow = want === 2 && screen && !(screen.width >= 1024 && screen.height >= 775);
     if (!count) misses.push("the capture has no count of pages on screen");
-    else if (Number(count.slice(6)) !== want) misses.push(`${count.slice(6)} page on screen, not ${want}`);
+    else if (Number(count.slice(6)) !== want && narrow && !misses.length) {
+      return {
+        result: "screen-too-narrow",
+        why: `the screen is ${screen.width} points wide, and the app shows two pages only from 1024; turn the iPad on its side and run this card again`,
+      };
+    } else if (Number(count.slice(6)) !== want) misses.push(`${count.slice(6)} page on screen, not ${want}`);
   }
   if (misses.length) return { result: "fail", why: misses.join("; ") };
   return { result: "pass", why: "" };
@@ -230,6 +241,7 @@ async function main(argv) {
   log("start", { on: target.kind, cards: all.length });
   const head = spawnSync("git", ["-C", repo, "rev-parse", "--short=8", "HEAD"], { encoding: "utf8" }).stdout?.trim() || null;
   let stale = null;
+  let stopped = null;
   const results = [];
   for (const card of all) {
     const name = captureName(card);
@@ -250,6 +262,21 @@ async function main(argv) {
     if (!got) {
       results.push({ id: card.id, result: "no-capture", why: `no capture named ${name} within ${wait} s` });
       log("card", { id: card.id, result: "no-capture" });
+      // A capture folder that cannot even be read means the app holds no walk
+      // capture at all (an older or release build): every other card would
+      // wait its full time for nothing. Seen on the iPad 2026-11-14, when it
+      // still had the throwaway test build of 2026-11-12.
+      if (target.captures() === null) {
+        stopped = "no-capture-folder";
+        log("no_capture_folder", {
+          msg: quote(
+            `the app's capture folder cannot be read, so this build has no walk capture: put the current debug build on (${
+              udid ? "make app-build-ipad, then install it in the simulator" : "make app-web, then make app-release-ipad DEVICE=…"
+            }) and run the check again`,
+          ),
+        });
+        break;
+      }
       continue;
     }
     if (stale === null) {
@@ -264,9 +291,10 @@ async function main(argv) {
 
   const count = (r) => results.filter((x) => x.result === r).length;
   mkdirSync(dirname(out), { recursive: true });
-  writeFileSync(out, JSON.stringify({ at: new Date().toISOString(), on: target.kind, ...(stale ? { stale } : {}), results }, null, 2) + "\n");
-  log("done", { pass: count("pass"), fail: count("fail"), not_in_build: count("not-in-build"), no_capture: count("no-capture"), not_sent: count("not-sent"), stale_build: stale ? 1 : 0, out });
-  return results.every((r) => ["pass", "not-in-build"].includes(r.result)) ? 0 : 1;
+  writeFileSync(out, JSON.stringify({ at: new Date().toISOString(), on: target.kind, ...(stale ? { stale } : {}), ...(stopped ? { stopped } : {}), results }, null, 2) + "\n");
+  log("done", { pass: count("pass"), fail: count("fail"), not_in_build: count("not-in-build"), screen_too_narrow: count("screen-too-narrow"), no_capture: count("no-capture"), not_sent: count("not-sent"), stale_build: stale ? 1 : 0, out });
+  if (stopped) return 1;
+  return results.every((r) => ["pass", "not-in-build", "screen-too-narrow"].includes(r.result)) ? 0 : 1;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
