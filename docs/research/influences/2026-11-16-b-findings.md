@@ -5,8 +5,8 @@ My own reading of what it means is in [the design note](2026-11-16-b-design.md).
 
 ## What is the short version?
 
-- I looked at 26 open-source apps and went deep on 14.
-- **Only one open-source book reader I found ships on Mac, iPhone, iPad and the web from one codebase: Readest.** It is also the closest match to how our app is built (a web page inside a thin native shell).
+- I listed 39 open-source apps, read the code of 15, and dropped 24.
+- **Two open-source readers say they ship on Mac, iPhone, iPad and the web from one codebase: one large (Readest) and one small (Open-Mushaf Native).** Readest is also the closest match to how our app is built (a web page inside a thin native shell). Zotero reaches all three a different way: one shared reading screen placed inside separate apps.
 - Most admired apps cover two of the three. Mac and iPhone apps usually have no web version. Web readers usually have no native app.
 - The richest evidence is in code, not in write-ups. Few projects wrote down *why* they laid the screen out as they did. The ones that did are listed under "Who wrote down why?" below.
 - Five apps carry a copyleft licence (GPL or AGPL). For those we take ideas only, never code. They are flagged each time.
@@ -21,7 +21,9 @@ My own reading of what it means is in [the design note](2026-11-16-b-design.md).
 
 ## Which apps did I look at closely?
 
-### 1. Readest: a book reader on every platform from one codebase
+Each app below ends with two lines: what a page-by-page reader could take, and what would not carry over.
+
+### 1. What does Readest, a book reader on every platform from one codebase, do?
 
 - **Code:** <https://github.com/readest/readest>, version read `ca575bb6`. **Fetched.**
 - **Licence:** AGPL-3.0. **Copyleft: ideas only, no code.**
@@ -34,14 +36,17 @@ What it does, by question:
 - **Two different bottom bars (1, 6).** At 640 px and wider, one thin row: previous section, previous page, go back, go forward, a type-a-page box, a slider, read aloud, next page, next section. Source: [`DesktopFooterBar.tsx`](https://github.com/readest/readest/blob/ca575bb68010fe52e599860c92df40ca59047068/apps/readest-app/src/app/reader/components/footerbar/DesktopFooterBar.tsx). Under 640 px wide or tall, a row of five icons (contents, colour, progress, font and layout, read aloud). Each opens a panel just above the row, and the slider lives in the progress panel. Source: [`MobileFooterBar.tsx`](https://github.com/readest/readest/blob/ca575bb68010fe52e599860c92df40ca59047068/apps/readest-app/src/app/reader/components/footerbar/MobileFooterBar.tsx) and `NavigationBar.tsx` beside it. **Fetched.**
 - **Right-to-left (8).** The arrow icons swap sides when the book reads right to left. Same file, `getNavigationIcon`. **Fetched.**
 - **Trail back (8).** "Go back" and "go forward" buttons sit beside the slider and light up only when there is somewhere to go. Same file. **Fetched.**
-- **Pens (2).** There is no standing pen bar. Tools appear as a small popup at the selected words, plus a quick menu in the top bar. Source: the folder [`annotator/`](https://github.com/readest/readest/tree/ca575bb68010fe52e599860c92df40ca59047068/apps/readest-app/src/app/reader/components/annotator). **Fetched** (file names and the popup; I did not read every file).
+- **Pens (2).** There is no standing pen bar. Tools appear as a small popup at the selected words, plus a quick menu in the top bar. Source: the folder [`annotator/`](https://github.com/readest/readest/tree/ca575bb68010fe52e599860c92df40ca59047068/apps/readest-app/src/app/reader/components/annotator). **Fetched** (file names and the popup; I did not read every file). A settings page lets the reader drag pens into or out of that popup and reorder them. Source: `src/components/settings/AnnotationToolbarCustomizer.tsx`. **Fetched** (opening lines only).
 - **Settings (3).** Nine icon tabs: Font, Layout, Theme, Behavior, Language, Integrations, AI Assistant, TTS, Custom. It reopens on the tab last used. Tab names hide under 640 px, leaving icons. On a phone it is a sheet rising to 70 % of the screen; on a computer a dialog. A switch says whether a change applies to every book or only this one. Source: [`SettingsDialog.tsx`](https://github.com/readest/readest/blob/ca575bb68010fe52e599860c92df40ca59047068/apps/readest-app/src/components/settings/SettingsDialog.tsx) lines 92 to 150, 487, 537. **Fetched.**
 - **Messages (4).** Short messages last 5 seconds. Plain information appears in the middle of the screen; success, warning and error appear at the top. Source: [`Toast.tsx`](https://github.com/readest/readest/blob/ca575bb68010fe52e599860c92df40ca59047068/apps/readest-app/src/components/Toast.tsx) lines 24 to 33. A separate 2-second hint sits in the page's own header strip (`HintInfo.tsx`). **Fetched.**
-- **First run (5).** I found no tour or welcome flow. A search of the code for "onboarding", "welcome" and "walkthrough" hit only tests. **Fetched** (absence, so weaker evidence).
+- **First run (5).** I found no tour or welcome flow. A search of the app's own source files for "onboarding", "welcome" and "walkthrough" found nothing. **Fetched** (absence, so weaker evidence).
 - **Links (7).** Two forms for the same place: a private scheme, and an ordinary web address on its own site. A code comment says the web form opens the installed app on phones and lands on a web page on a computer. Its exported notes use the web form. Source: [`deeplink.ts`](https://github.com/readest/readest/blob/ca575bb68010fe52e599860c92df40ca59047068/apps/readest-app/src/utils/deeplink.ts). **Fetched.**
 - **Why documents.** [`docs/view-settings.md`](https://github.com/readest/readest/blob/ca575bb68010fe52e599860c92df40ca59047068/apps/readest-app/docs/view-settings.md) explains global defaults with per-book overrides. `docs/page-curl.md` explains its paper page turn: on a two-page spread the outer page turns as a leaf hinged at the spine. `docs/safe-area-insets.md` covers notches and home bars. **Fetched** (the first two read; the third seen by name and opening lines).
 
-### 2. Zotero's reader: pens and page controls in one bar, with a careful "back"
+- **Could take:** the two bottom bars (full row when wide, five icons when narrow), bars that appear at the pointer on a computer, back and forward beside the slider, and one place with two link forms.
+- **Would not carry over:** the "this book or all books" switch (we have one book), and pens that appear only at selected words (our marks go on a fixed printed page, not on selected running text).
+
+### 2. What does Zotero's reader do, with pens and page controls in one bar and a careful "back"?
 
 - **Code:** <https://github.com/zotero/reader>, version read `5581a8da`, and <https://github.com/zotero/zotero-ios>, version read `0d914f8c`. **Fetched.**
 - **Licence:** both carry a COPYING file saying AGPL-3.0. **Copyleft: ideas only.**
@@ -57,7 +62,10 @@ What it does:
 - **Links (7).** A link opens a document at a page. A code comment warns that links count pages from 1 while the reader counts from 0. Source: [`CustomURLController.swift`](https://github.com/zotero/zotero-ios/blob/0d914f8c3d7ed3ac20a815f1c6c92b5c86db0687/Zotero/Controllers/CustomURLController.swift) lines 17 and 176. **Fetched.**
 - **Why documents.** None found in the two repositories. Not searched in their forums.
 
-### 3. The Quran.com iPhone and iPad app: the closest subject match
+- **Could take:** pens in their own zone; press the pen in hand to put it down; the back button's rules; a pen bar the reader can move to another edge.
+- **Would not carry over:** a bar that is always showing takes height a phone-sized page cannot spare; the iPad page drawing itself is a paid component we cannot learn from.
+
+### 3. What does the Quran.com iPhone and iPad app, the closest subject match, do?
 
 - **Code:** <https://github.com/quran/quran-ios>, version read `956e30a2`. **Fetched, single files** (nine files).
 - **Licence:** Apache-2.0. **Stars and last change:** 601; 2026-11-16.
@@ -70,9 +78,12 @@ What it does:
 - **Two pages (6, 8).** Two pages side by side is on by default on anything that is not a phone, and only offered when the screen is wider than 900 points. Source: [`TwoPagesUtils.swift`](https://github.com/quran/quran-ios/blob/956e30a27cfdd44ae1d4d175ef801432d90b0100/Domain/QuranTextKit/Sources/TwoPages/TwoPagesUtils.swift). **Fetched.**
 - **Links (7).** A link names a surah, or a surah and a verse. The parser skips words and keeps numbers, so several spellings of the same link all work. A comment says the format matches the Android app on purpose. Source: [`QuranDeepLink.swift`](https://github.com/quran/quran-ios/blob/956e30a27cfdd44ae1d4d175ef801432d90b0100/Features/AppStructureFeature/Sources/Launch/QuranDeepLink.swift). **Fetched.**
 - **Telling readers what changed (5).** A "what's new" screen shows only versions the reader has not seen. A brand-new install is marked as having seen everything, so a first-time reader is not shown old news. Source: [`AppWhatsNewPlan.swift`](https://github.com/quran/quran-ios/blob/956e30a27cfdd44ae1d4d175ef801432d90b0100/Features/WhatsNewFeature/Sources/AppWhatsNewPlan.swift). **Fetched.**
+- **Screen stays awake (8).** The screen is kept from dimming while the reading screen is open, and released on leaving. Same `QuranViewController.swift`, lines 113 and 127. **Fetched.**
 - **Not verified:** whether it has a page slider; I did not find one in the files I read.
+- **Could take:** view choices in a small menu on the page with rows that hide when they do not apply; two pages by default on wide screens; forgiving links that match sibling apps; no old news for new installs.
+- **Would not carry over:** its five-tab home (bookmarks, notes, search) is a native phone pattern; we open straight onto the page.
 
-### 4. Quran.com on the web: a tour, a checklist and a written navbar design
+### 4. What does Quran.com on the web do, with its tour, checklist and written navbar design?
 
 - **Code:** <https://github.com/quran/quran.com-frontend-next>, version read `aff1a035`. **Fetched, single files** (eleven files).
 - **Licence:** unclear. GitHub detects none, the README shows an MIT badge, and the licence file the badge points at was not found at the address I tried. **Treat as ideas only until checked.**
@@ -87,7 +98,10 @@ What it does:
 - **First run (5).** A tour that points at real buttons, split into four named groups (home page, settings, reading, personal features), each with Previous, Skip and Finish. A checklist lists the groups. If the reader closes it unfinished, it comes back once a month, at most three times, then never again. The top bar is forced visible while the tour runs. Sources: [`locales/en/onboarding.json`](https://github.com/quran/quran.com-frontend-next/blob/aff1a035b09b66f28047b3216edcae4c5c949a49/locales/en/onboarding.json), [`useShowChecklistAfterInterval.ts`](https://github.com/quran/quran.com-frontend-next/blob/aff1a035b09b66f28047b3216edcae4c5c949a49/src/components/Onboarding/OnboardingChecklist/hooks/useShowChecklistAfterInterval.ts), `src/components/Onboarding/steps.ts`. **Fetched.**
 - **Why documents.** The navbar document above, and `docs/ui-stacking-analysis.md` (1,118 lines on which layer sits above which; downloaded, only skimmed).
 
-### 5. Open-Mushaf Native: a small page-image mus'haf on phone, web and Mac
+- **Could take:** the strip saying surah, juz and page; a tour in named groups that can start at any group; the cap on how often the checklist returns; a live preview and a reset in settings.
+- **Would not carry over:** hiding the bar on scroll, because our page does not scroll; a tour for first-time public visitors is heavier than people who know the book need.
+
+### 5. What does Open-Mushaf Native, a small page-image mus'haf on phone, web and Mac, do?
 
 - **Code:** <https://github.com/adelpro/open-mushaf-native>, version read `3bcc94a8`. **Fetched.**
 - **Licence:** MIT. **Stars and last change:** 45; 2026-11-06. Small, so weigh it as one careful person's choices, not a crowd's.
@@ -103,7 +117,10 @@ What it does:
 - **First run (5).** A swipeable set of slides on first launch with a Skip button, and the same slides reachable later as their own screen. Source: [`TutorialGuide.tsx`](https://github.com/adelpro/open-mushaf-native/blob/3bcc94a86bfe26874e9aa929acac1d4a23716ec6/components/TutorialGuide.tsx) and `app/_layout.tsx` line 123. **Fetched.**
 - **Why document.** `DESIGN.md` is a full written account of its design rules, including what it has left undone.
 
-### 6. Kavita: a web reader with the fullest bottom sheet
+- **Could take:** the "return to reading position" strip and jumps that do not overwrite the saved place; a skippable tutorial that is its own reopenable screen; a page turn that reads as a sheet lifting.
+- **Would not carry over:** the single narrow column on every size, which gives up the two-page spread; numbered circles in place of a slider are too slow across 604 pages.
+
+### 6. What does Kavita, a web reader with the fullest bottom sheet, do?
 
 - **Code:** <https://github.com/Kareadita/Kavita>, version read `e844b64f`. **Fetched.**
 - **Licence:** GPL-3.0. **Copyleft: ideas only.** **Stars and last change:** 12,138; 2026-11-15.
@@ -119,7 +136,10 @@ What it does (comic reader, the page-by-page one):
 - **Two pages (8).** If the window is too narrow for two pages it falls back to one and says so in a short message. Same file, lines 991 to 993. **Fetched.**
 - **Not verified:** whether the slider runs right to left for right-to-left books.
 
-### 7. Aidoku: a right-to-left page slider done properly
+- **Could take:** view settings unfolding under the slider; a closing timer that pauses while a control is held; one first-time message; a message when two pages fall back to one.
+- **Would not carry over:** image scaling and splitting choices are for scans of mixed sizes; our pages are all one size.
+
+### 7. What does Aidoku do, with a right-to-left page slider done properly?
 
 - **Code:** <https://github.com/Aidoku/Aidoku>, version read `95d1468d`. **Fetched.**
 - **Licence:** GPL-3.0. **Copyleft: ideas only.** **Stars and last change:** 4,760; 2026-11-14.
@@ -130,8 +150,11 @@ What it does:
 - **Slider direction (8).** The page slider has a direction. For right-to-left books the thumb starts at the right and moves left as you read. The thumb grows by half while held, and can be grabbed slightly outside its drawn edge. Sources: [`ReaderSliderView.swift`](https://github.com/Aidoku/Aidoku/blob/95d1468d599a154f03d6a1dd06bf839d3ff3f7bd/Aidoku/Features/Reader/Toolbar/ReaderSliderView.swift), [`ReaderViewController.swift`](https://github.com/Aidoku/Aidoku/blob/95d1468d599a154f03d6a1dd06bf839d3ff3f7bd/Aidoku/Features/Reader/ReaderViewController.swift) lines 735 to 753. **Fetched.**
 - **Two pages (6, 8).** Three choices: one page, two pages, or automatic. Automatic means two pages whenever the window is wider than it is tall, and it re-decides on rotation while keeping the current page. Source: [`ReaderPagedViewController.swift`](https://github.com/Aidoku/Aidoku/blob/95d1468d599a154f03d6a1dd06bf839d3ff3f7bd/Aidoku/Features/Reader/Readers/Paged/ReaderPagedViewController.swift) lines 175 to 206. **Fetched.**
 - **Tap areas (1).** The reader can choose which parts of the page turn it. Seen by name only (`updateTapZone`); details not verified.
+- **Where the slider sits (1).** The slider is placed in the system's toolbar at the bottom of the screen. Same `ReaderViewController.swift`, lines 236 to 252. **Fetched.**
+- **Could take:** a slider that runs right to left, with a thumb that grows when held; one page, two pages or automatic.
+- **Would not carry over:** it is built from native iPhone parts, so only the behaviour transfers to a web page, not the construction.
 
-### 8. PDF.js: the standard web document bar
+### 8. What does PDF.js, the standard web document bar, do?
 
 - **Code:** <https://github.com/mozilla/pdf.js>, version read `bb1539a2`. **Fetched.**
 - **Licence:** Apache-2.0. **Stars and last change:** 54,142; 2026-11-15.
@@ -145,7 +168,10 @@ What it does:
 - **Links (7).** The address can carry the page and zoom after a `#` mark, for example a page number. Source: [`web/pdf_link_service.js`](https://github.com/mozilla/pdf.js/blob/bb1539a2c9b5b76d070284cca9091717133d8bf1/web/pdf_link_service.js) lines 375 to 446. **Fetched.**
 - **Trail back (8).** It uses the browser's own back button. Passing positions are held as "temporary" and replaced; only settled ones are kept. Source: [`web/pdf_history.js`](https://github.com/mozilla/pdf.js/blob/bb1539a2c9b5b76d070284cca9091717133d8bf1/web/pdf_history.js) lines 25 to 29 and 404 to 430. **Fetched.**
 
-### 9. Excalidraw: one drawing tool that rearranges itself by window size
+- **Could take:** three zones in one bar; each pen's options hanging under that pen; rare view choices in a second menu; page and zoom carried in the web address.
+- **Would not carry over:** dropping buttons as the window narrows removed "next page" on small screens, which a reader cannot lose.
+
+### 9. What does Excalidraw, a drawing tool that rearranges itself by window size, do?
 
 - **Code:** <https://github.com/excalidraw/excalidraw>, version read `82190fb2`. **Fetched.**
 - **Licence:** MIT. **Stars and last change:** 135,783; 2026-11-16.
@@ -159,7 +185,10 @@ What it does:
 - **Short messages (4).** 5 seconds by default, with a way to keep one open until closed. Source: `Toast.tsx`. **Fetched.**
 - **First run (5).** Hand-drawn arrows with labels pointing at the menu, the tools and the help button. They show whenever the canvas is empty, not only the first time, and vanish at the first stroke. Source: [`WelcomeScreen.Hints.tsx`](https://github.com/excalidraw/excalidraw/blob/82190fb28f58070b34b4017e70c0e2e83701a8e3/packages/excalidraw/components/welcome-screen/WelcomeScreen.Hints.tsx). **Fetched.**
 
-### 10. NetNewsWire: how to keep settings short
+- **Could take:** choosing the arrangement by the size of its own area; pens at the bottom on a phone; a help line that follows the pen in hand.
+- **Would not carry over:** arrows on an empty canvas, because a mus'haf page is never empty.
+
+### 10. How does NetNewsWire keep settings short?
 
 - **Code:** <https://github.com/Ranchero-Software/NetNewsWire>, version read `a5cec78e`. **Fetched.**
 - **Licence:** MIT. **Stars and last change:** 10,539; 2026-11-16.
@@ -171,7 +200,10 @@ What it does:
 - **Why document: rare settings get no screen at all.** [`Technotes/HiddenPrefs.md`](https://github.com/Ranchero-Software/NetNewsWire/blob/a5cec78e2aaca287144bcd45fa6ff2f1141518e7/Technotes/HiddenPrefs.md) says settings only one or two people asked for exist but have no switch on screen, and each is named after the person who asked "so we can remember who asked for them". **Fetched.**
 - **Why document: separate screens per platform on purpose.** `Technotes/SwiftUI-UIKit-AppKit-Guidelines.markdown`. **Fetched** (skimmed).
 
-### 11. Home Assistant for Apple devices: a web page in a Swift shell, like ours
+- **Could take:** rare settings with no screen; a different settings frame on phone and on Mac.
+- **Would not carry over:** building every screen separately per platform, since we draw one web page; sending the reader to the system's Settings does not work in a browser tab.
+
+### 11. What does Home Assistant for Apple devices, a web page in a Swift shell like ours, do?
 
 - **Code:** <https://github.com/home-assistant/iOS>, version read `ac2896d2`. **Fetched, single files** (four files, plus the list of file names).
 - **Licence:** Apache-2.0. **Stars and last change:** 2,415; 2026-11-16.
@@ -183,7 +215,10 @@ What it does:
 - **Settings (3, 6).** The native shell owns its own settings: about 25 named groups in one list (servers, general, gestures, notifications, widgets, help, privacy, debugging, what's new and more). On Mac the same list becomes a sidebar with the chosen group shown beside it. On iPhone it is a list you drill into. Groups that do not apply to a device are left out. Sources: [`SettingsItem.swift`](https://github.com/home-assistant/iOS/blob/ac2896d2f14a0e80d18e612eef7633d06b5be501/Sources/App/Settings/Settings/SettingsItem.swift) lines 6 to 30, [`SettingsView.swift`](https://github.com/home-assistant/iOS/blob/ac2896d2f14a0e80d18e612eef7633d06b5be501/Sources/App/Settings/Settings/SettingsView.swift) lines 26, 71, 119. **Fetched.**
 - **First run (5).** A fixed sequence of set-up steps (welcome, find server, permissions). Seen by file name only. It is set-up, not teaching, so it carries little for us.
 
-### 12. Kiwix for Apple devices: one app, three arrangements
+- **Could take:** asking before a link does something; one settings list that becomes a sidebar on Mac; leaving out groups that do not apply.
+- **Would not carry over:** its many link kinds serve home automation, well beyond a reader's needs.
+
+### 12. How does Kiwix for Apple devices arrange one app three ways?
 
 - **Code:** <https://github.com/kiwix/kiwix-apple>, version read `8e13ae64`. **Fetched.**
 - **Licence:** GPL-3.0. **Copyleft: ideas only.** **Stars and last change:** 823; 2026-11-16.
@@ -194,7 +229,10 @@ What it does:
 - **Different arrangement per size (6).** On a narrow screen: a bottom bar with back, forward, tabs, library, outline and a "more" menu, with find and settings at the top right. On a wide iPad screen and on Mac: a sidebar with the content beside it. The switch is the width class the system reports, so an iPad in a narrow split window gets the phone arrangement. Sources: [`RootView_iOS.swift`](https://github.com/kiwix/kiwix-apple/blob/8e13ae648ae92e3da019521554a67cb27b01a5c1/App/RootView_iOS.swift) lines 20 to 30, [`CompactViewController.swift`](https://github.com/kiwix/kiwix-apple/blob/8e13ae648ae92e3da019521554a67cb27b01a5c1/App/CompactViewController.swift) lines 84 to 110 and 243 to 252. **Fetched.**
 - **What went wrong for them (why material).** Its change notes list a run of iPad fixes: toolbars that disappeared, the sidebar forgetting whether it was open, the bottom bar not appearing in split view. Source: [`CHANGELOG.md`](https://github.com/kiwix/kiwix-apple/blob/8e13ae648ae92e3da019521554a67cb27b01a5c1/CHANGELOG.md) lines 89 to 330. **Fetched.** The lesson is that the iPad middle ground is where the faults gather.
 
-### 13. Bluesky: one codebase, web and phone, three widths
+- **Could take:** switching arrangement by available width, so a narrow iPad window gets the phone layout; testing the iPad middle size hardest.
+- **Would not carry over:** a sidebar of tabs and a library suits browsing many documents, not one book.
+
+### 13. What does Bluesky do with one codebase across web and phone at three widths?
 
 - **Code:** <https://github.com/bluesky-social/social-app>, version read `7f064abe`. **Fetched.**
 - **Licence:** MIT. **Stars and last change:** 18,392; 2026-11-16.
@@ -208,7 +246,10 @@ What it does:
 - **Links (7).** Ordinary web addresses on its own site open the installed app; a private scheme exists too. Source: `app.config.js` lines 28 and 68. **Fetched.**
 - **Telling readers about new features (5).** One announcement dialog per new feature, in a folder of them (bookmarks, drafts, iPad beta and so on). Seen by file name only; how it decides when to show: not verified.
 
-### 14. Wikipedia for iPhone and iPad: tips and a documented link list
+- **Could take:** about eleven plain-named settings groups; three widths with a middle one; short messages of 3 seconds.
+- **Would not carry over:** a permanent side list of sections on wide screens; a reader has one main screen, the page.
+
+### 14. What does Wikipedia for iPhone and iPad do with tips and a documented link list?
 
 - **Code:** <https://github.com/wikimedia/wikipedia-ios>, version read `0cc1624a`. **Fetched.**
 - **Licence:** MIT. **Stars and last change:** 3,478; 2026-11-16.
@@ -221,12 +262,17 @@ What it does:
 - **Links (7), with a why document.** A short public table of every link the app answers, each with an example, including the same article reachable by private scheme or by ordinary web address. Source: [`docs/url_schemes.md`](https://github.com/wikimedia/wikipedia-ios/blob/0cc1624ab47c5e40b9e3968dc2362b45877cd81d/docs/url_schemes.md). **Fetched.**
 - **First run (5).** A few welcome pages (`WelcomeViewController.swift`). Seen by name only.
 
-### Also read, more lightly: Komga
+- **Could take:** one tip at a time with rules for when; a public table of every link.
+- **Would not carry over:** the tip bubbles are an Apple part, so a web page needs its own; welcome pages about an encyclopedia's features are not our case.
+
+### 15. What does Komga do? (read more lightly)
 
 - **Code:** <https://github.com/gotson/komga>, version read `db2ad643`. **Fetched.** MIT; 6,851 stars; last change 2026-11-16. A website from your own server ("works on desktop, tablets and phones", README). No native app.
 - **Bars (1, 8).** Tap to show a top bar and a bottom bar; the bottom bar is a page slider with the current page at one end, the total at the other, and first, last, previous-book and next-book buttons around it. Source: [`DivinaReader.vue`](https://github.com/gotson/komga/blob/db2ad643c64d9199f7dd01cd3cca3ff0e7a17445/komga-webui/src/views/DivinaReader.vue) lines 82 to 120.
 - **Confirm before leaving (4, 8).** At the last page, the first "next" shows a short message ("end of book; press again to move to the next") and only the second press leaves. Same file, lines 258 to 285.
 - **Message on a silent change (4).** When the reading direction is set automatically, a 3-second message says so and says where the setting came from. Same file, lines 287 to 298.
+- **Could take:** a second press before leaving the end of the book; a message whenever the app picks a setting by itself.
+- **Would not carry over:** previous-book and next-book buttons; we have one book.
 
 ## Which candidates did I drop, and why?
 
