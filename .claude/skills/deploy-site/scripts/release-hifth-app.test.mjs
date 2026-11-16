@@ -15,8 +15,8 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { spawn } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, changesThatShip, configProblems, localListFrom, serveArgs } from "./release-hifth-app.mjs";
-import { auditShipped, readFolder } from "./shipped.mjs";
+import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, changesThatShip, configProblems, localListFrom, serveArgs, withoutScriptRule } from "./release-hifth-app.mjs";
+import { auditShipped, inlineScriptHashes, readFolder } from "./shipped.mjs";
 
 function tree(root, files) {
   for (const [path, text] of Object.entries(files)) {
@@ -86,11 +86,34 @@ test("the front page goes at the root and the app under read/, and nothing the s
   ]);
 });
 
+test("putting it together writes the fingerprint of the app page's own script into the app's rule", () => {
+  const { landing, app, out } = fixture({
+    "index.html": "<script>window.lang='en'</script><script src=\"./assets/index-abc.js\"></script>",
+  });
+  writeFileSync(join(landing, "_headers"), "/read/\n  Content-Security-Policy: script-src 'self' {app-inline-scripts}; object-src 'none'\n");
+  assemble({ landing, app, out });
+  const headers = readFileSync(join(out, "_headers"), "utf8");
+  const [hash] = inlineScriptHashes("<script>window.lang='en'</script>");
+  assert.equal(headers, `/read/\n  Content-Security-Policy: script-src 'self' ${hash}; object-src 'none'\n`);
+  assert.deepEqual(auditShipped(readFolder(out).files).problems.filter((p) => /script/.test(p.why)), []);
+  // The front page's own copy keeps the gap, so the next build fills it again.
+  assert.match(readFileSync(join(landing, "_headers"), "utf8"), /\{app-inline-scripts\}/);
+});
+
 test("a pitch build is copied, so the check refuses the release instead of hiding it", () => {
   const { landing, app, out } = fixture({ "pitch/index.html": "<html>" });
   assemble({ landing, app, out });
   const problems = auditShipped(readFolder(out).files).problems;
   assert.deepEqual(problems.map((p) => p.path), ["read/pitch/index.html"]);
+});
+
+// Finder writes a .DS_Store into any build folder it has open (seen 2026-11-15 in the app's
+// build folder). It is never part of the site, so the copy leaves it out rather than letting
+// the check refuse the whole release over it.
+test("Finder's .DS_Store files are not copied", () => {
+  const { landing, app, out } = fixture({ ".DS_Store": "x", "assets/.DS_Store": "x" });
+  assemble({ landing, app, out });
+  assert.deepEqual(readFolder(out).files.filter((f) => f.path.endsWith(".DS_Store")), []);
 });
 
 test("putting it together again starts from an empty folder", () => {
@@ -177,4 +200,16 @@ test("a change to the page-comment files does not stop a release; any other chan
   assert.deepEqual(changesThatShip(""), []);
   // git() trims its output, so the first line can arrive without its leading space.
   assert.deepEqual(changesThatShip("M .page-comments/threads/t_000001.jsonl\n M apps/web/src/App.tsx"), [" M apps/web/src/App.tsx"]);
+});
+
+// The copy on this laptop writes the side bar and the comment button into each page, which the
+// front pages' script rule refuses. Only that rule is left out there; every other header stays.
+test("the laptop's copy leaves out only the script rule from the site's headers", () => {
+  const live = readFileSync(join(dirname(new URL(import.meta.url).pathname), "../../../../apps/landing/_headers"), "utf8");
+  assert.match(live, /Content-Security-Policy:/);
+  const local = withoutScriptRule(live);
+  assert.doesNotMatch(local, /Content-Security-Policy/i);
+  const others = (t) => t.split("\n").filter((l) => !/Content-Security-Policy/i.test(l));
+  assert.deepEqual(others(local), others(live));
+  assert.match(local, /X-Frame-Options: DENY/);
 });

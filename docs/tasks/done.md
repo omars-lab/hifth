@@ -62,6 +62,34 @@ the spam-check key (`hifth-app-turnstile-key`).
   release folder is now cleared by moving it aside first, because Finder could write into it
   while it was being deleted (`docs/issues/old-folder-written-to-while-deleted.md`).
 
+### 2026-11-15 — a script rule for the app at hifth.app/read (branch hifth-app-read-csp)
+
+**Done:**
+- The app at /read/ says where its scripts may come from: this site, plus the one script written
+  into its page, whose fingerprint the release fills in and checks; the recitation only from
+  verses.quran.com (backlog row `hifth-app-csp-for-the-app`, fixed). Tried in Chrome and Firefox
+  with the rule on, nothing refused. The iPad and Mac apps never see the rule.
+- Finder's .DS_Store files in the app's build folder no longer stop a release; the copy leaves
+  them out.
+
+### 2026-11-14 — hifth.app's contact address, spam-check command and safety (branch hifth-app-next)
+
+**Done:**
+- The pages name hello@hifth.app as the contact address (55959008).
+- A command that makes the real spam-check widget and saves its secret (bf98aced); running it
+  waits on the owner's Cloudflare key getting the spam-check permission.
+- The secret scan refuses a Supabase project's address or ID; a memory note that named the
+  project was cleaned (9a6e8500). The two old copies stay in history (the owner's call).
+- Safety headers on every hifth.app page, a script rule on the front, privacy and email pages,
+  looked at with the rule on (8441f7b2). The app at /read/ is backlog row
+  `hifth-app-csp-for-the-app`.
+- A security review of the site: no hole an outsider can use; the findings were relayed to the
+  owner, with the history scrub and the commit email left as the owner's calls.
+- The site's security page (`docs/design/hifth-app-security.md`): every value a visitor sends
+  and how it is checked, what the server trusts, who can read or change the email list, where
+  the keys live, the pages' rules, what stays on the laptop, and what is still open. Linked from
+  the site's design and the email list's design.
+
 ### 2026-11-09 — Installing on our own devices through TestFlight
 
 **Done:** The research page on putting the app on our own devices was written

@@ -136,7 +136,18 @@ ${action ? `    <form method="post" action="${escapeAttr(action.url)}"><button t
 </html>
 `;
 
-const HEADERS = { "cache-control": "no-store", "referrer-policy": "no-referrer" };
+// Not stored, not passed on to the next site (the link carries the reader's code), never framed
+// by another site, and nothing on the page may run a script: the pages are a heading, a line and
+// at most one button that posts back here. Cloudflare's _headers file does not reach answers made
+// here, so they carry their own (docs/design/hifth-app-security.md).
+const HEADERS = {
+  "cache-control": "no-store",
+  "referrer-policy": "no-referrer",
+  "content-security-policy":
+    "default-src 'none'; style-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+  "x-frame-options": "DENY",
+  "x-content-type-options": "nosniff",
+};
 
 function answer(request, status, key, lang = "en", action) {
   const [title, message] = WORDS[lang][key];

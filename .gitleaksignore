@@ -1,0 +1,13 @@
+# Findings the secret scan already knows about, one per line, as gitleaks prints them
+# (commit:file:rule:line). Each names a commit already public, so refusing it would only
+# block every push without taking anything back. Add one only with the reason beside it.
+#
+# 2026-11-14: two old copies of a memory note named the hifth Supabase project's address.
+# The note was cleaned in the commit that added the supabase-project-address rule; the
+# old copies stay in history. Scrubbing them would be a history rewrite (the owner's call,
+# like the 2026-10-08 held-text scrub). Even so, an attacker gets nothing from the address:
+# the list is not served by Supabase's web API, and every action on it needs the site key.
+e7159824bad68e59d587eb90dbc39eac10ceae82:.claude/memory/hifth-supabase-via-cli.md:supabase-project-address:20
+e7159824bad68e59d587eb90dbc39eac10ceae82:.claude/memory/hifth-supabase-via-cli.md:supabase-project-address:42
+d41ee6f9f0ec54b1be6deafee6a01fd44dc7dc02:.claude/memory/hifth-supabase-via-cli.md:supabase-project-address:20
+d41ee6f9f0ec54b1be6deafee6a01fd44dc7dc02:.claude/memory/hifth-supabase-via-cli.md:supabase-project-address:42

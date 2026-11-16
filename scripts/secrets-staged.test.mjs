@@ -63,6 +63,38 @@ test("the pre-commit secret scan refuses a staged signing key", () => {
   }
 });
 
+// A Supabase project's address names the project, and project IDs stay out of this public
+// repo (the security review of 2026-11-14 found one in a memory note). The made-up ID is
+// built at run time, so this file has none for the scan to trip on.
+function scanStaged(name, text) {
+  const dir = freshRepo();
+  try {
+    writeFileSync(join(dir, name), text);
+    execFileSync("git", ["-C", dir, "add", name], { env });
+    const r = run("gitleaks", ["git", "--staged", "--redact", "--no-banner", "--config", ".gitleaks.toml"], { cwd: dir });
+    assert.notEqual(r.error?.code, "ENOENT", "gitleaks is not installed");
+    return r;
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+const madeUpRef = Array.from({ length: 20 }, (_, i) => String.fromCharCode(97 + ((i * 7) % 26))).join("");
+
+test("the pre-commit secret scan refuses a Supabase project's address", () => {
+  const r = scanStaged("note.md", `The list lives at https://${madeUpRef}.supabase.co today.\n`);
+  assert.equal(r.status, 1, `the scan let a project address through:\n${r.stdout}${r.stderr}`);
+});
+
+test("the pre-commit secret scan refuses a Supabase project ID given to the CLI", () => {
+  const r = scanStaged("steps.md", `supabase link --project-ref ${madeUpRef}\n`);
+  assert.equal(r.status, 1, `the scan let a project ID through:\n${r.stdout}${r.stderr}`);
+});
+
+test("the shared connection host names no project, so the scan lets it through", () => {
+  const r = scanStaged("steps.md", "Connect through aws-0-us-east-1.pooler.supabase.com on port 6543.\n");
+  assert.equal(r.status, 0, `the scan refused a host that names no project:\n${r.stdout}${r.stderr}`);
+});
+
 // The guard for the comment above: run this file the way a commit hook in a
 // worktree does (this repo is worked in worktrees), with GIT_DIR and
 // GIT_INDEX_FILE pointing at a stand-in worktree's git folder, and check the

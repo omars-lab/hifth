@@ -17,6 +17,9 @@ place to hear when the Mac app is out. The pages, marks and look-alike jumps are
   sign-in button.
 - It is hosted on Cloudflare Pages, on the new account that holds hifth.app.
 
+**How it is kept safe** (what a visitor can send, what is checked, who can read the email list,
+where the keys live, and what is still open) is in [the site's security page](hifth-app-security.md).
+
 ## Open questions, and what would answer each
 
 ### ① Is hifth.app live, with the app at /read and the email form working? · **open**
@@ -37,11 +40,15 @@ and the hub lists it as a private, local-only page. A production build never inc
 the route serves that one page and nothing else from the repository. Draw or redraw it with
 `make intent`.
 
-### ③ What contact address does the privacy page give? · **open**
+### ③ What contact address does the privacy page give? · **fixed**
 
 The privacy page tells a reader how to have their email removed without the link in the email.
-It needs an address the owner reads. Until the owner picks one, the page shows a placeholder,
-and the site does not go live with it.
+It needs an address the owner reads. Until the owner picked one, the page showed a placeholder,
+and the release check refused it.
+
+Done 2026-11-14: the owner picked hello@hifth.app. Both privacy pages, English and Arabic, link
+to it, and a test holds both to it. The address has to exist in the owner's iCloud+ mail for
+hifth.app before the site goes live.
 
 ### ④ Has the release tool ever put hifth.app up? · **open**
 
@@ -296,3 +303,40 @@ Done 2026-11-14 and looked at in Chrome and Firefox, on a laptop and a phone. Lo
 faults, each now held by a test. The panels group showed 9 of the page's 11 cards, missing the two
 marked pitch-only; they are now listed with a "pitch only" tag. A long group name was cut off; it
 now wraps. And on a phone the Menu button sat under the comment bar, so it moved to the top left.
+
+### ⑱ Does the app at hifth.app/read say where its scripts may come from? · **fixed**
+
+Yes, since 2026-11-15. The front pages, the privacy pages and the email pages already told the
+browser (since 2026-11-14) that scripts may come only from hifth.app itself and, on the front
+pages, from Cloudflare's spam check. If someone ever slipped a line of their own into one of
+those pages, the browser would refuse to run it. Every page, the app included, also refuses to be
+shown inside another site's frame and refuses a guessed file type.
+
+The app at /read/ now has a rule of its own. Scripts may come only from hifth.app, plus the one
+short script written into the app's page, which starts fetching the reader's language early.
+That script changes with every build, so the release writes its fingerprint into the rule, and
+refuses to upload a folder where the fingerprint is missing or does not match. The recitation may
+come from verses.quran.com; nothing else may come from another site, and there are no frames.
+
+What was looked at: the release folder served on this laptop with the rule on, in Chrome and
+Firefox. The pages drew, the recitation was fetched and played, the offline worker started, the
+language download started early, and the browser refused nothing. /read/index.html is answered by
+sending the reader on to /read/, so the rule always applies. The iPad and Mac apps load the same
+files from inside the app, without the site's headers, so the rule does not reach them and could
+not break them. Carrying marks from the old address passes them between two tabs, which the rule
+does not govern.
+
+On this laptop the script rule is left out of every page, because the local side bar and the
+comment button are written into each page directly. The release check serves the folder going up
+with the rule in place, and that is where it was looked at (front page, Arabic page, privacy page,
+the form sending, the spam check loading: no refusals).
+
+### ⑲ Is there a support page the App Store can link to? · **open**
+
+Not yet. Apple asks every app listing for a support address, a web page where a reader can find
+help or reach whoever makes the app. hifth.app names hello@hifth.app only on its privacy page.
+What would answer it: a short page at hifth.app/support, in English and Arabic like the others,
+that says how to get in touch, what to include when something goes wrong (the device, the page
+and what happened), and links the privacy page; with the same safety headers as the front pages,
+a place in the release check's list of pages that must be there, and a test. The plan for the
+App Store launch (a separate session, 2026-11-15) may take this over.
