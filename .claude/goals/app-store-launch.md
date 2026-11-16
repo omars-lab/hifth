@@ -29,7 +29,8 @@ goes ahead while we wait.
 Four facts shape the order:
 
 - Every fix is a new build through Apple's review, because the web part is packed inside the app.
-- A store build could today be the private build: nothing stops it.
+- A store build could have been the private build. Since 2026-11-16 the archive step refuses
+  anything but the public one.
 - No privacy file, no sandbox on the Mac, no system logging, no "report a problem".
 - Sign-in has no code yet, and three choices on the sign-in page wait on the owner.
 
@@ -52,7 +53,7 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **33**: the 31 on the launch page, and the two older App Store rows on the licence | 2026-11-15 |
+| Launch blockers open | **32** of 33: 30 of the 31 on the launch page (the store-build guard closed), and the two older App Store rows on the licence | 2026-11-16 |
 | Owner steps waiting | **6**: two permission emails and a fallback date; delete 134 merged branches and ask GitHub to purge; three sign-in choices; the hifth.app first upload steps; the EU trader answer; the Mac keyboard test permission | 2026-11-15 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet | 2026-11-15 |
@@ -68,8 +69,8 @@ Update this table on every pass of the loop (`.claude/loop-prompts/operational-r
 1. **Write it down:** backlog rows, this page, the research, the reopened decision.
 2. **Clear the licence:** a citations page, two emails for the owner to send, read the page
    artwork's terms, check the recitation audio's terms.
-3. **A store build can never be the private build:** the archive step refuses anything else,
-   proven by a test.
+3. **A store build can never be the private build:** done 2026-11-16. The archive step refuses
+   anything else, proven by a test.
 4. **What Apple requires:** privacy file, Mac sandbox and signing, version numbers, a real
    archive, sound with the silent switch, the "more than a website" notes, an app-wide error
    screen, a screen-reader walk, open faults a reviewer would hit.

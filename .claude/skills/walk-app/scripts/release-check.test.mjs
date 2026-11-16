@@ -5,7 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { KEYS, SIGNS } from "./release-check.mjs";
 
@@ -24,7 +24,10 @@ function app(root, name, { keys = [], binaries = { Hifth: "plain app code" }, in
   mkdirSync(join(at, "WebBundle"), { recursive: true });
   writeFileSync(join(at, "Info.plist"), plist(keys));
   for (const [file, text] of Object.entries(binaries)) writeFileSync(join(at, file), `\0\0${text}\0\0`);
-  for (const [file, text] of Object.entries(inFolder)) writeFileSync(join(at, "WebBundle", file), text);
+  for (const [file, text] of Object.entries(inFolder)) {
+    mkdirSync(dirname(join(at, "WebBundle", file)), { recursive: true });
+    writeFileSync(join(at, "WebBundle", file), text);
+  }
   return at;
 }
 
@@ -86,6 +89,47 @@ test("the web pages inside the app are not searched: only the app's own code", (
   const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
   const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: everySign } });
   const release = app(root, "release", { inFolder: { "index.js": "walk-captures" } });
+  assert.equal(run(debug, release).status, 0);
+});
+
+// A store build must be the public one. The copy step leaves a one-word file in
+// the web folder saying which build it is, and that file ships inside the app,
+// so the check reads it from the built app: the thing that would be uploaded.
+function storeRun(release) {
+  const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
+  const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: everySign } });
+  return spawnSync(process.execPath, [SCRIPT, "--debug", debug, "--release", app(root, "release", release), "--flavour", "public"], {
+    encoding: "utf8",
+  });
+}
+
+test("asked for the public build, a release app that says public passes", () => {
+  const r = storeRun({ inFolder: { ".hifth-web-flavour": "public\n" } });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+test("asked for the public build, a release app that says pitch fails, by name", () => {
+  const r = storeRun({ inFolder: { ".hifth-web-flavour": "pitch\n" } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /pitch build/);
+});
+
+test("asked for the public build, a release app that does not say which it is fails", () => {
+  const r = storeRun({});
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /does not say which build/);
+});
+
+test("asked for the public build, a private folder inside the app fails even when it says public", () => {
+  const r = storeRun({ inFolder: { ".hifth-web-flavour": "public\n", "assets/private/1.json": "{}" } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /private folder/);
+});
+
+test("not asked, the flavour is not looked at: the check still runs on a laptop holding the pitch build", () => {
+  const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
+  const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: everySign } });
+  const release = app(root, "release", { inFolder: { ".hifth-web-flavour": "pitch\n" } });
   assert.equal(run(debug, release).status, 0);
 });
 

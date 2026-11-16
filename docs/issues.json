@@ -6822,11 +6822,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "The archive step should read the flavour stamp the copy step writes and refuse anything but the public build. Test first: archiving a private build fails."
+      "closedBy": "scripts/native-store-flavour.test.mjs",
+      "note": "The archive step refuses anything but the public build: first on the web folder, before anything else runs, then on the built release app, where a private folder is refused whatever the label says. Building for the owner's own iPad still accepts the private build."
     },
     {
       "id": "launch-citations-page",

@@ -49,15 +49,21 @@ flowchart TD
 
 ## Open questions, and what would answer each
 
-### ① A build for the store could be the private build · **open**
+### ① A build for the store could be the private build · **fixed**
 
 The command that packs the web part into the app builds the private flavour unless told
-otherwise, and nothing stops an archive of it. A store build carrying The Study Quran's notes
+otherwise, and nothing stopped an archive of it. A store build carrying The Study Quran's notes
 would publish them.
 
-*What would answer it:* the archive step reads the flavour stamp the copy step already writes and
-refuses anything but the public build, with a test that tries to archive a private build and
-watches it fail.
+*What answered it (2026-11-16):* the archive step now refuses anything but the public build, in
+two places. Before anything else runs, it reads the one-word file the copy step leaves in the web
+folder and stops if that does not say "public". Later, the check on the built release app reads
+the same file from inside the app, the thing that would be uploaded, and also refuses a private
+folder there whatever the file says. Tests try to archive a private build and watch it fail with
+that message, not with the licence lock's.
+
+*Still true:* building for the owner's own iPad keeps accepting the private build, as it must.
+A private build for named testers, if that is ever chosen, would need a command of its own.
 
 ### ② No page names every source with its licence and a link back · **open**
 

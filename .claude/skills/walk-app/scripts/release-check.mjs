@@ -14,7 +14,11 @@
 // the debug build's second code file); the web pages inside are not, since they
 // are not the capture.
 //
-//   node release-check.mjs --debug <Hifth.app> --release <Hifth.app>
+//   node release-check.mjs --debug <Hifth.app> --release <Hifth.app> [--flavour public]
+//
+// With --flavour public it also fails unless the web build inside the release
+// app is the public one, with no private folder. `make app-archive` asks for
+// that; the plain check does not, since it also runs on the pitch build.
 //
 // Exit 0 when Release is clean, 1 when it is not (or Debug is missing a sign),
 // 2 when a path is not an app. Built and run by `make app-release-check`.
@@ -66,8 +70,28 @@ function signsIn(files) {
   return SIGNS.filter(([, text]) => files.some((f) => f.bytes.includes(Buffer.from(text, "utf8"))));
 }
 
-export function check(debug, release) {
+/**
+ * Is the web build inside this app the one asked for? The copy step leaves a
+ * one-word file in the web folder saying which build it is, and the folder
+ * ships as it is, so this reads the built app: the thing that would be
+ * uploaded. A private folder is refused whatever the file says, because the
+ * file is only a label and the folder is the held commentary itself.
+ */
+export function flavourProblems(release, wanted) {
+  const web = join(release, "WebBundle");
+  const stamp = join(web, ".hifth-web-flavour");
+  const says = existsSync(stamp) ? readFileSync(stamp, "utf8").trim() : "";
   const problems = [];
+  if (!says) problems.push(`the release build does not say which build its web part is, and only the ${wanted} build may be uploaded`);
+  else if (says !== wanted) problems.push(`the release build's web part is the ${says} build, and only the ${wanted} build may be uploaded`);
+  if (wanted === "public" && existsSync(join(web, "assets", "private"))) {
+    problems.push("the release build has the private folder of held commentary in its web part");
+  }
+  return problems;
+}
+
+export function check(debug, release, { flavour } = {}) {
+  const problems = flavour ? flavourProblems(release, flavour) : [];
   const debugKeys = settings(debug);
   for (const key of KEYS) {
     if (debugKeys[key] !== true) problems.push(`the check is out of date: the debug build no longer has ${key}`);
@@ -102,8 +126,13 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       process.exit(2);
     }
   }
-  log("start", { debug, release });
-  const problems = check(debug, release);
+  const flavour = arg("--flavour");
+  if (process.argv.includes("--flavour") && !flavour) {
+    log("error", { msg: '"--flavour needs a build name, such as public"' });
+    process.exit(2);
+  }
+  log("start", { debug, release, flavour: flavour ?? "any" });
+  const problems = check(debug, release, { flavour });
   for (const problem of problems) log("problem", { msg: JSON.stringify(problem) });
   log("done", { release_clean: problems.length === 0 ? "yes" : "no", problems: problems.length });
   process.exit(problems.length === 0 ? 0 : 1);

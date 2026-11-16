@@ -18,6 +18,7 @@
 #   make walk-pull DEVICE=… [CLEAR=1]   copy the screenshots kept on a walk off the iPad, and draw them as one page
 #   make walk-gallery · make walk-list [JSON=1]   redraw that page · list the captures, oldest first
 #   make app-release-check   fail if the release iPad build carries any of the walk capture
+#   make app-store-flavour   fail unless the web build in the app is the public one (an archive needs it)
 #   make app-devices [CSV=1]   the registered devices, and the slots of each kind left this year
 #   make app-device-register DEVICE=…   register a new device with Apple (uses a slot), then install
 # ---------------------------------------------------------------------------
@@ -441,15 +442,21 @@ walk-current: ## Where the app on a plugged-in iPad is, as current-to-file last 
 # The capture is for builds from this laptop only. Builds the iPad app both
 # ways for a real iPad (unsigned, so no device is needed) and fails if the
 # release build has the Files app settings or any of the capture code.
+#
+# RELEASE_FLAVOUR=public also fails it unless the built release app is the
+# public build. Empty by default: this check runs on laptops whose web build is
+# the pitch, and the capture question is the same for both.
 RELEASE_CHECK_DD := $(DERIVED)/release-check
-app-release-check: app-generate ## Fail if the release iPad build carries any of the walk capture (builds Debug and Release, a few minutes)
+RELEASE_FLAVOUR ?=
+app-release-check: app-generate ## Fail if the release iPad build carries any of the walk capture (builds Debug and Release, a few minutes; RELEASE_FLAVOUR=public also requires the public build)
 	@for config in Debug Release; do \
 	  set -o pipefail; xcodebuild -quiet -project $(XCPROJ) -derivedDataPath $(RELEASE_CHECK_DD) -scheme Hifth-iOS \
 	    -configuration $$config -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO build || exit 1; \
 	done
 	node .claude/skills/walk-app/scripts/release-check.mjs \
 	  --debug $(RELEASE_CHECK_DD)/Build/Products/Debug-iphoneos/Hifth.app \
-	  --release $(RELEASE_CHECK_DD)/Build/Products/Release-iphoneos/Hifth.app
+	  --release $(RELEASE_CHECK_DD)/Build/Products/Release-iphoneos/Hifth.app \
+	  $(if $(RELEASE_FLAVOUR),--flavour $(RELEASE_FLAVOUR))
 
 # ---- which devices Apple has registered for us, and the slots left (100 of each
 # kind a year). CSV=1 prints a row per device with its full id: keep it off the repo.
@@ -457,21 +464,36 @@ CSV          ?=
 app-devices: ## List the registered devices and how many slots of each kind are left this year (CSV=1 for a spreadsheet)
 	@node .claude/skills/add-device/scripts/device-list.mjs $(if $(CSV),--csv)
 
-# ---- TestFlight: gated on the licence decision, not on the build
-# Both refuse until docs/decisions.json settles `native-testflight-licence` on
-# an upload option (A or B). Settled on C, own devices only, they still refuse.
+# ---- A build for upload: two locks, and both must open
+# 1. Which build it is. The web part is the private pitch by default, and the
+#    pitch carries The Study Quran's commentary, so an archive is only ever
+#    made of the public build. Checked first, on the web folder, so a pitch
+#    build stops in a second; checked again on the built app by the release
+#    check below, because that is what would be uploaded. If a private build
+#    is ever sent to named testers, it gets a target of its own, not this one.
+# 2. The licence. Even the public build carries data whose licence may not
+#    allow the App Store, so both targets refuse until docs/decisions.json
+#    settles `native-testflight-licence` on an upload option (A or B). Settled
+#    on C, own devices only, they still refuse.
+.PHONY: app-store-flavour
+app-store-flavour: ## Fail unless the web build in the app is the public one (the only build that may be archived)
+	@test "$$(cat $(WEB_BUNDLE)/.hifth-web-flavour 2>/dev/null)" = public || { \
+	  echo ""; echo "  A build for upload is made of only the public build, never the pitch, which"; \
+	  echo "  carries the held commentary. This one says: $$(cat $(WEB_BUNDLE)/.hifth-web-flavour 2>/dev/null || echo nothing)."; \
+	  echo "  Run: make app-web FLAVOUR=public"; echo ""; exit 1; }
+
 TESTFLIGHT_SETTLED = $(shell node scripts/testflight-allowed.mjs 2>/dev/null && echo yes || echo no)
 define TESTFLIGHT_GATE
 	@test "$(TESTFLIGHT_SETTLED)" = yes || { echo ""; \
-	  echo "  Not yet. A build with the held commentary goes to outside testers only once"; \
-	  echo "  docs/decisions/native-testflight-licence.md says A or B; today it does not."; echo ""; exit 1; }
+	  echo "  Not yet. A build goes to anyone outside only once the licence question is settled:"; \
+	  echo "  docs/decisions/native-testflight-licence.md must say A or B; today it does not."; echo ""; exit 1; }
 endef
 
-app-archive: app-generate ## Archive the iPad app for upload (refuses until the TestFlight decision is settled)
+app-archive: app-store-flavour app-generate ## Archive the iPad app for upload (public build only; refuses until the licence decision is settled)
 	$(TESTFLIGHT_GATE)
-	@# Nothing ships with the walk capture in it.
-	$(MAKE) --no-print-directory app-release-check
-	@echo "  archive: not built yet — the export options, privacy manifest and signing come with the decision (docs/backlog.md)"; exit 1
+	@# Nothing ships with the walk capture in it, or as anything but the public build.
+	$(MAKE) --no-print-directory app-release-check RELEASE_FLAVOUR=public
+	@echo "  archive: not built yet. The export options, privacy manifest and signing come with the decision (docs/backlog.md)"; exit 1
 
 app-testflight: app-archive ## Upload the archive to TestFlight with an App Store Connect API key from the environment
 	@echo "  upload: not built yet"; exit 1
