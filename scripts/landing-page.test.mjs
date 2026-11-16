@@ -297,8 +297,10 @@ test("the Arabic pages carry no vowel marks", () => {
  * a full stop says the same thing.
  */
 test("no landing page uses a long dash", () => {
-  for (const name of PAGES) {
-    const dashed = read(name).split("\n").filter((line) => /[–—]/.test(line));
+  // The pages, and the files that write words onto one: the sign-up form's answers, the confirm
+  // and leave pages with their emails, and the stylesheet. Typed as itself or as an HTML code.
+  for (const name of [...PAGES, "lib/notify.mjs", "notify.js", "styles.css"]) {
+    const dashed = read(name).split("\n").filter((line) => /[–—]|&[mn]dash;|&#821[12];/.test(line));
     assert.deepEqual(dashed, [], name);
   }
 });
