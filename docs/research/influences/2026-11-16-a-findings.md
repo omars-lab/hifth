@@ -18,9 +18,9 @@ To open a line yourself: take the "source version" address from the table and ad
 - **One open-source reader really does ship on Mac, iPhone, iPad and the web from one codebase: Readest.** It is the closest match to our shape. It is AGPL, so we take ideas, not code.
 - **The readers agree on one thing: the page comes first, and the bars hide.** Readest, Quran for iOS, Aidoku and pdf.js full-screen all hide controls until asked. They disagree on how you ask: hover (computer), tap (touch), or a timer.
 - **Two apps solved "where do the pens go" in opposite ways.** The Zotero web reader puts pens in the middle of the one top bar, between navigation and search. Zotero for iPad makes the pen bar a separate strip the reader can drag to the left, right, top, or pin under the top bar.
-- **Nobody I read ships a step-by-step first-run tour.** Excalidraw shows three hand-drawn hints on an empty canvas. Quran for iOS shows "what's new" screens per version. Readest teaches a gesture at the moment it happens. NetNewsWire, Kiwix, Aidoku, pdf.js: nothing found.
+- **Only one app has anything like a step-by-step tour, and it does not use it on its reading screen.** Sefaria has a guide of numbered cards, shown once, with a button to bring it back, switched on for its editor only. Excalidraw shows three hints on an empty canvas. Quran for iOS shows "what's new" screens per version. Readest teaches a gesture at the moment it happens. Zotero for iPad shows four picture pages before sign-in, and a one-time setup sheet the first time read-aloud is used. Home Assistant has a long first-run setup (find your server, sign in, permissions), which is setup, not teaching. See "How did I search for first-run teaching?" near the end for exactly what I searched and what I did not.
 - **Links: the strongest pattern is two forms that mean the same thing.** Readest builds a custom-scheme link and an ordinary https link for the same place, and treats the https one as the one to share. Zotero's page links count pages from 1, like a person does. Home Assistant asks before a link is allowed to *do* something.
-- **Gaps.** I could not download the Quran.com website source in time. I did not find a single design document on screen layout in any of these projects. The "why" I found is in code comments, one issue, and NetNewsWire's short technical notes.
+- **Gaps.** The download of the Quran.com website source hung and never finished, so I read none of it. I did not find a single design document on screen layout in any of these projects. The "why" I found is in code comments, one issue, and NetNewsWire's short technical notes.
 
 ## Which apps did I read closely, and what are their numbers?
 
@@ -123,7 +123,14 @@ So navigation is on the reading-start side, pens in the centre, search and panel
 
 **Question 2, the iPad pen bar** (`zotero/zotero-ios`, `Zotero/Scenes/Detail/PDF/Views/AnnotationToolbarHandler.swift`; fetched). The pen bar is its own strip, apart from navigation. It can sit in four places: leading edge, trailing edge, top, or pinned under the top bar (L36-41). The reader drags it by a handle after a long press (L64). Dashed outlines show where it can be dropped (L65-73). The code sets a smallest width of 300 points for the bar (L51). The position is stored in a form made for saving, so I read it as remembered; I did not trace where it is saved.
 
-**Question 7, links** (`Zotero/Controllers/CustomURLController.swift`; whole file read). Two actions: `zotero://select/...` shows an item in the library, `zotero://open-pdf/...?page=N&annotation=KEY` opens a file at a page or a note (L15-18, L136-137). A comment at L176 says these links "use 1-based physical page numbers" while the reader counts from zero inside, and the code converts. An older link shape from a retired add-on is still accepted (L156-169).
+**Question 7, links** (`Zotero/Controllers/CustomURLController.swift`; whole file read). Two actions: `zotero://select/...` shows an item in the library, `zotero://open-pdf/...?page=N&annotation=KEY` opens a file at a page or a note (L15-18, L136-137). A comment at L176 says these links "use 1-based physical page numbers" while the reader counts from zero inside, and the code converts. A second, older-looking link shape, which the code calls the "ZotFile format", is still accepted (L156-169).
+
+**Question 5, teaching** (`zotero/zotero-ios`; fetched, searched by word, lines below read in the search output only).
+
+- Before sign-in there are four picture pages named access, annotate, share and sync, with sign-in and create-account buttons (`Zotero/Scenes/Onboarding/Views/OnboardingViewController.swift` L43-46, L212-216). This introduces the product. It is not a tour of the reader's controls.
+- The first time read-aloud is used, a one-time setup sheet appears with Cancel and Done (`Zotero/Scenes/General/Views/ReadAloudOnboardingView.swift` L36, L65-70). A saved flag records that it was shown (`Zotero/Models/Defaults.swift` L183-184). So a feature teaches itself the first time it is used, once.
+
+**Why, a pointer.** The pen-bar file's history shows three changes in early 2024: "PDF reader & related refactoring (#834)", "Improve code (#841)", "Improve annotation toolbar logic (#856)" (GitHub's change list for that file, fetched 2026-11-16). I did not open those three pull requests, so I do not know if they explain the movable bar.
 
 **What carries over.** Navigation at the start, pens in the middle, search at the end is a clear answer for a wide screen. The movable pen bar is the best answer I found for a tablet held in different hands. Page links that count from 1 match a printed book.
 
@@ -149,7 +156,7 @@ All fetched.
 - An in-reader "more" menu holds what changes the page you are looking at: reading mode, translation, word pointer, dividers, verse markers, rotation lock, two pages, vertical scrolling, theme (`Features/MoreMenuFeature/Sources/views/MoreMenuView.swift` L39-113).
 - A separate Settings screen holds the rest: account, app icon, which printed edition, audio, downloads, translations, donate, share, review, contact, privacy, diagnostics (`Features/SettingsFeature/Sources/SettingsRootView.swift` L103-207).
 
-**Question 5.** No tour found. There are "what's new" screens tied to app versions (`Features/WhatsNewFeature/Sources/`). I listed the folder and did not read the screens in detail.
+**Question 5.** A word search of every Swift file for onboarding, walkthrough, tutorial, coach mark, the system's tips kit and the system's notification centre found nothing. There are "what's new" screens tied to app versions (`Features/WhatsNewFeature/Sources/`). I listed the folder and did not read the screens in detail.
 
 **Question 6 and 8, two pages.** Two pages side by side is on by default on anything that is not an iPhone, and only shows when the screen is wider than 900 points (`Domain/QuranTextKit/Sources/TwoPages/TwoPagesUtils.swift` L11-18, whole file read). The setting's label says "(in landscape)". The pager is forced right-to-left whatever the device language (`Features/QuranPagesFeature/Sources/QuranPaginationView.swift` L55).
 
@@ -173,7 +180,7 @@ All paths start with `packages/`. All fetched.
 
 **Question 6, three named sizes.** The code names three: phone, tablet, desktop (`common/src/editorInterface.ts` L4). Phone is up to 599 pixels wide (L19), or a short wide screen under 500 by 1000 for a phone on its side (L21-22, L72-75). Tablet is 600 to 1180 (L25-26). The size is worked out from the size of the drawing area, not the device (L148-157), and an app embedding it can force one (`excalidraw/components/App.tsx` L3768). On a computer the reader can also pick a "compact" or "full" look, which is remembered (L5, L16).
 
-**Question 2, tools.** On a computer the tool row sits top-centre (`excalidraw/components/LayerUI.tsx` L334). On a phone there is a top bar and a bottom bar, and the tools sit in the bottom bar (`excalidraw/components/MobileMenu.tsx` L162-199).
+**Question 2, tools.** On a computer the tool row sits in a container fixed to the top (`excalidraw/components/LayerUI.tsx` L334). Whether it is centred I did not verify. On a phone there is a top bar and a bottom bar, and the tools sit in the bottom bar (`excalidraw/components/MobileMenu.tsx` L162-199).
 
 **Question 4.**
 
@@ -198,7 +205,7 @@ All fetched.
 
 - **The slider runs backward for right-to-left books.** The reader sets the slider's direction to "backward" when the reading mode is right-to-left (`Aidoku/Features/Reader/ReaderViewController.swift` L734-737). The slider has both directions built in (`Aidoku/Features/Reader/Toolbar/ReaderSliderView.swift` L11-20). It is also told not to flip again for a right-to-left device language (`Aidoku/Features/Reader/Toolbar/ReaderToolbarView.swift` L62).
 - The slider ticks under the thumb as the page changes (`ReaderToolbarView.swift` L15-16), and its handle grows while held (`ReaderSliderView.swift` L200).
-- **Tap zones.** Five named maps of where a tap means "next" or "previous": left-right thirds, an L shape, one called "kindle", one called "edge", and automatic, plus off (`Aidoku/Core/Settings/TapZone.swift` L25-63, whole file read). The reader picks one from small pictures (`Aidoku/Features/Settings/TapZonesSelectView.swift` L44-46). There is also "invert tap zones" (`Aidoku/Features/Reader/ReaderSettingsView.swift` L82).
+- **Tap zones.** Four named maps of where a tap means "next" or "previous": left-right thirds, an L shape, one called "kindle" and one called "edge". The setting also offers automatic and off (`Aidoku/Core/Settings/TapZone.swift` L25-63, whole file read). The reader picks one from small pictures (`Aidoku/Features/Settings/TapZonesSelectView.swift` L44-46). There is also "invert tap zones" (`Aidoku/Features/Reader/ReaderSettingsView.swift` L82).
 - **Two pages** has three settings: single, double, automatic. Automatic means two pages whenever the view is wider than it is tall (`Aidoku/Features/Reader/Readers/Paged/ReaderPagedViewController.swift` L175-187).
 
 **Question 1.** A tap toggles the bars (`ReaderViewController.swift` L1565). The slider is in the bottom bar (L252). There is a setting to hide the bars when the reader swipes (`ReaderSettingsView.swift` L301).
@@ -223,7 +230,7 @@ All fetched.
 
 **Questions 1 and 2, one top bar, three zones** (`web/viewer.html`).
 
-- Left: sidebar on/off, find, previous, next, page-number box (L148-402).
+- Left: a button that opens the side panel of page views (L150), find, previous, next, page-number box (L334-402).
 - Middle: zoom out, zoom in, zoom menu (L414-425).
 - Right: the tools (comment, signature, highlight, text, draw, image; L474-648), print, save, then a "more" button (L692).
 - The "more" menu holds the rare things: full screen, a link to the current view, first page, last page, hand tool, four scrolling modes, and three two-page choices: none, odd, even (L729-857).
@@ -251,13 +258,16 @@ All fetched.
 **Question 7** (`Sources/App/Frontend/IncomingURLHandler.swift`; L24-168 read).
 
 - The first word of a link is its action: `navigate`, `call_service`, `fire_event`, `send_location`, `assist`, `camera`, `settings`, `invite`, and `x-callback-url` (L26-37). The comment gives `homeassistant://navigate/lovelace/dashboard` as the example (L101).
-- **A link that only goes somewhere just goes. A link that does something asks first.** Calling a service, firing an event and sending location each show a confirm box (L68-84). Links from the app's own widget carry a proof and skip the question (L110, L156).
+- **A link that does something always asks first.** Calling a service, firing an event and sending location each show a confirm box (L68-84).
+- **A link that only goes somewhere asks only if the reader has switched that on.** The opening code skips the question unless a preference called "confirm before opening URL" is set (`Sources/App/Container/AppContainerCoordinator.swift` L298). Links from the app's own widget carry a proof and always skip the question (`IncomingURLHandler.swift` L110, L156).
 - Ordinary https links on the project's own web address are handled apart from custom-scheme links, and only for http and https. The comment says this stops a crafted custom-scheme link from reaching the in-app browser (L49-58).
 - A link the app does not understand gets an error message, not silence (L234).
 
-**What carries over.** Sort links into "go there" and "do this", and confirm the second kind. Tell the reader when a link was not understood.
+**Question 5.** There is a first-run folder of about sixty files: welcome, find your server, sign in, permissions for location and privacy, name this device (`Sources/App/Onboarding/`; file list read, files not opened). By the file names this is setup the app cannot work without, not teaching.
 
-**What does not.** It is a remote control, not a reader. It says nothing on questions 1 to 5 or 8 that I verified.
+**What carries over.** Sort links into "go there" and "do this", and always confirm the second kind. Tell the reader when a link was not understood.
+
+**What does not.** It is a remote control, not a reader. It says nothing on questions 1 to 4 or 8 that I verified.
 
 ---
 
@@ -308,11 +318,19 @@ All fetched.
 
 Fetched: `static/js/ReaderApp.jsx`.
 
-**Question 6.** The screen is a row of panels. The number allowed is the window width divided by 360 pixels (L63, L1143). A narrow screen gets a "single panel" arrangement (L2809).
+**Question 6.** The screen is a row of panels. The number allowed is the window width divided by 360 pixels (L63, L1143). The code also has a separate "single panel" mode (L2809). What switches it on I did not trace.
 
 **Question 7.** The web address says what is on screen. A verse reference is the path. A short form adds commentary beside it, for example `/Genesis.1?with=Rashi` (comment at L926). More panels get numbered parts (L982).
 
-**What carries over.** Panels by available width, with a floor of about 360 pixels each. An address a person can read and retype.
+**Question 5, a guide of cards shown once** (`static/js/GuideOverlay.jsx`, `static/js/ReaderPanel.jsx`; fetched, read through a word search and not top to bottom).
+
+- There is a guide made of numbered cards with next and previous, and a "1 of N" count (`GuideOverlay.jsx` L252-254, L301).
+- Its own comment says it "Only shows on first time user opens the relevant page" and "Can be forced to show" (L100-102). A saved marker is set the moment it appears, so it shows once (L179-184).
+- A guide button brings it back whenever the reader asks (`ReaderPanel.jsx` L521, L1569; `Misc.jsx` L1567).
+- It gives up after 7 seconds if the cards have not loaded, so a slow guide never blocks the page (`GuideOverlay.jsx` L112-114, L136-142).
+- **It is switched on for the editor only.** The entry that would turn it on for the reading screen is commented out (`ReaderPanel.jsx` L550-558). So this is the nearest thing to a tour I found, and the project has not put it on its reader.
+
+**What carries over.** Panels by available width, with a floor of about 360 pixels each. An address a person can read and retype. A guide that shows once, never blocks the page, and has a button to bring it back.
 
 **What does not.** Its texts scroll; they are not fixed pages.
 
@@ -324,19 +342,19 @@ Numbers are API, 2026-11-16. "Not opened" means I did not read any of its source
 
 | Candidate | Stars | Licence | Why dropped |
 | --- | --- | --- | --- |
-| `quran/quran.com-frontend-next` | 1,932 | none detected | Wanted it. The download did not finish in the time I had. Last change 2026-04-27. |
-| `quran/quran_android` | 2,444 | GPL-3.0 | Android only; the iOS sibling covers the same design. |
+| `quran/quran.com-frontend-next` | 1,932 | none detected | Wanted it. The download hung and never finished, so nothing was read. Last change 2026-04-27. |
+| `quran/quran_android` | 2,444 | GPL-3.0 | Not opened. Dropped because the brief is Apple devices and the web; I read the iOS sibling. |
 | `koreader/koreader` | 31,130 | AGPL-3.0 | Not opened. |
 | `kovidgoyal/calibre` | 26,452 | GPL-3.0 | Not opened. |
 | `edrlab/thorium-reader` | 2,951 | BSD-3-Clause | Not opened. |
-| `readium/swift-toolkit` | 582 | BSD-3-Clause | A building kit, not an app with a layout to study. |
-| `johnfactotum/foliate-js` | 1,157 | MIT | The page-drawing library under Readest; no screen layout of its own. |
+| `readium/swift-toolkit` | 582 | BSD-3-Clause | Not opened. By its name a building kit, not an app. Not verified. |
+| `johnfactotum/foliate-js` | 1,157 | MIT | Not opened. A library, not an app, as far as I know. Not verified. |
 | `Kareadita/Kavita` | 12,138 | GPL-3.0 | Not opened. A server with a web reader; worth a look for its page reader next time. |
 | `gotson/komga` | 6,851 | MIT | Not opened. Same reason as Kavita. |
 | `YACReader/yacreader` | 1,438 | GPL-3.0 | Not opened. |
 | `ezra-bible-app/ezra-bible-app` | 239 | GPL-2.0 | Not opened. Small; last release 2026-06-04. |
 | `Sefaria/Sefaria-Mobile` | 44 | GPL-3.0 | Not opened. Low activity signal. |
-| `tldraw/tldraw` | 51,434 | custom, not read | Excalidraw covers the same ground under MIT. |
+| `tldraw/tldraw` | 51,434 | custom, not read | Not opened. I chose Excalidraw for the same question because its licence is plain MIT. |
 | `saber-notes/saber` | 5,050 | GPL-3.0 | Not opened. A handwriting app; would be a good second voice on pens. |
 | `laurent22/joplin` | 57,204 | not detected, not read | Not opened. Would be a good second voice on long settings lists. |
 | `standardnotes/app` | 6,722 | AGPL-3.0 | Not opened. |
@@ -348,15 +366,15 @@ Numbers are API, 2026-11-16. "Not opened" means I did not read any of its source
 | `anyproto/anytype-ts` | 9,100 | not detected, not read | Not opened. |
 | `Automattic/simplenote-ios` | 2,147 | GPL-2.0 | Last release 2024-11-04; too quiet. |
 | `omnivore-app/omnivore` | 16,419 | AGPL-3.0 | Not opened. No release listed. |
-| `wallabag/wallabag` | 13,063 | MIT | Not opened. Server side of a read-later service. |
+| `wallabag/wallabag` | 13,063 | MIT | Not opened. |
 | `karakeep-app/karakeep` | 30,604 | AGPL-3.0 | Not opened. |
 | `wikimedia/wikipedia-ios` | 3,478 | MIT | Not opened. Would be a good voice on first-run teaching next time. |
-| `bluesky-social/social-app` | 18,392 | MIT | Not opened. One codebase for phone and web; not a reader. |
+| `bluesky-social/social-app` | 18,392 | MIT | Not opened. Not a reader. |
 | `Dimillian/IceCubesApp` | 7,112 | AGPL-3.0 | Not opened. |
 | `lichess-org/mobile` | 2,666 | GPL-3.0 | Not opened. |
 | `jellyfin/Swiftfin` and `jellyfin/jellyfin-web` | 4,288 and 3,994 | MPL-2.0 and GPL-2.0 | Not opened. Media players; the scrubber would have been the interest. |
 | `videolan/vlc-ios` | 1,320 | not detected, not read | Not opened. Same reason. |
-| `zotero/zotero` | 15,961 | not read | The computer app; its reader is the `zotero/reader` project I did read. |
+| `zotero/zotero` | 15,961 | not read | Not opened. I read `zotero/reader`, the reader project, instead. |
 
 ## What secondary things did I notice without chasing?
 
@@ -364,10 +382,29 @@ Numbers are API, 2026-11-16. "Not opened" means I did not read any of its source
 - **Optional sign-in.** Quran for iOS shows an account card at the top of settings; reading works without it as far as the settings layout shows. Not read in detail.
 - **How the public site presents the app.** Readest's https links land on a page of the website that decides whether to open the app or show the book in the browser (`deeplink.ts` L56-61, and `app/o/page.tsx`, which I listed and did not read).
 
+## How did I search for first-run teaching and for device notifications?
+
+One word search per downloaded source, for: onboarding, walkthrough, tutorial, coach mark, the system's tips kit, and (in the Swift apps) the system's notification centre. A word search can miss a tour that is named something else.
+
+| App | First-run teaching found | Device notifications found |
+| --- | --- | --- |
+| Readest | None. One hint during a gesture (section 1). | Did not look. |
+| Zotero web reader | None. | Did not look. |
+| Zotero for iPad | Four picture pages before sign-in; a one-time sheet on first use of read-aloud (section 2). | The search matched files I did not sort into teaching or notifications. Not verified. |
+| Quran for iOS | None by these words. "What's new" screens exist (section 3). | None. |
+| Excalidraw | None by these words. Three hints on an empty canvas (section 4). | Did not look. |
+| Aidoku | None. | Yes, a notification service exists (`Aidoku/Core/Library/Services/NotificationManager.swift` L83-85). What it announces I did not read. |
+| pdf.js | None. | Did not look. |
+| Home Assistant | A long first-run setup, not teaching (section 7). | Did not look. |
+| Kiwix | A welcome screen with two actions, open a file or fetch the catalogue (`Views/WelcomeCatalog.swift` L59). | Yes, one when a download completes (`Model/Downloads/DownloadSessionDelegate.swift` L252-256). |
+| NetNewsWire | None. | Yes, one per new article: the feed's name, the article's title, a short summary (`Shared/UserNotifications/UserNotificationManager.swift` L67-73). |
+| Sefaria | A guide of cards, shown once, on its editor only (section 10). | Did not look. |
+
 ## What could I not find?
 
 - No project had a design document about where controls go. The reasons I found are four: one issue (Readest 6999), two code comments (Quran for iOS on the bar timer, Readest on the page-turn hint), and NetNewsWire's two notes.
 - Two searches of issue lists for layout discussions (Quran for iOS, Zotero for iPad) returned nothing. That may be my search words, not an absence.
 - No app I read has a revision calendar, look-alike verses, or a "mark a mistake" pen. Nothing here speaks to those.
-- No app I read shows a first-run tour with steps, so I have no evidence about linking to a tour step.
+- No app I read shows a tour with steps on its reading screen, so I have no evidence about linking to a tour step. Sefaria's card guide is the nearest, and it is on the editor.
+- The history of the files behind three choices names changes I did not open: Zotero's movable pen bar (pull requests 834, 841, 856) and Readest's page-turn hint (pull request 5888, titled as a fix to selecting across pages). They may hold the reasons.
 - I looked at no screenshots and ran no app.
