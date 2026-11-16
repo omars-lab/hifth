@@ -270,6 +270,14 @@ Moves to the bar: the page number (which becomes the button for Go to), the one-
 
 *What would answer it:* a rough build behind a switch, tried on the iPad and a laptop, in Chrome and Firefox. Tests: every moved control still does what it did; the arrow keys and the Go-to key still work; the bar fits at phone, iPad and laptop widths with nothing cut off; after a jump, Back returns to the page the reader left, and a second jump does not lose it; in Arabic the bar reads right to left; every control on the bar is 32 to 40 points tall and can be hit across 44. The pitch walk is run again on the iPad afterwards.
 
+*What the first rough build taught (2026-11-16):* only the Back button is built so far, as the setting "Back button beside the page slider" in the info panel, off until it is judged. Nothing else has moved to the bar yet.
+
+- **What counts as a jump had to be decided, and no list had a row for it.** The build says: a move of more than two pages made with the slider, a juz mark or Go to. A page turn, a hop to a look-alike verse and a link are not jumps, so they never fill the button.
+- **The button shows the page number it goes back to**, so the separate "return to page N" strip may not be needed. That is for a hand on it to say.
+- **It keeps the first page left.** After 7 → 42 → 582, Back goes to 7. Arriving on that page by any road empties the button.
+- **It fits at phone width.** The slider gets shorter by the button's width (about 62 points) and nothing is cut off. The button keeps its width whether or not it shows a number, so the slider does not change length when a jump fills it.
+- **Not yet known:** whether one remembered page is enough, or a reader expects Back to step through several.
+
 ### ③ Should the pens sit in the top bar, so the tool row is not a row of its own? · **open**
 
 **What it changes for a hafiz:** one more row of height for the page on a computer and an iPad. Nothing on a phone, where the pens are already a single button.
@@ -390,6 +398,15 @@ It also flagged that the page ends on the email sign-up. That is on purpose whil
 The first version of this plan set this aside. The research on other apps reversed that: it is the best-supported thing found (see "What do people outside this project do?"). Apps where the reader works on the page with tools keep a bar showing, so the version to try hides the bars while reading and keeps them while a pen is in hand. It would be a switch, off until the rough build is judged.
 
 *What would answer it:* a rough build beside ② and ③, tried on an iPad and a phone: does a tap in the middle of the page still do what it does today, do the bars stay while a pen is held, and does the reader find the slider again without being told. Nobody has run the other apps, so how long they wait before hiding is taken from their code (3 to 5 seconds), not from use.
+
+*What the rough build taught (2026-11-16):* it is built as the setting "Bars while reading" in the info panel, off until it is judged. The bars leave after 4 quiet seconds and a tap brings them back. They stay while a pen is in hand, a verse is chosen, a panel is open, the keyboard is inside a bar or a finger is still down. A swipe or an arrow key turns the page without bringing them back.
+
+- **On a laptop the book grows by half when the bars leave.** At 1280 by 800 with two pages showing, each page goes from 281 to 424 points wide, and shrinks back on a tap. That is the gain, and it is also the cost: the line under the reader's eye moves every time. No list made beforehand had this, and it is the thing to judge first. The other way to build it is for the bars to float over a page that stays the large size.
+- **On a phone the page keeps its width and slides up** by the height of the top bar, and its bottom lines, which the bars covered, come into view.
+- **The "install" message stays when the bars leave**, and takes more room than the top bar did on a phone. It is a message, not a bar, so the build left it. Whether it should leave too is open.
+- **The bars leave 4 seconds after the app opens**, before the reader has touched anything. Waiting for the first page turn may be kinder.
+- **A tap on a verse brings the bars back and also does what it does today** (opens the verses like it). Whether the first tap should only bring the bars back is for a hand to say.
+- **Still to try on a real iPad and phone:** it is parked on the by-hand list.
 
 ## What else could be considered, and why is it not here?
 

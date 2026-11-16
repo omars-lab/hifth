@@ -211,6 +211,21 @@ export interface Strings {
   pageOfTotal(page: number, total: number): string;
   prevPage: string;
   nextPage: string;
+  /** The Back button beside the slider (slider-back.ts): with nowhere to go, and with a page to return to. */
+  sliderBack: string;
+  sliderBackTo(page: number): string;
+  /** A page number alone, in the reader's own numerals. */
+  pageNumber(page: number): string;
+  /** Settings: the Back button beside the slider. */
+  sliderBackTitle: string;
+  sliderBackOff: string;
+  sliderBackOn: string;
+  sliderBackNote: string;
+  /** Settings: whether the bars hide while reading (reading-bars.ts). */
+  readingBarsTitle: string;
+  readingBarsStay: string;
+  readingBarsHide: string;
+  readingBarsNote: string;
   /**
    * How much of the print is actually in this build. Loop 4b vendors the rest;
    * until then the slider spans 604 pages of which three exist, and saying so
@@ -1344,6 +1359,8 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     firstPage: (page) => m.firstPage({ page: n(page) }),
     lastPage: (page) => m.lastPage({ page: n(page) }),
     nearestPageN: (page) => m.nearestPageN({ page: n(page) }),
+    sliderBackTo: (page) => m.sliderBackTo({ page: n(page) }),
+    pageNumber: (page) => n(page),
     // Full speed is spelled `other`: ICU requires one, and a fifth case that
     // repeats it could drift from it.
     scrubSpeed: (speed) => m.scrubSpeed({ speed: speed === "full" ? "other" : speed }),

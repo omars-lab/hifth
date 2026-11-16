@@ -260,6 +260,12 @@
       "android",
       "iphone"
     ],
+    "reading-bars.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "recitation-keep.spec.ts": [
       "android",
       "desktop",
@@ -309,6 +315,12 @@
       "iphone"
     ],
     "slider-arrows.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
+    "slider-back.spec.ts": [
       "android",
       "desktop",
       "desktop-firefox",

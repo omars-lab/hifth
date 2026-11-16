@@ -21,6 +21,8 @@ import { RUN_MARKS, type RunMark } from "../run-mark";
 import { RUN_FOLLOWS, rememberRunFollow, useRunFollow } from "../run-follow";
 import { RUN_AHEADS, rememberRunAhead, useRunAhead } from "../run-ahead";
 import { ARROW_SHOWINGS } from "../jump-arrows";
+import { SLIDER_BACKS, type SliderBack } from "../slider-back";
+import { READING_BARS, type ReadingBars } from "../reading-bars";
 import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PITCH } from "../pitch/pitch";
@@ -107,6 +109,12 @@ interface ColophonProps {
   /** Whether the saved jump arrows stay on the page; remembered on this device. */
   arrowShowing?: ArrowShowing;
   onArrowShowing?: (choice: ArrowShowing) => void;
+  /** The Back button beside the slider, a rough build; remembered on this device. */
+  sliderBack?: SliderBack;
+  onSliderBack?: (choice: SliderBack) => void;
+  /** Whether the bars hide while reading, a rough build; remembered on this device. */
+  readingBars?: ReadingBars;
+  onReadingBars?: (choice: ReadingBars) => void;
   /** How a note draws the parts it can be about; remembered on this device. */
   scopeLook?: ScopeLook;
   onScopeLook?: (look: ScopeLook) => void;
@@ -422,6 +430,10 @@ export function Colophon({
   onRunMark,
   arrowShowing,
   onArrowShowing,
+  sliderBack,
+  onSliderBack,
+  readingBars,
+  onReadingBars,
   scopeLook,
   onScopeLook,
   markTools,
@@ -762,6 +774,15 @@ export function Colophon({
             the owner chose staying, and kept the other way as a choice. */}
         {arrowShowing && onArrowShowing && (
           <Choice id="jump-arrows" title={t.jumpArrowsTitle} note={t.jumpArrowsNote} value={arrowShowing} options={ARROW_SHOWINGS} label={(choice) => choice === "stays" ? t.jumpArrowsStays : t.jumpArrowsAsked} data="jump-arrows" onPick={onArrowShowing} />
+        )}
+
+        {/* Two rough builds from the layout plan (docs/design/app-layout.md,
+            items ② and ⑪), each off until it has been tried on the devices. */}
+        {sliderBack && onSliderBack && (
+          <Choice id="slider-back" title={t.sliderBackTitle} note={t.sliderBackNote} value={sliderBack} options={SLIDER_BACKS} label={(choice) => choice === "on" ? t.sliderBackOn : t.sliderBackOff} data="slider-back" onPick={onSliderBack} />
+        )}
+        {readingBars && onReadingBars && (
+          <Choice id="reading-bars" title={t.readingBarsTitle} note={t.readingBarsNote} value={readingBars} options={READING_BARS} label={(choice) => choice === "hide" ? t.readingBarsHide : t.readingBarsStay} data="reading-bars" onPick={onReadingBars} />
         )}
 
         {/* What a card over the facing page does at the page's outer edge

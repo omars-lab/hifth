@@ -85,6 +85,40 @@
   outline-offset: -2px;
 }
 
+/* Back, after a jump (slider-back.ts): a fourth place in the row, past the
+   page turn, with the page it returns to beside its arrow. Its width is held
+   so the slider does not change length when a page number appears. */
+.bar:has(> .back) {
+  grid-template-columns: auto 1fr auto auto;
+}
+
+.back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-inline-size: calc(var(--touch-min) + 2.5ch);
+  min-block-size: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.back:disabled {
+  color: var(--ink-soft);
+  opacity: 0.4;
+  cursor: default;
+}
+
+.back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .track {
   position: relative;
   display: flex;

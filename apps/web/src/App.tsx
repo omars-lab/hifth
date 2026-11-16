@@ -153,6 +153,8 @@ import { PageToolbar, TOOL_KEYS, TOOLS, toolHint, toolName } from "./components/
 import { useSideRoom } from "./components/useSideRoom";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 import { rememberArrowShowing, savedArrowShowing } from "./jump-arrows";
+import { placeAfterMove, rememberSliderBack, savedSliderBack, type SliderBack } from "./slider-back";
+import { BARS_HIDE_MS, barsMayHide, rememberReadingBars, savedReadingBars, type ReadingBars } from "./reading-bars";
 // Opened by few readers and never before the page is up: loaded on first open.
 import {
   useOpenedOnce,
@@ -1645,6 +1647,36 @@ export function App(): JSX.Element {
   }, []);
   // Full screen: every bar hidden, the page alone (the same note, all options).
   const [full, setFull] = useState(false);
+  // The Back button beside the slider (slider-back.ts, a rough build, off by
+  // default): the page the reader left by a jump. A jump names its landing
+  // page in `jumpToRef` as it sets off; a page that changes any other way (a
+  // turn, a hop between verses, a link opening) records nothing.
+  const [sliderBack, setSliderBack] = useState<SliderBack>(() => savedSliderBack());
+  const chooseSliderBack = useCallback((choice: SliderBack) => {
+    rememberSliderBack(choice);
+    setSliderBack(choice);
+  }, []);
+  const [backPlace, setBackPlace] = useState<number | null>(null);
+  const jumpToRef = useRef<number | null>(null);
+  const backFromRef = useRef(page);
+  useEffect(() => {
+    const from = backFromRef.current;
+    backFromRef.current = page;
+    const jumped = jumpToRef.current === page;
+    jumpToRef.current = null;
+    setBackPlace((place) => (jumped ? placeAfterMove(place, from, page) : place === page ? null : place));
+  }, [page]);
+  // Whether the bars hide while reading (reading-bars.ts, a rough build, off
+  // by default). Its own state, not full screen's: full screen is something
+  // the reader asked for and says aloud; this comes and goes quietly.
+  const [readingBars, setReadingBars] = useState<ReadingBars>(() => savedReadingBars());
+  const chooseReadingBars = useCallback((choice: ReadingBars) => {
+    rememberReadingBars(choice);
+    setReadingBars(choice);
+  }, []);
+  const [barsAway, setBarsAway] = useState(false);
+  const barsAwayRef = useRef(false);
+  barsAwayRef.current = barsAway;
   // Where the tools go in full screen (full-screen-tools.ts): down the side by
   // default, so a mistake can be marked without leaving it; on a desktop or a
   // sideways iPad only, since a phone's tools live in its bottom line.
@@ -1903,6 +1935,9 @@ export function App(): JSX.Element {
         });
         return;
       }
+      // A jump the reader made, for the Back button; a run following the
+      // recitation is not one.
+      if (!follow) jumpToRef.current = next;
       setPage(next);
       // A run's jump leaves the chosen verse behind the same way a turn does.
       if (follow) leaveVerse();
@@ -3625,7 +3660,9 @@ export function App(): JSX.Element {
       // The page opens the word instead; the verse stays lit.
       if (openWordsOfRef.current === key) return;
       if (verseGestures === "a" && !desktop) {
-        setFull((f) => !f);
+        // With the bars away while reading, this tap is spent bringing them
+        // back; it does not also ask for full screen.
+        if (!barsAwayRef.current) setFull((f) => !f);
         return;
       }
       handleSelect(key);
@@ -3743,6 +3780,7 @@ export function App(): JSX.Element {
         // kept looking at whatever page was already mounted — the one case
         // where the app said one thing and showed another.
         if (state.page) {
+          if (origin === "jump") jumpToRef.current = state.page;
           setPage(state.page);
           announce(t.arrivedPage(origin, state.page));
           void stage.showPage(state.page);
@@ -3765,6 +3803,7 @@ export function App(): JSX.Element {
         }
         setSelectedKey(null);
         setSelectedRange(keys);
+        if (origin === "jump") jumpToRef.current = head.page;
         setPage(head.page);
         announce(t.arrivedRange(origin, `${surah}:${ayah}-${toAyah}`, head.page));
         // No pulse: the stage paints the passage from `rangeKeys`, and a drag
@@ -3787,6 +3826,7 @@ export function App(): JSX.Element {
       setSelectedKey(key);
       const words = origin === "link" && state.word ? state.word : null;
       setMarkedWords(words ? { key, from: words[0], to: words[1] } : null);
+      if (origin === "jump") jumpToRef.current = loc.page;
       setPage(loc.page);
       announce(t.arrivedAyah(origin, t.ayahLabel(key) ?? key, loc.page));
       // Words the link names (`?w=3-7`) are laid as word ink on arrival. The
@@ -4304,6 +4344,72 @@ export function App(): JSX.Element {
   useEffect(() => {
     drawerWasUp.current = drawerUp;
   }, [drawerUp]);
+  // The bars leave while reading (reading-bars.ts): after a few quiet seconds,
+  // and never with a pen in hand, a verse chosen, a panel open, the keyboard in
+  // a bar or a finger still down. A tap brings them back; a swipe that turns
+  // the page, or an arrow key, does not.
+  const fullRef = useRef(full);
+  fullRef.current = full;
+  useEffect(() => {
+    if (readingBars !== "hide") {
+      setBarsAway(false);
+      return;
+    }
+    let quiet = performance.now();
+    let held = false;
+    let downAt: { x: number; y: number } | null = null;
+    const mayHide = () => {
+      const focus = document.activeElement;
+      const inBar = focus?.closest('header, footer, nav, [role="toolbar"]') != null && focus.matches(":focus-visible");
+      const open =
+        selectedKeyRef.current !== null ||
+        document.querySelector('[role="dialog"], [role="menu"], [aria-modal="true"]') !== null;
+      return barsMayHide({ way: "hide", tool: toolRef.current, open, full: fullRef.current, inBar });
+    };
+    const onDown = (e: PointerEvent) => {
+      held = true;
+      downAt = { x: e.clientX, y: e.clientY };
+      quiet = performance.now();
+    };
+    const onUp = () => {
+      held = false;
+      quiet = performance.now();
+    };
+    const onClick = (e: MouseEvent) => {
+      quiet = performance.now();
+      const from = downAt;
+      downAt = null;
+      if (!barsAwayRef.current) return;
+      if (from && Math.hypot(e.clientX - from.x, e.clientY - from.y) > 10) return;
+      setBarsAway(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      quiet = performance.now();
+      if (barsAwayRef.current && (e.key === "Escape" || e.key === "Tab")) setBarsAway(false);
+    };
+    const tick = window.setInterval(() => {
+      if (barsAwayRef.current) {
+        // Something else took a pen up or opened a panel: the bars come back.
+        if (!mayHide()) setBarsAway(false);
+        return;
+      }
+      if (held || performance.now() - quiet < BARS_HIDE_MS) return;
+      if (mayHide()) setBarsAway(true);
+    }, 500);
+    window.addEventListener("pointerdown", onDown, true);
+    window.addEventListener("pointerup", onUp, true);
+    window.addEventListener("pointercancel", onUp, true);
+    window.addEventListener("click", onClick);
+    window.addEventListener("keydown", onKey, true);
+    return () => {
+      window.clearInterval(tick);
+      window.removeEventListener("pointerdown", onDown, true);
+      window.removeEventListener("pointerup", onUp, true);
+      window.removeEventListener("pointercancel", onUp, true);
+      window.removeEventListener("click", onClick);
+      window.removeEventListener("keydown", onKey, true);
+    };
+  }, [readingBars]);
   // The address moving the verse on (the back button, a link from another app)
   // takes no tap on the page, so nothing else closed a stacked word's drawer:
   // it was left over the next verse's, or over no drawer at all (2026-11-10).
@@ -4395,7 +4501,7 @@ export function App(): JSX.Element {
     // RTL because they are furniture around a mus'haf, not around a sentence.
     <MarkUndoContext.Provider value={markUndo}>
     <FullScreenContext.Provider value={fullInBar}>
-    <div className={styles.app} dir={dir} data-full={full || undefined} data-full-tools={keepTools ? fullTools : undefined} data-full-side={keepTools ? penSide : undefined} data-full-touch={touchFullNow ?? undefined} data-pages={appPages === "row" ? "" : undefined} data-note-stands={(noteStanding && noteCorner !== null) || undefined}>
+    <div className={styles.app} dir={dir} data-full={full || undefined} data-bars-away={(barsAway && !full) || undefined}data-full-tools={keepTools ? fullTools : undefined} data-full-side={keepTools ? penSide : undefined} data-full-touch={touchFullNow ?? undefined} data-pages={appPages === "row" ? "" : undefined} data-note-stands={(noteStanding && noteCorner !== null) || undefined}>
       <header className={styles.chrome}>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to
@@ -5042,6 +5148,10 @@ export function App(): JSX.Element {
             onRunMark={chooseRunMark}
             arrowShowing={arrowShowing}
             onArrowShowing={chooseArrowShowing}
+            sliderBack={sliderBack}
+            onSliderBack={chooseSliderBack}
+            readingBars={readingBars}
+            onReadingBars={chooseReadingBars}
             scopeLook={scopeLook}
             onScopeLook={chooseScopeLook}
             markTools={markTools}
@@ -5451,6 +5561,10 @@ export function App(): JSX.Element {
         pageContext={pageContext}
         fisheye={fisheye}
         behind={drawerUp}
+        back={sliderBack === "on" ? backPlace : undefined}
+        onBack={() => {
+          if (backPlace !== null) goToPage(backPlace, t.sliderBackTo(backPlace));
+        }}
       />
 
       {PITCH && verseMenuAt && verseMenuItems.length > 0 && (

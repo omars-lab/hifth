@@ -268,6 +268,12 @@
   display: none;
 }
 
+/* The bars away while reading (reading-bars.ts, a rough build behind a
+   setting): the same bars go as in full screen, and a tap brings them back. */
+.app[data-bars-away] > :is(header, footer, nav, [role="toolbar"]) {
+  display: none;
+}
+
 /* Full screen (docs/design/verse-tap-and-hold.md): every bar goes, and the
    page takes the room they leave. */
 .app[data-full] > :is(header, footer:not([data-full-keep]), nav, [role="toolbar"]:not([data-full-keep])) {

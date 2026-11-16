@@ -571,6 +571,10 @@ export interface Catalog {
   readonly rangeEmpty: string;
   readonly rangeFrom: (d: { readonly refs: string | number }) => string;
   readonly rangeUnavailable: string;
+  readonly readingBarsHide: string;
+  readonly readingBarsNote: string;
+  readonly readingBarsStay: string;
+  readonly readingBarsTitle: string;
   readonly recGone: (d: { readonly name: string | number }) => string;
   readonly recKeep: string;
   readonly recKeeping: (d: { readonly doneText: string | number; readonly totalText: string | number }) => string;
@@ -674,6 +678,12 @@ export interface Catalog {
   readonly showBars: string;
   readonly signName: (d: { readonly sign: "fatha" | "kasra" | "damma" | "sukun" | "shadda" | "hamza" | "wasla" | "superscript_alef" | "maddah" | "rounded_zero" | "successive_fathatan" | "successive_kasratan" | "successive_dammatan" | "small_waw" | "small_yeh" | "fathatan" | "kasratan" | "dammatan" | "small_meem" | "damma_iqlab" | "fatha_iqlab" | "kasra_iqlab" | "rectangular_zero" | "small_seen" | "vowel_sign" | "small_noon" | "other" }) => string;
   readonly skinGroup: string;
+  readonly sliderBack: string;
+  readonly sliderBackNote: string;
+  readonly sliderBackOff: string;
+  readonly sliderBackOn: string;
+  readonly sliderBackTitle: string;
+  readonly sliderBackTo: (d: { readonly page: string | number }) => string;
   readonly slipMarked: (d: { readonly fromText: string | number; readonly toText: string | number; readonly n: number; readonly nText: string | number }) => string;
   readonly slipMarkedUnsure: (d: { readonly fromText: string | number }) => string;
   readonly slipWhere: (d: { readonly fromText: string | number }) => string;
