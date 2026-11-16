@@ -31,7 +31,8 @@ Four facts shape the order:
 - Every fix is a new build through Apple's review, because the web part is packed inside the app.
 - A store build could have been the private build. Since 2026-11-16 the archive step refuses
   anything but the public one.
-- No privacy file, no sandbox on the Mac, no system logging, no "report a problem".
+- No sandbox on the Mac, no system logging, no "report a problem". The privacy file went in on
+  2026-11-16.
 - Sign-in has no code yet, and three choices on the sign-in page wait on the owner.
 
 ## How we measure progress
@@ -53,7 +54,7 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **32** of 33: 30 of the 31 on the launch page (the store-build guard closed), and the two older App Store rows on the licence | 2026-11-16 |
+| Launch blockers open | **31** of 33: 29 of the 31 on the launch page (the store-build guard and the privacy file closed), and the two older App Store rows on the licence | 2026-11-16 |
 | Owner steps waiting | **6**: two permission emails and a fallback date; delete 134 merged branches and ask GitHub to purge; three sign-in choices; the hifth.app first upload steps; the EU trader answer; the Mac keyboard test permission | 2026-11-15 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet | 2026-11-15 |

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Apple's privacy file for the iPad, iPhone and Mac app.
+
+  The app tracks nobody, talks to no tracking address and collects nothing
+  about the reader: notes, marks and progress stay on the device. It uses
+  none of the system features Apple asks a reason for (saved settings, file
+  dates, the time since start-up, free disk space, the keyboard list); the
+  web part keeps its settings in the web view's own storage, which is not one
+  of them. If the shell starts using one, add it below with Apple's reason
+  code, and the release check will refuse the build until it has one.
+
+  When sign-in or the reader-sent problem report arrives, the collected-data
+  list changes with it.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>

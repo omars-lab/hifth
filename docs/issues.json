@@ -6901,11 +6901,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑦"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "Apple refuses uploads that use saved settings and similar features without a privacy file giving the reason."
+      "closedBy": ".claude/skills/walk-app/scripts/release-check.test.mjs",
+      "note": "The iPad, iPhone and Mac apps now carry Apple's privacy file: no tracking, no tracking addresses, nothing collected, and none of the system features Apple asks a reason for (the shell was searched for each). A store build's release check fails without the file, if it says the app tracks people, names a tracking address, or lists a feature with no reason. It changes when sign-in or the reader-sent report arrives."
     },
     {
       "id": "launch-mac-sandbox",

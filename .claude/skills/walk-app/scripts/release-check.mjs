@@ -90,8 +90,38 @@ export function flavourProblems(release, wanted) {
   return problems;
 }
 
+/**
+ * Does this store build carry Apple's privacy file, and does it say what we
+ * mean? Apple refuses an upload without one. Ours says the app tracks nobody
+ * and names no tracking address, and every system feature it lists must give
+ * at least one of Apple's reasons, or Apple refuses that too. The iPad and
+ * iPhone app keep it at the top of the app, the Mac app one folder down.
+ */
+export function privacyProblems(release) {
+  const at = [join(release, "PrivacyInfo.xcprivacy"), join(release, "Contents", "Resources", "PrivacyInfo.xcprivacy")].find((p) =>
+    existsSync(p),
+  );
+  if (!at) return ["the release build has no privacy file, and Apple refuses an upload without one"];
+  let file;
+  try {
+    file = JSON.parse(execFileSync("plutil", ["-convert", "json", "-o", "-", at], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }));
+  } catch {
+    return ["the release build's privacy file cannot be read as a settings list"];
+  }
+  const problems = [];
+  if (file.NSPrivacyTracking !== false) problems.push("the release build's privacy file says the app tracks people, or does not say it does not");
+  for (const domain of file.NSPrivacyTrackingDomains ?? []) problems.push(`the release build's privacy file names a tracking address: ${domain}`);
+  for (const api of file.NSPrivacyAccessedAPITypes ?? []) {
+    if (!(api.NSPrivacyAccessedAPITypeReasons ?? []).length) {
+      problems.push(`the release build's privacy file lists ${api.NSPrivacyAccessedAPIType} with no reason, and Apple refuses that`);
+    }
+  }
+  return problems;
+}
+
 export function check(debug, release, { flavour } = {}) {
   const problems = flavour ? flavourProblems(release, flavour) : [];
+  if (flavour === "public") problems.push(...privacyProblems(release));
   const debugKeys = settings(debug);
   for (const key of KEYS) {
     if (debugKeys[key] !== true) problems.push(`the check is out of date: the debug build no longer has ${key}`);
@@ -117,7 +147,7 @@ function arg(name) {
   return at === -1 ? undefined : process.argv[at + 1];
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const debug = arg("--debug");
   const release = arg("--release");
   for (const [which, app] of [["debug", debug], ["release", release]]) {

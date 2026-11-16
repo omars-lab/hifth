@@ -43,7 +43,12 @@ targetTemplates:
           - "**/*.xcassets"
           - "Resources/*.plist"
           - "Resources/*.entitlements"
+          - "Resources/*.xcprivacy"
       - path: Hifth/Resources/Assets.xcassets
+        buildPhase: resources
+      # Apple's privacy file: no tracking, nothing collected. Apple refuses an
+      # upload without it; the release check reads it from the built app.
+      - path: Hifth/Resources/PrivacyInfo.xcprivacy
         buildPhase: resources
       # The web build, as a folder reference: nothing inside it is compiled or
       # renamed, and the scheme handler reads it by path at run time.

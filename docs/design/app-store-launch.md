@@ -101,13 +101,19 @@ store app.
 *What would answer it:* that site's terms found and recorded, and the source added to the
 citations page; or the recitation switched off in the store build.
 
-### ⑦ The app has no privacy file · **open**
+### ⑦ The app has no privacy file · **fixed**
 
-Apple refuses uploads that use certain system features without a file saying why. The shell uses
-saved settings, which is one of them.
+Apple refuses an upload without a privacy file, and refuses one that uses certain system features
+(saved settings, file dates, the time since start-up, free disk space, the keyboard list) without
+saying why.
 
-*What would answer it:* the file added with the right reasons, and an archive that Apple's own
-check accepts.
+*What answered it (2026-11-16):* the iPad, iPhone and Mac apps now carry the file. It says the
+app tracks nobody, names no tracking address and collects nothing. This page used to say the
+shell uses saved settings; a search of the shell's code found none of the five features, so the
+file lists none. The web part keeps its settings in the web view's own storage, which Apple does
+not count. A store build's release check fails if the file is missing, says the app tracks people,
+names a tracking address, or lists a feature with no reason. Apple's own check of the file runs
+on the first real archive, so it belongs to ⑪.
 
 ### ⑧ The Mac app is not sandboxed or signed for the store · **open**
 
@@ -131,8 +137,9 @@ test.
 
 ### ⑪ The commands to make and upload a store build only print an error · **open**
 
-*What would answer it:* a real archive and export that runs clean, with the upload step still
-locked until ③ and ④ are answered.
+*What would answer it:* a real archive and export that runs clean, and Apple's own check of it
+(the privacy file from ⑦ included) passing, with the upload step still locked until ③ and ④
+are answered.
 
 ### ⑫ A recitation may be silent when the phone's silent switch is on · **suspected**
 
