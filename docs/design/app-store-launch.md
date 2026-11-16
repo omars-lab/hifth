@@ -144,10 +144,14 @@ Raising the build as part of the archive comes with ⑪.
 (the privacy file from ⑦ included) passing, with the upload step still locked until ③ and ④
 are answered.
 
-### ⑫ A recitation may be silent when the phone's silent switch is on · **suspected**
+### ⑫ A recitation may be silent when the phone's silent switch is on · **fixed**
 
-*What would answer it:* the app's sound set to play as media, and a recitation heard on a device
-with the switch on.
+*What answered it (2026-11-16):* the iPad and iPhone app now tells the phone at launch that its
+sound is media, which the silent switch does not mute, and spoken words, so a call or spoken
+directions pause it instead of being talked over. Setting this starts no sound and leaves other
+apps' music alone until a verse plays. A test on the Mac holds the choice, and the iPad app in
+the simulator reports it back. The simulator has no silent switch, so hearing it on a real
+device is on the by-hand checks list; if it turns out silent, this item reopens.
 
 ### ⑬ Nothing yet shows Apple's reviewers the app is more than a website · **open**
 

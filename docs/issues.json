@@ -927,6 +927,14 @@
       "owner": "user"
     },
     {
+      "id": "check-silent-switch-recitation-heard",
+      "source": {
+        "ledger": "silent-switch-recitation-heard"
+      },
+      "severity": "risk",
+      "owner": "user"
+    },
+    {
       "id": "check-kfgqpc-terms",
       "source": {
         "ledger": "kfgqpc-terms-primary-source"
@@ -6963,11 +6971,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑫"
       },
-      "status": "suspected",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "Not seen yet on a device; suspected because the app does not set its sound to play as media."
+      "closedBy": "native/HifthTests/SoundTests.swift",
+      "note": "The app now tells the system at launch that its sound is media, spoken words, so the silent switch does not mute a recitation and the system pauses it for a call. A Mac test holds the choice, and the iPad app in the simulator reports the setting back. Hearing it with the switch on needs a real device, since the simulator has no switch: that is parked as the by-hand check silent-switch-recitation-heard, and a silent result reopens this row."
     },
     {
       "id": "launch-more-than-a-website",
