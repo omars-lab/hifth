@@ -1,7 +1,8 @@
 // May the app be archived and sent to TestFlight? Only when the licence
 // question (docs/decisions/native-testflight-licence.md) is settled on one of
 // the two upload options. Settled on C, own devices only, it stays locked.
-// Exits 0 when allowed, 1 otherwise; `make app-archive` calls it.
+// Exits 0 when allowed, 1 otherwise; `make app-testflight` calls it (an archive
+// and an export stay on the laptop, so only the upload waits on this).
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 

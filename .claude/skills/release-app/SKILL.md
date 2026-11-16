@@ -46,6 +46,9 @@ reader-sent problem report arrives, the collected-data list changes with it.
 
 ## Not built yet
 
-The archive and export, the upload, version numbers raised by the release itself, Apple's own
-check of the archive, and the steps after upload (review, staged release). Each is a row in the
-backlog tagged for the launch (`make issues LAUNCH=1`).
+Apple's own check of the export (needs the App Store Connect key), the upload itself, one
+command that runs the whole release with the version raised, and the steps after upload
+(review, staged release). Each is a row in the backlog tagged for the launch
+(`make issues LAUNCH=1`). The whole road, its one-time setup and what each step guards against
+are explained in the `understanding-processes` skill's `app-release.md`; `make app-release-setup`
+checks the setup.
