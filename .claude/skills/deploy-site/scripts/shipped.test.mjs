@@ -12,7 +12,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { auditShipped } from "./shipped.mjs";
+import { auditShipped, inlineScriptHashes } from "./shipped.mjs";
 
 const HEAD = "0123456789abcdef0123456789abcdef01234567";
 
@@ -155,6 +155,45 @@ test("a header that cuts the link between the old tab and the new one is refused
   const got = refusals(files);
   assert.deepEqual(paths(got), ["_headers"]);
   assert.match(got[0].why, /carry/);
+});
+
+/*
+ * The app's page carries one script written into the page itself: it starts fetching the
+ * reader's language file before the main script asks for it. Its words change with every
+ * build, so the release writes its fingerprint into the app's script rule
+ * (hifth-app-csp-for-the-app). A rule left unfilled, or filled for another build, would make
+ * browsers refuse that script.
+ */
+const withAppScript = (headers, script = "window.lang='en'") =>
+  cleanFolder().map((f) => {
+    if (f.path === "_headers") return { ...f, text: headers };
+    if (f.path === "read/index.html") return { ...f, text: `<script>${script}</script>${f.text}` };
+    return f;
+  });
+
+test("an app script rule left unfilled is refused", () => {
+  const got = refusals(withAppScript("/read/\n  Content-Security-Policy: script-src 'self' {app-inline-scripts}\n"));
+  assert.ok(paths(got).includes("_headers"), JSON.stringify(got));
+  assert.match(got.find((p) => p.path === "_headers").why, /never filled in/);
+});
+
+test("a script in the app's page that its rule does not allow is refused", () => {
+  const headers = `/read/\n  Content-Security-Policy: script-src 'self' ${inlineScriptHashes("<script>window.lang='ar'</script>").join(" ")}\n`;
+  const got = refusals(withAppScript(headers));
+  assert.deepEqual(paths(got), ["read/index.html"]);
+  assert.match(got[0].why, /refuse/);
+});
+
+test("a script in the app's page that its rule allows passes", () => {
+  const page = "<script>window.lang='en'</script>";
+  const headers = `/read/\n  Content-Security-Policy: script-src 'self' ${inlineScriptHashes(page).join(" ")}\n`;
+  assert.deepEqual(refusals(withAppScript(headers)), []);
+});
+
+test("a script's fingerprint is the one browsers compute: SHA-256 of its words, in base64", () => {
+  // The hash of the empty script, as browsers and every CSP guide give it.
+  assert.deepEqual(inlineScriptHashes("<script></script>"), ["'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"]);
+  assert.deepEqual(inlineScriptHashes('<script type="module" src="./a.js"></script>'), []);
 });
 
 test("a release missing a page the site needs is refused", () => {

@@ -21,9 +21,9 @@
 import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, extname, join, relative, resolve } from "node:path";
+import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { auditShipped, readFolder } from "./shipped.mjs";
+import { APP_SCRIPTS_GAP, auditShipped, inlineScriptHashes, readFolder } from "./shipped.mjs";
 import { verifyLive } from "./live.mjs";
 import { addDevDesigns, commitDates } from "./dev-designs.mjs";
 import { addDevSidebar, copyFeaturesPage, findFeaturesPage } from "./dev-sidebar.mjs";
@@ -40,8 +40,9 @@ const SITE = "https://hifth.app";
 const LANDING_FILE = /^(_headers|_redirects|[\w-]+\.(html|css|js|png|svg|ico|webp))$/;
 /** Front-page folders copied whole, each with the kinds of file it may hold. */
 const LANDING_DIRS = { ar: /^(index|privacy)\.html$/, shots: /^[\w-]+\.(png|jpg|webp)$/, fonts: /^[\w.-]+\.(woff2|txt)$/ };
-/** What every app build writes and the site never needs. */
-const APP_SKIP = (rel) => rel === "docs" || rel === "_headers" || rel === "_redirects" || extname(rel) === ".map";
+/** What every app build writes and the site never needs, and Finder's folder notes. */
+const APP_SKIP = (rel) =>
+  rel === "docs" || rel === "_headers" || rel === "_redirects" || extname(rel) === ".map" || basename(rel) === ".DS_Store";
 
 /**
  * Empty the release folder. Finder writes a .DS_Store into a folder it has open, and can do so
@@ -88,7 +89,23 @@ export function assemble({ landing = LANDING, app = APP_DIST, out = OUT } = {}) 
     recursive: true,
     filter: (src) => src === app || !APP_SKIP(src.slice(app.length + 1)),
   });
+  fillAppScriptRule(out);
   return out;
+}
+
+/**
+ * Write the fingerprints of the scripts in the app's page into the gap its script rule leaves
+ * (apps/landing/_headers, under /read/). They change with every build, so the checked-in file
+ * cannot hold them. Only the release folder's copy is changed; the check refuses a folder
+ * whose gap is still there, or whose page runs a script the rule does not name.
+ */
+function fillAppScriptRule(out) {
+  const headers = join(out, "_headers");
+  const page = join(out, "read", "index.html");
+  if (!existsSync(headers) || !existsSync(page)) return;
+  const text = readFileSync(headers, "utf8");
+  if (!text.includes(APP_SCRIPTS_GAP)) return;
+  writeFileSync(headers, text.replaceAll(APP_SCRIPTS_GAP, inlineScriptHashes(readFileSync(page, "utf8")).join(" ")));
 }
 
 /**

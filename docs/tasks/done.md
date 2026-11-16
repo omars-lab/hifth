@@ -62,6 +62,16 @@ the spam-check key (`hifth-app-turnstile-key`).
   release folder is now cleared by moving it aside first, because Finder could write into it
   while it was being deleted (`docs/issues/old-folder-written-to-while-deleted.md`).
 
+### 2026-11-15 — a script rule for the app at hifth.app/read (branch hifth-app-read-csp)
+
+**Done:**
+- The app at /read/ says where its scripts may come from: this site, plus the one script written
+  into its page, whose fingerprint the release fills in and checks; the recitation only from
+  verses.quran.com (backlog row `hifth-app-csp-for-the-app`, fixed). Tried in Chrome and Firefox
+  with the rule on, nothing refused. The iPad and Mac apps never see the rule.
+- Finder's .DS_Store files in the app's build folder no longer stop a release; the copy leaves
+  them out.
+
 ### 2026-11-14 — hifth.app's contact address, spam-check command and safety (branch hifth-app-next)
 
 **Done:**

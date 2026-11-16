@@ -15,8 +15,27 @@
  * Owner, 2026-11-11: "ensuring the bare minimum is deployed (in prod, no dev functionality)".
  * Tests: shipped.test.mjs. The release script, release-hifth-app.mjs, calls auditShipped.
  */
+import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
+
+/**
+ * Where the app's script rule (apps/landing/_headers, under /read/) leaves a gap for the
+ * scripts written into the app's own page. Their words change with every build, so the release
+ * fills the gap in (release-hifth-app.mjs, assemble).
+ */
+export const APP_SCRIPTS_GAP = "{app-inline-scripts}";
+
+/**
+ * The fingerprint a script rule needs to let each script written into a page run: SHA-256 of
+ * the script's words exactly as they sit between its tags, in base64, the way browsers compute
+ * it. A script loaded from a file (one with src) needs none.
+ */
+export function inlineScriptHashes(html) {
+  return [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(
+    ([, words]) => `'sha256-${createHash("sha256").update(words, "utf8").digest("base64")}'`,
+  );
+}
 
 const ALLOWED = [
   /^(index\.html|privacy\.html|404\.html|styles\.css|notify\.js|_headers|_redirects)$/,
@@ -94,6 +113,21 @@ export function auditShipped(files, opts = {}) {
         why: "it sets Cross-Origin-Opener-Policy, which cuts the old address's tab off from hifth.app's, so readers could not carry their marks across (apps/web/src/moved.ts)",
       });
     }
+  }
+  const headers = files.find((f) => f.path === "_headers")?.text ?? "";
+  if (headers.includes(APP_SCRIPTS_GAP)) {
+    problems.push({
+      path: "_headers",
+      why: "the app's script rule was never filled in with the fingerprint of the script in its page; put the folder together with the release script, not by hand",
+    });
+  }
+  const appPage = files.find((f) => f.path === "read/index.html")?.text ?? "";
+  const refused = inlineScriptHashes(appPage).filter((hash) => !headers.includes(hash));
+  if (refused.length) {
+    problems.push({
+      path: "read/index.html",
+      why: `browsers would refuse ${refused.length} script(s) written into the app's page, because the app's script rule does not name them; the app would still work, but fetch the reader's language one round trip later, with a refusal in every reader's console`,
+    });
   }
   const have = new Set(files.map((f) => f.path));
   for (const path of REQUIRED) {
