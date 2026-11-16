@@ -8,6 +8,10 @@ import { SLIDER_BACK_KEY } from "../src/slider-back";
  * build behind a setting, off by default. After a few quiet seconds the bars
  * leave; a tap brings them back; they stay while a pen is in hand. The clock
  * is the test's own, so nothing here waits real seconds.
+ *
+ * These run in the two laptop browsers only. The file sets a laptop-sized
+ * window, which on the phone runs would make a screen no device has; the
+ * phone has its own test below, in a phone-sized window with a finger.
  */
 
 test.use({ locale: "en-US", viewport: { width: 1280, height: 800 } });
