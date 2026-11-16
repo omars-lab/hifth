@@ -2,3 +2,4 @@
 {"v":1,"ts":"2026-11-12T20:18:23Z","ev":"shot","role":"comment","author":"omar","icloud":"CloudDesktop/data/page-comments/hifth/t_476e84/comment.png","sha":"eedd1ec11f4d"}
 {"v":1,"ts":"2026-11-12T20:18:28Z","ev":"anchor","author":"page","state":"lost"}
 {"v":1,"ts":"2026-11-12T20:18:28Z","ev":"anchor","author":"page","state":"found"}
+{"v":1,"ts":"2026-11-16T13:47:43Z","ev":"reply","author":"claude","body":"Built on 2026-11-12 and 13 as four looks (shades, rings, cards, dots), in the info panel under \"How the calendar shows a day\" and drawn side by side in `docs/design/calendar-look.md`. Waiting on your pick; the front page's picture follows once you choose."}

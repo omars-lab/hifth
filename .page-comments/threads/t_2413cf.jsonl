@@ -2,3 +2,4 @@
 {"v":1,"ts":"2026-11-12T20:17:57Z","ev":"shot","role":"comment","author":"omar","icloud":"CloudDesktop/data/page-comments/hifth/t_2413cf/comment.png","sha":"6179e1399d3d"}
 {"v":1,"ts":"2026-11-12T20:18:04Z","ev":"anchor","author":"page","state":"lost"}
 {"v":1,"ts":"2026-11-12T20:18:05Z","ev":"anchor","author":"page","state":"found"}
+{"v":1,"ts":"2026-11-16T13:47:43Z","ev":"reply","author":"claude","body":"Built on 2026-11-12 as three layouts, including the one you describe (choose the kind first, then the mistake). They are in the info panel under \"How the Mistake pen asks\" and drawn side by side in `docs/design/mistake-ask.md`. Waiting on your pick; the front page's picture follows once you choose."}

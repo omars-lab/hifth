@@ -7200,6 +7200,120 @@
       "owner": "agent",
       "launch": true,
       "note": "Of the public build only, in English and Arabic."
+    },
+    {
+      "id": "layout-pages-line-only-when-missing",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-16 (page comment t_13550d): all 604 pages are always there, so why print the count. Plan: draw the line only when pages are missing, and keep it as what a screen reader hears for the slider. Test first: no line with every page present, the line with one page missing."
+    },
+    {
+      "id": "layout-bottom-bar-moving-and-viewing",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-16 (page comments t_3b503f and t_f9e931): Go to, the size buttons and one page or two belong on the page bar at the bottom, and its turn buttons should look like the keyboard keys drawn in the top bar. Those two keys are pictures, not buttons. Plan: a rough build behind one switch, \"The new layout\"; the slider itself does not change. Tried on the iPad and a laptop, in Chrome and Firefox, before anything is chosen."
+    },
+    {
+      "id": "layout-pens-in-the-top-bar",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "③"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Follows the bottom-bar row: once the top bar is emptied, the pens fit in it and the page gains a row of height on a computer and an iPad. Built under the same switch. To check by hand: the pens are still easy to hit with the pencil."
+    },
+    {
+      "id": "layout-settings-sorted-by-subject",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "④"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "useCase": "have-it-my-way-and-keep-it",
+      "feature": "settings",
+      "note": "Owner, 2026-11-16 (page comment t_1fe0f7): one settings button like the phone's own Settings, for which mus'haf, tajweed on or off, language and the rest. Measured that day: the info panel holds 47 groups of settings and 118 controls and is about eleven screens tall. Plan: one list sorted by subject with those three first, built on the settings page that already exists (the row app-pages-settings-and-developer), with one way in instead of three. A test counts that no setting was lost."
+    },
+    {
+      "id": "layout-messages-not-a-help-row",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑤"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-16 (page comment t_21e97a): is the row above the page bar adding value, and could its lines be notices like a Mac's. Plan: the row shows only while there is a way back after a jump; on a phone the pen switch and Full screen stay; what the app has to say becomes a short message that leaves by itself. First step is a list of every line the app prints, each marked as a message, a first-use tip, or dropped."
+    },
+    {
+      "id": "layout-tour-with-a-link-per-step",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑥"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "note": "Owner, 2026-11-16 (page comment t_a03692): a guided tour of the menus and pens that can be turned off, each step reachable by one of the app's links. Plan: two shapes built rough, a spotlight in order and a checklist in any order, over the real page; each step gets a web link and an app link, which adds a kind of link to the list kept in step in four places. Built after the controls have stopped moving."
+    },
+    {
+      "id": "layout-where-losing-options-go",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑦"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "feature": "settings",
+      "note": "Most of the 47 groups of settings are options that lost a choice and were kept as a switch, by the owner's rule. A short settings list needs a place for them. Three choices are set out on the page; folded under each subject is assumed until the owner picks."
+    },
+    {
+      "id": "layout-tour-starts-by-itself",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "On 2026-09-25 the owner chose that tips wait until asked for. A tour that starts by itself reverses that. Three choices are set out on the page; offered once and not started is assumed until the owner picks."
+    },
+    {
+      "id": "layout-messages-in-app-or-device",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "\"Notices like a Mac's\" can mean a card the app draws, or the device's own notifications, which need permission and suit reminders more than \"Bookmark kept\". Drawn inside the app is assumed until the owner picks."
+    },
+    {
+      "id": "front-page-comments-of-nov-12",
+      "source": {
+        "file": "docs/design/app-layout.md",
+        "item": "⑩"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "note": "Eight page comments the owner left on hifth.app's front page on 2026-11-12 (t_c21ede, t_594286, t_016a29, t_0f5ddd, t_37714b, t_7a13cc, t_7b53cc, t_9200ae): a features section, a new line under the name, Aref Ruqaa for the name's lettering, device tabs with \"coming soon\", a two-page picture and a site-wide language choice. They belong to the front-page work, which has unmerged changes of its own; listed here so they are not lost."
     }
   ]
 }
