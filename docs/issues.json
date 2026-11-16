@@ -6820,11 +6820,12 @@
         "file": "docs/design/hifth-app-site.md",
         "item": "⑱"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "The app at hifth.app/read/ does not yet tell the browser where its scripts may come from; the front, privacy and email pages do since 2026-11-14. Write the rule for /read/ in apps/landing/_headers, try the app with it in Chrome, Firefox and the iPad simulator (page pictures, sounds, the service worker, the native apps' bridge), fix what the browser refuses, and add /read/ to the test in apps/landing/lib/pages.test.mjs."
+      "closedBy": ".claude/skills/deploy-site/scripts/shipped.test.mjs",
+      "note": "Fixed 2026-11-15. The app at hifth.app/read/ now has its own script rule in apps/landing/_headers: scripts from the site only, plus the one script written into the app's page (it starts fetching the reader's language early). That script changes with every build, so the release fills its fingerprint into the rule and refuses a folder where it is missing or does not match; shipped.test.mjs and release-hifth-app.test.mjs hold that, pages.test.mjs holds the rule itself. Tried in Chrome and Firefox with the rule on: pages, recitation, offline worker and early language download all worked, no refusals. The iPad and Mac apps load the files from inside the app without the site's headers, so the rule never reaches them. Looking also found Finder's .DS_Store in the app's build folder stopping a release; the copy now leaves it out, with a test."
     },
     {
       "id": "hifth-app-support-page",

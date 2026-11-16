@@ -304,19 +304,27 @@ faults, each now held by a test. The panels group showed 9 of the page's 11 card
 marked pitch-only; they are now listed with a "pitch only" tag. A long group name was cut off; it
 now wraps. And on a phone the Menu button sat under the comment bar, so it moved to the top left.
 
-### ⑱ Does the app at hifth.app/read say where its scripts may come from? · **open**
+### ⑱ Does the app at hifth.app/read say where its scripts may come from? · **fixed**
 
-Not yet. Since 2026-11-14 the front pages, the privacy pages and the email pages each tell the
-browser that scripts may come only from hifth.app itself (and, on the front pages, from
-Cloudflare's spam check). If someone ever slipped a line of their own into one of those pages,
-the browser would refuse to run it. Every page, the app included, also refuses to be shown inside
-another site's frame and refuses a guessed file type.
+Yes, since 2026-11-15. The front pages, the privacy pages and the email pages already told the
+browser (since 2026-11-14) that scripts may come only from hifth.app itself and, on the front
+pages, from Cloudflare's spam check. If someone ever slipped a line of their own into one of
+those pages, the browser would refuse to run it. Every page, the app included, also refuses to be
+shown inside another site's frame and refuses a guessed file type.
 
-The app at /read/ does not carry the script rule yet. It loads the pictures of the pages, its
-sounds and its service worker, and it talks to the iPad and Mac apps through their own web views,
-so a rule written without trying each of those could quietly break one. What would answer it:
-write the rule for /read/, open the app with it in Chrome, Firefox and the iPad simulator, and
-fix each thing the browser refuses, with a test that the rule stays on.
+The app at /read/ now has a rule of its own. Scripts may come only from hifth.app, plus the one
+short script written into the app's page, which starts fetching the reader's language early.
+That script changes with every build, so the release writes its fingerprint into the rule, and
+refuses to upload a folder where the fingerprint is missing or does not match. The recitation may
+come from verses.quran.com; nothing else may come from another site, and there are no frames.
+
+What was looked at: the release folder served on this laptop with the rule on, in Chrome and
+Firefox. The pages drew, the recitation was fetched and played, the offline worker started, the
+language download started early, and the browser refused nothing. /read/index.html is answered by
+sending the reader on to /read/, so the rule always applies. The iPad and Mac apps load the same
+files from inside the app, without the site's headers, so the rule does not reach them and could
+not break them. Carrying marks from the old address passes them between two tabs, which the rule
+does not govern.
 
 On this laptop the script rule is left out of every page, because the local side bar and the
 comment button are written into each page directly. The release check serves the folder going up

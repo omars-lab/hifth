@@ -42,7 +42,7 @@ test("both privacy pages give hello@hifth.app to write to, and no placeholder", 
  * The site's own headers (the security review of 2026-11-14, docs/design/hifth-app-security.md).
  * Every address: no framing by another site, no guessing a file's type. The front pages also
  * name every place a script, frame or font may come from: this site, and Cloudflare's spam
- * check. The app under /read/ gets no script rule yet (backlog: hifth-app-csp-for-the-app).
+ * check. The app under /read/ has a rule of its own, tested below.
  */
 const headerRules = () => {
   const rules = {};
@@ -78,6 +78,24 @@ test("each front page lets scripts come only from this site and the spam check",
     assert.match(csp, /object-src 'none'/, path);
     assert.doesNotMatch(csp, /unsafe-inline|unsafe-eval/, path);
   }
+});
+
+/*
+ * The app under /read/ (hifth-app-csp-for-the-app): scripts from this site only, plus the one
+ * script written into its page, whose fingerprint the release fills in where the gap is. The
+ * recitation comes from verses.quran.com. Nothing else from another site, no frames.
+ */
+test("the app lets scripts come only from this site, and sounds only from the recitation's site", () => {
+  const csp = headerRules()["/read/"]?.["content-security-policy"] || "";
+  assert.match(csp, /default-src 'self'/);
+  assert.match(csp, /script-src 'self' \{app-inline-scripts\}(;|$)/);
+  assert.match(csp, /media-src 'self' blob: https:\/\/verses\.quran\.com(;|$)/);
+  assert.match(csp, /connect-src 'self' https:\/\/verses\.quran\.com(;|$)/);
+  assert.match(csp, /frame-src 'none'/);
+  assert.match(csp, /frame-ancestors 'none'/);
+  assert.match(csp, /object-src 'none'/);
+  assert.match(csp, /base-uri 'none'/);
+  assert.doesNotMatch(csp, /unsafe-inline|unsafe-eval|https:\/\/(?!verses\.quran\.com)/);
 });
 
 test("no front page carries a script or style written into the page itself", () => {

@@ -17,8 +17,8 @@
 # The front pages name every place a script, frame, picture or font may come from: this site,
 # and Cloudflare's spam check (its script, and the frame it draws the check in). Nothing is
 # written into the pages themselves, so nothing needs 'unsafe-inline'. The "no page here" page
-# is served at every unknown address, so it has only the rule above. The app under /read/ has
-# no script rule yet (backlog: hifth-app-csp-for-the-app).
+# is served at every unknown address, so it has only the rule above. The app's own rule is at
+# the end, under /read/.
 /
   Cache-Control: no-cache
   Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; connect-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'
@@ -50,5 +50,13 @@
 /read/manifest.webmanifest
   Cache-Control: no-cache
 
+# The app (hifth-app-csp-for-the-app). Scripts come from this site only, plus the one script
+# written into the app's page, which starts fetching the reader's language early. Its words
+# change with every build, so the release fills its fingerprint in where {app-inline-scripts}
+# stands, and refuses a folder where it did not. The recitation is fetched from
+# verses.quran.com and played from memory (blob:); the pointer shapes are pictures written
+# into the styles (data:). Nothing else from another site, and no frames. The offline
+# worker (sw.js) gets no rule of its own: one there would govern the worker itself.
 /read/
   Cache-Control: no-cache
+  Content-Security-Policy: default-src 'self'; script-src 'self' {app-inline-scripts}; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob: https://verses.quran.com; connect-src 'self' https://verses.quran.com; font-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'none'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'

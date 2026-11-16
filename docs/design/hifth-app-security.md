@@ -2,7 +2,8 @@
 
 *Written 2026-11-14, after a security review of the site the same day. It covers the front page,
 the privacy page, and the "tell me when the Mac app is out" email list. The reading app under
-`/read/` is covered only where it shares the site's rules.*
+`/read/` is covered for the rules the browser is told to keep (since 2026-11-15), not for its own
+data.*
 
 ## The short version
 
@@ -17,7 +18,7 @@ the privacy page, and the "tell me when the Mac app is out" email list. The read
 - **The pages tell the browser what they may do.** They load scripts only from this site and
   Cloudflare's spam check, they can't be put in a frame on another site, and the browser may not
   guess a file's type.
-- **What is still open:** the reading app has no script rule yet, old copies of the database's
+- **What is still open:** old copies of the database's
   name sit in the repository's history, commits carry the owner's personal email, and the spam
   check still uses Cloudflare's test key until the owner gives the key the right permission.
 
@@ -130,12 +131,23 @@ only the spam check's, and pictures, styles and fonts only from this site. Nothi
 the pages themselves, so the rule needs no exceptions for inline code. These live in
 `apps/landing/_headers`.
 
+The reading app at `/read/` has a rule of its own (since 2026-11-15): scripts only from this
+site, plus the one short script written into the app's page, which starts fetching the reader's
+language early. That script changes with every build, so the release writes its fingerprint into
+the rule, and refuses to upload a folder where the fingerprint is missing or does not match. The
+recitation may come from verses.quran.com, and nothing else from another site; no frames at all.
+It was tried in Chrome and Firefox with the rule on: the pages, the recitation, the offline
+worker and the early language download all worked, and the browser refused nothing. The iPad and
+Mac apps load the same files from inside the app, without the site's headers, so the rule does not
+reach them.
+
 The pages the server code makes (the "check your inbox", confirm and leave pages) set their own,
 stricter rules, because Cloudflare doesn't add `_headers` to them: no scripts at all, no framing,
 no address sent to other sites, and never kept in a cache.
 
-The tests that hold all of this still: `apps/landing/lib/pages.test.mjs` and
-`apps/landing/lib/notify.test.mjs`.
+The tests that hold all of this still: `apps/landing/lib/pages.test.mjs`,
+`apps/landing/lib/notify.test.mjs`, and for the app's fingerprint
+`.claude/skills/deploy-site/scripts/shipped.test.mjs` and `release-hifth-app.test.mjs`.
 
 ## What runs only on the laptop, and what stops it reaching the live site?
 
@@ -161,7 +173,6 @@ for each development address and expects an error every time.
 
 | Gap | What it risks | What closes it | Whose |
 |---|---|---|---|
-| The reading app at `/read/` has no script rule | If a bad script ever got into the app, the browser wouldn't block it. The app holds no secrets and sends nothing, so the harm is limited to that tab. | Write the rule and test it in the app on every device (backlog: hifth-app-csp-for-the-app). | agent |
 | Old copies of the database's name are in the repository's history | Someone reading old commits can learn which Supabase project holds the list. The name alone opens nothing, since every change needs the site key and reading needs the password. | Rewriting history and asking GitHub to purge it. | owner |
 | Commits carry the owner's personal email | Anyone can read it from the public commits. | Set the commit email to GitHub's no-reply address, and turn on GitHub's block on pushes that show a personal email. | owner |
 | The spam check still uses Cloudflare's test key | Every token passes, so the form would take scripts. The release check refuses it, so it can't go live like this. | Give the Cloudflare key the "Turnstile, Edit" permission, then make the real check. | owner |
