@@ -1,0 +1,124 @@
+# Check that we could run the app, fix the worst gap, check again
+
+Paste everything under **The prompt** into `/loop` with no interval, so the session sets its own
+pace. Each pass re-counts how ready we are to launch and run Hifth on the App Store, fixes the
+thing behind the worst number, and writes down what changed, so the readiness picture lives in
+the repository and never only in a chat.
+
+The goal it serves is `.claude/goals/app-store-launch.md`. The plan is
+`.claude/plans/launch-readiness.md`. What other teams check, with sources, is
+`docs/research/app-launch/research.md`.
+
+## The loop, one line per step
+
+1. **Count** the measures on the goal page: blockers, owner steps, restore and release ages,
+   unanswered reports and reviews, new crashes, unsteady tests, skill gaps.
+2. **Pick** the worst number, and the one thing behind it worth most for the effort.
+3. **Fix** it test first: a test that fails for the real reason, then the fix.
+4. **Compare** our setup with the research once a pass, and once a month read Apple's
+   upcoming-requirements page for new rules.
+5. **Improve the setup** when a step was slow or done by hand: put it in a skill's script.
+6. **Write it down** the same turn: the goal page's numbers, the issue row, the plan.
+7. **Ship it** with the next feature, tell the owner in one sentence, go to 1.
+
+```mermaid
+flowchart TD
+  count["Count the measures<br/>on the goal page"] --> pick["Pick the worst number<br/>and the best fix behind it"]
+  pick --> kind{"Whose is it?"}
+  kind -- "ours" --> test["Write a test that fails<br/>for the real reason"]
+  test --> fix["Fix it, run the test again"]
+  kind -- "only the owner can do it" --> ask["Make sure it is on the goal page's<br/>waiting list and an issue row; one sentence"]
+  fix --> compare["Compare with the research;<br/>monthly: Apple's new rules"]
+  ask --> compare
+  compare --> setup["A step done by hand or slow?<br/>Put it in a skill's script"]
+  setup --> record["Write it down, same turn:<br/>numbers, issue row, plan"]
+  record --> ship["Commit by name, push<br/>(checks run here), merge with the next feature"]
+  ship --> tell["Tell the owner in one sentence"]
+  tell --> count
+```
+
+## The prompt
+
+> Continue the operational-readiness loop for Hifth, following
+> `.claude/loop-prompts/operational-readiness.md`. Each pass: re-count every measure on
+> `.claude/goals/app-store-launch.md` and update its numbers table with today's date. Pick the
+> worst number and the one fix behind it worth most for the effort (a quick win that finishes a
+> half-built piece beats a large new surface). If it is ours, write the test first and watch it
+> fail for the real reason, then fix it. If only the owner can do it, make sure it is on the goal
+> page's waiting list with an issue row owned by them, tell them in one sentence, and do not ask
+> again. Once a pass, compare our setup with `docs/research/app-launch/research.md`; once a month,
+> read Apple's upcoming-requirements page and add any new rule as an issue row. When a step was
+> slow or done by hand, put it in a skill's script with a line in that skill's scripts table.
+> Write down what changed the same turn. Ship it: commit by name, push (every check runs on this
+> laptop), and merge with the next finished feature. Never put The Study Quran's words in
+> anything committed, never decrypt secrets to the terminal, and never upload a build to Apple
+> while the upload is locked. End each pass with one plain sentence to the owner.
+
+<details>
+<summary>1. Counting the measures</summary>
+
+| Measure | How to count it |
+|---|---|
+| Launch blockers open | `make issues LAUNCH=1` prints the count |
+| Owner steps waiting | The goal page's waiting list; strike what the owner has done |
+| Days since a restore was practised | The date of the last restore drill on the goal page |
+| Days since the release command ran clean | The date of its last clean dry run |
+| Unanswered reports and reviews | The `operate-app` skill's commands, once built; until then "no way to receive them" |
+| New crashes | The `crash-logs` skill; a crash with no issue row counts |
+| Unsteady tests | The last push's report of tests that passed only on a second try |
+| Skills with a known gap | Open rows in the plan's skills table |
+
+A measure that cannot be counted yet says so in words ("no release command yet"), never a
+made-up number.
+
+</details>
+
+<details>
+<summary>2. Picking what to fix</summary>
+
+- A number that blocks the upload or a review comes first; then one that would slow a fix once
+  readers have the app; then polish.
+- Do not reopen a choice the owner already made, and do not decide one that waits on them.
+- The licence lock is deliberate. Work around it (citations, fallbacks), never through it.
+
+</details>
+
+<details>
+<summary>3. Fixing, test first</summary>
+
+Follow the `testing` skill. Use made-up text in every test. A check that trips on the setup rather
+than the change gets fixed too, small, with a note in `docs/issues/<slug>.md`. Never loosen a
+check, raise retries, or skip a test to get past it.
+
+</details>
+
+<details>
+<summary>4. Comparing with the research and Apple's new rules</summary>
+
+- Read the checklist in `docs/research/app-launch/research.md`. A line with no backlog row and no
+  "done" gets a row.
+- Monthly, read https://developer.apple.com/news/upcoming-requirements/ and note the date read on
+  the goal page. A new rule with a date becomes an issue row with that date in it.
+
+</details>
+
+<details>
+<summary>5–6. Improving the setup and writing it down</summary>
+
+- A command run by hand twice belongs in a skill's `scripts/` folder, with a row in that skill's
+  "Scripts — when to use each" table, in the same change.
+- Then: the goal page's numbers, the issue rows (`make issues-doc`), the plan's stage, and
+  `docs/issues/<slug>.md` for any change of approach. Run `pnpm gate:issues`.
+
+</details>
+
+<details>
+<summary>7. Shipping and pacing</summary>
+
+- `git branch --show-current`, stage each file by name, commit with the attribution lines.
+- Push in the background; do not poll. Merge with the next finished feature (each merge publishes
+  the site and costs minutes); a fix someone is waiting on merges alone.
+- Stop the loop when every measure is at its target, or when everything left waits on the owner;
+  say which, in plain words.
+
+</details>

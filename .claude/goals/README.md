@@ -7,6 +7,7 @@ repeatable. A session reads the **current** goal before picking work.
 | Goal | Status | Started |
 |---|---|---|
 | [A demo good enough to show The Study Quran's team](study-quran-pitch.md) | **current** | 2026-11-09 |
+| [Hifth on the App Store, and able to fix problems fast once it is there](app-store-launch.md) | **current**, beside the pitch | 2026-11-15 |
 
 ## Adding a goal
 
