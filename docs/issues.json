@@ -6838,6 +6838,17 @@
       "owner": "agent",
       "feature": "hifth-app-site",
       "note": "The App Store asks every listing for a support page. hifth.app has none; hello@hifth.app is named only on the privacy page. Add hifth.app/support in English and Arabic (how to reach us, what to include when something goes wrong, a link to the privacy page), with the front pages' safety headers in apps/landing/_headers, a place in the release check's must-have list (.claude/skills/deploy-site/scripts/shipped.mjs), and a test in apps/landing/lib/pages.test.mjs. The App Store launch plan (another session, 2026-11-15) may take this over."
+    },
+    {
+      "id": "influence-catalog",
+      "source": {
+        "file": "docs/research/influences/README.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Owner, 2026-11-16: look at well-used open apps that run on a Mac, an iPhone and the web, keep what we learn as a catalog in docs, and add a skill for carrying the research on. Two researchers read 10 and 15 apps from their source; a checker writes docs/research/influences/catalog.md from both. Still to do: write the catalog's findings into the layout plan (docs/design/app-layout.md), item by item, with a link back."
     }
   ]
 }
