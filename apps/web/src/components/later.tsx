@@ -55,6 +55,10 @@ export const DiffView = later(() => tools().then((m) => m.DiffView));
 export const SharedWords = later(() => tools().then((m) => m.SharedWords));
 export const HighlightMenu = later(() => tools().then((m) => m.HighlightMenu));
 export const MovedCard = later(() => tools().then((m) => m.MovedCard));
+/* The "page stopped" card loads with the page; its report panel only once the card shows. */
+export const ReportProblem = later(() => tools().then((m) => m.ReportProblem));
+/* The go-to box draws nothing until "/" or its button opens it. */
+export const Jumper = later(() => tools().then((m) => m.Jumper));
 
 /* Only on a computer-sized screen, or by an iPad's Pencil: a phone never fetches ./wide-screen.ts. */
 export const PenHomeAt = later(() => wide().then((m) => m.PenHomeAt));

@@ -169,6 +169,7 @@ import {
   VerseNotes,
   JumpList,
   JumpShelf,
+  Jumper,
   RevisionMap,
   RootLens,
   WordPartsHost,
@@ -193,7 +194,6 @@ import { ShareInDrawer, ShareSheet } from "./components/ShareSheet";
 import { ListenOptions } from "./components/ListenOptions";
 import { rememberListenWay, savedListenWay } from "./listen-way";
 import { OfflineNotice } from "./components/OfflineNotice";
-import { Jumper } from "./components/Jumper";
 import { CoachMarks } from "./components/CoachMarks";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
@@ -4212,6 +4212,7 @@ export function App(): JSX.Element {
   const colophonMounted = useOpenedOnce(colophonOpen || settingsPage);
   const revisionMounted = useOpenedOnce(revisionOpen);
   const drawerMounted = useOpenedOnce(drawerBookmark !== null);
+  const jumperMounted = useOpenedOnce(jumperOpen || jumpNaming !== null);
 
   /* The look-alike chips. One rail, placed by whoever renders it: the stage's
      corner on a phone, the desk beside the live page above the breakpoint. */
@@ -5052,19 +5053,23 @@ export function App(): JSX.Element {
         )}
       </main>
 
-      <Jumper
-        open={jumperOpen || jumpNaming !== null}
-        onJump={(target) => {
-          if (!jumpNaming) return handleJump(target);
-          if (!resolver) return;
-          saveJump(jumpNaming.from, formatAyahKey(resolver.edition, target.surah, target.ayah), jumpNaming.kind);
-        }}
-        onClose={() => {
-          setJumperOpen(false);
-          setJumpNaming(null);
-          setJumpRenaming(null);
-        }}
-      />
+      {jumperMounted && (
+        <Later>
+          <Jumper
+            open={jumperOpen || jumpNaming !== null}
+            onJump={(target) => {
+              if (!jumpNaming) return handleJump(target);
+              if (!resolver) return;
+              saveJump(jumpNaming.from, formatAyahKey(resolver.edition, target.surah, target.ayah), jumpNaming.kind);
+            }}
+            onClose={() => {
+              setJumperOpen(false);
+              setJumpNaming(null);
+              setJumpRenaming(null);
+            }}
+          />
+        </Later>
+      )}
       {jumpAsking && (
         <JumpPicker
           head={(jumpAsking.kind === "slip" ? t.slipWhere : t.jumpWhere)(jumpAsking.from.key)}

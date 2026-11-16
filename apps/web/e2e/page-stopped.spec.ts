@@ -27,3 +27,27 @@ test("a page that throws while drawing shows the stopped screen, not a blank one
   await expect(page.locator("svg[role='group']").first()).toBeVisible();
   await expect(title).toHaveCount(0);
 });
+
+test("when the report panel's file cannot come, the card still offers to open the page again", async ({ page }) => {
+  // The report panel loads from the rarely used tools' file once the card
+  // shows. Offline before the service worker kept that file, the request fails:
+  // the card must still say what happened and keep its one useful button.
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  let refused = false;
+  await page.route(/\/assets\/rarely-used-[^/]+\.js$/, (route) => {
+    refused = true;
+    return route.abort();
+  });
+  await page.route("**/assets/manifest.json", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: '{"edition":"made-up","pages":7}' }),
+  );
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "توقّفت الصفحة عن العمل" })).toBeVisible();
+  await expect.poll(() => refused, { message: "the card asked for the report panel's file" }).toBe(true);
+  await expect(page.getByRole("button", { name: "افتح الصفحة من جديد" })).toBeVisible();
+  // Still there a moment later: the failed load did not take the card with it.
+  await page.waitForTimeout(500);
+  await expect(page.getByRole("heading", { name: "توقّفت الصفحة عن العمل" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "افتح الصفحة من جديد" })).toBeVisible();
+});

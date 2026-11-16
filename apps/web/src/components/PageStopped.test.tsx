@@ -60,14 +60,15 @@ describe("when a part of the page throws while it draws", () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
-  it("offers a problem report that already holds the error", () => {
+  it("offers a problem report that already holds the error", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     render(
       <PageStopped>
         <Throws />
       </PageStopped>,
     );
-    fireEvent.click(screen.getByRole("button", { name: AR.reportOpen }));
+    // The report panel loads from the rarely used tools' file once the card shows.
+    fireEvent.click(await screen.findByRole("button", { name: AR.reportOpen }, { timeout: 5000 }));
     const box = screen.getByRole("textbox", { name: AR.reportTextLabel }) as HTMLTextAreaElement;
     expect(box.value).toContain("made-up fault while drawing");
   });

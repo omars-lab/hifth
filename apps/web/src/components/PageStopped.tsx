@@ -1,7 +1,7 @@
 import { Component, type ReactNode } from "react";
 import { noteFault } from "../fault-log";
 import { useT } from "../i18n";
-import { ReportProblem } from "./ReportProblem";
+import { Later, ReportProblem } from "./later";
 import styles from "./PageStopped.module.css";
 
 /**
@@ -13,7 +13,10 @@ import styles from "./PageStopped.module.css";
  * they are made, not in the page), and offers the one thing that helps:
  * opening the page again. Under it, "Report a problem" (launch item 18) shows
  * the reader a report that already holds what went wrong (kept for it in
- * `fault-log.ts`), and sends nothing unless they choose to mail it.
+ * `fault-log.ts`), and sends nothing unless they choose to mail it. The report
+ * panel loads from the rarely used tools' file once the card shows, so it adds
+ * nothing to the first download; if that file cannot come (offline before the
+ * service worker kept it), the card still offers to open the page again.
  *
  * It sits inside the language provider, so it speaks the reader's language.
  * A part that only fails to load (a tool's file missing offline) is caught
@@ -49,7 +52,9 @@ function StoppedScreen({ reload }: { reload: () => void }): JSX.Element {
         <button type="button" className={styles.reload} onClick={reload}>
           {t.pageStoppedReload}
         </button>
-        <ReportProblem headingLevel={2} />
+        <Later>
+          <ReportProblem headingLevel={2} />
+        </Later>
       </div>
     </main>
   );
