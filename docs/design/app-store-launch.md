@@ -185,7 +185,8 @@ memory for the report, and each line carries the app version and the build's com
 Apple requires a support address with working contact details.
 
 *What would answer it:* a support and known-issues page at hifth.app/support, linked from the
-app. (Takes over the landing page's support-page row.)
+app, with its own entry in hifth.app's safety settings, which list each page by name. (Takes
+over the landing page's support-page row.)
 
 ### ㉑ Once a bad version is out, we cannot stop it or warn readers · **open**
 
