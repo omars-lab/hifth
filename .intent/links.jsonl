@@ -148,3 +148,5 @@
 {"commit": "49d96264338aab7780a781c2494e1e65256660ef", "kind": "task", "name": "is-the-privacy-rule-nothing-leaves-or-nothing-that-doesnt-serve", "by": "hand", "sure": true, "words": "Security reviews check that the reader decides who sees their data"}
 {"commit": "a4bfb7fd3ec87ec01b4c24d108e4a55cfdc7f6a2", "kind": "task", "name": "feature-links-hub", "by": "hand", "sure": true, "words": "Running the feature check on the real iPad is next for the pitch"}
 {"commit": "4ce91f2ed9dcaaf91572c5956d593c25fb757d15", "kind": "task", "name": "supabase-move", "by": "hand", "sure": true, "words": "Saving a secret shows the shape it expects and refuses the wrong one"}
+{"commit": "0238cc880998b531eb0e0ddf57709ffd49fd2769", "kind": "none", "by": "hand", "sure": true, "words": "research on how other open apps lay out their screens; no backlog row for it yet"}
+{"commit": "91e139930dca1786dacb3a7de5ff1b61a2f0699d", "kind": "none", "by": "hand", "sure": true, "words": "corrections to the same research notes; no backlog row for it yet"}
