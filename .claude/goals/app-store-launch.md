@@ -74,8 +74,8 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **28** of 36: 26 of the 34 on the launch page (the store-build guard, the privacy file, the version command, the outside-links test, the silent switch, the review notes with the no-connection test, the error screen and "Report a problem" closed; store reviews, store numbers and the second key on the release page added 2026-11-16), and the two older App Store rows on the licence | 2026-11-16 |
-| Owner steps waiting | **7**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; the hifth.app first upload steps; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-16 |
+| Launch blockers open | **34** of 42: 32 of the 40 on the launch page, and the two older App Store rows on the licence. Six added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊵). Of the 34, **12 can get the app turned down at review**, 8 stop the upload itself (six launch-page items and the two older licence rows), and 14 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
+| Owner steps waiting | **9**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet | 2026-11-15 |
 | Unanswered reports and reviews | no way to receive them yet | 2026-11-15 |
@@ -102,14 +102,20 @@ page" below). Backlog row names are in brackets.
 
 ## What comes next, in order
 
-1. **The quick ones on the new key:** store reviews, store numbers, the release page and setup
-   check. The key exists, so each is a skill and a script.
-2. **The fast-fix line:** the release command, the site's undo, the retry report, then the
-   off-switch and the prompt, each loaded after the page is up.
-3. **The app's log and readers' crashes**, the rest of hearing about problems.
+Reordered 2026-11-17 after the first walk as Apple's reviewer: what can get the app turned down
+comes before what matters once readers have it, since a turned-down build costs a week.
+
+1. **What the reviewer would trip on:** the "Left off" ribbon on a first open (㊳), the walk
+   tools' settings out of the store copy (㊱), and the rest of the reviewer walk (㉟): iPhone,
+   small iPhone, a first launch with no connection, rotation, split view, larger text.
+2. **Apple's settings:** the Mac sandbox, the permissions file, the archive up to the lock.
+3. **What Apple asks to link to:** the support page and the app's privacy policy, then the store
+   answers and screenshots.
 4. **The licence line:** the citations page and the two terms readings.
-5. **Apple's settings:** the Mac sandbox, the permissions file, the archive up to the lock.
-6. **Listing:** the store answers and screenshots.
+5. **The fast-fix line:** the release command, the site's undo, the retry report, then the
+   off-switch and the prompt, each loaded after the page is up.
+6. **Hearing about problems:** store reviews, store numbers and the release page on the new key;
+   the app's log and readers' crashes; the sources in English (㊴).
 7. **Accounts**, as far as the sign-in choices allow; all of it once they are made.
 8. **Test flight** with a few named readers, then **upload and release** once the permissions
    are in writing.
@@ -122,25 +128,32 @@ The plan has the detail of each step.
    deleting an account, and backups of reader data.
 2. **Send the two permission emails, and set the date after which we stop waiting.** This frees
    only the upload, but the answer takes weeks, so the sooner it goes the better.
-3. **The hifth.app first upload steps:** the Cloudflare key permission, the database step, four
+3. **Should the store build show the tajweed colours?** (launch item ㊲) Off: one permission
+   leaves the upload's path and a reviewer sees nothing marked "unchecked". On: huffaz keep the
+   feature and the upload waits on that permission too.
+4. **The hifth.app first upload steps:** the Cloudflare key permission, the database step, four
    secrets, and the mail sender. These put the support page and the off-switch's file online.
-4. **Let the terminal run the Mac app's keyboard test**, or let it run while you are away. This
+5. **Send one test "Report a problem" from the simulator and say whether it arrived** (㊵).
+6. **Let the terminal run the Mac app's keyboard test**, or let it run while you are away. This
    frees checking the Mac app once the sandbox is on.
-5. **Whether you trade in the EU.** Apple asks, and the answer decides what contact details are
+7. **Whether you trade in the EU.** Apple asks, and the answer decides what contact details are
    published.
-6. **Delete the 134 merged branches on GitHub, and ask GitHub Support to purge the old commits.**
+8. **Delete the 134 merged branches on GitHub, and ask GitHub Support to purge the old commits.**
    This frees no launch work, but it finishes the clean-up of the old pictures.
-7. **Try the new layout on the iPad** (the switch in the info panel). This decides whether it
+9. **Try the new layout on the iPad** (the switch in the info panel). This decides whether it
    becomes the default.
 
-## Where the work stands (2026-11-16)
+## Where the work stands (2026-11-17)
 
 - Worktree `../hifth-auth`, branch `store-feedback`, made from main after #636 (the new layout
-  and the size limit raise). It is pushed, with no pull request yet, and holds the session note,
-  the three new backlog rows, the loop's rule on blocks and this page. They ship with the
-  store-feedback skill's pull request.
-- The branch's label is set (`intent start launch-store-feedback`).
-- None of the 36 launch rows names who the work is for (a use case), so every commit label
+  and the size limit raise). It is pushed, with no pull request yet. It holds the session note,
+  the loop's rule on blocks, this page, and the first walk as Apple's reviewer: the review notes
+  rewritten to match what the app shows, "A rough build to try" gone from three settings, the
+  report's device line, the designs link, two walk scripts, the reviewer section of the walk
+  checklist, and six new launch rows (㉟ to ㊵).
+- The reviewer walk's commits carry `intent start launch-reviewer-walk`; the store-feedback
+  skill's carry `launch-store-feedback`.
+- None of the 42 launch rows names who the work is for (a use case), so every commit label
   warns. Add one use case for the launch, such as "a reader hits a problem and gets a fix
   within days", to `docs/use-cases.json` and name it on each launch row.
 - Next item: the store-feedback skill (`launch-store-feedback`). The key is `hifth-reviews`;

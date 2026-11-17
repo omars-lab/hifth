@@ -335,6 +335,62 @@ the launch goal's numbers.
 check confirms the reviews key's file is in place and its ID is saved, printing names and
 dates, never the key itself.
 
+### ㉟ Nobody has walked the store build as Apple's reviewer would · **open**
+
+The first walk, on 2026-11-17 on an iPad simulator with the Release build, found three things
+and fixed them: the review notes' steps described a row of links an iPad never shows; the
+tajweed badge said "beta" and three settings said "A rough build to try", which Apple's rule on
+betas and demos turns down; and the problem report did not name the device.
+
+*What would answer it:* the same walk on the iPhone and the small iPhone, a first launch with no
+connection, swipe page turns, rotation, split view, larger text, and the Mac by picture. The
+steps are in the walk-app skill's checklist, under "The store build, as Apple's reviewer".
+
+### ㊱ The store copy still answers the walk tools' launch settings · **open**
+
+Only someone starting the app from a Mac can set them, so no reader or reviewer can reach them.
+
+*What would answer it:* the archive step leaves them out, and the release check refuses an
+archive that has them.
+
+### ㊲ Should the store build show the tajweed colours at all? · **open**
+
+Its data's permission (④) is not in hand, and its badge says "unchecked". Leaving it off takes
+one permission off the upload's path; leaving it on keeps a feature huffaz use. The owner's
+call.
+
+### ㊳ A "Left off" ribbon appears on the first open, though nothing has been read · **open**
+
+*What would answer it:* no ribbon until the reader has turned a page, with a test.
+
+### ㊴ In English, the sources list still names its sources in Arabic · **open**
+
+*What would answer it:* an English name beside each source's own, with a test.
+
+### ㊵ Nobody has seen a problem report arrive · **open**
+
+The address has mail servers, and the report card offers Copy when there is no mail app.
+
+*What would answer it:* one test report sent from the simulator and seen in the inbox.
+
+## Which of these could get the app turned down, and which matter once readers have it?
+
+Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
+
+- **Stops the upload itself** (nothing goes to Apple until these close): the licence items ②
+  ③ ④ ⑤ ⑥, and the archive and upload ⑪.
+- **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
+  permissions file ⑨ (the upload checks both); the support page ⑳ and the privacy policy ㉙
+  (Apple requires a link to each); the store's questions ㉚ and screenshots ㉛; sign-in ㉖ and
+  deleting an account ㉗ (once sign-in ships, deletion must be in the app); the rest of the
+  reviewer walk ㉟; the tajweed question ㊲ and the first-open ribbon ㊳ (each can read as
+  unfinished); the walk tools' settings ㊱ (low risk, cheap to close).
+- **Matters once readers have it** (Apple will not check these, readers will): the screen
+  reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
+  the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
+  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, the sources in English ㊴, and a
+  report seen to arrive ㊵.
+
 ## What does this leave alone?
 
 - The pitch build and its walk: the pitch goal still governs them.

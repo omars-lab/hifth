@@ -7269,6 +7269,78 @@
       "note": "Of the public build only, in English and Arabic."
     },
     {
+      "id": "launch-reviewer-walk",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉟"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "Walk the public store build as Apple's reviewer would: fresh install, the review notes' steps word for word, every button a reviewer might press. First walk 2026-11-17 on the reviewer iPad simulator (Release build). Found and fixed: the notes' steps described a row of links an iPad never shows (rewritten to name page 7, verse 40 and the round look-alike button, held by a browser test that walks them); the tajweed badge said \"beta\" and three settings said \"A rough build to try\", which Apple's rule on betas and demos turns down (now \"unchecked\" and \"New.\", held by a wording test); the problem report gained the device line. Still to walk: iPhone and iPhone SE (does the top bar fit?), a first launch with no connection on the Release build, swipe page turns, rotation, split view, larger text, and the Mac by picture."
+    },
+    {
+      "id": "launch-probe-in-store-build",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊱"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "The Release build still answers the walk tools' launch settings: one runs a script in the page and prints the answer, others take pictures. Only someone starting the app from a Mac with a cable or the simulator can set them, so neither a reader nor Apple can reach them, and they switch on nothing a reader could use. Still, the copy sent to the store has no need of them. What would answer it: the archive step builds without them, the release check refuses an archive that has them, and the walk build keeps them."
+    },
+    {
+      "id": "launch-tajweed-in-store",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊲"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "launch": true,
+      "note": "Should the store build show the tajweed colours at all? Its data's permission (item ④) is not in hand, and its badge says \"unchecked\" (it said \"beta\" until 2026-11-17). Off in the store build: one permission leaves the upload's path, and a reviewer sees nothing that reads as unfinished; huffaz lose a feature until it returns in an update. On: the feature stays, and the upload waits on that permission too. The owner's call."
+    },
+    {
+      "id": "launch-left-off-on-first-open",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊳"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "On a fresh install the red \"Left off\" ribbon appears on the opening page within a few seconds, though nothing has been read. The app marks the page a reader stays on, which is right later, but on a first open a reviewer sees what looks like someone else's place. Seen on the reviewer iPad and in the browser with nothing stored, 2026-11-17. What would answer it: no ribbon until the reader has turned at least one page, with a test."
+    },
+    {
+      "id": "launch-sources-in-english",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊴"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "With the buttons in English, the sources list in the info panel still names the page print, the word-root corpus and the reciter in Arabic. Seen in the store web build, 2026-11-17. Each name gets an English form beside the source's own, with a test."
+    },
+    {
+      "id": "launch-support-mail-arrives",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊵"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "launch": true,
+      "note": "\"Report a problem\" writes to hello@hifth.app. The address has mail servers (Apple's, checked 2026-11-17), but no report has been sent to it and seen to arrive. With no mail app the report card still offers Copy, so a reader is never stuck. What would answer it: one test report sent from the simulator and seen in the owner's inbox; parked on the by-hand list."
+    },
+    {
       "id": "layout-pages-line-only-when-missing",
       "source": {
         "file": "docs/design/app-layout.md",
