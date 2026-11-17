@@ -104,6 +104,11 @@ made-up number.
 - New web code loads after the page is up: the first download is full (160.8 of 161 KB).
 - Do not reopen a choice the owner already made, and do not decide one that waits on them.
 - The licence lock is deliberate. Work around it (citations, fallbacks), never through it.
+  Apple's own check (`make app-store-check`) is allowed before the licence answer (owner,
+  2026-11-17); it makes no build anyone can install. The upload is not.
+- Signing for the store uses Xcode's own sign-in to the Apple account, which expires. When the
+  export says to sign in again, that is a step only the owner can do: put it on the waiting
+  list and move to another line of work.
 
 </details>
 

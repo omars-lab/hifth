@@ -479,7 +479,8 @@ this laptop until the rights holders answer.
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 
 - **Stops the upload itself** (nothing goes to Apple until these close): the licence items ②
-  ③ ④ ⑤ ⑥, and the archive and upload ⑪.
+  ③ ④ ⑤ ⑥. (The archive, the export and Apple's own check ⑪ are fixed; only the upload
+  command itself waits on these.)
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
   permissions file ⑨ (the upload checks both); the support page ⑳ and the privacy policy ㉙
   (Apple requires a link to each); the store's questions ㉚ and screenshots ㉛; sign-in ㉖ and
