@@ -359,6 +359,10 @@
       "desktop",
       "iphone"
     ],
+    "store-review-steps.spec.ts": [
+      "android",
+      "iphone"
+    ],
     "tajweed-key.spec.ts": [
       "android",
       "desktop-firefox",
