@@ -144,6 +144,21 @@ Raising the build as part of the archive comes with ⑪.
 (the privacy file from ⑦ included) passing, with the upload step still locked until ③ and ④
 are answered.
 
+*Where it stands (2026-11-16):* the archive is real. `make app-archive` makes an Xcode archive
+of the public build, signed with the team's development certificate, and then runs the release
+check again on the app inside the archive, since that is what would be uploaded. Its first run
+passed: the public build, no walk capture, the privacy file in place. The archive stays on the
+laptop, so it no longer waits on the licence answer; only the upload does, and the upload now
+checks the licence before it builds anything. Tests hold both.
+
+`make app-export` signs the archive for the App Store. The owner said yes to its first run on
+2026-11-16, which had Xcode make the team's App Store certificate in the Apple account, and it
+passed: the app inside the export is signed for distribution, is the public build, carries the
+privacy file and has no private folder. The export stays on the laptop.
+
+One step is left. Apple's own check of the exported app needs an App Store Connect key, which
+is the owner's to make.
+
 ### ⑫ A recitation may be silent when the phone's silent switch is on · **fixed**
 
 *What answered it (2026-11-16):* the iPad and iPhone app now tells the phone at launch that its
