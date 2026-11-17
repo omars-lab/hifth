@@ -9,27 +9,42 @@ The goal it serves is `.claude/goals/app-store-launch.md`. The plan is
 `.claude/plans/launch-readiness.md`. What other teams check, with sources, is
 `docs/research/app-launch/research.md`.
 
+## Starting in a new session
+
+1. Read the goal page's **"Where the work stands"**: which worktree and branch, what is
+   committed but not pushed, and the next item.
+2. Work in that worktree (today `../hifth-auth`), never in the main checkout, which other
+   sessions share. Run `git branch --show-current` before the first commit. If its pull
+   request has merged, start the next branch there from `origin/main`.
+3. Use the Node the repo names in `.nvmrc`.
+4. Paste **The prompt** below into `/loop` with no interval.
+
 ## The loop, one line per step
 
 1. **Count** the measures on the goal page: blockers, owner steps, restore and release ages,
    unanswered reports and reviews, new crashes, unsteady tests, skill gaps.
-2. **Pick** the worst number, and the one thing behind it worth most for the effort.
+2. **Pick** the next item in the goal page's "What comes next". When it is blocked, the next
+   one in "What is left, by line of work" that is free to build now.
 3. **Fix** it test first: a test that fails for the real reason, then the fix.
 4. **Compare** our setup with the research once a pass, and once a month read Apple's
    upcoming-requirements page for new rules.
 5. **Improve the setup** when a step was slow or done by hand: put it in a skill's script.
 6. **Write it down** the same turn: the goal page's numbers, the issue row, the plan.
-7. **Ship it** with the next feature, tell the owner in one sentence, go to 1.
+7. **Ship it** with the next feature, tell the owner in one sentence, go to 1. Stop only when
+   every line of work is blocked on the owner, and then ask once, in one list.
 
 ```mermaid
 flowchart TD
-  count["Count the measures<br/>on the goal page"] --> pick["Pick the worst number<br/>and the best fix behind it"]
-  pick --> kind{"Whose is it?"}
-  kind -- "ours" --> test["Write a test that fails<br/>for the real reason"]
+  count["Count the measures<br/>on the goal page"] --> pick["Take the next item<br/>in What comes next"]
+  pick --> kind{"Can we do it now?"}
+  kind -- "yes" --> test["Write a test that fails<br/>for the real reason"]
   test --> fix["Fix it, run the test again"]
-  kind -- "only the owner can do it" --> ask["Make sure it is on the goal page's<br/>waiting list and an issue row; one sentence"]
+  kind -- "it waits on the owner" --> around["Work around it: a draft,<br/>a switch that is off, the fallback"]
+  around --> log["Write it on the waiting list<br/>and its issue row"]
+  log --> other{"Any line of work<br/>still free?"}
+  other -- "yes" --> pick
+  other -- "no, all blocked" --> batch["Ask the owner once:<br/>one list, most work freed first"]
   fix --> compare["Compare with the research;<br/>monthly: Apple's new rules"]
-  ask --> compare
   compare --> setup["A step done by hand or slow?<br/>Put it in a skill's script"]
   setup --> record["Write it down, same turn:<br/>numbers, issue row, plan"]
   record --> ship["Commit by name, push<br/>(checks run here), merge with the next feature"]
@@ -41,18 +56,21 @@ flowchart TD
 
 > Continue the operational-readiness loop for Hifth, following
 > `.claude/loop-prompts/operational-readiness.md`. Each pass: re-count every measure on
-> `.claude/goals/app-store-launch.md` and update its numbers table with today's date. Pick the
-> worst number and the one fix behind it worth most for the effort (a quick win that finishes a
-> half-built piece beats a large new surface). If it is ours, write the test first and watch it
+> `.claude/goals/app-store-launch.md` and update its numbers table with today's date. Start from
+> its "Where the work stands" (worktree, branch, next item). Take the next item in "What comes
+> next"; if it is blocked, take the next one free to build in "What is left, by line of work"
+> (a quick win that finishes a half-built piece beats a large new surface). If it is ours, write the test first and watch it
 > fail for the real reason, then fix it. If only the owner can do it, first look for a way around
 > it (a draft, a build behind a switch that is off, the fallback, the half that needs no answer);
 > then make sure it is on the goal page's waiting list with an issue row owned by them, and move
 > to the next number without asking. Ask the owner only when every number left is blocked on
 > them, in one list ordered by how much work each answer frees, except a block on weeks of work,
-> which is named early in one line without stopping. Once a pass, compare our setup with `docs/research/app-launch/research.md`; once a month,
+> which is named early in one line without stopping. Once a pass, compare our setup with
+> `docs/research/app-launch/research.md`; once a month,
 > read Apple's upcoming-requirements page and add any new rule as an issue row. When a step was
 > slow or done by hand, put it in a skill's script with a line in that skill's scripts table.
-> Write down what changed the same turn. Ship it: commit by name, push (every check runs on this
+> Write down what changed the same turn, including the goal page's "What is left" table and
+> "Where the work stands". Ship it: commit by name, push (every check runs on this
 > laptop), and merge with the next finished feature. Never put The Study Quran's words in
 > anything committed, never decrypt secrets to the terminal, and never upload a build to Apple
 > while the upload is locked. End each pass with one plain sentence to the owner.
@@ -79,8 +97,9 @@ made-up number.
 <details>
 <summary>2. Picking what to fix</summary>
 
-- A number that blocks the upload or a review comes first; then one that would slow a fix once
-  readers have the app; then polish.
+- The goal page's "What comes next" is the order. Within it, a number that blocks the upload or
+  a review comes first; then one that would slow a fix once readers have the app; then polish.
+- New web code loads after the page is up: the first download is full (160.8 of 161 KB).
 - Do not reopen a choice the owner already made, and do not decide one that waits on them.
 - The licence lock is deliberate. Work around it (citations, fallbacks), never through it.
 
@@ -121,7 +140,9 @@ check, raise retries, or skip a test to get past it.
 - `git branch --show-current`, stage each file by name, commit with the attribution lines.
 - Push in the background; do not poll. Merge with the next finished feature (each merge publishes
   the site and costs minutes); a fix someone is waiting on merges alone.
-- Stop the loop when every measure is at its target, or when everything left waits on the owner;
-  say which, in plain words.
+- Stop the loop when every measure is at its target, or when every line of work waits on the
+  owner; say which, in plain words, and give the waiting list ordered by what each answer frees.
+- Before the session ends, update the goal page's "Where the work stands" so the next session
+  starts from it.
 
 </details>
