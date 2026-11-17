@@ -1127,3 +1127,45 @@ the mini upright and the 13-inch on its side, in Arabic): nothing wrong.
   The listing shows both.
   · `node packages/etl/tools/pitch/extract.mjs --splits`
   · test: `e2e/pitch.spec.ts` ("breaks where its page does, not one word early")
+
+## The store build, as Apple's reviewer
+
+Walk the **public** build made the way a store copy is made (`make app-web FLAVOUR=public`, then
+`CONFIG=Release` on the app commands), on a simulator the app was taken off first, so it opens as
+it would for a reviewer: no address, nothing stored. Each line names the store rule a fault there
+would break. Pictures of this build may be committed; it carries no held text.
+
+- [ ] Open it fresh on an English device: the buttons are English, it opens on page 7, and a
+  screen reader is told nothing it did not ask for. · reviewer iPad simulator ·
+  `make app-probe TARGET=ipad CONFIG=Release ROUTE= EVALFILE=.claude/skills/walk-app/scripts/first-open-walk.js DELAY_MS=500`
+  · walked 2026-11-17: right, but a "Left off" ribbon came up within seconds (issue:
+  `launch-left-off-on-first-open`, fixed the same day; the walk's `leftOffAt12s` must say `no`;
+  test: `apps/web/e2e/bookmarks.spec.ts`)
+- [ ] Leave off on a later page, close the app, open it again and wait on its first page for ten
+  seconds: the "Left off" ribbon is still on the page you left, not the first page. · any · test:
+  `apps/web/e2e/bookmarks.spec.ts` · found 2026-11-17 while fixing the first-open ribbon
+- [ ] Follow the review notes' "How to try it" steps word for word (`docs/design/store-listing.md`):
+  verse 40 on page 7, the round "≈ 2" button, 2:47 and 2:122 in the list, the green arrow turns
+  there. A step that names something the screen does not show is a reviewer stuck at step 2. ·
+  ipad, phone · test: `apps/web/e2e/store-review-steps.spec.ts` · found 2026-11-17: the steps named
+  a row of links an iPad never shows; rewritten (issue: `launch-reviewer-walk`)
+- [ ] Read every word a reviewer can reach in English for "beta", "test", "demo", "rough build" or
+  "coming soon": Apple turns down an app that calls itself unfinished (rule 2.2). · any · test:
+  `apps/web/src/messages/plain-words.test.ts` · found 2026-11-17: the tajweed badge said "beta"
+  and three settings began "A rough build to try"; changed
+- [ ] Press "Report a problem" in the info panel on a simulator with no mail account: the whole
+  report shows first, and a Copy button is there when no mail can be sent. · reviewer iPad
+  simulator · `make app-probe TARGET=ipad CONFIG=Release LOCALE=en ROUTE=/hafs-kfqc/p7 EVALFILE=.claude/skills/walk-app/scripts/report-problem-walk.js DELAY_MS=500`
+  · test: `apps/web/src/components/ReportProblem.test.tsx` · walked 2026-11-17, right; a report
+  seen to arrive is parked (issue: `launch-support-mail-arrives`)
+- [ ] Open the info panel's sources and links in English: each source is named in English as
+  well as its own name, and the source code link opens. · any · found 2026-11-17: the sources are
+  named in Arabic only (issue: `launch-sources-in-english`)
+- [ ] Turn on Airplane Mode, take the app off, and open it fresh: every page opens and a tapped
+  verse lights; only the recitation is missing (rule 4.2, "more than a website"). · reviewer
+  iPad, iPhone · test: `apps/web/e2e/offline.spec.ts` · not walked on the Release build yet
+- [ ] Walk the same steps on the iPhone and the small iPhone, upright and on its side: the top
+  bar fits, and nothing a reviewer must press is cut off (rule 2.1, a final version). · not walked
+  yet
+- [ ] Turn the iPad, use it in split view beside another app, and set the largest text: the page
+  and the bars still fit, and nothing overlaps. · not walked yet

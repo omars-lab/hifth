@@ -161,6 +161,55 @@ test.describe("Hifth · bookmarks", () => {
     await expect(seam).toHaveCount(1, { timeout: 3000 });
   });
 
+  // 2026-11-17, walking a fresh install as the store's reviewer would: the red
+  // seam lay on the page the app opens on within seconds, though nothing had
+  // been read, so a first open looked like somebody else's place. Worse, the
+  // app opens there on every launch, so a reader who left off elsewhere lost
+  // their place to it after six seconds of looking. The page the app opens on
+  // by itself is not a place anyone chose; the seam waits for a turn.
+  test("the page the app opens on by itself is not taken as where you left off", async ({ page }) => {
+    test.slow();
+    const seam = page.getByRole("img", { name: "Where you left off" });
+    await page.goto("/");
+    await expect(page.locator('svg[aria-labelledby="page-label-7"]')).toBeVisible();
+    await page.waitForTimeout(7000);
+    await expect(seam, "no seam on a page nobody chose").toHaveCount(0);
+
+    // Once the reader turns a page, the page they stay on is theirs.
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator('svg[aria-labelledby="page-label-7"]')).toBeHidden();
+    await page.waitForTimeout(7000);
+    await expect(seam).toHaveCount(1);
+  });
+
+  test("a link followed to the page the app opened on is a choice, and takes the seam", async ({ page }) => {
+    test.slow();
+    const seam = page.getByRole("img", { name: "Where you left off" });
+    await page.goto("/");
+    await expect(page.locator('svg[aria-labelledby="page-label-7"]')).toBeVisible();
+    // 2:46 is on page 7: the same page, reached by a link this time.
+    await page.goto("/#/hafs-kfqc/2:46");
+    await page.waitForTimeout(7000);
+    await expect(seam).toHaveCount(1);
+  });
+
+  test("a place you left off survives opening the app and looking at its first page", async ({ page }) => {
+    test.slow();
+    const seam = page.getByRole("img", { name: "Where you left off" });
+    await page.goto("/#/hafs-kfqc/p110");
+    await expect(page.locator('svg[aria-labelledby="page-label-110"]')).toBeVisible();
+    await page.waitForTimeout(7000);
+    await expect(seam).toHaveCount(1);
+
+    // Open the app afresh, as a launch does: no address, so its first page.
+    await page.goto("/");
+    await expect(page.locator('svg[aria-labelledby="page-label-7"]')).toBeVisible();
+    await page.waitForTimeout(7000);
+    await page.goto("/#/hafs-kfqc/p110");
+    await expect(page.locator('svg[aria-labelledby="page-label-110"]')).toBeVisible();
+    await expect(seam, "the place is still page 110").toHaveCount(1, { timeout: 3000 });
+  });
+
   // 2026-10-10, walking the live site on a phone: on a page bound on its left,
   // the seam lay wholly on the paper, nine points wide, and the ink starts about
   // eight points in, so the ribbon covered the ends of the lines on that side.

@@ -1984,7 +1984,17 @@ export function App(): JSX.Element {
     saved: bookmarksSaved,
   } = useBookmarks(announce, t.bmNotSaved, recorders.bookmarks);
   // The red seam: where the reader left off, following the last page they stayed on.
-  const seamPage = useSeam(page);
+  // Read before the router writes the address back: an open with no address
+  // lands on the app's own first page, which the seam does not take as a choice.
+  // A link followed afterwards is one, even to that same page.
+  const [openedBare, setOpenedBare] = useState(() => !/^#\/./.test(location.hash));
+  useEffect(() => {
+    if (!openedBare) return;
+    const chose = () => setOpenedBare(false);
+    addEventListener("hashchange", chose);
+    return () => removeEventListener("hashchange", chose);
+  }, [openedBare]);
+  const seamPage = useSeam(page, { waitForTurn: openedBare });
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [freshId, setFreshId] = useState<string | null>(null);
   const drawerBookmark = bookmarks.find((b) => b.id === drawerId) ?? null;

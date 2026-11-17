@@ -154,3 +154,8 @@
 {"commit": "91e139930dca1786dacb3a7de5ff1b61a2f0699d", "kind": "none", "by": "hand", "sure": true, "words": "corrections to the same research notes; no backlog row for it yet"}
 {"commit": "690ddfd1e13458d1e8e980cb54b48d477a917bb1", "kind": "task", "name": "influence-catalog", "by": "hand", "sure": true, "words": "Say what the two research commits were for"}
 {"commit": "559117b08dcf8fa64f2d375da2e4d6252839ffee", "kind": "task", "name": "influence-catalog", "by": "hand", "sure": true, "words": "Say the two research commits belong to no listed task yet"}
+{"commit": "e8f342adc69e52d90730ddd6b0256ffe19fd4cd1", "kind": "task", "name": "layout-bottom-bar-moving-and-viewing", "by": "hand", "sure": true, "words": "Retro note for the new layout session"}
+{"commit": "62779868742ade7c0cc836a0d6f7fe6ba568dd84", "kind": "task", "name": "launch-store-feedback", "by": "hand", "sure": true, "words": "Track the store reviews, store numbers and second-key work in the backlog"}
+{"commit": "3f48b9b2c02258a58d623dc9c7dec0eb18318646", "kind": "task", "name": "launch-error-screen", "by": "hand", "sure": true, "words": "The error screen test loads its late file before it waits"}
+{"commit": "5d29f3ee97382c51a597f986e79771d3633ff794", "kind": "none", "by": "hand", "sure": true, "words": "how the launch loop works: its rule on blocks, no backlog row of its own"}
+{"commit": "184699eb9ad77a885c1c06ca5fe998bca7caca00", "kind": "none", "by": "hand", "sure": true, "words": "the launch goal page and its loop prompt: what is left and where to start, no backlog row of its own"}

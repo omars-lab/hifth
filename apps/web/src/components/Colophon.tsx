@@ -59,6 +59,7 @@ import { NOTE_LEAVES, rememberNoteLeave, useNoteLeave } from "../note-leave";
 import { UsageReadout } from "./UsageReadout";
 import { RecitationShelf } from "./RecitationShelf";
 import { ReportProblem } from "./ReportProblem";
+import { isNative, shareBase } from "../native-bridge";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -1069,11 +1070,13 @@ export function Colophon({
           {/* Every page this project drew to decide something, served from this
               site so a reader can see the reasoning and not only the result —
               the CLAUDE.md tenet that a design is public or it is not published.
-              Relative on purpose: the build stages docs/ beside the app
-              (scripts/stage-docs.mjs), whichever host serves it. */}
+              Relative on purpose in a browser: the build stages docs/ beside the
+              app (scripts/stage-docs.mjs), whichever host serves it. Inside the
+              app the bundle carries no docs/ and only web addresses leave it, so
+              there the link names the public site. */}
           <a
             className={styles.source}
-            href="./docs/"
+            href={isNative() ? `${shareBase()}docs/` : "./docs/"}
             target="_blank"
             rel="noopener noreferrer"
           >

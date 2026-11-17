@@ -56,6 +56,20 @@ describe("the words a reader sees", () => {
       expect(offending).toEqual([]);
     });
 
+    // Walking the store build as Apple's reviewer would, 2026-11-17: three
+    // settings opened "A rough build to try". Apple turns down an app that
+    // carries temporary content or calls itself a demo (its rules 2.1 and 2.2),
+    // and the app is the same build a reader gets. "New." says what is true.
+    // The same walk: the tajweed button said "beta" and its key said "in beta".
+    // The honest part stays (no hafiz has checked it yet); the word goes.
+    it(`${locale}: never call a part of the app a rough build or a beta`, () => {
+      const rough = locale === "en" ? /\b(rough build|beta)\b/i : /نسخة أولية|تجريبي/;
+      const offending = Object.entries(catalog as Record<string, string>)
+        .filter(([, text]) => rough.test(text))
+        .map(([key, text]) => `${key}: ${text}`);
+      expect(offending).toEqual([]);
+    });
+
     // The reason an edition cannot be opened yet is read in the editions list.
     it(`${locale}: the editions list never uses a long dash`, () => {
       const lines =

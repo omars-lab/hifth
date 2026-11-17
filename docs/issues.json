@@ -7093,6 +7093,42 @@
       "note": "Apple requires a support address with working contact details. Takes over the hifth.app front-page work's support-page item; that session was told on 2026-11-15. The page needs its own entry in hifth.app's safety settings (apps/landing/_headers), as each page there is listed by name."
     },
     {
+      "id": "launch-store-feedback",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉜"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "A store-feedback skill: one command pulls new reviews and ratings with the hifth-reviews key into a git-ignored folder, and drafts an answer to each. Nothing is posted without the owner's yes, and reviewers' names and words never enter the repo. Feeds the launch goal's \"unanswered reports and reviews\" number."
+    },
+    {
+      "id": "launch-store-numbers",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉝"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "A store-numbers skill: one command pulls the daily download and sales reports with the same hifth-reviews key into a git-ignored folder and prints a short summary. Same key as launch-store-feedback, different skill and script (owner, 2026-11-16)."
+    },
+    {
+      "id": "launch-keys-on-release-page",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉞"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "The release page and the setup check cover the reviews key as well as the upload key: what each key is for, and a check that the file is in place and its ID saved, printing names and dates only."
+    },
+    {
       "id": "launch-remote-switch",
       "source": {
         "file": "docs/design/app-store-launch.md",
@@ -7231,6 +7267,90 @@
       "owner": "agent",
       "launch": true,
       "note": "Of the public build only, in English and Arabic."
+    },
+    {
+      "id": "launch-reviewer-walk",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉟"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "Walk the public store build as Apple's reviewer would: fresh install, the review notes' steps word for word, every button a reviewer might press. First walk 2026-11-17 on the reviewer iPad simulator (Release build). Found and fixed: the notes' steps described a row of links an iPad never shows (rewritten to name page 7, verse 40 and the round look-alike button, held by a browser test that walks them); the tajweed badge said \"beta\" and three settings said \"A rough build to try\", which Apple's rule on betas and demos turns down (now \"unchecked\" and \"New.\", held by a wording test); the problem report gained the device line. Still to walk: iPhone and iPhone SE (does the top bar fit?), a first launch with no connection on the Release build, swipe page turns, rotation, split view, larger text, and the Mac by picture."
+    },
+    {
+      "id": "launch-probe-in-store-build",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊱"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "note": "The Release build still answers the walk tools' launch settings: one runs a script in the page and prints the answer, others take pictures. Only someone starting the app from a Mac with a cable or the simulator can set them, so neither a reader nor Apple can reach them, and they switch on nothing a reader could use. Still, the copy sent to the store has no need of them. What would answer it: the archive step builds without them, the release check refuses an archive that has them, and the walk build keeps them."
+    },
+    {
+      "id": "launch-tajweed-in-store",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊲"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "launch": true,
+      "note": "Should the store build show the tajweed colours at all? Its data's permission (item ④) is not in hand, and its badge says \"unchecked\" (it said \"beta\" until 2026-11-17). Off in the store build: one permission leaves the upload's path, and a reviewer sees nothing that reads as unfinished; huffaz lose a feature until it returns in an update. On: the feature stays, and the upload waits on that permission too. The owner's call."
+    },
+    {
+      "id": "launch-left-off-on-first-open",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊳"
+      },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "closedBy": "apps/web/e2e/bookmarks.spec.ts",
+      "note": "On a fresh install the red \"Left off\" ribbon appeared on the opening page within a few seconds, though nothing had been read. The app marks the page a reader stays on, which is right later, but on a first open a reviewer saw what looked like someone else's place. Seen on the reviewer iPad and in the browser with nothing stored, 2026-11-17. Worse, found while fixing it: the app opens on that page on every launch, so a reader who left off elsewhere lost their place to it after six seconds of looking. Fixed 2026-11-17: when the app opens with no address, the page it opens on does not move the ribbon until the reader turns a page or follows a link (useSeam's waitForTurn). Tests: bookmarks.spec.ts 'the page the app opens on by itself is not taken as where you left off' and 'a place you left off survives opening the app and looking at its first page' failed first; 'a link followed to the page the app opened on is a choice' guards the other side."
+    },
+    {
+      "id": "launch-sources-in-english",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊴"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "note": "With the buttons in English, the sources list in the info panel still names the page print, the word-root corpus and the reciter in Arabic. Seen in the store web build, 2026-11-17. Each name gets an English form beside the source's own, with a test."
+    },
+    {
+      "id": "english-top-bar-320",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊶"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "In English at 320 px wide the top bar needs 333 px (Chrome's engine) or 337 px (Safari's): the info button is cut off and the bar grows from 69 to 82 px as the line under the name wraps. Predates the store work; the top-bar test ran in Arabic only and never saw it. The tajweed button is 70 px in English and 49 in Arabic. Not a launch blocker: the store app needs iOS 17, whose phones are at least 375 px wide. The test now runs in English and is marked as an expected failure (apps/web/e2e/chrome-fit.spec.ts); the fix removes that mark. Measured 2026-11-17: a smaller tag plus a shorter line just fit in Chrome and still spill in Safari, so it needs a narrow-phone layout, not a tweak."
+    },
+    {
+      "id": "launch-support-mail-arrives",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊵"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "launch": true,
+      "note": "\"Report a problem\" writes to hello@hifth.app. The address has mail servers (Apple's, checked 2026-11-17), but no report has been sent to it and seen to arrive. With no mail app the report card still offers Copy, so a reader is never stuck. What would answer it: one test report sent from the simulator and seen in the owner's inbox; parked on the by-hand list."
     },
     {
       "id": "layout-pages-line-only-when-missing",

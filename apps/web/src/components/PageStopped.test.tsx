@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { describe, expect, it, vi, afterEach, beforeAll } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { stringsFor } from "../i18n";
 import { clearFaults, recentFaults } from "../fault-log";
@@ -12,6 +12,15 @@ import { PageStopped } from "./PageStopped";
  */
 
 const AR = stringsFor("ar");
+
+// The report button comes from the rarely used tools' file, which loads after
+// the card shows. The first load also compiles that large file, and under the
+// full suite's load that alone ran past the 5-second wait below (2026-11-16).
+// Loading it once here, with its own long allowance, leaves the wait to cover
+// only the drawing of the button.
+beforeAll(async () => {
+  await import("./rarely-used");
+}, 60_000);
 
 function Throws(): JSX.Element {
   throw new Error("made-up fault while drawing");

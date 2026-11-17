@@ -1,13 +1,14 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { clearFaults, noteFault } from "./fault-log";
 import { stringsFor } from "./i18n";
-import { REPORT_FAULTS, SUPPORT_ADDRESS, gatherFacts, mailLink, reportText, type ReportFacts } from "./problem-report";
+import { REPORT_FAULTS, SUPPORT_ADDRESS, deviceKind, gatherFacts, mailLink, reportText, type ReportFacts } from "./problem-report";
 
 const FACTS: ReportFacts = {
   platform: "ios",
   appVersion: "0.1.0 (7)",
   commit: "abc1234def",
   userAgent: "Made-up browser 1.0",
+  device: "iPad",
   screen: "820 × 1180 at 2×",
   language: "ar",
   when: "2026-11-16T12:00:00.000Z",
@@ -25,11 +26,26 @@ describe("the problem report", () => {
     const text = reportText(FACTS);
     expect(text).toContain("App: iPad or iPhone app 0.1.0 (7)");
     expect(text).toContain("Built from: abc1234def");
-    expect(text).toContain("Device: Made-up browser 1.0");
+    expect(text).toContain("Device: iPad");
+    expect(text).toContain("Web view: Made-up browser 1.0");
     expect(text).toContain("Screen: 820 × 1180 at 2×");
     expect(text).toContain("Language: ar");
     expect(text).toContain("Time: 2026-11-16T12:00:00.000Z");
     expect(text).toContain("Errors: none kept since the page opened");
+  });
+
+  it("names an iPad as an iPad, though its web view says it is a Mac", () => {
+    // Seen on the store build, 2026-11-17: an iPad's report said "Macintosh",
+    // because iPads present themselves to web pages as Macs. A Mac has no touch
+    // screen, so touch points tell the two apart.
+    const mac = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)";
+    expect(deviceKind(mac, 5)).toBe("iPad");
+    expect(deviceKind(mac, 0)).toBe("Mac");
+    expect(deviceKind("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", 5)).toBe("iPhone");
+    expect(deviceKind("Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X)", 5)).toBe("iPad");
+    expect(deviceKind("Mozilla/5.0 (Linux; Android 14)", 5)).toBe("Android");
+    expect(deviceKind("Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 0)).toBe("Windows");
+    expect(deviceKind("Made-up browser 1.0", 0)).toBe("not known");
   });
 
   it("carries only the latest errors, each cut short", () => {

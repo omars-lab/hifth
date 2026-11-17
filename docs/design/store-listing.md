@@ -29,7 +29,8 @@ check, listed after it, so the notes cannot drift from the app.
 > page of the mus'haf and, on any verse, the other places in the Qur'an that read almost the
 > same, which is where people who have memorised it slip.
 >
-> The app's buttons are in Arabic, because its readers use it in Arabic.
+> The app follows the device's language: on an English device its buttons are in English, and
+> the EN / ع switch at the top right changes it. The Qur'an pages are always in Arabic.
 >
 > What the app does beyond a web page:
 >
@@ -47,11 +48,19 @@ check, listed after it, so the notes cannot drift from the app.
 >
 > How to try it:
 >
-> 1. Open the app. It opens on a page of the mus'haf.
-> 2. Tap any verse. A row of links appears under it, showing how many look-alike verses there
->    are in the same chapter and in the whole Qur'an.
-> 3. Tap one of those links, then a verse in the list, to jump to it.
-> 4. Swipe sideways to turn the page.
+> 1. Open the app. It opens on page 7 of the mus'haf (chapter 2, Al-Baqarah).
+> 2. Tap verse 40, in the middle of the page (each verse ends in a round mark with its number;
+>    look for ٤٠). The verse is highlighted, and a bar comes up at the bottom of the screen
+>    with the verse's name.
+> 3. On that bar is a small round button with the sign ≈ and the number 2: two other verses in
+>    this chapter read almost the same. Tap it. A list opens with verses 2:47 and 2:122, and
+>    shows the words where each one starts to differ.
+> 4. Tap the green arrow beside one of them. The app turns to that verse and highlights it.
+> 5. Turn pages with a swipe, or with the arrows at each end of the slider at the bottom.
+>
+> If anything goes wrong, the ⓘ button on the top bar opens a panel with "Report a problem".
+> It shows the reader the whole report first (the app's version, the device, recent errors,
+> never their notes or marks), and only then opens their own mail app to send it.
 >
 > The one thing the app fetches from the internet is the sound of a verse being recited, from
 > verses.quran.com. It fetches a verse's sound when the verse is selected, so Play starts at
@@ -75,12 +84,16 @@ the test account for the reviewer.*
 | Saves through the system's save window | `native/Hifth/Web/Downloads.swift`, held by `DownloadTests.swift`. |
 | The recitation is the only outside fetch, and it can be turned off | The same browser test counts exactly one outside request after a tap, for that verse's sound. The "fetch ahead" setting (`apps/web/src/run-ahead.ts`) is in the info panel. |
 | No account, no ads, no tracking, no analytics | The privacy file says the app tracks nobody and collects nothing, and the store build's release check refuses one that says otherwise (launch page item ⑦). |
-| The marks stay on the device | No code sends them; when "Report a problem" is built (item ⑱) it must keep them out, as its design says. |
+| The marks stay on the device | No code sends them, and the problem report leaves them out: a test writes made-up notes and marks to storage and checks the report has none of them (`apps/web/src/problem-report.test.ts`). |
+| The buttons follow the device's language; it opens on page 7 | A fresh install on the reviewer iPad simulator, English device, 2026-11-17: English buttons, page 7, nothing announced (`.claude/skills/walk-app/scripts/first-open-walk.js`). |
+| Verse 40 on page 7 has two look-alikes in its chapter, 2:47 and 2:122, behind a "≈ 2" button | Checked in the store web build, 2026-11-17, and held by `apps/web/e2e/store-review-steps.spec.ts`. |
+| "Report a problem" shows the report before any mail | `apps/web/src/components/ReportProblem.test.tsx`; walked on the reviewer iPad with no mail account, 2026-11-17 (`.claude/skills/walk-app/scripts/report-problem-walk.js`). |
 
 ## What would change these notes?
 
 - **Sign-in ships:** the account sentence names the test account and what it unlocks.
 - **The recitation is switched off in the store build** (one answer to item ⑥): the
   recitation paragraph goes, and the notes say the app asks nothing of the internet.
-- **"Report a problem" ships:** add a line saying the reader sees the whole report and sends it
-  by mail themselves.
+- **The opening page or the look-alike button changes:** the "How to try it" steps name page 7,
+  verse 40 and the "≈ 2" button, so they change with it. The test that walks those steps fails
+  first.

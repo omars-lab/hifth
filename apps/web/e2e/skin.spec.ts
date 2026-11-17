@@ -47,10 +47,10 @@ async function settledSignature(page: Page): Promise<string> {
 }
 
 test.describe("Hifth · tajweed skin (spec §8)", () => {
-  test("the beta badge is visible before the skin is ever switched on", async ({ page }) => {
+  test("the unchecked badge is visible before the skin is ever switched on", async ({ page }) => {
     await page.goto("/#/hafs-kfqc/2:38");
     // Not behind the toggle, not in a settings screen: on the control itself.
-    await expect(page.locator(`${toggle} >> text=تجريبي`)).toBeVisible();
+    await expect(page.locator(`${toggle} >> text=لم يُدقَّق`)).toBeVisible();
     await expect(page.locator(toggle)).toHaveAttribute("aria-pressed", "false");
   });
 
@@ -104,7 +104,7 @@ test.describe("Hifth · tajweed skin (spec §8)", () => {
       await expect(legend.getByText(rule, { exact: true }).first()).toBeVisible();
     }
     // And the two things a hafiz must know before trusting it.
-    await expect(legend.getByText(/تجريبية/)).toBeVisible();
+    await expect(legend.getByText(/لم يراجعها حافظ بعد/)).toBeVisible();
     await expect(legend.getByText(/الآية كاملة/)).toBeVisible();
 
     await page.keyboard.press("Escape");
