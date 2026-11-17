@@ -16,8 +16,10 @@ The goal it serves is `.claude/goals/app-store-launch.md`. The plan is
 2. Work in that worktree (today `../hifth-auth`), never in the main checkout, which other
    sessions share. Run `git branch --show-current` before the first commit. If its pull
    request has merged, start the next branch there from `origin/main`.
-3. Use the Node the repo names in `.nvmrc`.
-4. Paste **The prompt** below into `/loop` with no interval.
+3. On a new branch, run `intent start <backlog row>` before the first commit. A push is refused
+   while any commit on the branch has no label.
+4. Use the Node the repo names in `.nvmrc`.
+5. Paste **The prompt** below into `/loop` with no interval.
 
 ## The loop, one line per step
 

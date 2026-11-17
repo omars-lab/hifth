@@ -139,6 +139,10 @@ The plan has the detail of each step.
   and the size limit raise). It is pushed, with no pull request yet, and holds the session note,
   the three new backlog rows, the loop's rule on blocks and this page. They ship with the
   store-feedback skill's pull request.
+- The branch's label is set (`intent start launch-store-feedback`).
+- None of the 36 launch rows names who the work is for (a use case), so every commit label
+  warns. Add one use case for the launch, such as "a reader hits a problem and gets a fix
+  within days", to `docs/use-cases.json` and name it on each launch row.
 - Next item: the store-feedback skill (`launch-store-feedback`). The key is `hifth-reviews`;
   its file sits in `~/.appstoreconnect/private_keys/` and is never read or printed.
 - The first download is at 160.8 of 161 KB, so new code loads after the page is up.
