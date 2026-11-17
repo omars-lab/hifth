@@ -7130,12 +7130,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊸"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
       "useCase": "get-help-and-know-what-is-kept",
-      "note": "Apple's privacy rule asks for the privacy policy to be linked inside the app as well as on the store listing, so this can get the app turned down. The info panel should link hifth.app's support and privacy pages, in the reader's language, so a reader inside the app can find them. Needs a message key in each language and the full hifth.app address inside the iPad and Mac apps (only web addresses leave the app). Left off the support-page branch on 2026-11-17 to keep that change to the site."
+      "closedBy": "apps/web/src/components/Colophon.test.tsx",
+      "note": "Apple's privacy rule asks for the privacy policy to be linked inside the app as well as on the store listing, so this can get the app turned down. Fixed 2026-11-17: the info panel's report section (also on the settings page) links hifth.app's support and privacy pages in the reader's language, always by the full hifth.app address (site-pages.ts), so they work inside the iPad and Mac apps and on any other host. Words in both message lists. Colophon.test.tsx 'support and privacy, in the info panel' failed first (Arabic, English, the settings page, inside the app); report-problem.spec.ts failed first on the links drawn touching the report button and each other, and passes in Chrome, Firefox and the iPhone engine. Looked at in Chrome at 1280 and 390, both languages; not yet inside the iPad app."
     },
     {
       "id": "launch-store-feedback",

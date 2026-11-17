@@ -509,6 +509,9 @@ export interface Strings {
 
   /* ---- report a problem (components/ReportProblem.tsx) -------------------- */
   reportSectionTitle: string;
+  /** hifth.app's support and privacy pages, linked under the report (launch item 43). */
+  supportLink: string;
+  privacyLink: string;
   reportOpen: string;
   reportTitle: string;
   reportBody: string;

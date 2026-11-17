@@ -228,6 +228,8 @@
   "pageStoppedBody": "Your notes and marks are kept on this device. Opening the page again usually fixes this.",
   "pageStoppedReload": "Open the page again",
   "reportSectionTitle": "Something not working?",
+  "supportLink": "Help and support",
+  "privacyLink": "Privacy policy",
   "reportOpen": "Report a problem",
   "reportTitle": "What the report holds",
   "reportBody": "This is the whole report. It holds none of your notes or marks, and no list of the pages you read. Nothing leaves this device until you press send in your mail app.",

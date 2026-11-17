@@ -1845,9 +1845,17 @@
         {
           "file": "apps/landing/lib/pages.test.mjs",
           "test": "the English and Arabic privacy pages have the same sections, in the same order"
+        },
+        {
+          "file": "apps/web/src/components/Colophon.test.tsx",
+          "test": "in Arabic, links the Arabic support and privacy pages, opening outside the app"
+        },
+        {
+          "file": "apps/web/e2e/report-problem.spec.ts",
+          "test": "the support and privacy links stand apart from each other and from the report button"
         }
       ],
-      "gap": "Live only once hifth.app is first published (docs/issues.json, hifth-app-first-release). The app's info panel does not link these pages yet (launch-support-links-in-app)."
+      "gap": "Live only once hifth.app is first published (docs/issues.json, hifth-app-first-release). The info panel's links to these pages are not yet looked at inside the iPad app itself."
     },
     {
       "id": "bring-my-marks-to-the-new-address",

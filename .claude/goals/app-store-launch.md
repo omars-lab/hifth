@@ -76,7 +76,7 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **27** of 46: 25 of the 44 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day, and the archive with Apple's own check ⑪ later that day. Later still the support page ⑳ and the apps' privacy policy ㉙ closed, and one item was added for linking both from inside the app (㊸). Of the 27, **8 can get the app turned down at review**, 6 stop the upload itself (four launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
+| Launch blockers open | **26** of 46: 24 of the 44 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day, and the archive with Apple's own check ⑪ later that day. Later still the support page ⑳ and the apps' privacy policy ㉙ closed, and one item was added for linking both from inside the app (㊸), which closed the same day. Of the 26, **7 can get the app turned down at review**, 6 stop the upload itself (four launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
 | Owner steps waiting | **10**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; adding the Mac to the app's store record; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet; its archive, export and Apple's check ran clean on 2026-11-17 | 2026-11-17 |
@@ -100,7 +100,7 @@ page" below). Backlog row names are in brackets.
 | **The licence** | 6 | (The citations page, `launch-citations-page`, is built and checked: it goes live with hifth.app's first upload.) Reading the page artwork's terms (`launch-page-artwork-terms`) and the recitation audio's terms (`launch-recitation-audio-terms`) | The two permissions (`launch-corpus-permission`, `launch-tajweed-permission`) wait on the owner's emails. Fallback if no answer by the date: fetch that data from hifth.app after install, or leave the tajweed colours off. The upload rows (`gpl-and-the-app-store`, `app-store-not-a-target`) close when the answers do. |
 | **What Apple requires** | 3 | The iPad and iPhone permissions file (`launch-ios-entitlements`). (The archive, the export and Apple's check, `launch-archive-upload`, are done. The Mac sandbox, `launch-mac-sandbox`, is done on this laptop: built, checked by the release check and walked.) | The Mac store archive and its installer package are built and checked (`make app-archive-mac`, `make app-export-mac`, owner's yes 2026-11-17). Apple's check of the Mac package waits on the owner adding the Mac to the app's store record (waiting list, item 6), and its upload on the licence. The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
 | **Listing** | 2 | The store answers (`launch-store-answers`), screenshots at Apple's sizes (`launch-store-screenshots`) | The EU trader answer is the owner's; draft both ways. |
-| **Accounts** | 3 | Backups and a practised restore of the notify-me list, which already exists (`launch-backups`); links to the support and privacy pages from the app's info panel (`launch-support-links-in-app`). (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, is done.) | Sign-in (`launch-sign-in`) waits on the three sign-in choices. Deleting an account (`launch-account-deletion`) is built behind a switch that is off once the choice of where accounts live is made. |
+| **Accounts** | 2 | Backups and a practised restore of the notify-me list, which already exists (`launch-backups`). (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, and the info panel's links to it and the support page, `launch-support-links-in-app`, are done.) | Sign-in (`launch-sign-in`) waits on the three sign-in choices. Deleting an account (`launch-account-deletion`) is built behind a switch that is off once the choice of where accounts live is made. |
 
 ## What comes next, in order
 
@@ -171,11 +171,11 @@ may be made.)
   emptied), and the Mac keyboard test never runs while the owner is at the laptop.
 - Done since: the citations page (②), then the support page (⑳) and the apps' privacy policy
   (㉙) on branch `support-and-privacy-pages`; all three go live with hifth.app's first upload.
-  Next item: the iPad and iPhone permissions file (⑨), then the in-app links to the support
-  and privacy pages (㊸). The store-feedback skill (㉜) and the store-numbers skill (㉝) are not started; the
+  The info panel links the support and privacy pages (㊸) since branch `support-links-in-app`.
+  Next item: the iPad and iPhone permissions file (⑨). The store-feedback skill (㉜) and the store-numbers skill (㉝) are not started; the
   `hifth-reviews` key they use is made, and its file in `~/.appstoreconnect/private_keys/` is
   never read or printed.
-- The first download is at 160.8 of 161 KB, so new code loads after the page is up.
+- The first download is at 160.1 of 161 KB (2026-11-17), so new code loads after the page is up.
 
 ## The tools that make this repeatable
 
