@@ -111,7 +111,7 @@ Do these once per Apple account and once per laptop. The check script reads each
 | Xcode signed in to your Apple account | you | Xcode, Settings, Accounts, +, Apple ID | done | `Xcode signed in to the Apple account` |
 | The development certificate | made by Xcode on the first device build | <https://developer.apple.com/account/resources/certificates/list> | done | `Development certificate in the keychain` |
 | The App Store certificate | made by Xcode on the first export, with your yes | the same certificates page | done 2026-11-16 | `App Store certificate` |
-| The App Store Connect key | you | <https://appstoreconnect.apple.com/access/integrations/api> | **not made** (`testflight-upload-key`) | `App Store Connect key file`, `App Store Connect key ID and issuer ID` |
+| The App Store Connect key | you | <https://appstoreconnect.apple.com/access/integrations/api> | made 2026-11-16 (`hifth-upload`, App Manager) | `App Store Connect key file`, `App Store Connect key ID and issuer ID` |
 | Written permission from the two data owners | they give it; you send the emails | `docs/design/store-permission-emails.md` | **waiting** (launch items ③ and ④) | `The licence answer allows an upload` |
 
 ### Setting up the App Store Connect key
@@ -128,13 +128,50 @@ you request access). The plan uses it for:
 | Apple's own check of the signed copy, before any upload | the release's check step | not yet; first use |
 | Uploading a build to TestFlight | `make app-testflight` | not yet; locked on the licence |
 | Seeing whether Apple has finished processing an upload, and adding it to a test group | part of the release command (launch item ㉒) | not yet |
-| Reading new store reviews, to answer them | a reviews command (launch stage 4) | not yet |
+| Reading new store reviews (answering them is done by hand; see below) | a reviews command (launch stage 4) | not yet |
 | Reading what Apple collects from readers' devices (hangs, slow launches, test-flight crash reports) | the crash command (launch stage 4) | not yet; which of these the key can reach is not checked yet |
 | Sending a build for review and starting the release | the release command (launch stage 8) | not yet |
 
-It is never used to change your account, add people, or read sales and payments. App Manager
-access can do more than this list;[^key] the commands only do what is listed. If that ever
-needs to shrink, a second key with less access can take over the read-only jobs.
+It is never used to change your account or add people, and with App Manager access it cannot:
+those need Admin. App Manager can do more than this list;[^key] the commands only do what is
+listed. If that ever needs to shrink, a second key with less access can take over the
+read-only jobs.
+
+#### Which access to give the key
+
+When you make the key, Apple asks for its **access**: one or more of the roles a person on the
+team can have. You can tick several, but **a key's access cannot be changed once it is made**.
+To change it, you make a new key and revoke the old one. Apple's full list is on its roles
+page.[^roles] In plain words:
+
+| access | what it lets the key do | for this key? |
+|---|---|---|
+| **App Manager** | Upload builds,[^upload-cert] run test flights (inside and outside the team), edit the store listing, prices and privacy answers, send a version for review, read reviews | **yes**: every job in the table above, and nothing to do with your account |
+| Admin | All of App Manager, plus add and remove people, make more keys, remove the app from sale | no: a leaked key could add people to your account |
+| Developer | Upload builds,[^upload-cert] test with people inside the team, read reviews; cannot send for review or run outside test flights | not needed: App Manager covers it. Apple greyed it out once App Manager was picked, most likely for that reason (not confirmed) |
+| Marketing | Make a new version and edit its listing, test inside the team, read reviews; cannot upload or send for review | not needed: App Manager covers it, and it was greyed out the same way |
+| Customer Support | Read reviews **and answer them** | not now (see below) |
+| Finance | Sales, payments, tax and bank details, how many people download the app | no: nothing to do with releasing |
+| Sales and Reports | Sales and download numbers | no: the same |
+
+**What App Manager cannot do, and what that means:**
+
+- **Answer a review.** Only Admin and Customer Support can. So answers to reviews are written
+  by hand in App Store Connect at first, which is fine while there are few. If answering from
+  a command is ever worth it, a second key with Customer Support access does only that job,
+  and this key stays as it is.
+- **See download and usage numbers, or sales.** Nothing in the plan needs them. You can still
+  see them yourself when you sign in.
+- **Add people or make keys.** On purpose: those stay with you.
+
+[^roles]: Apple's roles, with a tick for each thing each one may do:
+    <https://developer.apple.com/help/account/access/roles>. The same for App Store Connect
+    alone: <https://developer.apple.com/help/app-store-connect/reference/role-permissions>.
+    Read on 2026-11-16.
+[^upload-cert]: Apple's table marks uploading for App Manager and Developer as allowed only
+    when the person also has access to certificates, identifiers and profiles. For a key, the
+    first real upload is what will show whether that applies. If it is refused, a new key is
+    made, since access cannot be changed afterwards.
 
 Nothing about readers goes *to* Apple through the key. It sends our build and our listing, and
 it reads back what Apple already holds. A reader's own report still goes only by the mail they
@@ -159,15 +196,29 @@ choose to send.
    mv ~/Downloads/AuthKey_*.p8 ~/.appstoreconnect/private_keys/
    chmod 600 ~/.appstoreconnect/private_keys/AuthKey_*.p8
    ```
-6. Tell the agent the **key ID** (the column beside the key's name) and the **issuer ID** (the
-   long id above the keys list). Neither is secret. The agent writes them to
-   `~/.appstoreconnect/hifth.json`, outside the repo.
+6. Save the **key ID** (the column beside the key's name; it is also in the file's name) and
+   the **issuer ID** (the long id above the keys list) in the repo's encrypted settings:
+   `make env-set NAME=ASC_KEY_ID`, then `make env-set NAME=ASC_ISSUER_ID`, pasting each at the
+   hidden prompt. Neither is secret, but keeping them with the other settings means a new
+   laptop gets them with the rest (`make env-keys-pull`, then `make env-bootstrap`). The agent
+   can save them for you from the clipboard; copy one, say so, then the other.
 7. The agent runs `make app-release-setup`, and both key lines should say `ok`.
 
 Never put the `.p8` file in the repo, a chat, a commit or the clipboard. The repo's
 `.gitignore` leaves out every `.p8` file, so git will not pick one up by accident. If the file
 is lost, revoke the key on the same page and make a new one; a lost file cannot be downloaded
 again.
+
+**Why the key file is not in the encrypted settings too.** The two ids are, so why not the file?
+
+- **This repo is public.** An encrypted copy would sit in its history for good, and one leaked
+  decryption key would open it. The ids are harmless without the file; the file is the part
+  that lets someone upload as you.
+- **Apple's tools read a file anyway**, from the folder above, so a copy in the settings would
+  only be a backup.
+- **Losing it costs a few minutes**: revoke it and make a new one on the same page.
+
+For a backup on another laptop, keep the file in your password manager instead, never in git.
 
 ## The whole road
 
@@ -223,7 +274,7 @@ Green steps work today. Amber ones are not built yet. Red is the licence lock.
 | The archive | `native/build/store/Hifth.xcarchive` | no (ignored by git) |
 | The store-signed copy | `native/build/store/export/Hifth.ipa` | no, until the upload |
 | The App Store Connect key | `~/.appstoreconnect/private_keys/AuthKey_<id>.p8` | never |
-| The key's two ids | `~/.appstoreconnect/hifth.json` | never |
+| The key's two ids | `ASC_KEY_ID` and `ASC_ISSUER_ID` in the repo's encrypted settings (`.env.encrypted`) | yes, encrypted, in the repo; neither is secret |
 | The App Store certificate | in your Apple account; Xcode signs with it at Apple, so this laptop's keychain holds none | no |
 
 ## Where it stands (2026-11-16)
@@ -231,8 +282,9 @@ Green steps work today. Amber ones are not built yet. Red is the licence lock.
 - The version is 0.1.0, build 1.
 - The archive and the export both ran clean today. The app inside the export is signed for the
   App Store, is the public build, carries the privacy file and has no private folder.
-- **Waiting on you:** the App Store Connect key (`testflight-upload-key`), then the two
-  permission emails (launch items ③ and ④).
+- The App Store Connect key was made today (`hifth-upload`, App Manager access), and its file is
+  in place, readable only by you. Its two ids are saved in the encrypted settings.
+- **Waiting on you:** the two permission emails (launch items ③ and ④).
 - **Not built yet:** Apple's own check, the upload itself, one command for the whole release
   (launch item ㉒), the Mac's sandbox and store signing (⑧), and the iPhone and iPad list of
   what the app may do (⑨).
