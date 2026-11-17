@@ -106,6 +106,15 @@ targets:
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual
         DEVELOPMENT_TEAM: ""
+      configs:
+        Release:
+          CODE_SIGN_ENTITLEMENTS: Hifth/Resources/Hifth-macOS-Store.entitlements
+          # The Mac store takes only sandboxed apps (launch item ⑧). The sandbox
+          # is on for Release only: Debug keeps the everyday app out of it, so
+          # the owner's saved notes stay in the folder they have always been in.
+          # The laptop's Release copy runs under its own id
+          # (com.bytesofpurpose.hifth plus ".release", given on the command line
+          # by the Mac commands), with its own data folder.
 
   # Pure-logic tests (route grammar, bundle paths, MIME table) run on the Mac:
   # no simulator to boot, seconds not minutes.

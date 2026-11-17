@@ -126,6 +126,14 @@ Dark: `APPEARANCE=dark` only colours native chrome. The desk colour is the web a
   `open -n -g -F -W --stdout native/build/mac-stdout.log --env HIFTH_ROUTE=/hafs-kfqc/p45 native/build/Build/Products/Debug/Hifth.app`
   (`-g` keeps it behind your windows, so the page reports itself hidden, but it is drawn at
   full size and its picture is right).
+- **Two Mac builds.** Debug (the default) is the everyday app: no sandbox, the real app id,
+  the owner's saved notes. `CONFIG=Release` builds the sandboxed copy the Mac store needs
+  (launch item ⑧), under the id `com.bytesofpurpose.hifth.release`, so it has its own data
+  folder at `~/Library/Containers/com.bytesofpurpose.hifth.release/` that may be emptied for
+  a true first open. Never empty the Debug app's folder. A sandboxed app may write only
+  inside that folder, so `app-shot` and `app-probe PROBE_SHOT=` write the picture there and
+  copy it out. The store's permissions are in `Hifth-macOS-Store.entitlements`: the sandbox,
+  the network, and files the reader picks.
 - Trackpad pinch reaches the web app as gesture events; that only works because
   `allowsMagnification` stays off (see the `web-shell-bridge` skill).
 

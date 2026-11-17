@@ -797,13 +797,14 @@ final class ShellModel {
     /// `make app-shot` and `make app-probe` open the Mac app behind the windows
     /// already on screen, so the owner keeps their place. Behind other windows
     /// WebKit calls the page hidden and stops its fades at the first frame, and
-    /// the picture shows notes half slid in. Only for those two jobs, and only
-    /// in a debug build, the web view is told to keep drawing anyway. WebKit
+    /// the picture shows notes half slid in. Only for those two jobs, and never
+    /// in the store build, the web view is told to keep drawing anyway (the
+    /// laptop's sandboxed Release copy needs it too, launch item ⑧). WebKit
     /// has no public switch for this; the private one is asked for by name and
     /// skipped if it is not there, so a WebKit without it fails the picture's
     /// own visibility check instead of crashing.
     private func keepDrawingWhileBehindIfAsked(_ webView: WKWebView) {
-        #if DEBUG
+        #if !STORE
         let environment = ProcessInfo.processInfo.environment
         let photographing = !(environment["HIFTH_SNAPSHOT_PATH"] ?? "").isEmpty || environment["HIFTH_PROBE"] == "1"
         let selector = NSSelectorFromString("_setWindowOcclusionDetectionEnabled:")

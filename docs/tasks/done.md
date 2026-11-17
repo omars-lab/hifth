@@ -9,6 +9,45 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## Sessions of 2026-11-15 to 2026-11-17
+
+This session's task numbers started again from 1, so they clash with the numbers further down;
+match by title. Pushes and merges are folded into the work they shipped.
+
+### 2026-11-15 to 2026-11-17: getting Hifth ready for the App Store
+
+Plan: `.claude/plans/frolicking-mapping-stardust.md`. Goal page: `.claude/goals/app-store-launch.md`.
+Merged in #634 (launch-readiness), #635 (launch-archive), #636 (the new layout), #638 (sources in
+English) and #639 (the archive check). What is still open is on the backlog, in its launch rows.
+
+**Done:**
+- #1: A build for upload is only ever the public build (55ac07ee, fedfc761).
+- #2: Rough builds to try: bars that hide while reading, and a Back button by the slider
+  (c1b4e3ad, ff68098d). Whether they feel right is item 24 on the by-hand list.
+- #3, #11: The launch-readiness branch pushed and merged (#634).
+- #7: One command to say, set and raise the app's version and build number (836b6b20).
+- #8: The App Store review notes, and a test of a first launch with no connection (afb1a53b).
+- #9: A "page stopped" card instead of a blank page (61a9f459).
+- #10: "Report a problem": the reader sees the whole report, then sends it from their own mail
+  app (d37a057b).
+- #12: A real store archive and export, signed for the App Store; only the upload waits on the
+  licence (a2677c3a, 9c0c7aeb).
+- #13: The owner made the reviews key; its two ids are saved in the settings (70451126).
+- #18: Room under the app's start-up size limit: the report panel and the go-to box load once
+  opened (6bd5dd4f), and the limit was measured again (595b040e).
+- #19: The new layout: Go to, Full screen, one page or two and the size on the page bar
+  (c92d8b61, #636). Whether it becomes the default is the owner's to try.
+- #20, #22: The walk of the store build as Apple's reviewer would meet it, on iPad and phones
+  (cffa9664, d1dc3854).
+- #21: The store build leaves out the laptop tools' launch settings (21829624).
+- #23: The English top bar fits a 320 px screen and keeps one height (a1752557, 008da8b9).
+- #24: The Mac sandbox, local half: the Release build is sandboxed with only the network and
+  files the reader picks, the release check reads Mac apps, and its first open and recitation
+  were walked (af1407ef, b9d9a877, ea8b8469). The store archive waits on the owner (goal page
+  item 6); saving, loading and links are item 25 on the by-hand list.
+- #25: Apple's own check of the exported app passes, and only an archive the archive command
+  made can be signed or sent (c15877e2, f1733d93, #639).
+
 ## Sessions of 2026-11-09 to 2026-11-13
 
 These sessions' task numbers started again from 1, so they would clash with the numbers below.

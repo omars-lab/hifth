@@ -122,6 +122,14 @@ The Mac store accepts only sandboxed apps signed by a paid team.
 *What would answer it:* the sandbox on, the app signed by the team, and a walk of the Mac app
 that finds nothing the sandbox broke (opening and saving files, links, the web part).
 
+*Where it stands (2026-11-17), half answered:* the sandbox is on in the Mac Release build, which
+asks only for the network and the files the reader picks. The release check now reads the Mac
+app and refuses it if a permission is missing or one nobody chose is there. The walk found
+nothing broken so far: a fresh first open lands on page 7 with no "Left off" ribbon, and the
+recitation reaches the network. Saving, loading and links wait on a person's hands (the by-hand
+list). Left: the store archive signed by the team, which waits on the owner's yes to its new
+certificate.
+
 ### ⑨ The iPad and iPhone app has no list of what it is allowed to do · **open**
 
 Sign in with Apple and links from hifth.app that open the app both need it.
