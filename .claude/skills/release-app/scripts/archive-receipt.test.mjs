@@ -159,6 +159,15 @@ test("any other uncommitted change still does", () => {
   assert.equal(JSON.parse(readFileSync(`${at}.receipt.json`, "utf8")).clean, false);
 });
 
+test("run from a folder inside the repo, a change elsewhere in it still counts", () => {
+  const dir = repo();
+  mkdirSync(join(dir, "native"));
+  writeFileSync(join(dir, "a.txt"), "2");
+  const at = archive();
+  assert.equal(writeIn(join(dir, "native"), at).status, 0);
+  assert.equal(JSON.parse(readFileSync(`${at}.receipt.json`, "utf8")).clean, false);
+});
+
 test("an archive made from uncommitted work says so when checked", () => {
   const at = archive();
   run("--write", at, "--commit", COMMIT, "--clean", "no");

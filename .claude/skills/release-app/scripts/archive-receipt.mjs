@@ -86,10 +86,11 @@ function write(archive) {
   const commit = arg("--commit") ?? git("rev-parse", "HEAD");
   const cleanArg = arg("--clean");
   // The comment server writes into .page-comments/ while the app is built, and
-  // none of it goes into the app, so it is not counted as uncommitted work.
+  // none of it goes into the app, so it is not counted as uncommitted work. Both
+  // paths start at the repo's top, so a run from a folder inside it sees it all.
   const clean = cleanArg
     ? cleanArg === "yes"
-    : git("status", "--porcelain", "--", ".", ":(exclude).page-comments").length === 0;
+    : git("status", "--porcelain", "--", ":(top)", ":(top,exclude).page-comments").length === 0;
   const flavour = arg("--flavour") ?? null;
   const { fingerprint: fp, files: n } = fingerprint(app);
   const receipt = {
