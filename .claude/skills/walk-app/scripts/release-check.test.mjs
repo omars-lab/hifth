@@ -254,6 +254,149 @@ test("another script can load the check without it running or crashing", () => {
   assert.equal(r.stdout.trim(), "function");
 });
 
+// The Mac app is laid out one folder down: its settings in Contents/Info.plist,
+// its code in Contents/MacOS, its web part in Contents/Resources/WebBundle. The
+// touch trail, Apple's screen recorder and the Files app settings are iPad
+// only, so the Mac's Debug build has none of them and they are not looked for.
+const MAC_SIGNS = SIGNS.filter(([, , , only]) => only !== "ipad");
+const everyMacSign = [...MAC_SIGNS, ...STORE_SIGNS].map(([, text]) => text).join("\0");
+
+function macApp(root, name, { binaries = { Hifth: "plain app code" }, inFolder = {} } = {}) {
+  const at = join(root, name, "Hifth.app");
+  mkdirSync(join(at, "Contents", "MacOS"), { recursive: true });
+  mkdirSync(join(at, "Contents", "Resources", "WebBundle"), { recursive: true });
+  writeFileSync(join(at, "Contents", "Info.plist"), plist([]));
+  for (const [file, text] of Object.entries(binaries)) writeFileSync(join(at, "Contents", "MacOS", file), `\0\0${text}\0\0`);
+  for (const [file, text] of Object.entries(inFolder)) {
+    mkdirSync(dirname(join(at, "Contents", "Resources", "WebBundle", file)), { recursive: true });
+    writeFileSync(join(at, "Contents", "Resources", "WebBundle", file), text);
+  }
+  return at;
+}
+
+function macRun(releaseOpts = {}, { debugCode = everyMacSign, permissions = STORE_PERMISSIONS, extra = [] } = {}) {
+  const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
+  const debug = macApp(root, "debug", { binaries: { Hifth: "stub", "Hifth.debug.dylib": debugCode } });
+  const release = macApp(root, "release", releaseOpts);
+  // Stand-in folders cannot be signed, so the test hands the check the
+  // permissions a signature would carry, as the file the signing tool prints.
+  const perms = join(root, "permissions.plist");
+  if (permissions !== null) writeFileSync(perms, permissionsFile(permissions));
+  return spawnSync(
+    process.execPath,
+    [SCRIPT, "--debug", debug, "--release", release, ...(permissions !== null ? ["--permissions", perms] : []), ...extra],
+    { encoding: "utf8" },
+  );
+}
+
+const STORE_PERMISSIONS = {
+  "com.apple.security.app-sandbox": true,
+  "com.apple.security.network.client": true,
+  "com.apple.security.files.user-selected.read-write": true,
+};
+
+function permissionsFile(dict) {
+  const entries = Object.entries(dict)
+    .map(([k, v]) => `<key>${k}</key>${v === true ? "<true/>" : v === false ? "<false/>" : `<string>${v}</string>`}`)
+    .join("");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>${entries}</dict></plist>`;
+}
+
+test("a clean Mac release build passes, against a Mac debug build with every sign the Mac has", () => {
+  const r = macRun();
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /ev=start .*platform=mac/);
+});
+
+test("on the Mac, a capture sign left in the release build fails, saying which", () => {
+  for (const [what, text] of MAC_SIGNS) {
+    const r = macRun({ binaries: { Hifth: `code ${text} code` } });
+    assert.equal(r.status, 1, `"${text}" in the Mac release was not caught`);
+    assert.ok(r.stdout.includes(what), `the failure says ${what}: ${r.stdout}`);
+  }
+});
+
+test("on the Mac, a debug build missing a sign the Mac has fails as out of date", () => {
+  const [, first] = MAC_SIGNS[0];
+  const r = macRun({}, { debugCode: everyMacSign.replace(first, "") });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /out of date/);
+});
+
+test("the iPad-only signs are marked so, and the Mac keeps the rest", () => {
+  const ipadOnly = SIGNS.filter(([, , , only]) => only === "ipad").map(([, text]) => text);
+  assert.deepEqual(ipadOnly.sort(), ["ReplayKit.framework", "TouchTrailRecorder"]);
+  assert.ok(MAC_SIGNS.length >= 5);
+});
+
+test("a Mac release build without the sandbox fails: the Mac store refuses it", () => {
+  const { "com.apple.security.app-sandbox": _, ...rest } = STORE_PERMISSIONS;
+  const r = macRun({}, { permissions: rest });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /sandbox/);
+});
+
+test("a Mac release build missing the network or the reader's files fails, saying which", () => {
+  for (const key of ["com.apple.security.network.client", "com.apple.security.files.user-selected.read-write"]) {
+    const { [key]: _, ...rest } = STORE_PERMISSIONS;
+    const r = macRun({}, { permissions: rest });
+    assert.equal(r.status, 1, `missing ${key} was not caught`);
+    assert.ok(r.stdout.includes(key), r.stdout);
+  }
+});
+
+test("a Mac release build asking for a permission nobody chose fails, by name", () => {
+  const r = macRun({}, { permissions: { ...STORE_PERMISSIONS, "com.apple.security.device.camera": true } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /com\.apple\.security\.device\.camera/);
+});
+
+test("the debugger permission may stay in a laptop build, never in a store one", () => {
+  const withDebugger = { ...STORE_PERMISSIONS, "com.apple.security.get-task-allow": true };
+  assert.equal(macRun({}, { permissions: withDebugger }).status, 0);
+  const store = macRun({}, { permissions: withDebugger, extra: ["--store"] });
+  assert.equal(store.status, 1);
+  assert.match(store.stdout, /get-task-allow/);
+});
+
+test("the team's own signing marks are allowed in a store build", () => {
+  const signed = { ...STORE_PERMISSIONS, "com.apple.application-identifier": "TEAM.com.example", "com.apple.developer.team-identifier": "TEAM" };
+  const r = macRun({}, { permissions: signed, extra: ["--store"] });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+test("a Mac release build whose permissions cannot be read fails, rather than passing unread", () => {
+  // No --permissions: the check asks the signing tool, and a stand-in folder is not signed.
+  const r = macRun({}, { permissions: null });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /permissions cannot be read/);
+});
+
+test("on the Mac, the web part is read one folder down for the public build", () => {
+  const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
+  const debug = macApp(root, "debug", { binaries: { Hifth: everyMacSign } });
+  const release = macApp(root, "release", { inFolder: { ".hifth-web-flavour": "public\n" } });
+  mkdirSync(join(release, "Contents", "Resources"), { recursive: true });
+  writeFileSync(join(release, "Contents", "Resources", "PrivacyInfo.xcprivacy"), privacyFile());
+  const perms = join(root, "permissions.plist");
+  writeFileSync(perms, permissionsFile(STORE_PERMISSIONS));
+  const r = spawnSync(process.execPath, [SCRIPT, "--debug", debug, "--release", release, "--permissions", perms, "--flavour", "public"], {
+    encoding: "utf8",
+  });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+test("a debug and a release build of different kinds are refused: one iPad, one Mac", () => {
+  const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
+  const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: everySign } });
+  const release = macApp(root, "release");
+  const r = run(debug, release);
+  assert.equal(r.status, 2);
+  assert.match(r.stdout, /one is an iPad app and the other a Mac app/);
+});
+
 test("a path that is not an app is refused, not passed", () => {
   const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
   const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: everySign } });

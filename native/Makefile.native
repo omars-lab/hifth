@@ -18,6 +18,7 @@
 #   make walk-pull DEVICE=… [CLEAR=1]   copy the screenshots kept on a walk off the iPad, and draw them as one page
 #   make walk-gallery · make walk-list [JSON=1]   redraw that page · list the captures, oldest first
 #   make app-release-check   fail if the release iPad build carries any of the walk capture
+#                            (TARGET=mac: the Mac builds, and the sandboxed one's permissions)
 #   make app-store-flavour   fail unless the web build in the app is the public one (an archive needs it)
 #   make app-devices [CSV=1]   the registered devices, and the slots of each kind left this year
 #   make app-device-register DEVICE=…   register a new device with Apple (uses a slot), then install
@@ -469,9 +470,22 @@ walk-current: ## Where the app on a plugged-in iPad is, as current-to-file last 
 # RELEASE_FLAVOUR=public also fails it unless the built release app is the
 # public build. Empty by default: this check runs on laptops whose web build is
 # the pitch, and the capture question is the same for both.
+#
+# TARGET=mac checks the Mac app instead: the same two builds the Mac commands
+# make (Release sandboxed, under its own id), and the release one's signed
+# permissions must be the three the Mac store build asks for (launch item 8).
 RELEASE_CHECK_DD := $(DERIVED)/release-check
 RELEASE_FLAVOUR ?=
-app-release-check: app-generate ## Fail if the release iPad build carries any of the walk capture (builds Debug and Release, a few minutes; RELEASE_FLAVOUR=public also requires the public build)
+ifeq ($(TARGET),mac)
+app-release-check: ## Fail if the release build carries any of the walk capture (builds Debug and Release, a few minutes; TARGET=mac for the Mac app and its permissions; RELEASE_FLAVOUR=public also requires the public build)
+	@$(MAKE) --no-print-directory app-build-mac CONFIG=Debug
+	@$(MAKE) --no-print-directory app-build-mac CONFIG=Release
+	node .claude/skills/walk-app/scripts/release-check.mjs \
+	  --debug $(DERIVED)/Build/Products/Debug/Hifth.app \
+	  --release $(DERIVED)/Build/Products/Release/Hifth.app \
+	  $(if $(RELEASE_FLAVOUR),--flavour $(RELEASE_FLAVOUR))
+else
+app-release-check: app-generate
 	@for config in Debug Release; do \
 	  set -o pipefail; xcodebuild -quiet -project $(XCPROJ) -derivedDataPath $(RELEASE_CHECK_DD) -scheme Hifth-iOS \
 	    -configuration $$config -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO build || exit 1; \
@@ -480,6 +494,7 @@ app-release-check: app-generate ## Fail if the release iPad build carries any of
 	  --debug $(RELEASE_CHECK_DD)/Build/Products/Debug-iphoneos/Hifth.app \
 	  --release $(RELEASE_CHECK_DD)/Build/Products/Release-iphoneos/Hifth.app \
 	  $(if $(RELEASE_FLAVOUR),--flavour $(RELEASE_FLAVOUR))
+endif
 
 # ---- which devices Apple has registered for us, and the slots left (100 of each
 # kind a year). CSV=1 prints a row per device with its full id: keep it off the repo.

@@ -48,10 +48,76 @@ export const SIGNS = [
   ["the launch switch that turns the video off", "HIFTH_WALK_VIDEO", "string"],
   ["the launch switch that moves where captures go", "HIFTH_WALK_CAPTURE_FOLDER", "string"],
   ["the video recorder", "ClipRecorder", "type"],
-  ["the touch trail", "TouchTrailRecorder", "type"],
-  ["Apple's screen recorder library", "ReplayKit.framework", "library"],
+  // The last field marks a sign the Mac app never has: its Debug build was
+  // searched on 2026-11-17 and had every other sign, but not these two.
+  ["the touch trail", "TouchTrailRecorder", "type", "ipad"],
+  ["Apple's screen recorder library", "ReplayKit.framework", "library", "ipad"],
   ["the code behind the capture and current-to-file links", "CaptureLinkWaiting", "type"],
 ];
+
+/**
+ * The permissions a Mac store build is signed with (launch item 8). The Mac
+ * store takes only sandboxed apps; the app asks for the network (recitation
+ * audio) and the files the reader picks in the open and save panels, and for
+ * nothing else. The team's signing adds its own two marks. Xcode adds the
+ * debugger permission to every laptop build, and store signing takes it out.
+ */
+export const MAC_NEEDS = [
+  ["com.apple.security.app-sandbox", "the sandbox, without which the Mac store refuses the app"],
+  ["com.apple.security.network.client", "the network, which the recitation audio needs"],
+  ["com.apple.security.files.user-selected.read-write", "the files the reader picks, which saving and loading need"],
+];
+const MAC_SIGNING_MARKS = ["com.apple.application-identifier", "com.apple.developer.team-identifier"];
+const DEBUGGER = "com.apple.security.get-task-allow";
+
+/** Where an app keeps its parts: the iPad app at its top, the Mac app one folder down. */
+export function layout(app) {
+  if (existsSync(join(app, "Contents", "Info.plist"))) {
+    return {
+      platform: "mac",
+      plist: join(app, "Contents", "Info.plist"),
+      code: join(app, "Contents", "MacOS"),
+      web: join(app, "Contents", "Resources", "WebBundle"),
+    };
+  }
+  if (existsSync(join(app, "Info.plist"))) {
+    return { platform: "ipad", plist: join(app, "Info.plist"), code: app, web: join(app, "WebBundle") };
+  }
+  return null;
+}
+
+/** What is wrong with a Mac release build's signed permissions. */
+export function macPermissionProblems(granted, { store = false } = {}) {
+  const problems = [];
+  for (const [key, what] of MAC_NEEDS) {
+    if (granted[key] !== true) problems.push(`the Mac release build is not signed with ${key}: ${what}`);
+  }
+  const known = new Set([...MAC_NEEDS.map(([k]) => k), ...MAC_SIGNING_MARKS, DEBUGGER]);
+  for (const key of Object.keys(granted)) {
+    if (!known.has(key)) problems.push(`the Mac release build asks for ${key}, which nobody chose`);
+  }
+  if (store && DEBUGGER in granted) {
+    problems.push(`the Mac store build still has ${DEBUGGER}, the debugger permission, which only a laptop build may keep`);
+  }
+  return problems;
+}
+
+/**
+ * The permissions signed into an app, read with the signing tool. A test hands
+ * them in as a file instead, since a stand-in folder cannot be signed. Null
+ * when they cannot be read, which the check reports rather than passing.
+ */
+function signedPermissions(app, file) {
+  try {
+    const xml = file
+      ? readFileSync(file, "utf8")
+      : execFileSync("codesign", ["-d", "--entitlements", "-", "--xml", app], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    if (!xml.trim()) return {};
+    return JSON.parse(execFileSync("plutil", ["-convert", "json", "-o", "-", "-"], { input: xml, encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] }));
+  } catch {
+    return null;
+  }
+}
 
 /**
  * The launch settings the laptop's tools start the app with: the probe and
@@ -79,15 +145,16 @@ const log = (ev, fields = {}) =>
   );
 
 function settings(app) {
-  const json = execFileSync("plutil", ["-convert", "json", "-o", "-", join(app, "Info.plist")], { encoding: "utf8" });
+  const json = execFileSync("plutil", ["-convert", "json", "-o", "-", layout(app).plist], { encoding: "utf8" });
   return JSON.parse(json);
 }
 
-/** The app's own top-level files, read as bytes. */
+/** The app's own code files, read as bytes (the iPad app's top level, the Mac app's Contents/MacOS). */
 function code(app) {
-  return readdirSync(app)
-    .filter((name) => name !== "Info.plist" && statSync(join(app, name)).isFile())
-    .map((name) => ({ name, bytes: readFileSync(join(app, name)) }));
+  const dir = layout(app).code;
+  return readdirSync(dir)
+    .filter((name) => name !== "Info.plist" && statSync(join(dir, name)).isFile())
+    .map((name) => ({ name, bytes: readFileSync(join(dir, name)) }));
 }
 
 function signsIn(files, signs = SIGNS) {
@@ -102,7 +169,7 @@ function signsIn(files, signs = SIGNS) {
  * file is only a label and the folder is the held commentary itself.
  */
 export function flavourProblems(release, wanted) {
-  const web = join(release, "WebBundle");
+  const web = layout(release)?.web ?? join(release, "WebBundle");
   const stamp = join(web, ".hifth-web-flavour");
   const says = existsSync(stamp) ? readFileSync(stamp, "utf8").trim() : "";
   const problems = [];
@@ -143,14 +210,22 @@ export function privacyProblems(release) {
   return problems;
 }
 
-export function check(debug, release, { flavour, store = false } = {}) {
+export function check(debug, release, { flavour, store = false, permissions } = {}) {
+  const mac = layout(release).platform === "mac";
   const problems = flavour ? flavourProblems(release, flavour) : [];
   if (flavour === "public") problems.push(...privacyProblems(release));
+  if (mac) {
+    const granted = signedPermissions(release, permissions);
+    if (granted === null) problems.push("the Mac release build's permissions cannot be read: is it signed?");
+    else problems.push(...macPermissionProblems(granted, { store }));
+  }
+  // The Files app settings are the iPad's; the Mac app has no Files app.
   const debugKeys = settings(debug);
-  for (const key of KEYS) {
+  for (const key of mac ? [] : KEYS) {
     if (debugKeys[key] !== true) problems.push(`the check is out of date: the debug build no longer has ${key}`);
   }
-  const signs = store ? [...SIGNS, ...STORE_SIGNS] : SIGNS;
+  const forThisApp = mac ? SIGNS.filter(([, , , only]) => only !== "ipad") : SIGNS;
+  const signs = store ? [...forThisApp, ...STORE_SIGNS] : forThisApp;
   const debugSigns = signsIn(code(debug), signs);
   for (const [what, text] of signs) {
     if (!debugSigns.some(([, t]) => t === text)) {
@@ -176,10 +251,15 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const debug = arg("--debug");
   const release = arg("--release");
   for (const [which, app] of [["debug", debug], ["release", release]]) {
-    if (!app || !existsSync(join(app, "Info.plist"))) {
+    if (!app || !layout(app)) {
       log("error", { which, msg: `"no app at ${app ?? "(not given)"}"` });
       process.exit(2);
     }
+  }
+  const platform = layout(release).platform;
+  if (layout(debug).platform !== platform) {
+    log("error", { msg: '"the two builds are not the same app: one is an iPad app and the other a Mac app"' });
+    process.exit(2);
   }
   const flavour = arg("--flavour");
   if (process.argv.includes("--flavour") && !flavour) {
@@ -187,8 +267,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     process.exit(2);
   }
   const store = process.argv.includes("--store");
-  log("start", { debug, release, flavour: flavour ?? "any", store: store ? "yes" : "no" });
-  const problems = check(debug, release, { flavour, store });
+  // Only for tests: the permissions a signature would carry, since a stand-in folder cannot be signed.
+  const permissions = arg("--permissions");
+  log("start", { debug, release, platform, flavour: flavour ?? "any", store: store ? "yes" : "no" });
+  const problems = check(debug, release, { flavour, store, permissions });
   for (const problem of problems) log("problem", { msg: JSON.stringify(problem) });
   log("done", { release_clean: problems.length === 0 ? "yes" : "no", problems: problems.length });
   process.exit(problems.length === 0 ? 0 : 1);
