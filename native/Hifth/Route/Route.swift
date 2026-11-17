@@ -6,8 +6,10 @@ import Foundation
 /// and this only checks the *shape* so a bad link is refused here, with the
 /// caller told, rather than parsed into nothing on the far side.
 ///
-/// Three doors:
+/// Four doors:
 ///  - `hifth://…` links (`parse`), while the app runs or to launch it;
+///  - `https://hifth.app/read/#/…` links (`parse` too), which Apple hands the
+///    iPad and iPhone app instead of the browser (launch item 9);
 ///  - the `HIFTH_ROUTE` launch variable (`fromEnvironment`), which is how the
 ///    Makefile and the screenshot targets open a state without a link dialog;
 ///  - a `--route=` argument (`fromArguments`), the same thing for XCUITest.
@@ -91,6 +93,7 @@ nonisolated enum Route {
     /// `hifth:///hafs-kfqc/2:255`, `hifth://hafs-kfqc/2:255`,
     /// `hifth://open/#/hafs-kfqc/2:255` (a site link's tail, fragment and all).
     static func parse(_ url: URL) -> String? {
+        if url.scheme?.lowercased() == "https" { return siteLink(url) }
         guard url.scheme?.lowercased() == scheme else { return nil }
         if let fragment = url.fragment, fragment.hasPrefix("/") {
             return hash(from: fragment)
@@ -103,6 +106,24 @@ nonisolated enum Route {
             route += "?" + query
         }
         return hash(from: route)
+    }
+
+    /// The site that hands its reader links to the app, and the addresses on
+    /// it that are the reader. The site's own file says the same to Apple
+    /// (the deploy-site skill writes it), so the support and privacy pages
+    /// stay in the browser.
+    static let siteHost = "hifth.app"
+    static let readerPaths: Set<String> = ["/read", "/read/", "/read/index.html"]
+
+    /// `https://hifth.app/read/#/hafs-kfqc/2:255` → the same hash the site
+    /// would show. Any other https address, including another page on
+    /// hifth.app, another port or another name in front, is not a route.
+    private static func siteLink(_ url: URL) -> String? {
+        guard url.host?.lowercased() == siteHost, url.port == nil, url.user == nil,
+              readerPaths.contains(url.path(percentEncoded: true)),
+              let fragment = url.fragment, fragment.hasPrefix("/")
+        else { return nil }
+        return hash(from: fragment)
     }
 
     // MARK: - Where and in which language this launch opens
