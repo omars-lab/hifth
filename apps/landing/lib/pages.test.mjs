@@ -69,7 +69,7 @@ test("every address refuses another site's frame and a guessed file type", () =>
 
 test("each front page lets scripts come only from this site and the spam check", () => {
   const rules = headerRules();
-  for (const path of ["/", "/privacy", "/sources", "/ar/", "/ar/privacy", "/ar/sources"]) {
+  for (const path of ["/", "/privacy", "/sources", "/support", "/ar/", "/ar/privacy", "/ar/sources", "/ar/support"]) {
     const csp = rules[path]?.["content-security-policy"] || "";
     assert.match(csp, /default-src 'self'/, path);
     assert.match(csp, /script-src 'self' https:\/\/challenges\.cloudflare\.com(;|$)/, path);
@@ -99,9 +99,73 @@ test("the app lets scripts come only from this site, and sounds only from the re
 });
 
 test("no front page carries a script or style written into the page itself", () => {
-  for (const path of ["index.html", "privacy.html", "sources.html", "404.html", "ar/index.html", "ar/privacy.html", "ar/sources.html"]) {
+  for (const path of ["index.html", "privacy.html", "sources.html", "support.html", "404.html", "ar/index.html", "ar/privacy.html", "ar/sources.html", "ar/support.html"]) {
     const html = page(path);
     assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)[^>]*>/, `${path} has a script with no src`);
     assert.doesNotMatch(html, /<style|\sstyle="|\son[a-z]+="/, `${path} has a style or handler in the page`);
   }
+});
+
+/*
+ * The support page (launch item 20, launch-support-page). Apple asks every listing for a support
+ * address with a working way to reach us. The page tells a reader which button in the app makes
+ * a problem report, so it names that button by the words the app shows, read from the app's own
+ * message files: rename the button and this test says the page is out of date.
+ */
+const appWords = (lang) => JSON.parse(readFileSync(new URL(`../../web/src/messages/${lang}.json`, import.meta.url), "utf8"));
+
+test("both support pages give hello@hifth.app to write to, and link the privacy page", () => {
+  for (const [path, privacy] of [["support.html", "/privacy.html"], ["ar/support.html", "/ar/privacy.html"]]) {
+    const html = page(path);
+    assert.match(html, /href="mailto:hello@hifth\.app"/, path);
+    assert.ok(html.includes(`href="${privacy}"`), `${path} links ${privacy}`);
+  }
+});
+
+test("each support page names the app's report buttons by the words the app shows", () => {
+  for (const [path, lang] of [["support.html", "en"], ["ar/support.html", "ar"]]) {
+    const html = page(path);
+    const words = appWords(lang);
+    for (const key of ["reportOpen", "reportSend"]) {
+      assert.ok(html.includes(words[key]), `${path} should say "${words[key]}", the app's ${key}`);
+    }
+  }
+});
+
+test("every page of the site links its support page", () => {
+  for (const [path, href] of [
+    ["index.html", "/support.html"],
+    ["privacy.html", "/support.html"],
+    ["sources.html", "/support.html"],
+    ["support.html", "/sources.html"],
+    ["ar/index.html", "/ar/support.html"],
+    ["ar/privacy.html", "/ar/support.html"],
+    ["ar/sources.html", "/ar/support.html"],
+    ["ar/support.html", "/ar/sources.html"],
+  ]) {
+    const footer = page(path).match(/<footer>[\s\S]*?<\/footer>/)?.[0] ?? "";
+    assert.ok(footer.includes(`href="${href}"`), `${path}'s footer links ${href}`);
+  }
+});
+
+/*
+ * The privacy page covers the apps, not only the list (launch item 29, launch-app-privacy-policy):
+ * what stays on the device, the one thing the app fetches from another site, the report only the
+ * reader sends, and that there are no accounts yet. Each part is a section with its own id, and
+ * the two languages must have the same ones, so neither copy can quietly fall behind the other.
+ */
+const sectionIds = (html) => [...html.matchAll(/<h2 id="([\w-]+)"/g)].map(([, id]) => id);
+
+test("both privacy pages cover the apps: the device, the recitation, the report and accounts", () => {
+  for (const path of ["privacy.html", "ar/privacy.html"]) {
+    const ids = sectionIds(page(path));
+    for (const id of ["on-your-device", "recitation", "problem-report", "accounts", "list", "spam-check", "no-tracking"]) {
+      assert.ok(ids.includes(id), `${path} has no section "${id}"`);
+    }
+    assert.match(page(path), /verses\.quran\.com/, `${path} names the site the recitation comes from`);
+  }
+});
+
+test("the English and Arabic privacy pages have the same sections, in the same order", () => {
+  assert.deepEqual(sectionIds(page("ar/privacy.html")), sectionIds(page("privacy.html")));
 });

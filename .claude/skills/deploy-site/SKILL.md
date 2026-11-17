@@ -110,8 +110,21 @@ copied into the release folder, and `wrangler.toml` names no database (the check
 
 The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch-all rule under
 `/read/` as an endless loop, and the app needs none, since it keeps its place after the `#`.
-Cloudflare also serves `privacy.html` at `/privacy` and `sources.html` at `/sources`, so
-`_headers` names those addresses.
+Cloudflare also serves `privacy.html` at `/privacy`, `sources.html` at `/sources` and
+`support.html` at `/support`, so `_headers` names those addresses.
+
+**The support page** (`support.html`, `ar/support.html`) is the address the store listing gives
+for help. It says how to send a problem report from the app, naming the buttons by the words the
+app shows (`apps/landing/lib/pages.test.mjs` reads them from the app's message files, so a
+renamed button fails the test), and lists the problems we know about. **When a fault a reader can
+meet opens or closes, update that list in both languages in the same change.** A release missing
+either copy is refused.
+
+**The privacy page** covers the apps as well as the list: what stays on the device, the
+recitation fetch, the problem report, and accounts. Both copies must have the same sections in the
+same order (the same test). When the app starts sending or fetching anything new, say so here in
+the same change, and check Apple's privacy file (`native/Hifth/Resources/PrivacyInfo.xcprivacy`)
+still agrees.
 
 **The sources page** (`sources.html`, `ar/sources.html`) names every outside source the app is
 built on, with its terms and a link. It is written by hand, and `scripts/landing-sources.test.mjs`
