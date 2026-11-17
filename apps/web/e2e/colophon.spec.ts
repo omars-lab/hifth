@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { SOURCE_REPO } from "../src/provenance";
+import { SOURCE_COPY, SOURCE_REPO } from "../src/provenance";
 
 /*
  * The colophon, against a real build — PLAN follow-up ⑤ (task #45).
@@ -14,11 +14,14 @@ import { SOURCE_REPO } from "../src/provenance";
  * Note on the commit: `vite.config.ts` bakes the SHA into the *bundle*, while
  * Playwright transpiles this file with esbuild and no `define`, so a spec that
  * imported `sourceUrl()` would compare the bundle's real commit against its own
- * "dev" fallback and fail. `SOURCE_REPO` is a plain constant and is safe to
- * import — the commit is asserted by shape instead.
+ * "dev" fallback and fail. `SOURCE_REPO` and `SOURCE_COPY` are plain constants and
+ * safe to import — the commit is asserted by shape instead. Once the public copy of each
+ * release exists (SOURCE_COPY set), the link names the release's tag there.
  */
 
-const SOURCE_LINK = new RegExp(`^${SOURCE_REPO}(/tree/[0-9a-f]{7,40})?$`);
+const SOURCE_LINK = SOURCE_COPY
+  ? new RegExp(`^${SOURCE_COPY}(/tree/release-[0-9a-f]{12})?$`)
+  : new RegExp(`^${SOURCE_REPO}(/tree/[0-9a-f]{7,40})?$`);
 
 test.describe("Hifth · colophon (GPL §6)", () => {
   test("the wordmark opens the source offer for this build", async ({ page }) => {

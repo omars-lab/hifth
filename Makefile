@@ -836,7 +836,7 @@ deploy-cloudflare: ## Publish to Cloudflare Pages from this machine (GitHub Page
 # that holds the domain. The script and its tests live in the deploy-site skill.
 RELEASE := node .claude/skills/deploy-site/scripts/release-hifth-app.mjs
 
-.PHONY: hifth-app-check hifth-app-serve hifth-app-publish hifth-app-verify hifth-app-list-count
+.PHONY: hifth-app-check hifth-app-serve hifth-app-publish hifth-app-verify hifth-app-list-count hifth-app-source
 hifth-app-serve: ## Serve hifth.app on this laptop at http://127.0.0.1:7124, with page comments (the app at /read/, the form with test keys); ARGS=--no-build reuses the last build
 	@$(RELEASE) prepare $(ARGS)
 	@echo "hifth.app on this laptop, with comments: http://127.0.0.1:7124/ (the app is at /read/)"
@@ -847,6 +847,10 @@ hifth-app-check: ## Build hifth.app's release folder and refuse it if anything b
 
 hifth-app-publish: ## Check, upload to hifth.app with the saved keys, then look at the live site
 	@dotenvx run --quiet -- $(RELEASE) publish
+
+hifth-app-source: ## Put a release's source in the public source repo (TO=<repo address>, COMMIT=<released commit>, default main), as one commit with no history, tagged by release
+	@test -n "$(TO)" || { echo "usage: make hifth-app-source TO=<public source repo address> [COMMIT=<released commit>]"; exit 2; }
+	@node .claude/skills/deploy-site/scripts/release-source.mjs publish --to "$(TO)" $(if $(COMMIT),--commit "$(COMMIT)")
 
 hifth-app-verify: ## Look at live hifth.app: pages answer, the app is this commit, no development address serves anything
 	@$(RELEASE) verify $(ARGS)

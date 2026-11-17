@@ -4,7 +4,7 @@ import { useT } from "../i18n";
 import { PenGuide } from "./PenGuide";
 import { LOCALES } from "../lang";
 import { LOCALE_IDS } from "../messages/locales.gen";
-import { SOURCE_REPO, hasCommit, shortCommit, sourceUrl } from "../provenance";
+import { SOURCE_HOME, hasCommit, shortCommit, sourceUrl } from "../provenance";
 import { TURN_STYLES, type TurnStyle } from "../turn-style";
 import { VERSE_GESTURES, type VerseGestures } from "../verse-gestures";
 import { DRAWER_TOOLS, type DrawerTools } from "../drawer-tools";
@@ -1170,8 +1170,8 @@ export function Colophon({
 
         <p className={styles.foot}>
           {t.aboutFoot}{" "}
-          <a className={styles.inline} href={SOURCE_REPO} target="_blank" rel="noopener noreferrer">
-            {SOURCE_REPO.replace("https://", "")}
+          <a className={styles.inline} href={SOURCE_HOME} target="_blank" rel="noopener noreferrer">
+            {SOURCE_HOME.replace("https://", "")}
           </a>
         </p>
           </>
