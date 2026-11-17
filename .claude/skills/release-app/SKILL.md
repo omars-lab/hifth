@@ -18,8 +18,9 @@ them. Each is a `make` target from `native/Makefile.native`.
 | 2b. or only a new build of the same version | `make app-version NEXT_BUILD=1` | raises the build number by one |
 | 3. put the public build in the app | `make app-web FLAVOUR=public` | the store build is never the private one |
 | 4. archive | `make app-archive` | refuses unless the web part is public; checks the release build, then makes the Xcode archive and checks the app inside it again (no walk capture, the public build, Apple's privacy file). Once every check passes, it writes a receipt beside the archive. Stays on the laptop, so the licence does not hold it |
-| 5. sign it for the store | `make app-export` | refuses an archive with no receipt, or one whose app has changed since; then signs the archive for the App Store into `native/build/store/export`. The first run made the team's App Store certificate in the Apple account (owner's yes, 2026-11-16); later runs reuse it. If it is ever revoked, ask the owner before a run makes a new one |
-| 6. upload | `make app-testflight` | locked behind the licence decision, checked before anything is built; the upload itself is not built yet |
+| 5. sign it for the store | `make app-export` | refuses an archive with no receipt, or one whose app has changed since; then signs the archive for the App Store into `native/build/store/export`. It signs with Apple's online store certificate through Xcode's own sign-in (Xcode > Settings > Accounts); the store key has no right to that certificate. The sign-in expires: "Your session has expired" means the owner signs in again there (2026-11-17). The first run made the team's App Store certificate in the Apple account (owner's yes, 2026-11-16); later runs reuse it. If it is ever revoked, ask the owner before a run makes a new one |
+| 6. Apple's check | `make app-store-check` | refuses an export older than the archive's receipt, or an archive the receipt no longer matches; then sends the exported app to Apple to check its signing, icons, permissions and privacy file. It makes no build anyone can install, puts nothing in the review queue and uses no build number, so the owner allowed it before the licence answer (launch item 42, 2026-11-17) |
+| 7. upload | `make app-testflight` | locked behind the licence decision, checked before anything is built; runs Apple's check before sending; the upload itself is not built yet |
 
 Commit the change to `native/project.yml` that step 2 makes, in the same commit as the release
 it belongs to, so the build number in the repo is always the one last sent.
@@ -47,8 +48,7 @@ reader-sent problem report arrives, the collected-data list changes with it.
 
 ## Not built yet
 
-Apple's own check of the export (the key exists, but the check sends the app to Apple, so it
-waits on the owner's answer to launch item 42), the upload itself, one
+The upload itself, one
 command that runs the whole release with the version raised, and the steps after upload
 (review, staged release). Each is a row in the backlog tagged for the launch
 (`make issues LAUNCH=1`). The whole road, its one-time setup and what each step guards against

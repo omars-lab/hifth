@@ -545,15 +545,38 @@ app-export: ## Sign the archive for the App Store, ready to upload (the first ru
 	@test -d $(ARCHIVE_PATH) || { echo "  no archive at $(ARCHIVE_PATH). Run: make app-archive"; exit 1; }
 	@node $(ARCHIVE_RECEIPT) --check $(ARCHIVE_PATH)
 	rm -rf $(EXPORT_PATH)
+	@# Signs with Apple's online store certificate, through Xcode's own sign-in
+	@# (Xcode > Settings > Accounts). The store key cannot: it has no right to
+	@# that certificate ("Cloud signing permission error", 2026-11-17).
+	@# The setup check only sees that an account is listed, not that its sign-in
+	@# is still live, so an expired one is caught here and said plainly.
 	set -o pipefail; xcodebuild -exportArchive -archivePath $(ARCHIVE_PATH) -exportPath $(EXPORT_PATH) \
-	  -exportOptionsPlist $(EXPORT_OPTIONS) -allowProvisioningUpdates | $(XCPRETTY)
+	  -exportOptionsPlist $(EXPORT_OPTIONS) -allowProvisioningUpdates 2>&1 | tee $(EXPORT_PATH).log | $(XCPRETTY) \
+	  || { grep -q "session has expired" $(EXPORT_PATH).log && echo "  Xcode's sign-in to the Apple account has expired. Sign in again in Xcode > Settings > Accounts, then: make app-export"; exit 1; }
 	@echo "  export: $(EXPORT_PATH)"
+
+# Apple's own check of the exported app: its signing, icons, permissions and
+# privacy file, against the app's record in App Store Connect. It sends the app
+# to Apple, but makes no build anyone can install, puts nothing in the review
+# queue and uses no build number, so the owner allowed it before the licence
+# answer (launch item 42, 2026-11-17). It takes only an export made after the
+# archive's receipt, of an archive the receipt still matches. The key's ID and
+# issuer come from the encrypted settings; the key file from
+# ~/.appstoreconnect/private_keys/, where altool looks by itself.
+app-store-check: ## Send the exported app to Apple for its check (no build anyone can install; allowed before the licence answer)
+	@test -f $(EXPORT_PATH)/Hifth.ipa || { echo "  no exported app at $(EXPORT_PATH). Run: make app-export"; exit 1; }
+	@test $(EXPORT_PATH)/Hifth.ipa -nt $(ARCHIVE_PATH).receipt.json || { echo "  the exported app is older than the archive. Run: make app-export"; exit 1; }
+	@node $(ARCHIVE_RECEIPT) --check $(ARCHIVE_PATH)
+	dotenvx run --quiet -- sh -c 'xcrun altool --validate-app -f $(EXPORT_PATH)/Hifth.ipa -t ios --apiKey "$$ASC_KEY_ID" --apiIssuer "$$ASC_ISSUER_ID"'
+	@echo "  ✓ Apple's check passed: $(EXPORT_PATH)/Hifth.ipa"
 
 app-testflight: app-store-flavour ## Upload the archive to TestFlight with an App Store Connect API key from the environment (locked until the licence decision allows it)
 	$(TESTFLIGHT_GATE)
 	$(MAKE) --no-print-directory app-archive
 	$(MAKE) --no-print-directory app-export
-	@# Checked again right before the upload, so nothing swapped in between is sent.
+	@# Apple's check first, and the receipt checked again right before the
+	@# upload, so nothing swapped in between is sent.
+	$(MAKE) --no-print-directory app-store-check
 	@node $(ARCHIVE_RECEIPT) --check $(ARCHIVE_PATH)
 	@echo "  upload: not built yet"; exit 1
 

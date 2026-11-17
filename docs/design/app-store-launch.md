@@ -138,7 +138,7 @@ number alone. A version lower than today's, or one Apple would refuse, is refuse
 written. It lives in the new release skill, which the rest of the release joins as it is built.
 Raising the build as part of the archive comes with ⑪.
 
-### ⑪ The commands to make and upload a store build only print an error · **open**
+### ⑪ The commands to make and upload a store build only print an error · **fixed**
 
 *What would answer it:* a real archive and export that runs clean, and Apple's own check of it
 (the privacy file from ⑦ included) passing, with the upload step still locked until ③ and ④
@@ -165,9 +165,17 @@ renamed after the checks is refused. The archive left on the laptop from 2026-11
 the receipt and is refused, as it should be. On the real app (2,834 files) the fingerprint takes
 under half a second.
 
-One step is left: Apple's own check of the exported app. The key now exists, but the check sends
-the app to Apple, and the upload lock exists so nothing goes to Apple before the licence answer.
-Whether the check counts as an upload is the owner's call, item ㊷.
+*What answered it (2026-11-17):* Apple's own check passed on the first try, "no errors", on a
+fresh archive and export of the public build. Whether the check counts as an upload was the
+owner's call, item ㊷; the owner said yes the same day, since it makes no build anyone can
+install, puts nothing in the review queue and uses no build number. `make app-store-check` runs
+it, and refuses an export older than the archive's receipt. The upload command runs the same
+check before it would send anything, and stays locked until ③ and ④ are answered.
+
+Two things learned on the way. The export signs with Apple's online store certificate through
+Xcode's own sign-in; the store key cannot, as it has no right to that certificate. That sign-in
+expires, and the release setup check only sees that an account is listed, so an export stopped
+by an expired sign-in now says in plain words to sign in again in Xcode's settings.
 
 ### ⑫ A recitation may be silent when the phone's silent switch is on · **fixed**
 
@@ -444,7 +452,14 @@ at 340 px (the narrow side of iPad split view), in both engines, and a second te
 picker from the info panel at 320 px. The name button keeps its spoken name, so a screen reader
 still hears "Navigation for huffaz".
 
-### ㊷ May the app be sent to Apple for its check before the licence is answered? · **open**
+### ㊷ May the app be sent to Apple for its check before the licence is answered? · **answered**
+
+*Answered by the owner, 2026-11-17: yes, check now,* so the store-only faults are found early and
+the rest of the launch work can be done backwards from a passing check. The lock now reads "no
+build anyone can install, and nothing in Apple's review queue", not "nothing leaves the laptop".
+The check makes no build in the store's listing, nothing a tester or reviewer can see, and uses
+up no build number, so it cannot make the later review harder; passing it also does not mean
+the review will pass, since a reviewer judges what the app does, not its packaging.
 
 Apple can check an exported app (its signing, its icons, its privacy file, its permissions)
 without it becoming a build anyone can install. That catches a refusal weeks before the real
