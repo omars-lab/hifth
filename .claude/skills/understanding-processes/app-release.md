@@ -19,6 +19,77 @@ The commands are in the `release-app` skill; the account IDs are in `app-setup`.
 
 Steps 1 to 5 stay on this laptop. Only steps 6 and 7 send anything to Apple.
 
+## The whole thing, as a story
+
+Apple lets an app into its store only when it knows three things: who made it, that nobody
+changed it on the way, and that it follows Apple's rules. Every setup step answers one of those.
+
+First you **join Apple's developer programme**, a yearly fee.[^program] That makes you a
+*team*: someone Apple will accept apps from. Then you **register the app's ID**,
+`com.bytesofpurpose.hifth`, the name Apple knows the app by for ever, and say which phone
+features it uses.[^app-id] Then you **open the app's record in App Store Connect**, Apple's
+website for everything after the build: the store listing, test flights, reviews, crash
+reports.[^asc]
+
+On the laptop, **Xcode is signed in to your account**, so it can act for the team. When it
+builds the app it puts a **seal** on it, a certificate, which proves the app came from you and
+was not changed since.[^certs] There are two seals. The *development* one is for your own iPad
+and iPhone. The *App Store* one is for the copy meant for the store, and Apple keeps that one
+itself and stamps the app for us when we ask.[^cloud]
+
+A release then goes like this. The agent sets the **version number**, puts the **public build**
+of the app inside (never the private one made for the pitch),[^flavour] and makes an
+**archive**: the finished app, packed and sealed. Then it **exports** it, re-sealed with the
+App Store seal.[^distribute] All of that stays on this laptop.
+
+To hand that copy to Apple, the laptop needs a **pass**: the App Store Connect key.[^key] It
+lets the agent's commands ask Apple to check the app and to take delivery of it, without anyone
+typing your password. That is the step we are on.
+
+One more gate is our own, not Apple's. The app carries data other people made, and they have
+not yet said yes to the store. So the upload stays **locked** until their written permission is
+in the repo.[^licence] After that: a **test flight** with a few readers,[^testflight] **Apple's
+review**,[^review] and a **release in stages** while we watch the first two weeks.[^phased]
+
+[^program]: Apple Developer Program, what membership gives and costs:
+    <https://developer.apple.com/programs/>. Ours was done on 2026-11-08; the team is named in
+    the `app-setup` skill.
+[^app-id]: Registering an app ID and choosing its features (Apple calls them capabilities):
+    <https://developer.apple.com/help/account/identifiers/register-an-app-id/>. Which features
+    ours ticks, and why each is there, is in the `app-setup` skill.
+[^asc]: App Store Connect help, the whole site: <https://developer.apple.com/help/app-store-connect/>.
+    Our record, made 2026-11-09, is one record for iOS and macOS; its link is in the
+    `app-setup` skill.
+[^certs]: Apple's certificate types, and which one signs what:
+    <https://developer.apple.com/support/certificates/>.
+[^cloud]: Cloud-managed certificates: with Xcode's automatic signing the App Store certificate's
+    private part stays at Apple, and Xcode asks Apple to sign:
+    <https://developer.apple.com/help/account/certificates/cloud-managed-certificates/>. Seen
+    here on 2026-11-16: the export was signed, and this laptop's keychain held no App Store
+    certificate. That is why the setup check also accepts a store-signed export.
+[^flavour]: The guard is the `app-store-flavour` step in `native/Makefile.native`, with its
+    tests in `scripts/native-store-flavour.test.mjs`. The release check that proves no
+    debug-only code reached the build is `.claude/skills/walk-app/scripts/release-check.mjs`.
+[^distribute]: Archiving and exporting for the store, Apple's guide:
+    <https://developer.apple.com/documentation/xcode/distributing-your-app-for-beta-testing-and-releases>.
+    Our export settings are `native/ExportOptions.plist`.
+[^key]: Making an App Store Connect API key:
+    <https://developer.apple.com/documentation/appstoreconnectapi/creating-api-keys-for-app-store-connect-api>.
+    What each access level may do (we use App Manager):
+    <https://developer.apple.com/help/app-store-connect/reference/role-permissions>.
+[^licence]: Why the upload waits: `docs/decisions/native-testflight-licence.md`. The two
+    permission emails, drafted and not sent: `docs/design/store-permission-emails.md`. The
+    lock itself: `scripts/testflight-allowed.mjs`.
+[^testflight]: TestFlight, Apple's way to hand a build to a few testers before release:
+    <https://developer.apple.com/testflight/>.
+[^review]: The rules Apple reviews against: <https://developer.apple.com/app-store/review/guidelines/>.
+    Our notes for the reviewer, including what makes the app more than a website (rule 4.2),
+    are drafted in `docs/design/store-listing.md`; each claim there names the test that holds it.
+[^phased]: Releasing an update in stages over seven days:
+    <https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases>.
+    Apple's page describes it for updates. Whether a first version can use it is not checked
+    yet; the launch plan lists it for the research pass.
+
 ## Who does what
 
 - **You** (the owner): anything that needs your Apple password, your account's settings, or a
@@ -48,23 +119,50 @@ Do these once per Apple account and once per laptop. The check script reads each
 Apple's tools use this key to check and upload the app without your password. Apple shows the
 key file **once**, so download it the moment it is made.
 
+**What the key is for.** It lets the agent's commands on this laptop talk to App Store Connect
+in your name, without your password, and only for this team's own work (what you agree to when
+you request access). The plan uses it for:
+
+| use | command | built? |
+|---|---|---|
+| Apple's own check of the signed copy, before any upload | the release's check step | not yet; first use |
+| Uploading a build to TestFlight | `make app-testflight` | not yet; locked on the licence |
+| Seeing whether Apple has finished processing an upload, and adding it to a test group | part of the release command (launch item ㉒) | not yet |
+| Reading new store reviews, to answer them | a reviews command (launch stage 4) | not yet |
+| Reading what Apple collects from readers' devices (hangs, slow launches, test-flight crash reports) | the crash command (launch stage 4) | not yet; which of these the key can reach is not checked yet |
+| Sending a build for review and starting the release | the release command (launch stage 8) | not yet |
+
+It is never used to change your account, add people, or read sales and payments. App Manager
+access can do more than this list;[^key] the commands only do what is listed. If that ever
+needs to shrink, a second key with less access can take over the read-only jobs.
+
+Nothing about readers goes *to* Apple through the key. It sends our build and our listing, and
+it reads back what Apple already holds. A reader's own report still goes only by the mail they
+choose to send.
+
 1. Open <https://appstoreconnect.apple.com/access/integrations/api>. It is **Users and Access**,
-   then the **Integrations** tab, then **App Store Connect API**. The first time, Apple asks you
-   to request access; accept it.
-2. Under **Team Keys**, click **+**. Name it `hifth-upload`. Access: **App Manager**. Click
-   **Generate**.
-3. Click **Download** beside the new key. Apple never offers it again. You get a file named
+   then the **Integrations** tab, then **App Store Connect API** under *Keys* on the left.
+2. **The first time only:** the page says "Permission is required to access the App Store
+   Connect API" with a **Request Access** button. Click it. A box opens listing what the API is
+   for; tick the box agreeing to use it within your team only, and click **Submit**. For a
+   one-person team it was approved at once (2026-11-16): the page then says "Your request to
+   access the App Store Connect API was approved."
+3. Stay on the **Team Keys** tab, not *Individual Keys*: a team key keeps working whoever on
+   the team runs the release. Click **Generate API Key** (or the **+** beside *Active (0)*).
+   Name it `hifth-upload`. Access: **App Manager**, the least that can upload and manage test
+   flights. Click **Generate**.
+4. Click **Download** beside the new key. Apple never offers it again. You get a file named
    `AuthKey_<key ID>.p8`.
-4. In your own terminal, move it into place and make it readable only by you:
+5. In your own terminal, move it into place and make it readable only by you:
    ```
    mkdir -p ~/.appstoreconnect/private_keys
    mv ~/Downloads/AuthKey_*.p8 ~/.appstoreconnect/private_keys/
    chmod 600 ~/.appstoreconnect/private_keys/AuthKey_*.p8
    ```
-5. Tell the agent the **key ID** (the column beside the key's name) and the **issuer ID** (the
+6. Tell the agent the **key ID** (the column beside the key's name) and the **issuer ID** (the
    long id above the keys list). Neither is secret. The agent writes them to
    `~/.appstoreconnect/hifth.json`, outside the repo.
-6. The agent runs `make app-release-setup`, and both key lines should say `ok`.
+7. The agent runs `make app-release-setup`, and both key lines should say `ok`.
 
 Never put the `.p8` file in the repo, a chat, a commit or the clipboard. The repo's
 `.gitignore` leaves out every `.p8` file, so git will not pick one up by accident. If the file
