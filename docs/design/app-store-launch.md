@@ -127,8 +127,9 @@ asks only for the network and the files the reader picks. The release check now 
 app and refuses it if a permission is missing or one nobody chose is there. The walk found
 nothing broken so far: a fresh first open lands on page 7 with no "Left off" ribbon, and the
 recitation reaches the network. Saving, loading and links wait on a person's hands (the by-hand
-list). Left: the store archive signed by the team, which waits on the owner's yes to its new
-certificate.
+list). The store archive is now made and signed by the team (owner's yes, 2026-11-17), and so
+is its installer package; the same checks pass on the app inside each. Left: Apple's own check
+of the package, which waits on the owner adding the Mac to the app's store record.
 
 ### ⑨ The iPad and iPhone app has no list of what it is allowed to do · **open**
 

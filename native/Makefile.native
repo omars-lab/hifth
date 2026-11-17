@@ -20,6 +20,8 @@
 #   make app-release-check   fail if the release iPad build carries any of the walk capture
 #                            (TARGET=mac: the Mac builds, and the sandboxed one's permissions)
 #   make app-store-flavour   fail unless the web build in the app is the public one (an archive needs it)
+#   make app-archive-mac · make app-export-mac   the Mac App Store archive, then its installer package,
+#                            each checked; nothing leaves the laptop (app-store-check-mac sends it to Apple's check)
 #   make app-devices [CSV=1]   the registered devices, and the slots of each kind left this year
 #   make app-device-register DEVICE=…   register a new device with Apple (uses a slot), then install
 # ---------------------------------------------------------------------------
@@ -124,7 +126,8 @@ IPHONE        ?= iPhone 17
 GOLDEN_IPHONE_ROUTES ?= /hafs-kfqc/2:255
 # The Apple Development team, read from the signing certificate's "OU" field
 # (the bracketed id in its name is the certificate's own, not the team's).
-# Only device builds and archives need it; simulator and Mac builds do not.
+# Only device builds and archives (the Mac's too) need it; simulator and
+# everyday Mac builds do not.
 TEAM         ?= $(shell sh native/scripts/signing-team.sh)
 # The plugged-in iPad, by the name `xcrun devicectl list devices` prints.
 DEVICE       ?=
@@ -607,6 +610,63 @@ app-testflight: app-store-flavour ## Upload the archive to TestFlight with an Ap
 	$(MAKE) --no-print-directory app-store-check
 	@node $(ARCHIVE_RECEIPT) --check $(ARCHIVE_PATH)
 	@echo "  upload: not built yet"; exit 1
+
+# ---- The Mac App Store build (launch item 8; the owner's yes, 2026-11-17).
+# The same steps as the iPad and iPhone one, in their own folder. The project
+# signs the everyday Mac app ad hoc, so only these commands sign it with the
+# team, and they keep the real app id: the `.release` suffix the laptop's Mac
+# Release builds carry never reaches the archive. The export's first run made
+# the team's Mac installer certificate (approved by the owner the same day).
+MAC_ARCHIVE_PATH ?= $(DERIVED)/store-mac/Hifth.xcarchive
+MAC_EXPORT_PATH  ?= $(DERIVED)/store-mac/export
+MAC_ARCHIVE_DD   := $(DERIVED)/store-mac/derived
+LSREGISTER       := /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+.PHONY: app-archive-mac app-export-mac app-store-check-mac
+
+app-archive-mac: app-store-flavour app-generate ## Archive the Mac app for the store: public build only, sandboxed, checked inside the archive; nothing leaves the laptop
+	@test -n "$(TEAM)" || { echo "  no Apple Development identity in the keychain (TEAM= to override)"; exit 1; }
+	@sh native/scripts/xcode-account.sh
+	$(MAKE) --no-print-directory app-release-check TARGET=mac RELEASE_FLAVOUR=public
+	rm -rf $(MAC_ARCHIVE_PATH) $(MAC_ARCHIVE_PATH).receipt.json
+	@# Xcode tells macOS about every Mac app it builds, so a hifth:// link could
+	@# open this sandboxed copy, with its own empty data, instead of the reader's
+	@# app. Both copies are taken off that list again, even when the archive fails.
+	set -o pipefail; xcodebuild -project $(XCPROJ) -derivedDataPath $(MAC_ARCHIVE_DD) -scheme Hifth-macOS \
+	  -configuration Release -destination generic/platform=macOS -archivePath $(MAC_ARCHIVE_PATH) \
+	  -allowProvisioningUpdates DEVELOPMENT_TEAM=$(TEAM) CODE_SIGN_STYLE=Automatic CODE_SIGN_IDENTITY="Apple Development" \
+	  HIFTH_STORE_CONDITION=STORE archive | $(XCPRETTY); s=$$?; \
+	  $(LSREGISTER) -u $(MAC_ARCHIVE_DD)/Build/Intermediates.noindex/ArchiveIntermediates/Hifth-macOS/InstallationBuildProductsLocation/Applications/Hifth.app 2>/dev/null; \
+	  $(LSREGISTER) -u $(MAC_ARCHIVE_PATH)/Products/Applications/Hifth.app 2>/dev/null; exit $$s
+	node .claude/skills/walk-app/scripts/release-check.mjs \
+	  --debug $(DERIVED)/Build/Products/Debug/Hifth.app \
+	  --release $(MAC_ARCHIVE_PATH)/Products/Applications/Hifth.app --flavour public --store
+	@node $(ARCHIVE_RECEIPT) --write $(MAC_ARCHIVE_PATH) --flavour public --by "make app-archive-mac"
+	@echo "  archive: $(MAC_ARCHIVE_PATH)"
+
+app-export-mac: ## Sign the Mac archive for the App Store as an installer package, and check the app inside it
+	@test -d $(MAC_ARCHIVE_PATH) || { echo "  no archive at $(MAC_ARCHIVE_PATH). Run: make app-archive-mac"; exit 1; }
+	@node $(ARCHIVE_RECEIPT) --check $(MAC_ARCHIVE_PATH) --by "make app-archive-mac"
+	rm -rf $(MAC_EXPORT_PATH)
+	set -o pipefail; xcodebuild -exportArchive -archivePath $(MAC_ARCHIVE_PATH) -exportPath $(MAC_EXPORT_PATH) \
+	  -exportOptionsPlist $(EXPORT_OPTIONS) -allowProvisioningUpdates 2>&1 | tee $(MAC_EXPORT_PATH).log | $(XCPRETTY) \
+	  || { grep -q "session has expired" $(MAC_EXPORT_PATH).log && echo "  Xcode's sign-in to the Apple account has expired. Sign in again in Xcode > Settings > Accounts, then: make app-export-mac"; exit 1; }
+	@# The export signs the app again, for the store, so the app that would be
+	@# sent is the one inside the package: open it and check that one too.
+	pkgutil --expand-full $(MAC_EXPORT_PATH)/Hifth.pkg $(MAC_EXPORT_PATH)/opened
+	node .claude/skills/walk-app/scripts/release-check.mjs \
+	  --debug $(DERIVED)/Build/Products/Debug/Hifth.app \
+	  --release $(MAC_EXPORT_PATH)/opened/*.pkg/Payload/Hifth.app --flavour public --store
+	@echo "  export: $(MAC_EXPORT_PATH)/Hifth.pkg"
+
+# Apple's own check of the Mac package. The owner's yes to Apple's check
+# covered the iPad and iPhone app; this one waits until the Mac is added to the
+# app's record in App Store Connect, and is run only then.
+app-store-check-mac: ## Send the Mac package to Apple for its check (no build anyone can install; run once the Mac is added in App Store Connect)
+	@test -f $(MAC_EXPORT_PATH)/Hifth.pkg || { echo "  no exported package at $(MAC_EXPORT_PATH). Run: make app-export-mac"; exit 1; }
+	@test $(MAC_EXPORT_PATH)/Hifth.pkg -nt $(MAC_ARCHIVE_PATH).receipt.json || { echo "  the exported package is older than the archive. Run: make app-export-mac"; exit 1; }
+	@node $(ARCHIVE_RECEIPT) --check $(MAC_ARCHIVE_PATH) --by "make app-archive-mac"
+	dotenvx run --quiet -- sh -c 'xcrun altool --validate-app -f $(MAC_EXPORT_PATH)/Hifth.pkg -t macos --apiKey "$$ASC_KEY_ID" --apiIssuer "$$ASC_ISSUER_ID"'
+	@echo "  ✓ Apple's check passed: $(MAC_EXPORT_PATH)/Hifth.pkg"
 
 app-logs: ## Stream the app's console output (Mac or simulator)
 	log stream --predicate 'process == "Hifth"' --level debug

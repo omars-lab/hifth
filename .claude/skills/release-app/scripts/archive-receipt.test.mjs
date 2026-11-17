@@ -7,6 +7,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, cpSync, ex
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { fixtureEnv } from "../../../../scripts/gate-fixture.mjs";
 
 const SCRIPT = new URL("./archive-receipt.mjs", import.meta.url).pathname;
 const COMMIT = "0123456789abcdef0123456789abcdef01234567";
@@ -45,6 +46,17 @@ test("an archive with no receipt was not made by the archive command, and is ref
   const c = check(at);
   assert.equal(c.status, 1);
   assert.match(c.stdout, /make app-archive/);
+});
+
+test("the Mac archive's receipt names the Mac command, and so does its refusal", () => {
+  const at = archive();
+  const w = write(at, "--by", "make app-archive-mac");
+  assert.equal(w.status, 0, w.stdout + w.stderr);
+  assert.equal(JSON.parse(readFileSync(`${at}.receipt.json`, "utf8")).madeBy, "make app-archive-mac");
+  const bare = archive();
+  const c = run("--check", bare, "--by", "make app-archive-mac");
+  assert.equal(c.status, 1);
+  assert.match(c.stdout, /Run: make app-archive-mac$/m);
 });
 
 test("a file changed inside the app after the archive was made is refused", () => {
@@ -111,6 +123,49 @@ test("the receipt says which commit it was made from and whether the tree was cl
   assert.equal(r.flavour, "public");
   assert.match(r.fingerprint, /^[0-9a-f]{64}$/);
   assert.equal(r.files, 3);
+});
+
+// Asked of a made-up repo, run with git's own variables taken out, so a
+// commit hook's pointers at the real repo never reach it.
+function repo() {
+  const at = mkdtempSync(join(tmpdir(), "hifth-repo-"));
+  const g = (...a) => spawnSync("git", ["-C", at, ...a], { encoding: "utf8", env: fixtureEnv() });
+  g("init", "-q");
+  writeFileSync(join(at, "a.txt"), "1");
+  mkdirSync(join(at, ".page-comments/threads"), { recursive: true });
+  writeFileSync(join(at, ".page-comments/threads/t.jsonl"), "{}\n");
+  g("add", "a.txt", ".page-comments/threads/t.jsonl");
+  g("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "--no-verify", "-m", "fixture");
+  return at;
+}
+const writeIn = (dir, at) =>
+  spawnSync(process.execPath, [SCRIPT, "--write", at, "--commit", COMMIT], { encoding: "utf8", cwd: dir, env: fixtureEnv() });
+
+// The comment server writes into .page-comments/ while the app is built, and
+// none of it goes into the app, so it never makes a tree count as uncommitted.
+test("a comment written on a page while the archive was made does not count as uncommitted work", () => {
+  const dir = repo();
+  writeFileSync(join(dir, ".page-comments/threads/t.jsonl"), "{}\n{}\n");
+  const at = archive();
+  assert.equal(writeIn(dir, at).status, 0);
+  assert.equal(JSON.parse(readFileSync(`${at}.receipt.json`, "utf8")).clean, true);
+});
+
+test("any other uncommitted change still does", () => {
+  const dir = repo();
+  writeFileSync(join(dir, "a.txt"), "2");
+  const at = archive();
+  assert.equal(writeIn(dir, at).status, 0);
+  assert.equal(JSON.parse(readFileSync(`${at}.receipt.json`, "utf8")).clean, false);
+});
+
+test("run from a folder inside the repo, a change elsewhere in it still counts", () => {
+  const dir = repo();
+  mkdirSync(join(dir, "native"));
+  writeFileSync(join(dir, "a.txt"), "2");
+  const at = archive();
+  assert.equal(writeIn(join(dir, "native"), at).status, 0);
+  assert.equal(JSON.parse(readFileSync(`${at}.receipt.json`, "utf8")).clean, false);
 });
 
 test("an archive made from uncommitted work says so when checked", () => {
