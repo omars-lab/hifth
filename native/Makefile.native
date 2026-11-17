@@ -553,6 +553,9 @@ app-release-setup: ## Is this laptop set up to release? Each thing a release nee
 app-store-reviews: ## Store reviews: ARGS=pull (counts only), waiting, "draft <id> --file F", "approve <id>", "post <id>". Kept in .store/reviews/ (git ignores it); nothing is posted without the owner's yes
 	@dotenvx run --quiet -- node .claude/skills/store-feedback/scripts/store-reviews.mjs $(ARGS)
 
+app-store-numbers: ## Downloads from Apple's daily reports: ARGS=pull or summary, with --days N (default 30). Kept in .store/numbers/ (git ignores it); prints counts only
+	@dotenvx run --quiet -- node .claude/skills/store-numbers/scripts/store-numbers.mjs $(ARGS)
+
 app-archive: app-store-flavour app-generate ## Archive the iPad and iPhone app for the store: public build only, checked inside the archive; nothing leaves the laptop
 	@test -n "$(TEAM)" || { echo "  no Apple Development identity in the keychain (TEAM= to override)"; exit 1; }
 	@sh native/scripts/xcode-account.sh
