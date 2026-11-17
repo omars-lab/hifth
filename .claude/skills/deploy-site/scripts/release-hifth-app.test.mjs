@@ -12,11 +12,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, changesThatShip, configProblems, localListFrom, serveArgs, withoutScriptRule } from "./release-hifth-app.mjs";
+import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, cleanCopy, configProblems, localListFrom, serveArgs, withoutScriptRule } from "./release-hifth-app.mjs";
 import { auditShipped, inlineScriptHashes, readFolder } from "./shipped.mjs";
+import { fixtureEnv } from "../../../../scripts/gate-fixture.mjs";
 
 function tree(root, files) {
   for (const [path, text] of Object.entries(files)) {
@@ -186,22 +187,6 @@ test("with a local list, serving hands it the local address, the made-up site ke
   assert.match(readFileSync(new URL("../../../../supabase/seed.sql", import.meta.url), "utf8"), new RegExp(LOCAL_LIST_KEY));
 });
 
-test("a change to the page-comment files does not stop a release; any other change does", () => {
-  // The comment tool adds a line to its thread files after every commit, and none of them
-  // ships, so counting them would refuse every release until someone committed them.
-  const porcelain = [
-    " M .page-comments/threads/t_000001.jsonl",
-    "?? .page-comments/threads/t_000002.jsonl",
-  ].join("\n");
-  assert.deepEqual(changesThatShip(porcelain), []);
-  assert.deepEqual(changesThatShip(`${porcelain}\n M apps/landing/index.html`), [" M apps/landing/index.html"]);
-  // A file merely named like the folder, elsewhere, still counts.
-  assert.deepEqual(changesThatShip(" M docs/.page-comments-notes.md"), [" M docs/.page-comments-notes.md"]);
-  assert.deepEqual(changesThatShip(""), []);
-  // git() trims its output, so the first line can arrive without its leading space.
-  assert.deepEqual(changesThatShip("M .page-comments/threads/t_000001.jsonl\n M apps/web/src/App.tsx"), [" M apps/web/src/App.tsx"]);
-});
-
 // The copy on this laptop writes the side bar and the comment button into each page, which the
 // front pages' script rule refuses. Only that rule is left out there; every other header stays.
 test("the laptop's copy leaves out only the script rule from the site's headers", () => {
@@ -212,4 +197,41 @@ test("the laptop's copy leaves out only the script rule from the site's headers"
   const others = (t) => t.split("\n").filter((l) => !/Content-Security-Policy/i.test(l));
   assert.deepEqual(others(local), others(live));
   assert.match(local, /X-Frame-Options: DENY/);
+});
+
+// GitHub's publish built from a fresh copy, which is what proved the site never held the private
+// pitch folder (git ignores it, so it sits only in the laptop's working tree). The laptop release
+// keeps that: it builds a clean copy of the released commit, never the working tree. Owner,
+// 2026-11-17: the laptop publishes (docs/design/laptop-publish.md).
+test("a release builds from a clean copy of the commit, with no ignored private folder and no uncommitted work", () => {
+  const env = fixtureEnv();
+  const git = (cwd, ...args) => execFileSync("git", ["-C", cwd, ...args], { env, encoding: "utf8" }).trim();
+  const repo = mkdtempSync(join(tmpdir(), "hifth-release-repo-"));
+  git(repo, "init", "--quiet", "--initial-branch=main");
+  tree(repo, {
+    ".gitignore": "apps/web/public/assets/private\n",
+    "apps/web/index.html": "<p>released</p>",
+  });
+  git(repo, "add", ".gitignore", "apps/web/index.html");
+  git(repo, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "--quiet", "--no-verify", "-m", "one");
+  const released = git(repo, "rev-parse", "HEAD");
+  // Made-up stand-ins: a private file git ignores, and an edit nobody committed.
+  tree(repo, {
+    "apps/web/public/assets/private/held.json": "{\"made\":\"up\"}",
+    "apps/web/index.html": "<p>not committed</p>",
+  });
+
+  const copy = cleanCopy({ repo, commit: released });
+
+  assert.equal(git(copy, "rev-parse", "HEAD"), released);
+  assert.equal(existsSync(join(copy, "apps/web/public/assets/private")), false);
+  assert.equal(readFileSync(join(copy, "apps/web/index.html"), "utf8"), "<p>released</p>");
+  assert.equal(git(copy, "status", "--porcelain"), "");
+});
+
+test("a clean copy refuses a commit the repo does not have", () => {
+  const env = fixtureEnv();
+  const repo = mkdtempSync(join(tmpdir(), "hifth-release-repo-"));
+  execFileSync("git", ["-C", repo, "init", "--quiet"], { env });
+  assert.throws(() => cleanCopy({ repo, commit: "0123456789abcdef0123456789abcdef01234567" }), /0123456789ab/);
 });

@@ -2,12 +2,12 @@
 /**
  * Release hifth.app: the front page at the root, the web app under /read/.
  *
- *   check     build the site (make site, with its gates), put the release folder together,
- *             and refuse it if it holds anything but the bare minimum (shipped.mjs). Also
- *             refuses a tree with uncommitted changes (the page-comment files aside), or a
- *             commit that is not on origin/main, because the app's source-code offer names the
- *             commit it was built from.
- *             --no-build checks the last build instead of making a new one.
+ *   check     make a clean copy of main as GitHub has it, build the site there (make site,
+ *             with its gates), put the release folder together, and refuse it if it holds
+ *             anything but the bare minimum (shipped.mjs). The copy has no ignored files and
+ *             no uncommitted work, so the private pitch folder can never ride along, and the
+ *             app's source-code offer names the very commit it was built from.
+ *             --no-build checks the last build on this laptop instead, as a look only.
  *   publish   check, then upload the folder to the hifth.app Cloudflare Pages project, then
  *             verify. Must run inside dotenvx (make hifth-app-publish does), and refuses
  *             unless the new account's token and ID are both loaded. Without them wrangler
@@ -129,9 +129,9 @@ export function configProblems(text) {
   return problems;
 }
 
-function readConfig() {
+function readConfig(landing = LANDING) {
   try {
-    return readFileSync(join(LANDING, "wrangler.toml"), "utf8");
+    return readFileSync(join(landing, "wrangler.toml"), "utf8");
   } catch {
     return null;
   }
@@ -142,30 +142,31 @@ function git(...args) {
   return { ok: r.status === 0, out: (r.stdout ?? "").trim() };
 }
 
+/** This process's environment without git's own variables, so git acts on the paths it is given. */
+const gitFreeEnv = () => Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith("GIT_")));
+
 /**
- * The lines of `git status --porcelain` that could change what ships. The page-comment tool
- * adds a line to its thread files after every commit (.page-comments/), and none of them is
- * in the site, so counting them would refuse every release until somebody committed them.
+ * A fresh copy of `commit` in a scratch folder, made from this repo's own objects. Git leaves
+ * out every file it ignores, so the private pitch folder never reaches the copy, and nothing
+ * uncommitted does either. GitHub's publish proved the same by building from a fresh clone;
+ * since 2026-11-17 the laptop publishes (docs/design/laptop-publish.md), so this keeps it.
  */
-export function changesThatShip(porcelain) {
-  return porcelain
-    .split("\n")
-    .filter((line) => line.trim() !== "")
-    // Each line is a one- or two-letter status, then the path. The first line's leading space
-    // may already be trimmed away (git() trims its output), so read the path by pattern.
-    .filter((line) => !/^\S{1,2}\s+\.page-comments\//.test(line.trimStart()));
+export function cleanCopy({ repo = REPO, commit, into = mkdtempSync(join(tmpdir(), "hifth-release-copy-")) }) {
+  const dir = join(into, "hifth");
+  const env = gitFreeEnv();
+  const run = (...args) => {
+    const r = spawnSync("git", args, { env, encoding: "utf8" });
+    if (r.status !== 0) throw new Error(`could not make a clean copy of ${commit.slice(0, 12)}: ${(r.stderr || "").trim()}`);
+  };
+  run("clone", "--quiet", "--no-checkout", repo, dir);
+  run("-C", dir, "checkout", "--quiet", "--detach", commit);
+  return dir;
 }
 
-function gitProblems() {
-  const problems = [];
-  if (changesThatShip(git("status", "--porcelain").out).length > 0) {
-    problems.push({ path: "(working tree)", why: "has uncommitted changes, so the app would name a commit that is not what it was built from; commit or put them aside" });
-  }
+/** The tip of main as GitHub has it, fetched now; a release is only ever that commit. */
+function releasedCommit() {
   git("fetch", "--quiet", "origin", "main");
-  if (!git("merge-base", "--is-ancestor", "HEAD", "origin/main").ok) {
-    problems.push({ path: "(commit)", why: "this commit is not on origin/main; release only what has been merged" });
-  }
-  return problems;
+  return git("rev-parse", "origin/main").out;
 }
 
 function say(problems, heading) {
@@ -174,35 +175,56 @@ function say(problems, heading) {
   for (const p of problems) console.log(`  ✗ ${p.path} — ${p.why}`);
 }
 
+/**
+ * Where the release is built. A release builds a clean copy of main's tip (cleanCopy), with its
+ * own installed packages, so the working tree, its private pitch folder and anything not yet
+ * merged never reach the site. A look on this laptop builds the working tree as it is.
+ */
+function buildIn({ release }) {
+  if (!release) return { root: REPO, commit: git("rev-parse", "HEAD").out };
+  const commit = releasedCommit();
+  console.log(`Making a clean copy of main (${commit.slice(0, 8)}), with nothing ignored or uncommitted in it…`);
+  const root = cleanCopy({ commit });
+  console.log("Installing its packages (pnpm install --frozen-lockfile)…");
+  const install = spawnSync("pnpm", ["install", "--frozen-lockfile", "--prefer-offline", "--silent"], { cwd: root, stdio: "inherit" });
+  return install.status === 0 ? { root, commit } : { root: null, commit };
+}
+
 function check({ build, release = true }) {
-  const commit = git("rev-parse", "HEAD").out;
-  // A folder put together only to look at on this laptop may come from work not
-  // yet committed or merged; what it holds is still checked.
-  const gitIssues = release ? [...gitProblems(), ...configProblems(readConfig())] : [];
+  // --no-build looks at the last build on this laptop, so it is never a release.
+  const { root, commit } = buildIn({ release: release && build });
+  if (!root) {
+    console.log("\n✗ the clean copy's packages would not install; nothing was put together.");
+    return { ok: false };
+  }
+  const landing = join(root, "apps", "landing");
+  const app = join(root, "apps", "web", "dist");
+  const out = join(landing, "dist");
+  const configIssues = release ? configProblems(readConfig(landing)) : [];
   if (build) {
     console.log("Building the site and running its checks (make site)…");
-    const r = spawnSync("make", ["-C", REPO, "site"], { stdio: "inherit" });
+    const r = spawnSync("make", ["-C", root, "site"], { stdio: "inherit" });
     if (r.status !== 0) {
       console.log("\n✗ make site failed; nothing was put together.");
       return { ok: false };
     }
-  } else if (!existsSync(join(APP_DIST, "index.html"))) {
+  } else if (!existsSync(join(app, "index.html"))) {
     console.log("✗ there is no app build yet; run without --no-build.");
     return { ok: false };
   }
-  const out = assemble();
+  assemble({ landing, app, out });
   const { files, bytes } = readFolder(out);
   const { problems } = auditShipped(files, { commit });
   say(problems, "The release folder holds something it must not:");
-  say(gitIssues, "This commit cannot be released yet:");
-  const ok = problems.length === 0 && gitIssues.length === 0;
+  say(configIssues, "This commit cannot be released yet:");
+  const ok = problems.length === 0 && configIssues.length === 0;
   const mb = (bytes / 1e6).toFixed(1);
   console.log(
     ok
-      ? `\n✓ ready: ${files.length} files, ${mb} MB, commit ${commit.slice(0, 8)}, in ${out.slice(REPO.length + 1)}/`
+      ? `\n✓ ready: ${files.length} files, ${mb} MB, commit ${commit.slice(0, 8)}, in ${out}/`
       : `\n✗ not ready (${files.length} files, ${mb} MB looked at).`,
   );
-  return { ok, out, commit };
+  return { ok, out, landing, commit };
 }
 
 async function verify({ url = SITE, commit = git("rev-parse", "HEAD").out } = {}) {
@@ -216,25 +238,27 @@ async function verify({ url = SITE, commit = git("rev-parse", "HEAD").out } = {}
   return problems.length === 0;
 }
 
+/** Check, then upload. Returns the commit that went up, or null. */
 function publish() {
   const missing = ["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID"].filter((k) => !process.env[k]);
   if (missing.length) {
     console.log(`✗ ${missing.join(" and ")} not loaded. Run this through make hifth-app-publish, which loads the saved keys. Without them wrangler would use its own login, a different Cloudflare account.`);
-    return false;
+    return null;
   }
-  const { ok, out, commit } = check({ build: true });
-  if (!ok) return false;
+  const { ok, out, landing, commit } = check({ build: true });
+  if (!ok) return null;
   console.log(`\nUploading to the Cloudflare Pages project "${PROJECT}"…`);
+  // Run from the clean copy's front-page folder, so its settings and its form's code go up too.
   const r = spawnSync(
     "wrangler",
     ["pages", "deploy", out, "--project-name", PROJECT, "--branch", "main", "--commit-hash", commit, "--commit-dirty=false"],
-    { cwd: LANDING, stdio: "inherit" },
+    { cwd: landing, stdio: "inherit" },
   );
   if (r.status !== 0) {
     console.log("\n✗ the upload failed; the live site is unchanged.");
-    return false;
+    return null;
   }
-  return true;
+  return commit;
 }
 
 /** Cloudflare's published test secret for the spam check: every answer passes, and says it came from example.com. */
@@ -370,7 +394,10 @@ async function main(argv) {
   if (command === "prepare") return prepare({ build: !rest.includes("--no-build") });
   if (command === "serve") return serve({ port: flag("--port") ?? "7124" });
   if (command === "verify") return verify({ url: flag("--url"), commit: flag("--commit") });
-  if (command === "publish") return publish() && (await verify());
+  if (command === "publish") {
+    const commit = publish();
+    return commit !== null && (await verify({ commit }));
+  }
   console.log("usage: release-hifth-app.mjs check [--no-build] | prepare [--no-build] | serve [--port N] | publish | verify [--url URL] [--commit SHA]");
   return false;
 }
