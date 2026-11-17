@@ -2079,7 +2079,9 @@
       "date": "2026-11-11",
       "related": [
         "notify-list-store",
-        "notify-list-sender"
+        "notify-list-sender",
+        "site-publish-from",
+        "repo-private"
       ]
     },
     {
@@ -2138,6 +2140,56 @@
       "related": [
         "hifth-app-site",
         "notify-list-store"
+      ]
+    },
+    {
+      "id": "site-publish-from",
+      "question": "Who sends a new version of the site up: GitHub on each merge, or someone on the laptop?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "GitHub, on each merge to main"
+        },
+        {
+          "id": "B",
+          "label": "The laptop, when someone runs the publish command"
+        }
+      ],
+      "doc": "docs/design/laptop-publish.md#where-should-the-site-be-published-from",
+      "decided": "B",
+      "by": "omar",
+      "date": "2026-11-17",
+      "related": [
+        "hifth-app-site",
+        "repo-private"
+      ]
+    },
+    {
+      "id": "repo-private",
+      "question": "Should the code's history, branches and pull requests be hidden from the public?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Private, with the laptop publishing to Cloudflare"
+        },
+        {
+          "id": "B",
+          "label": "Private, paying GitHub to keep publishing the site"
+        },
+        {
+          "id": "C",
+          "label": "Stay public"
+        }
+      ],
+      "doc": "docs/design/laptop-publish.md#should-the-repo-be-private",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-11-17",
+      "related": [
+        "site-publish-from",
+        "hifth-app-site"
       ]
     }
   ]

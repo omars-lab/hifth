@@ -6479,6 +6479,31 @@
       "note": "The release tool's check and its last look are proven (one on a real build, one on Cloudflare's local server), but the upload has never run. Done 2026-11-12: the keys work on this laptop, and the site project (hifth-app) is made on the new account. Still needed: hifth.app attached to that project after the first upload, the email list's database, the contact address and the real spam-check key. The app-setup skill and make deploy-cloudflare still point at the old address and the other Cloudflare account; point them at hifth.app, or retire them, after the first upload. Also: make the email list's database (wrangler d1 create hifth-notify, then its table from apps/landing/schema.sql) and put its id in apps/landing/wrangler.toml; the check refuses the stand-in id. 2026-11-12: this is the top item for the front page; it waits on three things from the owner: the email list's database, the contact address the privacy page names, and the real spam-check key. 2026-11-12: the email list moves to Supabase (owner's choice), so the Cloudflare database step above no longer applies; see notify-function-on-d1. 2026-11-13: still the next thing for the front page once the calendar's dots look was added. Readers cannot reach hifth.app at all until this first upload runs, and the upload waits only on the owner: pushing the email list's table to Supabase, the four site keys, the contact address and the real spam-check key. 2026-11-13: the release check counted the page-comment files as uncommitted work and so refused every release; it now leaves them aside, with a test. 2026-11-14: still the most important thing for the front page, after the local side bar shipped; nothing an agent can do moves it, so it now shows as waiting on the owner. 2026-11-14: the contact address is done (hello@hifth.app, the owner's pick); left: the email list's table, the four site keys and the real spam-check key."
     },
     {
+      "id": "laptop-publish",
+      "source": {
+        "file": "docs/design/laptop-publish.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "hifth-app-site",
+      "useCase": "prove-the-source-offer-before-publishing",
+      "note": "Owner, 2026-11-17: the site publishes from this laptop, and the repo goes private once nothing would break. Steps: the release builds from a clean copy of the released commit, so the private pitch folder can never ride along; each release's source goes to a public copy with no history, and the app links to it by release; the design pages get a Cloudflare site of their own; the links to the repo on the front page, its privacy pages and the trust page move; GitHub's publish job is switched off; the rule that every design is public names the new address. Then, only after hifth.app/read is live and readers have had time to carry their marks from the old address (carry-marks-switched-off), the repo goes private. Waiting on the owner: hifth.app's first upload, a yes to a public source repo (their pick was a download on the site, but the release is about 107 MB and Cloudflare takes files of at most 25 MiB), and whether the design pages keep the old address."
+    },
+    {
+      "id": "ci-when-others-join",
+      "source": {
+        "file": "docs/design/laptop-publish.md",
+        "item": "②"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "ci-and-gates",
+      "note": "Owner, 2026-11-17: a plan for turning GitHub's checks and publishing back on once other developers join. While one person works here, checks run on the laptop before each push and the laptop publishes. With more people, a push from someone else's machine is not checked by our hooks, so: (1) run the push checks (make pre-push) on GitHub for each pull request, on a private repo's minutes or a paid plan; (2) require them to pass before a merge; (3) publish from GitHub again by putting back the publish job's push trigger in .github/workflows/deploy.yml, building from a fresh copy as it did, and sending to Cloudflare with a saved key instead of to GitHub's own site; (4) keep the laptop command as the way to publish by hand. Do this when the second developer gets write access, not before."
+    },
+    {
       "id": "hifth-app-arabic-pictures",
       "source": {
         "file": "docs/design/hifth-app-site.md",
