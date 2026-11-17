@@ -11,10 +11,17 @@ import Foundation
 ///  - the `HIFTH_ROUTE` launch variable (`fromEnvironment`), which is how the
 ///    Makefile and the screenshot targets open a state without a link dialog;
 ///  - a `--route=` argument (`fromArguments`), the same thing for XCUITest.
+///
+/// The last two, and the launch language below, are for the laptop's tools
+/// only: the build made for the store (the STORE condition, set by
+/// `make app-archive`) has none of them, so a reader's app opens where it
+/// would anyway, whatever it was started with (launch item 36).
 nonisolated enum Route {
     static let scheme = "hifth"
+    #if !STORE
     static let environmentKey = "HIFTH_ROUTE"
     static let argumentPrefix = "--route="
+    #endif
 
     /// One mus'haf the app knows by id. `shipped` is whether its pages are in
     /// the build; an unshipped one carries the reason, in plain words.
@@ -98,6 +105,29 @@ nonisolated enum Route {
         return hash(from: route)
     }
 
+    // MARK: - Where and in which language this launch opens
+
+    /// The route the laptop's tools started the app at, or `nil`. Always `nil`
+    /// in the store build.
+    static func launchRoute() -> String? {
+        #if STORE
+        return nil
+        #else
+        return fromEnvironment() ?? fromArguments()
+        #endif
+    }
+
+    /// The language the laptop's tools started the app in, or `nil` for the
+    /// reader's own. Always `nil` in the store build.
+    static func launchLanguage() -> String? {
+        #if STORE
+        return nil
+        #else
+        return language()
+        #endif
+    }
+
+    #if !STORE
     static func fromEnvironment(
         _ environment: [String: String] = ProcessInfo.processInfo.environment
     ) -> String? {
@@ -110,8 +140,6 @@ nonisolated enum Route {
             .map { String($0.dropFirst(argumentPrefix.count)) }
             .flatMap(hash(from:))
     }
-
-    // MARK: - The language for this launch
 
     static let languageKey = "HIFTH_LANG"
     static let languageArgumentPrefix = "--lang="
@@ -130,6 +158,7 @@ nonisolated enum Route {
             ?? arguments.first { $0.hasPrefix(languageArgumentPrefix) }.map { String($0.dropFirst(languageArgumentPrefix.count)) }
         return named.flatMap { languages.contains($0) ? $0 : nil }
     }
+    #endif
 
     /// The address the shell opens first: the language before the `#`, where
     /// the web app reads it, and the route after it.

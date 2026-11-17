@@ -346,12 +346,21 @@ betas and demos turns down; and the problem report did not name the device.
 connection, swipe page turns, rotation, split view, larger text, and the Mac by picture. The
 steps are in the walk-app skill's checklist, under "The store build, as Apple's reviewer".
 
-### ㊱ The store copy still answers the walk tools' launch settings · **open**
+### ㊱ The store copy still answers the walk tools' launch settings · **fixed**
 
 Only someone starting the app from a Mac can set them, so no reader or reviewer can reach them.
 
 *What would answer it:* the archive step leaves them out, and the release check refuses an
 archive that has them.
+
+*Fixed 2026-11-17.* The archive step now builds with a store switch that leaves out the page
+probe, the walk of steps, the picture, the forced light or dark look, and the page and language
+a test starts the app at. A plain Release build keeps them, because the reviewer walk drives
+one. The check on the archive refuses one that still has the long setting names; it found all
+six in the archive made before the change. The page and language names are too short to find
+in a built app, so a test reads the app's code instead and refuses any read of a launch setting
+the store build would keep. The Mac app is not archived yet; when it is, it takes the same
+switch.
 
 ### ㊲ Should the store build show the tajweed colours at all? · **open**
 
@@ -414,8 +423,8 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
   permissions file ⑨ (the upload checks both); the support page ⑳ and the privacy policy ㉙
   (Apple requires a link to each); the store's questions ㉚ and screenshots ㉛; sign-in ㉖ and
   deleting an account ㉗ (once sign-in ships, deletion must be in the app); the rest of the
-  reviewer walk ㉟; the tajweed question ㊲ (it can read as unfinished); the walk tools'
-  settings ㊱ (low risk, cheap to close).
+  reviewer walk ㉟; the tajweed question ㊲ (it can read as unfinished). (The walk tools'
+  settings ㊱ are fixed.)
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store

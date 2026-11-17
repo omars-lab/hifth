@@ -105,9 +105,9 @@ page" below). Backlog row names are in brackets.
 Reordered 2026-11-17 after the first walk as Apple's reviewer: what can get the app turned down
 comes before what matters once readers have it, since a turned-down build costs a week.
 
-1. **What the reviewer would trip on:** the walk tools' settings out of the store copy (㊱),
-   and the rest of the reviewer walk (㉟): iPhone, small iPhone, a first launch with no
-   connection, rotation, split view, larger text. (The first-open ribbon ㊳ is fixed.)
+1. **What the reviewer would trip on:** the rest of the reviewer walk (㉟): iPhone, small
+   iPhone, a first launch with no connection, rotation, split view, larger text. (The
+   first-open ribbon ㊳ and the walk tools' settings in the store copy ㊱ are fixed.)
 2. **Apple's settings:** the Mac sandbox, the permissions file, the archive up to the lock.
 3. **What Apple asks to link to:** the support page and the app's privacy policy, then the store
    answers and screenshots.

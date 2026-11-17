@@ -7,7 +7,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
-import { KEYS, SIGNS } from "./release-check.mjs";
+import { KEYS, SIGNS, STORE_SIGNS } from "./release-check.mjs";
 
 const SCRIPT = new URL("./release-check.mjs", import.meta.url).pathname;
 
@@ -199,6 +199,51 @@ test("not asked, the flavour is not looked at: the check still runs on a laptop 
   const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: everySign } });
   const release = app(root, "release", { inFolder: { ".hifth-web-flavour": "pitch\n" } });
   assert.equal(run(debug, release).status, 0);
+});
+
+// The build made for the store also leaves out the launch settings the
+// laptop's tools use. A plain Release build keeps them for the reviewer walk,
+// so only --store looks for them.
+const everyStoreSign = [...SIGNS, ...STORE_SIGNS].map(([, text]) => text).join("\0");
+
+function archiveRun(releaseCode, { debugCode = everyStoreSign, store = true } = {}) {
+  const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
+  const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: debugCode } });
+  const release = app(root, "release", { binaries: { Hifth: releaseCode } });
+  return spawnSync(process.execPath, [SCRIPT, "--debug", debug, "--release", release, ...(store ? ["--store"] : [])], {
+    encoding: "utf8",
+  });
+}
+
+test("a store build with none of the tools' launch settings passes", () => {
+  const r = archiveRun("plain app code");
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(r.stdout, /ev=start .*store=yes/);
+});
+
+test("any of the tools' launch settings left in a store build fails, saying which", () => {
+  for (const [what, text] of STORE_SIGNS) {
+    const r = archiveRun(`code ${text} code`);
+    assert.equal(r.status, 1, `"${text}" in the store build was not caught`);
+    assert.ok(r.stdout.includes(what), `the failure says ${what}: ${r.stdout}`);
+  }
+});
+
+test("a plain release build may keep the tools' launch settings: the reviewer walk uses them", () => {
+  const r = archiveRun(STORE_SIGNS.map(([, text]) => text).join("\0"), { store: false });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+test("a debug build missing a launch setting's name fails the store check: not finding it would prove nothing", () => {
+  const [, first] = STORE_SIGNS[0];
+  const r = archiveRun("plain app code", { debugCode: everyStoreSign.replace(first, "") });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /out of date/);
+  assert.ok(r.stdout.includes(first));
+});
+
+test("no launch setting's name is short enough for an optimized build to hide it", () => {
+  for (const [, text] of STORE_SIGNS) assert.ok(Buffer.byteLength(text) > 15, `"${text}" is 15 bytes or less`);
 });
 
 test("another script can load the check without it running or crashing", () => {

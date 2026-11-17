@@ -76,7 +76,7 @@ final class ShellModel {
     }
 
     init(
-        launchRoute: String? = Route.fromEnvironment() ?? Route.fromArguments(),
+        launchRoute: String? = Route.launchRoute(),
         callbackTimeout: Duration = .seconds(8)
     ) {
         self.callbackTimeout = callbackTimeout
@@ -147,7 +147,9 @@ final class ShellModel {
         webView.addInteraction(pencil)
         #endif
 
+        #if !STORE
         applyAppearanceOverride(webView)
+        #endif
 
         guard root != nil else {
             webView.loadHTMLString(Self.missingBundlePage, baseURL: nil)
@@ -155,7 +157,7 @@ final class ShellModel {
         }
         // A launch route (and language) rides in the first URL: no timing, no
         // race, the page simply opens there.
-        webView.load(URLRequest(url: Route.startURL(route: launchRoute, language: Route.language())))
+        webView.load(URLRequest(url: Route.startURL(route: launchRoute, language: Route.launchLanguage())))
         return webView
     }
 
@@ -447,8 +449,10 @@ final class ShellModel {
             ready = true
             readyCount += 1
             if let pendingHash { show(pendingHash) }
+            #if !STORE
             probeIfAsked()
             scheduleSnapshotIfAsked()
+            #endif
             #if DEBUG
             startWalkCaptureOnce()
             #endif
@@ -477,6 +481,12 @@ final class ShellModel {
         #endif
     }
 
+    // The probe, the walk of steps, the picture and the forced look below are
+    // for the laptop's tools. A plain Release build keeps them, since the
+    // reviewer walk drives one; the build made for the store (STORE, set by
+    // `make app-archive`) leaves them out, and its release check refuses an
+    // archive that still has them (launch item 36).
+    #if !STORE
     // MARK: - Probe (make app-probe)
 
     /// With `HIFTH_PROBE=1`, ask the page what it can see of its own world
@@ -781,6 +791,7 @@ final class ShellModel {
             }
         }
     }
+    #endif
 
     #if os(macOS)
     /// `make app-shot` and `make app-probe` open the Mac app behind the windows
@@ -839,6 +850,7 @@ final class ShellModel {
 
     // MARK: - Appearance (HIFTH_APPEARANCE=dark|light)
 
+    #if !STORE
     private func applyAppearanceOverride(_ webView: WKWebView) {
         guard let wanted = ProcessInfo.processInfo.environment["HIFTH_APPEARANCE"] else { return }
         #if os(iOS)
@@ -855,6 +867,7 @@ final class ShellModel {
         }
         #endif
     }
+    #endif
 
     private static let missingBundlePage = """
     <!doctype html><meta charset="utf-8"><title>Hifth</title>

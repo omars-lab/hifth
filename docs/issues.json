@@ -6940,7 +6940,7 @@
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "The Mac app's permissions file is empty and the app is signed for this laptop only."
+      "note": "The Mac app's permissions file is empty and the app is signed for this laptop only. When the Mac app gets its own store archive, build it with the same store switch the iPad archive uses (HIFTH_STORE_CONDITION=STORE, launch item 36) and run the release check on it with --store."
     },
     {
       "id": "launch-ios-entitlements",
@@ -7286,11 +7286,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊱"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
       "launch": true,
-      "note": "The Release build still answers the walk tools' launch settings: one runs a script in the page and prints the answer, others take pictures. Only someone starting the app from a Mac with a cable or the simulator can set them, so neither a reader nor Apple can reach them, and they switch on nothing a reader could use. Still, the copy sent to the store has no need of them. What would answer it: the archive step builds without them, the release check refuses an archive that has them, and the walk build keeps them."
+      "closedBy": "scripts/native-store-launch-settings.test.mjs",
+      "note": "The Release build still answers the walk tools' launch settings: one runs a script in the page and prints the answer, others take pictures. Only someone starting the app from a Mac with a cable or the simulator can set them, so neither a reader nor Apple can reach them, and they switch on nothing a reader could use. Still, the copy sent to the store has no need of them. What would answer it: the archive step builds without them, the release check refuses an archive that has them, and the walk build keeps them. FIXED 2026-11-17: the archive step builds with a store switch (STORE) that leaves out the probe, the walk of steps, the picture, the forced look, and the launch route and language; a plain Release build keeps them for the reviewer walk. The archive's release check, run with --store, refuses an archive that still has the six long setting names (it found all six in the archive made before the change). The route and language names are too short to find in an optimized build, so a test reads the app's code and refuses any read of a launch setting outside a part the store build leaves out (it found 19 such reads in the code before the change)."
     },
     {
       "id": "launch-tajweed-in-store",
