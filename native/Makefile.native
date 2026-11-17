@@ -34,16 +34,27 @@ SHOTS        := $(NATIVE)/shots
 BUNDLE_ID    := com.bytesofpurpose.hifth
 XCB          := xcodebuild -project $(XCPROJ) -derivedDataPath $(DERIVED)
 XCPRETTY     := $(shell command -v xcbeautify >/dev/null 2>&1 && echo "xcbeautify" || echo "cat")
-MAC_APP      := $(DERIVED)/Build/Products/Debug/Hifth.app
 # The simulator build's configuration. `Release` is what Apple's reviewer and
 # readers get: it leaves out the debug capture code, so walk the store build as the
 # reviewer would with `CONFIG=Release` (the walk-app skill's reviewer walk). The
-# probe still answers in it (launch item ㊱). The Mac build stays Debug.
+# probe still answers in it (launch item ㊱). The Mac follows it too.
 CONFIG       ?= Debug
 IPAD_APP      = $(DERIVED)/Build/Products/$(CONFIG)-iphonesimulator/Hifth.app
-# On the Mac, CONFIG=Release was once quietly ignored, so a store-style walk looked
-# at the Debug app. Refused by name until the Mac store build exists (launch item ⑧).
-MAC_DEBUG_ONLY = @test "$(CONFIG)" = Debug || { echo "  ✗ CONFIG=$(CONFIG): the Mac app is built in Debug only until its store build exists (launch item 8). Leave CONFIG off for TARGET=mac."; exit 1; }
+# The Mac app in Release is sandboxed, as the Mac store requires (launch item ⑧).
+# On this laptop it runs under its own id (MAC_ID), so it keeps its own data
+# folder, which can be emptied for a true first open, and never touches the
+# everyday Debug app's saved notes. The id the store sees is the real one: the
+# suffix is given here, on the command line, and never in the project.
+MAC_RELEASE   = $(filter Release,$(CONFIG))
+MAC_ID        = $(BUNDLE_ID)$(if $(MAC_RELEASE),.release)
+MAC_ID_ARG    = $(if $(MAC_RELEASE),PRODUCT_BUNDLE_IDENTIFIER=$(MAC_ID))
+MAC_APP       = $(DERIVED)/Build/Products/$(CONFIG)/Hifth.app
+# A sandboxed app may write only inside its own data folder ("Operation not
+# permitted" anywhere else, tried 2026-11-17). So in Release a picture is
+# written there and copied out to where it was asked for.
+MAC_INSIDE    = $(HOME)/Library/Containers/$(MAC_ID)/Data/tmp
+mac_write_at  = $(if $(MAC_RELEASE),$(MAC_INSIDE)/$(notdir $(1)),$(abspath $(1)))
+mac_copy_out  = $(if $(MAC_RELEASE),cp $(call mac_write_at,$(1)) $(abspath $(1)))
 # The Mac app is started through macOS's launcher, never by running the binary
 # inside it: started that way it runs with no window at all, so the page is
 # 0×0 and hidden and its picture comes out empty (native-shell.md ⑪). A new
@@ -75,6 +86,8 @@ PROBE_OUT    ?= $(SHOTS)/probe-side.json
 # home screen). Kept outside the repository when the page may show a note.
 PROBE_SHOT   ?=
 PROBE_SHOT_AT = $(if $(PROBE_SHOT),$(abspath $(PROBE_SHOT)))
+# The same picture as the Mac app writes it (inside its own folder in Release).
+MAC_PROBE_SHOT_AT = $(if $(PROBE_SHOT),$(call mac_write_at,$(PROBE_SHOT)))
 # app-probe SIDEWAYS=1 TURNS=12,24: seconds after launch at which the UI test
 # turns the iPad upright, then back on its side (an even count, so it ends on
 # its side), while the question watches. Only a UI test can turn the simulator.
@@ -161,8 +174,8 @@ endif
 	@echo "$$(git rev-parse --short=8 HEAD 2>/dev/null || echo unknown)$$(git diff --quiet HEAD 2>/dev/null || echo +changes)" > $(WEB_BUNDLE)/.hifth-web-commit
 	@echo "  ✓ $(FLAVOUR) web build in $(WEB_BUNDLE) ($$(find $(WEB_BUNDLE) -type f | wc -l | tr -d ' ') files)"
 
-app-build-mac: app-generate ## Build the Mac app (Debug, ad-hoc signed)
-	set -o pipefail; $(XCB) -scheme Hifth-macOS -configuration Debug -destination 'platform=macOS' build | $(XCPRETTY)
+app-build-mac: app-generate ## Build the Mac app, ad-hoc signed (CONFIG=Release: sandboxed, under its own id)
+	set -o pipefail; $(XCB) -scheme Hifth-macOS -configuration $(CONFIG) -destination 'platform=macOS' $(MAC_ID_ARG) build | $(XCPRETTY)
 
 app-build-ipad: app-generate ## Build the iPad app for the simulator
 	set -o pipefail; $(XCB) -scheme Hifth-iOS -configuration $(CONFIG) -sdk iphonesimulator \
@@ -175,7 +188,7 @@ app-run-mac: app-build-mac ## Build and open the Mac app (ROUTE=… to open at a
 	HIFTH_ROUTE=$(ROUTE) open -a $(MAC_APP)
 
 app-callback-check: app-build-mac ## Send one x-callback-url request through macOS to the app and check a second process gets the answer (opens one browser tab)
-	$(NATIVE)/scripts/callback-check.sh $(MAC_APP) $(BUNDLE_ID)
+	$(NATIVE)/scripts/callback-check.sh $(MAC_APP) $(MAC_ID)
 
 app-run-mac-stdout: app-build-mac ## Run the Mac app until you quit it, then print its console output here (live: make app-logs)
 	@: > $(MAC_LOG)
@@ -198,12 +211,12 @@ ifneq ($(SIDEWAYS),)
 endif
 	@mkdir -p $(SHOTS)
 ifeq ($(TARGET),mac)
-	$(MAC_DEBUG_ONLY)
 	$(MAKE) app-build-mac
-	@rm -f $(SHOT_OUT); : > $(MAC_LOG)
+	@rm -f $(SHOT_OUT) $(call mac_write_at,$(SHOT_OUT)); : > $(MAC_LOG)
 	$(MAC_OPEN) --env HIFTH_ROUTE=$(ROUTE) --env HIFTH_APPEARANCE=$(APPEARANCE) \
-	  --env HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) $(MAC_APP) $(MAC_ARGS)
+	  --env HIFTH_SNAPSHOT_PATH=$(call mac_write_at,$(SHOT_OUT)) $(MAC_APP) $(MAC_ARGS)
 	@cat $(MAC_LOG)
+	$(call mac_copy_out,$(SHOT_OUT))
 else
 	$(MAKE) app-build-ipad
 	xcrun simctl bootstatus $(IPAD_UDID) -b
@@ -272,12 +285,12 @@ else
 	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
 endif
 else
-	$(MAC_DEBUG_ONLY)
 	$(MAKE) app-build-mac
 	@: > $(MAC_LOG)
 	$(MAC_OPEN) --env HIFTH_PROBE=1 --env HIFTH_ROUTE='$(ROUTE)' --env HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
-	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) --env HIFTH_PROBE_SHOT='$(PROBE_SHOT_AT)' $(MAC_APP) $(MAC_ARGS)
+	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) --env HIFTH_PROBE_SHOT='$(MAC_PROBE_SHOT_AT)' $(MAC_APP) $(MAC_ARGS)
 	@grep '^probe {' $(MAC_LOG) | sed 's/^probe //' | python3 -m json.tool
+	$(if $(PROBE_SHOT),$(call mac_copy_out,$(PROBE_SHOT)))
 	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
 endif
 
