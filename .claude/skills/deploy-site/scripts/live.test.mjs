@@ -11,6 +11,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DEV_PATHS, verifyLive } from "./live.mjs";
+import { APP_LINKS_FILE, appSiteAssociation } from "./app-links.mjs";
+
+const LINKS = `/${APP_LINKS_FILE}`;
+const MADE_UP_TEAM = "Q9Z8Y7X6W5";
 
 const BASE = "https://hifth.app";
 const HEAD = "0123456789abcdef0123456789abcdef01234567";
@@ -28,6 +32,7 @@ function goodSite() {
     // main script itself (seen in the 2026-11-11 build: rarely-used-*.js).
     "/read/assets/index-abc.js": [200, 'const s=()=>import("./rarely-used-xyz.js");'],
     "/read/assets/rarely-used-xyz.js": [200, `const c="${HEAD}";`],
+    [LINKS]: [200, appSiteAssociation(MADE_UP_TEAM), "application/json"],
   };
 }
 
@@ -42,10 +47,45 @@ function network(site, unknown = () => [404, "Not found"]) {
     const path = new URL(url).pathname;
     asked.push(path);
     const hit = site[path] ?? unknown(site, path);
-    return { status: hit[0], text: async () => hit[1] };
+    const type = hit[2] ?? "text/html; charset=utf-8";
+    return { status: hit[0], headers: { get: (name) => (name.toLowerCase() === "content-type" ? type : null) }, text: async () => hit[1] };
   };
   return { fetch, asked };
 }
+
+// Apple fetches the links file itself and follows no redirect, so the live site must answer it
+// directly, as JSON, with the right words (launch item 9).
+test("Apple's links file missing from the live site is reported", async () => {
+  const site = goodSite();
+  delete site[LINKS];
+  const problems = await verifyLive(BASE, { commit: HEAD, fetch: network(site).fetch });
+  assert.deepEqual(problems.map((p) => p.path), [LINKS]);
+  assert.match(problems[0].why, /404/);
+});
+
+test("Apple's links file sent on to another address is reported, since Apple follows no redirect", async () => {
+  const site = goodSite();
+  site[LINKS] = [301, "", "text/html"];
+  const problems = await verifyLive(BASE, { commit: HEAD, fetch: network(site).fetch });
+  assert.deepEqual(problems.map((p) => p.path), [LINKS]);
+  assert.match(problems[0].why, /redirect|sent on/);
+});
+
+test("Apple's links file served as a web page instead of JSON is reported", async () => {
+  const site = goodSite();
+  site[LINKS] = [200, appSiteAssociation(MADE_UP_TEAM), "application/octet-stream"];
+  const problems = await verifyLive(BASE, { commit: HEAD, fetch: network(site).fetch });
+  assert.deepEqual(problems.map((p) => p.path), [LINKS]);
+  assert.match(problems[0].why, /JSON/);
+});
+
+test("Apple's links file with the wrong words is reported, without repeating the team id", async () => {
+  const site = goodSite();
+  site[LINKS] = [200, JSON.stringify({ applinks: { details: [{ appIDs: [`${MADE_UP_TEAM}.other.app`], components: [] }] } }), "application/json"];
+  const problems = await verifyLive(BASE, { commit: HEAD, fetch: network(site).fetch });
+  assert.ok(problems.length > 0);
+  assert.ok(problems.every((p) => p.path === LINKS && !p.why.includes(MADE_UP_TEAM)));
+});
 
 test("a good release passes, and every development address was asked", async () => {
   const net = network(goodSite());

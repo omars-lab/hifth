@@ -198,6 +198,14 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     Mail, never inside the app. Why not a machine: each step goes through a window that waits for
     a real click on the laptop's own screen. The automatic walk already proved the sandboxed app
     opens fresh with nothing left over and reaches the recitation over the network (launch item ⑧).
+26. **A hifth.app link opening the iPad app.** Only after hifth.app's first upload, and the
+    first store build is on the iPad (a test flight build, or one signed by the team). Apple can
+    take up to about a day to read the site's new file. In Notes or Messages on the iPad, write
+    `https://hifth.app/read/#/hafs-kfqc/2:255` and tap it. Right: the Hifth app opens at that
+    verse, not Safari. Then tap `https://hifth.app/` and `https://hifth.app/support`: those open
+    in Safari, since the app claims only the reader. Why not a machine: only Apple's servers
+    and a real device decide whether a link opens the app; the tests prove the site's file, the
+    app's permission and the app's reading of the link each on their own (launch item ⑨).
 
 ## Done
 

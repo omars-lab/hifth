@@ -25,6 +25,7 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { APP_SCRIPTS_GAP, auditShipped, inlineScriptHashes, readFolder } from "./shipped.mjs";
 import { verifyLive } from "./live.mjs";
+import { APP_LINKS_FILE, appSiteAssociation, signingTeam } from "./app-links.mjs";
 import { addDevDesigns, commitDates } from "./dev-designs.mjs";
 import { addDevSidebar, copyFeaturesPage, findFeaturesPage } from "./dev-sidebar.mjs";
 
@@ -67,8 +68,13 @@ function clearAway(out) {
   }
 }
 
-/** Put the release folder together from the front page and the app's build. */
-export function assemble({ landing = LANDING, app = APP_DIST, out = OUT } = {}) {
+/**
+ * Put the release folder together from the front page and the app's build. Given the signing
+ * team, it also writes the file that tells Apple which hifth.app links open the app
+ * (app-links.mjs). With no team it writes none, and the folder check says the file is missing,
+ * so a release cannot go up without it.
+ */
+export function assemble({ landing = LANDING, app = APP_DIST, out = OUT, team = null } = {}) {
   clearAway(out);
   mkdirSync(join(out, "read"), { recursive: true });
   for (const name of readdirSync(landing)) {
@@ -90,6 +96,10 @@ export function assemble({ landing = LANDING, app = APP_DIST, out = OUT } = {}) 
     filter: (src) => src === app || !APP_SKIP(src.slice(app.length + 1)),
   });
   fillAppScriptRule(out);
+  if (team) {
+    mkdirSync(dirname(join(out, APP_LINKS_FILE)), { recursive: true });
+    writeFileSync(join(out, APP_LINKS_FILE), appSiteAssociation(team));
+  }
   return out;
 }
 
@@ -212,9 +222,20 @@ function check({ build, release = true }) {
     console.log("✗ there is no app build yet; run without --no-build.");
     return { ok: false };
   }
-  assemble({ landing, app, out });
+  // The team id is read here, from this laptop's signing setup, and only ever written into the
+  // folder; nothing prints it. A look on this laptop goes on without it, saying so once.
+  const team = signingTeam({ script: join(root, "native", "scripts", "signing-team.sh") });
+  assemble({ landing, app, out, team });
   const { files, bytes } = readFolder(out);
-  const { problems } = auditShipped(files, { commit });
+  let { problems } = auditShipped(files, { commit });
+  if (!team) {
+    if (release) {
+      console.log("\nThis laptop has no Apple signing team, so the file that tells Apple which links open the app could not be written.");
+    } else {
+      problems = problems.filter((p) => p.path !== APP_LINKS_FILE);
+      console.log("  No Apple signing team on this laptop, so the file that tells Apple which links open the app was left out of this look.");
+    }
+  }
   say(problems, "The release folder holds something it must not:");
   say(configIssues, "This commit cannot be released yet:");
   const ok = problems.length === 0 && configIssues.length === 0;

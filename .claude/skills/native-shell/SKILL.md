@@ -52,9 +52,15 @@ any shape people paste (`hifth:///hafs-kfqc/2:255`, `hifth://hafs-kfqc/p45`,
 `hifth://open/#/hafs-kfqc/2:255`). The shell only checks the shape
 (`native/Hifth/Route/Route.swift`); the web router decides what it means.
 
-Three doors, all ending in the same hash:
+Four doors, all ending in the same hash:
 
 - `hifth://…` URL — while running (`.onOpenURL`) or to launch.
+- `https://hifth.app/read/#/hafs-kfqc/2:255` — a tapped link on the iPad or iPhone, once the
+  site's file at `/.well-known/apple-app-site-association` is live (launch item ⑨). The app
+  takes only the reader's addresses on exactly `hifth.app`; the site's file claims the same
+  ones, written by the deploy-site skill's `app-links.mjs`. Add a mus'haf to the app's shipped
+  list and to that file's list together; a test holds the two. A link the app opens but cannot
+  place is dropped silently today (backlog `app-link-it-cannot-place`).
 - `HIFTH_ROUTE=/hafs-kfqc/p45` env var — what the Makefile uses.
 - `--route=/hafs-kfqc/p45` launch argument — what XCUITest uses.
 

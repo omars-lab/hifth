@@ -206,7 +206,7 @@ test("not asked, the flavour is not looked at: the check still runs on a laptop 
 // so only --store looks for them.
 const everyStoreSign = [...SIGNS, ...STORE_SIGNS].map(([, text]) => text).join("\0");
 
-function archiveRun(releaseCode, { debugCode = everyStoreSign, store = true, permissions = IPAD_STORE_PERMISSIONS, extra = [] } = {}) {
+function archiveRun(releaseCode, { debugCode = everyStoreSign, store = true, permissions = IPAD_STORE_PERMISSIONS, team = MADE_UP_TEAM, extra = [] } = {}) {
   const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
   const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: debugCode } });
   const release = app(root, "release", { binaries: { Hifth: releaseCode } });
@@ -214,9 +214,13 @@ function archiveRun(releaseCode, { debugCode = everyStoreSign, store = true, per
   // signature would carry, as the file the signing tool prints.
   const perms = join(root, "permissions.plist");
   if (permissions !== null) writeFileSync(perms, permissionsFile(permissions));
+  // And a stand-in for the laptop's signing script, which names the team
+  // hifth.app's links file will name (or nothing, as on a laptop with no team).
+  const teamScript = join(root, "signing-team.sh");
+  writeFileSync(teamScript, team === null ? "exit 0\n" : `echo ${team}\n`);
   return spawnSync(
     process.execPath,
-    [SCRIPT, "--debug", debug, "--release", release, ...(store ? ["--store"] : []), ...(permissions !== null ? ["--permissions", perms] : []), ...extra],
+    [SCRIPT, "--debug", debug, "--release", release, ...(store ? ["--store"] : []), ...(permissions !== null ? ["--permissions", perms] : []), "--team-script", teamScript, ...extra],
     { encoding: "utf8" },
   );
 }
@@ -278,6 +282,26 @@ test("an iPad store build without the team's signing marks fails: it was not sig
   const r = archiveRun("plain app code", { permissions: rest });
   assert.equal(r.status, 1);
   assert.match(r.stdout, /application-identifier/);
+});
+
+// hifth.app's links file names the team the laptop's signing script finds. If
+// the store build was signed under another, every check passes and no link
+// ever opens the app, so the two are held together here.
+test("an iPad store build signed under another team than the laptop's fails, and prints neither id", () => {
+  const other = "A1B2C3D4E5";
+  for (const extra of [[], ["--exported"]]) {
+    const permissions = extra.length ? { ...IPAD_STORE_PERMISSIONS, "get-task-allow": false } : IPAD_STORE_PERMISSIONS;
+    const r = archiveRun("plain app code", { permissions, team: other, extra });
+    assert.equal(r.status, 1, `a different team was not caught ${extra}`);
+    assert.match(r.stdout, /another team/);
+    assert.ok(!r.stdout.includes(other) && !r.stdout.includes(MADE_UP_TEAM), "a team id was printed");
+  }
+});
+
+test("an iPad store build on a laptop with no signing team fails, rather than passing unchecked", () => {
+  const r = archiveRun("plain app code", { team: null });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /no signing team/);
 });
 
 test("an iPad store build whose permissions cannot be read fails, rather than passing unread", () => {

@@ -85,6 +85,15 @@ test("each front page lets scripts come only from this site and the spam check",
  * script written into its page, whose fingerprint the release fills in where the gap is. The
  * recitation comes from verses.quran.com. Nothing else from another site, no frames.
  */
+// Apple reads the file naming which links open the app only when it is served as JSON, and it
+// keeps its own copy, so ours must never be held by a cache (launch item 9).
+test("Apple's links file is served as JSON and never held by a cache", () => {
+  const rule = headerRules()["/.well-known/apple-app-site-association"];
+  assert.ok(rule, "_headers has no rule for Apple's links file");
+  assert.equal(rule["content-type"], "application/json");
+  assert.equal(rule["cache-control"], "no-cache");
+});
+
 test("the app lets scripts come only from this site, and sounds only from the recitation's site", () => {
   const csp = headerRules()["/read/"]?.["content-security-policy"] || "";
   assert.match(csp, /default-src 'self'/);

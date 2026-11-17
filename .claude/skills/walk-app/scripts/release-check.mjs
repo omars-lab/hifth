@@ -25,7 +25,9 @@
 // inside the archive; a plain Release build keeps them for the reviewer walk.
 // On the iPad and iPhone app, --store also reads the permissions it was signed
 // with: Sign in with Apple and hifth.app links (IPAD_NEEDS), the team's signing
-// marks, and nothing anybody did not choose. Only key names are ever printed.
+// marks, and nothing anybody did not choose. It must be signed under the team
+// the laptop's signing script finds, which hifth.app's links file names. Only
+// key names are ever printed, never an id.
 //
 // --exported is --store for the app inside the file that would be uploaded
 // (`make app-export`): there the debugger permission must be off as well.
@@ -36,6 +38,7 @@ import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { signingTeam } from "../../../../scripts/lib/signing-team.mjs";
 
 /** The two Info.plist settings that put the captures in the Files app. */
 export const KEYS = ["UIFileSharingEnabled", "LSSupportsOpeningDocumentsInPlace"];
@@ -104,10 +107,21 @@ const same = (a, b) => Array.isArray(a) && a.length === b.length && a.every((v, 
  * the team id. With `exported`, the app is the one that would be uploaded, and
  * the debugger permission must be off.
  */
-export function ipadPermissionProblems(granted, { exported = false } = {}) {
+export function ipadPermissionProblems(granted, { exported = false, team } = {}) {
   const problems = [];
   for (const key of IPAD_SIGNING_MARKS) {
     if (!(key in granted)) problems.push(`the iPad store build has no ${key}: it was not signed for the store`);
+  }
+  // hifth.app's links file names the team the laptop's signing script finds
+  // (scripts/lib/signing-team.mjs). Signed under another, no link would open it.
+  if (team === null) {
+    problems.push("this laptop has no signing team to hold the iPad store build to, so hifth.app's links file could not name it");
+  } else if (team !== undefined && IPAD_SIGNING_MARKS.every((key) => key in granted)) {
+    const sameTeam = granted["com.apple.developer.team-identifier"] === team &&
+      String(granted["application-identifier"]).startsWith(`${team}.`);
+    if (!sameTeam) {
+      problems.push("the iPad store build is signed under another team than the one hifth.app's links file names, so no link would open it");
+    }
   }
   for (const [key, want, what] of IPAD_NEEDS) {
     if (!(key in granted)) {
@@ -276,7 +290,7 @@ export function privacyProblems(release) {
   return problems;
 }
 
-export function check(debug, release, { flavour, store = false, exported = false, permissions } = {}) {
+export function check(debug, release, { flavour, store = false, exported = false, permissions, teamScript } = {}) {
   const mac = layout(release).platform === "mac";
   const problems = flavour ? flavourProblems(release, flavour) : [];
   if (flavour === "public") problems.push(...privacyProblems(release));
@@ -289,7 +303,7 @@ export function check(debug, release, { flavour, store = false, exported = false
     // store builds (the archive and the exported app) are signed to read.
     const granted = signedPermissions(release, permissions);
     if (granted === null) problems.push("the iPad store build's permissions cannot be read: is it signed?");
-    else problems.push(...ipadPermissionProblems(granted, { exported }));
+    else problems.push(...ipadPermissionProblems(granted, { exported, team: signingTeam(teamScript ? { script: teamScript } : {}) }));
   }
   // The Files app settings are the iPad's; the Mac app has no Files app.
   const debugKeys = settings(debug);
@@ -343,8 +357,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const store = exported || process.argv.includes("--store");
   // Only for tests: the permissions a signature would carry, since a stand-in folder cannot be signed.
   const permissions = arg("--permissions");
+  // Only for tests: a stand-in for the laptop's signing script, which names the team.
+  const teamScript = arg("--team-script");
   log("start", { debug, release, platform, flavour: flavour ?? "any", store: store ? "yes" : "no", exported: exported ? "yes" : "no" });
-  const problems = check(debug, release, { flavour, store, exported, permissions });
+  const problems = check(debug, release, { flavour, store, exported, permissions, teamScript });
   for (const problem of problems) log("problem", { msg: JSON.stringify(problem) });
   log("done", { release_clean: problems.length === 0 ? "yes" : "no", problems: problems.length });
   process.exit(problems.length === 0 ? 0 : 1);

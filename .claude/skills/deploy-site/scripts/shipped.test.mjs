@@ -12,9 +12,12 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { auditShipped, inlineScriptHashes } from "./shipped.mjs";
+import { auditShipped, inlineScriptHashes, isText } from "./shipped.mjs";
+import { APP_LINKS_FILE, appSiteAssociation } from "./app-links.mjs";
 
 const HEAD = "0123456789abcdef0123456789abcdef01234567";
+/** A made-up team id; the real one is read at release time and never written here. */
+const MADE_UP_TEAM = "Q9Z8Y7X6W5";
 
 /** The smallest folder that is a whole release: the front page and the app under /read/. */
 function cleanFolder() {
@@ -43,6 +46,7 @@ function cleanFolder() {
     { path: "read/assets/index-abc.js", text: `const c="${HEAD}";` },
     { path: "read/assets/index-abc.css", text: "a{}" },
     { path: "read/assets/pages/hafs/p1.svg", text: "<svg/>" },
+    { path: APP_LINKS_FILE, text: appSiteAssociation(MADE_UP_TEAM) },
   ];
 }
 
@@ -52,7 +56,41 @@ const paths = (problems) => problems.map((p) => p.path);
 test("a clean release folder passes, and says what it holds", () => {
   const result = auditShipped(cleanFolder(), { commit: HEAD });
   assert.deepEqual(result.problems, []);
-  assert.equal(result.files, 24);
+  assert.equal(result.files, 25);
+});
+
+// The file that tells Apple which hifth.app links open the app (launch item 9) is the one hidden
+// file the site holds. Only that exact path is let through, and its words are checked.
+test("the file that tells Apple which links open the app is the only hidden file allowed", () => {
+  assert.ok(isText(APP_LINKS_FILE), "the links file is not read as text, so it would go unchecked");
+  const files = [
+    ...cleanFolder(),
+    { path: ".well-known/security.txt", text: "Contact: x" },
+    { path: "read/.well-known/apple-app-site-association", text: appSiteAssociation(MADE_UP_TEAM) },
+    { path: ".well-known/apple-app-site-association.json", text: "{}" },
+  ];
+  assert.deepEqual(paths(refusals(files)), [
+    ".well-known/security.txt",
+    "read/.well-known/apple-app-site-association",
+    ".well-known/apple-app-site-association.json",
+  ]);
+});
+
+test("a release without the links file is refused: no hifth.app link would open the app", () => {
+  const files = cleanFolder().filter((f) => f.path !== APP_LINKS_FILE);
+  const problems = refusals(files);
+  assert.deepEqual(paths(problems), [APP_LINKS_FILE]);
+  assert.match(problems[0].why, /missing/);
+});
+
+test("a links file that claims more than the reader is refused, and the id is never repeated", () => {
+  const every = JSON.stringify({ applinks: { details: [{ appIDs: [`${MADE_UP_TEAM}.com.bytesofpurpose.hifth`], components: [{ "/": "*" }] }] } });
+  for (const text of [every, "not json", null]) {
+    const files = cleanFolder().map((f) => (f.path === APP_LINKS_FILE ? { ...f, text } : f));
+    const problems = refusals(files);
+    assert.deepEqual(paths(problems), [APP_LINKS_FILE], `not refused: ${text}`);
+    assert.ok(problems.every((p) => !p.why.includes(MADE_UP_TEAM)), "the team id was repeated");
+  }
 });
 
 test("a file that is not on the list of what the site needs is refused", () => {
