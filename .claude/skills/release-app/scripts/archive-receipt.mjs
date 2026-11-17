@@ -85,7 +85,11 @@ function write(archive) {
   }
   const commit = arg("--commit") ?? git("rev-parse", "HEAD");
   const cleanArg = arg("--clean");
-  const clean = cleanArg ? cleanArg === "yes" : git("status", "--porcelain").length === 0;
+  // The comment server writes into .page-comments/ while the app is built, and
+  // none of it goes into the app, so it is not counted as uncommitted work.
+  const clean = cleanArg
+    ? cleanArg === "yes"
+    : git("status", "--porcelain", "--", ".", ":(exclude).page-comments").length === 0;
   const flavour = arg("--flavour") ?? null;
   const { fingerprint: fp, files: n } = fingerprint(app);
   const receipt = {
