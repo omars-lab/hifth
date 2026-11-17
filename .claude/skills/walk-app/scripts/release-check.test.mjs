@@ -206,14 +206,100 @@ test("not asked, the flavour is not looked at: the check still runs on a laptop 
 // so only --store looks for them.
 const everyStoreSign = [...SIGNS, ...STORE_SIGNS].map(([, text]) => text).join("\0");
 
-function archiveRun(releaseCode, { debugCode = everyStoreSign, store = true } = {}) {
+function archiveRun(releaseCode, { debugCode = everyStoreSign, store = true, permissions = IPAD_STORE_PERMISSIONS, extra = [] } = {}) {
   const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
   const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: debugCode } });
   const release = app(root, "release", { binaries: { Hifth: releaseCode } });
-  return spawnSync(process.execPath, [SCRIPT, "--debug", debug, "--release", release, ...(store ? ["--store"] : [])], {
-    encoding: "utf8",
-  });
+  // A stand-in folder cannot be signed, so the test hands in the permissions a
+  // signature would carry, as the file the signing tool prints.
+  const perms = join(root, "permissions.plist");
+  if (permissions !== null) writeFileSync(perms, permissionsFile(permissions));
+  return spawnSync(
+    process.execPath,
+    [SCRIPT, "--debug", debug, "--release", release, ...(store ? ["--store"] : []), ...(permissions !== null ? ["--permissions", perms] : []), ...extra],
+    { encoding: "utf8" },
+  );
 }
+
+// The iPad and iPhone store build is signed with the two permissions the owner
+// said yes to on 2026-11-17, and the team's own signing marks. The id values
+// are made up: a real one is never written into a test.
+const MADE_UP_TEAM = "Q9Z8Y7X6W5";
+const IPAD_STORE_PERMISSIONS = {
+  "application-identifier": `${MADE_UP_TEAM}.com.example.hifth`,
+  "com.apple.developer.team-identifier": MADE_UP_TEAM,
+  "com.apple.developer.applesignin": ["Default"],
+  "com.apple.developer.associated-domains": ["applinks:hifth.app"],
+  "get-task-allow": true,
+};
+
+test("an iPad store build signed with the two chosen permissions passes, and prints no id", () => {
+  const r = archiveRun("plain app code");
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(!r.stdout.includes(MADE_UP_TEAM), "the team id was printed");
+});
+
+test("an iPad store build missing Sign in with Apple or the hifth.app links fails, saying which", () => {
+  for (const [key, what] of [
+    ["com.apple.developer.applesignin", /Sign in with Apple/],
+    ["com.apple.developer.associated-domains", /hifth\.app links/],
+  ]) {
+    const { [key]: _, ...rest } = IPAD_STORE_PERMISSIONS;
+    const r = archiveRun("plain app code", { permissions: rest });
+    assert.equal(r.status, 1, `missing ${key} was not caught`);
+    assert.ok(r.stdout.includes(key), r.stdout);
+    assert.match(r.stdout, what);
+  }
+});
+
+test("an iPad store build whose links name another site, or a second one, fails, naming it", () => {
+  for (const domains of [["applinks:example.com"], ["applinks:hifth.app", "webcredentials:example.com"]]) {
+    const r = archiveRun("plain app code", { permissions: { ...IPAD_STORE_PERMISSIONS, "com.apple.developer.associated-domains": domains } });
+    assert.equal(r.status, 1, `${domains} was not caught`);
+    assert.match(r.stdout, /example\.com/);
+  }
+});
+
+test("an iPad store build whose Sign in with Apple is not the plain kind fails", () => {
+  const r = archiveRun("plain app code", { permissions: { ...IPAD_STORE_PERMISSIONS, "com.apple.developer.applesignin": [] } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /applesignin/);
+});
+
+test("an iPad store build asking for a permission nobody chose fails, by name", () => {
+  const r = archiveRun("plain app code", { permissions: { ...IPAD_STORE_PERMISSIONS, "aps-environment": "production" } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /aps-environment, which nobody chose/);
+  assert.ok(!r.stdout.includes("production"), "a permission's value was printed");
+});
+
+test("an iPad store build without the team's signing marks fails: it was not signed for the store", () => {
+  const { "application-identifier": _, "com.apple.developer.team-identifier": __, ...rest } = IPAD_STORE_PERMISSIONS;
+  const r = archiveRun("plain app code", { permissions: rest });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /application-identifier/);
+});
+
+test("an iPad store build whose permissions cannot be read fails, rather than passing unread", () => {
+  const r = archiveRun("plain app code", { permissions: null });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /permissions cannot be read/);
+});
+
+test("the debugger permission may stay in the archive, never in the exported app that is uploaded", () => {
+  assert.equal(archiveRun("plain app code").status, 0);
+  const exported = archiveRun("plain app code", { extra: ["--exported"] });
+  assert.equal(exported.status, 1);
+  assert.match(exported.stdout, /get-task-allow/);
+  const clean = { ...IPAD_STORE_PERMISSIONS, "get-task-allow": false, "beta-reports-active": true };
+  const r = archiveRun("plain app code", { permissions: clean, extra: ["--exported"] });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+test("a plain iPad release build, unsigned on the laptop, is not asked for permissions", () => {
+  const r = archiveRun("plain app code", { store: false, permissions: null });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
 
 test("a store build with none of the tools' launch settings passes", () => {
   const r = archiveRun("plain app code");
@@ -296,8 +382,16 @@ const STORE_PERMISSIONS = {
 };
 
 function permissionsFile(dict) {
+  const value = (v) =>
+    v === true
+      ? "<true/>"
+      : v === false
+        ? "<false/>"
+        : Array.isArray(v)
+          ? `<array>${v.map((s) => `<string>${s}</string>`).join("")}</array>`
+          : `<string>${v}</string>`;
   const entries = Object.entries(dict)
-    .map(([k, v]) => `<key>${k}</key>${v === true ? "<true/>" : v === false ? "<false/>" : `<string>${v}</string>`}`)
+    .map(([k, v]) => `<key>${k}</key>${value(v)}`)
     .join("");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

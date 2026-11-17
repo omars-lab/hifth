@@ -584,6 +584,13 @@ app-export: ## Sign the archive for the App Store, ready to upload (the first ru
 	set -o pipefail; xcodebuild -exportArchive -archivePath $(ARCHIVE_PATH) -exportPath $(EXPORT_PATH) \
 	  -exportOptionsPlist $(EXPORT_OPTIONS) -allowProvisioningUpdates 2>&1 | tee $(EXPORT_PATH).log | $(XCPRETTY) \
 	  || { grep -q "session has expired" $(EXPORT_PATH).log && echo "  Xcode's sign-in to the Apple account has expired. Sign in again in Xcode > Settings > Accounts, then: make app-export"; exit 1; }
+	@# The export signs the app again, for the store, so the app that would be
+	@# sent is the one inside the file: open it and check that one, as the
+	@# uploaded app (its debugger permission must be off).
+	unzip -q -o $(EXPORT_PATH)/Hifth.ipa -d $(EXPORT_PATH)/opened
+	node .claude/skills/walk-app/scripts/release-check.mjs \
+	  --debug $(RELEASE_CHECK_DD)/Build/Products/Debug-iphoneos/Hifth.app \
+	  --release $(EXPORT_PATH)/opened/Payload/Hifth.app --flavour public --exported
 	@echo "  export: $(EXPORT_PATH)"
 
 # Apple's own check of the exported app: its signing, icons, permissions and

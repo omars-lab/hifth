@@ -83,6 +83,9 @@ targets:
         # the developer certificate for a plugged-in iPad (make app-device-install).
         DEVELOPMENT_TEAM: ""
         CODE_SIGN_STYLE: Automatic
+        # Sign in with Apple and hifth.app links (launch item 9). Every signed
+        # build carries them, so a plugged-in iPad can try a link before upload.
+        CODE_SIGN_ENTITLEMENTS: Hifth/Resources/Hifth-iOS.entitlements
         # The plist goes through the C preprocessor, so a block in it can be
         # Debug only (Xcode's own per-key settings skip UIFileSharingEnabled).
         INFOPLIST_PREPROCESS: YES

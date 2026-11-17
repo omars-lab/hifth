@@ -14,7 +14,7 @@
 // the debug build's second code file); the web pages inside are not, since they
 // are not the capture.
 //
-//   node release-check.mjs --debug <Hifth.app> --release <Hifth.app> [--flavour public] [--store]
+//   node release-check.mjs --debug <Hifth.app> --release <Hifth.app> [--flavour public] [--store | --exported]
 //
 // With --flavour public it also fails unless the web build inside the release
 // app is the public one, with no private folder. `make app-archive` asks for
@@ -23,6 +23,12 @@
 // With --store it also fails if the app still answers the laptop tools' launch
 // settings (STORE_SIGNS below). `make app-archive` asks for that on the app
 // inside the archive; a plain Release build keeps them for the reviewer walk.
+// On the iPad and iPhone app, --store also reads the permissions it was signed
+// with: Sign in with Apple and hifth.app links (IPAD_NEEDS), the team's signing
+// marks, and nothing anybody did not choose. Only key names are ever printed.
+//
+// --exported is --store for the app inside the file that would be uploaded
+// (`make app-export`): there the debugger permission must be off as well.
 //
 // Exit 0 when Release is clean, 1 when it is not (or Debug is missing a sign),
 // 2 when a path is not an app. Built and run by `make app-release-check`.
@@ -69,6 +75,66 @@ export const MAC_NEEDS = [
 ];
 const MAC_SIGNING_MARKS = ["com.apple.application-identifier", "com.apple.developer.team-identifier"];
 const DEBUGGER = "com.apple.security.get-task-allow";
+
+/**
+ * The permissions the iPad and iPhone store build is signed with (launch item
+ * 9; the owner said yes to both on 2026-11-17), each with the one value it may
+ * carry. The links permission names hifth.app alone: the site's own file says
+ * which of its addresses open the app (only the reader under /read/).
+ */
+export const IPAD_NEEDS = [
+  ["com.apple.developer.applesignin", ["Default"], "Sign in with Apple"],
+  ["com.apple.developer.associated-domains", ["applinks:hifth.app"], "hifth.app links opening the app"],
+];
+/**
+ * The marks the team's signing adds. A store build must carry both, so an app
+ * that was never signed for the store fails rather than passing with nothing
+ * to read. Their values hold the team id, so they are never printed.
+ */
+const IPAD_SIGNING_MARKS = ["application-identifier", "com.apple.developer.team-identifier"];
+const IPAD_DEBUGGER = "get-task-allow";
+/** Added by store signing when the upload is for the test flight. */
+const IPAD_TEST_FLIGHT = "beta-reports-active";
+
+const same = (a, b) => Array.isArray(a) && a.length === b.length && a.every((v, i) => v === b[i]);
+
+/**
+ * What is wrong with an iPad or iPhone store build's signed permissions. Only
+ * key names and the links' site names are printed, never a value that holds
+ * the team id. With `exported`, the app is the one that would be uploaded, and
+ * the debugger permission must be off.
+ */
+export function ipadPermissionProblems(granted, { exported = false } = {}) {
+  const problems = [];
+  for (const key of IPAD_SIGNING_MARKS) {
+    if (!(key in granted)) problems.push(`the iPad store build has no ${key}: it was not signed for the store`);
+  }
+  for (const [key, want, what] of IPAD_NEEDS) {
+    if (!(key in granted)) {
+      problems.push(`the iPad store build is not signed with ${key}, which ${what} needs`);
+      continue;
+    }
+    if (same(granted[key], want)) continue;
+    const has = Array.isArray(granted[key]) ? granted[key] : [];
+    if (key === "com.apple.developer.associated-domains") {
+      const extra = has.filter((d) => !want.includes(d));
+      problems.push(
+        `the iPad store build's ${key} must name ${want.join(", ")} and nothing else` +
+          (extra.length ? `, but also names ${extra.join(", ")}` : ""),
+      );
+    } else {
+      problems.push(`the iPad store build's ${key} must be ${want.join(", ")} only`);
+    }
+  }
+  const known = new Set([...IPAD_NEEDS.map(([k]) => k), ...IPAD_SIGNING_MARKS, IPAD_DEBUGGER, IPAD_TEST_FLIGHT]);
+  for (const key of Object.keys(granted)) {
+    if (!known.has(key)) problems.push(`the iPad store build asks for ${key}, which nobody chose`);
+  }
+  if (exported && granted[IPAD_DEBUGGER] === true) {
+    problems.push(`the exported iPad app still has ${IPAD_DEBUGGER}, the debugger permission, which the uploaded app may not keep`);
+  }
+  return problems;
+}
 
 /** Where an app keeps its parts: the iPad app at its top, the Mac app one folder down. */
 export function layout(app) {
@@ -210,7 +276,7 @@ export function privacyProblems(release) {
   return problems;
 }
 
-export function check(debug, release, { flavour, store = false, permissions } = {}) {
+export function check(debug, release, { flavour, store = false, exported = false, permissions } = {}) {
   const mac = layout(release).platform === "mac";
   const problems = flavour ? flavourProblems(release, flavour) : [];
   if (flavour === "public") problems.push(...privacyProblems(release));
@@ -218,6 +284,12 @@ export function check(debug, release, { flavour, store = false, permissions } = 
     const granted = signedPermissions(release, permissions);
     if (granted === null) problems.push("the Mac release build's permissions cannot be read: is it signed?");
     else problems.push(...macPermissionProblems(granted, { store }));
+  } else if (store || exported) {
+    // A plain iPad release build is made unsigned on the laptop, so only the
+    // store builds (the archive and the exported app) are signed to read.
+    const granted = signedPermissions(release, permissions);
+    if (granted === null) problems.push("the iPad store build's permissions cannot be read: is it signed?");
+    else problems.push(...ipadPermissionProblems(granted, { exported }));
   }
   // The Files app settings are the iPad's; the Mac app has no Files app.
   const debugKeys = settings(debug);
@@ -266,11 +338,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     log("error", { msg: '"--flavour needs a build name, such as public"' });
     process.exit(2);
   }
-  const store = process.argv.includes("--store");
+  // --exported: the app inside the exported file that would be uploaded; it is a store build too.
+  const exported = process.argv.includes("--exported");
+  const store = exported || process.argv.includes("--store");
   // Only for tests: the permissions a signature would carry, since a stand-in folder cannot be signed.
   const permissions = arg("--permissions");
-  log("start", { debug, release, platform, flavour: flavour ?? "any", store: store ? "yes" : "no" });
-  const problems = check(debug, release, { flavour, store, permissions });
+  log("start", { debug, release, platform, flavour: flavour ?? "any", store: store ? "yes" : "no", exported: exported ? "yes" : "no" });
+  const problems = check(debug, release, { flavour, store, exported, permissions });
   for (const problem of problems) log("problem", { msg: JSON.stringify(problem) });
   log("done", { release_clean: problems.length === 0 ? "yes" : "no", problems: problems.length });
   process.exit(problems.length === 0 ? 0 : 1);
