@@ -3400,10 +3400,10 @@
         "file": "docs/design/testflight-plan.md",
         "item": "⑦"
       },
-      "status": "open",
+      "status": "done",
       "severity": "question",
       "owner": "user",
-      "note": "Make the App Store Connect API key under Users and Access, Integrations; the key file goes in ~/.appstoreconnect/private_keys/ (where the upload tools look), never the repo; the agent needs only the key ID and issuer ID."
+      "note": "Make the App Store Connect API key under Users and Access, Integrations; the key file goes in ~/.appstoreconnect/private_keys/ (where the upload tools look), never the repo; the agent needs only the key ID and issuer ID. Done 2026-11-16: key hifth-upload (App Manager) in place, ids saved as ASC_KEY_ID and ASC_ISSUER_ID in the encrypted settings; make app-release-setup says ok."
     },
     {
       "id": "testflight-upload-step",
@@ -6976,7 +6976,7 @@
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made. Next (2026-11-16): the launch item the agent takes next, because it adds no code to the web app, and the web app has no room left under its size limit (room-under-the-size-limit-again). Half done 2026-11-16: make app-archive makes a real Xcode archive of the public build and runs the release check on the app inside it (first run clean), and only the upload waits on the licence, checked before anything is built (scripts/native-store-flavour.test.mjs). make app-export ran clean the same day with the owner's yes, which made the team's App Store certificate; the app inside the export is signed for distribution and is the public build. Left: Apple's own check of the exported app needs the App Store Connect key the owner makes (testflight-upload-key); and the upload should take only an archive this command made."
+      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made. Next (2026-11-16): the launch item the agent takes next, because it adds no code to the web app, and the web app has no room left under its size limit (room-under-the-size-limit-again). Half done 2026-11-16: make app-archive makes a real Xcode archive of the public build and runs the release check on the app inside it (first run clean), and only the upload waits on the licence, checked before anything is built (scripts/native-store-flavour.test.mjs). make app-export ran clean the same day with the owner's yes, which made the team's App Store certificate; the app inside the export is signed for distribution and is the public build. Left: Apple's own check of the exported app, now unblocked because the key exists (2026-11-16, testflight-upload-key done) and the agent's next item; and the upload should take only an archive this command made."
     },
     {
       "id": "launch-silent-switch-audio",
