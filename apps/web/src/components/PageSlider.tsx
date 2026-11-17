@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   APPLE_SCRUB_BANDS,
   focusSpread,
@@ -131,6 +131,16 @@ interface PageSliderProps {
    */
   back?: number | null | undefined;
   onBack?: () => void;
+  /**
+   * "The new layout" (new-layout.ts). `lead` sits between the earlier-page
+   * turn and the slider (the page label that opens Go to); `tail` after the
+   * later-page turn (one page or two, the size buttons, Full screen). With
+   * `keyed` the two page turns are drawn as the keyboard keys they answer to.
+   * All three left out: the bar as it was.
+   */
+  keyed?: boolean;
+  lead?: ReactNode;
+  tail?: ReactNode;
 }
 
 /**
@@ -197,6 +207,9 @@ export function PageSlider({
   behind = false,
   back,
   onBack,
+  keyed = false,
+  lead,
+  tail,
 }: PageSliderProps): JSX.Element {
   const { t } = useT();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -689,13 +702,15 @@ export function PageSlider({
     /* Pinned RTL in both languages — see the direction note above. `nav` rather
        than a bare div so a screen-reader user can jump to it as a landmark; it
        is the app's second way of moving through the book, after the jumper. */
-    <nav className={styles.bar} aria-label={t.pageBar} dir="rtl" data-behind={behind || undefined}>
+    <nav className={styles.bar} aria-label={t.pageBar} dir="rtl" data-behind={behind || undefined} data-keyed={keyed || undefined}>
       <button
         type="button"
         className={styles.edge}
         onClick={() => onStep(-1)}
         disabled={empty}
         aria-label={t.prevPage}
+        aria-keyshortcuts={keyed ? "ArrowRight" : undefined}
+        title={keyed ? t.prevPageKey : undefined}
       >
         {/* Earlier in the book is to the right. A drawn shape, not a text
             mark: the angle quotes ‹ › flip inside the right-to-left row, and
@@ -703,6 +718,8 @@ export function PageSlider({
             pair never matched (Firefox drew one a third the size of the other). */}
         <EdgeArrow points="right" />
       </button>
+
+      {lead}
 
       <div className={styles.track} ref={trackRef}>
         <input
@@ -928,6 +945,8 @@ export function PageSlider({
         onClick={() => onStep(1)}
         disabled={empty}
         aria-label={t.nextPage}
+        aria-keyshortcuts={keyed ? "ArrowLeft" : undefined}
+        title={keyed ? t.nextPageKey : undefined}
       >
         <EdgeArrow points="left" />
       </button>
@@ -948,6 +967,8 @@ export function PageSlider({
           {back !== null && <span dir="auto">{t.pageNumber(back)}</span>}
         </button>
       )}
+
+      {tail}
 
       {/* Visible, small and permanent: how much of the book is here. It reads
           «٦٠٤ من ٦٠٤» now, and it stays — it is not a warning that disappears

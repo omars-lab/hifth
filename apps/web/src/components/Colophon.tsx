@@ -22,6 +22,7 @@ import { RUN_FOLLOWS, rememberRunFollow, useRunFollow } from "../run-follow";
 import { RUN_AHEADS, rememberRunAhead, useRunAhead } from "../run-ahead";
 import { ARROW_SHOWINGS } from "../jump-arrows";
 import { SLIDER_BACKS, type SliderBack } from "../slider-back";
+import { NEW_LAYOUTS, type NewLayout } from "../new-layout";
 import { READING_BARS, type ReadingBars } from "../reading-bars";
 import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
@@ -113,6 +114,9 @@ interface ColophonProps {
   /** The Back button beside the slider, a rough build; remembered on this device. */
   sliderBack?: SliderBack;
   onSliderBack?: (choice: SliderBack) => void;
+  /** "The new layout", a rough build; remembered on this device. */
+  newLayout?: NewLayout;
+  onNewLayout?: (choice: NewLayout) => void;
   /** Whether the bars hide while reading, a rough build; remembered on this device. */
   readingBars?: ReadingBars;
   onReadingBars?: (choice: ReadingBars) => void;
@@ -433,6 +437,8 @@ export function Colophon({
   onArrowShowing,
   sliderBack,
   onSliderBack,
+  newLayout,
+  onNewLayout,
   readingBars,
   onReadingBars,
   scopeLook,
@@ -777,8 +783,11 @@ export function Colophon({
           <Choice id="jump-arrows" title={t.jumpArrowsTitle} note={t.jumpArrowsNote} value={arrowShowing} options={ARROW_SHOWINGS} label={(choice) => choice === "stays" ? t.jumpArrowsStays : t.jumpArrowsAsked} data="jump-arrows" onPick={onArrowShowing} />
         )}
 
-        {/* Two rough builds from the layout plan (docs/design/app-layout.md,
+        {/* Rough builds from the layout plan (docs/design/app-layout.md,
             items ② and ⑪), each off until it has been tried on the devices. */}
+        {newLayout && onNewLayout && (
+          <Choice id="new-layout" title={t.newLayoutTitle} note={t.newLayoutNote} value={newLayout} options={NEW_LAYOUTS} label={(choice) => choice === "bar" ? t.newLayoutBar : t.newLayoutToday} data="new-layout" onPick={onNewLayout} />
+        )}
         {sliderBack && onSliderBack && (
           <Choice id="slider-back" title={t.sliderBackTitle} note={t.sliderBackNote} value={sliderBack} options={SLIDER_BACKS} label={(choice) => choice === "on" ? t.sliderBackOn : t.sliderBackOff} data="slider-back" onPick={onSliderBack} />
         )}

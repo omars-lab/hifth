@@ -270,7 +270,17 @@ Moves to the bar: the page number (which becomes the button for Go to), the one-
 
 *What would answer it:* a rough build behind a switch, tried on the iPad and a laptop, in Chrome and Firefox. Tests: every moved control still does what it did; the arrow keys and the Go-to key still work; the bar fits at phone, iPad and laptop widths with nothing cut off; after a jump, Back returns to the page the reader left, and a second jump does not lose it; in Arabic the bar reads right to left; every control on the bar is 32 to 40 points tall and can be hit across 44. The pitch walk is run again on the iPad afterwards.
 
-*What the first rough build taught (2026-11-16):* only the Back button is built so far, as the setting "Back button beside the page slider" in the info panel, off until it is judged. Nothing else has moved to the bar yet.
+*What the second rough build taught (2026-11-16):* the whole arrangement is now built, behind one switch in the info panel, "The new layout", off until it is judged. With it on, Go to, Full screen, one page or two and the size buttons sit on the bottom bar, and the top bar keeps the app's name, the page chip that opens the revision map, the tajweed switch, settings and the language.
+
+- **The label is the Go to button.** It reads "Page 7 · Juz 1 · Al-Baqarah" on a laptop, drops the surah's name below 1024 points wide and the juz below 600, so a phone shows "Page 7". The label had to be plain text, not a row of boxes: boxes dropped the space before each dot.
+- **One page or two, and the size buttons, show on the bar only on a wide screen** (a laptop, an iPad on its side). An upright iPad pinches to zoom and always shows one page, so it gets Go to and Full screen only. That is an assumption to check by hand.
+- **Full screen is on the bar at every width.** On an upright iPad it used to sit in a row above the bar; with the switch on, that button goes, and the way out of full screen is the same as before.
+- **The turn buttons are drawn as keys** and say their key when pointed at ("Next page (Left arrow key)"). The pictures of keys in the top bar are gone with the switch on.
+- **The bar wraps instead of cutting off.** The slider keeps at least 10 rem, and the pages line takes a row of its own. A test checks the bar at phone, upright iPad and laptop widths.
+- **Every control is 32 to 44 points tall**, not 32 to 40 as the design check asked: the app's own touch size is 44, and the bar's buttons kept it. That is for a hand on it to say.
+- **Not yet known:** whether the bar feels crowded on a laptop with everything on it, and whether a hafiz finds Go to on the bar without being told.
+
+*What the first rough build taught (2026-11-16):* the Back button came first, as the setting "Back button beside the page slider" in the info panel, off until it is judged. It works with the new layout on or off.
 
 - **What counts as a jump had to be decided, and no list had a row for it.** The build says: a move of more than two pages made with the slider, a juz mark or Go to. A page turn, a hop to a look-alike verse and a link are not jumps, so they never fill the button.
 - **The button shows the page number it goes back to**, so the separate "return to page N" strip may not be needed. That is for a hand on it to say.

@@ -249,3 +249,11 @@
   color: var(--ink-faint);
   font-size: var(--text-xs);
 }
+
+/* ---- on the page bar ("the new layout", new-layout.ts) ------------------- */
+
+/* Beside the slider rather than in the top bar, at the widths the top bar
+   showed them. A gap the size of the bar's own, not the header's. */
+.extras.inBar {
+  gap: var(--space-2);
+}

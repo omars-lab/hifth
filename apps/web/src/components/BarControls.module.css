@@ -1,0 +1,71 @@
+/*
+ * The page bar's own controls under "the new layout" (new-layout.ts). Quiet,
+ * like the page turns beside them: the bar is furniture, the page is the point.
+ */
+
+/* Plain inline text, not a row of boxes: boxes would drop the space before
+   each dot ("Page 7· Juz 1"), since a flex item trims its own leading space. */
+.goTo {
+  display: inline-block;
+  block-size: var(--touch-min);
+  line-height: calc(var(--touch-min) - 2px);
+  text-overflow: ellipsis;
+  max-inline-size: 100%;
+  padding-inline: var(--space-2);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.goTo:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.goTo:focus-visible,
+.full:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* Short of room, the surah's name goes first, then the juz: on a phone the
+   label is the page alone (docs/design/app-layout.md, item ②). */
+.juz,
+.surah {
+  color: var(--ink-soft);
+}
+
+@media (max-width: 1023px) {
+  .surah {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .juz {
+    display: none;
+  }
+}
+
+.full {
+  display: grid;
+  place-items: center;
+  min-block-size: var(--touch-min);
+  min-inline-size: var(--touch-min);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.full:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
