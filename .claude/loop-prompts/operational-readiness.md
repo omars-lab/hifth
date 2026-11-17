@@ -44,9 +44,12 @@ flowchart TD
 > `.claude/goals/app-store-launch.md` and update its numbers table with today's date. Pick the
 > worst number and the one fix behind it worth most for the effort (a quick win that finishes a
 > half-built piece beats a large new surface). If it is ours, write the test first and watch it
-> fail for the real reason, then fix it. If only the owner can do it, make sure it is on the goal
-> page's waiting list with an issue row owned by them, tell them in one sentence, and do not ask
-> again. Once a pass, compare our setup with `docs/research/app-launch/research.md`; once a month,
+> fail for the real reason, then fix it. If only the owner can do it, first look for a way around
+> it (a draft, a build behind a switch that is off, the fallback, the half that needs no answer);
+> then make sure it is on the goal page's waiting list with an issue row owned by them, and move
+> to the next number without asking. Ask the owner only when every number left is blocked on
+> them, in one list ordered by how much work each answer frees, except a block on weeks of work,
+> which is named early in one line without stopping. Once a pass, compare our setup with `docs/research/app-launch/research.md`; once a month,
 > read Apple's upcoming-requirements page and add any new rule as an issue row. When a step was
 > slow or done by hand, put it in a skill's script with a line in that skill's scripts table.
 > Write down what changed the same turn. Ship it: commit by name, push (every check runs on this
