@@ -313,6 +313,18 @@ footer {
 .prose h1 { text-transform: none; letter-spacing: 0; font-size: 28px; color: var(--ink); }
 .prose h2 { font: 600 18px/1.3 ui-sans-serif, system-ui, sans-serif; margin-top: 28px; }
 
+/* The sources page: one block per source, what it gave first, then who, the terms and the link. */
+.sources { list-style: none; padding: 0; margin: 28px 0; }
+.source {
+  display: grid; gap: 2px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+}
+.source:last-child { border-bottom: 1px solid var(--rule); }
+.source .what { font-weight: 600; color: var(--ink); }
+.source .licence { color: var(--muted); font: 15px/1.5 ui-sans-serif, system-ui, sans-serif; }
+.source .link { font: 14px/1.5 ui-sans-serif, system-ui, sans-serif; overflow-wrap: anywhere; justify-self: start; }
+
 /* Arabic has no capitals, and spacing its letters apart breaks their joins. */
 [lang="ar"] h1 { letter-spacing: 0; text-transform: none; }
 html[lang="ar"] body { font-family: "Geeza Pro", "Noto Naskh Arabic", ui-serif, serif; }

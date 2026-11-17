@@ -88,6 +88,7 @@ function folder() {
     "index.html": "<html><body><h1>Hifth</h1></body></html>",
     "ar/index.html": "<html dir=rtl><body><h1>Hifth</h1></body></html>",
     "privacy.html": "<html><body><p>privacy</p></body></html>",
+    "sources.html": "<html><body><p>sources</p></body></html>",
     "404.html": "<html><body><p>none</p></body></html>",
     "read/index.html": "<html><body><div id=root></div></body></html>",
     "docs/design/index.html": "<html><body><h1>Design pages</h1></body></html>",
@@ -103,7 +104,7 @@ test("the side bar goes on the front pages, the features page and the notes; nev
   const features = copyFeaturesPage({ from: hub, out });
   const pages = addDevSidebar({ out, designs: DESIGNS, features });
   const has = (p) => /data-dev-sidebar/.test(readFileSync(join(out, p), "utf8"));
-  for (const p of ["index.html", "ar/index.html", "privacy.html", "404.html", "dev-hub/index.html", "docs/design/index.html", "docs/design/share-look.md.html"]) {
+  for (const p of ["index.html", "ar/index.html", "privacy.html", "sources.html", "404.html", "dev-hub/index.html", "docs/design/index.html", "docs/design/share-look.md.html"]) {
     assert.ok(has(p), p);
     assert.ok(pages.includes(p), p);
   }

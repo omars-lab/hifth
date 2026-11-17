@@ -35,6 +35,8 @@ function fixture(appExtra = {}) {
     "privacy.html": "<p>privacy</p>",
     "ar/index.html": "<h1>حفظ</h1>",
     "ar/privacy.html": "<p>privacy</p>",
+    "ar/sources.html": "<p>sources</p>",
+    "sources.html": "<p>sources</p>",
     "ar/draft.md": "draft",
     "404.html": "<h1>No page here</h1>",
     "styles.css": "body{}",
@@ -74,6 +76,7 @@ test("the front page goes at the root and the app under read/, and nothing the s
     "_redirects",
     "ar/index.html",
     "ar/privacy.html",
+    "ar/sources.html",
     "fonts/aref-ruqaa-OFL.txt",
     "fonts/aref-ruqaa-wordmark.woff2",
     "index.html",
@@ -83,6 +86,7 @@ test("the front page goes at the root and the app under read/, and nothing the s
     "read/index.html",
     "read/sw.js",
     "shots/feature-notes.jpg",
+    "sources.html",
     "styles.css",
   ]);
 });

@@ -38,8 +38,8 @@ export function inlineScriptHashes(html) {
 }
 
 const ALLOWED = [
-  /^(index\.html|privacy\.html|404\.html|styles\.css|notify\.js|_headers|_redirects)$/,
-  /^ar\/(index|privacy)\.html$/,
+  /^(index\.html|privacy\.html|sources\.html|404\.html|styles\.css|notify\.js|_headers|_redirects)$/,
+  /^ar\/(index|privacy|sources)\.html$/,
   /^shots\/[\w-]+\.(png|jpg|webp)$/,
   /^fonts\/[\w.-]+\.(woff2|txt)$/,
   /^read\/(index\.html|sw\.js|workbox-[\w-]+\.js|manifest\.webmanifest|favicon\.svg)$/,
@@ -78,7 +78,9 @@ export function markersIn(text) {
   return MARKERS.filter(([re]) => re.test(text)).map(([, why]) => `it mentions ${why}`);
 }
 
-const REQUIRED = ["index.html", "privacy.html", "404.html", "read/index.html", "read/sw.js"];
+// The sources page is required in both languages: the permission emails send the rights
+// holders to it (launch-citations-page).
+const REQUIRED = ["index.html", "privacy.html", "sources.html", "ar/sources.html", "404.html", "read/index.html", "read/sw.js"];
 
 const TEXT = new Set([".html", ".js", ".css", ".json", ".webmanifest", ".svg", ".txt", ".xml"]);
 

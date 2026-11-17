@@ -1277,12 +1277,28 @@
         {
           "file": "apps/web/src/provenance.ts",
           "symbol": "SOURCE_REPO"
+        },
+        {
+          "file": "apps/landing/sources.html",
+          "symbol": "class=\"sources\""
+        },
+        {
+          "file": "apps/landing/ar/sources.html",
+          "symbol": "class=\"sources\""
         }
       ],
       "proof": [
         {
           "file": "apps/web/e2e/colophon.spec.ts",
           "test": "every source whose licence asks to be named is named, with its link"
+        },
+        {
+          "file": "scripts/landing-sources.test.mjs",
+          "test": "a missing source, a swapped licence and a wrong link are each refused"
+        },
+        {
+          "file": "scripts/landing-sources.test.mjs",
+          "test": "every source the licence file relies on is on the sources page, or says why not"
         },
         {
           "file": "apps/web/e2e/colophon.spec.ts",

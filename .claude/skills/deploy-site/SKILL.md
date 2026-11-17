@@ -110,7 +110,14 @@ copied into the release folder, and `wrangler.toml` names no database (the check
 
 The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch-all rule under
 `/read/` as an endless loop, and the app needs none, since it keeps its place after the `#`.
-Cloudflare also serves `privacy.html` at `/privacy`, so `_headers` names that address.
+Cloudflare also serves `privacy.html` at `/privacy` and `sources.html` at `/sources`, so
+`_headers` names those addresses.
+
+**The sources page** (`sources.html`, `ar/sources.html`) names every outside source the app is
+built on, with its terms and a link. It is written by hand, and `scripts/landing-sources.test.mjs`
+holds both copies to `SOURCES.md` row for row, and refuses a short name `LICENSES.md` uses that the
+page leaves out. A release missing either copy is refused. To change a source, change
+`SOURCES.md` first, then both pages until that test passes.
 
 ## Rules
 
