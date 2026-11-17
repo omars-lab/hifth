@@ -55,6 +55,21 @@ describe("Colophon", () => {
     expect(link).toHaveAttribute("href", "./docs/");
   });
 
+  it("inside the app, links the designs on the public site, since the app carries no copy", () => {
+    // In the app the page is served from inside the bundle, which holds no docs/,
+    // and the app only hands web addresses to the browser. A relative link there
+    // went nowhere: Apple's reviewer would tap it and nothing would happen.
+    const shelled = window as Window & { __HIFTH_NATIVE__?: unknown };
+    shelled.__HIFTH_NATIVE__ = { platform: "ios", publicBase: "https://example.org/hifth/" };
+    try {
+      render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+      const link = screen.getByRole("link", { name: /التصاميم والقرارات/ });
+      expect(link).toHaveAttribute("href", "https://example.org/hifth/docs/");
+    } finally {
+      delete shelled.__HIFTH_NATIVE__;
+    }
+  });
+
   it("credits every source whose licence asks to be named", () => {
     render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
     // The Quranic Arabic Corpus requires the link, verbatim: "a link is made to
