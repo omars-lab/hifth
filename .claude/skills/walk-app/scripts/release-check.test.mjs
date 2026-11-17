@@ -206,14 +206,124 @@ test("not asked, the flavour is not looked at: the check still runs on a laptop 
 // so only --store looks for them.
 const everyStoreSign = [...SIGNS, ...STORE_SIGNS].map(([, text]) => text).join("\0");
 
-function archiveRun(releaseCode, { debugCode = everyStoreSign, store = true } = {}) {
+function archiveRun(releaseCode, { debugCode = everyStoreSign, store = true, permissions = IPAD_STORE_PERMISSIONS, team = MADE_UP_TEAM, extra = [] } = {}) {
   const root = mkdtempSync(join(tmpdir(), "hifth-release-"));
   const debug = app(root, "debug", { keys: KEYS, binaries: { Hifth: debugCode } });
   const release = app(root, "release", { binaries: { Hifth: releaseCode } });
-  return spawnSync(process.execPath, [SCRIPT, "--debug", debug, "--release", release, ...(store ? ["--store"] : [])], {
-    encoding: "utf8",
-  });
+  // A stand-in folder cannot be signed, so the test hands in the permissions a
+  // signature would carry, as the file the signing tool prints.
+  const perms = join(root, "permissions.plist");
+  if (permissions !== null) writeFileSync(perms, permissionsFile(permissions));
+  // And a stand-in for the laptop's signing script, which names the team
+  // hifth.app's links file will name (or nothing, as on a laptop with no team).
+  const teamScript = join(root, "signing-team.sh");
+  writeFileSync(teamScript, team === null ? "exit 0\n" : `echo ${team}\n`);
+  return spawnSync(
+    process.execPath,
+    [SCRIPT, "--debug", debug, "--release", release, ...(store ? ["--store"] : []), ...(permissions !== null ? ["--permissions", perms] : []), "--team-script", teamScript, ...extra],
+    { encoding: "utf8" },
+  );
 }
+
+// The iPad and iPhone store build is signed with the two permissions the owner
+// said yes to on 2026-11-17, and the team's own signing marks. The id values
+// are made up: a real one is never written into a test.
+const MADE_UP_TEAM = "Q9Z8Y7X6W5";
+const IPAD_STORE_PERMISSIONS = {
+  "application-identifier": `${MADE_UP_TEAM}.com.example.hifth`,
+  "com.apple.developer.team-identifier": MADE_UP_TEAM,
+  "com.apple.developer.applesignin": ["Default"],
+  "com.apple.developer.associated-domains": ["applinks:hifth.app"],
+  "get-task-allow": true,
+};
+
+test("an iPad store build signed with the two chosen permissions passes, and prints no id", () => {
+  const r = archiveRun("plain app code");
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(!r.stdout.includes(MADE_UP_TEAM), "the team id was printed");
+});
+
+test("an iPad store build missing Sign in with Apple or the hifth.app links fails, saying which", () => {
+  for (const [key, what] of [
+    ["com.apple.developer.applesignin", /Sign in with Apple/],
+    ["com.apple.developer.associated-domains", /hifth\.app links/],
+  ]) {
+    const { [key]: _, ...rest } = IPAD_STORE_PERMISSIONS;
+    const r = archiveRun("plain app code", { permissions: rest });
+    assert.equal(r.status, 1, `missing ${key} was not caught`);
+    assert.ok(r.stdout.includes(key), r.stdout);
+    assert.match(r.stdout, what);
+  }
+});
+
+test("an iPad store build whose links name another site, or a second one, fails, naming it", () => {
+  for (const domains of [["applinks:example.com"], ["applinks:hifth.app", "webcredentials:example.com"]]) {
+    const r = archiveRun("plain app code", { permissions: { ...IPAD_STORE_PERMISSIONS, "com.apple.developer.associated-domains": domains } });
+    assert.equal(r.status, 1, `${domains} was not caught`);
+    assert.match(r.stdout, /example\.com/);
+  }
+});
+
+test("an iPad store build whose Sign in with Apple is not the plain kind fails", () => {
+  const r = archiveRun("plain app code", { permissions: { ...IPAD_STORE_PERMISSIONS, "com.apple.developer.applesignin": [] } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /applesignin/);
+});
+
+test("an iPad store build asking for a permission nobody chose fails, by name", () => {
+  const r = archiveRun("plain app code", { permissions: { ...IPAD_STORE_PERMISSIONS, "aps-environment": "production" } });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /aps-environment, which nobody chose/);
+  assert.ok(!r.stdout.includes("production"), "a permission's value was printed");
+});
+
+test("an iPad store build without the team's signing marks fails: it was not signed for the store", () => {
+  const { "application-identifier": _, "com.apple.developer.team-identifier": __, ...rest } = IPAD_STORE_PERMISSIONS;
+  const r = archiveRun("plain app code", { permissions: rest });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /application-identifier/);
+});
+
+// hifth.app's links file names the team the laptop's signing script finds. If
+// the store build was signed under another, every check passes and no link
+// ever opens the app, so the two are held together here.
+test("an iPad store build signed under another team than the laptop's fails, and prints neither id", () => {
+  const other = "A1B2C3D4E5";
+  for (const extra of [[], ["--exported"]]) {
+    const permissions = extra.length ? { ...IPAD_STORE_PERMISSIONS, "get-task-allow": false } : IPAD_STORE_PERMISSIONS;
+    const r = archiveRun("plain app code", { permissions, team: other, extra });
+    assert.equal(r.status, 1, `a different team was not caught ${extra}`);
+    assert.match(r.stdout, /another team/);
+    assert.ok(!r.stdout.includes(other) && !r.stdout.includes(MADE_UP_TEAM), "a team id was printed");
+  }
+});
+
+test("an iPad store build on a laptop with no signing team fails, rather than passing unchecked", () => {
+  const r = archiveRun("plain app code", { team: null });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /no signing team/);
+});
+
+test("an iPad store build whose permissions cannot be read fails, rather than passing unread", () => {
+  const r = archiveRun("plain app code", { permissions: null });
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /permissions cannot be read/);
+});
+
+test("the debugger permission may stay in the archive, never in the exported app that is uploaded", () => {
+  assert.equal(archiveRun("plain app code").status, 0);
+  const exported = archiveRun("plain app code", { extra: ["--exported"] });
+  assert.equal(exported.status, 1);
+  assert.match(exported.stdout, /get-task-allow/);
+  const clean = { ...IPAD_STORE_PERMISSIONS, "get-task-allow": false, "beta-reports-active": true };
+  const r = archiveRun("plain app code", { permissions: clean, extra: ["--exported"] });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+test("a plain iPad release build, unsigned on the laptop, is not asked for permissions", () => {
+  const r = archiveRun("plain app code", { store: false, permissions: null });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
 
 test("a store build with none of the tools' launch settings passes", () => {
   const r = archiveRun("plain app code");
@@ -296,8 +406,16 @@ const STORE_PERMISSIONS = {
 };
 
 function permissionsFile(dict) {
+  const value = (v) =>
+    v === true
+      ? "<true/>"
+      : v === false
+        ? "<false/>"
+        : Array.isArray(v)
+          ? `<array>${v.map((s) => `<string>${s}</string>`).join("")}</array>`
+          : `<string>${v}</string>`;
   const entries = Object.entries(dict)
-    .map(([k, v]) => `<key>${k}</key>${v === true ? "<true/>" : v === false ? "<false/>" : `<string>${v}</string>`}`)
+    .map(([k, v]) => `<key>${k}</key>${value(v)}`)
     .join("");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

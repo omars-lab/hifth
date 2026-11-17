@@ -5,7 +5,8 @@
  * the site does not need, or a sign of a development feature. Two lists do the work:
  *
  *   ALLOWED  the files the site needs: the front page at the root (with its pictures in shots/
- *            and the wordmark's font in fonts/), its Arabic copy in ar/, the app under read/.
+ *            and the wordmark's font in fonts/), its Arabic copy in ar/, the app under read/,
+ *            and the one file that tells Apple which links open the app (app-links.mjs).
  *            Anything else is refused, so a new kind of file has to be added here on purpose.
  *   NEVER    files that are refused with a reason, because each could really end up in the
  *            folder on this laptop. A pitch build leaves read/pitch/ behind (found 2026-11-11),
@@ -18,6 +19,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
+import { APP_LINKS_FILE, appLinksProblems } from "./app-links.mjs";
 
 /**
  * Where the app's script rule (apps/landing/_headers, under /read/) leaves a gap for the
@@ -48,7 +50,9 @@ const ALLOWED = [
 ];
 
 const NEVER = [
-  [/(^|\/)\./, "a hidden file; nothing on the site starts with a dot"],
+  // The one exception is the file that tells Apple which links open the app (app-links.mjs),
+  // at exactly the path Apple fetches; its words are checked below.
+  [/(^|\/)\./, "a hidden file; nothing on the site starts with a dot except Apple's links file", (path) => path !== APP_LINKS_FILE],
   [/\.map$/, "a debug copy of the source code, which only a developer needs"],
   [/^shots\/[^/]*pitch/, "a picture from a pitch build, which can show The Study Quran's text and never goes on the public site"],
   [/(^|\/)pitch\//, "part of a pitch build, which holds The Study Quran's text and never goes on the public site"],
@@ -80,8 +84,10 @@ export function markersIn(text) {
 
 // The sources page is required in both languages: the permission emails send the rights
 // holders to it (launch-citations-page). So is the support page: Apple asks every store
-// listing for one (launch-support-page).
+// listing for one (launch-support-page). And so is the links file: without it, no hifth.app
+// link opens the app (launch item 9).
 const REQUIRED = [
+  APP_LINKS_FILE,
   "index.html",
   "privacy.html",
   "sources.html",
@@ -97,7 +103,7 @@ const TEXT = new Set([".html", ".js", ".css", ".json", ".webmanifest", ".svg", "
 
 /** Whether a shipped file is read as text and searched for development markers. */
 export function isText(path) {
-  return TEXT.has(extname(path)) || /(^|\/)_(headers|redirects)$/.test(path);
+  return TEXT.has(extname(path)) || /(^|\/)_(headers|redirects)$/.test(path) || path === APP_LINKS_FILE;
 }
 
 /**
@@ -109,9 +115,13 @@ export function isText(path) {
 export function auditShipped(files, opts = {}) {
   const problems = [];
   for (const { path, text } of files) {
-    const never = NEVER.find(([re]) => re.test(path));
+    const never = NEVER.find(([re, , applies = () => true]) => re.test(path) && applies(path));
     if (never) {
       problems.push({ path, why: never[1] });
+      continue;
+    }
+    if (path === APP_LINKS_FILE) {
+      for (const why of appLinksProblems(text)) problems.push({ path, why });
       continue;
     }
     if (!ALLOWED.some((re) => re.test(path))) {

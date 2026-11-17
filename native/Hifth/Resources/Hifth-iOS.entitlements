@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The permissions the iPad and iPhone app asks Apple for (launch item 9; the
+  owner said yes to both on 2026-11-17):
+    - Sign in with Apple, through Apple's own sheet;
+    - hifth.app links opening the app. Which addresses open it is said by the
+      site's own file (/.well-known/apple-app-site-association): only the
+      reader under /read/, so the support and privacy pages stay in the browser.
+  Anything else needs the owner's yes first. The release check refuses any
+  other permission in a store build (walk-app/scripts/release-check.mjs).
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:hifth.app</string>
+	</array>
+</dict>
+</plist>

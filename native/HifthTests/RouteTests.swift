@@ -58,6 +58,34 @@ struct RouteTests {
         #expect(Route.parse(try #require(URL(string: "HIFTH:///hafs-kfqc/p2"))) == "#/hafs-kfqc/p2")
     }
 
+    // A hifth.app link to the reader opens the app (launch item 9). Apple hands
+    // the app the whole web address; the site's own file claims only /read/,
+    // and this takes only that, so a stray address never turns the page.
+    @Test("a hifth.app link to the reader opens the same place as the site would")
+    func parseSiteLink() throws {
+        #expect(Route.parse(try #require(URL(string: "https://hifth.app/read/#/hafs-kfqc/2:255"))) == "#/hafs-kfqc/2:255")
+        #expect(Route.parse(try #require(URL(string: "https://hifth.app/read#/hafs-kfqc/p45"))) == "#/hafs-kfqc/p45")
+        #expect(Route.parse(try #require(URL(string: "https://hifth.app/read/index.html#/hafs-kfqc/2:255?w=1-2"))) == "#/hafs-kfqc/2:255?w=1-2")
+        #expect(Route.parse(try #require(URL(string: "https://HIFTH.app/read/#/hafs-kfqc/p2"))) == "#/hafs-kfqc/p2")
+    }
+
+    @Test("a hifth.app address that is not the reader, or names no place, is not a route", arguments: [
+        "https://hifth.app/read/",
+        "https://hifth.app/read/#/",
+        "https://hifth.app/read/#/warsh-libya/p1",
+        "https://hifth.app/support/#/hafs-kfqc/2:255",
+        "https://hifth.app/#/hafs-kfqc/2:255",
+        "https://hifth.app/reader/#/hafs-kfqc/2:255",
+        "http://hifth.app/read/#/hafs-kfqc/2:255",
+        "https://www.hifth.app/read/#/hafs-kfqc/2:255",
+        "https://hifth.app.example.com/read/#/hafs-kfqc/2:255",
+        "https://hifth.app:8443/read/#/hafs-kfqc/2:255",
+        "https://someone@hifth.app/read/#/hafs-kfqc/2:255",
+    ])
+    func parseSiteLinkRefuses(_ raw: String) throws {
+        #expect(Route.parse(try #require(URL(string: raw))) == nil)
+    }
+
     @Test("other schemes and empty links are not routes")
     func parseRefuses() throws {
         #expect(Route.parse(try #require(URL(string: "https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/2:255"))) == nil)

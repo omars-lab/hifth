@@ -18,6 +18,9 @@ import { dirname, join } from "node:path";
 import { LOCAL_LIST_KEY, TEST_TURNSTILE_SECRET, assemble, cleanCopy, configProblems, localListFrom, serveArgs, withoutScriptRule } from "./release-hifth-app.mjs";
 import { auditShipped, inlineScriptHashes, readFolder } from "./shipped.mjs";
 import { fixtureEnv } from "../../../../scripts/gate-fixture.mjs";
+import { APP_LINKS_FILE, appSiteAssociation } from "./app-links.mjs";
+
+const MADE_UP_TEAM = "Q9Z8Y7X6W5";
 
 function tree(root, files) {
   for (const [path, text] of Object.entries(files)) {
@@ -109,9 +112,29 @@ test("putting it together writes the fingerprint of the app page's own script in
   assert.match(readFileSync(join(landing, "_headers"), "utf8"), /\{app-inline-scripts\}/);
 });
 
+// The file that tells Apple which hifth.app links open the app names the signing team, which is
+// read at release time and never written into the repo (launch item 9). A made-up team here.
+test("given the signing team, putting it together writes Apple's links file, and the check passes it", () => {
+  const { landing, app, out } = fixture();
+  assemble({ landing, app, out, team: MADE_UP_TEAM });
+  const text = readFileSync(join(out, APP_LINKS_FILE), "utf8");
+  assert.equal(text, appSiteAssociation(MADE_UP_TEAM));
+  const problems = auditShipped(readFolder(out).files).problems;
+  assert.deepEqual(problems.filter((p) => p.path === APP_LINKS_FILE), []);
+});
+
+test("with no signing team, no links file is written, and the check says it is missing", () => {
+  const { landing, app, out } = fixture();
+  assemble({ landing, app, out });
+  assert.equal(existsSync(join(out, ".well-known")), false);
+  const problems = auditShipped(readFolder(out).files).problems.filter((p) => p.path === APP_LINKS_FILE);
+  assert.equal(problems.length, 1);
+  assert.match(problems[0].why, /missing/);
+});
+
 test("a pitch build is copied, so the check refuses the release instead of hiding it", () => {
   const { landing, app, out } = fixture({ "pitch/index.html": "<html>" });
-  assemble({ landing, app, out });
+  assemble({ landing, app, out, team: MADE_UP_TEAM });
   const problems = auditShipped(readFolder(out).files).problems;
   assert.deepEqual(problems.map((p) => p.path), ["read/pitch/index.html"]);
 });

@@ -143,6 +143,26 @@ Sign in with Apple and links from hifth.app that open the app both need it.
 
 *What would answer it:* the file added, and a link on hifth.app opening the app on a device.
 
+*Where it stands (2026-11-17, the owner said yes to both):* the iPad and iPhone app is signed
+with a permissions file asking for Sign in with Apple and hifth.app links, and nothing else. The
+store release check reads the signed app's permissions and refuses a missing one, a wrong one or
+one nobody chose. The app takes a link to the reader on hifth.app and opens the same place the
+site would; any other address is not taken.
+
+The other half is a small file on hifth.app that tells Apple which links open the app. It has
+to name the Apple team the app is signed by, so the release writes it from this laptop's
+signing setup each time; the team's id is never written into the repo. The release refuses a
+folder without it, the site serves it as JSON and never from a cache, and the look at the live
+site after an upload checks that it answers directly, since Apple follows no redirect. The file
+claims only the reader's addresses with a mus'haf place in them, the same ones the app takes,
+and a test holds the two lists together.
+
+Left: the file goes live with hifth.app's first upload, which the owner runs. Then a link has
+to open the app on a real iPad; Apple can take up to about a day to read a new file. That
+check is on the by-hand list. The team's id becomes public in that file, which is how Apple
+asks for it; it is not a secret, but it is new on a public page. The Mac half waits on the
+owner adding the Mac to the app's store record.
+
 ### ⑩ The version is fixed at 0.1.0, build 1 · **fixed**
 
 Every upload needs a higher build number.

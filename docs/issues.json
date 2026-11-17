@@ -6576,9 +6576,9 @@
       "owner": "agent",
       "feature": "hifth-app-site",
       "blockedBy": [
-        "the apps signed with the paid Apple team"
+        "hifth.app's first upload, which the owner runs"
       ],
-      "note": "The small file at hifth.app/.well-known/apple-app-site-association that lets a tapped link open the app. Needs the paid team's ID in it, so it waits on the apps being signed with the paid team."
+      "note": "The small file at hifth.app/.well-known/apple-app-site-association that lets a tapped link open the app. Built 2026-11-17 (launch-ios-entitlements): the release writes it from this laptop's signing team, so the team's id is never in the repo (.claude/skills/deploy-site/scripts/app-links.mjs, app-links.test.mjs); a release without it is refused (shipped.test.mjs, release-hifth-app.test.mjs); the site serves it as JSON, never cached (apps/landing/_headers, apps/landing/lib/pages.test.mjs; seen 200 and application/json from Cloudflare's local server); the live look checks it answers with no redirect and the right words (live.test.mjs). It claims only the reader's addresses with a mus'haf place, the ones the app takes. Waits on the first upload; then the manual-testing check that a link opens the app on an iPad."
     },
     {
       "id": "hifth-app-launch-email",
@@ -6980,7 +6980,33 @@
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "Needed for Sign in with Apple and for hifth.app links that open the app."
+      "useCase": "open-a-link-someone-sent-me",
+      "note": "The owner said yes to both on 2026-11-17. Done on the laptop: the iPad and iPhone app is signed with a permissions file asking for Sign in with Apple and hifth.app links, and nothing else (native/Hifth/Resources/Hifth-iOS.entitlements, held by scripts/native-ios-config.test.mjs). The store release check reads the signed app's permissions and refuses a missing one, a wrong value or one nobody chose, printing key names only (release-check.test.mjs); the export opens the file that would be uploaded and checks the app inside it too. The app takes a link to the reader on hifth.app (https://hifth.app/read/#/…) and opens the same place the site would; any other address on hifth.app, or anywhere else, is not taken (RouteTests). The file on hifth.app that tells Apple which links open the app is built too: the release writes it from this laptop's signing team and refuses a folder without it, the site serves it as JSON, and the live look checks it (hifth-app-link-file). Left, and why the row stays open: that file goes up with the site's first upload, which the owner runs; then a link has to open the app on a real iPad (manual-testing checklist). The Mac's links and Sign in with Apple wait on the owner adding the Mac to the app's store record (launch-mac-links-and-sign-in)."
+    },
+    {
+      "id": "launch-mac-links-and-sign-in",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "useCase": "open-a-link-someone-sent-me",
+      "note": "The Mac half of ⑨: Sign in with Apple and hifth.app links opening the Mac app, in the Mac store build's permissions file, with the release check's Mac list widened to allow them. Waits on the owner adding the Mac to the app's store record, since Apple turns the two on per platform. The site's file already names the app's id, which the Mac app shares."
+    },
+    {
+      "id": "app-link-it-cannot-place",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "useCase": "open-a-link-someone-sent-me",
+      "note": "Found 2026-11-17 while building ⑨. Apple now hands the app every hifth.app reader link that names a mus'haf, but the app checks the rest of the link itself (Route.parse), and a link it cannot place, such as a mistyped verse, is dropped with no word: the app opens where it was and the reader cannot tell the link did anything (native/Hifth/Web/ShellModel.swift, the open handler's early return). Before, only hifth:// links reached that path, which people rarely type. The web app does the same with a link it cannot read (apps/web/src/useHashRouter.ts skips it), in the browser as much as in the app, and opening the site instead would only reach that same silence. So the fix is one short line in the web app, \"this link does not point to a page or verse\", shown for both doors, with the shell handing on the link it could not place instead of dropping it; test first, a Playwright test for the line and a Swift test that the shell hands the link on. That line adds to the first download, which is full (160.1 of 161 KB, 2026-11-17), so it waits on new code loading after the page is up, like the app's log and the off-switch."
     },
     {
       "id": "launch-version-numbers",
