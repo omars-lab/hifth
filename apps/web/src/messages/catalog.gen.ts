@@ -396,6 +396,7 @@ export interface Catalog {
   readonly movedTitle: string;
   readonly movedWaiting: string;
   readonly mushaf: string;
+  readonly mushafChoose: string;
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
   readonly newLayoutBar: string;
   readonly newLayoutNote: string;

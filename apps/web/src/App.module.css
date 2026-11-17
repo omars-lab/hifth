@@ -166,6 +166,29 @@
   }
 }
 
+/* English only (launch item 41). "Navigation for huffaz" is about 100 px,
+   twice its Arabic, and once the row squeezed the name it wrapped onto a second
+   line: the bar grew from 69 to 82 px. Measured in Chrome's engine, 2026-11-17,
+   it wrapped from 320 to 380 px and again at 410 to 412 px (where the spacing
+   above widens back), and stayed on one line from 420 px up. So on any phone
+   in English (the widest is 430 px) the name line goes. The name button keeps
+   its spoken name, so a screen reader still hears it. */
+@media (max-width: 440px) {
+  :root[lang="en"] .tagline {
+    display: none;
+  }
+}
+
+/* English at the narrowest widths: a small phone, or an iPad's split view at
+   320 px. Even without the name line the row is about 20 px too wide, so ▤
+   steps aside; the info panel's "Choose the mus'haf" is its way back
+   (e2e/chrome-fit.spec.ts opens it from there at 320 px). */
+@media (max-width: 359px) {
+  :root[lang="en"] .mushafBtn {
+    display: none;
+  }
+}
+
 .pageNum {
   font-size: var(--text-lg);
   font-weight: 600;

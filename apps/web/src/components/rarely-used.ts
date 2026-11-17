@@ -25,3 +25,4 @@ export { HighlightMenu } from "./HighlightMenu";
 export { MovedCard } from "./MovedCard";
 export { ReportProblem } from "./ReportProblem";
 export { Jumper } from "./Jumper";
+export { VerseMenu } from "./VerseMenu";

@@ -35,6 +35,14 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Trimmed 2026-11-17: start-up 160.9 → 160.1 KB.** The verse menu (the tap-and-hold menu
+on a verse, and its corner twin) moved out of start-up into the rarely-used file: it draws
+nothing until a verse is held, so it mounts only then. Main script 127.98 → 127.35 KB; the
+rarely-used file 31.3 → 32.6 KB, since it also took the new "Choose the mus'haf" button in the
+info panel (launch item 41). Total 211.6 KB against the 220 KB cap. The room this made went to
+the English narrow-bar style rules, which have to be there from the first paint.
+`e2e/lazy-tools.spec.ts` lists the menu among the files the first script must not carry.
+
 **Measured again 2026-11-16 (night), alone: cap raised to 220 KB.** "The new layout" took the app
 to 211.0 KB, 1 KB over. Every word in the app is still used, so there was no quick trim that
 shrinks the total. The other way, a fresh measurement, was open because start-up had got faster

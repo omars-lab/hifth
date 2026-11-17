@@ -156,6 +156,8 @@ interface ColophonProps {
   onRailHome?: ((home: RailHome) => void) | undefined;
   /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
   onShowTips?: () => void;
+  /** Open the mus'haf picker: its way in when the top bar has no room for ▤. */
+  onOpenEditions?: () => void;
   /** Whether this screen can show two pages side by side. What a card does at the
       facing page's edge only means something then, so a phone is not asked. */
   spread?: boolean;
@@ -491,6 +493,7 @@ export function Colophon({
   railHome,
   onRailHome,
   onShowTips,
+  onOpenEditions,
   spread = false,
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
@@ -1048,6 +1051,20 @@ export function Colophon({
               <span>{t.tipsShow}</span>
             </button>
             <p className={styles.note}>{t.tipsNote}</p>
+          </section>
+        )}
+
+        {/* The mus'haf picker's second way in. On a narrow screen in English
+            (an iPad's split view, a small phone) the top bar has no room for
+            its ▤ button, so this is the way there (launch item 41). */}
+        {onOpenEditions && (
+          <section className={styles.block} aria-labelledby="colophon-mushaf">
+            <h3 className={styles.subhead} id="colophon-mushaf">
+              {t.mushaf}
+            </h3>
+            <button type="button" className={styles.toggle} data-colophon-mushaf="" onClick={onOpenEditions}>
+              <span>{t.mushafChoose}</span>
+            </button>
           </section>
         )}
 

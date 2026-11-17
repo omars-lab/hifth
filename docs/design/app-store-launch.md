@@ -403,7 +403,7 @@ The address has mail servers, and the report card offers Copy when there is no m
 
 *What would answer it:* one test report sent from the simulator and seen in the inbox.
 
-### ㊶ In English, on a 320 px phone, the top bar spills off the screen · **open**
+### ㊶ In English, on a 320 px phone, the top bar spills off the screen · **fixed**
 
 Found while fixing the Arabic tag's fit. In English at 320 px wide the row needs 333 px in
 Chrome's engine and 337 px in Safari's, so the ⓘ button is cut off at the edge. The line under
@@ -423,8 +423,16 @@ alone fixes the height but not the spill. Both together just fit in Chrome and w
 spill in Safari.
 
 *What would answer it:* a narrow-phone layout for the English bar that fits in both engines
-with room to spare. The top-bar test now runs in English too, and marks this as a known fault
-until it is fixed.
+with room to spare.
+
+*Fixed 2026-11-17.* In English, on any screen 440 px wide or less, the line under the name is
+left out; checked every 5 px, it had wrapped not only at 320 to 380 px but again at 405 to
+415 px. Below 360 px the mus'haf button steps aside too, and the info panel gained "Choose the
+mus'haf", so the picker is still one step away. The bar is now 69 px with nothing spilling at
+every width from 320 to 520 px. The top-bar test runs in English with no known-fault mark, also
+at 340 px (the narrow side of iPad split view), in both engines, and a second test opens the
+picker from the info panel at 320 px. The name button keeps its spoken name, so a screen reader
+still hears "Navigation for huffaz".
 
 ## Which of these could get the app turned down, and which matter once readers have it?
 
@@ -436,9 +444,8 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
   permissions file ⑨ (the upload checks both); the support page ⑳ and the privacy policy ㉙
   (Apple requires a link to each); the store's questions ㉚ and screenshots ㉛; sign-in ㉖ and
   deleting an account ㉗ (once sign-in ships, deletion must be in the app); the tajweed
-  question ㊲ (it can read as unfinished); the English top bar at 320 px ㊶, which a reviewer
-  reaches by putting the app in a third of an iPad screen. (The reviewer walk ㉟ and the walk
-  tools' settings ㊱ are fixed.)
+  question ㊲ (it can read as unfinished). (The reviewer walk ㉟, the walk tools' settings ㊱
+  and the English top bar at 320 px ㊶ are fixed.)
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store

@@ -7338,11 +7338,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊶"
       },
-      "status": "open",
+      "status": "fixed",
+      "useCase": "read-the-chrome-in-a-language-i-read",
+      "closedBy": "apps/web/e2e/chrome-fit.spec.ts",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "In English at 320 px wide the top bar needs 333 px (Chrome's engine) or 337 px (Safari's): the info button is cut off and the bar grows from 69 to 82 px as the line under the name wraps. Predates the store work; the top-bar test ran in Arabic only and never saw it. The tajweed button is 70 px in English and 49 in Arabic. A launch row since 2026-11-17: the store app's phones are at least 375 px wide, but the iPad lets the app share the screen (it does not ask for the whole screen), and a window a third of the screen wide is 320 px on every iPad but the largest; iPad windows can also be resized freely. The test now runs in English and is marked as an expected failure (apps/web/e2e/chrome-fit.spec.ts); the fix removes that mark. Measured 2026-11-17: a smaller tag plus a shorter line just fit in Chrome and still spill in Safari, so it needs a narrow-phone layout, not a tweak."
+      "note": "Fixed 2026-11-17; the tests that would catch it coming back are \"the same, with the buttons in English\" (no spill and one bar height at 320, 340, 360, 375, 390, 412 and 430 px) and \"in English at 320 px, the mus'haf picker opens from the info panel\". In English, on any screen 440 px wide or less, the line under the name goes (it wrapped from 320 to 380 px and again at 405 to 415 px, measured in Chrome's engine every 5 px), and below 360 px the mus'haf button steps aside; the info panel now has \"Choose the mus'haf\", so the picker is still one step away. Measured after the fix: 69 px and no spill at every width from 320 to 520 px. The test's expected-failure mark is gone, and it now also checks 340 px, the narrow side of iPad split view. What was found: in English at 320 px wide the top bar needs 333 px (Chrome's engine) or 337 px (Safari's): the info button is cut off and the bar grows from 69 to 82 px as the line under the name wraps. Predates the store work; the top-bar test ran in Arabic only and never saw it. The tajweed button is 70 px in English and 49 in Arabic. A launch row since 2026-11-17: the store app's phones are at least 375 px wide, but the iPad lets the app share the screen (it does not ask for the whole screen), and a window a third of the screen wide is 320 px on every iPad but the largest; iPad windows can also be resized freely. The test now runs in English and is marked as an expected failure (apps/web/e2e/chrome-fit.spec.ts); the fix removes that mark. Measured 2026-11-17: a smaller tag plus a shorter line just fit in Chrome and still spill in Safari, so it needs a narrow-phone layout, not a tweak."
     },
     {
       "id": "launch-support-mail-arrives",
