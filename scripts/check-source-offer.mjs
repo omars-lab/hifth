@@ -43,6 +43,7 @@ import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 import { ROOT } from "./code-pointers.mjs";
 import { creditedHrefs } from "./colophon-record.mjs";
+import { treeUrl } from "./source-offer-url.mjs";
 
 const PROVENANCE = join(ROOT, "apps", "web", "src", "provenance.ts");
 const TIMEOUT_MS = 15_000;
@@ -75,6 +76,16 @@ function sourceRepo() {
     process.exit(CANNOT_TELL);
   }
   return m[1].replace(/\/+$/, "");
+}
+
+/**
+ * `SOURCE_COPY`, the public copy of each release's source, or "" while it is switched off.
+ * Once it is set, the offer is that copy, and a build's source is its release tag there
+ * (release-<first 12 of the commit>, as provenance.ts's `releaseTag` makes it).
+ */
+function sourceCopy() {
+  const m = readFileSync(PROVENANCE, "utf8").match(/export const SOURCE_COPY\s*=\s*"([^"]*)"/);
+  return m ? m[1].replace(/\/+$/, "") : "";
 }
 
 /** The commit a local build would bake in — `vite.config.ts`'s last fallback. */
@@ -179,7 +190,9 @@ const problems = [];
 const unknowns = [];
 const lines = [];
 
-const repo = sourceRepo();
+const copy = sourceCopy();
+const repo = copy || sourceRepo();
+const treeAt = (c) => treeUrl({ copy, repo, commit: c });
 const deployed = flag("--url");
 const say = (mark, text) => lines.push(`  ${mark} ${text}`);
 
@@ -227,7 +240,7 @@ if (deployed) {
     // Every candidate gets checked below, not just the first.
     if (offer.commits.length > 1) {
       for (const c of offer.commits.slice(1)) {
-        const at = `${repo}/tree/${c}`;
+        const at = treeAt(c);
         const r = await probe(at);
         if (r.state === "ok") say("✓", `${at}`);
         else if (r.state === "gone") {
@@ -281,7 +294,7 @@ if (!commit) {
   );
   say("?", "no build commit available");
 } else {
-  const at = `${repo}/tree/${commit}`;
+  const at = treeAt(commit);
   const r = await probe(at);
   if (r.state === "ok") say("✓", `${at}   (${commitFrom})`);
   else if (r.state === "gone") {
@@ -354,6 +367,6 @@ if (unknowns.length > 0) {
 }
 
 console.log(
-  `source-offer — OK (${repo}/tree/${commit} and ${links.length} attribution link(s) resolve anonymously)`,
+  `source-offer — OK (${treeAt(commit)} and ${links.length} attribution link(s) resolve anonymously)`,
 );
 process.exit(OK);

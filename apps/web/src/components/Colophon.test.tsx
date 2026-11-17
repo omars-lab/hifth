@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/preact";
 import { describe, expect, it, vi } from "vitest";
 import { Colophon } from "./Colophon";
 import { LangProvider, stringsFor } from "../i18n";
-import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
+import { SOURCE_COPY, SOURCE_HOME, SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 import { CARD_EDGE_KEY } from "../card-edge";
 import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
@@ -294,6 +294,22 @@ describe("provenance", () => {
     // A dev server corresponds to a working tree; there is no tree to link.
     expect(isCommit("dev")).toBe(false);
     expect(urlFor("dev")).toBe(SOURCE_REPO);
+  });
+
+  it("links the release's tag in the public copy once there is one", () => {
+    // When this repo goes private, the offer moves to a copy holding one commit per
+    // release, tagged release-<first 12 of the commit>. scripts/source-offer-url.test.mjs
+    // pins the same written-out tag for the script that makes it.
+    const sha = "0123456789abcdef0123456789abcdef01234567";
+    const copy = "https://example.com/made-up/source-copy";
+    expect(urlFor(sha, copy)).toBe(`${copy}/tree/release-0123456789ab`);
+    expect(urlFor("dev", copy)).toBe(copy);
+  });
+
+  it("keeps the switch to the public copy off until that copy exists", () => {
+    // Turning it on before the copy holds the live release would hand readers a dead link.
+    expect(SOURCE_COPY).toBe("");
+    expect(SOURCE_HOME).toBe(SOURCE_REPO);
   });
 });
 

@@ -19,6 +19,24 @@ declare const __SOURCE_COMMIT__: string;
 export const SOURCE_REPO = "https://github.com/omars-lab/hifth";
 
 /**
+ * The public copy of each release's source, for when this repo goes private (owner,
+ * 2026-11-17; docs/design/laptop-publish.md). It holds one commit per release, tagged
+ * `release-<first 12 of the commit>` by `release-source.mjs` in the deploy-site skill, and none
+ * of this repo's history. Empty until that repo exists and holds the live release: while it
+ * is empty the link names the commit in SOURCE_REPO, as it always has. Setting it is the
+ * switch, and the source-offer check reads this line to follow it.
+ */
+export const SOURCE_COPY = "";
+
+/** Where the source is offered: the public copy once it exists, this repo until then. */
+export const SOURCE_HOME = SOURCE_COPY || SOURCE_REPO;
+
+/** The tag the public copy gives a release; `release-source.mjs` makes the same one. */
+export function releaseTag(commit: string): string {
+  return `release-${commit.slice(0, 12)}`;
+}
+
+/**
  * The commit this bundle was built from, or `"dev"` when there is none.
  *
  * `"dev"` is not a failure: an unpublished dev server corresponds to a working
@@ -43,9 +61,13 @@ export function isCommit(commit: string): boolean {
   return /^[0-9a-f]{7,40}$/.test(commit);
 }
 
-/** The URL that satisfies the offer for `commit`: that tree, or the repo root. */
-export function urlFor(commit: string): string {
-  return isCommit(commit) ? `${SOURCE_REPO}/tree/${commit}` : SOURCE_REPO;
+/**
+ * The URL that satisfies the offer for `commit`: that release in the public copy, or that
+ * tree here while there is no copy, or the root of wherever the source lives.
+ */
+export function urlFor(commit: string, copy: string = SOURCE_COPY): string {
+  if (!isCommit(commit)) return copy || SOURCE_REPO;
+  return copy ? `${copy}/tree/${releaseTag(commit)}` : `${SOURCE_REPO}/tree/${commit}`;
 }
 
 /** True when this build can name the exact commit it came from. */
