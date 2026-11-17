@@ -44,11 +44,13 @@ describe("SkinToggle", () => {
     expect(screen.getByRole("button", { pressed: true })).toBeTruthy();
   });
 
-  it("shows the beta badge in BOTH states — it is the deliverable, not a TODO", () => {
+  // The badge was "beta" until 2026-11-17; it now says "unchecked", since Apple
+  // turns down an app that calls itself a beta. Its job is the same.
+  it("shows the unchecked badge in BOTH states, it is the deliverable, not a TODO", () => {
     const { rerender } = render(<SkinToggle skin="plain" onChange={noop} onOpenLegend={noop} />);
-    expect(screen.getByText("تجريبي")).toBeTruthy();
+    expect(screen.getByText("غير مُراجَع")).toBeTruthy();
     rerender(<SkinToggle skin="tajweed" onChange={noop} onOpenLegend={noop} />);
-    expect(screen.getByText("تجريبي")).toBeTruthy();
+    expect(screen.getByText("غير مُراجَع")).toBeTruthy();
   });
 
   it("flips to the other skin", () => {
@@ -136,10 +138,10 @@ describe("TajweedLegend", () => {
     expect(section.textContent).toContain("مدّ لازم");
   });
 
-  it("states the beta status and the ayah-granularity caveat", () => {
+  it("says no hafiz has checked it yet, and that it colours the whole ayah", () => {
     open();
     const dialog = screen.getByRole("dialog");
-    expect(dialog.textContent).toContain("تجريبية");
+    expect(dialog.textContent).toContain("لم يراجعها حافظ بعد");
     expect(dialog.textContent).toContain("الآية كاملة");
   });
 
