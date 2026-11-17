@@ -99,7 +99,7 @@ page" below). Backlog row names are in brackets.
 | **Shipping a fix fast** | 5 | The release command (`launch-release-command`), the site's undo (`launch-site-undo`), reporting tests that pass only on a second try (`launch-retry-tests-hidden`) | The off-switch (`launch-remote-switch`) and the "new version ready" prompt (`launch-browser-new-version`) load after the page is up, for the same reason. The off-switch's file goes online with hifth.app's first upload; until then it is tested against a local copy. |
 | **The licence** | 6 | (The citations page, `launch-citations-page`, is built and checked: it goes live with hifth.app's first upload.) Reading the page artwork's terms (`launch-page-artwork-terms`) and the recitation audio's terms (`launch-recitation-audio-terms`) | The two permissions (`launch-corpus-permission`, `launch-tajweed-permission`) wait on the owner's emails. Fallback if no answer by the date: fetch that data from hifth.app after install, or leave the tajweed colours off. The upload rows (`gpl-and-the-app-store`, `app-store-not-a-target`) close when the answers do. |
 | **What Apple requires** | 3 | (The iPad and iPhone permissions file and the hifth.app file that tells Apple which links open the app, `launch-ios-entitlements`, are built and checked; the site's file goes live with hifth.app's first upload, then a link is tried on the iPad from the by-hand list.) (The archive, the export and Apple's check, `launch-archive-upload`, are done. The Mac sandbox, `launch-mac-sandbox`, is done on this laptop: built, checked by the release check and walked.) | The Mac store archive and its installer package are built and checked (`make app-archive-mac`, `make app-export-mac`, owner's yes 2026-11-17). Apple's check of the Mac package waits on the owner adding the Mac to the app's store record (waiting list, item 6), and its upload on the licence. The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
-| **Listing** | 2 | The store answers (`launch-store-answers`), screenshots at Apple's sizes (`launch-store-screenshots`) | The EU trader answer is the owner's; draft both ways. |
+| **Listing** | 2 | Screenshots at Apple's sizes (`launch-store-screenshots`); the Arabic listing (`launch-store-answers`). (The English listing, the privacy, age and export answers and the category are drafted and checked by `make app-store-listing`.) | The EU trader answer, the price and the copyright line are the owner's (waiting list). The content-rights answer waits on the permissions, the same lock as the upload. |
 | **Accounts** | 2 | Backups and a practised restore of the notify-me list, which already exists (`launch-backups`). (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, and the info panel's links to it and the support page, `launch-support-links-in-app`, are done.) | Sign-in (`launch-sign-in`) waits on the three sign-in choices. Deleting an account (`launch-account-deletion`) is built behind a switch that is off once the choice of where accounts live is made. |
 
 ## What comes next, in order
@@ -113,8 +113,8 @@ comes before what matters once readers have it, since a turned-down build costs 
 2. **Apple's settings:** the iPad and iPhone permissions file. (The archive up to the lock,
    with Apple's own check passing, is done, and so are the Mac sandbox and the Mac store archive
    and package; Apple's check of the Mac package waits on item 6 below.)
-3. **What Apple asks to link to:** the support page and the app's privacy policy are written;
-   next, link both from the app's info panel, then the store answers and screenshots.
+3. **What Apple asks to link to:** the support page, the app's privacy policy, the info panel's
+   links to both and the English store answers are done; next, the screenshots.
 4. **The licence line:** the citations page and the two terms readings.
 5. **The fast-fix line:** the release command, the site's undo, the retry report, then the
    off-switch and the prompt, each loaded after the page is up.
@@ -155,6 +155,10 @@ The plan has the detail of each step.
 11. **Save the vendor number.** In App Store Connect, open Payments and Financial Reports and
    copy the number at the top left, then type `make env-set NAME=ASC_VENDOR_NUMBER` in your own
    terminal. This frees the download numbers (㉝); `make app-release-setup` then says ok.
+12. **Three store answers only you can give** (㉚, at upload): whether you are an EU "trader"
+   (a trader's address, phone and email show on the store page to everyone; one person with a
+   free app and no sales can usually say no), the price (drafted as free), and the copyright
+   line (it shows your name). The rest of the listing is drafted on the listing page.
 
 (Answered 2026-11-17: Apple may check the exported app before the licence is answered, ㊷; the
 site publishes from this laptop, not from GitHub; the Mac store archive and its certificate
@@ -185,6 +189,9 @@ may be made.)
   and keep what Apple sends in `.store/`, which git ignores. The reviews pull ran live and found
   0 reviews. The numbers need the vendor number, which waits on the owner. The `hifth-reviews`
   key's file in `~/.appstoreconnect/private_keys/` is never read or printed.
+- Then, on the same branch: the English store answers (㉚) on `docs/design/store-listing.md`,
+  checked by `make app-store-listing`, and both privacy pages now say the sound is asked for
+  before Play and name the setting that stops it.
 - The first download is at 160.1 of 161 KB (2026-11-17), so new code loads after the page is up.
 
 ## The tools that make this repeatable

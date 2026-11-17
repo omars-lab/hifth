@@ -550,6 +550,9 @@ ARCHIVE_RECEIPT := .claude/skills/release-app/scripts/archive-receipt.mjs
 app-release-setup: ## Is this laptop set up to release? Each thing a release needs, ok or missing, with the page to fix it on
 	@dotenvx run --quiet -- node .claude/skills/understanding-processes/scripts/check-release-setup.mjs
 
+app-store-listing: ## The words for Apple's store forms (docs/design/store-listing.md): each field's length against Apple's limit, and that it agrees with the app's settings
+	@node .claude/skills/understanding-processes/scripts/check-store-listing.mjs
+
 app-store-reviews: ## Store reviews: ARGS=pull (counts only), waiting, "draft <id> --file F", "approve <id>", "post <id>". Kept in .store/reviews/ (git ignores it); nothing is posted without the owner's yes
 	@dotenvx run --quiet -- node .claude/skills/store-feedback/scripts/store-reviews.mjs $(ARGS)
 

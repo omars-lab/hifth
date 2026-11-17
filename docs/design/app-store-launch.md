@@ -374,6 +374,17 @@ the review notes.
 *What would answer it:* every answer drafted in the repository, the EU trader answer from the
 owner, and the labels checked against what the app really sends.
 
+*Drafted 2026-11-17* on the [listing page](store-listing.md): the name, subtitle, keywords,
+promotional line and description in English; the category (Education, then Reference); the
+privacy answer, "Data Not Collected", with why each thing that leaves the device does not count
+under Apple's definition; the age answers, giving 4+; the export answer; the support and privacy
+addresses. `make app-store-listing` checks every field against Apple's limits and against the
+app's name, category, privacy file and export setting, with a test that breaks each one in turn.
+Writing the privacy answer showed the policy did not say the sound is asked for before Play, so
+both privacy pages now say so and name the setting that stops it, held by a test. **Still open:**
+the EU trader answer, the price and the copyright line (the owner's); the "rights to the content"
+answer, which waits on the permissions; the listing in Arabic.
+
 ### ㉛ There are no screenshots at Apple's sizes · **open**
 
 *What would answer it:* a command that takes the public build's screenshots at Apple's iPhone,

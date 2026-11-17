@@ -175,6 +175,25 @@ test("both privacy pages cover the apps: the device, the recitation, the report 
   }
 });
 
+/*
+ * The app asks for a verse's sound before it is played (when its tools open, and the next few
+ * while one plays), so the policy must say so and name the setting that stops it. It names the
+ * setting by the words the app shows, so renaming the setting fails here, not on a reader. The
+ * site's Arabic is written without vowel marks, so the app's words are compared without them.
+ */
+const withoutVowelMarks = (text) => text.replace(/[ً-ْٰ]/g, "");
+
+test("both privacy pages say the sound is asked for early, and name the setting that stops it", () => {
+  for (const [path, lang] of [["privacy.html", "en"], ["ar/privacy.html", "ar"]]) {
+    const section = page(path).match(/<h2 id="recitation">[\s\S]*?<\/p>/)?.[0].replace(/\s+/g, " ") ?? "";
+    const words = appWords(lang);
+    for (const key of ["runAheadTitle", "runAheadOff"]) {
+      const want = withoutVowelMarks(words[key]);
+      assert.ok(section.includes(want), `${path}'s recitation section should say "${want}", the app's ${key}`);
+    }
+  }
+});
+
 test("the English and Arabic privacy pages have the same sections, in the same order", () => {
   assert.deepEqual(sectionIds(page("ar/privacy.html")), sectionIds(page("privacy.html")));
 });

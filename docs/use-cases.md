@@ -592,10 +592,10 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 |---|---|
 | happens in | [`apps/landing/support.html:25`](../apps/landing/support.html#L25) — `Sending a problem report from the app` |
 | happens in | [`apps/landing/ar/support.html:25`](../apps/landing/ar/support.html#L25) — `إرسال بلاغ عن مشكلة من التطبيق` |
-| happens in | [`apps/landing/privacy.html:37`](../apps/landing/privacy.html#L37) — `id="problem-report"` |
+| happens in | [`apps/landing/privacy.html:41`](../apps/landing/privacy.html#L41) — `id="problem-report"` |
 | proven by | [`apps/landing/lib/pages.test.mjs:134`](../apps/landing/lib/pages.test.mjs#L134) — “each support page names the app's report buttons by the words the app shows” |
 | proven by | [`apps/landing/lib/pages.test.mjs:168`](../apps/landing/lib/pages.test.mjs#L168) — “both privacy pages cover the apps: the device, the recitation, the report and accounts” |
-| proven by | [`apps/landing/lib/pages.test.mjs:178`](../apps/landing/lib/pages.test.mjs#L178) — “the English and Arabic privacy pages have the same sections, in the same order” |
+| proven by | [`apps/landing/lib/pages.test.mjs:193`](../apps/landing/lib/pages.test.mjs#L193) — “the English and Arabic privacy pages have the same sections, in the same order” |
 | proven by | [`apps/web/src/components/Colophon.test.tsx:426`](../apps/web/src/components/Colophon.test.tsx#L426) — “in Arabic, links the Arabic support and privacy pages, opening outside the app” |
 | proven by | [`apps/web/e2e/report-problem.spec.ts:63`](../apps/web/e2e/report-problem.spec.ts#L63) — “the support and privacy links stand apart from each other and from the report button” |
 

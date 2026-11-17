@@ -18,6 +18,7 @@ rather than repeating them.
 | script | what it does | when to reach for it | command |
 |---|---|---|---|
 | `scripts/check-release-setup.mjs` | checks everything a release needs on this laptop and in the Apple account (Node, Xcode and its sign-in, the two certificates, the App Store Connect key and its ids, the public build, the licence lock), says ok, missing or later for each, what to do and the page to do it on, then which release steps can run today. Prints no secret, no certificate name and no key id | before a first release on a laptop, after setting up a key or a certificate, or when a release step fails for a missing account or key | `make app-release-setup` |
+| `scripts/check-store-listing.mjs` | reads the words drafted for Apple's store forms (`docs/design/store-listing.md`, each box under a `<!-- field: name -->` line) and checks each against Apple's length limit, no long dash, the app's display name, keywords that do not repeat the name or subtitle, the privacy answer against the app's privacy file, the export answer and category against the app's settings, and that each hifth.app page it gives is in the site's files. Prints lengths only, never the words | after editing the listing, before pasting it into App Store Connect, and when the app's name, category or privacy file changes | `make app-store-listing` |
 
 ## The shape of every page here
 
