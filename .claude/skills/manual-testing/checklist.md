@@ -188,6 +188,16 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     the slider names the page you left and returns to it. Why not a machine: the tests prove the
     rules; whether it feels right mid-recitation is a judgement. The findings so far are in
     `docs/design/app-layout.md`, items ② and ⑪.
+25. **Saving, loading and following links in the sandboxed Mac app.** The Mac store build is
+    sandboxed: it may touch only the files the reader picks in the system's own windows. Open it
+    with `make app-run-mac CONFIG=Release`. Save the bookmarks from the bookmarks shelf to the
+    Desktop, then save them again over that same file; press the shelf's load button and pick it;
+    then press a link to the website (the colophon) and the "Report a problem" mail button.
+    Right: both saves land (the second replaces the first, with no "not permitted" message), the
+    shelf shows the bookmarks it loaded, the website opens in your browser and the mail opens in
+    Mail, never inside the app. Why not a machine: each step goes through a window that waits for
+    a real click on the laptop's own screen. The automatic walk already proved the sandboxed app
+    opens fresh with nothing left over and reaches the recitation over the network (launch item ⑧).
 
 ## Done
 
