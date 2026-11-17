@@ -99,6 +99,10 @@ Stages 2 to 7 do not wait on the licence answer. Only stage 8 does.
 
 ## Stage 3. What Apple requires
 
+"Today" is as of 2026-11-15, when the plan was written. What is done since (the privacy file, the
+version command, the archive with Apple's own check) is kept on the goal page,
+`.claude/goals/app-store-launch.md`, so this table is not kept up to date.
+
 | Item | Today | Work |
 |---|---|---|
 | Privacy manifest | Missing | Add it, with the reasons for each system feature the shell uses |

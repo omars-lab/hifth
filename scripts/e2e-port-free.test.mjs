@@ -71,7 +71,8 @@ test("the free port's partner 1000 up is free too, even when the first one tried
 /** Run the script told to look at `port` (and so port + 1000 for the pitch build). */
 const run = (port, env = {}) =>
   new Promise((done) => {
-    const child = spawn("node", [SCRIPT], {
+    // This same node, found by its full path, so a test's short PATH still runs it.
+    const child = spawn(process.execPath, [SCRIPT], {
       // Start from a known state: none of the settings that switch the look off.
       env: { ...process.env, HIFTH_BASE_URL: "", HIFTH_REUSE_SERVER: "", CI: "", HIFTH_E2E_PORT: String(port), ...env },
       stdio: ["ignore", "pipe", "pipe"],
@@ -98,6 +99,17 @@ test("a server on the app's port stops it, naming the port, who holds it and how
     assert.match(out, new RegExp(`\\b${port}\\b`));
     // This test's own process is the holder.
     assert.match(out, new RegExp(`\\b${process.pid}\\b`));
+    assert.match(out, new RegExp(`kill ${process.pid}\\b`));
+  } finally {
+    await new Promise((r) => s.close(r));
+  }
+});
+
+test("the holder is still named when the search path leaves out the folder lsof is in", async () => {
+  const s = await hold("127.0.0.1");
+  try {
+    const { status, out } = await run(s.address().port, { PATH: "/usr/bin:/bin" });
+    assert.equal(status, 1, out);
     assert.match(out, new RegExp(`kill ${process.pid}\\b`));
   } finally {
     await new Promise((r) => s.close(r));

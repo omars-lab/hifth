@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { pageNumber } from "./page-number";
+import { NEW_LAYOUT_KEY } from "../src/new-layout";
+import { SETTINGS_AT_KEY } from "../src/settings-at";
 
 /*
  * The chrome fits the phone — at every width a phone actually has.
@@ -105,6 +107,29 @@ test.describe("Hifth · the chrome fits a phone", () => {
   test("the same, with the buttons in English", async ({ page }) => {
     await fitsAtEveryWidth(page, "en");
   });
+
+  // The two settings that change what sits in the top bar: the settings behind
+  // one button, and the new layout that moves Go to and the page size onto the
+  // bottom bar. Each must fit in English as well as the default does
+  // (launch item 41, checked again 2026-11-17).
+  for (const [name, saved] of [
+    ["the settings behind one button", { [SETTINGS_AT_KEY]: "drawer" }],
+    ["the new layout", { [NEW_LAYOUT_KEY]: "bar" }],
+    ["both of those", { [SETTINGS_AT_KEY]: "drawer", [NEW_LAYOUT_KEY]: "bar" }],
+  ] as const) {
+    test(`in English with ${name}`, async ({ page }) => {
+      await page.addInitScript((pairs: Record<string, string>) => {
+        for (const [k, v] of Object.entries(pairs)) localStorage.setItem(k, v);
+      }, saved as Record<string, string>);
+      await fitsAtEveryWidth(page, "en");
+      // The setting really took: a pass with the default bar proves nothing.
+      const header = page.locator("header");
+      const drawer = SETTINGS_AT_KEY in saved;
+      const onBar = NEW_LAYOUT_KEY in saved;
+      await expect(header.getByRole("button", { name: "Reading settings" })).toHaveCount(drawer ? 1 : 0);
+      await expect(header.getByRole("button", { name: /^Go to/ })).toHaveCount(onBar ? 0 : 1);
+    });
+  }
 
   // Where the mus'haf button steps aside, the picker is still one step away: the
   // info panel, opened from the name, has "Choose the mus'haf".

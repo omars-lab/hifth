@@ -29,14 +29,16 @@ stays private and the store build stays the public one.
 
 ## Are we on it? (checked 2026-11-17)
 
-Not yet: 31 launch rows are open. The App Store is still recorded as "not a target", and the
+Not yet: 29 launch rows are open. The App Store is still recorded as "not a target", and the
 upload is locked until two rights holders say yes in writing. Everything else goes ahead meanwhile.
 
 Done so far:
 - a store build can never be the private build;
 - the privacy file;
 - the version command;
-- a real archive of the store build (Apple's own check of it and the upload are left);
+- a real archive of the store build, and the export and upload take only an archive that
+  command made, and Apple's own check of it, passed on 2026-11-17 (the owner said yes to the
+  check the same day, ㊷; the upload still waits on the licence);
 - the outside-links test;
 - sound with the silent switch on;
 - the review notes, with a no-connection first launch;
@@ -74,10 +76,10 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **30** of 43: 28 of the 41 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day. Of the 30, **9 can get the app turned down at review**, 8 stop the upload itself (six launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
-| Owner steps waiting | **9**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
+| Launch blockers open | **29** of 44: 27 of the 42 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day, and the archive with Apple's own check ⑪ later that day. Of the 29, **9 can get the app turned down at review**, 7 stop the upload itself (five launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
+| Owner steps waiting | **10**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad; how to spend GitHub's paid minutes on publishing | 2026-11-17 |
 | Days since a restore was practised | never | 2026-11-15 |
-| Days since the release command ran clean | no release command yet | 2026-11-15 |
+| Days since the release command ran clean | no release command yet; its archive, export and Apple's check ran clean on 2026-11-17 | 2026-11-17 |
 | Unanswered reports and reviews | no way to receive them yet | 2026-11-15 |
 | New crashes | readers' crashes cannot be read yet | 2026-11-15 |
 | Unsteady tests | not reported yet | 2026-11-15 |
@@ -96,7 +98,7 @@ page" below). Backlog row names are in brackets.
 | **Hearing about problems** | 6 | Store reviews (`launch-store-feedback`), store numbers (`launch-store-numbers`), the second key on the release page (`launch-keys-on-release-page`), readers' crashes (`launch-readers-crashes`) | The app's log (`launch-logging`) has to load after the page is up, since the first download is full. The support page (`launch-support-page`) can be written now and goes live with hifth.app's first upload. |
 | **Shipping a fix fast** | 5 | The release command (`launch-release-command`), the site's undo (`launch-site-undo`), reporting tests that pass only on a second try (`launch-retry-tests-hidden`) | The off-switch (`launch-remote-switch`) and the "new version ready" prompt (`launch-browser-new-version`) load after the page is up, for the same reason. The off-switch's file goes online with hifth.app's first upload; until then it is tested against a local copy. |
 | **The licence** | 7 | The citations page (`launch-citations-page`), reading the page artwork's terms (`launch-page-artwork-terms`) and the recitation audio's terms (`launch-recitation-audio-terms`) | The two permissions (`launch-corpus-permission`, `launch-tajweed-permission`) wait on the owner's emails. Fallback if no answer by the date: fetch that data from hifth.app after install, or leave the tajweed colours off. The upload rows (`gpl-and-the-app-store`, `app-store-not-a-target`) close when the answers do. |
-| **What Apple requires** | 4 | The Mac sandbox and signing (`launch-mac-sandbox`), the iPad and iPhone permissions file (`launch-ios-entitlements`), the archive up to the locked upload (`launch-archive-upload`) | The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
+| **What Apple requires** | 3 | The Mac sandbox and signing (`launch-mac-sandbox`), the iPad and iPhone permissions file (`launch-ios-entitlements`). (The archive, the export and Apple's check, `launch-archive-upload`, are done.) | The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
 | **Listing** | 2 | The store answers (`launch-store-answers`), screenshots at Apple's sizes (`launch-store-screenshots`) | The EU trader answer is the owner's; draft both ways. |
 | **Accounts** | 4 | Backups and a practised restore of the notify-me list, which already exists (`launch-backups`); the privacy policy for what the app keeps today (`launch-app-privacy-policy`) | Sign-in (`launch-sign-in`) waits on the three sign-in choices. Deleting an account (`launch-account-deletion`) is built behind a switch that is off once the choice of where accounts live is made. |
 
@@ -108,7 +110,8 @@ comes before what matters once readers have it, since a turned-down build costs 
 1. **What the reviewer would trip on:** all found so far are fixed (the reviewer walk ㉟, the
    first-open ribbon ㊳, the walk tools' settings in the store copy ㊱, and the English top bar
    at 320 px ㊶). The next reviewer walk looks again.
-2. **Apple's settings:** the Mac sandbox, the permissions file, the archive up to the lock.
+2. **Apple's settings:** the Mac sandbox, then the iPad and iPhone permissions file. (The
+   archive up to the lock, with Apple's own check passing, is done.)
 3. **What Apple asks to link to:** the support page and the app's privacy policy, then the store
    answers and screenshots.
 4. **The licence line:** the citations page and the two terms readings.
@@ -142,22 +145,30 @@ The plan has the detail of each step.
    This frees no launch work, but it finishes the clean-up of the old pictures.
 9. **Try the new layout on the iPad** (the switch in the info panel). This decides whether it
    becomes the default.
+10. **How to spend GitHub's paid minutes on publishing.** A: keep publishing the site from
+    GitHub, about one minute per merge. B: publish from this laptop and let GitHub run nothing
+    on a merge. B saves the minutes, but a publish needs the laptop on. Nothing is built for B
+    until you choose it.
+
+(Answered 2026-11-17: Apple may check the exported app before the licence is answered, ㊷.)
 
 ## Where the work stands (2026-11-17)
 
-- Worktree `../hifth-auth`, branch `store-feedback`, made from main after #636 (the new layout
-  and the size limit raise). It is pushed, with no pull request yet. It holds the session note,
-  the loop's rule on blocks, this page, and the first walk as Apple's reviewer: the review notes
-  rewritten to match what the app shows, "A rough build to try" gone from three settings, the
-  report's device line, the designs link, two walk scripts, the reviewer section of the walk
-  checklist, and six new launch rows (㉟ to ㊵).
-- The reviewer walk's commits carry `intent start launch-reviewer-walk`; the store-feedback
-  skill's carry `launch-store-feedback`.
-- None of the 42 launch rows names who the work is for (a use case), so every commit label
-  warns. Add one use case for the launch, such as "a reader hits a problem and gets a fix
-  within days", to `docs/use-cases.json` and name it on each launch row.
-- Next item: the store-feedback skill (`launch-store-feedback`). The key is `hifth-reviews`;
-  its file sits in `~/.appstoreconnect/private_keys/` and is never read or printed.
+- Worktree `../hifth-auth`, branch `archive-upload-own-archive`, made from main after #638.
+  Intent `launch-archive-upload`. It holds the archive receipt (only an archive the archive
+  command made can be signed or sent), Apple's own check (`make app-store-check`, passed first
+  try), the plain message for an expired Xcode sign-in, and a port-check fix. Its pull request
+  opens once the push's checks pass, and merges when green.
+- Signing for the store goes through Xcode's own sign-in to the Apple account, not the store
+  key (Apple refuses the key that certificate). The sign-in expires; the export then says to
+  sign in again in Xcode > Settings > Accounts.
+- Next item: the Mac sandbox (`launch-mac-sandbox`, ⑧), on a new branch from main with its own
+  `intent start`. The Mac app's saved data must never be cleared, and the Mac keyboard test
+  never runs while the owner is at the laptop.
+- After that: the iPad and iPhone permissions file (⑨), then the support page and privacy
+  policy. The store-feedback skill (㉜) and the store-numbers skill (㉝) are not started; the
+  `hifth-reviews` key they use is made, and its file in `~/.appstoreconnect/private_keys/` is
+  never read or printed.
 - The first download is at 160.8 of 161 KB, so new code loads after the page is up.
 
 ## The tools that make this repeatable

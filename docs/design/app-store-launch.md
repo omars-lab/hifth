@@ -138,7 +138,7 @@ number alone. A version lower than today's, or one Apple would refuse, is refuse
 written. It lives in the new release skill, which the rest of the release joins as it is built.
 Raising the build as part of the archive comes with ⑪.
 
-### ⑪ The commands to make and upload a store build only print an error · **open**
+### ⑪ The commands to make and upload a store build only print an error · **fixed**
 
 *What would answer it:* a real archive and export that runs clean, and Apple's own check of it
 (the privacy file from ⑦ included) passing, with the upload step still locked until ③ and ④
@@ -156,8 +156,26 @@ checks the licence before it builds anything. Tests hold both.
 passed: the app inside the export is signed for distribution, is the public build, carries the
 privacy file and has no private folder. The export stays on the laptop.
 
-One step is left. Apple's own check of the exported app needs an App Store Connect key, which
-is the owner's to make.
+*2026-11-17:* the export and the upload now take only an archive `make app-archive` made. Once
+every check has passed, the archive command writes a receipt beside the archive: the commit it
+was built from, whether that work was all committed, and one fingerprint of every file in the
+app. The export reads the receipt first, and the upload reads it again just before sending. An
+archive made by hand in Xcode, an older one, or one with any file changed, added, removed or
+renamed after the checks is refused. The archive left on the laptop from 2026-11-16 predates
+the receipt and is refused, as it should be. On the real app (2,834 files) the fingerprint takes
+under half a second.
+
+*What answered it (2026-11-17):* Apple's own check passed on the first try, "no errors", on a
+fresh archive and export of the public build. Whether the check counts as an upload was the
+owner's call, item ㊷; the owner said yes the same day, since it makes no build anyone can
+install, puts nothing in the review queue and uses no build number. `make app-store-check` runs
+it, and refuses an export older than the archive's receipt. The upload command runs the same
+check before it would send anything, and stays locked until ③ and ④ are answered.
+
+Two things learned on the way. The export signs with Apple's online store certificate through
+Xcode's own sign-in; the store key cannot, as it has no right to that certificate. That sign-in
+expires, and the release setup check only sees that an account is listed, so an export stopped
+by an expired sign-in now says in plain words to sign in again in Xcode's settings.
 
 ### ⑫ A recitation may be silent when the phone's silent switch is on · **fixed**
 
@@ -434,12 +452,35 @@ at 340 px (the narrow side of iPad split view), in both engines, and a second te
 picker from the info panel at 320 px. The name button keeps its spoken name, so a screen reader
 still hears "Navigation for huffaz".
 
+### ㊷ May the app be sent to Apple for its check before the licence is answered? · **answered**
+
+*Answered by the owner, 2026-11-17: yes, check now,* so the store-only faults are found early and
+the rest of the launch work can be done backwards from a passing check. The lock now reads "no
+build anyone can install, and nothing in Apple's review queue", not "nothing leaves the laptop".
+The check makes no build in the store's listing, nothing a tester or reviewer can see, and uses
+up no build number, so it cannot make the later review harder; passing it also does not mean
+the review will pass, since a reviewer judges what the app does, not its packaging.
+
+Apple can check an exported app (its signing, its icons, its privacy file, its permissions)
+without it becoming a build anyone can install. That catches a refusal weeks before the real
+upload. But the check sends the whole app to Apple's servers, and the upload lock (③ ④) was put
+there so the app, with the data whose licence is still being asked about, goes nowhere outside
+this laptop until the rights holders answer.
+
+| choice | what it buys | what it costs | what it commits to |
+|---|---|---|---|
+| Check now | Apple's refusals found weeks early, while the licence wait runs anyway | the app reaches Apple's servers before the licence answer | the lock is read as "no build anyone can install", not "nothing leaves the laptop" |
+| Wait for the licence answer | the lock means exactly what it says | Apple's refusals are found only on the first real upload | nothing; the check runs the day the lock opens |
+
+*What would answer it:* the owner's choice, written into ⑪.
+
 ## Which of these could get the app turned down, and which matter once readers have it?
 
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 
 - **Stops the upload itself** (nothing goes to Apple until these close): the licence items ②
-  ③ ④ ⑤ ⑥, and the archive and upload ⑪.
+  ③ ④ ⑤ ⑥. (The archive, the export and Apple's own check ⑪ are fixed; only the upload
+  command itself waits on these.)
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
   permissions file ⑨ (the upload checks both); the support page ⑳ and the privacy policy ㉙
   (Apple requires a link to each); the store's questions ㉚ and screenshots ㉛; sign-in ㉖ and

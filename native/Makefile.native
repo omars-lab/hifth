@@ -41,6 +41,9 @@ MAC_APP      := $(DERIVED)/Build/Products/Debug/Hifth.app
 # probe still answers in it (launch item ㊱). The Mac build stays Debug.
 CONFIG       ?= Debug
 IPAD_APP      = $(DERIVED)/Build/Products/$(CONFIG)-iphonesimulator/Hifth.app
+# On the Mac, CONFIG=Release was once quietly ignored, so a store-style walk looked
+# at the Debug app. Refused by name until the Mac store build exists (launch item ⑧).
+MAC_DEBUG_ONLY = @test "$(CONFIG)" = Debug || { echo "  ✗ CONFIG=$(CONFIG): the Mac app is built in Debug only until its store build exists (launch item 8). Leave CONFIG off for TARGET=mac."; exit 1; }
 # The Mac app is started through macOS's launcher, never by running the binary
 # inside it: started that way it runs with no window at all, so the page is
 # 0×0 and hidden and its picture comes out empty (native-shell.md ⑪). A new
@@ -195,6 +198,7 @@ ifneq ($(SIDEWAYS),)
 endif
 	@mkdir -p $(SHOTS)
 ifeq ($(TARGET),mac)
+	$(MAC_DEBUG_ONLY)
 	$(MAKE) app-build-mac
 	@rm -f $(SHOT_OUT); : > $(MAC_LOG)
 	$(MAC_OPEN) --env HIFTH_ROUTE=$(ROUTE) --env HIFTH_APPEARANCE=$(APPEARANCE) \
@@ -268,6 +272,7 @@ else
 	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
 endif
 else
+	$(MAC_DEBUG_ONLY)
 	$(MAKE) app-build-mac
 	@: > $(MAC_LOG)
 	$(MAC_OPEN) --env HIFTH_PROBE=1 --env HIFTH_ROUTE='$(ROUTE)' --env HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
@@ -509,6 +514,7 @@ ARCHIVE_PATH   ?= $(DERIVED)/store/Hifth.xcarchive
 EXPORT_PATH    ?= $(DERIVED)/store/export
 EXPORT_OPTIONS := $(NATIVE)/ExportOptions.plist
 ARCHIVE_DD     := $(DERIVED)/store/derived
+ARCHIVE_RECEIPT := .claude/skills/release-app/scripts/archive-receipt.mjs
 
 app-release-setup: ## Is this laptop set up to release? Each thing a release needs, ok or missing, with the page to fix it on
 	@dotenvx run --quiet -- node .claude/skills/understanding-processes/scripts/check-release-setup.mjs
@@ -518,7 +524,7 @@ app-archive: app-store-flavour app-generate ## Archive the iPad and iPhone app f
 	@sh native/scripts/xcode-account.sh
 	@# Nothing ships with the walk capture in it, or as anything but the public build.
 	$(MAKE) --no-print-directory app-release-check RELEASE_FLAVOUR=public
-	rm -rf $(ARCHIVE_PATH)
+	rm -rf $(ARCHIVE_PATH) $(ARCHIVE_PATH).receipt.json
 	set -o pipefail; xcodebuild -project $(XCPROJ) -derivedDataPath $(ARCHIVE_DD) -scheme Hifth-iOS \
 	  -configuration Release -destination generic/platform=iOS -archivePath $(ARCHIVE_PATH) \
 	  -allowProvisioningUpdates DEVELOPMENT_TEAM=$(TEAM) HIFTH_STORE_CONDITION=STORE archive | $(XCPRETTY)
@@ -527,6 +533,9 @@ app-archive: app-store-flavour app-generate ## Archive the iPad and iPhone app f
 	node .claude/skills/walk-app/scripts/release-check.mjs \
 	  --debug $(RELEASE_CHECK_DD)/Build/Products/Debug-iphoneos/Hifth.app \
 	  --release $(ARCHIVE_PATH)/Products/Applications/Hifth.app --flavour public --store
+	@# The receipt: only now, with every check passed. The export and the upload
+	@# take this archive only while the app inside still matches it file for file.
+	@node $(ARCHIVE_RECEIPT) --write $(ARCHIVE_PATH) --flavour public
 	@echo "  archive: $(ARCHIVE_PATH)"
 
 # The export signs the archive for the App Store. The first time, Xcode asks
@@ -534,15 +543,41 @@ app-archive: app-store-flavour app-generate ## Archive the iPad and iPhone app f
 # Apple account, so it is run only with the owner's go.
 app-export: ## Sign the archive for the App Store, ready to upload (the first run makes the team's App Store certificate in the Apple account)
 	@test -d $(ARCHIVE_PATH) || { echo "  no archive at $(ARCHIVE_PATH). Run: make app-archive"; exit 1; }
+	@node $(ARCHIVE_RECEIPT) --check $(ARCHIVE_PATH)
 	rm -rf $(EXPORT_PATH)
+	@# Signs with Apple's online store certificate, through Xcode's own sign-in
+	@# (Xcode > Settings > Accounts). The store key cannot: it has no right to
+	@# that certificate ("Cloud signing permission error", 2026-11-17).
+	@# The setup check only sees that an account is listed, not that its sign-in
+	@# is still live, so an expired one is caught here and said plainly.
 	set -o pipefail; xcodebuild -exportArchive -archivePath $(ARCHIVE_PATH) -exportPath $(EXPORT_PATH) \
-	  -exportOptionsPlist $(EXPORT_OPTIONS) -allowProvisioningUpdates | $(XCPRETTY)
+	  -exportOptionsPlist $(EXPORT_OPTIONS) -allowProvisioningUpdates 2>&1 | tee $(EXPORT_PATH).log | $(XCPRETTY) \
+	  || { grep -q "session has expired" $(EXPORT_PATH).log && echo "  Xcode's sign-in to the Apple account has expired. Sign in again in Xcode > Settings > Accounts, then: make app-export"; exit 1; }
 	@echo "  export: $(EXPORT_PATH)"
+
+# Apple's own check of the exported app: its signing, icons, permissions and
+# privacy file, against the app's record in App Store Connect. It sends the app
+# to Apple, but makes no build anyone can install, puts nothing in the review
+# queue and uses no build number, so the owner allowed it before the licence
+# answer (launch item 42, 2026-11-17). It takes only an export made after the
+# archive's receipt, of an archive the receipt still matches. The key's ID and
+# issuer come from the encrypted settings; the key file from
+# ~/.appstoreconnect/private_keys/, where altool looks by itself.
+app-store-check: ## Send the exported app to Apple for its check (no build anyone can install; allowed before the licence answer)
+	@test -f $(EXPORT_PATH)/Hifth.ipa || { echo "  no exported app at $(EXPORT_PATH). Run: make app-export"; exit 1; }
+	@test $(EXPORT_PATH)/Hifth.ipa -nt $(ARCHIVE_PATH).receipt.json || { echo "  the exported app is older than the archive. Run: make app-export"; exit 1; }
+	@node $(ARCHIVE_RECEIPT) --check $(ARCHIVE_PATH)
+	dotenvx run --quiet -- sh -c 'xcrun altool --validate-app -f $(EXPORT_PATH)/Hifth.ipa -t ios --apiKey "$$ASC_KEY_ID" --apiIssuer "$$ASC_ISSUER_ID"'
+	@echo "  ✓ Apple's check passed: $(EXPORT_PATH)/Hifth.ipa"
 
 app-testflight: app-store-flavour ## Upload the archive to TestFlight with an App Store Connect API key from the environment (locked until the licence decision allows it)
 	$(TESTFLIGHT_GATE)
 	$(MAKE) --no-print-directory app-archive
 	$(MAKE) --no-print-directory app-export
+	@# Apple's check first, and the receipt checked again right before the
+	@# upload, so nothing swapped in between is sent.
+	$(MAKE) --no-print-directory app-store-check
+	@node $(ARCHIVE_RECEIPT) --check $(ARCHIVE_PATH)
 	@echo "  upload: not built yet"; exit 1
 
 app-logs: ## Stream the app's console output (Mac or simulator)

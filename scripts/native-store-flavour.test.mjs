@@ -90,6 +90,88 @@ test("the export signs for the App Store and keeps the result on this laptop", (
   assert.equal(o.teamID, undefined, "the team id is read from the keychain, never written in the repo");
 });
 
+// The receipt (.claude/skills/release-app/scripts/archive-receipt.mjs): written
+// only once the archive's checks have passed, and read before the archive is
+// signed and again before it is sent, so only an archive this command made and
+// checked, untouched since, goes any further.
+test("the archive writes its receipt only after the release check of the app inside it", () => {
+  const said = plan("app-archive", "public");
+  const checked = said.search(/release-check\.mjs[^\n]*--release [^\n]*Hifth\.xcarchive/);
+  const receipt = said.search(/archive-receipt\.mjs --write [^\n]*Hifth\.xcarchive/);
+  assert.ok(checked >= 0, "no release check of the archive");
+  assert.ok(receipt > checked, "the receipt is written before the archive is checked, or not at all");
+  // A run that fails part way leaves no receipt from an earlier archive behind.
+  assert.match(said, /rm -rf [^\n]*Hifth\.xcarchive [^\n]*Hifth\.xcarchive\.receipt\.json/);
+});
+
+test("the export reads the receipt before it signs anything", () => {
+  const said = plan("app-export", "public");
+  const receipt = said.search(/archive-receipt\.mjs --check [^\n]*Hifth\.xcarchive/);
+  const sign = said.search(/-exportArchive/);
+  assert.ok(receipt >= 0, "the export never reads the receipt");
+  assert.ok(sign > receipt, "the export signs before it reads the receipt");
+});
+
+// The export signs through Xcode's own sign-in, which expires; the release
+// setup check only sees that an account is listed. On 2026-11-17 the export
+// died with "Your session has expired" buried in Xcode's log, so it now says
+// in plain words what to do.
+test("an export stopped by an expired Xcode sign-in says how to sign in again", () => {
+  const said = plan("app-export", "public");
+  assert.match(said, /xcodebuild -exportArchive [^\n]*tee [^\n]*export\.log/);
+  assert.match(said, /grep -q "session has expired" [^\n]*export\.log/);
+  assert.match(said, /Xcode > Settings > Accounts/);
+});
+
+test("the upload reads the receipt again after the export, just before sending", () => {
+  const said = plan("app-testflight", "public");
+  const sign = said.lastIndexOf("-exportArchive");
+  const lastCheck = said.lastIndexOf("archive-receipt.mjs --check");
+  const send = said.indexOf("upload: not built yet");
+  assert.ok(sign >= 0 && send >= 0, "the plan has no export, or no upload step");
+  assert.ok(lastCheck > sign && lastCheck < send, "no receipt check between the export and the upload");
+});
+
+// Apple's own check (launch item 42, owner's yes on 2026-11-17): the exported
+// app goes to Apple to be checked, and nothing becomes a build anyone can
+// install. So it is not behind the licence lock, but it takes only an export of
+// an archive with a good receipt, and it only checks, never uploads.
+test("Apple's check reads the receipt, then checks the exported app and uploads nothing", () => {
+  const said = plan("app-store-check", "public");
+  const receipt = said.search(/archive-receipt\.mjs --check [^\n]*Hifth\.xcarchive/);
+  const send = said.search(/altool --validate-app [^\n]*Hifth\.ipa/);
+  assert.ok(receipt >= 0, "the check never reads the receipt");
+  assert.ok(send > receipt, "the app goes to Apple before the receipt is read");
+  assert.doesNotMatch(said, /--upload-app|--upload-package/);
+  assert.doesNotMatch(said, /Not yet/, "the check waits on the licence lock, which the owner lifted for it");
+});
+
+test("Apple's check refuses an export made before the archive, and says what to run", () => {
+  const dir = mkdtempSync(join(tmpdir(), "store-"));
+  const archive = join(dir, "Hifth.xcarchive");
+  const exported = join(dir, "export");
+  spawnSync("mkdir", ["-p", archive, exported]);
+  writeFileSync(join(exported, "Hifth.ipa"), "");
+  // The receipt is written after the export, as when the archive is made again.
+  spawnSync("touch", ["-t", "202601010000", join(exported, "Hifth.ipa")]);
+  writeFileSync(`${archive}.receipt.json`, "{}");
+  const r = spawnSync("make", ["-s", "-C", root, "app-store-check", `ARCHIVE_PATH=${archive}`, `EXPORT_PATH=${exported}`], {
+    encoding: "utf8",
+  });
+  const said = r.stdout + r.stderr;
+  assert.notEqual(r.status, 0, said);
+  assert.match(said, /Run: make app-export/);
+  assert.doesNotMatch(said, /altool/);
+});
+
+test("the upload runs Apple's check after the export and before sending", () => {
+  const said = plan("app-testflight", "public");
+  const sign = said.lastIndexOf("-exportArchive");
+  const check = said.indexOf("altool --validate-app");
+  const send = said.indexOf("upload: not built yet");
+  assert.ok(check > sign && check < send, "the upload does not run Apple's check between the export and the send");
+});
+
 test("the upload meets the licence lock before it archives or exports anything", () => {
   const said = plan("app-testflight", "public");
   const lock = said.indexOf("Not yet");
