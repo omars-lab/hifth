@@ -7170,11 +7170,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉜"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "A store-feedback skill: one command pulls new reviews and ratings with the hifth-reviews key into a git-ignored folder, and drafts an answer to each. Nothing is posted without the owner's yes, and reviewers' names and words never enter the repo. Feeds the launch goal's \"unanswered reports and reviews\" number."
+      "useCase": "answer-store-reviews-only-with-the-owners-yes",
+      "closedBy": ".claude/skills/store-feedback/scripts/store-reviews.test.mjs",
+      "note": "Built 2026-11-17 as the store-feedback skill, run by make app-store-reviews. pull keeps every review in .store/reviews/ (git ignores it) and prints counts only; waiting lists open reviews with no words; draft saves an answer; approve records the owner's yes against the exact words; post sends only those words, and refuses if they changed or the review already has an answer. The signed token and paging are shared with store-numbers in scripts/lib/app-store-connect.mjs. Checked live the same day with the hifth-reviews key: Apple let it in and listed 0 reviews, which is right before any release. Feeds the launch goal's \"unanswered reports and reviews\" number."
     },
     {
       "id": "launch-store-numbers",
@@ -7182,11 +7184,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉝"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "A store-numbers skill: one command pulls the daily download and sales reports with the same hifth-reviews key into a git-ignored folder and prints a short summary. Same key as launch-store-feedback, different skill and script (owner, 2026-11-16)."
+      "useCase": "count-downloads-without-watching-readers",
+      "closedBy": ".claude/skills/store-numbers/scripts/store-numbers.test.mjs",
+      "note": "Built 2026-11-17 as the store-numbers skill, run by make app-store-numbers. pull fetches each day's summary sales report (up to the year Apple keeps) into .store/numbers/ (git ignores it); summary counts first downloads, updates and downloads again for this app only, by device and country. A report that changes form is refused, not miscounted. Same key as launch-store-feedback, different skill and script (owner, 2026-11-16). Not run live yet: it needs the vendor number, which only the owner can copy from App Store Connect (make env-set NAME=ASC_VENDOR_NUMBER); until then it stops and names the missing setting, which was checked live."
     },
     {
       "id": "launch-keys-on-release-page",
@@ -7194,11 +7198,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉞"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "The release page and the setup check cover the reviews key as well as the upload key: what each key is for, and a check that the file is in place and its ID saved, printing names and dates only."
+      "useCase": "answer-store-reviews-only-with-the-owners-yes",
+      "closedBy": ".claude/skills/understanding-processes/scripts/check-release-setup.test.mjs",
+      "note": "Done 2026-11-17. The release page has a section on the second key: what each key is for, which skills use it, and how to find and save the vendor number. make app-release-setup now checks the reviews key's file and id (and that it is not the upload key) and whether the vendor number is saved, printing states only. Both are reported as later and never hold a release back. Run live: everything ok except the vendor number, which waits on the owner."
     },
     {
       "id": "launch-remote-switch",

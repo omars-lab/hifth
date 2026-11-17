@@ -166,6 +166,53 @@ const CHECKS = [
     },
   },
   {
+    // The second key, named hifth-reviews (Customer Support, Finance and
+    // Marketing access), reads and answers store reviews and pulls the
+    // download and sales reports. No release step needs it: reported, never a
+    // failure, and it holds back no step.
+    id: "reviews-key",
+    name: "The reviews key (store reviews, downloads and sales)",
+    needs: "after release",
+    test: () => {
+      const id = process.env.ASC_REVIEWS_KEY_ID ?? "";
+      if (!id)
+        return {
+          state: "later",
+          fix: "make a second key named hifth-reviews with Customer Support, Finance and Marketing access, move its .p8 next to the first, then make env-set NAME=ASC_REVIEWS_KEY_ID",
+          link: KEY_PAGE,
+        };
+      if (!/^[A-Z0-9]{10}$/.test(id))
+        return { state: "missing", fix: "ASC_REVIEWS_KEY_ID must be 10 letters and digits; save it again with make env-set" };
+      if (id === process.env.ASC_KEY_ID)
+        return { state: "missing", fix: "ASC_REVIEWS_KEY_ID names the same key as ASC_KEY_ID; save the hifth-reviews key's id instead" };
+      const file = `AuthKey_${id}.p8`;
+      if (!keyFiles().includes(file))
+        return { state: "missing", fix: `no key file matches the saved ASC_REVIEWS_KEY_ID; move the hifth-reviews .p8 into ${KEYS_DIR}/` };
+      if ((statSync(join(KEYS_DIR, file)).mode & 0o077) !== 0)
+        return { state: "missing", fix: `other people on this laptop can read it: chmod 600 ${KEYS_DIR}/AuthKey_*.p8` };
+      return { state: "ok" };
+    },
+  },
+  {
+    // Apple files the daily download and sales reports under the account's
+    // vendor number. Only the store-numbers skill needs it.
+    id: "vendor-number",
+    name: "The vendor number (download and sales reports)",
+    needs: "after release",
+    test: () => {
+      const n = process.env.ASC_VENDOR_NUMBER ?? "";
+      if (!n)
+        return {
+          state: "later",
+          fix: "copy the number at the top of Payments and Financial Reports, then make env-set NAME=ASC_VENDOR_NUMBER",
+          link: "https://appstoreconnect.apple.com/itc/payments_and_financial_reports",
+        };
+      return /^\d+$/.test(n)
+        ? { state: "ok" }
+        : { state: "missing", fix: "ASC_VENDOR_NUMBER must be digits only; save it again with make env-set" };
+    },
+  },
+  {
     id: "public-build",
     name: "The public build is in the app (needed for each release)",
     needs: "archive",
@@ -208,12 +255,17 @@ if (!ONLY) {
   let open = true;
   for (const step of STEPS) {
     const blocking = results.filter(
-      (r) => STEPS.indexOf(r.needs) <= STEPS.indexOf(step) && r.state !== "ok" && r.id !== "public-build",
+      (r) =>
+        STEPS.includes(r.needs) &&
+        STEPS.indexOf(r.needs) <= STEPS.indexOf(step) &&
+        r.state !== "ok" &&
+        r.id !== "public-build",
     );
     open = open && blocking.length === 0;
     console.log(`${open ? "can run " : "waits   "} ${STEP_NAME[step]}${open ? "" : `: ${blocking.map((b) => b.name).join(", ")}`}`);
   }
 }
 
-const failed = results.some((r) => r.state === "missing" && r.needs !== "upload");
+// Only what the archive, the export or Apple's check needs fails the run.
+const failed = results.some((r) => r.state === "missing" && ["archive", "export", "check"].includes(r.needs));
 process.exit(failed ? 1 : 0);

@@ -65,7 +65,7 @@ Four facts shape the order:
 | **Owner steps waiting** | Things only the owner can do (emails, sign-in choices, store forms). | The "Waiting on the owner" list below |
 | **Days since a restore was practised** | A backup put back into a scratch database and its rows counted. Under 30. | This page |
 | **Days since the release command ran clean** | Version bump to a built, checked archive, upload still locked. Under 14. | This page |
-| **Unanswered reports and reviews** | Reader reports in the support folder and store reviews with no answer. Zero. | The `operate-app` skill's commands, once built |
+| **Unanswered reports and reviews** | Reader reports in the support folder and store reviews with no answer. Zero. | Store reviews: `make app-store-reviews ARGS=pull` (the `store-feedback` skill). Reader reports: the `operate-app` skill's commands, once built |
 | **New crashes** | Crashes from readers' devices not yet in a backlog row. Zero. | The `crash-logs` skill, once it reads readers' crashes |
 | **Unsteady tests** | Tests that passed only on a second try in the last push. Zero. | The push's report, once built |
 | **Skills with a known gap** | Rows still open in the skills table in the plan. Zero. | The plan's stage 9 |
@@ -76,11 +76,11 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **26** of 46: 24 of the 44 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day, and the archive with Apple's own check ⑪ later that day. Later still the support page ⑳ and the apps' privacy policy ㉙ closed, and one item was added for linking both from inside the app (㊸), which closed the same day. Of the 26, **7 can get the app turned down at review**, 6 stop the upload itself (four launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
+| Launch blockers open | **24** of 46 (2026-11-17, after the store reviews ㉜, the download numbers ㉝ and the second key on the release page ㉞ closed; `make issues LAUNCH=1` lists them). Before that, **26**: 24 of the 44 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day, and the archive with Apple's own check ⑪ later that day. Later still the support page ⑳ and the apps' privacy policy ㉙ closed, and one item was added for linking both from inside the app (㊸), which closed the same day. Of the 26, **7 can get the app turned down at review**, 6 stop the upload itself (four launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
 | Owner steps waiting | **10**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; adding the Mac to the app's store record; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet; its archive, export and Apple's check ran clean on 2026-11-17 | 2026-11-17 |
-| Unanswered reports and reviews | no way to receive them yet | 2026-11-15 |
+| Unanswered reports and reviews | **0** store reviews, none waiting (read live with the reviews key; the app is not in the store yet). Reader reports have no folder to land in yet | 2026-11-17 |
 | New crashes | readers' crashes cannot be read yet | 2026-11-15 |
 | Unsteady tests | not reported yet | 2026-11-15 |
 | Skills with a known gap | **10** | 2026-11-15 |
@@ -95,7 +95,7 @@ page" below). Backlog row names are in brackets.
 
 | Line of work | Open | Free to build now | Blocked, and the way around it meanwhile |
 |---|---|---|---|
-| **Hearing about problems** | 6 | Store reviews (`launch-store-feedback`), store numbers (`launch-store-numbers`), the second key on the release page (`launch-keys-on-release-page`), readers' crashes (`launch-readers-crashes`) | The app's log (`launch-logging`) has to load after the page is up, since the first download is full. (The support page, `launch-support-page`, is built and checked: it goes live with hifth.app's first upload.) |
+| **Hearing about problems** | 2 | Readers' crashes (`launch-readers-crashes`). (Store reviews, `launch-store-feedback`, store numbers, `launch-store-numbers`, and the second key on the release page, `launch-keys-on-release-page`, are done; the numbers wait on the owner saving the vendor number.) | The app's log (`launch-logging`) has to load after the page is up, since the first download is full. (The support page, `launch-support-page`, is built and checked: it goes live with hifth.app's first upload.) |
 | **Shipping a fix fast** | 5 | The release command (`launch-release-command`), the site's undo (`launch-site-undo`), reporting tests that pass only on a second try (`launch-retry-tests-hidden`) | The off-switch (`launch-remote-switch`) and the "new version ready" prompt (`launch-browser-new-version`) load after the page is up, for the same reason. The off-switch's file goes online with hifth.app's first upload; until then it is tested against a local copy. |
 | **The licence** | 6 | (The citations page, `launch-citations-page`, is built and checked: it goes live with hifth.app's first upload.) Reading the page artwork's terms (`launch-page-artwork-terms`) and the recitation audio's terms (`launch-recitation-audio-terms`) | The two permissions (`launch-corpus-permission`, `launch-tajweed-permission`) wait on the owner's emails. Fallback if no answer by the date: fetch that data from hifth.app after install, or leave the tajweed colours off. The upload rows (`gpl-and-the-app-store`, `app-store-not-a-target`) close when the answers do. |
 | **What Apple requires** | 3 | (The iPad and iPhone permissions file and the hifth.app file that tells Apple which links open the app, `launch-ios-entitlements`, are built and checked; the site's file goes live with hifth.app's first upload, then a link is tried on the iPad from the by-hand list.) (The archive, the export and Apple's check, `launch-archive-upload`, are done. The Mac sandbox, `launch-mac-sandbox`, is done on this laptop: built, checked by the release check and walked.) | The Mac store archive and its installer package are built and checked (`make app-archive-mac`, `make app-export-mac`, owner's yes 2026-11-17). Apple's check of the Mac package waits on the owner adding the Mac to the app's store record (waiting list, item 6), and its upload on the licence. The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
@@ -118,8 +118,8 @@ comes before what matters once readers have it, since a turned-down build costs 
 4. **The licence line:** the citations page and the two terms readings.
 5. **The fast-fix line:** the release command, the site's undo, the retry report, then the
    off-switch and the prompt, each loaded after the page is up.
-6. **Hearing about problems:** store reviews, store numbers and the release page on the new key;
-   the app's log and readers' crashes. (The sources in English ㊴ are fixed.)
+6. **Hearing about problems:** the app's log and readers' crashes. (The sources in English ㊴
+   are fixed, and so are store reviews, store numbers and the release page on the new key.)
 7. **Accounts**, as far as the sign-in choices allow; all of it once they are made.
 8. **Test flight** with a few named readers, then **upload and release** once the permissions
    are in writing.
@@ -152,6 +152,9 @@ The plan has the detail of each step.
    This frees no launch work, but it finishes the clean-up of the old pictures.
 10. **Try the new layout on the iPad** (the switch in the info panel). This decides whether it
    becomes the default.
+11. **Save the vendor number.** In App Store Connect, open Payments and Financial Reports and
+   copy the number at the top left, then type `make env-set NAME=ASC_VENDOR_NUMBER` in your own
+   terminal. This frees the download numbers (㉝); `make app-release-setup` then says ok.
 
 (Answered 2026-11-17: Apple may check the exported app before the licence is answered, ㊷; the
 site publishes from this laptop, not from GitHub; the Mac store archive and its certificate
@@ -175,9 +178,13 @@ may be made.)
   Then ⑨ on branch `ios-permissions`: the iPad and iPhone permissions file, the app taking
   hifth.app reader links, and the site's file that tells Apple which links open the app, which
   the release writes from this laptop's signing team (the team's id becomes public in it, which
-  is how Apple asks for it). Next item: the store-feedback skill (㉜). The store-feedback skill (㉜) and the store-numbers skill (㉝) are not started; the
-  `hifth-reviews` key they use is made, and its file in `~/.appstoreconnect/private_keys/` is
-  never read or printed.
+  is how Apple asks for it). That merged as pull request 646.
+- Then, on branch `launch-store-feedback`: the store-feedback skill (㉜, `make app-store-reviews`),
+  the store-numbers skill (㉝, `make app-store-numbers`) and the release page and setup check on
+  the second key (㉞). Both skills share the signed-request code in `scripts/lib/app-store-connect.mjs`
+  and keep what Apple sends in `.store/`, which git ignores. The reviews pull ran live and found
+  0 reviews. The numbers need the vendor number, which waits on the owner. The `hifth-reviews`
+  key's file in `~/.appstoreconnect/private_keys/` is never read or printed.
 - The first download is at 160.1 of 161 KB (2026-11-17), so new code loads after the page is up.
 
 ## The tools that make this repeatable
@@ -195,14 +202,14 @@ may be made.)
 | Keys and secrets | `secrets` skill |
 | A choice to record | `decide` skill |
 | Release notes | `intent-manager:write-release-notes` |
+| Store reviews, with answers sent only on the owner's yes | `store-feedback` skill, `make app-store-reviews` |
+| Downloads, updates and downloads again from Apple's daily reports | `store-numbers` skill, `make app-store-numbers` |
 
 ### To build
 
 | What | Tool | Why |
 |---|---|---|
 | Archive, upload, review, staged release | the `release-app` skill, started 2026-11-16 with the version command | The rest of the release has no command yet |
-| Store reviews and ratings, with drafted answers | new `store-feedback` skill, on the `hifth-reviews` key | Nothing reads what readers write in the store |
-| Downloads and sales | new `store-numbers` skill, on the same key | Nothing counts them |
 | Reading crashes and reports; the fix-in-a-hurry path | new `operate-app` skill | Nothing covers running the app once it is out |
 | The numbers kept up to date | the loop, `.claude/loop-prompts/operational-readiness.md` | A table nobody updates is worse than none |
 

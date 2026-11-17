@@ -379,26 +379,32 @@ owner, and the labels checked against what the app really sends.
 *What would answer it:* a command that takes the public build's screenshots at Apple's iPhone,
 iPad and Mac sizes, in English and Arabic.
 
-### ㉜ Nothing reads what readers write about the app in the store · **open**
+### ㉜ Nothing reads what readers write about the app in the store · **fixed**
 
 The owner made one App Store Connect key for this, `hifth-reviews` (Customer Support, Finance
 and Marketing), on 2026-11-16. One key, two skills: this one and ㉝.
 
-*What would answer it:* a store-feedback skill whose command lists new reviews and ratings into
-a folder git ignores, since reviewers' names and words never reach the public repo, and drafts
-an answer to each. An answer is posted only after the owner says yes to it.
+*What answered it (2026-11-17):* the store-feedback skill. One command keeps every review in a
+folder git ignores, since reviewers' names and words never reach the public repo, and prints
+only counts. An answer is drafted there, and is sent only after the owner says yes to those
+exact words: if the words change after the yes, it refuses and asks again. Run live the same
+day: Apple let the key in and listed no reviews, which is right before the first release.
 
-### ㉝ Nothing counts downloads and sales · **open**
+### ㉝ Nothing counts downloads and sales · **fixed**
 
-*What would answer it:* a store-numbers skill whose command pulls the daily download and sales
-reports with the same key, keeps them in a folder git ignores, and prints a short summary for
-the launch goal's numbers.
+*What answered it (2026-11-17):* the store-numbers skill. One command fetches Apple's daily
+download reports with the same key into a folder git ignores, and another counts first
+downloads, updates and downloads again, by device and country. It has not fetched a report
+yet: that needs the vendor number, a number only the owner can copy from App Store Connect.
+Until it is saved, the command stops and says which setting is missing.
 
-### ㉞ The release page and the setup check know only the upload key · **open**
+### ㉞ The release page and the setup check know only the upload key · **fixed**
 
-*What would answer it:* the release page names both keys and what each is for, and the setup
-check confirms the reviews key's file is in place and its ID is saved, printing names and
-dates, never the key itself.
+*What answered it (2026-11-17):* the release page names both keys and what each is for, and
+says where to find the vendor number. The setup check confirms the reviews key's file is in
+place, that its ID is saved, and that it is not the upload key, and says whether the vendor
+number is saved. It prints states only, never a key, an ID or the number, and neither of the
+two ever holds a release back.
 
 ### ㉟ Nobody has walked the store build as Apple's reviewer would · **fixed**
 

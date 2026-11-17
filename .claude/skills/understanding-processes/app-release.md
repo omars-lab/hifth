@@ -112,6 +112,8 @@ Do these once per Apple account and once per laptop. The check script reads each
 | The development certificate | made by Xcode on the first device build | <https://developer.apple.com/account/resources/certificates/list> | done | `Development certificate in the keychain` |
 | The App Store certificate | made by Xcode on the first export, with your yes | the same certificates page | done 2026-11-16 | `App Store certificate` |
 | The App Store Connect key | you | <https://appstoreconnect.apple.com/access/integrations/api> | made 2026-11-16 (`hifth-upload`, App Manager) | `App Store Connect key file`, `App Store Connect key ID and issuer ID` |
+| The reviews key, for after the release | you | the same keys page | made 2026-11-16 (`hifth-reviews`, Customer Support, Finance and Marketing) | `The reviews key`, reported but never holding a release back |
+| The vendor number, for the download reports | you copy it | <https://appstoreconnect.apple.com/itc/payments_and_financial_reports> (the number at the top) | **not saved yet** | `The vendor number`, reported but never holding a release back |
 | Written permission from the two data owners | they give it; you send the emails | `docs/design/store-permission-emails.md` | **waiting** (launch items ③ and ④) | `The licence answer allows an upload` |
 
 ### Setting up the App Store Connect key
@@ -128,14 +130,15 @@ you request access). The plan uses it for:
 | Apple's own check of the signed copy, before any upload | the release's check step | not yet; first use |
 | Uploading a build to TestFlight | `make app-testflight` | not yet; locked on the licence |
 | Seeing whether Apple has finished processing an upload, and adding it to a test group | part of the release command (launch item ㉒) | not yet |
-| Reading new store reviews (answering them is done by hand; see below) | a reviews command (launch stage 4) | not yet |
+| Reading and answering store reviews | the store-feedback skill, on the **second** key (see below) | yes, 2026-11-17 |
+| Counting downloads, updates and downloads again | the store-numbers skill, on the second key | yes, 2026-11-17 |
 | Reading what Apple collects from readers' devices (hangs, slow launches, test-flight crash reports) | the crash command (launch stage 4) | not yet; which of these the key can reach is not checked yet |
 | Sending a build for review and starting the release | the release command (launch stage 8) | not yet |
 
 It is never used to change your account or add people, and with App Manager access it cannot:
 those need Admin. App Manager can do more than this list;[^key] the commands only do what is
-listed. If that ever needs to shrink, a second key with less access can take over the
-read-only jobs.
+listed. The reviews and the download numbers are not this key's job: they run on the second
+key, below, so this one never needs more access.
 
 #### Which access to give the key
 
@@ -156,13 +159,29 @@ page.[^roles] In plain words:
 
 **What App Manager cannot do, and what that means:**
 
-- **Answer a review.** Only Admin and Customer Support can. So answers to reviews are written
-  by hand in App Store Connect at first, which is fine while there are few. If answering from
-  a command is ever worth it, a second key with Customer Support access does only that job,
-  and this key stays as it is.
-- **See download and usage numbers, or sales.** Nothing in the plan needs them. You can still
-  see them yourself when you sign in.
+- **Answer a review.** Only Admin and Customer Support can. That is why there is a second key.
+- **See download numbers, or sales.** Only Finance and Sales and Reports can. The second key
+  has Finance.
 - **Add people or make keys.** On purpose: those stay with you.
+
+### The second key: reviews and download numbers
+
+You made it on 2026-11-16, on the same keys page, named `hifth-reviews`, with **Customer
+Support, Finance and Marketing** access. It cannot upload a build or send one for review, so
+a leak of it cannot ship anything. Its file sits next to the first one, and its id is saved as
+`ASC_REVIEWS_KEY_ID` (`make env-set NAME=ASC_REVIEWS_KEY_ID`). The two skills that use it:
+
+| skill | what it does with the key | what it never does |
+|---|---|---|
+| store-feedback | pulls reviews and ratings into a folder git ignores; posts an answer only after you say yes to its exact words | puts a reviewer's name or words in the repo |
+| store-numbers | pulls Apple's daily download report into the same ignored folder and prints counts | collects anything inside the app; these are Apple's store counts |
+
+The download reports also need the account's **vendor number**: the number at the top of
+*Payments and Financial Reports* in App Store Connect. Copy it and save it with
+`make env-set NAME=ASC_VENDOR_NUMBER`. It is not secret either, and nothing prints it.
+
+`make app-release-setup` lists both, as `later` until they are in place. Neither one ever holds
+a release step back.
 
 [^roles]: Apple's roles, with a tick for each thing each one may do:
     <https://developer.apple.com/help/account/access/roles>. The same for App Store Connect
@@ -275,6 +294,8 @@ Green steps work today. Amber ones are not built yet. Red is the licence lock.
 | The store-signed copy | `native/build/store/export/Hifth.ipa` | no, until the upload |
 | The App Store Connect key | `~/.appstoreconnect/private_keys/AuthKey_<id>.p8` | never |
 | The key's two ids | `ASC_KEY_ID` and `ASC_ISSUER_ID` in the repo's encrypted settings (`.env.encrypted`) | yes, encrypted, in the repo; neither is secret |
+| The reviews key | its `.p8` next to the first; its id as `ASC_REVIEWS_KEY_ID`, and the vendor number as `ASC_VENDOR_NUMBER`, in the same settings | the file never; the two values encrypted, in the repo |
+| Store reviews and the download reports | `.store/reviews/` and `.store/numbers/` | no (ignored by git) |
 | The App Store certificate | in your Apple account; Xcode signs with it at Apple, so this laptop's keychain holds none | no |
 
 ## Where it stands (2026-11-16)
