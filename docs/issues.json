@@ -7093,6 +7093,42 @@
       "note": "Apple requires a support address with working contact details. Takes over the hifth.app front-page work's support-page item; that session was told on 2026-11-15. The page needs its own entry in hifth.app's safety settings (apps/landing/_headers), as each page there is listed by name."
     },
     {
+      "id": "launch-store-feedback",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉜"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "A store-feedback skill: one command pulls new reviews and ratings with the hifth-reviews key into a git-ignored folder, and drafts an answer to each. Nothing is posted without the owner's yes, and reviewers' names and words never enter the repo. Feeds the launch goal's \"unanswered reports and reviews\" number."
+    },
+    {
+      "id": "launch-store-numbers",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉝"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "A store-numbers skill: one command pulls the daily download and sales reports with the same hifth-reviews key into a git-ignored folder and prints a short summary. Same key as launch-store-feedback, different skill and script (owner, 2026-11-16)."
+    },
+    {
+      "id": "launch-keys-on-release-page",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉞"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "launch": true,
+      "note": "The release page and the setup check cover the reviews key as well as the upload key: what each key is for, and a check that the file is in place and its ID saved, printing names and dates only."
+    },
+    {
       "id": "launch-remote-switch",
       "source": {
         "file": "docs/design/app-store-launch.md",

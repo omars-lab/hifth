@@ -54,7 +54,7 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **25** of 33: 23 of the 31 on the launch page (the store-build guard, the privacy file, the version command, the outside-links test, the silent switch, the review notes with the no-connection test, the error screen and "Report a problem" closed), and the two older App Store rows on the licence | 2026-11-16 |
+| Launch blockers open | **28** of 36: 26 of the 34 on the launch page (the store-build guard, the privacy file, the version command, the outside-links test, the silent switch, the review notes with the no-connection test, the error screen and "Report a problem" closed; store reviews, store numbers and the second key on the release page added 2026-11-16), and the two older App Store rows on the licence | 2026-11-16 |
 | Owner steps waiting | **6**: two permission emails and a fallback date; delete 134 merged branches and ask GitHub to purge; three sign-in choices; the hifth.app first upload steps; the EU trader answer; the Mac keyboard test permission | 2026-11-15 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet | 2026-11-15 |

@@ -314,6 +314,27 @@ owner, and the labels checked against what the app really sends.
 *What would answer it:* a command that takes the public build's screenshots at Apple's iPhone,
 iPad and Mac sizes, in English and Arabic.
 
+### ㉜ Nothing reads what readers write about the app in the store · **open**
+
+The owner made one App Store Connect key for this, `hifth-reviews` (Customer Support, Finance
+and Marketing), on 2026-11-16. One key, two skills: this one and ㉝.
+
+*What would answer it:* a store-feedback skill whose command lists new reviews and ratings into
+a folder git ignores, since reviewers' names and words never reach the public repo, and drafts
+an answer to each. An answer is posted only after the owner says yes to it.
+
+### ㉝ Nothing counts downloads and sales · **open**
+
+*What would answer it:* a store-numbers skill whose command pulls the daily download and sales
+reports with the same key, keeps them in a folder git ignores, and prints a short summary for
+the launch goal's numbers.
+
+### ㉞ The release page and the setup check know only the upload key · **open**
+
+*What would answer it:* the release page names both keys and what each is for, and the setup
+check confirms the reviews key's file is in place and its ID is saved, printing names and
+dates, never the key itself.
+
 ## What does this leave alone?
 
 - The pitch build and its walk: the pitch goal still governs them.
