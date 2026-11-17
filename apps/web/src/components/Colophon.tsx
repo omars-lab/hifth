@@ -60,6 +60,7 @@ import { UsageReadout } from "./UsageReadout";
 import { RecitationShelf } from "./RecitationShelf";
 import { ReportProblem } from "./ReportProblem";
 import { isNative, shareBase } from "../native-bridge";
+import { sitePageUrl, type SitePage } from "../site-pages";
 import styles from "./Colophon.module.css";
 
 interface ColophonProps {
@@ -1075,6 +1076,27 @@ export function Colophon({
             {t.reportSectionTitle}
           </h3>
           <ReportProblem headingLevel={4} />
+          {/* hifth.app's support and privacy pages (launch item 43): Apple asks
+              for the privacy policy inside the app as well as on the listing.
+              Full addresses in the reader's language; see site-pages.ts for
+              why never relative. Outside the panel-only block, so the settings
+              page carries them too. */}
+          <div className={styles.siteLinks}>
+            {(["support", "privacy"] as const satisfies readonly SitePage[]).map((page) => (
+              <a
+                key={page}
+                className={styles.source}
+                href={sitePageUrl(page, lang)}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-site-page={page}
+              >
+                <span className={styles.sourceLabel}>
+                  {page === "support" ? t.supportLink : t.privacyLink}
+                </span>
+              </a>
+            ))}
+          </div>
         </section>
 
         {/* The owner's own count of what gets used, kept on this device only

@@ -566,6 +566,7 @@ export interface Catalog {
   readonly playingRun: (d: { readonly from: string | number; readonly to: string | number }) => string;
   readonly prevPage: string;
   readonly prevPageKey: string;
+  readonly privacyLink: string;
   readonly qulVerse: (d: { readonly label: string | number }) => string;
   readonly "railDirection.earlier": string;
   readonly "railDirection.later": string;
@@ -719,6 +720,7 @@ export interface Catalog {
   readonly stageLoading: string;
   readonly stateOff: string;
   readonly stateOn: string;
+  readonly supportLink: string;
   readonly surahIntro: string;
   readonly surahN: (d: { readonly surahText: string | number }) => string;
   readonly tafsirImportBusy: string;

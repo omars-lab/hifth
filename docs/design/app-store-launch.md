@@ -279,8 +279,7 @@ over the landing page's support-page row.)
 problem report from the app (naming the buttons by the words the app shows; a test fails if one
 is renamed), the problems we know about, and what happens to a reader's marks. Every page of the
 site links it, and a release missing it is refused. It goes live with hifth.app's first upload.
-Links to it and to the privacy page from inside the app are still open, as item ㊸; Apple asks
-for the privacy link inside the app, so it counts at review.
+The app's info panel links it and the privacy page since the same day (item ㊸).
 
 ### ㉑ Once a bad version is out, we cannot stop it or warn readers · **open**
 
@@ -502,7 +501,7 @@ this laptop until the rights holders answer.
 
 *What would answer it:* the owner's choice, written into ⑪.
 
-### ㊸ The app does not link the support and privacy pages · **open**
+### ㊸ The app does not link the support and privacy pages · **fixed**
 
 hifth.app now has a support page and a privacy page (⑳ ㉙), but nothing inside the app leads
 to them. Apple asks for the privacy policy to be linked inside the app as well as on the store
@@ -513,6 +512,17 @@ reader's language, with their words in each language's message list. Inside the 
 apps they need hifth.app's full address, since only web addresses leave the app. A test fails
 if either link goes missing.
 
+*Done 2026-11-17:* under "Report a problem" in the info panel sit two links, "Help and support"
+and "Privacy policy", each opening hifth.app's page in the reader's language (the Arabic copy
+for an Arabic reader) in the browser. They carry the full hifth.app address everywhere, so they
+work inside the iPad and Mac apps and on a copy of the app served from anywhere else. They show
+on the settings page too. Tests fail if either link goes missing, points at the wrong language,
+or loses its full address inside the apps, and a browser test fails if the two links and the
+report button are drawn touching (they were, on the first build). Looked at in Chrome at 1280
+and 390 wide in both languages, and the browser test runs in Chrome, Firefox and the iPhone's
+Safari engine. Not yet looked at inside the iPad app itself. The pages answer once hifth.app's
+first upload is made.
+
 ## Which of these could get the app turned down, and which matter once readers have it?
 
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
@@ -521,13 +531,11 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
   ③ ④ ⑤ ⑥. (The archive, the export and Apple's own check ⑪ are fixed; only the upload
   command itself waits on these. The citations page ② is built; that row closed.)
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
-  permissions file ⑨ (the upload checks both); links to the support and privacy pages from
-  inside the app ㊸ (Apple wants the privacy link in the app too); the store's questions ㉚ and
-  screenshots ㉛;
+  permissions file ⑨ (the upload checks both); the store's questions ㉚ and screenshots ㉛;
   sign-in ㉖ and deleting an account ㉗ (once sign-in ships, deletion must be in the app); the
   tajweed question ㊲ (it can read as unfinished). (The reviewer walk ㉟, the walk tools'
-  settings ㊱, the English top bar at 320 px ㊶, the support page ⑳ and the privacy policy ㉙
-  are fixed.)
+  settings ㊱, the English top bar at 320 px ㊶, the support page ⑳, the privacy policy ㉙
+  and the app's links to both ㊸ are fixed.)
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store

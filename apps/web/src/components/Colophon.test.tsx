@@ -406,3 +406,70 @@ describe("report a problem, in the info panel", () => {
     expect(screen.getByRole("heading", { name: AR.reportTitle, level: 4 })).toBeTruthy();
   });
 });
+
+/*
+ * Launch item 43: Apple asks for the privacy policy to be linked inside the app
+ * as well as on the store listing, and a reviewer who looks for it in the app
+ * and cannot find it can turn the app down. So both of hifth.app's pages are
+ * linked from the info panel, in the reader's language, by their full address:
+ * inside the iPad and Mac apps only web addresses leave the app, so a relative
+ * link there would go nowhere.
+ */
+describe("support and privacy, in the info panel", () => {
+  function links(): { support: HTMLElement; privacy: HTMLElement } {
+    return {
+      support: document.querySelector<HTMLElement>("a[data-site-page='support']")!,
+      privacy: document.querySelector<HTMLElement>("a[data-site-page='privacy']")!,
+    };
+  }
+
+  it("in Arabic, links the Arabic support and privacy pages, opening outside the app", () => {
+    const AR = stringsFor("ar");
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const support = screen.getByRole("link", { name: AR.supportLink });
+    const privacy = screen.getByRole("link", { name: AR.privacyLink });
+    expect(support).toHaveAttribute("href", "https://hifth.app/ar/support");
+    expect(privacy).toHaveAttribute("href", "https://hifth.app/ar/privacy");
+    for (const link of [support, privacy]) {
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
+  });
+
+  it("in English, links the English pages, in English words", async () => {
+    const EN = stringsFor("en");
+    render(
+      <LangProvider>
+        <Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />
+      </LangProvider>,
+    );
+    fireEvent.click(screen.getByRole("radio", { name: /English/ }));
+    const support = await screen.findByRole("link", { name: EN.supportLink });
+    localStorage.clear();
+    expect(support).toHaveAttribute("href", "https://hifth.app/support");
+    expect(screen.getByRole("link", { name: EN.privacyLink })).toHaveAttribute(
+      "href",
+      "https://hifth.app/privacy",
+    );
+  });
+
+  it("are on the settings page too, not only in the panel", () => {
+    render(<Colophon open asPage onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const { support, privacy } = links();
+    expect(support).not.toBeNull();
+    expect(privacy).not.toBeNull();
+  });
+
+  it("inside the app, still carry hifth.app's full address", () => {
+    const shelled = window as Window & { __HIFTH_NATIVE__?: unknown };
+    shelled.__HIFTH_NATIVE__ = { platform: "ios", publicBase: "https://example.org/hifth/" };
+    try {
+      render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+      const { support, privacy } = links();
+      expect(support).toHaveAttribute("href", "https://hifth.app/ar/support");
+      expect(privacy).toHaveAttribute("href", "https://hifth.app/ar/privacy");
+    } finally {
+      delete shelled.__HIFTH_NATIVE__;
+    }
+  });
+});

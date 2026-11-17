@@ -54,6 +54,31 @@ test("the info panel shows the whole report before the reader's own mail app sen
   await expect(box).toHaveCount(0);
 });
 
+/*
+ * Launch item 43. Under the report button sit the links to hifth.app's support
+ * and privacy pages. Each is its own boxed link, and they were drawn touching,
+ * border on border, with the button right on top: three targets read as one
+ * block, easy to hit the wrong one with a thumb. Each must leave a gap.
+ */
+test("the support and privacy links stand apart from each other and from the report button", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("svg[role='group']").first()).toBeVisible();
+  await page.getByRole("button", { name: /عن حِفظ/ }).click();
+  const sheet = page.getByRole("dialog", { name: "عن حِفظ" });
+
+  const report = sheet.getByRole("button", { name: "أبلغ عن مشكلة" });
+  const support = sheet.locator("a[data-site-page='support']");
+  const privacy = sheet.locator("a[data-site-page='privacy']");
+  await privacy.scrollIntoViewIfNeeded();
+  await expect(support).toHaveAttribute("href", "https://hifth.app/ar/support");
+  await expect(privacy).toHaveAttribute("href", "https://hifth.app/ar/privacy");
+
+  const [r, s, p] = await Promise.all([report, support, privacy].map((l) => l.boundingBox()));
+  expect(r && s && p).toBeTruthy();
+  expect(s!.y - (r!.y + r!.height)).toBeGreaterThanOrEqual(4);
+  expect(p!.y - (s!.y + s!.height)).toBeGreaterThanOrEqual(4);
+});
+
 test.describe("on the card the reader sees when the page stops", () => {
   test.use({ serviceWorkers: "block" });
 

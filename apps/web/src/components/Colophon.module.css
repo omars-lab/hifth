@@ -224,6 +224,15 @@
   outline-offset: 2px;
 }
 
+/* The support and privacy links under the report button: separate targets,
+   so a gap between them and above them (launch item 43). */
+.siteLinks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+}
+
 .sourceLabel {
   font-size: var(--text-md);
   font-weight: 600;
