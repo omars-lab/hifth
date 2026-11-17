@@ -36,7 +36,8 @@ Done so far:
 - a store build can never be the private build;
 - the privacy file;
 - the version command;
-- a real archive of the store build (Apple's own check of it and the upload are left);
+- a real archive of the store build, and the export and upload take only an archive that
+  command made (Apple's own check of it waits on the owner, ㊷, and the upload on the licence);
 - the outside-links test;
 - sound with the silent switch on;
 - the review notes, with a no-connection first launch;
@@ -75,7 +76,7 @@ The first one is the main measure. The others say whether we could run the app o
 | Measure | Value | As of |
 |---|---|---|
 | Launch blockers open | **30** of 43: 28 of the 41 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day. Of the 30, **9 can get the app turned down at review**, 8 stop the upload itself (six launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
-| Owner steps waiting | **9**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
+| Owner steps waiting | **10**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; whether Apple may check the exported app before the licence is answered; one test problem report seen to arrive; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet | 2026-11-15 |
 | Unanswered reports and reviews | no way to receive them yet | 2026-11-15 |
@@ -133,14 +134,18 @@ The plan has the detail of each step.
    feature and the upload waits on that permission too.
 4. **The hifth.app first upload steps:** the Cloudflare key permission, the database step, four
    secrets, and the mail sender. These put the support page and the off-switch's file online.
-5. **Send one test "Report a problem" from the simulator and say whether it arrived** (㊵).
-6. **Let the terminal run the Mac app's keyboard test**, or let it run while you are away. This
+5. **May the exported app go to Apple for its check before the licence is answered?** (㊷)
+   Yes: Apple's check runs now and finds any store-only fault weeks early; Apple sees a build
+   before the rights holders say yes. No: nothing goes to Apple until the licence is answered,
+   and the check runs then, on the critical path. Frees only the last step of the archive work.
+6. **Send one test "Report a problem" from the simulator and say whether it arrived** (㊵).
+7. **Let the terminal run the Mac app's keyboard test**, or let it run while you are away. This
    frees checking the Mac app once the sandbox is on.
-7. **Whether you trade in the EU.** Apple asks, and the answer decides what contact details are
+8. **Whether you trade in the EU.** Apple asks, and the answer decides what contact details are
    published.
-8. **Delete the 134 merged branches on GitHub, and ask GitHub Support to purge the old commits.**
+9. **Delete the 134 merged branches on GitHub, and ask GitHub Support to purge the old commits.**
    This frees no launch work, but it finishes the clean-up of the old pictures.
-9. **Try the new layout on the iPad** (the switch in the info panel). This decides whether it
+10. **Try the new layout on the iPad** (the switch in the info panel). This decides whether it
    becomes the default.
 
 ## Where the work stands (2026-11-17)

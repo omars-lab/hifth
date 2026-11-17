@@ -17,8 +17,8 @@ them. Each is a `make` target from `native/Makefile.native`.
 | 2. set the version for this release | `make app-version VERSION=1.0.0` | sets it and raises the build number; a lower version is refused |
 | 2b. or only a new build of the same version | `make app-version NEXT_BUILD=1` | raises the build number by one |
 | 3. put the public build in the app | `make app-web FLAVOUR=public` | the store build is never the private one |
-| 4. archive | `make app-archive` | refuses unless the web part is public; checks the release build, then makes the Xcode archive and checks the app inside it again (no walk capture, the public build, Apple's privacy file). Stays on the laptop, so the licence does not hold it |
-| 5. sign it for the store | `make app-export` | signs the archive for the App Store into `native/build/store/export`. The first run made the team's App Store certificate in the Apple account (owner's yes, 2026-11-16); later runs reuse it. If it is ever revoked, ask the owner before a run makes a new one |
+| 4. archive | `make app-archive` | refuses unless the web part is public; checks the release build, then makes the Xcode archive and checks the app inside it again (no walk capture, the public build, Apple's privacy file). Once every check passes, it writes a receipt beside the archive. Stays on the laptop, so the licence does not hold it |
+| 5. sign it for the store | `make app-export` | refuses an archive with no receipt, or one whose app has changed since; then signs the archive for the App Store into `native/build/store/export`. The first run made the team's App Store certificate in the Apple account (owner's yes, 2026-11-16); later runs reuse it. If it is ever revoked, ask the owner before a run makes a new one |
 | 6. upload | `make app-testflight` | locked behind the licence decision, checked before anything is built; the upload itself is not built yet |
 
 Commit the change to `native/project.yml` that step 2 makes, in the same commit as the release
@@ -29,6 +29,7 @@ it belongs to, so the build number in the repo is always the one last sent.
 | script | what it does | when to reach for it | command |
 |---|---|---|---|
 | `scripts/app-version.mjs` | reads and writes the two version lines in `native/project.yml`, and nothing else in it; refuses a version Apple would refuse (more than three numbers, letters, leading zeros) or one lower than today's | before every build meant for Apple | `make app-version [VERSION=x.y.z] [NEXT_BUILD=1]` |
+| `scripts/archive-receipt.mjs` | `--write` fingerprints every file in the app inside the archive and saves it, with the commit and whether the work was all committed, as `Hifth.xcarchive.receipt.json`; `--check` refuses an archive with no receipt, or whose app has any file changed, added, removed or renamed since | never by hand for a release: `make app-archive` writes it and `make app-export` and `make app-testflight` check it. By hand to ask whether the archive on disk may still be signed | `node .claude/skills/release-app/scripts/archive-receipt.mjs --check native/build/store/Hifth.xcarchive` |
 
 The release check that step 4 runs lives with the walk, in
 `.claude/skills/walk-app/scripts/release-check.mjs`, since it was written to keep the walk
@@ -46,7 +47,8 @@ reader-sent problem report arrives, the collected-data list changes with it.
 
 ## Not built yet
 
-Apple's own check of the export (needs the App Store Connect key), the upload itself, one
+Apple's own check of the export (the key exists, but the check sends the app to Apple, so it
+waits on the owner's answer to launch item 42), the upload itself, one
 command that runs the whole release with the version raised, and the steps after upload
 (review, staged release). Each is a row in the backlog tagged for the launch
 (`make issues LAUNCH=1`). The whole road, its one-time setup and what each step guards against

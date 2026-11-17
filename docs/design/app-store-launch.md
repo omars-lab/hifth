@@ -156,8 +156,18 @@ checks the licence before it builds anything. Tests hold both.
 passed: the app inside the export is signed for distribution, is the public build, carries the
 privacy file and has no private folder. The export stays on the laptop.
 
-One step is left. Apple's own check of the exported app needs an App Store Connect key, which
-is the owner's to make.
+*2026-11-17:* the export and the upload now take only an archive `make app-archive` made. Once
+every check has passed, the archive command writes a receipt beside the archive: the commit it
+was built from, whether that work was all committed, and one fingerprint of every file in the
+app. The export reads the receipt first, and the upload reads it again just before sending. An
+archive made by hand in Xcode, an older one, or one with any file changed, added, removed or
+renamed after the checks is refused. The archive left on the laptop from 2026-11-16 predates
+the receipt and is refused, as it should be. On the real app (2,834 files) the fingerprint takes
+under half a second.
+
+One step is left: Apple's own check of the exported app. The key now exists, but the check sends
+the app to Apple, and the upload lock exists so nothing goes to Apple before the licence answer.
+Whether the check counts as an upload is the owner's call, item ㊷.
 
 ### ⑫ A recitation may be silent when the phone's silent switch is on · **fixed**
 
@@ -433,6 +443,21 @@ every width from 320 to 520 px. The top-bar test runs in English with no known-f
 at 340 px (the narrow side of iPad split view), in both engines, and a second test opens the
 picker from the info panel at 320 px. The name button keeps its spoken name, so a screen reader
 still hears "Navigation for huffaz".
+
+### ㊷ May the app be sent to Apple for its check before the licence is answered? · **open**
+
+Apple can check an exported app (its signing, its icons, its privacy file, its permissions)
+without it becoming a build anyone can install. That catches a refusal weeks before the real
+upload. But the check sends the whole app to Apple's servers, and the upload lock (③ ④) was put
+there so the app, with the data whose licence is still being asked about, goes nowhere outside
+this laptop until the rights holders answer.
+
+| choice | what it buys | what it costs | what it commits to |
+|---|---|---|---|
+| Check now | Apple's refusals found weeks early, while the licence wait runs anyway | the app reaches Apple's servers before the licence answer | the lock is read as "no build anyone can install", not "nothing leaves the laptop" |
+| Wait for the licence answer | the lock means exactly what it says | Apple's refusals are found only on the first real upload | nothing; the check runs the day the lock opens |
+
+*What would answer it:* the owner's choice, written into ⑪.
 
 ## Which of these could get the app turned down, and which matter once readers have it?
 

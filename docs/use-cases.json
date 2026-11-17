@@ -1737,6 +1737,33 @@
       "gap": "Proven on this laptop only: hifth.app is not published yet (docs/issues.json, hifth-app-first-release)."
     },
     {
+      "id": "send-apple-only-the-build-we-checked",
+      "actor": "maintainer",
+      "goal": "Sign and send to Apple only the archive the release command made and checked, so a build made by hand, an older one, or one changed after its checks never reaches the store.",
+      "feature": "native-shell",
+      "code": [
+        {
+          "file": ".claude/skills/release-app/scripts/archive-receipt.mjs",
+          "symbol": "function check"
+        },
+        {
+          "file": "native/Makefile.native",
+          "symbol": "ARCHIVE_RECEIPT"
+        }
+      ],
+      "proof": [
+        {
+          "file": ".claude/skills/release-app/scripts/archive-receipt.test.mjs",
+          "test": "an archive with no receipt was not made by the archive command, and is refused"
+        },
+        {
+          "file": ".claude/skills/release-app/scripts/archive-receipt.test.mjs",
+          "test": "a file changed inside the app after the archive was made is refused"
+        }
+      ],
+      "gap": "The upload itself is not built yet; the receipt is checked where it will run (docs/issues.json, launch-archive-upload)."
+    },
+    {
       "id": "hear-when-the-mac-app-is-out",
       "actor": "hafiz",
       "goal": "Leave my email once, hear when the Mac app is out, and be able to take it off the list.",

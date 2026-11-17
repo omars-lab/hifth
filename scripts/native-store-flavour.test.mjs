@@ -90,6 +90,37 @@ test("the export signs for the App Store and keeps the result on this laptop", (
   assert.equal(o.teamID, undefined, "the team id is read from the keychain, never written in the repo");
 });
 
+// The receipt (.claude/skills/release-app/scripts/archive-receipt.mjs): written
+// only once the archive's checks have passed, and read before the archive is
+// signed and again before it is sent, so only an archive this command made and
+// checked, untouched since, goes any further.
+test("the archive writes its receipt only after the release check of the app inside it", () => {
+  const said = plan("app-archive", "public");
+  const checked = said.search(/release-check\.mjs[^\n]*--release [^\n]*Hifth\.xcarchive/);
+  const receipt = said.search(/archive-receipt\.mjs --write [^\n]*Hifth\.xcarchive/);
+  assert.ok(checked >= 0, "no release check of the archive");
+  assert.ok(receipt > checked, "the receipt is written before the archive is checked, or not at all");
+  // A run that fails part way leaves no receipt from an earlier archive behind.
+  assert.match(said, /rm -rf [^\n]*Hifth\.xcarchive [^\n]*Hifth\.xcarchive\.receipt\.json/);
+});
+
+test("the export reads the receipt before it signs anything", () => {
+  const said = plan("app-export", "public");
+  const receipt = said.search(/archive-receipt\.mjs --check [^\n]*Hifth\.xcarchive/);
+  const sign = said.search(/-exportArchive/);
+  assert.ok(receipt >= 0, "the export never reads the receipt");
+  assert.ok(sign > receipt, "the export signs before it reads the receipt");
+});
+
+test("the upload reads the receipt again after the export, just before sending", () => {
+  const said = plan("app-testflight", "public");
+  const sign = said.lastIndexOf("-exportArchive");
+  const lastCheck = said.lastIndexOf("archive-receipt.mjs --check");
+  const send = said.indexOf("upload: not built yet");
+  assert.ok(sign >= 0 && send >= 0, "the plan has no export, or no upload step");
+  assert.ok(lastCheck > sign && lastCheck < send, "no receipt check between the export and the upload");
+});
+
 test("the upload meets the licence lock before it archives or exports anything", () => {
   const said = plan("app-testflight", "public");
   const lock = said.indexOf("Not yet");

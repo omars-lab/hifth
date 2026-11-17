@@ -6977,7 +6977,8 @@
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made. Next (2026-11-16): the launch item the agent takes next, because it adds no code to the web app, and the web app has no room left under its size limit (room-under-the-size-limit-again). Half done 2026-11-16: make app-archive makes a real Xcode archive of the public build and runs the release check on the app inside it (first run clean), and only the upload waits on the licence, checked before anything is built (scripts/native-store-flavour.test.mjs). make app-export ran clean the same day with the owner's yes, which made the team's App Store certificate; the app inside the export is signed for distribution and is the public build. Left: Apple's own check of the exported app, now unblocked because the key exists (2026-11-16, testflight-upload-key done) and the agent's next item; and the upload should take only an archive this command made."
+      "useCase": "send-apple-only-the-build-we-checked",
+      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made. Next (2026-11-16): the launch item the agent takes next, because it adds no code to the web app, and the web app has no room left under its size limit (room-under-the-size-limit-again). Half done 2026-11-16: make app-archive makes a real Xcode archive of the public build and runs the release check on the app inside it (first run clean), and only the upload waits on the licence, checked before anything is built (scripts/native-store-flavour.test.mjs). make app-export ran clean the same day with the owner's yes, which made the team's App Store certificate; the app inside the export is signed for distribution and is the public build. 2026-11-17: the export and the upload now take only an archive make app-archive made. After every check passes, the archive command writes a receipt beside the archive (the commit, whether the work was all committed, one fingerprint of every file in the app); make app-export reads it first and the upload reads it again just before sending, and an archive made by hand, an older one, or one with any file changed, added, removed or renamed is refused (.claude/skills/release-app/scripts/archive-receipt.test.mjs). The archive on the laptop from 2026-11-16 predates the receipt and is refused. Left: Apple's own check of the exported app. The key exists, but the check sends the app to Apple, which the upload lock was put there to prevent until the licence answer, so whether it may run now is the owner's question (launch-apple-check-before-licence, item 42)."
     },
     {
       "id": "launch-silent-switch-audio",
@@ -7357,6 +7358,30 @@
       "owner": "user",
       "launch": true,
       "note": "\"Report a problem\" writes to hello@hifth.app. The address has mail servers (Apple's, checked 2026-11-17), but no report has been sent to it and seen to arrive. With no mail app the report card still offers Copy, so a reader is never stuck. What would answer it: one test report sent from the simulator and seen in the owner's inbox; parked on the by-hand list."
+    },
+    {
+      "id": "launch-apple-check-before-licence",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊷"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "launch": true,
+      "note": "May the exported app be sent to Apple for its check (signing, icons, privacy file, permissions) before the rights holders answer? The check makes no build anyone can install, and would find Apple's refusals weeks before the real upload, but it sends the whole app to Apple's servers, and the upload lock was put there so the app goes nowhere outside this laptop until the licence is answered. The choices, with what each costs, are in the plan page's item 42. Holds up only the last step of launch-archive-upload; everything else goes on meanwhile."
+    },
+    {
+      "id": "mac-walk-ignores-release",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㉟"
+      },
+      "status": "fixed",
+      "closedBy": "scripts/native-mac-config.test.mjs",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "Fixed 2026-11-17; the tests that would catch it coming back are \"app-shot on the Mac refuses CONFIG=Release before building anything\", the same for app-probe, and \"the Mac picture and probe still build the Debug app when CONFIG is left alone\". What was found during the reviewer walk: CONFIG=Release switches the iPad simulator build to the store one, but on the Mac the picture and probe commands always built and ran the Debug app, saying nothing, so a reviewer-style walk of the Mac with CONFIG=Release looked at the wrong build. Both now refuse CONFIG=Release on the Mac by name, before building, until the Mac store build exists (launch-mac-sandbox)."
     },
     {
       "id": "layout-pages-line-only-when-missing",
