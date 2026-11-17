@@ -47,6 +47,17 @@ test("an archive with no receipt was not made by the archive command, and is ref
   assert.match(c.stdout, /make app-archive/);
 });
 
+test("the Mac archive's receipt names the Mac command, and so does its refusal", () => {
+  const at = archive();
+  const w = write(at, "--by", "make app-archive-mac");
+  assert.equal(w.status, 0, w.stdout + w.stderr);
+  assert.equal(JSON.parse(readFileSync(`${at}.receipt.json`, "utf8")).madeBy, "make app-archive-mac");
+  const bare = archive();
+  const c = run("--check", bare, "--by", "make app-archive-mac");
+  assert.equal(c.status, 1);
+  assert.match(c.stdout, /Run: make app-archive-mac$/m);
+});
+
 test("a file changed inside the app after the archive was made is refused", () => {
   const at = archive();
   write(at);

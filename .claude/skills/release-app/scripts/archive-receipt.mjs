@@ -22,6 +22,9 @@ import { join, relative, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 
 const APP = "Products/Applications/Hifth.app";
+// The command that makes this archive: the iPad and iPhone one by default,
+// `--by "make app-archive-mac"` for the Mac's, so a refusal names the right one.
+const BY = () => arg("--by") ?? "make app-archive";
 
 function arg(name) {
   const i = process.argv.indexOf(name);
@@ -86,7 +89,7 @@ function write(archive) {
   const flavour = arg("--flavour") ?? null;
   const { fingerprint: fp, files: n } = fingerprint(app);
   const receipt = {
-    madeBy: "make app-archive",
+    madeBy: BY(),
     archive: resolve(archive),
     commit,
     clean,
@@ -102,13 +105,13 @@ function write(archive) {
 function refuse(why) {
   say(`ev=receipt_refused`);
   say(`  ${why}`);
-  say(`  Only an archive made and checked by make app-archive is signed or sent. Run: make app-archive`);
+  say(`  Only an archive made and checked by ${BY()} is signed or sent. Run: ${BY()}`);
   process.exit(1);
 }
 
 function check(archive) {
   const at = receiptOf(archive);
-  if (!existsSync(at)) refuse(`The archive at ${archive} has no receipt, so it was not made by make app-archive.`);
+  if (!existsSync(at)) refuse(`The archive at ${archive} has no receipt, so it was not made by ${BY()}.`);
   let receipt;
   try {
     receipt = JSON.parse(readFileSync(at, "utf8"));
@@ -135,6 +138,6 @@ const toCheck = arg("--check");
 if (toWrite) write(toWrite);
 else if (toCheck) check(toCheck);
 else {
-  say("usage: archive-receipt.mjs --write <archive> [--flavour public] | --check <archive>");
+  say("usage: archive-receipt.mjs --write <archive> [--flavour public] | --check <archive>  [--by <the command that makes it>]");
   process.exit(2);
 }
