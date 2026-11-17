@@ -335,7 +335,7 @@ the launch goal's numbers.
 check confirms the reviews key's file is in place and its ID is saved, printing names and
 dates, never the key itself.
 
-### ㉟ Nobody has walked the store build as Apple's reviewer would · **open**
+### ㉟ Nobody has walked the store build as Apple's reviewer would · **fixed**
 
 The first walk, on 2026-11-17 on an iPad simulator with the Release build, found three things
 and fixed them: the review notes' steps described a row of links an iPad never shows; the
@@ -345,6 +345,16 @@ betas and demos turns down; and the problem report did not name the device.
 *What would answer it:* the same walk on the iPhone and the small iPhone, a first launch with no
 connection, swipe page turns, rotation, split view, larger text, and the Mac by picture. The
 steps are in the walk-app skill's checklist, under "The store build, as Apple's reviewer".
+
+*Walked 2026-11-17, the same day, on the Release build.* A fresh first open on the iPad, the
+iPhone and the small iPhone opens page 7, with no "Left off" ribbon and nothing read aloud. A
+first launch with no connection is held by the browser test that refuses every outside request,
+and the app serves its own files. On its side the iPad shows two pages with nothing spilling. A
+finger swipe turns the page forward and back on both phones. Split view found one fault: the
+English top bar does not fit at 320 px ㊶. The largest system text size changes nothing in the
+app, which is now part of the accessibility item ⑯. The Mac's fresh first open waits for the
+Mac sandbox ⑧: no Mac store copy exists before it, and the laptop's copy keeps earlier saved
+data.
 
 ### ㊱ The store copy still answers the walk tools' launch settings · **fixed**
 
@@ -401,8 +411,11 @@ the name breaks onto two lines, and the bar grows from 69 to 82 px. Two reasons:
 button is 70 px wide in English and 49 px in Arabic, and "Navigation for huffaz" is much wider
 than its Arabic.
 
-It does not reach the store app, which needs iOS 17, on phones at least 375 px wide. It hits
-the website on the oldest small phones.
+It hits the website on the oldest small phones. The store app needs iOS 17, so its phones are
+at least 375 px wide, but it still reaches the store app on an iPad: the app does not ask for
+the whole screen, and when a reader puts it beside another app in a third of the screen, the
+window is 320 px wide on every iPad but the largest. (First written as "website only"; the
+reviewer walk found the iPad case on 2026-11-17.)
 
 Tried on the live page: a smaller "unchecked" tag alone fits the row at exactly 320 px in
 Chrome, with nothing to spare, and the bar is still 82 px tall. A shorter line under the name
@@ -422,15 +435,14 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
   permissions file ⑨ (the upload checks both); the support page ⑳ and the privacy policy ㉙
   (Apple requires a link to each); the store's questions ㉚ and screenshots ㉛; sign-in ㉖ and
-  deleting an account ㉗ (once sign-in ships, deletion must be in the app); the rest of the
-  reviewer walk ㉟; the tajweed question ㊲ (it can read as unfinished). (The walk tools'
-  settings ㊱ are fixed.)
+  deleting an account ㉗ (once sign-in ships, deletion must be in the app); the tajweed
+  question ㊲ (it can read as unfinished); the English top bar at 320 px ㊶, which a reviewer
+  reaches by putting the app in a third of an iPad screen. (The reviewer walk ㉟ and the walk
+  tools' settings ㊱ are fixed.)
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
-  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, a
-  report seen to arrive ㊵, and the English top bar on the smallest phones ㊶ (the website
-  only; the store app's phones are wider).
+  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, and a report seen to arrive ㊵.
 
 ## What does this leave alone?
 

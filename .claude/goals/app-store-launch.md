@@ -27,9 +27,9 @@ stays private and the store build stays the public one.
   hits can be heard about, traced and fixed within days.
 - **Done:** the app is in the store on all three devices and those measures have held for a month.
 
-## Are we on it? (checked 2026-11-16)
+## Are we on it? (checked 2026-11-17)
 
-Not yet: 28 launch rows are open. The App Store is still recorded as "not a target", and the
+Not yet: 31 launch rows are open. The App Store is still recorded as "not a target", and the
 upload is locked until two rights holders say yes in writing. Everything else goes ahead meanwhile.
 
 Done so far:
@@ -74,7 +74,7 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **33** of 42: 31 of the 40 on the launch page, and the two older App Store rows on the licence. Six added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊵); the first-open ribbon ㊳ closed the same day. Of the 33, **11 can get the app turned down at review**, 8 stop the upload itself (six launch-page items and the two older licence rows), and 14 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
+| Launch blockers open | **31** of 43: 29 of the 41 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴ and the walk tools' launch settings ㊱ closed the same day. Of the 31, **10 can get the app turned down at review**, 8 stop the upload itself (six launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them). The English top bar at 320 px ㊶ joined the launch rows, among those that can get the app turned down, when the walk found a reviewer reaches that width by putting the app in a third of an iPad screen | 2026-11-17 |
 | Owner steps waiting | **9**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet | 2026-11-15 |
@@ -105,8 +105,8 @@ page" below). Backlog row names are in brackets.
 Reordered 2026-11-17 after the first walk as Apple's reviewer: what can get the app turned down
 comes before what matters once readers have it, since a turned-down build costs a week.
 
-1. **What the reviewer would trip on:** the rest of the reviewer walk (㉟): iPhone, small
-   iPhone, a first launch with no connection, rotation, split view, larger text. (The
+1. **What the reviewer would trip on:** the English top bar at 320 px (㊶), which the reviewer
+   walk found by putting the app in a third of an iPad screen. (The reviewer walk ㉟, the
    first-open ribbon ㊳ and the walk tools' settings in the store copy ㊱ are fixed.)
 2. **Apple's settings:** the Mac sandbox, the permissions file, the archive up to the lock.
 3. **What Apple asks to link to:** the support page and the app's privacy policy, then the store
