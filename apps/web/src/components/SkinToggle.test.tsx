@@ -48,9 +48,9 @@ describe("SkinToggle", () => {
   // turns down an app that calls itself a beta. Its job is the same.
   it("shows the unchecked badge in BOTH states, it is the deliverable, not a TODO", () => {
     const { rerender } = render(<SkinToggle skin="plain" onChange={noop} onOpenLegend={noop} />);
-    expect(screen.getByText("غير مُراجَع")).toBeTruthy();
+    expect(screen.getByText("لم يُدقَّق")).toBeTruthy();
     rerender(<SkinToggle skin="tajweed" onChange={noop} onOpenLegend={noop} />);
-    expect(screen.getByText("غير مُراجَع")).toBeTruthy();
+    expect(screen.getByText("لم يُدقَّق")).toBeTruthy();
   });
 
   it("flips to the other skin", () => {

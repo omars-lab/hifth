@@ -36,7 +36,7 @@ const messages: Catalog = {
   beatenOfferSixWeeks: "بعد ستة أسابيع دونها",
   beatenOfferThreeMonths: "بعد ثلاثة أشهر دونها",
   beatenOfferTitle: "اقتراح تعليم القفزة «تجاوزتُه»",
-  beta: "غير مُراجَع",
+  beta: "لم يُدقَّق",
   bmAddAnother: "أضف علامة أخرى هنا",
   bmCancel: "إلغاء",
   bmClear: "امسح",

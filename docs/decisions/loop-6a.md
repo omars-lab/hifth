@@ -36,7 +36,8 @@ on the page, and both the unit and e2e tiers compare the bytes across a swap.
 - **Colour is never the only channel.** Each family also has an Arabic name, a text mark and
   a dash pattern, and the legend is part of the feature — reachable with the skin off.
 - Labelled **beta on the control itself in both states**, per PLAN §6, until hafiz sign-off.
-  *2026-11-17: the word is now "unchecked" (Arabic «غير مُراجَع»), and the key says "not yet
+  *2026-11-17: the word is now "unchecked" (Arabic «لم يُدقَّق», "not checked", one word as narrow as the old one so the top bar
+  keeps its height on the narrowest phone), and the key says "not yet
   checked by a hafiz". Apple turns down an app that calls itself a beta (its rule 2.2), and the
   store build is the one readers get. The label's job is the same: on the control, in both
   states, until a hafiz signs off. The owner can ask for the old word back.*
