@@ -41,9 +41,15 @@ const answers = (port, host) =>
 /** "localhost" may mean either address, so both are tried. */
 const held = async (port) => (await Promise.all(["127.0.0.1", "::1"].map((h) => answers(port, h)))).some(Boolean);
 
-/** Who is listening there, as [{ pid, command }]. Empty when it cannot be told. */
+/**
+ * Who is listening there, as [{ pid, command }]. Empty when it cannot be told.
+ * lsof lives in /usr/sbin on the Mac, which a hook started with a short search
+ * path does not include; it then said only "something", never who (2026-11-17).
+ */
 function holders(port) {
-  const r = spawnSync("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-Fpc"], { encoding: "utf8", timeout: 5000 });
+  const args = ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-Fpc"];
+  let r = spawnSync("lsof", args, { encoding: "utf8", timeout: 5000 });
+  if (r.error?.code === "ENOENT") r = spawnSync("/usr/sbin/lsof", args, { encoding: "utf8", timeout: 5000 });
   if (r.error || !r.stdout) return [];
   const found = [];
   for (const line of r.stdout.split("\n")) {
