@@ -36,13 +36,24 @@ export const FEATURE_GROUPS = [
 ];
 
 /** hifth.app's own pages; the side bar goes on each, never on the app under read/. */
-export const FRONT_PAGES = ["index.html", "privacy.html", "sources.html", "404.html", "ar/index.html", "ar/privacy.html", "ar/sources.html"];
+export const FRONT_PAGES = [
+  "index.html",
+  "privacy.html",
+  "sources.html",
+  "support.html",
+  "404.html",
+  "ar/index.html",
+  "ar/privacy.html",
+  "ar/sources.html",
+  "ar/support.html",
+];
 
 const SITE_LINKS = [
   ["/", "Front page"],
   ["/ar/", "Front page in Arabic"],
   ["/privacy.html", "Privacy page"],
   ["/sources.html", "Sources page"],
+  ["/support.html", "Support page"],
   ["/404.html", "Page not found"],
   ["/read/", "The app"],
 ];

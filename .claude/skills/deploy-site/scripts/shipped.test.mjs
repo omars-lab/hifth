@@ -31,6 +31,8 @@ function cleanFolder() {
     { path: "ar/privacy.html", text: "<p>privacy</p>" },
     { path: "sources.html", text: "<p>sources</p>" },
     { path: "ar/sources.html", text: "<p>sources</p>" },
+    { path: "support.html", text: "<p>support</p>" },
+    { path: "ar/support.html", text: "<p>support</p>" },
     { path: "_headers", text: "/read/assets/*\n  Cache-Control: immutable\n" },
     { path: "read/index.html", text: '<script type="module" src="./assets/index-abc.js"></script>' },
     { path: "read/sw.js", text: "self.addEventListener('fetch', () => {})" },
@@ -50,7 +52,7 @@ const paths = (problems) => problems.map((p) => p.path);
 test("a clean release folder passes, and says what it holds", () => {
   const result = auditShipped(cleanFolder(), { commit: HEAD });
   assert.deepEqual(result.problems, []);
-  assert.equal(result.files, 22);
+  assert.equal(result.files, 24);
 });
 
 test("a file that is not on the list of what the site needs is refused", () => {
@@ -208,6 +210,13 @@ test("a release missing a page the site needs is refused", () => {
 test("a release missing the sources page, in either language, is refused", () => {
   const files = cleanFolder().filter((f) => !["sources.html", "ar/sources.html"].includes(f.path));
   assert.deepEqual(paths(refusals(files)), ["sources.html", "ar/sources.html"]);
+});
+
+// Apple asks every listing for a support page (launch-support-page), so a release without it,
+// in either language, would leave the store listing pointing at a missing page.
+test("a release missing the support page, in either language, is refused", () => {
+  const files = cleanFolder().filter((f) => !["support.html", "ar/support.html"].includes(f.path));
+  assert.deepEqual(paths(refusals(files)), ["support.html", "ar/support.html"]);
 });
 
 test("the app must carry the commit being released, so its source-code offer is true", () => {

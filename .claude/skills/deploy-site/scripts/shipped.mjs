@@ -38,8 +38,8 @@ export function inlineScriptHashes(html) {
 }
 
 const ALLOWED = [
-  /^(index\.html|privacy\.html|sources\.html|404\.html|styles\.css|notify\.js|_headers|_redirects)$/,
-  /^ar\/(index|privacy|sources)\.html$/,
+  /^(index\.html|privacy\.html|sources\.html|support\.html|404\.html|styles\.css|notify\.js|_headers|_redirects)$/,
+  /^ar\/(index|privacy|sources|support)\.html$/,
   /^shots\/[\w-]+\.(png|jpg|webp)$/,
   /^fonts\/[\w.-]+\.(woff2|txt)$/,
   /^read\/(index\.html|sw\.js|workbox-[\w-]+\.js|manifest\.webmanifest|favicon\.svg)$/,
@@ -79,8 +79,19 @@ export function markersIn(text) {
 }
 
 // The sources page is required in both languages: the permission emails send the rights
-// holders to it (launch-citations-page).
-const REQUIRED = ["index.html", "privacy.html", "sources.html", "ar/sources.html", "404.html", "read/index.html", "read/sw.js"];
+// holders to it (launch-citations-page). So is the support page: Apple asks every store
+// listing for one (launch-support-page).
+const REQUIRED = [
+  "index.html",
+  "privacy.html",
+  "sources.html",
+  "ar/sources.html",
+  "support.html",
+  "ar/support.html",
+  "404.html",
+  "read/index.html",
+  "read/sw.js",
+];
 
 const TEXT = new Set([".html", ".js", ".css", ".json", ".webmanifest", ".svg", ".txt", ".xml"]);
 

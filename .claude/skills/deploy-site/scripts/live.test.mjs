@@ -22,6 +22,7 @@ function goodSite() {
     "/": [200, '<h1>Hifth</h1><a href="/read/">Open Hifth in your browser</a>'],
     "/privacy.html": [200, "<p>Write to us.</p>"],
     "/sources.html": [200, "<p>Where the pages come from.</p>"],
+    "/support.html": [200, "<p>Help with Hifth.</p>"],
     "/read/": [200, SHELL],
     // Like the real build: the commit sits in a script the main one loads later, not in the
     // main script itself (seen in the 2026-11-11 build: rarely-used-*.js).
@@ -57,8 +58,9 @@ test("a page that does not answer is reported", async () => {
   const site = goodSite();
   site["/privacy.html"] = [404, "Not found"];
   site["/sources.html"] = [404, "Not found"];
+  site["/support.html"] = [404, "Not found"];
   const problems = await verifyLive(BASE, { commit: HEAD, fetch: network(site).fetch });
-  assert.deepEqual(problems.map((p) => p.path), ["/privacy.html", "/sources.html"]);
+  assert.deepEqual(problems.map((p) => p.path), ["/privacy.html", "/sources.html", "/support.html"]);
 });
 
 test("an app built from another commit is reported", async () => {

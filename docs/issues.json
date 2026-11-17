@@ -7116,11 +7116,26 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑳"
       },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "useCase": "get-help-and-know-what-is-kept",
+      "closedBy": "apps/landing/lib/pages.test.mjs",
+      "note": "Apple requires a support address with working contact details. Built 2026-11-17 at /support.html and /ar/support.html: the address to write to, how to send a problem report from the app (naming its buttons by the words the app shows, which a test reads from the app's message files, so a renamed button fails it), the problems we know about, what happens to marks, and a link to the sources page. Both pages have their own entries in apps/landing/_headers, every page's footer links them, the release refuses a folder missing either, and the check after a release asks for /support.html. The deploy-site skill now says to update the known-problems list in the same change whenever a reader-visible fault opens or closes. Looked at in Chrome at 1280 and 390 wide, both languages. Goes live with hifth.app's first upload, which waits on the owner. Linking it from the app's info panel is its own row (launch-support-links-in-app)."
+    },
+    {
+      "id": "launch-support-links-in-app",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊸"
+      },
       "status": "open",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "Apple requires a support address with working contact details. Takes over the hifth.app front-page work's support-page item; that session was told on 2026-11-15. The page needs its own entry in hifth.app's safety settings (apps/landing/_headers), as each page there is listed by name."
+      "useCase": "get-help-and-know-what-is-kept",
+      "note": "Apple's privacy rule asks for the privacy policy to be linked inside the app as well as on the store listing, so this can get the app turned down. The info panel should link hifth.app's support and privacy pages, in the reader's language, so a reader inside the app can find them. Needs a message key in each language and the full hifth.app address inside the iPad and Mac apps (only web addresses leave the app). Left off the support-page branch on 2026-11-17 to keep that change to the site."
     },
     {
       "id": "launch-store-feedback",
@@ -7268,11 +7283,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉙"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "The privacy pages cover the notify-me list only."
+      "useCase": "get-help-and-know-what-is-kept",
+      "closedBy": "apps/landing/lib/pages.test.mjs",
+      "note": "Fixed 2026-11-17. Both privacy pages now cover the iPad, iPhone and Mac apps, the web app and the site, not only the notify-me list: what stays on the device (and that carrying marks to hifth.app happens inside the reader's browser), the recitation fetched from verses.quran.com, the problem report (what it holds, what it never holds, and that the reader's own mail app sends it), Apple's opt-in crash reports, and that there are no accounts yet, with a promise to say what an account stores before sign-in opens. A test requires each of those sections in both languages, and another holds the English and Arabic sections to the same order. Apple's privacy file in the app is settled with the store answers (launch-store-answers)."
     },
     {
       "id": "launch-store-answers",
@@ -7557,11 +7574,12 @@
         "file": "docs/design/hifth-app-site.md",
         "item": "⑲"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "feature": "hifth-app-site",
-      "note": "The App Store asks every listing for a support page. hifth.app has none; hello@hifth.app is named only on the privacy page. Add hifth.app/support in English and Arabic (how to reach us, what to include when something goes wrong, a link to the privacy page), with the front pages' safety headers in apps/landing/_headers, a place in the release check's must-have list (.claude/skills/deploy-site/scripts/shipped.mjs), and a test in apps/landing/lib/pages.test.mjs. The App Store launch plan (another session, 2026-11-15) may take this over."
+      "closedBy": "apps/landing/lib/pages.test.mjs",
+      "note": "Fixed 2026-11-17 by the App Store launch's support page (launch-support-page), which took this over. The App Store asks every listing for a support page. hifth.app has none; hello@hifth.app is named only on the privacy page. Add hifth.app/support in English and Arabic (how to reach us, what to include when something goes wrong, a link to the privacy page), with the front pages' safety headers in apps/landing/_headers, a place in the release check's must-have list (.claude/skills/deploy-site/scripts/shipped.mjs), and a test in apps/landing/lib/pages.test.mjs. The App Store launch plan (another session, 2026-11-15) may take this over."
     },
     {
       "id": "influence-catalog",

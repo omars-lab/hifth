@@ -36,7 +36,9 @@ function fixture(appExtra = {}) {
     "ar/index.html": "<h1>حفظ</h1>",
     "ar/privacy.html": "<p>privacy</p>",
     "ar/sources.html": "<p>sources</p>",
+    "ar/support.html": "<p>support</p>",
     "sources.html": "<p>sources</p>",
+    "support.html": "<p>support</p>",
     "ar/draft.md": "draft",
     "404.html": "<h1>No page here</h1>",
     "styles.css": "body{}",
@@ -77,6 +79,7 @@ test("the front page goes at the root and the app under read/, and nothing the s
     "ar/index.html",
     "ar/privacy.html",
     "ar/sources.html",
+    "ar/support.html",
     "fonts/aref-ruqaa-OFL.txt",
     "fonts/aref-ruqaa-wordmark.woff2",
     "index.html",
@@ -88,6 +91,7 @@ test("the front page goes at the root and the app under read/, and nothing the s
     "shots/feature-notes.jpg",
     "sources.html",
     "styles.css",
+    "support.html",
   ]);
 });
 

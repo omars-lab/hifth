@@ -267,13 +267,20 @@ has the picture and the reasons. "The last few steps by name" waits on ⑲, the 
 *What would answer it:* the shell writes to the system log, the web part keeps a short log in
 memory for the report, and each line carries the app version and the build's commit.
 
-### ⑳ There is no support page · **open**
+### ⑳ There is no support page · **fixed**
 
 Apple requires a support address with working contact details.
 
 *What would answer it:* a support and known-issues page at hifth.app/support, linked from the
 app, with its own entry in hifth.app's safety settings, which list each page by name. (Takes
 over the landing page's support-page row.)
+
+*Done 2026-11-17:* hifth.app/support in English and Arabic says where to write, how to send a
+problem report from the app (naming the buttons by the words the app shows; a test fails if one
+is renamed), the problems we know about, and what happens to a reader's marks. Every page of the
+site links it, and a release missing it is refused. It goes live with hifth.app's first upload.
+Links to it and to the privacy page from inside the app are still open, as item ㊸; Apple asks
+for the privacy link inside the app, so it counts at review.
 
 ### ㉑ Once a bad version is out, we cannot stop it or warn readers · **open**
 
@@ -327,12 +334,18 @@ stored. Waits on ㉖.
 *What would answer it:* a backup on a schedule, kept off the database's own host, a message when
 one fails, and a restore into a scratch database with its rows counted.
 
-### ㉙ The apps have no privacy policy of their own · **open**
+### ㉙ The apps have no privacy policy of their own · **fixed**
 
 The privacy pages cover the notify-me list only.
 
 *What would answer it:* a policy that says what stays on the device, what an account stores, what
 the recitation fetch sends, and what a reader's report holds, linked from the app and the store.
+
+*Done 2026-11-17:* both privacy pages now cover the apps: what stays on the device, the recitation
+fetched from Quran.com's library, what the problem report holds and never holds, Apple's opt-in
+crash reports, and that there are no accounts yet (the page will say what an account stores
+before sign-in opens). A test keeps the English and Arabic pages to the same sections. Apple's
+privacy file inside the app is settled with the store's questions ㉚.
 
 ### ㉚ The store's questions are not answered yet · **open**
 
@@ -489,19 +502,32 @@ this laptop until the rights holders answer.
 
 *What would answer it:* the owner's choice, written into ⑪.
 
+### ㊸ The app does not link the support and privacy pages · **open**
+
+hifth.app now has a support page and a privacy page (⑳ ㉙), but nothing inside the app leads
+to them. Apple asks for the privacy policy to be linked inside the app as well as on the store
+listing, so a reviewer who looks for it in the app and cannot find it can turn the app down.
+
+*What would answer it:* two links in the info panel, to the support and privacy pages in the
+reader's language, with their words in each language's message list. Inside the iPad and Mac
+apps they need hifth.app's full address, since only web addresses leave the app. A test fails
+if either link goes missing.
+
 ## Which of these could get the app turned down, and which matter once readers have it?
 
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 
 - **Stops the upload itself** (nothing goes to Apple until these close): the licence items ②
   ③ ④ ⑤ ⑥. (The archive, the export and Apple's own check ⑪ are fixed; only the upload
-  command itself waits on these.)
+  command itself waits on these. The citations page ② is built; that row closed.)
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
-  permissions file ⑨ (the upload checks both); the support page ⑳ and the privacy policy ㉙
-  (Apple requires a link to each); the store's questions ㉚ and screenshots ㉛; sign-in ㉖ and
-  deleting an account ㉗ (once sign-in ships, deletion must be in the app); the tajweed
-  question ㊲ (it can read as unfinished). (The reviewer walk ㉟, the walk tools' settings ㊱
-  and the English top bar at 320 px ㊶ are fixed.)
+  permissions file ⑨ (the upload checks both); links to the support and privacy pages from
+  inside the app ㊸ (Apple wants the privacy link in the app too); the store's questions ㉚ and
+  screenshots ㉛;
+  sign-in ㉖ and deleting an account ㉗ (once sign-in ships, deletion must be in the app); the
+  tajweed question ㊲ (it can read as unfinished). (The reviewer walk ㉟, the walk tools'
+  settings ㊱, the English top bar at 320 px ㊶, the support page ⑳ and the privacy policy ㉙
+  are fixed.)
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
