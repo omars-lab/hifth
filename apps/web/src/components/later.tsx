@@ -59,6 +59,8 @@ export const MovedCard = later(() => tools().then((m) => m.MovedCard));
 export const ReportProblem = later(() => tools().then((m) => m.ReportProblem));
 /* The go-to box draws nothing until "/" or its button opens it. */
 export const Jumper = later(() => tools().then((m) => m.Jumper));
+/* The verse's "more" menu draws nothing until a press and hold opens it. */
+export const VerseMenu = later(() => tools().then((m) => m.VerseMenu));
 
 /* Only on a computer-sized screen, or by an iPad's Pencil: a phone never fetches ./wide-screen.ts. */
 export const PenHomeAt = later(() => wide().then((m) => m.PenHomeAt));

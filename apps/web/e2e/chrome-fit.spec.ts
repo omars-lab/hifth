@@ -33,6 +33,12 @@ import { pageNumber } from "./page-number";
 /** Phone widths, narrowest first. */
 const WIDTHS = [320, 360, 375, 390, 412, 430] as const;
 
+/**
+ * English adds 340: the width an iPad's split view gives an app on the
+ * narrow side (launch item 41). The narrowest is 320, which is already here.
+ */
+const WIDTHS_EN = [320, 340, 360, 375, 390, 412, 430] as const;
+
 /** Header box + the document's own overflow, in one round trip. */
 async function measure(page: Page) {
   return page.evaluate(() => {
@@ -57,7 +63,7 @@ async function fitsAtEveryWidth(page: Page, lang: "ar" | "en") {
 
     const heights = new Map<number, number>();
 
-    for (const width of WIDTHS) {
+    for (const width of lang === "en" ? WIDTHS_EN : WIDTHS) {
       await page.setViewportSize({ width, height: 844 });
       // One frame for the media queries to apply before measuring.
       await expect
@@ -91,14 +97,27 @@ test.describe("Hifth · the chrome fits a phone", () => {
   });
 
   // This ran in Arabic only until 2026-11-17, when a walk of the store build found
-  // the English top bar 82 px tall at 320 px (69 px at every other width) and
-  // spilling 13 to 17 px off the side: the buttons' English words are wider than
-  // their Arabic ones. A known fault, not a pass. When the narrow English bar is
-  // fixed, this mark makes the test fail, so it gets removed.
-  // Backlog: english-top-bar-320.
+  // the English top bar 82 px tall from 320 to 375 px (69 px wider than that) and
+  // spilling 13 to 17 px off the side at 320: the English name line, "Navigation
+  // for huffaz", wrapped onto a second line once the bar squeezed it. Now, on a
+  // narrow screen in English, the name line goes and so does the mus'haf button
+  // (the next test is its way back). Backlog: english-top-bar-320.
   test("the same, with the buttons in English", async ({ page }) => {
-    test.fail(true, "the English top bar spills at 320 px (english-top-bar-320)");
     await fitsAtEveryWidth(page, "en");
+  });
+
+  // Where the mus'haf button steps aside, the picker is still one step away: the
+  // info panel, opened from the name, has "Choose the mus'haf".
+  test("in English at 320 px, the mus'haf picker opens from the info panel", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 844 });
+    await page.goto("/?lang=en#/hafs-kfqc/p7");
+    await expect(page.locator("main svg[role='group']").first()).toBeVisible();
+    // The bar's own button is out of the way here, not merely squeezed.
+    await expect(page.getByRole("button", { name: "Mus'haf", exact: true })).toBeHidden();
+
+    await page.locator("header button[aria-haspopup='dialog']").first().click();
+    await page.getByRole("button", { name: "Choose the mus'haf" }).click();
+    await expect(page.getByRole("dialog", { name: "Mus'haf" })).toBeVisible();
   });
 
   test("still fits with the widest page number the mushaf has", async ({ page }) => {

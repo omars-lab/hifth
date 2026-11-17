@@ -251,11 +251,28 @@
 }
 
 .row {
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--hairline);
+}
+
+/* The row's Arabic part: the attribution SOURCES.md records, in both languages. */
+.credit {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 2px var(--space-3);
-  padding-block: var(--space-2);
-  border-block-end: 1px solid var(--hairline);
+}
+
+/* With English chosen, the same row in English, under the Arabic. Smaller, so
+   the attribution above stays the row's first line. */
+.creditEn {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.whatEn {
+  color: var(--ink);
 }
 
 .row:last-child {

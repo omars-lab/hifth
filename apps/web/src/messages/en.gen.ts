@@ -402,6 +402,7 @@ const messages: Catalog = {
   movedTitle: "Hifth has moved to hifth.app",
   movedWaiting: "Opening hifth.app…",
   mushaf: "Mus'haf",
+  mushafChoose: "Choose the mus'haf",
   nearestPageN: (d) => "Nearest available page · Page " + d.page,
   newLayoutBar: "Controls on the page bar",
   newLayoutNote: "New. Go to, one page or two, the size buttons and Full screen move onto the page bar at the bottom, beside the slider. The page label on the bar opens Go to, and the page turns are drawn as the arrow keys they answer to. The slider itself does not change.",

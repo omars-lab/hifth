@@ -156,6 +156,8 @@ interface ColophonProps {
   onRailHome?: ((home: RailHome) => void) | undefined;
   /** Open the three tips strip. It no longer opens by itself (owner, 2026-09-25). */
   onShowTips?: () => void;
+  /** Open the mus'haf picker: its way in when the top bar has no room for ▤. */
+  onOpenEditions?: () => void;
   /** Whether this screen can show two pages side by side. What a card does at the
       facing page's edge only means something then, so a phone is not asked. */
   spread?: boolean;
@@ -227,6 +229,10 @@ interface Credit {
   readonly licence: string;
   /** Where it lives. Mandatory for the corpus; useful for the rest. */
   readonly href: string;
+  /** The same three, in English: the line shown under the row when the reader chose English. */
+  readonly whatEn: string;
+  readonly whoEn: string;
+  readonly licenceEn: string;
 }
 
 /*
@@ -272,42 +278,63 @@ const CREDITS: readonly Credit[] = [
     // told every reader the artwork was more restricted than it is.
     licence: "إتاحة حرّة للاستعمال الرقمي · الطبع التجاري محفوظ للمجمع",
     href: "https://github.com/quranpedia/quran-svg",
+    whatEn: "Mushaf pages",
+    whoEn: "King Fahd Complex print (KFGQPC), via quran-svg / quranpedia",
+    licenceEn: "Free for digital use · commercial printing reserved to the Complex",
   },
   {
     what: "المتشابهات",
     who: "Quran Mutashabihat Data · Waqar Ahmed",
     licence: "استعمال حرّ مع ذكر المصدر",
     href: "https://github.com/Waqar144/Quran_Mutashabihat_Data",
+    whatEn: "Look-alike verses",
+    whoEn: "Quran Mutashabihat Data · Waqar Ahmed",
+    licenceEn: "Free to use, with the source named",
   },
   {
     what: "الجذور والصرف",
     who: "Quranic Arabic Corpus · Kais Dukes، جامعة ليدز",
     licence: "GNU GPL",
     href: "http://corpus.quran.com",
+    whatEn: "Word roots and grammar",
+    whoEn: "Quranic Arabic Corpus · Kais Dukes, University of Leeds",
+    licenceEn: "GNU GPL",
   },
   {
     what: "أحكام التجويد",
     who: "quran-tajweed · Collin Fair",
     licence: "CC BY 4.0",
     href: "https://github.com/cpfair/quran-tajweed",
+    whatEn: "Tajweed rules",
+    whoEn: "quran-tajweed · Collin Fair",
+    licenceEn: "CC BY 4.0",
   },
   {
     what: "أقسام المصحف",
     who: "Tanzil Project",
     licence: "CC BY",
     href: "https://tanzil.net",
+    whatEn: "Mushaf divisions (juz and hizb)",
+    whoEn: "Tanzil Project",
+    licenceEn: "CC BY",
   },
   {
     what: "مواضع الكلمات",
     who: "Mushaf Database · قاعدة بيانات المصحف",
     licence: "صدقة جارية · إتاحة حرّة",
     href: "https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG",
+    whatEn: "Word positions",
+    whoEn: "Mushaf Database",
+    licenceEn: "Ongoing charity (sadaqah jariyah) · free to use",
   },
   {
     what: "التلاوة",
     who: "الشيخ محمد صديق المنشاوي · عبر مكتبة قرآن (quran.com)",
     licence: "إتاحة حرّة للاستماع · بثّ من مكتبة قرآن",
     href: "https://quran.com",
+    whatEn: "Recitation",
+    whoEn: "Sheikh Muhammad Siddiq al-Minshawi · via the Quran.com library (quran.com)",
+    licenceEn: "Free to listen · streamed from the Quran.com library",
   },
 ];
 
@@ -466,6 +493,7 @@ export function Colophon({
   railHome,
   onRailHome,
   onShowTips,
+  onOpenEditions,
   spread = false,
 }: ColophonProps): JSX.Element | null {
   const { t, dir, lang, setLang } = useT();
@@ -1026,6 +1054,20 @@ export function Colophon({
           </section>
         )}
 
+        {/* The mus'haf picker's second way in. On a narrow screen in English
+            (an iPad's split view, a small phone) the top bar has no room for
+            its ▤ button, so this is the way there (launch item 41). */}
+        {onOpenEditions && (
+          <section className={styles.block} aria-labelledby="colophon-mushaf">
+            <h3 className={styles.subhead} id="colophon-mushaf">
+              {t.mushaf}
+            </h3>
+            <button type="button" className={styles.toggle} data-colophon-mushaf="" onClick={onOpenEditions}>
+              <span>{t.mushafChoose}</span>
+            </button>
+          </section>
+        )}
+
         {/* Report a problem (launch item 18, docs/design/report-a-problem.md):
             the reader sees the whole report before their own mail app sends it. */}
         <section className={styles.block} aria-labelledby="colophon-report">
@@ -1093,19 +1135,34 @@ export function Colophon({
                 attribution that says something different depending on who is
                 reading is an attribution nobody has actually made. So the row
                 declares the language it is written in and lets the browser
-                bidi-render the Latin names inside it, exactly as before. */}
+                bidi-render the Latin names inside it, exactly as before.
+                With English chosen, a line under each row says the same in
+                English (launch item 39): an English reader, Apple's reviewer
+                among them, could not tell what the app is built on. That line
+                is bound to SOURCES.md too, so neither language can drift. */}
             {CREDITS.map((credit) => (
-              <li key={credit.href} className={styles.row} lang="ar" dir="rtl">
-                <span className={styles.what}>{credit.what}</span>
-                <a
-                  className={styles.who}
-                  href={credit.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {credit.who}
-                </a>
-                <span className={styles.licence}>{credit.licence}</span>
+              <li key={credit.href} className={styles.row} data-credit={credit.href}>
+                <div className={styles.credit} lang="ar" dir="rtl">
+                  <span className={styles.what}>{credit.what}</span>
+                  <a
+                    className={styles.who}
+                    href={credit.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {credit.who}
+                  </a>
+                  <span className={styles.licence}>{credit.licence}</span>
+                </div>
+                {lang === "en" && (
+                  <p className={styles.creditEn} lang="en" dir="ltr">
+                    <span className={styles.whatEn}>{credit.whatEn}</span>
+                    {" · "}
+                    {credit.whoEn}
+                    {" · "}
+                    {credit.licenceEn}
+                  </p>
+                )}
               </li>
             ))}
           </ul>

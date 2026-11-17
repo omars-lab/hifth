@@ -44,6 +44,8 @@ const LATER = [
   "problem-report.ts",
   // The go-to box draws nothing until "/" or its button opens it.
   "components/Jumper.tsx",
+  // The verse's "more" menu draws nothing until a press and hold opens it.
+  "components/VerseMenu.tsx",
 ];
 
 /**

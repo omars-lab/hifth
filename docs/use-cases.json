@@ -1120,6 +1120,14 @@
         {
           "file": "apps/web/src/i18n.test.tsx",
           "test": "leaves no Arabic in the English chrome"
+        },
+        {
+          "file": "apps/web/e2e/chrome-fit.spec.ts",
+          "test": "the same, with the buttons in English"
+        },
+        {
+          "file": "apps/web/e2e/chrome-fit.spec.ts",
+          "test": "in English at 320 px, the mus'haf picker opens from the info panel"
         }
       ],
       "gap": "Two languages, and the second one is the author's second language. Nothing here judges whether the English reads well to a hafiz who uses it — only that it is English, complete, and has not leaked into the places that must stay Arabic."

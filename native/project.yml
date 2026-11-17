@@ -27,12 +27,18 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    # Empty, except in the build made for the store: `make app-archive` sets
+    # it to STORE, which leaves out the launch settings the laptop's tools use
+    # (the probe, the picture, the forced look, the launch route and language).
+    # A plain Release build keeps them, because the reviewer walk drives one.
+    HIFTH_STORE_CONDITION: ""
   configs:
     Debug:
       SWIFT_OPTIMIZATION_LEVEL: "-Onone"
       SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG"
     Release:
       SWIFT_OPTIMIZATION_LEVEL: "-O"
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(HIFTH_STORE_CONDITION)"
 
 targetTemplates:
   HifthApp:

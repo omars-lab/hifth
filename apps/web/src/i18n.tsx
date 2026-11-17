@@ -166,6 +166,8 @@ export interface Strings {
   tipsSectionTitle: string;
   tipsShow: string;
   tipsNote: string;
+  /** The info panel's way to the mus'haf picker, for when the top bar has no room for ▤. */
+  mushafChoose: string;
   /** On/off, for the state word beside a two-state switch. */
   stateOn: string;
   stateOff: string;

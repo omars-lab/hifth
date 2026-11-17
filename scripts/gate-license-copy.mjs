@@ -59,11 +59,13 @@ for (const [id, row] of declarations) {
   }
   declared.set(row.href, { id, row });
 
-  const claim = NON_COMMERCIAL.find((re) => re.test(row.licence));
+  // Both languages: the English line could repeat the old defect as easily.
+  const said = [row.licence, row.licenceEn].find((l) => NON_COMMERCIAL.some((re) => re.test(l)));
+  const claim = said && NON_COMMERCIAL.find((re) => re.test(said));
   if (claim && row["commercial-use"] !== "restricted") {
     problems.push(
       `SOURCES.md § ${id} — the colophon line claims non-commercial terms (matched ${claim}):\n` +
-        `      ${row.licence}\n` +
+        `      ${said}\n` +
         `      This is the defect the gate was written for: «غير التجاري» is the Libyan\n` +
         `      Endowments Qālūn edition's term, and it was once carried over to the KFGQPC\n` +
         `      artwork, which permits digital and commercial use and reserves only printing.\n` +

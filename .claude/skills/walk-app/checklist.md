@@ -1163,9 +1163,26 @@ would break. Pictures of this build may be committed; it carries no held text.
   named in Arabic only (issue: `launch-sources-in-english`)
 - [ ] Turn on Airplane Mode, take the app off, and open it fresh: every page opens and a tapped
   verse lights; only the recitation is missing (rule 4.2, "more than a website"). · reviewer
-  iPad, iPhone · test: `apps/web/e2e/offline.spec.ts` · not walked on the Release build yet
+  iPad, iPhone · test: `apps/web/e2e/offline.spec.ts` · settled 2026-11-17 by that test (it
+  refuses every outside request) and by the app serving its own files; the in-app walk cannot
+  count outside fetches, because the app's web view lists none of the files it serves itself
 - [ ] Walk the same steps on the iPhone and the small iPhone, upright and on its side: the top
-  bar fits, and nothing a reviewer must press is cut off (rule 2.1, a final version). · not walked
-  yet
-- [ ] Turn the iPad, use it in split view beside another app, and set the largest text: the page
-  and the bars still fit, and nothing overlaps. · not walked yet
+  bar fits, and nothing a reviewer must press is cut off (rule 2.1, a final version). · reviewer
+  iPhone and iPhone SE simulators · the first-open command above with
+  `"IPAD=Hifth Reviewer iPhone SE"` · walked 2026-11-17, right
+- [ ] Swipe the page on a phone: a finger drawn to the right turns forward, back to the left turns
+  back. · reviewer iPhone, iPhone SE · `make app-test "IPAD=Hifth Reviewer iPhone SE" ONLY=SmokeTests/testSwipeTurnsThePage`
+  · walked 2026-11-17, right on both
+- [ ] Turn the iPad on its side: two pages, right page first, nothing spills. · reviewer iPad ·
+  the first-open command above with `SIDEWAYS=1` · walked 2026-11-17, right
+- [ ] Put the app in a third of an iPad screen beside another app: that is 320 px wide on every
+  iPad but the largest, so the bars must fit at 320 px (rule 2.1). · any, at 320 px · test:
+  `apps/web/e2e/chrome-fit.spec.ts` · found 2026-11-17: the English top bar does not fit (issue:
+  `english-top-bar-320`)
+- [ ] Set the largest system text size (`xcrun simctl ui <device> content_size accessibility-extra-extra-extra-large`,
+  then back to `large`) and open the app: say whether the bars grew. · reviewer iPhone SE ·
+  walked 2026-11-17: nothing in the app follows the system text size; the question went to the
+  accessibility row (issue: `launch-screen-reader-walk`)
+- [ ] Open the Mac store copy fresh, from an emptied data folder: page 7, no "Left off" ribbon. ·
+  Mac · not walked: the Mac picture command builds the test copy and keeps the laptop's saved
+  data, so it showed a ribbon from past runs; waits for the Mac sandbox (issue: `launch-mac-sandbox`)

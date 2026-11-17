@@ -6940,7 +6940,7 @@
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "The Mac app's permissions file is empty and the app is signed for this laptop only."
+      "note": "The Mac app's permissions file is empty and the app is signed for this laptop only. When the Mac app gets its own store archive, build it with the same store switch the iPad archive uses (HIFTH_STORE_CONDITION=STORE, launch item 36) and run the release check on it with --store. Then walk its first open as the reviewer would (walk-app's first-open-walk.js): the reviewer walk of 2026-11-17 could not, because the Mac picture command builds the test copy and keeps the laptop's earlier saved data, so a \"Left off\" ribbon from past runs showed. The sandboxed app gets its own data folder, which can be emptied for a true first open."
     },
     {
       "id": "launch-ios-entitlements",
@@ -7041,7 +7041,7 @@
       "severity": "question",
       "owner": "agent",
       "launch": true,
-      "note": "Walk with VoiceOver on iPad, iPhone and Mac; by-hand parts go on the manual-testing list."
+      "note": "Walk with VoiceOver on iPad, iPhone and Mac; by-hand parts go on the manual-testing list. Also larger text: the reviewer walk (2026-11-17) set the iPhone SE to the largest system text size and the app looked the same, because nothing in it follows the system's text size. The page itself has its own size control; the bars, buttons and panels do not grow. Decide whether they should, and say so in the store's accessibility answers."
     },
     {
       "id": "launch-readers-crashes",
@@ -7274,11 +7274,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉟"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "Walk the public store build as Apple's reviewer would: fresh install, the review notes' steps word for word, every button a reviewer might press. First walk 2026-11-17 on the reviewer iPad simulator (Release build). Found and fixed: the notes' steps described a row of links an iPad never shows (rewritten to name page 7, verse 40 and the round look-alike button, held by a browser test that walks them); the tajweed badge said \"beta\" and three settings said \"A rough build to try\", which Apple's rule on betas and demos turns down (now \"unchecked\" and \"New.\", held by a wording test); the problem report gained the device line. Still to walk: iPhone and iPhone SE (does the top bar fit?), a first launch with no connection on the Release build, swipe page turns, rotation, split view, larger text, and the Mac by picture."
+      "closedBy": "apps/web/e2e/store-review-steps.spec.ts",
+      "note": "Walk the public store build as Apple's reviewer would: fresh install, the review notes' steps word for word, every button a reviewer might press. First walk 2026-11-17 on the reviewer iPad simulator (Release build). Found and fixed: the notes' steps described a row of links an iPad never shows (rewritten to name page 7, verse 40 and the round look-alike button, held by a browser test that walks them); the tajweed badge said \"beta\" and three settings said \"A rough build to try\", which Apple's rule on betas and demos turns down (now \"unchecked\" and \"New.\", held by a wording test); the problem report gained the device line. Second pass the same day, all on the Release build: a fresh first open on iPad, iPhone and iPhone SE opens page 7 with no \"Left off\" ribbon at 4 or 12 seconds and nothing read aloud (walk-app's first-open-walk.js); a first launch with no connection is held by the browser test that refuses every outside request, and the app serves its own files; the iPad on its side shows two pages, nothing spilling; a finger swipe turns the page forward and back on both phones (the app's swipe UI test); split view takes the app down to 320 px wide on most iPads, which found the English top bar fault (launch item 41, now a launch row); the largest system text size changes nothing in the app (added to launch item 16, the accessibility row). Not walked here: the Mac's fresh first open. The Mac picture command builds the test copy and keeps earlier saved data, so it showed a \"Left off\" ribbon from past runs; that walk moves to launch item 8, the Mac sandbox row, since no Mac store copy exists before it."
     },
     {
       "id": "launch-probe-in-store-build",
@@ -7286,11 +7287,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊱"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
       "launch": true,
-      "note": "The Release build still answers the walk tools' launch settings: one runs a script in the page and prints the answer, others take pictures. Only someone starting the app from a Mac with a cable or the simulator can set them, so neither a reader nor Apple can reach them, and they switch on nothing a reader could use. Still, the copy sent to the store has no need of them. What would answer it: the archive step builds without them, the release check refuses an archive that has them, and the walk build keeps them."
+      "closedBy": "scripts/native-store-launch-settings.test.mjs",
+      "note": "The Release build still answers the walk tools' launch settings: one runs a script in the page and prints the answer, others take pictures. Only someone starting the app from a Mac with a cable or the simulator can set them, so neither a reader nor Apple can reach them, and they switch on nothing a reader could use. Still, the copy sent to the store has no need of them. What would answer it: the archive step builds without them, the release check refuses an archive that has them, and the walk build keeps them. FIXED 2026-11-17: the archive step builds with a store switch (STORE) that leaves out the probe, the walk of steps, the picture, the forced look, and the launch route and language; a plain Release build keeps them for the reviewer walk. The archive's release check, run with --store, refuses an archive that still has the six long setting names (it found all six in the archive made before the change). The route and language names are too short to find in an optimized build, so a test reads the app's code and refuses any read of a launch setting outside a part the store build leaves out (it found 19 such reads in the code before the change)."
     },
     {
       "id": "launch-tajweed-in-store",
@@ -7323,7 +7325,8 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊴"
       },
-      "status": "open",
+      "status": "fixed",
+      "closedBy": "apps/web/e2e/lang.spec.ts",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
@@ -7335,10 +7338,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊶"
       },
-      "status": "open",
+      "status": "fixed",
+      "useCase": "read-the-chrome-in-a-language-i-read",
+      "closedBy": "apps/web/e2e/chrome-fit.spec.ts",
       "severity": "defect",
       "owner": "agent",
-      "note": "In English at 320 px wide the top bar needs 333 px (Chrome's engine) or 337 px (Safari's): the info button is cut off and the bar grows from 69 to 82 px as the line under the name wraps. Predates the store work; the top-bar test ran in Arabic only and never saw it. The tajweed button is 70 px in English and 49 in Arabic. Not a launch blocker: the store app needs iOS 17, whose phones are at least 375 px wide. The test now runs in English and is marked as an expected failure (apps/web/e2e/chrome-fit.spec.ts); the fix removes that mark. Measured 2026-11-17: a smaller tag plus a shorter line just fit in Chrome and still spill in Safari, so it needs a narrow-phone layout, not a tweak."
+      "launch": true,
+      "note": "Fixed 2026-11-17; the tests that would catch it coming back are \"the same, with the buttons in English\" (no spill and one bar height at 320, 340, 360, 375, 390, 412 and 430 px) and \"in English at 320 px, the mus'haf picker opens from the info panel\". In English, on any screen 440 px wide or less, the line under the name goes (it wrapped from 320 to 380 px and again at 405 to 415 px, measured in Chrome's engine every 5 px), and below 360 px the mus'haf button steps aside; the info panel now has \"Choose the mus'haf\", so the picker is still one step away. Measured after the fix: 69 px and no spill at every width from 320 to 520 px. The test's expected-failure mark is gone, and it now also checks 340 px, the narrow side of iPad split view. What was found: in English at 320 px wide the top bar needs 333 px (Chrome's engine) or 337 px (Safari's): the info button is cut off and the bar grows from 69 to 82 px as the line under the name wraps. Predates the store work; the top-bar test ran in Arabic only and never saw it. The tajweed button is 70 px in English and 49 in Arabic. A launch row since 2026-11-17: the store app's phones are at least 375 px wide, but the iPad lets the app share the screen (it does not ask for the whole screen), and a window a third of the screen wide is 320 px on every iPad but the largest; iPad windows can also be resized freely. The test now runs in English and is marked as an expected failure (apps/web/e2e/chrome-fit.spec.ts); the fix removes that mark. Measured 2026-11-17: a smaller tag plus a shorter line just fit in Chrome and still spill in Safari, so it needs a narrow-phone layout, not a tweak."
     },
     {
       "id": "launch-support-mail-arrives",

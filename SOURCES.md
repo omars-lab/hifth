@@ -71,6 +71,9 @@ what: صفحات المصحف
 who: طباعة مجمع الملك فهد (KFGQPC)، عبر quran-svg / quranpedia
 licence: إتاحة حرّة للاستعمال الرقمي · الطبع التجاري محفوظ للمجمع
 href: https://github.com/quranpedia/quran-svg
+whatEn: Mushaf pages
+whoEn: King Fahd Complex print (KFGQPC), via quran-svg / quranpedia
+licenceEn: Free for digital use · commercial printing reserved to the Complex
 ```
 
 - **Status: CONFIRMED. The overlay is CC0, read at the source; the Complex's own
@@ -133,6 +136,9 @@ what: المتشابهات
 who: Quran Mutashabihat Data · Waqar Ahmed
 licence: استعمال حرّ مع ذكر المصدر
 href: https://github.com/Waqar144/Quran_Mutashabihat_Data
+whatEn: Look-alike verses
+whoEn: Quran Mutashabihat Data · Waqar Ahmed
+licenceEn: Free to use, with the source named
 ```
 
 - **Status: VENDORED (Loop 4a) — primary mutashabihat edge source.**
@@ -187,6 +193,9 @@ what: الجذور والصرف
 who: Quranic Arabic Corpus · Kais Dukes، جامعة ليدز
 licence: GNU GPL
 href: http://corpus.quran.com
+whatEn: Word roots and grammar
+whoEn: Quranic Arabic Corpus · Kais Dukes, University of Leeds
+licenceEn: GNU GPL
 ```
 
 - **Status: VENDORED (Loop 5) — root/lemma source for the root lens.**
@@ -242,6 +251,9 @@ what: أحكام التجويد
 who: quran-tajweed · Collin Fair
 licence: CC BY 4.0
 href: https://github.com/cpfair/quran-tajweed
+whatEn: Tajweed rules
+whoEn: quran-tajweed · Collin Fair
+licenceEn: CC BY 4.0
 ```
 
 - **Status: VENDORED (Loop 6a) — rule-span source for the tajweed skin.**
@@ -287,6 +299,9 @@ what: أقسام المصحف
 who: Tanzil Project
 licence: CC BY
 href: https://tanzil.net
+whatEn: Mushaf divisions (juz and hizb)
+whoEn: Tanzil Project
+licenceEn: CC BY
 ```
 
 - **Status: VENDORED (Loop 6b prep) — structural tables for juz/hizb.**
@@ -370,6 +385,9 @@ what: مواضع الكلمات
 who: Mushaf Database · قاعدة بيانات المصحف
 licence: صدقة جارية · إتاحة حرّة
 href: https://github.com/mushafdatabase/MushafDatabase-Ligature-Based-SVG
+whatEn: Word positions
+whoEn: Mushaf Database
+licenceEn: Ongoing charity (sadaqah jariyah) · free to use
 ```
 
 - **Status: DERIVED (word-B) — word boxes on our frame; no upstream bytes ship.**
@@ -447,6 +465,9 @@ what: التلاوة
 who: الشيخ محمد صديق المنشاوي · عبر مكتبة قرآن (quran.com)
 licence: إتاحة حرّة للاستماع · بثّ من مكتبة قرآن
 href: https://quran.com
+whatEn: Recitation
+whoEn: Sheikh Muhammad Siddiq al-Minshawi · via the Quran.com library (quran.com)
+licenceEn: Free to listen · streamed from the Quran.com library
 ```
 
 - **Status: STREAMED (task #67) — client-side `<audio>` from Quran.com's CDN; no

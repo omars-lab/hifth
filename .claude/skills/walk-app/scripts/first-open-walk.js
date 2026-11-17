@@ -11,5 +11,9 @@
   out.push(`leftOffAt4s=${document.querySelector("[data-bookmark-seam]") ? "yes" : "no"}`);
   await wait(8000);
   out.push(`leftOffAt12s=${document.querySelector("[data-bookmark-seam]") ? "yes" : "no"} hashAt12s=${location.hash || "(none)"}`);
+  // Not here: a count of files fetched from outside the app. The app's web view lists none of
+  // the files it serves itself (tried 2026-11-17: 0 seen), so the count could not tell an
+  // offline-safe first open from a blind one. The browser test "a first launch with no
+  // connection" (apps/web/e2e/offline.spec.ts) refuses every outside request instead.
   return out.join(" ; ");
 })()

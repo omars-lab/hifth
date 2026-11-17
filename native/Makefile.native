@@ -521,11 +521,12 @@ app-archive: app-store-flavour app-generate ## Archive the iPad and iPhone app f
 	rm -rf $(ARCHIVE_PATH)
 	set -o pipefail; xcodebuild -project $(XCPROJ) -derivedDataPath $(ARCHIVE_DD) -scheme Hifth-iOS \
 	  -configuration Release -destination generic/platform=iOS -archivePath $(ARCHIVE_PATH) \
-	  -allowProvisioningUpdates DEVELOPMENT_TEAM=$(TEAM) archive | $(XCPRETTY)
-	@# The same check again, on the app inside the archive, because that is what would be uploaded.
+	  -allowProvisioningUpdates DEVELOPMENT_TEAM=$(TEAM) HIFTH_STORE_CONDITION=STORE archive | $(XCPRETTY)
+	@# The same check again, on the app inside the archive, because that is what would be uploaded,
+	@# and with --store: the archive must also have left out the laptop tools' launch settings.
 	node .claude/skills/walk-app/scripts/release-check.mjs \
 	  --debug $(RELEASE_CHECK_DD)/Build/Products/Debug-iphoneos/Hifth.app \
-	  --release $(ARCHIVE_PATH)/Products/Applications/Hifth.app --flavour public
+	  --release $(ARCHIVE_PATH)/Products/Applications/Hifth.app --flavour public --store
 	@echo "  archive: $(ARCHIVE_PATH)"
 
 # The export signs the archive for the App Store. The first time, Xcode asks

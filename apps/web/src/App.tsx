@@ -171,6 +171,7 @@ import {
   JumpList,
   JumpShelf,
   Jumper,
+  VerseMenu,
   RevisionMap,
   RootLens,
   WordPartsHost,
@@ -221,7 +222,7 @@ import { LiveAnnouncer, useAnnouncer } from "./components/LiveAnnouncer";
 import { RootLensTrigger } from "./components/RootLensTrigger";
 import { PlayTrigger, listenCaption, listenGlyph } from "./components/PlayTrigger";
 import { DrawerTool, VerseDrawer, type VerseClear } from "./components/VerseDrawer";
-import { VerseMenu, type VerseMenuItem } from "./components/VerseMenu";
+import type { VerseMenuItem } from "./components/VerseMenu";
 import { QulTrigger } from "./components/QulTrigger";
 import { useVerseAudio, versesBetween } from "./audio";
 import {
@@ -4589,9 +4590,13 @@ export function App(): JSX.Element {
             ⌖
           </button>
         )}
+        {/* In English on a narrow screen (a small phone, an iPad's split view)
+            the bar has no room for this one, so it steps aside and the info
+            panel's "Choose the mus'haf" is the way there (launch item 41,
+            e2e/chrome-fit.spec.ts). */}
         <button
           type="button"
-          className={styles.chromeBtn}
+          className={`${styles.chromeBtn} ${styles.mushafBtn}`}
           aria-label={t.mushaf}
           aria-haspopup="dialog"
           onClick={() => setEditionOpen(true)}
@@ -5217,6 +5222,10 @@ export function App(): JSX.Element {
               setColophonOpen(false);
               setCoachUp(true);
             }}
+            onOpenEditions={() => {
+              setColophonOpen(false);
+              setEditionOpen(true);
+            }}
           />
         </Later>
       )}
@@ -5542,6 +5551,7 @@ export function App(): JSX.Element {
       </VerseDrawer>
 
       {verseMenu && (
+        <Later>
         <VerseMenu
           name={t.verseMore(t.ayahLabel(verseMenu.key) ?? verseMenu.key)}
           around={verseMenu.around}
@@ -5558,14 +5568,17 @@ export function App(): JSX.Element {
             { caption: t.vdJump, onPick: () => askJumpFrom(verseMenu.key, heldVerseBox(verseMenu.key) ?? verseMenu.around) },
           ]}
         />
+        </Later>
       )}
       {cornerMenu && cornerMenuOf && (
+        <Later>
         <VerseMenu
           name={t.verseMore(cornerMenuOf.name)}
           around={cornerMenu.around}
           onClose={closeCornerMenu}
           items={cornerMenuOf.items}
         />
+        </Later>
       )}
       {/* The way back from full screen, for B and C; A's way back is a tap. */}
       {full && verseGestures !== "a" && touchFullNow !== "row" && (
@@ -5631,6 +5644,7 @@ export function App(): JSX.Element {
       />
 
       {PITCH && verseMenuAt && verseMenuItems.length > 0 && (
+        <Later>
         <VerseMenu
           name={t.verseMenu(verseMenuAt.key)}
           around={verseMenuAt.around}
@@ -5640,6 +5654,7 @@ export function App(): JSX.Element {
           onClose={closeNumberMenu}
           stacked
         />
+        </Later>
       )}
 
       {verseNotesAt && verseNotes.length > 0 && (

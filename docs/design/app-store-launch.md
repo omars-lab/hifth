@@ -335,7 +335,7 @@ the launch goal's numbers.
 check confirms the reviews key's file is in place and its ID is saved, printing names and
 dates, never the key itself.
 
-### ㉟ Nobody has walked the store build as Apple's reviewer would · **open**
+### ㉟ Nobody has walked the store build as Apple's reviewer would · **fixed**
 
 The first walk, on 2026-11-17 on an iPad simulator with the Release build, found three things
 and fixed them: the review notes' steps described a row of links an iPad never shows; the
@@ -346,12 +346,31 @@ betas and demos turns down; and the problem report did not name the device.
 connection, swipe page turns, rotation, split view, larger text, and the Mac by picture. The
 steps are in the walk-app skill's checklist, under "The store build, as Apple's reviewer".
 
-### ㊱ The store copy still answers the walk tools' launch settings · **open**
+*Walked 2026-11-17, the same day, on the Release build.* A fresh first open on the iPad, the
+iPhone and the small iPhone opens page 7, with no "Left off" ribbon and nothing read aloud. A
+first launch with no connection is held by the browser test that refuses every outside request,
+and the app serves its own files. On its side the iPad shows two pages with nothing spilling. A
+finger swipe turns the page forward and back on both phones. Split view found one fault: the
+English top bar does not fit at 320 px ㊶. The largest system text size changes nothing in the
+app, which is now part of the accessibility item ⑯. The Mac's fresh first open waits for the
+Mac sandbox ⑧: no Mac store copy exists before it, and the laptop's copy keeps earlier saved
+data.
+
+### ㊱ The store copy still answers the walk tools' launch settings · **fixed**
 
 Only someone starting the app from a Mac can set them, so no reader or reviewer can reach them.
 
 *What would answer it:* the archive step leaves them out, and the release check refuses an
 archive that has them.
+
+*Fixed 2026-11-17.* The archive step now builds with a store switch that leaves out the page
+probe, the walk of steps, the picture, the forced light or dark look, and the page and language
+a test starts the app at. A plain Release build keeps them, because the reviewer walk drives
+one. The check on the archive refuses one that still has the long setting names; it found all
+six in the archive made before the change. The page and language names are too short to find
+in a built app, so a test reads the app's code instead and refuses any read of a launch setting
+the store build would keep. The Mac app is not archived yet; when it is, it takes the same
+switch.
 
 ### ㊲ Should the store build show the tajweed colours at all? · **open**
 
@@ -368,9 +387,15 @@ at every launch, so a reader who left off on page 110 lost that place after six 
 looking at the first page. Now the page the app opens on by itself is not taken as a place until
 the reader turns a page or follows a link. A saved place still shows where it was.
 
-### ㊴ In English, the sources list still names its sources in Arabic · **open**
+### ㊴ In English, the sources list still names its sources in Arabic · **fixed**
 
 *What would answer it:* an English name beside each source's own, with a test.
+
+*Fixed 2026-11-17.* With English chosen, each source keeps its Arabic row and gains a smaller
+English line under it: what the source gives the app, who made it, and its terms. The English
+words live in the sources record beside the Arabic ones, and the check that binds the screen
+to that record now covers them too, including the rule against a "non-commercial" claim the
+record has not signed off. Tests in the panel, in the check, and in a real browser.
 
 ### ㊵ Nobody has seen a problem report arrive · **open**
 
@@ -378,7 +403,7 @@ The address has mail servers, and the report card offers Copy when there is no m
 
 *What would answer it:* one test report sent from the simulator and seen in the inbox.
 
-### ㊶ In English, on a 320 px phone, the top bar spills off the screen · **open**
+### ㊶ In English, on a 320 px phone, the top bar spills off the screen · **fixed**
 
 Found while fixing the Arabic tag's fit. In English at 320 px wide the row needs 333 px in
 Chrome's engine and 337 px in Safari's, so the ⓘ button is cut off at the edge. The line under
@@ -386,8 +411,11 @@ the name breaks onto two lines, and the bar grows from 69 to 82 px. Two reasons:
 button is 70 px wide in English and 49 px in Arabic, and "Navigation for huffaz" is much wider
 than its Arabic.
 
-It does not reach the store app, which needs iOS 17, on phones at least 375 px wide. It hits
-the website on the oldest small phones.
+It hits the website on the oldest small phones. The store app needs iOS 17, so its phones are
+at least 375 px wide, but it still reaches the store app on an iPad: the app does not ask for
+the whole screen, and when a reader puts it beside another app in a third of the screen, the
+window is 320 px wide on every iPad but the largest. (First written as "website only"; the
+reviewer walk found the iPad case on 2026-11-17.)
 
 Tried on the live page: a smaller "unchecked" tag alone fits the row at exactly 320 px in
 Chrome, with nothing to spare, and the bar is still 82 px tall. A shorter line under the name
@@ -395,8 +423,16 @@ alone fixes the height but not the spill. Both together just fit in Chrome and w
 spill in Safari.
 
 *What would answer it:* a narrow-phone layout for the English bar that fits in both engines
-with room to spare. The top-bar test now runs in English too, and marks this as a known fault
-until it is fixed.
+with room to spare.
+
+*Fixed 2026-11-17.* In English, on any screen 440 px wide or less, the line under the name is
+left out; checked every 5 px, it had wrapped not only at 320 to 380 px but again at 405 to
+415 px. Below 360 px the mus'haf button steps aside too, and the info panel gained "Choose the
+mus'haf", so the picker is still one step away. The bar is now 69 px with nothing spilling at
+every width from 320 to 520 px. The top-bar test runs in English with no known-fault mark, also
+at 340 px (the narrow side of iPad split view), in both engines, and a second test opens the
+picker from the info panel at 320 px. The name button keeps its spoken name, so a screen reader
+still hears "Navigation for huffaz".
 
 ## Which of these could get the app turned down, and which matter once readers have it?
 
@@ -407,15 +443,13 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
   permissions file ⑨ (the upload checks both); the support page ⑳ and the privacy policy ㉙
   (Apple requires a link to each); the store's questions ㉚ and screenshots ㉛; sign-in ㉖ and
-  deleting an account ㉗ (once sign-in ships, deletion must be in the app); the rest of the
-  reviewer walk ㉟; the tajweed question ㊲ (it can read as unfinished); the walk tools'
-  settings ㊱ (low risk, cheap to close).
+  deleting an account ㉗ (once sign-in ships, deletion must be in the app); the tajweed
+  question ㊲ (it can read as unfinished). (The reviewer walk ㉟, the walk tools' settings ㊱
+  and the English top bar at 320 px ㊶ are fixed.)
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
-  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, the sources in English ㊴, a
-  report seen to arrive ㊵, and the English top bar on the smallest phones ㊶ (the website
-  only; the store app's phones are wider).
+  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, and a report seen to arrive ㊵.
 
 ## What does this leave alone?
 

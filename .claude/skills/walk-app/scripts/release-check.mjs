@@ -14,11 +14,15 @@
 // the debug build's second code file); the web pages inside are not, since they
 // are not the capture.
 //
-//   node release-check.mjs --debug <Hifth.app> --release <Hifth.app> [--flavour public]
+//   node release-check.mjs --debug <Hifth.app> --release <Hifth.app> [--flavour public] [--store]
 //
 // With --flavour public it also fails unless the web build inside the release
 // app is the public one, with no private folder. `make app-archive` asks for
 // that; the plain check does not, since it also runs on the pitch build.
+//
+// With --store it also fails if the app still answers the laptop tools' launch
+// settings (STORE_SIGNS below). `make app-archive` asks for that on the app
+// inside the archive; a plain Release build keeps them for the reviewer walk.
 //
 // Exit 0 when Release is clean, 1 when it is not (or Debug is missing a sign),
 // 2 when a path is not an app. Built and run by `make app-release-check`.
@@ -49,6 +53,26 @@ export const SIGNS = [
   ["the code behind the capture and current-to-file links", "CaptureLinkWaiting", "type"],
 ];
 
+/**
+ * The launch settings the laptop's tools start the app with: the probe and
+ * the walk of steps, the picture, and the forced light or dark look. A plain
+ * Release build keeps them, because the reviewer walk drives one with them
+ * (`CONFIG=Release`); only the build made for the store leaves them out
+ * (`make app-archive` sets the STORE condition), so only `--store` looks for
+ * them. Each was seen in a store archive made before they were left out
+ * (2026-11-17). The route and language settings are read in the same place
+ * and left out with them, but their names are too short to find, so a test
+ * of the app's own code holds them instead (scripts/native-store-launch-settings.test.mjs).
+ */
+export const STORE_SIGNS = [
+  ["the launch setting that walks a list of steps", "HIFTH_PROBE_STEPS", "string"],
+  ["the launch setting that asks the page a question", "HIFTH_PROBE_EVAL", "string"],
+  ["the launch setting that says where the probe's answer goes", "HIFTH_PROBE_PATH", "string"],
+  ["the launch setting that takes a picture with the probe", "HIFTH_PROBE_SHOT", "string"],
+  ["the launch setting that takes a picture and quits", "HIFTH_SNAPSHOT_PATH", "string"],
+  ["the launch setting that forces the light or dark look", "HIFTH_APPEARANCE", "string"],
+];
+
 const log = (ev, fields = {}) =>
   console.log(
     [`${new Date().toISOString()} pid=${process.pid} ev=${ev}`, ...Object.entries(fields).map(([k, v]) => `${k}=${v}`)].join(" "),
@@ -66,8 +90,8 @@ function code(app) {
     .map((name) => ({ name, bytes: readFileSync(join(app, name)) }));
 }
 
-function signsIn(files) {
-  return SIGNS.filter(([, text]) => files.some((f) => f.bytes.includes(Buffer.from(text, "utf8"))));
+function signsIn(files, signs = SIGNS) {
+  return signs.filter(([, text]) => files.some((f) => f.bytes.includes(Buffer.from(text, "utf8"))));
 }
 
 /**
@@ -119,15 +143,16 @@ export function privacyProblems(release) {
   return problems;
 }
 
-export function check(debug, release, { flavour } = {}) {
+export function check(debug, release, { flavour, store = false } = {}) {
   const problems = flavour ? flavourProblems(release, flavour) : [];
   if (flavour === "public") problems.push(...privacyProblems(release));
   const debugKeys = settings(debug);
   for (const key of KEYS) {
     if (debugKeys[key] !== true) problems.push(`the check is out of date: the debug build no longer has ${key}`);
   }
-  const debugSigns = signsIn(code(debug));
-  for (const [what, text] of SIGNS) {
+  const signs = store ? [...SIGNS, ...STORE_SIGNS] : SIGNS;
+  const debugSigns = signsIn(code(debug), signs);
+  for (const [what, text] of signs) {
     if (!debugSigns.some(([, t]) => t === text)) {
       problems.push(`the check is out of date: the debug build has no "${text}" (${what}), so its absence from release proves nothing`);
     }
@@ -136,7 +161,7 @@ export function check(debug, release, { flavour } = {}) {
   for (const key of KEYS) {
     if (key in releaseKeys) problems.push(`the release build has ${key}, which shows the app's files in the Files app`);
   }
-  for (const [what, text] of signsIn(code(release))) {
+  for (const [what, text] of signsIn(code(release), signs)) {
     problems.push(`the release build has "${text}": ${what} is in it`);
   }
   return problems;
@@ -161,8 +186,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     log("error", { msg: '"--flavour needs a build name, such as public"' });
     process.exit(2);
   }
-  log("start", { debug, release, flavour: flavour ?? "any" });
-  const problems = check(debug, release, { flavour });
+  const store = process.argv.includes("--store");
+  log("start", { debug, release, flavour: flavour ?? "any", store: store ? "yes" : "no" });
+  const problems = check(debug, release, { flavour, store });
   for (const problem of problems) log("problem", { msg: JSON.stringify(problem) });
   log("done", { release_clean: problems.length === 0 ? "yes" : "no", problems: problems.length });
   process.exit(problems.length === 0 ? 0 : 1);

@@ -207,6 +207,27 @@ test.describe("Hifth · language", () => {
     await expect(sheet.locator("a[href='http://corpus.quran.com']")).toBeVisible();
   });
 
+  test("each licence credit has an English line under it, in English", async ({ page }) => {
+    // Launch item 39 (2026-11-17): the rows above stay Arabic, so an English
+    // reader, Apple's reviewer among them, could not tell what the app is built
+    // on. Each row now has an English line under it, bound to SOURCES.md as well.
+    await page.goto("/");
+    await page.getByRole("button", { name: /About Hifth/ }).tap();
+    const sheet = page.getByRole("dialog", { name: /About Hifth/ });
+    await expect(sheet).toBeVisible();
+
+    const row = sheet.locator("li[data-credit='http://corpus.quran.com']");
+    await expect(row.locator("[lang='en']")).toHaveText(/Word roots and grammar/);
+    await expect(row.locator("[lang='en']")).toBeVisible();
+    // Every credit row has one, and each is written in English only.
+    const rows = sheet.locator("li[data-credit]");
+    const count = await rows.count();
+    expect(count).toBeGreaterThanOrEqual(7);
+    for (let i = 0; i < count; i++) {
+      await expect(rows.nth(i).locator("[lang='en']")).not.toHaveText(/[؀-ۿ]/);
+    }
+  });
+
   test("the jumper answers to a romanised name and to an Arabic one", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("svg[role='group']").first()).toBeVisible();
