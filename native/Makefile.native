@@ -35,7 +35,12 @@ BUNDLE_ID    := com.bytesofpurpose.hifth
 XCB          := xcodebuild -project $(XCPROJ) -derivedDataPath $(DERIVED)
 XCPRETTY     := $(shell command -v xcbeautify >/dev/null 2>&1 && echo "xcbeautify" || echo "cat")
 MAC_APP      := $(DERIVED)/Build/Products/Debug/Hifth.app
-IPAD_APP     := $(DERIVED)/Build/Products/Debug-iphonesimulator/Hifth.app
+# The simulator build's configuration. `Release` is what Apple's reviewer and
+# readers get: it leaves out the debug capture code, so walk the store build as the
+# reviewer would with `CONFIG=Release` (the walk-app skill's reviewer walk). The
+# probe still answers in it (launch item ㊱). The Mac build stays Debug.
+CONFIG       ?= Debug
+IPAD_APP      = $(DERIVED)/Build/Products/$(CONFIG)-iphonesimulator/Hifth.app
 # The Mac app is started through macOS's launcher, never by running the binary
 # inside it: started that way it runs with no window at all, so the page is
 # 0×0 and hidden and its picture comes out empty (native-shell.md ⑪). A new
@@ -157,7 +162,7 @@ app-build-mac: app-generate ## Build the Mac app (Debug, ad-hoc signed)
 	set -o pipefail; $(XCB) -scheme Hifth-macOS -configuration Debug -destination 'platform=macOS' build | $(XCPRETTY)
 
 app-build-ipad: app-generate ## Build the iPad app for the simulator
-	set -o pipefail; $(XCB) -scheme Hifth-iOS -configuration Debug -sdk iphonesimulator \
+	set -o pipefail; $(XCB) -scheme Hifth-iOS -configuration $(CONFIG) -sdk iphonesimulator \
 	  -destination 'platform=iOS Simulator,id=$(IPAD_UDID)' CODE_SIGNING_ALLOWED=NO build | $(XCPRETTY)
 
 app-run-mac: app-build-mac ## Build and open the Mac app (ROUTE=… to open at a route)
