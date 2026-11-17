@@ -368,9 +368,15 @@ at every launch, so a reader who left off on page 110 lost that place after six 
 looking at the first page. Now the page the app opens on by itself is not taken as a place until
 the reader turns a page or follows a link. A saved place still shows where it was.
 
-### ㊴ In English, the sources list still names its sources in Arabic · **open**
+### ㊴ In English, the sources list still names its sources in Arabic · **fixed**
 
 *What would answer it:* an English name beside each source's own, with a test.
+
+*Fixed 2026-11-17.* With English chosen, each source keeps its Arabic row and gains a smaller
+English line under it: what the source gives the app, who made it, and its terms. The English
+words live in the sources record beside the Arabic ones, and the check that binds the screen
+to that record now covers them too, including the rule against a "non-commercial" claim the
+record has not signed off. Tests in the panel, in the check, and in a real browser.
 
 ### ㊵ Nobody has seen a problem report arrive · **open**
 
@@ -413,7 +419,7 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
-  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, the sources in English ㊴, a
+  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, a
   report seen to arrive ㊵, and the English top bar on the smallest phones ㊶ (the website
   only; the store app's phones are wider).
 

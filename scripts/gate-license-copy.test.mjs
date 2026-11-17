@@ -14,8 +14,25 @@ import { makeFixture, dropFixture, runGate } from "./gate-fixture.mjs";
 const COLOPHON = "apps/web/src/components/Colophon.tsx";
 const FENCE = "```";
 
-const rowA = { what: "Pages", who: "A printer", licence: "Free for digital use", href: "https://example.org/a" };
-const rowB = { what: "Pairs", who: "A scholar", licence: "Free with a mention", href: "https://example.org/b" };
+// Each row also carries its English line (whatEn, whoEn, licenceEn), shown when the reader picks English.
+const rowA = {
+  what: "Pages",
+  who: "A printer",
+  licence: "Free for digital use",
+  href: "https://example.org/a",
+  whatEn: "Pages",
+  whoEn: "A printer",
+  licenceEn: "Free for digital use",
+};
+const rowB = {
+  what: "Pairs",
+  who: "A scholar",
+  licence: "Free with a mention",
+  href: "https://example.org/b",
+  whatEn: "Pairs",
+  whoEn: "A scholar",
+  licenceEn: "Free with a mention",
+};
 
 /** A SOURCES.md section: a heading and a colophon fence of `key: value` lines. */
 const entry = (id, fields) =>
@@ -78,6 +95,40 @@ test("gate:license-copy refuses a licence line that differs between the record a
     assert.match(r.out, /source-a — colophon `licence` differs between the record and the screen/);
     assert.match(r.out, /Colophon\.tsx: Free for any use at all/);
   });
+});
+
+test("gate:license-copy refuses an English line that differs between the record and the screen", () => {
+  const changed = { ...rowA, licenceEn: "Free for any use at all" };
+  withFixture({ ...clean, [COLOPHON]: colophon(changed, rowB) }, (root) => {
+    const r = runGate("license-copy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /source-a — colophon `licenceEn` differs between the record and the screen/);
+  });
+});
+
+test("gate:license-copy refuses a source whose record has no English line", () => {
+  const arabicOnly = Object.fromEntries(Object.entries(rowA).filter(([k]) => !k.endsWith("En")));
+  withFixture(
+    { ...clean, "SOURCES.md": sources(entry("source-a", arabicOnly), entry("source-b", rowB)) },
+    (root) => {
+      const r = runGate("license-copy", root);
+      assert.equal(r.status, 1, r.out);
+      assert.match(r.out, /SOURCES\.md § source-a — colophon fence is missing whatEn, whoEn, licenceEn/);
+    },
+  );
+});
+
+test("gate:license-copy refuses a non-commercial claim made only in the English line", () => {
+  const nc = { ...rowA, licenceEn: "Non-commercial use only" };
+  withFixture(
+    { "SOURCES.md": sources(entry("source-a", nc), entry("source-b", rowB)), [COLOPHON]: colophon(nc, rowB) },
+    (root) => {
+      const r = runGate("license-copy", root);
+      assert.equal(r.status, 1, r.out);
+      assert.match(r.out, /source-a — the colophon line claims non-commercial terms/);
+      assert.match(r.out, /Non-commercial use only/);
+    },
+  );
 });
 
 test("gate:license-copy refuses a declared row the app never shows", () => {

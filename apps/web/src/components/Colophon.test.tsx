@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { describe, expect, it, vi } from "vitest";
 import { Colophon } from "./Colophon";
-import { stringsFor } from "../i18n";
+import { LangProvider, stringsFor } from "../i18n";
 import { SOURCE_REPO, isCommit, sourceUrl, urlFor } from "../provenance";
 import { CARD_EDGE_KEY } from "../card-edge";
 import { LOOKALIKE_COMPARE_KEY } from "../lookalike-compare";
@@ -94,6 +94,44 @@ describe("Colophon", () => {
     // above (Hifth's own licence), and the corpus's is a separate obligation.
     expect(screen.getByText("CC BY 4.0")).toBeInTheDocument();
     expect(screen.getByText("GNU GPL")).toBeInTheDocument();
+  });
+
+  it("in English, gives every source an English line under the row its licence asks for", async () => {
+    // Found on the store build, 2026-11-17 (launch item 39): with the buttons in
+    // English, the sources still read only in Arabic, so an English reader (and
+    // Apple's reviewer) could not tell what the app is built on. The Arabic row
+    // stays as it is, because it is the attribution SOURCES.md records; the
+    // English line sits under it, and is bound to SOURCES.md the same way.
+    // The real language holder, so the panel's own English button switches it.
+    render(
+      <LangProvider>
+        <Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />
+      </LangProvider>,
+    );
+    fireEvent.click(screen.getByRole("radio", { name: /English/ }));
+    // The English strings may load a moment after the tap.
+    await screen.findByText("Mushaf pages");
+    // The choice is remembered on the device; forget it for the tests after this one.
+    localStorage.clear();
+    const rows = Array.from(document.querySelectorAll("li[data-credit]"));
+    expect(rows.length).toBeGreaterThanOrEqual(7);
+    for (const row of rows) {
+      const english = row.querySelector('[lang="en"]');
+      expect(english, `no English line for ${row.getAttribute("data-credit")}`).not.toBeNull();
+      expect(english!.textContent).not.toMatch(/[؀-ۿ]/);
+      // The Arabic attribution is still there, unchanged.
+      expect(row.querySelector('[lang="ar"]')?.textContent).toMatch(/[؀-ۿ]/);
+    }
+    const page = rows.find((r) => r.getAttribute("data-credit") === "https://github.com/quranpedia/quran-svg");
+    expect(page!.textContent).toMatch(/Mushaf pages/);
+    expect(page!.textContent).not.toMatch(/non-commercial/i);
+  });
+
+  it("in Arabic, shows the sources as before, with no English line", () => {
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const rows = Array.from(document.querySelectorAll("li[data-credit]"));
+    expect(rows.length).toBeGreaterThanOrEqual(7);
+    for (const row of rows) expect(row.querySelector('[lang="en"]')).toBeNull();
   });
 
   it("does not claim the mushaf artwork is restricted to non-commercial use", () => {

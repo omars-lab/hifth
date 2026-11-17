@@ -21,8 +21,14 @@ const ROOT = process.env.HIFTH_GATE_ROOT ? process.env.HIFTH_GATE_ROOT.replace(/
 export const SOURCES_PATH = join(ROOT, "SOURCES.md");
 export const COLOPHON_PATH = join(ROOT, "apps", "web", "src", "components", "Colophon.tsx");
 
-/** The row fields, in the order a failure should print them. */
-export const FIELDS = ["what", "who", "licence", "href"];
+/**
+ * The row fields, in the order a failure should print them. The three `…En`
+ * fields are the English line the info panel shows under the Arabic row when the
+ * reader has chosen English (launch item 39, 2026-11-17). They are bound like the
+ * rest, so what an English reader is told about a licence is also what the
+ * record says.
+ */
+export const FIELDS = ["what", "who", "licence", "href", "whatEn", "whoEn", "licenceEn"];
 
 /**
  * Every ```colophon fence in SOURCES.md, keyed by the `### <id>` it sits under.

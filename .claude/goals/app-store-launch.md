@@ -115,7 +115,7 @@ comes before what matters once readers have it, since a turned-down build costs 
 5. **The fast-fix line:** the release command, the site's undo, the retry report, then the
    off-switch and the prompt, each loaded after the page is up.
 6. **Hearing about problems:** store reviews, store numbers and the release page on the new key;
-   the app's log and readers' crashes; the sources in English (㊴).
+   the app's log and readers' crashes. (The sources in English ㊴ are fixed.)
 7. **Accounts**, as far as the sign-in choices allow; all of it once they are made.
 8. **Test flight** with a few named readers, then **upload and release** once the permissions
    are in writing.

@@ -7323,7 +7323,8 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊴"
       },
-      "status": "open",
+      "status": "fixed",
+      "closedBy": "apps/web/e2e/lang.spec.ts",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
