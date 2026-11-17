@@ -69,7 +69,7 @@ test("every address refuses another site's frame and a guessed file type", () =>
 
 test("each front page lets scripts come only from this site and the spam check", () => {
   const rules = headerRules();
-  for (const path of ["/", "/privacy", "/ar/", "/ar/privacy"]) {
+  for (const path of ["/", "/privacy", "/sources", "/ar/", "/ar/privacy", "/ar/sources"]) {
     const csp = rules[path]?.["content-security-policy"] || "";
     assert.match(csp, /default-src 'self'/, path);
     assert.match(csp, /script-src 'self' https:\/\/challenges\.cloudflare\.com(;|$)/, path);
@@ -99,7 +99,7 @@ test("the app lets scripts come only from this site, and sounds only from the re
 });
 
 test("no front page carries a script or style written into the page itself", () => {
-  for (const path of ["index.html", "privacy.html", "404.html", "ar/index.html", "ar/privacy.html"]) {
+  for (const path of ["index.html", "privacy.html", "sources.html", "404.html", "ar/index.html", "ar/privacy.html", "ar/sources.html"]) {
     const html = page(path);
     assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)[^>]*>/, `${path} has a script with no src`);
     assert.doesNotMatch(html, /<style|\sstyle="|\son[a-z]+="/, `${path} has a style or handler in the page`);

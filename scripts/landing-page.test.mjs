@@ -14,7 +14,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const LANDING = join(dirname(fileURLToPath(import.meta.url)), "..", "apps", "landing");
-const PAGES = ["index.html", "privacy.html", "404.html", "ar/index.html", "ar/privacy.html"];
+const PAGES = ["index.html", "privacy.html", "sources.html", "404.html", "ar/index.html", "ar/privacy.html", "ar/sources.html"];
+// The sources pages repeat other people's terms ("Free to use, with the source named"), which
+// are about their work, not Hifth's price, so the free-claim check leaves them out.
+// What they say is held to SOURCES.md by landing-sources.test.mjs instead.
+const SOURCES_PAGES = new Set(["sources.html", "ar/sources.html"]);
 
 /** Lines of a page's visible text that call something free. */
 export function freeClaims(html) {
@@ -35,7 +39,7 @@ test("the rule spots a free claim and ignores markup", () => {
 
 test("no landing page calls Hifth free", () => {
   const found = [];
-  for (const page of PAGES) {
+  for (const page of PAGES.filter((p) => !SOURCES_PAGES.has(p))) {
     for (const claim of freeClaims(readFileSync(join(LANDING, page), "utf8"))) {
       found.push(`${page}: ${claim}`);
     }
@@ -212,6 +216,7 @@ test("every picture the front pages name is in the folder and allowed to ship", 
 const BILINGUAL = [
   ["index.html", "ar/index.html"],
   ["privacy.html", "ar/privacy.html"],
+  ["sources.html", "ar/sources.html"],
 ];
 const read = (name) => readFileSync(join(LANDING, name), "utf8");
 const address = (name) => "/" + name.replace(/index\.html$/, "");
@@ -285,7 +290,7 @@ test("the Arabic sign-up form answers in Arabic", () => {
 // page's own Arabic is plain words about the app, so it carries no vowel marks at all, and no
 // line of it can be taken for a verse.
 test("the Arabic pages carry no vowel marks", () => {
-  for (const name of ["ar/index.html", "ar/privacy.html"]) {
+  for (const name of ["ar/index.html", "ar/privacy.html", "ar/sources.html"]) {
     const marked = read(name).split("\n").filter((line) => /[\u064B-\u0652\u0670]/.test(line));
     assert.deepEqual(marked, [], name);
   }

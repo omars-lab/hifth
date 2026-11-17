@@ -65,13 +65,19 @@ that message, not with the licence lock's.
 *Still true:* building for the owner's own iPad keeps accepting the private build, as it must.
 A private build for named testers, if that is ever chosen, would need a command of its own.
 
-### ② No page names every source with its licence and a link back · **open**
+### ② No page names every source with its licence and a link back · **fixed**
 
-The credits sit in the colophon and in our source files. Apple's reviewers and the rights holders
-will both look for one place that names them all.
+The credits sat in the app's info panel and in our source files. Apple's reviewers and the rights
+holders will both look for one place on the web that names them all.
 
-*What would answer it:* a citations page in the app and on hifth.app, listing every source the
-source and licence files name, with a check that refuses a source left off.
+*What answered it (2026-11-17):* a sources page on hifth.app, in English at /sources.html and in
+Arabic at /ar/sources.html, linked from every page's footer. It names each source the app is built
+on, what it gave, who made it, its terms and a link to its own page: the same list the app shows
+in its info panel. A check holds both pages to the sources record row for row, and refuses a source
+the licence file names that the page leaves out. The release refuses a folder missing either page.
+
+*Still true:* the page goes live with hifth.app's first upload, which waits on the owner. The
+check reads the licence file's short names only; a source it mentions only in prose is not caught.
 
 ### ③ The word-root data's owners have not given permission for the store · **blocked**
 

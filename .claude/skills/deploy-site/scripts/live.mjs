@@ -19,7 +19,7 @@
  */
 import { markersIn } from "./shipped.mjs";
 
-const PAGES = ["/", "/privacy.html", "/read/"];
+const PAGES = ["/", "/privacy.html", "/sources.html", "/read/"];
 
 export const DEV_PATHS = [
   "/read/pitch/",

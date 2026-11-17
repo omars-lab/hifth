@@ -29,6 +29,8 @@ function cleanFolder() {
     { path: "404.html", text: "<h1>No page here</h1><a href=\"/\">Hifth</a>" },
     { path: "ar/index.html", text: '<html lang="ar" dir="rtl"><h1>حفظ</h1>' },
     { path: "ar/privacy.html", text: "<p>privacy</p>" },
+    { path: "sources.html", text: "<p>sources</p>" },
+    { path: "ar/sources.html", text: "<p>sources</p>" },
     { path: "_headers", text: "/read/assets/*\n  Cache-Control: immutable\n" },
     { path: "read/index.html", text: '<script type="module" src="./assets/index-abc.js"></script>' },
     { path: "read/sw.js", text: "self.addEventListener('fetch', () => {})" },
@@ -48,7 +50,7 @@ const paths = (problems) => problems.map((p) => p.path);
 test("a clean release folder passes, and says what it holds", () => {
   const result = auditShipped(cleanFolder(), { commit: HEAD });
   assert.deepEqual(result.problems, []);
-  assert.equal(result.files, 20);
+  assert.equal(result.files, 22);
 });
 
 test("a file that is not on the list of what the site needs is refused", () => {
@@ -199,6 +201,13 @@ test("a script's fingerprint is the one browsers compute: SHA-256 of its words, 
 test("a release missing a page the site needs is refused", () => {
   const files = cleanFolder().filter((f) => !["read/index.html", "privacy.html", "404.html"].includes(f.path));
   assert.deepEqual(paths(refusals(files)), ["privacy.html", "404.html", "read/index.html"]);
+});
+
+// The permission emails point the rights holders at the sources page (launch-citations-page),
+// so a release without it, in either language, would send them to a missing page.
+test("a release missing the sources page, in either language, is refused", () => {
+  const files = cleanFolder().filter((f) => !["sources.html", "ar/sources.html"].includes(f.path));
+  assert.deepEqual(paths(refusals(files)), ["sources.html", "ar/sources.html"]);
 });
 
 test("the app must carry the commit being released, so its source-code offer is true", () => {
