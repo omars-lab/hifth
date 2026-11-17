@@ -35,6 +35,17 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Measured again 2026-11-16 (night), alone: cap raised to 220 KB.** "The new layout" took the app
+to 211.0 KB, 1 KB over. Every word in the app is still used, so there was no quick trim that
+shrinks the total. The other way, a fresh measurement, was open because start-up had got faster
+first. Start-up as built: 2111 ms, against 2306 at the last raise. With 25 KB added, 2261 ms; with
+50 KB, 2408; with 100 KB, 2709. Each set of five runs agreed within 17 ms. So about 50 KB fits
+under 2.5 s, and the cap went up by 10 KB, a fifth of that. After the new layout that leaves
+about 9 KB of room for the app's own log, the remote off-switch and the new-version prompt. The
+next raise should again wait for a trim or a faster start. **Watch the start-up download**: it is
+now 160.8 of its 161 KB, so any of those three that is needed from the first second has to move
+something else out of start-up first.
+
 **Trimmed 2026-11-16: start-up 163.0 → 159.8 KB, back under the 161 KB limit.** The error card
 (launch item 15) and "Report a problem" (item 18) are needed from the first second, and took the
 start-up download to 163.0 KB, over the limit that marks the ~150 ms step. Two parts moved out:

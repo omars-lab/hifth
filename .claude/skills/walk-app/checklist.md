@@ -82,6 +82,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
 
 ## The page bar
 
+- [ ] With "The new layout" on in the info panel, everything on the bottom bar is in reach and
+  nothing is cut off: on the iPad on its side, upright, and on a phone, in English and Arabic.
+  The label opens Go to, Full screen goes in and comes back out, and on a wide screen one page or
+  two and the size buttons work from the bar. · ipad, phone, laptop · issue:
+  `layout-bottom-bar-moving-and-viewing` · not walked yet (built 2026-11-16)
 - [ ] With one page open and a note up, the page bar is still in reach. · laptop, ipad · issue:
   `one-page-note-covers-page-bar` · in the iPad app (walked 2026-10-15 upright on 2:255, with a
   picture from `PROBE_SHOT=`): on the 13-inch the note ends above the full-screen row and the bar

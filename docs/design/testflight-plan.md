@@ -210,11 +210,14 @@ selling the app later with in-app purchases.
 Yours, once the brief exists (⑤): send it to a qualified reader. On a yes, the decision record
 moves to A with who read it and when; on a no, B is the fallback.
 
-### ⑦ Make the App Store Connect key the upload uses · **open**
+### ⑦ Make the App Store Connect key the upload uses · **done**
 
 Yours, in App Store Connect under Users and Access, Integrations. The key file goes in your
 home folder, where Apple's upload tools look for it (the app-setup skill gives the exact
 place), never in the repo.
+
+Done 2026-11-16: the key `hifth-upload` (App Manager access) is in place, and its two ids are
+saved in the repo's encrypted settings. `make app-release-setup` says ok for both.
 
 ### ⑧ Write the upload step · **blocked**
 

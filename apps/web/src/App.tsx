@@ -154,6 +154,7 @@ import { useSideRoom } from "./components/useSideRoom";
 import { PhoneToolbarA, PhoneToolbarB, PhoneToolbarC, phoneBarFromUrl } from "./components/PhoneToolbar";
 import { rememberArrowShowing, savedArrowShowing } from "./jump-arrows";
 import { placeAfterMove, rememberSliderBack, savedSliderBack, type SliderBack } from "./slider-back";
+import { rememberNewLayout, savedNewLayout, type NewLayout } from "./new-layout";
 import { BARS_HIDE_MS, barsMayHide, rememberReadingBars, savedReadingBars, type ReadingBars } from "./reading-bars";
 // Opened by few readers and never before the page is up: loaded on first open.
 import {
@@ -185,6 +186,7 @@ import type { NoteAbout } from "./components/NoteBox";
 import { PageSpread } from "./components/PageSpread";
 import type { EdgeTurnDriver, PeelPages } from "./components/EdgeGrabRails";
 import { DesktopChrome } from "./components/DesktopChrome";
+import { BarFullScreen, BarGoTo } from "./components/BarControls";
 import { HopRail } from "./components/HopRail";
 import { HopPopover } from "./components/HopPopover";
 import { LookalikeSections } from "./components/LookalikeSections";
@@ -1656,6 +1658,14 @@ export function App(): JSX.Element {
     rememberSliderBack(choice);
     setSliderBack(choice);
   }, []);
+  // "The new layout" (new-layout.ts, a rough build, off by default): Go to,
+  // one page or two, the size buttons and Full screen move onto the page bar.
+  const [newLayout, setNewLayout] = useState<NewLayout>(() => savedNewLayout());
+  const chooseNewLayout = useCallback((choice: NewLayout) => {
+    rememberNewLayout(choice);
+    setNewLayout(choice);
+  }, []);
+  const onBar = newLayout === "bar";
   const [backPlace, setBackPlace] = useState<number | null>(null);
   const jumpToRef = useRef<number | null>(null);
   const backFromRef = useRef(page);
@@ -4137,7 +4147,12 @@ export function App(): JSX.Element {
   // undo and redo (owner's page comment, 2026-11-07); a phone keeps the word in
   // the bottom line. Gesture option A has no button either way.
   const toggleFull = useCallback(() => setFull((f) => !f), []);
-  const fullInBar = useMemo(() => (desktop && verseGestures !== "a" ? { full, toggle: toggleFull } : null), [desktop, verseGestures, full, toggleFull]);
+  // With the new layout, Full screen is entered from the page bar; the tool
+  // row keeps only the way back, since the page bar is away in full screen.
+  const fullInBar = useMemo(
+    () => (desktop && verseGestures !== "a" && (!onBar || full) ? { full, toggle: toggleFull } : null),
+    [desktop, verseGestures, full, toggleFull, onBar],
+  );
   const fullSaid = useRef(false);
   useEffect(() => {
     if (full === fullSaid.current) return;
@@ -4553,15 +4568,17 @@ export function App(): JSX.Element {
         </button>
         {/* Wayfinding lives in the chrome because it is always available: the
             keyboard has `/`, and a touch device needs something to press. */}
-        <button
-          type="button"
-          className={styles.chromeBtn}
-          aria-label={t.goToLong}
-          aria-haspopup="dialog"
-          onClick={() => setJumperOpen(true)}
-        >
-          ⌖
-        </button>
+        {!onBar && (
+          <button
+            type="button"
+            className={styles.chromeBtn}
+            aria-label={t.goToLong}
+            aria-haspopup="dialog"
+            onClick={() => setJumperOpen(true)}
+          >
+            ⌖
+          </button>
+        )}
         <button
           type="button"
           className={styles.chromeBtn}
@@ -4586,6 +4603,7 @@ export function App(): JSX.Element {
               onZoom={handleZoom}
               zoomNow={zoomNow}
               stacked
+              part={onBar ? "lang" : "all"}
             />
           </SettingsDrawer>
         ) : (
@@ -4609,6 +4627,7 @@ export function App(): JSX.Element {
             zoom={zoom}
             onZoom={handleZoom}
             zoomNow={zoomNow}
+            part={onBar ? "lang" : "all"}
           />
         )}
         {/* No install button here. There used to be one, and it was a ~126px
@@ -5155,6 +5174,8 @@ export function App(): JSX.Element {
             onArrowShowing={chooseArrowShowing}
             sliderBack={sliderBack}
             onSliderBack={chooseSliderBack}
+            newLayout={newLayout}
+            onNewLayout={chooseNewLayout}
             readingBars={readingBars}
             onReadingBars={chooseReadingBars}
             scopeLook={scopeLook}
@@ -5307,8 +5328,10 @@ export function App(): JSX.Element {
                   : t.clickHint
           }
         />
-        {verseGestures !== "a" && !desktop && (
+        {verseGestures !== "a" && !desktop && (!onBar || full) && (
           // With the bottom line kept in full screen, its own button is the way back.
+          // Under the new layout, Full screen is entered from the page bar and this
+          // button stays only as the way back.
           <button type="button" className={styles.fullBtn} data-full-enter="" onClick={() => setFull((f) => !f)}>
             {full ? t.showBars : t.fullScreen}
           </button>
@@ -5570,6 +5593,31 @@ export function App(): JSX.Element {
         onBack={() => {
           if (backPlace !== null) goToPage(backPlace, t.sliderBackTo(backPlace));
         }}
+        keyed={onBar}
+        lead={
+          onBar ? (
+            <BarGoTo page={page} context={pageContext(page)} onOpen={() => setJumperOpen(true)} />
+          ) : undefined
+        }
+        tail={
+          // One page or two and the size buttons only where the top bar showed
+          // them (an upright iPad pinches); Full screen at every width.
+          onBar ? (
+            <>
+              {desktop && (
+                <DesktopChrome
+                  pageMode={pageMode}
+                  onPageMode={handlePageMode}
+                  zoom={zoom}
+                  onZoom={handleZoom}
+                  zoomNow={zoomNow}
+                  part="view"
+                />
+              )}
+              {verseGestures !== "a" && <BarFullScreen onToggle={toggleFull} />}
+            </>
+          ) : undefined
+        }
       />
 
       {PITCH && verseMenuAt && verseMenuItems.length > 0 && (

@@ -180,6 +180,10 @@
       "desktop",
       "desktop-firefox"
     ],
+    "new-layout.spec.ts": [
+      "desktop",
+      "desktop-firefox"
+    ],
     "notes.spec.ts": [
       "desktop"
     ],

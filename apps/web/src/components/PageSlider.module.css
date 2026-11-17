@@ -634,3 +634,39 @@
   color: var(--ink-soft);
   font-size: var(--text-xs);
 }
+
+/*
+ * "The new layout" (new-layout.ts): the bar carries Go to, one page or two, the
+ * size buttons and Full screen as well as the slider. A wrapping row rather
+ * than the fixed grid, so what does not fit beside the slider drops under it
+ * instead of squeezing it; the slider takes whatever room is left and never
+ * less than a useful length. The count of pages keeps its own line.
+ */
+.bar[data-keyed] {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bar[data-keyed] > .track {
+  flex: 1 1 10rem;
+  min-inline-size: 10rem;
+}
+
+.bar[data-keyed] > .inventory {
+  flex-basis: 100%;
+}
+
+/* The page turns drawn as the keys they answer to: a keycap face inside the
+   full touch target, so the look says "this is the arrow key" while a thumb
+   still has 44 points to hit. */
+.bar[data-keyed] > .edge > .arrow {
+  display: grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2rem;
+  border: 1px solid var(--hairline);
+  border-block-end-width: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--paper-sunk);
+}

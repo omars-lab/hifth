@@ -638,7 +638,13 @@ offered to the owner, not done.
 **Done when:** the size check shows at least 3 KB of room, the baseline is recorded, and the
 trims list has a dated entry saying what was taken.
 
-### ㉓ The size limit is full again, and the launch still has code to add · **open**
+### ㉓ The size limit is full again, and the launch still has code to add · **fixed**
+
+**Fixed 2026-11-16 (night), by measuring again.** Start-up came out at 2111 ms as built, and still
+2408 ms with 50 KB added, so the limit went up by the skill's rule from 210 to 220 KB. The new
+layout on the page bar took 1 KB of it, which leaves about 9 KB for the three launch items below.
+The numbers are in the cap history in the optimizing-performance skill and in the trims list. The
+start-up download's own limit stays at 161 KB.
 
 **Where it stands (2026-11-16).** The error card and "Report a problem" took the app to 210.0 KB
 against its 210 KB limit: no room. Moving parts out of start-up kept the first download under its

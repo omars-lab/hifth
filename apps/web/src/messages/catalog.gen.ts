@@ -397,7 +397,12 @@ export interface Catalog {
   readonly movedWaiting: string;
   readonly mushaf: string;
   readonly nearestPageN: (d: { readonly page: string | number }) => string;
+  readonly newLayoutBar: string;
+  readonly newLayoutNote: string;
+  readonly newLayoutTitle: string;
+  readonly newLayoutToday: string;
   readonly nextPage: string;
+  readonly nextPageKey: string;
   readonly nextTellsApart: string;
   readonly noConcordance: string;
   readonly noteAboutAsk: string;
@@ -559,6 +564,7 @@ export interface Catalog {
   readonly playToPickClick: string;
   readonly playingRun: (d: { readonly from: string | number; readonly to: string | number }) => string;
   readonly prevPage: string;
+  readonly prevPageKey: string;
   readonly qulVerse: (d: { readonly label: string | number }) => string;
   readonly "railDirection.earlier": string;
   readonly "railDirection.later": string;

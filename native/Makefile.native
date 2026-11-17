@@ -506,7 +506,7 @@ EXPORT_OPTIONS := $(NATIVE)/ExportOptions.plist
 ARCHIVE_DD     := $(DERIVED)/store/derived
 
 app-release-setup: ## Is this laptop set up to release? Each thing a release needs, ok or missing, with the page to fix it on
-	node .claude/skills/understanding-processes/scripts/check-release-setup.mjs
+	@dotenvx run --quiet -- node .claude/skills/understanding-processes/scripts/check-release-setup.mjs
 
 app-archive: app-store-flavour app-generate ## Archive the iPad and iPhone app for the store: public build only, checked inside the archive; nothing leaves the laptop
 	@test -n "$(TEAM)" || { echo "  no Apple Development identity in the keychain (TEAM= to override)"; exit 1; }

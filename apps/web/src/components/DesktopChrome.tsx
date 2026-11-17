@@ -45,6 +45,13 @@ interface DesktopChromeProps {
   zoomNow?: (() => number) | undefined;
   /** In a column, for the settings drawer, rather than along the bar. */
   stacked?: boolean;
+  /**
+   * Which controls. "all" is the top bar today. Under "the new layout"
+   * (new-layout.ts) the top bar keeps only the language ("lang"), the page bar
+   * takes one page or two and the size buttons ("view"), and the pictures of
+   * keys go, since the page turns on the bar name their own keys.
+   */
+  part?: "all" | "lang" | "view";
 }
 
 /**
@@ -71,6 +78,7 @@ export function DesktopChrome({
   onZoom,
   zoomNow,
   stacked,
+  part = "all",
 }: DesktopChromeProps): JSX.Element {
   const { t, lang, setLang } = useT();
   // The stepper works whether the book is open or closed: a spread magnifies
@@ -86,7 +94,10 @@ export function DesktopChrome({
   };
 
   return (
-    <div className={stacked ? `${styles.extras} ${styles.stacked}` : styles.extras}>
+    <div
+      className={`${styles.extras}${stacked ? ` ${styles.stacked}` : ""}${part === "view" ? ` ${styles.inBar}` : ""}`}
+      data-bar-view={part === "view" ? "" : undefined}
+    >
       {/*
        * One leaf or two — the control the whole desktop spread now hangs on.
        *
@@ -105,6 +116,7 @@ export function DesktopChrome({
        * labelled "two pages" would leave a listener guessing whether *checked*
        * means the box is ticked or the book is open.
        */}
+      {part !== "lang" && (<>
       <div
         className={styles.modeRow}
         role="radiogroup"
@@ -171,6 +183,7 @@ export function DesktopChrome({
           +
         </button>
       </div>
+      </>)}
 
       {/*
        * The language switch, in the header at last.
@@ -200,6 +213,7 @@ export function DesktopChrome({
        * before; the aria snapshots record it. Naming it too is a separate
        * question about this one abbreviation, not about the switch.
        */}
+      {part !== "view" && (
       <div className={styles.langRow} role="radiogroup" aria-label={t.langSectionTitle}>
         {LOCALE_IDS.map((id) => (
           <button
@@ -216,6 +230,7 @@ export function DesktopChrome({
           </button>
         ))}
       </div>
+      )}
 
       {/*
        * The keyboard map, said out loud for the first time.
@@ -241,6 +256,7 @@ export function DesktopChrome({
        * keyboard. The query and the reasoning are in `DesktopChrome.module.css`
        * beside `.keys` (docs/design/desktop.md §8 ③).
        */}
+      {part === "all" && (
       <div className={styles.keys} aria-hidden="true">
         <span className={styles.keyGroup}>
           {/* `dir="ltr"` on the caps, and it is load-bearing rather than tidy.
@@ -264,6 +280,7 @@ export function DesktopChrome({
           <span className={styles.keyWhat}>{t.keyJump}</span>
         </span>
       </div>
+      )}
     </div>
   );
 }

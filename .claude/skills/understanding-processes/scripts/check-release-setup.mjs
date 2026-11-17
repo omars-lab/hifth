@@ -31,7 +31,6 @@ const ONLY = opt("--only")?.split(",");
 const KEY_PAGE = "https://appstoreconnect.apple.com/access/integrations/api";
 const CERT_PAGE = "https://developer.apple.com/account/resources/certificates/list";
 const KEYS_DIR = join(HOME, ".appstoreconnect/private_keys");
-const IDS_FILE = join(HOME, ".appstoreconnect/hifth.json");
 
 function run(cmd, argv) {
   const r = spawnSync(cmd, argv, { cwd: root, encoding: "utf8", timeout: 20000 });
@@ -149,16 +148,20 @@ const CHECKS = [
     name: "App Store Connect key ID and issuer ID",
     needs: "check",
     test: () => {
-      let ids;
-      try {
-        ids = JSON.parse(readFileSync(IDS_FILE, "utf8"));
-      } catch {
-        return { state: "missing", fix: `tell the agent the key ID and issuer ID (neither is secret); it writes them to ${IDS_FILE}`, link: KEY_PAGE };
-      }
-      if (!/^[A-Z0-9]{10}$/.test(ids.keyId ?? "") || !/^[0-9a-f-]{36}$/i.test(ids.issuerId ?? ""))
-        return { state: "missing", fix: `${IDS_FILE} needs a keyId (10 letters and digits) and an issuerId (the long id above the keys list)` };
-      if (!keyFiles().includes(`AuthKey_${ids.keyId}.p8`))
-        return { state: "missing", fix: `no key file matches the key ID in ${IDS_FILE}; check the ID, or move the right .p8 into ${KEYS_DIR}/` };
+      // Saved in the repo's encrypted settings; `make app-release-setup` runs
+      // this under `dotenvx run`, which hands them over as environment values.
+      const keyId = process.env.ASC_KEY_ID ?? "";
+      const issuerId = process.env.ASC_ISSUER_ID ?? "";
+      if (!keyId || !issuerId)
+        return {
+          state: "missing",
+          fix: "save them in the repo's encrypted settings: make env-set NAME=ASC_KEY_ID, then make env-set NAME=ASC_ISSUER_ID (the long id above the keys list)",
+          link: KEY_PAGE,
+        };
+      if (!/^[A-Z0-9]{10}$/.test(keyId) || !/^[0-9a-f-]{36}$/i.test(issuerId))
+        return { state: "missing", fix: "ASC_KEY_ID must be 10 letters and digits and ASC_ISSUER_ID the 36-character id; save them again with make env-set" };
+      if (!keyFiles().includes(`AuthKey_${keyId}.p8`))
+        return { state: "missing", fix: `no key file matches the saved ASC_KEY_ID; check the ID, or move the right .p8 into ${KEYS_DIR}/` };
       return { state: "ok" };
     },
   },

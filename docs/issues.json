@@ -3400,10 +3400,10 @@
         "file": "docs/design/testflight-plan.md",
         "item": "⑦"
       },
-      "status": "open",
+      "status": "done",
       "severity": "question",
       "owner": "user",
-      "note": "Make the App Store Connect API key under Users and Access, Integrations; the key file goes in ~/.appstoreconnect/private_keys/ (where the upload tools look), never the repo; the agent needs only the key ID and issuer ID."
+      "note": "Make the App Store Connect API key under Users and Access, Integrations; the key file goes in ~/.appstoreconnect/private_keys/ (where the upload tools look), never the repo; the agent needs only the key ID and issuer ID. Done 2026-11-16: key hifth-upload (App Manager) in place, ids saved as ASC_KEY_ID and ASC_ISSUER_ID in the encrypted settings; make app-release-setup says ok."
     },
     {
       "id": "testflight-upload-step",
@@ -6419,11 +6419,12 @@
         "file": "docs/performance.md",
         "item": "㉓"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "feature": "performance",
-      "note": "The error card and \"Report a problem\" took the app to 210.0 KB against its 210 KB size limit (2026-11-16), so the three launch items that still add web code (the app's log, the remote off-switch, the new-version prompt) cannot land. Two ways out: a trim that shrinks the total with nothing a reader sees changed, or measuring start-up again with nothing else running, since it is about 150 ms faster than when the limit was set. Done when the size check shows at least 3 KB of room.",
+      "closedBy": "scripts/gate-budget.mjs",
+      "note": "FIXED 2026-11-16 (night) by measuring again: start-up 2111 ms as built and 2408 with 50 KB added, so the limit went from 210 to 220 KB by the skill's rule. After the new layout on the page bar (1 KB) the app is 211.0 KB, 9 KB of room. The start-up download is 160.8 of its own 161 KB, flagged in the trims list. Was: the error card and \"Report a problem\" took the app to 210.0 KB against its 210 KB size limit (2026-11-16), so the three launch items that still add web code (the app's log, the remote off-switch, the new-version prompt) cannot land. Two ways out: a trim that shrinks the total with nothing a reader sees changed, or measuring start-up again with nothing else running, since it is about 150 ms faster than when the limit was set. Done when the size check shows at least 3 KB of room.",
       "useCase": "refuse-a-bundle-that-would-not-load-on-a-phone"
     },
     {
@@ -6976,7 +6977,7 @@
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made. Next (2026-11-16): the launch item the agent takes next, because it adds no code to the web app, and the web app has no room left under its size limit (room-under-the-size-limit-again). Half done 2026-11-16: make app-archive makes a real Xcode archive of the public build and runs the release check on the app inside it (first run clean), and only the upload waits on the licence, checked before anything is built (scripts/native-store-flavour.test.mjs). make app-export ran clean the same day with the owner's yes, which made the team's App Store certificate; the app inside the export is signed for distribution and is the public build. Left: Apple's own check of the exported app needs the App Store Connect key the owner makes (testflight-upload-key); and the upload should take only an archive this command made."
+      "note": "The upload step stays locked until ③ and ④ are answered. When the real archive exists, the public-build check must read the app inside that archive: today it reads a release build the check makes itself. An archive made straight from Xcode skips these commands altogether, so the upload step should take only an archive this command made. Next (2026-11-16): the launch item the agent takes next, because it adds no code to the web app, and the web app has no room left under its size limit (room-under-the-size-limit-again). Half done 2026-11-16: make app-archive makes a real Xcode archive of the public build and runs the release check on the app inside it (first run clean), and only the upload waits on the licence, checked before anything is built (scripts/native-store-flavour.test.mjs). make app-export ran clean the same day with the owner's yes, which made the team's App Store certificate; the app inside the export is signed for distribution and is the public build. Left: Apple's own check of the exported app, now unblocked because the key exists (2026-11-16, testflight-upload-key done) and the agent's next item; and the upload should take only an archive this command made."
     },
     {
       "id": "launch-silent-switch-audio",
@@ -7251,7 +7252,8 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Owner, 2026-11-16 (page comments t_3b503f and t_f9e931): Go to, the size buttons and one page or two belong on the page bar at the bottom, and its turn buttons should look like the keyboard keys drawn in the top bar. Those two keys are pictures, not buttons. Plan: a rough build behind one switch, \"The new layout\"; the slider itself does not change. Tried on the iPad and a laptop, in Chrome and Firefox, before anything is chosen."
+      "useCase": "move-across-the-whole-mushaf",
+      "note": "Owner, 2026-11-16 (page comments t_3b503f and t_f9e931): Go to, the size buttons and one page or two belong on the page bar at the bottom, and its turn buttons should look like the keyboard keys drawn in the top bar. Those two keys are pictures, not buttons. Plan: a rough build behind one switch, \"The new layout\"; the slider itself does not change. Tried on the iPad and a laptop, in Chrome and Firefox, before anything is chosen. Built 2026-11-16 behind the info panel's switch \"The new layout\" (e2e/new-layout.spec.ts); waiting on the owner to try it on the iPad."
     },
     {
       "id": "layout-pens-in-the-top-bar",

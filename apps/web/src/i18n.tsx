@@ -221,6 +221,14 @@ export interface Strings {
   sliderBackOff: string;
   sliderBackOn: string;
   sliderBackNote: string;
+  /** Settings: "the new layout" (new-layout.ts). */
+  newLayoutTitle: string;
+  newLayoutToday: string;
+  newLayoutBar: string;
+  newLayoutNote: string;
+  /** The page turns' tooltips under the new layout, naming their key. */
+  prevPageKey: string;
+  nextPageKey: string;
   /** Settings: whether the bars hide while reading (reading-bars.ts). */
   readingBarsTitle: string;
   readingBarsStay: string;
