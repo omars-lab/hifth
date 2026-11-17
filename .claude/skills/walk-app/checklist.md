@@ -1139,7 +1139,11 @@ would break. Pictures of this build may be committed; it carries no held text.
   screen reader is told nothing it did not ask for. · reviewer iPad simulator ·
   `make app-probe TARGET=ipad CONFIG=Release ROUTE= EVALFILE=.claude/skills/walk-app/scripts/first-open-walk.js DELAY_MS=500`
   · walked 2026-11-17: right, but a "Left off" ribbon came up within seconds (issue:
-  `launch-left-off-on-first-open`)
+  `launch-left-off-on-first-open`, fixed the same day; the walk's `leftOffAt12s` must say `no`;
+  test: `apps/web/e2e/bookmarks.spec.ts`)
+- [ ] Leave off on a later page, close the app, open it again and wait on its first page for ten
+  seconds: the "Left off" ribbon is still on the page you left, not the first page. · any · test:
+  `apps/web/e2e/bookmarks.spec.ts` · found 2026-11-17 while fixing the first-open ribbon
 - [ ] Follow the review notes' "How to try it" steps word for word (`docs/design/store-listing.md`):
   verse 40 on page 7, the round "≈ 2" button, 2:47 and 2:122 in the list, the green arrow turns
   there. A step that names something the screen does not show is a reviewer stuck at step 2. ·

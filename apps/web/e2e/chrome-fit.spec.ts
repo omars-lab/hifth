@@ -50,11 +50,9 @@ async function measure(page: Page) {
   });
 }
 
-test.describe("Hifth · the chrome fits a phone", () => {
-  test("no horizontal overflow, and a constant header height, from 320 to 430", async ({
-    page,
-  }) => {
-    await page.goto("/#/hafs-kfqc/2:47");
+/** Every phone width: no sideways spill, and one header height throughout. */
+async function fitsAtEveryWidth(page: Page, lang: "ar" | "en") {
+    await page.goto(`/?lang=${lang}#/hafs-kfqc/2:47`);
     await expect(page.locator("main svg[role='group']").first()).toBeVisible();
 
     const heights = new Map<number, number>();
@@ -82,6 +80,25 @@ test.describe("Hifth · the chrome fits a phone", () => {
     expect(Object.fromEntries(heights), "header height varies by viewport width").toEqual(
       Object.fromEntries([...heights.keys()].map((w) => [w, [...distinct][0]])),
     );
+}
+
+test.describe("Hifth · the chrome fits a phone", () => {
+  // The title stays as it always was: a use case names it (docs/use-cases.json).
+  test("no horizontal overflow, and a constant header height, from 320 to 430", async ({
+    page,
+  }) => {
+    await fitsAtEveryWidth(page, "ar");
+  });
+
+  // This ran in Arabic only until 2026-11-17, when a walk of the store build found
+  // the English top bar 82 px tall at 320 px (69 px at every other width) and
+  // spilling 13 to 17 px off the side: the buttons' English words are wider than
+  // their Arabic ones. A known fault, not a pass. When the narrow English bar is
+  // fixed, this mark makes the test fail, so it gets removed.
+  // Backlog: english-top-bar-320.
+  test("the same, with the buttons in English", async ({ page }) => {
+    test.fail(true, "the English top bar spills at 320 px (english-top-bar-320)");
+    await fitsAtEveryWidth(page, "en");
   });
 
   test("still fits with the widest page number the mushaf has", async ({ page }) => {

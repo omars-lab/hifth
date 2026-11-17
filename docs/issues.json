@@ -7310,11 +7310,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊳"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "On a fresh install the red \"Left off\" ribbon appears on the opening page within a few seconds, though nothing has been read. The app marks the page a reader stays on, which is right later, but on a first open a reviewer sees what looks like someone else's place. Seen on the reviewer iPad and in the browser with nothing stored, 2026-11-17. What would answer it: no ribbon until the reader has turned at least one page, with a test."
+      "closedBy": "apps/web/e2e/bookmarks.spec.ts",
+      "note": "On a fresh install the red \"Left off\" ribbon appeared on the opening page within a few seconds, though nothing had been read. The app marks the page a reader stays on, which is right later, but on a first open a reviewer saw what looked like someone else's place. Seen on the reviewer iPad and in the browser with nothing stored, 2026-11-17. Worse, found while fixing it: the app opens on that page on every launch, so a reader who left off elsewhere lost their place to it after six seconds of looking. Fixed 2026-11-17: when the app opens with no address, the page it opens on does not move the ribbon until the reader turns a page or follows a link (useSeam's waitForTurn). Tests: bookmarks.spec.ts 'the page the app opens on by itself is not taken as where you left off' and 'a place you left off survives opening the app and looking at its first page' failed first; 'a link followed to the page the app opened on is a choice' guards the other side."
     },
     {
       "id": "launch-sources-in-english",
@@ -7327,6 +7328,17 @@
       "owner": "agent",
       "launch": true,
       "note": "With the buttons in English, the sources list in the info panel still names the page print, the word-root corpus and the reciter in Arabic. Seen in the store web build, 2026-11-17. Each name gets an English form beside the source's own, with a test."
+    },
+    {
+      "id": "english-top-bar-320",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊶"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "In English at 320 px wide the top bar needs 333 px (Chrome's engine) or 337 px (Safari's): the info button is cut off and the bar grows from 69 to 82 px as the line under the name wraps. Predates the store work; the top-bar test ran in Arabic only and never saw it. The tajweed button is 70 px in English and 49 in Arabic. Not a launch blocker: the store app needs iOS 17, whose phones are at least 375 px wide. The test now runs in English and is marked as an expected failure (apps/web/e2e/chrome-fit.spec.ts); the fix removes that mark. Measured 2026-11-17: a smaller tag plus a shorter line just fit in Chrome and still spill in Safari, so it needs a narrow-phone layout, not a tweak."
     },
     {
       "id": "launch-support-mail-arrives",

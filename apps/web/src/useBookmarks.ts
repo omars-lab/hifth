@@ -113,9 +113,18 @@ export const SEAM_DWELL_MS = 6000;
  * The seam: the one red ribbon that marks where the reader left off. Nobody
  * places it — it follows the last page the reader stayed on (`SEAM_DWELL_MS`),
  * and is written to the phone each time it moves.
+ *
+ * `waitForTurn`: the app was opened with no address, so the first page shown is
+ * the one it opens on by itself, not one the reader chose. Staying there does not
+ * move the seam until the reader has gone to another page at least once.
+ * Otherwise a first open shows a "Left off" mark on a page nobody read, and every
+ * launch (which opens there too) would take the reader's place away after a few
+ * seconds. Found walking a fresh install as the store's reviewer would, 2026-11-17.
  */
-export function useSeam(page: number | null): number | null {
+export function useSeam(page: number | null, { waitForTurn = false } = {}): number | null {
   const [seam, setSeam] = useState<number | null>(null);
+  const opening = useRef<number | null>(null);
+  const left = useRef(false);
 
   useEffect(() => {
     let live = true;
@@ -130,12 +139,15 @@ export function useSeam(page: number | null): number | null {
 
   useEffect(() => {
     if (page === null) return;
+    opening.current ??= page;
+    if (page !== opening.current) left.current = true;
+    if (waitForTurn && !left.current) return;
     const timer = setTimeout(() => {
       setSeam(page);
       void writeSeam({ page, at: Date.now() });
     }, SEAM_DWELL_MS);
     return () => clearTimeout(timer);
-  }, [page]);
+  }, [page, waitForTurn]);
 
   return seam;
 }
