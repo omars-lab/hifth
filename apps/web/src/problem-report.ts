@@ -40,6 +40,8 @@ export interface ReportFacts {
   /** The commit the page was built from, or null on a laptop's dev server. */
   readonly commit: string | null;
   readonly userAgent: string;
+  /** The kind of device in plain words (`deviceKind`), since the line above can lie. */
+  readonly device: string;
   /** Width × height in CSS pixels, and the pixel ratio. */
   readonly screen: string;
   readonly language: string;
@@ -61,11 +63,26 @@ export function gatherFacts(): ReportFacts {
     appVersion: info?.appVersion ?? null,
     commit: isCommit(SOURCE_COMMIT) ? SOURCE_COMMIT : null,
     userAgent: navigator.userAgent,
+    device: deviceKind(navigator.userAgent, navigator.maxTouchPoints || 0),
     screen: `${window.innerWidth} × ${window.innerHeight} at ${ratio}×`,
     language: document.documentElement.lang || navigator.language,
     when: new Date().toISOString(),
     faults: recentFaults(),
   };
+}
+
+/**
+ * What kind of device this is. An iPad tells web pages it is a Mac, so a Mac
+ * that has a touch screen is an iPad: no Mac has one.
+ */
+export function deviceKind(userAgent: string, touchPoints: number): string {
+  if (/iPhone/.test(userAgent)) return "iPhone";
+  if (/iPad/.test(userAgent)) return "iPad";
+  if (/Macintosh/.test(userAgent)) return touchPoints > 1 ? "iPad" : "Mac";
+  if (/Android/.test(userAgent)) return "Android";
+  if (/Windows/.test(userAgent)) return "Windows";
+  if (/Linux/.test(userAgent)) return "Linux";
+  return "not known";
 }
 
 function platformName(platform: ReportFacts["platform"]): string {
@@ -81,7 +98,8 @@ export function reportText(facts: ReportFacts): string {
     "",
     `App: ${platformName(facts.platform)}${facts.appVersion ? ` ${facts.appVersion}` : ""}`,
     `Built from: ${facts.commit ?? "a laptop's working copy"}`,
-    `Device: ${facts.userAgent}`,
+    `Device: ${facts.device}`,
+    `Web view: ${facts.userAgent}`,
     `Screen: ${facts.screen}`,
     `Language: ${facts.language}`,
     `Time: ${facts.when}`,
