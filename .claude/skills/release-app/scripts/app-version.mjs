@@ -47,6 +47,11 @@ function find(text, key) {
   return hits[0][2];
 }
 
+/** The version and build number the project file holds now. */
+export function current(text) {
+  return { version: find(text, VERSION_KEY), build: find(text, BUILD_KEY) };
+}
+
 /** One to three whole numbers with dots between, no leading zeros: what Apple takes. */
 export function isVersion(text) {
   return /^(0|[1-9]\d*)(\.(0|[1-9]\d*)){0,2}$/.test(text);
@@ -64,14 +69,14 @@ export function compare(a, b) {
 }
 
 export function plan(text, { version, nextBuild }) {
-  const current = { version: find(text, VERSION_KEY), build: find(text, BUILD_KEY) };
-  if (!/^[1-9]\d*$/.test(current.build)) throw new Refused(`the build number "${current.build}" is not a whole number`, 2);
-  if (version === undefined && !nextBuild) return { current, next: null };
+  const now = current(text);
+  if (!/^[1-9]\d*$/.test(now.build)) throw new Refused(`the build number "${now.build}" is not a whole number`, 2);
+  if (version === undefined && !nextBuild) return { current: now, next: null };
   if (version !== undefined) {
     if (!isVersion(version)) throw new Refused(`"${version}" is not a version Apple takes: one to three whole numbers with dots between`, 1);
-    if (compare(version, current.version) < 0) throw new Refused(`${version} is lower than today's ${current.version}`, 1);
+    if (compare(version, now.version) < 0) throw new Refused(`${version} is lower than today's ${now.version}`, 1);
   }
-  return { current, next: { version: version ?? current.version, build: String(Number(current.build) + 1) } };
+  return { current: now, next: { version: version ?? now.version, build: String(Number(now.build) + 1) } };
 }
 
 export function apply(text, next) {

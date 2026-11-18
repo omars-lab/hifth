@@ -7266,11 +7266,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉑"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "The store has no undo and a paused release recalls nothing, so a small file at hifth.app read at launch is the only fast lever."
+      "useCase": "answer-a-bad-version-without-a-new-build",
+      "closedBy": "native/HifthTests/AppStatusTests.swift",
+      "note": "Done 2026-11-17. The iPad, iPhone and Mac apps read hifth.app/app-status.json once a launch, after the page is up, with no cookies and nothing about the reader. It can ask readers below a lowest version to update, show a short notice in English and Arabic, and switch off writing with the pencil or links from other apps; with no file or no connection the app carries on. The release refuses a file the apps could not read, and one whose lowest version is above the version being shipped. The privacy page and the store answers say so. It cannot fix a bug itself, readers with no connection never see it, and the browser version does not read it. The real drill (change the file, relaunch, see the notice) waits on hifth.app's first upload."
     },
     {
       "id": "launch-release-command",

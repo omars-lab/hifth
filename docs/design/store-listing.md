@@ -185,7 +185,7 @@ Why that answer is true, case by case:
 | What leaves the device | Why it is not "collected" |
 |---|---|
 | Nothing the reader writes: notes, marks, bookmarks, progress | It stays in the app's own storage on the device. No code sends it. |
-| Nothing is fetched while reading | The store build leaves the recitation out (launch item ⑥), so it makes no request to any site. If the recitation comes back, the fetch is of a public sound file from a site that is not code inside our app, so Apple's word "partner" would not cover it either. |
+| One small file at each launch, and nothing while reading | The store build leaves the recitation out (launch item ⑥). Its only request is the launch check (launch item ㉑): one public file from hifth.app, asked for with no cookies, no identifiers and nothing about the reader, compared on the device, and kept by us nowhere. Apple counts data as collected only when it is kept longer than it takes to answer the request, so this is not collected. If the recitation comes back, the fetch is of a public sound file from a site that is not code inside our app, so Apple's word "partner" would not cover it either. |
 | A problem report, if the reader sends one | The reader sees the whole report first and sends it from their own mail app, with their own address on it, each time they choose to. Apple lists exactly this kind of "customer service request", given by the reader and shown in full, as one that need not be declared. |
 
 The app's privacy file says the same (tracks nobody, collects nothing), and a test refuses a
@@ -210,7 +210,7 @@ read 2026-11-17.)
 
 ## Does the app use encryption Apple must be told about?
 
-No. The store build fetches nothing, and the only encryption it could ever use is the
+No. The store build fetches only the launch file, and the only encryption it uses is the
 system's own secure connection, which Apple exempts. Both the iPad and iPhone settings and the Mac settings say so
 (`ITSAppUsesNonExemptEncryption` is off), so Apple's form does not ask at each upload. A test
 keeps both set.

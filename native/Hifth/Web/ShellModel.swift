@@ -40,6 +40,61 @@ final class ShellModel {
     /// How many times the page has said it is ready: a walk of steps reloads
     /// the page for each one and waits for this to go up.
     private var readyCount = 0
+
+    // MARK: - The launch file (launch item ㉑, AppStatus.swift)
+
+    /// What the launch file says for this build; empty until it is read, and
+    /// empty for good when it cannot be.
+    private(set) var status = AppStatus.Verdict()
+    /// "Please update" was closed; it comes back at the next launch.
+    private(set) var updateClosed = false
+    /// The read in flight, kept so tests can wait for it.
+    @ObservationIgnored private(set) var statusRead: Task<Void, Never>?
+    /// Reads the launch file; nil when this build reads none.
+    @ObservationIgnored var loadStatus: () async -> Data? = {
+        guard let address = AppStatus.launchAddress() else { return nil }
+        return await AppStatus.fetch(from: address)
+    }
+    @ObservationIgnored var statusDefaults: UserDefaults = .standard
+    @ObservationIgnored var appVersion: String =
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+
+    /// The card to show over the page, if any, in the reader's language.
+    var statusWords: String? {
+        let arabic = AppStatus.readsArabic
+        if status.tooOld && !updateClosed { return AppStatus.updateWords(arabic: arabic) }
+        if let notice = status.notice { return arabic ? notice.arabic : notice.english }
+        return nil
+    }
+
+    func closeStatusCard() {
+        if status.tooOld && !updateClosed { updateClosed = true } else { closeNotice() }
+    }
+
+    func closeNotice() {
+        guard let notice = status.notice else { return }
+        AppStatus.dismiss(notice.id, in: statusDefaults)
+        status.notice = nil
+    }
+
+    /// Once per launch, after the first page is up, so the read never holds
+    /// up the page.
+    private func readStatusOnce() {
+        guard statusRead == nil else { return }
+        #if os(iOS)
+        let platform = "ios"
+        #else
+        let platform = "macos"
+        #endif
+        let load = loadStatus
+        statusRead = Task { [weak self] in
+            guard let data = await load(), let file = AppStatus.parse(data) else { return }
+            guard let self else { return }
+            self.status = file.verdict(
+                platform: platform, version: self.appVersion,
+                dismissed: AppStatus.dismissed(in: self.statusDefaults))
+        }
+    }
     #if os(iOS)
     /// Kept here because the pencil interaction holds it only weakly.
     @ObservationIgnored private let pencilListener = PencilListener()
@@ -169,14 +224,18 @@ final class ShellModel {
     /// A `hifth://` link, from the system while running or at launch: an
     /// x-callback-url request, which is answered, or a plain link, which only
     /// turns the page.
+    /// The launch file can switch links from other apps off for a version
+    /// with a problem in them: a request is told so, a plain link does nothing.
     func open(_ url: URL) {
+        let linksOff = status.off.contains(.links)
         switch XCallback.parse(url) {
         case .request(let request)?:
+            if linksOff { answer(request.callbacks.errorURL(.switchedOff)); return }
             perform(request)
         case .failure(let failure, let callbacks)?:
             answer(callbacks.errorURL(failure))
         case nil:
-            guard let hash = Route.parse(url) else { return }
+            guard !linksOff, let hash = Route.parse(url) else { return }
             show(hash)
         }
     }
@@ -451,6 +510,7 @@ final class ShellModel {
         case .ready:
             ready = true
             readyCount += 1
+            readStatusOnce()
             if let pendingHash { show(pendingHash) }
             #if !STORE
             probeIfAsked()

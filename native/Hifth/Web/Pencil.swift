@@ -24,9 +24,10 @@ extension ShellModel {
     /// web view's points, which are the page's own pixels here (it never
     /// scrolls or zooms); `nil` when it was not near. Before the page is ready
     /// the gesture is dropped, as a menu press is: one acted on later would be
-    /// a tool change nobody asked for.
+    /// a tool change nobody asked for. The launch file (AppStatus.swift) can
+    /// switch the pencil off for a version with a problem in it.
     func pencil(_ gesture: PencilGesture, preference: String, tip: CGPoint?) {
-        guard ready else { return }
+        guard ready, !status.off.contains(.pencil) else { return }
         var e: [String: Any] = ["kind": gesture.rawValue, "pref": preference]
         if let tip {
             e["x"] = Double(tip.x)

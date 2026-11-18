@@ -327,13 +327,25 @@ is renamed), the problems we know about, and what happens to a reader's marks. E
 site links it, and a release missing it is refused. It goes live with hifth.app's first upload.
 The app's info panel links it and the privacy page since the same day (item ㊸).
 
-### ㉑ Once a bad version is out, we cannot stop it or warn readers · **open**
+### ㉑ Once a bad version is out, we cannot stop it or warn readers · **fixed**
 
 The store has no undo, and a pause only stops an update spreading.
 
 *What would answer it:* a small public file at hifth.app that the app reads at launch, with the
 lowest version still allowed, a message to show, and switches for risky features. With no
 connection the app carries on as before. A test changes the file and sees the message.
+
+*Done 2026-11-17:* the iPad, iPhone and Mac apps ask hifth.app for `app-status.json` once each
+launch, after the page is up, so it never slows the first page. The request sends no cookies and
+nothing about the reader; the app compares versions itself. The file can ask readers below a
+lowest version to update, show a short notice in English and Arabic (which the reader can
+close), and switch off writing with the pencil or links from other apps. With no file, a broken
+file or no connection, the app carries on as before. The release refuses a file the apps could
+not read, and a lowest version above the one being shipped, so the file can never tell every
+reader to update to a version that does not exist yet. The privacy page says what is asked for,
+in both languages. What it cannot do: fix a bug itself, reach a reader with no connection, or
+reach the browser version, which does not read it. The real drill, changing the file and
+relaunching, waits on hifth.app's first upload; until then the tests use a made-up file.
 
 ### ㉒ There is no one command to release, and no written fix-in-a-hurry page · **fixed**
 
