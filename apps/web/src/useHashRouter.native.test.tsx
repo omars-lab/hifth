@@ -185,14 +185,14 @@ describe("useHashRouter notes the reader's steps for the problem report", () => 
     rerender({ state: { ...pageOne, page: 2 }, ready: true });
     rerender({ state: { ...pageOne, page: 3 }, ready: true });
     rerender({ state: verse, ready: true });
-    expect(names()).toEqual(["opened the app", "turned to another page ×2", "chose a verse"]);
+    expect(names()).toEqual(["open", "turn ×2", "verse"]);
   });
 
   it("opened cold at a link, the landing is not counted as a step of its own", () => {
     const { rerender } = mount("#/hafs-kfqc/2:255");
     rerender({ state: pageOne, ready: true });
     rerender({ state: verse, ready: true });
-    expect(names()).toEqual(["opened the app"]);
+    expect(names()).toEqual(["open"]);
   });
 
   it("a link followed while the app is open is one step", () => {
@@ -202,6 +202,6 @@ describe("useHashRouter notes the reader's steps for the problem report", () => 
     window.dispatchEvent(new HashChangeEvent("hashchange"));
     rerender({ state: verse, ready: true });
     rerender({ state: { ...verse, page: 45, select: null }, ready: true });
-    expect(names()).toEqual(["opened the app", "opened a link", "let go of the verse"]);
+    expect(names()).toEqual(["open", "link", "unselect"]);
   });
 });

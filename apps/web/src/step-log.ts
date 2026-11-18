@@ -15,17 +15,23 @@
 
 import type { AppState } from "@hifth/core";
 
+/**
+ * A step, as a short code. The words the report prints for each ("turned to
+ * another page") live in the report (`STEP_WORDS` in `problem-report.ts`),
+ * which loads only when the reader opens it: this file is in the start-up
+ * script, and the sentences cost bytes every reader downloads.
+ */
 export type StepName =
-  | "opened the app"
-  | "opened a link"
-  | "turned to another page"
-  | "chose a verse"
-  | "chose several verses"
-  | "let go of the verse"
-  | "followed a link to another verse"
-  | "went back along the trail"
-  | "changed the colouring"
-  | "changed the desk";
+  | "open"
+  | "link"
+  | "turn"
+  | "verse"
+  | "verses"
+  | "unselect"
+  | "follow"
+  | "back"
+  | "skin"
+  | "desk";
 
 export interface Step {
   /** When it last happened. */
@@ -50,32 +56,24 @@ export function noteStep(name: StepName, at: number = Date.now()): void {
   if (steps.length > STEP_LIMIT) steps.splice(0, steps.length - STEP_LIMIT);
 }
 
-function depth(state: AppState): number {
-  return (state.via ? 1 : 0) + (state.trail?.length ?? 0);
-}
-
-function sameSelect(a: AppState["select"], b: AppState["select"]): boolean {
-  if (a === null || b === null) return a === b;
-  const aTo = "toAyah" in a ? a.toAyah : undefined;
-  const bTo = "toAyah" in b ? b.toAyah : undefined;
-  return a.surah === b.surah && a.ayah === b.ayah && aTo === bTo;
-}
+// Kept short on purpose: this file is in the start-up script.
+const depth = (s: AppState): number => (s.via ? 1 : 0) + (s.trail?.length ?? 0);
+const lastAyah = (s: AppState["select"]): number | undefined => (s && "toAyah" in s ? s.toAyah : undefined);
 
 /** What the reader did between two views, as step names. */
 export function stepsBetween(prev: AppState | null, next: AppState): StepName[] {
   if (!prev) return [];
   const out: StepName[] = [];
-  const before = depth(prev);
-  const after = depth(next);
-  if (after > before) out.push("followed a link to another verse");
-  else if (after < before) out.push("went back along the trail");
-  else if (!sameSelect(prev.select, next.select)) {
-    if (next.select === null) out.push("let go of the verse");
-    else if ("toAyah" in next.select && next.select.toAyah !== undefined) out.push("chose several verses");
-    else out.push("chose a verse");
-  } else if (prev.page !== next.page) out.push("turned to another page");
-  if (prev.skin !== next.skin) out.push("changed the colouring");
-  if (prev.field !== next.field) out.push("changed the desk");
+  const a = prev.select;
+  const b = next.select;
+  const moved = depth(next) - depth(prev);
+  if (moved) out.push(moved > 0 ? "follow" : "back");
+  // A missing selection reads as undefined on both sides, so two empty ones match.
+  else if (a?.surah !== b?.surah || a?.ayah !== b?.ayah || lastAyah(a) !== lastAyah(b))
+    out.push(!b ? "unselect" : lastAyah(b) !== undefined ? "verses" : "verse");
+  else if (prev.page !== next.page) out.push("turn");
+  if (prev.skin !== next.skin) out.push("skin");
+  if (prev.field !== next.field) out.push("desk");
   return out;
 }
 

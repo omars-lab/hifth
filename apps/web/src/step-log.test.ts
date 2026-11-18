@@ -10,23 +10,21 @@ afterEach(() => clearSteps());
 describe("the last few steps, kept for the problem report", () => {
   it("names what changed between two views, never which page or verse", () => {
     expect(stepsBetween(null, PAGE)).toEqual([]);
-    expect(stepsBetween(PAGE, { ...PAGE, page: 438 })).toEqual(["turned to another page"]);
-    expect(stepsBetween(PAGE, VERSE)).toEqual(["chose a verse"]);
-    expect(stepsBetween(VERSE, { ...VERSE, select: { surah: 2, ayah: 255, toAyah: 257 } })).toEqual([
-      "chose several verses",
-    ]);
-    expect(stepsBetween(VERSE, PAGE)).toEqual(["let go of the verse"]);
+    expect(stepsBetween(PAGE, { ...PAGE, page: 438 })).toEqual(["turn"]);
+    expect(stepsBetween(PAGE, VERSE)).toEqual(["verse"]);
+    expect(stepsBetween(VERSE, { ...VERSE, select: { surah: 2, ayah: 255, toAyah: 257 } })).toEqual(["verses"]);
+    expect(stepsBetween(VERSE, PAGE)).toEqual(["unselect"]);
     expect(stepsBetween(VERSE, { ...VERSE, select: { surah: 3, ayah: 7 }, via: { surah: 2, ayah: 255 } })).toEqual([
-      "followed a link to another verse",
+      "follow",
     ]);
     expect(
       stepsBetween(
         { ...VERSE, select: { surah: 3, ayah: 7 }, via: { surah: 2, ayah: 255 } },
         VERSE,
       ),
-    ).toEqual(["went back along the trail"]);
-    expect(stepsBetween(PAGE, { ...PAGE, skin: "tajweed" })).toEqual(["changed the colouring"]);
-    expect(stepsBetween(PAGE, { ...PAGE, field: "dark" })).toEqual(["changed the desk"]);
+    ).toEqual(["back"]);
+    expect(stepsBetween(PAGE, { ...PAGE, skin: "tajweed" })).toEqual(["skin"]);
+    expect(stepsBetween(PAGE, { ...PAGE, field: "dark" })).toEqual(["desk"]);
     expect(stepsBetween(PAGE, PAGE)).toEqual([]);
   });
 
@@ -40,13 +38,13 @@ describe("the last few steps, kept for the problem report", () => {
     noteViewChange(view, VERSE, 2000);
     const steps = recentSteps();
     expect(steps).toHaveLength(2);
-    expect(steps[0]).toMatchObject({ name: "turned to another page", count: 30, at: 1030 });
-    expect(steps[1]).toMatchObject({ name: "chose a verse", count: 1 });
+    expect(steps[0]).toMatchObject({ name: "turn", count: 30, at: 1030 });
+    expect(steps[1]).toMatchObject({ name: "verse", count: 1 });
   });
 
   it("keeps only the latest steps", () => {
     for (let i = 0; i < STEP_LIMIT + 5; i++) {
-      noteStep(i % 2 ? "turned to another page" : "chose a verse", i);
+      noteStep(i % 2 ? "turn" : "verse", i);
     }
     const steps = recentSteps();
     expect(steps).toHaveLength(STEP_LIMIT);
