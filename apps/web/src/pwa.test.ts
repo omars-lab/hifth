@@ -84,6 +84,13 @@ async function load(): Promise<typeof Pwa> {
   return await import("./pwa");
 }
 
+/** The flag in pwa.ts and the watcher in pwa-update.ts, fresh and sharing one copy of the flag. */
+async function loadUpdate() {
+  const pwa = await load();
+  const update = await import("./pwa-update");
+  return { ...pwa, ...update };
+}
+
 /** Let every pending microtask and zero-delay timer run. */
 const tick = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -214,5 +221,122 @@ describe("initPwa", () => {
     expect(persist).not.toHaveBeenCalled();
     window.dispatchEvent(new Event("appinstalled"));
     await vi.waitFor(() => expect(persist).toHaveBeenCalledTimes(1));
+  });
+});
+
+/** A worker this test moves by hand, which remembers what it was sent. */
+class SentWorker extends FakeWorker {
+  sent: unknown[] = [];
+  postMessage(m: unknown): void {
+    this.sent.push(m);
+  }
+}
+
+/**
+ * A registration and worker container for the update watcher. `controller` is
+ * the worker running this page; null on a first visit.
+ */
+function stubUpdate(opts: { controller: boolean; waiting?: SentWorker | null }) {
+  const container = new EventTarget() as EventTarget & { controller: object | null };
+  container.controller = opts.controller ? new FakeWorker(SCRIPT) : null;
+  Object.defineProperty(navigator, "serviceWorker", { configurable: true, value: container });
+  const reg = new EventTarget() as EventTarget & { waiting: SentWorker | null; installing: SentWorker | null };
+  reg.waiting = opts.waiting ?? null;
+  reg.installing = null;
+  /** A new release's worker arriving while the page is open. */
+  const arrive = (url = SCRIPT): SentWorker => {
+    const w = new SentWorker(url);
+    reg.installing = w;
+    reg.dispatchEvent(new Event("updatefound"));
+    return w;
+  };
+  return { container, reg: reg as unknown as ServiceWorkerRegistration, arrive };
+}
+
+describe("a new version is ready", () => {
+  it("says so when a new release is waiting behind the one running the page", async () => {
+    const waiting = new SentWorker(SCRIPT);
+    waiting.state = "installed";
+    const { reg } = stubUpdate({ controller: true, waiting });
+    const { watchForUpdate, onUpdateReady } = await loadUpdate();
+    const seen: boolean[] = [];
+    onUpdateReady((r) => seen.push(r));
+    watchForUpdate(reg);
+    expect(seen.at(-1)).toBe(true);
+  });
+
+  it("says so when the new release finishes installing while the page is open", async () => {
+    const { reg, arrive } = stubUpdate({ controller: true });
+    const { watchForUpdate, onUpdateReady } = await loadUpdate();
+    let ready = false;
+    onUpdateReady((r) => (ready = r));
+    watchForUpdate(reg);
+    const w = arrive();
+    expect(ready).toBe(false);
+    w.advance("installed");
+    expect(ready).toBe(true);
+  });
+
+  it("says nothing on a first visit, when there was no old version to replace", async () => {
+    const { reg, arrive } = stubUpdate({ controller: false });
+    const { watchForUpdate, onUpdateReady } = await loadUpdate();
+    let ready = false;
+    onUpdateReady((r) => (ready = r));
+    watchForUpdate(reg);
+    arrive().advance("installed");
+    expect(ready).toBe(false);
+  });
+
+  it("says nothing about the shell repair's second copy of the same release", async () => {
+    const { reg, arrive } = stubUpdate({ controller: true });
+    const { watchForUpdate, onUpdateReady } = await loadUpdate();
+    let ready = false;
+    onUpdateReady((r) => (ready = r));
+    watchForUpdate(reg);
+    arrive(`${SCRIPT}?shell-repair=1`).advance("installed");
+    expect(ready).toBe(false);
+  });
+
+  it("Reload asks the waiting release to take over, then opens the page again once it has", async () => {
+    const waiting = new SentWorker(SCRIPT);
+    waiting.state = "installed";
+    const { container, reg } = stubUpdate({ controller: true, waiting });
+    const { watchForUpdate, applyUpdate } = await loadUpdate();
+    watchForUpdate(reg);
+    const reload = vi.fn();
+    applyUpdate(reload);
+    expect(waiting.sent).toEqual([{ type: "SKIP_WAITING" }]);
+    // Not before the new release is running the page, or the reload would come
+    // back to the old one.
+    expect(reload).not.toHaveBeenCalled();
+    container.dispatchEvent(new Event("controllerchange"));
+    expect(reload).toHaveBeenCalledTimes(1);
+    // A second press while it switches does not send it twice.
+    applyUpdate(reload);
+    expect(waiting.sent).toHaveLength(1);
+  });
+
+  it("a tab left on the old release after Reload in another tab is told too, and Reload only reopens it", async () => {
+    const { container, reg } = stubUpdate({ controller: true });
+    const { watchForUpdate, onUpdateReady, applyUpdate } = await loadUpdate();
+    let ready = false;
+    onUpdateReady((r) => (ready = r));
+    watchForUpdate(reg);
+    container.dispatchEvent(new Event("controllerchange"));
+    expect(ready).toBe(true);
+    const reload = vi.fn();
+    applyUpdate(reload);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("the first visit's worker taking over is not an update", async () => {
+    const { container, reg } = stubUpdate({ controller: false });
+    const { watchForUpdate, onUpdateReady } = await loadUpdate();
+    let ready = false;
+    onUpdateReady((r) => (ready = r));
+    watchForUpdate(reg);
+    container.controller = new FakeWorker(SCRIPT);
+    container.dispatchEvent(new Event("controllerchange"));
+    expect(ready).toBe(false);
   });
 });

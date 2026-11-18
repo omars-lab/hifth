@@ -115,7 +115,7 @@ export type { EditionCopy };
  *  these unions are declared by the components that own the behaviour, and an
  *  index into these records stops compiling the day one of them gains a case. */
 type Direction = "loop" | "earlier" | "later" | "root";
-type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt";
+type NoticeKind = "pack-gone" | "update-ready" | "capped" | "install-ios" | "install-prompt";
 
 /** One coach card: the glyph belongs to the component, the words to the language. */
 export interface CoachStep {
@@ -1517,6 +1517,11 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
         title: m["notices.pack-gone.title"],
         body: m["notices.pack-gone.body"],
         action: m["notices.pack-gone.action"],
+      },
+      "update-ready": {
+        title: m["notices.update-ready.title"],
+        body: m["notices.update-ready.body"],
+        action: m["notices.update-ready.action"],
       },
       capped: { title: m["notices.capped.title"], body: m["notices.capped.body"] },
       "install-ios": {

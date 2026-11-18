@@ -597,6 +597,16 @@
           "note": "Registration and update flow. Service workers need a secure context — that is why offline specs cannot pass against a plain-http LAN or container URL, and it is the harness, not the app."
         },
         {
+          "file": "apps/web/src/pwa-update.ts",
+          "symbol": "watchForUpdate",
+          "note": "Launch item 24. A new release waits instead of taking over: the worker is built with registerType prompt, so it only switches when the page posts SKIP_WAITING, which applyUpdate does when the reader presses Reload in the strip, then reloads once the new worker controls the page. Other open tabs hear controllerchange and are told, not reloaded. Kept out of the start-up script's hot path: it only listens. e2e/update-ready.spec.ts serves dist itself and changes one line of sw.js to make a release without a second build."
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/carry-previous.mjs",
+          "symbol": "carryPrevious",
+          "note": "Why an old open page does not break after an upload: before each hifth.app upload, the live sw.js is read for its fingerprinted script and style names and any missing from the new build are copied in. It runs after the folder check, and refuses (stopping the upload) on a file that will not come or comes back as a page. The first upload has nothing live and passes --no-carry."
+        },
+        {
           "file": "apps/web/src/pwa.ts",
           "symbol": "repairShellCache",
           "note": "Eviction takes the precache and leaves the registration, so the worker never installs again and offline dies silently while every online signal still says healthy. The repair re-registers the same sw.js under a query-suffixed URL, because only a script the registration has never seen produces an install — measured, not assumed: reloads, update(), and unregister()+register() all leave the precache empty or resurrect the old worker. It waits for that install to finish, not for index.html to reappear: the shell is the first entry written and the app's scripts are the last."

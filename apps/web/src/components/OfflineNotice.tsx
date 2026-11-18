@@ -11,6 +11,7 @@ import {
   isIosDevice,
   isStandalone,
   onInstallAvailability,
+  onUpdateReady,
   promptInstall,
 } from "../pwa";
 import { packStatuses } from "../packs";
@@ -52,12 +53,16 @@ import styles from "./OfflineNotice.module.css";
  *     only one of the five that reports something that has *already happened*
  *     rather than a risk, which is why it outranks even `capped`, and the only
  *     one whose action opens a sheet instead of firing an install prompt.
+ *   • `update-ready` — a new release of the app is downloaded and waiting
+ *     (launch item 24). Second only to `pack-gone`: it is the one that brings a
+ *     fix. Its action reloads into the new release; hiding it lasts for this
+ *     session only, since the next release would otherwise never be told.
  *
  * This union is declared here, where the ordering below decides between them,
- * and the bundles' `notices` record is indexed by it — so a fifth state cannot
+ * and the bundles' `notices` record is indexed by it — so a new state cannot
  * be added without both languages growing an entry for it.
  */
-type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt";
+type NoticeKind = "pack-gone" | "update-ready" | "capped" | "install-ios" | "install-prompt";
 
 /**
  * Pick the one thing worth saying. Order is by what blocks offline hardest:
@@ -67,6 +72,7 @@ type NoticeKind = "pack-gone" | "capped" | "install-ios" | "install-prompt";
  */
 function pickNotice(
   swept: boolean,
+  updateReady: boolean,
   durability: Durability,
   installable: boolean,
   standalone: boolean,
@@ -77,6 +83,7 @@ function pickNotice(
   // been taken, and it is the only one where reading the mus'haf offline has
   // already stopped working.
   if (swept) return "pack-gone";
+  if (updateReady) return "update-ready";
   if (durability === "capped") return "capped";
   if (durability === "persisted") return null;
   // An installed app already sits in the platform's durable tier — on iOS that
@@ -170,6 +177,11 @@ export function OfflineNotice({
   // heuristics are satisfied), and `appinstalled` clears it.
   useEffect(() => onInstallAvailability(setInstallable), []);
 
+  // A new release waiting behind this one (pwa-update.ts). Never true inside
+  // the Mac / iPad shell, which registers no worker.
+  const [updateReady, setUpdateReady] = useState(false);
+  useEffect(() => onUpdateReady(setUpdateReady), []);
+
   // `torn` counts as swept. A pack missing four of its twenty-three pages opens
   // most of the juz, which is precisely why it needs saying out loud: the reader
   // finds the hole in aeroplane mode, at the page they were revising.
@@ -187,24 +199,32 @@ export function OfflineNotice({
   // its storage is the shell's own, so it sits in the same silent tier.
   const kind = pickNotice(
     swept,
+    updateReady,
     durability,
     installable,
     isStandalone() || isNative(),
     isIosDevice(),
   );
-  // `pack-gone` is an event, not a standing condition, so it is never written to
-  // the durable dismissal store: a reader who hid it in March would otherwise
-  // never be told about the sweep that takes the next juz. Hiding it lasts for
-  // this session, and the shelf keeps the answer for anyone who goes looking.
+  // `pack-gone` and `update-ready` are events, not standing conditions, so they
+  // are never written to the durable dismissal store: a reader who hid one in
+  // March would otherwise never be told about the next sweep or the next
+  // release. Hiding them lasts for this session.
+  const lasting = kind !== "pack-gone" && kind !== "update-ready";
   const dismissed =
-    kind !== null &&
-    (hidden.has(kind) || (kind !== "pack-gone" && isNoticeDismissed(kind)));
+    kind !== null && (hidden.has(kind) || (lasting && isNoticeDismissed(kind)));
 
   const handleDismiss = useCallback(() => {
     if (!kind) return;
-    if (kind !== "pack-gone") dismissNotice(kind);
+    if (lasting) dismissNotice(kind);
     setHidden((s) => new Set(s).add(kind));
-  }, [kind]);
+  }, [kind, lasting]);
+
+  // The switching code is fetched only now; it is already loaded by the time
+  // the strip shows (it is what raised the flag), so this does not wait on the
+  // network.
+  const handleUpdate = useCallback(() => {
+    void import("../pwa-update").then((m) => m.applyUpdate());
+  }, []);
 
   const handleInstall = useCallback(() => {
     void promptInstall().then((outcome) => {
@@ -235,7 +255,13 @@ export function OfflineNotice({
           <button
             type="button"
             className={styles.primary}
-            onClick={kind === "pack-gone" ? onShowPacks : handleInstall}
+            onClick={
+              kind === "pack-gone"
+                ? onShowPacks
+                : kind === "update-ready"
+                  ? handleUpdate
+                  : handleInstall
+            }
           >
             {notice.action}
           </button>

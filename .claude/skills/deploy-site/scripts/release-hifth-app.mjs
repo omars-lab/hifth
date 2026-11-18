@@ -8,8 +8,9 @@
  *             no uncommitted work, so the private pitch folder can never ride along, and the
  *             app's source-code offer names the very commit it was built from.
  *             --no-build checks the last build on this laptop instead, as a look only.
- *   publish   check, then upload the folder to the hifth.app Cloudflare Pages project, then
- *             verify. Must run inside dotenvx (make hifth-app-publish does), and refuses
+ *   publish   check, keep the live release's app files beside the new ones (carry-previous.mjs),
+ *             then upload the folder to the hifth.app Cloudflare Pages project, then
+ *             verify. --no-carry skips the keeping, for the very first upload only. Must run inside dotenvx (make hifth-app-publish does), and refuses
  *             unless the new account's token and ID are both loaded. Without them wrangler
  *             would quietly use its own login, which is a different Cloudflare account.
  *   verify    look at the live site (live.mjs). --url to look somewhere else, --commit to
@@ -25,6 +26,7 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { APP_SCRIPTS_GAP, auditShipped, inlineScriptHashes, readFolder } from "./shipped.mjs";
 import { verifyLive } from "./live.mjs";
+import { carryPrevious, fetchBytes } from "./carry-previous.mjs";
 import { APP_LINKS_FILE, appSiteAssociation, signingTeam } from "./app-links.mjs";
 import { addDevDesigns, commitDates } from "./dev-designs.mjs";
 import { addDevSidebar, copyFeaturesPage, findFeaturesPage } from "./dev-sidebar.mjs";
@@ -261,8 +263,12 @@ async function verify({ url = SITE, commit = git("rev-parse", "HEAD").out } = {}
   return problems.length === 0;
 }
 
-/** Check, then upload. Returns the commit that went up, or null. */
-function publish() {
+/**
+ * Check, carry the live release's app files over (carry-previous.mjs), then upload. Returns the
+ * commit that went up, or null. `carry: false` (--no-carry) is for the very first upload only,
+ * when there is no live release; any other time it would break the pages readers have open.
+ */
+async function publish({ carry = true } = {}) {
   const missing = ["CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID"].filter((k) => !process.env[k]);
   if (missing.length) {
     console.log(`✗ ${missing.join(" and ")} not loaded. Run this through make hifth-app-publish, which loads the saved keys. Without them wrangler would use its own login, a different Cloudflare account.`);
@@ -270,6 +276,18 @@ function publish() {
   }
   const { ok, out, landing, commit } = check({ build: true });
   if (!ok) return null;
+  if (carry) {
+    const kept = await carryPrevious({ out, site: SITE, get: fetchBytes });
+    if (kept.problem) {
+      console.log(`\n✗ ${kept.problem}. Not uploading: the pages readers have open would ask for files that are gone. Check the live site, then publish again.`);
+      return null;
+    }
+    console.log(kept.none
+      ? "  Last release's app files: none live yet, so nothing to keep"
+      : `  Last release's app files kept for pages still open: ${kept.carried.length}`);
+  } else {
+    console.log("  Last release's app files: not kept (--no-carry, for the very first upload only)");
+  }
   console.log(`\nUploading to the Cloudflare Pages project "${PROJECT}"…`);
   // Run from the clean copy's front-page folder, so its settings and its form's code go up too.
   const r = spawnSync(
@@ -418,10 +436,10 @@ async function main(argv) {
   if (command === "serve") return serve({ port: flag("--port") ?? "7124" });
   if (command === "verify") return verify({ url: flag("--url"), commit: flag("--commit") });
   if (command === "publish") {
-    const commit = publish();
+    const commit = await publish({ carry: !rest.includes("--no-carry") });
     return commit !== null && (await verify({ commit }));
   }
-  console.log("usage: release-hifth-app.mjs check [--no-build] | prepare [--no-build] | serve [--port N] | publish | verify [--url URL] [--commit SHA]");
+  console.log("usage: release-hifth-app.mjs check [--no-build] | prepare [--no-build] | serve [--port N] | publish [--no-carry] | verify [--url URL] [--commit SHA]");
   return false;
 }
 

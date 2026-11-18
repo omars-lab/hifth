@@ -7309,11 +7309,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉔"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "A page cached before an update can ask for files the update removed. When fixing it, also add the go-to box to a test that blocks the rarely used tools' file: today no test opens the go-to box with that file missing (it moved there 2026-11-16)."
+      "useCase": "switch-to-a-new-version-when-i-choose",
+      "closedBy": "apps/web/e2e/update-ready.spec.ts",
+      "note": "Done 2026-11-17. The browser version no longer switches to a new release by itself: when one is waiting, the strip above the page says so, and Reload starts it on the same page (pwa-update.ts; hiding the line lasts the visit only, and a juz already lost still comes first). Other open tabs are told once one switches, not reloaded under the reader. Each hifth.app upload now first copies the live release's script and style files into the new one, so a page left open from before still finds them; the upload stops rather than go ahead if any of them will not come (deploy-site carry-previous.mjs; the very first upload uses ARGS=--no-carry). The browser test fails on the old build and passed 51 of 51 with the offline tests. The go-to box with the rarely used tools' file missing is already safe: a failed load leaves that tool hidden and the rest of the app working (later.tsx)."
     },
     {
       "id": "launch-retry-tests-hidden",

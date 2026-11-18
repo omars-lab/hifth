@@ -372,12 +372,24 @@ is copied and it takes seconds. It is tested against a made-up Cloudflare. Again
 account, its list found the site with no uploads yet, so the real drill (publish twice, put back,
 check, publish again) waits on the first upload.
 
-### ㉔ The browser version never says a new version is ready · **open**
+### ㉔ The browser version never says a new version is ready · **fixed**
 
 A page cached from before an update can ask for files the update removed, and break.
 
 *What would answer it:* a "new version ready" prompt, the previous release's files kept for one
 release, and a test that loads an old page after an update.
+
+*Fixed 2026-11-17:* a new release of the browser version now waits instead of taking over. The
+line above the page says "A new version of Hifth is ready", and Reload starts it on the same
+page; the reader's marks stay as they are. Hiding the line lasts the visit only, and a juz
+already lost from the phone is still told first. Other open tabs are told once one switches,
+never reloaded under the reader. Each hifth.app upload first copies the live release's script
+and style files into the new one, so a page left open from before still finds them, and the
+upload stops rather than go ahead if any of them will not come. A browser test makes a new
+release, sees the line, presses Reload and checks the new version is running; it fails on the
+build from before. The very first upload has nothing live to keep, so it runs with
+`ARGS=--no-carry`; the real check of the kept files is the second upload. The store apps do not
+need any of this: their pages are packed inside them.
 
 ### ㉕ A test that passes only on its second try still counts as a pass · **open**
 

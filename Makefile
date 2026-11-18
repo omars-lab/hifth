@@ -845,8 +845,8 @@ hifth-app-serve: ## Serve hifth.app on this laptop at http://127.0.0.1:7124, wit
 hifth-app-check: ## Build hifth.app's release folder and refuse it if anything but the bare minimum is in it
 	@$(RELEASE) check $(ARGS)
 
-hifth-app-publish: ## Check, upload to hifth.app with the saved keys, then look at the live site
-	@dotenvx run --quiet -- $(RELEASE) publish
+hifth-app-publish: ## Check, keep the live release's app files, upload to hifth.app with the saved keys, then look at the live site; ARGS=--no-carry for the very first upload only
+	@dotenvx run --quiet -- $(RELEASE) publish $(ARGS)
 
 hifth-app-put-back: ## Put the previous hifth.app release back, then look at the live site; ARGS=list shows the releases, ARGS="run --dry" or ARGS="run --to <commit>"
 	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/put-back.mjs $(or $(ARGS),run)
