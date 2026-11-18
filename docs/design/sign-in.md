@@ -156,7 +156,7 @@ sequenceDiagram
   W-->>B: a normal secure cookie, back on the page they left
 ```
 
-Apple's return trip is a form posted from Apple's own site, so the browser does not send hifth.app's ordinary cookies with it. That is why the server notes its own random value instead of relying on a cookie. A popular sign-in library got exactly this wrong (see the agreements section).
+Apple's return trip is a form posted from Apple's own site, so the browser does not send hifth.app's ordinary cookies with it. That is why the server notes its own random value instead of relying on a cookie. A popular sign-in library got exactly this wrong, and fixed it in November 2025 (see the agreements section, and the library page, [sign-in-library.md](sign-in-library.md)).
 
 ### In what order do the steps go?
 
@@ -202,11 +202,11 @@ Both researchers picked the first, independently. It is recommended because it i
 | | **Our own small code on hifth.app's Cloudflare, with its free database** (recommended) | The same, with a ready-made sign-in library | A new Supabase project just for readers | Firebase sign-in | No accounts: own iCloud only |
 | --- | --- | --- | --- | --- | --- |
 | Pros | Next to the notify list and the planned shared copies, so no new company; nothing pauses; every line is ours to read; the key can sign a fresh short note each time, so there is no six-month renewal chore | Less code; sessions and add-ons come built (Better Auth runs on this database) | Sign-in, sessions and email codes ready-made and widely used | Ready-made Apple and email sign-in, with a built-in "cut the link with Apple" call | No server, no account, nothing for us to hold |
-| Cons | We write and own the security-critical parts: the note check, sessions, deletion, limits. A small, well-known signature library (jose) handles the cryptography | Its Apple website sign-in had the cookie fault above; it was closed as fixed, and two commenters later said it was back; the thread is now locked | Free projects pause after a week unused; at most two free projects per person; deleting a user does not cut their Apple link, so our code is needed anyway; the website needs a new secret pasted in every six months; splits reader data from shared copies | A third company, Google, holds readers' accounts; shared copies would still be on Cloudflare | Does nothing for Firefox, Android or the website |
+| Cons | We write and own the security-critical parts: the note check, sessions, deletion, limits. A small, well-known signature library (jose) handles the cryptography | Its Apple website sign-in had the cookie fault above; a second fix (Nov 2025) is still in its code, read but not tried. It does not cut the Apple link on delete, changes very fast, and may exceed the free plan's computing limit (see [sign-in-library.md](sign-in-library.md)) | Free projects pause after a week unused; at most two free projects per person; deleting a user does not cut their Apple link, so our code is needed anyway; the website needs a new secret pasted in every six months; splits reader data from shared copies | A third company, Google, holds readers' accounts; shared copies would still be on Cloudflare | Does nothing for Firefox, Android or the website |
 | Implications | Commits us to tests for every security part; the sharing work can build on the same tables | Ties our sessions to the library's next release | Two vendors to delete from; the existing project still must never hold accounts | Ties the email code to Google's sender | Stays the answer for own Apple devices whichever way this goes |
 | For a hafiz | Invisible when it works; if a daily limit is ever hit, sign-in fails until midnight UTC and reading carries on | The same, if the library behaves | Invisible, unless the project pauses: then sign-in fails until someone wakes it | Invisible; their email sits with Google | Seamless on Apple devices; Firefox readers carry a file by hand |
 
-Recommended because the parts that make sign-in "proper" (deletion that really deletes, the who-sees-this button, the privacy check) are ours to write in every option. A library saves the easy part and, here, brought a known fault in the hard part. Cloudflare's free plan allows 100,000 requests and 100,000 database writes a day, far beyond a tester group.
+Recommended because the parts that make sign-in "proper" (deletion that really deletes, the who-sees-this button, the privacy check) are ours to write in every option. A library saves the easier part (sessions and the website's return trip) and brings a fast-moving dependency; the library page weighs the two closely. Cloudflare's free plan allows 100,000 requests and 100,000 database writes a day, far beyond a tester group.
 
 ### How should the apps sign in?
 
@@ -265,7 +265,7 @@ Apple's rule that an app offering another company's login must also offer Apple'
 
 - **Apple's iCloud user number as the account.** No sign-in on Apple devices, but nothing for the website. It is the own-device path, already planned.
 - **Clerk and other hosted sign-in companies.** Clerk's free plan lacks Face ID sign-in in apps; the others were not looked at closely.
-- **Lucia**, a sign-in library, closed in March 2025.
+- **Lucia**, a sign-in library, closed in March 2025. Arctic, Oslo, Auth.js and OpenAuth are covered on the library page, [sign-in-library.md](sign-in-library.md).
 - **An email link instead of a code.** Workplace and school mail scanners open the link first and use it up.
 
 ## Where did the two researchers agree, and where did they disagree?
@@ -303,7 +303,7 @@ The checker re-opened the sources behind every claim that would change the recom
 | Only A | Checked |
 | --- | --- |
 | The notify list's server code calls Supabase's data door, but the checked-in settings say that door is off, and another design page says nothing uses it | **Confirmed as a contradiction in the files.** The live project was not looked at. Question ⑦ below |
-| Better Auth's website sign-in had the cookie fault, closed as fixed and reportedly reverted | Confirmed: closed as fixed on 2025-11-04; on 2025-11-19 and 2025-11-24 commenters said it was back; locked 2026-03-31. The revert is a commenter's claim, not confirmed |
+| Better Auth's website sign-in had the cookie fault, closed as fixed and reportedly reverted | Confirmed, and then superseded: the first fix was reverted on 2025-11-04, but a second fix that turns Apple's form into an ordinary page load was merged on 2025-11-05 and is still in the code. Read, not tried; one later "still failing" comment went unanswered. Checked 2026-11-18 in [library-check.md](../research/sign-in/library-check.md) |
 | One forum report says the same person gets a different account number in the app and on the website | Apple's developer support says the same number is given when both belong to one team; the contrary forum thread (2019, plus a 2023 "same issue") has no cause or answer. **Unsettled; trial ④** |
 | One Apple page says website sign-in needs an existing app in the App Store; another does not | **Confirmed: the two Apple pages disagree.** Unsettled; trial ⑥ |
 | Keep only a scrambled copy of each session on the server; sessions renew on use and end after 60 days unused | Not contested; design detail |
@@ -349,7 +349,7 @@ These are tracked in the issue register, one row each, the way the sharing page'
 
 ### ② Where should reader accounts live? · **open**
 
-Recommended: our own small code on hifth.app's Cloudflare account, with its free database, next to the notify list and the planned shared copies. Alternatives: the same with a ready-made library, a new Supabase project, Firebase, or no accounts. The sharing page's ⑥ chose Cloudflare for shared copies only. **What would answer it:** the owner's pick. Then step 9 connects the database.
+Recommended: our own small code on hifth.app's Cloudflare account, with its free database, next to the notify list and the planned shared copies. Alternatives: the same with a ready-made library, a new Supabase project, Firebase, or no accounts. Ours against a library is weighed part by part on the library page ([sign-in-library.md](sign-in-library.md)). The sharing page's ⑥ chose Cloudflare for shared copies only. **What would answer it:** the owner's pick. Then step 9 connects the database.
 
 ### ③ Should your copy on our server be locked so that we cannot read it? · **open**
 

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign-in: our own code or a library</title>
+<meta name="description" content="Should we write sign-in ourselves, or use a ready-made library?">
+<!-- Built by scripts/build-design-note.mjs from design/sign-in-library.md. Do not edit by hand. -->
+<style>
+:root { --bg: #fbfaf7; --ink: #1f2328; --muted: #5b636d; --line: #d9dcd3; --tip: #eef6ee; --tip-edge: #3d8b55; --code: #f0efe9; --link: #1f5fa8; --hafiz: #fff3c4; --flow: #4b5563; --marks: #b4690e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #161c25; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2e3846; --tip: #17271d; --tip-edge: #5fbf7a; --code: #1d2531; --link: #8cb8f0; --hafiz: #3a3214; } }
+:root[data-theme="dark"] { --bg: #161c25; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2e3846; --tip: #17271d; --tip-edge: #5fbf7a; --code: #1d2531; --link: #8cb8f0; --hafiz: #3a3214; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+main { max-width: 60rem; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.6rem; line-height: 1.25; }
+h2 { font-size: 1.25rem; margin-top: 2.2rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
+h3 { font-size: 1.05rem; margin-top: 1.8rem; }
+a { color: var(--link); }
+code { background: var(--code); padding: 0 4px; border-radius: 4px; font-size: 0.9em; }
+.callout { background: var(--tip); border-left: 4px solid var(--tip-edge); padding: 4px 16px; border-radius: 6px; }
+.callout-title { font-weight: 700; margin-bottom: 0; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: left; }
+th { background: var(--code); }
+thead:not(:has(th:not(:empty))) { display: none; }
+tr:has(td:first-child strong:only-child) td { background: var(--hafiz); }
+.diagram { margin: 1rem 0; padding: 12px; background: #ffffff; border-radius: 8px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; width: 100%; max-width: 560px !important; height: auto; }
+.diagram svg .flowchart-link.edge-pattern-solid { stroke: var(--flow) !important; stroke-dasharray: 8 5 !important; animation: note-flow 0.9s linear infinite; }
+.diagram svg .flowchart-link.edge-thickness-thick { stroke: var(--marks) !important; stroke-width: 3.5px !important; }
+.diagram svg .flowchart-link.edge-pattern-dotted { stroke-dasharray: 2 6 !important; stroke-linecap: round; animation: none; }
+@keyframes note-flow { to { stroke-dashoffset: -13; } }
+@media (prefers-reduced-motion: reduce) { .diagram svg .flowchart-link { animation: none !important; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Should we write sign-in ourselves, or use a ready-made library?</h1>
+<p><em>Written 2026-11-18 for the owner. This is choice ② on the options page (<a href="sign-in-options.html">sign-in-options.md</a>), between its options A and B, looked at closely. Both keep accounts on hifth.app&#39;s Cloudflare account with its free database; the only question is whose code does the signing in. The sources are in the check of the two research passes (<a href="../research/sign-in/library-check.md">library-check.md</a>), made today. Nothing here was built.</em></p>
+<p><em>This note is the record. Its page is <a href="sign-in-library.html">sign-in-library.html</a>, on the site at <a href="https://blog.bytesofpurpose.com/hifth/docs/design/sign-in-library.html">https://blog.bytesofpurpose.com/hifth/docs/design/sign-in-library.html</a>, and it is rebuilt from this note by <code>scripts/build-design-note.mjs</code>.</em></p>
+<aside class="callout tip"><p class="callout-title">Short version</p>
+
+<p><strong>Two real choices are left.</strong> Write it ourselves with two small, free pieces (a signature checker and a sample sessions file), or use Better Auth, the one full library still growing. The other libraries we looked at are closed, or in maintenance only, or stalled.
+<strong>The hard parts are ours either way.</strong> Deleting an account so that it also cuts the reader&#39;s link with Apple, and the limits against abuse, are not in Better Auth. We write them in both options.
+<strong>What the library saves us:</strong> sessions and the website&#39;s return trip from Apple. The fault we had noted in that return trip was fixed in November 2025. The code shows the fix; nobody has run it here.
+<strong>What it costs:</strong> a library that changes very fast (12 releases in the first two weeks of November), breaks something every few months, and may not fit the free plan&#39;s computing limit.
+<strong>Recommended: write it ourselves.</strong> The library saves the easier part, and we would still have to read its code to trust it.</p>
+</aside>
+
+<h2>What do the words on this page mean?</h2>
+<ul>
+<li><strong>Sign-in library</strong>: someone else&#39;s code, run inside ours, that does the signing in for us.</li>
+<li><strong>Apple&#39;s note</strong>: the signed message Apple hands back after Face ID. It proves &quot;this is the same Apple user as before&quot;.</li>
+<li><strong>Checking the note</strong>: confirming Apple really signed it, it is for Hifth, and it is fresh. Done wrong, anyone could sign in as anyone.</li>
+<li><strong>Session</strong>: what keeps a reader signed in after the first time, so they do not see Face ID on every visit.</li>
+<li><strong>The website&#39;s return trip</strong>: on the website, Apple sends the reader back to hifth.app by posting a form from Apple&#39;s own site. Browsers hold back hifth.app&#39;s own cookies on that trip, which is easy to get wrong.</li>
+<li><strong>Cutting the link with Apple</strong>: when a reader deletes their account, Apple&#39;s rules say we must also tell Apple, so &quot;Hifth&quot; disappears from the reader&#39;s list of apps using their Apple sign-in.</li>
+<li><strong>The free plan&#39;s computing limit</strong>: Cloudflare&#39;s free plan allows 10 thousandths of a second of computing per request. Waiting on the database or on Apple does not count.</li>
+</ul>
+<h2>What does sign-in need, and who does each part?</h2>
+<p>This grid decides the question. Each row is one part of sign-in; each cell says whose code does it.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Part of sign-in</th>
+<th><strong>Ours, with two small pieces</strong> (recommended)</th>
+<th><strong>Better Auth</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Checking Apple&#39;s note from the app</td>
+<td>jose, a small signature checker with no other code it depends on</td>
+<td>The library</td>
+</tr>
+<tr>
+<td>The website&#39;s return trip from Apple</td>
+<td>Ours. A short, known pattern: turn Apple&#39;s form into an ordinary page load first</td>
+<td>The library, fixed in Nov 2025; read in its code, not tried</td>
+</tr>
+<tr>
+<td>Sessions</td>
+<td>Ours, starting from Lucia&#39;s free sample file (one file, no licence terms)</td>
+<td>The library</td>
+</tr>
+<tr>
+<td>Deleting the account and cutting the link with Apple</td>
+<td><strong>Ours</strong></td>
+<td><strong>Ours.</strong> The library gives a place to call it from, but does not call Apple</td>
+</tr>
+<tr>
+<td>Keeping Apple&#39;s key to cut the link later (the app&#39;s sign-in)</td>
+<td><strong>Ours</strong></td>
+<td><strong>Ours.</strong> The library&#39;s app sign-in does not fetch it</td>
+</tr>
+<tr>
+<td>Limits against abuse</td>
+<td>Ours, with Cloudflare&#39;s own tools</td>
+<td>Ours with Cloudflare&#39;s tools; the library&#39;s own limiter was not checked on Cloudflare</td>
+</tr>
+<tr>
+<td>Fitting the free plan&#39;s computing limit</td>
+<td>Small, still to be measured</td>
+<td>At risk: Cloudflare says sign-in work typically takes 10 to 20 thousandths; must be measured</td>
+</tr>
+<tr>
+<td>Who keeps it working</td>
+<td>Us, plus jose&#39;s author, who has kept it up for years</td>
+<td>The Better Auth team, part of Vercel since July 2026</td>
+</tr>
+</tbody></table></div>
+<figure class="diagram"><svg id="note-diagram-0" width="100%" xmlns="http://www.w3.org/2000/svg" class="flowchart" style="max-width: 576px;" viewBox="4 4 576 499" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#note-diagram-0{font-family:ui-sans-serif,system-ui,sans-serif;font-size:16px;fill:#000000;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#note-diagram-0 .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#note-diagram-0 .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#note-diagram-0 .error-icon{fill:#552222;}#note-diagram-0 .error-text{fill:#552222;stroke:#552222;}#note-diagram-0 .edge-thickness-normal{stroke-width:1px;}#note-diagram-0 .edge-thickness-thick{stroke-width:3.5px;}#note-diagram-0 .edge-pattern-solid{stroke-dasharray:0;}#note-diagram-0 .edge-thickness-invisible{stroke-width:0;fill:none;}#note-diagram-0 .edge-pattern-dashed{stroke-dasharray:3;}#note-diagram-0 .edge-pattern-dotted{stroke-dasharray:2;}#note-diagram-0 .marker{fill:#666;stroke:#666;}#note-diagram-0 .marker.cross{stroke:#666;}#note-diagram-0 svg{font-family:ui-sans-serif,system-ui,sans-serif;font-size:16px;}#note-diagram-0 p{margin:0;}#note-diagram-0 .label{font-family:ui-sans-serif,system-ui,sans-serif;color:#000000;}#note-diagram-0 .cluster-label text{fill:#333;}#note-diagram-0 .cluster-label span{color:#333;}#note-diagram-0 .cluster-label span p{background-color:transparent;}#note-diagram-0 .label text,#note-diagram-0 span{fill:#000000;color:#000000;}#note-diagram-0 .node rect,#note-diagram-0 .node circle,#note-diagram-0 .node ellipse,#note-diagram-0 .node polygon,#note-diagram-0 .node path{fill:#eee;stroke:#999;stroke-width:1px;}#note-diagram-0 .rough-node .label text,#note-diagram-0 .node .label text,#note-diagram-0 .image-shape .label,#note-diagram-0 .icon-shape .label{text-anchor:middle;}#note-diagram-0 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#note-diagram-0 .rough-node .label,#note-diagram-0 .node .label,#note-diagram-0 .image-shape .label,#note-diagram-0 .icon-shape .label{text-align:center;}#note-diagram-0 .node.clickable{cursor:pointer;}#note-diagram-0 .root .anchor path{fill:#666!important;stroke-width:0;stroke:#666;}#note-diagram-0 .arrowheadPath{fill:#333333;}#note-diagram-0 .edgePaths .path{stroke:#666;stroke-width:1px;}#note-diagram-0 .flowchart-link{stroke:#666;fill:none;}#note-diagram-0 .edgeLabel{background-color:white;text-align:center;}#note-diagram-0 .edgeLabel p{background-color:white;}#note-diagram-0 .edgeLabel rect{opacity:0.5;background-color:white;fill:white;}#note-diagram-0 .labelBkg{background-color:rgba(255, 255, 255, 0.5);}#note-diagram-0 .cluster rect{fill:hsl(0, 0%, 98.9%);stroke:#707070;stroke-width:1px;}#note-diagram-0 .cluster text{fill:#333;}#note-diagram-0 .cluster span{color:#333;}#note-diagram-0 .node .collapsed-indicator{fill:#707070;stroke:none;opacity:0.6;}#note-diagram-0 .node .collapsed-separator{stroke:#707070;stroke-width:0.7px;}#note-diagram-0 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;background:hsl(-160, 0%, 93.3%);border:1px solid #707070;border-radius:2px;pointer-events:none;z-index:100;}#note-diagram-0 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#000000;}#note-diagram-0 rect.text{fill:none;stroke-width:0;}#note-diagram-0 .icon-shape,#note-diagram-0 .image-shape{background-color:white;text-align:center;}#note-diagram-0 .icon-shape p,#note-diagram-0 .image-shape p{background-color:white;padding:2px;}#note-diagram-0 .icon-shape .label rect,#note-diagram-0 .image-shape .label rect{opacity:0.5;background-color:white;fill:white;}#note-diagram-0 .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.1em;}#note-diagram-0 .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#note-diagram-0 .node .neo-node{stroke:#999;}#note-diagram-0 [data-look="neo"].node rect,#note-diagram-0 [data-look="neo"].cluster rect,#note-diagram-0 [data-look="neo"].node polygon{stroke:url(#note-diagram-0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#note-diagram-0 [data-look="neo"].swimlane.cluster rect{filter:none;}#note-diagram-0 [data-look="neo"].node path{stroke:url(#note-diagram-0-gradient);stroke-width:1px;}#note-diagram-0 [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#note-diagram-0 [data-look="neo"].node .neo-line path{stroke:#999;filter:none;}#note-diagram-0 [data-look="neo"].node circle{stroke:url(#note-diagram-0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#note-diagram-0 [data-look="neo"].node circle .state-start{fill:#000000;}#note-diagram-0 [data-look="neo"].icon-shape .icon{fill:url(#note-diagram-0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#note-diagram-0 [data-look="neo"].icon-shape .icon-neo path{stroke:url(#note-diagram-0-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#note-diagram-0 :root{--mermaid-font-family:ui-sans-serif,system-ui,sans-serif;}#note-diagram-0 .ours&gt;*{fill:rgb(220, 239, 226)!important;stroke:rgb(47, 122, 74)!important;color:rgb(16, 48, 28)!important;}#note-diagram-0 .ours span{fill:rgb(220, 239, 226)!important;stroke:rgb(47, 122, 74)!important;color:rgb(16, 48, 28)!important;}#note-diagram-0 .ours tspan{fill:rgb(16, 48, 28)!important;}#note-diagram-0 .small&gt;*{fill:rgb(228, 236, 247)!important;stroke:rgb(58, 95, 148)!important;color:rgb(20, 36, 61)!important;}#note-diagram-0 .small span{fill:rgb(228, 236, 247)!important;stroke:rgb(58, 95, 148)!important;color:rgb(20, 36, 61)!important;}#note-diagram-0 .small tspan{fill:rgb(20, 36, 61)!important;}#note-diagram-0 .lib&gt;*{fill:rgb(246, 222, 222)!important;stroke:rgb(163, 58, 58)!important;color:rgb(61, 16, 16)!important;}#note-diagram-0 .lib span{fill:rgb(246, 222, 222)!important;stroke:rgb(163, 58, 58)!important;color:rgb(61, 16, 16)!important;}#note-diagram-0 .lib tspan{fill:rgb(61, 16, 16)!important;}</style><g><marker id="note-diagram-0_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="note-diagram-0_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="note-diagram-0_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></path></marker><marker id="note-diagram-0_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></polygon></marker><marker id="note-diagram-0_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="note-diagram-0_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="note-diagram-0_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.2" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></circle></marker><marker id="note-diagram-0_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></circle></marker><marker id="note-diagram-0_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="note-diagram-0_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="note-diagram-0_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"></path></marker><marker id="note-diagram-0_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"></path></marker><g class="root"><g class="clusters"><g class="cluster" id="note-diagram-0-B" data-look="neo"><rect style="" x="312" y="36" width="260" height="435"></rect><g class="cluster-label" transform="translate(400.7, 36)"><foreignObject width="82.4" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Better Auth</p></span></div></foreignObject></g></g><g class="cluster" id="note-diagram-0-A" data-look="neo"><rect style="" x="12" y="12" width="260" height="483"></rect><g class="cluster-label" transform="translate(43.1, 12)"><foreignObject width="197.7" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5;"><span class="nodeLabel"><p>Ours, with two small pieces</p></span></div></foreignObject></g></g></g><g class="edges edgePaths"><path d="M142,135L142,159" id="note-diagram-0-L_a1_a2_0" class="edge-thickness-invisible edge-pattern-solid" style="stroke-dasharray: 0 0 24 0; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_a1_a2_0" data-points="W3sieCI6MTQyLCJ5IjoxMzV9LHsieCI6MTQyLCJ5IjoxNTl9XQ==" data-look="neo"></path><path d="M142,207L142,231" id="note-diagram-0-L_a2_a3_0" class="edge-thickness-invisible edge-pattern-solid" style="stroke-dasharray: 0 0 24 0; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_a2_a3_0" data-points="W3sieCI6MTQyLCJ5IjoyMDd9LHsieCI6MTQyLCJ5IjoyMzF9XQ==" data-look="neo"></path><path d="M142,303L142,327" id="note-diagram-0-L_a3_a4_0" class="edge-thickness-invisible edge-pattern-solid" style="stroke-dasharray: 0 0 24 0; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_a3_a4_0" data-points="W3sieCI6MTQyLCJ5IjozMDN9LHsieCI6MTQyLCJ5IjozMjd9XQ==" data-look="neo"></path><path d="M142,399L142,423" id="note-diagram-0-L_a4_a5_0" class="edge-thickness-invisible edge-pattern-solid" style="stroke-dasharray: 0 0 24 0; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_a4_a5_0" data-points="W3sieCI6MTQyLCJ5IjozOTl9LHsieCI6MTQyLCJ5Ijo0MjN9XQ==" data-look="neo"></path><path d="M442,135L442,159" id="note-diagram-0-L_b1_b2_0" class="edge-thickness-invisible edge-pattern-solid" style="stroke-dasharray: 0 0 24 0; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_b1_b2_0" data-points="W3sieCI6NDQyLCJ5IjoxMzV9LHsieCI6NDQyLCJ5IjoxNTl9XQ==" data-look="neo"></path><path d="M442,207L442,231" id="note-diagram-0-L_b2_b3_0" class="edge-thickness-invisible edge-pattern-solid" style="stroke-dasharray: 0 0 24 0; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_b2_b3_0" data-points="W3sieCI6NDQyLCJ5IjoyMDd9LHsieCI6NDQyLCJ5IjoyMzF9XQ==" data-look="neo"></path><path d="M442,279L442,303" id="note-diagram-0-L_b3_b4_0" class="edge-thickness-invisible edge-pattern-solid" style="stroke-dasharray: 0 0 24 0; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_b3_b4_0" data-points="W3sieCI6NDQyLCJ5IjoyNzl9LHsieCI6NDQyLCJ5IjozMDN9XQ==" data-look="neo"></path><path d="M442,375L442,399" id="note-diagram-0-L_b4_b5_0" class="edge-thickness-invisible edge-pattern-solid" style="stroke-dasharray: 0 0 24 0; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_b4_b5_0" data-points="W3sieCI6NDQyLCJ5IjozNzV9LHsieCI6NDQyLCJ5IjozOTl9XQ==" data-look="neo"></path><path d="M272,253.5L312,253.5" id="note-diagram-0-L_A_B_0" class="edge-thickness-invisible edge-pattern-solid" style="stroke-dasharray: 0 0 40 0; stroke-dashoffset: 0;;" data-edge="true" data-et="edge" data-id="L_A_B_0" data-points="W3sieCI6MjcyLCJ5IjoyNTMuNX0seyJ4IjozMTIsInkiOjI1My41fV0=" data-look="neo"></path></g><g class="edgeLabels"></g><g class="nodes"><g class="node default small" id="note-diagram-0-flowchart-a1-0" data-look="neo" transform="translate(142, 99)"><rect class="basic label-container" style="fill:#e4ecf7 !important;stroke:#3a5f94 !important" x="-86.6" y="-36" width="173.2" height="72"></rect><g class="label" style="color:#14243d !important" transform="translate(-70.6, -24)"><rect></rect><foreignObject width="141.2" height="48"><div style="color: rgb(20, 36, 61) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 180px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#14243d !important" class="nodeLabel"><p>Check Apple's note<br>(jose)</p></span></div></foreignObject></g></g><g class="node default ours" id="note-diagram-0-flowchart-a2-1" data-look="neo" transform="translate(142, 183)"><rect class="basic label-container" style="fill:#dcefe2 !important;stroke:#2f7a4a !important" x="-83.6" y="-24" width="167.2" height="48"></rect><g class="label" style="color:#10301c !important" transform="translate(-67.6, -12)"><rect></rect><foreignObject width="135.2" height="24"><div style="color: rgb(16, 48, 28) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 180px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#10301c !important" class="nodeLabel"><p>Website return trip</p></span></div></foreignObject></g></g><g class="node default ours" id="note-diagram-0-flowchart-a3-2" data-look="neo" transform="translate(142, 267)"><rect class="basic label-container" style="fill:#dcefe2 !important;stroke:#2f7a4a !important" x="-94.5" y="-36" width="189.0" height="72"></rect><g class="label" style="color:#10301c !important" transform="translate(-78.5, -24)"><rect></rect><foreignObject width="157.0" height="48"><div style="color: rgb(16, 48, 28) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 180px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#10301c !important" class="nodeLabel"><p>Sessions<br>(from Lucia's sample)</p></span></div></foreignObject></g></g><g class="node default ours" id="note-diagram-0-flowchart-a4-3" data-look="neo" transform="translate(142, 363)"><rect class="basic label-container" style="fill:#dcefe2 !important;stroke:#2f7a4a !important" x="-106" y="-36" width="212" height="72"></rect><g class="label" style="color:#10301c !important" transform="translate(-90, -24)"><rect></rect><foreignObject width="180" height="48"><div style="color: rgb(16, 48, 28) !important; display: table; white-space: break-spaces; line-height: 1.5; max-width: 180px; text-align: center; width: 180px;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#10301c !important" class="nodeLabel"><p>Delete and cut the Apple link</p></span></div></foreignObject></g></g><g class="node default ours" id="note-diagram-0-flowchart-a5-4" data-look="neo" transform="translate(142, 447)"><rect class="basic label-container" style="fill:#dcefe2 !important;stroke:#2f7a4a !important" x="-76" y="-24" width="152" height="48"></rect><g class="label" style="color:#10301c !important" transform="translate(-60, -12)"><rect></rect><foreignObject width="120" height="24"><div style="color: rgb(16, 48, 28) !important; display: table; white-space: nowrap; line-height: 1.5; max-width: 180px; text-align: center; width: 120px;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#10301c !important" class="nodeLabel"><p>Limits</p></span></div></foreignObject></g></g><g class="node default lib" id="note-diagram-0-flowchart-b1-10" data-look="neo" transform="translate(442, 111)"><rect class="basic label-container" style="fill:#f6dede !important;stroke:#a33a3a !important" x="-86.6" y="-24" width="173.2" height="48"></rect><g class="label" style="color:#3d1010 !important" transform="translate(-70.6, -12)"><rect></rect><foreignObject width="141.2" height="24"><div style="color: rgb(61, 16, 16) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 180px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#3d1010 !important" class="nodeLabel"><p>Check Apple's note</p></span></div></foreignObject></g></g><g class="node default lib" id="note-diagram-0-flowchart-b2-11" data-look="neo" transform="translate(442, 183)"><rect class="basic label-container" style="fill:#f6dede !important;stroke:#a33a3a !important" x="-83.6" y="-24" width="167.2" height="48"></rect><g class="label" style="color:#3d1010 !important" transform="translate(-67.6, -12)"><rect></rect><foreignObject width="135.2" height="24"><div style="color: rgb(61, 16, 16) !important; display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 180px; text-align: center;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#3d1010 !important" class="nodeLabel"><p>Website return trip</p></span></div></foreignObject></g></g><g class="node default lib" id="note-diagram-0-flowchart-b3-12" data-look="neo" transform="translate(442, 255)"><rect class="basic label-container" style="fill:#f6dede !important;stroke:#a33a3a !important" x="-76" y="-24" width="152" height="48"></rect><g class="label" style="color:#3d1010 !important" transform="translate(-60, -12)"><rect></rect><foreignObject width="120" height="24"><div style="color: rgb(61, 16, 16) !important; display: table; white-space: nowrap; line-height: 1.5; max-width: 180px; text-align: center; width: 120px;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#3d1010 !important" class="nodeLabel"><p>Sessions</p></span></div></foreignObject></g></g><g class="node default ours" id="note-diagram-0-flowchart-b4-13" data-look="neo" transform="translate(442, 339)"><rect class="basic label-container" style="fill:#dcefe2 !important;stroke:#2f7a4a !important" x="-106" y="-36" width="212" height="72"></rect><g class="label" style="color:#10301c !important" transform="translate(-90, -24)"><rect></rect><foreignObject width="180" height="48"><div style="color: rgb(16, 48, 28) !important; display: table; white-space: break-spaces; line-height: 1.5; max-width: 180px; text-align: center; width: 180px;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#10301c !important" class="nodeLabel"><p>Delete and cut the Apple link</p></span></div></foreignObject></g></g><g class="node default ours" id="note-diagram-0-flowchart-b5-14" data-look="neo" transform="translate(442, 423)"><rect class="basic label-container" style="fill:#dcefe2 !important;stroke:#2f7a4a !important" x="-76" y="-24" width="152" height="48"></rect><g class="label" style="color:#10301c !important" transform="translate(-60, -12)"><rect></rect><foreignObject width="120" height="24"><div style="color: rgb(16, 48, 28) !important; display: table; white-space: nowrap; line-height: 1.5; max-width: 180px; text-align: center; width: 120px;" xmlns="http://www.w3.org/1999/xhtml"><span style="color:#10301c !important" class="nodeLabel"><p>Limits</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="note-diagram-0-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.0" flood-color="#000000"></feDropShadow></filter></defs><defs><filter id="note-diagram-0-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.0" flood-color="#000000"></feDropShadow></filter></defs><linearGradient id="note-diagram-0-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3%)" stop-opacity="1"></stop><stop offset="100%" stop-color="hsl(0, 0%, 88.9%)" stop-opacity="1"></stop></linearGradient></svg></figure>
+
+
+<p><strong>The key:</strong> green is code we write · blue is a small outside piece we call · red is the library&#39;s code.</p>
+<h2>What does each choice mean for a hafiz?</h2>
+<p>When it works, nothing: the reader taps Sign in, sees Face ID, and their marks are there in Firefox. The two differ only in how it fails and how fast it is fixed.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Ours</th>
+<th>Better Auth</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>When it breaks</strong></td>
+<td><strong>If sign-in breaks, the fault is in code we wrote and can read, so it can be fixed the same day.</strong></td>
+<td><strong>If sign-in breaks inside the library, we wait for their fix or work around it. An upgrade can break sign-in, but only when we choose to upgrade.</strong></td>
+</tr>
+</tbody></table></div>
+<h2>The two choices, side by side</h2>
+<h3>Ours: jose to check Apple&#39;s note, Lucia&#39;s free sample for sessions, the rest ours (recommended)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>For a hafiz</strong></td>
+<td><strong>A fault is ours to read and fix the same day.</strong></td>
+</tr>
+<tr>
+<td>Pros</td>
+<td>Every line that touches a reader&#39;s account is ours to read. Small: nothing runs that we did not ask for. jose has been kept up for years, has no other code it depends on, and lists Cloudflare as supported (version 6.2.17, 9 Nov 2026). Lucia&#39;s sample file is free to copy with no terms, and its author wrote it for exactly this after closing the library. Nothing changes under us unless we change it.</td>
+</tr>
+<tr>
+<td>Cons</td>
+<td>We write the website&#39;s return trip and sessions too, on top of the deletion and limits that are ours anyway. One mistake in those parts is a security fault, and nobody else is finding it for us. The sample needs one change for us: its guard against forged requests would refuse Apple&#39;s return trip unless that route is handled first.</td>
+</tr>
+<tr>
+<td>What it commits us to</td>
+<td>A test for every security part, written first. A short note in the repo saying what each part checks, so a later reader can audit it.</td>
+</tr>
+</tbody></table></div>
+<h3>Better Auth on hifth.app&#39;s Cloudflare, with its free database</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>For a hafiz</strong></td>
+<td><strong>The same when it works. A fault inside the library waits on its team, or on a patch of ours.</strong></td>
+</tr>
+<tr>
+<td>Pros</td>
+<td>Sessions, the website&#39;s return trip and the app&#39;s sign-in come built and used by many projects. Runs on Cloudflare&#39;s free database directly (since February 2026). The return-trip fault we had noted was fixed in November 2025 by turning Apple&#39;s form into an ordinary page load; later reports had other causes and were fixed too. Add-ons for email codes and passkeys exist if we want them later.</td>
+</tr>
+<tr>
+<td>Cons</td>
+<td>It does not cut the reader&#39;s link with Apple on delete, and its app sign-in does not keep the key needed to do so; both are ours to write anyway. It changes very fast: 12 releases in two weeks, and each minor version every three to four months has broken something; version 1.7 required a database change, then took it back. Cloudflare says sign-in work typically takes 10 to 20 thousandths of a second, against a limit of 10 on the free plan, so it may need the paid plan. Its fix for the return trip puts Apple&#39;s one-time name and email into the page address, so they can land in request logs. It stores Apple&#39;s keys unencrypted unless we add that.</td>
+</tr>
+<tr>
+<td>What it commits us to</td>
+<td>Pinning a version and reading each upgrade&#39;s breaking changes before taking it. Measuring computing time on a real deploy before the first testers. Logs that drop the return trip&#39;s address. Our sign-in moves when the library does.</td>
+</tr>
+</tbody></table></div>
+<h2>What did we look at and leave out?</h2>
+<ul>
+<li><strong>Arctic</strong>, a small helper for signing in with other companies, closed on 29 July 2026. Its last version still works, but nothing will be fixed in it.</li>
+<li><strong>Oslo</strong>, the same author&#39;s building blocks, closed the same day, except its text-encoding piece.</li>
+<li><strong>Lucia</strong>, the same author&#39;s sign-in library, closed in March 2025. Its free sample sessions file is what the recommended choice copies.</li>
+<li><strong>Auth.js</strong>, once popular, became part of Better Auth in September 2025 and gets security fixes only. New projects are told to use Better Auth.</li>
+<li><strong>OpenAuth</strong> says it is in beta and has had no release since March 2025. It cannot store in Cloudflare&#39;s database and cannot take the app&#39;s sign-in note.</li>
+<li><strong>Cloudflare&#39;s own sign-in</strong> is for a company&#39;s staff, not for the public.</li>
+<li><strong>Hosted sign-in companies</strong> (a new Supabase project, Firebase, Clerk) are the other options on the options page, not this one.</li>
+</ul>
+<h2>Why is &quot;ours&quot; recommended?</h2>
+<p>The parts that make sign-in proper, and that Apple&#39;s review checks, are deleting the account and cutting the Apple link. They are ours in both choices. What Better Auth adds is sessions and the website&#39;s return trip. Both are short, with a free sample and a known pattern to start from. Against that, it brings a fast-moving dependency that breaks something every few months, a real chance of going over the free plan&#39;s computing limit, and a habit of putting Apple&#39;s one-time name into addresses. For one owner and a few testers, code we can read in an afternoon is worth more than a framework.</p>
+<h2>What would change the answer?</h2>
+<ul>
+<li><strong>If the owner would rather not own security code,</strong> Better Auth is the right pick, pinned to one version, with the deletion and the Apple link written by us on top.</li>
+<li><strong>If we later want email codes, passkeys or several sign-in companies,</strong> Better Auth&#39;s add-ons start to outweigh its cost. Its tables could be adopted then; a reader would sign in again once.</li>
+<li><strong>If a measurement shows our own code also goes over the free plan&#39;s limit,</strong> the computing limit stops separating the two, and the paid plan (about 5 dollars a month) is needed either way.</li>
+<li><strong>If the November 2025 fix turns out not to work</strong> when tried, Better Auth&#39;s main saving shrinks to sessions alone.</li>
+</ul>
+<h2>What is this not settling?</h2>
+<p>Whether accounts live on Cloudflare at all (that is the rest of choice ②), whether we can read a reader&#39;s copy (choice ③), and the design of the recovery code if the copy is locked.</p>
+
+</main>
+</body>
+</html>

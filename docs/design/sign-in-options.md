@@ -87,7 +87,7 @@ flowchart TB
   COPY[("The copy of your marks")]:::data
   APPLE["Apple"]:::apple
   IPAD -- "sends Apple's note" --> LIB
-  FF -. "website sign-in had a known cookie fault" .-> LIB
+  FF -- "sends Apple's note" --> LIB
   LIB -- "checks the note with" --> APPLE
   LIB -- "keeps the account in" --> DB
   IPAD == "your marks" ==> COPY
@@ -102,8 +102,8 @@ flowchart TB
 | --- | --- |
 | **For a hafiz** | **The same as A, as long as the library behaves.** |
 | Pros | Less code to write. Sessions and add-ons come built. |
-| Cons | Its Apple sign-in on websites had a fault with cookies; it was closed as fixed, then two people said it was back. Deletion that really cuts the Apple link is still ours to write. |
-| What it commits us to | Our sign-in changes whenever the library's next version does. |
+| Cons | Deletion that really cuts the Apple link is still ours to write. It changes very fast and breaks something every few months, and it may go over the free plan's computing limit. Its website sign-in had a cookie fault, fixed in November 2025. |
+| What it commits us to | Our sign-in changes whenever the library's next version does. The library page weighs this against A part by part: [sign-in-library.md](sign-in-library.md). |
 
 ### C. A new Supabase project just for readers
 
@@ -253,7 +253,7 @@ flowchart TB
 
 ## Why are these the recommendations?
 
-- **② A**, because the parts that make sign-in proper (deletion that really deletes, the button that says who sees what, the privacy check) are ours to write in every option. A library saves the easy part, and here it brought a known fault in the hard part. Cloudflare's free plan allows 100,000 requests and 100,000 database writes a day, far beyond a group of testers.
+- **② A**, because the parts that make sign-in proper (deletion that really deletes, the button that says who sees what, the privacy check) are ours to write in every option. A library saves the easier part (sessions and the website's return trip) and brings a fast-moving dependency; the library page ([sign-in-library.md](sign-in-library.md)) weighs the two closely. Cloudflare's free plan allows 100,000 requests and 100,000 database writes a day, far beyond a group of testers.
 - **③ not locked, first**, because it is the smaller build and can be locked later without losing anyone's marks; going the other way, from locked to readable, would need every reader's code. The cost is honesty on the button, which our own privacy rule already asks for. If the owner would rather testers never hand us readable marks, locked is the answer, and the first unlock waits for the recovery-code design.
 
 ## What would change the answer?
