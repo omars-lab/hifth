@@ -35,6 +35,18 @@ raise should not happen without a trim or a faster start first. The two candidat
 only move code between files, so they free no room; finding what does, and what slowed start-up,
 is its own open item (⑳ in `docs/performance.md`, backlog row `startup-slowed-in-a-month`).
 
+**Trimmed 2026-11-17 (2): start-up 161.0 → 159.4 KB, 1.6 KB of room (item ㉔).** Three moves,
+nothing a reader sees changed. What the share sheet holds (the choices and the two links) moved to
+the rarely-used file; the Share button stays in start-up and the card's frame and close button
+draw at once, the links a moment later, and the focus moves onto the first of them when they
+arrive (`components/ShareBody.tsx`, 0.6 KB). The tajweed colour key moved there too, and mounts
+only once it is opened; its switch stays (`components/TajweedLegend.tsx`, 0.8 KB). And the build
+setting that folds small files into the main script went from 2048 to 1024: at 2048 it had folded
+the update watcher (`pwa-update.ts`, loaded only once the offline worker is up) back into start-up,
+0.3 KB. The language-file check still passes at 1024. Total 212.7 → 213.7 KB of the 220 KB cap, the
+usual cost of more files. `e2e/lazy-tools.spec.ts` lists both moved files, and opens the colour key
+on a slow first load.
+
 **Trimmed 2026-11-17: start-up 160.9 → 160.1 KB.** The verse menu (the tap-and-hold menu
 on a verse, and its corner twin) moved out of start-up into the rarely-used file: it draws
 nothing until a verse is held, so it mounts only then. Main script 127.98 → 127.35 KB; the
@@ -292,8 +304,9 @@ less. Read the per-file lines in the baseline diff, not only the total. After bo
      stop.
    - **A tiny shared file.** Two later-loaded files that share a small helper make the build
      ship the helper on its own: one more request before the first paint. The build folds any
-     shared file under 2 KB into the main script, and refuses to build if a language file still
-     needs one (`docs/issues/one-language-startup-check.md`).
+     shared file under 1 KB into the main script (2 KB until 2026-11-17, when that was found
+     folding a later-loaded file back into start-up), and refuses to build if a language file
+     still needs one (`docs/issues/one-language-startup-check.md`).
    - **A top-level wait in the main script.** A later-loaded file can import things from the main
      script. If the main script is paused at the top waiting for that file, each waits for the
      other and the page never paints. Load, then draw, from a promise.

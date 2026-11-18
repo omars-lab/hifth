@@ -52,9 +52,10 @@ describe("ShareSheet in the native shell", () => {
 
     render(<ShareSheet state={STATE} hasTrail={false} />);
     // The button opens the link sheet (decision share-sheet-builder); the
-    // website link is the next tap, and the shell's sheet takes it.
+    // website link is the next tap, and the shell's sheet takes it. The
+    // sheet's links arrive a moment after it opens (launch item 24), so wait.
     fireEvent.click(screen.getByRole("button", { name: "شارك هذه الآية كرابط" }));
-    fireEvent.click(screen.getByRole("button", { name: "شارك رابط الموقع" }));
+    fireEvent.click(await screen.findByRole("button", { name: "شارك رابط الموقع" }));
 
     await waitFor(() => expect(sent).toHaveLength(1));
     expect(sent[0]).toMatchObject({
@@ -74,7 +75,7 @@ describe("ShareSheet in the native shell", () => {
 
     render(<ShareSheet state={STATE} hasTrail={false} />);
     fireEvent.click(screen.getByRole("button", { name: "شارك هذه الآية كرابط" }));
-    fireEvent.click(screen.getByRole("button", { name: "شارك رابط الموقع" }));
+    fireEvent.click(await screen.findByRole("button", { name: "شارك رابط الموقع" }));
 
     await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
     const data = share.mock.calls[0]?.[0] as ShareData | undefined;

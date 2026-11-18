@@ -26,3 +26,5 @@ export { MovedCard } from "./MovedCard";
 export { ReportProblem } from "./ReportProblem";
 export { Jumper } from "./Jumper";
 export { VerseMenu } from "./VerseMenu";
+export { ShareBody, ShareInDrawer } from "./ShareBody";
+export { TajweedLegend } from "./TajweedLegend";

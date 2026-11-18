@@ -1,0 +1,251 @@
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { TAJWEED_RULES, type LeafSide, type TajweedMark, type TajweedRuleId } from "@hifth/core";
+import { useT } from "../i18n";
+import { leafStyle, useOverLeaf } from "./over-leaf";
+import { useSideCover, type CardSpan } from "./short-band";
+import styles from "./SkinToggle.module.css";
+
+/*
+ * The tajweed colour key, loaded the first time it opens (launch item 24: room
+ * in the first download). The switch that opens it is in ./SkinToggle.tsx and
+ * loads with the page; this sheet lives in the rarely-used file, reached
+ * through ./later.tsx. e2e/lazy-tools.spec.ts fails if it slips back.
+ */
+
+interface TajweedLegendProps {
+  /** Null when closed (same convention as HopPopover's `chip`). */
+  open: boolean;
+  /** Rule → how many ayahs on the current page carry it; null while still counting. */
+  counts: ReadonlyMap<TajweedRuleId, number> | null;
+  /** The page the counts describe. */
+  page: number;
+  /** The selected ayah's rules, spelled out in text — the non-visual channel. */
+  selection: { label: string; marks: readonly TajweedMark[] } | null;
+  /** Attribution required by the rule source's licence, rendered verbatim. */
+  credit: { text: string; href: string } | null;
+  onClose: () => void;
+  /**
+   * Where the open key spans across the window, or null once it closes, so a
+   * single page on a laptop moves aside for it as it does for the roots list.
+   */
+  onSide?: (span: CardSpan | null) => void;
+  /**
+   * On a spread, the leaf the key lies over: the one the verse is not on, as
+   * the roots list and the share card do. Null keeps the corner.
+   */
+  side?: LeafSide | null;
+}
+
+/** Focusable descendants of `root`, in tab order (excludes disabled + hidden). */
+function focusables(root: HTMLElement): HTMLElement[] {
+  const sel =
+    'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  return Array.from(root.querySelectorAll<HTMLElement>(sel));
+}
+
+/**
+ * TajweedLegend — the key, and the honesty.
+ *
+ * Every rule gets four channels: an Arabic name, a text mark, a colour swatch
+ * and the dash pattern the page actually draws (rendered as a real stroked line,
+ * so what you see here is what you see there). Counts say how many ayahs on this
+ * page carry the rule, which turns a colour key into something worth opening.
+ *
+ * It also states the two things a hafiz must know before trusting it: the skin
+ * is **beta** pending sign-off, and it marks whole ayahs rather than letters
+ * because the vendored corpus has no letter geometry yet.
+ *
+ * A11y: HopPopover's contract exactly — modal dialog, focus in on open, Tab
+ * trapped, Escape closes, focus restored to the trigger.
+ */
+export function TajweedLegend({
+  open,
+  counts,
+  page,
+  selection,
+  credit,
+  onClose,
+  onSide,
+  side = null,
+}: TajweedLegendProps): JSX.Element | null {
+  const { t, dir } = useT();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const restoreRef = useRef<HTMLElement | null>(null);
+  // The key counts the colours on this page, so a reader holds it up against
+  // the page; in its corner it covered where the lines begin (look-alike rows ⑬).
+  // On a spread it lies over the facing leaf instead (look-alike rows ⑭).
+  const place = useOverLeaf(open, side);
+  useSideCover(open, side !== null, sheetRef, onSide);
+  // Whether the card holds more than it shows. On a laptop-sized window the
+  // key is taller than its card, and the last thing in it is the source's
+  // credit, a licence condition; without a cue nothing says it is there.
+  const [moreBelow, setMoreBelow] = useState(false);
+  const measure = useCallback(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    setMoreBelow(sheet.scrollTop + sheet.clientHeight < sheet.scrollHeight - 2);
+  }, []);
+
+  // The counts and the selection arrive after the card opens, and a window
+  // can change size under it, so measure again whenever any of them does.
+  useLayoutEffect(() => {
+    if (!open) return;
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [open, counts, selection, credit, measure]);
+
+  // Takes the keyboard in the step that draws it, so a key pressed as it appears lands here, not on the page.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const opener = document.activeElement as HTMLElement | null;
+    restoreRef.current = opener;
+    const sheet = sheetRef.current;
+    // Opened by a link, nothing was pressed: focus the sheet itself, so a screen
+    // reader still lands in it but no ring appears round a button nobody reached for.
+    const byLink = !opener || opener === document.body;
+    if (sheet) (byLink ? sheet : focusables(sheet)[0] ?? sheet).focus();
+    return () => {
+      restoreRef.current?.focus?.();
+    };
+  }, [open]);
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const sheet = sheetRef.current;
+      if (!sheet) return;
+      const items = focusables(sheet);
+      if (items.length === 0) return;
+      const first = items[0]!;
+      const last = items[items.length - 1]!;
+      const active = document.activeElement;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    },
+    [onClose],
+  );
+
+  if (!open) return null;
+
+  return (
+    <>
+      <div className={styles.scrim} onClick={onClose} aria-hidden="true" />
+      <div
+        ref={sheetRef}
+        className={styles.sheet}
+        style={leafStyle(place, "content")}
+        data-side={side ?? undefined}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t.legendAria}
+        // The panel's name in a link (`?open=`), for the features-page check.
+        data-panel="key"
+        dir={dir}
+        tabIndex={-1}
+        onKeyDown={onKeyDown}
+        onScroll={measure}
+        data-more={moreBelow ? "below" : undefined}
+      >
+        <div className={styles.grip} aria-hidden="true" />
+        <header className={styles.head}>
+          <h2 className={styles.title}>{t.legendTitle}</h2>
+          <span className={styles.beta}>{t.beta}</span>
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t.close}>
+            ✕
+          </button>
+        </header>
+
+        {/* Split around the <strong> rather than interpolated: "beta" is
+            emphasised in both languages, and a bundle that shipped the markup
+            as a string would have to be trusted with HTML. */}
+        <p className={styles.caveat}>
+          {t.legendCaveat.lead}
+          <strong>{t.legendCaveat.strong}</strong>
+          {t.legendCaveat.rest}
+        </p>
+
+        <ul className={styles.list}>
+          {TAJWEED_RULES.map((rule) => {
+            const n = counts ? (counts.get(rule.id) ?? 0) : null;
+            return (
+              <li key={rule.id} className={styles.row} data-empty={n === 0 || undefined}>
+                <span className={styles.swatch} aria-hidden="true">
+                  <svg viewBox="0 0 40 12" className={styles.swatchSvg}>
+                    <rect
+                      x="1"
+                      y="1"
+                      width="38"
+                      height="10"
+                      rx="2"
+                      className={`${styles.swatchShape} tj-legend-${rule.id}`}
+                    />
+                  </svg>
+                </span>
+                <span className={styles.mark} aria-hidden="true">
+                  {rule.mark}
+                </span>
+                <span className={styles.name}>
+                  {/* The rule name is its own element, not a bare text node: it
+                      is the non-colour channel for rule identity, so it has to
+                      be addressable on its own by a screen reader's element
+                      navigation and by the tests that police WCAG 1.4.1. Both
+                      spellings are always rendered — only which one leads
+                      changes, because the Arabic name is the one a teacher
+                      says and the Latin one is how it is written down. */}
+                  <span>{t.ruleName(rule.label, rule.latin).primary}</span>
+                  <span className={styles.latin}>
+                    {t.ruleName(rule.label, rule.latin).secondary}
+                  </span>
+                </span>
+                <span className={styles.count}>
+                  {n === null ? null : n === 0 ? t.legendNoneOnPage : t.legendCountOnPage(n, page)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+
+        {selection && (
+          <section className={styles.selection} aria-label={t.legendSelection}>
+            <h3 className={styles.subhead}>{selection.label}</h3>
+            {selection.marks.length === 0 ? (
+              <p className={styles.empty}>{t.legendNoRules}</p>
+            ) : (
+              <ul className={styles.chips}>
+                {selection.marks.map((mark) => (
+                  <li key={mark.rule.id} className={styles.chip}>
+                    <span className={styles.mark} aria-hidden="true">
+                      {mark.rule.mark}
+                    </span>
+                    {t.ruleName(mark.rule.label, mark.rule.latin).primary}
+                    <span className="numeric">{t.num(mark.count)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+
+        {credit && (
+          <p className={styles.credit}>
+            {credit.text}{" "}
+            <a href={credit.href} target="_blank" rel="noreferrer noopener">
+              {credit.href}
+            </a>
+          </p>
+        )}
+      </div>
+    </>
+  );
+}

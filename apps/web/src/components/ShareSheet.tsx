@@ -1,16 +1,15 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { type AppState, type LeafSide } from "@hifth/core";
-import { ayahLabelAt, digits } from "../format";
 import { useT } from "../i18n";
 import { nativeShare, shareBase } from "../native-bridge";
 import { linksFor, shareShapeFromUrl, type SharePanel, type ShareShape } from "../share-links";
-import { savedShareLook, shortAddress } from "../share-look";
+import { Later, ShareBody } from "./later";
 import { leafStyle, useOverLeaf } from "./over-leaf";
 import { useSideCover, type CardSpan } from "./short-band";
 import styles from "./ShareSheet.module.css";
 
-interface ShareSheetProps {
+export interface ShareSheetProps {
   /** The current view to encode into the shareable link, or null (nothing to share). */
   state: AppState | null;
   /** Whether the current view includes a trail (offers the "share the whole walk" copy). */
@@ -61,14 +60,14 @@ const WIDE = "(min-width: 40rem)";
 type Feedback = { kind: "copied" | "shared" | "error"; text: string } | null;
 
 /** Read once: the shape is a property of the visit, not of any one sheet. */
-const SHAPE = shareShapeFromUrl(window.location.search);
+export const SHARE_SHAPE = shareShapeFromUrl(window.location.search);
 
 /**
  * What sharing a view needs, in a card or in the drawer: its name, its two
  * links (with the panel the sender picked written in), and the three ways out
  * (the shell's sheet, the browser's, the clipboard), with what happened.
  */
-function useShare(state: AppState | null, hasTrail: boolean, variant: "ayah" | "range") {
+export function useShare(state: AppState | null, hasTrail: boolean, variant: "ayah" | "range") {
   const { t } = useT();
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [panel, setPanel] = useState<SharePanel>("");
@@ -124,7 +123,7 @@ function useShare(state: AppState | null, hasTrail: boolean, variant: "ayah" | "
   return { state, ariaLabel, links, panel, setPanel, isRange, feedback, setFeedback, shareSite, shareApp };
 }
 
-type Share = ReturnType<typeof useShare>;
+export type Share = ReturnType<typeof useShare>;
 
 /**
  * ShareSheet (spec §7) — the "send this view" affordance, and since the
@@ -146,7 +145,7 @@ export function ShareSheet({
   state,
   hasTrail,
   variant = "ayah",
-  shape = SHAPE,
+  shape = SHARE_SHAPE,
   pitch = false,
   onCover,
   onTop,
@@ -249,7 +248,9 @@ export function ShareSheet({
             ×
           </button>
         </div>
-        <ShareBody share={share} shape={shape} pitch={pitch} />
+        <Later>
+          <ShareBody share={share} shape={shape} pitch={pitch} focusFirst />
+        </Later>
       </div>,
       document.body,
     );
@@ -276,133 +277,5 @@ export function ShareSheet({
       )}
       {sheet}
     </div>
-  );
-}
-
-/** A sign for each thing a link can open, drawn on the tiles. */
-const SIGN: Record<SharePanel, string> = { "": "¶", lookalikes: "≈", roots: "√", commentary: "❝" };
-
-/**
- * What the sheet holds below its title: what the link should open, the two
- * links, and what happened. The same in the card and in the drawer, drawn in
- * the look chosen in the info panel (share-look.ts), read each time it opens.
- * Every look has the same choices and buttons under the same names.
- */
-function ShareBody({ share, shape, pitch }: { share: Share; shape: ShareShape; pitch: boolean }): JSX.Element | null {
-  const { t, lang } = useT();
-  const legendId = useId();
-  const [look] = useState(savedShareLook);
-  const { state, links, panel, setPanel, isRange, feedback, shareSite, shareApp } = share;
-  if (!links) return null;
-  const panels: { id: SharePanel; label: string }[] = [
-    { id: "", label: t.shareAsIs },
-    { id: "lookalikes", label: t.shareLookalikes },
-    { id: "roots", label: t.shareRoots },
-    ...(pitch ? [{ id: "commentary" as const, label: t.shareCommentary }] : []),
-  ];
-  const sel = state?.select;
-  const title = !sel
-    ? t.shareTitle
-    : "toAyah" in sel && sel.toAyah !== sel.ayah
-      ? `${ayahLabelAt(sel.surah, sel.ayah, lang)}–${digits(sel.toAyah, lang)}`
-      : ayahLabelAt(sel.surah, sel.ayah, lang);
-  const opens = panels.find((p) => p.id === panel) ?? panels[0]!;
-  const tiles = look === "tiles";
-  return (
-    <div className={styles.body} data-share-look={look}>
-      {look === "preview" && (
-        <div className={styles.preview} data-share-preview="">
-          <span className={styles.previewSite}>{t.shareTitle}</span>
-          <span className={styles.previewTitle}>{title}</span>
-          {shape === "c" && !isRange && (
-            <span className={styles.previewOpens}>
-              <span aria-hidden="true">{SIGN[opens.id]}</span> {opens.label}
-            </span>
-          )}
-          <span className={styles.previewUrl}>
-            <bdi dir="ltr">{shortAddress(links.site)}</bdi>
-          </span>
-        </div>
-      )}
-      {shape === "c" && !isRange && (
-        <div className={styles.panels} role="radiogroup" aria-labelledby={legendId}>
-          <span id={legendId} className={styles.legend}>
-            {t.shareOpenWith}
-          </span>
-          {panels.map((p) => (
-            <label key={p.id} className={styles.panel}>
-              <input
-                type="radio"
-                name={`share-panel-${legendId}`}
-                value={p.id}
-                checked={panel === p.id}
-                onChange={() => setPanel(p.id)}
-              />
-              {tiles && (
-                <span className={styles.sign} aria-hidden="true">
-                  {SIGN[p.id]}
-                </span>
-              )}
-              <span>{p.label}</span>
-            </label>
-          ))}
-        </div>
-      )}
-      <div className={styles.links}>
-        <button
-          type="button"
-          className={styles.link}
-          data-main=""
-          onClick={() => void shareSite(links.site)}
-          aria-label={t.shareSiteAria}
-        >
-          <span className={styles.glyph} aria-hidden="true">
-            ⇪
-          </span>
-          <span className={styles.linkText}>
-            <span>{t.shareSite}</span>
-            {tiles && <span className={styles.hint}>{t.shareSiteHint}</span>}
-          </span>
-        </button>
-        <button
-          type="button"
-          className={styles.link}
-          onClick={() => void shareApp(links.app)}
-          aria-label={t.shareAppAria}
-        >
-          <span className={styles.glyph} aria-hidden="true">
-            ⧉
-          </span>
-          <span className={styles.linkText}>
-            <span>{t.shareApp}</span>
-            {tiles && <span className={styles.hint}>{t.shareAppHint}</span>}
-          </span>
-        </button>
-      </div>
-      <span className={styles.feedback} role="status" data-kind={feedback?.kind}>
-        {feedback?.text}
-      </span>
-    </div>
-  );
-}
-
-/**
- * The share links drawn inside the verse's drawer (selection-drawer ③, a
- * setting): the same body as the card, under the drawer's own heading, so the
- * verse stays in sight and one Escape folds it.
- */
-export function ShareInDrawer({
-  state,
-  hasTrail,
-  variant = "ayah",
-  shape = SHAPE,
-  pitch = false,
-}: Pick<ShareSheetProps, "state" | "hasTrail" | "variant" | "shape" | "pitch">): JSX.Element | null {
-  const share = useShare(state, hasTrail, variant);
-  if (!state || !share.links) return null;
-  return (
-    <section className={styles.inDrawer} role="region" aria-label={share.ariaLabel}>
-      <ShareBody share={share} shape={shape} pitch={pitch} />
-    </section>
   );
 }
