@@ -2642,7 +2642,17 @@
         {
           "file": "apps/landing/lib/accounts.mjs",
           "symbol": "signIn",
-          "note": "Spends the one-off word, runs Apple's check, finds or makes the account by Apple's user number, and hands back a new session. handOutWord, whoIs and signOut sit beside it."
+          "note": "Spends the one-off word, runs Apple's check, finds or makes the account by Apple's user number, and hands back a new session. Beside it: handOutWord (at most MOST_WAITING_WORDS waiting at once, sign-in step 17), whoIs, signOut, actOnAppleNotice and deleteAccount (steps 13 and 14)."
+        },
+        {
+          "file": "apps/landing/lib/apple-link.mjs",
+          "symbol": "tradeCode",
+          "note": "The link with Apple that outlives a sign-in (steps 13 and 14): trades the one-time code from Apple's sheet for the cancel ticket, locks and opens the ticket, hands it back to Apple when an account is deleted, and checks the notices Apple sends when a reader leaves from Apple's side."
+        },
+        {
+          "file": "apps/landing/migrations/0002_apple_tickets.sql",
+          "symbol": "CREATE TABLE apple_tickets",
+          "note": "One locked cancel ticket per account. Goes into the real database only with the owner's yes, before sign-in is switched on."
         },
         {
           "file": "apps/landing/migrations/0001_accounts.sql",
@@ -2657,12 +2667,12 @@
         {
           "file": "apps/landing/lib/sign-in-api.mjs",
           "symbol": "handleSignIn",
-          "note": "The three web addresses the app calls: a one-off word, sign in, sign out. Answers 404 unless SIGN_IN is \"on\", 503 without the database or app ids; every reply says no-store and none carries Apple's user number."
+          "note": "The web addresses: a one-off word (429 when too many are waiting), sign in, sign out, delete my account, and the one Apple posts its notices to. Answers 404 unless SIGN_IN is \"on\", 503 without the database or app ids; every reply says no-store and none carries Apple's user number."
         },
         {
           "file": "apps/landing/functions/api/sign-in/index.js",
           "symbol": "onRequestPost",
-          "note": "Cloudflare's thin file for /api/sign-in; word.js and ../sign-out.js are its siblings."
+          "note": "Cloudflare's thin file for /api/sign-in; word.js, apple-notice.js, delete-account.js and ../sign-out.js are its siblings."
         }
       ],
       "extend": [
@@ -2671,10 +2681,11 @@
         "The sign-in library (jose) is for the server only; the web app and the shared core never import it, and a test refuses it.",
         "Only the local database copy until the owner says yes to the real one (docs/design/sign-in.md, question 9).",
         "The plan and its order: .claude/plans/sign-in-build.md.",
+        "Limit only the word address, and keep nothing about a caller; the limit per caller is Cloudflare's (docs/issues/sign-in-limit-not-the-person-check.md).",
         "On the laptop's Cloudflare stand-in, Apple refuses to hand over its keys, so a note is refused as keys-unreachable there; that is expected (docs/issues/apple-keys-refuse-local-runtime.md)."
       ],
       "gates": [
-        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/accounts.test.mjs apps/landing/lib/sign-in-api.test.mjs apps/landing/lib/server-only.test.mjs"
+        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/accounts.test.mjs apps/landing/lib/sign-in-api.test.mjs apps/landing/lib/apple-link.test.mjs apps/landing/lib/server-only.test.mjs"
       ],
       "seeAlso": [
         "hifth-app-site"
