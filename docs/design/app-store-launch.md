@@ -334,11 +334,19 @@ The store has no undo, and a pause only stops an update spreading.
 lowest version still allowed, a message to show, and switches for risky features. With no
 connection the app carries on as before. A test changes the file and sees the message.
 
-### ㉒ There is no one command to release, and no written fix-in-a-hurry page · **open**
+### ㉒ There is no one command to release, and no written fix-in-a-hurry page · **fixed**
 
 *What would answer it:* one release command, from version to a checked build, and a page that
 says how to reproduce, patch, build, upload and ask Apple for a faster review, with the request
 text ready to paste.
+
+*Fixed 2026-11-17:* `make app-release VERSION=…` (or `NEXT_BUILD=1`) now runs every step from
+the setup check to Apple's own check, in order. It refuses work that is not committed, stops at
+the first step that fails and says how to carry on, and ends before the upload while the
+licence keeps it locked. The fix-in-a-hurry page is in the processes skill, with the request
+for a faster review ready to paste and what pausing a staged release can and cannot undo,
+checked against Apple's own pages. It has been run as a dry run; a real run raises the build
+number, so it waits for the first real release.
 
 ### ㉓ A bad publish of the site cannot be put back · **open**
 

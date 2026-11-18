@@ -4,20 +4,25 @@ How a build of the iPad, iPhone and Mac app gets from this laptop to people's de
 the App Store, what has to be set up before the first one, and what each step guards against.
 The commands are in the `release-app` skill; the account IDs are in `app-setup`.
 
-*Last checked: 2026-11-16.*
+*Last checked: 2026-11-17.*
 
 ## The short version
+
+**One command runs steps 1 to 6:** `make app-release VERSION=1.0.0` (or `NEXT_BUILD=1`; add
+`MAC=1` for the Mac, `DRY=1` to see the steps without running them). It refuses uncommitted
+work and stops at the first step that fails. The steps it runs:
 
 1. **Check the setup:** `make app-release-setup` says what is missing and where to fix it.
 2. **Set the version:** `make app-version VERSION=1.0.0`, or `NEXT_BUILD=1` for another build.
 3. **Put the public build in the app:** `make app-web FLAVOUR=public`.
 4. **Archive:** `make app-archive` builds the store copy and checks the app inside it.
 5. **Sign it for the store:** `make app-export`.
-6. **Apple's own check:** not built yet; needs the App Store Connect key.
+6. **Apple's own check:** `make app-store-check` sends it to Apple to check, with no build anyone can install.
 7. **Upload:** `make app-testflight`, locked until the licence permissions arrive.
 8. **Test flight, review, release:** not built yet.
 
-Steps 1 to 5 stay on this laptop. Only steps 6 and 7 send anything to Apple.
+Steps 1 to 5 stay on this laptop. Only steps 6 and 7 send anything to Apple. When a version
+on the store turns out broken, [fix-in-a-hurry.md](fix-in-a-hurry.md) is the page to follow.
 
 ## The whole thing, as a story
 
@@ -247,7 +252,7 @@ flowchart TD
   version --> web["Put the public build in the app<br/>make app-web FLAVOUR=public"]
   web --> archive["Archive<br/>make app-archive"]
   archive --> export["Sign it for the store<br/>make app-export"]
-  export --> validate["Apple's own check<br/>needs the key"]
+  export --> validate["Apple's own check<br/>make app-store-check"]
   validate --> lock{"Licence permissions<br/>in the repo?"}
   lock -- "no (today)" --> stop["The upload refuses"]
   lock -- "yes" --> upload["Upload<br/>make app-testflight"]
@@ -266,12 +271,13 @@ flowchart TD
   classDef done fill:#dff3e4,stroke:#2e7d32,color:#1b1b1b
   classDef notyet fill:#fdf1d6,stroke:#b7791f,color:#1b1b1b
   classDef locked fill:#f9dede,stroke:#b42318,color:#1b1b1b
-  class setup,version,web,archive,export done
-  class validate,flight,review,release notyet
+  class setup,version,web,archive,export,validate done
+  class flight,review,release notyet
   class lock,stop,upload locked
 ```
 
-Green steps work today. Amber ones are not built yet. Red is the licence lock.
+Green steps work today, and `make app-release` runs them all in order. Amber ones are not
+built yet. Red is the licence lock.
 
 ## Each step, and what it guards against
 
@@ -282,7 +288,7 @@ Green steps work today. Amber ones are not built yet. Red is the licence lock.
 | Put the public build in | nothing on its own; it stamps the build `public` | the private pitch build carries The Study Quran's commentary and must never reach the store |
 | Archive | any web build but the public one; no Xcode sign-in; a release build with the walk-capture code, without Apple's privacy file, or with a private folder; and it checks the app **inside the archive** a second time | the archive is what would be uploaded, so it is the one that has to be clean |
 | Sign it for the store | an archive that does not exist | only a copy signed for the App Store can go to Apple; the export stays on the laptop |
-| Apple's own check (not built) | whatever Apple refuses: missing icons, a wrong ID, a bad privacy file | finding it here costs minutes; finding it after upload costs a review round |
+| Apple's own check | an export older than the archive's receipt; then whatever Apple refuses: missing icons, a wrong ID, a bad privacy file | finding it here costs minutes; finding it after upload costs a review round |
 | Upload | anything while the licence decision is open, checked **before** anything is built | the data owners have not yet allowed the store; their permission comes first |
 
 ## Where things end up
@@ -306,9 +312,10 @@ Green steps work today. Amber ones are not built yet. Red is the licence lock.
 - The App Store Connect key was made today (`hifth-upload`, App Manager access), and its file is
   in place, readable only by you. Its two ids are saved in the encrypted settings.
 - **Waiting on you:** the two permission emails (launch items ③ and ④).
-- **Not built yet:** Apple's own check, the upload itself, one command for the whole release
-  (launch item ㉒), the Mac's sandbox and store signing (⑧), and the iPhone and iPad list of
-  what the app may do (⑨).
+- **Since then (2026-11-17):** Apple's own check runs (`make app-store-check`); the Mac
+  archive and package are built (⑧); and one command runs the whole release up to the upload
+  (`make app-release`, launch item ㉒).
+- **Not built yet:** the upload itself, and the iPhone and iPad list of what the app may do (⑨).
 
 The open rows: `make issues LAUNCH=1`. The launch page: `docs/design/app-store-launch.md`.
 

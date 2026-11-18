@@ -7266,11 +7266,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉒"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "Goes in a new release-app skill, with the faster-review request text ready to paste."
+      "useCase": "send-apple-only-the-build-we-checked",
+      "closedBy": ".claude/skills/release-app/scripts/release.test.mjs",
+      "note": "Done 2026-11-17. make app-release runs the setup check, the version, the public build, the archive, the signing and Apple's check in order, refusing uncommitted work first and stopping at the first step that fails, with a logged line before and after each step; it ends before the upload while the licence keeps it locked. MAC=1 adds the Mac archive and package. The fix-in-a-hurry page (understanding-processes/fix-in-a-hurry.md) covers reproducing, pausing a staged release, fixing with a test, building, uploading and asking Apple for a faster review, with the request text ready to paste, checked against Apple's pages the same day. Checked by a dry run; not yet run for real, which would raise the build number."
     },
     {
       "id": "launch-site-undo",

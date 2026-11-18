@@ -11,6 +11,18 @@ them. Each is a `make` target from `native/Makefile.native`.
 
 ## Short version
 
+**The whole release in one command:** `make app-release VERSION=1.0.1` (or `NEXT_BUILD=1`, or
+`KEEP_VERSION=1` to carry on after a failed run with the number it already set). Add `MAC=1`
+for the Mac archive and package, and `MAC_CHECK=1` for Apple's check of the Mac package too.
+`DRY=1` lists the steps and runs none. It refuses uncommitted work, then runs the setup check
+and steps 2 to 6 below in order, stops at the first that fails, and ends before the upload
+while the licence keeps it locked. Each step's start and end goes to
+`native/build/release/release.log` (`grep ev=step native/build/release/release.log | tail -1`
+shows where a run is). When a version on the store is broken, follow
+`.claude/skills/understanding-processes/fix-in-a-hurry.md`.
+
+The steps it runs, one by one:
+
 | step | command | what it does |
 |---|---|---|
 | 1. see where the version stands | `make app-version` | says the version readers see and the build number |
@@ -33,6 +45,7 @@ it belongs to, so the build number in the repo is always the one last sent.
 
 | script | what it does | when to reach for it | command |
 |---|---|---|---|
+| `scripts/release.mjs` | holds the order of a release's steps; `run` checks the work is committed, then runs each step's make command, stops at the first failure and logs a line before and after each; `plan` prints the steps | every release, through the make command; `plan` by hand to see what a release would run | `make app-release NEXT_BUILD=1 [MAC=1] [DRY=1]` |
 | `scripts/app-version.mjs` | reads and writes the two version lines in `native/project.yml`, and nothing else in it; refuses a version Apple would refuse (more than three numbers, letters, leading zeros) or one lower than today's | before every build meant for Apple | `make app-version [VERSION=x.y.z] [NEXT_BUILD=1]` |
 | `scripts/store-shots.mjs` | holds the list of screens, devices and Apple's sizes (read 2026-11-17 from Apple's screenshot specifications page); `plan` prints one line per picture for the make command; `check DIR` refuses a missing picture, one not in the plan, one of a size the store does not take for its device, or one with a see-through layer | to add or change a screen or a device, edit its lists; the check runs at the end of `make app-store-shots`. By hand to check a folder of pictures before an upload | `node .claude/skills/release-app/scripts/store-shots.mjs check native/shots/store` |
 | `scripts/archive-receipt.mjs` | `--write` fingerprints every file in the app inside the archive and saves it, with the commit and whether the work was all committed, as `Hifth.xcarchive.receipt.json`; `--check` refuses an archive with no receipt, or whose app has any file changed, added, removed or renamed since | never by hand for a release: `make app-archive` writes it and `make app-export` and `make app-testflight` check it; the Mac commands pass `--by "make app-archive-mac"`, so the receipt and any refusal name the Mac command. By hand to ask whether the archive on disk may still be signed | `node .claude/skills/release-app/scripts/archive-receipt.mjs --check native/build/store/Hifth.xcarchive` |
@@ -53,9 +66,7 @@ reader-sent problem report arrives, the collected-data list changes with it.
 
 ## Not built yet
 
-The upload itself, one
-command that runs the whole release with the version raised, and the steps after upload
-(review, staged release). Each is a row in the backlog tagged for the launch
+The upload itself, and the steps after upload (review, staged release). Each is a row in the backlog tagged for the launch
 (`make issues LAUNCH=1`). The whole road, its one-time setup and what each step guards against
 are explained in the `understanding-processes` skill's `app-release.md`; `make app-release-setup`
 checks the setup.

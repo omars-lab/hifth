@@ -719,6 +719,19 @@ app-store-check-mac: ## Send the Mac package to Apple for its check (no build an
 	dotenvx run --quiet -- sh -c 'xcrun altool --validate-app -f $(MAC_EXPORT_PATH)/Hifth.pkg -t macos --apiKey "$$ASC_KEY_ID" --apiIssuer "$$ASC_ISSUER_ID"'
 	@echo "  ✓ Apple's check passed: $(MAC_EXPORT_PATH)/Hifth.pkg"
 
+# ---- One command for the whole release (launch item 22). It runs the steps
+# above in order and stops at the first that fails; each step keeps its own
+# refusals. It ends at the upload while the licence keeps that locked.
+KEEP_VERSION ?=
+MAC          ?=
+MAC_CHECK    ?=
+DRY          ?=
+.PHONY: app-release
+app-release: ## The whole release: VERSION=1.0.1, NEXT_BUILD=1 or KEEP_VERSION=1; MAC=1 adds the Mac, MAC_CHECK=1 Apple's Mac check; DRY=1 lists the steps only
+	@node .claude/skills/release-app/scripts/release.mjs run $(if $(VERSION),--version $(VERSION)) \
+	  $(if $(NEXT_BUILD),--next-build) $(if $(KEEP_VERSION),--keep-version) $(if $(MAC),--mac) \
+	  $(if $(MAC_CHECK),--mac-check) $(if $(DRY),--dry-run)
+
 app-logs: ## Stream the app's console output (Mac or simulator)
 	log stream --predicate 'process == "Hifth"' --level debug
 
