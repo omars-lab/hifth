@@ -125,6 +125,33 @@ export async function actOnAppleNotice(db, { type, appleUser, at }) {
   return "nothing";
 }
 
+/**
+ * Deletes everything kept about one reader (step 14, delete my account): the account, every
+ * session on every device, and the cancel ticket.
+ *
+ * `cut` hands the ticket back to Apple so Apple drops its link with Hifth too; it is given
+ * { sealed, appId, accountId } and answers true when Apple agreed. It is tried first, because
+ * the ticket is gone once the account is. Whatever Apple says, and even if it cannot be
+ * reached, the reader's data here is still deleted: that part is ours to promise.
+ *
+ * Returns { appleLink: "cut" } or { appleLink: "left" }. "left" means Hifth still shows in the
+ * reader's Apple settings and they can remove it there themselves.
+ */
+export async function deleteAccount(db, accountId, { cut } = {}) {
+  let appleLink = "left";
+  try {
+    const ticket = await db.prepare("SELECT sealed, app_id FROM apple_tickets WHERE account_id = ?").bind(accountId).first();
+    if (ticket && typeof cut === "function") {
+      if ((await cut({ sealed: ticket.sealed, appId: ticket.app_id, accountId })) === true) appleLink = "cut";
+    }
+  } catch {
+    // Nothing is logged: the error could carry the ticket. The delete below still runs.
+  }
+  // Sessions and the ticket go with the account (ON DELETE CASCADE in the migrations).
+  await db.prepare("DELETE FROM accounts WHERE id = ?").bind(accountId).run();
+  return { appleLink };
+}
+
 /** The account a session belongs to, or null if it is unknown or has run out. */
 export async function whoIs(db, session, { now = nowSeconds() } = {}) {
   if (typeof session !== "string" || session === "") return null;

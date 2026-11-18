@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createLocalJWKSet, exportJWK, exportPKCS8, generateKeyPair, SignJWT } from "jose";
-import { handleAppleNotice, handleWord, handleSignIn, handleSignOut } from "./sign-in-api.mjs";
+import { handleAppleNotice, handleDeleteAccount, handleWord, handleSignIn, handleSignOut } from "./sign-in-api.mjs";
 import { whoIs } from "./accounts.mjs";
 import { localD1 } from "./test-d1.mjs";
 
@@ -313,6 +313,115 @@ test("with sign-in switched off, the notice address answers as if it was not the
     env,
     { keys },
   );
+  assert.equal(res.status, 404);
+});
+
+// Step 14: delete my account.
+
+/** Apple's two addresses stood in for: the trade hands out a ticket, and the revoke answers `revoke`. */
+function standInAppleBoth({ revoke = 200 } = {}) {
+  const calls = [];
+  const fetch = async (url, init) => {
+    const form = new URLSearchParams(init.body);
+    calls.push({ url: String(url), form });
+    if (String(url).endsWith("/auth/token")) return new Response(JSON.stringify({ refresh_token: TICKET }), { status: 200 });
+    return new Response("", { status: revoke });
+  };
+  return { fetch, calls };
+}
+
+async function signedInWithTicket(env, apple, user = "000001.made-up.0001") {
+  const word = await getWord(env);
+  const res = await handleSignIn(post("/api/sign-in", { note: `apple:${user}`, word, code: "made-up-code" }), env, {
+    check: checkWithApp,
+    fetch: apple.fetch,
+  });
+  return (await res.json()).session;
+}
+
+const asReader = (session) => ({ authorization: `Bearer ${session}` });
+
+test("delete my account: everything kept about the reader goes, and Apple is handed the ticket back", async () => {
+  const { db, env, rows } = setUp(secrets);
+  const apple = standInAppleBoth();
+  const session = await signedInWithTicket(env, apple);
+  const other = await signedInWithTicket(env, apple, "000002.made-up.0002");
+  const res = await handleDeleteAccount(post("/api/sign-in/delete-account", {}, asReader(session)), env, { fetch: apple.fetch });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await res.json(), { deleted: true, appleLink: "cut" });
+  const revoked = apple.calls.filter((c) => c.url === "https://appleid.apple.com/auth/revoke");
+  assert.equal(revoked.length, 1);
+  assert.equal(revoked[0].form.get("token"), TICKET, "the ticket was opened and handed back whole");
+  assert.equal(revoked[0].form.get("client_id"), APP);
+  assert.equal(await whoIs(db, session), null);
+  assert.ok(await whoIs(db, other), "another reader is untouched");
+  assert.deepEqual(rows("accounts").map((r) => r.apple_user), ["000002.made-up.0002"]);
+  assert.equal(rows("sessions").length, 1);
+  assert.equal(rows("apple_tickets").length, 1);
+});
+
+test("delete my account still deletes everything when Apple says no, and tells the app the link was left", async () => {
+  const { env, rows } = setUp(secrets);
+  const apple = standInAppleBoth({ revoke: 400 });
+  const session = await signedInWithTicket(env, apple);
+  const res = await handleDeleteAccount(post("/api/sign-in/delete-account", {}, asReader(session)), env, { fetch: apple.fetch });
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { deleted: true, appleLink: "left" });
+  assert.equal(rows("accounts").length, 0);
+  assert.equal(rows("sessions").length, 0);
+  assert.equal(rows("apple_tickets").length, 0);
+});
+
+test("delete my account with no ticket kept, or no key file set, deletes and says the link was left", async () => {
+  const apple = standInAppleBoth();
+  {
+    const { env, rows } = setUp(secrets);
+    const session = await signedIn(env, "000001.made-up.0001");
+    const res = await handleDeleteAccount(post("/api/sign-in/delete-account", {}, asReader(session)), env, { fetch: apple.fetch });
+    assert.deepEqual(await res.json(), { deleted: true, appleLink: "left" });
+    assert.equal(rows("accounts").length, 0);
+  }
+  {
+    const { env, rows } = setUp(secrets);
+    const session = await signedInWithTicket(env, apple);
+    const before = apple.calls.length;
+    for (const name of Object.keys(secrets)) delete env[name];
+    const res = await handleDeleteAccount(post("/api/sign-in/delete-account", {}, asReader(session)), env, { fetch: apple.fetch });
+    assert.deepEqual(await res.json(), { deleted: true, appleLink: "left" });
+    assert.equal(rows("accounts").length, 0);
+    assert.equal(apple.calls.length, before, "Apple is not called without the key file");
+  }
+});
+
+test("delete my account needs a live session: none, a made-up one or a signed-out one deletes nothing", async () => {
+  const { env, rows } = setUp(secrets);
+  const apple = standInAppleBoth();
+  const session = await signedInWithTicket(env, apple);
+  const gone = await signedIn(env, "000002.made-up.0002");
+  await handleSignOut(post("/api/sign-out", {}, asReader(gone)), env);
+  const before = apple.calls.length;
+  for (const headers of [{}, { authorization: "Bearer made-up" }, { authorization: `Basic ${session}` }, asReader(gone)]) {
+    const res = await handleDeleteAccount(post("/api/sign-in/delete-account", {}, headers), env, { fetch: apple.fetch });
+    assert.equal(res.status, 401, JSON.stringify(Object.keys(headers)));
+    assert.deepEqual(await res.json(), { reason: "signed-out" });
+    assert.equal(res.headers.get("access-control-allow-origin"), null);
+  }
+  assert.equal(rows("accounts").length, 2);
+  assert.equal(apple.calls.length, before);
+});
+
+test("the session cannot be named in the body or the address to delete an account", async () => {
+  const { env, rows } = setUp(secrets);
+  const session = await signedIn(env, "000001.made-up.0001");
+  const res = await handleDeleteAccount(post(`/api/sign-in/delete-account?session=${session}`, { session }), env, {});
+  assert.equal(res.status, 401);
+  assert.equal(rows("accounts").length, 1);
+});
+
+test("with sign-in switched off, delete my account answers as if it was not there", async () => {
+  const { env } = setUp({ SIGN_IN: undefined });
+  const res = await handleDeleteAccount(post("/api/sign-in/delete-account", {}, asReader("x")), env, {});
   assert.equal(res.status, 404);
 });
 

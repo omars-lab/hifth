@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { actOnAppleNotice, handOutWord, signIn, signOut, whoIs, SESSION_SECONDS, WORD_SECONDS } from "./accounts.mjs";
+import { actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs, SESSION_SECONDS, WORD_SECONDS } from "./accounts.mjs";
 import { localD1 } from "./test-d1.mjs";
 
 /*
@@ -243,6 +243,70 @@ test("a notice about a reader we do not know, or of a kind we keep nothing for, 
   assert.equal(await actOnAppleNotice(db, { type: "made-up-kind", appleUser: "000001.made-up.0001", at: T0 + 60 }), "nothing");
   assert.equal(await whoIs(db, kept.session, { now: T0 + 90 }), kept.accountId);
   assert.equal(rows("apple_tickets").length, 1);
+});
+
+// Step 14: delete my account. `cut` stands in for opening the ticket and Apple's revoke call.
+
+test("deleting an account removes the account, every session and the ticket, and cuts the link with Apple", async () => {
+  const { db, rows } = localD1();
+  const { trade } = standInTrade();
+  const ipad = await signInWithCode(db, "000001.made-up.0001", { trade });
+  const phone = await signInWithCode(db, "000001.made-up.0001", { trade, at: T0 + 30 });
+  const other = await signInWithCode(db, "000002.made-up.0002", { code: "other-code", trade });
+  const asked = [];
+  const cut = async (args) => {
+    asked.push(args);
+    return true;
+  };
+  const result = await deleteAccount(db, ipad.accountId, { cut });
+  assert.deepEqual(result, { appleLink: "cut" });
+  assert.deepEqual(asked, [{ sealed: "locked(made-up-code)", appId: APP, accountId: ipad.accountId }]);
+  assert.equal(await whoIs(db, ipad.session, { now: T0 + 60 }), null);
+  assert.equal(await whoIs(db, phone.session, { now: T0 + 60 }), null);
+  assert.deepEqual(rows("accounts").map((r) => r.id), [other.accountId]);
+  assert.deepEqual(rows("sessions").map((r) => r.account_id), [other.accountId]);
+  assert.deepEqual(rows("apple_tickets").map((r) => r.account_id), [other.accountId]);
+  assert.ok(!JSON.stringify([rows("accounts"), rows("sessions"), rows("apple_tickets")]).includes("000001.made-up.0001"));
+});
+
+test("when Apple cannot be told, everything is still deleted and the reply says the link was left", async () => {
+  for (const cut of [
+    async () => false,
+    async () => {
+      throw new Error("made-up failure");
+    },
+    undefined,
+  ]) {
+    const { db, rows } = localD1();
+    const { trade } = standInTrade();
+    const reader = await signInWithCode(db, "000001.made-up.0001", { trade });
+    assert.deepEqual(await deleteAccount(db, reader.accountId, { cut }), { appleLink: "left" });
+    assert.equal(rows("accounts").length, 0);
+    assert.equal(rows("sessions").length, 0);
+    assert.equal(rows("apple_tickets").length, 0);
+  }
+});
+
+test("an account with no ticket is deleted without asking Apple, and the link is left", async () => {
+  const { db, rows } = localD1();
+  const reader = await freshSignIn(db, "000001.made-up.0001");
+  let asked = 0;
+  const cut = async () => {
+    asked += 1;
+    return true;
+  };
+  assert.deepEqual(await deleteAccount(db, reader.accountId, { cut }), { appleLink: "left" });
+  assert.equal(asked, 0);
+  assert.equal(rows("accounts").length, 0);
+});
+
+test("after deleting, the same Apple user signing in again starts a new, empty account", async () => {
+  const { db } = localD1();
+  const before = await freshSignIn(db, "000001.made-up.0001");
+  await deleteAccount(db, before.accountId, {});
+  const after = await freshSignIn(db, "000001.made-up.0001", T0 + 60);
+  assert.equal(after.ok, true);
+  assert.notEqual(after.accountId, before.accountId);
 });
 
 test("left to itself, a word and a session are long random codes", async () => {

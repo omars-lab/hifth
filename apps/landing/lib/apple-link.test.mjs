@@ -2,11 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createLocalJWKSet, exportJWK, exportPKCS8, generateKeyPair, jwtVerify, SignJWT } from "jose";
 import {
+  APPLE_REVOKE,
   APPLE_TOKEN,
   appleConfig,
   checkAppleNotice,
   clientSecret,
   openTicket,
+  revokeTicket,
   sealTicket,
   tradeCode,
 } from "./apple-link.mjs";
@@ -45,7 +47,7 @@ function standInApple({ status = 200, reply = { refresh_token: TICKET, access_to
     } catch {
       return new Response(JSON.stringify({ error: "invalid_client" }), { status: 400 });
     }
-    return new Response(JSON.stringify(reply), { status });
+    return new Response(typeof reply === "string" ? reply : JSON.stringify(reply), { status });
   };
   return { fetch, calls };
 }
@@ -144,6 +146,45 @@ test("a locked ticket does not open for another account, with another key, or on
   for (const junk of [undefined, null, "", "v1", "v1.a.b", "plain text", 42]) {
     assert.equal(await openTicket(junk, { secret: config.key, accountId: "account-1" }), null, String(junk));
   }
+});
+
+// Step 14: cutting the link with Apple when a reader deletes their account.
+
+test("cutting the link hands the ticket back at Apple's revoke address, with our proof", async () => {
+  const apple = standInApple({ reply: "" });
+  const result = await revokeTicket({ ticket: TICKET, appId: APP, config, fetch: apple.fetch });
+  assert.deepEqual(result, { ok: true });
+  assert.equal(apple.calls.length, 1);
+  const [call] = apple.calls;
+  assert.equal(call.url, APPLE_REVOKE);
+  assert.equal(call.url, "https://appleid.apple.com/auth/revoke");
+  assert.equal(call.method, "POST");
+  assert.equal(call.form.get("token"), TICKET);
+  assert.equal(call.form.get("token_type_hint"), "refresh_token");
+  assert.equal(call.form.get("client_id"), APP);
+});
+
+test("a cut Apple turns down, or that never reaches Apple, says why and does not throw", async () => {
+  const refused = standInApple({ status: 400, reply: { error: "invalid_client" } });
+  assert.deepEqual(await revokeTicket({ ticket: TICKET, appId: APP, config, fetch: refused.fetch }), {
+    ok: false,
+    reason: "apple-refused",
+  });
+  const down = async () => {
+    throw new Error("network down");
+  };
+  assert.deepEqual(await revokeTicket({ ticket: TICKET, appId: APP, config, fetch: down }), {
+    ok: false,
+    reason: "apple-unreachable",
+  });
+});
+
+test("with no ticket or no settings, nothing is sent to Apple's revoke address", async () => {
+  const apple = standInApple();
+  assert.equal((await revokeTicket({ ticket: "", appId: APP, config, fetch: apple.fetch })).ok, false);
+  assert.equal((await revokeTicket({ ticket: null, appId: APP, config, fetch: apple.fetch })).ok, false);
+  assert.equal((await revokeTicket({ ticket: TICKET, appId: APP, config: null, fetch: apple.fetch })).ok, false);
+  assert.equal(apple.calls.length, 0);
 });
 
 // Apple's notices: a signed note posted to hifth.app when a reader leaves.

@@ -104,6 +104,17 @@ export async function tradeCode({ code, appId, config, fetch = globalThis.fetch 
   return { ok: true, ticket };
 }
 
+/**
+ * Cuts the link between a reader's Apple account and Hifth by handing the cancel ticket back to
+ * Apple (step 14, delete my account). After it, Hifth is gone from the reader's list of apps
+ * using Apple sign-in. Returns { ok: true } or { ok: false, reason }.
+ */
+export async function revokeTicket({ ticket, appId, config, fetch = globalThis.fetch }) {
+  if (typeof ticket !== "string" || !ticket) return { ok: false, reason: "no-ticket" };
+  const asked = await askApple(APPLE_REVOKE, { token: ticket, token_type_hint: "refresh_token" }, { appId, config, fetch });
+  return asked.ok ? { ok: true } : asked;
+}
+
 async function lockKey(secret) {
   const material = await crypto.subtle.importKey("raw", text(secret), "HKDF", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(

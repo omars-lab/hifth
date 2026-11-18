@@ -5,6 +5,8 @@
 //   POST /api/sign-in        { note, word, code? } -> 200 { session, expiresAt } | 400 | 401 { reason } | 413
 //   POST /api/sign-out       Authorization: Bearer <session> -> 204
 //   POST /api/sign-in/apple-notice   { payload } from Apple -> 200 | 400 | 401 { reason } | 413
+//   POST /api/sign-in/delete-account Authorization: Bearer <session>
+//                                    -> 200 { deleted: true, appleLink: "cut" | "left" } | 401 { reason }
 //
 // What the server needs, all set in Cloudflare and none of it secret:
 //   SIGN_IN        "on" opens the addresses. Anything else and they answer 404, as if they were
@@ -20,8 +22,8 @@
 
 import { createRemoteJWKSet } from "jose";
 import { APPLE_KEYS, checkAppleNote } from "./apple-signin.mjs";
-import { appleConfig, checkAppleNotice, sealTicket, tradeCode } from "./apple-link.mjs";
-import { actOnAppleNotice, handOutWord, signIn, signOut } from "./accounts.mjs";
+import { appleConfig, checkAppleNotice, openTicket, revokeTicket, sealTicket, tradeCode } from "./apple-link.mjs";
+import { actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs } from "./accounts.mjs";
 
 /** A sign-in body is a note of a few kilobytes and a 64-letter word; anything far bigger is not one. */
 const MOST_BYTES = 16 * 1024;
@@ -139,11 +141,46 @@ export async function handleAppleNotice(request, env, { keys } = {}) {
   return reply(200, { ok: true });
 }
 
+/** The session named in the Authorization line, or "" when there is none. Never read from the body or the address. */
+function sessionFrom(request) {
+  const [kind, session] = (request.headers.get("authorization") ?? "").split(" ");
+  return kind === "Bearer" && session ? session : "";
+}
+
+/**
+ * How deleting an account hands the cancel ticket back to Apple (step 14), or undefined when the
+ * key file's secrets are not set: the account is still deleted, and the link with Apple is left.
+ */
+function ticketCut(env, fetch) {
+  const config = appleConfig(env);
+  if (!config) return undefined;
+  return async ({ sealed, appId, accountId }) => {
+    const ticket = await openTicket(sealed, { secret: config.key, accountId });
+    if (!ticket) return false;
+    return (await revokeTicket({ ticket, appId, config, fetch })).ok;
+  };
+}
+
+/**
+ * POST /api/sign-in/delete-account. Only the signed-in reader can ask, and only for themselves:
+ * the account is the one their session belongs to, never one named in the request. Everything
+ * kept about them is deleted whatever Apple answers; `appleLink` tells the app whether Apple
+ * dropped its side too ("cut") or the reader should remove Hifth in their Apple settings ("left").
+ */
+export async function handleDeleteAccount(request, env, { fetch } = {}) {
+  const stop = closed(env);
+  if (stop) return stop;
+  const accountId = await whoIs(env.ACCOUNTS, sessionFrom(request));
+  if (!accountId) return reply(401, { reason: "signed-out" });
+  const { appleLink } = await deleteAccount(env.ACCOUNTS, accountId, { cut: ticketCut(env, fetch) });
+  return reply(200, { deleted: true, appleLink });
+}
+
 /** POST /api/sign-out. Quietly fine with no session or an unknown one: the device is signed out either way. */
 export async function handleSignOut(request, env) {
   const stop = closed(env);
   if (stop) return stop;
-  const [kind, session] = (request.headers.get("authorization") ?? "").split(" ");
-  if (kind === "Bearer" && session) await signOut(env.ACCOUNTS, session);
+  const session = sessionFrom(request);
+  if (session) await signOut(env.ACCOUNTS, session);
   return reply(204);
 }
