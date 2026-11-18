@@ -116,8 +116,9 @@ the first real check of a note is the live site after the owner's upload.
      site key) and `TURNSTILE_SECRET`. Also the sender's settings, once the decision
      `notify-list-sender` is made.
   3. Add `SUPABASE_DB_URL` to the saved keys, so `make hifth-app-list-count` can count.
-  4. **The Sign in with Apple key** (sign-in step 12): make it on Apple's site as the `app-setup`
-     skill's step ⑥ says, keep the file in `~/.appstoreconnect/sign-in-with-apple/`, then in
+  4. **The Sign in with Apple key** (sign-in step 12): make it on Apple's site
+     (<https://developer.apple.com/account/resources/authkeys/add>) as the `app-setup` skill's
+     step ⑥ says, field by field, keep the file in `~/.appstoreconnect/sign-in-with-apple/`, then in
      your own terminal `make hifth-app-apple-key ARGS="--save <that file>"`. It saves three
      secrets, `APPLE_SIGN_IN_KEY`, `APPLE_SIGN_IN_KEY_ID` and `APPLE_TEAM_ID`, and prints none of
      them. Claude checks afterwards with `make hifth-app-apple-key`, which prints set or not set.
