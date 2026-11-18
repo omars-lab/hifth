@@ -124,17 +124,29 @@ function fillAppScriptRule(out) {
 /**
  * What is wrong with the site's Cloudflare settings (apps/landing/wrangler.toml), which the
  * upload reads. The email list lives on Supabase and the form reaches it through Pages
- * secrets, so this file must name no database and hold no Supabase address or key: a
- * Supabase project's address in a checked-in file is one this repo keeps out of sight, and a
- * leftover Cloudflare database block would put up a form the code no longer uses.
+ * secrets, so this file holds no Supabase address or key: a Supabase project's address in a
+ * checked-in file is one this repo keeps out of sight. The one Cloudflare database it may name
+ * is the sign-in server's accounts (made 2026-11-18, sign-in step 9); any other database block
+ * is a leftover that would put up a form the code no longer uses.
  */
+export const ALLOWED_DATABASES = ["ACCOUNTS"];
+
 export function configProblems(text) {
   const path = "apps/landing/wrangler.toml";
   if (typeof text !== "string") return [{ path, why: "the site's Cloudflare settings are missing" }];
   const lines = text.split("\n").filter((l) => !/^\s*#/.test(l)).join("\n");
   const problems = [];
-  if (/\[\[\s*d1_databases\s*\]\]/.test(lines)) {
-    problems.push({ path, why: "still names a Cloudflare database; the email list is on Supabase now, so take the block out" });
+  for (const block of lines.split(/\[\[\s*d1_databases\s*\]\]/).slice(1)) {
+    const own = block.split(/^\s*\[/m)[0];
+    const binding = own.match(/^\s*binding\s*=\s*"([^"]*)"/m)?.[1];
+    if (!ALLOWED_DATABASES.includes(binding)) {
+      problems.push({
+        path,
+        why: binding
+          ? `names a Cloudflare database "${binding}"; only the accounts database belongs here (the email list is on Supabase), so take the block out`
+          : "names a Cloudflare database with no binding name; only the accounts database belongs here, so take the block out",
+      });
+    }
   }
   if (/supabase\.co|SUPABASE_|LIST_KEY|TURNSTILE_SECRET/i.test(lines)) {
     problems.push({ path, why: "holds a Supabase address or one of the form's secret settings; those go in as Pages secrets, never in this file" });

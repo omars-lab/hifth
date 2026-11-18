@@ -9,3 +9,12 @@ compatibility_date = "2026-09-01"
 # secrets, set once by the owner: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, LIST_KEY and
 # TURNSTILE_SECRET. None of them goes in this file; the release check refuses a Supabase
 # address here.
+
+# Sign-in's accounts and sessions (docs/design/sign-in.md, step 9; made 2026-11-18 with the
+# owner's yes). Its tables come from migrations/. The id is not a secret: only someone signed in
+# to the account can reach the database. Sign-in stays off until SIGN_IN is "on" and
+# APPLE_APP_IDS is set, and neither is set here. The release check allows this one database.
+[[d1_databases]]
+binding = "ACCOUNTS"
+database_name = "hifth-accounts"
+database_id = "58ae8615-aca1-4612-833c-a903371dd501"

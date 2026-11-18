@@ -18,7 +18,8 @@ flowchart TD
   s10b --> s11
   s10b --> s13["Steps 13, 14: cancel ticket, delete my account"]
   s12["Step 12 (owner): the key file"] --> s13
-  s9["Step 9 (owner's yes): the real database"] --> live["First real sign-in"]
+  s9["Step 9: the real database<br/>(made 2026-11-18, empty)"] --> up["Owner's next upload of hifth.app"]
+  up --> live["First real sign-in"]
   s11 --> live
   s13 --> s15["Steps 15 to 19: stay signed in, the button, limits, testers, privacy"]
   s15 --> s21["Step 21: marks follow you"]
@@ -37,7 +38,9 @@ Steps 10, 6 and 7 do not depend on each other, and none waits on the owner, so t
 - **Only a scrambled copy (a hash) of a session token is stored.** A leaked database lets no one
   sign in.
 - **jose runs on the server only.** It never enters the web app's bundle; a check proves it.
-- **The local database only** until the owner says yes to the real one (step 9).
+- **Tests and laptop trials use a local database only.** The real one exists since step 9
+  (2026-11-18), but nothing in this work writes to it; only the live site does, once sign-in is
+  switched on there.
 - **The new way off the device is named in the privacy check**, and the whole feature stays behind
   the developer setting until step 16's button exists.
 - The code lives with the notify list's: thin files under `apps/landing/functions/api/`, the work
@@ -77,8 +80,8 @@ Steps 10, 6 and 7 do not depend on each other, and none waits on the owner, so t
   `hifth.app` or `hifth-app.pages.dev` gets the keys. So this is a laptop-only quirk; the first
   real sign-in after the upload is what proves the live fetch. Full write-up:
   `docs/issues/apple-keys-refuse-local-runtime.md`.
-- **Nothing was added to the Cloudflare settings file.** A database line there needs the real
-  database's id, which waits on step 9. Until then the addresses answer 404 unless `SIGN_IN` is
+- **Nothing was added to the Cloudflare settings file then.** A database line there needed the
+  real database's id, which came in step 9 (below). The addresses answer 404 unless `SIGN_IN` is
   "on", and 503 if it is on with no database.
 
 ## What step 8 showed (2026-11-18)
@@ -103,12 +106,31 @@ Steps 10, 6 and 7 do not depend on each other, and none waits on the owner, so t
   is not allowed Sign in with Apple. No sheet appeared either time. The command:
   `pnpm dlx wrangler pages dev apps/landing/dist --cwd apps/landing --ip 127.0.0.1 --port 8799
   --d1 ACCOUNTS=local-sign-in-check --binding SIGN_IN=on --binding APPLE_APP_IDS=app.example.hifth
-  --persist-to <scratch folder>`.
+  --persist-to <scratch folder>`. Keep the `--d1` part even now the settings file names the real
+  database: the laptop server ignores databases in that file (see step 9 below).
 - **The store-build check was missing three launch settings** (the probe's wait, the picture's
   wait, the Mac window size). A test now matches the check's list against every name the app's
   code reads, so a new setting cannot be left off it.
 - **Naming the new way out in the privacy check moves to step 16**, with the button that says
   what leaves the device. Nothing reaches a reader before that button exists.
+
+## What step 9 showed (2026-11-18, the owner's yes)
+
+- **The accounts database is made** on hifth.app's Cloudflare account, named `hifth-accounts`,
+  in western North America. Its three tables (accounts, sessions, one-off words) were put in
+  from `apps/landing/migrations/`, and a count on the real database found all three empty.
+- **The settings file names it** (`apps/landing/wrangler.toml`, binding `ACCOUNTS`). The id is
+  not a secret: only someone signed in to the account can reach the database.
+- **The release check allows that one database and no other.** It refused every database line
+  before; a test now holds that the accounts line passes and any other (the old list line, one
+  with no name) is still refused.
+- **Sign-in is still off on the live site.** Nothing was uploaded, and `SIGN_IN` and
+  `APPLE_APP_IDS` are not set on the live project. The database reaches hifth.app with the
+  owner's next upload: wrangler sends the settings file with every upload.
+- **The laptop server ignores the settings file's databases.** `wrangler pages dev` (4.164)
+  takes databases only from its `--d1` flag; started with the settings file alone, the word
+  address answered 503 "not set up". So laptop trials keep `--d1`, which also keeps them off the
+  real database.
 
 ### Still open for step 11: how the iPad trial asks for sign-in
 
@@ -119,5 +141,6 @@ to settle when step 11 starts:
   stand-in on the home network (`--ip 0.0.0.0`). Needs nothing from the owner, but Apple's keys
   are refused on the laptop (`docs/issues/apple-keys-refuse-local-runtime.md`), so the note is
   sent but cannot be checked there.
-- **The store-signed build against hifth.app**, which needs step 9's real database first, and
-  that needs the owner's yes. This is the first time a real note is checked end to end.
+- **The store-signed build against hifth.app.** The database is ready (step 9); it still needs
+  the owner to upload hifth.app and to set `SIGN_IN` and `APPLE_APP_IDS` on the live project.
+  This is the first time a real note is checked end to end.

@@ -176,12 +176,17 @@ test("putting it together again works while another program keeps writing into t
   assert.ok(existsSync(join(out, "read", "index.html")));
 });
 
-test("the site's Cloudflare settings name no database and hold no list address or secret", () => {
+test("the site's Cloudflare settings name only the accounts database and hold no list address or secret", () => {
   const base = 'name = "hifth-app"\npages_build_output_dir = "dist"\n';
+  const accounts = '[[d1_databases]]\nbinding = "ACCOUNTS"\ndatabase_name = "hifth-accounts"\ndatabase_id = "00000000-0000-4000-8000-000000000000"\n';
   assert.deepEqual(configProblems(base), []);
+  // The sign-in server's own database is the one allowed.
+  assert.deepEqual(configProblems(base + accounts), []);
   // Talking about the settings in a comment is fine; only real lines count.
   assert.deepEqual(configProblems(base + "# SUPABASE_URL and LIST_KEY are Pages secrets\n"), []);
   assert.match(configProblems(base + '[[d1_databases]]\nbinding = "DB"\n').map((p) => p.why).join(" "), /database/);
+  assert.match(configProblems(base + accounts + '[[d1_databases]]\nbinding = "LIST"\n').map((p) => p.why).join(" "), /LIST/);
+  assert.match(configProblems(base + "[[d1_databases]]\ndatabase_name = \"x\"\n").map((p) => p.why).join(" "), /database/);
   assert.match(configProblems(base + '[vars]\nSUPABASE_URL = "https://made-up.supabase.co"\n').map((p) => p.why).join(" "), /secret/);
   assert.match(configProblems(base + '[vars]\nLIST_KEY = "x"\n').map((p) => p.why).join(" "), /secret/);
   assert.match(configProblems(null).map((p) => p.why).join(" "), /settings/);

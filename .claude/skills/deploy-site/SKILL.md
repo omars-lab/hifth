@@ -99,7 +99,10 @@ three entry files in `apps/landing/functions/api/` (sign up, confirm, leave). Th
 Supabase: the table and the three database functions the form calls are in
 `supabase/migrations/20261113000001_notify_list.sql`, with their checks in
 `supabase/tests/notify_list.test.sql`. The upload runs from `apps/landing/`; none of this is
-copied into the release folder, and `wrangler.toml` names no database (the check refuses one).
+copied into the release folder. `wrangler.toml` names one database, sign-in's accounts
+(binding `ACCOUNTS`, made 2026-11-18); the check refuses any other, so the list can never move
+back onto Cloudflare by accident. `wrangler pages dev` ignores that line, so a laptop trial of
+sign-in passes `--d1 ACCOUNTS=<local name>` and never touches the real one.
 
 - **Once, by the owner** (it needs the database password; the `manage-database` skill's login
   check first):
