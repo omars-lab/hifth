@@ -62,6 +62,13 @@ test("a part the apps cannot switch off is refused", () => {
   assert.match(appStatusProblems(ok({ off: "pencil" })).join("\n"), /list of parts/);
 });
 
+test("sign-in can be switched on, and nothing else can", () => {
+  assert.deepEqual(appStatusProblems(ok({ on: ["sign-in"] })), []);
+  assert.deepEqual(appStatusProblems(ok({ on: [] })), []);
+  assert.match(appStatusProblems(ok({ on: ["marks-copy"] })).join("\n"), /names "marks-copy"/);
+  assert.match(appStatusProblems(ok({ on: "sign-in" })).join("\n"), /"on" must be a list/);
+});
+
 test("the real file passes against the version in the project file", () => {
   const text = readFileSync(join(root, "apps/landing", APP_STATUS_FILE), "utf8");
   const { version: shipping } = current(readFileSync(join(root, "native/project.yml"), "utf8"));

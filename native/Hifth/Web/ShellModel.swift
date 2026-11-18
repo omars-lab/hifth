@@ -553,12 +553,61 @@ final class ShellModel {
     /// page never waits forever. `ping` is the harmless one the trial on a
     /// device uses (sign-in ⑤); `sign-in` shows Apple's sheet (step 8);
     /// `signed-in` says "signed-in" or "signed-out" and nothing more (step 15).
+    /// The account section's questions (steps 14 and 16): `account` says "off",
+    /// "signed-out" or "signed-in"; `sign-out`; `delete-account`; `invite-kept`
+    /// says "yes" or "no", never the code; `forget-invite`.
     /// `text` is the invite code a tester typed with `sign-in` (step 18): it
     /// goes to hifth.app and the Keychain, and never back to the page.
     private func answer(question name: String, text: String? = nil) async -> [String: Any] {
         switch name {
         case "ping":
             return ["ok": true, "value": "pong"]
+        case "account":
+            if await currentSession() != nil { return ["ok": true, "value": "signed-in"] }
+            // The launch file is what switches sign-in on in the store build.
+            await statusRead?.value
+            let offered = SignIn.offered(server: server != nil, on: status.on, storeBuild: storeBuild)
+            return ["ok": true, "value": offered ? "signed-out" : "off"]
+        case "sign-out":
+            guard !signingIn else { return ["ok": false, "error": SignIn.Failure.busy.code] }
+            // This device first, whatever the connection; hifth.app is told after the answer.
+            let leaving = await currentSession()
+            session = nil
+            sessionStore?.clear()
+            if let leaving, let server {
+                lastSignOut = Task { await server.signOut(session: leaving.token) }
+            }
+            return ["ok": true, "value": "signed-out"]
+        case "delete-account":
+            guard !signingIn else { return ["ok": false, "error": SignIn.Failure.busy.code] }
+            signingIn = true
+            defer { signingIn = false }
+            guard let leaving = await currentSession(), let server else {
+                return ["ok": false, "error": "signed-out"]
+            }
+            do {
+                let link = try await server.deleteAccount(session: leaving.token)
+                // Only now, with hifth.app's yes: everything this device keeps for the account.
+                session = nil
+                sessionStore?.clear()
+                inviteStore?.clear()
+                return ["ok": true, "value": "deleted-\(link)"]
+            } catch let failure as SignIn.Failure where failure == .refused("signed-out") {
+                // hifth.app does not know this sign-in, so it cannot say whose account to
+                // delete. The device is signed out; signing in again comes first.
+                session = nil
+                sessionStore?.clear()
+                return ["ok": false, "error": "signed-out"]
+            } catch let failure as SignIn.Failure {
+                return ["ok": false, "error": failure.code]
+            } catch {
+                return ["ok": false, "error": SignIn.Failure.badReply.code]
+            }
+        case "invite-kept":
+            return ["ok": true, "value": inviteStore?.load() == nil ? "no" : "yes"]
+        case "forget-invite":
+            inviteStore?.clear()
+            return ["ok": true, "value": "forgotten"]
         case "sign-in":
             guard !signingIn else { return ["ok": false, "error": SignIn.Failure.busy.code] }
             signingIn = true
@@ -586,16 +635,21 @@ final class ShellModel {
                 return ["ok": false, "error": failure.code]
             }
         case "signed-in":
-            // Waits for the launch check, so the page never hears a stale yes.
-            await checkSessionOnce().value
-            if let session, !SignIn.usable(session, now: now()) {
-                self.session = nil
-                sessionStore?.clear()
-            }
-            return ["ok": true, "value": session == nil ? "signed-out" : "signed-in"]
+            return ["ok": true, "value": await currentSession() == nil ? "signed-out" : "signed-in"]
         default:
             return ["ok": false, "error": "unknown-question"]
         }
+    }
+
+    /// The session in use right now. Waits for the launch check, so the page
+    /// never hears a stale yes, and drops a session that has run out.
+    private func currentSession() async -> SignIn.Session? {
+        await checkSessionOnce().value
+        if let session, !SignIn.usable(session, now: now()) {
+            self.session = nil
+            sessionStore?.clear()
+        }
+        return session
     }
 
     // MARK: - Signing in (sign-in step 8, Account/SignIn.swift)
@@ -613,6 +667,14 @@ final class ShellModel {
     /// Where a tester's invite code is kept (step 18, Account/InviteStore.swift).
     /// Nil, like the two above, in a build that names no sign-in server.
     @ObservationIgnored var inviteStore: InviteStore? = SignIn.realInviteStore(at: SignIn.address())
+    /// hifth.app's sign-in addresses for this build; nil when it names no server.
+    @ObservationIgnored var server: SignIn.Server? = SignIn.address().map { SignIn.Server(base: $0) }
+    /// Whether this is the store build, which offers sign-in only once the
+    /// launch file switches it on. The tests set it.
+    @ObservationIgnored var storeBuild = SignIn.storeBuild
+    /// The word to hifth.app that this device signed out, kept so the tests
+    /// can wait for it.
+    @ObservationIgnored private(set) var lastSignOut: Task<Void, Never>?
     /// The clock, so the tests can move it.
     @ObservationIgnored var now: () -> Date = { Date() }
     /// The check at launch, kept so the page's questions and the tests can
@@ -645,10 +707,10 @@ final class ShellModel {
     @ObservationIgnored var signIn: ((_ invite: String?, _ invited: () -> Void) async -> Result<SignIn.Session, SignIn.Failure>)?
 
     private func signInWithApple(invite: String?, invited: () -> Void) async -> Result<SignIn.Session, SignIn.Failure> {
-        guard let base = SignIn.address() else { return .failure(.off) }
+        guard let server else { return .failure(.off) }
         guard webViewBuilt, let window = webView.window else { return .failure(.noWindow) }
         let sheet = AppleSheet(anchor: window)
-        return await SignIn.run(server: SignIn.Server(base: base), invite: invite, invited: invited) {
+        return await SignIn.run(server: server, invite: invite, invited: invited) {
             try await sheet.ask(nonce: $0)
         }
     }

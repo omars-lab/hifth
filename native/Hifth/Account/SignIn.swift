@@ -148,10 +148,27 @@ enum SignIn {
             return Session(token: token, expiresAt: expiresAt)
         }
 
-        private func call(_ path: String, body: [String: String]?) async throws -> [String: Any] {
+        /// Ends the session on hifth.app. Nothing comes back and nothing is thrown: the device
+        /// is signed out either way, and a session hifth.app never hears about ends by itself.
+        func signOut(session: String) async {
+            _ = try? await call("api/sign-out", body: nil, session: session)
+        }
+
+        /// Deletes the reader's account and everything kept about them. Says whether Apple
+        /// dropped its side of the link too ("cut"), or the reader should remove Hifth in their
+        /// Apple settings ("left"). Throws unless hifth.app says in so many words it is deleted.
+        func deleteAccount(session: String) async throws -> String {
+            let reply = try await call("api/sign-in/delete-account", body: nil, session: session)
+            guard reply["deleted"] as? Bool == true else { throw Failure.badReply }
+            return reply["appleLink"] as? String == "cut" ? "cut" : "left"
+        }
+
+        /// `session` goes in the Authorization line, never in the body or the address.
+        private func call(_ path: String, body: [String: String]?, session: String? = nil) async throws -> [String: Any] {
             var request = URLRequest(url: base.appending(path: path))
             request.httpMethod = "POST"
             request.httpShouldHandleCookies = false
+            if let session { request.setValue("Bearer \(session)", forHTTPHeaderField: "Authorization") }
             if let body {
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 request.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -167,6 +184,7 @@ enum SignIn {
             case 200:
                 guard let json else { throw Failure.badReply }
                 return json
+            case 204: return [:]
             case 404: throw Failure.off
             case 503: throw Failure("not-set-up")
             case 400: throw Failure("bad-request")
@@ -194,6 +212,21 @@ enum SignIn {
             return try await session.data(for: request)
         }
     }
+
+    /// Whether a reader who is not signed in is offered sign-in. A build that names no server
+    /// never offers it. The store build offers it only once hifth.app's launch file switches it
+    /// on (AppStatus.Offer), so the button is not shown before the server is ready or with no
+    /// connection. A laptop trial that names a server by hand has already said yes.
+    static func offered(server: Bool, on: Set<AppStatus.Offer>, storeBuild: Bool) -> Bool {
+        server && (!storeBuild || on.contains(.signIn))
+    }
+
+    /// The store build, which takes its switches from the launch file alone.
+    #if STORE
+    static let storeBuild = true
+    #else
+    static let storeBuild = false
+    #endif
 
     /// Where this build signs in. The build for the store uses hifth.app. Every other build signs
     /// in only when `HIFTH_SIGN_IN_URL` names a server (the laptop's stand-in), so the laptop's

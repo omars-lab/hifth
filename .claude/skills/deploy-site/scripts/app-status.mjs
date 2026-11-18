@@ -17,6 +17,12 @@ export const APP_STATUS_FILE = "app-status.json";
 export const PLATFORMS = ["ios", "macos"];
 /** The parts the apps can switch off (AppStatus.Part). */
 export const PARTS = ["pencil", "links"];
+/**
+ * What the apps offer only once the file switches it on (AppStatus.Offer). An app that cannot
+ * read the file offers none of it. Sign-in also needs SIGN_IN set on the site; the file only
+ * decides whether the app shows the button.
+ */
+export const OFFERS = ["sign-in"];
 
 const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const extra = (object, keys) => Object.keys(object).filter((k) => !keys.includes(k));
@@ -36,7 +42,7 @@ export function appStatusProblems(text, { shipping } = {}) {
   if (!isObject(file)) return ["the file the apps read at launch must be one object"];
   const problems = [];
   if (file.format !== 1) problems.push("its format must be the number 1; the apps out today read no other");
-  for (const key of extra(file, ["format", "lowest", "notice", "off"])) {
+  for (const key of extra(file, ["format", "lowest", "notice", "off", "on"])) {
     problems.push(`it has "${key}", which no app reads; a new meaning goes in a new file`);
   }
   if (file.lowest !== undefined) {
@@ -72,6 +78,14 @@ export function appStatusProblems(text, { shipping } = {}) {
     else {
       for (const part of file.off) {
         if (!PARTS.includes(part)) problems.push(`"off" names "${part}"; the apps can switch off only ${PARTS.join(" and ")}`);
+      }
+    }
+  }
+  if (file.on !== undefined) {
+    if (!Array.isArray(file.on)) problems.push(`"on" must be a list of what to switch on`);
+    else {
+      for (const offer of file.on) {
+        if (!OFFERS.includes(offer)) problems.push(`"on" names "${offer}"; the apps can switch on only ${OFFERS.join(" and ")}`);
       }
     }
   }
