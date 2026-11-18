@@ -664,6 +664,24 @@ remote off-switch and the new-version prompt. None of them can land until there 
 **Done when:** the size check shows at least 3 KB of room, and the trims list says which way it
 was found.
 
+### ㉔ The first download is full: the next thing a reader sees at start-up cannot go in · **open**
+
+**Where it stands (2026-11-17).** The app as a whole has about 7 KB of room, but what a reader
+downloads before the first page can be used is at 161.0 KB of its own 161 KB limit. The app's log
+(launch item 19) took it over by a few bytes once the other launch work was merged; the step names
+it keeps were moved into the report, which loads later, and that was just enough.
+
+**Why it matters.** Anything that has to work before the first page (a change to the page stage,
+the address handling, the first-run screens) now fails the size check, however small. Each time,
+someone has to find bytes in a hurry, as happened here.
+
+**What to do.** Take the next trim that moves start-up code to a file that loads later, with the
+checklist in the optimizing-performance skill: the candidates already named there first. Measure
+start-up side by side before and after.
+
+**Done when:** the first download has at least 1.5 KB of room, and the trims list has a dated
+entry saying what moved.
+
 ---
 
 ---

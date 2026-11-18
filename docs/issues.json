@@ -6428,6 +6428,19 @@
       "useCase": "refuse-a-bundle-that-would-not-load-on-a-phone"
     },
     {
+      "id": "room-in-the-first-download",
+      "source": {
+        "file": "docs/performance.md",
+        "item": "㉔"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "performance",
+      "note": "2026-11-17: what a reader downloads before the first page can be used is at 161.0 of its own 161 KB limit, while the app as a whole has about 7 KB of room. The app's log took it over by a few bytes after the other launch work merged; moving its step names into the report, which loads later, was just enough. Next: the next trim that moves start-up code to a file that loads later, measured side by side. Done when there is at least 1.5 KB of room and the trims list says what moved.",
+      "useCase": "refuse-a-bundle-that-would-not-load-on-a-phone"
+    },
+    {
       "id": "hifth-app-site",
       "source": {
         "file": "docs/design/hifth-app-site.md",
