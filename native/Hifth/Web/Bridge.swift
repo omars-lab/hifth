@@ -11,6 +11,9 @@ enum BridgeMessage: Equatable {
     case route(String)
     /// The reader tapped share: show the platform's sheet for this link.
     case share(url: String, title: String, text: String)
+    /// A question the page waits on (`askApp`). The shell always answers it,
+    /// with this id, through `ShellModel.answerScript`, a no included.
+    case ask(id: String, name: String)
 
     init?(body: Any) {
         guard let dict = body as? [String: Any], let type = dict["type"] as? String else { return nil }
@@ -27,6 +30,10 @@ enum BridgeMessage: Equatable {
                 title: dict["title"] as? String ?? "",
                 text: dict["text"] as? String ?? ""
             )
+        case "ask":
+            guard let id = dict["id"] as? String, !id.isEmpty,
+                  let name = dict["name"] as? String, !name.isEmpty else { return nil }
+            self = .ask(id: id, name: name)
         default:
             return nil
         }

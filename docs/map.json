@@ -2388,7 +2388,7 @@
         {
           "file": "native/Hifth/Web/Bridge.swift",
           "symbol": "Bridge",
-          "note": "The three words the page says to the shell — ready, route, share — and nothing else. The route is mirrored into a hidden native label so a test has something native to wait on."
+          "note": "The four words the page says to the shell — ready, route, share, ask — and nothing else. The route is mirrored into a hidden native label so a test has something native to wait on. An ask carries an id; ShellModel answers it by name (answer(question:)) through `answerScript`, always, a no included. AskTests.swift plays the page's side."
         },
         {
           "file": "native/Hifth/Web/Pencil.swift",
@@ -2423,7 +2423,7 @@
         {
           "file": "apps/web/src/native-bridge.ts",
           "symbol": "nativeInfo",
-          "note": "The web side: reads the small object the shell injects at document start (platform, public site address), so shared links stay public links and the service worker and install prompt stay off in-shell. `exposeToShell` lends the page's turn to the Mac's Page menu. Does nothing in a browser."
+          "note": "The web side: reads the small object the shell injects at document start (platform, public site address), so shared links stay public links and the service worker and install prompt stay off in-shell. `exposeToShell` lends the page's turn to the Mac's Page menu. `askApp` asks the app a question and waits, matching the answer that comes back through `window.__HIFTH_ANSWER__` by id (sign-in step 7). Does nothing in a browser."
         },
         {
           "file": "native/Makefile.native",

@@ -51,7 +51,7 @@ exception, and a fast page turn stops tasks all the time.
 Data store: the **default persistent** one. A non-persistent store would wipe bookmarks and
 notes every launch; do not "fix" a caching problem by switching it.
 
-## The ready handshake and the three messages
+## The ready handshake and the four messages
 
 The shell injects `window.__HIFTH_NATIVE__ = {platform, publicBase}` at document start, main
 frame only, so `isNative()` is already true when the first module runs. The page posts to one
@@ -61,7 +61,17 @@ handler, `webkit.messageHandlers.hifth`:
 |---|---|---|
 | `ready` | `{type:"ready"}` | marks ready; applies a queued route; runs the probe or snapshot if asked |
 | `route` | `{type:"route", hash}` | mirrors it into `currentHash` → window title and the `hifth.route` label |
-| `share` | `{type:"share", url, title, text}` | shows the platform share sheet (the page is not a secure context, so `navigator.share` is missing) |
+| `share` | `{type:"share", url, title, text}` | shows the platform share sheet (its own, the same on every platform; on the Mac on 2026-11-18 the page reported a secure context and a `navigator.share`, so do not trust older notes that say it is missing) |
+| `ask` | `{type:"ask", id, name}` | answers the question, always, a no included, by running `ShellModel.answerScript` with `id` and `answer` bound |
+
+**A question the page waits on** (`askApp(name, {waitMs?})` in `native-bridge.ts`). The page
+puts `window.__HIFTH_ANSWER__(id, answer)` in place, then posts `ask`. The shell answers with
+`{ok:true, value}` or `{ok:false, error}`; a name it does not know gets `unknown-question`, so
+the page never waits for ever. The id ties the answer to its question, so answers may come back
+in any order, and a stray or second answer is ignored. WebKit's own reply-to-a-message is not
+used. To add a question, add a case to `ShellModel.answer(question:)` with its test in
+`AskTests.swift`; `ping` → `pong` is the harmless one for trials. Proved in the real Mac app
+with `make app-probe TARGET=mac EVALFILE=…` posting two asks by hand.
 
 `publicBase` goes the other way: a shared link built from `location.origin` inside the shell
 would read `hifth-app://app/…` and be dead for everyone it was sent to.

@@ -110,6 +110,12 @@ final class ShellModel {
     /// The one line the Page menu runs: the page's own turn, exposed under
     /// `window.__HIFTH_PAGE__` by `apps/web/src/native-bridge.ts`.
     static let stepPageScript = "window.__HIFTH_PAGE__?.stepPage(step);"
+    /// How the shell answers a question the page asked (`askApp` in
+    /// `native-bridge.ts`): the page's answer door, put in place before the
+    /// question left, with the id and the answer bound, never written in.
+    static let answerScript = "window.__HIFTH_ANSWER__?.(id, answer);"
+    /// The last question being answered, kept so tests can wait for it.
+    @ObservationIgnored private(set) var lastAsk: Task<Void, Never>?
     /// How long `open` waits for the page to show the route before telling
     /// the caller it did not.
     private let callbackTimeout: Duration
@@ -532,6 +538,25 @@ final class ShellModel {
             #endif
         case .share(let url, let title, let text):
             Sharing.present(url: url, title: title, text: text, from: webView)
+        case .ask(let id, let name):
+            lastAsk = Task { [weak self] in
+                guard let self else { return }
+                let answer = await self.answer(question: name)
+                self.runScript(Self.answerScript, ["id": id, "answer": answer])
+            }
+        }
+    }
+
+    /// The questions the page may ask, each answered with `ok` and a `value`,
+    /// or `ok: false` and an `error`. Every question gets an answer, so the
+    /// page never waits forever. `ping` is the harmless one the trial on a
+    /// device uses (sign-in ⑤); Apple's sheet joins it in step 8.
+    private func answer(question name: String) async -> [String: Any] {
+        switch name {
+        case "ping":
+            return ["ok": true, "value": "pong"]
+        default:
+            return ["ok": false, "error": "unknown-question"]
         }
     }
 

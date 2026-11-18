@@ -4079,7 +4079,7 @@
       "status": "open",
       "severity": "question",
       "owner": "agent",
-      "note": "Can the page inside the app get a waiting answer from the app, what address does it say it comes from when it calls hifth.app, and can it use the browser's scrambling code? No Apple page says; WebKit bugs from 2021 show such a page reporting its address as null. An hour on the owner's iPad answers all three, and decides whether the app or the page calls the server (the page recommends the app)."
+      "note": "Can the page inside the app get a waiting answer from the app? Step 7 (2026-11-18) built the waiting answer without leaning on WebKit's own reply, and it works in the real Mac app: the page asked, the app answered by id. The app, not the page, calls hifth.app, so what address the page says it comes from, and whether it can use the browser's scrambling code, no longer matter. Left: the same ask on the owner's iPad (step 11), a few minutes."
     },
     {
       "id": "sign-in-web-before-store",

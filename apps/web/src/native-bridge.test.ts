@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  askApp,
   exposeToShell,
   isNative,
   nativeShare,
@@ -110,6 +111,101 @@ describe("ready and route", () => {
       { type: "route", hash: "#/hafs-kfqc/2:255" },
       { type: "route", hash: "#/hafs-kfqc/p45" },
     ]);
+  });
+});
+
+/**
+ * The page asking the app a question and waiting for the answer (sign-in step
+ * 7). The page posts `{type:"ask", id, name}`; the app answers later by
+ * calling `window.__HIFTH_ANSWER__(id, answer)` from Swift. The id is what
+ * ties an answer to its question, so these tests send answers out of order,
+ * twice, and for questions nobody asked.
+ */
+describe("askApp", () => {
+  type Answered = Window & {
+    __HIFTH_ANSWER__?: (id: string, answer: unknown) => void;
+  };
+  const aw = window as Answered;
+  const answer = (id: string, a: unknown) => aw.__HIFTH_ANSWER__?.(id, a);
+  const asks = (sent: NativeMessage[]) =>
+    sent.filter((m): m is Extract<NativeMessage, { type: "ask" }> => m.type === "ask");
+
+  it("in a browser, posts nothing and says it is not in the app", async () => {
+    const spy = vi.fn();
+    w.webkit = { messageHandlers: { hifth: { postMessage: spy } } };
+    await expect(askApp("ping")).rejects.toThrow("not-in-app");
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it("in the app, posts the question with an id and waits for that id's answer", async () => {
+    const sent = inShell();
+    const waiting = askApp("ping");
+    const [ask] = asks(sent);
+    expect(ask).toMatchObject({ type: "ask", name: "ping" });
+    expect(typeof ask?.id).toBe("string");
+    answer(ask!.id, { ok: true, value: "pong" });
+    await expect(waiting).resolves.toBe("pong");
+  });
+
+  it("each answer reaches its own question, whatever order they come back in", async () => {
+    const sent = inShell();
+    const first = askApp("ping");
+    const second = askApp("ping");
+    const [a, b] = asks(sent);
+    expect(a!.id).not.toBe(b!.id);
+    answer(b!.id, { ok: true, value: "second" });
+    answer(a!.id, { ok: true, value: "first" });
+    await expect(first).resolves.toBe("first");
+    await expect(second).resolves.toBe("second");
+  });
+
+  it("an answer nobody is waiting for, or a second answer to the same question, is ignored", async () => {
+    const sent = inShell();
+    const waiting = askApp("ping");
+    const [ask] = asks(sent);
+    expect(() => answer("not-asked", { ok: true, value: "stray" })).not.toThrow();
+    answer(ask!.id, { ok: true, value: "pong" });
+    expect(() => answer(ask!.id, { ok: true, value: "again" })).not.toThrow();
+    await expect(waiting).resolves.toBe("pong");
+  });
+
+  it("the app saying no rejects with its reason", async () => {
+    const sent = inShell();
+    const waiting = askApp("nothing-like-this");
+    answer(asks(sent)[0]!.id, { ok: false, error: "unknown-question" });
+    await expect(waiting).rejects.toThrow("unknown-question");
+  });
+
+  it("an answer of the wrong shape rejects rather than passing junk on", async () => {
+    const sent = inShell();
+    const waiting = askApp("ping");
+    answer(asks(sent)[0]!.id, "pong");
+    await expect(waiting).rejects.toThrow("bad-answer");
+  });
+
+  it("waits as long as it is told for each question, and gives up after that", async () => {
+    vi.useFakeTimers();
+    try {
+      inShell();
+      const waiting = askApp("ping", { waitMs: 1000 });
+      const settled = expect(waiting).rejects.toThrow("no-answer");
+      await vi.advanceTimersByTimeAsync(1000);
+      await settled;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("the answer door is in place before the first question leaves, not tied to the page's own handlers", () => {
+    inShell();
+    let doorWhenPosted: unknown;
+    w.webkit!.messageHandlers!.hifth = {
+      postMessage: () => {
+        doorWhenPosted = aw.__HIFTH_ANSWER__;
+      },
+    };
+    void askApp("ping").catch(() => {});
+    expect(typeof doorWhenPosted).toBe("function");
   });
 });
 

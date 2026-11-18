@@ -80,6 +80,21 @@ test("with sign-in switched off, every address answers as if it was not there, a
   assert.equal(rows("sign_in_words").length, 0);
 });
 
+test("no reply lets another site's page read it: the Swift app calls hifth.app, never the page", async () => {
+  const { env } = setUp();
+  const word = await getWord(env);
+  const asApp = { origin: "hifth-app://app" };
+  const replies = [
+    await handleWord(post("/api/sign-in/word", {}, asApp), env),
+    await handleSignIn(post("/api/sign-in", { note: "apple:000001.made-up.0001", word }, asApp), env, { check }),
+    await handleSignOut(post("/api/sign-out", {}, asApp), env),
+  ];
+  for (const res of replies) {
+    assert.equal(res.headers.get("access-control-allow-origin"), null, String(res.status));
+    assert.equal(res.headers.get("access-control-allow-credentials"), null, String(res.status));
+  }
+});
+
 test("switched on but missing its database or app ids, it says it is not set up", async () => {
   for (const extra of [{ ACCOUNTS: undefined }, { APPLE_APP_IDS: undefined }, { APPLE_APP_IDS: " , " }]) {
     const { env } = setUp(extra);

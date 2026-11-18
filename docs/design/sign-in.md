@@ -78,7 +78,7 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | B | Where accounts live (② below) | done 2026-11-18: our own code on hifth.app's Cloudflare, free database | — | — |
 | **Milestone 1: a first real sign-in on your own iPad, hidden behind a developer setting** | | | | |
 | 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple, and add the same line to the Mac's | done 2026-11-18: the iPad and iPhone file asks for it (launch item ⑨), and so does the Mac store build's. The two Mac builds signed on the laptop with no profile from Apple cannot carry it (Xcode refuses to build them), so the everyday one asks for nothing and the laptop's Release copy uses the store's file without that line | — | — |
-| 7 | Let the page ask the app a question and wait for the answer (today messages only go one way, page to app) | left | agent | half a day, with tests |
+| 7 | Let the page ask the app a question and wait for the answer (before this, messages only went one way, page to app) | done 2026-11-18: works in the Mac app; the iPad tries it in step 11 | agent | half a day, with tests |
 | 8 | Show Apple's sheet from the app with a fresh one-off word, and hand the result on | left | agent | a day |
 | 9 | Connect a free database to hifth.app's server for accounts (⑨ below) | left | you in the Cloudflare dashboard, or the agent with your yes | 5 minutes |
 | 10 | Server code on hifth.app: check Apple's note against Apple's published keys, make or find the account, start a session, sign out | done 2026-11-18 on the laptop with made-up keys and a local database copy; switched off until step 9's real database exists. The live fetch of Apple's keys is proved by the first real sign-in | — | — |
@@ -365,7 +365,7 @@ Apple's developer support says yes for apps and websites under one team; one for
 
 ### ⑤ Can the page inside the app wait for the app's answer, and what address does it say it comes from? · **open**
 
-No Apple page says the page gets a waiting answer from the app; WebKit bugs from 2021 show such a page calling a website said it came from "null". **What would answer it:** an hour on your iPad (step 11): ask the app a question from the page and wait for the answer; call hifth.app from the page and read what address the server sees; try the browser's scrambling code on the page.
+**Answered on the Mac; the iPad is left.** No Apple page says the page gets a waiting answer from the app; WebKit bugs from 2021 show such a page calling a website said it came from "null". So step 7 did not lean on WebKit's own reply: the page gives each question an id and the app answers by calling back into the page with that id, which it could already do. In the real Mac app on 2026-11-18 the page asked, waited, and got the answer. The address question no longer matters, because the app, not the page, calls hifth.app. **What would finish it:** the same ask on your iPad (step 11), a few minutes.
 
 ### ⑥ Does website sign-in work before the app is in the App Store? · **open**
 
