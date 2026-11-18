@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs, MOST_WAITING_WORDS, SESSION_SECONDS, WORD_SECONDS } from "./accounts.mjs";
+import { actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs, MOST_WORDS_A_STRETCH, SESSION_SECONDS, WORD_SECONDS } from "./accounts.mjs";
 import { localD1 } from "./test-d1.mjs";
 
 /*
@@ -317,38 +317,55 @@ test("left to itself, a word and a session are long random codes", async () => {
   assert.match(session, /^[0-9a-f]{64}$/);
 });
 
-// Step 17: a limit on how many sign-ins can be waiting at once.
+// Step 17: a limit on how many one-off words are handed out in each ten minutes.
 
-test("only so many one-off words can be waiting at once; the next ask gets none and keeps nothing", async () => {
+test("only so many one-off words are handed out in one stretch; the next ask gets none and keeps nothing", async () => {
   const { db, rows } = localD1();
-  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) {
+  for (let i = 0; i < MOST_WORDS_A_STRETCH; i += 1) {
     assert.equal(typeof (await handOutWord(db, { now: T0, newCode })), "string", `word ${i + 1}`);
   }
   assert.equal(await handOutWord(db, { now: T0, newCode }), null);
-  assert.equal(rows("sign_in_words").length, MOST_WAITING_WORDS);
+  assert.equal(rows("sign_in_words").length, MOST_WORDS_A_STRETCH);
+  assert.deepEqual(rows("sign_in_counts").map((row) => row.handed_out), [MOST_WORDS_A_STRETCH]);
 });
 
-test("a word that is used makes room for the next ask", async () => {
+test("asking for a word and burning it with a junk note, over and over, still runs into the limit", async () => {
   const { db } = localD1();
-  let word;
-  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) word = await handOutWord(db, { now: T0, newCode });
-  assert.equal(await handOutWord(db, { now: T0, newCode }), null);
-  await signIn(db, { note: "apple:000001.made-up.0001", word, check, now: T0, newCode });
-  assert.equal(typeof (await handOutWord(db, { now: T0, newCode })), "string");
+  const junk = async () => ({ ok: false, reason: "bad-note" });
+  let handed = 0;
+  for (let i = 0; i < MOST_WORDS_A_STRETCH * 3; i += 1) {
+    const word = await handOutWord(db, { now: T0, newCode });
+    if (word === null) break;
+    handed += 1;
+    await signIn(db, { note: "junk", word, check: junk, now: T0, newCode });
+  }
+  assert.equal(handed, MOST_WORDS_A_STRETCH);
 });
 
-test("words that ran out are cleared away when the next one is handed out, so they hold no place", async () => {
+test("a refused ask writes nothing at all", async () => {
   const { db, rows } = localD1();
-  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) await handOutWord(db, { now: T0, newCode });
-  const later = T0 + WORD_SECONDS + 1;
+  for (let i = 0; i < MOST_WORDS_A_STRETCH; i += 1) await handOutWord(db, { now: T0, newCode });
+  const before = JSON.stringify([rows("sign_in_words"), rows("sign_in_counts")]);
+  for (let i = 0; i < 5; i += 1) assert.equal(await handOutWord(db, { now: T0, newCode }), null);
+  assert.equal(JSON.stringify([rows("sign_in_words"), rows("sign_in_counts")]), before);
+});
+
+test("the next stretch starts afresh, and clears the words and the count from the one before", async () => {
+  const { db, rows } = localD1();
+  const start = Math.ceil(T0 / WORD_SECONDS) * WORD_SECONDS;
+  for (let i = 0; i < MOST_WORDS_A_STRETCH; i += 1) await handOutWord(db, { now: start, newCode });
+  assert.equal(await handOutWord(db, { now: start + WORD_SECONDS - 1, newCode }), null);
+  const later = start + WORD_SECONDS + 1;
   assert.equal(typeof (await handOutWord(db, { now: later, newCode })), "string");
   assert.equal(rows("sign_in_words").length, 1);
+  assert.deepEqual(rows("sign_in_counts").map((row) => row.handed_out), [1]);
 });
 
-test("a full waiting list never touches readers who are already signed in", async () => {
+test("a used-up stretch never touches readers who are already signed in", async () => {
   const { db } = localD1();
   const reader = await freshSignIn(db, "000001.made-up.0001");
-  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) await handOutWord(db, { now: T0, newCode });
-  assert.equal(await handOutWord(db, { now: T0, newCode }), null);
+  let refused = false;
+  for (let i = 0; i <= MOST_WORDS_A_STRETCH && !refused; i += 1) refused = (await handOutWord(db, { now: T0, newCode })) === null;
+  assert.equal(refused, true);
   assert.equal(await whoIs(db, reader.session, { now: T0 + 60 }), reader.accountId);
 });

@@ -164,12 +164,19 @@ Built by a helper agent on this branch; the app's half is still to do.
 - **The plan's "reuse the notify list's are-you-a-person check" does not fit.** That check is a
   widget in a web page, tied to hifth.app; sign-in is asked by the Swift app. Why, and what
   replaced it: `docs/issues/sign-in-limit-not-the-person-check.md`.
-- **Built instead:** `handOutWord` (`apps/landing/lib/accounts.mjs`) clears run-out words, then
-  inserts only while fewer than `MOST_WAITING_WORDS` (60) are waiting, in one statement. Full
-  means `null`, and the word address answers 429 `too-many` with `Retry-After: 60`. Nothing
-  else is limited.
-- **Nothing about a caller is kept**, so the 60 places are shared. The per-caller limit is the
-  owner's one free rate limiting rule in Cloudflare (deploy-site skill, step 5; question ⑮).
+- **Built instead:** `handOutWord` (`apps/landing/lib/accounts.mjs`) counts each word into its
+  ten-minute stretch (`sign_in_counts`, migration 0003) with one conditional statement, and
+  refuses past `MOST_WORDS_A_STRETCH` (60). Refused means `null`, nothing written, and the word
+  address answers 429 `too-many` with `Retry-After` set to the seconds left in the stretch. Nothing else is limited.
+- **The first version counted words waiting, and that was wrong:** ask, burn with a junk note,
+  ask again never reached it (a test got 180 words out of a cap of 60). Count what is handed
+  out, not what is waiting.
+- **Nothing about a caller is kept**, so the 60 are shared, and one caller at one ask per ten
+  seconds takes them all. Cloudflare's free per-caller rule cannot be set tighter than that, so
+  it only stops floods. The real answer is who may start a sign-in at all: question ⑮, and it
+  moves step 18's invite check to before the word is handed out.
+- **Migration 0003 goes into the real database with 0002**, on the owner's yes (question ⑩).
+  Without it every ask for a word fails.
 - **The app** shows 429 as a plain "server-error" today. Step 16 maps it to "try again shortly"
   when the held Swift files are in.
 

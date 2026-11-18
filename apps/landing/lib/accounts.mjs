@@ -21,17 +21,20 @@ export const SESSION_SECONDS = 60 * 24 * 60 * 60;
 /** How long a one-off word waits for its sign-in: 10 minutes. */
 export const WORD_SECONDS = 10 * 60;
 /**
- * The most one-off words that can be waiting for their sign-in at once (step 17). Past it, the
- * next ask gets none until a waiting word is used or runs out.
+ * The most one-off words handed out in one stretch of WORD_SECONDS, to everyone together
+ * (step 17). Past it, the next ask gets none until the next stretch starts.
  *
- * It is sized to the free database, not to the readers: every word costs a few writes, the free
- * plan allows 100,000 a day, and 60 words per ten minutes is at most 8,640 a day. Sixty readers
- * opening Apple's sheet in the same ten minutes is far more than a first release will see. It is
- * one list shared by everyone, because nothing about a caller is kept; so someone asking for
- * words non-stop can keep new sign-ins out for a while. They cannot touch a reader who is already
- * signed in, and the per-caller limit that stops them belongs at Cloudflare's edge, not here.
+ * It is sized to the free database, not to the readers. Handing out a word is the one thing
+ * someone who has proved nothing can make the server write for; each costs a handful of writes,
+ * the free plan allows 100,000 a day, and 60 per ten minutes is at most 8,640 words a day. It
+ * counts words handed out, not words waiting: a caller can use a word up with a junk note the
+ * moment they get it, so a count of waiting words would never stop them.
+ *
+ * It is one count shared by everyone, because nothing about a caller is kept. So someone asking
+ * for words non-stop can keep new sign-ins out, a stretch at a time. They cannot touch a reader
+ * who is already signed in. docs/issues/sign-in-limit-not-the-person-check.md has the rest.
  */
-export const MOST_WAITING_WORDS = 60;
+export const MOST_WORDS_A_STRETCH = 60;
 
 const nowSeconds = () => Math.floor(Date.now() / 1000);
 
@@ -43,21 +46,31 @@ export function randomCode() {
 
 /**
  * Hands out a one-off word for one sign-in, and keeps only its scrambled copy. Returns null, and
- * keeps nothing, when MOST_WAITING_WORDS are already waiting.
+ * keeps nothing, when MOST_WORDS_A_STRETCH have already been handed out in this stretch.
  */
 export async function handOutWord(db, { now = nowSeconds(), newCode = randomCode } = {}) {
-  // Words that ran out hold no place, and are not left to pile up.
-  await db.prepare("DELETE FROM sign_in_words WHERE expires_at < ?").bind(now).run();
+  const stretch = Math.floor(now / WORD_SECONDS);
 
-  // The count and the insert are one statement, so asks racing each other cannot slip past the limit.
-  const word = newCode();
-  const kept = await db
+  // Count this word in, or refuse it: one statement, so asks racing each other cannot slip past
+  // the limit. A refused ask writes nothing.
+  const counted = await db
     .prepare(
-      "INSERT INTO sign_in_words (word_hash, expires_at) SELECT ?, ? WHERE (SELECT COUNT(*) FROM sign_in_words WHERE expires_at >= ?) < ?",
+      "INSERT INTO sign_in_counts (stretch, handed_out) VALUES (?, 1) ON CONFLICT (stretch) DO UPDATE SET handed_out = handed_out + 1 WHERE handed_out < ?",
     )
-    .bind(await hashWord(word), now + WORD_SECONDS, now, MOST_WAITING_WORDS)
+    .bind(stretch, MOST_WORDS_A_STRETCH)
     .run();
-  return kept.meta.changes === 1 ? word : null;
+  if (counted.meta.changes !== 1) return null;
+
+  // Words that ran out, and counts for stretches that are over, are not left to pile up.
+  await db.prepare("DELETE FROM sign_in_words WHERE expires_at < ?").bind(now).run();
+  await db.prepare("DELETE FROM sign_in_counts WHERE stretch < ?").bind(stretch).run();
+
+  const word = newCode();
+  await db
+    .prepare("INSERT INTO sign_in_words (word_hash, expires_at) VALUES (?, ?)")
+    .bind(await hashWord(word), now + WORD_SECONDS)
+    .run();
+  return word;
 }
 
 /**

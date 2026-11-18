@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createLocalJWKSet, exportJWK, exportPKCS8, generateKeyPair, SignJWT } from "jose";
 import { handleAppleNotice, handleDeleteAccount, handleWord, handleSignIn, handleSignOut } from "./sign-in-api.mjs";
-import { MOST_WAITING_WORDS, whoIs } from "./accounts.mjs";
+import { MOST_WORDS_A_STRETCH, whoIs } from "./accounts.mjs";
 import { localD1 } from "./test-d1.mjs";
 
 /*
@@ -444,33 +444,41 @@ test("signing out with no session, or one nobody was given, is quietly fine", as
   }
 });
 
-// Step 17: a limit on how many sign-ins can be waiting at once.
+// Step 17: a limit on how many one-off words are handed out in each ten minutes.
 
-async function fillTheWaitingList(env) {
+/** Asks for words until the stretch is used up; hands back the last one given. */
+async function useUpTheStretch(env) {
   let word;
-  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) word = await getWord(env);
-  return word;
+  // Twice the limit, in case the clock crosses into a new stretch partway through.
+  for (let i = 0; i <= MOST_WORDS_A_STRETCH * 2; i += 1) {
+    const res = await handleWord(post("/api/sign-in/word", {}), env);
+    if (res.status === 429) return word;
+    ({ word } = await res.json());
+  }
+  throw new Error("the limit never came");
 }
 
-test("when too many sign-ins are waiting, the word address says try again shortly", async () => {
+test("when too many sign-ins have been started, the word address says try again shortly", async () => {
   const { env, rows } = setUp();
-  await fillTheWaitingList(env);
+  await useUpTheStretch(env);
+  const kept = rows("sign_in_words").length;
   const res = await handleWord(post("/api/sign-in/word", {}), env);
   assert.equal(res.status, 429);
   assert.deepEqual(await res.json(), { reason: "too-many" });
-  assert.equal(res.headers.get("retry-after"), "60");
+  const wait = Number(res.headers.get("retry-after"));
+  assert.ok(Number.isInteger(wait) && wait >= 1 && wait <= 600, `retry-after ${wait}`);
   assert.equal(res.headers.get("cache-control"), "no-store");
-  assert.equal(rows("sign_in_words").length, MOST_WAITING_WORDS);
+  assert.equal(rows("sign_in_words").length, kept);
 });
 
-test("a full waiting list stops nothing else: a word already in hand, sign-out, delete my account and Apple's notice all still work", async () => {
+test("a used-up stretch stops nothing else: a word already in hand, sign-out, delete my account and Apple's notice all still work", async () => {
   const { db, env } = setUp();
   const first = await getWord(env);
   const signedInRes = await handleSignIn(post("/api/sign-in", { note: "apple:000001.made-up.0001", word: first }), env, { check });
   const { session } = await signedInRes.json();
   const other = await signedIn(env, "000002.made-up.0002");
 
-  const inHand = await fillTheWaitingList(env);
+  const inHand = await useUpTheStretch(env);
   assert.equal((await handleWord(post("/api/sign-in/word", {}), env)).status, 429);
 
   const late = await handleSignIn(post("/api/sign-in", { note: "apple:000003.made-up.0003", word: inHand }), env, { check });

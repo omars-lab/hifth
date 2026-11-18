@@ -20,30 +20,46 @@ check the "tell me when it's out" form already has: Cloudflare's "are you a pers
 
 ## What replaced it
 
-Two layers, each doing the one thing it can:
+**In our code: a count of sign-ins started in each ten minutes**, at most 60 for everyone
+together. A sign-in starts with a one-off word that is good for ten minutes. Handing one out is
+the only step that writes to the database for someone who has proved nothing yet, so that is
+where the limit is. It keeps anyone from using up the free database's 100,000 writes a day,
+which would stop every sign-in until midnight. Past the limit, the address says how long to
+wait (ten minutes at most) and writes nothing.
 
-1. **In our code: a cap on how many sign-ins can be waiting at once** (60). A sign-in starts
-   with a one-off word that is good for ten minutes. Handing one out is the only step that
-   writes to the database for someone who has proved nothing yet, so that is where the cap is.
-   It keeps anyone from using up the free database's 100,000 writes a day, which would stop
-   every sign-in until midnight. Past the cap, the address answers "try again in a minute".
-   Words that have run out are cleared at the same moment, so they hold no place.
-2. **At Cloudflare: a limit per caller**, which the owner switches on. Only Cloudflare sees
-   each caller before our code runs, and it keeps the count, not us.
+## The first try at it was wrong, and how we found out
 
-## What the cap costs
+The first version (commit 841ccf70, the same day) counted words *waiting*, not words handed
+out: at most 60 could be waiting at once. A review pointed out the hole, and a test proved it:
+a caller can ask for a word and use it up straight away with a junk note, which frees the place,
+and repeat without end. The test asked 180 times and got 180 words. Counting words handed out
+per stretch of time closes that; the test now stops at 60.
 
-The 60 places are one list for everyone. Someone asking non-stop can fill it and keep new
-sign-ins out until the second layer is on. They cannot sign anyone out: readers already signed
-in, sign-out, delete my account and Apple's notices never pass through the cap, and a test
-holds that.
+The same review caught two more things written into the owner's steps:
 
-Also still true: each refused ask reads the waiting list (up to 60 rows), and the free plan
-allows 5 million rows read a day. About one refused ask a second, all day, would use that up.
-Only the per-caller limit stops it.
+- **The Cloudflare rule was drawn too wide.** "Addresses starting with /api/sign-in" would also
+  have limited delete my account and Apple's notices, which must never be turned away. It is
+  now the one address that starts a sign-in.
+- **The Cloudflare rule was oversold.** The free plan's limit counts over 10 seconds and blocks
+  for 10 seconds. Even set as tight as it goes, one caller can still ask about once every ten
+  seconds: 60 in ten minutes, the whole shared allowance. So it stops a flood from one place,
+  and it cannot stop one patient caller keeping new sign-ins out.
+
+## What the limit costs, and what is left open
+
+The 60 are one count for everyone, because nothing about a caller is kept. Someone asking
+steadily can take them all and keep new sign-ins out for as long as they keep at it. They
+cannot sign anyone out: readers already signed in, sign-out, delete my account and Apple's
+notices never pass through the limit, and a test holds that.
+
+Limits on how often people ask cannot fix this on the free plan: the database's allowance and
+one caller's smallest possible share are the same size. What can is deciding who may start a
+sign-in at all. That is question ⑮ on the sign-in page, with its options; the recommended one
+is to check the tester invite code (step 18) before a word is handed out.
 
 ## Where it lives
 
-`handOutWord` in `apps/landing/lib/accounts.mjs`, the word address in
+`handOutWord` in `apps/landing/lib/accounts.mjs`, the count's table in
+`apps/landing/migrations/0003_sign_in_counts.sql`, the word address in
 `apps/landing/lib/sign-in-api.mjs`, and their tests beside them. The owner's Cloudflare step is
-in the deploy-site skill, step 5, and is question ⑮ on the sign-in page.
+in the deploy-site skill, step 5.

@@ -2642,7 +2642,7 @@
         {
           "file": "apps/landing/lib/accounts.mjs",
           "symbol": "signIn",
-          "note": "Spends the one-off word, runs Apple's check, finds or makes the account by Apple's user number, and hands back a new session. Beside it: handOutWord (at most MOST_WAITING_WORDS waiting at once, sign-in step 17), whoIs, signOut, actOnAppleNotice and deleteAccount (steps 13 and 14)."
+          "note": "Spends the one-off word, runs Apple's check, finds or makes the account by Apple's user number, and hands back a new session. Beside it: handOutWord (at most MOST_WORDS_A_STRETCH handed out in any ten minutes, sign-in step 17), whoIs, signOut, actOnAppleNotice and deleteAccount (steps 13 and 14)."
         },
         {
           "file": "apps/landing/lib/apple-link.mjs",
@@ -2653,6 +2653,11 @@
           "file": "apps/landing/migrations/0002_apple_tickets.sql",
           "symbol": "CREATE TABLE apple_tickets",
           "note": "One locked cancel ticket per account. Goes into the real database only with the owner's yes, before sign-in is switched on."
+        },
+        {
+          "file": "apps/landing/migrations/0003_sign_in_counts.sql",
+          "symbol": "CREATE TABLE sign_in_counts",
+          "note": "How many one-off words were handed out in each ten minutes, by everyone together; nothing about who asked. Goes into the real database with the tickets table."
         },
         {
           "file": "apps/landing/migrations/0001_accounts.sql",

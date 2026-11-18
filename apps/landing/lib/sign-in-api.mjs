@@ -1,7 +1,7 @@
 // hifth.app's sign-in addresses (docs/design/sign-in.md, step 10). The thin Cloudflare files in
 // functions/api/ call these; the work is in accounts.mjs and apple-signin.mjs.
 //
-//   POST /api/sign-in/word   -> 200 { word } | 429 { reason: "too-many" } when too many are waiting
+//   POST /api/sign-in/word   -> 200 { word } | 429 { reason: "too-many" } past the ten-minute limit
 //   POST /api/sign-in        { note, word, code? } -> 200 { session, expiresAt } | 400 | 401 { reason } | 413
 //   POST /api/sign-out       Authorization: Bearer <session> -> 204
 //   POST /api/sign-in/apple-notice   { payload } from Apple -> 200 | 400 | 401 { reason } | 413
@@ -23,7 +23,7 @@
 import { createRemoteJWKSet } from "jose";
 import { APPLE_KEYS, checkAppleNote } from "./apple-signin.mjs";
 import { appleConfig, checkAppleNotice, openTicket, revokeTicket, sealTicket, tradeCode } from "./apple-link.mjs";
-import { actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs } from "./accounts.mjs";
+import { WORD_SECONDS, actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs } from "./accounts.mjs";
 
 /** A sign-in body is a note of a few kilobytes and a 64-letter word; anything far bigger is not one. */
 const MOST_BYTES = 16 * 1024;
@@ -71,11 +71,12 @@ export async function handleWord(request, env) {
   if (stop) return stop;
   const word = await handOutWord(env.ACCOUNTS);
   if (word === null) {
-    // Too many sign-ins are waiting (step 17). Only this address is limited: a sign-in without a
-    // live word costs one cheap delete, and sign-out, delete my account and Apple's notice must
-    // never be turned away.
+    // Too many sign-ins were started in these ten minutes (step 17). Only this address is
+    // limited: a sign-in without a live word writes nothing, and sign-out, delete my account and
+    // Apple's notice must never be turned away.
     const res = reply(429, { reason: "too-many" });
-    res.headers.set("retry-after", "60");
+    // The limit starts afresh with the next ten-minute stretch; say how far off that is.
+    res.headers.set("retry-after", String(WORD_SECONDS - (Math.floor(Date.now() / 1000) % WORD_SECONDS)));
     return res;
   }
   return reply(200, { word });

@@ -134,9 +134,11 @@ the first real check of a note is the live site after the owner's upload.
   5. **Switch sign-in on**, after the first upload: `SIGN_IN=on` and
      `APPLE_APP_IDS=com.bytesofpurpose.hifth` on the project (neither is secret). Until then the
      sign-in addresses answer "not on yet", whatever else is set. Two things first, or readers'
-     links with Apple can never be cut (sign-in steps 13 and 14):
-     - every file in `apps/landing/migrations/` is in the real accounts database (the second,
-       `0002_apple_tickets.sql`, holds Apple's cancel tickets), put in with the owner's yes;
+     links with Apple can never be cut and no sign-in can start (sign-in steps 13, 14 and 17):
+     - every file in `apps/landing/migrations/` is in the real accounts database, put in with
+       the owner's yes. `0002_apple_tickets.sql` holds Apple's cancel tickets;
+       `0003_sign_in_counts.sql` holds the count that limits how many sign-ins can be started,
+       and without it every sign-in fails at its first step;
      - the owner has registered `https://hifth.app/api/sign-in/apple-notice` on Apple's developer
        site as the address for Sign in with Apple's server-to-server notices, so Apple can say
        when a reader has left. Apple's own steps (read 2026-11-18,
@@ -144,13 +146,18 @@ the first real check of a note is the live site after the owner's upload.
        Certificates, Identifiers & Profiles, Identifiers, pick the app's identifier, scroll to
        Sign in with Apple, Configure, type the address, Done, then Save at the top right. It
        takes one address, and only on the main app identifier.
-     And one thing soon after, which does not hold the switch up (sign-in step 17): the server
-     lets only 60 sign-ins wait at once, shared by everyone, so one caller asking non-stop could
-     keep new sign-ins out. The owner adds the one free "rate limiting rule" on the hifth.app
-     zone in Cloudflare (Security, WAF, Rate limiting rules): address path starts with
-     `/api/sign-in`, more than 10 requests in 10 seconds from one address, block for 10 seconds.
-     The free plan gives one such rule with exactly those 10-second settings. It does not cover
-     the project's `pages.dev` address.
+     And one thing soon after, which does not hold the switch up (sign-in step 17): the owner
+     adds the one free rate limiting rule on the hifth.app zone, so a single caller hammering
+     the sign-in start address is cut off at Cloudflare before our code or database is touched.
+     Cloudflare's own steps (read 2026-11-18,
+     <https://developers.cloudflare.com/waf/rate-limiting-rules/create-zone-dashboard/>): on the
+     zone's Security rules page, Create rule, Rate limiting rules; name it; Field "URI Path",
+     Operator "equals", Value `/api/sign-in/word`; With the same characteristics: IP; When rate
+     exceeds: 2 requests per 10 seconds; Then take action: Block, for 10 seconds; Deploy. The
+     free plan gives one rule with those 10-second periods. Only that one address: never
+     `/api/sign-in` as a whole, which would also catch delete my account and Apple's notices.
+     Be clear what it buys: it does not stop one caller keeping new sign-ins out (question ⑮ on
+     the sign-in page says why), and it does not cover the project's `pages.dev` address.
 - **To try the form locally:** `supabase start` (in a scratch copy if the repo's own is busy, named
   by `SUPABASE_WORKDIR`), then `make hifth-app-serve`, and open http://127.0.0.1:7124/ (press C to
   leave a comment on the page). It reads the local list's address and key from `supabase status`
