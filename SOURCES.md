@@ -44,12 +44,16 @@ option, because it reads identically to having forgotten.
   Surah 2, ayahs 38–48 (p7), 58–61 (p9), 120–126 (p19); the Loop 0 corpus audit in
   `docs/decisions/loop-0.md` is that era's record.)
 - **License / usage:** two licences, layered.
-  1. **The overlay is CC0 1.0.** Read firsthand from the
+  1. **The overlay is CC0 1.0 at the commit Hifth pins.** Read firsthand from the
      [quran-svg](https://github.com/quranpedia/quran-svg) README (2026-07-26): the
      ayah-polygon overlay, the per-page JSON (`mushafs/**/json/`, `surah.json`,
      `markers.json`) and the repo tooling are public domain — "reuse freely,
      including commercially, no attribution required". That is the half of these
      assets Hifth's resolver actually depends on, and it carries no obligation.
+     Upstream moved to CC BY 4.0 on 2026-09-12, with the credit waived inside an
+     app, free or commercial. CC0 cannot be withdrawn, so the pinned files stay
+     CC0; this changes only if the pin moves, and even then the waiver keeps it
+     free of obligations. (Re-checked 2026-11-17, `docs/research/2026-11-17-store-terms.md`.)
   2. **The artwork is the Complex's, under the Complex's terms.** Per that repo's
      [`NOTICE.md`](https://github.com/quranpedia/quran-svg/blob/main/NOTICE.md),
      which records publishers' terms verbatim: the digital Madinah mushaf "can be
@@ -67,14 +71,21 @@ option, because it reads identically to having forgotten.
   longer disagree — that drift is what shipped the «غير التجاري» defect above.
 
 ```colophon
-what: صفحات المصحف
-who: طباعة مجمع الملك فهد (KFGQPC)، عبر quran-svg / quranpedia
-licence: إتاحة حرّة للاستعمال الرقمي · الطبع التجاري محفوظ للمجمع
+what: صفحات مصحف المدينة النبوية (الإصدار الرقمي)
+who: مجمع الملك فهد لطباعة المصحف الشريف · حوّلها إلى SVG وعدّلها مشروع quran-svg (Quranpedia)
+licence: متاح مجانًا للاستعمال في البرامج الحاسوبية وفق شروط المجمع · لا يعني ذلك اعتماد المجمع لهذا التطبيق
 href: https://github.com/quranpedia/quran-svg
-whatEn: Mushaf pages
-whoEn: King Fahd Complex print (KFGQPC), via quran-svg / quranpedia
-licenceEn: Free for digital use · commercial printing reserved to the Complex
+whatEn: Mushaf pages of the Madinah print (digital edition)
+whoEn: King Fahd Glorious Qur'an Printing Complex · converted to SVG and adapted by quran-svg (Quranpedia)
+licenceEn: Free to use in software under the Complex's terms · this does not mean the Complex has approved this app
 ```
+
+- **Why the row reads this way (2026-11-17).** The earlier licence line, "commercial
+  printing reserved to the Complex", said more than the Complex does: its footnote limits
+  only printing inside the Kingdom and importing copies for sale. The terms are silent on
+  changing the artwork and on approval, so the row says the pages were adapted and that the
+  Complex has not approved the app. Two researchers and a checker read the terms for this;
+  `docs/research/2026-11-17-store-terms.md` is the record.
 
 - **Status: CONFIRMED. The overlay is CC0, read at the source; the Complex's own
   terms are now read at the source too** — the maintainer opened qurancomplex.gov.sa
@@ -87,6 +98,20 @@ licenceEn: Free for digital use · commercial printing reserved to the Complex
   ordinary connection — and why NOTICE.md carried the terms as a strong secondary source in
   the meantime. Nothing in the build depended on the answer, and nothing changed: the primary
   source matched the restatement.
+- **The rights page is now only on archive.org.** As of 2026-11-17 the live address returns
+  404. The archived Arabic copies are word for word the same:
+  [2024-12-02](https://web.archive.org/web/20241202071217/https://dm.qurancomplex.gov.sa/rights/)
+  and [2026-01-19](https://web.archive.org/web/20260119105728/https://dm.qurancomplex.gov.sa/rights/)
+  (a 2024-05-18 copy matches too), with the English
+  [2021-12-06](https://web.archive.org/web/20211206122921/https://dm.qurancomplex.gov.sa/en/copyright-2/).
+  Apple can ask for proof of permission, so these links are the proof to hand over.
+- **One open point could change the answer.** The pin file once described these pages as
+  shapes taken from the Complex's font, and the Complex's font licence forbids changes
+  without written approval. If the pinned pages were built from the font, the artwork needs
+  permission; if from the Complex's own drawing files of the digital mus'haf, the answer
+  above stands. The pinned files do not say. Settling it: compare one pinned page with the
+  Complex's free drawing-file download, or read quran-svg's history before the pin.
+  Tracked on the launch page.
 - **Immutability:** SVG bytes are never hand-edited (PLAN §8). Loop 4b applies
   **three** declared transforms, each reproducible and each asserted:
   1. **svgo** at the version and config recorded in the pin — the config was
@@ -448,30 +473,38 @@ not-credited: The app ships nothing from this font — no bytes, no outlines, no
   `https://verses.quran.com/Minshawi/Murattal/mp3/{SSS}{AAA}.mp3` (built by
   `apps/web/src/audio.ts`). The CDN serves it with `Access-Control-Allow-Origin: *`
   and byte ranges, so the cross-origin stream needs no proxy of ours.
-- **Access:** open. The owner's standing stance (2026-09-20, "qul allows open
-  access") is that Quran.com / QUL resources are openly accessible for this POC, so
-  the app links the CDN directly. That is a green light on *access*, not a waiver of
-  the credit: the file carries no explicit licence of its own, so the reciter is
-  named as a courtesy — the honest posture for a source read openly but not
-  formally licensed for redistribution. Since Hifth redistributes none of the
-  bytes (it only links them, the way any web page links media it does not host),
-  there is nothing here to license; the credit is respect for the reciter's work,
-  recorded so a later reader does not mistake a courtesy for a condition, or a
-  condition for a courtesy.
-- **Colophon row.** Verbatim; bound to `Colophon.tsx` by `gate:license-copy`.
+- **Access: not licensed for the store app.** This entry used to call access open, on
+  two grounds that do not hold (re-checked 2026-11-17,
+  `docs/research/2026-11-17-store-terms.md`):
+  1. "QUL allows open access" (2026-09-20) was said about a different QUL resource,
+     not this audio host.
+  2. "Hifth only links the files, so there is nothing to license" does not hold either.
+     Quran.com's terms allow personal, non-commercial use only, and other public display
+     needs its written consent. Apple's rule 5.2.2 asks that an app showing content from
+     another service be allowed to by that service's terms, with proof on request.
+  The file's own tag points back to QuranicAudio.com, which allows personal use only. Who
+  owns the 1960s recording itself is unclear under every source.
+- **What we do about it.** The store build leaves recitation out until a route is in place.
+  The routes, side by side, are in the research record; the recommended one is to register
+  with Quran Foundation, whose developer terms cover audio. The private build keeps it. The
+  public website keeps it for now, as an open question for the owner, since the same terms
+  apply there.
+- **Colophon row.** Verbatim; bound to `Colophon.tsx` by `gate:license-copy`. It names the
+  reciter and claims no permission, because none has been given.
 
 ```colophon
 what: التلاوة
-who: الشيخ محمد صديق المنشاوي · عبر مكتبة قرآن (quran.com)
-licence: إتاحة حرّة للاستماع · بثّ من مكتبة قرآن
+who: الشيخ محمد صديق المنشاوي (المصحف المرتّل) · يُبثّ من quran.com
+licence: الحقوق لأصحابها
 href: https://quran.com
 whatEn: Recitation
-whoEn: Sheikh Muhammad Siddiq al-Minshawi · via the Quran.com library (quran.com)
-licenceEn: Free to listen · streamed from the Quran.com library
+whoEn: Sheikh Muhammad Siddiq al-Minshawi (Murattal) · streamed from quran.com
+licenceEn: All rights belong to their owners
 ```
 
-- **Status: STREAMED (task #67) — client-side `<audio>` from Quran.com's CDN; no
-  bytes vendored or shipped.**
+- **Status: STREAMED on the website and in the private build — client-side `<audio>` from
+  Quran.com's server; no bytes vendored or shipped. Left out of the store build until
+  permission is in hand.**
 
 ---
 

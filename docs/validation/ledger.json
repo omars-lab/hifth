@@ -269,7 +269,7 @@
       "id": "kfgqpc-terms-primary-source",
       "title": "Read the Complex's published terms at the source",
       "why": "SOURCES.md currently reads KFGQPC's terms through quran-svg's NOTICE.md, which quotes them verbatim and cites Royal Decrees 136/8 and 9/B/46356 — strong, but secondary. The app states those terms to every reader in the colophon, and an earlier paraphrase of them was wrong.",
-      "how": "Open qurancomplex.gov.sa in an ordinary browser. The host is unreachable from automation, and this was measured rather than assumed: a GitHub-hosted runner (Azure westus2, run 30285643491, 2026-07-27) resolves the A record to 66.9.131.70 and then times out on TCP 443 — connect rc=124, and curl returns 000 under both a curl and a desktop-Chrome User-Agent. The same failure appears from the maintainer's machine. A third network confirmed it on 2026-08-16: a licensing research pass reached for the primary terms and got connect ECONNREFUSED on qurancomplex.gov.sa and on the dm., fonts. and nashrmaktabi. subdomains, having also found web.archive.org hard-blocked by its tooling. Three unrelated networks failing at the TCP layer is not a bot filter a header could talk past, and no scheduled watcher can do this. It stays a human check permanently. Confirm the wording still says free digital/web/software use with commercial printing reserved.",
+      "how": "Open qurancomplex.gov.sa in an ordinary browser. The host is unreachable from automation, and this was measured rather than assumed: a GitHub-hosted runner (Azure westus2, run 30285643491, 2026-07-27) resolves the A record to 66.9.131.70 and then times out on TCP 443 — connect rc=124, and curl returns 000 under both a curl and a desktop-Chrome User-Agent. The same failure appears from the maintainer's machine. A third network confirmed it on 2026-08-16: a licensing research pass reached for the primary terms and got connect ECONNREFUSED on qurancomplex.gov.sa and on the dm., fonts. and nashrmaktabi. subdomains, having also found web.archive.org hard-blocked by its tooling. Three unrelated networks failing at the TCP layer is not a bot filter a header could talk past, and no scheduled watcher can do this. It stays a human check permanently. Confirm the wording still says free use in websites and computer programs, inside and outside the Kingdom, with only printing in the Kingdom and importing for commercial sale held back. Since 2026-11-17 the live rights page returns 404; the archive.org copies of 2024-12-02 and 2026-01-19 (linked in SOURCES.md) are the text to read until the Complex puts it back.",
       "owner": "user",
       "status": "done",
       "blocks": [],
@@ -300,7 +300,7 @@
           },
           {
             "do": "Compare that against the two places we restate it: SOURCES.md §hafs-kfqc, and the colophon in the app (tap the wordmark حِفظ → «الرخصة والمصدر»).",
-            "expect": "Both should describe free digital use with the printing restriction — and specifically NOT «إتاحة حرّة للاستعمال غير التجاري» (non-commercial only), which is a different edition's term and shipped once as a live defect.",
+            "expect": "Both should say the pages are free to use in software under the Complex's terms, and that this does not mean the Complex approved the app. They should NOT say «إتاحة حرّة للاستعمال غير التجاري» (non-commercial only), which is a different edition's term and shipped once as a live defect, and should not add a restriction the terms do not state (the earlier «الطبع التجاري محفوظ للمجمع» said more than the footnote, and was dropped on 2026-11-17).",
             "why": "We restate these terms in two places a stranger can read, so a wrong restatement is a licensing claim we are making on the Complex's behalf. This exact string was wrong once and shipped.",
             "shot": "colophon-source",
             "id": "compare-to-ours"
@@ -312,7 +312,7 @@
           "You are unsure whether our summary is stricter than the source → treat that as a failure and write it down. Overstating someone else's terms fails silently: it reads as caution, so no reader ever files a bug about being told they have fewer rights than they do.",
           "The Libyan Endowments editions (Qālūn/Warsh) really are non-commercial-only — do not let their terms drift back onto this row."
         ],
-        "record": "make record CHECK=kfgqpc-terms-primary-source RESULT='read at qurancomplex.gov.sa/en/ on <date> — free digital use, commercial printing reserved; matches SOURCES.md and the colophon'"
+        "record": "make record CHECK=kfgqpc-terms-primary-source RESULT='read the Complex rights page (live or its archive.org copy) on <date>: free use in software, only printing in the Kingdom and commercial import held back; matches SOURCES.md and the colophon'"
       },
       "tunes": [
         "SOURCES.md §hafs-kfqc — drops the 'pending-that-glance' clause from the Status line",

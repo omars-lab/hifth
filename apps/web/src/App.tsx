@@ -251,6 +251,7 @@ import {
   type Commentator,
   type PitchSurah,
 } from "./pitch/pitch";
+import { RECITATION } from "./recitation";
 // The one commentary drawer and its sources (decision `tafsir-provider`): the
 // pitch's book is one source, a live public service another, and the drawer
 // draws whichever is on without knowing which.
@@ -3354,15 +3355,16 @@ export function App(): JSX.Element {
         glyph: "⬡",
         onPick: () => setRootsOpen(true),
       });
-    items.push({
-      id: "listen",
-      caption: listenCaption(audio.phaseFor(key), t),
-      glyph: listenGlyph(audio.phaseFor(key)),
-      onPick: () => {
-        if (audio.phaseFor(key) === "idle") void countUse("listen");
-        audio.toggle(key);
-      },
-    });
+    if (RECITATION)
+      items.push({
+        id: "listen",
+        caption: listenCaption(audio.phaseFor(key), t),
+        glyph: listenGlyph(audio.phaseFor(key)),
+        onPick: () => {
+          if (audio.phaseFor(key) === "idle") void countUse("listen");
+          audio.toggle(key);
+        },
+      });
     const surah = parseAyahKey(key)?.surah;
     if (surah && INTRO_SURAHS.has(surah))
       items.push({
@@ -3951,8 +3953,11 @@ export function App(): JSX.Element {
             : { type: "juz", juz: juzOf(first.surah, first.ayah) };
       const about = notesAbout(scoped, scope, pageOfKey);
       const items: VerseMenuItem[] = [
-        { caption: t.cornerPlay, onPick: () => playBetween(key(first.surah, first.ayah), key(last.surah, last.ayah)) },
-        ...(which === "surah" && keepSupported() ? [keepRecitationItem(first.surah, name)] : []),
+        // A build without the recitation (the App Store's) has nothing to play or keep.
+        ...(RECITATION
+          ? [{ caption: t.cornerPlay, onPick: () => playBetween(key(first.surah, first.ayah), key(last.surah, last.ayah)) }]
+          : []),
+        ...(RECITATION && which === "surah" && keepSupported() ? [keepRecitationItem(first.surah, name)] : []),
         which === "page"
           ? { caption: t.vdBookmark, onPick: () => dropOn(page) }
           : { caption: t.cornerStart, onPick: () => restoreState({ edition, select: first }, "jump") },
@@ -5541,7 +5546,9 @@ export function App(): JSX.Element {
         {/* The fuller drawer of options A and B: what C keeps for its hold. */}
         {selectedKey && verseGestures !== "c" && (
           <>
+            {RECITATION && (
             <DrawerTool glyph={"⏭\uFE0E"} caption={t.vdPlayTo} label={t.vdPlayToAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => startPlayTo(selectedKey)} />
+            )}
             <DrawerTool glyph="✎" caption={t.vdMark} label={t.vdMarkAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => markVerse(selectedKey)} />
             <DrawerTool glyph={"✍\uFE0E"} caption={t.vdNote} label={t.vdNoteAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => noteOnVerse(selectedKey)} />
             <DrawerTool glyph="⧉" caption={t.vdCopy} label={t.vdCopyAria(t.ayahLabel(selectedKey) ?? selectedKey)} onClick={() => copyVerse(selectedKey)} />
@@ -5558,7 +5565,7 @@ export function App(): JSX.Element {
           follow={followVerseMenu}
           onClose={closeVerseMenu}
           items={[
-            { caption: t.vdPlayTo, onPick: () => startPlayTo(verseMenu.key) },
+            ...(RECITATION ? [{ caption: t.vdPlayTo, onPick: () => startPlayTo(verseMenu.key) }] : []),
             { caption: t.vdMark, onPick: () => markVerse(verseMenu.key) },
             { caption: t.vdNote, onPick: () => noteOnVerse(verseMenu.key) },
             { caption: t.vdCopy, onPick: () => copyVerse(verseMenu.key) },

@@ -163,7 +163,7 @@ const messages: Catalog = {
   drawerMarksTitle: "How a drawer shows what it sits on",
   drawerTabsLabel: "Tools open in this drawer",
   drawerToolsDrawer: "Inside the verse's drawer",
-  drawerToolsNote: "Where Share, Same roots and Listen open when you press them under a verse. In a card of their own: a separate card, and the verse's drawer steps aside while it is up. Inside the verse's drawer: they open under the drawer's buttons, one at a time, the drawer stays, and the page moves the verse up clear of it. As tabs in the verse's drawer: the same, but each one you open stays open as a tab, so going back to one finds it as you left it.",
+  drawerToolsNote: "Where the tools under a verse, such as Share and Same roots, open when you press them. In a card of their own: a separate card, and the verse's drawer steps aside while it is up. Inside the verse's drawer: they open under the drawer's buttons, one at a time, the drawer stays, and the page moves the verse up clear of it. As tabs in the verse's drawer: the same, but each one you open stays open as a tab, so going back to one finds it as you left it.",
   drawerToolsSheet: "In a card of their own",
   drawerToolsTabs: "As tabs in the verse's drawer",
   drawerToolsTitle: "Where a verse's tools open",

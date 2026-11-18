@@ -6921,16 +6921,30 @@
       "note": "Draft written 2026-11-15 in docs/design/store-permission-emails.md, not sent. Fallback: leave the tajweed colours out of the store build."
     },
     {
+      "id": "launch-recitation-permission",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊻"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "launch": true,
+      "note": "Waits on the owner sending email 3. Draft written 2026-11-17 in docs/design/store-permission-emails.md (email 3, to Quran.com), not sent. It does not hold up the upload: the store build already leaves the recitation out. A yes, or Quran Foundation's developer route, brings it back to the store apps and settles whether the website may keep it."
+    },
+    {
       "id": "launch-page-artwork-terms",
       "source": {
         "file": "docs/design/app-store-launch.md",
         "item": "⑤"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
       "launch": true,
-      "note": "The same reading the old board item 55 asked for, now for a store app. May need a third email."
+      "useCase": "know-where-this-text-came-from",
+      "closedBy": "apps/web/src/components/Colophon.test.tsx",
+      "note": "Read 2026-11-17 by two researchers and a checker (docs/research/2026-11-17-store-terms.md): the Complex allows free use in software, inside and outside the Kingdom, and holds back only printing in the Kingdom and importing for sale. The credit row now names the Complex, says quran-svg converted and adapted the pages, and says the Complex has not approved the app; the old 'commercial printing reserved' line said more than the terms and is gone. Same words in the app, SOURCES.md and both hifth.app sources pages (gate:license-copy and the landing sources test hold them together). The one open point that could flip it is launch-artwork-font-or-drawings."
     },
     {
       "id": "launch-recitation-audio-terms",
@@ -6938,11 +6952,39 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑥"
       },
+      "status": "fixed",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "useCase": "send-apple-only-the-build-we-checked",
+      "closedBy": "apps/web/src/no-recitation.test.tsx",
+      "note": "Read 2026-11-17 (docs/research/2026-11-17-store-terms.md): Quran.com's terms allow personal use only, other public display needs written consent, and Apple asks for that permission on request. The credit no longer claims 'free to listen'. Fixed 2026-11-17: make app-web FLAVOUR=public builds with VITE_NO_RECITATION=1 (src/recitation.ts), so no verse has a sound address and no listen button, play option, keep-for-offline offer, play setting or recitation credit shows (no-recitation.test.tsx); the copy into the app refuses any file holding verses.quran.com (native-golden-public.test.mjs); checked on the real store build in a browser. Review notes, privacy answers and both hifth.app privacy pages updated. The website keeps it (launch-website-recitation). Route to bring it back: register with Quran Foundation (its developer terms cover audio; needs a small server holding the key)."
+    },
+    {
+      "id": "launch-artwork-font-or-drawings",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊺"
+      },
       "status": "open",
       "severity": "question",
       "owner": "agent",
       "launch": true,
-      "note": "The recitation is fetched from another site with no licence note in the source register."
+      "useCase": "know-where-this-text-came-from",
+      "note": "Found 2026-11-17 by the checker on the terms research. The pin file calls the pages 'QCF V2 glyph outlines' (shapes from the Complex's font, whose licence forbids changes without written approval). The pinned commit (5fbcb1d4, 2026-07-13) does not say where its pages came from; quran-svg's note naming the Complex's Illustrator files came later. Settle by comparing one pinned page with the same page in the Complex's free Illustrator bundle, or reading quran-svg's history before the pin. If from the font, the artwork needs permission."
+    },
+    {
+      "id": "launch-website-recitation",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊻"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "launch": true,
+      "useCase": "know-where-this-text-came-from",
+      "note": "Quran.com's terms (personal use only) reach the website too. The store build leaves recitation out; hifth.app/read still streams it. Owner's call: switch it off there as well, or keep it while the Quran Foundation route is built. Does not hold up the store upload."
     },
     {
       "id": "launch-privacy-file",
@@ -7170,11 +7212,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉜"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "A store-feedback skill: one command pulls new reviews and ratings with the hifth-reviews key into a git-ignored folder, and drafts an answer to each. Nothing is posted without the owner's yes, and reviewers' names and words never enter the repo. Feeds the launch goal's \"unanswered reports and reviews\" number."
+      "useCase": "answer-store-reviews-only-with-the-owners-yes",
+      "closedBy": ".claude/skills/store-feedback/scripts/store-reviews.test.mjs",
+      "note": "Built 2026-11-17 as the store-feedback skill, run by make app-store-reviews. pull keeps every review in .store/reviews/ (git ignores it) and prints counts only; waiting lists open reviews with no words; draft saves an answer; approve records the owner's yes against the exact words; post sends only those words, and refuses if they changed or the review already has an answer. The signed token and paging are shared with store-numbers in scripts/lib/app-store-connect.mjs. Checked live the same day with the hifth-reviews key: Apple let it in and listed 0 reviews, which is right before any release. Feeds the launch goal's \"unanswered reports and reviews\" number."
     },
     {
       "id": "launch-store-numbers",
@@ -7182,11 +7226,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉝"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "A store-numbers skill: one command pulls the daily download and sales reports with the same hifth-reviews key into a git-ignored folder and prints a short summary. Same key as launch-store-feedback, different skill and script (owner, 2026-11-16)."
+      "useCase": "count-downloads-without-watching-readers",
+      "closedBy": ".claude/skills/store-numbers/scripts/store-numbers.test.mjs",
+      "note": "Built 2026-11-17 as the store-numbers skill, run by make app-store-numbers. pull fetches each day's summary sales report (up to the year Apple keeps) into .store/numbers/ (git ignores it); summary counts first downloads, updates and downloads again for this app only, by device and country. A report that changes form is refused, not miscounted. Same key as launch-store-feedback, different skill and script (owner, 2026-11-16). Not run live yet: it needs the vendor number, which only the owner can copy from App Store Connect (make env-set NAME=ASC_VENDOR_NUMBER); until then it stops and names the missing setting, which was checked live."
     },
     {
       "id": "launch-keys-on-release-page",
@@ -7194,11 +7240,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉞"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "The release page and the setup check cover the reviews key as well as the upload key: what each key is for, and a check that the file is in place and its ID saved, printing names and dates only."
+      "useCase": "answer-store-reviews-only-with-the-owners-yes",
+      "closedBy": ".claude/skills/understanding-processes/scripts/check-release-setup.test.mjs",
+      "note": "Done 2026-11-17. The release page has a section on the second key: what each key is for, which skills use it, and how to find and save the vendor number. make app-release-setup now checks the reviews key's file and id (and that it is not the upload key) and whether the vendor number is saved, printing states only. Both are reported as later and never hold a release back. Run live: everything ok except the vendor number, which waits on the owner."
     },
     {
       "id": "launch-remote-switch",
@@ -7328,7 +7376,8 @@
       "severity": "question",
       "owner": "agent",
       "launch": true,
-      "note": "All drafted in the repository; the EU trader answer is the owner's."
+      "useCase": "get-help-and-know-what-is-kept",
+      "note": "Drafted 2026-11-17 on docs/design/store-listing.md: name, subtitle, keywords, promotional line, description, category, privacy answer (Data Not Collected, with the reasons), age answers (4+), export answer, support and privacy addresses; make app-store-listing checks them against Apple's limits and the app's settings. Both privacy pages now also say the sound is asked for early and name the setting that stops it. Still open: the EU trader answer, price and copyright line (the owner's), the content-rights answer (waits on the permissions), and the Arabic listing."
     },
     {
       "id": "launch-store-screenshots",
@@ -7336,11 +7385,26 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉛"
       },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "useCase": "find-hifth-and-open-it",
+      "closedBy": ".claude/skills/release-app/scripts/store-shots.test.mjs",
+      "note": "Fixed 2026-11-17: make app-store-shots takes 32 pictures of the public build (iPhone 6.9 and 6.3 inch, iPad 13 inch, Mac; English and Arabic) and refuses the private build and any size the store does not take (tests: store-shots.test.mjs). The Mac window is resized until the page is exactly 2560x1600 (WindowSizeTests; docs/issues/mac-store-shot-window-size.md), and a picture run keeps its page data in an empty throwaway store, so no 'Left off' ribbon or saved mark from the laptop shows (ScreenshotDataTests). Every picture was looked at. Left over: the empty clock-and-battery strip on the iPhone pictures (launch-store-shots-status-bar)."
+    },
+    {
+      "id": "launch-store-shots-status-bar",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊹"
+      },
       "status": "open",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "Of the public build only, in English and Arabic."
+      "useCase": "find-hifth-and-open-it",
+      "note": "Found 2026-11-17 looking at the store pictures: on the iPhone pictures the strip at the top where the clock and battery sit is an empty band, because the app photographs its own page. Apple takes the pictures as they are, but they look less finished than a real phone. Fix: set the simulator's clock and battery to Apple's usual 9:41 and full (xcrun simctl status_bar override) and photograph the whole screen, or fill the strip with the page's own top colour. Test: the store-shots check refuses an iPhone picture whose top strip is one flat colour."
     },
     {
       "id": "launch-reviewer-walk",

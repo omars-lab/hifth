@@ -56,6 +56,9 @@ docs/design/*.artifact.html
 *.p12
 # Apple signing keys (App Store Connect API keys come as AuthKey_*.p8).
 *.p8
+# Store reviews (reviewers' names and words) and Apple's download reports:
+# kept on this laptop only, never in the public repo.
+.store/
 id_rsa*
 **/credentials.json
 

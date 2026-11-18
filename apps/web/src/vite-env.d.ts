@@ -18,6 +18,13 @@ interface ImportMetaEnv {
    * "What we are building right now".
    */
   readonly VITE_PITCH?: string;
+  /**
+   * Set only by the App Store's web build (`make app-web FLAVOUR=public`), which
+   * leaves the recitation out: it streams from Quran.com, whose terms allow
+   * personal use only (`src/recitation.ts`). The copy step then checks that the
+   * audio server's address is gone from what it copied.
+   */
+  readonly VITE_NO_RECITATION?: string;
 
   /**
    * The open live tafsir provider (`src/tafsir/quran-foundation.ts`). Set

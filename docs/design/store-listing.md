@@ -9,9 +9,14 @@ under item ㉚. Nothing here is sent anywhere yet; the owner pastes it into Appl
 
 - **What this page is:** the words for Apple's forms, drafted where they can be checked against
   the app.
-- **Done so far:** the notes for Apple's reviewer.
-- **Still to come:** the description, keywords, privacy labels, age answers, the EU trader answer
-  (the owner's), and a test account once sign-in exists.
+- **Done so far:** the notes for Apple's reviewer; the name, subtitle, keywords, short promotion
+  and description in English; the category; the privacy answer; the age answers (4+); the export
+  answer; the support and privacy addresses.
+- **Still to come:** the EU trader answer (the owner's), the price and copyright line (the
+  owner's), the "rights to the content" answer (waits on the permissions), the listing in
+  Arabic, and a test account once sign-in exists.
+- **What keeps it honest:** a test checks every field against Apple's length limits and against
+  the app's own settings (`make app-store-listing` prints the counts).
 
 ## Words used here
 
@@ -25,6 +30,7 @@ under item ㉚. Nothing here is sent anywhere yet; the owner pastes it into Appl
 The text below goes into the review notes box as it is. Each claim in it is held by a test or a
 check, listed after it, so the notes cannot drift from the app.
 
+<!-- field: review-notes -->
 > Hifth is a study tool for people who have memorised the Qur'an (huffaz). It shows the printed
 > page of the mus'haf and, on any verse, the other places in the Qur'an that read almost the
 > same, which is where people who have memorised it slip.
@@ -62,10 +68,8 @@ check, listed after it, so the notes cannot drift from the app.
 > It shows the reader the whole report first (the app's version, the device, recent errors,
 > never their notes or marks), and only then opens their own mail app to send it.
 >
-> The one thing the app fetches from the internet is the sound of a verse being recited, from
-> verses.quran.com. It fetches a verse's sound when the verse is selected, so Play starts at
-> once; the reader can turn that off. With no connection the page still works and only the
-> sound is missing.
+> The app asks nothing of the internet. Every page, and everything a page needs, is inside the
+> app, so it works the same with no connection.
 >
 > The app has no account, no ads, no tracking and no analytics. Nothing the reader writes leaves
 > the device.
@@ -82,7 +86,8 @@ the test account for the reviewer.*
 | Answers the Apple Pencil | The shell hands double-tap and squeeze to the page (`native/Hifth/Web/Pencil.swift`), held by `native/HifthTests/PencilTests.swift`. |
 | Other apps can open it and get an answer | The `hifth` link scheme in `native/Hifth/Resources/Info-iOS.plist` and the actions in `native/Hifth/Route/XCallback.swift`, held by `XCallbackTests.swift`, `ShellCallbackTests.swift` and `RouteTests.swift`. |
 | Saves through the system's save window | `native/Hifth/Web/Downloads.swift`, held by `DownloadTests.swift`. |
-| The recitation is the only outside fetch, and it can be turned off | The same browser test counts exactly one outside request after a tap, for that verse's sound. The "fetch ahead" setting (`apps/web/src/run-ahead.ts`) is in the info panel. |
+| The app asks nothing of the internet | The store build leaves the recitation out (launch item ⑥): `make app-web FLAVOUR=public` builds without it, and the copy into the app refuses any file holding the recitation server's address (`native/Makefile.native`, tested by `scripts/native-golden-public.test.mjs`). With the switch off, no listen control, play setting or recitation credit shows (`apps/web/src/no-recitation.test.tsx`). The website still streams it (item ㊻). |
+| The store fields fit Apple's limits; the name, category, privacy and export answers agree with the app | `make app-store-listing` (`.claude/skills/understanding-processes/scripts/check-store-listing.mjs`), held by its test, which breaks one thing at a time in a made-up copy of this page. |
 | No account, no ads, no tracking, no analytics | The privacy file says the app tracks nobody and collects nothing, and the store build's release check refuses one that says otherwise (launch page item ⑦). |
 | The marks stay on the device | No code sends them, and the problem report leaves them out: a test writes made-up notes and marks to storage and checks the report has none of them (`apps/web/src/problem-report.test.ts`). |
 | The buttons follow the device's language; it opens on page 7 | A fresh install on the reviewer iPad simulator, English device, 2026-11-17: English buttons, page 7, nothing announced (`.claude/skills/walk-app/scripts/first-open-walk.js`). |
@@ -92,8 +97,136 @@ the test account for the reviewer.*
 ## What would change these notes?
 
 - **Sign-in ships:** the account sentence names the test account and what it unlocks.
-- **The recitation is switched off in the store build** (one answer to item ⑥): the
-  recitation paragraph goes, and the notes say the app asks nothing of the internet.
+- **The recitation comes back to the store build** (route 2 for item ⑥, through Quran
+  Foundation): the notes then say again what the app fetches, from where, and how to turn the
+  early fetch off. (Switched off on 2026-11-17; these notes already say so.)
 - **The opening page or the look-alike button changes:** the "How to try it" steps name page 7,
   verse 40 and the "≈ 2" button, so they change with it. The test that walks those steps fails
   first.
+
+## What will a reader see on the store page?
+
+Each box below is pasted into Apple's form as it is. Apple's limit for each is in the heading.
+Every line in the description is something the reviewer notes above already prove; nothing new
+is claimed here.
+
+**Name** (30 characters)
+
+<!-- field: name -->
+```text
+Hifth
+```
+
+**Subtitle** (30 characters), shown under the name in search results:
+
+<!-- field: subtitle -->
+```text
+For huffaz: look-alike verses
+```
+
+**Keywords** (100 characters, commas between them). Apple already searches the name and
+subtitle, so these leave out the words in them.
+
+<!-- field: keywords -->
+```text
+quran,mushaf,hifz,hafiz,memorize,revision,mutashabihat,similar,muraja'a,mistakes,juz,page
+```
+
+**Promotional text** (170 characters), the line at the top that can change without a new build:
+
+<!-- field: promotional-text -->
+```text
+Revise on the printed page you memorised from, with the verses that read almost the same one tap away. Works with no connection from the first launch.
+```
+
+**Description** (4,000 characters)
+
+<!-- field: description -->
+```text
+Hifth is a study companion for people who have memorised the Qur'an.
+
+It shows the printed page of the mus'haf, all 604 pages. On any verse it shows the other places in the Qur'an that read almost the same, which is where people who have memorised it slip, and the words where each one starts to differ.
+
+What you can do:
+
+- Tap a verse to see the verses that look like it, and turn straight to any of them.
+- Mark your own slips by writing on the page with your finger or an Apple Pencil. On an iPad, double-tap or squeeze the pencil to change tools.
+- Keep bookmarks, and save them as a file to take with you.
+- Hear a verse recited. This is the one thing that needs a connection.
+- Open a verse from another app or from Shortcuts with a link.
+- Use the buttons in English or Arabic. The app follows your device, and one switch changes it.
+
+It works with no connection from the first launch: the pages and the look-alike verses are inside the app.
+
+No account, no ads, no tracking. Nothing you write leaves your device.
+```
+
+**Category:** Education first, Reference second. (The Mac app's own settings already say
+Education, and a test keeps the two the same.)
+
+**Support address:** `https://hifth.app/support.html` · **Privacy policy:**
+`https://hifth.app/privacy.html` · **Website:** `https://hifth.app`. A test checks both pages
+are in the site's files.
+
+## What does the app tell Apple about the reader's data?
+
+Apple's form asks whether the app "collects" data, which Apple defines as sending it off the
+device where we, or code from another company built into the app, can keep it longer than it
+takes to answer the request. ([Apple's page](https://developer.apple.com/app-store/app-privacy-details/),
+read 2026-11-17.)
+
+<!-- field: privacy-answer -->
+```text
+Data Not Collected
+```
+
+Why that answer is true, case by case:
+
+| What leaves the device | Why it is not "collected" |
+|---|---|
+| Nothing the reader writes: notes, marks, bookmarks, progress | It stays in the app's own storage on the device. No code sends it. |
+| Nothing is fetched while reading | The store build leaves the recitation out (launch item ⑥), so it makes no request to any site. If the recitation comes back, the fetch is of a public sound file from a site that is not code inside our app, so Apple's word "partner" would not cover it either. |
+| A problem report, if the reader sends one | The reader sees the whole report first and sends it from their own mail app, with their own address on it, each time they choose to. Apple lists exactly this kind of "customer service request", given by the reader and shown in full, as one that need not be declared. |
+
+The app's privacy file says the same (tracks nobody, collects nothing), and a test refuses a
+listing whose answer disagrees with it. **This answer changes when sign-in ships:** an account
+stores an Apple sign-in id and the reader's copy, so the form then lists those, "linked to
+you", for "app functionality".
+
+## How old must a reader be?
+
+Apple's age questions, answered for the app as it is. The result is **4+**.
+([Apple's list](https://developer.apple.com/help/app-store-connect/reference/app-information/age-ratings-values-and-definitions/),
+read 2026-11-17.)
+
+| Apple's question | Answer | What holds it |
+|---|---|---|
+| Parental controls; age checks | No | The app has neither. |
+| Can a reader open any website inside the app? | No | Only the app's own pages load inside it; anything else goes to the system browser or nowhere. The shell's tests try mail, file, data and script addresses and other sites (`native/HifthTests/OutsideLinkTests.swift`). |
+| Do readers' own posts reach other people? | No | Marks and notes stay on the device. |
+| Social media; messaging and chat; advertising | No | None in the app. |
+| Swearing, horror, alcohol or drugs, medical or health topics, sexual themes, violence, weapons | None | The app shows the Qur'an's pages and our own buttons. |
+| Gambling, contests, loot boxes | None | None in the app. |
+
+## Does the app use encryption Apple must be told about?
+
+No. The store build fetches nothing, and the only encryption it could ever use is the
+system's own secure connection, which Apple exempts. Both the iPad and iPhone settings and the Mac settings say so
+(`ITSAppUsesNonExemptEncryption` is off), so Apple's form does not ask at each upload. A test
+keeps both set.
+
+## What is still the owner's to fill in?
+
+- **EU trader status.** In the EU, Apple must show whether the seller is a "trader", meaning
+  someone doing this as a business. A trader's address, phone and email are shown on the store
+  page to everyone. A free app made by one person, with no sales, can usually say "not a
+  trader"; the owner decides.
+- **Price** (assumed free; the app has nothing to buy) and the **copyright line**, which shows
+  the owner's name on the store page.
+- **"Does the app show content made by others, and do you have the rights?"** Yes, it does: the
+  page artwork, the word-root data and the tajweed colours (the store build leaves the
+  recitation out, item ⑥). The answer "we have the rights" waits on the two permission emails
+  and the artwork question (launch items ③ ④ ㊺); it is the same lock as the upload.
+- **The listing in Arabic.** Apple shows the listing in the reader's language. The Arabic
+  version is drafted after the English one is settled, and read by a native reader before it
+  goes in.

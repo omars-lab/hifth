@@ -14,6 +14,7 @@ import {
 import { KEEP_WHENS, rememberKeepWhen, useKeepWhen } from "../keep-when";
 import styles from "./PackShelf.module.css";
 import choices from "./Colophon.module.css";
+import { RECITATION } from "../recitation";
 
 /**
  * The surahs whose recitation is kept on this device (docs/PLAN.md, item 101),
@@ -22,8 +23,9 @@ import choices from "./Colophon.module.css";
  * the menu on its name at the top of the page; this is where the reader sees
  * what that has cost them, and takes it back.
  *
- * Shown inside the iPad and Mac app too: the app carries every page, but not
- * the recitation, which streams like it does in the browser.
+ * Not shown in the App Store's iPad, iPhone and Mac apps, which leave the
+ * recitation out (`src/recitation.ts`); a private build of the app streams it
+ * like the browser does.
  *
  * It says what the files are, not what the claim says: a claimed surah whose
  * files are partly gone is named "incomplete" (the juz shelf's rule, for the
@@ -39,7 +41,12 @@ function megabytes(bytes: number): number {
   return bytes / 1_000_000;
 }
 
-export function RecitationShelf(): JSX.Element {
+/** Nothing in a build without the recitation (the App Store's): nothing to keep. */
+export function RecitationShelf(): JSX.Element | null {
+  return RECITATION ? <KeptRecitations /> : null;
+}
+
+function KeptRecitations(): JSX.Element {
   const { t } = useT();
   const changes = useKeptChanges();
   // `undefined` while the files are being looked at: "still looking" is not

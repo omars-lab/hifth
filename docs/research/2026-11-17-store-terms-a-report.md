@@ -1,0 +1,78 @@
+# Researcher A: the page artwork and the recitation audio (read 2026-11-17)
+
+Saved by the main session from researcher A's final report, word for word in substance. Its raw
+copies of every source are in terms-a/raw/ next to this file.
+
+## Summaries
+
+**Question 1, the page artwork: allowed as it is, with a credit change. Fairly sure.**
+1. The Complex's usage terms allow free use of the digital mus'haf in "computer programs ... inside and outside Saudi Arabia" (Arabic, archived 2024-05-18) and "websites, software" (English, archived 2021-12-06).
+2. No approval, licence, credit or ban on sale or bundling. The only limit is a footnote on printing paper copies inside Saudi Arabia and importing printed copies for sale.
+3. Weak points: the terms survive only in the Internet Archive (the live site is a trial launch, "all rights reserved", digital mus'haf "coming soon"); and they are silent on changes, while quran-svg dropped the frame and header and redrew the verse-end markers.
+4. Changes: reword the credit ("commercial printing reserved to the Complex" claims more than the footnote); keep copies of both archived terms; correct any record calling quran-svg's layer CC0 (it is CC BY 4.0, credit waived inside an app); optionally a courtesy note to info@qurancomplex.gov.sa.
+5. Would change if: the new site publishes other terms; the font licence applied (it does not, we ship drawings, not the font file); the Complex's app review committee (Arab News 2018) turned out to be required.
+
+**Question 2, the recitation audio: needs permission, or a different source. Fairly sure on the host, somewhat sure on the recording.**
+1. Host: no grant covers another app building addresses on verses.quran.com. Quran.com's user terms: personal, non-commercial use only, "no linking the Service to other services". Its developer terms send apps through a keyed API needing a backend, account, privacy policy and terms of use. No permission found; both point against it; not a clear ban.
+2. Recording: the file is byte-identical to everyayah's; its tag reads "VerseByVerseQuran.com / MP3s from QuranicAudio.com"; QuranicAudio says its files were "hand ripped from cds", personal use only, not commercial. Nobody shows a grant from Egyptian Radio (recorded 1965) or the reciter's heirs.
+3. The Quran Foundation API fixes the host question, not the recording one (its licence covers only what it owns, §2.3).
+4. No better-licensed copy of the same recording found. The Complex's free recitations licence names "computer apps" but covers other reciters (Al-Huthify, Al-Muaiqly, Ayyoub, Al-Muhanna, Al-Akhdhar), not Minshawi; that page is 404 now, archived.
+5. Changes: "Free to listen" has no source and must not stand. Near term, ask Quran Foundation in writing or move to the keyed API with a backend. Longer term, ask Egyptian Radio or the heirs, or offer a Complex-licensed reciter as the default.
+
+## Design (what we may ship)
+
+| | Answer | What to change | How sure |
+|---|---|---|---|
+| Page artwork (KFGQPC, through quran-svg) | Allowed as it is, with a credit change | Reword the credit, keep copies of the terms, fix the CC0 note | Fairly sure |
+| Minshawi audio (verses.quran.com) | Needs permission, or a different source | Written OK or the keyed API; settle the recording rights; fix "Free to listen" | Fairly sure (host), somewhat sure (recording) |
+
+### Question 1
+
+Suggested credit: "Page artwork: King Fahd Glorious Qur'an Printing Complex (KFGQPC), Mus'haf al-Madinah, free digital copy. Traced to vector by quran-svg (quranpedia). The Complex allows free use in computer programs. Printing the mus'haf for sale is governed by Saudi law."
+
+Also: check in copies of both archived terms pages with their archive addresses; keep Hifth's own changes to number rounding and shape repair and redraw no letter (quran-svg NOTICE §1: the text "must never be altered").
+
+Would change the answer: different terms on the new qurancomplex.gov.sa (its developer platform is "coming soon"); evidence the app review committee is required outside Saudi Arabia (Arab News 2018: it can "grant digital certificates" and "prevent the publication or distribution of flawed texts"; no page says it is required); bundling a KFGQPC font file (the font licence forbids reproduction or change without written approval, conflicting with the 2021 page listing the TrueType font as free).
+
+### Question 2
+
+A. The host. Quran.com terms (updated July 28, 2026): Content incl. "sound and video recordings" is "PERSONAL, NON-COMMERCIAL USE ONLY"; forbids "distribute or link the Service to multiple Mobile Devices or other services" and "use any proprietary information or interfaces of the Service"; no public display without "prior written consent". Developer terms (updated 2026-10-11): audio is QF Content; needs client_id and client_secret on a backend; apps need a public privacy policy and terms of use; must not "extract, scrape, or index QF Content ... outside the API responses". A free app fits the developer terms (they even allow paid apps).
+
+B. The recording. Same file as everyayah.com (SHA-256 compared). QuranicAudio: "used for personal use free of charge ... you may not use these files for commercial purposes as many of these files have rules and regulations that prevent their sale except by the publishing companies"; "Many of them are hand ripped from cds." Recorded for Egyptian Radio in 1965. alquran.cloud: "recitations remain the copyright of their ... reciters", personal and educational use.
+
+Suggested credit now: "Recitation: Sheikh Muhammad Siddiq al-Minshawi (Murattal), streamed from the Quran.com library. Rights in the recording belong to their owners."
+
+Before any store release, one of: (a) ask Quran Foundation in writing whether a free app may stream verses.quran.com directly; (b) move to the keyed API with a small backend, privacy policy, terms and a Quran Foundation credit; (c) either, plus ask Egyptian Radio (National Media Authority) or the heirs. Consider a Complex-licensed reciter as default or fallback ("free general use in computer apps ... inside and outside the Kingdom", archived 2022; not Minshawi).
+
+Would change the answer: written permission from Quran Foundation, or it documenting verse audio as public files the way it does word audio; any rights statement from Egyptian Radio or the heirs; a copyright-term analysis (not done; no term stated).
+
+## Findings (raw record)
+
+Labels: "opened, checked" = fetched, read, quote found in the saved copy; "fetch tool only" = from the fetch tool's summary; "snippet" = search result only.
+
+### Question 1
+
+- **1.1** Complex terms, English: https://dm.qurancomplex.gov.sa/en/copyright-2/ via Internet Archive 2021-12-06 (raw/wb-en-copyright-20211206.html). Opened, checked. Live page 404, gone by 2022-08-03. Free formats: "Adobe Illustrator files", "PDF files", "High quality images", "True Type Font". "Mus'haf al-Madinah in these previous formats can be used for free in all personal, individual businesses, in works of governmental departments & agencies, in the publications of both private and national institutions, also allows Qur'an printing *, digital publishing, & for media use, can be used also in websites, software, and other similar intermediates." Not responsible for "technical or software errors". Footnote: printing inside the Kingdom and importing for commercial sale is subject to Royal Decree No. 136/8 of 1/2/1406 AH and No. 9/B/46356 of 28/9/1424 AH.
+- **1.2** Complex terms, Arabic: https://dm.qurancomplex.gov.sa/copyright/ via Internet Archive 2024-05-18, newest held (raw/wb-ar-copyright-20240518.html). Opened, checked. Heading "حقوق الاستخدام". Only format: "رسم المتجهات Illustrator". "ويمكن استخدام النسخة المذكورة مجاناً في المجالات الشخصية والأعمال الفردية كافة، وأعمال الجهات الحكومية والجهات والمؤسسات الخاصة والأهلية، وأعمال الطباعة الورقية *، والنشـر المكتبي والإعلامي، ومواقع الإنترنت والبرامج الحاسوبية وغيرها، وذلك داخل المملكة العربية السعودية وخارجها."
+- **1.3** Neither page has a clause on changes, an app approval step, a ban on sale or bundling (beyond the footnote), or required credit wording.
+- **1.4** Live site https://qurancomplex.gov.sa/ (raw/complex-home.html, 200). Opened. Trial launch ("الموقع في مرحلة الإطلاق التجريبي، وستتوفر بعض الخدمات قريباً"); digital mus'haf, developer platform and embedding marked "قريباً"; no usage-rights page; footer "جميع الحقوق محفوظة ... © 2026"; contact info@qurancomplex.gov.sa. dm.../en/?p=138 redirects to a 404; ?p=5536 and ?p=5086 are 404.
+- **1.5** quran-svg. NOTICE.md (raw/NOTICE.md), opened, checked: "everything *we* made is CC BY 4.0, with attribution waived when you use it inside a product; the muṣḥaf page artwork belongs to its publishers"; "The **only** restriction is the physical **print‑for‑commercial‑sale** trade of muṣḥafs, which is reserved to the Complex"; §1 text "must never be altered, truncated, or misrepresented"; §3 attribution "**waived** when the material is used inside an application, website, service, API, bot, tool, research work or product, free or commercial." README (raw/README.md), opened: "CC BY 4.0 for the metadata and polygon layer, MIT for `tools/`". docs/PROVENANCE.md (raw/PROVENANCE.md), opened, checked: hafs/kfqc pages from 1441-AI-hafs.zip (466,430,736 bytes, SHA-256 280c5d71ca16aaeeb3a343be1b92c76fa6df71d0671e202c026fde12402d9eef); original host answers "from inside Saudi Arabia only"; "Four of the five bundles have since been removed"; mirror at cdn.quran.ws and github.com/quran-ws/kfgqpc-resources; "The shipped SVG is not a pixel copy of the `.ai` page — the decorative frame, the running header and the printed page number are dropped, the page is re-cropped to the text block, and the ayah markers are redrawn — but the type itself is the same artwork."; for Hafs "only structure was checked".
+- **1.6** Font licence https://scancode-licensedb.aboutcode.org/kfgqpc-uthmanic-script-hafs.LICENSE. Opened, not saved. "This Font is the property of King Fahd Glorious Quran Printing Complex, and may not be reproduced, modified without the express written approval of King Fahd Glorious Quran Printing Complex." OpenHub copy 403 (snippet only).
+- **1.7** Arab News, 25 August 2018 (raw/arabnews-2018.html). Opened, checked. A committee formed in 2007 "to review and oversee the production of e-books, including digital and audio versions of the Qur'an"; "authorized to grant digital certificates, prevent the publication or distribution of flawed texts, and provide appropriate electronic alternatives"; reviews "digital applications relating to the Qur'an, whether produced in-house or by third parties". Does not say review is required. Arabic search for a clearance (فسح) service found no official page.
+- **1.8** The Complex's own App Store app (id1616321992): snippet only.
+
+### Question 2
+
+- **2.1** Own check (raw/audio/): verses.quran.com/Minshawi/Murattal/mp3/002255.mp3 and everyayah.com/data/Minshawy_Murattal_128kbps/002255.mp3 identical, SHA-256 97b30e67f038cd5320a5abf436b14bfd6d153c6a93f14ac5afa288ec56413484, 1,086,404 bytes. Tag: artist "Minshawy (Murattal)", album "VerseByVerseQuran.com Minshawy", comment "MP3s from QuranicAudio.com". Both send access-control-allow-origin: *; both on BunnyCDN, zones 1134975 and 1134976. everyayah's contact link goes to quran.zendesk.com. Same operators: inference only.
+- **2.2** https://quran.com/terms-and-conditions (raw/qurancom-terms.txt). Opened, checked. Last updated July 28, 2026. §1.4 Content incl. "sound and video recordings" "FOR YOUR PERSONAL, NON-COMMERCIAL USE ONLY". §2.2 forbids (vi) "distribute or link the Service to multiple Mobile Devices or other services", (viii) data mining, scraping, crawling, redirecting, (xi) "use any proprietary information or interfaces of the Service". §2.3 no copy, distribute or publicly display without "prior written consent of Quran". §5.1 claims "music, sound, and other files". Takedown at §14.
+- **2.3** https://api-docs.quran.foundation/legal/developer-terms/ (old /legal/mushaf-fonts-and-images/ redirects here; raw/qf-developer-terms.txt). Opened, checked. Last updated 2026-10-11. "QF Content" incl. audio returned by the APIs. §2.2 not "sold, sublicensed, or redistributed"; may charge for an Application; serving from a developer backend is not by itself redistribution. §2.3 "QF retains its rights in the APIs and QF Content it owns." §3.1 forbids extracting, scraping or indexing outside API responses, circumventing restrictions, caching over 1 week (except offline sync), subverting access control, misleading users about the source. Fonts and mushaf images bundled only with an active Developer Console account and credit. §3.2 public privacy policy and terms of use. §6 terms begin on first API access. §10 New York law.
+- **2.4** https://api-docs.quran.foundation/docs/sdk/javascript/audio/ (raw/qf-sdk-audio.html). Opened. "Backend required: Yes." "Required credentials: client_id, client_secret, Content API access." "Audio returned by the APIs is QF Content." "Do not assume audio is browser-safe just because the final result is a media URL." "Word-by-word audio files are public CDN assets, not authenticated Content API endpoints" (word audio only). Snippet only: verse addresses come back relative or on verses.quran.foundation.
+- **2.5** https://quranicaudio.com/about (raw/quranicaudio-about.html). Opened, checked, undated. Quotes as in the design section above; also lists HidayahOnline, DawahAcademy, Sabbir.com, dhikrullah, mp3quran, tvquran as sources.
+- **2.6** everyayah home and old_index.html, data/recitations.js (raw/everyayah-*.html, raw/everyayah-recitations.js). Opened. Lists "Minshawy_Murattal_128kbps". No terms; "Contact us for more details."
+- **2.7** Rights in the recording: snippets only (masrawy.com, akhbarelyom.com, omandaily.om June 2026, islamway "Egyptian Radio Recordings"): full Murattal recorded for Egyptian Radio in 1965, part re-recorded, rare recording aired 2026. No owner statement or licence; no copyright term given.
+- **2.8** alquran.cloud terms (raw/alqurancloud-terms.html), opened, checked, last updated 13 November 2026: recitations remain the copyright of reciters; stream, embed, download for personal and educational use; in a commercial product reciters may ask for removal; "Please cache audio on your side." Islamic Network forum thread 231 (raw/islamicnetwork-231.html), opened, no post date: operator says most files are "completely public domain" from everyayah or globalquran, "But the copyright still remains with the reciter", and "There is no explicit right granted ... So it may be called implied" (one opinion, self-contradicting). The Complex's recitations page https://qurancomplex.gov.sa/en/sounds/ via Internet Archive 2022-01-14 (raw/wb-complex-p3979.html), opened, live 404: "free general use in computer apps, broadcasting channels, internet websites ... inside and outside the Kingdom of Saudi Arabia"; reciters Al-Huthify, Al-Muaiqly, Mohammed Ayyoub, Al-Muhanna, Al-Akhdhar (Hafs), Al-Huthify in Shu'bah and Qalun; not Minshawi. mp3quran.net/eng/about: fetch tool only, no rights text. feedback.quran.com permission request (January 20, 2025): opened, no staff reply. Quran.com's Quran Audio app (id6759504275): snippet only.
+- **2.9** "Free to listen" has no source behind it.
+
+Not found: any Complex clause on changes; proof the app review is required; any Quran Foundation grant for using the host without the API; who owns the Minshawi Murattal today; a better-licensed copy; terms on everyayah.
+
+Not opened: quran.ws/docs/reference/licensing; quran-svg's history for when CC0 became CC BY.

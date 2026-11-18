@@ -6,7 +6,8 @@
 #   make app-web FLAVOUR=public   copy the public build (refuses held data)
 #   make app-run-mac        build and open the Mac app
 #   make app-run-ipad       build, install and launch on the iPad simulator
-#   make app-shot ROUTE=/hafs-kfqc/p45 TARGET=ipad|mac [APPEARANCE=dark] [LOCALE=ar|en]
+#   make app-shot ROUTE=/hafs-kfqc/p45 TARGET=ipad|mac [APPEARANCE=dark] [LOCALE=ar|en] [WINDOW=1280x800, Mac]
+#   make app-store-shots    the store's screenshots of the public build, at Apple's sizes, both languages
 #   make app-open ROUTE=/hafs-kfqc/2:255   turn the running app to a route
 #   make app-callback-check an x-callback request through macOS, answer received by a second process
 #   make app-test           route/bundle unit tests + the XCUITest smoke
@@ -66,6 +67,13 @@ mac_copy_out  = $(if $(MAC_RELEASE),cp $(call mac_write_at,$(1)) $(abspath $(1))
 # it quits (-W); what it prints lands in MAC_LOG. Add `--env NAME=value`.
 MAC_LOG      := $(DERIVED)/mac-stdout.log
 MAC_OPEN     := open -n -g -F -W --stdout $(abspath $(MAC_LOG)) --stderr $(abspath $(MAC_LOG))
+# app-shot TARGET=mac WINDOW=1280x800: open the window at that size instead of
+# the usual one (the store's Mac screenshots must be 16:10, launch item ㉛).
+WINDOW       ?=
+MAC_WINDOW_ARG = $(if $(WINDOW),--env HIFTH_WINDOW_SIZE=$(WINDOW))
+# app-store-shots: where the store's screenshots go, and what decides them.
+STORE_SHOTS  ?= $(SHOTS)/store
+STORE_SHOTS_JS := .claude/skills/release-app/scripts/store-shots.mjs
 # Which web build goes in: `pitch` (private, with the held commentary) or
 # `public` (what the site ships).
 FLAVOUR      ?= pitch
@@ -155,7 +163,8 @@ ifeq ($(FLAVOUR),pitch)
 	  echo "  Build it first (node packages/etl/tools/pitch/extract.mjs) or use FLAVOUR=public"; echo ""; exit 1; }
 	VITE_PITCH=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
 else
-	$(WEB) exec vite build --outDir dist-native --emptyOutDir
+	@# The store build leaves the recitation out (app-store-launch ⑥).
+	VITE_NO_RECITATION=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
 endif
 	@$(MAKE) --no-print-directory app-web-copy FLAVOUR=$(FLAVOUR)
 
@@ -171,6 +180,13 @@ ifeq ($(FLAVOUR),pitch)
 else
 	rsync -a --delete --delete-excluded --exclude 'assets/private' $(DIST)/ $(WEB_BUNDLE)/
 	@test ! -e $(WEB_BUNDLE)/assets/private || { echo "held data reached the public shell bundle"; exit 1; }
+	@# The store build leaves the recitation out: Quran.com's terms allow personal
+	@# use only (app-store-launch ⑥). Checked on what was copied, not on the flag.
+	@# Source maps are skipped: they hold the original source, comments and all,
+	@# and are never run.
+	@! grep -rlF --exclude='*.map' 'verses.quran.com' $(WEB_BUNDLE) >/dev/null || { \
+	  echo "the public shell bundle still streams the recitation (verses.quran.com):"; \
+	  grep -rlF --exclude='*.map' 'verses.quran.com' $(WEB_BUNDLE); exit 1; }
 endif
 	@echo "$(FLAVOUR)" > $(WEB_BUNDLE)/.hifth-web-flavour
 	@# The commit, for a walk capture to say which build it came from; its own
@@ -213,11 +229,11 @@ app-shot: ## Screenshot the app at ROUTE on TARGET=ipad|mac (APPEARANCE=light|da
 ifneq ($(SIDEWAYS),)
 	@echo "  ✗ app-shot is upright only: on its side use app-walk SIDEWAYS=1, or app-probe SIDEWAYS=1 PROBE_SHOT=file.png"; exit 1
 endif
-	@mkdir -p $(SHOTS)
+	@mkdir -p $(SHOTS) $(dir $(SHOT_OUT))
 ifeq ($(TARGET),mac)
 	$(MAKE) app-build-mac
 	@rm -f $(SHOT_OUT) $(call mac_write_at,$(SHOT_OUT)); : > $(MAC_LOG)
-	$(MAC_OPEN) --env HIFTH_ROUTE=$(ROUTE) --env HIFTH_APPEARANCE=$(APPEARANCE) \
+	$(MAC_OPEN) --env HIFTH_ROUTE=$(ROUTE) --env HIFTH_APPEARANCE=$(APPEARANCE) $(MAC_WINDOW_ARG) \
 	  --env HIFTH_SNAPSHOT_PATH=$(call mac_write_at,$(SHOT_OUT)) $(MAC_APP) $(MAC_ARGS)
 	@cat $(MAC_LOG)
 	$(call mac_copy_out,$(SHOT_OUT))
@@ -238,6 +254,25 @@ endif
 	@test -s $(SHOT_OUT) || { echo "  ✗ $(SHOT_OUT) is empty"; exit 1; }
 	@sips -g pixelWidth $(SHOT_OUT) | awk '/pixelWidth/ { exit !($$2 > 0) }' || { echo "  ✗ $(SHOT_OUT) has no pixels"; exit 1; }
 	@echo "  ✓ $(SHOT_OUT)"
+
+# ---- the store's screenshots (launch item ㉛). The list of screens and devices,
+# and Apple's sizes, live in store-shots.mjs; this loops over its plan. Each is
+# taken of the public build, then any see-through layer is removed (the store
+# refuses one), and the check fails on a size the store does not take. The
+# pictures stay on the laptop (native/shots/ is ignored); the upload takes them.
+.PHONY: app-store-shots
+app-store-shots: app-golden-public ## The store's screenshots of the public build: iPhone, iPad and Mac, English and Arabic, at Apple's sizes, into native/shots/store/
+	@rm -rf $(STORE_SHOTS) && mkdir -p $(STORE_SHOTS)
+	@node $(STORE_SHOTS_JS) plan | while IFS="$$(printf '\t')" read -r locale target sim window route file; do \
+	  out=$(STORE_SHOTS)/$$file; mkdir -p "$$(dirname "$$out")"; \
+	  if [ "$$target" = mac ]; then \
+	    $(MAKE) --no-print-directory app-shot TARGET=mac LOCALE=$$locale WINDOW=$$window ROUTE="$$route" SHOT_OUT="$$out" < /dev/null || exit 1; \
+	  else \
+	    $(MAKE) --no-print-directory app-shot TARGET=ipad IPAD="$$sim" LOCALE=$$locale ROUTE="$$route" SHOT_OUT="$$out" < /dev/null || exit 1; \
+	  fi; \
+	  magick mogrify -background white -alpha remove -alpha off "$$out" || exit 1; \
+	done
+	@node $(STORE_SHOTS_JS) check $(STORE_SHOTS)
 
 app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1 [TURNS=12,24]] [STEPS=/abs/steps.json, iPad only, either way up] [PROBE_SHOT=file.png]
 ifneq ($(TURNS),)
@@ -549,6 +584,15 @@ ARCHIVE_RECEIPT := .claude/skills/release-app/scripts/archive-receipt.mjs
 
 app-release-setup: ## Is this laptop set up to release? Each thing a release needs, ok or missing, with the page to fix it on
 	@dotenvx run --quiet -- node .claude/skills/understanding-processes/scripts/check-release-setup.mjs
+
+app-store-listing: ## The words for Apple's store forms (docs/design/store-listing.md): each field's length against Apple's limit, and that it agrees with the app's settings
+	@node .claude/skills/understanding-processes/scripts/check-store-listing.mjs
+
+app-store-reviews: ## Store reviews: ARGS=pull (counts only), waiting, "draft <id> --file F", "approve <id>", "post <id>". Kept in .store/reviews/ (git ignores it); nothing is posted without the owner's yes
+	@dotenvx run --quiet -- node .claude/skills/store-feedback/scripts/store-reviews.mjs $(ARGS)
+
+app-store-numbers: ## Downloads from Apple's daily reports: ARGS=pull or summary, with --days N (default 30). Kept in .store/numbers/ (git ignores it); prints counts only
+	@dotenvx run --quiet -- node .claude/skills/store-numbers/scripts/store-numbers.mjs $(ARGS)
 
 app-archive: app-store-flavour app-generate ## Archive the iPad and iPhone app for the store: public build only, checked inside the archive; nothing leaves the laptop
 	@test -n "$(TEAM)" || { echo "  no Apple Development identity in the keychain (TEAM= to override)"; exit 1; }

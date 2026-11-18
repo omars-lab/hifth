@@ -17,6 +17,10 @@ and the [source register](../../SOURCES.md). Written by someone who is not a law
 |---|---|---|
 | 1 | Kais Dukes, author of the Quranic Arabic Corpus | An added permission under the GPL to ship data built from the corpus in a store app |
 | 2 | Collin Fair, author of quran-tajweed | Permission to ship the tajweed colour data in a store app despite Apple's copy protection |
+| 3 | Quran.com, run by Quran Foundation | Written consent to play its recitation files verse by verse in the store app, or which route they would rather we take (added 2026-11-17, launch item ⑥) |
+
+Email 3 does not hold up the upload: the store build leaves the recitation out until it is
+answered. It only decides whether store readers can listen along later.
 
 ## Where to send each one
 
@@ -29,6 +33,9 @@ one. Check them before sending; I did not look up anyone's personal address.
 - **Collin Fair:** the contact on his GitHub profile (github.com/cpfair), or an issue on the
   quran-tajweed repository if no address is listed. An issue is public, so email is better if
   there is one.
+- **Quran.com:** the contact address in Quran.com's terms of use, or the developer contact on
+  Quran Foundation's API site. Their terms ask for written consent, so a reply by email is what
+  we need.
 
 ## Email 1: the Quranic Arabic Corpus
 
@@ -48,7 +55,7 @@ one. Check them before sending; I did not look up anyone's personal address.
 > own code is public under the GPL, version 3 or later.
 >
 > **What we would like to do.** Offer the app on Apple's App Store for iPad, iPhone and Mac.
-> [It is free / It is free, with optional paid extras later — choose one before sending.]
+> [It is free / It is free, with optional paid extras later. Choose one before sending.]
 >
 > **Why we are asking.** Apple's store terms add conditions the GPL does not allow a distributor to
 > add, such as limits on how many devices a copy may run on, and copy protection. Other GPL
@@ -87,7 +94,7 @@ one. Check them before sending; I did not look up anyone's personal address.
 > to your repository, and says the data is under CC BY 4.0. Our own code is public.
 >
 > **What we would like to do.** Offer the app on Apple's App Store for iPad, iPhone and Mac.
-> [It is free / It is free, with optional paid extras later — choose one before sending.]
+> [It is free / It is free, with optional paid extras later. Choose one before sending.]
 >
 > **Why we are asking.** CC BY 4.0 says the material may not be shipped with technical measures
 > that stop people doing what the licence allows. Apple wraps every store app in its own copy
@@ -105,6 +112,46 @@ one. Check them before sending; I did not look up anyone's personal address.
 > them as today.
 >
 > Thank you for making the data open. It has saved a great deal of work.
+>
+> [your name]
+> [a web address for Hifth, for example https://hifth.app]
+
+## Email 3: the recitation from Quran.com
+
+**Subject:** Permission to play Quran.com's verse-by-verse recitation in a free Qur'an revision app
+
+> Assalamu alaykum,
+>
+> My name is [your name]. I build Hifth, an app that helps people who have memorised the Qur'an
+> revise it on the pages of the Madinah mus'haf. On our website, a reader can play a verse, or
+> play from one verse to another, and the sound is Minshawi's murattal recitation, fetched verse
+> by verse from verses.quran.com. Each verse is fetched when the reader plays it, or a moment
+> before so there is no pause. We keep no copy on our side, and every page that plays it credits
+> Quran.com and links to it.
+>
+> **What we would like to do.** Offer the app on Apple's App Store for iPad, iPhone and Mac,
+> with the same recitation. [It is free / It is free, with optional paid extras later. Choose
+> one before sending.]
+>
+> **Why we are asking.** Your terms allow personal, non-commercial use, and ask for written
+> consent for other public display. A store app is public, so we have left the recitation out of
+> the store version until we hear from you.
+>
+> **What we are asking for.** One of these, whichever you prefer:
+>
+> 1. Your written consent to play the recitation from verses.quran.com inside Hifth, as the
+>    website does today, with the credit and link kept; or
+> 2. Your advice on the route you would rather we take, for example registering for Quran
+>    Foundation's developer access and fetching the audio through it. We are happy to do that,
+>    and to use the credit wording your developer terms give.
+>
+> We also understand the recordings themselves may belong to others. If you know who we should
+> ask about Minshawi's recording, that would help us too.
+>
+> If the answer is no, the store version stays without recitation, and we will look again at our
+> website.
+>
+> JazakAllahu khayran for Quran.com. It has been a great help to us and to many others.
 >
 > [your name]
 > [a web address for Hifth, for example https://hifth.app]
@@ -141,8 +188,9 @@ flowchart TD
 
 ## What is this not asking?
 
-- **The page pictures.** The King Fahd Complex's terms have not been read for a store app yet.
-  That is its own step (⑤ on the launch page), and may need a third email.
+- **The page pictures.** The King Fahd Complex's terms were read on 2026-11-17 (⑤ on the launch
+  page, and the [terms research](../research/2026-11-17-store-terms.md)). What follows from them
+  is its own question, ㊺, and may need a fourth email.
 - **Tanzil's text inside the corpus file.** The app shows none of it, and we do not change the
   file.
 - **The Study Quran's text.** It is never in a store build.

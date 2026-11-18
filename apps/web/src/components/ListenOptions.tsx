@@ -3,6 +3,7 @@ import type { ListenWay } from "../audio";
 import { useT } from "../i18n";
 import { REPEATS, SPEEDS } from "../listen-way";
 import styles from "./ListenOptions.module.css";
+import { RECITATION } from "../recitation";
 
 /**
  * The play options that open under Listen inside the verse's drawer
@@ -22,9 +23,11 @@ export function ListenOptions({
   onWay: (way: ListenWay) => void;
   /** Start "Play to" from this verse: the reader then picks where it stops. */
   onPlayTo: () => void;
-}): JSX.Element {
+}): JSX.Element | null {
   const { t } = useT();
   const id = useId();
+  // The App Store build has no recitation, so no way to play it (recitation.ts).
+  if (!RECITATION) return null;
   const repeatName = (n: number): string =>
     n === 1 ? t.listenOnce : n === Infinity ? t.listenUntilStop : t.listenTimes(n);
   const speedName = (s: number): string => (s < 1 ? t.listenSlower : s > 1 ? t.listenFaster : t.listenAsRecited);

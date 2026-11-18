@@ -1780,6 +1780,60 @@
       "gap": "The upload itself is not built yet; the receipt is checked where it will run (docs/issues.json, launch-archive-upload)."
     },
     {
+      "id": "answer-store-reviews-only-with-the-owners-yes",
+      "actor": "maintainer",
+      "goal": "Read every store review on the laptop and answer it, so a reader who wrote in hears back, while nothing is posted without the owner's yes to those exact words and no reviewer's name or words reach the public repo.",
+      "feature": "native-shell",
+      "code": [
+        {
+          "file": ".claude/skills/store-feedback/scripts/store-reviews.mjs",
+          "symbol": "case \"post\""
+        },
+        {
+          "file": "scripts/lib/app-store-connect.mjs",
+          "symbol": "export function client"
+        }
+      ],
+      "proof": [
+        {
+          "file": ".claude/skills/store-feedback/scripts/store-reviews.test.mjs",
+          "test": "an answer is sent only after a yes, and only the words that got the yes"
+        },
+        {
+          "file": ".claude/skills/store-feedback/scripts/store-reviews.test.mjs",
+          "test": "pull keeps every page of reviews and prints only counts"
+        },
+        {
+          "file": ".claude/skills/understanding-processes/scripts/check-release-setup.test.mjs",
+          "test": "the reviews key in place passes, and its id is never printed"
+        }
+      ],
+      "gap": "No review exists until the app is in the store, so no answer has been posted yet."
+    },
+    {
+      "id": "count-downloads-without-watching-readers",
+      "actor": "maintainer",
+      "goal": "Know how many people download, update and download the app again, by device and country, from Apple's own daily reports, since the app itself counts nothing about its readers.",
+      "feature": "native-shell",
+      "code": [
+        {
+          "file": ".claude/skills/store-numbers/scripts/store-numbers.mjs",
+          "symbol": "export function summarize"
+        }
+      ],
+      "proof": [
+        {
+          "file": ".claude/skills/store-numbers/scripts/store-numbers.test.mjs",
+          "test": "summary counts this app's first downloads, updates and downloads again, by device and country"
+        },
+        {
+          "file": ".claude/skills/store-numbers/scripts/store-numbers.test.mjs",
+          "test": "a report without the columns this reads is refused, not miscounted"
+        }
+      ],
+      "gap": "Not run against Apple yet: it needs the vendor number, which only the owner can copy from App Store Connect."
+    },
+    {
       "id": "hear-when-the-mac-app-is-out",
       "actor": "hafiz",
       "goal": "Leave my email once, hear when the Mac app is out, and be able to take it off the list.",

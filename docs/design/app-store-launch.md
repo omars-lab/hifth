@@ -95,17 +95,42 @@ Its licence forbids the copy protection Apple puts on every store app.
 build. The owner sends the email; the draft is email 2 in
 [store-permission-emails.md](store-permission-emails.md).
 
-### ⑤ Nobody has read the page artwork's own terms · **open**
+### ⑤ Nobody has read the page artwork's own terms · **fixed**
 
 The mus'haf page artwork comes from the King Fahd Complex. Its terms have never been read for a
 store app.
 
 *What would answer it:* the terms read, quoted in the source file, and the reading recorded here.
 
-### ⑥ The recitation audio comes from another site with no licence note · **open**
+*Done 2026-11-17:* two researchers read the terms on their own and a third pass re-opened the
+sources ([the combined write-up](../research/2026-11-17-store-terms.md)). The Complex allows free
+use in websites and computer programs, inside and outside the Kingdom; only printing in the
+Kingdom and importing for sale are held back. So a free store app may show the pages, with a
+fairer credit. The credit now names the Complex first, says quran-svg converted and adapted the
+pages, and says the Complex has not approved the app. The old line "commercial printing reserved
+to the Complex" said more than the terms do, and is gone. The same words are in the app, the
+source file and both hifth.app sources pages, and a test fails if the app's row loses any of
+them. One open point could still change the answer: ㊺.
+
+### ⑥ The recitation audio comes from another site with no licence note · **fixed**
 
 *What would answer it:* that site's terms found and recorded, and the source added to the
 citations page; or the recitation switched off in the store build.
+
+*Read 2026-11-17* (same write-up as ⑤): Quran.com's terms allow personal use only, and showing
+its content anywhere else needs written consent. Apple's rules ask for that permission on
+request. So the store build has no right to stream the recitation today. The credit no longer
+says "free to listen". What remains is the switch that leaves recitation out of the store
+build, with a test that the store build holds no address of the recitation's server. The
+private build keeps it. Getting it back into the store is route 2 in the write-up: register
+with Quran Foundation, whose developer terms cover audio. The website is ㊻.
+
+*Fixed 2026-11-17:* the store build now leaves the recitation out. It is built with the
+recitation switched off, so no verse has a sound address, and no listen button, play option,
+keep-for-offline offer, play setting or recitation credit shows. The copy into the app then
+refuses any file that still holds the recitation server's address. The website and the private
+build keep it. The review notes, the privacy answers and the hifth.app privacy page now say the
+store apps fetch nothing.
 
 ### ⑦ The app has no privacy file · **fixed**
 
@@ -374,31 +399,57 @@ the review notes.
 *What would answer it:* every answer drafted in the repository, the EU trader answer from the
 owner, and the labels checked against what the app really sends.
 
-### ㉛ There are no screenshots at Apple's sizes · **open**
+*Drafted 2026-11-17* on the [listing page](store-listing.md): the name, subtitle, keywords,
+promotional line and description in English; the category (Education, then Reference); the
+privacy answer, "Data Not Collected", with why each thing that leaves the device does not count
+under Apple's definition; the age answers, giving 4+; the export answer; the support and privacy
+addresses. `make app-store-listing` checks every field against Apple's limits and against the
+app's name, category, privacy file and export setting, with a test that breaks each one in turn.
+Writing the privacy answer showed the policy did not say the sound is asked for before Play, so
+both privacy pages now say so and name the setting that stops it, held by a test. **Still open:**
+the EU trader answer, the price and the copyright line (the owner's); the "rights to the content"
+answer, which waits on the permissions; the listing in Arabic.
+
+### ㉛ There are no screenshots at Apple's sizes · **fixed**
 
 *What would answer it:* a command that takes the public build's screenshots at Apple's iPhone,
 iPad and Mac sizes, in English and Arabic.
 
-### ㉜ Nothing reads what readers write about the app in the store · **open**
+*What answered it (2026-11-17):* `make app-store-shots` takes 32 pictures of the public build
+(iPhone 6.9 and 6.3 inch, iPad 13 inch, Mac; English and Arabic), refuses the private build, and
+refuses any picture of a size the store does not take. Two faults found on the way are fixed with
+tests: the Mac window opened at the wrong height (written up in
+`docs/issues/mac-store-shot-window-size.md`), and a picture run read the laptop's own saved
+reading place, so the Mac pictures showed a "Left off" ribbon; a picture run now starts from an
+empty, throwaway store. Every picture was looked at. **Left over:** on the iPhone pictures the
+strip where the clock and battery sit is empty (㊹).
+
+### ㉜ Nothing reads what readers write about the app in the store · **fixed**
 
 The owner made one App Store Connect key for this, `hifth-reviews` (Customer Support, Finance
 and Marketing), on 2026-11-16. One key, two skills: this one and ㉝.
 
-*What would answer it:* a store-feedback skill whose command lists new reviews and ratings into
-a folder git ignores, since reviewers' names and words never reach the public repo, and drafts
-an answer to each. An answer is posted only after the owner says yes to it.
+*What answered it (2026-11-17):* the store-feedback skill. One command keeps every review in a
+folder git ignores, since reviewers' names and words never reach the public repo, and prints
+only counts. An answer is drafted there, and is sent only after the owner says yes to those
+exact words: if the words change after the yes, it refuses and asks again. Run live the same
+day: Apple let the key in and listed no reviews, which is right before the first release.
 
-### ㉝ Nothing counts downloads and sales · **open**
+### ㉝ Nothing counts downloads and sales · **fixed**
 
-*What would answer it:* a store-numbers skill whose command pulls the daily download and sales
-reports with the same key, keeps them in a folder git ignores, and prints a short summary for
-the launch goal's numbers.
+*What answered it (2026-11-17):* the store-numbers skill. One command fetches Apple's daily
+download reports with the same key into a folder git ignores, and another counts first
+downloads, updates and downloads again, by device and country. It has not fetched a report
+yet: that needs the vendor number, a number only the owner can copy from App Store Connect.
+Until it is saved, the command stops and says which setting is missing.
 
-### ㉞ The release page and the setup check know only the upload key · **open**
+### ㉞ The release page and the setup check know only the upload key · **fixed**
 
-*What would answer it:* the release page names both keys and what each is for, and the setup
-check confirms the reviews key's file is in place and its ID is saved, printing names and
-dates, never the key itself.
+*What answered it (2026-11-17):* the release page names both keys and what each is for, and
+says where to find the vendor number. The setup check confirms the reviews key's file is in
+place, that its ID is saved, and that it is not the upload key, and says whether the vendor
+number is saved. It prints states only, never a key, an ID or the number, and neither of the
+two ever holds a release back.
 
 ### ㉟ Nobody has walked the store build as Apple's reviewer would · **fixed**
 
@@ -543,13 +594,47 @@ and 390 wide in both languages, and the browser test runs in Chrome, Firefox and
 Safari engine. Not yet looked at inside the iPad app itself. The pages answer once hifth.app's
 first upload is made.
 
+### ㊹ The iPhone store pictures have an empty strip where the clock and battery sit · **open**
+
+Found while looking at the pictures ㉛ takes. The app photographs its own page, so the strip at
+the top of an iPhone picture, where a real phone shows the time and battery, is one flat band.
+Apple takes the pictures as they are, but they look less finished than a phone in a hand.
+
+*What would answer it:* set the simulator's clock and battery to Apple's usual 9:41 and full,
+and photograph the whole screen; or fill the strip with the page's own top colour. A test
+refuses an iPhone picture whose top strip is one flat colour.
+
+### ㊺ Were the pages we ship drawn from the Complex's font, or from its drawing files? · **open**
+
+Found by the third pass on the terms (⑤). The Complex's free-use terms cover its digital
+mus'haf. Its fonts carry a stricter licence: no changes without written approval. Our record of
+the page files calls them shapes from the font, and the files we pinned in July do not say where
+they came from. quran-svg's later note says its pages come from the Complex's own drawing files,
+but that note was written after our pin. If our pages came from the font, ⑤'s answer becomes
+"needs permission".
+
+*What would answer it:* compare one pinned page with the same page in the Complex's free bundle
+of drawing files, or read quran-svg's history before 2026-07-13. Moving the pin to a version whose
+note names the drawing files would also settle it.
+
+### ㊻ Should the website keep playing the recitation? · **open**
+
+Quran.com's terms (⑥) cover the website as much as the store app: personal use only. The store
+build leaves recitation out; the website at hifth.app/read still streams it. Whether to switch
+it off there too, or keep it while route 2 is built, is the owner's call. It does not hold up
+the store upload.
+
+*What would answer it:* the owner's choice, recorded here and in the source file.
+
 ## Which of these could get the app turned down, and which matter once readers have it?
 
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 
 - **Stops the upload itself** (nothing goes to Apple until these close): the licence items ②
-  ③ ④ ⑤ ⑥. (The archive, the export and Apple's own check ⑪ are fixed; only the upload
-  command itself waits on these. The citations page ② is built; that row closed.)
+  ③ ④ and the artwork question ㊺. (The archive, the export and Apple's own check ⑪ are
+  fixed; only the upload command itself waits on these. The citations page ② is built, the
+  artwork's terms ⑤ are read, and the store build leaves the recitation out ⑥; those rows
+  closed.)
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
   permissions file ⑨ (the upload checks both); the store's questions ㉚ and screenshots ㉛;
   sign-in ㉖ and deleting an account ㉗ (once sign-in ships, deletion must be in the app); the
@@ -559,7 +644,8 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
-  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, and a report seen to arrive ㊵.
+  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, a report seen to arrive ㊵,
+  and whether the website keeps the recitation ㊻.
 
 ## What does this leave alone?
 

@@ -104,6 +104,9 @@ final class ShellModel {
         #endif
 
         let configuration = WKWebViewConfiguration()
+        if ScreenshotData.atLaunch {
+            configuration.websiteDataStore = .nonPersistent()
+        }
         let root = BundleFiles.root
         if let root {
             configuration.setURLSchemeHandler(LocalSchemeHandler(root: root), forURLScheme: BundleFiles.scheme)
@@ -765,11 +768,22 @@ final class ShellModel {
         snapshotTaken = true
         let delayMs = Int(environment["HIFTH_SNAPSHOT_DELAY_MS"] ?? "") ?? 1500
         Task {
+            #if os(macOS)
+            if let wanted = WindowSize.asked(environment["HIFTH_WINDOW_SIZE"]) {
+                await fitPage(to: wanted)
+            }
+            #endif
             try? await Task.sleep(for: .milliseconds(delayMs))
             // A page the system thinks nobody can see stops its fades at the
             // first frame, so its picture shows notes half slid in and chips
             // still blank. Refuse to keep a picture like that.
             let page = await Self.pageState(of: webView)
+            #if os(macOS)
+            if let wanted = WindowSize.asked(environment["HIFTH_WINDOW_SIZE"]), page.size != wanted {
+                print("snapshot refused: the page is \(Int(page.size.width))x\(Int(page.size.height)) but \(Int(wanted.width))x\(Int(wanted.height)) was asked for")
+                exit(1)
+            }
+            #endif
             guard page.visibility == "visible" else {
                 print("snapshot refused: the page is \(page.visibility), so a picture of it would be frozen mid-animation")
                 exit(1)
@@ -794,6 +808,20 @@ final class ShellModel {
     #endif
 
     #if os(macOS)
+    /// Resizes the window until the page inside it is `wanted` points, for the
+    /// store's 16:10 Mac screenshots (WindowSize says why the window alone
+    /// cannot be trusted). A few tries, since the page settles a frame or two
+    /// after the window moves.
+    private func fitPage(to wanted: CGSize) async {
+        for _ in 0..<4 {
+            let page = await Self.pageState(of: webView).size
+            guard page != wanted, let window = webView.window else { return }
+            let now = window.contentRect(forFrameRect: window.frame).size
+            window.setContentSize(WindowSize.window(now, page: page, wanted: wanted))
+            try? await Task.sleep(for: .milliseconds(300))
+        }
+    }
+
     /// `make app-shot` and `make app-probe` open the Mac app behind the windows
     /// already on screen, so the owner keeps their place. Behind other windows
     /// WebKit calls the page hidden and stops its fades at the first frame, and
