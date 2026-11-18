@@ -6971,7 +6971,19 @@
       "owner": "agent",
       "launch": true,
       "useCase": "know-where-this-text-came-from",
-      "note": "Found 2026-11-17 by the checker on the terms research. The pin file calls the pages 'QCF V2 glyph outlines' (shapes from the Complex's font, whose licence forbids changes without written approval). The pinned commit (5fbcb1d4, 2026-07-13) does not say where its pages came from; quran-svg's note naming the Complex's Illustrator files came later. Settle by comparing one pinned page with the same page in the Complex's free Illustrator bundle, or reading quran-svg's history before the pin. If from the font, the artwork needs permission."
+      "note": "Found 2026-11-17 by the checker on the terms research. Text answered the same day: the page text comes from the Complex's own 1441H Hafs drawing files, not its font. quran-svg's first README (d964aaee, 2026-02-07, before our pin) names the Complex's Illustrator files, and nothing of theirs mentions a font; the 'QCF V2 glyph outlines' wording was ours. Pages 2, 7, 300 and 604, as pinned (hashes match the pin), were laid over the same pages of 1441-AI-hafs with no fitting, and every letter landed in place; the drawing files hold no fonts. Still open: the verse-number rings, which quran-svg redrew from a source it does not name, drawn the way font letters are. Settle by comparing the ring with the end-of-verse sign in the Complex's fonts, asking quran-svg, or drawing our own ring."
+    },
+    {
+      "id": "page-copy-moves-words",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊼"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "useCase": "know-where-this-text-came-from",
+      "note": "Found 2026-11-17 by the check behind ㊺. vendor-pages.mjs runs svgo with floatPrecision 1, which rounds the shapes and rewrites cubic curves as quadratic ones. Over the Complex's drawing file, 28% to 56% of the ink differs on pages 2, 7, 300 and 604, while the pinned upstream pages land in place; on page 604 whole lines sit about 2 of 345 units off. Likely cause: the rounding builds up along relative path steps (not proven). Fix: first a test that draws each vendored page over its upstream page and sets a ceiling on the difference, then more precision or no curve rewrite, then a re-pin. The words gate and the pages gate assume one decimal, and mark placement must be checked against the new pages."
     },
     {
       "id": "launch-website-recitation",
