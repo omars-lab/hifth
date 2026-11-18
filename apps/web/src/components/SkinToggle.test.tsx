@@ -6,7 +6,8 @@ import {
   type TajweedShard,
   type TajweedVocabulary,
 } from "@hifth/core";
-import { SkinToggle, TajweedLegend } from "./SkinToggle";
+import { SkinToggle } from "./SkinToggle";
+import { TajweedLegend } from "./TajweedLegend";
 
 // Shards are keyed by the *source's* rule ids, and the vocabulary is what turns
 // them into the seven painted families — so a fixture needs both halves.

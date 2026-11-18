@@ -181,6 +181,8 @@ import {
   PenHomeBottom,
   PenHomeFloat,
   PenHomeSide,
+  ShareInDrawer,
+  TajweedLegend,
 } from "./components/later";
 import type { CropBox } from "./components/CropSheet";
 import type { NoteAbout } from "./components/NoteBox";
@@ -193,7 +195,7 @@ import { HopPopover } from "./components/HopPopover";
 import { LookalikeSections } from "./components/LookalikeSections";
 import { DrawerTabs } from "./components/DrawerTabs";
 import { TrailBeads, type TrailBead } from "./components/TrailBeads";
-import { ShareInDrawer, ShareSheet } from "./components/ShareSheet";
+import { ShareSheet } from "./components/ShareSheet";
 import { ListenOptions } from "./components/ListenOptions";
 import { rememberListenWay, savedListenWay } from "./listen-way";
 import { OfflineNotice } from "./components/OfflineNotice";
@@ -271,7 +273,7 @@ const INTRO_SURAHS: ReadonlySet<number> = new Set(
 );
 import { drawIntroBadges } from "./components/intro-badge";
 import { drawVerseNumbers } from "./components/verse-numbers";
-import { SkinToggle, TajweedLegend } from "./components/SkinToggle";
+import { SkinToggle } from "./components/SkinToggle";
 import { PageSlider } from "./components/PageSlider";
 import { fisheyeEnabled, rememberFisheye } from "./pagebar-fisheye";
 import { rememberTurnStyle, savedTurnStyle, type TurnStyle } from "./turn-style";
@@ -4244,6 +4246,7 @@ export function App(): JSX.Element {
   const revisionMounted = useOpenedOnce(revisionOpen);
   const drawerMounted = useOpenedOnce(drawerBookmark !== null);
   const jumperMounted = useOpenedOnce(jumperOpen || jumpNaming !== null);
+  const legendMounted = useOpenedOnce(legendOpen);
 
   /* The look-alike chips. One rail, placed by whoever renders it: the stage's
      corner on a phone, the desk beside the live page above the breakpoint. */
@@ -4508,7 +4511,9 @@ export function App(): JSX.Element {
         onPlayTo={() => startPlayTo(selectedKey)}
       />
     ) : tab === "share" ? (
-      <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
+      <Later>
+        <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
+      </Later>
     ) : tab === "roots" && rootFamilies !== null ? (
       <Later>
         <RootLens
@@ -5128,19 +5133,23 @@ export function App(): JSX.Element {
       {/* CC BY 4.0's condition, discharged where a reader can see it — the
           licence the rule spans ship under requires the credit to travel with
           the work, not just with the repo. */}
-      <TajweedLegend
-        open={legendOpen}
-        counts={tajweedCounts}
-        page={page}
-        selection={tajweedSelection}
-        onSide={setKeySide}
-        side={sheetSide}
-        credit={{
-          text: t.tajweedCredit,
-          href: "https://github.com/cpfair/quran-tajweed",
-        }}
-        onClose={() => setLegendOpen(false)}
-      />
+      {legendMounted && (
+        <Later>
+          <TajweedLegend
+            open={legendOpen}
+            counts={tajweedCounts}
+            page={page}
+            selection={tajweedSelection}
+            onSide={setKeySide}
+            side={sheetSide}
+            credit={{
+              text: t.tajweedCredit,
+              href: "https://github.com/cpfair/quran-tajweed",
+            }}
+            onClose={() => setLegendOpen(false)}
+          />
+        </Later>
+      )}
       {editionMounted && (
         <Later>
           <EditionPicker
@@ -5412,7 +5421,9 @@ export function App(): JSX.Element {
               onPlayTo={() => startPlayTo(selectedKey)}
             />
           ) : toolsInDrawer && shareInDrawer ? (
-            <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
+            <Later>
+              <ShareInDrawer state={selectedKey ? currentState : null} hasTrail={trail.length > 0} pitch={PITCH} />
+            </Later>
           ) : toolsInDrawer && rootFamilies !== null ? (
             <Later>
               <RootLens

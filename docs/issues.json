@@ -6433,11 +6433,12 @@
         "file": "docs/performance.md",
         "item": "㉔"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "feature": "performance",
-      "note": "2026-11-17: what a reader downloads before the first page can be used is at 161.0 of its own 161 KB limit, while the app as a whole has about 7 KB of room. The app's log took it over by a few bytes after the other launch work merged; moving its step names into the report, which loads later, was just enough. Next: the next trim that moves start-up code to a file that loads later, measured side by side. Done when there is at least 1.5 KB of room and the trims list says what moved.",
+      "closedBy": "apps/web/e2e/lazy-tools.spec.ts",
+      "note": "FIXED 2026-11-17: the first download is 159.4 KB, 1.6 KB of room. What the share sheet holds and the tajweed colour key now load the first time each opens, and the build setting that folds small files into start-up went from 2 KB to 1 KB, which had folded the update watcher back in. The browser test lists both moved files among those start-up must not carry, and opens the colour key on a slow first load. Was: what a reader downloads before the first page can be used is at 161.0 of its own 161 KB limit, while the app as a whole has about 7 KB of room. The app's log took it over by a few bytes after the other launch work merged; moving its step names into the report, which loads later, was just enough. Next: the next trim that moves start-up code to a file that loads later, measured side by side. Done when there is at least 1.5 KB of room and the trims list says what moved.",
       "useCase": "refuse-a-bundle-that-would-not-load-on-a-phone"
     },
     {

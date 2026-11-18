@@ -4,6 +4,7 @@ import type { AppState, MergedEdge } from "@hifth/core";
 import { HighlightMenu } from "./HighlightMenu";
 import { PASSAGE_ROWS_KEY } from "../passage-rows";
 import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
+import type * as ShareBodyModule from "./ShareBody";
 
 /**
  * The panel itself is a crop of two mus'haf pages and needs both pages' artwork
@@ -12,9 +13,12 @@ import { LOOKALIKE_PREVIEW_KEY } from "../lookalike-preview";
  * stub reports exactly that and `DiffView.test.tsx` covers the drawing.
  */
 // The menu reaches the panel through the load-on-first-open wrapper.
-vi.mock("./later", () => ({
+// The share sheet's links come through it too, and are the real ones here.
+vi.mock("./later", async () => ({
   DiffView: ({ fromKey }: { fromKey: string }) => <div data-here={fromKey} />,
   SharedWords: ({ run }: { run: { key: string } }) => <div data-run={run.key} />,
+  Later: ({ children }: { children: preact.ComponentChildren }) => <>{children}</>,
+  ShareBody: (await vi.importActual<typeof ShareBodyModule>("./ShareBody")).ShareBody,
 }));
 
 const ED = "hafs-kfqc";
@@ -145,7 +149,8 @@ describe("HighlightMenu (spec §9 — the drag-highlight menu)", () => {
     });
     renderMenu();
     fireEvent.click(screen.getByRole("button", { name: /شارك هذا المقطع كرابط/ }));
-    fireEvent.click(screen.getByRole("button", { name: "شارك رابط الموقع" }));
+    // The sheet's links arrive a moment after it opens (launch item 24).
+    fireEvent.click(await screen.findByRole("button", { name: "شارك رابط الموقع" }));
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith(expect.stringContaining(`#/${ED}/2:47-2:48`));
     });

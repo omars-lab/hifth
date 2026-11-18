@@ -664,9 +664,16 @@ remote off-switch and the new-version prompt. None of them can land until there 
 **Done when:** the size check shows at least 3 KB of room, and the trims list says which way it
 was found.
 
-### ㉔ The first download is full: the next thing a reader sees at start-up cannot go in · **open**
+### ㉔ The first download is full: the next thing a reader sees at start-up cannot go in · **fixed**
 
-**Where it stands (2026-11-17).** The app as a whole has about 7 KB of room, but what a reader
+**Fixed 2026-11-17.** The first download is 159.4 KB, 1.6 KB of room. Three moves, nothing a
+reader sees changed: what the share sheet holds now loads the first time it opens (its button
+stays), the tajweed colour key loads the first time it opens (its switch stays), and a build
+setting that had folded the update watcher back into start-up was lowered. The trims list has the
+dated entry. The browser test of slow first loads now also opens the colour key while its file is
+held back.
+
+**Where it stood (2026-11-17, before).** The app as a whole has about 7 KB of room, but what a reader
 downloads before the first page can be used is at 161.0 KB of its own 161 KB limit. The app's log
 (launch item 19) took it over by a few bytes once the other launch work was merged; the step names
 it keeps were moved into the report, which loads later, and that was just enough.

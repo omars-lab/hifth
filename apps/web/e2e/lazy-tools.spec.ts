@@ -46,6 +46,11 @@ const LATER = [
   "components/Jumper.tsx",
   // The verse's "more" menu draws nothing until a press and hold opens it.
   "components/VerseMenu.tsx",
+  // The Share button loads with the page; what its sheet holds, once it opens
+  // (item 24 of the launch list: room in the first download).
+  "components/ShareBody.tsx",
+  // The same for the tajweed switch and its colour key.
+  "components/TajweedLegend.tsx",
 ];
 
 /**
@@ -108,6 +113,11 @@ test.describe("Hifth · rarely used tools load when first opened", () => {
       name: "the go-to box",
       open: (p) => p.keyboard.press("/"),
       sheet: (p) => p.getByRole("dialog", { name: "اذهب إلى" }),
+    },
+    {
+      name: "the tajweed colour key",
+      open: (p) => p.getByRole("button", { name: "مفتاح ألوان التجويد" }).click(),
+      sheet: (p) => p.getByRole("dialog", { name: "مفتاح ألوان التجويد" }),
     },
   ];
 

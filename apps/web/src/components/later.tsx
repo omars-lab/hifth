@@ -61,6 +61,11 @@ export const ReportProblem = later(() => tools().then((m) => m.ReportProblem));
 export const Jumper = later(() => tools().then((m) => m.Jumper));
 /* The verse's "more" menu draws nothing until a press and hold opens it. */
 export const VerseMenu = later(() => tools().then((m) => m.VerseMenu));
+/* What the share sheet holds: the Share button loads with the page, its choices once it opens. */
+export const ShareBody = later(() => tools().then((m) => m.ShareBody));
+export const ShareInDrawer = later(() => tools().then((m) => m.ShareInDrawer));
+/* The tajweed colour key: its switch loads with the page, the key once it is opened. */
+export const TajweedLegend = later(() => tools().then((m) => m.TajweedLegend));
 
 /* Only on a computer-sized screen, or by an iPad's Pencil: a phone never fetches ./wide-screen.ts. */
 export const PenHomeAt = later(() => wide().then((m) => m.PenHomeAt));

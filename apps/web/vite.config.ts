@@ -452,7 +452,10 @@ export default defineConfig({
         // uses) into one that is always loaded first, rather than ship it on
         // its own: each separate file is a round trip before the first paint.
         // `preloadReaderLanguage` refuses the build if one slips through.
-        experimentalMinChunkSize: 2048,
+        // 1024, not 2048 (2026-11-17, launch item 24): at 2048 the update
+        // watcher (pwa-update.ts), loaded only once the offline worker is up,
+        // was folded back into the start-up script, 0.3 KB gz of it.
+        experimentalMinChunkSize: 1024,
       },
     },
   },
