@@ -422,7 +422,10 @@
         "note-persistence",
         "confusion-map-export",
         "mistake-note-kinds",
-        "bookmark-admin"
+        "bookmark-admin",
+        "sign-in-first-unlock",
+        "sign-in-accounts-home",
+        "sign-in-locked-copy"
       ]
     },
     {
@@ -2190,6 +2193,103 @@
       "related": [
         "site-publish-from",
         "hifth-app-site"
+      ]
+    },
+    {
+      "id": "sign-in-first-unlock",
+      "question": "What is the first thing a reader gets from signing in?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Your marks follow you to Firefox and a phone"
+        },
+        {
+          "id": "B",
+          "label": "Switching off a teacher link from anywhere"
+        },
+        {
+          "id": "C",
+          "label": "Nothing yet"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/sign-in-options.html",
+      "page": "docs/design/sign-in-options.html",
+      "builtBy": "scripts/build-design-note.mjs",
+      "doc": "docs/design/sign-in.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-11-17",
+      "related": [
+        "storage-model",
+        "sign-in-accounts-home",
+        "sign-in-locked-copy"
+      ]
+    },
+    {
+      "id": "sign-in-accounts-home",
+      "question": "Where should readers' accounts be kept?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Our own small code on hifth.app's Cloudflare, with its free database"
+        },
+        {
+          "id": "B",
+          "label": "The same, with a ready-made sign-in library"
+        },
+        {
+          "id": "C",
+          "label": "A new Supabase project just for readers"
+        },
+        {
+          "id": "D",
+          "label": "Firebase sign-in, run by Google"
+        },
+        {
+          "id": "E",
+          "label": "No accounts: each reader's own Apple storage only"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/sign-in-options.html",
+      "page": "docs/design/sign-in-options.html",
+      "builtBy": "scripts/build-design-note.mjs",
+      "doc": "docs/design/sign-in-options.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-11-18",
+      "related": [
+        "storage-model",
+        "sign-in-first-unlock",
+        "sign-in-locked-copy"
+      ]
+    },
+    {
+      "id": "sign-in-locked-copy",
+      "question": "Should we be able to read the copy of a reader's marks kept on our server?",
+      "status": "decided",
+      "options": [
+        {
+          "id": "A",
+          "label": "Not locked: the server's own encryption, and the button says we could read it"
+        },
+        {
+          "id": "B",
+          "label": "Locked: sealed on the device with a recovery code the reader saves once"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/sign-in-options.html",
+      "page": "docs/design/sign-in-options.html",
+      "builtBy": "scripts/build-design-note.mjs",
+      "doc": "docs/design/sign-in-options.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-11-18",
+      "related": [
+        "storage-model",
+        "sign-in-first-unlock",
+        "sign-in-accounts-home"
       ]
     }
   ]

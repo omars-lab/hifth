@@ -4032,10 +4032,10 @@
         "file": "docs/design/sign-in.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "What should sign-in unlock first? Both researchers picked the reader's own marks following them to Firefox and a phone, behind one button that says what goes and to whom; the alternatives are switching off a teacher link from anywhere, or nothing yet. Until the owner picks, the hidden plumbing (steps 6 to 15 on the page) can be built and tried on the owner's iPad."
+      "note": "What should sign-in unlock first? The owner chose on 2026-11-17: the reader's own marks follow them to Firefox and a phone, behind one button that says what goes and to whom. The alternatives were switching off a teacher link from anywhere, or nothing yet. Recorded in the decision list as sign-in-first-unlock."
     },
     {
       "id": "sign-in-accounts-home",
@@ -4043,10 +4043,10 @@
         "file": "docs/design/sign-in.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Where should reader accounts live? Recommended: our own small code on hifth.app's Cloudflare account with its free database, next to the notify list and the planned shared copies. Alternatives on the page: the same with a ready-made library, a new Supabase project (never the existing store), Firebase, or no accounts. The sharing page's ⑥ chose Cloudflare for shared copies only, so this is still open for accounts."
+      "note": "Where should reader accounts live? The owner chose on 2026-11-18: our own small code on hifth.app's Cloudflare account with its free database, next to the notify list and the planned shared copies. jose checks Apple's note and sessions start from Lucia's free sample file. The alternatives were the same with a ready-made library (Better Auth, weighed on docs/design/sign-in-library.md), a new Supabase project, Firebase, or no accounts. Recorded in the decision list as sign-in-accounts-home."
     },
     {
       "id": "sign-in-locked-copy",
@@ -4054,10 +4054,10 @@
         "file": "docs/design/sign-in.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Should the reader's copy on our server be locked on their device so we cannot read it, at the cost that losing the recovery code loses the synced copy? Or kept with the server's own encryption and a plain note that we could read it? Researcher A said locked; researcher B left it as a separate choice. Needed before the first unlock ships, not before the first sign-in on the owner's iPad."
+      "note": "Should the reader's copy on our server be locked on their device so we cannot read it? The owner chose on 2026-11-18: not locked, at first. The server's own encryption, and the button and the privacy label say plainly that we could read the copy. Locking can come later, with a recovery code each reader saves once; nobody loses marks. Recorded in the decision list as sign-in-locked-copy."
     },
     {
       "id": "sign-in-same-account",
@@ -4091,6 +4091,28 @@
       "severity": "question",
       "owner": "agent",
       "note": "Does Sign in with Apple on hifth.app work before the app is in the App Store? Apple's help page does not require it; Apple's set-up page says an existing App Store app is needed. Trial: set up the website's Apple name and sign in on a preview address. Website sign-in comes after testers in the plan, so this does not hold anything up yet."
+    },
+    {
+      "id": "sign-in-apple-key-file",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Make the Sign in with Apple key file (the sign-in page's step 12, about 20 minutes): in Apple's developer site under Keys, tick Sign in with Apple, download the file once, note its ID, and save both as hifth.app secrets on Cloudflare. It is a different key from the App Store Connect one. Deleting an account needs it, and Apple's review requires deleting an account. Meanwhile deletion is built and tested on the laptop with a made-up key."
+    },
+    {
+      "id": "sign-in-database-yes",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "A one-line yes to make the accounts database on hifth.app's Cloudflare account (the sign-in page's step 9), the free database the owner chose on 2026-11-18. Making it touches the live account, so it waits for the owner's word. Meanwhile the server code runs against a local copy on the laptop."
     },
     {
       "id": "notify-list-data-door",
@@ -7359,16 +7381,11 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉖"
       },
-      "status": "blocked",
-      "severity": "question",
-      "owner": "user",
-      "blockedBy": [
-        "sign-in-first-unlock",
-        "sign-in-accounts-home",
-        "sign-in-locked-copy"
-      ],
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
       "launch": true,
-      "note": "The owner chose sign-in at launch on 2026-11-15. The building is the sign-in work's; this row only counts it toward the launch."
+      "note": "The owner chose sign-in at launch on 2026-11-15, and on 2026-11-17 chose what it unlocks first: the reader's marks follow them. On 2026-11-18 the owner settled the last two choices: accounts are kept by our own small code on hifth.app's Cloudflare account with its free database, and the copy on our server is not locked at first, with the button saying we could read it. No choice waits on the owner now, and the sign-in build is ours. Two small owner steps remain, the sign-in page's ⑧ and ⑨: the Sign in with Apple key file, and a yes to make the real accounts database. Until then the server runs on the laptop with a local copy and a made-up key. The building is the sign-in work's; this row only counts it toward the launch."
     },
     {
       "id": "launch-account-deletion",
@@ -7380,10 +7397,11 @@
       "severity": "defect",
       "owner": "agent",
       "blockedBy": [
-        "launch-sign-in"
+        "launch-sign-in",
+        "sign-in-apple-key-file"
       ],
       "launch": true,
-      "note": "Apple requires deletion inside the app for any app with accounts, and it must also cancel the Apple sign-in."
+      "note": "Apple requires deletion inside the app for any app with accounts, and it must also cancel the Apple sign-in. Cancelling needs the Sign in with Apple key file (the sign-in page's ⑧, the owner's); until then deletion is built and tested on the laptop with a made-up key."
     },
     {
       "id": "launch-backups",

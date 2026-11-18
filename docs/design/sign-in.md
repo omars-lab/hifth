@@ -74,17 +74,17 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 4 | hifth.app on Cloudflare, with small server functions for the notify list checked in (the live site was not looked at; see ⑦) | done | — | — |
 | 5 | A privacy check that refuses any way off the device it does not name | done | — | — |
 | **Your answers first** | | | | |
-| A | What sign-in unlocks first (① below) | left | you, one conversation | — |
-| B | Where accounts live (② below) | left | you, one conversation | — |
+| A | What sign-in unlocks first (① below) | done 2026-11-17: your marks follow you | — | — |
+| B | Where accounts live (② below) | done 2026-11-18: our own code on hifth.app's Cloudflare, free database | — | — |
 | **Milestone 1: a first real sign-in on your own iPad, hidden behind a developer setting** | | | | |
-| 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple (it has none today), and add the same line to the Mac's (empty today) | left | agent | an hour |
+| 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple, and add the same line to the Mac's | half done: the iPad and iPhone file asks for it (launch item ⑨); the Mac's two files do not yet | agent | an hour |
 | 7 | Let the page ask the app a question and wait for the answer (today messages only go one way, page to app) | left | agent | half a day, with tests |
 | 8 | Show Apple's sheet from the app with a fresh one-off word, and hand the result on | left | agent | a day |
-| 9 | Connect a free database to hifth.app's server for accounts | left | you in the Cloudflare dashboard, or the agent with your yes | 5 minutes |
+| 9 | Connect a free database to hifth.app's server for accounts (⑨ below) | left | you in the Cloudflare dashboard, or the agent with your yes | 5 minutes |
 | 10 | Server code on hifth.app: check Apple's note against Apple's published keys, make or find the account, start a session, sign out | left | agent | two to three days |
 | 11 | Trials on your iPad: does the page get a waiting answer from the app, and what address does it say it comes from (⑤ below) | left | you hold the iPad, agent runs it | an hour |
 | **Milestone 2: ready for people other than you** | | | | |
-| 12 | Make the key file in Apple's developer site, note its ID, store both as hifth.app secrets on Cloudflare. **Needed even with no website sign-in**, because deleting an account needs it | left | you, Apple then Cloudflare dashboards | 20 minutes |
+| 12 | (⑧ below) Make the key file in Apple's developer site, note its ID, store both as hifth.app secrets on Cloudflare. **Needed even with no website sign-in**, because deleting an account needs it | left | you, Apple then Cloudflare dashboards | 20 minutes |
 | 13 | Get Apple's cancel-ticket at the first sign-in and keep it locked on the server; take Apple's notices that a reader has left | left | agent | a day |
 | 14 | "Delete my account" inside the app: delete everything, cut the link with Apple. App Review requires it | left | agent | a day |
 | 15 | Keep the session in the Keychain, so an iPad stays signed in for months; check at each launch that the reader has not cut Hifth off in their Apple settings | left | agent | half a day |
@@ -92,7 +92,7 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 17 | Limit how often anyone can try, reusing the notify list's "are you a person" check | left | agent; you may need to switch on a limit in Cloudflare | half a day |
 | 18 | Keep it to testers: an invite code (an email list fails when testers hide their email), and a working test login for Apple's beta reviewers | left | agent | half a day |
 | 19 | Privacy page and App Store privacy label updated | left | agent drafts, you approve | half a day |
-| 20 | Sign the Mac build with the paid team. Apple says Sign in with Apple does not work in Mac apps sold outside the App Store, so the Mac goes through TestFlight or the Mac App Store | left | you in Xcode, then agent | an hour to half a day |
+| 20 | Sign the Mac build with the paid team. Apple says Sign in with Apple does not work in Mac apps sold outside the App Store, so the Mac goes through TestFlight or the Mac App Store | done 2026-11-17: the Mac App Store build is signed with the paid team and archived; its Sign in with Apple line is step 6 | — | — |
 | 21 | The first thing sign-in unlocks, behind its own button (depends on ①) | left | agent | three to four days for "your marks follow you" |
 | 22 | TestFlight upload and tester invitations | left | **held by the licence reading**, not by sign-in | — |
 | **Later, not needed for testers on Apple devices** | | | | |
@@ -100,12 +100,12 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 24 | Register the mail sender with Apple, so mail reaches readers who hid their email | left | you in the Apple dashboard and DNS; waits on the mail sender decision | 30 minutes |
 | 25 | A second way in for people without Apple: a six-digit code by email | left | agent, after the mail sender is picked | two days |
 
-**Headline: 5 done, 2 answers from you, then 6 steps to a first real sign-in on your iPad (about a week), 11 more to be ready for testers (about two weeks), and 3 for later.** Both researchers put the whole build at two to three weeks of agent work; this table agrees.
+**Headline: 5 done, both answers in (2026-11-17 and 2026-11-18), then 6 steps to a first real sign-in on your iPad (about a week), 10 more to be ready for testers (about two weeks; step 20 is done), and 3 for later.** Both researchers put the whole build at two to three weeks of agent work; this table agrees.
 
 ### What can be built and tried now, on your own devices?
 
 - **Steps 6, 7, 8 and 11 need no decision** and can start today on the iPad that is already signed with the paid team. They run behind a developer setting, not a button readers see, so the rule "no Sign in button with nothing behind it" holds.
-- **The server check can run on the laptop**, against a local copy of the database, with tests that use made-up notes. A real note from the iPad can then be checked there too. This waits on answer B only if the answer is not Cloudflare.
+- **The server check can run on the laptop**, against a local copy of the database, with tests that use made-up notes. A real note from the iPad can then be checked there too. Answer B was Cloudflare, so nothing here waits; only making the real database on Cloudflare (step 9) touches the live account.
 - **Deletion and cutting the link** can be walked end to end on your own Apple account once the key file exists (step 12): sign in, delete, then check that Hifth is gone from your Apple account's list of apps using Sign in with Apple.
 - **What cannot be tried on the laptop:** website sign-in, because Apple refuses local addresses and needs a real https address on hifth.app registered with it; and the Mac app, until step 20.
 - **What waits on the licence reading:** only step 22, putting the build in front of testers. Everything else can be built and tried first.
@@ -156,14 +156,14 @@ sequenceDiagram
   W-->>B: a normal secure cookie, back on the page they left
 ```
 
-Apple's return trip is a form posted from Apple's own site, so the browser does not send hifth.app's ordinary cookies with it. That is why the server notes its own random value instead of relying on a cookie. A popular sign-in library got exactly this wrong (see the agreements section).
+Apple's return trip is a form posted from Apple's own site, so the browser does not send hifth.app's ordinary cookies with it. That is why the server notes its own random value instead of relying on a cookie. A popular sign-in library got exactly this wrong, and fixed it in November 2025 (see the agreements section, and the library page, [sign-in-library.md](sign-in-library.md)).
 
 ### In what order do the steps go?
 
 ```mermaid
 flowchart TD
-  Q1["You: what is sign-in for first?"] --> F
-  Q2["You: where do accounts live?"] --> DB
+  Q1["Answered: your marks follow you"] --> F
+  Q2["Answered: our own code on Cloudflare"] --> DB
   E["Agent: permissions file in each build"] --> SH
   BR["Agent: page can ask the app and wait"] --> SH
   SH["Agent: Apple's sheet in the app"] --> SV
@@ -202,11 +202,11 @@ Both researchers picked the first, independently. It is recommended because it i
 | | **Our own small code on hifth.app's Cloudflare, with its free database** (recommended) | The same, with a ready-made sign-in library | A new Supabase project just for readers | Firebase sign-in | No accounts: own iCloud only |
 | --- | --- | --- | --- | --- | --- |
 | Pros | Next to the notify list and the planned shared copies, so no new company; nothing pauses; every line is ours to read; the key can sign a fresh short note each time, so there is no six-month renewal chore | Less code; sessions and add-ons come built (Better Auth runs on this database) | Sign-in, sessions and email codes ready-made and widely used | Ready-made Apple and email sign-in, with a built-in "cut the link with Apple" call | No server, no account, nothing for us to hold |
-| Cons | We write and own the security-critical parts: the note check, sessions, deletion, limits. A small, well-known signature library (jose) handles the cryptography | Its Apple website sign-in had the cookie fault above; it was closed as fixed, and two commenters later said it was back; the thread is now locked | Free projects pause after a week unused; at most two free projects per person; deleting a user does not cut their Apple link, so our code is needed anyway; the website needs a new secret pasted in every six months; splits reader data from shared copies | A third company, Google, holds readers' accounts; shared copies would still be on Cloudflare | Does nothing for Firefox, Android or the website |
+| Cons | We write and own the security-critical parts: the note check, sessions, deletion, limits. A small, well-known signature library (jose) handles the cryptography | Its Apple website sign-in had the cookie fault above; a second fix (Nov 2025) is still in its code, read but not tried. It does not cut the Apple link on delete, changes very fast, and may exceed the free plan's computing limit (see [sign-in-library.md](sign-in-library.md)) | Free projects pause after a week unused; at most two free projects per person; deleting a user does not cut their Apple link, so our code is needed anyway; the website needs a new secret pasted in every six months; splits reader data from shared copies | A third company, Google, holds readers' accounts; shared copies would still be on Cloudflare | Does nothing for Firefox, Android or the website |
 | Implications | Commits us to tests for every security part; the sharing work can build on the same tables | Ties our sessions to the library's next release | Two vendors to delete from; the existing project still must never hold accounts | Ties the email code to Google's sender | Stays the answer for own Apple devices whichever way this goes |
 | For a hafiz | Invisible when it works; if a daily limit is ever hit, sign-in fails until midnight UTC and reading carries on | The same, if the library behaves | Invisible, unless the project pauses: then sign-in fails until someone wakes it | Invisible; their email sits with Google | Seamless on Apple devices; Firefox readers carry a file by hand |
 
-Recommended because the parts that make sign-in "proper" (deletion that really deletes, the who-sees-this button, the privacy check) are ours to write in every option. A library saves the easy part and, here, brought a known fault in the hard part. Cloudflare's free plan allows 100,000 requests and 100,000 database writes a day, far beyond a tester group.
+Recommended because the parts that make sign-in "proper" (deletion that really deletes, the who-sees-this button, the privacy check) are ours to write in every option. A library saves the easier part (sessions and the website's return trip) and brings a fast-moving dependency; the library page weighs the two closely. Cloudflare's free plan allows 100,000 requests and 100,000 database writes a day, far beyond a tester group.
 
 ### How should the apps sign in?
 
@@ -265,7 +265,7 @@ Apple's rule that an app offering another company's login must also offer Apple'
 
 - **Apple's iCloud user number as the account.** No sign-in on Apple devices, but nothing for the website. It is the own-device path, already planned.
 - **Clerk and other hosted sign-in companies.** Clerk's free plan lacks Face ID sign-in in apps; the others were not looked at closely.
-- **Lucia**, a sign-in library, closed in March 2025.
+- **Lucia**, a sign-in library, closed in March 2025. Arctic, Oslo, Auth.js and OpenAuth are covered on the library page, [sign-in-library.md](sign-in-library.md).
 - **An email link instead of a code.** Workplace and school mail scanners open the link first and use it up.
 
 ## Where did the two researchers agree, and where did they disagree?
@@ -303,7 +303,7 @@ The checker re-opened the sources behind every claim that would change the recom
 | Only A | Checked |
 | --- | --- |
 | The notify list's server code calls Supabase's data door, but the checked-in settings say that door is off, and another design page says nothing uses it | **Confirmed as a contradiction in the files.** The live project was not looked at. Question ⑦ below |
-| Better Auth's website sign-in had the cookie fault, closed as fixed and reportedly reverted | Confirmed: closed as fixed on 2025-11-04; on 2025-11-19 and 2025-11-24 commenters said it was back; locked 2026-03-31. The revert is a commenter's claim, not confirmed |
+| Better Auth's website sign-in had the cookie fault, closed as fixed and reportedly reverted | Confirmed, and then superseded: the first fix was reverted on 2025-11-04, but a second fix that turns Apple's form into an ordinary page load was merged on 2025-11-05 and is still in the code. Read, not tried; one later "still failing" comment went unanswered. Checked 2026-11-18 in [library-check.md](../research/sign-in/library-check.md) |
 | One forum report says the same person gets a different account number in the app and on the website | Apple's developer support says the same number is given when both belong to one team; the contrary forum thread (2019, plus a 2023 "same issue") has no cause or answer. **Unsettled; trial ④** |
 | One Apple page says website sign-in needs an existing app in the App Store; another does not | **Confirmed: the two Apple pages disagree.** Unsettled; trial ⑥ |
 | Keep only a scrambled copy of each session on the server; sessions renew on use and end after 60 days unused | Not contested; design detail |
@@ -341,17 +341,21 @@ The checker re-opened the sources behind every claim that would change the recom
 
 ## Open questions, and what would answer each
 
-These are tracked in the issue register, one row each, the way the sharing page's questions are. There is no row in the decision register yet: that needs a drawn options page, which is worth making once the owner has answered ① and ②.
+These are tracked in the issue register, one row each, the way the sharing page's questions are. ①, ② and ③ are also rows in the decision register, and ② and ③ are drawn, one picture per option, on the options page ([sign-in-options.md](sign-in-options.md), served as [sign-in-options.html](sign-in-options.html), and on the site at <https://blog.bytesofpurpose.com/hifth/docs/design/sign-in-options.html>).
 
-### ① What should sign-in unlock first? · **open**
+### ① What should sign-in unlock first? · **answered**
 
-Recommended: your marks following you to Firefox and a phone, behind one button that says what goes and to whom. The alternatives are switching off a teacher link from anywhere, or nothing yet. **What would answer it:** the owner's pick, in one conversation. Until then steps 6 to 15 can be built hidden.
+**Settled 2026-11-17 by the owner: your marks follow you.** Sign-in first unlocks one button that says what goes and to whom, so a reader's marks follow them from the iPad to Firefox and a phone. The alternatives were switching off a teacher link from anywhere, or nothing yet. Steps 6 to 15 are built toward this.
 
-### ② Where should reader accounts live? · **open**
+### ② Where should reader accounts live? · **answered**
 
-Recommended: our own small code on hifth.app's Cloudflare account, with its free database, next to the notify list and the planned shared copies. Alternatives: the same with a ready-made library, a new Supabase project, Firebase, or no accounts. The sharing page's ⑥ chose Cloudflare for shared copies only. **What would answer it:** the owner's pick. Then step 9 connects the database.
+**Settled 2026-11-18 by the owner: our own small code on hifth.app's Cloudflare account, with its free database.** jose checks Apple's note, sessions start from Lucia's free sample file, and the rest is ours, each security part with a test written first. Step 9 connects the database. What the owner weighed:
 
-### ③ Should your copy on our server be locked so that we cannot read it? · **open**
+Recommended: our own small code on hifth.app's Cloudflare account, with its free database, next to the notify list and the planned shared copies. Alternatives: the same with a ready-made library, a new Supabase project, Firebase, or no accounts. Ours against a library is weighed part by part on the library page ([sign-in-library.md](sign-in-library.md)). The sharing page's ⑥ chose Cloudflare for shared copies only. **What would answer it:** the owner's pick. Then step 9 connects the database.
+
+### ③ Should your copy on our server be locked so that we cannot read it? · **answered**
+
+**Settled 2026-11-18 by the owner: not locked, at first.** The server's own encryption, and the button and the privacy label say plainly that we could read the copy. Locking can come later; each reader would then save a recovery code once, and nobody loses marks. What the owner weighed:
 
 Locked: sealed on the device with a recovery code the reader saves once; the server holds a box it cannot open; lose the code and the synced copy is gone (the marks on the device are never at risk). Not locked: the server's own encryption, with a plain note on the button that we could read it. **What would answer it:** the owner's pick, before the first unlock ships. It does not hold up milestone 1.
 
@@ -370,3 +374,11 @@ Apple's help page does not require it; Apple's set-up page says an existing App 
 ### ⑦ Does the notify list reach Supabase through a door the settings say is closed? · **suspected**
 
 The notify list's server code calls Supabase's data door with the public key, but the checked-in settings switch that door off, and the Supabase move page says nothing uses it. Either the settings file is out of date or the list does not work. **What would answer it:** the store check, which prints settings and never a row, compared against the settings file; then one test sign-up on the notify form. This matters before anything else is added to that project.
+
+### ⑧ Is the Sign in with Apple key file made and saved on Cloudflare? · **open**
+
+Step 12: about 20 minutes in Apple's developer site, then Cloudflare. It is a different key from the App Store Connect one already made. Deleting an account needs it to cut the link with Apple, and Apple's review requires deleting an account, so the launch's account deletion waits on it. Meanwhile deletion is built and tested on the laptop with a made-up key. **What would answer it:** the owner makes the key, notes its ID, and saves both as hifth.app secrets; the check prints only that each secret is set.
+
+### ⑨ May the accounts database be made on hifth.app's Cloudflare account? · **open**
+
+Step 9: the free database chosen in ②, made with one command. Making it touches the live account, so it waits for the owner's word. Meanwhile the server code runs against a local copy on the laptop, so nothing else waits. **What would answer it:** a one-line yes from the owner.
