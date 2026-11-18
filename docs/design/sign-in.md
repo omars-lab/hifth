@@ -341,11 +341,11 @@ The checker re-opened the sources behind every claim that would change the recom
 
 ## Open questions, and what would answer each
 
-These are tracked in the issue register, one row each, the way the sharing page's questions are. There is no row in the decision register yet: that needs a drawn options page, which is worth making once the owner has answered ① and ②.
+These are tracked in the issue register, one row each, the way the sharing page's questions are. ①, ② and ③ are also rows in the decision register, and ② and ③ are drawn, one picture per option, on the options page ([sign-in-options.md](sign-in-options.md), served as [sign-in-options.html](sign-in-options.html), and on the site at <https://blog.bytesofpurpose.com/hifth/docs/design/sign-in-options.html>).
 
-### ① What should sign-in unlock first? · **open**
+### ① What should sign-in unlock first? · **answered**
 
-Recommended: your marks following you to Firefox and a phone, behind one button that says what goes and to whom. The alternatives are switching off a teacher link from anywhere, or nothing yet. **What would answer it:** the owner's pick, in one conversation. Until then steps 6 to 15 can be built hidden.
+**Settled 2026-11-17 by the owner: your marks follow you.** Sign-in first unlocks one button that says what goes and to whom, so a reader's marks follow them from the iPad to Firefox and a phone. The alternatives were switching off a teacher link from anywhere, or nothing yet. Steps 6 to 15 are built toward this.
 
 ### ② Where should reader accounts live? · **open**
 

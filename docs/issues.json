@@ -4032,10 +4032,10 @@
         "file": "docs/design/sign-in.md",
         "item": "①"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "What should sign-in unlock first? Both researchers picked the reader's own marks following them to Firefox and a phone, behind one button that says what goes and to whom; the alternatives are switching off a teacher link from anywhere, or nothing yet. Until the owner picks, the hidden plumbing (steps 6 to 15 on the page) can be built and tried on the owner's iPad."
+      "note": "What should sign-in unlock first? The owner chose on 2026-11-17: the reader's own marks follow them to Firefox and a phone, behind one button that says what goes and to whom. The alternatives were switching off a teacher link from anywhere, or nothing yet. Recorded in the decision list as sign-in-first-unlock."
     },
     {
       "id": "sign-in-accounts-home",
@@ -7363,12 +7363,11 @@
       "severity": "question",
       "owner": "user",
       "blockedBy": [
-        "sign-in-first-unlock",
         "sign-in-accounts-home",
         "sign-in-locked-copy"
       ],
       "launch": true,
-      "note": "The owner chose sign-in at launch on 2026-11-15. The building is the sign-in work's; this row only counts it toward the launch."
+      "note": "The owner chose sign-in at launch on 2026-11-15, and on 2026-11-17 chose what it unlocks first: the reader's marks follow them. It now waits on two choices: where accounts are kept, and whether we can read the copy on our server. The building is the sign-in work's; this row only counts it toward the launch."
     },
     {
       "id": "launch-account-deletion",

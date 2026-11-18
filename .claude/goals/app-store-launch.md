@@ -77,7 +77,7 @@ The first one is the main measure. The others say whether we could run the app o
 | Measure | Value | As of |
 |---|---|---|
 | Launch blockers open | **24** of 46 (2026-11-17, after the store reviews ㉜, the download numbers ㉝ and the second key on the release page ㉞ closed; `make issues LAUNCH=1` lists them). Before that, **26**: 24 of the 44 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day, and the archive with Apple's own check ⑪ later that day. Later still the support page ⑳ and the apps' privacy policy ㉙ closed, and one item was added for linking both from inside the app (㊸), which closed the same day. Of the 26, **7 can get the app turned down at review**, 6 stop the upload itself (four launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
-| Owner steps waiting | **10**, ordered by what each frees in "Waiting on the owner": three sign-in choices; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; adding the Mac to the app's store record; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
+| Owner steps waiting | **10**, ordered by what each frees in "Waiting on the owner": two sign-in choices (the first was answered 2026-11-17); two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; adding the Mac to the app's store record; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet; its archive, export and Apple's check ran clean on 2026-11-17 | 2026-11-17 |
 | Unanswered reports and reviews | **0** store reviews, none waiting (read live with the reviews key; the app is not in the store yet). Reader reports have no folder to land in yet | 2026-11-17 |
@@ -128,7 +128,10 @@ The plan has the detail of each step.
 
 ## Waiting on the owner, most work freed first
 
-1. **The three choices on the sign-in page.** These free about three weeks of work: sign-in,
+1. **The two choices left on the sign-in page** (the first was answered on 2026-11-17: a
+   reader's marks follow them). Still open: where accounts are kept, and whether we can read
+   the copy on our server. Both are drawn, one picture per option, on
+   `docs/design/sign-in-options.html`. These free about three weeks of work: sign-in,
    deleting an account, and backups of reader data.
 2. **Send the two permission emails, and set the date after which we stop waiting.** This frees
    only the upload, but the answer takes weeks, so the sooner it goes the better.
