@@ -81,8 +81,18 @@ export function gatherFacts(): ReportFacts {
     when: new Date().toISOString(),
     faults: recentFaults(),
     steps: recentSteps(),
-    deviceReports: info?.deviceReports ?? null,
+    deviceReports: info ? deviceReportsFromApp() : null,
   };
+}
+
+/**
+ * Apple's crash and freeze lines the app hands over in its marker. Read here
+ * and not in `nativeInfo`, because that file is in the start-up script and
+ * this one loads only when the reader opens the report.
+ */
+function deviceReportsFromApp(): string | null {
+  const lines = (window as { __HIFTH_NATIVE__?: { deviceReports?: unknown } }).__HIFTH_NATIVE__?.deviceReports;
+  return typeof lines === "string" && lines !== "" ? lines : null;
 }
 
 /**
