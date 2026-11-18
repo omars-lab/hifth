@@ -85,13 +85,13 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 11 | Trials on your iPad: does the page get a waiting answer from the app, and what address does it say it comes from (⑤ below) | left | you hold the iPad, agent runs it | an hour |
 | **Milestone 2: ready for people other than you** | | | | |
 | 12 | (⑧ below) Make the key file in Apple's developer site, note its ID, store both as hifth.app secrets on Cloudflare. **Needed even with no website sign-in**, because deleting an account needs it | left | you, Apple then Cloudflare dashboards | 20 minutes |
-| 13 | Get Apple's cancel-ticket at the first sign-in and keep it locked on the server; take Apple's notices that a reader has left | left | agent | a day |
-| 14 | "Delete my account" inside the app: delete everything, cut the link with Apple. App Review requires it | left | agent | a day |
+| 13 | Get Apple's cancel-ticket at the first sign-in and keep it locked on the server; take Apple's notices that a reader has left | left: the server half was built 2026-11-18 and tested with a stand-in Apple and made-up keys. Still to do: the app sends Apple's one-time code with the sign-in (without it no ticket is kept), you register hifth.app's notice address on Apple's developer site, and the new table goes into the real database | agent, then you on Apple's site | a day |
+| 14 | "Delete my account" inside the app: delete everything, cut the link with Apple. App Review requires it | left: the server half was built 2026-11-18 (it deletes the account, every session and the ticket, and tells Apple to cut the link). The button in the app comes with step 16 | agent | a day |
 | 15 | Keep the session in the Keychain, so an iPad stays signed in for months; check at each launch that the reader has not cut Hifth off in their Apple settings | left | agent | half a day |
 | 16 | A button that says what leaves the device and who sees it, a place to see and take it back, and the new way out named in the privacy check | left | agent | a day |
 | 17 | Limit how often anyone can try, reusing the notify list's "are you a person" check | left | agent; you may need to switch on a limit in Cloudflare | half a day |
 | 18 | Keep it to testers: an invite code (an email list fails when testers hide their email), and a working test login for Apple's beta reviewers | left | agent | half a day |
-| 19 | Privacy page and App Store privacy label updated | left | agent drafts, you approve | half a day |
+| 19 | Privacy page and App Store privacy label updated | left: drafted 2026-11-18 in [the privacy draft](sign-in-privacy-draft.md), with seven questions for you at its top. Nothing live has changed | agent drafts, you approve | half a day |
 | 20 | Sign the Mac build with the paid team. Apple says Sign in with Apple does not work in Mac apps sold outside the App Store, so the Mac goes through TestFlight or the Mac App Store | done 2026-11-17: the Mac App Store build is signed with the paid team and archived; its Sign in with Apple line is step 6 | — | — |
 | 21 | The first thing sign-in unlocks, behind its own button (depends on ①) | left | agent | three to four days for "your marks follow you" |
 | 22 | TestFlight upload and tester invitations | left | **held by the licence reading**, not by sign-in | — |
@@ -383,3 +383,23 @@ The notify list's server code calls Supabase's data door with the public key, bu
 ### ⑨ May the accounts database be made on hifth.app's Cloudflare account? · **answered**
 
 **Settled 2026-11-18 by the owner: yes.** Step 9: the free database chosen in ②, made with one command. It was made the same day: its three tables are in place and empty, and the site's settings name it. The release check allows that one database and no other. Sign-in is still off on the live site: nothing was uploaded, and the two switches that turn it on are not set there. Laptop trials keep using a local copy, so nothing in this work writes to the real one.
+
+### ⑩ Has Apple been told where to send its notices, and is the tickets table in the real database? · **open**
+
+Two things owed before sign-in is switched on for anyone, both found by step 13. Without them a reader's link with Apple can never be cut from our side. **You, on Apple's developer site:** under the app's identifier, Sign in with Apple, Edit, enter hifth.app's notice address (the deploy skill gives it in full) so Apple can tell us when a reader stops using Sign in with Apple with Hifth or deletes their Apple account. **A one-line yes from you:** the agent adds the new table that holds Apple's cancel tickets to the real accounts database, the same way the first three went in.
+
+### ⑪ What happens to a reader's cancel ticket if the Apple key file is ever replaced? · **open**
+
+The ticket's lock is worked out from the Sign in with Apple key file, so there is no extra secret to keep. The cost, found in step 13: after a key swap the old tickets cannot be opened, and nothing replaces them, because sign-in sees a ticket is kept and does not ask Apple for a new one. Those readers' "delete my account" still deletes everything we hold but cannot cut the Apple link, so the app has to tell them to remove Hifth in their Apple settings. Fix before any key is replaced: when a kept ticket cannot be opened, trade for a new one at the next sign-in. A second small case rides with it: if Apple cuts the link but our delete then fails, the ticket left behind is dead and a second try says the link was left.
+
+### ⑫ How long does a sign-in last, and are old ones cleared out? · **open**
+
+This page says a sign-in renews each time it is used, so an iPad stays signed in for months. The code gives a fixed 60 days and never renews, and nothing removes sign-ins or one-off words that have run out, so a list of when each device signed in builds up until the account is deleted. Found by the privacy draft (step 19), which follows the code. To settle: renew on use or keep the fixed length, and clear out what has run out on a schedule; then make the privacy page promise exactly that.
+
+### ⑬ Does the app tell hifth.app when it signs a reader out by itself? · **open**
+
+Found in step 15. At launch the app drops its saved sign-in when Apple says the reader has cut Hifth off, but it does not tell hifth.app, so the server's copy lives on until it runs out (Apple's own notice, ⑩, covers most cases). And the app only asks Apple at launch: a reader who cuts Hifth off while the app is open stays signed in until the next launch. Apple offers a notice inside the app for that; listen for it.
+
+### ⑭ Does an iPad really stay signed in, and sign out when it should? · **open**
+
+Step 15's code is tested with a stand-in Keychain and a stand-in Apple, so five things can only be seen on real devices, after the first real sign-in (step 11). Parked for one sitting with the iPad, each answer to become a test where it can: still signed in after quitting the app, after restarting the iPad, and some days later; signed out at the next launch after you remove Hifth under Sign in with Apple in the iPad's Settings; still signed in when opened in airplane mode; what a reader sees after deleting the app and installing it again; and whether the store-signed Mac app can save its sign-in at all.

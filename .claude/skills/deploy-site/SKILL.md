@@ -133,7 +133,13 @@ the first real check of a note is the live site after the owner's upload.
      them. Claude checks afterwards with `make hifth-app-apple-key`, which prints set or not set.
   5. **Switch sign-in on**, after the first upload: `SIGN_IN=on` and
      `APPLE_APP_IDS=com.bytesofpurpose.hifth` on the project (neither is secret). Until then the
-     sign-in addresses answer "not on yet", whatever else is set.
+     sign-in addresses answer "not on yet", whatever else is set. Two things first, or readers'
+     links with Apple can never be cut (sign-in steps 13 and 14):
+     - every file in `apps/landing/migrations/` is in the real accounts database (the second,
+       `0002_apple_tickets.sql`, holds Apple's cancel tickets), put in with the owner's yes;
+     - the owner has registered `https://hifth.app/api/sign-in/apple-notice` on Apple's developer
+       site as the address for Sign in with Apple's server-to-server notices (under the app's
+       identifier, Sign in with Apple, Edit), so Apple can say when a reader has left.
 - **To try the form locally:** `supabase start` (in a scratch copy if the repo's own is busy, named
   by `SUPABASE_WORKDIR`), then `make hifth-app-serve`, and open http://127.0.0.1:7124/ (press C to
   leave a comment on the page). It reads the local list's address and key from `supabase status`

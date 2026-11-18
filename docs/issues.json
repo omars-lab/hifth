@@ -4115,6 +4115,61 @@
       "note": "A one-line yes to make the accounts database on hifth.app's Cloudflare account (the sign-in page's step 9), the free database the owner chose on 2026-11-18. Making it touches the live account, so it waits for the owner's word. Meanwhile the server code runs against a local copy on the laptop. 2026-11-18: the owner said yes, and the database was made the same day: its tables are in place and empty, and the site's settings name it. Sign-in stays off on the live site until the owner uploads hifth.app and switches it on there."
     },
     {
+      "id": "sign-in-apple-notice-and-tickets-table",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑩"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Two things owed before sign-in is switched on for anyone (found by step 13, 2026-11-18). The owner registers hifth.app's notice address on Apple's developer site (the app's identifier, Sign in with Apple, Edit), so Apple can say when a reader has left; the address is in the deploy-site skill. And a one-line yes for the agent to add the cancel-tickets table to the real accounts database. Without both, a reader's link with Apple can never be cut from our side."
+    },
+    {
+      "id": "sign-in-ticket-after-key-swap",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑪"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Apple's cancel ticket is locked with a key worked out from the Sign in with Apple key file. If that file is ever replaced, old tickets cannot be opened and nothing replaces them, so those readers' account deletes cannot cut the Apple link. Fix before any key swap: trade for a new ticket at the next sign-in when the kept one cannot be opened. Also: if Apple cuts the link and our delete then fails, the ticket left is dead and a second try says the link was left."
+    },
+    {
+      "id": "sign-in-session-length-and-clean-up",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑫"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "The sign-in page says a sign-in renews when used; the code gives a fixed 60 days with no renewal. Nothing removes sign-ins or one-off words that have run out, so a list of sign-in dates builds up per account. Found by the privacy draft on 2026-11-18. Settle renew or fixed, add a clean-up, and make the privacy wording match."
+    },
+    {
+      "id": "sign-in-app-drops-session-quietly",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑬"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "note": "At launch the app drops its saved sign-in when Apple says the reader cut Hifth off, but does not tell hifth.app, so the server's copy lives until it runs out. And the app asks Apple only at launch, not while open; Apple has an in-app notice for a cut-off that the app does not listen for yet. Found in step 15, 2026-11-18."
+    },
+    {
+      "id": "sign-in-stays-signed-in-on-devices",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑭"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Five checks only real devices can answer, in one sitting with the iPad after the first real sign-in (step 11): still signed in after a quit, a restart and some days; signed out at the next launch after removing Hifth under Sign in with Apple in Settings; still signed in when opened in airplane mode; what shows after deleting and reinstalling the app; whether the store-signed Mac app can save its sign-in. Step 15's code is tested only with stand-ins. Each answer becomes a test where it can."
+    },
+    {
       "id": "notify-list-data-door",
       "source": {
         "file": "docs/design/sign-in.md",

@@ -132,6 +132,33 @@ Steps 10, 6 and 7 do not depend on each other, and none waits on the owner, so t
   address answered 503 "not set up". So laptop trials keep `--d1`, which also keeps them off the
   real database.
 
+## What steps 13 and 14 showed (2026-11-18, server half)
+
+Built by a helper agent on this branch; the app's half is still to do.
+
+- **The sign-in address now takes Apple's one-time code** beside the note and the word. With a
+  code, a key file and no ticket yet, the server trades the code with Apple for the cancel ticket
+  and keeps it locked in a new table (`apps/landing/migrations/0002_apple_tickets.sql`). Failing
+  to keep a ticket never blocks a sign-in.
+- **The ticket's lock is worked out from the Sign in with Apple key file**, so no new secret
+  name exists. The cost: after a key file swap, old tickets cannot be opened, and nothing
+  replaces them (sign-in sees one is kept and skips the trade). Those readers' deletes answer
+  "left". Worth fixing before a key is ever replaced.
+- **Apple's notices** arrive at `/api/sign-in/apple-notice`. "Stopped using Apple sign-in" ends
+  the sessions and drops the ticket but keeps the account; "deleted their Apple account" deletes
+  everything. Only things older than the notice are touched, so a replayed notice cannot undo a
+  later sign-in.
+- **Delete my account** is `/api/sign-in/delete-account`, with the session as a Bearer header.
+  It answers `appleLink: "cut"` or `"left"`; on "left" the app must tell the reader to remove
+  Hifth in their Apple settings.
+- **Still to do:** the app sends the code (it holds it but sends only the note and the word);
+  the owner registers the notice address on Apple's developer site; the new table goes into the
+  real database before sign-in is switched on. Not provable on the laptop: a real trade, a real
+  revoke, the real shape of Apple's notices.
+- **Sessions last a fixed 60 days and do not renew**, though the design page says a sign-in
+  renews when used. And nothing clears out sessions or one-off words that have run out. Both
+  found by the privacy draft (step 19); settle them with step 15's "stays signed in for months".
+
 ### Still open for step 11: how the iPad trial asks for sign-in
 
 A tapped app has no launch setting, and the page has no sign-in button until step 16. Two ways,
