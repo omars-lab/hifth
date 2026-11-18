@@ -11,7 +11,17 @@ description: Release or publish Hifth's public site — hifth.app (front page pl
 make hifth-app-check      build, put the release folder together, refuse anything extra
 make hifth-app-publish    the check, then upload with the saved keys, then look at the live site
 make hifth-app-verify     look at the live site again, any time
+make hifth-app-put-back   the release just published is broken: put the one before it back
 ```
+
+**When a release is broken,** put the previous one back first and fix after.
+`make hifth-app-put-back ARGS=list` shows the finished uploads, newest first, with the live one
+marked. `ARGS="run --dry"` says which one it would put back and changes nothing. With no ARGS, it
+points hifth.app at the upload before the live one and checks the live app carries that upload's
+commit. Nothing is copied: Cloudflare keeps every upload. Each put-back goes one further back, and
+`ARGS="run --to <commit>"` picks one by its commit. Going forward again is a fix, a merge and
+`make hifth-app-publish`. A put-back changes only the site, never the iPad or Mac app, which has
+its own fix-in-a-hurry page (`understanding-processes/fix-in-a-hurry.md`).
 
 Run them with Node 22 on the path (`export PATH="$HOME/.nvm/versions/node/v22.22.3/bin:$PATH"`).
 Release after the merge, from a worktree switched to origin/main with nothing uncommitted. The
@@ -165,6 +175,7 @@ page leaves out. A release missing either copy is refused. To change a source, c
 | `scripts/release-hifth-app.mjs serve --port N` | Serves the prepared folder with Cloudflare's local server, the spam check's always-pass test keys, and the local Supabase list when one is running | Second half; `make hifth-app-serve` has the comment server start it behind itself, so http://127.0.0.1:7124 has the Comment button | `make hifth-app-serve` |
 | `scripts/release-hifth-app.mjs publish` | The check, then `wrangler pages deploy` from the clean copy with the saved keys, then verify | To release hifth.app | `make hifth-app-publish` |
 | `scripts/release-source.mjs publish --to <repo>` | Puts the source of one release in the public source repo: one commit holding exactly the released commit's files, on top of the release before it, tagged `release-<first 12 of the commit>`, signed by the project, never carrying this repo's history. A release that is already public is left alone, even an older one, and the branch and tag go up together | Before each release's upload, for the commit that release built, once the repo is private and the public source repo exists (waits on the owner; docs/design/laptop-publish.md). The app links that tag only when `SOURCE_COPY` in `apps/web/src/provenance.ts` is set | `make hifth-app-source TO=<repo> COMMIT=<released commit>`; tests: `node --test .claude/skills/deploy-site/scripts/release-source.test.mjs` |
+| `scripts/put-back.mjs` | Asks Cloudflare which upload of the site is live, and points hifth.app at the finished production upload before it (Cloudflare's "rollback"), then looks at the live site for that upload's commit. Previews never count. `list` shows the uploads; `run --dry` names the one it would put back; `run --to <commit>` picks one by the first 7 or more characters of its commit. Refuses unless the saved token and account id are loaded, and prints neither | The release just published is broken, before the fix is ready | `make hifth-app-put-back` (`ARGS=list`, `ARGS="run --dry"`, `ARGS="run --to <commit>"`); tests: `node --test .claude/skills/deploy-site/scripts/put-back.test.mjs` |
 | `scripts/release-hifth-app.mjs verify` | Looks at the live site as a reader's browser does | After a release; when someone asks if hifth.app is live | `make hifth-app-verify` (`ARGS="--url https://x.pages.dev"` for a preview) |
 | `apps/web/e2e/landing-shots.spec.ts` (a Playwright file, not a script here) | Builds the plain public app and photographs it for the front page: the laptop, phone and iPad-with-pen views and one picture per feature, into `apps/landing/shots/` as JPEGs. Each picture checks the screen shows what it is meant to before it is taken. Never from the pitch build | After a change to how the app looks that the front page's pictures show; before a release that changes the front page | `make landing-shots` |
 | `scripts/list-count.mjs` | Asks the Supabase database how many people are on the Mac-app list and how many still have to confirm, and prints those two numbers only; an answer holding anything else is refused. The password goes in the environment, never on the command line | When someone asks how many signed up; after a sign-up test on the live site | `make hifth-app-list-count` (`ARGS=--local` for the copy on this laptop) |

@@ -848,6 +848,9 @@ hifth-app-check: ## Build hifth.app's release folder and refuse it if anything b
 hifth-app-publish: ## Check, upload to hifth.app with the saved keys, then look at the live site
 	@dotenvx run --quiet -- $(RELEASE) publish
 
+hifth-app-put-back: ## Put the previous hifth.app release back, then look at the live site; ARGS=list shows the releases, ARGS="run --dry" or ARGS="run --to <commit>"
+	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/put-back.mjs $(or $(ARGS),run)
+
 hifth-app-source: ## Put a release's source in the public source repo (TO=<repo address>, COMMIT=<released commit>, default main), as one commit with no history, tagged by release
 	@test -n "$(TO)" || { echo "usage: make hifth-app-source TO=<public source repo address> [COMMIT=<released commit>]"; exit 2; }
 	@node .claude/skills/deploy-site/scripts/release-source.mjs publish --to "$(TO)" $(if $(COMMIT),--commit "$(COMMIT)")
