@@ -23,7 +23,25 @@
 import { recentFaults, type Fault } from "./fault-log";
 import { nativeInfo } from "./native-bridge";
 import { SOURCE_COMMIT, isCommit } from "./provenance";
-import { recentSteps, type Step } from "./step-log";
+import { recentSteps, type Step, type StepName } from "./step-log";
+
+/**
+ * What each step code says in the report. Here, not in the step log, because
+ * the step log is in the start-up script and this file loads only when the
+ * reader opens the report.
+ */
+export const STEP_WORDS: Readonly<Record<StepName, string>> = {
+  open: "opened the app",
+  link: "opened a link",
+  turn: "turned to another page",
+  verse: "chose a verse",
+  verses: "chose several verses",
+  unselect: "let go of the verse",
+  follow: "followed a link to another verse",
+  back: "went back along the trail",
+  skin: "changed the colouring",
+  desk: "changed the desk",
+};
 
 /** Where reports go: the project's own address, chosen by the owner 2026-11-14. */
 export const SUPPORT_ADDRESS = "hello@hifth.app";
@@ -136,7 +154,7 @@ export function reportText(facts: ReportFacts): string {
     lines.push(`Steps (the last ${steps.length}, oldest first):`);
     for (const step of steps) {
       const times = step.count > 1 ? ` (${step.count} times)` : "";
-      lines.push(`- ${clock(step.at)} ${step.name}${times}`);
+      lines.push(`- ${clock(step.at)} ${STEP_WORDS[step.name]}${times}`);
     }
   }
   lines.push("");

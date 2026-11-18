@@ -1811,6 +1811,41 @@
       "gap": "Proven against a made-up file on this laptop only: the real file goes online with hifth.app's first upload (docs/issues.json, hifth-app-first-release). The browser version does not read it."
     },
     {
+      "id": "switch-to-a-new-version-when-i-choose",
+      "actor": "hafiz",
+      "goal": "Reading in the browser version, be told in one line when a new version is ready and switch to it with one press at a moment I choose, landing on the same page, while a page I left open from before keeps working instead of breaking mid-revision.",
+      "feature": "offline-pwa",
+      "code": [
+        {
+          "file": "apps/web/src/pwa-update.ts",
+          "symbol": "function watchForUpdate"
+        },
+        {
+          "file": "apps/web/src/pwa-update.ts",
+          "symbol": "function applyUpdate"
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/carry-previous.mjs",
+          "symbol": "function carryPrevious"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/web/e2e/update-ready.spec.ts",
+          "test": "the reader is told, and Reload starts the new version on the same page"
+        },
+        {
+          "file": "apps/web/e2e/update-ready.spec.ts",
+          "test": "a second open tab is told too once the first one switches"
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/carry-previous.test.mjs",
+          "test": "the live release's old files go into the new release beside the new ones"
+        }
+      ],
+      "gap": "The kept files are proven against a made-up live site; the real check is hifth.app's second upload, after the first (docs/issues.json, hifth-app-first-release). The apps from the store do not need this: their pages are packed inside them."
+    },
+    {
       "id": "answer-store-reviews-only-with-the-owners-yes",
       "actor": "maintainer",
       "goal": "Read every store review on the laptop and answer it, so a reader who wrote in hears back, while nothing is posted without the owner's yes to those exact words and no reviewer's name or words reach the public repo.",

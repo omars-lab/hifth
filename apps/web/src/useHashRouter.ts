@@ -57,14 +57,14 @@ export function useHashRouter(
       // ships, and the address is rewritten to say so once the view is there.
       const parsed = raw && { ...raw, edition: shippedEdition(raw.edition) };
       if (parsed) {
-        if (coldOpened.current) noteStep("opened a link");
+        if (coldOpened.current) noteStep("link");
         lastView.current = null;
         onRestoreRef.current(parsed);
       }
       return parsed;
     };
     if (ready && !coldOpened.current) {
-      noteStep("opened the app");
+      noteStep("open");
       const parsed = apply(); // cold open, now that restore can actually resolve the link
       coldOpened.current = true;
       if (parsed) landing.current = place(parsed);

@@ -384,6 +384,10 @@
       "desktop",
       "desktop-firefox"
     ],
+    "update-ready.spec.ts": [
+      "android",
+      "iphone"
+    ],
     "usage.spec.ts": [
       "android",
       "iphone"

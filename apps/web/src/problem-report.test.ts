@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { clearFaults, noteFault } from "./fault-log";
 import { stringsFor } from "./i18n";
 import { STEP_LIMIT, clearSteps, noteViewChange } from "./step-log";
-import { REPORT_DEVICE_LINES, REPORT_FAULTS, SUPPORT_ADDRESS, deviceKind, gatherFacts, mailLink, reportText, type ReportFacts } from "./problem-report";
+import { REPORT_DEVICE_LINES, REPORT_FAULTS, STEP_WORDS, SUPPORT_ADDRESS, deviceKind, gatherFacts, mailLink, reportText, type ReportFacts } from "./problem-report";
 
 const FACTS: ReportFacts = {
   platform: "ios",
@@ -75,15 +75,24 @@ describe("the problem report", () => {
   it("lists the reader's last steps by name, a run of the same step as one line", () => {
     expect(reportText(FACTS)).toContain("Steps: none kept since the page opened");
     const steps = [
-      { at: Date.UTC(2026, 10, 16, 11, 58, 0), name: "opened the app" as const, count: 1 },
-      { at: Date.UTC(2026, 10, 16, 11, 59, 30), name: "turned to another page" as const, count: 12 },
-      { at: Date.UTC(2026, 10, 16, 11, 59, 40), name: "chose a verse" as const, count: 1 },
+      { at: Date.UTC(2026, 10, 16, 11, 58, 0), name: "open" as const, count: 1 },
+      { at: Date.UTC(2026, 10, 16, 11, 59, 30), name: "turn" as const, count: 12 },
+      { at: Date.UTC(2026, 10, 16, 11, 59, 40), name: "verse" as const, count: 1 },
     ];
     const text = reportText({ ...FACTS, steps });
     expect(text).toContain("Steps (the last 3, oldest first):");
     expect(text).toContain("- 11:59:30 turned to another page (12 times)");
     expect(text).toContain("- 11:59:40 chose a verse\n");
     expect(text.indexOf("Steps (")).toBeLessThan(text.indexOf("Errors:"));
+  });
+
+  it("prints a sentence for every step code, and no code on its own", () => {
+    const steps = (Object.keys(STEP_WORDS) as (keyof typeof STEP_WORDS)[]).map((name, i) => ({ at: i, name, count: 1 }));
+    const lines = reportText({ ...FACTS, steps })
+      .split("\n")
+      .filter((line) => line.startsWith("- 00:00:00 "));
+    expect(lines).toHaveLength(steps.length);
+    for (const line of lines) expect(line.slice("- 00:00:00 ".length)).toMatch(/^[a-z]+ [a-z ]+$/);
   });
 
   it("takes the steps the app kept, and never which page they were on", () => {
@@ -144,7 +153,7 @@ describe("the problem report", () => {
     }));
     const steps = Array.from({ length: STEP_LIMIT }, (_, i) => ({
       at: i,
-      name: i % 2 ? ("followed a link to another verse" as const) : ("went back along the trail" as const),
+      name: i % 2 ? ("follow" as const) : ("back" as const),
       count: 99,
     }));
     const deviceReports = Array.from({ length: 40 }, () => "- 2026-11-17 08:30 crash (exception 1, signal 11), app 0.1.0 (7)").join("\n");
