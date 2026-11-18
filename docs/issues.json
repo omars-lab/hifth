@@ -6428,6 +6428,19 @@
       "useCase": "refuse-a-bundle-that-would-not-load-on-a-phone"
     },
     {
+      "id": "room-in-the-first-download",
+      "source": {
+        "file": "docs/performance.md",
+        "item": "㉔"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "feature": "performance",
+      "note": "2026-11-17: what a reader downloads before the first page can be used is at 161.0 of its own 161 KB limit, while the app as a whole has about 7 KB of room. The app's log took it over by a few bytes after the other launch work merged; moving its step names into the report, which loads later, was just enough. Next: the next trim that moves start-up code to a file that loads later, measured side by side. Done when there is at least 1.5 KB of room and the trims list says what moved.",
+      "useCase": "refuse-a-bundle-that-would-not-load-on-a-phone"
+    },
+    {
       "id": "hifth-app-site",
       "source": {
         "file": "docs/design/hifth-app-site.md",
@@ -7176,7 +7189,7 @@
       "owner": "agent",
       "launch": true,
       "closedBy": "apps/web/e2e/report-problem.spec.ts",
-      "note": "A 'Report a problem' button in the info panel and on the error card shows the reader the whole report and the address (hello@hifth.app), then offers to open their own mail app with it filled in, or to copy it. It holds the app and version, the build, the device, the screen, the language, the time and the last five errors; never notes, marks or a list of pages read. The browser test puts a made-up note on the device and checks it is in neither the report nor the mail link, and that the error card's report names the error. Design page: docs/design/report-a-problem.md. 'The last few steps by name' waits on launch-logging (item 19)."
+      "note": "A 'Report a problem' button in the info panel and on the error card shows the reader the whole report and the address (hello@hifth.app), then offers to open their own mail app with it filled in, or to copy it. It holds the app and version, the build, the device, the screen, the language, the time and the last five errors; never notes, marks or a list of pages read. The browser test puts a made-up note on the device and checks it is in neither the report nor the mail link, and that the error card's report names the error. Design page: docs/design/report-a-problem.md. Since 2026-11-17 it also lists the last steps by name (launch-logging, item 19)."
     },
     {
       "id": "launch-logging",
@@ -7184,11 +7197,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑲"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "Each line should carry the app version and the build's commit, so a report can be matched to the code."
+      "closedBy": "apps/web/src/step-log.test.ts",
+      "useCase": "get-help-and-know-what-is-kept",
+      "note": "Fixed 2026-11-17. The page keeps the reader's last 20 steps in memory by name only (step-log.ts, fed by the hash router), repeats folded into one line with a count; the problem report shows the last 10. No step names a page or verse; a test checks the pages turned to never reach the report. The apps write to the system log through AppLog.swift, every line starting ev=<event> version=… commit=…, with a launch line first (tests: native/HifthTests/AppLogTests.swift). The walk, probe and snapshot tools still print, on purpose: debug builds only, and the laptop's scripts read their output."
     },
     {
       "id": "launch-support-page",

@@ -1037,7 +1037,7 @@ final class NavigationPolicy: NSObject, WKNavigationDelegate, WKUIDelegate {
     var reloadAfterCrash: (WKWebView) -> Void = { $0.reload() }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-        print("page process ended, loading the page again")
+        AppLog.problem("page_process_ended", message: "loading the page again")
         reloadAfterCrash(webView)
     }
 

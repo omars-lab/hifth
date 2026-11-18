@@ -1973,6 +1973,10 @@
         {
           "file": "apps/web/e2e/report-problem.spec.ts",
           "test": "the support and privacy links stand apart from each other and from the report button"
+        },
+        {
+          "file": "apps/web/src/problem-report.test.ts",
+          "test": "takes the steps the app kept, and never which page they were on"
         }
       ],
       "gap": "Live only once hifth.app is first published (docs/issues.json, hifth-app-first-release). The info panel's links to these pages are not yet looked at inside the iPad app itself."

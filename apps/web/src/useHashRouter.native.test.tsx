@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { renderHook } from "@testing-library/preact";
 import type { AppState } from "@hifth/core";
 import { useHashRouter } from "./useHashRouter";
+import { clearSteps, recentSteps } from "./step-log";
 
 /**
  * The shell has no address bar, so the hash router tells it two things: when
@@ -155,5 +156,52 @@ describe("useHashRouter in the native shell", () => {
         { type: "route", hash: "#/hafs-kfqc/p45" },
       ]);
     });
+  });
+});
+
+/**
+ * Launch item 19: the problem report lists the reader's last steps by name.
+ * The router sees every change of view, so it is where they are noted. A link
+ * that moves the view is one step, "opened a link", not also the page turn or
+ * verse it lands on.
+ */
+describe("useHashRouter notes the reader's steps for the problem report", () => {
+  // Before, not after: the tests above this block also note steps.
+  beforeEach(() => clearSteps());
+  const pageOne: AppState = { edition: "hafs-kfqc", select: null, page: 1 };
+  const verse: AppState = { edition: "hafs-kfqc", select: { surah: 2, ayah: 255 } };
+  const names = () => recentSteps().map((s) => `${s.name}${s.count > 1 ? ` ×${s.count}` : ""}`);
+  function mount(initialHash = "#") {
+    window.history.replaceState(null, "", initialHash);
+    return renderHook(
+      ({ state, ready }: { state: AppState | null; ready: boolean }) => useHashRouter(state, () => {}, ready),
+      { initialProps: { state: null as AppState | null, ready: false } },
+    );
+  }
+
+  it("notes the app opening, then each change the reader makes", () => {
+    const { rerender } = mount();
+    rerender({ state: pageOne, ready: true });
+    rerender({ state: { ...pageOne, page: 2 }, ready: true });
+    rerender({ state: { ...pageOne, page: 3 }, ready: true });
+    rerender({ state: verse, ready: true });
+    expect(names()).toEqual(["open", "turn ×2", "verse"]);
+  });
+
+  it("opened cold at a link, the landing is not counted as a step of its own", () => {
+    const { rerender } = mount("#/hafs-kfqc/2:255");
+    rerender({ state: pageOne, ready: true });
+    rerender({ state: verse, ready: true });
+    expect(names()).toEqual(["open"]);
+  });
+
+  it("a link followed while the app is open is one step", () => {
+    const { rerender } = mount();
+    rerender({ state: pageOne, ready: true });
+    window.history.replaceState(null, "", "#/hafs-kfqc/2:255");
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    rerender({ state: verse, ready: true });
+    rerender({ state: { ...verse, page: 45, select: null }, ready: true });
+    expect(names()).toEqual(["open", "link", "unselect"]);
   });
 });
