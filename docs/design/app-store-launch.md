@@ -385,10 +385,19 @@ both privacy pages now say so and name the setting that stops it, held by a test
 the EU trader answer, the price and the copyright line (the owner's); the "rights to the content"
 answer, which waits on the permissions; the listing in Arabic.
 
-### ㉛ There are no screenshots at Apple's sizes · **open**
+### ㉛ There are no screenshots at Apple's sizes · **fixed**
 
 *What would answer it:* a command that takes the public build's screenshots at Apple's iPhone,
 iPad and Mac sizes, in English and Arabic.
+
+*What answered it (2026-11-17):* `make app-store-shots` takes 32 pictures of the public build
+(iPhone 6.9 and 6.3 inch, iPad 13 inch, Mac; English and Arabic), refuses the private build, and
+refuses any picture of a size the store does not take. Two faults found on the way are fixed with
+tests: the Mac window opened at the wrong height (written up in
+`docs/issues/mac-store-shot-window-size.md`), and a picture run read the laptop's own saved
+reading place, so the Mac pictures showed a "Left off" ribbon; a picture run now starts from an
+empty, throwaway store. Every picture was looked at. **Left over:** on the iPhone pictures the
+strip where the clock and battery sit is empty (㊹).
 
 ### ㉜ Nothing reads what readers write about the app in the store · **fixed**
 
@@ -559,6 +568,16 @@ report button are drawn touching (they were, on the first build). Looked at in C
 and 390 wide in both languages, and the browser test runs in Chrome, Firefox and the iPhone's
 Safari engine. Not yet looked at inside the iPad app itself. The pages answer once hifth.app's
 first upload is made.
+
+### ㊹ The iPhone store pictures have an empty strip where the clock and battery sit · **open**
+
+Found while looking at the pictures ㉛ takes. The app photographs its own page, so the strip at
+the top of an iPhone picture, where a real phone shows the time and battery, is one flat band.
+Apple takes the pictures as they are, but they look less finished than a phone in a hand.
+
+*What would answer it:* set the simulator's clock and battery to Apple's usual 9:41 and full,
+and photograph the whole screen; or fill the strip with the page's own top colour. A test
+refuses an iPhone picture whose top strip is one flat colour.
 
 ## Which of these could get the app turned down, and which matter once readers have it?
 

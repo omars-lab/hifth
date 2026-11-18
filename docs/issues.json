@@ -7343,11 +7343,26 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉛"
       },
+      "status": "fixed",
+      "severity": "defect",
+      "owner": "agent",
+      "launch": true,
+      "useCase": "find-hifth-and-open-it",
+      "closedBy": ".claude/skills/release-app/scripts/store-shots.test.mjs",
+      "note": "Fixed 2026-11-17: make app-store-shots takes 32 pictures of the public build (iPhone 6.9 and 6.3 inch, iPad 13 inch, Mac; English and Arabic) and refuses the private build and any size the store does not take (tests: store-shots.test.mjs). The Mac window is resized until the page is exactly 2560x1600 (WindowSizeTests; docs/issues/mac-store-shot-window-size.md), and a picture run keeps its page data in an empty throwaway store, so no 'Left off' ribbon or saved mark from the laptop shows (ScreenshotDataTests). Every picture was looked at. Left over: the empty clock-and-battery strip on the iPhone pictures (launch-store-shots-status-bar)."
+    },
+    {
+      "id": "launch-store-shots-status-bar",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊹"
+      },
       "status": "open",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
-      "note": "Of the public build only, in English and Arabic."
+      "useCase": "find-hifth-and-open-it",
+      "note": "Found 2026-11-17 looking at the store pictures: on the iPhone pictures the strip at the top where the clock and battery sit is an empty band, because the app photographs its own page. Apple takes the pictures as they are, but they look less finished than a real phone. Fix: set the simulator's clock and battery to Apple's usual 9:41 and full (xcrun simctl status_bar override) and photograph the whole screen, or fill the strip with the page's own top colour. Test: the store-shots check refuses an iPhone picture whose top strip is one flat colour."
     },
     {
       "id": "launch-reviewer-walk",

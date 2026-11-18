@@ -1186,3 +1186,7 @@ would break. Pictures of this build may be committed; it carries no held text.
 - [ ] Open the Mac store copy fresh, from an emptied data folder: page 7, no "Left off" ribbon. ·
   Mac · not walked: the Mac picture command builds the test copy and keeps the laptop's saved
   data, so it showed a ribbon from past runs; waits for the Mac sandbox (issue: `launch-mac-sandbox`)
+- [ ] Look at every store picture (`make app-store-shots`) for anything a new reader would not
+  see: a "Left off" ribbon, a bookmark, a note, a first-run tip, a half-drawn page. · Mac, iPad,
+  iPhone · test: `native/HifthTests/ScreenshotDataTests.swift` · found 2026-11-17: the Mac pictures
+  showed the laptop's own "Left off" ribbon; a picture run now starts from an empty, throwaway store
