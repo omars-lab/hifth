@@ -176,6 +176,21 @@ test("both privacy pages cover the apps: the device, the recitation, the report 
 });
 
 /*
+ * The apps keep Apple's crash and freeze reports on the device (launch item 17) and the problem
+ * report lists them, so both privacy pages must say so, in the report's section, and give the
+ * same count the app keeps. The count is read from the app's own code, so keeping more fails
+ * here before the page under-promises.
+ */
+test("both privacy pages say how many crash and freeze reports the apps keep, and that they leave only in a report", () => {
+  const swift = readFileSync(new URL("../../../native/Hifth/App/DeviceReports.swift", import.meta.url), "utf8");
+  const keep = Number(swift.match(/static let keep = (\d+)/)?.[1]);
+  assert.equal(keep, 5, "the app's count is read, and the pages below say five");
+  const section = (html) => html.slice(html.indexOf('id="problem-report"'), html.indexOf('id="accounts"'));
+  assert.match(section(page("privacy.html")), /last five short reports[\s\S]*only\s+inside a problem report you choose to send/);
+  assert.match(section(page("ar/privacy.html")), /آخر خمسة تقارير[\s\S]*إلا داخل بلاغ عن مشكلة تختار أنت إرساله/);
+});
+
+/*
  * The app asks for a verse's sound before it is played (when its tools open, and the next few
  * while one plays), so the policy must say so and name the setting that stops it. It names the
  * setting by the words the app shows, so renaming the setting fails here, not on a reader. The

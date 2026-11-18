@@ -43,6 +43,12 @@ export interface NativeInfo {
    * leaves it out, and the report then says no version.
    */
   readonly appVersion?: string;
+  /**
+   * Apple's crash and freeze reports the app keeps on the device, as the
+   * lines the problem report shows (launch item 17). Optional, like the
+   * version: left out when the device keeps none.
+   */
+  readonly deviceReports?: string;
 }
 
 export type NativeMessage =
@@ -69,12 +75,13 @@ export interface PageApi {
 export function nativeInfo(): NativeInfo | null {
   const raw = (window as Shelled).__HIFTH_NATIVE__;
   if (!raw || typeof raw !== "object") return null;
-  const { platform, publicBase, appVersion } = raw as Partial<NativeInfo>;
+  const { platform, publicBase, appVersion, deviceReports } = raw as Partial<NativeInfo>;
   if (platform !== "ios" && platform !== "macos") return null;
   if (typeof publicBase !== "string" || publicBase === "") return null;
-  return typeof appVersion === "string" && appVersion !== ""
-    ? { platform, publicBase, appVersion }
-    : { platform, publicBase };
+  const info: { -readonly [K in keyof NativeInfo]: NativeInfo[K] } = { platform, publicBase };
+  if (typeof appVersion === "string" && appVersion !== "") info.appVersion = appVersion;
+  if (typeof deviceReports === "string" && deviceReports !== "") info.deviceReports = deviceReports;
+  return info;
 }
 
 export function isNative(): boolean {

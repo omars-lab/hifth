@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { clearFaults, noteFault } from "./fault-log";
 import { stringsFor } from "./i18n";
 import { STEP_LIMIT, clearSteps, noteViewChange } from "./step-log";
-import { REPORT_FAULTS, SUPPORT_ADDRESS, deviceKind, gatherFacts, mailLink, reportText, type ReportFacts } from "./problem-report";
+import { REPORT_DEVICE_LINES, REPORT_FAULTS, SUPPORT_ADDRESS, deviceKind, gatherFacts, mailLink, reportText, type ReportFacts } from "./problem-report";
 
 const FACTS: ReportFacts = {
   platform: "ios",
@@ -15,7 +15,14 @@ const FACTS: ReportFacts = {
   when: "2026-11-16T12:00:00.000Z",
   faults: [],
   steps: [],
+  deviceReports: null,
 };
+
+/** Made-up lines in the shape the app's DeviceReports.summary writes. */
+const DEVICE_LINES =
+  "- 2026-11-17 08:30 crash (exception 1, signal 11), app 0.1.0 (7)\n" +
+  "  at Hifth +0x1a2b < Hifth +0x3c4d < UIKitCore +0x10\n" +
+  "- 2026-11-16 21:04 froze for 20 sec, app 0.1.0 (7)";
 
 afterEach(() => {
   clearFaults();
@@ -140,7 +147,44 @@ describe("the problem report", () => {
       name: i % 2 ? ("followed a link to another verse" as const) : ("went back along the trail" as const),
       count: 99,
     }));
-    expect(mailLink(reportText({ ...FACTS, faults, steps }), "What happened?").length).toBeLessThan(4000);
+    const deviceReports = Array.from({ length: 40 }, () => "- 2026-11-17 08:30 crash (exception 1, signal 11), app 0.1.0 (7)").join("\n");
+    expect(mailLink(reportText({ ...FACTS, faults, steps, deviceReports }), "What happened?").length).toBeLessThan(4000);
+  });
+
+  it("lists the crash and freeze reports the app keeps, after the errors", () => {
+    const text = reportText({ ...FACTS, deviceReports: DEVICE_LINES });
+    expect(text).toContain(`Crash and freeze reports from Apple's system, kept on this device (newest first):\n${DEVICE_LINES}`);
+    expect(text.indexOf("Errors")).toBeLessThan(text.indexOf("Crash and freeze"));
+  });
+
+  it("says when the app keeps none, and leaves the section out on the website", () => {
+    expect(reportText(FACTS)).toContain("Crash and freeze reports: none kept on this device");
+    expect(reportText({ ...FACTS, platform: "browser", appVersion: null })).not.toContain("Crash and freeze");
+  });
+
+  it("takes no more from the app than a few short lines", () => {
+    const deviceReports = Array.from({ length: 30 }, (_, i) => `- made-up line ${i} ${"z".repeat(400)}`).join("\n");
+    const text = reportText({ ...FACTS, deviceReports });
+    const section = text.slice(text.indexOf("Crash and freeze")).split("\n").slice(1);
+    expect(section).toHaveLength(REPORT_DEVICE_LINES);
+    expect(text).not.toContain(`made-up line ${REPORT_DEVICE_LINES}`);
+    for (const line of section) expect(line.length).toBeLessThan(200);
+  });
+
+  it("reads the device's reports from the app, and ignores anything that is not text", () => {
+    const marker = (deviceReports: unknown) => {
+      (window as { __HIFTH_NATIVE__?: unknown }).__HIFTH_NATIVE__ = {
+        platform: "ios",
+        publicBase: "https://example.invalid/",
+        deviceReports,
+      };
+    };
+    marker(DEVICE_LINES);
+    expect(gatherFacts().deviceReports).toBe(DEVICE_LINES);
+    marker(42);
+    expect(gatherFacts().deviceReports).toBeNull();
+    marker("");
+    expect(gatherFacts().deviceReports).toBeNull();
   });
 
   it("keeps the page an error names, so the reader is promised no list of pages, not no page at all", () => {
