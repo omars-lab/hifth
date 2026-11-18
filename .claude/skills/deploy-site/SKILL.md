@@ -138,8 +138,19 @@ the first real check of a note is the live site after the owner's upload.
      - every file in `apps/landing/migrations/` is in the real accounts database (the second,
        `0002_apple_tickets.sql`, holds Apple's cancel tickets), put in with the owner's yes;
      - the owner has registered `https://hifth.app/api/sign-in/apple-notice` on Apple's developer
-       site as the address for Sign in with Apple's server-to-server notices (under the app's
-       identifier, Sign in with Apple, Edit), so Apple can say when a reader has left.
+       site as the address for Sign in with Apple's server-to-server notices, so Apple can say
+       when a reader has left. Apple's own steps (read 2026-11-18,
+       <https://developer.apple.com/help/account/capabilities/enabling-server-to-server-notifications/>):
+       Certificates, Identifiers & Profiles, Identifiers, pick the app's identifier, scroll to
+       Sign in with Apple, Configure, type the address, Done, then Save at the top right. It
+       takes one address, and only on the main app identifier.
+     And one thing soon after, which does not hold the switch up (sign-in step 17): the server
+     lets only 60 sign-ins wait at once, shared by everyone, so one caller asking non-stop could
+     keep new sign-ins out. The owner adds the one free "rate limiting rule" on the hifth.app
+     zone in Cloudflare (Security, WAF, Rate limiting rules): address path starts with
+     `/api/sign-in`, more than 10 requests in 10 seconds from one address, block for 10 seconds.
+     The free plan gives one such rule with exactly those 10-second settings. It does not cover
+     the project's `pages.dev` address.
 - **To try the form locally:** `supabase start` (in a scratch copy if the repo's own is busy, named
   by `SUPABASE_WORKDIR`), then `make hifth-app-serve`, and open http://127.0.0.1:7124/ (press C to
   leave a comment on the page). It reads the local list's address and key from `supabase status`

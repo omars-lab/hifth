@@ -89,7 +89,7 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 14 | "Delete my account" inside the app: delete everything, cut the link with Apple. App Review requires it | left: the server half was built 2026-11-18 (it deletes the account, every session and the ticket, and tells Apple to cut the link). The button in the app comes with step 16 | agent | a day |
 | 15 | Keep the session in the Keychain, so an iPad stays signed in for months; check at each launch that the reader has not cut Hifth off in their Apple settings | left | agent | half a day |
 | 16 | A button that says what leaves the device and who sees it, a place to see and take it back, and the new way out named in the privacy check | left | agent | a day |
-| 17 | Limit how often anyone can try, reusing the notify list's "are you a person" check | left | agent; you may need to switch on a limit in Cloudflare | half a day |
+| 17 | Limit how often anyone can try | built on the server 2026-11-18: at most 60 sign-ins can be waiting at once, and the next ask is told to try again in a minute. Not the notify list's "are you a person" check after all: that check runs in a web page, and sign-in is asked by the app. Left: one limit per caller, switched on in Cloudflare (question ⑮), and the app saying "try again shortly" instead of a plain error (step 16) | agent; you switch on the limit in Cloudflare | half a day |
 | 18 | Keep it to testers: an invite code (an email list fails when testers hide their email), and a working test login for Apple's beta reviewers | left | agent | half a day |
 | 19 | Privacy page and App Store privacy label updated | left: drafted 2026-11-18 in [the privacy draft](sign-in-privacy-draft.md), with seven questions for you at its top. Nothing live has changed | agent drafts, you approve | half a day |
 | 20 | Sign the Mac build with the paid team. Apple says Sign in with Apple does not work in Mac apps sold outside the App Store, so the Mac goes through TestFlight or the Mac App Store | done 2026-11-17: the Mac App Store build is signed with the paid team and archived; its Sign in with Apple line is step 6 | — | — |
@@ -394,7 +394,7 @@ The ticket's lock is worked out from the Sign in with Apple key file, so there i
 
 ### ⑫ How long does a sign-in last, and are old ones cleared out? · **open**
 
-This page says a sign-in renews each time it is used, so an iPad stays signed in for months. The code gives a fixed 60 days and never renews, and nothing removes sign-ins or one-off words that have run out, so a list of when each device signed in builds up until the account is deleted. Found by the privacy draft (step 19), which follows the code. To settle: renew on use or keep the fixed length, and clear out what has run out on a schedule; then make the privacy page promise exactly that.
+This page says a sign-in renews each time it is used, so an iPad stays signed in for months. The code gives a fixed 60 days and never renews, and nothing removes sign-ins or one-off words that have run out, so a list of when each device signed in builds up until the account is deleted. Found by the privacy draft (step 19), which follows the code. To settle: renew on use or keep the fixed length, and clear out what has run out on a schedule; then make the privacy page promise exactly that. Since step 17, one-off words that have run out are cleared each time a new one is handed out; sign-ins that have run out are still kept.
 
 ### ⑬ Does the app tell hifth.app when it signs a reader out by itself? · **open**
 
@@ -403,3 +403,10 @@ Found in step 15. At launch the app drops its saved sign-in when Apple says the 
 ### ⑭ Does an iPad really stay signed in, and sign out when it should? · **open**
 
 Step 15's code is tested with a stand-in Keychain and a stand-in Apple, so five things can only be seen on real devices, after the first real sign-in (step 11). Parked for one sitting with the iPad, each answer to become a test where it can: still signed in after quitting the app, after restarting the iPad, and some days later; signed out at the next launch after you remove Hifth under Sign in with Apple in the iPad's Settings; still signed in when opened in airplane mode; what a reader sees after deleting the app and installing it again; and whether the store-signed Mac app can save its sign-in at all.
+
+### ⑮ Could one person keep everyone else from signing in? · **open**
+
+Yes, for a while, until you switch on one limit in Cloudflare. Since step 17 the server lets at most 60 sign-ins wait at once. That number protects the free database, which allows 100,000 writes a day: without it, anyone could fill the day's allowance and stop every sign-in until midnight. But the 60 places are shared by every reader, because we keep nothing about who is asking (no internet address, as the privacy draft promises). So someone asking for sign-ins non-stop can hold all 60 places, and a real reader who taps "Sign in" is told to try again. Readers who are already signed in are not touched, and neither are sign-out, delete my account or Apple's notices.
+
+What stops that person is a limit per caller, which only Cloudflare can apply, before the request reaches our code and without us keeping anything. The free plan gives one such rule: block a caller for 10 seconds once they make more than a set number of requests in 10 seconds. You add it on the hifth.app zone; the steps are in the deploy-site skill, step 5. Two gaps stay even then: the rule does not cover the project's own Cloudflare address, and a patient caller under the limit can still use up places slowly. Both are small next to an open door.
+

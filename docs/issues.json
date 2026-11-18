@@ -4170,6 +4170,17 @@
       "note": "Five checks only real devices can answer, in one sitting with the iPad after the first real sign-in (step 11): still signed in after a quit, a restart and some days; signed out at the next launch after removing Hifth under Sign in with Apple in Settings; still signed in when opened in airplane mode; what shows after deleting and reinstalling the app; whether the store-signed Mac app can save its sign-in. Step 15's code is tested only with stand-ins. Each answer becomes a test where it can."
     },
     {
+      "id": "sign-in-limit-per-caller",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑮"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "note": "The server lets at most 60 sign-ins wait at once (step 17, built 2026-11-18), shared by every reader because nothing about a caller is kept. One caller asking non-stop can hold every place and keep new sign-ins out; signed-in readers are not touched. The owner adds the one free rate limiting rule on the hifth.app zone in Cloudflare: path starts with /api/sign-in, more than 10 requests in 10 seconds, block 10 seconds (deploy-site skill, step 5). Soon after sign-in is switched on; it does not hold the switch up."
+    },
+    {
       "id": "notify-list-data-door",
       "source": {
         "file": "docs/design/sign-in.md",

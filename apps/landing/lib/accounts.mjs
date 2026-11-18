@@ -20,6 +20,18 @@ import { hashWord } from "./apple-signin.mjs";
 export const SESSION_SECONDS = 60 * 24 * 60 * 60;
 /** How long a one-off word waits for its sign-in: 10 minutes. */
 export const WORD_SECONDS = 10 * 60;
+/**
+ * The most one-off words that can be waiting for their sign-in at once (step 17). Past it, the
+ * next ask gets none until a waiting word is used or runs out.
+ *
+ * It is sized to the free database, not to the readers: every word costs a few writes, the free
+ * plan allows 100,000 a day, and 60 words per ten minutes is at most 8,640 a day. Sixty readers
+ * opening Apple's sheet in the same ten minutes is far more than a first release will see. It is
+ * one list shared by everyone, because nothing about a caller is kept; so someone asking for
+ * words non-stop can keep new sign-ins out for a while. They cannot touch a reader who is already
+ * signed in, and the per-caller limit that stops them belongs at Cloudflare's edge, not here.
+ */
+export const MOST_WAITING_WORDS = 60;
 
 const nowSeconds = () => Math.floor(Date.now() / 1000);
 
@@ -29,14 +41,23 @@ export function randomCode() {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** Hands out a one-off word for one sign-in, and keeps only its scrambled copy. */
+/**
+ * Hands out a one-off word for one sign-in, and keeps only its scrambled copy. Returns null, and
+ * keeps nothing, when MOST_WAITING_WORDS are already waiting.
+ */
 export async function handOutWord(db, { now = nowSeconds(), newCode = randomCode } = {}) {
+  // Words that ran out hold no place, and are not left to pile up.
+  await db.prepare("DELETE FROM sign_in_words WHERE expires_at < ?").bind(now).run();
+
+  // The count and the insert are one statement, so asks racing each other cannot slip past the limit.
   const word = newCode();
-  await db
-    .prepare("INSERT INTO sign_in_words (word_hash, expires_at) VALUES (?, ?)")
-    .bind(await hashWord(word), now + WORD_SECONDS)
+  const kept = await db
+    .prepare(
+      "INSERT INTO sign_in_words (word_hash, expires_at) SELECT ?, ? WHERE (SELECT COUNT(*) FROM sign_in_words WHERE expires_at >= ?) < ?",
+    )
+    .bind(await hashWord(word), now + WORD_SECONDS, now, MOST_WAITING_WORDS)
     .run();
-  return word;
+  return kept.meta.changes === 1 ? word : null;
 }
 
 /**

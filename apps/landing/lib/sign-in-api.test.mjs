@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createLocalJWKSet, exportJWK, exportPKCS8, generateKeyPair, SignJWT } from "jose";
 import { handleAppleNotice, handleDeleteAccount, handleWord, handleSignIn, handleSignOut } from "./sign-in-api.mjs";
-import { whoIs } from "./accounts.mjs";
+import { MOST_WAITING_WORDS, whoIs } from "./accounts.mjs";
 import { localD1 } from "./test-d1.mjs";
 
 /*
@@ -442,4 +442,42 @@ test("signing out with no session, or one nobody was given, is quietly fine", as
     const res = await handleSignOut(post("/api/sign-out", {}, headers), env);
     assert.equal(res.status, 204, JSON.stringify(headers));
   }
+});
+
+// Step 17: a limit on how many sign-ins can be waiting at once.
+
+async function fillTheWaitingList(env) {
+  let word;
+  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) word = await getWord(env);
+  return word;
+}
+
+test("when too many sign-ins are waiting, the word address says try again shortly", async () => {
+  const { env, rows } = setUp();
+  await fillTheWaitingList(env);
+  const res = await handleWord(post("/api/sign-in/word", {}), env);
+  assert.equal(res.status, 429);
+  assert.deepEqual(await res.json(), { reason: "too-many" });
+  assert.equal(res.headers.get("retry-after"), "60");
+  assert.equal(res.headers.get("cache-control"), "no-store");
+  assert.equal(rows("sign_in_words").length, MOST_WAITING_WORDS);
+});
+
+test("a full waiting list stops nothing else: a word already in hand, sign-out, delete my account and Apple's notice all still work", async () => {
+  const { db, env } = setUp();
+  const first = await getWord(env);
+  const signedInRes = await handleSignIn(post("/api/sign-in", { note: "apple:000001.made-up.0001", word: first }), env, { check });
+  const { session } = await signedInRes.json();
+  const other = await signedIn(env, "000002.made-up.0002");
+
+  const inHand = await fillTheWaitingList(env);
+  assert.equal((await handleWord(post("/api/sign-in/word", {}), env)).status, 429);
+
+  const late = await handleSignIn(post("/api/sign-in", { note: "apple:000003.made-up.0003", word: inHand }), env, { check });
+  assert.equal(late.status, 200);
+  assert.equal((await handleSignOut(post("/api/sign-out", {}, asReader(session)), env)).status, 204);
+  assert.equal(await whoIs(db, session), null);
+  assert.equal((await handleDeleteAccount(post("/api/sign-in/delete-account", {}, asReader(other)), env)).status, 200);
+  const res = await handleAppleNotice(post("/api/sign-in/apple-notice", await notice("consent-revoked", "000003.made-up.0003")), env, { keys });
+  assert.equal(res.status, 200);
 });

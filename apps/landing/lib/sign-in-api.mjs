@@ -1,7 +1,7 @@
 // hifth.app's sign-in addresses (docs/design/sign-in.md, step 10). The thin Cloudflare files in
 // functions/api/ call these; the work is in accounts.mjs and apple-signin.mjs.
 //
-//   POST /api/sign-in/word   -> 200 { word }
+//   POST /api/sign-in/word   -> 200 { word } | 429 { reason: "too-many" } when too many are waiting
 //   POST /api/sign-in        { note, word, code? } -> 200 { session, expiresAt } | 400 | 401 { reason } | 413
 //   POST /api/sign-out       Authorization: Bearer <session> -> 204
 //   POST /api/sign-in/apple-notice   { payload } from Apple -> 200 | 400 | 401 { reason } | 413
@@ -69,7 +69,16 @@ function appleCheck(env) {
 export async function handleWord(request, env) {
   const stop = closed(env);
   if (stop) return stop;
-  return reply(200, { word: await handOutWord(env.ACCOUNTS) });
+  const word = await handOutWord(env.ACCOUNTS);
+  if (word === null) {
+    // Too many sign-ins are waiting (step 17). Only this address is limited: a sign-in without a
+    // live word costs one cheap delete, and sign-out, delete my account and Apple's notice must
+    // never be turned away.
+    const res = reply(429, { reason: "too-many" });
+    res.headers.set("retry-after", "60");
+    return res;
+  }
+  return reply(200, { word });
 }
 
 /** The request's JSON body as { fields }, or { stop } with the reply that refuses it. */

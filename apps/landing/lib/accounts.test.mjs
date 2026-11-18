@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs, SESSION_SECONDS, WORD_SECONDS } from "./accounts.mjs";
+import { actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs, MOST_WAITING_WORDS, SESSION_SECONDS, WORD_SECONDS } from "./accounts.mjs";
 import { localD1 } from "./test-d1.mjs";
 
 /*
@@ -315,4 +315,40 @@ test("left to itself, a word and a session are long random codes", async () => {
   assert.match(word, /^[0-9a-f]{64}$/);
   const { session } = await signIn(db, { note: "apple:000001.made-up.0001", word, check, now: T0 });
   assert.match(session, /^[0-9a-f]{64}$/);
+});
+
+// Step 17: a limit on how many sign-ins can be waiting at once.
+
+test("only so many one-off words can be waiting at once; the next ask gets none and keeps nothing", async () => {
+  const { db, rows } = localD1();
+  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) {
+    assert.equal(typeof (await handOutWord(db, { now: T0, newCode })), "string", `word ${i + 1}`);
+  }
+  assert.equal(await handOutWord(db, { now: T0, newCode }), null);
+  assert.equal(rows("sign_in_words").length, MOST_WAITING_WORDS);
+});
+
+test("a word that is used makes room for the next ask", async () => {
+  const { db } = localD1();
+  let word;
+  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) word = await handOutWord(db, { now: T0, newCode });
+  assert.equal(await handOutWord(db, { now: T0, newCode }), null);
+  await signIn(db, { note: "apple:000001.made-up.0001", word, check, now: T0, newCode });
+  assert.equal(typeof (await handOutWord(db, { now: T0, newCode })), "string");
+});
+
+test("words that ran out are cleared away when the next one is handed out, so they hold no place", async () => {
+  const { db, rows } = localD1();
+  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) await handOutWord(db, { now: T0, newCode });
+  const later = T0 + WORD_SECONDS + 1;
+  assert.equal(typeof (await handOutWord(db, { now: later, newCode })), "string");
+  assert.equal(rows("sign_in_words").length, 1);
+});
+
+test("a full waiting list never touches readers who are already signed in", async () => {
+  const { db } = localD1();
+  const reader = await freshSignIn(db, "000001.made-up.0001");
+  for (let i = 0; i < MOST_WAITING_WORDS; i += 1) await handOutWord(db, { now: T0, newCode });
+  assert.equal(await handOutWord(db, { now: T0, newCode }), null);
+  assert.equal(await whoIs(db, reader.session, { now: T0 + 60 }), reader.accountId);
 });

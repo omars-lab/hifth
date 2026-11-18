@@ -159,6 +159,20 @@ Built by a helper agent on this branch; the app's half is still to do.
   renews when used. And nothing clears out sessions or one-off words that have run out. Both
   found by the privacy draft (step 19); settle them with step 15's "stays signed in for months".
 
+## What step 17 showed (2026-11-18)
+
+- **The plan's "reuse the notify list's are-you-a-person check" does not fit.** That check is a
+  widget in a web page, tied to hifth.app; sign-in is asked by the Swift app. Why, and what
+  replaced it: `docs/issues/sign-in-limit-not-the-person-check.md`.
+- **Built instead:** `handOutWord` (`apps/landing/lib/accounts.mjs`) clears run-out words, then
+  inserts only while fewer than `MOST_WAITING_WORDS` (60) are waiting, in one statement. Full
+  means `null`, and the word address answers 429 `too-many` with `Retry-After: 60`. Nothing
+  else is limited.
+- **Nothing about a caller is kept**, so the 60 places are shared. The per-caller limit is the
+  owner's one free rate limiting rule in Cloudflare (deploy-site skill, step 5; question ⑮).
+- **The app** shows 429 as a plain "server-error" today. Step 16 maps it to "try again shortly"
+  when the held Swift files are in.
+
 ### Still open for step 11: how the iPad trial asks for sign-in
 
 A tapped app has no launch setting, and the page has no sign-in button until step 16. Two ways,
