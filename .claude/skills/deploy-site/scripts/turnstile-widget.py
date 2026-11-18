@@ -4,7 +4,9 @@
 The email form on the front page asks Cloudflare Turnstile whether a person, not a robot, filled
 it in. That needs one widget on the account that holds hifth.app. A widget has two halves:
 
-  - the site key, which is public and sits in the page (data-sitekey on the form);
+  - the site key, which is public and sits in the page (data-sitekey on the form). The repo's
+    page keeps Cloudflare's test key so the form works on this laptop; --make saves the real
+    one as HIFTH_APP_TURNSTILE_SITEKEY and the release puts it into the release copy;
   - the secret, which the sign-up function sends to Cloudflare to check an answer. It goes in
     the encrypted keys file as TURNSTILE_SECRET and, at release, into the site's settings.
 
@@ -103,9 +105,14 @@ def main(argv):
     if not secret:
         print(f'Could not read the widget\'s secret: {why(detail)}', file=sys.stderr)
         return 2
-    saved = subprocess.run(['bash', os.path.join(ROOT, 'scripts', 'env', 'env-set.sh'), 'TURNSTILE_SECRET'],
-                           input=secret + '\n', text=True, cwd=ROOT)
-    return 0 if saved.returncode == 0 else 2
+    # The site key is public, but it is saved beside the secret so the release can put it into
+    # the release copy of the front page; the repo's page keeps the test key for this laptop.
+    for name, value in (('TURNSTILE_SECRET', secret), ('HIFTH_APP_TURNSTILE_SITEKEY', sitekey)):
+        saved = subprocess.run(['bash', os.path.join(ROOT, 'scripts', 'env', 'env-set.sh'), name],
+                               input=value + '\n', text=True, cwd=ROOT)
+        if saved.returncode != 0:
+            return 2
+    return 0
 
 
 if __name__ == '__main__':

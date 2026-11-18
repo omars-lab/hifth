@@ -123,13 +123,30 @@ test("a token that cannot look at widgets says it could not look, and is not cou
   assert.match(out.text(), /could not look/i);
 });
 
-test("main's front page still carrying the test spam-check key is not ready, in either language", async () => {
+// The repo's front page keeps the test key so the form works on this laptop; the release swaps in
+// the real one from the saved keys. So the test key on main is fine once the real one is saved.
+test("main's front page with the test key and no real key saved is not ready, in either language", async () => {
   for (const which of ["apps/landing/index.html", "apps/landing/ar/index.html"]) {
     const out = said();
     const ok = await firstUpload({ env, fetch: cloudflare(allSet()).fetch, readMain: main({ ...ready, [which]: page(TEST_KEY) }), say: out.say });
     assert.equal(ok, false, which);
-    assert.match(out.text(), /✗.*test key/i);
+    assert.match(out.text(), /✗.*HIFTH_APP_TURNSTILE_SITEKEY/);
   }
+});
+
+test("main's test key with the real one saved is ready, and the saved key is never printed", async () => {
+  const out = said();
+  const both = { ...ready, "apps/landing/index.html": page(TEST_KEY), "apps/landing/ar/index.html": page(TEST_KEY) };
+  const ok = await firstUpload({ env: { ...env, HIFTH_APP_TURNSTILE_SITEKEY: REAL_KEY }, fetch: cloudflare(allSet()).fetch, readMain: main(both), say: out.say });
+  assert.equal(ok, true);
+  assert.match(out.text(), /✓.*HIFTH_APP_TURNSTILE_SITEKEY/);
+  assert.ok(!out.text().includes(REAL_KEY));
+});
+
+test("only live uploads are counted, not previews", async () => {
+  const cf = cloudflare(allSet());
+  await firstUpload({ env, fetch: cf.fetch, readMain: main(ready), say: () => {} });
+  assert.ok(cf.asked.some((u) => u.includes("/deployments?env=production")), cf.asked.join("\n"));
 });
 
 test("sign-in code not yet on main is a warning about sign-in, not a block on the upload", async () => {

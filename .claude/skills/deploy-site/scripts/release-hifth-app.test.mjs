@@ -134,6 +134,38 @@ test("with no signing team, no links file is written, and the check says it is m
   assert.match(problems[0].why, /missing/);
 });
 
+// The front page in the repo keeps Cloudflare's test spam-check key, so the form still works on
+// this laptop (the real widget answers only on hifth.app). The release copy gets the real,
+// public site key in its place, in both languages; the repo's own copy is left as it was.
+const TEST_SITE_KEY = "1x00000000000000000000AA";
+const MADE_UP_SITE_KEY = "0x4AAAAAAAmadeUpSiteKey";
+const form = (key) => `<div class="cf-turnstile" data-sitekey="${key}" data-action="notify"></div>`;
+
+test("given the real site key, the release copy carries it in both languages, and the repo's pages keep the test key", () => {
+  const { landing, app, out } = fixture();
+  writeFileSync(join(landing, "index.html"), form(TEST_SITE_KEY));
+  writeFileSync(join(landing, "ar", "index.html"), form(TEST_SITE_KEY));
+  assemble({ landing, app, out, sitekey: MADE_UP_SITE_KEY });
+  for (const page of ["index.html", "ar/index.html"]) {
+    assert.equal(readFileSync(join(out, page), "utf8"), form(MADE_UP_SITE_KEY), page);
+    assert.equal(readFileSync(join(landing, page), "utf8"), form(TEST_SITE_KEY), page);
+  }
+});
+
+test("with no site key the copy keeps the test key, so the folder check refuses it", () => {
+  const { landing, app, out } = fixture();
+  writeFileSync(join(landing, "index.html"), form(TEST_SITE_KEY));
+  assemble({ landing, app, out, team: MADE_UP_TEAM });
+  const problems = auditShipped(readFolder(out).files).problems.filter((p) => p.path === "index.html");
+  assert.equal(problems.length, 1);
+});
+
+test("a site key that is not shaped like one is refused, not written into the page", () => {
+  const { landing, app, out } = fixture();
+  writeFileSync(join(landing, "index.html"), form(TEST_SITE_KEY));
+  assert.throws(() => assemble({ landing, app, out, sitekey: '"><script>' }), /site key/);
+});
+
 test("a pitch build is copied, so the check refuses the release instead of hiding it", () => {
   const { landing, app, out } = fixture({ "pitch/index.html": "<html>" });
   assemble({ landing, app, out, team: MADE_UP_TEAM });

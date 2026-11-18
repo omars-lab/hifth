@@ -106,7 +106,8 @@ export async function firstUpload({
       else no(`${name} not set (${what})`);
     }
 
-    const uploads = await ask(fetch, env, `${base}/deployments`);
+    // Live uploads only: a preview upload does not make the next one any less the first.
+    const uploads = await ask(fetch, env, `${base}/deployments?env=production`);
     const count = uploads.ok ? (uploads.body.result ?? []).length : null;
     if (count === null) say(`  ? could not count the project's uploads (${why(uploads)})`);
     else if (count === 0) say("  · no upload yet, so the first one runs with --no-carry");
@@ -122,11 +123,15 @@ export async function firstUpload({
   else no(`no spam-check widget for ${DOMAIN} yet. make hifth-app-turnstile ARGS=--make makes it and saves its secret.`);
 
   say("On main (what a release is built from)");
+  // The repo's front page keeps the test key so the form works on this laptop; the release puts
+  // the saved real key into its own copy (release-hifth-app.mjs, stampSiteKey).
+  const saved = Boolean(env.HIFTH_APP_TURNSTILE_SITEKEY);
   for (const path of FRONT_PAGES) {
     const text = readMain(path);
     if (text == null) no(`${path} is not on main`);
-    else if (TEST_KEY.test(text)) no(`${path} still carries the spam check's test key; the widget's public site key goes in its place`);
-    else yes(`${path} carries a real spam-check key`);
+    else if (!TEST_KEY.test(text)) yes(`${path} carries a real spam-check key`);
+    else if (saved) yes(`${path} has the test key, and HIFTH_APP_TURNSTILE_SITEKEY is saved, so the release puts the real one in`);
+    else no(`${path} has the test key and HIFTH_APP_TURNSTILE_SITEKEY is not saved, so the release would keep it. make hifth-app-turnstile ARGS=--make saves it.`);
   }
   if (readMain(SIGN_IN_CODE) == null) say("  ! the sign-in code is not on main yet, so this upload has no sign-in; switching it on waits for the sign-in pull request to merge and a second upload");
   else yes("the sign-in code is on main");
