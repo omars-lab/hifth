@@ -2079,9 +2079,25 @@
         {
           "file": "apps/landing/lib/apple-signin.mjs",
           "symbol": "checkAppleNote"
+        },
+        {
+          "file": "apps/landing/lib/accounts.mjs",
+          "symbol": "signIn"
         }
       ],
       "proof": [
+        {
+          "file": "apps/landing/lib/accounts.test.mjs",
+          "test": "the same Apple user signing in on a second device finds the same account, with its own session"
+        },
+        {
+          "file": "apps/landing/lib/accounts.test.mjs",
+          "test": "the database keeps only scrambled copies: no session and no one-off word in plain"
+        },
+        {
+          "file": "apps/landing/lib/accounts.test.mjs",
+          "test": "signing out on one device ends that session only"
+        },
         {
           "file": "apps/landing/lib/apple-signin.test.mjs",
           "test": "a good note names the reader by Apple's lasting user number"
@@ -2099,7 +2115,7 @@
           "test": "a note whose one-off word does not match the one we handed out is refused"
         }
       ],
-      "gap": "Only the server's check of Apple's note is built. Accounts, sessions, Apple's sheet in the apps and marks following the reader are still to come (docs/design/sign-in.md, steps 6 to 21)."
+      "gap": "The server's check of Apple's note, and accounts and sessions on a local copy of the database, are built and tested. The web address the app calls, Apple's sheet in the apps and marks following the reader are still to come (docs/design/sign-in.md, steps 6 to 21)."
     }
   ]
 }

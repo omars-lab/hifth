@@ -2633,6 +2633,21 @@
           "file": "apps/landing/lib/apple-signin.mjs",
           "symbol": "checkAppleNote",
           "note": "Checks Apple's note (an identity token): Apple's signature, signed one pinned way only, issued by Apple, meant for one of our app ids, not expired, and carrying the scrambled copy of the one-off word hifth.app handed out. Only Apple's lasting user number comes back."
+        },
+        {
+          "file": "apps/landing/lib/accounts.mjs",
+          "symbol": "signIn",
+          "note": "Spends the one-off word, runs Apple's check, finds or makes the account by Apple's user number, and hands back a new session. handOutWord, whoIs and signOut sit beside it."
+        },
+        {
+          "file": "apps/landing/migrations/0001_accounts.sql",
+          "symbol": "CREATE TABLE accounts",
+          "note": "The tables: accounts, sessions and one-off words. Only scrambled copies of sessions and words are kept."
+        },
+        {
+          "file": "apps/landing/lib/test-d1.mjs",
+          "symbol": "localD1",
+          "note": "The tests' stand-in for Cloudflare's database: Node's own SQLite, running the real migration files."
         }
       ],
       "extend": [
@@ -2643,7 +2658,7 @@
         "The plan and its order: .claude/plans/sign-in-build.md."
       ],
       "gates": [
-        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/server-only.test.mjs"
+        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/accounts.test.mjs apps/landing/lib/server-only.test.mjs"
       ],
       "seeAlso": [
         "hifth-app-site"
