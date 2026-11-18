@@ -424,6 +424,9 @@ app-device-register: app-generate ## Register a new plugged-in device with Apple
 	  -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=$(TEAM) build | $(XCPRETTY)
 	@$(MAKE) --no-print-directory app-device-install DEVICE="$(DEVICE)"
 
+app-profile-allows: ## Say whether each signing profile Xcode downloaded allows a permission (KEY=, default Sign in with Apple); prints no team id
+	@sh native/scripts/profile-allows.sh --installed $(or $(KEY),com.apple.developer.applesignin)
+
 # ---- a real iPad over USB
 app-device-install: app-generate ## Build for a plugged-in iPad, install and launch at ROUTE (DEVICE=<name from `xcrun devicectl list devices`>)
 	@test -n "$(DEVICE)" || { echo ""; echo "  DEVICE= is empty. Pick a name from:"; xcrun devicectl list devices; echo ""; exit 1; }
