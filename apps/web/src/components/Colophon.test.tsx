@@ -110,7 +110,7 @@ describe("Colophon", () => {
     );
     fireEvent.click(screen.getByRole("radio", { name: /English/ }));
     // The English strings may load a moment after the tap.
-    await screen.findByText("Mushaf pages");
+    await screen.findByText("Mushaf pages of the Madinah print (digital edition)");
     // The choice is remembered on the device; forget it for the tests after this one.
     localStorage.clear();
     const rows = Array.from(document.querySelectorAll("li[data-credit]"));
@@ -141,10 +141,29 @@ describe("Colophon", () => {
     // Hifth does not vendor. Overstating someone else's terms fails silently —
     // it reads as caution, so no reader files a bug. This pins the negative.
     render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
-    const row = screen.getByText(/KFGQPC/).closest("li");
+    const row = document.querySelector('li[data-credit="https://github.com/quranpedia/quran-svg"]');
     expect(row).not.toBeNull();
     expect(row!.textContent).not.toMatch(/غير التجاري/);
-    expect(row!.textContent).toMatch(/الطبع التجاري محفوظ للمجمع/);
+    // "Commercial printing reserved" also said more than the Complex's footnote,
+    // which limits only printing inside the Kingdom and importing for sale
+    // (docs/research/2026-11-17-store-terms.md).
+    expect(row!.textContent).not.toMatch(/الطبع التجاري/);
+    expect(row!.textContent).toMatch(/مجمع الملك فهد لطباعة المصحف الشريف/);
+    expect(row!.textContent).toMatch(/في البرامج الحاسوبية/);
+    // Saying it was adapted, and that the Complex has not approved this app.
+    expect(row!.textContent).toMatch(/عدّلها/);
+    expect(row!.textContent).toMatch(/لا يعني ذلك اعتماد المجمع/);
+  });
+
+  it("does not claim anyone allowed the recitation to be streamed", () => {
+    // "Free to listen" named a permission nobody gave: Quran.com's terms allow
+    // personal, non-commercial use only (2026-11-17 store-terms research).
+    render(<Colophon open onClose={() => {}} fisheye onToggleFisheye={() => {}} />);
+    const row = document.querySelector('li[data-credit="https://quran.com"]');
+    expect(row).not.toBeNull();
+    expect(row!.textContent).not.toMatch(/إتاحة/);
+    expect(row!.textContent).toMatch(/المنشاوي/);
+    expect(row!.textContent).toMatch(/الحقوق لأصحابها/);
   });
 
   it("is a modal dialog that Escape closes", () => {

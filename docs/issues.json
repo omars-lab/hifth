@@ -6926,11 +6926,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑤"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
       "launch": true,
-      "note": "The same reading the old board item 55 asked for, now for a store app. May need a third email."
+      "useCase": "know-where-this-text-came-from",
+      "closedBy": "apps/web/src/components/Colophon.test.tsx",
+      "note": "Read 2026-11-17 by two researchers and a checker (docs/research/2026-11-17-store-terms.md): the Complex allows free use in software, inside and outside the Kingdom, and holds back only printing in the Kingdom and importing for sale. The credit row now names the Complex, says quran-svg converted and adapted the pages, and says the Complex has not approved the app; the old 'commercial printing reserved' line said more than the terms and is gone. Same words in the app, SOURCES.md and both hifth.app sources pages (gate:license-copy and the landing sources test hold them together). The one open point that could flip it is launch-artwork-font-or-drawings."
     },
     {
       "id": "launch-recitation-audio-terms",
@@ -6942,7 +6944,34 @@
       "severity": "question",
       "owner": "agent",
       "launch": true,
-      "note": "The recitation is fetched from another site with no licence note in the source register."
+      "useCase": "send-apple-only-the-build-we-checked",
+      "note": "Read 2026-11-17 (docs/research/2026-11-17-store-terms.md): Quran.com's terms allow personal use only, other public display needs written consent, and Apple asks for that permission on request. The credit no longer claims 'free to listen'. Left: the switch that leaves recitation out of the store build, with a test that the store bundle holds no verses.quran.com address. Route to bring it back: register with Quran Foundation (its developer terms cover audio; needs a small server holding the key)."
+    },
+    {
+      "id": "launch-artwork-font-or-drawings",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊺"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "launch": true,
+      "useCase": "know-where-this-text-came-from",
+      "note": "Found 2026-11-17 by the checker on the terms research. The pin file calls the pages 'QCF V2 glyph outlines' (shapes from the Complex's font, whose licence forbids changes without written approval). The pinned commit (5fbcb1d4, 2026-07-13) does not say where its pages came from; quran-svg's note naming the Complex's Illustrator files came later. Settle by comparing one pinned page with the same page in the Complex's free Illustrator bundle, or reading quran-svg's history before the pin. If from the font, the artwork needs permission."
+    },
+    {
+      "id": "launch-website-recitation",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊻"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "launch": true,
+      "useCase": "know-where-this-text-came-from",
+      "note": "Quran.com's terms (personal use only) reach the website too. The store build leaves recitation out; hifth.app/read still streams it. Owner's call: switch it off there as well, or keep it while the Quran Foundation route is built. Does not hold up the store upload."
     },
     {
       "id": "launch-privacy-file",

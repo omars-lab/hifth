@@ -95,17 +95,35 @@ Its licence forbids the copy protection Apple puts on every store app.
 build. The owner sends the email; the draft is email 2 in
 [store-permission-emails.md](store-permission-emails.md).
 
-### ⑤ Nobody has read the page artwork's own terms · **open**
+### ⑤ Nobody has read the page artwork's own terms · **fixed**
 
 The mus'haf page artwork comes from the King Fahd Complex. Its terms have never been read for a
 store app.
 
 *What would answer it:* the terms read, quoted in the source file, and the reading recorded here.
 
+*Done 2026-11-17:* two researchers read the terms on their own and a third pass re-opened the
+sources ([the combined write-up](../research/2026-11-17-store-terms.md)). The Complex allows free
+use in websites and computer programs, inside and outside the Kingdom; only printing in the
+Kingdom and importing for sale are held back. So a free store app may show the pages, with a
+fairer credit. The credit now names the Complex first, says quran-svg converted and adapted the
+pages, and says the Complex has not approved the app. The old line "commercial printing reserved
+to the Complex" said more than the terms do, and is gone. The same words are in the app, the
+source file and both hifth.app sources pages, and a test fails if the app's row loses any of
+them. One open point could still change the answer: ㊺.
+
 ### ⑥ The recitation audio comes from another site with no licence note · **open**
 
 *What would answer it:* that site's terms found and recorded, and the source added to the
 citations page; or the recitation switched off in the store build.
+
+*Read 2026-11-17* (same write-up as ⑤): Quran.com's terms allow personal use only, and showing
+its content anywhere else needs written consent. Apple's rules ask for that permission on
+request. So the store build has no right to stream the recitation today. The credit no longer
+says "free to listen". What remains is the switch that leaves recitation out of the store
+build, with a test that the store build holds no address of the recitation's server. The
+private build keeps it. Getting it back into the store is route 2 in the write-up: register
+with Quran Foundation, whose developer terms cover audio. The website is ㊻.
 
 ### ⑦ The app has no privacy file · **fixed**
 
@@ -579,13 +597,36 @@ Apple takes the pictures as they are, but they look less finished than a phone i
 and photograph the whole screen; or fill the strip with the page's own top colour. A test
 refuses an iPhone picture whose top strip is one flat colour.
 
+### ㊺ Were the pages we ship drawn from the Complex's font, or from its drawing files? · **open**
+
+Found by the third pass on the terms (⑤). The Complex's free-use terms cover its digital
+mus'haf. Its fonts carry a stricter licence: no changes without written approval. Our record of
+the page files calls them shapes from the font, and the files we pinned in July do not say where
+they came from. quran-svg's later note says its pages come from the Complex's own drawing files,
+but that note was written after our pin. If our pages came from the font, ⑤'s answer becomes
+"needs permission".
+
+*What would answer it:* compare one pinned page with the same page in the Complex's free bundle
+of drawing files, or read quran-svg's history before 2026-07-13. Moving the pin to a version whose
+note names the drawing files would also settle it.
+
+### ㊻ Should the website keep playing the recitation? · **open**
+
+Quran.com's terms (⑥) cover the website as much as the store app: personal use only. The store
+build leaves recitation out; the website at hifth.app/read still streams it. Whether to switch
+it off there too, or keep it while route 2 is built, is the owner's call. It does not hold up
+the store upload.
+
+*What would answer it:* the owner's choice, recorded here and in the source file.
+
 ## Which of these could get the app turned down, and which matter once readers have it?
 
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 
 - **Stops the upload itself** (nothing goes to Apple until these close): the licence items ②
-  ③ ④ ⑤ ⑥. (The archive, the export and Apple's own check ⑪ are fixed; only the upload
-  command itself waits on these. The citations page ② is built; that row closed.)
+  ③ ④ ⑥ and the artwork question ㊺. (The archive, the export and Apple's own check ⑪ are
+  fixed; only the upload command itself waits on these. The citations page ② is built and the
+  artwork's terms ⑤ are read; those rows closed.)
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
   permissions file ⑨ (the upload checks both); the store's questions ㉚ and screenshots ㉛;
   sign-in ㉖ and deleting an account ㉗ (once sign-in ships, deletion must be in the app); the
@@ -595,7 +636,8 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
-  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, and a report seen to arrive ㊵.
+  reviews ㉜ and numbers ㉝, both keys on the release page ㉞, a report seen to arrive ㊵,
+  and whether the website keeps the recitation ㊻.
 
 ## What does this leave alone?
 

@@ -6,7 +6,7 @@
   "commitDate": "2026-07-13",
   "retrieved": "2026-07-25",
   "path": "mushafs/hafs/kfqc",
-  "license": "See docs/SOURCES.md — the KFGQPC QCF V2 glyph outlines are the King Fahd Complex's; quran-svg packages them.",
+  "license": "See SOURCES.md (hafs-kfqc). The page artwork is the King Fahd Complex's, under its digital-mushaf terms; quran-svg's own layer is CC0 1.0 at this commit. Whether these pages were drawn from the Complex's font shapes or its drawing files is not recorded here, and is an open question on the launch page.",
   "print": "KFGQPC QCF V2 / 1421H (NOT V1/1405H) — see PROVENANCE.md for the evidence and the consequence for cross-check sources.",
   "svgo": {
     "version": "4.0.2",

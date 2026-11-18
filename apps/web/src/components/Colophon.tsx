@@ -267,21 +267,23 @@ interface Credit {
  */
 const CREDITS: readonly Credit[] = [
   {
-    what: "صفحات المصحف",
-    who: "طباعة مجمع الملك فهد (KFGQPC)، عبر quran-svg / quranpedia",
+    what: "صفحات مصحف المدينة النبوية (الإصدار الرقمي)",
+    who: "مجمع الملك فهد لطباعة المصحف الشريف · حوّلها إلى SVG وعدّلها مشروع quran-svg (Quranpedia)",
     // Two licences layered, and only one of them constrains anyone: quran-svg's
-    // own contribution (the polygon overlay and JSON) is CC0, which asks for
-    // nothing; the Complex's terms are what a reader might need to know. Those
-    // terms permit digital, web and software use — the reservation is on
-    // printing physical masahif for commercial sale, which this app cannot do.
-    // Said plainly because the earlier wording here, "non-commercial use only",
-    // was the *Libyan Awqaf* edition's term, which Hifth does not vendor: it
-    // told every reader the artwork was more restricted than it is.
-    licence: "إتاحة حرّة للاستعمال الرقمي · الطبع التجاري محفوظ للمجمع",
+    // own part (the tap areas and data files) was CC0 at the commit Hifth pins
+    // (upstream moved to CC BY 4.0 on 2026-09-12, credit waived inside an app);
+    // the Complex's terms are what a reader might need to know. They allow free
+    // use in websites and computer programs; the one limit, in a footnote, is
+    // printing inside the Kingdom and importing copies for sale. The earlier
+    // "commercial printing reserved" said more than that, and the line before it,
+    // "non-commercial use only", was another edition's term entirely. This line
+    // also says the pages were adapted and that the Complex has not approved the
+    // app, since the terms are silent on both (docs/research/2026-11-17-store-terms.md).
+    licence: "متاح مجانًا للاستعمال في البرامج الحاسوبية وفق شروط المجمع · لا يعني ذلك اعتماد المجمع لهذا التطبيق",
     href: "https://github.com/quranpedia/quran-svg",
-    whatEn: "Mushaf pages",
-    whoEn: "King Fahd Complex print (KFGQPC), via quran-svg / quranpedia",
-    licenceEn: "Free for digital use · commercial printing reserved to the Complex",
+    whatEn: "Mushaf pages of the Madinah print (digital edition)",
+    whoEn: "King Fahd Glorious Qur'an Printing Complex · converted to SVG and adapted by quran-svg (Quranpedia)",
+    licenceEn: "Free to use in software under the Complex's terms · this does not mean the Complex has approved this app",
   },
   {
     what: "المتشابهات",
@@ -330,12 +332,16 @@ const CREDITS: readonly Credit[] = [
   },
   {
     what: "التلاوة",
-    who: "الشيخ محمد صديق المنشاوي · عبر مكتبة قرآن (quran.com)",
-    licence: "إتاحة حرّة للاستماع · بثّ من مكتبة قرآن",
+    // No permission is claimed here, because none has been given: Quran.com's
+    // terms allow personal use only, and public display needs its written OK.
+    // The store build leaves recitation out until one of the routes in the
+    // store-terms research is in place (docs/research/2026-11-17-store-terms.md).
+    who: "الشيخ محمد صديق المنشاوي (المصحف المرتّل) · يُبثّ من quran.com",
+    licence: "الحقوق لأصحابها",
     href: "https://quran.com",
     whatEn: "Recitation",
-    whoEn: "Sheikh Muhammad Siddiq al-Minshawi · via the Quran.com library (quran.com)",
-    licenceEn: "Free to listen · streamed from the Quran.com library",
+    whoEn: "Sheikh Muhammad Siddiq al-Minshawi (Murattal) · streamed from quran.com",
+    licenceEn: "All rights belong to their owners",
   },
 ];
 

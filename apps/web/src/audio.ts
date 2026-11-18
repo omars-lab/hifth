@@ -7,7 +7,9 @@
  * with no proxy and nothing held in the tree. The URL is deterministic — surah
  * and ayah, each padded to three digits — so there is no API round-trip at play
  * time. Reciter: Mohamed Siddiq al-Minshawi (Murattal). Attribution lives in
- * SOURCES.md; the CDN itself is open access (see the QUL licensing note).
+ * SOURCES.md. Quran.com's terms allow personal use only, so no permission to
+ * stream is claimed, and the store build leaves recitation out until one is in
+ * hand (docs/research/2026-11-17-store-terms.md).
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fromAbsoluteAyah, parseAyahKey, toAbsoluteAyah } from "@hifth/core";
