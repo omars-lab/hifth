@@ -69,7 +69,15 @@ test("the store build reads no launch setting: every read sits in a part it leav
 
 test("the reads are really found, so a clean result is not an empty search", () => {
   const texts = appReads.map((r) => r.text).join("\n");
-  for (const name of ["HIFTH_ROUTE", "HIFTH_LANG", "HIFTH_PROBE_STEPS", "HIFTH_SNAPSHOT_PATH", "HIFTH_APPEARANCE"]) {
+  for (const name of [
+    "HIFTH_ROUTE",
+    "HIFTH_LANG",
+    "HIFTH_PROBE_STEPS",
+    "HIFTH_SNAPSHOT_PATH",
+    "HIFTH_APPEARANCE",
+    "HIFTH_STATUS_URL",
+    "HIFTH_SIGN_IN_URL",
+  ]) {
     assert.ok(texts.includes(`"${name}"`), `${name} was not found in the app's code: the search has gone blind`);
   }
   assert.ok(appReads.some((r) => r.text.includes("CommandLine.arguments")), "no read of the launch arguments was found");

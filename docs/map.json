@@ -2391,6 +2391,11 @@
           "note": "The four words the page says to the shell — ready, route, share, ask — and nothing else. The route is mirrored into a hidden native label so a test has something native to wait on. An ask carries an id; ShellModel answers it by name (answer(question:)) through `answerScript`, always, a no included. AskTests.swift plays the page's side."
         },
         {
+          "file": "native/Hifth/Account/SignIn.swift",
+          "symbol": "SignIn",
+          "note": "The page's `sign-in` question (sign-in step 8): ask hifth.app for a one-off word, show Apple's sheet with its scrambled copy and no name or email asked for, trade Apple's note and the word for a session. The word comes first, so sign-in switched off on the server never shows Face ID. The page hears only `signed-in` or a reason; the session stays in ShellModel. Only builds not for the store read HIFTH_SIGN_IN_URL; with none set they answer `sign-in-off`. AppleSheet keeps Apple's controller alive until it answers, once. SignInTests.swift plays the sheet and the server."
+        },
+        {
           "file": "native/Hifth/Web/Pencil.swift",
           "symbol": "PencilListener",
           "note": "The Apple Pencil's double-tap and squeeze, heard on the iPad and handed to the page's lent `window.__HIFTH_PAGE__.pencil` with the reader's own pencil setting and, when it hovers, the tip. The shell only names the setting; what it means in Hifth is apps/web/src/pencil.ts. PencilTests.swift reads what reaches the page."

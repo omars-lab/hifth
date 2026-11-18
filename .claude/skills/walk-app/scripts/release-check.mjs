@@ -206,7 +206,9 @@ function signedPermissions(app, file) {
  * (`CONFIG=Release`); only the build made for the store leaves them out
  * (`make app-archive` sets the STORE condition), so only `--store` looks for
  * them. Each was seen in a store archive made before they were left out
- * (2026-11-17). The route and language settings are read in the same place
+ * (2026-11-17). The two that point the app at another server (the launch file's
+ * and sign-in's) were left out from the start and are listed so they stay out.
+ * The route and language settings are read in the same place
  * and left out with them, but their names are too short to find, so a test
  * of the app's own code holds them instead (scripts/native-store-launch-settings.test.mjs).
  */
@@ -217,6 +219,8 @@ export const STORE_SIGNS = [
   ["the launch setting that takes a picture with the probe", "HIFTH_PROBE_SHOT", "string"],
   ["the launch setting that takes a picture and quits", "HIFTH_SNAPSHOT_PATH", "string"],
   ["the launch setting that forces the light or dark look", "HIFTH_APPEARANCE", "string"],
+  ["the launch setting that points the launch file at another server", "HIFTH_STATUS_URL", "string"],
+  ["the launch setting that points sign-in at another server", "HIFTH_SIGN_IN_URL", "string"],
 ];
 
 const log = (ev, fields = {}) =>

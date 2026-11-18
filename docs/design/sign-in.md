@@ -79,7 +79,7 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | **Milestone 1: a first real sign-in on your own iPad, hidden behind a developer setting** | | | | |
 | 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple, and add the same line to the Mac's | done 2026-11-18: the iPad and iPhone file asks for it (launch item ⑨), and so does the Mac store build's. The two Mac builds signed on the laptop with no profile from Apple cannot carry it (Xcode refuses to build them), so the everyday one asks for nothing and the laptop's Release copy uses the store's file without that line | — | — |
 | 7 | Let the page ask the app a question and wait for the answer (before this, messages only went one way, page to app) | done 2026-11-18: works in the Mac app; the iPad tries it in step 11 | agent | half a day, with tests |
-| 8 | Show Apple's sheet from the app with a fresh one-off word, and hand the result on | left | agent | a day |
+| 8 | Show Apple's sheet from the app with a fresh one-off word, and hand the result on | left: built 2026-11-18 and tested with a stand-in sheet and server; the Mac app answers "sign-in is off" when no server is named. The real sheet is first seen in step 11, on your iPad | agent | a day |
 | 9 | Connect a free database to hifth.app's server for accounts (⑨ below) | left | you in the Cloudflare dashboard, or the agent with your yes | 5 minutes |
 | 10 | Server code on hifth.app: check Apple's note against Apple's published keys, make or find the account, start a session, sign out | done 2026-11-18 on the laptop with made-up keys and a local database copy; switched off until step 9's real database exists. The live fetch of Apple's keys is proved by the first real sign-in | — | — |
 | 11 | Trials on your iPad: does the page get a waiting answer from the app, and what address does it say it comes from (⑤ below) | left | you hold the iPad, agent runs it | an hour |
@@ -123,13 +123,14 @@ sequenceDiagram
   participant W as hifth.app server
   R->>P: presses the button for the feature
   P->>A: "sign me in", and waits
-  A->>A: makes a fresh one-off word
-  A->>S: Apple's sheet, with a scrambled copy of the word
+  A->>W: asks for a fresh one-off word
+  W-->>A: the word (or "sign-in is off", and no sheet is shown)
+  A->>S: Apple's sheet, with a scrambled copy of the word, asking for no name and no email
   S-->>R: Face ID
-  S-->>A: Apple's note, a one-time code, the name (first time only)
-  A->>W: the note, the code, the word, the name
+  S-->>A: Apple's note and a one-time code
+  A->>W: the note and the word (the one-time code too, from step 13)
   W->>W: checks Apple's signature, that it is for Hifth, not expired, the word matches
-  W->>S: trades the one-time code for the cancel-ticket
+  W->>S: trades the one-time code for the cancel-ticket (step 13)
   W->>W: keeps the ticket locked, makes or finds the account
   W-->>A: a session
   A->>A: keeps the session in the Keychain

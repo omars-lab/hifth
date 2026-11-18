@@ -80,3 +80,21 @@ Steps 10, 6 and 7 do not depend on each other, and none waits on the owner, so t
 - **Nothing was added to the Cloudflare settings file.** A database line there needs the real
   database's id, which waits on step 9. Until then the addresses answer 404 unless `SIGN_IN` is
   "on", and 503 if it is on with no database.
+
+## What step 8 showed (2026-11-18)
+
+- **The app asks hifth.app for the word before it shows Apple's sheet.** A server with sign-in
+  switched off answers 404 first, so a reader never sees Face ID for nothing. The page hears
+  only "signed-in" or a short reason ("cancelled", "sign-in-off", "busy", "offline",
+  "refused:<why>"); the session stays in the app, in memory until step 15.
+- **Apple is asked for no name and no email**, since the server keeps neither. The design
+  page's diagram had the app sending the name; it now matches.
+- **The one-time code is carried but not sent.** Step 13 sends it with the note.
+- **Only builds that are not for the store can be pointed at another server**, with
+  `HIFTH_SIGN_IN_URL`; with none set they answer "sign-in-off". The store build always uses
+  hifth.app, and the release check now looks for that setting's name in a store archive.
+- **In the real Mac app** (`make app-probe`, no server named), "sign-in" came back
+  "sign-in-off" at once and no sheet was shown. The real sheet is first seen on the iPad
+  in step 11.
+- **Naming the new way out in the privacy check moves to step 16**, with the button that says
+  what leaves the device. Nothing reaches a reader before that button exists.

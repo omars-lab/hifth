@@ -550,14 +550,44 @@ final class ShellModel {
     /// The questions the page may ask, each answered with `ok` and a `value`,
     /// or `ok: false` and an `error`. Every question gets an answer, so the
     /// page never waits forever. `ping` is the harmless one the trial on a
-    /// device uses (sign-in ⑤); Apple's sheet joins it in step 8.
+    /// device uses (sign-in ⑤); `sign-in` shows Apple's sheet (step 8).
     private func answer(question name: String) async -> [String: Any] {
         switch name {
         case "ping":
             return ["ok": true, "value": "pong"]
+        case "sign-in":
+            guard !signingIn else { return ["ok": false, "error": SignIn.Failure.busy.code] }
+            signingIn = true
+            defer { signingIn = false }
+            switch await (signIn ?? signInWithApple)() {
+            case .success(let session):
+                self.session = session
+                return ["ok": true, "value": "signed-in"]
+            case .failure(let failure):
+                return ["ok": false, "error": failure.code]
+            }
         default:
             return ["ok": false, "error": "unknown-question"]
         }
+    }
+
+    // MARK: - Signing in (sign-in step 8, Account/SignIn.swift)
+
+    /// The session hifth.app gave, held in memory only until step 15 keeps it
+    /// in the Keychain. It never reaches the page, the log or a probe's answer.
+    @ObservationIgnored private(set) var session: SignIn.Session?
+    /// A sign-in is open: a second ask is turned away rather than showing a
+    /// second sheet.
+    @ObservationIgnored private var signingIn = false
+    /// The whole sign-in; nil means the real one with Apple's sheet. The tests
+    /// replace it with a stand-in.
+    @ObservationIgnored var signIn: (() async -> Result<SignIn.Session, SignIn.Failure>)?
+
+    private func signInWithApple() async -> Result<SignIn.Session, SignIn.Failure> {
+        guard let base = SignIn.address() else { return .failure(.off) }
+        guard webViewBuilt, let window = webView.window else { return .failure(.noWindow) }
+        let sheet = AppleSheet(anchor: window)
+        return await SignIn.run(server: SignIn.Server(base: base)) { try await sheet.ask(nonce: $0) }
     }
 
     private func loaded() {
