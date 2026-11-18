@@ -177,6 +177,29 @@ Built by a helper agent on this branch; the app's half is still to do.
   moves step 18's invite check to before the word is handed out.
 - **Migration 0003 goes into the real database with 0002**, on the owner's yes (question ⑩).
   Without it every ask for a word fails.
+- **The counting statement was tried on Cloudflare's own local database** (a one-off page
+  function under `wrangler pages dev --d1`, limit 2, four asks): it reported 1, 1, 0, 0 changes
+  and kept 2. So a refused ask is told apart on Cloudflare the same way as in the tests.
+
+## What step 18's server half showed (2026-11-18)
+
+- **The invite check is on the word address only, before the database** (`uninvited` in
+  `apps/landing/lib/sign-in-api.mjs`): 403 `invite-needed`, nothing written, the ten-minute count
+  untouched. It is off until `SIGN_IN_INVITES` is set; sign-out, delete my account and Apple's
+  notices never ask for a code. The owner has not yet chosen to use it (question ⑮).
+- **Codes are made, never picked** (`apps/landing/lib/invites.mjs`, `make hifth-app-invites`):
+  80 random bits, so the setting can hold plain SHA-256 copies and not be a secret. A code a
+  person chose would be guessable from the setting; do not add a way to set one.
+- **`tidyInvite` is fixed from the first code handed out**: small letters, o read as 0, i and l
+  as 1, everything else dropped. The app must send what the tester typed and leave the tidying
+  to the server, or tidy with the same rule.
+- **An unset setting means open to everyone**, and a setting that holds something other than
+  scrambled copies lets nobody in.
+- **Left for the app half:** send `invite` with the ask for a word; show 403 as "invite needed";
+  decide where the code is kept (each new sign-in needs it again; the keychain, beside the
+  session, is the likely place); the test login for Apple's beta reviewers.
+- **Every ask runs our code, refused or not**, and the free plan runs it 100,000 times a day.
+  The owner's one free Cloudflare rule on the word address is what keeps one caller under that.
 - **The app** shows 429 as a plain "server-error" today. Step 16 maps it to "try again shortly"
   when the held Swift files are in.
 

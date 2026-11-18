@@ -1,7 +1,8 @@
 // hifth.app's sign-in addresses (docs/design/sign-in.md, step 10). The thin Cloudflare files in
 // functions/api/ call these; the work is in accounts.mjs and apple-signin.mjs.
 //
-//   POST /api/sign-in/word   -> 200 { word } | 429 { reason: "too-many" } past the ten-minute limit
+//   POST /api/sign-in/word   { invite? } -> 200 { word } | 403 { reason: "invite-needed" }
+//                            | 429 { reason: "too-many" } past the ten-minute limit
 //   POST /api/sign-in        { note, word, code? } -> 200 { session, expiresAt } | 400 | 401 { reason } | 413
 //   POST /api/sign-out       Authorization: Bearer <session> -> 204
 //   POST /api/sign-in/apple-notice   { payload } from Apple -> 200 | 400 | 401 { reason } | 413
@@ -13,6 +14,11 @@
 //                  not there, so a site published before sign-in is ready shows nothing of it.
 //   ACCOUNTS       the D1 database (migrations/).
 //   APPLE_APP_IDS  our app ids Apple's note may be meant for, separated by commas.
+//   SIGN_IN_INVITES  optional (step 18). The scrambled copies of the invite codes that may
+//                  start a sign-in, separated by commas. Unset or empty, anyone may. It is not
+//                  a secret only because every code is 80 random bits made by invites.mjs,
+//                  never a word someone picked. The codes themselves are never set here, kept
+//                  in the database or logged.
 // And three secrets, for Apple's cancel ticket (step 13, apple-link.mjs): APPLE_SIGN_IN_KEY,
 // APPLE_SIGN_IN_KEY_ID and APPLE_TEAM_ID. With any of them missing a reader can still sign in;
 // no ticket is kept. `code` is the one-time code from Apple's sheet; the app may leave it out.
@@ -23,6 +29,7 @@
 import { createRemoteJWKSet } from "jose";
 import { APPLE_KEYS, checkAppleNote } from "./apple-signin.mjs";
 import { appleConfig, checkAppleNotice, openTicket, revokeTicket, sealTicket, tradeCode } from "./apple-link.mjs";
+import { inviteHash, tidyInvite } from "./invites.mjs";
 import { WORD_SECONDS, actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs } from "./accounts.mjs";
 
 /** A sign-in body is a note of a few kilobytes and a 64-letter word; anything far bigger is not one. */
@@ -65,9 +72,31 @@ function appleCheck(env) {
   return (note, word) => checkAppleNote(note, { keys: applePublishedKeys(), audiences, word });
 }
 
+/**
+ * null when this ask may start a sign-in, or the reply that turns it away (step 18). It runs
+ * before the database is touched, so someone without a code cannot make the server write, or
+ * use up the ten-minute limit for those who hold one. The code is tidied first (invites.mjs),
+ * so capitals, spaces and dashes do not matter. The comparison is between scrambled copies, so
+ * how long it takes says nothing about a code. An entry in the setting that is not a scrambled
+ * copy matches nothing: a mistyped setting lets nobody in, never everybody.
+ */
+async function uninvited(request, env) {
+  const allowed = String(env?.SIGN_IN_INVITES ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  if (allowed.length === 0) return null;
+
+  const body = await readBody(request);
+  if (body.stop) return body.stop;
+  const { invite } = body.fields;
+  const ok = tidyInvite(invite) !== "" && allowed.includes(await inviteHash(invite));
+  return ok ? null : reply(403, { reason: "invite-needed" });
+}
+
 /** POST /api/sign-in/word */
 export async function handleWord(request, env) {
-  const stop = closed(env);
+  const stop = closed(env) ?? (await uninvited(request, env));
   if (stop) return stop;
   const word = await handOutWord(env.ACCOUNTS);
   if (word === null) {

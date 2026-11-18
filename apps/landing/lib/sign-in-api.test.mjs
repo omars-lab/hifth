@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createLocalJWKSet, exportJWK, exportPKCS8, generateKeyPair, SignJWT } from "jose";
 import { handleAppleNotice, handleDeleteAccount, handleWord, handleSignIn, handleSignOut } from "./sign-in-api.mjs";
+import { inviteHash } from "./invites.mjs";
 import { MOST_WORDS_A_STRETCH, whoIs } from "./accounts.mjs";
 import { localD1 } from "./test-d1.mjs";
 
@@ -488,4 +489,89 @@ test("a used-up stretch stops nothing else: a word already in hand, sign-out, de
   assert.equal((await handleDeleteAccount(post("/api/sign-in/delete-account", {}, asReader(other)), env)).status, 200);
   const res = await handleAppleNotice(post("/api/sign-in/apple-notice", await notice("consent-revoked", "000003.made-up.0003")), env, { keys });
   assert.equal(res.status, 200);
+});
+
+// Step 18, the server half: with invite codes set, only someone holding one can start a sign-in.
+// The codes here are made up. The setting holds each code's scrambled copy, never the code.
+
+const INVITE = "0a1b-2c3d-4e5f-6g7h";
+const OTHER_INVITE = "zzzz-zzzz-zzzz-zzzz";
+const invited = async (extra = {}) =>
+  setUp({ SIGN_IN_INVITES: ` ${await inviteHash(INVITE)} , ${await inviteHash(OTHER_INVITE)}`, ...extra });
+const askWord = (env, body) => handleWord(post("/api/sign-in/word", body), env);
+
+test("with invite codes set, an ask with no code or a wrong one is refused before the database is touched", async () => {
+  const { env, rows } = await invited();
+  const asks = [{}, { invite: "" }, { invite: "not-a-code" }, { invite: " - " }, { invite: "0a1b-2c3d-4e5f-6g7j" }, { invite: 7 }, { invite: [INVITE] }, { invite: await inviteHash(INVITE) }, "not json"];
+  for (const body of asks) {
+    const res = await askWord(env, body);
+    assert.equal(res.status, 403, JSON.stringify(body));
+    assert.deepEqual(await res.json(), { reason: "invite-needed" });
+    assert.equal(res.headers.get("cache-control"), "no-store");
+  }
+  assert.equal(rows("sign_in_words").length, 0);
+  assert.equal(rows("sign_in_counts").length, 0);
+});
+
+test("with invite codes set, any one of the codes starts a sign-in that goes the whole way", async () => {
+  const { db, env } = await invited();
+  for (const invite of [INVITE, OTHER_INVITE]) {
+    const res = await askWord(env, { invite });
+    assert.equal(res.status, 200, invite);
+    const { word } = await res.json();
+    const signedInRes = await handleSignIn(post("/api/sign-in", { note: "apple:000001.made-up.0001", word }), env, { check });
+    assert.equal(signedInRes.status, 200);
+    assert.ok(await whoIs(db, (await signedInRes.json()).session));
+  }
+});
+
+test("a code typed with capitals, spaces and no dashes still starts a sign-in", async () => {
+  const { env } = await invited();
+  for (const invite of ["0A1B 2C3D 4E5F 6G7H", " 0a1b2c3d4e5f6g7h\n", "Oalb-2c3d-4e5f-6g7h"]) {
+    assert.equal((await askWord(env, { invite })).status, 200, invite);
+  }
+});
+
+test("refused asks never use up the ten-minute limit for people who hold a code", async () => {
+  const { env } = await invited();
+  for (let i = 0; i < MOST_WORDS_A_STRETCH + 5; i += 1) assert.equal((await askWord(env, {})).status, 403);
+  assert.equal((await askWord(env, { invite: INVITE })).status, 200);
+});
+
+test("an ask far too big to be an invite code is refused", async () => {
+  const { env, rows } = await invited();
+  const res = await askWord(env, { invite: "x".repeat(20 * 1024) });
+  assert.equal(res.status, 413);
+  assert.equal(rows("sign_in_counts").length, 0);
+});
+
+test("invite codes gate only the start of a sign-in: sign-out, delete my account and Apple's notice never ask for one", async () => {
+  const { db, env } = await invited();
+  const reader = await signedInWithInvite(env, "000001.made-up.0001");
+  const other = await signedInWithInvite(env, "000002.made-up.0002");
+  assert.equal((await handleSignOut(post("/api/sign-out", {}, asReader(reader)), env)).status, 204);
+  assert.equal(await whoIs(db, reader), null);
+  assert.equal((await handleDeleteAccount(post("/api/sign-in/delete-account", {}, asReader(other)), env)).status, 200);
+  const res = await handleAppleNotice(post("/api/sign-in/apple-notice", await notice("consent-revoked", "000003.made-up.0003")), env, { keys });
+  assert.equal(res.status, 200);
+});
+
+async function signedInWithInvite(env, appleUser) {
+  const { word } = await (await askWord(env, { invite: INVITE })).json();
+  const res = await handleSignIn(post("/api/sign-in", { note: `apple:${appleUser}`, word }), env, { check });
+  return (await res.json()).session;
+}
+
+test("with no invite codes set, or a setting with nothing usable in it, anyone may start a sign-in as before", async () => {
+  for (const SIGN_IN_INVITES of [undefined, "", " , ,"]) {
+    const { env } = setUp({ SIGN_IN_INVITES });
+    assert.equal((await askWord(env, {})).status, 200, String(SIGN_IN_INVITES));
+    assert.equal((await askWord(env, "not json")).status, 200, String(SIGN_IN_INVITES));
+  }
+});
+
+test("a setting that holds something other than scrambled copies lets nobody in, rather than everybody", async () => {
+  const { env } = setUp({ SIGN_IN_INVITES: INVITE });
+  assert.equal((await askWord(env, { invite: INVITE })).status, 403);
+  assert.equal((await askWord(env, {})).status, 403);
 });

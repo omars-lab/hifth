@@ -57,6 +57,16 @@ one caller's smallest possible share are the same size. What can is deciding who
 sign-in at all. That is question ⑮ on the sign-in page, with its options; the recommended one
 is to check the tester invite code (step 18) before a word is handed out.
 
+## What was checked afterwards
+
+- The counting statement was tried once through Cloudflare's own local database, not only the
+  tests' stand-in: with a limit of 2 and four asks it reported 1, 1, 0, 0 changes and kept 2.
+- The server half of the invite check is built and off (`uninvited` in
+  `apps/landing/lib/sign-in-api.mjs`, the codes in `apps/landing/lib/invites.mjs`).
+- A turned-away ask still runs our code, and Cloudflare's free plan runs it 100,000 times a
+  day. So the free rule per caller is worth having for that reason, even though it cannot stop
+  the lock-out above.
+
 ## Where it lives
 
 `handOutWord` in `apps/landing/lib/accounts.mjs`, the count's table in

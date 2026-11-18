@@ -1,5 +1,7 @@
 // Accounts and sessions on hifth.app (docs/design/sign-in.md, step 10). The tables are in
-// apps/landing/migrations/0001_accounts.sql, which says what is kept and why only that.
+// apps/landing/migrations/, and each file there says what is kept and why only that:
+// 0001 accounts, sessions and one-off words; 0002 Apple's cancel tickets; 0003 how many one-off
+// words were handed out in each ten minutes (step 17), which names no one.
 //
 // A sign-in goes:
 //   1. the app asks for a one-off word (handOutWord); hifth.app keeps only its scrambled copy;

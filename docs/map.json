@@ -2655,6 +2655,16 @@
           "note": "One locked cancel ticket per account. Goes into the real database only with the owner's yes, before sign-in is switched on."
         },
         {
+          "file": "apps/landing/lib/invites.mjs",
+          "symbol": "tidyInvite",
+          "note": "Invite codes for the tester stage (sign-in step 18): newInvite makes one from 80 random bits, tidyInvite reads a typed one, inviteHash is the scrambled copy the site's SIGN_IN_INVITES setting holds. The check itself is uninvited in sign-in-api.mjs, before the database."
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/invite-codes.mjs",
+          "symbol": "sheet",
+          "note": "make hifth-app-invites: prints new codes once and the setting's line. The owner runs it."
+        },
+        {
           "file": "apps/landing/migrations/0003_sign_in_counts.sql",
           "symbol": "CREATE TABLE sign_in_counts",
           "note": "How many one-off words were handed out in each ten minutes, by everyone together; nothing about who asked. Goes into the real database with the tickets table."

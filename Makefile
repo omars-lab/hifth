@@ -867,6 +867,9 @@ hifth-app-apple-key: ## Are the Sign in with Apple key, its id and the team id s
 hifth-app-ready: ## Is hifth.app ready for its first upload? One line per thing it needs (project, domain, each site setting, spam-check widget, main's front page), names and yes or no only
 	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/first-upload.mjs
 
+hifth-app-invites: ## Makes invite codes for sign-in's tester stage and the line for the SIGN_IN_INVITES setting. The owner runs it; the codes are shown once. ARGS="--count 12"
+	@node .claude/skills/deploy-site/scripts/invite-codes.mjs $(ARGS)
+
 hifth-app-turnstile: ## Does hifth.app's spam-check widget exist? Prints its public site key. ARGS=--make makes it and saves its secret; never prints the secret or the token
 	@python3 .claude/skills/deploy-site/scripts/turnstile-widget.py $(ARGS)
 
