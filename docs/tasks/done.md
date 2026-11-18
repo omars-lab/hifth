@@ -9,10 +9,39 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
-## Sessions of 2026-11-15 to 2026-11-17
+## Sessions of 2026-11-15 to 2026-11-18
 
 This session's task numbers started again from 1, so they clash with the numbers further down;
 match by title. Pushes and merges are folded into the work they shipped.
+
+### 2026-11-17 to 2026-11-18: the launch, continued, and the sign-in choices
+
+Same plan and goal page as the block below. What is still open is on the backlog, in its launch
+rows and the sign-in page's rows.
+
+**Done:**
+- #15, #16: Store reviews pulled with drafted answers, and the download numbers (launch ㉜, ㉝).
+- #17: The release page and its setup check cover both keys and the vendor number (㉞).
+- #27: A backlog plan for turning GitHub checks and publishing back on when other developers join.
+- #28: The Mac App Store archive and its installer package, built and checked (owner's yes,
+  2026-11-17).
+- #29: The citations page at hifth.app, checked against the source and licence files.
+- #30, #31, #32: The support page in English and Arabic, the apps' own privacy policy, and links
+  to both from the info panel (⑳, ㉙, ㊸).
+- #34: Store pictures at Apple's sizes (㉛).
+- #35: The store terms research written up, and the credits fixed.
+- #36: The store build leaves recitation out (⑥).
+- #37, #38: One release command with a fix-in-a-hurry page, and putting the previous hifth.app
+  release back (㉒, ㉓).
+- #39: The file the apps read at launch: lowest version, a notice, parts switched off (㉑).
+- #40: The browser version says when a new version is ready, and an old page keeps working (㉔).
+- #41, #42: The app's own log, and readers' crashes reaching us (⑲, ⑰).
+- #45: The start-up trim merged.
+- #46: The sign-in options page, checked at 1280 and 390 px and in Firefox; and the library
+  comparison page, with a builder fix and a test that headings line up (#654).
+- #47, #48: The three sign-in choices recorded: marks follow the reader (2026-11-17); our own code
+  on hifth.app's Cloudflare with its free database, and the copy not locked at first (2026-11-18)
+  (#654).
 
 ### 2026-11-15 to 2026-11-17: getting Hifth ready for the App Store
 

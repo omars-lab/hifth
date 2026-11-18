@@ -77,14 +77,14 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | A | What sign-in unlocks first (① below) | done 2026-11-17: your marks follow you | — | — |
 | B | Where accounts live (② below) | done 2026-11-18: our own code on hifth.app's Cloudflare, free database | — | — |
 | **Milestone 1: a first real sign-in on your own iPad, hidden behind a developer setting** | | | | |
-| 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple (it has none today), and add the same line to the Mac's (empty today) | left | agent | an hour |
+| 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple, and add the same line to the Mac's | half done: the iPad and iPhone file asks for it (launch item ⑨); the Mac's two files do not yet | agent | an hour |
 | 7 | Let the page ask the app a question and wait for the answer (today messages only go one way, page to app) | left | agent | half a day, with tests |
 | 8 | Show Apple's sheet from the app with a fresh one-off word, and hand the result on | left | agent | a day |
-| 9 | Connect a free database to hifth.app's server for accounts | left | you in the Cloudflare dashboard, or the agent with your yes | 5 minutes |
+| 9 | Connect a free database to hifth.app's server for accounts (⑨ below) | left | you in the Cloudflare dashboard, or the agent with your yes | 5 minutes |
 | 10 | Server code on hifth.app: check Apple's note against Apple's published keys, make or find the account, start a session, sign out | left | agent | two to three days |
 | 11 | Trials on your iPad: does the page get a waiting answer from the app, and what address does it say it comes from (⑤ below) | left | you hold the iPad, agent runs it | an hour |
 | **Milestone 2: ready for people other than you** | | | | |
-| 12 | Make the key file in Apple's developer site, note its ID, store both as hifth.app secrets on Cloudflare. **Needed even with no website sign-in**, because deleting an account needs it | left | you, Apple then Cloudflare dashboards | 20 minutes |
+| 12 | (⑧ below) Make the key file in Apple's developer site, note its ID, store both as hifth.app secrets on Cloudflare. **Needed even with no website sign-in**, because deleting an account needs it | left | you, Apple then Cloudflare dashboards | 20 minutes |
 | 13 | Get Apple's cancel-ticket at the first sign-in and keep it locked on the server; take Apple's notices that a reader has left | left | agent | a day |
 | 14 | "Delete my account" inside the app: delete everything, cut the link with Apple. App Review requires it | left | agent | a day |
 | 15 | Keep the session in the Keychain, so an iPad stays signed in for months; check at each launch that the reader has not cut Hifth off in their Apple settings | left | agent | half a day |
@@ -92,7 +92,7 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 17 | Limit how often anyone can try, reusing the notify list's "are you a person" check | left | agent; you may need to switch on a limit in Cloudflare | half a day |
 | 18 | Keep it to testers: an invite code (an email list fails when testers hide their email), and a working test login for Apple's beta reviewers | left | agent | half a day |
 | 19 | Privacy page and App Store privacy label updated | left | agent drafts, you approve | half a day |
-| 20 | Sign the Mac build with the paid team. Apple says Sign in with Apple does not work in Mac apps sold outside the App Store, so the Mac goes through TestFlight or the Mac App Store | left | you in Xcode, then agent | an hour to half a day |
+| 20 | Sign the Mac build with the paid team. Apple says Sign in with Apple does not work in Mac apps sold outside the App Store, so the Mac goes through TestFlight or the Mac App Store | done 2026-11-17: the Mac App Store build is signed with the paid team and archived; its Sign in with Apple line is step 6 | — | — |
 | 21 | The first thing sign-in unlocks, behind its own button (depends on ①) | left | agent | three to four days for "your marks follow you" |
 | 22 | TestFlight upload and tester invitations | left | **held by the licence reading**, not by sign-in | — |
 | **Later, not needed for testers on Apple devices** | | | | |
@@ -100,7 +100,7 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 24 | Register the mail sender with Apple, so mail reaches readers who hid their email | left | you in the Apple dashboard and DNS; waits on the mail sender decision | 30 minutes |
 | 25 | A second way in for people without Apple: a six-digit code by email | left | agent, after the mail sender is picked | two days |
 
-**Headline: 5 done, both answers in (2026-11-17 and 2026-11-18), then 6 steps to a first real sign-in on your iPad (about a week), 11 more to be ready for testers (about two weeks), and 3 for later.** Both researchers put the whole build at two to three weeks of agent work; this table agrees.
+**Headline: 5 done, both answers in (2026-11-17 and 2026-11-18), then 6 steps to a first real sign-in on your iPad (about a week), 10 more to be ready for testers (about two weeks; step 20 is done), and 3 for later.** Both researchers put the whole build at two to three weeks of agent work; this table agrees.
 
 ### What can be built and tried now, on your own devices?
 
@@ -374,3 +374,11 @@ Apple's help page does not require it; Apple's set-up page says an existing App 
 ### ⑦ Does the notify list reach Supabase through a door the settings say is closed? · **suspected**
 
 The notify list's server code calls Supabase's data door with the public key, but the checked-in settings switch that door off, and the Supabase move page says nothing uses it. Either the settings file is out of date or the list does not work. **What would answer it:** the store check, which prints settings and never a row, compared against the settings file; then one test sign-up on the notify form. This matters before anything else is added to that project.
+
+### ⑧ Is the Sign in with Apple key file made and saved on Cloudflare? · **open**
+
+Step 12: about 20 minutes in Apple's developer site, then Cloudflare. It is a different key from the App Store Connect one already made. Deleting an account needs it to cut the link with Apple, and Apple's review requires deleting an account, so the launch's account deletion waits on it. Meanwhile deletion is built and tested on the laptop with a made-up key. **What would answer it:** the owner makes the key, notes its ID, and saves both as hifth.app secrets; the check prints only that each secret is set.
+
+### ⑨ May the accounts database be made on hifth.app's Cloudflare account? · **open**
+
+Step 9: the free database chosen in ②, made with one command. Making it touches the live account, so it waits for the owner's word. Meanwhile the server code runs against a local copy on the laptop, so nothing else waits. **What would answer it:** a one-line yes from the owner.

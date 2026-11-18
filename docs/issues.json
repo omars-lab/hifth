@@ -4093,6 +4093,28 @@
       "note": "Does Sign in with Apple on hifth.app work before the app is in the App Store? Apple's help page does not require it; Apple's set-up page says an existing App Store app is needed. Trial: set up the website's Apple name and sign in on a preview address. Website sign-in comes after testers in the plan, so this does not hold anything up yet."
     },
     {
+      "id": "sign-in-apple-key-file",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑧"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Make the Sign in with Apple key file (the sign-in page's step 12, about 20 minutes): in Apple's developer site under Keys, tick Sign in with Apple, download the file once, note its ID, and save both as hifth.app secrets on Cloudflare. It is a different key from the App Store Connect one. Deleting an account needs it, and Apple's review requires deleting an account. Meanwhile deletion is built and tested on the laptop with a made-up key."
+    },
+    {
+      "id": "sign-in-database-yes",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑨"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "A one-line yes to make the accounts database on hifth.app's Cloudflare account (the sign-in page's step 9), the free database the owner chose on 2026-11-18. Making it touches the live account, so it waits for the owner's word. Meanwhile the server code runs against a local copy on the laptop."
+    },
+    {
       "id": "notify-list-data-door",
       "source": {
         "file": "docs/design/sign-in.md",
@@ -7363,7 +7385,7 @@
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "The owner chose sign-in at launch on 2026-11-15, and on 2026-11-17 chose what it unlocks first: the reader's marks follow them. On 2026-11-18 the owner settled the last two choices: accounts are kept by our own small code on hifth.app's Cloudflare account with its free database, and the copy on our server is not locked at first, with the button saying we could read it. Nothing waits on the owner now; the sign-in build is ours. The building is the sign-in work's; this row only counts it toward the launch."
+      "note": "The owner chose sign-in at launch on 2026-11-15, and on 2026-11-17 chose what it unlocks first: the reader's marks follow them. On 2026-11-18 the owner settled the last two choices: accounts are kept by our own small code on hifth.app's Cloudflare account with its free database, and the copy on our server is not locked at first, with the button saying we could read it. No choice waits on the owner now, and the sign-in build is ours. Two small owner steps remain, the sign-in page's ⑧ and ⑨: the Sign in with Apple key file, and a yes to make the real accounts database. Until then the server runs on the laptop with a local copy and a made-up key. The building is the sign-in work's; this row only counts it toward the launch."
     },
     {
       "id": "launch-account-deletion",
@@ -7375,10 +7397,11 @@
       "severity": "defect",
       "owner": "agent",
       "blockedBy": [
-        "launch-sign-in"
+        "launch-sign-in",
+        "sign-in-apple-key-file"
       ],
       "launch": true,
-      "note": "Apple requires deletion inside the app for any app with accounts, and it must also cancel the Apple sign-in."
+      "note": "Apple requires deletion inside the app for any app with accounts, and it must also cancel the Apple sign-in. Cancelling needs the Sign in with Apple key file (the sign-in page's ⑧, the owner's); until then deletion is built and tested on the laptop with a made-up key."
     },
     {
       "id": "launch-backups",
