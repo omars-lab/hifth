@@ -3,7 +3,7 @@
 *Written 2026-11-18 for the owner to approve.
 This is step 19 of the sign-in plan ([sign-in.md](sign-in.md)).
 It is a draft: the live privacy page, the store answers and the app's privacy file are all unchanged, and sign-in is still switched off.
-Every sentence below was checked against the sign-in server code as it stood on 2026-11-18, after steps 6 to 10, 12 and the server half of step 13.
+Every sentence below was checked against the sign-in server code as it stood on 2026-11-18, after steps 6 to 10, 12 and the server halves of steps 13 and 14.
 Step 15 was being built in the app the same day and is not yet read here.*
 
 > [!tip] Short version
@@ -11,7 +11,7 @@ Step 15 was being built in the app the same day and is not yet read here.*
 > It says sign-in is optional, lists the few things an account stores, who can see them and how to delete them.
 > **What an account stores today.** A number Apple gives us for the reader, a random account number of our own, the date the account was made, for each signed-in device a scrambled copy of its sign-in key with a start and an end date, and Apple's cancel ticket, locked.
 > **No email and no name.** The app asks Apple for neither, and the server keeps neither, so the draft says so plainly.
-> **Not built yet, so marked.** "Delete my account" (step 14), staying signed in after the app closes (step 15), the button that says what leaves the device (step 16), the limit on tries (step 17) and the copy of the reader's marks (step 21).
+> **Not built yet, so marked.** The "Delete my account" button in the app (step 14; the server can already do it), staying signed in after the app closes (step 15), the button that says what leaves the device (step 16), the limit on tries (step 17) and the copy of the reader's marks (step 21).
 > **Step 13 landed while this was written.** The server now keeps the cancel ticket and acts on Apple's notices, so those sentences are marked as built on the server.
 > **The store label.** "Data Not Collected" ends the day a store build can sign in.
 > It becomes one data type, User ID, linked to the reader, for app functionality, not used for tracking.
@@ -214,7 +214,8 @@ Apple's cancel ticket (step 13) adds no new line: it is a sign-in credential tie
 - **The design page says a sign-in renews when used and ends after 60 days unused.** The code gives a fixed 60 days from sign-in, with no renewal. The draft follows the code. If step 15 adds renewal, the "60 days" sentence changes to "60 days after you last used it".
 - **A history of sign-in times builds up.** Each device's sign-in is kept with its start time and its account, and nothing removes it after it runs out. The draft now says so in plain words, because "we keep no record of when you signed in" would be false. A clean-up of run-out sign-ins would let that sentence go.
 - **Step 13 landed on the server while this was written** (2026-11-18). The draft follows it: removing Hifth in Apple's settings signs every device out and drops the ticket but keeps the account, and deleting the Apple account deletes everything. A ticket is kept only when the app sends Apple's one-time code, and the app's side of that was not read here.
-- **Steps 14 and 15 were being built the same day** and are not committed. Their sentences stay marked. The server half of step 14, as it stood unfinished, matches the draft: the account is deleted whatever Apple answers, and the app is told whether Apple cut its side. Both need a re-read once they land, the "60 days" sentence most of all.
+- **The server half of step 14 landed the same day**, and it matches the draft: the account, every device's sign-in and the ticket are deleted whatever Apple answers, and the app is told whether Apple cut its side. The "Delete my account" button in the app is not built, so those sentences stay marked.
+- **Step 15 was being built in the app the same day** and was not committed when this was written. Its two sentences stay marked, and the "60 days" sentence needs a re-read once it lands.
 - **The time an account was made is stored to the second.** The draft calls it "the date your account was made".
 
 ## Which questions can only the owner answer?
