@@ -123,10 +123,10 @@ struct SignInTests {
         var appleGot: String?
         let result = await SignIn.run(server: server(fake)) { nonce in
             appleGot = nonce
-            return SignIn.AppleAnswer(note: "made-up-note", code: "made-up-code")
+            return SignIn.AppleAnswer(note: "made-up-note", code: "made-up-code", user: "made-up-apple-user")
         }
         #expect(appleGot == SignIn.scramble("made-up-word"))
-        #expect(try result.get() == SignIn.Session(token: "made-up-session", expiresAt: 1_900_000_000))
+        #expect(try result.get() == SignIn.Session(token: "made-up-session", expiresAt: 1_900_000_000, appleUser: "made-up-apple-user"))
         #expect(fake.body(1)?["word"] as? String == "made-up-word")
         #expect(fake.body(1)?["note"] as? String == "made-up-note")
     }
@@ -138,7 +138,7 @@ struct SignInTests {
         var sheetShown = false
         let result = await SignIn.run(server: server(fake)) { _ in
             sheetShown = true
-            return SignIn.AppleAnswer(note: "made-up-note", code: nil)
+            return SignIn.AppleAnswer(note: "made-up-note", code: nil, user: "made-up-apple-user")
         }
         #expect(sheetShown == false)
         #expect(result == .failure(SignIn.Failure("sign-in-off")))

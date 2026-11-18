@@ -518,6 +518,7 @@ final class ShellModel {
             ready = true
             readyCount += 1
             readStatusOnce()
+            checkSessionOnce()
             if let pendingHash { show(pendingHash) }
             #if !STORE
             probeIfAsked()
@@ -550,7 +551,8 @@ final class ShellModel {
     /// The questions the page may ask, each answered with `ok` and a `value`,
     /// or `ok: false` and an `error`. Every question gets an answer, so the
     /// page never waits forever. `ping` is the harmless one the trial on a
-    /// device uses (sign-in ⑤); `sign-in` shows Apple's sheet (step 8).
+    /// device uses (sign-in ⑤); `sign-in` shows Apple's sheet (step 8);
+    /// `signed-in` says "signed-in" or "signed-out" and nothing more (step 15).
     private func answer(question name: String) async -> [String: Any] {
         switch name {
         case "ping":
@@ -559,13 +561,26 @@ final class ShellModel {
             guard !signingIn else { return ["ok": false, "error": SignIn.Failure.busy.code] }
             signingIn = true
             defer { signingIn = false }
+            // The launch check ends first, so it cannot drop the session this is about to save.
+            await checkSessionOnce().value
             switch await (signIn ?? signInWithApple)() {
             case .success(let session):
                 self.session = session
+                // A Keychain that refuses is not a failed sign-in: the reader is signed in
+                // until the app closes.
+                sessionStore?.save(session)
                 return ["ok": true, "value": "signed-in"]
             case .failure(let failure):
                 return ["ok": false, "error": failure.code]
             }
+        case "signed-in":
+            // Waits for the launch check, so the page never hears a stale yes.
+            await checkSessionOnce().value
+            if let session, !SignIn.usable(session, now: now()) {
+                self.session = nil
+                sessionStore?.clear()
+            }
+            return ["ok": true, "value": session == nil ? "signed-out" : "signed-in"]
         default:
             return ["ok": false, "error": "unknown-question"]
         }
@@ -573,9 +588,39 @@ final class ShellModel {
 
     // MARK: - Signing in (sign-in step 8, Account/SignIn.swift)
 
-    /// The session hifth.app gave, held in memory only until step 15 keeps it
-    /// in the Keychain. It never reaches the page, the log or a probe's answer.
+    /// The session hifth.app gave. It is kept in the Keychain between launches
+    /// (step 15) and never reaches the page, the log or a probe's answer; the
+    /// page hears only "signed-in" or "signed-out".
     @ObservationIgnored private(set) var session: SignIn.Session?
+    /// Where the session is kept between launches, and how Apple is asked
+    /// whether the reader still allows Hifth. Both are nil in a build that
+    /// names no sign-in server, so the laptop's tests and walks never touch the
+    /// Keychain. The tests replace them with stand-ins.
+    @ObservationIgnored var sessionStore: SessionStore? = SignIn.realStore(at: SignIn.address())
+    @ObservationIgnored var credentialCheck: CredentialCheck? = SignIn.realCheck(at: SignIn.address())
+    /// The clock, so the tests can move it.
+    @ObservationIgnored var now: () -> Date = { Date() }
+    /// The check at launch, kept so the page's questions and the tests can
+    /// wait for it.
+    @ObservationIgnored private(set) var sessionCheck: Task<Void, Never>?
+
+    /// Once per launch, after the first page is up or at the page's first
+    /// sign-in question, whichever comes first: read the saved session and ask
+    /// Apple whether the reader has cut Hifth off (StaySignedIn.swift).
+    @discardableResult
+    private func checkSessionOnce() -> Task<Void, Never> {
+        if let sessionCheck { return sessionCheck }
+        let store = sessionStore
+        let check = credentialCheck
+        let moment = now()
+        let task = Task { [weak self] in
+            guard let store else { return }
+            let restored = await SignIn.restore(from: store, check: check, now: moment)
+            self?.session = restored
+        }
+        sessionCheck = task
+        return task
+    }
     /// A sign-in is open: a second ask is turned away rather than showing a
     /// second sheet.
     @ObservationIgnored private var signingIn = false

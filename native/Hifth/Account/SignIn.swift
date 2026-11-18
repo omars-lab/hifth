@@ -44,18 +44,23 @@ enum SignIn {
         }
     }
 
-    /// What hifth.app hands back: the session, and when it ends (seconds since 1970). Held in
-    /// memory only until step 15 keeps it in the Keychain.
-    struct Session: Equatable, Sendable {
+    /// What hifth.app hands back: the session, and when it ends (seconds since 1970). With it
+    /// goes Apple's lasting id for the reader, which the app needs at each launch to ask Apple
+    /// whether the reader still allows Hifth. Kept in the Keychain (step 15, StaySignedIn.swift);
+    /// none of it ever reaches the page.
+    struct Session: Equatable, Sendable, Codable {
         let token: String
         let expiresAt: Int
+        var appleUser = ""
     }
 
-    /// What Apple's sheet hands back: its signed note, and the one-time code the server will
-    /// trade for the ticket that lets it cancel the sign-in later (step 13; not sent yet).
+    /// What Apple's sheet hands back: its signed note, the one-time code the server will trade
+    /// for the ticket that lets it cancel the sign-in later (step 13; not sent yet), and Apple's
+    /// lasting id for the reader, which stays on the device.
     struct AppleAnswer: Sendable {
         let note: String
         let code: String?
+        let user: String
     }
 
     /// The scrambled copy of the word Apple signs into its note: the lowercase hex SHA-256, the
@@ -89,7 +94,9 @@ enum SignIn {
             let word = try await server.word()
             let apple: AppleAnswer
             do { apple = try await askApple(scramble(word)) } catch { throw failure(for: error) }
-            return .success(try await server.signIn(note: apple.note, word: word))
+            var session = try await server.signIn(note: apple.note, word: word)
+            session.appleUser = apple.user
+            return .success(session)
         } catch let failure as Failure {
             return .failure(failure)
         } catch {
@@ -216,7 +223,7 @@ final class AppleSheet: NSObject, ASAuthorizationControllerDelegate, ASAuthoriza
               let note = String(data: data, encoding: .utf8), !note.isEmpty
         else { return finish(.failure(SignIn.Failure.badReply)) }
         let code = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
-        finish(.success(SignIn.AppleAnswer(note: note, code: code)))
+        finish(.success(SignIn.AppleAnswer(note: note, code: code, user: credential.user)))
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
