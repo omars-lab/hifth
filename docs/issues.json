@@ -4098,10 +4098,10 @@
         "file": "docs/design/sign-in.md",
         "item": "⑧"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Make the Sign in with Apple key file (the sign-in page's step 12, about 20 minutes): in Apple's developer site under Keys, tick Sign in with Apple, download the file once, note its ID, and save both as hifth.app secrets on Cloudflare. It is a different key from the App Store Connect one. Deleting an account needs it, and Apple's review requires deleting an account. Meanwhile deletion is built and tested on the laptop with a made-up key."
+      "note": "Done 2026-11-18 by the owner: the Sign in with Apple key was made on Apple's site (the sign-in page's step 12), kept in its own folder outside the repo, readable by its owner only, and saved with its ID and the team ID as hifth.app secrets on Cloudflare; the check said set for all three. The live site uses them from its first upload. It is a different key from the App Store Connect one. Deleting an account needs it, and Apple's review requires deleting an account."
     },
     {
       "id": "sign-in-database-yes",
@@ -7398,11 +7398,10 @@
       "severity": "defect",
       "owner": "agent",
       "blockedBy": [
-        "launch-sign-in",
-        "sign-in-apple-key-file"
+        "launch-sign-in"
       ],
       "launch": true,
-      "note": "Apple requires deletion inside the app for any app with accounts, and it must also cancel the Apple sign-in. Cancelling needs the Sign in with Apple key file (the sign-in page's ⑧, the owner's); until then deletion is built and tested on the laptop with a made-up key."
+      "note": "Apple requires deletion inside the app for any app with accounts, and it must also cancel the Apple sign-in. Cancelling needs the Sign in with Apple key, which the owner saved on hifth.app on 2026-11-18 (the sign-in page's ⑧); on the laptop deletion is built and tested with a made-up key."
     },
     {
       "id": "launch-backups",

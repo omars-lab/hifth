@@ -67,6 +67,15 @@ None of them is printed; each check says only whether it is set.
 | `APPLE_TEAM_ID` | The Apple team. It also goes public in the app-links file with the first upload; saved as a secret here only so all three travel together. | Read from this laptop's signing certificate by the same command. | same | Never changes for the team. |
 | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `LIST_KEY`, `TURNSTILE_SECRET` | The notify list's address, its public key, the site's own key, and the spam check's secret. | The `deploy-site` skill's "Once, by the owner" steps; `TURNSTILE_SECRET` also sits in the saved settings (`make hifth-app-turnstile`). | `wrangler pages secret list --project-name hifth-app` from the sign-in working copy (names only) | As each source says. |
 
+**Apple's key files are not backed up, on purpose.** Neither the Sign in with Apple key nor the
+App Store upload key has a LastPass copy; LastPass holds only the key that opens the encrypted
+settings. Each Apple key lives in its file on this laptop and, for the sign-in key, in
+Cloudflare, which never hands a secret back. If the laptop is lost, the live site keeps working on
+Cloudflare's copy; the file is only needed again to move or rotate the key, and then the owner
+makes a new one on Apple's Keys page (about 10 minutes), saves it as above and revokes the old
+one. Fewer copies means fewer places it can leak from. (Owner, 2026-11-18: "No copy, remake if
+lost", asked when the sign-in key was first saved.)
+
 ## If a value leaked
 
 ```mermaid

@@ -376,9 +376,9 @@ Apple's help page does not require it; Apple's set-up page says an existing App 
 
 The notify list's server code calls Supabase's data door with the public key, but the checked-in settings switch that door off, and the Supabase move page says nothing uses it. Either the settings file is out of date or the list does not work. **What would answer it:** the store check, which prints settings and never a row, compared against the settings file; then one test sign-up on the notify form. This matters before anything else is added to that project.
 
-### ⑧ Is the Sign in with Apple key file made and saved on Cloudflare? · **open**
+### ⑧ Is the Sign in with Apple key file made and saved on Cloudflare? · **answered**
 
-Step 12: about 20 minutes in Apple's developer site, then Cloudflare. It is a different key from the App Store Connect one already made. Deleting an account needs it to cut the link with Apple, and Apple's review requires deleting an account, so the launch's account deletion waits on it. Meanwhile deletion is built and tested on the laptop with a made-up key. **What would answer it:** the owner makes the key, notes its ID, and saves both as hifth.app secrets; the check prints only that each secret is set.
+**Settled 2026-11-18 by the owner: yes.** Step 12. The owner made the key on Apple's site, the file was moved to its own folder outside the repo and made readable by its owner only, and the owner's save sent the key, its ID and the team ID to hifth.app's Cloudflare project as secrets. The check printed "set" for all three. The live site uses them from its first upload; until then sign-in stays off there. It is a different key from the App Store Connect one. Deleting an account needs it to cut the link with Apple, and Apple's review requires deleting an account.
 
 ### ⑨ May the accounts database be made on hifth.app's Cloudflare account? · **answered**
 
