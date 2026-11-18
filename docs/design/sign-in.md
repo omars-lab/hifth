@@ -74,8 +74,8 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 4 | hifth.app on Cloudflare, with small server functions for the notify list checked in (the live site was not looked at; see ⑦) | done | — | — |
 | 5 | A privacy check that refuses any way off the device it does not name | done | — | — |
 | **Your answers first** | | | | |
-| A | What sign-in unlocks first (① below) | left | you, one conversation | — |
-| B | Where accounts live (② below) | left | you, one conversation | — |
+| A | What sign-in unlocks first (① below) | done 2026-11-17: your marks follow you | — | — |
+| B | Where accounts live (② below) | done 2026-11-18: our own code on hifth.app's Cloudflare, free database | — | — |
 | **Milestone 1: a first real sign-in on your own iPad, hidden behind a developer setting** | | | | |
 | 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple (it has none today), and add the same line to the Mac's (empty today) | left | agent | an hour |
 | 7 | Let the page ask the app a question and wait for the answer (today messages only go one way, page to app) | left | agent | half a day, with tests |
@@ -100,12 +100,12 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | 24 | Register the mail sender with Apple, so mail reaches readers who hid their email | left | you in the Apple dashboard and DNS; waits on the mail sender decision | 30 minutes |
 | 25 | A second way in for people without Apple: a six-digit code by email | left | agent, after the mail sender is picked | two days |
 
-**Headline: 5 done, 2 answers from you, then 6 steps to a first real sign-in on your iPad (about a week), 11 more to be ready for testers (about two weeks), and 3 for later.** Both researchers put the whole build at two to three weeks of agent work; this table agrees.
+**Headline: 5 done, both answers in (2026-11-17 and 2026-11-18), then 6 steps to a first real sign-in on your iPad (about a week), 11 more to be ready for testers (about two weeks), and 3 for later.** Both researchers put the whole build at two to three weeks of agent work; this table agrees.
 
 ### What can be built and tried now, on your own devices?
 
 - **Steps 6, 7, 8 and 11 need no decision** and can start today on the iPad that is already signed with the paid team. They run behind a developer setting, not a button readers see, so the rule "no Sign in button with nothing behind it" holds.
-- **The server check can run on the laptop**, against a local copy of the database, with tests that use made-up notes. A real note from the iPad can then be checked there too. This waits on answer B only if the answer is not Cloudflare.
+- **The server check can run on the laptop**, against a local copy of the database, with tests that use made-up notes. A real note from the iPad can then be checked there too. Answer B was Cloudflare, so nothing here waits; only making the real database on Cloudflare (step 9) touches the live account.
 - **Deletion and cutting the link** can be walked end to end on your own Apple account once the key file exists (step 12): sign in, delete, then check that Hifth is gone from your Apple account's list of apps using Sign in with Apple.
 - **What cannot be tried on the laptop:** website sign-in, because Apple refuses local addresses and needs a real https address on hifth.app registered with it; and the Mac app, until step 20.
 - **What waits on the licence reading:** only step 22, putting the build in front of testers. Everything else can be built and tried first.
@@ -162,8 +162,8 @@ Apple's return trip is a form posted from Apple's own site, so the browser does 
 
 ```mermaid
 flowchart TD
-  Q1["You: what is sign-in for first?"] --> F
-  Q2["You: where do accounts live?"] --> DB
+  Q1["Answered: your marks follow you"] --> F
+  Q2["Answered: our own code on Cloudflare"] --> DB
   E["Agent: permissions file in each build"] --> SH
   BR["Agent: page can ask the app and wait"] --> SH
   SH["Agent: Apple's sheet in the app"] --> SV
