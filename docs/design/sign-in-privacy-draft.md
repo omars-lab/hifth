@@ -1,0 +1,215 @@
+# What will the privacy page and the App Store privacy label say once a reader can sign in?
+
+*Written 2026-11-18 for the owner to approve.
+This is step 19 of the sign-in plan ([sign-in.md](sign-in.md)).
+It is a draft: the live privacy page, the store answers and the app's privacy file are all unchanged, and sign-in is still switched off.
+Every sentence below was checked against the sign-in code as it stood on 2026-11-18, after steps 6 to 10 and 12.*
+
+> [!tip] Short version
+> **The privacy page.** The "Accounts" section stops saying "Hifth has no accounts yet".
+> It says sign-in is optional, lists the few things an account stores, who can see them and how to delete them.
+> **What an account stores today.** A number Apple gives us for the reader, a random account number of our own, the date the account was made, and for each signed-in device a scrambled copy of its sign-in key with a start and an end date.
+> **No email and no name.** The app asks Apple for neither, and the server keeps neither, so the draft says so plainly.
+> **Not built yet, so marked.** Apple's cancel ticket (step 13), "Delete my account" (step 14), staying signed in after the app closes (step 15), the button that says what leaves the device (step 16), the limit on tries (step 17) and the copy of the reader's marks (step 21).
+> **The store label.** "Data Not Collected" ends the day a store build can sign in.
+> It becomes one data type, User ID, linked to the reader, for app functionality, not used for tracking.
+> The copy of the marks adds a second type at step 21.
+> **Seven questions are yours.** They are at the end, the one that holds up the most first.
+
+## What do the words on this page mean?
+
+- **Hafiz:** someone who has memorised the Qur'an, or is memorising it.
+- **Your marks:** what the app keeps for one reader: mistakes, look-alike jumps, notes and bookmarks.
+- **Apple's number for the reader:** a long code Apple hands us at sign-in. It is the same every time that reader signs in to Hifth, and it is not their Apple ID or their email.
+- **The sign-in key:** a long random code the server hands the app after a sign-in. The app shows it on later requests to prove who it is.
+- **A scrambled copy:** a one-way fingerprint of a code. The code cannot be worked back out of it.
+- **The cancel ticket:** a long-lived code from Apple that lets our server ask Apple to cut the link between a reader's Apple account and Hifth.
+- **The store label:** the "App Privacy" box on the app's App Store page, filled in from answers we give Apple.
+- **The app's privacy file:** a small file inside the app that tells Apple the same things in a form its tools can read.
+
+## What does this change for a hafiz?
+
+> [!important] For a hafiz
+> Nothing while reading and revising: no account is needed, and the page says so first.
+> A reader who does sign in can read, in a few lines, exactly what we hold about them and how to remove it.
+> The one thing close to their worship, the copy of where their memory slips, is not stored by sign-in at all.
+> It arrives only with its own button at step 21, and the page will say plainly that we could read that copy.
+
+## What does an account really store today?
+
+This is what the code does, which is narrower than what the plan first imagined.
+
+| Thing | Kept? | Detail |
+| --- | --- | --- |
+| Apple's number for the reader | yes | One per account. Accounts are found by it. |
+| Our own account number | yes | A random code, so nothing else we store repeats Apple's number. |
+| When the account was made | yes | A date and time. |
+| Email | **no** | The app asks Apple for no email. Apple's note may still carry one, and the server reads past it and keeps nothing. |
+| Name | **no** | The app asks Apple for no name. |
+| The sign-in key, per device | scrambled copy only | With when it started and when it ends. It ends after 60 days, and signing out ends it on that device only. |
+| The one-off value for a sign-in | scrambled copy only | Good once, for ten minutes, and not tied to any reader. |
+| Apple's cancel ticket | not yet | Step 13. |
+| A copy of the reader's marks | not yet | Step 21, behind its own button. |
+| Which device, which address, any log of sign-ins | **no** | The sign-in code writes no log and keeps no device name or internet address. |
+
+## What will the "Accounts" section say, in English?
+
+This replaces the two lines under "Accounts" on the privacy page.
+A line that starts with a step in square brackets goes in when that step lands, and stays out until then.
+
+### Accounts
+
+Signing in is optional.
+Hifth works in full without an account, and everything above on this page stays true for you if you never sign in.
+
+You sign in with Apple's own "Sign in with Apple" panel.
+We ask Apple for neither your name nor your email, and we keep neither.
+
+**[goes in when step 21 lands]** Signing in is for one thing: so that your marks can follow you from one device to another, and only if you press the button that says so.
+
+**What an account stores**
+
+- A number Apple gives us for you. It is the same each time you sign in to Hifth, and it is not your Apple ID or your email.
+- An account number of our own, picked at random, and the date your account was made.
+- For each device you sign in on, a scrambled copy of the key that keeps that device signed in, with the date it started and the date it ends. The key cannot be worked back out of the scrambled copy, so a copy of our database could not be used to sign in as you.
+- **[goes in when step 13 lands]** A ticket from Apple that we use for one thing: to ask Apple to cut the link between your Apple account and Hifth when you delete your account. It is kept locked.
+- **[goes in when step 21 lands]** If you press "Keep a copy of my marks on hifth.app", one copy of your marks, notes and bookmarks. This copy is not locked against us: the person who runs Hifth could read it. Without that button, your marks never leave your device.
+
+We do not keep your name, your email, the name of your device, or a record of when you signed in.
+
+A device stays signed in for 60 days, and then asks you to sign in again.
+Signing out ends the sign-in on that device only.
+
+**[goes in when step 15 lands]** The app keeps its sign-in key in your device's locked store for passwords, and nowhere else.
+**[goes in when step 15 lands]** Each time it opens, the app asks Apple whether you still allow Hifth to use Sign in with Apple, and signs you out if you do not.
+
+**[goes in when step 17 lands]** To stop bots from trying to sign in over and over, sign-in uses the same check as the form on the front page, described under "Spam check" below.
+
+**Who can see it**
+
+Accounts are stored in a database at Cloudflare, the company that hosts hifth.app.
+Only the person who runs Hifth can open it.
+We do not share it or sell it, and it is never used for advertising.
+Like any visit to a website, Cloudflare sees each sign-in request arrive.
+Apple knows that you use Sign in with Apple with Hifth, and shows Hifth in the list of apps in your Apple account's settings.
+
+**How to delete your account**
+
+**[goes in when step 14 lands]** Choose "Delete my account" in the app.
+**[goes in when step 14 lands]** It deletes your account and signs out every device, and it asks Apple to cut the link between your Apple account and Hifth.
+**[goes in when step 21 lands]** It also deletes the copy of your marks that we hold.
+**[goes in when step 14 lands]** The marks on your own device are not touched.
+**[goes in when step 14 lands]** If Apple cannot be reached, your account is still deleted, and the app tells you how to remove Hifth from your Apple account's settings yourself.
+
+## What will the "Accounts" section say, in Arabic?
+
+The same wording, sentence for sentence, with no vowel marks, in the words the Arabic page already uses.
+
+### الحسابات
+
+تسجيل الدخول اختياري.
+يعمل حفظ كاملا بلا حساب، وكل ما سبق في هذه الصفحة يبقى صحيحا إن لم تسجل الدخول أبدا.
+
+تسجل الدخول من لوحة Apple نفسها «تسجيل الدخول باستخدام Apple».
+لا نطلب من Apple اسمك ولا بريدك، ولا نحتفظ بأي منهما.
+
+**[يضاف حين تنجز الخطوة 21]** لتسجيل الدخول غرض واحد: أن تنتقل علاماتك معك من جهاز إلى آخر، وذلك فقط إن ضغطت الزر الذي يذكر ذلك.
+
+**ما يحفظه الحساب**
+
+- رقم تعطينا إياه Apple لك. هو نفسه في كل مرة تسجل فيها الدخول إلى حفظ، وليس هو Apple ID ولا بريدك.
+- رقم حساب من عندنا يختار عشوائيا، وتاريخ إنشاء حسابك.
+- لكل جهاز تسجل الدخول منه، نسخة مموهة من المفتاح الذي يبقي ذلك الجهاز مسجلا، مع تاريخ بدايته وتاريخ نهايته. لا يمكن استخراج المفتاح من النسخة المموهة، فلا تنفع نسخة من قاعدة بياناتنا أحدا في الدخول باسمك.
+- **[يضاف حين تنجز الخطوة 13]** تذكرة من Apple نستعملها لأمر واحد: أن نطلب من Apple قطع الصلة بين حسابك في Apple وحفظ حين تحذف حسابك. وهي محفوظة مقفلة.
+- **[يضاف حين تنجز الخطوة 21]** إن ضغطت «احتفظ بنسخة من علاماتي على hifth.app»، نسخة واحدة من علاماتك وملاحظاتك ومواضع وقوفك. هذه النسخة غير مقفلة عنا: يستطيع الشخص الذي يشغل حفظ أن يقرأها. ومن دون ذلك الزر لا تغادر علاماتك جهازك أبدا.
+
+لا نحتفظ باسمك ولا ببريدك ولا باسم جهازك ولا بسجل لأوقات تسجيل دخولك.
+
+يبقى الجهاز مسجلا ستين يوما، ثم يطلب منك تسجيل الدخول من جديد.
+وتسجيل الخروج ينهي الدخول على ذلك الجهاز وحده.
+
+**[يضاف حين تنجز الخطوة 15]** يحفظ التطبيق مفتاح الدخول في مخزن كلمات السر المقفل في جهازك، ولا يحفظه في مكان آخر.
+**[يضاف حين تنجز الخطوة 15]** وفي كل مرة يفتح فيها، يسأل التطبيق Apple هل ما زلت تسمح لحفظ باستعمال «تسجيل الدخول باستخدام Apple»، ويسجل خروجك إن لم تعد تسمح.
+
+**[يضاف حين تنجز الخطوة 17]** ولمنع البرامج الآلية من محاولة الدخول مرة بعد مرة، يستعمل تسجيل الدخول التحقق نفسه الذي يستعمله النموذج في الصفحة الأولى، وهو مذكور في قسم «التحقق من البريد المزعج» أدناه.
+
+**من يستطيع أن يراه**
+
+تخزن الحسابات في قاعدة بيانات عند Cloudflare، وهي الشركة التي تستضيف <span dir="ltr">hifth.app</span>.
+لا يفتحها إلا الشخص الذي يشغل حفظ.
+لا نشاركها ولا نبيعها، ولا تستعمل للإعلانات أبدا.
+وكما في أي زيارة لموقع، يرى Cloudflare وصول كل طلب لتسجيل الدخول.
+وتعرف Apple أنك تستعمل «تسجيل الدخول باستخدام Apple» مع حفظ، وتعرض حفظ في قائمة التطبيقات في إعدادات حسابك لديها.
+
+**كيف تحذف حسابك**
+
+**[يضاف حين تنجز الخطوة 14]** اختر «احذف حسابي» في التطبيق.
+**[يضاف حين تنجز الخطوة 14]** يحذف ذلك حسابك ويسجل خروج كل جهاز، ويطلب من Apple قطع الصلة بين حسابك في Apple وحفظ.
+**[يضاف حين تنجز الخطوة 21]** ويحذف أيضا نسخة علاماتك التي عندنا.
+**[يضاف حين تنجز الخطوة 14]** أما العلامات التي على جهازك فلا تمس.
+**[يضاف حين تنجز الخطوة 14]** وإن تعذر الوصول إلى Apple، فحسابك يحذف مع ذلك، ويخبرك التطبيق كيف تزيل حفظ من إعدادات حسابك في Apple بنفسك.
+
+## Which other sentences on the privacy page must change with it?
+
+- **"What stays on your device"** says none of your marks are sent to us and we have no copy. That stays true through step 20. At step 21 it gains: "unless you sign in and press the button that keeps a copy on hifth.app, described under Accounts".
+- **"A check for problems, each time the app opens"** says the request carries no account. That is true today. It stays true only if the app never attaches its sign-in key to that request, so step 15 should hold it with a test.
+- **"Spam check"** says only the form uses it. Step 17 adds sign-in to that sentence.
+- **"No tracking"** stays as it is. Sign-in adds no analytics, no advertising and no outside company beyond Cloudflare and Apple, both already named.
+
+## What changes on the App Store privacy label?
+
+Apple counts data as "collected" when it leaves the device and we can reach it for longer than it takes to answer the request.
+The data type names below are Apple's own, read on [Apple's page](https://developer.apple.com/app-store/app-privacy-details/) on 2026-11-18.
+
+### What changes the day a store build can sign in?
+
+The answer "Data Not Collected" is no longer true, because Apple's number for the reader is kept on our server.
+
+| Apple's data type | Collected? | Linked to the reader? | Used for tracking? | Purpose | Reason, in one line |
+| --- | --- | --- | --- | --- | --- |
+| Identifiers: User ID | **yes** | **yes** | no | App Functionality | Apple's number for the reader and our own account number are account-level IDs, kept to sign the reader in. |
+| Contact Info: Email Address | no | | | | The app asks Apple for no email, and the server keeps none even when Apple's note carries one. |
+| Contact Info: Name | no | | | | The app asks Apple for no name. |
+| Identifiers: Device ID | no | | | | The sign-in key is random and new at each sign-in. It names a sign-in, not a device. |
+| Everything else | no | | | | Unchanged from today's answer, for the reasons the store listing page already gives. |
+
+"Used for tracking: no" is true because nothing is joined with another company's data for advertising, and nothing goes to a data broker.
+Apple's cancel ticket (step 13) adds no new line: it is a sign-in credential tied to the same account, covered by User ID.
+
+### What changes when the copy of the marks arrives (step 21)?
+
+| Apple's data type | Collected? | Linked to the reader? | Used for tracking? | Purpose | Reason, in one line |
+| --- | --- | --- | --- | --- | --- |
+| User Content: Other User Content | **yes** | **yes** | no | App Functionality | The copy of the reader's marks, notes and bookmarks is kept with their account so it can follow them. |
+| Sensitive Info | **your call**, recommended yes | yes | no | App Functionality | Apple's list for this type includes "religious or philosophical beliefs", and a record of Qur'an revision can show a reader's faith. Declaring it costs nothing and cannot be called an understatement later. |
+
+### What has to change in the same commit as the label?
+
+- The store listing page's privacy answer, and its line "No account, no ads, no tracking, no analytics", which becomes "No account needed".
+- The app's privacy file, which gains one collected data type (User ID, linked, not tracking, for app functionality). Its tracking answer stays "no".
+- The check that compares the two already refuses a listing that declares collected data while the privacy file lists none, and the other way round. So neither can change alone.
+- Apple's exact spelling of the data type inside the privacy file should be read from Apple's page when that change is made, not from memory.
+
+## What did reading the code turn up that the lead should know?
+
+- **Expired rows are never removed.** A sign-in that has run out, and a one-off value that was never used, stop working but stay in the database. The draft says "ends" and never "is deleted". If the page should promise removal, a clean-up has to be built first.
+- **The design page says a sign-in renews when used and ends after 60 days unused.** The code gives a fixed 60 days from sign-in, with no renewal. The draft follows the code. If step 15 adds renewal, the "60 days" sentence changes to "60 days after you last used it".
+- **Nothing says yet what the server does with Apple's notice that a reader has left** (step 13). If it deletes the account, the delete section gains one sentence saying that removing Hifth in Apple's settings also deletes the account.
+- **The time an account was made is stored to the second.** The draft calls it "the date your account was made".
+
+## Which questions can only the owner answer?
+
+1. **The live page promises that the account wording and deleting from inside the app will be there "before it opens". Is "opens" the first reader other than you?** If yes, this wording goes live with steps 13 to 16 and before step 18's invitations, and your own trials in step 11 need no change to the page. This is first because it sets when everything else here is due.
+2. **Is it true that only you can open the accounts database?** The draft says "only the person who runs Hifth can open it". That holds only if no one else has access to hifth.app's Cloudflare account.
+3. **May the page name Cloudflare as where accounts are kept?** The page already names Cloudflare as the site's host and Supabase for the notify list, so the draft does the same.
+4. **Should the label declare Sensitive Info for the copy of the marks?** Recommended yes. It is a judgment about how Apple's words apply to a record of Qur'an revision, and the answer is shown publicly on the store page.
+5. **Should sign-ins that have run out and accounts never used be cleaned up, and should the page promise it?** Today nothing removes them. A promise needs the clean-up built first.
+6. **Before step 14 exists, what should a reader who wants their account gone be told?** The draft promises nothing here. Writing to the support address already on the page would work only if you are willing to delete an account by hand.
+7. **Does the label change go to Apple with the first build that can sign in, even if the sign-in button is hidden?** Recommended yes, because the label describes what the build can do, and a tester build with an invite code can already make an account.
+
+## What is this not settling?
+
+- When sign-in opens, which the storage decision ties to the licensing question.
+- The wording on the button that says what leaves the device (step 16).
+- Any legal advice. European data law treats religious data as a special kind, and this draft has not been read by anyone qualified.
+- The wording for website sign-in and the email code (steps 23 to 25), which will add an email address to both the page and the label.
