@@ -43,7 +43,7 @@ export async function handOutWord(db, { now = nowSeconds(), newCode = randomCode
  * Signs a reader in from Apple's note and the one-off word it carries.
  * Returns { ok: true, session, accountId, expiresAt } or { ok: false, reason }.
  */
-export async function signIn(db, { note, word, check, now = nowSeconds(), newCode = randomCode }) {
+export async function signIn(db, { note, word, check, code, trade, now = nowSeconds(), newCode = randomCode }) {
   if (typeof word !== "string" || word === "") return { ok: false, reason: "word-unknown" };
 
   // Spend the word first: one DELETE, so two sign-ins racing with the same word cannot both win.
@@ -62,6 +62,8 @@ export async function signIn(db, { note, word, check, now = nowSeconds(), newCod
     .run();
   const accountId = await db.prepare("SELECT id FROM accounts WHERE apple_user = ?").bind(checked.appleUser).first("id");
 
+  await keepTicket(db, { accountId, appId: checked.appId, code, trade, now });
+
   const session = newCode();
   const expiresAt = now + SESSION_SECONDS;
   await db
@@ -69,6 +71,58 @@ export async function signIn(db, { note, word, check, now = nowSeconds(), newCod
     .bind(await hashWord(session), accountId, now, expiresAt)
     .run();
   return { ok: true, session, accountId, expiresAt };
+}
+
+/**
+ * Keeps Apple's cancel ticket for an account that has none yet (step 13). `trade` swaps the
+ * one-time code from Apple's sheet for the ticket and hands it back already locked, or null.
+ * A reader is never kept out because this failed: without a ticket, deleting the account still
+ * deletes everything here, and the reader is told how to remove Hifth on Apple's side themselves.
+ */
+async function keepTicket(db, { accountId, appId, code, trade, now }) {
+  if (typeof trade !== "function" || typeof code !== "string" || code === "") return;
+  if (typeof appId !== "string" || appId === "") return;
+  try {
+    const kept = await db.prepare("SELECT 1 AS kept FROM apple_tickets WHERE account_id = ?").bind(accountId).first("kept");
+    if (kept) return;
+    const sealed = await trade({ code, appId, accountId });
+    if (typeof sealed !== "string" || sealed === "") return;
+    await db
+      .prepare("INSERT INTO apple_tickets (account_id, sealed, app_id, created_at) VALUES (?, ?, ?, ?) ON CONFLICT (account_id) DO NOTHING")
+      .bind(accountId, sealed, appId, now)
+      .run();
+  } catch {
+    // Nothing is logged: the error could carry the code or the ticket.
+  }
+}
+
+/**
+ * Acts on a notice from Apple that a reader has left from Apple's side (step 13). The notice is
+ * checked first (checkAppleNotice in apple-link.mjs); `at` is when it happened, in seconds.
+ *
+ *   "consent-revoked"  the reader stopped using Apple sign-in with Hifth. Apple says to treat it
+ *                      as signing out: every session from before then ends and the ticket, now
+ *                      dead, is dropped. The account stays, so signing in again finds it.
+ *   "account-delete"   the reader deleted their Apple account. Everything kept about them goes.
+ *   anything else      (email forwarding switched on or off) nothing: no email is kept.
+ *
+ * Only what is older than the notice is touched, so an old notice sent again cannot undo a
+ * sign-in made after it. Returns "signed-out", "deleted" or "nothing".
+ */
+export async function actOnAppleNotice(db, { type, appleUser, at }) {
+  if (typeof appleUser !== "string" || appleUser === "" || !Number.isFinite(at)) return "nothing";
+  if (type === "account-delete") {
+    const gone = await db.prepare("DELETE FROM accounts WHERE apple_user = ? AND created_at <= ?").bind(appleUser, at).run();
+    return gone.meta.changes > 0 ? "deleted" : "nothing";
+  }
+  if (type === "consent-revoked") {
+    const accountId = await db.prepare("SELECT id FROM accounts WHERE apple_user = ?").bind(appleUser).first("id");
+    if (!accountId) return "nothing";
+    await db.prepare("DELETE FROM sessions WHERE account_id = ? AND created_at <= ?").bind(accountId, at).run();
+    await db.prepare("DELETE FROM apple_tickets WHERE account_id = ? AND created_at <= ?").bind(accountId, at).run();
+    return "signed-out";
+  }
+  return "nothing";
 }
 
 /** The account a session belongs to, or null if it is unknown or has run out. */

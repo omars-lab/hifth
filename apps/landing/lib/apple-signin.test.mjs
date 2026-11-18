@@ -71,7 +71,15 @@ test("the email in a note is never handed on: only the user number comes back", 
     await note({ extra: { email: "made-up@privaterelay.example", is_private_email: "true", email_verified: "true" } }),
     opts,
   );
-  assert.deepEqual(result, { ok: true, appleUser: USER });
+  assert.deepEqual(result, { ok: true, appleUser: USER, appId: APP });
+});
+
+test("a good note also says which of our apps it was for, so the one-time code can be traded under that name", async () => {
+  const result = await checkAppleNote(await note({ aud: "app.example.hifth.mac" }), {
+    ...opts,
+    audiences: [APP, "app.example.hifth.mac"],
+  });
+  assert.equal(result.appId, "app.example.hifth.mac");
 });
 
 test("a note signed by a key that is not Apple's is refused", async () => {

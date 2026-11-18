@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { handleWord, handleSignIn, handleSignOut } from "./sign-in-api.mjs";
+import { createLocalJWKSet, exportJWK, exportPKCS8, generateKeyPair, SignJWT } from "jose";
+import { handleAppleNotice, handleWord, handleSignIn, handleSignOut } from "./sign-in-api.mjs";
 import { whoIs } from "./accounts.mjs";
 import { localD1 } from "./test-d1.mjs";
 
@@ -136,6 +137,183 @@ test("an oversized body is refused without being read into a note", async () => 
   const huge = JSON.stringify({ note: "apple:" + "0".repeat(20_000), word: "x" });
   const res = await handleSignIn(post("/api/sign-in", huge), env, { check });
   assert.equal(res.status, 413);
+});
+
+// Step 13: the one-time code, Apple's cancel ticket, and Apple's notices. Apple is a stand-in
+// function here, the key file is made up in the test, and the team id is a made-up one.
+
+const APPLE = "https://appleid.apple.com";
+const APP = "app.example.hifth";
+const TICKET = "made-up-cancel-ticket.r.0001";
+const ourKey = await generateKeyPair("ES256", { extractable: true });
+const secrets = {
+  APPLE_SIGN_IN_KEY: await exportPKCS8(ourKey.privateKey),
+  APPLE_SIGN_IN_KEY_ID: "MADEUPKEY1",
+  APPLE_TEAM_ID: "Q9Z8Y7X6W5",
+};
+const checkWithApp = async (note) => ({ ...(await check(note)), appId: APP });
+
+function standInApple({ status = 200 } = {}) {
+  const calls = [];
+  const fetch = async (url, init) => {
+    calls.push({ url: String(url), form: new URLSearchParams(init.body) });
+    return new Response(JSON.stringify(status === 200 ? { refresh_token: TICKET } : { error: "invalid_grant" }), { status });
+  };
+  return { fetch, calls };
+}
+
+test("a sign-in that carries Apple's one-time code keeps the cancel ticket, locked", async () => {
+  const { env, rows } = setUp(secrets);
+  const apple = standInApple();
+  const word = await getWord(env);
+  const res = await handleSignIn(
+    post("/api/sign-in", { note: "apple:000001.made-up.0001", word, code: "made-up-code" }),
+    env,
+    { check: checkWithApp, fetch: apple.fetch },
+  );
+  assert.equal(res.status, 200);
+  assert.deepEqual(Object.keys(await res.json()).sort(), ["expiresAt", "session"]);
+  assert.equal(apple.calls.length, 1);
+  assert.equal(apple.calls[0].url, "https://appleid.apple.com/auth/token");
+  assert.equal(apple.calls[0].form.get("code"), "made-up-code");
+  assert.equal(apple.calls[0].form.get("client_id"), APP);
+  const kept = rows("apple_tickets");
+  assert.equal(kept.length, 1);
+  assert.ok(!JSON.stringify(kept).includes(TICKET), "the ticket itself must not be kept in plain");
+  assert.ok(!JSON.stringify(kept).includes("made-up-code"));
+});
+
+test("a sign-in still works when Apple turns the trade down, when the key file is not set, or with no code", async () => {
+  const refused = standInApple({ status: 400 });
+  const fine = standInApple();
+  for (const [extra, body, apple, asked] of [
+    [secrets, { code: "old-code" }, refused, 1],
+    [{}, { code: "made-up-code" }, fine, 0],
+    [secrets, {}, fine, 0],
+    [secrets, { code: 42 }, fine, 0],
+  ]) {
+    const { env, rows } = setUp(extra);
+    const word = await getWord(env);
+    const res = await handleSignIn(post("/api/sign-in", { note: "apple:000001.made-up.0001", word, ...body }), env, {
+      check: checkWithApp,
+      fetch: apple.fetch,
+    });
+    assert.equal(res.status, 200, JSON.stringify(body));
+    assert.equal(rows("apple_tickets").length, 0);
+    assert.equal(apple.calls.length, asked, JSON.stringify(body));
+  }
+});
+
+const appleKey = await generateKeyPair("RS256", { extractable: true });
+const forger = await generateKeyPair("RS256", { extractable: true });
+const keys = createLocalJWKSet({
+  keys: [{ ...(await exportJWK(appleKey.publicKey)), kid: "apple-1", alg: "RS256", use: "sig" }],
+});
+
+async function notice(type, user, { key = appleKey.privateKey, at = Date.now() + 1000 } = {}) {
+  const payload = await new SignJWT({ events: JSON.stringify({ type, sub: user, event_time: at }) })
+    .setProtectedHeader({ alg: "RS256", kid: "apple-1" })
+    .setIssuer(APPLE)
+    .setAudience(APP)
+    .setIssuedAt()
+    .setExpirationTime("10m")
+    .sign(key);
+  return { payload };
+}
+
+async function signedIn(env, user) {
+  const word = await getWord(env);
+  const res = await handleSignIn(post("/api/sign-in", { note: `apple:${user}`, word }), env, { check: checkWithApp });
+  return (await res.json()).session;
+}
+
+test("Apple's notice that a reader stopped using Apple sign-in signs them out everywhere", async () => {
+  const { db, env, rows } = setUp();
+  const session = await signedIn(env, "000001.made-up.0001");
+  const other = await signedIn(env, "000002.made-up.0002");
+  const res = await handleAppleNotice(
+    post("/api/sign-in/apple-notice", await notice("consent-revoked", "000001.made-up.0001")),
+    env,
+    { keys },
+  );
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("cache-control"), "no-store");
+  assert.equal(await whoIs(db, session), null);
+  assert.ok(await whoIs(db, other));
+  assert.equal(rows("accounts").length, 2);
+});
+
+test("Apple's notice that a reader deleted their Apple account deletes what is kept about them", async () => {
+  const { db, env, rows } = setUp();
+  const session = await signedIn(env, "000001.made-up.0001");
+  await signedIn(env, "000002.made-up.0002");
+  const res = await handleAppleNotice(
+    post("/api/sign-in/apple-notice", await notice("account-delete", "000001.made-up.0001")),
+    env,
+    { keys },
+  );
+  assert.equal(res.status, 200);
+  assert.equal(await whoIs(db, session), null);
+  assert.deepEqual(rows("accounts").map((r) => r.apple_user), ["000002.made-up.0002"]);
+});
+
+test("a notice Apple did not sign changes nothing and is refused", async () => {
+  const { db, env } = setUp();
+  const session = await signedIn(env, "000001.made-up.0001");
+  const forged = await notice("account-delete", "000001.made-up.0001", { key: forger.privateKey });
+  const res = await handleAppleNotice(post("/api/sign-in/apple-notice", forged), env, { keys });
+  assert.equal(res.status, 401);
+  assert.deepEqual(await res.json(), { reason: "bad-signature" });
+  assert.ok(await whoIs(db, session));
+});
+
+test("a notice about a reader we do not know, or about email forwarding, is taken with thanks and changes nothing", async () => {
+  const { db, env } = setUp();
+  const session = await signedIn(env, "000001.made-up.0001");
+  for (const body of [
+    await notice("account-delete", "000009.nobody.0009"),
+    await notice("email-disabled", "000001.made-up.0001"),
+  ]) {
+    const res = await handleAppleNotice(post("/api/sign-in/apple-notice", body), env, { keys });
+    assert.equal(res.status, 200);
+  }
+  assert.ok(await whoIs(db, session));
+});
+
+test("the reply to a notice says nothing about whether the reader is known", async () => {
+  const { env } = setUp();
+  await signedIn(env, "000001.made-up.0001");
+  const known = await handleAppleNotice(
+    post("/api/sign-in/apple-notice", await notice("account-delete", "000001.made-up.0001")),
+    env,
+    { keys },
+  );
+  const unknown = await handleAppleNotice(
+    post("/api/sign-in/apple-notice", await notice("account-delete", "000009.nobody.0009")),
+    env,
+    { keys },
+  );
+  assert.equal(await known.text(), await unknown.text());
+});
+
+test("a notice body that is not the expected shape, or far too big, is refused", async () => {
+  const { env } = setUp();
+  for (const body of ["not json", "[]", "null", JSON.stringify({ payload: 1 }), JSON.stringify({ other: "x" })]) {
+    const res = await handleAppleNotice(post("/api/sign-in/apple-notice", body), env, { keys });
+    assert.equal(res.status, 400, body);
+  }
+  const huge = JSON.stringify({ payload: "0".repeat(20_000) });
+  assert.equal((await handleAppleNotice(post("/api/sign-in/apple-notice", huge), env, { keys })).status, 413);
+});
+
+test("with sign-in switched off, the notice address answers as if it was not there", async () => {
+  const { env } = setUp({ SIGN_IN: undefined });
+  const res = await handleAppleNotice(
+    post("/api/sign-in/apple-notice", await notice("account-delete", "000001.made-up.0001")),
+    env,
+    { keys },
+  );
+  assert.equal(res.status, 404);
 });
 
 test("signing out ends the session named in the Authorization line", async () => {

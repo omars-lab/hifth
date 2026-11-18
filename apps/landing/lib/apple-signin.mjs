@@ -65,29 +65,45 @@ function reasonFor(error) {
 }
 
 /**
+ * Checks that Apple signed something for one of our apps: the sign-in note here, and the notices
+ * Apple posts when a reader leaves (apple-link.mjs). `required` names what it must carry.
+ * Returns { ok: true, payload, appId } or { ok: false, reason }; appId is which of our app ids
+ * it was meant for.
+ */
+export async function checkSignedByApple(token, { keys, audiences, required = [] } = {}) {
+  if (typeof token !== "string" || !token) return { ok: false, reason: "not-a-note" };
+  if (!keys || !Array.isArray(audiences) || audiences.length === 0) return { ok: false, reason: "not-set-up" };
+  try {
+    const { payload } = await jwtVerify(token, keys, {
+      algorithms: [METHOD],
+      issuer: APPLE_ISSUER,
+      audience: audiences,
+      requiredClaims: [...required, "exp", "iat"],
+      clockTolerance: CLOCK_SLACK_SECONDS,
+    });
+    const meantFor = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+    return { ok: true, payload, appId: audiences.find((id) => meantFor.includes(id)) };
+  } catch (error) {
+    return { ok: false, reason: reasonFor(error) };
+  }
+}
+
+/**
  * Checks Apple's note. `keys` is Apple's key set (see above), `audiences` our app ids, and `word`
- * the one-off word handed out for this sign-in. Returns { ok: true, appleUser } or
- * { ok: false, reason }.
+ * the one-off word handed out for this sign-in. Returns { ok: true, appleUser, appId } or
+ * { ok: false, reason }. appId is which of our apps the reader signed in to; Apple wants it named
+ * again when the one-time code is traded for the cancel ticket (apple-link.mjs).
  */
 export async function checkAppleNote(token, { keys, audiences, word } = {}) {
   if (typeof token !== "string" || !token) return { ok: false, reason: "not-a-note" };
   if (!keys || !Array.isArray(audiences) || audiences.length === 0) return { ok: false, reason: "not-set-up" };
   if (typeof word !== "string" || !word) return { ok: false, reason: "word-mismatch" };
 
-  let payload;
-  try {
-    ({ payload } = await jwtVerify(token, keys, {
-      algorithms: [METHOD],
-      issuer: APPLE_ISSUER,
-      audience: audiences,
-      requiredClaims: ["sub", "exp", "iat"],
-      clockTolerance: CLOCK_SLACK_SECONDS,
-    }));
-  } catch (error) {
-    return { ok: false, reason: reasonFor(error) };
-  }
+  const signed = await checkSignedByApple(token, { keys, audiences, required: ["sub"] });
+  if (!signed.ok) return signed;
+  const { payload } = signed;
 
   if (!sameText(payload.nonce, await hashWord(word))) return { ok: false, reason: "word-mismatch" };
   if (typeof payload.sub !== "string" || !payload.sub) return { ok: false, reason: "no-user" };
-  return { ok: true, appleUser: payload.sub };
+  return { ok: true, appleUser: payload.sub, appId: signed.appId };
 }
