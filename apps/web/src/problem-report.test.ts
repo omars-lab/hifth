@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { clearFaults, noteFault } from "./fault-log";
 import { stringsFor } from "./i18n";
+import { STEP_LIMIT, clearSteps, noteViewChange } from "./step-log";
 import { REPORT_FAULTS, SUPPORT_ADDRESS, deviceKind, gatherFacts, mailLink, reportText, type ReportFacts } from "./problem-report";
 
 const FACTS: ReportFacts = {
@@ -13,10 +14,12 @@ const FACTS: ReportFacts = {
   language: "ar",
   when: "2026-11-16T12:00:00.000Z",
   faults: [],
+  steps: [],
 };
 
 afterEach(() => {
   clearFaults();
+  clearSteps();
   localStorage.clear();
   delete (window as { __HIFTH_NATIVE__?: unknown }).__HIFTH_NATIVE__;
 });
@@ -60,6 +63,28 @@ describe("the problem report", () => {
     expect(text).not.toContain("made-up fault 3");
     expect(text).toContain("12:00:08 uncaught at index.js:42: made-up fault 8");
     for (const line of text.split("\n")) expect(line.length).toBeLessThan(260);
+  });
+
+  it("lists the reader's last steps by name, a run of the same step as one line", () => {
+    expect(reportText(FACTS)).toContain("Steps: none kept since the page opened");
+    const steps = [
+      { at: Date.UTC(2026, 10, 16, 11, 58, 0), name: "opened the app" as const, count: 1 },
+      { at: Date.UTC(2026, 10, 16, 11, 59, 30), name: "turned to another page" as const, count: 12 },
+      { at: Date.UTC(2026, 10, 16, 11, 59, 40), name: "chose a verse" as const, count: 1 },
+    ];
+    const text = reportText({ ...FACTS, steps });
+    expect(text).toContain("Steps (the last 3, oldest first):");
+    expect(text).toContain("- 11:59:30 turned to another page (12 times)");
+    expect(text).toContain("- 11:59:40 chose a verse\n");
+    expect(text.indexOf("Steps (")).toBeLessThan(text.indexOf("Errors:"));
+  });
+
+  it("takes the steps the app kept, and never which page they were on", () => {
+    noteViewChange({ edition: "e", select: null, page: 437 }, { edition: "e", select: null, page: 438 });
+    const text = reportText(gatherFacts());
+    expect(text).toContain("turned to another page");
+    expect(text).not.toContain("437");
+    expect(text).not.toContain("438");
   });
 
   it("says when it comes from the website, or from a laptop's own copy", () => {
@@ -110,7 +135,12 @@ describe("the problem report", () => {
       how: "drawing" as const,
       message: "y".repeat(300),
     }));
-    expect(mailLink(reportText({ ...FACTS, faults }), "What happened?").length).toBeLessThan(4000);
+    const steps = Array.from({ length: STEP_LIMIT }, (_, i) => ({
+      at: i,
+      name: i % 2 ? ("followed a link to another verse" as const) : ("went back along the trail" as const),
+      count: 99,
+    }));
+    expect(mailLink(reportText({ ...FACTS, faults, steps }), "What happened?").length).toBeLessThan(4000);
   });
 
   it("keeps the page an error names, so the reader is promised no list of pages, not no page at all", () => {

@@ -9,21 +9,21 @@
  * their mail app.
  *
  * What it holds: which app and version, the build's commit, the device's
- * browser line, the screen size, the language, the time, and the last few
- * errors the page kept in memory (`fault-log.ts`). What it never holds: the
+ * browser line, the screen size, the language, the time, the reader's last few
+ * steps by name (`step-log.ts`, launch item 19: "turned to another page", never
+ * which page) and the last few errors the page kept in memory (`fault-log.ts`).
+ * What it never holds: the
  * reader's notes, marks, bookmarks, a list of the pages they read, or anything
  * they typed. The test checks that by writing made-up notes to storage and
  * looking for them in the report. An error's own words can still name a page
  * (a page that failed to load says which), so the reader is promised no list
  * of pages, not that no page number ever appears.
- *
- * "The last few steps by name" from the launch page waits on the app's own log
- * (launch item 19); until then the report says only what is listed above.
  */
 
 import { recentFaults, type Fault } from "./fault-log";
 import { nativeInfo } from "./native-bridge";
 import { SOURCE_COMMIT, isCommit } from "./provenance";
+import { recentSteps, type Step } from "./step-log";
 
 /** Where reports go: the project's own address, chosen by the owner 2026-11-14. */
 export const SUPPORT_ADDRESS = "hello@hifth.app";
@@ -31,6 +31,8 @@ export const SUPPORT_ADDRESS = "hello@hifth.app";
 /** How many of the kept errors go in; the latest matter, and a mail link has a length limit. */
 export const REPORT_FAULTS = 5;
 const FAULT_MESSAGE_LIMIT = 200;
+/** How many step lines go in; a run of the same step is already one line. */
+export const REPORT_STEPS = 10;
 
 export interface ReportFacts {
   /** "ios" or "macos" inside the apps, "browser" on the website. */
@@ -48,6 +50,8 @@ export interface ReportFacts {
   /** When the report was made, as an ISO time. */
   readonly when: string;
   readonly faults: readonly Fault[];
+  /** The reader's last steps, by name only. */
+  readonly steps: readonly Step[];
 }
 
 /**
@@ -68,6 +72,7 @@ export function gatherFacts(): ReportFacts {
     language: document.documentElement.lang || navigator.language,
     when: new Date().toISOString(),
     faults: recentFaults(),
+    steps: recentSteps(),
   };
 }
 
@@ -105,18 +110,32 @@ export function reportText(facts: ReportFacts): string {
     `Time: ${facts.when}`,
     "",
   ];
+  const steps = facts.steps.slice(-REPORT_STEPS);
+  if (steps.length === 0) {
+    lines.push("Steps: none kept since the page opened");
+  } else {
+    lines.push(`Steps (the last ${steps.length}, oldest first):`);
+    for (const step of steps) {
+      const times = step.count > 1 ? ` (${step.count} times)` : "";
+      lines.push(`- ${clock(step.at)} ${step.name}${times}`);
+    }
+  }
+  lines.push("");
   const faults = facts.faults.slice(-REPORT_FAULTS);
   if (faults.length === 0) {
     lines.push("Errors: none kept since the page opened");
   } else {
     lines.push(`Errors (the last ${faults.length}, oldest first):`);
     for (const fault of faults) {
-      const at = new Date(fault.at).toISOString().slice(11, 19);
       const where = fault.where ? ` at ${fault.where}` : "";
-      lines.push(`- ${at} ${fault.how}${where}: ${fault.message.slice(0, FAULT_MESSAGE_LIMIT)}`);
+      lines.push(`- ${clock(fault.at)} ${fault.how}${where}: ${fault.message.slice(0, FAULT_MESSAGE_LIMIT)}`);
     }
   }
   return lines.join("\n");
+}
+
+function clock(at: number): string {
+  return new Date(at).toISOString().slice(11, 19);
 }
 
 /**

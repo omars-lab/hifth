@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { parseHash, serializeState, shippedEdition, type AppState } from "@hifth/core";
 import { postReady, postRoute } from "./native-bridge";
+import { noteStep, noteViewChange } from "./step-log";
 
 /**
  * Hash router (spec §7) — the app's view ↔ URL bridge. It does two things:
@@ -39,6 +40,10 @@ export function useHashRouter(
   // the verse, its window title flickered, and a `current` request queued
   // before the first route was answered with page 1 (native-shell.md ⑧).
   const landing = useRef<string | null>(null);
+  // The last view a step was measured from, for the problem report's list of
+  // steps (`step-log.ts`). Cleared when a link moves the view, so the landing
+  // is counted as "opened a link" and not also as the page turn it causes.
+  const lastView = useRef<AppState | null>(null);
 
   // Restore on `ready` (cold open, once the resolver exists) and on user-driven
   // hash changes (paste, back/forward). The resolver loads async, so the mount
@@ -51,12 +56,17 @@ export function useHashRouter(
       // A link naming a mus'haf the site does not have lands on the one it
       // ships, and the address is rewritten to say so once the view is there.
       const parsed = raw && { ...raw, edition: shippedEdition(raw.edition) };
-      if (parsed) onRestoreRef.current(parsed);
+      if (parsed) {
+        if (coldOpened.current) noteStep("opened a link");
+        lastView.current = null;
+        onRestoreRef.current(parsed);
+      }
       return parsed;
     };
     if (ready && !coldOpened.current) {
-      coldOpened.current = true;
+      noteStep("opened the app");
       const parsed = apply(); // cold open, now that restore can actually resolve the link
+      coldOpened.current = true;
       if (parsed) landing.current = place(parsed);
       // The native shell holds any early `hifth://` link until it hears this.
       postReady();
@@ -79,6 +89,8 @@ export function useHashRouter(
       landing.current = null;
       if (!arrived) return;
     }
+    noteViewChange(lastView.current, state);
+    lastView.current = state;
     const hash = serializeState(state);
     showing.current = hash;
     // The shell has no address bar; this is how it learns what is on screen.
