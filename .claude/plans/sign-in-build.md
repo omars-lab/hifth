@@ -46,6 +46,24 @@ Steps 10, 6 and 7 do not depend on each other, and none waits on the owner, so t
 ## Not yet known
 
 - How much server time one sign-in takes on Cloudflare's free plan. Measurable only after
-  hifth.app's first upload, which the owner runs; until then, timed on the laptop.
-- Whether jose needs anything Cloudflare's runtime lacks. Its own tests on the laptop's
-  Cloudflare stand-in settle it at step 10.
+  hifth.app's first upload, which the owner runs. On the laptop's Cloudflare stand-in, checking
+  one note took about 1 ms (2026-11-18), well inside the free plan's 10 ms.
+- Whether Apple hands its keys to the live site. Settled as far as the laptop can take it: see
+  "What step 10 showed" below.
+
+## What step 10 showed (2026-11-18)
+
+- **jose runs on Cloudflare's runtime.** On the laptop's stand-in (`wrangler pages dev`, a
+  throwaway local database), jose built in, checked a made-up note signed the way Apple signs,
+  and refused a tampered one.
+- **The three addresses answer as the tests say**: a word with "no-store", a junk body 400,
+  sign-out 204, and a made-up note refused.
+- **On the laptop, Apple refuses to hand over its keys**, so a note there is refused as
+  "keys-unreachable" even when nothing is wrong. The stand-in names every request it sends as
+  coming from `….example.com`, and Apple answers that name with 403. The same request naming
+  `hifth.app` or `hifth-app.pages.dev` gets the keys. So this is a laptop-only quirk; the first
+  real sign-in after the upload is what proves the live fetch. Full write-up:
+  `docs/issues/apple-keys-refuse-local-runtime.md`.
+- **Nothing was added to the Cloudflare settings file.** A database line there needs the real
+  database's id, which waits on step 9. Until then the addresses answer 404 unless `SIGN_IN` is
+  "on", and 503 if it is on with no database.

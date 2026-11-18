@@ -2648,6 +2648,16 @@
           "file": "apps/landing/lib/test-d1.mjs",
           "symbol": "localD1",
           "note": "The tests' stand-in for Cloudflare's database: Node's own SQLite, running the real migration files."
+        },
+        {
+          "file": "apps/landing/lib/sign-in-api.mjs",
+          "symbol": "handleSignIn",
+          "note": "The three web addresses the app calls: a one-off word, sign in, sign out. Answers 404 unless SIGN_IN is \"on\", 503 without the database or app ids; every reply says no-store and none carries Apple's user number."
+        },
+        {
+          "file": "apps/landing/functions/api/sign-in/index.js",
+          "symbol": "onRequestPost",
+          "note": "Cloudflare's thin file for /api/sign-in; word.js and ../sign-out.js are its siblings."
         }
       ],
       "extend": [
@@ -2655,10 +2665,11 @@
         "Accounts are found by Apple's lasting user number, never by email.",
         "The sign-in library (jose) is for the server only; the web app and the shared core never import it, and a test refuses it.",
         "Only the local database copy until the owner says yes to the real one (docs/design/sign-in.md, question 9).",
-        "The plan and its order: .claude/plans/sign-in-build.md."
+        "The plan and its order: .claude/plans/sign-in-build.md.",
+        "On the laptop's Cloudflare stand-in, Apple refuses to hand over its keys, so a note is refused as keys-unreachable there; that is expected (docs/issues/apple-keys-refuse-local-runtime.md)."
       ],
       "gates": [
-        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/accounts.test.mjs apps/landing/lib/server-only.test.mjs"
+        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/accounts.test.mjs apps/landing/lib/sign-in-api.test.mjs apps/landing/lib/server-only.test.mjs"
       ],
       "seeAlso": [
         "hifth-app-site"

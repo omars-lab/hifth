@@ -2083,9 +2083,21 @@
         {
           "file": "apps/landing/lib/accounts.mjs",
           "symbol": "signIn"
+        },
+        {
+          "file": "apps/landing/lib/sign-in-api.mjs",
+          "symbol": "handleSignIn"
         }
       ],
       "proof": [
+        {
+          "file": "apps/landing/lib/sign-in-api.test.mjs",
+          "test": "the whole way: a word, then Apple's note, gives a session that finds the account"
+        },
+        {
+          "file": "apps/landing/lib/sign-in-api.test.mjs",
+          "test": "the sign-in reply carries the session and when it ends, nothing else"
+        },
         {
           "file": "apps/landing/lib/accounts.test.mjs",
           "test": "the same Apple user signing in on a second device finds the same account, with its own session"
@@ -2115,7 +2127,7 @@
           "test": "a note whose one-off word does not match the one we handed out is refused"
         }
       ],
-      "gap": "The server's check of Apple's note, and accounts and sessions on a local copy of the database, are built and tested. The web address the app calls, Apple's sheet in the apps and marks following the reader are still to come (docs/design/sign-in.md, steps 6 to 21)."
+      "gap": "The server side is built and tested: the check of Apple's note, accounts and sessions, and the three web addresses the app calls (switched off until the real database exists). Apple's sheet in the apps and marks following the reader are still to come (docs/design/sign-in.md, steps 6 to 21)."
     }
   ]
 }
