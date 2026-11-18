@@ -171,7 +171,8 @@ final class ShellModel {
             Bridge.bootScript(
                 platform: platform,
                 publicBase: Self.publicBase,
-                appVersion: Bridge.versionLine(info: Bundle.main.infoDictionary ?? [:])
+                appVersion: Bridge.versionLine(info: Bundle.main.infoDictionary ?? [:]),
+                deviceReports: DeviceReports.folder.map { DeviceReports.summary(in: $0) } ?? ""
             )
         )
         #if os(iOS)

@@ -935,6 +935,14 @@
       "owner": "user"
     },
     {
+      "id": "check-device-crash-report-arrives",
+      "source": {
+        "ledger": "device-crash-report-arrives"
+      },
+      "severity": "risk",
+      "owner": "user"
+    },
+    {
       "id": "check-kfgqpc-terms",
       "source": {
         "ledger": "kfgqpc-terms-primary-source"
@@ -7177,7 +7185,7 @@
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "Today a crash is read only from a device on a cable. Apple's own daily reports, kept on the device, are the owner's choice from 2026-11-15; no outside company."
+      "note": "Built 2026-11-17: a store build's crash never reaches Apple's server for us, so the apps keep Apple's own short report (MetricKit, handed over the next time the app opens), the last five, and the problem report lists them; never the words the system wrote about the crash. `make app-store-crashes` lists what Apple's server has: test builds' crashes and every build's freezes and slow launches, never a tester's comment or email. Tested in native/HifthTests/DeviceReportsTests.swift, apps/web/src/problem-report.test.ts and .claude/skills/crash-logs/scripts/store-crashes.test.mjs. Open until a crash forced on a test device shows in both, which needs the first test build and the upload key's ids saved (make app-release-setup). Why: docs/issues/store-crashes-stay-on-the-device.md. No outside company, the owner's choice from 2026-11-15."
     },
     {
       "id": "launch-report-a-problem",

@@ -612,10 +612,10 @@ Someone memorising the Qur'an, holding a phone, usually mid-revision. Every gest
 | happens in | [`apps/landing/privacy.html:54`](../apps/landing/privacy.html#L54) — `id="problem-report"` |
 | proven by | [`apps/landing/lib/pages.test.mjs:134`](../apps/landing/lib/pages.test.mjs#L134) — “each support page names the app's report buttons by the words the app shows” |
 | proven by | [`apps/landing/lib/pages.test.mjs:168`](../apps/landing/lib/pages.test.mjs#L168) — “both privacy pages cover the apps: the device, the recitation, the report and accounts” |
-| proven by | [`apps/landing/lib/pages.test.mjs:197`](../apps/landing/lib/pages.test.mjs#L197) — “the English and Arabic privacy pages have the same sections, in the same order” |
+| proven by | [`apps/landing/lib/pages.test.mjs:212`](../apps/landing/lib/pages.test.mjs#L212) — “the English and Arabic privacy pages have the same sections, in the same order” |
 | proven by | [`apps/web/src/components/Colophon.test.tsx:445`](../apps/web/src/components/Colophon.test.tsx#L445) — “in Arabic, links the Arabic support and privacy pages, opening outside the app” |
 | proven by | [`apps/web/e2e/report-problem.spec.ts:63`](../apps/web/e2e/report-problem.spec.ts#L63) — “the support and privacy links stand apart from each other and from the report button” |
-| proven by | [`apps/web/src/problem-report.test.ts:82`](../apps/web/src/problem-report.test.ts#L82) — “takes the steps the app kept, and never which page they were on” |
+| proven by | [`apps/web/src/problem-report.test.ts:98`](../apps/web/src/problem-report.test.ts#L98) — “takes the steps the app kept, and never which page they were on” |
 
 > **Not proven:** Live only once hifth.app is first published (docs/issues.json, hifth-app-first-release). The info panel's links to these pages are not yet looked at inside the iPad app itself.
 
@@ -748,8 +748,8 @@ Whoever is changing the app next, including this project's own future self. Arri
 
 | | |
 |---|---|
-| happens in | [`native/Hifth/Web/ShellModel.swift:285`](../native/Hifth/Web/ShellModel.swift#L285) — `keepCaptureForLink` |
-| happens in | [`native/Hifth/Web/ShellModel.swift:291`](../native/Hifth/Web/ShellModel.swift#L291) — `writeCurrentToFile` |
+| happens in | [`native/Hifth/Web/ShellModel.swift:286`](../native/Hifth/Web/ShellModel.swift#L286) — `keepCaptureForLink` |
+| happens in | [`native/Hifth/Web/ShellModel.swift:292`](../native/Hifth/Web/ShellModel.swift#L292) — `writeCurrentToFile` |
 | happens in | [`native/Hifth/Capture/CaptureStore.swift:26`](../native/Hifth/Capture/CaptureStore.swift#L26) — `keepCurrent` |
 | happens in | [`.claude/skills/walk-app/scripts/walk-captures.mjs:74`](../.claude/skills/walk-app/scripts/walk-captures.mjs#L74) — `current` |
 | proven by | [`native/HifthUITests/SmokeTests.swift:184`](../native/HifthUITests/SmokeTests.swift#L184) — “testCaptureLinkKeepsANamedCaptureAndCurrentToFileWritesThePlace” |

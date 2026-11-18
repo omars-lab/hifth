@@ -135,24 +135,36 @@ thrown in UIKit's gesture code on a touch. Cause, proven: the web view was built
 had finished starting the app; it is now built on first use (fixed 2026-11-10, no crash since). See the research page above and the native-shell skill's
 "Crashes" section.
 
+## Crashes on readers' devices (built 2026-11-17)
+
+Apple keeps two kinds of report for us, and neither needs a cable:
+
+- **A store build's crash never reaches Apple's server for us.** So the app keeps it itself:
+  after a crash or a freeze, Apple's system (MetricKit) hands the app a short report the next
+  time it opens. The app keeps the last five (`native/Hifth/App/DeviceReports.swift`), and the
+  reader's problem report lists them under the errors. Nothing leaves unless the reader sends
+  that report.
+- **Test builds' crashes, and every build's freezes and slow launches,** are on Apple's
+  server. `make app-store-crashes` lists them. A tester's crash also carries their own comment
+  and email; the command never asks Apple for either.
+
+The command uses the upload key (App Manager access), so it works once `make app-release-setup`
+shows that key's two ids as saved. Why the store-build half lives on the device:
+`docs/issues/store-crashes-stay-on-the-device.md`.
+
 ## Planned, not built yet
 
 None of these exist today. Do not run them; they are what the research page recommends.
 
 - Collecting the recent device log in the same command as the crash reports.
-- The app saving Apple's crash summary (MetricKit) as a file on the next launch. Copying a
-  file out of the app's own folder is built (the walk-app skill's `walk-captures.mjs pull`
-  does it with `--domain-type appDataContainer --domain-identifier com.bytesofpurpose.hifth`),
-  so only the saving is left.
-- The app logging through the system log (one subsystem, `com.bytesofpurpose.hifth`) instead
-  of `print`.
 - A make target that runs a UI test on the plugged-in iPad.
 - The 18.5 simulator pass in the regular push checks.
-- A release (TestFlight) path with uploaded debug symbols, so testers' crashes reach Xcode's
-  Organizer; waits on the TestFlight decision.
+- Uploaded debug symbols with each test build, so a test crash's places in the code read as
+  names in Xcode's Organizer; comes with the first upload.
 
 ## Scripts — when to use each
 
 | script | what it does | when to reach for it | command |
 |---|---|---|---|
 | `scripts/pull-crashes.mjs` | Copies the app's crash reports off a plugged-in iPad (only ones not already copied), and prints one `ev=crash` line each with the kind of stop, Apple's last words and the first call past the throw, then `ev=done new=N`. `--since` keeps only newer reports; `--fail-on-new` exits 3 when there is one. Exits 1 when the iPad cannot be reached, never an empty pass. Tested with a stand-in device tool in `scripts/crash-logs-pull.test.mjs` | The app closed on the iPad; or after installing, to prove no new crash (the release command does this) | `make app-crash-logs DEVICE=<device-id> [SINCE=<ISO time>]` |
+| `scripts/store-crashes.mjs` | Asks Apple's server for test builds' crashes (when, build, device, system version) and the newest builds' freezes, slow launches and heavy storage writes, grouped by where in the code, heaviest first. One `ev=test_crash` or `ev=signature` line each, then `ev=done`; keeps the list in `.store/crashes/`. Never asks for a tester's comment or email. A refusal from Apple fails the run with its status. Tested with a stand-in Apple in `scripts/store-crashes.test.mjs` | Once a test build is out: each morning of a test flight, and after any reader reports a freeze | `make app-store-crashes ARGS="list --since <ISO time>"` |

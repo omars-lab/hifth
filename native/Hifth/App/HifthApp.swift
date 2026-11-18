@@ -12,6 +12,10 @@ struct HifthApp: App {
         #else
         AppLog.note("launch", ["platform": "ios"])
         #endif
+        // Before the page is built (the web view is made lazily, on first
+        // show), so the reports handed over since the last run are in the
+        // summary the page hears.
+        DeviceReports.start()
         Sound.setUp()
     }
 

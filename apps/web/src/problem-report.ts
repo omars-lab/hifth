@@ -51,6 +51,9 @@ export const REPORT_FAULTS = 5;
 const FAULT_MESSAGE_LIMIT = 200;
 /** How many step lines go in; a run of the same step is already one line. */
 export const REPORT_STEPS = 10;
+/** How many lines of Apple's crash and freeze reports go in, each cut to a length. */
+export const REPORT_DEVICE_LINES = 6;
+const DEVICE_LINE_LIMIT = 120;
 
 export interface ReportFacts {
   /** "ios" or "macos" inside the apps, "browser" on the website. */
@@ -70,6 +73,11 @@ export interface ReportFacts {
   readonly faults: readonly Fault[];
   /** The reader's last steps, by name only. */
   readonly steps: readonly Step[];
+  /**
+   * Apple's crash and freeze reports the app keeps on the device, as lines
+   * the app wrote (launch item 17); null when it keeps none or on the website.
+   */
+  readonly deviceReports: string | null;
 }
 
 /**
@@ -91,7 +99,18 @@ export function gatherFacts(): ReportFacts {
     when: new Date().toISOString(),
     faults: recentFaults(),
     steps: recentSteps(),
+    deviceReports: info ? deviceReportsFromApp() : null,
   };
+}
+
+/**
+ * Apple's crash and freeze lines the app hands over in its marker. Read here
+ * and not in `nativeInfo`, because that file is in the start-up script and
+ * this one loads only when the reader opens the report.
+ */
+function deviceReportsFromApp(): string | null {
+  const lines = (window as { __HIFTH_NATIVE__?: { deviceReports?: unknown } }).__HIFTH_NATIVE__?.deviceReports;
+  return typeof lines === "string" && lines !== "" ? lines : null;
 }
 
 /**
@@ -147,6 +166,21 @@ export function reportText(facts: ReportFacts): string {
     for (const fault of faults) {
       const where = fault.where ? ` at ${fault.where}` : "";
       lines.push(`- ${clock(fault.at)} ${fault.how}${where}: ${fault.message.slice(0, FAULT_MESSAGE_LIMIT)}`);
+    }
+  }
+  if (facts.platform !== "browser") {
+    lines.push("");
+    // The app already keeps only a few short lines; the page cuts them again,
+    // so the mail stays short whatever an older or odd build hands over.
+    const kept = (facts.deviceReports ?? "")
+      .split("\n")
+      .filter((line) => line.trim() !== "")
+      .slice(0, REPORT_DEVICE_LINES)
+      .map((line) => line.slice(0, DEVICE_LINE_LIMIT));
+    if (kept.length === 0) {
+      lines.push("Crash and freeze reports: none kept on this device");
+    } else {
+      lines.push("Crash and freeze reports from Apple's system, kept on this device (newest first):", ...kept);
     }
   }
   return lines.join("\n");
