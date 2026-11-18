@@ -265,6 +265,27 @@ export async function repairShellCache(): Promise<boolean> {
   return true;
 }
 
+/*
+ * "A new version is ready" (launch item 24). Only the flag lives here, in the
+ * start-up script, so the strip can listen from its first draw; the watching and
+ * the switching live in pwa-update.ts, fetched once the worker is registered.
+ */
+let updateReady = false;
+const updateListeners = new Set<(ready: boolean) => void>();
+
+/** Subscribe to "a new version is ready". Returns an unsubscribe fn. */
+export function onUpdateReady(fn: (ready: boolean) => void): () => void {
+  updateListeners.add(fn);
+  fn(updateReady);
+  return () => updateListeners.delete(fn);
+}
+
+/** Called by pwa-update.ts when a new release is waiting to take over. */
+export function markUpdateReady(): void {
+  updateReady = true;
+  for (const fn of updateListeners) fn(true);
+}
+
 export function initPwa(): void {
   // Inside the Mac / iPad shell the app is served from its own bundle: there
   // is nothing to cache, nothing to install into, and a custom-scheme origin
@@ -285,12 +306,15 @@ export function initPwa(): void {
   });
   if (!("serviceWorker" in navigator)) return;
   // Registered by hand since 2026-11-12. The plugin's helper fetched a 2.3 KB
-  // library to watch for a waiting update, and with nothing asking it to show
-  // one, it did no more than this line. A new worker still waits until every
-  // tab of the old one closes (no skipWaiting in the build), as before. The dev
-  // server serves no worker, so it registers none.
+  // library to watch for a waiting update; ours is pwa-update.ts, a few hundred
+  // bytes, loaded after the page is up. A new worker waits until the reader
+  // presses "Reload" on the strip that says it is ready, or every tab of the old
+  // one closes. The dev server serves no worker, so it registers none.
   if (import.meta.env.PROD) {
-    navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(() => undefined);
+    navigator.serviceWorker
+      .register("./sw.js", { scope: "./" })
+      .then((reg) => import("./pwa-update").then((m) => m.watchForUpdate(reg)))
+      .catch(() => undefined);
   }
   // Only meaningful once a worker is actually controlling this page: before
   // that, an empty cache is a first visit rather than an eviction, and the

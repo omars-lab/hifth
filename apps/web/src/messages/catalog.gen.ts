@@ -467,6 +467,9 @@ export interface Catalog {
   readonly "notices.pack-gone.action": string;
   readonly "notices.pack-gone.body": string;
   readonly "notices.pack-gone.title": string;
+  readonly "notices.update-ready.action": string;
+  readonly "notices.update-ready.body": string;
+  readonly "notices.update-ready.title": string;
   readonly openOnQul: string;
   readonly openOnQulAria: (d: { readonly label: string | number }) => string;
   readonly openSizeCloser: string;

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { OfflineNotice } from "./OfflineNotice";
+import type * as Pwa from "../pwa";
 
 /*
  * The pack register is mocked rather than driven through a fake Cache Storage:
@@ -13,6 +14,20 @@ const packs = vi.hoisted(() => ({ statuses: [] as { health: string }[] }));
 vi.mock("../packs", () => ({
   packStatuses: async () => packs.statuses,
 }));
+
+/*
+ * "A new version is ready" is raised by the update watcher (pwa-update.ts,
+ * tested in pwa.test.ts). Here it is a switch, and Reload is a spy.
+ */
+const update = vi.hoisted(() => ({ ready: false, apply: vi.fn() }));
+vi.mock("../pwa", async (actual) => ({
+  ...(await actual<typeof Pwa>()),
+  onUpdateReady: (fn: (ready: boolean) => void) => {
+    fn(update.ready);
+    return () => undefined;
+  },
+}));
+vi.mock("../pwa-update", () => ({ applyUpdate: update.apply }));
 
 /**
  * The banner's contract: exactly one message, chosen by what blocks offline
@@ -46,6 +61,8 @@ const ANDROID_UA =
 
 afterEach(() => {
   packs.statuses = [];
+  update.ready = false;
+  update.apply.mockClear();
   stubStorage(null);
   window.localStorage.clear();
   vi.restoreAllMocks();
@@ -218,6 +235,59 @@ describe("OfflineNotice", () => {
       "data-notice",
       "pack-gone",
     );
+  });
+});
+
+describe("OfflineNotice when a new version is ready", () => {
+  const persisted = (): void =>
+    stubStorage({
+      persisted: async () => true,
+      estimate: async () => ({ usage: 0, quota: 40 * GB }),
+    });
+
+  it("says so, even when storage needs no warning", async () => {
+    stubUserAgent(ANDROID_UA);
+    persisted();
+    update.ready = true;
+    render(<OfflineNotice />);
+    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "update-ready");
+  });
+
+  it("outranks the storage warnings, but not a juz already lost", async () => {
+    stubUserAgent(IPHONE_UA);
+    stubStorage({ persisted: async () => false, estimate: async () => ({ usage: 0, quota: 40 * GB }) });
+    update.ready = true;
+    const first = render(<OfflineNotice />);
+    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "update-ready");
+    first.unmount();
+
+    packs.statuses = [{ health: "gone" }];
+    render(<OfflineNotice />);
+    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "pack-gone");
+  });
+
+  it("Reload starts the new version", async () => {
+    stubUserAgent(ANDROID_UA);
+    persisted();
+    update.ready = true;
+    render(<OfflineNotice />);
+    await screen.findByRole("status");
+    fireEvent.click(screen.getByRole("button", { name: "أعد التحميل" }));
+    await waitFor(() => expect(update.apply).toHaveBeenCalledTimes(1));
+  });
+
+  it("hiding it lasts this visit only, so the next release is still told", async () => {
+    stubUserAgent(ANDROID_UA);
+    persisted();
+    update.ready = true;
+    const first = render(<OfflineNotice />);
+    await screen.findByRole("status");
+    fireEvent.click(screen.getByRole("button", { name: "إخفاء التنبيه" }));
+    expect(screen.queryByRole("status")).toBeNull();
+    first.unmount();
+
+    render(<OfflineNotice />);
+    expect(await screen.findByRole("status")).toHaveAttribute("data-notice", "update-ready");
   });
 });
 
