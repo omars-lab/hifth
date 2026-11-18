@@ -50,6 +50,13 @@ Steps 10, 6 and 7 do not depend on each other, and none waits on the owner, so t
   one note took about 1 ms (2026-11-18), well inside the free plan's 10 ms.
 - Whether Apple hands its keys to the live site. Settled as far as the laptop can take it: see
   "What step 10 showed" below.
+- **Who calls hifth.app's sign-in addresses from inside the apps: the page or the Swift app?**
+  Inside the apps, the page is served from the app's own bundle, not from hifth.app, so a call
+  from the page to hifth.app counts as coming from another site. The server would then have to
+  say which sites may call it (CORS). If the Swift app makes the call itself, after Apple's sheet
+  closes, the server needs no such list. Leaning: the Swift app calls, and hands the page only
+  "signed in" and the session. Settle it in step 7 (the page asks the app and waits), with a
+  test either way. The browser version on hifth.app calls from the same site and needs neither.
 
 ## What step 10 showed (2026-11-18)
 

@@ -49,9 +49,11 @@ IPAD_APP      = $(DERIVED)/Build/Products/$(CONFIG)-iphonesimulator/Hifth.app
 # folder, which can be emptied for a true first open, and never touches the
 # everyday Debug app's saved notes. The id the store sees is the real one: the
 # suffix is given here, on the command line, and never in the project.
+# This copy is signed on the laptop with no profile from Apple, so it gets the
+# store's permissions minus Sign in with Apple (Hifth-macOS-Laptop.entitlements).
 MAC_RELEASE   = $(filter Release,$(CONFIG))
 MAC_ID        = $(BUNDLE_ID)$(if $(MAC_RELEASE),.release)
-MAC_ID_ARG    = $(if $(MAC_RELEASE),PRODUCT_BUNDLE_IDENTIFIER=$(MAC_ID))
+MAC_ID_ARG    = $(if $(MAC_RELEASE),PRODUCT_BUNDLE_IDENTIFIER=$(MAC_ID) CODE_SIGN_ENTITLEMENTS=Hifth/Resources/Hifth-macOS-Laptop.entitlements)
 MAC_APP       = $(DERIVED)/Build/Products/$(CONFIG)/Hifth.app
 # A sandboxed app may write only inside its own data folder ("Operation not
 # permitted" anywhere else, tried 2026-11-17). So in Release a picture is

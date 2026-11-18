@@ -83,7 +83,7 @@ test("the Mac app's Release build is signed with the store's permissions, and De
   );
 });
 
-test("the store's permissions file turns the sandbox on and asks only for the network and the files the reader picks", () => {
+test("the store's permissions file turns the sandbox on and asks only for the network, the files the reader picks, and Sign in with Apple", () => {
   const read = (name) =>
     JSON.parse(
       spawnSync("plutil", ["-convert", "json", "-o", "-", join(root, "native", "Hifth", "Resources", name)], { encoding: "utf8" }).stdout ||
@@ -93,8 +93,24 @@ test("the store's permissions file turns the sandbox on and asks only for the ne
     "com.apple.security.app-sandbox": true,
     "com.apple.security.network.client": true,
     "com.apple.security.files.user-selected.read-write": true,
+    "com.apple.developer.applesignin": ["Default"],
   });
-  assert.deepEqual(read("Hifth-macOS.entitlements"), {}, "the everyday Debug build must stay out of the sandbox");
+  // The everyday build is signed on the laptop with no profile from Apple. Sign in with Apple
+  // needs one, so asking for it there would stop the app from opening.
+  assert.deepEqual(read("Hifth-macOS.entitlements"), {}, "the everyday Debug build must stay out of the sandbox and ask for nothing");
+  // The laptop's Release copy is signed on the laptop too, so it gets the store's permissions
+  // minus Sign in with Apple; with it, Xcode refuses to build ("requires a provisioning profile",
+  // 2026-11-18). Kept equal to the store's file otherwise, so the sandbox it tries is the real one.
+  const { "com.apple.developer.applesignin": _signIn, ...storeWithoutSignIn } = read("Hifth-macOS-Store.entitlements");
+  assert.deepEqual(read("Hifth-macOS-Laptop.entitlements"), storeWithoutSignIn, "the laptop's Release copy drifted from the store's permissions");
+});
+
+test("the laptop's Release copy is signed with its own permissions file; the store archive never is", () => {
+  const makefile = readFileSync(join(root, "native", "Makefile.native"), "utf8");
+  const idArg = makefile.match(/^MAC_ID_ARG\s*=.*$/m)?.[0] ?? "";
+  assert.match(idArg, /CODE_SIGN_ENTITLEMENTS=Hifth\/Resources\/Hifth-macOS-Laptop\.entitlements/, "the laptop's Release copy is not given its own permissions file");
+  const archive = makefile.slice(makefile.indexOf("\napp-archive:"), makefile.indexOf("\napp-export:"));
+  assert.doesNotMatch(archive, /Laptop\.entitlements|MAC_ID_ARG/, "the store archive picks up the laptop's permissions file");
 });
 
 test("the app id the store sees stays the real one: the suffix lives only in the laptop's commands", () => {

@@ -77,11 +77,11 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | A | What sign-in unlocks first (① below) | done 2026-11-17: your marks follow you | — | — |
 | B | Where accounts live (② below) | done 2026-11-18: our own code on hifth.app's Cloudflare, free database | — | — |
 | **Milestone 1: a first real sign-in on your own iPad, hidden behind a developer setting** | | | | |
-| 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple, and add the same line to the Mac's | half done: the iPad and iPhone file asks for it (launch item ⑨); the Mac's two files do not yet | agent | an hour |
+| 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple, and add the same line to the Mac's | done 2026-11-18: the iPad and iPhone file asks for it (launch item ⑨), and so does the Mac store build's. The two Mac builds signed on the laptop with no profile from Apple cannot carry it (Xcode refuses to build them), so the everyday one asks for nothing and the laptop's Release copy uses the store's file without that line | — | — |
 | 7 | Let the page ask the app a question and wait for the answer (today messages only go one way, page to app) | left | agent | half a day, with tests |
 | 8 | Show Apple's sheet from the app with a fresh one-off word, and hand the result on | left | agent | a day |
 | 9 | Connect a free database to hifth.app's server for accounts (⑨ below) | left | you in the Cloudflare dashboard, or the agent with your yes | 5 minutes |
-| 10 | Server code on hifth.app: check Apple's note against Apple's published keys, make or find the account, start a session, sign out | left | agent | two to three days |
+| 10 | Server code on hifth.app: check Apple's note against Apple's published keys, make or find the account, start a session, sign out | done 2026-11-18 on the laptop with made-up keys and a local database copy; switched off until step 9's real database exists. The live fetch of Apple's keys is proved by the first real sign-in | — | — |
 | 11 | Trials on your iPad: does the page get a waiting answer from the app, and what address does it say it comes from (⑤ below) | left | you hold the iPad, agent runs it | an hour |
 | **Milestone 2: ready for people other than you** | | | | |
 | 12 | (⑧ below) Make the key file in Apple's developer site, note its ID, store both as hifth.app secrets on Cloudflare. **Needed even with no website sign-in**, because deleting an account needs it | left | you, Apple then Cloudflare dashboards | 20 minutes |
