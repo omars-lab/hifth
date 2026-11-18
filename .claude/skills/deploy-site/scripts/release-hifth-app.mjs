@@ -28,6 +28,7 @@ import { verifyLive } from "./live.mjs";
 import { APP_LINKS_FILE, appSiteAssociation, signingTeam } from "./app-links.mjs";
 import { addDevDesigns, commitDates } from "./dev-designs.mjs";
 import { addDevSidebar, copyFeaturesPage, findFeaturesPage } from "./dev-sidebar.mjs";
+import { current } from "../../release-app/scripts/app-version.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, "..", "..", "..", "..");
@@ -38,7 +39,7 @@ const PROJECT = process.env.HIFTH_APP_PAGES_PROJECT || "hifth-app";
 const SITE = "https://hifth.app";
 
 /** Front-page files: pages, styles, scripts and pictures at the top of apps/landing. */
-const LANDING_FILE = /^(_headers|_redirects|[\w-]+\.(html|css|js|png|svg|ico|webp))$/;
+const LANDING_FILE = /^(_headers|_redirects|app-status\.json|[\w-]+\.(html|css|js|png|svg|ico|webp))$/;
 /** Front-page folders copied whole, each with the kinds of file it may hold. */
 const LANDING_DIRS = { ar: /^(index|privacy|sources|support)\.html$/, shots: /^[\w-]+\.(png|jpg|webp)$/, fonts: /^[\w.-]+\.(woff2|txt)$/ };
 /** What every app build writes and the site never needs, and Finder's folder notes. */
@@ -227,7 +228,8 @@ function check({ build, release = true }) {
   const team = signingTeam({ script: join(root, "native", "scripts", "signing-team.sh") });
   assemble({ landing, app, out, team });
   const { files, bytes } = readFolder(out);
-  let { problems } = auditShipped(files, { commit });
+  const { version: shipping } = current(readFileSync(join(root, "native", "project.yml"), "utf8"));
+  let { problems } = auditShipped(files, { commit, shipping });
   if (!team) {
     if (release) {
       console.log("\nThis laptop has no Apple signing team, so the file that tells Apple which links open the app could not be written.");

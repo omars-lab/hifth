@@ -1780,6 +1780,37 @@
       "gap": "The upload itself is not built yet; the receipt is checked where it will run (docs/issues.json, launch-archive-upload)."
     },
     {
+      "id": "answer-a-bad-version-without-a-new-build",
+      "actor": "maintainer",
+      "goal": "When a version on the store has a problem, change one small file on hifth.app so the apps ask readers on that version to update, show them a short notice, or switch off writing with the pencil or links from other apps, without waiting for Apple to review a new build, and without the file learning anything about the reader.",
+      "feature": "native-shell",
+      "code": [
+        {
+          "file": "native/Hifth/App/AppStatus.swift",
+          "symbol": "struct AppStatus"
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/app-status.mjs",
+          "symbol": "function appStatusProblems"
+        }
+      ],
+      "proof": [
+        {
+          "file": "native/HifthTests/AppStatusTests.swift",
+          "test": "the shell reads the file once, after the page is ready, and shows what it says"
+        },
+        {
+          "file": "native/HifthTests/AppStatusTests.swift",
+          "test": "no file, or a page that is not the file, leaves the shell as it was"
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/app-status.test.mjs",
+          "test": "a lowest version above the one being shipped is refused"
+        }
+      ],
+      "gap": "Proven against a made-up file on this laptop only: the real file goes online with hifth.app's first upload (docs/issues.json, hifth-app-first-release). The browser version does not read it."
+    },
+    {
       "id": "answer-store-reviews-only-with-the-owners-yes",
       "actor": "maintainer",
       "goal": "Read every store review on the laptop and answer it, so a reader who wrote in hears back, while nothing is posted without the owner's yes to those exact words and no reviewer's name or words reach the public repo.",

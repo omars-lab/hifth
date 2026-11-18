@@ -110,7 +110,8 @@ fairer credit. The credit now names the Complex first, says quran-svg converted 
 pages, and says the Complex has not approved the app. The old line "commercial printing reserved
 to the Complex" said more than the terms do, and is gone. The same words are in the app, the
 source file and both hifth.app sources pages, and a test fails if the app's row loses any of
-them. One open point could still change the answer: ㊺.
+them. The page text was then traced to the Complex's own drawing files, not its font; only the
+verse-number rings are still open: ㊺.
 
 ### ⑥ The recitation audio comes from another site with no licence note · **fixed**
 
@@ -326,13 +327,25 @@ is renamed), the problems we know about, and what happens to a reader's marks. E
 site links it, and a release missing it is refused. It goes live with hifth.app's first upload.
 The app's info panel links it and the privacy page since the same day (item ㊸).
 
-### ㉑ Once a bad version is out, we cannot stop it or warn readers · **open**
+### ㉑ Once a bad version is out, we cannot stop it or warn readers · **fixed**
 
 The store has no undo, and a pause only stops an update spreading.
 
 *What would answer it:* a small public file at hifth.app that the app reads at launch, with the
 lowest version still allowed, a message to show, and switches for risky features. With no
 connection the app carries on as before. A test changes the file and sees the message.
+
+*Done 2026-11-17:* the iPad, iPhone and Mac apps ask hifth.app for `app-status.json` once each
+launch, after the page is up, so it never slows the first page. The request sends no cookies and
+nothing about the reader; the app compares versions itself. The file can ask readers below a
+lowest version to update, show a short notice in English and Arabic (which the reader can
+close), and switch off writing with the pencil or links from other apps. With no file, a broken
+file or no connection, the app carries on as before. The release refuses a file the apps could
+not read, and a lowest version above the one being shipped, so the file can never tell every
+reader to update to a version that does not exist yet. The privacy page says what is asked for,
+in both languages. What it cannot do: fix a bug itself, reach a reader with no connection, or
+reach the browser version, which does not read it. The real drill, changing the file and
+relaunching, waits on hifth.app's first upload; until then the tests use a made-up file.
 
 ### ㉒ There is no one command to release, and no written fix-in-a-hurry page · **fixed**
 
@@ -618,18 +631,29 @@ Apple takes the pictures as they are, but they look less finished than a phone i
 and photograph the whole screen; or fill the strip with the page's own top colour. A test
 refuses an iPhone picture whose top strip is one flat colour.
 
-### ㊺ Were the pages we ship drawn from the Complex's font, or from its drawing files? · **open**
+### ㊺ Where did the verse-number rings on our pages come from? · **open**
 
 Found by the third pass on the terms (⑤). The Complex's free-use terms cover its digital
 mus'haf. Its fonts carry a stricter licence: no changes without written approval. Our record of
-the page files calls them shapes from the font, and the files we pinned in July do not say where
-they came from. quran-svg's later note says its pages come from the Complex's own drawing files,
-but that note was written after our pin. If our pages came from the font, ⑤'s answer becomes
-"needs permission".
+the page files called them shapes from the font, and the files we pinned in July do not say where
+they came from. If our pages came from the font, ⑤'s answer becomes "needs permission".
 
-*What would answer it:* compare one pinned page with the same page in the Complex's free bundle
-of drawing files, or read quran-svg's history before 2026-07-13. Moving the pin to a version whose
-note names the drawing files would also settle it.
+*Answered for the text, 2026-11-17:* the page text comes from the Complex's own drawing files,
+not its font. quran-svg's first note (February 2026, before our pin) names the Complex's
+Illustrator files as its source, and no note of theirs ever mentions a font; the "font" wording
+was ours. Then we checked it ourselves on pages 2, 7, 300 and 604. We laid each page as we
+pinned it over the same page in the Complex's free 1441H Hafs drawing files, with no fitting or
+nudging, and every letter landed in place. The drawing files hold no font at all; every letter
+is already a drawn shape. So the text is under the digital mus'haf terms we already credit.
+
+*Still open: the verse-number rings.* quran-svg says it redrew them, and they do not match the
+Complex's own. Each is drawn the way a font's letter is, and quran-svg does not say where they
+came from. If they come from the Complex's font, the strict licence covers that one small
+decoration.
+
+*What would answer it:* compare the ring with the end-of-verse sign in the Complex's fonts and
+a few common Arabic fonts, or ask quran-svg. Or draw our own ring and use it instead: we already
+draw marks on the page, and that removes the question.
 
 ### ㊻ Should the website keep playing the recitation? · **open**
 
@@ -640,12 +664,27 @@ the store upload.
 
 *What would answer it:* the owner's choice, recorded here and in the source file.
 
+### ㊼ Our copy step moves some words off where the Complex drew them · **open**
+
+Found by the check behind ㊺. When we copy the pages in, we shrink each file by rounding its
+shapes to one decimal place and rewriting its curves. On most pages the result is a hairline.
+On some it is not: on page 604 whole lines sit about 2 of the page's 345 units off, and the
+letters change shape a little too. Laid over the Complex's drawing, 28% to 56% of the ink
+differs across the four pages checked, where the pages we pinned differ almost nowhere. It is
+our change to the Complex's artwork, and a reader comparing with a printed copy could notice
+it on those pages.
+
+*What would answer it:* a test that draws each copied page over the page we pinned and sets a
+ceiling on the difference, then a copy step that keeps more precision (or leaves the curves
+alone), checked by that test. Every page is copied again, so the marks drawn on the page must
+be checked against the new pages too.
+
 ## Which of these could get the app turned down, and which matter once readers have it?
 
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 
 - **Stops the upload itself** (nothing goes to Apple until these close): the licence items ②
-  ③ ④ and the artwork question ㊺. (The archive, the export and Apple's own check ⑪ are
+  ③ ④ and where the verse-number rings came from ㊺ (the page text is settled). (The archive, the export and Apple's own check ⑪ are
   fixed; only the upload command itself waits on these. The citations page ② is built, the
   artwork's terms ⑤ are read, and the store build leaves the recitation out ⑥; those rows
   closed.)
@@ -659,7 +698,7 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
   reviews ㉜ and numbers ㉝, both keys on the release page ㉞, a report seen to arrive ㊵,
-  and whether the website keeps the recitation ㊻.
+  whether the website keeps the recitation ㊻, and the words our copy step moves ㊼.
 
 ## What does this leave alone?
 

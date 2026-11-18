@@ -600,9 +600,10 @@
           "bad-check",
           "not-in-this-build",
           "capture-not-kept",
-          "current-not-written"
+          "current-not-written",
+          "switched-off"
         ],
-        "description": "`missing-route`: open named no page, verse, surah or route. `bad-route`: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. `unknown-action`: the path after x-callback-url is not one of the five actions above. `route-not-shown`: the place was accepted but the page never showed it. `bad-check`: a check card with no steps, more than 12, an empty step, or a `see` with no step before it. `not-in-this-build`: a check card, capture or current-to-file sent to a release build, which has none; the message names which. `capture-not-kept`: the app could not keep the capture (no web view yet, or the folder could not be written). `current-not-written`: current-to-file could not write its file."
+        "description": "`missing-route`: open named no page, verse, surah or route. `bad-route`: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. `unknown-action`: the path after x-callback-url is not one of the five actions above. `route-not-shown`: the place was accepted but the page never showed it. `bad-check`: a check card with no steps, more than 12, an empty step, or a `see` with no step before it. `not-in-this-build`: a check card, capture or current-to-file sent to a release build, which has none; the message names which. `capture-not-kept`: the app could not keep the capture (no web view yet, or the folder could not be written). `current-not-written`: current-to-file could not write its file. `switched-off`: links from other apps are switched off for this version for now, by the file the app reads at launch; nothing was opened."
       }
     },
     "callbacks": {

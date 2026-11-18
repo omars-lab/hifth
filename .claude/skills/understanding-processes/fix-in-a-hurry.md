@@ -47,7 +47,7 @@ flowchart TD
 | **Release to everyone** | ends the stages at once, once the version is ready for sale | anything before Apple approves it |
 | **A faster review** | Apple may look at the build sooner, "as allowed by availability and demand"[^expedite] | it is never promised, and only a build already sent for review can ask |
 | **Taking the app off sale** | stops new downloads in App Store Connect | change the app on any reader's device |
-| **The switch the app reads at launch** (launch item ㉑) | would show readers a message, or turn a risky feature off, with no new build | not built yet |
+| **The file the app reads at launch** (launch item ㉑) | edit `apps/landing/app-status.json` and release hifth.app: ask readers below a version to update (`lowest`), show a short notice in English and Arabic (`notice`), or switch off writing with the pencil or links from other apps (`off`: `pencil`, `links`). The release checks the file first. Readers see it on their next launch | fix the bug, reach a reader with no connection, or reach the browser version; and `lowest` cannot be above the version being shipped, so ask for an update only once the fixed version is on the store |
 
 The stages apply to an update, not to a first version: Apple's page offers them "when you
 submit a version update".[^phased]

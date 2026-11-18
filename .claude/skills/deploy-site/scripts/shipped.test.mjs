@@ -14,6 +14,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { auditShipped, inlineScriptHashes, isText } from "./shipped.mjs";
 import { APP_LINKS_FILE, appSiteAssociation } from "./app-links.mjs";
+import { APP_STATUS_FILE } from "./app-status.mjs";
 
 const HEAD = "0123456789abcdef0123456789abcdef01234567";
 /** A made-up team id; the real one is read at release time and never written here. */
@@ -47,8 +48,12 @@ function cleanFolder() {
     { path: "read/assets/index-abc.css", text: "a{}" },
     { path: "read/assets/pages/hafs/p1.svg", text: "<svg/>" },
     { path: APP_LINKS_FILE, text: appSiteAssociation(MADE_UP_TEAM) },
+    { path: APP_STATUS_FILE, text: STATUS },
   ];
 }
+
+/** The file the apps read at launch, with nothing switched off (launch item 21). */
+const STATUS = '{"format":1,"lowest":{"ios":"0.1.0","macos":"0.1.0"},"notice":null,"off":[]}';
 
 const refusals = (files, opts = { commit: HEAD }) => auditShipped(files, opts).problems;
 const paths = (problems) => problems.map((p) => p.path);
@@ -56,7 +61,28 @@ const paths = (problems) => problems.map((p) => p.path);
 test("a clean release folder passes, and says what it holds", () => {
   const result = auditShipped(cleanFolder(), { commit: HEAD });
   assert.deepEqual(result.problems, []);
-  assert.equal(result.files, 25);
+  assert.equal(result.files, 26);
+});
+
+test("a release without the file the apps read at launch is refused", () => {
+  const files = cleanFolder().filter((f) => f.path !== APP_STATUS_FILE);
+  const problems = refusals(files);
+  assert.deepEqual(paths(problems), [APP_STATUS_FILE]);
+  assert.match(problems[0].why, /missing/);
+});
+
+test("a launch file that would tell readers of the version being shipped to update is refused", () => {
+  const text = STATUS.replace('"ios":"0.1.0"', '"ios":"0.2.0"');
+  const files = cleanFolder().map((f) => (f.path === APP_STATUS_FILE ? { ...f, text } : f));
+  const problems = refusals(files, { commit: HEAD, shipping: "0.1.0" });
+  assert.deepEqual(paths(problems), [APP_STATUS_FILE]);
+  assert.match(problems[0].why, /above the version being shipped/);
+  assert.deepEqual(refusals(files, { commit: HEAD, shipping: "0.2.0" }), []);
+});
+
+test("a launch file the apps would misread is refused", () => {
+  const files = cleanFolder().map((f) => (f.path === APP_STATUS_FILE ? { ...f, text: "not json" } : f));
+  assert.deepEqual(paths(refusals(files)), [APP_STATUS_FILE]);
 });
 
 // The file that tells Apple which hifth.app links open the app (launch item 9) is the one hidden

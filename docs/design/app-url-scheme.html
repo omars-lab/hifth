@@ -101,7 +101,7 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
 <p>Opened by the app when the action failed</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code></td><td><p></p></td></tr>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code>, <code>switched-off</code></td><td><p></p></td></tr>
 <tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
@@ -171,7 +171,7 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
 <p>Opened by the app when the action failed</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code></td><td><p></p></td></tr>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code>, <code>switched-off</code></td><td><p></p></td></tr>
 <tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
@@ -203,7 +203,7 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
 <p>Opened by the app when the action failed</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code></td><td><p></p></td></tr>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code>, <code>switched-off</code></td><td><p></p></td></tr>
 <tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
@@ -236,7 +236,7 @@ button { font: inherit; font-size: 0.85em; padding: 2px 8px; border: 1px solid #
 <h4>error <span class="faint">— opens <code>{$request.query.x-error}</code></span></h4>
 <p>Opened by the app when the action failed</p>
 <table><thead><tr><th>key</th><th>where</th><th>values</th><th>what it does</th></tr></thead><tbody>
-<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code></td><td><p></p></td></tr>
+<tr><td><code>errorCode</code> <span class="req">required</span></td><td>query</td><td><code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code>, <code>switched-off</code></td><td><p></p></td></tr>
 <tr><td><code>errorMessage</code> <span class="req">required</span></td><td>query</td><td>string</td><td><p>One plain sentence for a person, e.g. <code>not a route: chapter-2</code>.</p></td></tr>
 </tbody></table>
 <h3>Examples</h3>
@@ -669,8 +669,8 @@ update();
 </section>
 <section id="errors">
 <h2>Error codes</h2>
-<p>An <code>x-error</code> answer carries <code>errorCode</code>, one of <code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code>, and a plain <code>errorMessage</code>.</p>
-<p><code>missing-route</code>: open named no page, verse, surah or route. <code>bad-route</code>: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. <code>unknown-action</code>: the path after x-callback-url is not one of the five actions above. <code>route-not-shown</code>: the place was accepted but the page never showed it. <code>bad-check</code>: a check card with no steps, more than 12, an empty step, or a <code>see</code> with no step before it. <code>not-in-this-build</code>: a check card, capture or current-to-file sent to a release build, which has none; the message names which. <code>capture-not-kept</code>: the app could not keep the capture (no web view yet, or the folder could not be written). <code>current-not-written</code>: current-to-file could not write its file.</p>
+<p>An <code>x-error</code> answer carries <code>errorCode</code>, one of <code>missing-route</code>, <code>bad-route</code>, <code>unknown-action</code>, <code>route-not-shown</code>, <code>bad-check</code>, <code>not-in-this-build</code>, <code>capture-not-kept</code>, <code>current-not-written</code>, <code>switched-off</code>, and a plain <code>errorMessage</code>.</p>
+<p><code>missing-route</code>: open named no page, verse, surah or route. <code>bad-route</code>: the place is not in the grammar (a page of 0, two places at once, words without a verse, a surah past 114), or a mode, panel or view name not in the app's lists, or an edition not in the list or not shipped yet. <code>unknown-action</code>: the path after x-callback-url is not one of the five actions above. <code>route-not-shown</code>: the place was accepted but the page never showed it. <code>bad-check</code>: a check card with no steps, more than 12, an empty step, or a <code>see</code> with no step before it. <code>not-in-this-build</code>: a check card, capture or current-to-file sent to a release build, which has none; the message names which. <code>capture-not-kept</code>: the app could not keep the capture (no web view yet, or the folder could not be written). <code>current-not-written</code>: current-to-file could not write its file. <code>switched-off</code>: links from other apps are switched off for this version for now, by the file the app reads at launch; nothing was opened.</p>
 </section>
 <section id="more"><h2>Other examples</h2><table><tbody><tr><td><code class="url">hifth://x-callback-url/bookmark?route=/hafs-kfqc/p1&amp;x-error=shortcuts://x-callback-url/run-shortcut?name=Log%20failure</code><div class="faint"><p>Only open, current, check, capture and current-to-file exist. Anything else answers errorCode=unknown-action; its message names only the three a reader's app takes.</p></div></td><td><code>error unknown-action</code></td></tr></tbody></table></section>
 </main>

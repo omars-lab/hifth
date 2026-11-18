@@ -58,6 +58,11 @@
   Content-Type: application/json
   Cache-Control: no-cache
 
+# The file the iPad, iPhone and Mac apps read once each launch (launch item 21). A change to it
+# is how a bad version is answered fast, so no copy along the way may hold an old one.
+/app-status.json
+  Cache-Control: no-cache
+
 /read/assets/*
   Cache-Control: public, max-age=31536000, immutable
 

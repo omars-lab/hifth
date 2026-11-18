@@ -105,13 +105,17 @@ licenceEn: Free to use in software under the Complex's terms · this does not me
   (a 2024-05-18 copy matches too), with the English
   [2021-12-06](https://web.archive.org/web/20211206122921/https://dm.qurancomplex.gov.sa/en/copyright-2/).
   Apple can ask for proof of permission, so these links are the proof to hand over.
-- **One open point could change the answer.** The pin file once described these pages as
-  shapes taken from the Complex's font, and the Complex's font licence forbids changes
-  without written approval. If the pinned pages were built from the font, the artwork needs
-  permission; if from the Complex's own drawing files of the digital mus'haf, the answer
-  above stands. The pinned files do not say. Settling it: compare one pinned page with the
-  Complex's free drawing-file download, or read quran-svg's history before the pin.
-  Tracked on the launch page.
+- **The text comes from the Complex's drawing files, not its font** (checked 2026-11-17).
+  The pin file once called these pages shapes from the Complex's font, whose licence forbids
+  changes without written approval. That wording was ours. quran-svg's first README
+  (2026-02-07, before the pin) names the Complex's Illustrator files as its source, and nothing
+  of theirs mentions a font. We laid pages 2, 7, 300 and 604, exactly as pinned, over the same
+  pages of the Complex's free 1441H Hafs drawing files, with no fitting, and every letter
+  landed in place. The drawing files hold no font; every letter is already a drawn shape. So
+  the answer above stands for the text.
+- **One small open point: the verse-number rings.** quran-svg redrew them from a source it
+  does not name, and they are drawn the way a font's letters are. If they come from the
+  Complex's font, that licence covers them. Tracked on the launch page (㊺).
 - **Immutability:** SVG bytes are never hand-edited (PLAN §8). Loop 4b applies
   **three** declared transforms, each reproducible and each asserted:
   1. **svgo** at the version and config recorded in the pin — the config was

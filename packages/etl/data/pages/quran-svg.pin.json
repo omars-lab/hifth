@@ -6,7 +6,7 @@
   "commitDate": "2026-07-13",
   "retrieved": "2026-07-25",
   "path": "mushafs/hafs/kfqc",
-  "license": "See SOURCES.md (hafs-kfqc). The page artwork is the King Fahd Complex's, under its digital-mushaf terms; quran-svg's own layer is CC0 1.0 at this commit. Whether these pages were drawn from the Complex's font shapes or its drawing files is not recorded here, and is an open question on the launch page.",
+  "license": "See SOURCES.md (hafs-kfqc). The page artwork is the King Fahd Complex's, under its digital-mushaf terms; quran-svg's own layer is CC0 1.0 at this commit. The page text traces to the Complex's 1441H Hafs Illustrator files (1441-AI-hafs), not its font: pages 2, 7, 300 and 604 at this pin land on those files letter for letter (checked 2026-11-17). The verse-number rings were redrawn by quran-svg from a source it does not name; that is open on the launch page (item 45).",
   "print": "KFGQPC QCF V2 / 1421H (NOT V1/1405H) — see PROVENANCE.md for the evidence and the consequence for cross-check sources.",
   "svgo": {
     "version": "4.0.2",

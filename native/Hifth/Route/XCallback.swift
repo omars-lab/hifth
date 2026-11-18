@@ -150,6 +150,8 @@ nonisolated enum XCallback {
         static let captureNotKept = Failure(code: "capture-not-kept", message: "the app could not keep a capture")
         /// current-to-file could not write its file.
         static let currentNotWritten = Failure(code: "current-not-written", message: "the app could not write current.json")
+        /// The launch file (AppStatus.swift) switched links from other apps off for this version.
+        static let switchedOff = Failure(code: "switched-off", message: "links from other apps are switched off in this version for now")
         static func routeNotShown(_ hash: String) -> Failure {
             Failure(code: "route-not-shown", message: "the page did not open \(hash.dropFirst())")
         }

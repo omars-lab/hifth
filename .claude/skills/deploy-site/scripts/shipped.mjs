@@ -6,7 +6,8 @@
  *
  *   ALLOWED  the files the site needs: the front page at the root (with its pictures in shots/
  *            and the wordmark's font in fonts/), its Arabic copy in ar/, the app under read/,
- *            and the one file that tells Apple which links open the app (app-links.mjs).
+ *            the one file that tells Apple which links open the app (app-links.mjs), and the
+ *            file the apps read at launch (app-status.mjs).
  *            Anything else is refused, so a new kind of file has to be added here on purpose.
  *   NEVER    files that are refused with a reason, because each could really end up in the
  *            folder on this laptop. A pitch build leaves read/pitch/ behind (found 2026-11-11),
@@ -20,6 +21,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, sep } from "node:path";
 import { APP_LINKS_FILE, appLinksProblems } from "./app-links.mjs";
+import { APP_STATUS_FILE, appStatusProblems } from "./app-status.mjs";
 
 /**
  * Where the app's script rule (apps/landing/_headers, under /read/) leaves a gap for the
@@ -85,9 +87,11 @@ export function markersIn(text) {
 // The sources page is required in both languages: the permission emails send the rights
 // holders to it (launch-citations-page). So is the support page: Apple asks every store
 // listing for one (launch-support-page). And so is the links file: without it, no hifth.app
-// link opens the app (launch item 9).
+// link opens the app (launch item 9). And so is the file the apps read at launch: without it,
+// a bad version could not be answered until Apple reviewed a new one (launch item 21).
 const REQUIRED = [
   APP_LINKS_FILE,
+  APP_STATUS_FILE,
   "index.html",
   "privacy.html",
   "sources.html",
@@ -109,7 +113,9 @@ export function isText(path) {
 /**
  * @param {{path: string, text: string | null}[]} files  every file in the folder, with the text
  *   of each text file and null for pictures and fonts
- * @param {{commit?: string}} opts  the commit being released; the app must carry it
+ * @param {{commit?: string, shipping?: string}} opts  the commit being released, which the app
+ *   must carry, and the apps' version in native/project.yml, which the launch file must not
+ *   tell to update
  * @returns {{problems: {path: string, why: string}[], files: number}}
  */
 export function auditShipped(files, opts = {}) {
@@ -122,6 +128,10 @@ export function auditShipped(files, opts = {}) {
     }
     if (path === APP_LINKS_FILE) {
       for (const why of appLinksProblems(text)) problems.push({ path, why });
+      continue;
+    }
+    if (path === APP_STATUS_FILE) {
+      for (const why of appStatusProblems(text, { shipping: opts.shipping })) problems.push({ path, why });
       continue;
     }
     if (!ALLOWED.some((re) => re.test(path))) {

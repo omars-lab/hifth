@@ -66,6 +66,14 @@ struct ShellView: View {
                     .id(capture)
             }
             #endif
+            // What the launch file says (AppStatus.swift): "please update", or
+            // its notice. Bottom middle, always closable, never over the whole page.
+            if let words = model.statusWords {
+                StatusCard(words: words, arabic: AppStatus.readsArabic, onClose: model.closeStatusCard)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 24)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            }
         }
         #if os(macOS)
         .navigationTitle(model.title)

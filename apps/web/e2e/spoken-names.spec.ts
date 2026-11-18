@@ -78,9 +78,14 @@ for (const locale of ["en-US", "ar"] as const) {
       // named without the line it shows (plan item 111). A sign with no letters
       // (+, −, ⌖) is not a word anyone says.
       await openTools(page);
-      const pairs = await page
-        .locator("button[aria-label], a[aria-label], [role=button][aria-label], [role=menuitem][aria-label]")
-        .evaluateAll((els) => {
+      // The bars come in while the tools open, so wait for them before reading
+      // the names: read once, too early, the screen showed fewer than six on a
+      // slow run and the test failed for no fault of the app.
+      const named = page.locator(
+        "button[aria-label], a[aria-label], [role=button][aria-label], [role=menuitem][aria-label]",
+      );
+      const collect = () =>
+        named.evaluateAll((els) => {
           const seen = (n: Node): string => {
             if (n.nodeType === Node.TEXT_NODE) return n.textContent ?? "";
             if (!(n instanceof Element) || n.getAttribute("aria-hidden") === "true") return "";
@@ -92,7 +97,10 @@ for (const locale of ["en-US", "ar"] as const) {
             .map((e) => ({ shown: seen(e), name: e.getAttribute("aria-label") ?? "" }))
             .filter((p) => /\p{L}/u.test(p.shown));
         });
-      expect(pairs.length, "the screen shows named buttons with words").toBeGreaterThan(5);
+      await expect
+        .poll(async () => (await collect()).length, { message: "the screen shows named buttons with words" })
+        .toBeGreaterThan(5);
+      const pairs = await collect();
       const missing = pairs.filter((p) => !words(p.name).includes(words(p.shown)));
       expect(
         missing.map((p) => `"${words(p.shown)}" is named "${p.name}"`),
