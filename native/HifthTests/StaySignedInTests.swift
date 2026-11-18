@@ -181,7 +181,7 @@ struct StaySignedInTests {
     func signInIsSaved() async {
         let store = FakeStore()
         let (model, ran) = model(store: store, check: FakeCheck(.allowed))
-        model.signIn = { .success(Self.saved) }
+        model.signIn = { _, _ in .success(Self.saved) }
         model.receive(.ask(id: "s-1", name: "sign-in"))
         await model.lastAsk?.value
         #expect(store.kept == Self.saved)
@@ -194,7 +194,7 @@ struct StaySignedInTests {
         let store = FakeStore()
         store.refusesToSave = true
         let (model, ran) = model(store: store, check: FakeCheck(.allowed))
-        model.signIn = { .success(Self.saved) }
+        model.signIn = { _, _ in .success(Self.saved) }
         model.receive(.ask(id: "s-1", name: "sign-in"))
         await model.lastAsk?.value
         #expect(store.saves == 1)
@@ -271,7 +271,7 @@ struct StaySignedInTests {
         let fresh = SignIn.Session(token: "made-up-fresh", expiresAt: Self.later, appleUser: "made-up-apple-user")
         let store = FakeStore(Self.saved)
         let (model, _) = model(store: store, check: FakeCheck(.revoked))
-        model.signIn = { .success(fresh) }
+        model.signIn = { _, _ in .success(fresh) }
         model.receive(.ready)
         model.receive(.ask(id: "s-1", name: "sign-in"))
         await model.lastAsk?.value

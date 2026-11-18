@@ -5,15 +5,17 @@ import Foundation
 /// Signing in from the app (sign-in step 8 in docs/design/sign-in.md). The page asks the app
 /// "sign-in" (`askApp` in apps/web/src/native-bridge.ts); the app then:
 ///
-/// 1. asks hifth.app for a fresh one-off word (`POST /api/sign-in/word`);
+/// 1. asks hifth.app for a fresh one-off word (`POST /api/sign-in/word`), with the tester's
+///    invite code while sign-in is for invited testers (step 18);
 /// 2. shows Apple's sheet with a scrambled copy of the word, asking Apple for no name and no
 ///    email, because the server keeps neither;
-/// 3. hands Apple's note and the plain word to hifth.app (`POST /api/sign-in`), which checks the
-///    note was made for this word and answers with a session;
+/// 3. hands Apple's note, the plain word and Apple's one-time code to hifth.app
+///    (`POST /api/sign-in`), which checks the note was made for this word and answers with a
+///    session. The code lets the server cut the link with Apple when the account is deleted;
 /// 4. tells the page only "signed-in". The session never reaches the page.
 ///
-/// The word is asked for before the sheet, so a server with sign-in switched off answers before
-/// Face ID is ever shown. The server side is apps/landing/lib/sign-in-api.mjs.
+/// The word is asked for before the sheet, so a server with sign-in switched off, past its
+/// limit or wanting an invite code answers before Face ID is ever shown. The server side is apps/landing/lib/sign-in-api.mjs.
 enum SignIn {
     /// Why a sign-in did not happen, in a word the page can act on.
     struct Failure: Error, Equatable, Sendable {
@@ -35,6 +37,11 @@ enum SignIn {
         static let notAvailable = Failure("not-available")
         /// Sign-in is switched off on the server (it answers 404), or this build names no server.
         static let off = Failure("sign-in-off")
+        /// Too many sign-ins were started in these ten minutes (step 17), or this device asked
+        /// too fast. Trying again shortly works.
+        static let tooMany = Failure("too-many")
+        /// Sign-in is for invited testers and the invite code was missing or wrong (step 18).
+        static let inviteNeeded = Failure("invite-needed")
 
         /// hifth.app turned the note down. Its reason is kept, cut down to plain letters, digits
         /// and dashes, since it comes from outside the app.
@@ -54,8 +61,8 @@ enum SignIn {
         var appleUser = ""
     }
 
-    /// What Apple's sheet hands back: its signed note, the one-time code the server will trade
-    /// for the ticket that lets it cancel the sign-in later (step 13; not sent yet), and Apple's
+    /// What Apple's sheet hands back: its signed note, the one-time code the server trades
+    /// for the ticket that lets it cancel the sign-in later (step 13), and Apple's
     /// lasting id for the reader, which stays on the device.
     struct AppleAnswer: Sendable {
         let note: String
@@ -85,16 +92,25 @@ enum SignIn {
         return .notAvailable
     }
 
-    /// The whole sign-in, with Apple's sheet passed in so the tests can play it.
+    /// The longest invite code sent. A real one is 19 letters; this leaves room for spaces.
+    static let mostInviteLetters = 64
+
+    /// The whole sign-in, with Apple's sheet passed in so the tests can play it. `invite` is the
+    /// tester's code as typed; the server tidies it. `invited` is called once the server has
+    /// handed out a word, which is when a sent code is known to be good: before Apple's sheet,
+    /// so the code can be kept even if the tester then closes the sheet.
     static func run(
         server: Server,
+        invite: String? = nil,
+        invited: () -> Void = {},
         askApple: (_ nonce: String) async throws -> AppleAnswer
     ) async -> Result<Session, Failure> {
         do {
-            let word = try await server.word()
+            let word = try await server.word(invite: invite)
+            invited()
             let apple: AppleAnswer
             do { apple = try await askApple(scramble(word)) } catch { throw failure(for: error) }
-            var session = try await server.signIn(note: apple.note, word: word)
+            var session = try await server.signIn(note: apple.note, word: word, code: apple.code)
             session.appleUser = apple.user
             return .success(session)
         } catch let failure as Failure {
@@ -113,15 +129,19 @@ enum SignIn {
         var send: (URLRequest) async throws -> (Data, URLResponse) = Server.ephemeral
 
         /// A fresh one-off word, good for ten minutes.
-        func word() async throws -> String {
-            let reply = try await call("api/sign-in/word", body: nil)
+        func word(invite: String? = nil) async throws -> String {
+            let typed = String((invite ?? "").prefix(SignIn.mostInviteLetters))
+            let reply = try await call("api/sign-in/word", body: typed.isEmpty ? nil : ["invite": typed])
             guard let word = reply["word"] as? String, (1...256).contains(word.count) else { throw Failure.badReply }
             return word
         }
 
-        /// Apple's note and the plain word, traded for a session.
-        func signIn(note: String, word: String) async throws -> Session {
-            let reply = try await call("api/sign-in", body: ["note": note, "word": word])
+        /// Apple's note and the plain word, traded for a session. Apple's one-time code goes
+        /// along when Apple gave one.
+        func signIn(note: String, word: String, code: String? = nil) async throws -> Session {
+            var body = ["note": note, "word": word]
+            if let code, !code.isEmpty { body["code"] = code }
+            let reply = try await call("api/sign-in", body: body)
             guard let token = reply["session"] as? String, !token.isEmpty,
                   let expiresAt = (reply["expiresAt"] as? NSNumber)?.intValue
             else { throw Failure.badReply }
@@ -152,6 +172,10 @@ enum SignIn {
             case 400: throw Failure("bad-request")
             case 413: throw Failure("too-big")
             case 401: throw Failure.refused(json?["reason"] as? String)
+            // Cloudflare's own limit answers 429 with a page of its own, so the body is not read.
+            case 429: throw Failure.tooMany
+            // Only our own 403 means the invite code; any other is not ours to explain.
+            case 403 where json?["reason"] as? String == "invite-needed": throw Failure.inviteNeeded
             default: throw Failure("server-error")
             }
         }

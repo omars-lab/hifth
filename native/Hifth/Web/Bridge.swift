@@ -12,8 +12,10 @@ enum BridgeMessage: Equatable {
     /// The reader tapped share: show the platform's sheet for this link.
     case share(url: String, title: String, text: String)
     /// A question the page waits on (`askApp`). The shell always answers it,
-    /// with this id, through `ShellModel.answerScript`, a no included.
-    case ask(id: String, name: String)
+    /// with this id, through `ShellModel.answerScript`, a no included. `text`
+    /// is one short line the question may carry, such as the invite code a
+    /// tester typed (sign-in step 18); longer than 200 letters and it is cut.
+    case ask(id: String, name: String, text: String? = nil)
 
     init?(body: Any) {
         guard let dict = body as? [String: Any], let type = dict["type"] as? String else { return nil }
@@ -33,7 +35,7 @@ enum BridgeMessage: Equatable {
         case "ask":
             guard let id = dict["id"] as? String, !id.isEmpty,
                   let name = dict["name"] as? String, !name.isEmpty else { return nil }
-            self = .ask(id: id, name: name)
+            self = .ask(id: id, name: name, text: (dict["text"] as? String).map { String($0.prefix(200)) })
         default:
             return nil
         }

@@ -54,7 +54,7 @@ export type NativeMessage =
   | { type: "ready" }
   | { type: "route"; hash: string }
   | { type: "share"; url: string; title: string; text: string }
-  | { type: "ask"; id: string; name: string };
+  | { type: "ask"; id: string; name: string; text?: string };
 
 type Handler = { postMessage: (m: unknown) => void };
 type Shelled = Window & {
@@ -163,7 +163,8 @@ function receiveAnswer(id: string, answer: unknown): void {
  * answers every question it is sent, a no included, so by default this waits
  * as long as it takes: a question like signing in waits on a person at
  * Apple's sheet. `waitMs` gives up sooner, for a question that should be quick.
- * Outside the app it fails at once with `not-in-app`.
+ * Outside the app it fails at once with `not-in-app`. `text` is one short line
+ * the question carries, such as the invite code a tester typed with `sign-in`.
  *
  * The answer comes back through `window.__HIFTH_ANSWER__`, put in place here
  * before the first question leaves, never through `__HIFTH_PAGE__`, which the
@@ -171,7 +172,7 @@ function receiveAnswer(id: string, answer: unknown): void {
  */
 export function askApp(
   name: string,
-  { waitMs }: { waitMs?: number } = {},
+  { waitMs, text }: { waitMs?: number; text?: string } = {},
 ): Promise<unknown> {
   if (!isNative()) return Promise.reject(new Error("not-in-app"));
   const w = window as Shelled;
@@ -184,7 +185,7 @@ export function askApp(
       setTimeout(() => {
         if (waiting.delete(id)) reject(new Error("no-answer"));
       }, waitMs);
-    if (!post({ type: "ask", id, name })) {
+    if (!post(text === undefined ? { type: "ask", id, name } : { type: "ask", id, name, text })) {
       waiting.delete(id);
       reject(new Error("not-in-app"));
     }

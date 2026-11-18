@@ -147,6 +147,18 @@ describe("askApp", () => {
     await expect(waiting).resolves.toBe("pong");
   });
 
+  it("a question can carry a line of text, and one without it carries none", async () => {
+    const sent = inShell();
+    const withText = askApp("sign-in", { text: "made-up" });
+    const without = askApp("sign-in");
+    const [first, second] = asks(sent);
+    expect(first).toMatchObject({ type: "ask", name: "sign-in", text: "made-up" });
+    expect(second && "text" in second).toBe(false);
+    answer(first!.id, { ok: true, value: "signed-in" });
+    answer(second!.id, { ok: true, value: "signed-in" });
+    await Promise.all([withText, without]);
+  });
+
   it("each answer reaches its own question, whatever order they come back in", async () => {
     const sent = inShell();
     const first = askApp("ping");

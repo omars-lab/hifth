@@ -87,6 +87,11 @@ struct SignInTests {
         (401, #"{"reason":"<script>"}"#, "refused:script"),
         (401, "not json", "refused"),
         (500, "", "server-error"),
+        (429, #"{"reason":"too-many"}"#, "too-many"),
+        (429, "<html>blocked</html>", "too-many"),
+        (403, #"{"reason":"invite-needed"}"#, "invite-needed"),
+        (403, "<html>forbidden</html>", "server-error"),
+        (403, #"{"reason":"something-else"}"#, "server-error"),
         (200, #"{"session":""}"#, "bad-reply"),
         (200, "<html>", "bad-reply"),
     ])
@@ -96,6 +101,75 @@ struct SignInTests {
         await #expect(throws: SignIn.Failure(reason)) {
             _ = try await server(fake).signIn(note: "made-up-note", word: "made-up-word")
         }
+    }
+
+    @Test("Apple's one-time code goes with the note and the word when Apple gave one, and is left out when it did not")
+    func signInSendsTheCode() async throws {
+        let fake = FakeServer()
+        fake.answers = [
+            (200, #"{"session":"made-up-session","expiresAt":1900000000}"#),
+            (200, #"{"session":"made-up-session","expiresAt":1900000000}"#),
+            (200, #"{"session":"made-up-session","expiresAt":1900000000}"#),
+        ]
+        _ = try await server(fake).signIn(note: "made-up-note", word: "made-up-word", code: "made-up-code")
+        _ = try await server(fake).signIn(note: "made-up-note", word: "made-up-word", code: nil)
+        _ = try await server(fake).signIn(note: "made-up-note", word: "made-up-word", code: "")
+        let withCode = try #require(fake.body(0))
+        #expect(Set(withCode.keys) == ["note", "word", "code"])
+        #expect(withCode["code"] as? String == "made-up-code")
+        #expect(Set(try #require(fake.body(1)).keys) == ["note", "word"])
+        #expect(Set(try #require(fake.body(2)).keys) == ["note", "word"])
+    }
+
+    @Test("an invite code goes with the ask for a word as it was typed, and an ask without one has no body")
+    func wordSendsTheInvite() async throws {
+        let fake = FakeServer()
+        fake.answers = [(200, #"{"word":"made-up-word"}"#), (200, #"{"word":"made-up-word"}"#), (200, #"{"word":"made-up-word"}"#)]
+        _ = try await server(fake).word(invite: " 0A1B 2c3d-4e5f-6g7h ")
+        _ = try await server(fake).word(invite: nil)
+        _ = try await server(fake).word(invite: "")
+        let body = try #require(fake.body(0))
+        #expect(Set(body.keys) == ["invite"])
+        #expect(body["invite"] as? String == " 0A1B 2c3d-4e5f-6g7h ")
+        #expect(fake.requests[0].value(forHTTPHeaderField: "Content-Type") == "application/json")
+        #expect(fake.requests[1].httpBody == nil)
+        #expect(fake.requests[2].httpBody == nil)
+    }
+
+    @Test("an invite code far too long to be one is cut before it is sent")
+    func longInviteIsCut() async throws {
+        let fake = FakeServer()
+        fake.answers = [(200, #"{"word":"made-up-word"}"#)]
+        _ = try await server(fake).word(invite: String(repeating: "z", count: 5000))
+        #expect((try #require(fake.body(0))["invite"] as? String)?.count == SignIn.mostInviteLetters)
+        #expect(SignIn.mostInviteLetters <= 200)
+    }
+
+    @Test("without the invite code the server asks for, Apple's sheet never shows")
+    func uninvitedMeansNoSheet() async {
+        let fake = FakeServer()
+        fake.answers = [(403, #"{"reason":"invite-needed"}"#)]
+        var sheetShown = false
+        let result = await SignIn.run(server: server(fake), invite: "not-a-code") { _ in
+            sheetShown = true
+            return SignIn.AppleAnswer(note: "made-up-note", code: nil, user: "made-up-apple-user")
+        }
+        #expect(result == .failure(SignIn.Failure.inviteNeeded))
+        #expect(!sheetShown)
+        #expect(fake.requests.count == 1)
+    }
+
+    @Test("past the ten-minute limit, Apple's sheet never shows")
+    func tooManyMeansNoSheet() async {
+        let fake = FakeServer()
+        fake.answers = [(429, #"{"reason":"too-many"}"#)]
+        var sheetShown = false
+        let result = await SignIn.run(server: server(fake)) { _ in
+            sheetShown = true
+            return SignIn.AppleAnswer(note: "made-up-note", code: nil, user: "made-up-apple-user")
+        }
+        #expect(result == .failure(SignIn.Failure.tooMany))
+        #expect(!sheetShown)
     }
 
     @Test("no connection is its own reason, not a refusal")
@@ -129,6 +203,20 @@ struct SignInTests {
         #expect(try result.get() == SignIn.Session(token: "made-up-session", expiresAt: 1_900_000_000, appleUser: "made-up-apple-user"))
         #expect(fake.body(1)?["word"] as? String == "made-up-word")
         #expect(fake.body(1)?["note"] as? String == "made-up-note")
+        #expect(fake.body(1)?["code"] as? String == "made-up-code")
+        #expect(fake.requests[0].httpBody == nil)
+    }
+
+    @Test("the whole sign-in carries the invite code to the ask for a word, and nowhere else")
+    func wholeSignInWithInvite() async throws {
+        let fake = FakeServer()
+        fake.answers = [(200, #"{"word":"made-up-word"}"#), (200, #"{"session":"made-up-session","expiresAt":1900000000}"#)]
+        let result = await SignIn.run(server: server(fake), invite: "0a1b-2c3d-4e5f-6g7h") { _ in
+            SignIn.AppleAnswer(note: "made-up-note", code: nil, user: "made-up-apple-user")
+        }
+        _ = try result.get()
+        #expect(fake.body(0)?["invite"] as? String == "0a1b-2c3d-4e5f-6g7h")
+        #expect(Set(try #require(fake.body(1)).keys) == ["note", "word"])
     }
 
     @Test("when sign-in is switched off on the server, Apple's sheet never shows")
@@ -187,7 +275,7 @@ struct SignInTests {
         let ran = Ran()
         let model = ShellModel(launchRoute: nil)
         model.runScript = { ran.scripts.append(($0, $1)) }
-        model.signIn = signIn
+        model.signIn = { _, _ in await signIn() }
         return (model, ran)
     }
 

@@ -539,10 +539,10 @@ final class ShellModel {
             #endif
         case .share(let url, let title, let text):
             Sharing.present(url: url, title: title, text: text, from: webView)
-        case .ask(let id, let name):
+        case .ask(let id, let name, let text):
             lastAsk = Task { [weak self] in
                 guard let self else { return }
-                let answer = await self.answer(question: name)
+                let answer = await self.answer(question: name, text: text)
                 self.runScript(Self.answerScript, ["id": id, "answer": answer])
             }
         }
@@ -553,7 +553,9 @@ final class ShellModel {
     /// page never waits forever. `ping` is the harmless one the trial on a
     /// device uses (sign-in ⑤); `sign-in` shows Apple's sheet (step 8);
     /// `signed-in` says "signed-in" or "signed-out" and nothing more (step 15).
-    private func answer(question name: String) async -> [String: Any] {
+    /// `text` is the invite code a tester typed with `sign-in` (step 18): it
+    /// goes to hifth.app and the Keychain, and never back to the page.
+    private func answer(question name: String, text: String? = nil) async -> [String: Any] {
         switch name {
         case "ping":
             return ["ok": true, "value": "pong"]
@@ -563,7 +565,17 @@ final class ShellModel {
             defer { signingIn = false }
             // The launch check ends first, so it cannot drop the session this is about to save.
             await checkSessionOnce().value
-            switch await (signIn ?? signInWithApple)() {
+            // A code just typed wins over the kept one. It is kept once hifth.app has taken
+            // it, and the kept one is dropped only when hifth.app says it is no longer good:
+            // never for no connection or any other failure.
+            let typed = text?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let fresh = typed?.isEmpty == false ? typed : nil
+            let invites = inviteStore
+            let result = await (signIn ?? signInWithApple)(fresh ?? invites?.load()) {
+                if let fresh { invites?.save(fresh) }
+            }
+            if result == .failure(.inviteNeeded) { invites?.clear() }
+            switch result {
             case .success(let session):
                 self.session = session
                 // A Keychain that refuses is not a failed sign-in: the reader is signed in
@@ -598,6 +610,9 @@ final class ShellModel {
     /// Keychain. The tests replace them with stand-ins.
     @ObservationIgnored var sessionStore: SessionStore? = SignIn.realStore(at: SignIn.address())
     @ObservationIgnored var credentialCheck: CredentialCheck? = SignIn.realCheck(at: SignIn.address())
+    /// Where a tester's invite code is kept (step 18, Account/InviteStore.swift).
+    /// Nil, like the two above, in a build that names no sign-in server.
+    @ObservationIgnored var inviteStore: InviteStore? = SignIn.realInviteStore(at: SignIn.address())
     /// The clock, so the tests can move it.
     @ObservationIgnored var now: () -> Date = { Date() }
     /// The check at launch, kept so the page's questions and the tests can
@@ -625,14 +640,17 @@ final class ShellModel {
     /// second sheet.
     @ObservationIgnored private var signingIn = false
     /// The whole sign-in; nil means the real one with Apple's sheet. The tests
-    /// replace it with a stand-in.
-    @ObservationIgnored var signIn: (() async -> Result<SignIn.Session, SignIn.Failure>)?
+    /// replace it with a stand-in. It is handed the invite code to send, if
+    /// any, and what to call once hifth.app has taken it.
+    @ObservationIgnored var signIn: ((_ invite: String?, _ invited: () -> Void) async -> Result<SignIn.Session, SignIn.Failure>)?
 
-    private func signInWithApple() async -> Result<SignIn.Session, SignIn.Failure> {
+    private func signInWithApple(invite: String?, invited: () -> Void) async -> Result<SignIn.Session, SignIn.Failure> {
         guard let base = SignIn.address() else { return .failure(.off) }
         guard webViewBuilt, let window = webView.window else { return .failure(.noWindow) }
         let sheet = AppleSheet(anchor: window)
-        return await SignIn.run(server: SignIn.Server(base: base)) { try await sheet.ask(nonce: $0) }
+        return await SignIn.run(server: SignIn.Server(base: base), invite: invite, invited: invited) {
+            try await sheet.ask(nonce: $0)
+        }
     }
 
     private func loaded() {

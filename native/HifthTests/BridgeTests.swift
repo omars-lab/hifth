@@ -15,6 +15,9 @@ struct BridgeTests {
                 == .share(url: "https://x/#/a", title: "t", text: "b")
         )
         #expect(BridgeMessage(body: ["type": "ask", "id": "q1", "name": "ping"]) == .ask(id: "q1", name: "ping"))
+        #expect(BridgeMessage(body: ["type": "ask", "id": "q1", "name": "sign-in", "text": "made-up"]) == .ask(id: "q1", name: "sign-in", text: "made-up"))
+        #expect(BridgeMessage(body: ["type": "ask", "id": "q1", "name": "sign-in", "text": 7]) == .ask(id: "q1", name: "sign-in"))
+        #expect(BridgeMessage(body: ["type": "ask", "id": "q1", "name": "sign-in", "text": String(repeating: "z", count: 5000)]) == .ask(id: "q1", name: "sign-in", text: String(repeating: "z", count: 200)))
     }
 
     @Test("ignores anything else")
