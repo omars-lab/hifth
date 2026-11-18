@@ -27,6 +27,7 @@ import { READING_BARS, type ReadingBars } from "../reading-bars";
 import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PITCH } from "../pitch/pitch";
+import { RECITATION, RECITATION_CREDIT } from "../recitation";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
 import { NOTE_LEADS, NOTE_SIDEWAYS, rememberNoteLead, rememberNoteSideways, useNoteLead, useNoteSideways } from "../phone-note";
 import { CARD_ROOMS, rememberCardRoom, useCardRoom } from "../card-room";
@@ -785,13 +786,16 @@ export function Colophon({
 
         {/* How the page shows the verse a "Play to" run is reciting
             (docs/PLAN.md, item 57): built two ways, the moving light first. */}
-        {runMark && onRunMark && (
+        {RECITATION && runMark && onRunMark && (
           <Choice id="run-mark" title={t.runMarkTitle} note={t.runMarkNote} value={runMark} options={RUN_MARKS} label={(choice) => choice === "light" ? t.runMarkLight : t.runMarkRing} data="run-mark" onPick={onRunMark} />
         )}
 
         {/* What the page does when the reader turns away from a run while it
-            plays (docs/PLAN.md, item 59): staying is the default; going back stays. */}
-        <Choice id="run-follow" title={t.runFollowTitle} note={t.runFollowNote} value={runFollow} options={RUN_FOLLOWS} label={(choice) => choice === "stay" ? t.runFollowStay : t.runFollowBack} data="run-follow" onPick={rememberRunFollow} />
+            plays (docs/PLAN.md, item 59): staying is the default; going back stays.
+            None of the playing settings show in a build without the recitation. */}
+        {RECITATION && (
+          <Choice id="run-follow" title={t.runFollowTitle} note={t.runFollowNote} value={runFollow} options={RUN_FOLLOWS} label={(choice) => choice === "stay" ? t.runFollowStay : t.runFollowBack} data="run-follow" onPick={rememberRunFollow} />
+        )}
 
         {/* Where the zoom buttons grow the page from (docs/PLAN.md, item 66):
             the chosen verse is the default; the middle, as it was, stays. */}
@@ -807,7 +811,9 @@ export function Colophon({
 
         {/* How a run makes its next verse ready while one sounds (docs/PLAN.md,
             item 63): holding it in hand is the default; asking early and off stay. */}
-        <Choice id="run-ahead" title={t.runAheadTitle} note={t.runAheadNote} value={runAhead} options={RUN_AHEADS} label={(choice) => choice === "hold" ? t.runAheadHold : choice === "ask" ? t.runAheadAsk : t.runAheadOff} data="run-ahead" onPick={rememberRunAhead} />
+        {RECITATION && (
+          <Choice id="run-ahead" title={t.runAheadTitle} note={t.runAheadNote} value={runAhead} options={RUN_AHEADS} label={(choice) => choice === "hold" ? t.runAheadHold : choice === "ask" ? t.runAheadAsk : t.runAheadOff} data="run-ahead" onPick={rememberRunAhead} />
+        )}
 
         {/* The surahs whose recitation is kept on this device (docs/PLAN.md,
             item 101), beside the setting for how the next verses are fetched. */}
@@ -1168,7 +1174,7 @@ export function Colophon({
                 English (launch item 39): an English reader, Apple's reviewer
                 among them, could not tell what the app is built on. That line
                 is bound to SOURCES.md too, so neither language can drift. */}
-            {CREDITS.map((credit) => (
+            {CREDITS.filter((credit) => RECITATION || credit.href !== RECITATION_CREDIT).map((credit) => (
               <li key={credit.href} className={styles.row} data-credit={credit.href}>
                 <div className={styles.credit} lang="ar" dir="rtl">
                   <span className={styles.what}>{credit.what}</span>

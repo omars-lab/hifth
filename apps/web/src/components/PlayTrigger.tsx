@@ -2,6 +2,7 @@ import { useT, type Strings } from "../i18n";
 import type { AudioPhase } from "../audio";
 import styles from "./PlayTrigger.module.css";
 import { spokenName } from "../spoken-name";
+import { RECITATION } from "../recitation";
 
 /**
  * PlayTrigger — the ▶ in the trail bar that recites the selected verse.
@@ -61,7 +62,8 @@ export function PlayTrigger({
   expanded?: boolean | undefined;
 }): JSX.Element | null {
   const { t } = useT();
-  if (!selectedKey || !label) return null;
+  // The App Store build has no recitation, so nothing to play (recitation.ts).
+  if (!RECITATION || !selectedKey || !label) return null;
 
   const loading = phase === "loading";
   // Asked for counts as playing: a press now pauses, so the control says so.

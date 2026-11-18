@@ -72,6 +72,45 @@ test("the copy leaves the commit it was built from beside the flavour", () => {
   assert.equal(readFileSync(join(bundle, ".hifth-web-flavour"), "utf8"), "public\n", "the flavour file holds the flavour alone");
 });
 
+// The store build leaves the recitation out, because Quran.com's terms allow
+// personal use only and no permission to stream has been given (app-store-launch
+// ⑥). The check is on what was copied, not on the flag that should have left it
+// out: a public bundle naming the recitation's server is refused. The other
+// quran.com addresses (the credit link, the word-root corpus) are not the
+// recitation and stay.
+function bundleWith(text) {
+  const dist = mkdtempSync(join(tmpdir(), "dist-"));
+  writeFileSync(join(dist, "index.html"), "<!doctype html>");
+  mkdirSync(join(dist, "assets"), { recursive: true });
+  writeFileSync(join(dist, "assets", "index-abc.js"), text);
+  return { dist, bundle: mkdtempSync(join(tmpdir(), "bundle-")) };
+}
+
+test("the public copy refuses a bundle that still streams the recitation", () => {
+  const r = copy("public", bundleWith('const u = `https://verses.quran.com/Minshawi/Murattal/mp3/${s}${a}.mp3`;'));
+  assert.notEqual(r.status, 0);
+  assert.match(r.stdout + r.stderr, /recitation/);
+});
+
+test("the public copy keeps the credit link and the word-root corpus's address", () => {
+  const r = copy("public", bundleWith('const a = "https://quran.com", b = "http://corpus.quran.com";'));
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+// A source map holds the original source, so the old address in a comment or
+// in code the build dropped is still in it; a map is never run.
+test("the public copy does not count the source map, which is never run", () => {
+  const paths = bundleWith("const ok = 1;");
+  writeFileSync(join(paths.dist, "assets", "index-abc.js.map"), '{"sourcesContent":["// was https://verses.quran.com/"]}');
+  const r = copy("public", paths);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+test("the private build keeps the recitation", () => {
+  const r = copy("pitch", bundleWith('const u = "https://verses.quran.com/Minshawi/Murattal/mp3/";'));
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
 test("a public build that itself carries the private folder is copied without it", () => {
   const dist = mkdtempSync(join(tmpdir(), "dist-"));
   mkdirSync(join(dist, "assets", "private"), { recursive: true });

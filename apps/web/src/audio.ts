@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fromAbsoluteAyah, parseAyahKey, toAbsoluteAyah } from "@hifth/core";
 import type { RunAhead } from "./run-ahead";
+import { RECITATION } from "./recitation";
 
 /** Who is reciting, for the credit line — the app never guesses this from a URL. */
 export const RECITER = "Mohamed Siddiq al-Minshawi";
@@ -24,9 +25,12 @@ const RUN_AHEAD_VERSES = 3;
 
 /**
  * The public URL of one ayah's recitation, or null when the key is not a bare
- * ayah (a word or range has no single file). Pure and deterministic.
+ * ayah (a word or range has no single file). Pure and deterministic. Null for
+ * every verse in a build without the recitation (the App Store's), which also
+ * drops the server's address from that build.
  */
 export function verseAudioUrl(key: string): string | null {
+  if (!RECITATION) return null;
   const parsed = parseAyahKey(key);
   if (!parsed) return null;
   const surah = String(parsed.surah).padStart(3, "0");

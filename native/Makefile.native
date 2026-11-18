@@ -163,7 +163,8 @@ ifeq ($(FLAVOUR),pitch)
 	  echo "  Build it first (node packages/etl/tools/pitch/extract.mjs) or use FLAVOUR=public"; echo ""; exit 1; }
 	VITE_PITCH=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
 else
-	$(WEB) exec vite build --outDir dist-native --emptyOutDir
+	@# The store build leaves the recitation out (app-store-launch ⑥).
+	VITE_NO_RECITATION=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
 endif
 	@$(MAKE) --no-print-directory app-web-copy FLAVOUR=$(FLAVOUR)
 
@@ -179,6 +180,13 @@ ifeq ($(FLAVOUR),pitch)
 else
 	rsync -a --delete --delete-excluded --exclude 'assets/private' $(DIST)/ $(WEB_BUNDLE)/
 	@test ! -e $(WEB_BUNDLE)/assets/private || { echo "held data reached the public shell bundle"; exit 1; }
+	@# The store build leaves the recitation out: Quran.com's terms allow personal
+	@# use only (app-store-launch ⑥). Checked on what was copied, not on the flag.
+	@# Source maps are skipped: they hold the original source, comments and all,
+	@# and are never run.
+	@! grep -rlF --exclude='*.map' 'verses.quran.com' $(WEB_BUNDLE) >/dev/null || { \
+	  echo "the public shell bundle still streams the recitation (verses.quran.com):"; \
+	  grep -rlF --exclude='*.map' 'verses.quran.com' $(WEB_BUNDLE); exit 1; }
 endif
 	@echo "$(FLAVOUR)" > $(WEB_BUNDLE)/.hifth-web-flavour
 	@# The commit, for a walk capture to say which build it came from; its own

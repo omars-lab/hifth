@@ -6921,6 +6921,18 @@
       "note": "Draft written 2026-11-15 in docs/design/store-permission-emails.md, not sent. Fallback: leave the tajweed colours out of the store build."
     },
     {
+      "id": "launch-recitation-permission",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊻"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "user",
+      "launch": true,
+      "note": "Waits on the owner sending email 3. Draft written 2026-11-17 in docs/design/store-permission-emails.md (email 3, to Quran.com), not sent. It does not hold up the upload: the store build already leaves the recitation out. A yes, or Quran Foundation's developer route, brings it back to the store apps and settles whether the website may keep it."
+    },
+    {
       "id": "launch-page-artwork-terms",
       "source": {
         "file": "docs/design/app-store-launch.md",
@@ -6940,12 +6952,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "⑥"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
       "launch": true,
       "useCase": "send-apple-only-the-build-we-checked",
-      "note": "Read 2026-11-17 (docs/research/2026-11-17-store-terms.md): Quran.com's terms allow personal use only, other public display needs written consent, and Apple asks for that permission on request. The credit no longer claims 'free to listen'. Left: the switch that leaves recitation out of the store build, with a test that the store bundle holds no verses.quran.com address. Route to bring it back: register with Quran Foundation (its developer terms cover audio; needs a small server holding the key)."
+      "closedBy": "apps/web/src/no-recitation.test.tsx",
+      "note": "Read 2026-11-17 (docs/research/2026-11-17-store-terms.md): Quran.com's terms allow personal use only, other public display needs written consent, and Apple asks for that permission on request. The credit no longer claims 'free to listen'. Fixed 2026-11-17: make app-web FLAVOUR=public builds with VITE_NO_RECITATION=1 (src/recitation.ts), so no verse has a sound address and no listen button, play option, keep-for-offline offer, play setting or recitation credit shows (no-recitation.test.tsx); the copy into the app refuses any file holding verses.quran.com (native-golden-public.test.mjs); checked on the real store build in a browser. Review notes, privacy answers and both hifth.app privacy pages updated. The website keeps it (launch-website-recitation). Route to bring it back: register with Quran Foundation (its developer terms cover audio; needs a small server holding the key)."
     },
     {
       "id": "launch-artwork-font-or-drawings",

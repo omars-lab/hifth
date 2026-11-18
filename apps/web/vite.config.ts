@@ -279,6 +279,10 @@ export default defineConfig({
     __PITCH__: JSON.stringify(Boolean(process.env.VITE_PITCH)),
     // The live commentary service's switch, the same way: on only when the build
     // names both the service and which of its tafsirs to show.
+    // Whether the build plays the recitation (src/recitation.ts). The App Store
+    // build sets VITE_NO_RECITATION, and the copy step checks the server's
+    // address really did drop out.
+    __RECITATION__: JSON.stringify(!process.env.VITE_NO_RECITATION),
     __LIVE_TAFSIR__: JSON.stringify(
       Boolean(process.env.VITE_TAFSIR_QF_BASE && process.env.VITE_TAFSIR_QF_ID),
     ),

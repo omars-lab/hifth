@@ -112,7 +112,7 @@ to the Complex" said more than the terms do, and is gone. The same words are in 
 source file and both hifth.app sources pages, and a test fails if the app's row loses any of
 them. One open point could still change the answer: ㊺.
 
-### ⑥ The recitation audio comes from another site with no licence note · **open**
+### ⑥ The recitation audio comes from another site with no licence note · **fixed**
 
 *What would answer it:* that site's terms found and recorded, and the source added to the
 citations page; or the recitation switched off in the store build.
@@ -124,6 +124,13 @@ says "free to listen". What remains is the switch that leaves recitation out of 
 build, with a test that the store build holds no address of the recitation's server. The
 private build keeps it. Getting it back into the store is route 2 in the write-up: register
 with Quran Foundation, whose developer terms cover audio. The website is ㊻.
+
+*Fixed 2026-11-17:* the store build now leaves the recitation out. It is built with the
+recitation switched off, so no verse has a sound address, and no listen button, play option,
+keep-for-offline offer, play setting or recitation credit shows. The copy into the app then
+refuses any file that still holds the recitation server's address. The website and the private
+build keep it. The review notes, the privacy answers and the hifth.app privacy page now say the
+store apps fetch nothing.
 
 ### ⑦ The app has no privacy file · **fixed**
 
@@ -624,9 +631,10 @@ the store upload.
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 
 - **Stops the upload itself** (nothing goes to Apple until these close): the licence items ②
-  ③ ④ ⑥ and the artwork question ㊺. (The archive, the export and Apple's own check ⑪ are
-  fixed; only the upload command itself waits on these. The citations page ② is built and the
-  artwork's terms ⑤ are read; those rows closed.)
+  ③ ④ and the artwork question ㊺. (The archive, the export and Apple's own check ⑪ are
+  fixed; only the upload command itself waits on these. The citations page ② is built, the
+  artwork's terms ⑤ are read, and the store build leaves the recitation out ⑥; those rows
+  closed.)
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
   permissions file ⑨ (the upload checks both); the store's questions ㉚ and screenshots ㉛;
   sign-in ㉖ and deleting an account ㉗ (once sign-in ships, deletion must be in the app); the

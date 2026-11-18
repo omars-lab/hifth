@@ -33,6 +33,7 @@ import { AYAH_COUNTS } from "@hifth/core";
 import { verseAudioUrl, type KeptRecitation } from "./audio";
 import { requestPersistentStorage } from "./storage";
 import { savedKeepWhen } from "./keep-when";
+import { RECITATION } from "./recitation";
 
 /** Where kept recitations live. Never shared with the page caches. */
 export const KEEP_CACHE = "hifth-recitation-v1";
@@ -76,8 +77,9 @@ export interface KeepOptions {
   readonly signal?: AbortSignal;
 }
 
-/** Whether this browser can keep files at all. */
+/** Whether this browser can keep files at all. Never in a build without the recitation. */
 export function keepSupported(): boolean {
+  if (!RECITATION) return false;
   return typeof caches !== "undefined" && caches !== null;
 }
 

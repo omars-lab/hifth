@@ -68,10 +68,8 @@ check, listed after it, so the notes cannot drift from the app.
 > It shows the reader the whole report first (the app's version, the device, recent errors,
 > never their notes or marks), and only then opens their own mail app to send it.
 >
-> The one thing the app fetches from the internet is the sound of a verse being recited, from
-> verses.quran.com. It fetches a verse's sound when the verse is selected, so Play starts at
-> once; the reader can turn that off. With no connection the page still works and only the
-> sound is missing.
+> The app asks nothing of the internet. Every page, and everything a page needs, is inside the
+> app, so it works the same with no connection.
 >
 > The app has no account, no ads, no tracking and no analytics. Nothing the reader writes leaves
 > the device.
@@ -88,7 +86,7 @@ the test account for the reviewer.*
 | Answers the Apple Pencil | The shell hands double-tap and squeeze to the page (`native/Hifth/Web/Pencil.swift`), held by `native/HifthTests/PencilTests.swift`. |
 | Other apps can open it and get an answer | The `hifth` link scheme in `native/Hifth/Resources/Info-iOS.plist` and the actions in `native/Hifth/Route/XCallback.swift`, held by `XCallbackTests.swift`, `ShellCallbackTests.swift` and `RouteTests.swift`. |
 | Saves through the system's save window | `native/Hifth/Web/Downloads.swift`, held by `DownloadTests.swift`. |
-| The recitation is the only outside fetch, and it can be turned off | The same browser test counts exactly one outside request after a tap, for that verse's sound. The setting "The next verses in a recitation" (`apps/web/src/run-ahead.ts`) is in the info panel, and set to Off it stops the early fetch; the privacy policy names it by the app's own words, held by `apps/landing/lib/pages.test.mjs`. |
+| The app asks nothing of the internet | The store build leaves the recitation out (launch item ⑥): `make app-web FLAVOUR=public` builds without it, and the copy into the app refuses any file holding the recitation server's address (`native/Makefile.native`, tested by `scripts/native-golden-public.test.mjs`). With the switch off, no listen control, play setting or recitation credit shows (`apps/web/src/no-recitation.test.tsx`). The website still streams it (item ㊻). |
 | The store fields fit Apple's limits; the name, category, privacy and export answers agree with the app | `make app-store-listing` (`.claude/skills/understanding-processes/scripts/check-store-listing.mjs`), held by its test, which breaks one thing at a time in a made-up copy of this page. |
 | No account, no ads, no tracking, no analytics | The privacy file says the app tracks nobody and collects nothing, and the store build's release check refuses one that says otherwise (launch page item ⑦). |
 | The marks stay on the device | No code sends them, and the problem report leaves them out: a test writes made-up notes and marks to storage and checks the report has none of them (`apps/web/src/problem-report.test.ts`). |
@@ -99,8 +97,9 @@ the test account for the reviewer.*
 ## What would change these notes?
 
 - **Sign-in ships:** the account sentence names the test account and what it unlocks.
-- **The recitation is switched off in the store build** (one answer to item ⑥): the
-  recitation paragraph goes, and the notes say the app asks nothing of the internet.
+- **The recitation comes back to the store build** (route 2 for item ⑥, through Quran
+  Foundation): the notes then say again what the app fetches, from where, and how to turn the
+  early fetch off. (Switched off on 2026-11-17; these notes already say so.)
 - **The opening page or the look-alike button changes:** the "How to try it" steps name page 7,
   verse 40 and the "≈ 2" button, so they change with it. The test that walks those steps fails
   first.
@@ -186,7 +185,7 @@ Why that answer is true, case by case:
 | What leaves the device | Why it is not "collected" |
 |---|---|
 | Nothing the reader writes: notes, marks, bookmarks, progress | It stays in the app's own storage on the device. No code sends it. |
-| A verse's recitation is fetched from verses.quran.com | The app asks for a public sound file. That site is not code inside our app, so Apple's word "partner" does not cover it, and we keep nothing from the request. The privacy policy names the fetch and how to turn the early fetch off. |
+| Nothing is fetched while reading | The store build leaves the recitation out (launch item ⑥), so it makes no request to any site. If the recitation comes back, the fetch is of a public sound file from a site that is not code inside our app, so Apple's word "partner" would not cover it either. |
 | A problem report, if the reader sends one | The reader sees the whole report first and sends it from their own mail app, with their own address on it, each time they choose to. Apple lists exactly this kind of "customer service request", given by the reader and shown in full, as one that need not be declared. |
 
 The app's privacy file says the same (tracks nobody, collects nothing), and a test refuses a
@@ -211,8 +210,8 @@ read 2026-11-17.)
 
 ## Does the app use encryption Apple must be told about?
 
-No. The app's only encryption is the system's own secure connection when it fetches a
-recitation, which Apple exempts. Both the iPad and iPhone settings and the Mac settings say so
+No. The store build fetches nothing, and the only encryption it could ever use is the
+system's own secure connection, which Apple exempts. Both the iPad and iPhone settings and the Mac settings say so
 (`ITSAppUsesNonExemptEncryption` is off), so Apple's form does not ask at each upload. A test
 keeps both set.
 
@@ -225,9 +224,9 @@ keeps both set.
 - **Price** (assumed free; the app has nothing to buy) and the **copyright line**, which shows
   the owner's name on the store page.
 - **"Does the app show content made by others, and do you have the rights?"** Yes, it does: the
-  page artwork, the word-root data, the tajweed colours and the recitation. The answer "we have
-  the rights" waits on the two permission emails and the two terms readings (launch items ③ ④
-  ⑤ ⑥); it is the same lock as the upload.
+  page artwork, the word-root data and the tajweed colours (the store build leaves the
+  recitation out, item ⑥). The answer "we have the rights" waits on the two permission emails
+  and the artwork question (launch items ③ ④ ㊺); it is the same lock as the upload.
 - **The listing in Arabic.** Apple shows the listing in the reader's language. The Arabic
   version is drafted after the English one is settled, and read by a native reader before it
   goes in.
