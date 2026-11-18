@@ -76,11 +76,15 @@ with `make app-probe TARGET=mac EVALFILE=…` posting two asks by hand.
 | question | answers | where |
 |---|---|---|
 | `ping` | `pong` | `ShellModel.answer(question:)` |
-| `sign-in` | `signed-in`, or a reason: `cancelled`, `sign-in-off`, `not-set-up`, `busy`, `no-window`, `offline`, `not-available`, `bad-reply`, `refused:<why>` | `Account/SignIn.swift`, tests in `SignInTests.swift` |
+| `sign-in` | `signed-in`, or a reason: `cancelled`, `sign-in-off`, `not-set-up`, `busy`, `no-window`, `offline`, `not-available`, `bad-reply`, `bad-request`, `too-big`, `server-error`, `refused:<why>` | `Account/SignIn.swift`, tests in `SignInTests.swift` |
 
 `sign-in` asks hifth.app for a word, then shows Apple's sheet; the session stays in the app and
 never reaches the page. Off the store build it calls a server only when `HIFTH_SIGN_IN_URL`
-names one, so with nothing set it answers `sign-in-off` and shows no sheet.
+names one, so with nothing set it answers `sign-in-off` and shows no sheet. To try it against the
+laptop's stand-in server: start `wrangler pages dev` on `apps/landing/dist` with a local database
+(the build plan has the line), then `make app-probe TARGET=mac SIGN_IN_URL=http://127.0.0.1:<port>
+EVALFILE=…` posting `sign-in`. Switch off: `sign-in-off`. Switch on: `not-available`, because the
+everyday Mac build is not allowed Sign in with Apple; only a signed store build gets the sheet.
 
 `publicBase` goes the other way: a shared link built from `location.origin` inside the shell
 would read `hifth-app://app/…` and be dead for everyone it was sent to.

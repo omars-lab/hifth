@@ -96,5 +96,28 @@ Steps 10, 6 and 7 do not depend on each other, and none waits on the owner, so t
 - **In the real Mac app** (`make app-probe`, no server named), "sign-in" came back
   "sign-in-off" at once and no sheet was shown. The real sheet is first seen on the iPad
   in step 11.
+- **Against the laptop's stand-in server** (the real server code under `wrangler pages dev`
+  with a local database, and `make app-probe TARGET=mac SIGN_IN_URL=…`, added for this): with
+  sign-in switched off the server really answered 404 and the app said "sign-in-off"; with it
+  on, the app fetched a real word and then said "not-available", because the everyday Mac build
+  is not allowed Sign in with Apple. No sheet appeared either time. The command:
+  `pnpm dlx wrangler pages dev apps/landing/dist --cwd apps/landing --ip 127.0.0.1 --port 8799
+  --d1 ACCOUNTS=local-sign-in-check --binding SIGN_IN=on --binding APPLE_APP_IDS=app.example.hifth
+  --persist-to <scratch folder>`.
+- **The store-build check was missing three launch settings** (the probe's wait, the picture's
+  wait, the Mac window size). A test now matches the check's list against every name the app's
+  code reads, so a new setting cannot be left off it.
 - **Naming the new way out in the privacy check moves to step 16**, with the button that says
   what leaves the device. Nothing reaches a reader before that button exists.
+
+### Still open for step 11: how the iPad trial asks for sign-in
+
+A tapped app has no launch setting, and the page has no sign-in button until step 16. Two ways,
+to settle when step 11 starts:
+
+- **A non-store iPad build launched by the laptop** with `SIGN_IN_URL` pointing at the laptop's
+  stand-in on the home network (`--ip 0.0.0.0`). Needs nothing from the owner, but Apple's keys
+  are refused on the laptop (`docs/issues/apple-keys-refuse-local-runtime.md`), so the note is
+  sent but cannot be checked there.
+- **The store-signed build against hifth.app**, which needs step 9's real database first, and
+  that needs the owner's yes. This is the first time a real note is checked end to end.

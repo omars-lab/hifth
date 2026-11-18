@@ -83,6 +83,17 @@ test("the reads are really found, so a clean result is not an empty search", () 
   assert.ok(appReads.some((r) => r.text.includes("CommandLine.arguments")), "no read of the launch arguments was found");
 });
 
+test("every launch setting long enough to survive the build is on the archive check's list", async () => {
+  // A new setting added to the app but not to the list would pass the archive
+  // check unlooked-for. Names of 15 bytes or less are packed into the machine
+  // code, so only this file's reading of the code can hold those.
+  const { SIGNS, STORE_SIGNS } = await import("../.claude/skills/walk-app/scripts/release-check.mjs");
+  const listed = new Set([...SIGNS, ...STORE_SIGNS].map(([, text]) => text));
+  const read = new Set(appReads.flatMap((r) => [...r.text.matchAll(/"(HIFTH_[A-Z_]+)"/g)].map((m) => m[1])));
+  const missing = [...read].filter((name) => Buffer.byteLength(name) > 15 && !listed.has(name)).sort();
+  assert.deepEqual(missing, [], `the archive check does not look for these:\n${missing.join("\n")}`);
+});
+
 test("a read outside any condition is caught, and one in a comment is not", () => {
   const reads = launchReads(['// with "HIFTH_X" set', 'let x = ProcessInfo.processInfo.environment["HIFTH_X"]'].join("\n"));
   assert.deepEqual(

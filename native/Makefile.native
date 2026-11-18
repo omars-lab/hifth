@@ -276,7 +276,7 @@ app-store-shots: app-golden-public ## The store's screenshots of the public buil
 	done
 	@node $(STORE_SHOTS_JS) check $(STORE_SHOTS)
 
-app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1 [TURNS=12,24]] [STEPS=/abs/steps.json, iPad only, either way up] [PROBE_SHOT=file.png]
+app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1 [TURNS=12,24]] [STEPS=/abs/steps.json, iPad only, either way up] [PROBE_SHOT=file.png] [SIGN_IN_URL=http://127.0.0.1:8788, the sign-in server; not the sideways or steps runs]
 ifneq ($(TURNS),)
 ifneq ($(TARGET)$(SIDEWAYS),ipad1)
 	@echo "  ✗ TURNS needs TARGET=ipad SIDEWAYS=1: only the sideways UI test can turn the iPad"; exit 1
@@ -321,6 +321,7 @@ else
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
 	SIMCTL_CHILD_HIFTH_PROBE=1 SIMCTL_CHILD_HIFTH_ROUTE='$(ROUTE)' SIMCTL_CHILD_HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
 	  SIMCTL_CHILD_HIFTH_PROBE_DELAY_MS=$(DELAY_MS) SIMCTL_CHILD_HIFTH_PROBE_SHOT='$(PROBE_SHOT_AT)' \
+	  $(if $(SIGN_IN_URL),SIMCTL_CHILD_HIFTH_SIGN_IN_URL='$(SIGN_IN_URL)') \
 	  xcrun simctl launch --console-pty --terminate-running-process $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS) \
 	  | grep '^probe {' | sed 's/^probe //' | python3 -m json.tool
 	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
@@ -329,7 +330,8 @@ else
 	$(MAKE) app-build-mac
 	@: > $(MAC_LOG)
 	$(MAC_OPEN) --env HIFTH_PROBE=1 --env HIFTH_ROUTE='$(ROUTE)' --env HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
-	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) --env HIFTH_PROBE_SHOT='$(MAC_PROBE_SHOT_AT)' $(MAC_APP) $(MAC_ARGS)
+	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) --env HIFTH_PROBE_SHOT='$(MAC_PROBE_SHOT_AT)' \
+	  $(if $(SIGN_IN_URL),--env HIFTH_SIGN_IN_URL='$(SIGN_IN_URL)') $(MAC_APP) $(MAC_ARGS)
 	@grep '^probe {' $(MAC_LOG) | sed 's/^probe //' | python3 -m json.tool
 	$(if $(PROBE_SHOT),$(call mac_copy_out,$(PROBE_SHOT)))
 	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')

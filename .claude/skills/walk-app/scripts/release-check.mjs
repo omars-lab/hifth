@@ -208,6 +208,9 @@ function signedPermissions(app, file) {
  * them. Each was seen in a store archive made before they were left out
  * (2026-11-17). The two that point the app at another server (the launch file's
  * and sign-in's) were left out from the start and are listed so they stay out.
+ * The two waits and the Mac window size were left out with the rest but only
+ * listed on 2026-11-18, when a test began matching this list against the
+ * names the app's code reads, so a new setting cannot be missed again.
  * The route and language settings are read in the same place
  * and left out with them, but their names are too short to find, so a test
  * of the app's own code holds them instead (scripts/native-store-launch-settings.test.mjs).
@@ -221,7 +224,13 @@ export const STORE_SIGNS = [
   ["the launch setting that forces the light or dark look", "HIFTH_APPEARANCE", "string"],
   ["the launch setting that points the launch file at another server", "HIFTH_STATUS_URL", "string"],
   ["the launch setting that points sign-in at another server", "HIFTH_SIGN_IN_URL", "string"],
+  ["the launch setting that waits before the probe asks", "HIFTH_PROBE_DELAY_MS", "string"],
+  ["the launch setting that waits before the picture", "HIFTH_SNAPSHOT_DELAY_MS", "string"],
+  ["the launch setting that sizes the Mac window for store pictures", "HIFTH_WINDOW_SIZE", "string", "mac"],
 ];
+
+/** Is this sign looked for in this kind of app? A fourth column names the one platform it belongs to. */
+const onPlatform = (mac) => ([, , , only]) => !only || only === (mac ? "mac" : "ipad");
 
 const log = (ev, fields = {}) =>
   console.log(
@@ -314,8 +323,8 @@ export function check(debug, release, { flavour, store = false, exported = false
   for (const key of mac ? [] : KEYS) {
     if (debugKeys[key] !== true) problems.push(`the check is out of date: the debug build no longer has ${key}`);
   }
-  const forThisApp = mac ? SIGNS.filter(([, , , only]) => only !== "ipad") : SIGNS;
-  const signs = store ? [...forThisApp, ...STORE_SIGNS] : forThisApp;
+  const forThisApp = SIGNS.filter(onPlatform(mac));
+  const signs = store ? [...forThisApp, ...STORE_SIGNS.filter(onPlatform(mac))] : forThisApp;
   const debugSigns = signsIn(code(debug), signs);
   for (const [what, text] of signs) {
     if (!debugSigns.some(([, t]) => t === text)) {
