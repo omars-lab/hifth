@@ -108,6 +108,18 @@ struct InviteTests {
         #expect(invites.kept == nil)
     }
 
+    @Test("a mistyped code does not cost the tester the good one already kept")
+    func mistypedCodeKeepsTheGoodOne() async {
+        let invites = FakeInvites("0a1b-2c3d-4e5f-6g7h")
+        let (model, ran, seen) = model(invites: invites, wordGiven: false, result: .failure(.inviteNeeded))
+        model.receive(.ask(id: "i-10", name: "sign-in", text: "zzzz-zzzz-zzzz-zzzz"))
+        await model.lastAsk?.value
+        #expect(seen.invites == ["zzzz-zzzz-zzzz-zzzz"])
+        #expect(invites.kept == "0a1b-2c3d-4e5f-6g7h")
+        #expect(invites.clears == 0)
+        #expect(answer(ran, "i-10")?["error"] as? String == "invite-needed")
+    }
+
     @Test("no connection, a busy server or any other failure leaves the kept code alone", arguments: [
         SignIn.Failure.offline, SignIn.Failure.tooMany, SignIn.Failure("server-error"), SignIn.Failure.off,
     ])

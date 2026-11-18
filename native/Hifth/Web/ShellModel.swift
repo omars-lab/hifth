@@ -566,15 +566,15 @@ final class ShellModel {
             // The launch check ends first, so it cannot drop the session this is about to save.
             await checkSessionOnce().value
             // A code just typed wins over the kept one. It is kept once hifth.app has taken
-            // it, and the kept one is dropped only when hifth.app says it is no longer good:
-            // never for no connection or any other failure.
+            // it, and the kept one is dropped only when it was the one sent and hifth.app says
+            // it is no longer good: never for a mistyped code, no connection or any other failure.
             let typed = text?.trimmingCharacters(in: .whitespacesAndNewlines)
             let fresh = typed?.isEmpty == false ? typed : nil
             let invites = inviteStore
             let result = await (signIn ?? signInWithApple)(fresh ?? invites?.load()) {
                 if let fresh { invites?.save(fresh) }
             }
-            if result == .failure(.inviteNeeded) { invites?.clear() }
+            if fresh == nil, result == .failure(.inviteNeeded) { invites?.clear() }
             switch result {
             case .success(let session):
                 self.session = session

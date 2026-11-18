@@ -62,9 +62,9 @@ handler, `webkit.messageHandlers.hifth`:
 | `ready` | `{type:"ready"}` | marks ready; applies a queued route; runs the probe or snapshot if asked |
 | `route` | `{type:"route", hash}` | mirrors it into `currentHash` → window title and the `hifth.route` label |
 | `share` | `{type:"share", url, title, text}` | shows the platform share sheet (its own, the same on every platform; on the Mac on 2026-11-18 the page reported a secure context and a `navigator.share`, so do not trust older notes that say it is missing) |
-| `ask` | `{type:"ask", id, name}` | answers the question, always, a no included, by running `ShellModel.answerScript` with `id` and `answer` bound |
+| `ask` | `{type:"ask", id, name, text?}` (`text` is one short line, cut at 200 letters) | answers the question, always, a no included, by running `ShellModel.answerScript` with `id` and `answer` bound |
 
-**A question the page waits on** (`askApp(name, {waitMs?})` in `native-bridge.ts`). The page
+**A question the page waits on** (`askApp(name, {waitMs?, text?})` in `native-bridge.ts`). The page
 puts `window.__HIFTH_ANSWER__(id, answer)` in place, then posts `ask`. The shell answers with
 `{ok:true, value}` or `{ok:false, error}`; a name it does not know gets `unknown-question`, so
 the page never waits for ever. The id ties the answer to its question, so answers may come back
@@ -76,7 +76,7 @@ with `make app-probe TARGET=mac EVALFILE=…` posting two asks by hand.
 | question | answers | where |
 |---|---|---|
 | `ping` | `pong` | `ShellModel.answer(question:)` |
-| `sign-in` | `signed-in`, or a reason: `cancelled`, `sign-in-off`, `not-set-up`, `busy`, `no-window`, `offline`, `not-available`, `bad-reply`, `bad-request`, `too-big`, `server-error`, `refused:<why>` | `Account/SignIn.swift`, tests in `SignInTests.swift` |
+| `sign-in` | `signed-in`, or a reason: `cancelled`, `sign-in-off`, `not-set-up`, `busy`, `no-window`, `offline`, `not-available`, `bad-reply`, `bad-request`, `too-big`, `server-error`, `refused:<why>`, `too-many` (try again shortly), `invite-needed` (ask the tester for a code, and send it as `text`). With `text`, the app sends it as the tester's invite code and keeps it on the device once hifth.app takes it; the page cannot read a kept code, so ask with no `text` first and show the code box only on `invite-needed` | `Account/SignIn.swift`, `Account/InviteStore.swift`, tests in `SignInTests.swift` and `InviteTests.swift` |
 
 `sign-in` asks hifth.app for a word, then shows Apple's sheet; the session stays in the app and
 never reaches the page. Off the store build it calls a server only when `HIFTH_SIGN_IN_URL`
