@@ -10,11 +10,11 @@ tell us something is wrong". The button is built; this page says what it does an
 - **What it does:** shows the reader the whole report first, says where it goes, and only then
   offers to open their own mail app with it filled in. They can also copy it instead.
 - **What it holds:** which app and version, the build it came from, the device, the screen size,
-  the language, the time, and the last five errors the page noticed.
+  the language, the time, the last five errors the page noticed, and the names of the last ten
+  steps the reader took, such as "turned to another page (12 times)".
 - **What it never holds:** the reader's notes, marks or bookmarks, a list of the pages they
-  read, or anything they typed.
+  read, which page or verse a step was on, or anything they typed.
 - **Where it goes:** hello@hifth.app, and only when the reader presses send in their mail app.
-- **Not yet in it:** "the last few steps", which waits on the app keeping its own log (item ⑲).
 
 ![The report in the info panel on a phone: the explanation, the address, the full report, and
 the buttons to open it in a mail app, copy it or close it](report-a-problem/info-panel-phone.png)
@@ -75,11 +75,29 @@ languages.
 Mail was the owner's choice on 2026-11-15, with Apple's crash reports beside it. If a reader has
 no mail app, **Copy** puts the report on the clipboard so they can paste it anywhere.
 
+## What are "the last steps", and why only their names?
+
+Added 2026-11-17 for item ⑲. An error on its own often does not say how the reader got there.
+"Chose several verses, then followed a link to another verse, then the page went blank" does.
+
+The app notes each step by a fixed name from a short list: opened the app, opened a link,
+turned to another page, chose a verse, chose several verses, let go of the verse, followed a
+link to another verse, went back along the trail, changed the colouring, changed the desk. The
+same step twice in a row is one line with a count, so thirty page turns are one line, not thirty.
+The report shows the last ten, oldest first, each with the time.
+
+A step never says which page or verse it was on. A name with a page number in it would be a list
+of the pages read by another route, which is exactly what the report promises not to hold. A
+test checks no step name has a digit in it, and another checks the page numbers of the pages
+turned to are nowhere in the report.
+
+The steps live only in the page's memory. Nothing writes them to the device, so closing the app
+forgets them, and they are never sent anywhere except inside a report the reader chose to send.
+
 ## What is not settled here
 
-- **The last few steps.** The launch page asks for "the last few steps by name". The page does
-  not keep such a log yet; that is item ⑲. When it does, the report gains a short list of step
-  names (never page numbers or text), and this page and its picture are updated.
+- **The picture** above was taken before the steps were added; the next time it is rebuilt it
+  shows them.
 - **Apple's crash reports** from readers' devices are item ⑰. When the apps keep them, the report
   can offer to include the latest one, shown in full like the rest.
 - **Reading what arrives.** A command that turns each mail into a backlog row is later work in
@@ -89,7 +107,10 @@ no mail app, **Copy** puts the report on the clipboard so they can paste it anyw
 <summary>Where it lives in the code, and the tests that hold it</summary>
 
 - The report is built in `apps/web/src/problem-report.ts`; the errors it lists come from
-  `apps/web/src/fault-log.ts`.
+  `apps/web/src/fault-log.ts`, and the steps from `apps/web/src/step-log.ts`, which the hash
+  router (`useHashRouter.ts`) feeds each time the view changes.
+- The apps' own lines go to the system log through `native/Hifth/App/AppLog.swift`, each one
+  carrying the version and the build's commit (tests: `native/HifthTests/AppLogTests.swift`).
 - The panel is `apps/web/src/components/ReportProblem.tsx`, used by the info panel
   (`Colophon.tsx`) and the error card (`PageStopped.tsx`).
 - The apps pass their version to the page through the shell's bridge (`native/Hifth/Web/Bridge.swift`).

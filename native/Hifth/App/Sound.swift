@@ -19,18 +19,18 @@ enum Sound {
     static let category = "AVAudioSessionCategoryPlayback"
     static let mode = "AVAudioSessionModeSpokenAudio"
 
-    /// Once, at launch. A failure is printed and the app carries on: the worst
-    /// case is the old behaviour, silent with the switch on.
+    /// Once, at launch. A failure goes to the app's log and the app carries
+    /// on: the worst case is the old behaviour, silent with the switch on.
     static func setUp() {
         #if os(iOS)
         let session = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(AVAudioSession.Category(rawValue: category), mode: AVAudioSession.Mode(rawValue: mode))
         } catch {
-            print("ev=sound_setup_failed msg=\"\(error.localizedDescription)\"")
+            AppLog.problem("sound_setup_failed", message: error.localizedDescription)
             return
         }
-        print("ev=sound category=\(session.category.rawValue) mode=\(session.mode.rawValue)")
+        AppLog.note("sound", ["category": session.category.rawValue, "mode": session.mode.rawValue])
         #endif
     }
 }

@@ -306,12 +306,22 @@ open their own mail app with it filled in, or to copy it. The report names the a
 the build, the device, the screen, the language, the time and the last five errors. It never
 holds their notes, marks or a list of the pages they read; a browser test puts a made-up note on
 the device and checks it is not in the report or the mail. The [design page](report-a-problem.md)
-has the picture and the reasons. "The last few steps by name" waits on ⑲, the app's own log.
+has the picture and the reasons. Since 2026-11-17 it also lists the last steps by name (⑲).
 
-### ⑲ The shell writes its log with bare prints, and the web part keeps none · **open**
+### ⑲ The shell writes its log with bare prints, and the web part keeps none · **fixed**
 
 *What would answer it:* the shell writes to the system log, the web part keeps a short log in
 memory for the report, and each line carries the app version and the build's commit.
+
+*Done 2026-11-17:* the page keeps the reader's last twenty steps in memory, by name only ("turned
+to another page", "chose a verse", "opened a link"), with repeats folded into one line and a
+count. The report shows the last ten. No step says which page or verse it was on; a test checks
+the pages turned to never reach the report. The apps write their own lines to the system log,
+where Console on a Mac and a device's shared diagnostics can read them, and every line starts
+with the event, the version and the build's commit. The first line of each run says the app
+opened. The walk and probe tools still print, on purpose: they are only in test builds and the
+laptop's scripts read what they print. The [design page](report-a-problem.md) says what a step
+is and why it carries no page.
 
 ### ⑳ There is no support page · **fixed**
 

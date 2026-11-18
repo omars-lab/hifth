@@ -57,7 +57,8 @@ final class Bridge: NSObject, WKScriptMessageHandler {
 
     /// The version as a reader would quote it: `0.1.0 (7)`, the version and the
     /// build number Apple counts, from the app's Info.plist.
-    static func versionLine(info: [String: Any]) -> String {
+    /// Pure, so the app's log can use it from any thread.
+    nonisolated static func versionLine(info: [String: Any]) -> String {
         let version = info["CFBundleShortVersionString"] as? String ?? ""
         let build = info["CFBundleVersion"] as? String ?? ""
         if version.isEmpty { return "" }

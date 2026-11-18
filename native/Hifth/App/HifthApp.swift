@@ -5,6 +5,13 @@ struct HifthApp: App {
     @State private var model = ShellModel()
 
     init() {
+        // The first line of every run, so the lines after it can be matched to
+        // the version and build that wrote them.
+        #if os(macOS)
+        AppLog.note("launch", ["platform": "macos"])
+        #else
+        AppLog.note("launch", ["platform": "ios"])
+        #endif
         Sound.setUp()
     }
 
