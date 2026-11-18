@@ -4123,7 +4123,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "Two things owed before sign-in is switched on for anyone (found by step 13, 2026-11-18). The owner registers hifth.app's notice address on Apple's developer site (the app's identifier, Sign in with Apple, Edit), so Apple can say when a reader has left; the address is in the deploy-site skill. And a one-line yes for the agent to add the cancel-tickets table to the real accounts database. Without both, a reader's link with Apple can never be cut from our side."
+      "note": "Owed before sign-in is switched on for anyone. Done 2026-11-18 with the owner's yes: the cancel-tickets table and the table that counts sign-ins started are in the real accounts database, both empty. Left, both the owner's: register hifth.app's notice address on Apple's developer site (the app's identifier, Sign in with Apple, Edit), so Apple can say when a reader has left; and, since the owner chose invite codes on 2026-11-18, run make hifth-app-invites in their own terminal, hand out the codes, and set the line it prints as SIGN_IN_INVITES on the site. Both are in the deploy-site skill, step 5."
     },
     {
       "id": "sign-in-ticket-after-key-swap",
@@ -4167,7 +4167,7 @@
       "status": "open",
       "severity": "question",
       "owner": "user",
-      "note": "Five checks only real devices can answer, in one sitting with the iPad after the first real sign-in (step 11): still signed in after a quit, a restart and some days; signed out at the next launch after removing Hifth under Sign in with Apple in Settings; still signed in when opened in airplane mode; what shows after deleting and reinstalling the app; whether the store-signed Mac app can save its sign-in. Step 15's code is tested only with stand-ins. Each answer becomes a test where it can."
+      "note": "Six checks only real devices can answer, in one sitting with the iPad after the first real sign-in (step 11): still signed in after a quit, a restart and some days; signed out at the next launch after removing Hifth under Sign in with Apple in Settings; still signed in when opened in airplane mode; what shows after deleting and reinstalling the app; whether the store-signed Mac app can save its sign-in; whether a typed invite code is still there after signing out and after a restart. Step 15's code is tested only with stand-ins. Each answer becomes a test where it can."
     },
     {
       "id": "sign-in-limit-per-caller",
@@ -4175,10 +4175,10 @@
         "file": "docs/design/sign-in.md",
         "item": "⑮"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "risk",
       "owner": "user",
-      "note": "Since step 17 (2026-11-18) the server starts at most 60 sign-ins in any ten minutes, for everyone together, to keep the free database's 100,000 writes a day safe. Nothing about a caller is kept, so one caller asking once every ten seconds takes all 60 and keeps new sign-ins out; signed-in readers are not touched. Cloudflare's one free limit per caller cannot close this (its shortest setting still allows the whole shared allowance) but is worth adding against floods: deploy-site skill, step 5. The choice is the owner's: check the tester invite code before a sign-in is started (recommended, rides on step 18), pay for the bigger database plan, have the app prove it is the real app (not looked into yet), or live with it. The server half of the invite check is built and off (2026-11-18): it comes on when the owner sets the codes' scrambled copies on the site (make hifth-app-invites prints them). Separately, every ask runs our code, and the free plan runs it 100,000 times a day; past that Cloudflare answers with its own error until midnight UTC, which the free limit per caller on the sign-in start address keeps one caller well short of."
+      "note": "Settled by the owner 2026-11-18: the invite code is checked first (option A), for as long as sign-in is for invited testers; it comes back before sign-in opens to everyone. The app half was built the same day. The owner's step is in the row for ⑩. As it stood: Since step 17 (2026-11-18) the server starts at most 60 sign-ins in any ten minutes, for everyone together, to keep the free database's 100,000 writes a day safe. Nothing about a caller is kept, so one caller asking once every ten seconds takes all 60 and keeps new sign-ins out; signed-in readers are not touched. Cloudflare's one free limit per caller cannot close this (its shortest setting still allows the whole shared allowance) but is worth adding against floods: deploy-site skill, step 5. The choice is the owner's: check the tester invite code before a sign-in is started (recommended, rides on step 18), pay for the bigger database plan, have the app prove it is the real app (not looked into yet), or live with it. The server half of the invite check is built and off (2026-11-18): it comes on when the owner sets the codes' scrambled copies on the site (make hifth-app-invites prints them). Separately, every ask runs our code, and the free plan runs it 100,000 times a day; past that Cloudflare answers with its own error until midnight UTC, which the free limit per caller on the sign-in start address keeps one caller well short of."
     },
     {
       "id": "notify-list-data-door",

@@ -181,6 +181,23 @@ Built by a helper agent on this branch; the app's half is still to do.
   function under `wrangler pages dev --d1`, limit 2, four asks): it reported 1, 1, 0, 0 changes
   and kept 2. So a refused ask is told apart on Cloudflare the same way as in the tests.
 
+## What the owner chose, and the app half of steps 13, 17 and 18 (2026-11-18)
+
+- The owner chose the invite code first (sign-in page ⑮, option A), said yes to the two new
+  tables (both now in the real accounts database, empty), and to keeping the six changed
+  comment files in the worktree as they are, out of the pull request.
+- The app now sends Apple's one-time code with the sign-in, so a cancel ticket can be kept.
+- The app tells the page "too-many" for a 429 whatever its body (Cloudflare's own limit answers
+  with a page, not JSON) and "invite-needed" only for our own 403; any other 403 stays
+  "server-error".
+- The page's question to the app can carry one short line (`askApp("sign-in", { text })`). The
+  app sends it as the invite code as typed (the server tidies it; the rule is not copied into
+  Swift), keeps it in its own Keychain item once the server hands out a word, and drops the kept
+  one only on "invite-needed". Assumption made without asking: the tester types the code on the
+  page, in step 16's sign-in screen, not in a native prompt.
+- Still to build: step 16's screen, which is the first thing on the page to ask "sign-in" or
+  "signed-in" at all.
+
 ## What step 18's server half showed (2026-11-18)
 
 - **The invite check is on the word address only, before the database** (`uninvited` in

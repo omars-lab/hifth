@@ -136,7 +136,7 @@ the first real check of a note is the live site after the owner's upload.
      sign-in addresses answer "not on yet", whatever else is set. Two things first, or readers'
      links with Apple can never be cut and no sign-in can start (sign-in steps 13, 14 and 17):
      - every file in `apps/landing/migrations/` is in the real accounts database, put in with
-       the owner's yes. `0002_apple_tickets.sql` holds Apple's cancel tickets;
+       the owner's yes (0001 to 0003 are in as of 2026-11-18; a later file needs a new yes). `0002_apple_tickets.sql` holds Apple's cancel tickets;
        `0003_sign_in_counts.sql` holds the count that limits how many sign-ins can be started,
        and without it every sign-in fails at its first step;
      - the owner has registered `https://hifth.app/api/sign-in/apple-notice` on Apple's developer

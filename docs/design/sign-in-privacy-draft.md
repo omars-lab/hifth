@@ -51,7 +51,7 @@ This is what the code does, which is narrower than what the plan first imagined.
 | The sign-in key, per device | scrambled copy only | With when it started and when it ends. It ends after 60 days, and signing out ends it on that device only. |
 | The one-off value for a sign-in | scrambled copy only | Good once, for ten minutes, and not tied to any reader. |
 | How many sign-ins were started in each ten minutes | yes, a number only | One count for everyone together, to limit how many can be started (step 17). Nothing about who asked, and counts for past stretches are deleted. |
-| A tester's invite code | **no** | While sign-in is for invited testers (step 18), the code is checked when a sign-in starts and is not kept, tied to an account or logged. The server holds only scrambled copies of the codes it accepts. |
+| A tester's invite code | **no** | While sign-in is for invited testers (step 18), the code is checked when a sign-in starts and is not kept, tied to an account or logged. The server holds only scrambled copies of the codes it accepts. The app keeps the code the tester typed on that device only, in Apple's locked store, so it is typed once; it is not synced or backed up to another device. |
 | Apple's cancel ticket | yes, locked | At most one per account, with which of our apps the reader signed in to and when it was kept. The lock's key is not in the database. Kept only if the app sends Apple's one-time code and the key file is set; sign-in works without it. |
 | A copy of the reader's marks | not yet | Step 21, behind its own button. |
 | Which device, which internet address | **no** | The sign-in code writes no log and keeps no device name or address. |
