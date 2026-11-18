@@ -864,6 +864,9 @@ hifth-app-list-count: ## How many people are on hifth.app's Mac-app list, and ho
 hifth-app-apple-key: ## Are the Sign in with Apple key, its id and the team id saved on hifth.app's Cloudflare project? Prints set or not set only. ARGS="--save <AuthKey_<id>.p8>" (owner, own terminal) sends them
 	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/apple-sign-in-key.mjs $(ARGS)
 
+hifth-app-ready: ## Is hifth.app ready for its first upload? One line per thing it needs (project, domain, each site setting, spam-check widget, main's front page), names and yes or no only
+	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/first-upload.mjs
+
 hifth-app-turnstile: ## Does hifth.app's spam-check widget exist? Prints its public site key. ARGS=--make makes it and saves its secret; never prints the secret or the token
 	@python3 .claude/skills/deploy-site/scripts/turnstile-widget.py $(ARGS)
 
