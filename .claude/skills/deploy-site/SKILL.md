@@ -102,7 +102,11 @@ Supabase: the table and the three database functions the form calls are in
 copied into the release folder. `wrangler.toml` names one database, sign-in's accounts
 (binding `ACCOUNTS`, made 2026-11-18); the check refuses any other, so the list can never move
 back onto Cloudflare by accident. `wrangler pages dev` ignores that line, so a laptop trial of
-sign-in passes `--d1 ACCOUNTS=<local name>` and never touches the real one.
+sign-in passes `--d1 ACCOUNTS=<local name>` and never touches the real one. On the laptop, Apple
+also refuses to hand its keys to that server, so a real note from Apple's sheet is refused there
+as "keys-unreachable" even when nothing is wrong; that is the laptop, not the code
+(`docs/issues/apple-keys-refuse-local-runtime.md`). Laptop tests use made-up keys instead, and
+the first real check of a note is the live site after the owner's upload.
 
 - **Once, by the owner** (it needs the database password; the `manage-database` skill's login
   check first):
@@ -112,6 +116,14 @@ sign-in passes `--d1 ACCOUNTS=<local name>` and never touches the real one.
      site key) and `TURNSTILE_SECRET`. Also the sender's settings, once the decision
      `notify-list-sender` is made.
   3. Add `SUPABASE_DB_URL` to the saved keys, so `make hifth-app-list-count` can count.
+  4. **The Sign in with Apple key** (sign-in step 12): make it on Apple's site as the `app-setup`
+     skill's step ⑥ says, keep the file in `~/.appstoreconnect/sign-in-with-apple/`, then in
+     your own terminal `make hifth-app-apple-key ARGS="--save <that file>"`. It saves three
+     secrets, `APPLE_SIGN_IN_KEY`, `APPLE_SIGN_IN_KEY_ID` and `APPLE_TEAM_ID`, and prints none of
+     them. Claude checks afterwards with `make hifth-app-apple-key`, which prints set or not set.
+  5. **Switch sign-in on**, after the first upload: `SIGN_IN=on` and
+     `APPLE_APP_IDS=com.bytesofpurpose.hifth` on the project (neither is secret). Until then the
+     sign-in addresses answer "not on yet", whatever else is set.
 - **To try the form locally:** `supabase start` (in a scratch copy if the repo's own is busy, named
   by `SUPABASE_WORKDIR`), then `make hifth-app-serve`, and open http://127.0.0.1:7124/ (press C to
   leave a comment on the page). It reads the local list's address and key from `supabase status`
@@ -184,6 +196,7 @@ page leaves out. A release missing either copy is refused. To change a source, c
 | `apps/web/e2e/landing-shots.spec.ts` (a Playwright file, not a script here) | Builds the plain public app and photographs it for the front page: the laptop, phone and iPad-with-pen views and one picture per feature, into `apps/landing/shots/` as JPEGs. Each picture checks the screen shows what it is meant to before it is taken. Never from the pitch build | After a change to how the app looks that the front page's pictures show; before a release that changes the front page | `make landing-shots` |
 | `scripts/list-count.mjs` | Asks the Supabase database how many people are on the Mac-app list and how many still have to confirm, and prints those two numbers only; an answer holding anything else is refused. The password goes in the environment, never on the command line | When someone asks how many signed up; after a sign-up test on the live site | `make hifth-app-list-count` (`ARGS=--local` for the copy on this laptop) |
 | `scripts/turnstile-widget.py` | Looks for the spam check's widget for hifth.app on the new Cloudflare account and prints its public site key. With `--make` it makes the widget if there is none, then saves its secret as `TURNSTILE_SECRET` through `scripts/env/env-set.sh`. The token, account ID and secret are never printed. The token needs the Account, Turnstile, Edit permission; without it Cloudflare answers "Authentication error" (seen 2026-11-14) | Once, before the first release; to read the site key again | `make hifth-app-turnstile` (`ARGS=--make` to make it) |
+| `scripts/apple-sign-in-key.mjs` | With no word, asks Cloudflare whether the three Sign in with Apple settings are saved on the project and prints "set" or "not set" for each, never a value. With `--save <AuthKey_<id>.p8>` (the owner, in their own terminal) it first checks the file is named the way Apple names it, is a P-256 private key, is readable by its owner only and sits outside the repo, then sends the key, its id (from the file name) and the team id (`scripts/lib/signing-team.mjs`) as secrets, and checks. Refuses unless the saved token and account id are loaded. The first check, 2026-11-18, said not set three times | Once, when the owner has made the key (app-setup step ⑥); after any key change; when sign-in's account deletion says it cannot reach Apple | `make hifth-app-apple-key` (`ARGS="--save <file>"`, owner only); tests: `node --test .claude/skills/deploy-site/scripts/apple-sign-in-key.test.mjs` |
 | `supabase/tests/notify_list.test.sql` (database checks, not a script here) | Proves the public key alone cannot read the list or the keys, the site key is needed, a repeat sign-up answers the same, only the latest confirm code works, and leaving removes the row | After changing the list's database part | `make notify-db-test` (`supabase start` first) |
 | `scripts/shipped.mjs` | The lists of what may and may not go up, and the folder check | Changing what the site may hold | imported; tests: `node --test .claude/skills/deploy-site/scripts/shipped.test.mjs` |
 | `scripts/app-links.mjs` | Writes and checks the file at `/.well-known/apple-app-site-association` that tells Apple which hifth.app links open the iPad and iPhone app (launch item ⑨). The release fills in the Apple team's id from this laptop's signing setup (`scripts/lib/signing-team.mjs`, shared with the store build check), so the id is never in the repo, and no message ever prints it. It claims only the reader's addresses with a mus'haf place, the same ones the app takes (`Route.swift`). With no signing team, a release is refused and `check --no-build` leaves the file out with one line. `_headers` serves it as JSON, never cached; `verify` checks it answers with no redirect, since Apple follows none | Changing which links open the app, or adding a mus'haf the app ships | imported by `check`, `publish` and `verify`; tests: `node --test .claude/skills/deploy-site/scripts/app-links.test.mjs` |

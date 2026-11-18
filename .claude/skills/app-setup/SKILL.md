@@ -37,6 +37,7 @@ flowchart LR
   A --> R[③ App Store Connect record]
   A --> C[④ iCloud container]
   R --> K[⑤ Upload key]
+  A --> SK[⑥ Sign in with Apple key<br/>saved on hifth.app]
   A --> S[agent: sign with the paid team,<br/>install on your iPhone, iPad, Mac]
 ```
 
@@ -47,6 +48,7 @@ flowchart LR
 | ③ App Store Connect record | you | **Apps → + → New App**. Platforms **iOS and macOS** both ticked (one record for iPhone, iPad and Mac, since the Mac build uses the same ID), name "Hifth - The Huffaz Toolkit" (the name is 30 characters at most and must not be taken by another app), language English, bundle ID `com.bytesofpurpose.hifth` (it appears in the list once ② is done), SKU `hifth`, access Full. No store listing is needed for TestFlight. | <https://appstoreconnect.apple.com/apps> | `testflight-register-app` |
 | ④ iCloud container | agent, or you | **Identifiers → +** → *iCloud Containers*, ID `iCloud.com.bytesofpurpose.hifth`; then on the app ID from ②, *iCloud → Configure* and tick it. Xcode can also make it the first time the agent signs with the team. | <https://developer.apple.com/account/resources/identifiers/list/cloudContainer> | `icloud-sync-try-signed` |
 | ⑤ Upload key | you | **Users and Access → Integrations → App Store Connect API → +**, access *App Manager*. Download the `.p8` once (Apple never offers it again) and move it to `~/.appstoreconnect/private_keys/AuthKey_<key ID>.p8`, readable only by you (`chmod 600`). Apple's upload tools look for it there by name. **Never in the repo or a chat.** Save the key ID and the issuer ID (neither is secret) in the encrypted settings: `make env-set NAME=ASC_KEY_ID`, then `NAME=ASC_ISSUER_ID`. Access *App Manager* alone: it cannot answer reviews, and a key's access can't be changed once made. Click by click: the `understanding-processes` skill's `app-release.md`; `make app-release-setup` checks it. | <https://appstoreconnect.apple.com/access/integrations/api> | `testflight-upload-key` |
+| ⑥ Sign in with Apple key | you | A different key from ⑤: hifth.app's server signs with it to end a reader's link with Apple when they delete their account, which Apple's review requires. First `make app-profile-allows` must say yes for each profile (it did on 2026-11-18, so the app's ID already allows Sign in with Apple; a no means tick it on the ID from ② and let Xcode download the profiles again). Then **Keys → +**: name "Hifth sign-in", tick **Sign in with Apple**, **Configure**, primary App ID *Hifth (com.bytesofpurpose.hifth)*, Save, Continue, Register. Note the **Key ID**, then **Download** once (Apple never offers it again). In your own terminal: `mkdir -p ~/.appstoreconnect/sign-in-with-apple`, `mv ~/Downloads/AuthKey_<key ID>.p8 ~/.appstoreconnect/sign-in-with-apple/`, `chmod 600` it. Its own folder, so the upload tools in `private_keys/` never pick it up. Then, from the sign-in working copy with `nvm use`: `make hifth-app-apple-key ARGS="--save $HOME/.appstoreconnect/sign-in-with-apple/AuthKey_<key ID>.p8"`. That sends the key, its id (read from the file name) and the team id (read from this laptop's signing certificate) to hifth.app's Cloudflare project as secrets, printing none of them. **Never in the repo, a chat or the encrypted settings.** Check: `make hifth-app-apple-key` says "set" three times | <https://developer.apple.com/account/resources/authkeys/add> | `sign-in-apple-key-file` |
 | Devices (only for a cable install) | you say yes, the agent registers | Each device takes one of Apple's 100 slots of its kind for the year. The add-device skill lists what is registered (`make app-devices`), asks you, then registers and installs (`make app-device-register`). The plain install does not register a new device; it stops and says so. | <https://developer.apple.com/account/resources/devices/list> | — |
 
 ### What the app's ID allows, and why
@@ -61,7 +63,7 @@ the same page.
 | Associated Domains | a link to the reading site opens the app | not yet |
 | Siri | "Hey Siri, play al-Kahf in Hifth"; on a HomePod only after Apple's separate approval, below | not yet (`siri-play-recitation`) |
 | Push Notifications | room for a reminder to revise, if one is ever built; it would also need its own key | no |
-| Sign in with Apple | the simplest sign-in if readers ever need an account to share copies; Apple requires it if any other sign-in (Google and the like) is offered | no |
+| Sign in with Apple | a reader's marks follow them to their other devices (docs/design/sign-in.md); Apple requires it if any other sign-in (Google and the like) is offered | being built (`launch-sign-in`); the Mac store, iPad store and iPad development profiles all allow it (`make app-profile-allows`, 2026-11-18) |
 
 **Not on the ID page, but needed:**
 

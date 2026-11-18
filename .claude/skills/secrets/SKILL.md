@@ -54,6 +54,19 @@ holds a name this table does not list.
 | `DOTENV_PUBLIC_KEY_ENCRYPTED` | The public half of the key, written by the tool at the top of `.env.encrypted`. Not a secret. | Written by `make env-encrypt`. | `make env-check` | Changes only when the key changes (below). | It is in the committed file. |
 | the key (`.env.keys`) | The private key that unlocks `.env.encrypted`. Not in the table's file; the only one that opens everything. | Made by `make env-encrypt` the first time. | `make env-keys-status` | "Changing the key" below. | LastPass, `dotenvx/hifth` (`make env-keys-push`). |
 
+## Secrets kept only on Cloudflare
+
+Some values never come to the laptop's saved settings at all: the live site reads them, and
+nothing here does. They are saved on the hifth.app Pages project (`hifth-app`) and nowhere else.
+None of them is printed; each check says only whether it is set.
+
+| Secret on the project | What it is | Where it comes from | Check it (Claude may run) | Replace it (owner) |
+| --- | --- | --- | --- | --- |
+| `APPLE_SIGN_IN_KEY` | The Sign in with Apple key file's text. The server signs with it to end a reader's link with Apple when they delete their account. Not the upload key. | Apple developer site → **Keys → +**, ticked for Sign in with Apple on the app's ID (`app-setup` step ⑥). Downloaded once; kept at `~/.appstoreconnect/sign-in-with-apple/AuthKey_<id>.p8`, readable by the owner only. | `make hifth-app-apple-key` | Revoke the key on Apple's Keys page, make a new one the same way, `make hifth-app-apple-key ARGS="--save <new file>"`, then delete the old file. |
+| `APPLE_SIGN_IN_KEY_ID` | Which key that is (10 letters and digits). | Read from the key file's name by the same command. | same | Saved with the key. |
+| `APPLE_TEAM_ID` | The Apple team. It also goes public in the app-links file with the first upload; saved as a secret here only so all three travel together. | Read from this laptop's signing certificate by the same command. | same | Never changes for the team. |
+| `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `LIST_KEY`, `TURNSTILE_SECRET` | The notify list's address, its public key, the site's own key, and the spam check's secret. | The `deploy-site` skill's "Once, by the owner" steps; `TURNSTILE_SECRET` also sits in the saved settings (`make hifth-app-turnstile`). | `wrangler pages secret list --project-name hifth-app` from the sign-in working copy (names only) | As each source says. |
+
 ## If a value leaked
 
 ```mermaid

@@ -861,6 +861,9 @@ hifth-app-verify: ## Look at live hifth.app: pages answer, the app is this commi
 hifth-app-list-count: ## How many people are on hifth.app's Mac-app list, and how many still to confirm; never shows an address. ARGS=--local counts the copy on this laptop
 	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/list-count.mjs $(ARGS)
 
+hifth-app-apple-key: ## Are the Sign in with Apple key, its id and the team id saved on hifth.app's Cloudflare project? Prints set or not set only. ARGS="--save <AuthKey_<id>.p8>" (owner, own terminal) sends them
+	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/apple-sign-in-key.mjs $(ARGS)
+
 hifth-app-turnstile: ## Does hifth.app's spam-check widget exist? Prints its public site key. ARGS=--make makes it and saves its secret; never prints the secret or the token
 	@python3 .claude/skills/deploy-site/scripts/turnstile-widget.py $(ARGS)
 
