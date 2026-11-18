@@ -2625,6 +2625,31 @@
       ]
     },
     {
+      "id": "accounts",
+      "what": "Sign in with Apple, so a reader's marks can follow them to their other devices. hifth.app checks the note Apple hands the app and keeps the reader's account on its own small database; the reader's email is never kept or used to find them.",
+      "layer": "L3 server",
+      "entry": [
+        {
+          "file": "apps/landing/lib/apple-signin.mjs",
+          "symbol": "checkAppleNote",
+          "note": "Checks Apple's note (an identity token): Apple's signature, signed one pinned way only, issued by Apple, meant for one of our app ids, not expired, and carrying the scrambled copy of the one-off word hifth.app handed out. Only Apple's lasting user number comes back."
+        }
+      ],
+      "extend": [
+        "Every check is written first and watched failing, with made-up keys and made-up notes; a real Apple account's note never goes in the repository.",
+        "Accounts are found by Apple's lasting user number, never by email.",
+        "The sign-in library (jose) is for the server only; the web app and the shared core never import it, and a test refuses it.",
+        "Only the local database copy until the owner says yes to the real one (docs/design/sign-in.md, question 9).",
+        "The plan and its order: .claude/plans/sign-in-build.md."
+      ],
+      "gates": [
+        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/server-only.test.mjs"
+      ],
+      "seeAlso": [
+        "hifth-app-site"
+      ]
+    },
+    {
       "id": "bookmarks",
       "what": "Bookmarks: fold a page's top outer corner (by a tap, or by pulling a ribbon out of it) to drop a named ribbon; push a ribbon back up, or unfold the corner, to lift it, with Undo.",
       "layer": "L2 web",

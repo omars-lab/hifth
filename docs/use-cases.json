@@ -2069,6 +2069,37 @@
         }
       ],
       "gap": "The jump tests run on a laptop in Chrome and on the phones, not in Firefox; the iPad waits for the owner's walk."
+    },
+    {
+      "id": "sign-in-so-my-marks-follow-me",
+      "actor": "hafiz",
+      "goal": "Let me sign in with my Apple account, without handing over my email, so the marks I make on my iPad are there on my phone too.",
+      "feature": "accounts",
+      "code": [
+        {
+          "file": "apps/landing/lib/apple-signin.mjs",
+          "symbol": "checkAppleNote"
+        }
+      ],
+      "proof": [
+        {
+          "file": "apps/landing/lib/apple-signin.test.mjs",
+          "test": "a good note names the reader by Apple's lasting user number"
+        },
+        {
+          "file": "apps/landing/lib/apple-signin.test.mjs",
+          "test": "the email in a note is never handed on: only the user number comes back"
+        },
+        {
+          "file": "apps/landing/lib/apple-signin.test.mjs",
+          "test": "a note signed by a key that is not Apple's is refused"
+        },
+        {
+          "file": "apps/landing/lib/apple-signin.test.mjs",
+          "test": "a note whose one-off word does not match the one we handed out is refused"
+        }
+      ],
+      "gap": "Only the server's check of Apple's note is built. Accounts, sessions, Apple's sheet in the apps and marks following the reader are still to come (docs/design/sign-in.md, steps 6 to 21)."
     }
   ]
 }

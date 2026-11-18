@@ -7385,6 +7385,7 @@
       "severity": "risk",
       "owner": "agent",
       "launch": true,
+      "useCase": "sign-in-so-my-marks-follow-me",
       "note": "The owner chose sign-in at launch on 2026-11-15, and on 2026-11-17 chose what it unlocks first: the reader's marks follow them. On 2026-11-18 the owner settled the last two choices: accounts are kept by our own small code on hifth.app's Cloudflare account with its free database, and the copy on our server is not locked at first, with the button saying we could read it. No choice waits on the owner now, and the sign-in build is ours. Two small owner steps remain, the sign-in page's ⑧ and ⑨: the Sign in with Apple key file, and a yes to make the real accounts database. Until then the server runs on the laptop with a local copy and a made-up key. The building is the sign-in work's; this row only counts it toward the launch."
     },
     {
