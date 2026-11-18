@@ -94,12 +94,41 @@ turned to are nowhere in the report.
 The steps live only in the page's memory. Nothing writes them to the device, so closing the app
 forgets them, and they are never sent anywhere except inside a report the reader chose to send.
 
+## How does a crash on a reader's iPad reach us?
+
+Added 2026-11-17 for item ⑰. Apple's server tells developers about freezes and slow launches in
+store builds, but not about crashes; crashes reach Apple's server only from test builds. So the
+apps keep their own copy. After the app crashes, freezes, or uses too much of the device,
+Apple's system hands the app a short report on the device itself, the next time it opens. The app keeps the
+last five, and the problem report lists them, newest first, under the errors:
+
+```
+Crash and freeze reports from Apple's system, kept on this device (newest first):
+- 2026-11-17 08:30 crash (exception 1, signal 11), app 0.1.0 (7)
+  at Hifth +0x1a2b < Hifth +0x3c4d < UIKitCore +0x10
+- 2026-11-16 21:04 froze for 20 sec, app 0.1.0 (7)
+```
+
+(Made-up lines in the real shape.) Each line says when, what kind, the system's numbers for a
+crash, how long a freeze lasted, and the app's version. The newest crash also names the three
+innermost places in the code it stopped, which our symbol files turn back into function names.
+
+What it never carries: the words the system wrote about a crash. Those can quote anything the
+app was holding, a route with a page in it for one, so the app keeps only fields it can cut to
+digits and names, and a test plants a made-up page route in those words and checks it never
+reaches the report. The page cuts the list again to six short lines, so an older or odd build
+cannot make the mail too long.
+
+A crash of the page itself (the web part, which runs in its own process) is not in these
+reports. The shell restarts the page when that happens and writes it to its own log.
+
 ## What is not settled here
 
-- **The picture** above was taken before the steps were added; the next time it is rebuilt it
-  shows them.
-- **Apple's crash reports** from readers' devices are item ⑰. When the apps keep them, the report
-  can offer to include the latest one, shown in full like the rest.
+- **The picture** above was taken before the steps and the crash reports were added; the next
+  time it is rebuilt it shows them.
+- **A real report's key names.** The app reads Apple's report by the key names in Apple's
+  documentation; the first forced crash on a test device checks them (it is on the
+  manual-testing list).
 - **Reading what arrives.** A command that turns each mail into a backlog row is later work in
   the launch plan.
 
@@ -114,6 +143,9 @@ forgets them, and they are never sent anywhere except inside a report the reader
 - The panel is `apps/web/src/components/ReportProblem.tsx`, used by the info panel
   (`Colophon.tsx`) and the error card (`PageStopped.tsx`).
 - The apps pass their version to the page through the shell's bridge (`native/Hifth/Web/Bridge.swift`).
+- Apple's crash and freeze reports are kept and summed up by `native/Hifth/App/DeviceReports.swift`
+  (tests: `native/HifthTests/DeviceReportsTests.swift`), started in `HifthApp.init` before the
+  page is built, and handed to the page with the version.
 - Unit tests: `problem-report.test.ts`, `ReportProblem.test.tsx`, `Colophon.test.tsx`,
   `PageStopped.test.tsx`.
 - Browser test: `apps/web/e2e/report-problem.spec.ts`, on phone, Android, desktop and Firefox:

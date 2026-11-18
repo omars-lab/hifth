@@ -44,9 +44,12 @@ final class Bridge: NSObject, WKScriptMessageHandler {
     /// true when the app's first module evaluates.
     /// `appVersion` goes only into the reader's own problem report, which they
     /// see in full before choosing to send it; empty leaves it out.
-    static func bootScript(platform: String, publicBase: String, appVersion: String = "") -> WKUserScript {
+    /// `deviceReports` is the same: Apple's crash and freeze reports the device
+    /// keeps (DeviceReports.summary), shown only in that report.
+    static func bootScript(platform: String, publicBase: String, appVersion: String = "", deviceReports: String = "") -> WKUserScript {
         var payload: [String: String] = ["platform": platform, "publicBase": publicBase]
         if !appVersion.isEmpty { payload["appVersion"] = appVersion }
+        if !deviceReports.isEmpty { payload["deviceReports"] = deviceReports }
         let json = (try? JSONSerialization.data(withJSONObject: payload)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}"
         return WKUserScript(
             source: "window.__HIFTH_NATIVE__ = Object.freeze(\(json));",
