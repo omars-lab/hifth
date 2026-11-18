@@ -4043,10 +4043,10 @@
         "file": "docs/design/sign-in.md",
         "item": "②"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Where should reader accounts live? Recommended: our own small code on hifth.app's Cloudflare account with its free database, next to the notify list and the planned shared copies. Alternatives on the page: the same with a ready-made library, a new Supabase project (never the existing store), Firebase, or no accounts. The sharing page's ⑥ chose Cloudflare for shared copies only, so this is still open for accounts."
+      "note": "Where should reader accounts live? The owner chose on 2026-11-18: our own small code on hifth.app's Cloudflare account with its free database, next to the notify list and the planned shared copies. jose checks Apple's note and sessions start from Lucia's free sample file. The alternatives were the same with a ready-made library (Better Auth, weighed on docs/design/sign-in-library.md), a new Supabase project, Firebase, or no accounts. Recorded in the decision list as sign-in-accounts-home."
     },
     {
       "id": "sign-in-locked-copy",
@@ -4054,10 +4054,10 @@
         "file": "docs/design/sign-in.md",
         "item": "③"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
       "owner": "user",
-      "note": "Should the reader's copy on our server be locked on their device so we cannot read it, at the cost that losing the recovery code loses the synced copy? Or kept with the server's own encryption and a plain note that we could read it? Researcher A said locked; researcher B left it as a separate choice. Needed before the first unlock ships, not before the first sign-in on the owner's iPad."
+      "note": "Should the reader's copy on our server be locked on their device so we cannot read it? The owner chose on 2026-11-18: not locked, at first. The server's own encryption, and the button and the privacy label say plainly that we could read the copy. Locking can come later, with a recovery code each reader saves once; nobody loses marks. Recorded in the decision list as sign-in-locked-copy."
     },
     {
       "id": "sign-in-same-account",
@@ -7359,15 +7359,11 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉖"
       },
-      "status": "blocked",
-      "severity": "question",
-      "owner": "user",
-      "blockedBy": [
-        "sign-in-accounts-home",
-        "sign-in-locked-copy"
-      ],
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
       "launch": true,
-      "note": "The owner chose sign-in at launch on 2026-11-15, and on 2026-11-17 chose what it unlocks first: the reader's marks follow them. It now waits on two choices: where accounts are kept, and whether we can read the copy on our server. The building is the sign-in work's; this row only counts it toward the launch."
+      "note": "The owner chose sign-in at launch on 2026-11-15, and on 2026-11-17 chose what it unlocks first: the reader's marks follow them. On 2026-11-18 the owner settled the last two choices: accounts are kept by our own small code on hifth.app's Cloudflare account with its free database, and the copy on our server is not locked at first, with the button saying we could read it. Nothing waits on the owner now; the sign-in build is ours. The building is the sign-in work's; this row only counts it toward the launch."
     },
     {
       "id": "launch-account-deletion",

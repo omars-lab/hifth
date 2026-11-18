@@ -49,7 +49,7 @@ Four facts shape the order:
 - **Every fix is a new build through Apple's review**, because the web part is packed inside the
   app. So the off-switch and the release command matter more than they would on a website.
 - **Two answers take weeks**, and everything else is days: the rights holders' replies, and
-  sign-in (about three weeks of work once the owner makes its three choices). These two set the
+  sign-in (about three weeks of work; the owner made its three choices by 2026-11-18). These two set the
   launch date, so they are asked for first, and the rest is built while they wait.
 - **The first download is full**: 160.8 of its 161 KB, though the app as a whole has 9 KB of
   room. The app's log, the off-switch and the "new version ready" prompt must each load after
@@ -77,7 +77,7 @@ The first one is the main measure. The others say whether we could run the app o
 | Measure | Value | As of |
 |---|---|---|
 | Launch blockers open | **24** of 46 (2026-11-17, after the store reviews ㉜, the download numbers ㉝ and the second key on the release page ㉞ closed; `make issues LAUNCH=1` lists them). Before that, **26**: 24 of the 44 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day, and the archive with Apple's own check ⑪ later that day. Later still the support page ⑳ and the apps' privacy policy ㉙ closed, and one item was added for linking both from inside the app (㊸), which closed the same day. Of the 26, **7 can get the app turned down at review**, 6 stop the upload itself (four launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
-| Owner steps waiting | **10**, ordered by what each frees in "Waiting on the owner": two sign-in choices (the first was answered 2026-11-17); two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; adding the Mac to the app's store record; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-17 |
+| Owner steps waiting | **9**, ordered by what each frees in "Waiting on the owner" (all three sign-in choices answered by 2026-11-18): two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; adding the Mac to the app's store record; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad | 2026-11-18 |
 | Days since a restore was practised | never | 2026-11-15 |
 | Days since the release command ran clean | no release command yet; its archive, export and Apple's check ran clean on 2026-11-17 | 2026-11-17 |
 | Unanswered reports and reviews | **0** store reviews, none waiting (read live with the reviews key; the app is not in the store yet). Reader reports have no folder to land in yet | 2026-11-17 |
@@ -100,7 +100,7 @@ page" below). Backlog row names are in brackets.
 | **The licence** | 6 | (The citations page, `launch-citations-page`, is built and checked: it goes live with hifth.app's first upload.) Reading the page artwork's terms (`launch-page-artwork-terms`) and the recitation audio's terms (`launch-recitation-audio-terms`) | The two permissions (`launch-corpus-permission`, `launch-tajweed-permission`) wait on the owner's emails. Fallback if no answer by the date: fetch that data from hifth.app after install, or leave the tajweed colours off. The upload rows (`gpl-and-the-app-store`, `app-store-not-a-target`) close when the answers do. |
 | **What Apple requires** | 3 | (The iPad and iPhone permissions file and the hifth.app file that tells Apple which links open the app, `launch-ios-entitlements`, are built and checked; the site's file goes live with hifth.app's first upload, then a link is tried on the iPad from the by-hand list.) (The archive, the export and Apple's check, `launch-archive-upload`, are done. The Mac sandbox, `launch-mac-sandbox`, is done on this laptop: built, checked by the release check and walked.) | The Mac store archive and its installer package are built and checked (`make app-archive-mac`, `make app-export-mac`, owner's yes 2026-11-17). Apple's check of the Mac package waits on the owner adding the Mac to the app's store record (waiting list, item 6), and its upload on the licence. The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
 | **Listing** | 2 | The Arabic listing (`launch-store-answers`); the empty clock-and-battery strip on the iPhone store pictures (㊹, `launch-store-shots-status-bar`). (The store pictures themselves are done: `make app-store-shots`, 2026-11-17.) (The English listing, the privacy, age and export answers and the category are drafted and checked by `make app-store-listing`.) | The EU trader answer, the price and the copyright line are the owner's (waiting list). The content-rights answer waits on the permissions, the same lock as the upload. |
-| **Accounts** | 2 | Backups and a practised restore of the notify-me list, which already exists (`launch-backups`). (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, and the info panel's links to it and the support page, `launch-support-links-in-app`, are done.) | Sign-in (`launch-sign-in`) waits on the three sign-in choices. Deleting an account (`launch-account-deletion`) is built behind a switch that is off once the choice of where accounts live is made. |
+| **Accounts** | 2 | Backups and a practised restore of the notify-me list, which already exists (`launch-backups`). (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, and the info panel's links to it and the support page, `launch-support-links-in-app`, are done.) | Nothing waits on the owner: the three sign-in choices were made by 2026-11-18. Sign-in (`launch-sign-in`) is ours to build: our own small code on hifth.app's Cloudflare with its free database, the copy not locked at first. Deleting an account (`launch-account-deletion`) comes with it, behind a switch that is off. The first real sign-in needs hifth.app's first upload, so it is built and tested locally until then. |
 
 ## What comes next, in order
 
@@ -120,7 +120,7 @@ comes before what matters once readers have it, since a turned-down build costs 
    off-switch and the prompt, each loaded after the page is up.
 6. **Hearing about problems:** the app's log and readers' crashes. (The sources in English ㊴
    are fixed, and so are store reviews, store numbers and the release page on the new key.)
-7. **Accounts**, as far as the sign-in choices allow; all of it once they are made.
+7. **Accounts:** all three sign-in choices are made (2026-11-18), so the sign-in build can start.
 8. **Test flight** with a few named readers, then **upload and release** once the permissions
    are in writing.
 
@@ -128,11 +128,9 @@ The plan has the detail of each step.
 
 ## Waiting on the owner, most work freed first
 
-1. **The two choices left on the sign-in page** (the first was answered on 2026-11-17: a
-   reader's marks follow them). Still open: where accounts are kept, and whether we can read
-   the copy on our server. Both are drawn, one picture per option, on
-   `docs/design/sign-in-options.html`. These free about three weeks of work: sign-in,
-   deleting an account, and backups of reader data.
+1. **Answered 2026-11-18: the sign-in choices.** A reader's marks follow them (2026-11-17);
+   accounts are kept by our own small code on hifth.app's Cloudflare with its free database;
+   the copy on our server is not locked at first. Nothing more is needed from the owner here.
 2. **Send the two permission emails, and set the date after which we stop waiting.** This frees
    only the upload, but the answer takes weeks, so the sooner it goes the better.
 3. **Should the store build show the tajweed colours?** (launch item ㊲) Off: one permission

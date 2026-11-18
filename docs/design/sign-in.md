@@ -347,11 +347,15 @@ These are tracked in the issue register, one row each, the way the sharing page'
 
 **Settled 2026-11-17 by the owner: your marks follow you.** Sign-in first unlocks one button that says what goes and to whom, so a reader's marks follow them from the iPad to Firefox and a phone. The alternatives were switching off a teacher link from anywhere, or nothing yet. Steps 6 to 15 are built toward this.
 
-### ② Where should reader accounts live? · **open**
+### ② Where should reader accounts live? · **answered**
+
+**Settled 2026-11-18 by the owner: our own small code on hifth.app's Cloudflare account, with its free database.** jose checks Apple's note, sessions start from Lucia's free sample file, and the rest is ours, each security part with a test written first. Step 9 connects the database. What the owner weighed:
 
 Recommended: our own small code on hifth.app's Cloudflare account, with its free database, next to the notify list and the planned shared copies. Alternatives: the same with a ready-made library, a new Supabase project, Firebase, or no accounts. Ours against a library is weighed part by part on the library page ([sign-in-library.md](sign-in-library.md)). The sharing page's ⑥ chose Cloudflare for shared copies only. **What would answer it:** the owner's pick. Then step 9 connects the database.
 
-### ③ Should your copy on our server be locked so that we cannot read it? · **open**
+### ③ Should your copy on our server be locked so that we cannot read it? · **answered**
+
+**Settled 2026-11-18 by the owner: not locked, at first.** The server's own encryption, and the button and the privacy label say plainly that we could read the copy. Locking can come later; each reader would then save a recovery code once, and nobody loses marks. What the owner weighed:
 
 Locked: sealed on the device with a recovery code the reader saves once; the server holds a box it cannot open; lose the code and the synced copy is gone (the marks on the device are never at risk). Not locked: the server's own encryption, with a plain note on the button that we could read it. **What would answer it:** the owner's pick, before the first unlock ships. It does not hold up milestone 1.
 

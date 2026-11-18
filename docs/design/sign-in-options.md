@@ -1,13 +1,13 @@
 # Where should reader accounts live, and should we be able to read your copy of your marks?
 
-*Drawn 2026-11-17 for the owner, from the sign-in page ([sign-in.md](sign-in.md)), which holds the research, the sources and the full tables. This page only draws the two choices still open, so they can be compared by eye. Nothing here was built.*
+*Drawn 2026-11-17 for the owner, from the sign-in page ([sign-in.md](sign-in.md)), which holds the research, the sources and the full tables. This page draws the two choices that were still open, so they could be compared by eye; both were settled on 2026-11-18. Nothing here was built.*
 
 *This note is the record. Its page is [sign-in-options.html](sign-in-options.html), on the site at <https://blog.bytesofpurpose.com/hifth/docs/design/sign-in-options.html>, and it is rebuilt from this note by `scripts/build-design-note.mjs`.*
 
 > [!tip] Short version
 > **Already settled (2026-11-17):** the first thing sign-in unlocks is one button, "Keep a copy of my marks on hifth.app", so a reader's marks follow them from the iPad to Firefox and a phone.
-> **Choice ②, where accounts live.** Recommended: our own small code on hifth.app's Cloudflare account, with its free database. It keeps everything with the one company that already runs the site, and nothing pauses.
-> **Choice ③, whether we can read the copy.** Recommended: not locked for the first testers, with the button saying plainly that we could read it; locking can come later without losing anyone's marks. The other way is locked with a recovery code the reader saves once.
+> **Choice ②, where accounts live. Settled 2026-11-18:** our own small code on hifth.app's Cloudflare account, with its free database (option A). It keeps everything with the one company that already runs the site, and nothing pauses. Ours against a library is on the library page ([sign-in-library.md](sign-in-library.md)).
+> **Choice ③, whether we can read the copy. Settled 2026-11-18:** not locked for the first testers (option A), with the button saying plainly that we could read it; locking can come later without losing anyone's marks.
 > **How to read the drawings.** Every drawing follows the same reader: signing in on the iPad, then opening Firefox in the evening. Moving lines are what happens at each sign-in; the thick line is the reader's marks; a dotted line is something that does not happen, or happens by hand.
 
 ## What do the words on this page mean?

@@ -2229,7 +2229,7 @@
     {
       "id": "sign-in-accounts-home",
       "question": "Where should readers' accounts be kept?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -2256,6 +2256,9 @@
       "page": "docs/design/sign-in-options.html",
       "builtBy": "scripts/build-design-note.mjs",
       "doc": "docs/design/sign-in-options.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-11-18",
       "related": [
         "storage-model",
         "sign-in-first-unlock",
@@ -2265,7 +2268,7 @@
     {
       "id": "sign-in-locked-copy",
       "question": "Should we be able to read the copy of a reader's marks kept on our server?",
-      "status": "open",
+      "status": "decided",
       "options": [
         {
           "id": "A",
@@ -2280,6 +2283,9 @@
       "page": "docs/design/sign-in-options.html",
       "builtBy": "scripts/build-design-note.mjs",
       "doc": "docs/design/sign-in-options.md",
+      "decided": "A",
+      "by": "omar",
+      "date": "2026-11-18",
       "related": [
         "storage-model",
         "sign-in-first-unlock",

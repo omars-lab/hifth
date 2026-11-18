@@ -410,13 +410,16 @@ need any of this: their pages are packed inside them.
 *What would answer it:* the push reports every test that needed a second try, so each one is
 fixed rather than hidden.
 
-### ㉖ Sign-in waits on three choices · **blocked**
+### ㉖ Sign-in is not built yet · **open**
 
 The sign-in page sets out what sign-in unlocks first, where reader accounts live, and whether a
-reader's copy is locked so we cannot read it.
+reader's copy is locked so we cannot read it. The owner settled all three (2026-11-17 and
+2026-11-18): the reader's marks follow them; accounts are kept by our own small code on
+hifth.app's Cloudflare account with its free database; and the copy is not locked at first, with
+the button saying we could read it.
 
-*What would answer it:* the owner's three choices, then sign in with Apple through Apple's own
-sheet.
+*What would answer it:* sign in with Apple through Apple's own sheet, built as the sign-in page's
+steps lay out.
 
 ### ㉗ A reader could not delete their account inside the app · **open**
 
