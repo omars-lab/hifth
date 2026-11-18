@@ -348,10 +348,16 @@ for a faster review ready to paste and what pausing a staged release can and can
 checked against Apple's own pages. It has been run as a dry run; a real run raises the build
 number, so it waits for the first real release.
 
-### ㉓ A bad publish of the site cannot be put back · **open**
+### ㉓ A bad publish of the site cannot be put back · **blocked**
 
 *What would answer it:* a "put the previous release back" command in the site-publishing skill,
 tested by publishing, putting back and checking the live commit.
+
+*Built 2026-11-17:* `make hifth-app-put-back` points hifth.app at the upload before the live one,
+then checks the live app carries that upload's commit. Cloudflare keeps every upload, so nothing
+is copied and it takes seconds. It is tested against a made-up Cloudflare. Against the real
+account, its list found the site with no uploads yet, so the real drill (publish twice, put back,
+check, publish again) waits on the first upload.
 
 ### ㉔ The browser version never says a new version is ready · **open**
 

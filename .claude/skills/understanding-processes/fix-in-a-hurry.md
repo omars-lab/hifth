@@ -5,6 +5,10 @@ and a fix has to reach them fast. The app is packed whole inside the store build
 is a new build through Apple's review. Nothing on this laptop can change what readers have
 without one.
 
+The site at hifth.app is different: a broken release of it is put back in seconds, with
+`make hifth-app-put-back` (the `deploy-site` skill). That changes only the site and the browser
+version, never an app readers installed.
+
 *Last checked: 2026-11-17, against Apple's pages linked below.*
 
 ## The short version

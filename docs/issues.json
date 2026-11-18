@@ -7280,11 +7280,14 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉓"
       },
-      "status": "open",
+      "status": "blocked",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "A put-back command in the site-publishing skill, tested by publishing, putting back and checking the live commit."
+      "blockedBy": [
+        "hifth.app's first upload, which the owner runs"
+      ],
+      "note": "A put-back command in the site-publishing skill, tested by publishing, putting back and checking the live commit. Built 2026-11-17: make hifth-app-put-back asks Cloudflare which upload is live, points hifth.app at the finished production upload before it (or the one ARGS=\"run --to <commit>\" names), then looks at the live site for that upload's commit; ARGS=list shows the uploads and ARGS=\"run --dry\" changes nothing (.claude/skills/deploy-site/scripts/put-back.mjs, put-back.test.mjs, 12 tests against a made-up Cloudflare). The list ran against the real account the same day and found the project with no uploads yet. The drill (publish twice, put back, check the live commit, publish again) waits on the first upload."
     },
     {
       "id": "launch-browser-new-version",
