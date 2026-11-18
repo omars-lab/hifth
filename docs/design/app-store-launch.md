@@ -292,11 +292,15 @@ tests, and the by-hand parts parked on the manual-testing list.
 
 ### ⑰ We cannot see crashes on readers' devices · **open**
 
-Today a crash is read only from a device on a cable.
+*What answered it (2026-11-17):* a store build's crash never reaches Apple's server for us, so
+the apps keep it themselves. After a crash or a freeze, Apple's system hands the app a short
+report the next time it opens; the app keeps the last five, and the problem report lists them
+under the errors, never the words the system wrote about the crash. A second command lists
+what Apple's server does have: test builds' crashes, and every build's freezes and slow
+launches. It never asks for a tester's comment or email.
 
-*What would answer it:* the app keeps Apple's daily crash and performance reports on the device,
-so they can go into a reader's report, and a command lists the crashes Apple has collected. A
-crash forced on a test device shows up in that list.
+*Still owed:* a crash forced on a test device shows up in the problem report and in that list.
+That needs the first test build, and the upload key's ids saved.
 
 ### ⑱ A reader has no way to tell us something is wrong · **fixed**
 

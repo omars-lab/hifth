@@ -1453,6 +1453,67 @@
         "done": "You heard the recitation with the switch on, and it paused for a call.",
         "unlocks": "The silent switch item on the App Store launch list"
       }
+    },
+    {
+      "id": "device-crash-report-arrives",
+      "title": "Apple's crash report reaches the problem report on a real iPad, and a test build's crash reaches the crash list",
+      "why": "Since 2026-11-17 the apps keep the short report Apple's system hands them after a crash or a freeze, and the problem report lists it. The tests feed the app made-up reports shaped like Apple's documentation. What no test here can do is take a real one: the simulator never hands the app a report, so only a device proves the real report's shape matches what the app reads. The same holds for the command that lists test builds' crashes from Apple's server: it has only ever talked to a made-up server.",
+      "how": "Run the app from Xcode on a real iPad, use Xcode's Debug menu to have the system hand the app a made-up report (Simulate MetricKit Payloads), reopen the app, and open Report a problem. Later, once a test build is out, have a tester's copy crash and send it, then run the crash list.",
+      "owner": "user",
+      "status": "pending",
+      "blocks": ["launch-readers-crashes"],
+      "runbook": {
+        "needs": [
+          "A real iPad plugged into this laptop, and Xcode open on the app (the native-shell skill says how).",
+          "For the second part: the first test build, and the upload key's two ids saved (make app-release-setup shows them).",
+          "Ten minutes."
+        ],
+        "steps": [
+          {
+            "id": "simulated-report-listed",
+            "do": "Run the app on the iPad from Xcode. With it open, choose Debug, then Simulate MetricKit Payloads. Close the app fully, open it again, then open the info panel and press Report a problem.",
+            "expect": "Under the errors, the report lists one crash and one freeze from the device, with a time and the app's version, and no sentence of the system's own about the crash.",
+            "why": "This is Apple's own report, in its real shape, reaching the code that keeps it. If the shape differs from the documentation the tests copied, nothing shows here.",
+            "short": "Simulate a report from Xcode, reopen, Report a problem: the crash and freeze are listed.",
+            "noLink": {
+              "why": "This happens in the installed app on a device, not in a browser, so there is no address to open.",
+              "add": "None is needed."
+            }
+          },
+          {
+            "id": "test-crash-listed",
+            "do": "Once a test build is out, have a tester's copy close unexpectedly and send the crash when the device offers. The next day, run make app-store-crashes.",
+            "expect": "One test_crash line for that build and device, and a done line; no tester's words or address anywhere in the output.",
+            "why": "The command has only ever talked to a made-up server. This is the first time it reads Apple's real answer, and Apple's access rules decide whether the upload key may read it.",
+            "short": "A tester's crash shows up in make app-store-crashes.",
+            "noLink": {
+              "why": "This is a command on this laptop, not a page, so there is no address to open.",
+              "add": "None is needed."
+            }
+          }
+        ],
+        "reading": [
+          "Both listed: nothing changes; record the device and the date, and close the launch row.",
+          "Nothing under the errors after the simulated report: the real report's shape differs from the one the tests copy; save the report's field names (never its text) and fix the reader in DeviceReports.swift with a test.",
+          "The command fails with answered 403: the upload key may not read test builds' crashes; make a key with the needed access, and say which in the crash-logs skill."
+        ],
+        "record": "make record CHECK=device-crash-report-arrives RESULT='<device>, <date>: simulated report listed; test crash listed'"
+      },
+      "tunes": [
+        "native/HifthTests/DeviceReportsTests.swift: if the real report's shape differs, these made-up reports change with it",
+        ".claude/skills/crash-logs/scripts/store-crashes.test.mjs: if Apple's real answer differs, the made-up server changes with it",
+        "docs/design/app-store-launch.md item 17: the launch item this answers"
+      ],
+      "record": "docs/design/app-store-launch.md",
+      "brief": {
+        "label": "A real crash report reaches us",
+        "ask": "On a real iPad, does Apple's crash report show up in Report a problem, and does a test build's crash show up in the crash list?",
+        "what": "The apps now keep Apple's own crash and freeze reports, and a command lists test builds' crashes. Only a real device hands the app a real report.",
+        "need": "A real iPad on a cable with Xcode open; later, the first test build.",
+        "time": "10 minutes",
+        "done": "The simulated crash and freeze are listed in the report, and a tester's crash is in the list.",
+        "unlocks": "The readers' crashes item on the App Store launch list"
+      }
     }
   ]
 }
