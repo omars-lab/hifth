@@ -137,7 +137,10 @@ the first real check of a note is the live site after the owner's upload.
      half. The store apps show Apple's button only once `apps/landing/app-status.json` lists
      `"on": ["sign-in"]` (the names it accepts are `OFFERS` in
      `.claude/skills/deploy-site/scripts/app-status.mjs`), so turn the server on first,
-     release, try it, then add the app's switch and release again. Before the app's switch:
+     release, try it, then add the app's switch and release again. The try uses a build that
+     is not the store build, launched with `HIFTH_SIGN_IN_URL=https://hifth.app`: such a build
+     shows the button whenever it names a server, while the store build waits for the launch
+     file (`SignIn.offered` in `native/Hifth/Account/SignIn.swift`). Before the app's switch:
      the account section's button may carry Apple's logo only from Apple's own artwork, which
      is not in the repo yet (an owner question; backlog row `sign-in-apple-logo-artwork`).
      Two things first, or readers'
