@@ -76,6 +76,12 @@ with `make app-probe TARGET=mac EVALFILE=…` posting two asks by hand.
 | question | answers | where |
 |---|---|---|
 | `ping` | `pong` | `ShellModel.answer(question:)` |
+| `signed-in` | `signed-in` or `signed-out`, nothing more | `ShellModel.answer(question:)`, tests in `AccountTests.swift` |
+| `account` | `off` (this build shows no account section), `signed-out` or `signed-in`. A build is `off` when it names no sign-in server, or is a store build whose launch file does not list `sign-in` in `on` | `ShellModel.answer(question:)`, `SignIn.offered`, tests in `AccountTests.swift` |
+| `sign-out` | `signed-out` (this device first, whatever the connection; hifth.app is told after), or `busy` while a sign-in is on its way | same |
+| `delete-account` | `deleted-cut` (Apple dropped its side too) or `deleted-left` (the reader removes Hifth in Apple's settings). Only on hifth.app's yes does the app clear the sign-in and the invite code. Errors: `busy`, `signed-out` (nobody signed in, or hifth.app no longer knows the sign-in; the device is then signed out), `offline` and the other `sign-in` reasons; nothing on the device changes on those | `Account/SignIn.swift` `deleteAccount`, tests in `AccountTests.swift` |
+| `invite-kept` | `yes` or `no`, never the code | `Account/InviteStore.swift`, tests in `AccountTests.swift` |
+| `forget-invite` | `forgotten` | same |
 | `sign-in` | `signed-in`, or a reason: `cancelled`, `sign-in-off`, `not-set-up`, `busy`, `no-window`, `offline`, `not-available`, `bad-reply`, `bad-request`, `too-big`, `server-error`, `refused:<why>`, `too-many` (try again shortly), `invite-needed` (ask the tester for a code, and send it as `text`). With `text`, the app sends it as the tester's invite code and keeps it on the device once hifth.app takes it; the page cannot read a kept code, so ask with no `text` first and show the code box only on `invite-needed` | `Account/SignIn.swift`, `Account/InviteStore.swift`, tests in `SignInTests.swift` and `InviteTests.swift` |
 
 `sign-in` asks hifth.app for a word, then shows Apple's sheet; the session stays in the app and
@@ -85,6 +91,14 @@ laptop's stand-in server: start `wrangler pages dev` on `apps/landing/dist` with
 (the build plan has the line), then `make app-probe TARGET=mac SIGN_IN_URL=http://127.0.0.1:<port>
 EVALFILE=…` posting `sign-in`. Switch off: `sign-in-off`. Switch on: `not-available`, because the
 everyday Mac build is not allowed Sign in with Apple; only a signed store build gets the sheet.
+
+**Who on the page may ask.** The app talks to hifth.app for some answers, so a question is a
+way off the device. The privacy check (`scripts/gate-revision-privacy.mjs`, its `ASKERS` list)
+refuses any file outside that list that imports `askApp`, any way out inside a listed file, and
+`text` from any listed file not marked for it. Today only the account section asks
+(`account.ts`, which may send the typed invite code, and `components/Account.tsx`, which may
+not). A new asker goes on that list with what it hands the app, and its refusal test goes in
+`scripts/gate-revision-privacy.test.mjs`.
 
 `publicBase` goes the other way: a shared link built from `location.origin` inside the shell
 would read `hifth-app://app/…` and be dead for everyone it was sent to.

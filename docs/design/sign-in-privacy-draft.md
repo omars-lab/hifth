@@ -11,7 +11,8 @@ Step 15 was being built in the app the same day and is not yet read here.*
 > It says sign-in is optional, lists the few things an account stores, who can see them and how to delete them.
 > **What an account stores today.** A number Apple gives us for the reader, a random account number of our own, the date the account was made, for each signed-in device a scrambled copy of its sign-in key with a start and an end date, and Apple's cancel ticket, locked.
 > **No email and no name.** The app asks Apple for neither, and the server keeps neither, so the draft says so plainly.
-> **Not built yet, so marked.** The "Delete my account" button in the app (step 14; the server can already do it), staying signed in after the app closes (step 15), the button that says what leaves the device (step 16), the limit on tries (step 17) and the copy of the reader's marks (step 21).
+> **Built since, so marked as built.** The "Delete my account" button in the app (step 14), staying signed in after the app closes (step 15), the place that says what leaves the device (step 16) and the limit on tries (step 17) were all built on 2026-11-18 and tried with a stand-in app; none has been seen in the real app on an iPad yet.
+> **Not built yet, so marked.** The copy of the reader's marks (step 21).
 > **Step 13 landed while this was written.** The server now keeps the cancel ticket and acts on Apple's notices, so those sentences are marked as built on the server.
 > **The store label.** "Data Not Collected" ends the day a store build can sign in.
 > It becomes one data type, User ID, linked to the reader, for app functionality, not used for tracking.
@@ -51,7 +52,7 @@ This is what the code does, which is narrower than what the plan first imagined.
 | The sign-in key, per device | scrambled copy only | With when it started and when it ends. It ends after 60 days, and signing out ends it on that device only. |
 | The one-off value for a sign-in | scrambled copy only | Good once, for ten minutes, and not tied to any reader. |
 | How many sign-ins were started in each ten minutes | yes, a number only | One count for everyone together, to limit how many can be started (step 17). Nothing about who asked, and counts for past stretches are deleted. |
-| A tester's invite code | **no** | While sign-in is for invited testers (step 18), the code is checked when a sign-in starts and is not kept, tied to an account or logged. The server holds only scrambled copies of the codes it accepts. The app keeps the code the tester typed on that device only, in Apple's locked store, so it is typed once; it is not synced or backed up to another device. |
+| A tester's invite code | **no** | While sign-in is for invited testers (step 18), the code is checked when a sign-in starts and is not kept, tied to an account or logged. The server holds only scrambled copies of the codes it accepts. The app keeps the code the tester typed on that device only, in Apple's locked store, so it is typed once; it is not synced or backed up to another device. The tester can make the app forget it from the account section, and deleting the account forgets it too. |
 | Apple's cancel ticket | yes, locked | At most one per account, with which of our apps the reader signed in to and when it was kept. The lock's key is not in the database. Kept only if the app sends Apple's one-time code and the key file is set; sign-in works without it. |
 | A copy of the reader's marks | not yet | Step 21, behind its own button. |
 | Which device, which internet address | **no** | The sign-in code writes no log and keeps no device name or address. |
@@ -86,12 +87,13 @@ The dates your devices signed in stay in our database, even after a sign-in has 
 A device stays signed in for 60 days, and then asks you to sign in again.
 Signing out ends the sign-in on that device only.
 
-**[goes in when step 16 lands]** Before anything of yours leaves your device, a button says what goes and who can see it, and the app has a place where you can see what you sent and take it back.
+**[step 16, built 2026-11-18]** Before you sign in, the "About Hifth" panel says what leaves your device and what hifth.app keeps, above Apple's button. Once you are signed in, the same place lets you sign out or delete your account.
+**[step 18, built 2026-11-18]** While sign-in is for invited testers, the app keeps your invite code on this device only, so you type it once. The same place says when a code is kept and lets you make the app forget it.
 
-**[goes in when step 15 lands]** The app keeps its sign-in key in your device's locked store for passwords, and nowhere else.
-**[goes in when step 15 lands]** Each time it opens, the app asks Apple whether you still allow Hifth to use Sign in with Apple, and signs you out if you do not.
+**[step 15, built 2026-11-18]** The app keeps its sign-in key in your device's locked store for passwords, and nowhere else.
+**[step 15, built 2026-11-18]** Each time it opens, the app asks Apple whether you still allow Hifth to use Sign in with Apple, and signs you out if you do not.
 
-**[goes in when step 17 lands]** To stop bots from trying to sign in over and over, sign-in uses the same check as the form on the front page, described under "Spam check" below.
+**[step 17, built 2026-11-18]** So that nobody can wear out our database, hifth.app starts only a limited number of sign-ins every ten minutes, for everyone together, and keeps no note of who asked. If the limit is reached, the app asks you to try again shortly.
 
 **Who can see it**
 
@@ -103,11 +105,11 @@ Apple knows that you use Sign in with Apple with Hifth, and shows Hifth in the l
 
 **How to delete your account**
 
-**[goes in when step 14 lands]** Choose "Delete my account" in the app.
-**[goes in when step 14 lands]** It deletes your account and signs out every device, and it asks Apple to cut the link between your Apple account and Hifth.
+**[step 14, built 2026-11-18]** Choose "Delete my account" in the app.
+**[step 14, built 2026-11-18]** It deletes your account and signs out every device, and it asks Apple to cut the link between your Apple account and Hifth.
 **[goes in when step 21 lands]** It also deletes the copy of your marks that we hold.
-**[goes in when step 14 lands]** The marks on your own device are not touched.
-**[goes in when step 14 lands]** If Apple cannot be reached, your account is still deleted, and the app tells you how to remove Hifth from your Apple account's settings yourself.
+**[step 14, built 2026-11-18]** The marks on your own device are not touched.
+**[step 14, built 2026-11-18]** If Apple cannot be reached, your account is still deleted, and the app tells you how to remove Hifth from your Apple account's settings yourself.
 
 **[step 13, built on the server 2026-11-18]** If you stop Hifth from using Sign in with Apple in your Apple account's settings, Apple tells us.
 **[step 13, built on the server 2026-11-18]** We then sign out all your devices and throw away Apple's ticket; your account stays, so signing in again finds it.
@@ -216,8 +218,9 @@ Apple's cancel ticket (step 13) adds no new line: it is a sign-in credential tie
 - **The design page says a sign-in renews when used and ends after 60 days unused.** The code gives a fixed 60 days from sign-in, with no renewal. The draft follows the code. If step 15 adds renewal, the "60 days" sentence changes to "60 days after you last used it".
 - **A history of sign-in times builds up.** Each device's sign-in is kept with its start time and its account, and nothing removes it after it runs out. The draft now says so in plain words, because "we keep no record of when you signed in" would be false. A clean-up of run-out sign-ins would let that sentence go.
 - **Step 13 landed on the server while this was written** (2026-11-18). The draft follows it: removing Hifth in Apple's settings signs every device out and drops the ticket but keeps the account, and deleting the Apple account deletes everything. A ticket is kept only when the app sends Apple's one-time code, and the app's side of that was not read here.
-- **The server half of step 14 landed the same day**, and it matches the draft: the account, every device's sign-in and the ticket are deleted whatever Apple answers, and the app is told whether Apple cut its side. The "Delete my account" button in the app is not built, so those sentences stay marked.
-- **Step 15 was being built in the app the same day** and was not committed when this was written. Its two sentences stay marked, and the "60 days" sentence needs a re-read once it lands.
+- **The server half of step 14 landed the same day**, and it matches the draft: the account, every device's sign-in and the ticket are deleted whatever Apple answers, and the app is told whether Apple cut its side. The "Delete my account" button in the app followed the same day (step 16's account section), and it says how to remove Hifth in Apple's settings when Apple could not be reached, as the draft promises.
+- **Step 15 landed in the app the same day.** Its two sentences match the code. It adds no renewal, so the "60 days" sentence stands.
+- **Step 17 is not the front page's "are you a person" check**, which an earlier version of this draft said. That check runs in a web page, and sign-in is asked by the app, so the limit is one shared count instead; the sentence was rewritten to match.
 - **The time an account was made is stored to the second.** The draft calls it "the date your account was made".
 
 ## Which questions can only the owner answer?
@@ -227,12 +230,12 @@ Apple's cancel ticket (step 13) adds no new line: it is a sign-in credential tie
 3. **May the page name Cloudflare as where accounts are kept?** The page already names Cloudflare as the site's host and Supabase for the notify list, so the draft does the same.
 4. **Should the label declare Sensitive Info for the copy of the marks?** Recommended yes. It is a judgment about how Apple's words apply to a record of Qur'an revision, and the answer is shown publicly on the store page.
 5. **Should sign-ins that have run out and accounts never used be cleaned up, and should the page promise it?** Today nothing removes them, so the database keeps the dates a reader signed in, and the draft has to say so. A promise needs the clean-up built first.
-6. **Before step 14 exists, what should a reader who wants their account gone be told?** The draft promises nothing here. Writing to the support address already on the page would work only if you are willing to delete an account by hand.
+6. **Before step 14 exists, what should a reader who wants their account gone be told?** No longer needed: the "Delete my account" button was built on 2026-11-18, so it exists before any reader other than you can sign in.
 7. **Does the label change go to Apple with the first build that can sign in, even if the sign-in button is hidden?** Recommended yes, because the label describes what the build can do, and a tester build with an invite code can already make an account.
 
 ## What is this not settling?
 
 - When sign-in opens, which the storage decision ties to the licensing question.
-- The wording on the button that says what leaves the device (step 16).
+- The wording in the account section that says what leaves the device (step 16). It is built, in English and Arabic, and still yours to approve.
 - Any legal advice. European data law treats religious data as a special kind, and this draft has not been read by anyone qualified.
 - The wording for website sign-in and the email code (steps 23 to 25), which will add an email address to both the page and the label.

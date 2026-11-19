@@ -4208,10 +4208,33 @@
         "file": "docs/design/sign-in.md",
         "item": "⑱"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "question",
       "owner": "agent",
-      "note": "The app keeps a tester's typed invite code in its own Keychain item, and nothing lets the tester remove it; a Keychain item can outlive deleting the app. Step 16's place to see what is kept and take it back needs a line for the code with a way to forget it, and a test."
+      "closedBy": "native/HifthTests/AccountTests.swift",
+      "note": "Closed 2026-11-18 with step 16. When a code is kept, the account section says so and offers to forget it; the page hears only yes or no, never the code, and deleting the account forgets it too. Tests: AccountTests.swift (invite-kept never returns the code, forget-invite clears it, delete-account clears it), account.test.ts and Account.test.tsx (the page asks and shows the line). Whether a kept code outlives deleting the app is parked with the iPad checks under ⑭."
+    },
+    {
+      "id": "sign-in-apple-logo-artwork",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑲"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "note": "Holds up the store apps showing the sign-in button (the launch file's on list), not the server switch. Apple allows its logo on a button an app draws only from Apple's own artwork, which is not in the repo; today's button is black with words and no logo. Recommended: the owner downloads Apple's artwork and accepts its terms, then the agent puts it in the button and checks it at Apple's sizes. The deploy-site skill, step 5, names this as the step before the app's switch."
+    },
+    {
+      "id": "sign-in-words-load-at-start",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "⑳"
+      },
+      "status": "open",
+      "severity": "risk",
+      "owner": "agent",
+      "note": "Step 16 added about 1 KB (zipped) to each language's words, which every reader loads at start though only the store apps show the account section; the size check's limit was raised to let it through (scripts/budget-baseline.json). Fix: split the words into a start pack and a later pack that loads with the info panel. Touches every screen's words, so not urgent."
     },
     {
       "id": "notify-list-data-door",

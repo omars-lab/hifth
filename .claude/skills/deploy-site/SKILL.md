@@ -133,7 +133,14 @@ the first real check of a note is the live site after the owner's upload.
      them. Claude checks afterwards with `make hifth-app-apple-key`, which prints set or not set.
   5. **Switch sign-in on**, after the first upload: `SIGN_IN=on` and
      `APPLE_APP_IDS=com.bytesofpurpose.hifth` on the project (neither is secret). Until then the
-     sign-in addresses answer "not on yet", whatever else is set. Two things first, or readers'
+     sign-in addresses answer "not on yet", whatever else is set. That is only the server's
+     half. The store apps show Apple's button only once `apps/landing/app-status.json` lists
+     `"on": ["sign-in"]` (the names it accepts are `OFFERS` in
+     `.claude/skills/deploy-site/scripts/app-status.mjs`), so turn the server on first,
+     release, try it, then add the app's switch and release again. Before the app's switch:
+     the account section's button may carry Apple's logo only from Apple's own artwork, which
+     is not in the repo yet (an owner question; backlog row `sign-in-apple-logo-artwork`).
+     Two things first, or readers'
      links with Apple can never be cut and no sign-in can start (sign-in steps 13, 14 and 17):
      - every file in `apps/landing/migrations/` is in the real accounts database, put in with
        the owner's yes (0001 to 0003 are in as of 2026-11-18; a later file needs a new yes). `0002_apple_tickets.sql` holds Apple's cancel tickets;

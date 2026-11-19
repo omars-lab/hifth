@@ -77,7 +77,7 @@ test("signed out: what leaves the device sits above Apple's button, which keeps 
   await button.scrollIntoViewIfNeeded();
   await expect(button).toBeVisible();
 
-  const says = sheet.getByText("تسجيل الدخول يرسل شيئًا واحدًا إلى hifth.app", { exact: false });
+  const says = sheet.getByText("تسجيل الدخول يرسل إلى hifth.app شيئين من Apple", { exact: false });
   await expect(says).toBeVisible();
   const [s, b] = await Promise.all([says.boundingBox(), button.boundingBox()]);
   expect(s && b).toBeTruthy();

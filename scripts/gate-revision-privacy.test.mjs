@@ -23,6 +23,12 @@ const importJumps = "import {\n  markConfusion,\n} " + "from " + '"@hifth/core";
 const USAGE = "apps/web/src/usage.ts";
 const USAGE_STORE = "apps/web/src/usage-store.ts";
 const importUsage = "import { countUse } " + "from " + '"./usage-store";';
+// The page's questions to the app: the one way the account section sends
+// anything, and the app, not the page, is what talks to hifth.app.
+const BRIDGE = "apps/web/src/native-bridge.ts";
+const ACCOUNT = "apps/web/src/account.ts";
+const ACCOUNT_PANEL = "apps/web/src/components/Account.tsx";
+const importAsk = (from) => "import { ask" + "App } " + "from " + `"${from}";\n`;
 
 /** The record, its store, and every module the check already permits. */
 const clean = {
@@ -42,6 +48,9 @@ const clean = {
   [USAGE_STORE]: "import { rollUpUse } " + "from " + '"./usage.js";',
   "apps/web/src/use-count.ts": importUsage,
   "apps/web/src/components/UsageReadout.tsx": importUsage,
+  [BRIDGE]: "export function ask" + "App() {}",
+  [ACCOUNT]: importAsk("./native-bridge") + "export const signIn = () => ask" + 'App("sign-in", { text: "x" });',
+  [ACCOUNT_PANEL]: importAsk("../native-bridge"),
 };
 
 function withFixture(files, fn) {
@@ -170,6 +179,55 @@ test("gate:revision-privacy refuses the app handing the record anywhere else", (
     const r = runGate("revision-privacy", root);
     assert.equal(r.status, 1, r.out);
     assert.match(r.out, /App\.tsx uses readRecord outside the carry card/);
+  });
+});
+
+test("gate:revision-privacy refuses a new file asking the app a question", () => {
+  withFixture({ ...clean, "apps/web/src/components/ShareSheet.tsx": importAsk("../native-bridge") }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /ShareSheet\.tsx asks the app a question/);
+  });
+});
+
+test("gate:revision-privacy lets a test file ask the app", () => {
+  withFixture({ ...clean, "apps/web/src/share.test.ts": importAsk("./native-bridge") }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 0, r.out);
+  });
+});
+
+test("gate:revision-privacy refuses a way off the device inside the account section", () => {
+  const hatch = "fet" + "ch(";
+  withFixture({ ...clean, [ACCOUNT_PANEL]: clean[ACCOUNT_PANEL] + `${hatch}"https://hifth.app/api/sign-in");` }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /Account\.tsx contains `fetch\(`/);
+  });
+});
+
+test("gate:revision-privacy refuses the account section reaching a record", () => {
+  withFixture({ ...clean, [ACCOUNT]: clean[ACCOUNT] + "\n" + importStore }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /account\.ts imports the revision record/);
+  });
+});
+
+test("gate:revision-privacy refuses the account section handing the app words of its own", () => {
+  withFixture({ ...clean, [ACCOUNT_PANEL]: clean[ACCOUNT_PANEL] + "ask" + 'App("sign-in", { text: "x" });' }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /Account\.tsx hands the app words with a question/);
+  });
+});
+
+test("gate:revision-privacy refuses a list of askers that names a file which is gone", () => {
+  const { [ACCOUNT_PANEL]: _gone, ...without } = clean;
+  withFixture(without, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /Account\.tsx, which no longer exists/);
   });
 });
 
