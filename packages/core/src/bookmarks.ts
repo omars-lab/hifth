@@ -17,6 +17,7 @@
 import { isConfusion, type Confusion } from "./confusions.js";
 import { parseAyahKey } from "./keys.js";
 import { isNote, type Note } from "./notes.js";
+import { isRemoval, type Removal } from "./removals.js";
 import { isScopedNote, type ScopedNote } from "./scoped-notes.js";
 
 /** One thing that happened to a bookmark. Its timeline is a list of these. */
@@ -56,6 +57,13 @@ export interface BookmarkFile {
   readonly scopedNotes?: readonly ScopedNote[];
   /** Where the reader's memory jumped (docs/design/confusion-jumps.md). Only in a version 3 file. */
   readonly confusions?: readonly Confusion[];
+  /**
+   * The notes the reader took away, by id and time only, so a device merging
+   * this copy takes them away too (removals.ts). Absent when there are none.
+   * No new version number: an older app reads the file and skips this list,
+   * which only means it keeps a note this device deleted, as it always did.
+   */
+  readonly removed?: readonly Removal[];
 }
 
 /** Longest name a ribbon carries; longer names are cut, not refused. */
@@ -208,12 +216,14 @@ export function toBookmarkFile(
   notes?: readonly Note[],
   scopedNotes?: readonly ScopedNote[],
   confusions?: readonly Confusion[],
+  removed?: readonly Removal[],
 ): BookmarkFile {
   const file: BookmarkFile = { kind: "hifth.bookmarks", version: 1, savedAt: now, bookmarks: set };
   const withNotes = notes && notes.length > 0 ? { ...file, notes } : file;
   const withScoped: BookmarkFile = scopedNotes ? { ...withNotes, version: 2, scopedNotes } : withNotes;
   // A file with no jumps keeps its old number, so an older copy of the app still reads it.
-  return confusions && confusions.length > 0 ? { ...withScoped, version: 3, confusions } : withScoped;
+  const withJumps = confusions && confusions.length > 0 ? { ...withScoped, version: 3 as const, confusions } : withScoped;
+  return removed && removed.length > 0 ? { ...withJumps, removed } : withJumps;
 }
 
 function isEvent(x: unknown): x is BookmarkEvent {
@@ -264,6 +274,7 @@ export function parseBookmarkFile(text: string): BookmarkFile | null {
     return null;
   if (f.confusions !== undefined && !(f.version === 3 && Array.isArray(f.confusions) && f.confusions.every(isConfusion)))
     return null;
+  if (f.removed !== undefined && !(Array.isArray(f.removed) && f.removed.every(isRemoval))) return null;
   const file: BookmarkFile = {
     kind: "hifth.bookmarks",
     version: f.version,
@@ -272,7 +283,10 @@ export function parseBookmarkFile(text: string): BookmarkFile | null {
   };
   const withNotes = Array.isArray(f.notes) ? { ...file, notes: f.notes as Note[] } : file;
   const withScoped = Array.isArray(f.scopedNotes) ? { ...withNotes, scopedNotes: f.scopedNotes as ScopedNote[] } : withNotes;
-  return Array.isArray(f.confusions) ? { ...withScoped, confusions: f.confusions as Confusion[] } : withScoped;
+  const withJumps = Array.isArray(f.confusions) ? { ...withScoped, confusions: f.confusions as Confusion[] } : withScoped;
+  return Array.isArray(f.removed)
+    ? { ...withJumps, removed: (f.removed as Removal[]).map((r) => ({ id: r.id, at: r.at })) }
+    : withJumps;
 }
 
 /**

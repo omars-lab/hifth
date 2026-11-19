@@ -2159,6 +2159,11 @@
           "file": "packages/core/src/scoped-notes.ts",
           "symbol": "notesAbout",
           "note": "The notes a juz, surah or page label lists: those about it or a smaller part inside it, and those holding one of its verses. The menu items are in cornerItems in App.tsx; a note with no verse opens its box there (openNoteOf, closeLabelNote)."
+        },
+        {
+          "file": "packages/core/src/removals.ts",
+          "symbol": "trackRemovals",
+          "note": "A note the reader deleted stays deleted when another device's copy is loaded in: each deletion is kept as the note's id and when it went, for a year, in the device's store and the saved file. A copy whose note is older than the deletion loses it; a note changed or put back by Undo after the deletion wins. mergeNotesFile in scoped-notes.ts applies it; track in useBookmarks.ts records each deletion."
         }
       ],
       "extend": [

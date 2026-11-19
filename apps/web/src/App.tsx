@@ -2148,6 +2148,7 @@ export function App(): JSX.Element {
   const {
     notes,
     scoped,
+    removed: notesRemoved,
     loaded: notesLoaded,
     commit: commitNotes,
     commitScoped,
@@ -2541,15 +2542,17 @@ export function App(): JSX.Element {
 
   // The file carries the notes that gather verses and, apart from them, the
   // marked mistakes, which are still the old kind of note, and the jumps. The
-  // same text is what the carry to hifth.app sends (moved.ts).
+  // same text is what the carry to hifth.app sends (moved.ts). It also names
+  // the notes taken away, by id and time only, so a device that merges it
+  // takes them away too (removals.ts).
   const bookmarkFileText = useCallback(
     () =>
       JSON.stringify(
-        toBookmarkFile(bookmarks, Date.now(), notes.filter(isMistake), [...scoped], confusions),
+        toBookmarkFile(bookmarks, Date.now(), notes.filter(isMistake), [...scoped], confusions, notesRemoved),
         null,
         2,
       ),
-    [bookmarks, notes, scoped, confusions],
+    [bookmarks, notes, scoped, confusions, notesRemoved],
   );
 
   const saveBookmarkFile = useCallback(() => {
@@ -2572,7 +2575,10 @@ export function App(): JSX.Element {
       }
       const merged = mergeBookmarks(bookmarks, file.bookmarks);
       const newBookmarks = merged.length - bookmarks.length;
-      const newNotes = file.notes || file.scopedNotes ? loadNotesFile(file.notes ?? [], file.scopedNotes ?? []) : 0;
+      const newNotes =
+        file.notes || file.scopedNotes || file.removed
+          ? loadNotesFile(file.notes ?? [], file.scopedNotes ?? [], file.removed ?? [])
+          : 0;
       const newJumps = file.confusions ? loadConfusionsFile(file.confusions) : 0;
       // Say what the file brought; "nothing new" only when it brought nothing at all.
       const parts = [

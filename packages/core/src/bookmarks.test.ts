@@ -116,6 +116,22 @@ describe("saving to a file and loading it back", () => {
     expect(parseBookmarkFile(JSON.stringify(broken))).toBeNull();
   });
 
+  it("carries the notes taken away, so another device takes them away too", () => {
+    const removed = [{ id: "n1", at: T + 3 }];
+    const file = toBookmarkFile(three(), T + 9, undefined, [], undefined, removed);
+    expect(file.removed).toEqual(removed);
+    expect(parseBookmarkFile(JSON.stringify(file))?.removed).toEqual(removed);
+    // None taken away: the file looks as it always did, so an older app reads it the same.
+    expect("removed" in toBookmarkFile(three(), T, undefined, [], undefined, [])).toBe(false);
+    expect(parseBookmarkFile(JSON.stringify(toBookmarkFile(three(), T)))?.removed).toBeUndefined();
+  });
+
+  it("refuses a file whose list of notes taken away is broken", () => {
+    const bad = { ...toBookmarkFile(three(), T), removed: [{ id: "n1", at: "soon" }] };
+    expect(parseBookmarkFile(JSON.stringify(bad))).toBeNull();
+    expect(parseBookmarkFile(JSON.stringify({ ...toBookmarkFile(three(), T), removed: "n1" }))).toBeNull();
+  });
+
   it("loading never deletes, and keeps the copy that has seen more", () => {
     const held = three();
     const id = held[0]!.id;

@@ -480,6 +480,41 @@ describe("loading a saved file into what the device holds", () => {
     expect(r.scoped[0]!.text).toBe("newer");
     expect(r.added).toBe(0);
   });
+
+  // Step 21a of the sign-in plan: copies on two devices meet, and a note taken
+  // away on one must not come back from the other.
+  it("a note deleted on the other device goes here too", () => {
+    const kept = note("a", { type: "whole" }, 10);
+    const r = mergeNotesFile([kept, note("b", { type: "whole" }, 10)], [], [], [kept], [], [{ id: "b", at: 20 }]);
+    expect(r.scoped.map((n) => n.id)).toEqual(["a"]);
+    expect(r.removed).toEqual([{ id: "b", at: 20 }]);
+    expect(r.added).toBe(0);
+  });
+
+  it("a note deleted here does not come back from an older copy", () => {
+    const r = mergeNotesFile([], [], [], [note("b", { type: "whole" }, 10)], [{ id: "b", at: 20 }], []);
+    expect(r.scoped).toEqual([]);
+    expect(r.removed).toEqual([{ id: "b", at: 20 }]);
+    expect(r.added).toBe(0);
+  });
+
+  it("a note written in on the other device after it was deleted here comes back", () => {
+    const later = { ...note("b", { type: "whole" }, 30), text: "still wanted" };
+    const r = mergeNotesFile([], [], [], [later], [{ id: "b", at: 20 }], []);
+    expect(r.scoped.map((n) => n.text)).toEqual(["still wanted"]);
+    expect(r.removed).toEqual([]);
+    expect(r.added).toBe(1);
+  });
+
+  it("a marked mistake deleted on one device stays deleted on the other", () => {
+    const r = mergeNotesFile([], [old("m", "correction", 5)], [old("m", "correction", 5)], [], [], [{ id: "m", at: 9 }]);
+    expect(r.mistakes).toEqual([]);
+  });
+
+  it("an old note from a file, moved across as it loads, stays deleted too", () => {
+    const r = mergeNotesFile([], [], [old("c", "comment", 5)], [], [{ id: "c", at: 9 }], []);
+    expect(r.scoped).toEqual([]);
+  });
 });
 
 describe("the dot by a verse's number", () => {

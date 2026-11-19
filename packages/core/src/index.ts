@@ -103,6 +103,16 @@ export {
   type ScopedNote,
   type ScopedNoteKind,
 } from "./scoped-notes.js";
+// removals — the notes a reader took away, by id and time, so a copy merged in
+// from another device does not bring them back (docs/design/sign-in.md, step 21a)
+export {
+  REMOVAL_KEEP_MS,
+  dropRemoved,
+  isRemoval,
+  joinRemovals,
+  trackRemovals,
+  type Removal,
+} from "./removals.js";
 // confusion jumps — where your memory jumped from one verse to another, kept
 // as one record per pair with every time it happened (docs/design/confusion-jumps.md)
 export {

@@ -7513,6 +7513,30 @@
       "note": "The owner chose sign-in at launch on 2026-11-15, and on 2026-11-17 chose what it unlocks first: the reader's marks follow them. On 2026-11-18 the owner settled the last two choices: accounts are kept by our own small code on hifth.app's Cloudflare account with its free database, and the copy on our server is not locked at first, with the button saying we could read it. No choice waits on the owner now, and the sign-in build is ours. Two small owner steps remain, the sign-in page's ⑧ and ⑨: the Sign in with Apple key file, and a yes to make the real accounts database. Until then the server runs on the laptop with a local copy and a made-up key. 2026-11-18: ⑨ is done (the owner said yes, and the accounts database is made and empty); ⑧, the key file, is the one owner step left. The building is the sign-in work's; this row only counts it toward the launch."
     },
     {
+      "id": "marks-copies-table-on-real-database",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "㉑"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "user",
+      "useCase": "sign-in-so-my-marks-follow-me",
+      "note": "Step 21b added a table that keeps one copy of each signed-in reader's marks. It is on the laptop's local copy only; the owner's yes of 2026-11-18 covered the two sign-in tables, not this one. Owed: a yes in the chat, then the same one command adds it, empty. Needed only before the first upload with the app's copy button (step 21c) switched on."
+    },
+    {
+      "id": "deleted-bookmarks-come-back",
+      "source": {
+        "file": "docs/design/sign-in.md",
+        "item": "㉒"
+      },
+      "status": "open",
+      "severity": "defect",
+      "owner": "agent",
+      "useCase": "sign-in-so-my-marks-follow-me",
+      "note": "Since step 21a a deleted note stays deleted when another device's copy of the marks is loaded in: the device keeps the note's id and when it went. Bookmarks and confusion jumps have no such list yet, so one deleted on the iPad comes back the next time the iPhone's older copy is loaded in. The fix is the same list (removals.ts) carried for them too, with the same tests. Not a blocker for laptop trials, but it is before marks follow a reader between devices for real."
+    },
+    {
       "id": "launch-account-deletion",
       "source": {
         "file": "docs/design/app-store-launch.md",

@@ -12,7 +12,17 @@
  * costs the reader a bookmark, never the page they are reading.
  */
 
-import { isConfusion, isMistake, migrateV1Notes, type Bookmark, type Confusion, type Note, type ScopedNote } from "@hifth/core";
+import {
+  isConfusion,
+  isMistake,
+  isRemoval,
+  migrateV1Notes,
+  type Bookmark,
+  type Confusion,
+  type Note,
+  type Removal,
+  type ScopedNote,
+} from "@hifth/core";
 
 const DB_NAME = "hifth.bookmarks.v1";
 const DB_VERSION = 1;
@@ -168,12 +178,26 @@ interface ScopedRecord {
   readonly notes: readonly ScopedNote[];
 }
 
-/** What the device holds: the new notes, the marked mistakes, and the backup. */
+/*
+ * The notes the reader took away, by id and time only (removals.ts in the
+ * core, sign-in step 21a), so a copy from another device merged in later does
+ * not bring them back. Written in the same write as the notes.
+ */
+const REMOVED_KEY = "removed";
+
+interface RemovedRecord {
+  readonly id: typeof REMOVED_KEY;
+  readonly removed: readonly Removal[];
+}
+
+/** What the device holds: the new notes, the marked mistakes, the backup, and what was taken away. */
 export interface HeldNotes {
   readonly scoped: ScopedNote[];
   readonly mistakes: Note[];
   /** The notes as they were the day they were moved across, kept untouched. */
   readonly backup: Note[];
+  /** The notes taken away. A list that cannot be read is read as empty. */
+  readonly removed: Removal[];
 }
 
 /**
@@ -201,7 +225,11 @@ export async function loadNotes(): Promise<HeldNotes | null> {
       tx.onerror = () => reject(tx.error);
       tx.onabort = () => reject(tx.error);
     });
-    const [old, held] = await Promise.all([get<NotesRecord>(NOTES_KEY), get<ScopedRecord>(SCOPED_KEY)]);
+    const [old, held, gone] = await Promise.all([
+      get<NotesRecord>(NOTES_KEY),
+      get<ScopedRecord>(SCOPED_KEY),
+      get<RemovedRecord>(REMOVED_KEY),
+    ]);
     const notes = [...(old?.notes ?? [])];
     let scoped = held ? [...held.notes] : null;
     if (!scoped) {
@@ -209,7 +237,8 @@ export async function loadNotes(): Promise<HeldNotes | null> {
       sets.put({ id: SCOPED_KEY, notes: scoped } satisfies ScopedRecord);
     }
     await done;
-    return { scoped, mistakes: notes.filter(isMistake), backup: notes.filter((n) => !isMistake(n)) };
+    const removed = Array.isArray(gone?.removed) && gone.removed.every(isRemoval) ? [...gone.removed] : [];
+    return { scoped, mistakes: notes.filter(isMistake), backup: notes.filter((n) => !isMistake(n)), removed };
   } catch {
     return null;
   } finally {
@@ -219,9 +248,14 @@ export async function loadNotes(): Promise<HeldNotes | null> {
 
 /**
  * Write the notes that gather verses and the old record together, in one
- * write, so the two never disagree. False when the phone refused it.
+ * write, so the two never disagree, with the notes taken away when given.
+ * False when the phone refused it.
  */
-export async function writeAllNotes(old: readonly Note[], scoped: readonly ScopedNote[]): Promise<boolean> {
+export async function writeAllNotes(
+  old: readonly Note[],
+  scoped: readonly ScopedNote[],
+  removed?: readonly Removal[],
+): Promise<boolean> {
   if (!bookmarkStoreSupported()) return false;
   let db: IDBDatabase | null = null;
   try {
@@ -230,6 +264,7 @@ export async function writeAllNotes(old: readonly Note[], scoped: readonly Scope
     const sets = tx.objectStore(SETS);
     sets.put({ id: NOTES_KEY, notes: old } satisfies NotesRecord);
     sets.put({ id: SCOPED_KEY, notes: scoped } satisfies ScopedRecord);
+    if (removed) sets.put({ id: REMOVED_KEY, removed } satisfies RemovedRecord);
     await new Promise<void>((resolve, reject) => {
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);

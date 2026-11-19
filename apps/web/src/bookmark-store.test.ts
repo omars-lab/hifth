@@ -99,7 +99,25 @@ const OLD: Note[] = [
 
 describe("notes moved across to the kind that gathers verses", () => {
   beforeEach(async () => {
-    await seed([], ["notes", "scoped-notes"]);
+    await seed([], ["notes", "scoped-notes", "removed"]);
+  });
+
+  it("keeps the notes taken away in the same write, and an old write leaves them alone", async () => {
+    const removed = [{ id: "c1", at: T + 5 }];
+    expect(await writeAllNotes([], [], removed)).toBe(true);
+    expect((await loadNotes())?.removed).toEqual(removed);
+    // A write that does not say leaves the list as it was.
+    expect(await writeAllNotes([], [])).toBe(true);
+    expect((await loadNotes())?.removed).toEqual(removed);
+    expect(await writeAllNotes([], [], [])).toBe(true);
+    expect((await loadNotes())?.removed).toEqual([]);
+  });
+
+  it("drops a broken list of notes taken away rather than the notes", async () => {
+    await seed([{ id: "removed", removed: [{ id: "c1", at: "soon" }] }, { id: "notes", notes: OLD }]);
+    const got = await loadNotes();
+    expect(got?.removed).toEqual([]);
+    expect(got?.mistakes.map((n) => n.id)).toEqual(["m1"]);
   });
 
   it("moves today's notes across once, keeping the old record as it was", async () => {
@@ -126,7 +144,7 @@ describe("notes moved across to the kind that gathers verses", () => {
   });
 
   it("starts with nothing on a device that never had notes", async () => {
-    expect(await loadNotes()).toEqual({ scoped: [], mistakes: [], backup: [] });
+    expect(await loadNotes()).toEqual({ scoped: [], mistakes: [], backup: [], removed: [] });
   });
 });
 

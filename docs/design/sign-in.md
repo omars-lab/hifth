@@ -457,3 +457,11 @@ Recommended: A. It keeps the page as it is and matches what readers expect. Noth
 ### ⑳ Do the account words slow the app's start for readers who never see them? · **open**
 
 The agent's, not urgent. The account section's English and Arabic words are packed with the words every reader loads when the app opens, though only the store apps show the section. Step 16 made each language's words about 1 KB larger (zipped), which the app's size check let through only after its limit was raised. Moving the account words into the part that loads later, when the info panel opens, would give that back. It needs the words to be split into two packs, which touches every screen's words, so it waits for a quiet stretch.
+
+### ㉑ May the table that keeps each reader's copy of their marks be added to the real accounts database? · **open**
+
+Step 21b added one more table: it keeps one copy of a signed-in reader's marks, replaced whole each time they send a new one, and deleted with their account. It is built and tested on the laptop's local copy only. Your yes on 2026-11-18 covered the two sign-in tables, not this one, so it waits on a new yes. **You:** say yes in the chat, and it is added with the same one command as before, empty. Nothing uses it until the app's button (step 21c) is switched on, so there is no hurry; it only has to be there before the first upload with that button on. Without it, the button would fail on the live site and say so; no reader's marks would be lost, since the device keeps its own.
+
+### ㉒ Can a bookmark or jump the reader deleted come back from an older copy? · **open**
+
+Yes, today. Since step 21a a deleted note stays deleted when another device's copy is loaded in, because the device keeps each deleted note's id and when it went. Bookmarks and the jumps between look-alike verses have no such list yet, so one deleted on the iPad comes back the next time the iPhone's older copy is loaded in. The fix is the same list carried for them too, with the same tests. It is the agent's, and it comes before marks follow a reader between devices for real; laptop trials are not held up by it.

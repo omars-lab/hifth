@@ -3,12 +3,15 @@ import {
   dropUnwritten,
   fromPins,
   isMistake,
+  joinRemovals,
   mergeConfusions,
   mergeNotesFile,
   pinsOf,
+  trackRemovals,
   type Bookmark,
   type Confusion,
   type Note,
+  type Removal,
   type ScopedNote,
 } from "@hifth/core";
 import {
@@ -170,12 +173,14 @@ export function useNotes(
 ): {
   notes: readonly Note[];
   scoped: readonly ScopedNote[];
+  /** The notes the reader took away, by id and time, for the copy to carry (removals.ts). */
+  removed: readonly Removal[];
   /** True once the saved notes have been read in; nothing is written before. */
   loaded: boolean;
   commit: (next: Note[], said: string, how?: CommitHow) => void;
   /** Replace the notes that gather verses outright, as joining a note and its Undo do. */
   commitScoped: (next: readonly ScopedNote[], said: string, how?: CommitHow) => void;
-  loadFile: (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => number;
+  loadFile: (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[], fileRemoved?: readonly Removal[]) => number;
   restore: (held: unknown, said: string) => void;
   /** Settles once every write asked for so far has reached disk. */
   saved: () => Promise<unknown>;
@@ -208,6 +213,7 @@ export function useNotes(
       hold({
         scoped: [...kept, ...now.scoped.filter((n) => !got.scoped.some((s) => s.id === n.id))],
         mistakes: [...got.mistakes, ...now.mistakes.filter((n) => !got.mistakes.some((s) => s.id === n.id))],
+        removed: joinRemovals(got.removed, now.removed),
       });
       setLoaded(true);
     });
@@ -224,7 +230,7 @@ export function useNotes(
           const from = stored.current;
           if (!from) return false;
           const now = latest.current;
-          return writeAllNotes([...from.backup, ...now.mistakes], now.scoped);
+          return writeAllNotes([...from.backup, ...now.mistakes], now.scoped, now.removed);
         })
         .then((ok) => {
           if (!ok) announce(notSaved);
@@ -237,9 +243,10 @@ export function useNotes(
   // Undo hears the notes as a whole, before and after: the notes that gather
   // verses and the mistakes together, so taking a change back is one write.
   const change = useCallback(
-    (next: Held, said: string, how?: CommitHow) => {
-      if (!how?.unrecorded) record?.(latest.current, next, said, how?.opens);
-      hold(next);
+    (next: Marks, said: string, how?: CommitHow) => {
+      const tracked = track(latest.current, next, Date.now());
+      if (!how?.unrecorded) record?.(latest.current, tracked, said, how?.opens);
+      hold(tracked);
       save(said);
     },
     [hold, record, save],
@@ -268,19 +275,23 @@ export function useNotes(
     [change],
   );
 
+  // Undo and Redo put back the notes they held, but the list of what was taken
+  // away is worked out from what the device holds now, never taken from the
+  // snapshot: a deletion the snapshot predates still happened, and a note Undo
+  // brings back must be stamped newer than its deletion.
   const restore = useCallback(
     (held: unknown, said: string) => {
-      hold(held as Held);
+      hold(track(latest.current, held as Marks, Date.now()));
       save(said);
     },
     [hold, save],
   );
 
   const loadFile = useCallback(
-    (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => {
+    (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[], fileRemoved: readonly Removal[] = []) => {
       const now = latest.current;
-      const merged = mergeNotesFile(now.scoped, now.mistakes, fileNotes, fileScoped);
-      hold({ scoped: merged.scoped, mistakes: merged.mistakes });
+      const merged = mergeNotesFile(now.scoped, now.mistakes, fileNotes, fileScoped, now.removed, fileRemoved);
+      hold({ scoped: merged.scoped, mistakes: merged.mistakes, removed: merged.removed });
       save("");
       return merged.added;
     },
@@ -288,15 +299,55 @@ export function useNotes(
   );
 
   const notes = useMemo(() => [...pinsOf(held.scoped), ...held.mistakes], [held]);
-  return { notes, scoped: held.scoped, loaded, commit, commitScoped, loadFile, restore, saved: () => queue.current };
+  return {
+    notes,
+    scoped: held.scoped,
+    removed: held.removed,
+    loaded,
+    commit,
+    commitScoped,
+    loadFile,
+    restore,
+    saved: () => queue.current,
+  };
 }
 
 interface Held {
   readonly scoped: ScopedNote[];
   readonly mistakes: Note[];
+  readonly removed: Removal[];
 }
 
-const EMPTY: Held = { scoped: [], mistakes: [] };
+/** The notes themselves, without the list of what was taken away. */
+type Marks = Pick<Held, "scoped" | "mistakes">;
+
+const EMPTY: Held = { scoped: [], mistakes: [], removed: [] };
+
+/**
+ * The notes after a change, with what the change took away remembered and a
+ * note it put back stamped newer than its removal (removals.ts). A note that
+ * gathers verses counts as changed when it was last edited or used; a mistake
+ * when it was last edited.
+ */
+function track(from: Held, next: Marks, now: number): Held {
+  const scoped = trackRemovals(
+    from.removed,
+    from.scoped,
+    next.scoped,
+    now,
+    (n) => Math.max(n.updatedAt, n.usedAt),
+    (n, at) => ({ ...n, usedAt: at }),
+  );
+  const mistakes = trackRemovals(
+    scoped.removed,
+    from.mistakes,
+    next.mistakes,
+    now,
+    (n) => n.updatedAt,
+    (n, at) => ({ ...n, updatedAt: at }),
+  );
+  return { scoped: scoped.after, mistakes: mistakes.after, removed: mistakes.removed };
+}
 
 /**
  * The reader's confusion jumps (docs/design/confusion-jumps.md), held like the
