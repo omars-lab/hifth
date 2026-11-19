@@ -691,6 +691,16 @@
           "note": "Loop 4b: the whole print, fetched from the pinned upstream, optimised the way Loop 0 optimised its three, and written unpadded (`8.svg`, not `008.svg`). It reproduces pages 7, 9 and 19 byte for byte before it will vendor anything else — a run that cannot rebuild what is already committed has changed the pipeline, not extended the corpus. Three transforms stand between upstream and what ships, all declared in the header and all asserted by exact count: svgo at the pinned version and config, `ID_REPAIRS` (two polygons whose `id` holds path geometry), and `POLYGON_REPAIRS` (PLAN 14 — 21 tap targets that did not cover their own ayah). The last runs *before* svgo, because svgo rewrites path data at `floatPrecision 1` and a repair written against optimised output would be matching our own rounding rather than upstream's bytes."
         },
         {
+          "file": "packages/etl/scripts/lib/verse-rings.mjs",
+          "symbol": "swapRings",
+          "note": "Launch item 45: the ring round each verse number comes from a source quran-svg does not name, so the copy step can swap it, after the polygon repairs and before svgo. The pin's `rings.mode` picks: `upstream` leaves every page byte for byte, `complex` places the Complex's own medallion, `plain` a ring of ours. Either swap is placed from the verse number alone, by a straight-line offset fitted against the Complex's drawing files, and refuses a page whose rings and numbers do not pair one to one or whose ring is not on its own number. How the offsets were fitted and checked is the mushaf-reference skill's scripts table."
+        },
+        {
+          "file": "packages/etl/scripts/lib/verse-rings.test.mjs",
+          "symbol": "swapRings",
+          "note": "Ten tests on made-up pages (no scripture): the switch left off changes nothing, each swap lands at the numeral plus the offset, the doubled rings on the opening pages are dropped, and every refusal fires. One failed first: a number written with an exponent was being read as a drawing command."
+        },
+        {
           "file": "packages/core/src/manifest.ts",
           "symbol": "expandManifest",
           "note": "The wire form the app fetches. 604 pages of per-ayah polygons is megabytes; the compact form is one 6236-long array indexed by absolute ayah, 1.3 KB gzipped, so the manifest stayed a single eager request instead of becoming a shard. A page an edition lacks is written as `0` and skipped on expand — that zero is what every honest-hole path downstream is reading."

@@ -210,8 +210,20 @@ copy step's cache (`packages/etl/data/pages/.cache/svg/NNN.svg`, main checkout o
 | `medallion_extract.py` | Writes the template: one medallion from one drawing file, that file's address and sha256, and the two placing lines (regular pages, and pages 1 and 2 with their smaller scale) | To make or remake the template the copy step's swap would use | `python3 -I medallion_extract.py <out.json> <007.ai> <url> 7 --regular <p>:<d> ... --small <p>:<d> ...` |
 | `medallion_place_trial.py` | Places the template's medallion on a pinned page from its numerals alone, reading no drawing file | To test the template on a page it was not made from, then run the overlay on the result | `python3 -I medallion_place_trial.py <pinned> <template.json> <page> <out.svg>` |
 | `medallion_svgo_trial.mjs` | Runs one page through the copy step's shrink settings from the pin, at a chosen rounding, and prints the size and whether verse numbers and green survive | To weigh a different rounding (㊼) before changing the copy step | `node medallion_svgo_trial.mjs packages/etl <pin.json> <in.svg> <out.svg> [places]` |
+| `ring_swap_pages.mjs` | Runs the copy step's own ring swap (`packages/etl/scripts/lib/verse-rings.mjs`) and shrink settings on chosen pages into a folder, leaving the app's pages and the pin alone; prints rings found, doubled ones dropped and shapes placed per page | To look at a ring mode before switching it on; then give its folder to the overlay as `<shipped_dir>` | `node ring_swap_pages.mjs --mode complex\|plain [--shape <template.json>] --pages 1,2,7 [--precision 1] --out <dir>` |
 
 The page's height in the drawing files is 547.086 points; the marker frame's y runs up from it.
+
+### Switching the ring
+
+The copy step reads `rings.mode` in the pin: `upstream` (today, every page as pinned),
+`complex` (the medallion, read from `packages/etl/data/pages/verse-ring-complex.json`, which is
+the template's `d` and `fill` and is committed only once the owner picks it) or `plain`. On every
+run it asserts 6248 rings found; with a swap on, also 12 doubled ones dropped and 6236 placed,
+and it stops if a ring is not on its own verse number. Switching rewrites all 604 pages, so it
+goes with `vendor:pages --repin`, the pages gate, and the owner's yes on the golden pictures.
+Checked 2026-11-18 through the real copy path at one decimal place: 5.4% to 6.0% of our green
+misses the drawing's on pages 1, 2, 7, 176, 177, 300 and 604, the same as the renderer floor.
 
 ## Where this stops
 

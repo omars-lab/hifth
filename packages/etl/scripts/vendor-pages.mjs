@@ -65,11 +65,14 @@ import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { optimize } from "svgo";
+import { swapRings } from "./lib/verse-rings.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..", "..");
 const DATA = join(HERE, "..", "data", "pages");
 const PIN_FILE = join(DATA, "quran-svg.pin.json");
+/** The Complex's medallion, read only when the pin's ring mode is "complex". */
+const COMPLEX_RING_FILE = join(DATA, "verse-ring-complex.json");
 const CACHE = join(DATA, ".cache");
 const PAGES_DIR = join(REPO, "apps", "web", "public", "assets", "pages", "hafs-kfqc");
 
@@ -84,6 +87,14 @@ const FETCH_RETRIES = 4;
  * being quietly rebased on a different corpus.
  */
 const LOOP0_PAGES = [7, 9, 19];
+
+/**
+ * Verse-number rings (launch item 45): quran-svg draws one per verse number,
+ * and pages 1 and 2 draw each of theirs twice. Asserted on every run, so a
+ * ring the swap step can no longer find is caught even while the swap is off.
+ */
+const RINGS_FOUND = 6248;
+const RING_TWINS = 12;
 
 /**
  * Upstream `id` defects, as {page, number(SSSAAA)}. Both hold path geometry
@@ -404,6 +415,16 @@ function readPin() {
   return JSON.parse(readFileSync(PIN_FILE, "utf8"));
 }
 
+/** The pin's ring entry, with the Complex's medallion added when that mode is on. */
+function readRings(pin) {
+  const rings = pin.rings ?? { mode: "upstream" };
+  if (rings.mode !== "complex") return rings;
+  if (!existsSync(COMPLEX_RING_FILE)) {
+    die(`ring mode is "complex" but ${COMPLEX_RING_FILE} is missing — see the mushaf-reference skill`);
+  }
+  return { ...rings, complex: JSON.parse(readFileSync(COMPLEX_RING_FILE, "utf8")) };
+}
+
 /** Raw URL for one upstream file, from the pin's coordinates. */
 function upstreamUrl(pin, kind, page) {
   const ext = kind === "svg" ? "svg" : "json";
@@ -618,15 +639,26 @@ async function main() {
     console.log(`pin verified: ${PAGES * 2} upstream files match ${pin.commit.slice(0, 8)}`);
   }
 
-  // 2. Repair polygons, optimize, repair ids. Order matters: the polygon
-  //    repairs match raw upstream `d` strings, which svgo then rewrites.
+  // 2. Repair polygons, swap the verse-number rings, optimize, repair ids.
+  //    Order matters: the polygon repairs and the ring swap both match raw
+  //    upstream markup, which svgo then rewrites.
   const config = svgoConfig(pin);
+  const rings = readRings(pin);
   const out = [];
   let repairs = 0;
   let polyRepairs = 0;
+  const ringTotals = { found: 0, twins: 0, placed: 0 };
   for (const u of upstream) {
-    const { svg: raw, count: polys } = repairPolygons(u.svg.toString("utf8"), u.page);
+    const { svg: repaired, count: polys } = repairPolygons(u.svg.toString("utf8"), u.page);
     polyRepairs += polys;
+    let raw;
+    try {
+      const swapped = swapRings(repaired, u.page, rings);
+      raw = swapped.svg;
+      for (const k of Object.keys(ringTotals)) ringTotals[k] += swapped[k];
+    } catch (e) {
+      die(e.message);
+    }
     const optimized = optimize(raw, config).data + "\n";
     if (/<text[\s>]/.test(optimized)) {
       // Loop 0's standing rule: outlined paths only. A <text> element trips the
@@ -643,6 +675,22 @@ async function main() {
   if (polyRepairs !== POLYGON_REPAIRS.length) {
     die(`expected exactly ${POLYGON_REPAIRS.length} polygon repairs, applied ${polyRepairs}`);
   }
+  if (ringTotals.found !== RINGS_FOUND) {
+    die(`expected exactly ${RINGS_FOUND} verse-number rings, found ${ringTotals.found}`);
+  }
+  if (rings.mode !== "upstream") {
+    const want = RINGS_FOUND - RING_TWINS;
+    if (ringTotals.twins !== RING_TWINS || ringTotals.placed !== want) {
+      die(
+        `ring swap: expected ${RING_TWINS} doubled rings dropped and ${want} placed, ` +
+          `got ${ringTotals.twins} and ${ringTotals.placed}`,
+      );
+    }
+  }
+  console.log(
+    `verse-number rings: ${ringTotals.found} found, mode ${rings.mode}` +
+      (rings.mode === "upstream" ? "" : `, ${ringTotals.twins} doubled dropped, ${ringTotals.placed} placed`),
+  );
 
   // 3. The self-test: reproduce Loop 0's three pages before overwriting them.
   for (const page of LOOP0_PAGES) {
