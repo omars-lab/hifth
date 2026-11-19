@@ -4131,10 +4131,11 @@
         "file": "docs/design/sign-in.md",
         "item": "⑪"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
-      "note": "Apple's cancel ticket is locked with a key worked out from the Sign in with Apple key file. If that file is ever replaced, old tickets cannot be opened and nothing replaces them, so those readers' account deletes cannot cut the Apple link. Fix before any key swap: trade for a new ticket at the next sign-in when the kept one cannot be opened. Also: if Apple cuts the link and our delete then fails, the ticket left is dead and a second try says the link was left."
+      "closedBy": "apps/landing/lib/sign-in-api.test.mjs",
+      "note": "Apple's cancel ticket is locked with a key worked out from the Sign in with Apple key file. If that file is ever replaced, old tickets could not be opened and nothing replaced them. Fixed 2026-11-18: each sign-in checks that the kept ticket still opens with today's key file, and if not trades Apple's new one-time code for a fresh one, swapping it in only once it is in hand. A ticket that opens is left alone. Tests: accounts.test.mjs (a ticket that will not open is traded and replaced; one that opens is not; a failed trade keeps the old one) and sign-in-api.test.mjs (a real lock, a replaced made-up key file, then delete my account hands the new ticket back). Left, by choice: if Apple cuts the link and our delete then fails, the ticket left is dead and a second try says the link was left, which is true."
     },
     {
       "id": "sign-in-session-length-and-clean-up",
@@ -4145,7 +4146,7 @@
       "status": "open",
       "severity": "defect",
       "owner": "agent",
-      "note": "The sign-in page says a sign-in renews when used; the code gives a fixed 60 days with no renewal. Nothing removes sign-ins or one-off words that have run out, so a list of sign-in dates builds up per account. Found by the privacy draft on 2026-11-18. Settle renew or fixed, add a clean-up, and make the privacy wording match."
+      "note": "The sign-in page says a sign-in renews when used; the code gives a fixed 60 days with no renewal. Found by the privacy draft on 2026-11-18. The clean-up half is done the same day: one-off words that ran out go when a new one is handed out, and sign-ins that ran out, anyone's, go each time someone signs in (accounts.test.mjs), and the privacy draft now says so. Left: the owner's choice of renew on use or a fixed 60 days, then the privacy wording to match."
     },
     {
       "id": "sign-in-app-drops-session-quietly",

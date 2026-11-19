@@ -138,6 +138,13 @@ function ticketTrade(env, fetch) {
   };
 }
 
+/** Whether a kept ticket still opens with today's key file (question 11), or undefined without one. */
+function ticketOpens(env) {
+  const config = appleConfig(env);
+  if (!config) return undefined;
+  return async ({ sealed, accountId }) => (await openTicket(sealed, { secret: config.key, accountId })) !== null;
+}
+
 /** POST /api/sign-in */
 export async function handleSignIn(request, env, { check, fetch } = {}) {
   const stop = closed(env);
@@ -156,6 +163,7 @@ export async function handleSignIn(request, env, { check, fetch } = {}) {
     check: check ?? appleCheck(env),
     code: typeof code === "string" ? code : undefined,
     trade: ticketTrade(env, fetch),
+    opens: ticketOpens(env),
   });
   if (!result.ok) return reply(401, { reason: result.reason });
   return reply(200, { session: result.session, expiresAt: result.expiresAt });

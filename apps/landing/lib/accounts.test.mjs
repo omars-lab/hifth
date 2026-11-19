@@ -44,6 +44,17 @@ test("the same Apple user signing in on a second device finds the same account, 
   assert.equal(await whoIs(db, phone.session, { now: T0 + 60 }), ipad.accountId);
 });
 
+test("sign-ins that have run out are cleared away at the next sign-in, anyone's; live ones stay", async () => {
+  const { db, rows } = localD1();
+  const old = await freshSignIn(db, "000001.made-up.0001");
+  const live = await freshSignIn(db, "000002.made-up.0002", T0 + 30 * 24 * 60 * 60);
+  assert.equal(rows("sessions").length, 2);
+  await freshSignIn(db, "000003.made-up.0003", T0 + SESSION_SECONDS + 1);
+  assert.equal(rows("sessions").length, 2);
+  assert.equal(await whoIs(db, old.session, { now: T0 + SESSION_SECONDS + 2 }), null);
+  assert.equal(await whoIs(db, live.session, { now: T0 + SESSION_SECONDS + 2 }), live.accountId);
+});
+
 test("two Apple users get two accounts, and our account number is not Apple's", async () => {
   const { db, rows } = localD1();
   const a = await freshSignIn(db, "000001.made-up.0001");
@@ -188,6 +199,36 @@ test("a trade that fails never stops the sign-in, and the next sign-in tries aga
   const works = standInTrade();
   await signInWithCode(db, "000001.made-up.0001", { code: "third-code", trade: works.trade });
   assert.equal(rows("apple_tickets").length, 1);
+});
+
+test("a kept ticket that can no longer be opened (the key file was replaced) is traded for a new one at the next sign-in", async () => {
+  const { db, rows } = localD1();
+  const { trade, asked } = standInTrade();
+  const first = await signInWithCode(db, "000001.made-up.0001", { trade });
+  const opens = async ({ sealed }) => sealed !== "locked(made-up-code)";
+  const word = await handOutWord(db, { now: T0 + 30, newCode });
+  const again = await signIn(db, { note: "apple:000001.made-up.0001", word, check: checkWithApp, code: "second-code", trade, opens, now: T0 + 30, newCode });
+  assert.equal(again.ok, true);
+  assert.equal(asked.length, 2);
+  assert.deepEqual(rows("apple_tickets"), [
+    { account_id: first.accountId, sealed: "locked(second-code)", app_id: APP, created_at: T0 + 30 },
+  ]);
+});
+
+test("a kept ticket that still opens is not traded again, and a failed trade leaves the old one", async () => {
+  const { db, rows } = localD1();
+  const { trade, asked } = standInTrade();
+  await signInWithCode(db, "000001.made-up.0001", { trade });
+  const word = await handOutWord(db, { now: T0 + 30, newCode });
+  await signIn(db, { note: "apple:000001.made-up.0001", word, check: checkWithApp, code: "second-code", trade, opens: async () => true, now: T0 + 30, newCode });
+  assert.equal(asked.length, 1);
+
+  const none = standInTrade(() => null);
+  const word2 = await handOutWord(db, { now: T0 + 60, newCode });
+  const late = await signIn(db, { note: "apple:000001.made-up.0001", word: word2, check: checkWithApp, code: "third-code", trade: none.trade, opens: async () => false, now: T0 + 60, newCode });
+  assert.equal(late.ok, true);
+  assert.equal(none.asked.length, 1);
+  assert.equal(rows("apple_tickets")[0].sealed, "locked(made-up-code)");
 });
 
 test("a note that fails Apple's check trades nothing", async () => {

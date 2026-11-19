@@ -79,7 +79,7 @@ export async function handOutWord(db, { now = nowSeconds(), newCode = randomCode
  * Signs a reader in from Apple's note and the one-off word it carries.
  * Returns { ok: true, session, accountId, expiresAt } or { ok: false, reason }.
  */
-export async function signIn(db, { note, word, check, code, trade, now = nowSeconds(), newCode = randomCode }) {
+export async function signIn(db, { note, word, check, code, trade, opens, now = nowSeconds(), newCode = randomCode }) {
   if (typeof word !== "string" || word === "") return { ok: false, reason: "word-unknown" };
 
   // Spend the word first: one DELETE, so two sign-ins racing with the same word cannot both win.
@@ -98,7 +98,10 @@ export async function signIn(db, { note, word, check, code, trade, now = nowSeco
     .run();
   const accountId = await db.prepare("SELECT id FROM accounts WHERE apple_user = ?").bind(checked.appleUser).first("id");
 
-  await keepTicket(db, { accountId, appId: checked.appId, code, trade, now });
+  await keepTicket(db, { accountId, appId: checked.appId, code, trade, opens, now });
+
+  // Sign-ins that ran out, anyone's, are not left to pile up (question 12 on the sign-in page).
+  await db.prepare("DELETE FROM sessions WHERE expires_at < ?").bind(now).run();
 
   const session = newCode();
   const expiresAt = now + SESSION_SECONDS;
@@ -114,17 +117,24 @@ export async function signIn(db, { note, word, check, code, trade, now = nowSeco
  * one-time code from Apple's sheet for the ticket and hands it back already locked, or null.
  * A reader is never kept out because this failed: without a ticket, deleting the account still
  * deletes everything here, and the reader is told how to remove Hifth on Apple's side themselves.
+ *
+ * `opens` answers whether a kept ticket can still be opened ({ sealed, accountId } → true/false).
+ * The lock comes from the key file, so a ticket kept before the key file was replaced cannot be
+ * opened any more (question 11); such a ticket is traded for a new one, and kept only once the
+ * new one is in hand.
  */
-async function keepTicket(db, { accountId, appId, code, trade, now }) {
+async function keepTicket(db, { accountId, appId, code, trade, opens, now }) {
   if (typeof trade !== "function" || typeof code !== "string" || code === "") return;
   if (typeof appId !== "string" || appId === "") return;
   try {
-    const kept = await db.prepare("SELECT 1 AS kept FROM apple_tickets WHERE account_id = ?").bind(accountId).first("kept");
-    if (kept) return;
+    const kept = await db.prepare("SELECT sealed FROM apple_tickets WHERE account_id = ?").bind(accountId).first("sealed");
+    if (kept && (typeof opens !== "function" || (await opens({ sealed: kept, accountId })))) return;
     const sealed = await trade({ code, appId, accountId });
     if (typeof sealed !== "string" || sealed === "") return;
     await db
-      .prepare("INSERT INTO apple_tickets (account_id, sealed, app_id, created_at) VALUES (?, ?, ?, ?) ON CONFLICT (account_id) DO NOTHING")
+      .prepare(
+        "INSERT INTO apple_tickets (account_id, sealed, app_id, created_at) VALUES (?, ?, ?, ?) ON CONFLICT (account_id) DO UPDATE SET sealed = excluded.sealed, app_id = excluded.app_id, created_at = excluded.created_at",
+      )
       .bind(accountId, sealed, appId, now)
       .run();
   } catch {

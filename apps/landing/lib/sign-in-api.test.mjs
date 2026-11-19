@@ -205,6 +205,28 @@ test("a sign-in still works when Apple turns the trade down, when the key file i
   }
 });
 
+test("after the key file is replaced, the next sign-in swaps the ticket that no longer opens, and delete my account can hand it back", async () => {
+  const { env, rows } = setUp(secrets);
+  const apple = standInAppleBoth();
+  await signedInWithTicket(env, apple);
+  const before = rows("apple_tickets")[0].sealed;
+
+  const newKey = await generateKeyPair("ES256", { extractable: true });
+  Object.assign(env, { APPLE_SIGN_IN_KEY: await exportPKCS8(newKey.privateKey), APPLE_SIGN_IN_KEY_ID: "MADEUPKEY2" });
+  const session = await signedInWithTicket(env, apple);
+  assert.equal(apple.calls.filter((c) => c.url.endsWith("/auth/token")).length, 2, "the second sign-in traded again");
+  const kept = rows("apple_tickets");
+  assert.equal(kept.length, 1);
+  assert.notEqual(kept[0].sealed, before);
+
+  // A third sign-in with the same key file keeps the ticket it has.
+  await signedInWithTicket(env, apple);
+  assert.equal(apple.calls.filter((c) => c.url.endsWith("/auth/token")).length, 2);
+
+  const res = await handleDeleteAccount(post("/api/sign-in/delete-account", {}, { authorization: `Bearer ${session}` }), env, { fetch: apple.fetch });
+  assert.deepEqual(await res.json(), { deleted: true, appleLink: "cut" });
+});
+
 const appleKey = await generateKeyPair("RS256", { extractable: true });
 const forger = await generateKeyPair("RS256", { extractable: true });
 const keys = createLocalJWKSet({
