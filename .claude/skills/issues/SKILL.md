@@ -191,6 +191,7 @@ way is [docs/design/project-board.md](../../../docs/design/project-board.md).
 |---|---|---|---|
 | `scripts/sync-project-board.mjs` | Adds a card for each new open item, updates changed ones, moves closed ones to Done | After the backlog changes, so the board matches | `make board` |
 | `scripts/sync-project-board.mjs --dry-run` | Says what a copy would add, change or finish, touching nothing | Before the first copy in a session, or when unsure | `make board-dry` |
+| `scripts/goal-names-every-row.mjs` | Lists the open or blocked launch rows that the launch goal page never names, and fails if any. A session working from the page alone never sees a row it leaves out (2026-11-19: five were missing) | On every count of the launch loop, and after adding a launch row | `node .claude/skills/issues/scripts/goal-names-every-row.mjs` (`--goal`, `--issues` to point elsewhere); tests: `node --test .claude/skills/issues/scripts/goal-names-every-row.test.mjs` |
 
 ## What this skill will not do
 

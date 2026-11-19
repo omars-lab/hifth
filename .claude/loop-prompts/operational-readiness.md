@@ -82,7 +82,12 @@ never decrypted to the terminal.
 ## The loop, one line per step
 
 1. **Count** the measures on the goal page: blockers, owner steps, restore and release ages,
-   unanswered reports and reviews, new crashes, unsteady tests, skill gaps.
+   unanswered reports and reviews, new crashes, unsteady tests, skill gaps. The page works back
+   from what done looks like, to the measures, to the lines of work, to what comes next, so
+   anything open that it does not name is work nobody picks up. Each pass,
+   `node .claude/skills/issues/scripts/goal-names-every-row.mjs` lists the open launch rows the
+   page leaves out; give each a place in "What is left, by line of work" (and on the waiting
+   list, if it is the owner's).
 2. **Pick** the next item in the goal page's "What comes next". When it is blocked, the next
    one in "What is left, by line of work" that is free to build now.
 3. **Carve out** a batch when two or more free items touch different files: each goes to a
@@ -99,7 +104,7 @@ never decrypted to the terminal.
 
 ```mermaid
 flowchart TD
-  count["Count the measures<br/>on the goal page"] --> pick["Take the next item<br/>in What comes next"]
+  count["Count the measures on the goal page;<br/>every open launch row named on it?"] --> pick["Take the next item<br/>in What comes next"]
   pick --> kind{"Can we do it now?"}
   kind -- "yes" --> carve{"Other free items<br/>on different files?"}
   carve -- "yes" --> helpers["Give each to a helper<br/>in its own working copy"]
@@ -125,7 +130,9 @@ flowchart TD
 > Continue the operational-readiness loop for Hifth, following
 > `.claude/loop-prompts/operational-readiness.md` (its "Starting in a new session" first, if this
 > session has not done it). Each pass: re-count every measure on
-> `.claude/goals/app-store-launch.md` and update its numbers table with today's date. Start from
+> `.claude/goals/app-store-launch.md` and update its numbers table with today's date; run
+> `node .claude/skills/issues/scripts/goal-names-every-row.mjs` and give every open launch row
+> it lists a place on that page. Start from
 > its "Where the work stands" (worktree, branch, next item). Take the next item in "What comes
 > next"; if it is blocked, take the next one free to build in "What is left, by line of work"
 > (a quick win that finishes a half-built piece beats a large new surface). When two or more
@@ -154,7 +161,7 @@ flowchart TD
 
 | Measure | How to count it |
 |---|---|
-| Launch blockers open | `make issues LAUNCH=1` prints the count |
+| Launch blockers open | `make issues LAUNCH=1` prints the count; then `node .claude/skills/issues/scripts/goal-names-every-row.mjs` must say the goal page names every one |
 | Owner steps waiting | The goal page's waiting list; strike what the owner has done |
 | Days since a restore was practised | The date of the last restore drill on the goal page |
 | Days since the release command ran clean | The date of its last clean dry run |
