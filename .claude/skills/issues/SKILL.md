@@ -170,6 +170,13 @@ eleven markers were wrong when the catalog was first built — three items had b
 silently fixed loops earlier and still said `confirmed`. Check the code, then
 check the test.
 
+## The backlog pages are drawn, never typed into
+
+`docs/backlog.md` and the task pages are drawn from `docs/issues.json` (and the by-hand list
+from `docs/validation/ledger.json`). A note typed straight into a drawn page is gone on the next
+redraw. Edit the register, then `make -s issues-doc tasks-doc`; after a ledger change also
+`make guide-doc`, or the commit's checks refuse the stale guide page.
+
 ## The board — the backlog on GitHub, at a glance
 
 <https://github.com/users/omars-lab/projects/2> shows every open item and every check by

@@ -3,8 +3,14 @@ date: 2026-11-19
 repo: hifth
 session: sign-in server and the reader's copy of marks
 branch: sign-in-server, PR #655
-folded: no
+folded: 2026-11-19
 ---
+
+Folded the same day, at the owner's ask, so a fresh session loops on the skills alone:
+the test-file runs (`testing`), the drawn backlog (`issues`), the audit lines, React's `inert`
+and comparing finding lists (`native-shell`), the saved copy's script name (`run-app`), the
+redraw that returns (`validate`). The first line is held by its own test; the last is the
+owner's.
 
 ## Snags
 - `apps/web/e2e/lazy-tools.spec.ts`: the first check that the preload stand-in stayed out looked for `supports("modulepreload")`, which Vite's own loader also carries, so it would have failed on a good build. Switching the setting back on and watching the test go red is what showed the right tell-tale (`link[rel="modulepreload"]`).

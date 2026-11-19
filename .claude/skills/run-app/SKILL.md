@@ -80,6 +80,9 @@ but confirm which, because "desktop UI" reads both ways.
    If the old look is still there after that, the saved files outlived the worker; delete them
    too and reload: `caches.keys().then((ks) => Promise.all(ks.map((k) => caches.delete(k)))).then(() => location.reload())`
    (2026-11-19: a style change for the link line only showed after both).
+   To know which build the tab runs, compare the script name it loaded
+   (`[...document.scripts].map((s) => s.src)`) with the one in `apps/web/dist/index.html`;
+   if they differ, the tab is on the saved copy, whatever the page looks like.
    The dev server (7122) saves nothing, so it never does this.
 5. **At phone width the dev server's comment bar covers the bottom of the app.** The bar for
    leaving comments on a page sits in the bottom corner of every dev-server page, and on a

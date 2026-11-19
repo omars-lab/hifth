@@ -356,7 +356,12 @@ It is the machine half of the screen-reader walk; listening stays on the by-hand
   knob, through `visibility: hidden`, `aria-hidden` and `inert`. A control that must leave a
   reader's way takes `display: none` (keep its room with the parent's size so nothing moves).
   A nameless type-1 item with no id or value is the tell (2026-11-19: the page slider under a
-  verse's tools).
+  verse's tools). In React 18, `inert` needs a value (`inert: "true"`); a bare `inert=""` is
+  dropped without a word, so test that the attribute is really on the page.
+- **Compare two runs' finding lists before trusting "it passed before".** Count the
+  `ev=a11y_finding` lines per kind in each log. A rule that excused a finding once can stop
+  matching quietly (2026-11-19: the "not a touch target" excuse compared the wrong field, so
+  every run failed on plain text).
 - **Check the screen the reader gets.** Wait for the screen's own controls before auditing
   (the verse test waits for its Bookmark button); the address is set before they open.
 

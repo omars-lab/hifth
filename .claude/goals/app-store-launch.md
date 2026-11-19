@@ -91,7 +91,7 @@ The first one is the main measure. The others say whether we could run the app o
 | Unanswered reports and reviews | **0** store reviews, none waiting (read live with the reviews key; the app is not in the store yet). Reader reports have no folder to land in yet | 2026-11-17 |
 | New crashes | readers' crashes cannot be read yet | 2026-11-15 |
 | Unsteady tests | **0**: the last push ran 2,076 browser tests, every one on its first try (the push names any that needed a second, ㉕) | 2026-11-19 |
-| Skills with a known gap | **9**: the `testing` skill now has the second-try rule and report (㉕); the other nine rows in the plan's skills table are not re-counted since | 2026-11-19 |
+| Skills with a known gap | **6 rows and 28 notes**: re-counted 2026-11-19. Of the plan's skills table, `testing`, `deploy-site`, `native-shell` and `walk-app` are done and 6 rows are open; 28 session notes in `docs/retros/` say `folded: no` (this session's own was folded the same day). Before: 9, rows only, not re-counted | 2026-11-19 |
 
 Update this table on every pass of the loop (`.claude/loop-prompts/operational-readiness.md`).
 
@@ -106,7 +106,7 @@ page" below). Backlog row names are in brackets.
 | **Hearing about problems** | 2 | Nothing (checked 2026-11-19). (Readers' crashes, `launch-readers-crashes`, are built; the row closes when a crash forced on a test device shows, which needs the first test build. The app's log, `launch-logging`, store reviews, `launch-store-feedback`, store numbers, `launch-store-numbers`, and the second key on the release page, `launch-keys-on-release-page`, are done; the numbers wait on the owner saving the vendor number.) | (The support page, `launch-support-page`, is built and checked: it goes live with hifth.app's first upload.) |
 | **Shipping a fix fast** | 4 | Nothing (checked 2026-11-19). (The release command, `launch-release-command`, the off-switch, `launch-remote-switch`, and the "new version ready" prompt, `launch-browser-new-version`, are done 2026-11-17; reporting tests that pass only on a second try, `launch-retry-tests-hidden`, 2026-11-19.) | The site's undo (`launch-site-undo`) is built; its drill waits on hifth.app's first upload. The off-switch's file goes online with that upload; until then it is tested against a local copy. |
 | **The licence** | 6 | Nothing (checked 2026-11-19). (The citations page, `launch-citations-page`, is built and checked: it goes live with hifth.app's first upload. Reading the page artwork's terms, `launch-page-artwork-terms`, and the recitation audio's terms, `launch-recitation-audio-terms`, are done, 2026-11-17. The verse-number rings, `launch-artwork-font-or-drawings`, are built and switched off; which ring is the owner's choice.) | The two permissions (`launch-corpus-permission`, `launch-tajweed-permission`) wait on the owner's emails. Fallback if no answer by the date: fetch that data from hifth.app after install, or leave the tajweed colours off. The upload rows (`gpl-and-the-app-store`, `app-store-not-a-target`) close when the answers do. |
-| **What Apple requires** | 3 | The machine half of the screen-reader walk (`launch-screen-reader-walk`): Apple's accessibility check in the iPad and iPhone UI tests, and axe over the main browser screens. (The iPad and iPhone permissions file and the hifth.app file that tells Apple which links open the app, `launch-ios-entitlements`, are built and checked; the site's file goes live with hifth.app's first upload, then a link is tried on the iPad from the by-hand list.) (The archive, the export and Apple's check, `launch-archive-upload`, are done. The Mac sandbox, `launch-mac-sandbox`, is done on this laptop: built, checked by the release check and walked.) | The Mac store archive and its installer package are built and checked (`make app-archive-mac`, `make app-export-mac`, owner's yes 2026-11-17). Apple's check of the Mac package waits on the owner adding the Mac to the app's store record (waiting list, item 6), and its upload on the licence. The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
+| **What Apple requires** | 3 | The rest of the machine half of the screen-reader walk (`launch-screen-reader-walk`): Apple's accessibility check on the iPhone, and axe over the main browser screens. (The iPad check runs and passes since 2026-11-19.) (The iPad and iPhone permissions file and the hifth.app file that tells Apple which links open the app, `launch-ios-entitlements`, are built and checked; the site's file goes live with hifth.app's first upload, then a link is tried on the iPad from the by-hand list.) (The archive, the export and Apple's check, `launch-archive-upload`, are done. The Mac sandbox, `launch-mac-sandbox`, is done on this laptop: built, checked by the release check and walked.) | The Mac store archive and its installer package are built and checked (`make app-archive-mac`, `make app-export-mac`, owner's yes 2026-11-17). Apple's check of the Mac package waits on the owner adding the Mac to the app's store record (waiting list, item 6), and its upload on the licence. The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
 | **Listing** | 1 | The Arabic listing (`launch-store-answers`). (The store pictures are done: `make app-store-shots`, 2026-11-17; since 2026-11-19 the phone and tablet pictures show the clock and battery, ㊹.) (The English listing, the privacy, age and export answers and the category are drafted and checked by `make app-store-listing`.) | The EU trader answer, the price and the copyright line are the owner's (waiting list). The content-rights answer waits on the permissions, the same lock as the upload. |
 | **Accounts** | 3 | (Backups, `launch-backups`, are built and the restore practised on made-up rows, 2026-11-19; the first real copy, the schedule, where copies live, how long and whether they are locked are the owner's.) (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, and the info panel's links to it and the support page, `launch-support-links-in-app`, are done.) | Sign-in (`launch-sign-in`) and deleting an account (`launch-account-deletion`) are built on the laptop and switched off (2026-11-18 and 19), tested with stand-ins for Apple, the app and the server. The key file and the real database were done 2026-11-18. What is left is the owner's: hifth.app's upload with sign-in switched on, Apple's notice address, the invite codes, the privacy draft's questions, the yes for the marks table (㉑), then one sitting with the iPad (⑭). (The account words now load only with the account section, ⑳, 2026-11-19, which made room at start-up.) |
 
@@ -135,7 +135,8 @@ comes before what matters once readers have it, since a turned-down build costs 
 8. **Test flight** with a few named readers, then **upload and release** once the permissions
    are in writing.
 
-The plan has the detail of each step.
+The plan has the detail of each step. Items 2 to 6 are built as far as they go without the
+owner (checked 2026-11-19); "Where the work stands" names the next free item.
 
 ## Waiting on the owner, most work freed first
 
@@ -203,12 +204,21 @@ may be made.)
   sign-in steps 10 to 21, the backups (㉘), the size trim, the account words loading only with
   the account section (⑳, pushed), and the line for a link that goes nowhere (㊽, backlog row
   `app-link-it-cannot-place`, 2026-11-19).
-- **Next item:** the part of the screen-reader walk (⑯, `launch-screen-reader-walk`) a machine
-  can do: Apple's own accessibility check run over the iPad and iPhone apps in their UI tests
-  (nothing runs it today), and the browser check (axe, already used by two tests) over the main
-  screens, each finding fixed with its test. Only the by-hand VoiceOver listen and the
-  larger-text choice wait on the owner. Checked 2026-11-19: every other launch row is fixed or
-  waits on the owner. ⑫ on the sign-in page (renew on use or a fixed 60 days) is the owner's
+- **Done since, not pushed:** the iPad half of the screen-reader walk's machine part (⑯):
+  Apple's accessibility check runs in the iPad app's UI tests (`make app-test
+  ONLY=AccessibilityAuditTests`) and passes; the page drawing's rings and lettering and the
+  hidden page slider are out of the reader's way (commits 0bb27c4a and e14fd5dd, 2026-11-19).
+  Then this session's snags folded into the skills, and this page, the plan's skills table and
+  the loop prompt brought up to date so a fresh session can loop from them alone.
+- **Next item:** the rest of ⑯'s machine part: the same check on the iPhone (`make app-test
+  IPAD="iPhone 17" ONLY=AccessibilityAuditTests`, after `make app-web FLAVOUR=public`), and axe over
+  the main browser screens that `share-a11y.spec.ts` does not cover yet. Then the skill gaps,
+  which make good helper batches (the loop prompt's section 3): 28 session notes in
+  `docs/retros/` not folded into skills, and 6 open rows in the plan's skills table (the
+  `operate-app` skill, store steps in `app-setup`, the launch checks in `manual-testing`,
+  readers' crashes in `crash-logs`, the rest of `release-app`, every skill's first line). Only the
+  by-hand VoiceOver listen and the larger-text choice wait on the owner. Checked 2026-11-19:
+  every other launch row is fixed or waits on the owner. ⑫ on the sign-in page (renew on use or a fixed 60 days) is the owner's
   choice, written up with its options on that page and tied to ㉑. The Arabic listing waits on
   the English wording being settled.
 - **The loop is not running.** The work has been driven by hand, one "continue" at a time. To
@@ -242,8 +252,9 @@ Older notes, kept for what they say about how things work:
 - Then, on the same branch: the English store answers (㉚) on `docs/design/store-listing.md`,
   checked by `make app-store-listing`, and both privacy pages now say the sound is asked for
   before Play and name the setting that stops it.
-- The first download is at 160.1 of 161 KB (2026-11-19, after sign-in pushed it over and two
-  build settings brought it back), so new code loads after the page is up.
+- The first download was at 160.1 of 161 KB earlier on 2026-11-19, after sign-in pushed it over
+  and two build settings brought it back (159.2 later that day; the numbers table has today's),
+  so new code loads after the page is up.
 
 ## The tools that make this repeatable
 

@@ -107,6 +107,10 @@ which runs pick up each file, and the commit check (`pnpm gate:e2e-runs`) refuse
 or one that joined or left a run, printing where it runs and where it does not. Add the file
 to the lists it belongs on, then `pnpm gate:e2e-runs --write` and commit the record with it.
 
+**Before picking `--project`, look the file up in `apps/web/e2e/runs.json`.** Some files run
+only on the laptop and Firefox (the phone runs leave `lazy-tools.spec.ts` out, for one), so
+`--project=iphone` on them finds no tests and says so, which is easy to read as a pass.
+
 A push looks at the copy's two ports before anything else (`make e2e-port-free`). If a
 preview server from an earlier look is still on one, the push stops in a second and prints
 the port, the program holding it and the `kill` line that stops it. Run the same target by
