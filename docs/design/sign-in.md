@@ -307,7 +307,7 @@ The checker re-opened the sources behind every claim that would change the recom
 | Better Auth's website sign-in had the cookie fault, closed as fixed and reportedly reverted | Confirmed, and then superseded: the first fix was reverted on 2025-11-04, but a second fix that turns Apple's form into an ordinary page load was merged on 2025-11-05 and is still in the code. Read, not tried; one later "still failing" comment went unanswered. Checked 2026-11-18 in [library-check.md](../research/sign-in/library-check.md) |
 | One forum report says the same person gets a different account number in the app and on the website | Apple's developer support says the same number is given when both belong to one team; the contrary forum thread (2019, plus a 2023 "same issue") has no cause or answer. **Unsettled; trial ④** |
 | One Apple page says website sign-in needs an existing app in the App Store; another does not | **Confirmed: the two Apple pages disagree.** Unsettled; trial ⑥ |
-| Keep only a scrambled copy of each session on the server; sessions renew on use and end after 60 days unused | Not contested; design detail |
+| Keep only a scrambled copy of each session on the server; sessions renew on use and end after 60 days unused | Not contested; design detail. The scrambled copy is built; the code ends a session 60 days after sign-in with no renewal, and which of the two to keep is ⑫ |
 
 | Only B | Checked |
 | --- | --- |
@@ -395,6 +395,18 @@ The ticket's lock is worked out from the Sign in with Apple key file, so there i
 ### ⑫ How long does a sign-in last, and are old ones cleared out? · **open**
 
 This page says a sign-in renews each time it is used, so an iPad stays signed in for months. The code gives a fixed 60 days and never renews, and nothing removes sign-ins or one-off words that have run out, so a list of when each device signed in builds up until the account is deleted. Found by the privacy draft (step 19), which follows the code. To settle: renew on use or keep the fixed length; then make the privacy page promise exactly that. The clearing half is done: since step 17, one-off words that have run out are cleared each time a new one is handed out, and since 2026-11-18 sign-ins that have run out, anyone's, are cleared each time someone signs in (tested). So the list of when each device signed in now holds only sign-ins still in use. What is left is your choice: renew on use, or keep a fixed 60 days.
+
+**What it changes for a hafiz:** with a fixed length, an iPad in daily use is signed out every 60 days and the reader taps "Sign in with Apple" again (one sheet; the invite code is meant to be kept, which the iPad sitting ⑭ checks). With renewal, an iPad in use stays signed in, and only one left unused for 60 days signs out.
+
+**What counts as "using" a sign-in today (read 2026-11-19).** The app shows its sign-in to hifth.app only to read or write the copy of the marks, and to delete the account. The marks copy waits on your yes for its table (㉑). Until then a sign-in is used for nothing day to day, so renewal would change nothing a reader sees. The two choices go together.
+
+| | What it is | What it buys | What it costs | What it commits you to |
+|---|---|---|---|---|
+| **A. Keep a fixed 60 days** (recommended while sign-in is for invited testers) | What the code does now | Nothing to build. The privacy draft already says it word for word | A reader in daily use signs in again every 60 days | Only this page's "renews on use" line (in the table of earlier choices) changes. Comes back before sign-in opens to everyone |
+| **B. Renew on use** | Each time the app reads or writes the marks copy, hifth.app moves the end date to 60 days from then, and its reply carries the new date, which the app saves | A reader in daily use is never signed out | About half a day, with tests on both sides: hifth.app's renewal, and the app saving the new date (today the app keeps the date it got at sign-in and drops the sign-in on that date, so a server-only change would not be enough). It does nothing until the marks copy is on | The privacy page's sentence becomes "60 days after you last used it". A sign-in someone copied off a device lasts as long as it keeps being used; sign-out, delete my account and Apple's notices still end it |
+| **C. A longer fixed length**, such as a year | One number on hifth.app; the app already takes its end date from hifth.app's reply | Fewer sign-ins again, with nothing built | A sign-in copied off a device lasts a year | The privacy page's "60 days" changes to the new length |
+
+Recommended: A now, since nothing uses a sign-in day to day until the marks copy is on; choose between A and B together with ㉑.
 
 ### ⑬ Does the app tell hifth.app when it signs a reader out by itself? · **fixed**
 
