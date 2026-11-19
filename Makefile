@@ -868,6 +868,19 @@ hifth-app-verify: ## Look at live hifth.app: pages answer, the app is this commi
 hifth-app-list-count: ## How many people are on hifth.app's Mac-app list, and how many still to confirm; never shows an address. ARGS=--local counts the copy on this laptop
 	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/list-count.mjs $(ARGS)
 
+# Copies of what readers gave hifth.app (the Mac-app list, and accounts once sign-in is
+# merged), kept on this laptop outside every repo. Counts only on screen.
+BACKUP := node .claude/skills/deploy-site/scripts/backup-reader-data.mjs
+.PHONY: hifth-app-backup hifth-app-backup-drill hifth-app-backup-status
+hifth-app-backup: ## Copy readers' data off its hosts to this laptop, check each copy's rows against the store; the owner says yes before the first real one. ARGS="--out <folder>"
+	@dotenvx run --quiet -- $(BACKUP) run $(ARGS)
+
+hifth-app-backup-drill: ## Practise the whole copy and restore on made-up rows, here only (needs Docker, and wrangler for the accounts half); ARGS="--accounts-migrations <folder>" practises accounts before sign-in is merged
+	@$(BACKUP) drill $(ARGS)
+
+hifth-app-backup-status: ## How old the last copy of readers' data and the last practised restore are; fails past ARGS="--max-days 2"
+	@$(BACKUP) status $(ARGS)
+
 hifth-app-turnstile: ## Does hifth.app's spam-check widget exist? Prints its public site key. ARGS=--make makes it and saves its secret; never prints the secret or the token
 	@python3 .claude/skills/deploy-site/scripts/turnstile-widget.py $(ARGS)
 
