@@ -1,0 +1,17 @@
+# hifth.app's list tidy (worker.mjs): once a day it deletes addresses nobody confirmed within
+# 7 days and keeps Supabase's free project awake. A Worker of its own, because the site's
+# Pages server code cannot hold a timer. On the new Cloudflare account, beside hifth-app.
+name = "hifth-app-list-tidy"
+main = "worker.mjs"
+compatibility_date = "2026-09-01"
+
+# A timer only: no workers.dev address and no preview address, so nobody can call it.
+workers_dev = false
+preview_urls = false
+
+# 04:17 UTC each day: a quiet hour for both readers' time zones, off the hour everyone picks.
+[triggers]
+crons = ["17 4 * * *"]
+
+# Its three settings are secrets set once by the owner, never written here: SUPABASE_URL,
+# SUPABASE_PUBLISHABLE_KEY and LIST_KEY (the same values the site's form uses).
