@@ -16,6 +16,7 @@ folded: no
 - `native/HifthUITests/AccessibilityAuditTests.swift`: the rule meant to let "too small to touch" pass on plain text compared the finding's own kind field with `.hitRegion`, which never matched, so those findings failed every run. It now uses the kind the test asked for. Compare the finding lists of two runs before believing "this passed before".
 - `make app-test ONLY=…` does not rebuild the app's web copy, so the first rerun of Apple's check tested the old copy and re-found the fixed fault. Run `make app-web FLAVOUR=public` first; now in the native-shell skill.
 - Checking a fix in the browser against the local preview: the page's offline cache kept serving the old build after a rebuild, so the knob looked "still drawn". Compare the loaded script's name with `dist/index.html`, and clear the offline cache before trusting what the page shows.
+- `scripts/gate-validation.mjs`: a changed ledger makes the commit's checks fail on a stale guide page, and the fix it named was `make guide`, which serves the page after drawing it and never returns. It now names `make guide-doc`, which only draws.
 - A new browser test file (not a new test in an old file) needs `pnpm gate:e2e-runs --write` and its runs file committed, or the commit's checks refuse it.
 - The decision-tracking plugin's after-edit hook points at a script that is gone, and prints an error after every edit. That plugin's repo is read-only here, so it is the owner's to fix or switch off.
 

@@ -776,6 +776,13 @@ guide: ## Render the runbooks to docs/validation/guide.html and serve them to yo
 	@node scripts/render-diagrams.mjs
 	@LAN_IP="$(LAN_IP)" node scripts/build-validation-guide.mjs --serve
 
+.PHONY: guide-doc
+guide-doc: ## Redraw docs/validation/guide.html and its diagrams, without serving them
+	@# What the validation check asks for when the ledger changed. `make guide`
+	@# draws the same page and then serves it, which never returns (2026-11-19).
+	@node scripts/render-diagrams.mjs
+	@node scripts/build-validation-guide.mjs
+
 .PHONY: session
 session: ## Work one check with the answers banked as you go:  make session CHECK=<id>
 	@# `make guide` is the reading surface — every check, tickable, nothing

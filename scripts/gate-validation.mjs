@@ -188,7 +188,7 @@ for (const check of checks) {
 for (const src of guideDiagrams(checks)) {
   if (!existsSync(diagramPath(src))) {
     errors.push(
-      `docs/validation/diagrams/${diagramKey(src)}.svg is not drawn — run: make guide`,
+      `docs/validation/diagrams/${diagramKey(src)}.svg is not drawn — run: make guide-doc`,
     );
   }
 }
@@ -199,10 +199,10 @@ for (const src of guideDiagrams(checks)) {
 const want = ledgerHash(checks);
 const have = guideHash();
 if (have === null) {
-  errors.push(`docs/validation/guide.html is missing or unstamped — run: make guide`);
+  errors.push(`docs/validation/guide.html is missing or unstamped — run: make guide-doc`);
 } else if (have !== want) {
   errors.push(
-    `docs/validation/guide.html is stale (built from ${have}, ledger is ${want}) — run: make guide`,
+    `docs/validation/guide.html is stale (built from ${have}, ledger is ${want}) — run: make guide-doc`,
   );
 }
 
