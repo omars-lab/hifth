@@ -7707,10 +7707,12 @@
         "file": "docs/design/app-layout.md",
         "item": "⑩"
       },
-      "status": "open",
+      "status": "fixed",
+      "closedBy": "apps/landing/lib/pages.test.mjs",
       "severity": "question",
       "owner": "agent",
       "feature": "hifth-app-site",
+      "useCase": "find-hifth-and-open-it",
       "note": "Eight page comments the owner left on hifth.app's front page on 2026-11-12 (t_c21ede, t_594286, t_016a29, t_0f5ddd, t_37714b, t_7a13cc, t_7b53cc, t_9200ae): a features section, a new line under the name, Aref Ruqaa for the name's lettering, device tabs with \"coming soon\", a two-page picture and a site-wide language choice. They belong to the front-page work, which has unmerged changes of its own; listed here so they are not lost."
     },
     {
