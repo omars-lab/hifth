@@ -822,7 +822,9 @@ final class ShellModel {
 
     /// With `HIFTH_SNAPSHOT_PATH` set, the app photographs its own page once it
     /// is ready and settled, writes the PNG there, and quits. Headless, no
-    /// Screen Recording permission, identical on both platforms.
+    /// Screen Recording permission, identical on both platforms. With
+    /// `HIFTH_SNAPSHOT_STAY=1` it stays open after writing, so the simulator's
+    /// whole screen (with the clock and battery) can be photographed next.
     private func scheduleSnapshotIfAsked() {
         let environment = ProcessInfo.processInfo.environment
         guard !snapshotTaken, let path = environment["HIFTH_SNAPSHOT_PATH"], !path.isEmpty else { return }
@@ -859,6 +861,9 @@ final class ShellModel {
             do {
                 try png.write(to: URL(fileURLWithPath: path))
                 print("snapshot written \(path)")
+                // make app-store-shots photographs the whole simulator screen, clock and
+                // all, once this picture says the page is ready; so the app must stay open.
+                if environment["HIFTH_SNAPSHOT_STAY"] == "1" { return }
                 exit(0)
             } catch {
                 print("snapshot failed \(error)")

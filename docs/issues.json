@@ -7464,12 +7464,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊹"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
       "useCase": "find-hifth-and-open-it",
-      "note": "Found 2026-11-17 looking at the store pictures: on the iPhone pictures the strip at the top where the clock and battery sit is an empty band, because the app photographs its own page. Apple takes the pictures as they are, but they look less finished than a real phone. Fix: set the simulator's clock and battery to Apple's usual 9:41 and full (xcrun simctl status_bar override) and photograph the whole screen, or fill the strip with the page's own top colour. Test: the store-shots check refuses an iPhone picture whose top strip is one flat colour."
+      "closedBy": ".claude/skills/release-app/scripts/store-shots.test.mjs",
+      "note": "Found 2026-11-17 looking at the store pictures: on the iPhone pictures the strip at the top where the clock and battery sit is an empty band, because the app photographs its own page. Fixed 2026-11-19: make app-store-shots now photographs the whole simulator screen on the iPhones and the iPad (make app-shot WHOLE_SCREEN=1), with the clock at 9:41, full signal and a full unplugged battery, put back afterwards. The app takes its own picture first as the sign the page is ready, then stays open (HIFTH_SNAPSHOT_STAY=1) while the screen is photographed. The store-shots check refuses a phone or tablet picture whose top strip is one flat colour, and names one whose pixels it cannot read (tests: store-shots.test.mjs, which watched the flat-strip test fail with the check switched off). Tried on the 6.9 inch iPhone and looked at by eye."
     },
     {
       "id": "launch-reviewer-walk",
