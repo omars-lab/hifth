@@ -36,14 +36,14 @@ setting was changed.*
 
 > [!important] For a hafiz
 > **Reading and revising: nothing, and it must stay that way.** Every Qur'an app either researcher looked at lets people read with no account. A sign-in wall in front of the mus'haf would cost a hafiz the thing they came for.
-> **What sign-in can add is one thing:** something of theirs that lives off their own devices, on purpose. The clearest case: revising on the iPad in the morning and in Firefox on the family laptop at night becomes one revision, not two. iCloud already carries marks between a reader's own Apple devices, but it cannot reach Firefox, Windows or Android.
+> **What sign-in can add is one thing:** something of theirs that lives off their own devices, on purpose. The clearest case: revising on the iPad in the morning and in Firefox on the family laptop at night becomes one revision, not two. Today nothing carries marks between devices except a saved file the reader moves by hand. iCloud was planned for a reader's own Apple devices but never built (checked 2026-11-19), and it could never reach Firefox, Windows or Android.
 > **The risk to weigh:** a record of where someone's memory slips in the Qur'an is close to their worship. Apple's privacy label lists religious beliefs under sensitive information. So every new way out is its own button that says what goes and to whom, and the reader can see and take back what they sent.
 
 ## Why is this being asked now?
 
 Two things changed in the week before the owner asked: the paid Apple membership arrived on 2026-11-08, and the iPad build was signed with the paid team on 2026-11-10. Sign in with Apple needs both. Testers are next, through TestFlight, once the licence reading clears the upload.
 
-**What happens if nobody decides?** Nothing breaks. Testers can still be invited through TestFlight, and they can send feedback with TestFlight's own button. Your own iPad and Mac keep in step through your own iCloud with no account. The cost of waiting is only that the online features stay unbuilt: marks in Firefox, switching a teacher link off from anywhere, and later sharing between a student and a teacher.
+**What happens if nobody decides?** Nothing breaks. Testers can still be invited through TestFlight, and they can send feedback with TestFlight's own button. Your own iPad and Mac keep in step only by a saved file you move by hand: the iCloud carry was planned but never built. The cost of waiting is only that the online features stay unbuilt: marks in Firefox, switching a teacher link off from anywhere, and later sharing between a student and a teacher.
 
 **What have we already decided that limits this?**
 
@@ -328,7 +328,7 @@ The checker re-opened the sources behind every claim that would change the recom
 - **If trial ④ shows different account numbers in the app and on the website**, link the two by email the first time, or ask the reader to sign in both ways once.
 - **If trial ⑥ shows website sign-in needs an App Store app**, website sign-in waits for the first App Store release.
 - **If the Mac app has to ship outside the App Store**, Mac readers sign in through a browser panel on hifth.app instead.
-- **If the licence reading keeps testers away for months**, milestone 2 can wait, and iCloud covers your own devices meanwhile.
+- **If the licence reading keeps testers away for months**, milestone 2 can wait, and the saved file covers your own devices meanwhile (iCloud would too, if it were built).
 
 ## What is this not settling?
 

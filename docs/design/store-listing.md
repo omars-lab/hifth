@@ -184,14 +184,16 @@ Why that answer is true, case by case:
 
 | What leaves the device | Why it is not "collected" |
 |---|---|
-| Nothing the reader writes: notes, marks, bookmarks, progress | It stays in the app's own storage on the device. No code sends it. |
+| Nothing the reader writes: notes, marks, bookmarks, progress | It stays in the app's own storage on the device. The only code that can send it is the copy of the marks (sign-in step 21), and the app offers that only when sign-in is on, which it is not in any build yet. |
 | One small file at each launch, and nothing while reading | The store build leaves the recitation out (launch item ⑥). Its only request is the launch check (launch item ㉑): one public file from hifth.app, asked for with no cookies, no identifiers and nothing about the reader, compared on the device, and kept by us nowhere. Apple counts data as collected only when it is kept longer than it takes to answer the request, so this is not collected. If the recitation comes back, the fetch is of a public sound file from a site that is not code inside our app, so Apple's word "partner" would not cover it either. |
 | A problem report, if the reader sends one | The reader sees the whole report first and sends it from their own mail app, with their own address on it, each time they choose to. Apple lists exactly this kind of "customer service request", given by the reader and shown in full, as one that need not be declared. |
 
 The app's privacy file says the same (tracks nobody, collects nothing), and a test refuses a
 listing whose answer disagrees with it. **This answer changes when sign-in ships:** an account
-stores an Apple sign-in id and the reader's copy, so the form then lists those, "linked to
-you", for "app functionality".
+stores Apple's number for the reader (User ID) and, only if the reader presses its button, one
+copy of their marks, including the mistakes they marked (Other User Content, and Sensitive Info
+if the owner says yes). The form then lists those, "linked to you", for "app functionality".
+The full new answer is drafted in [the privacy draft](sign-in-privacy-draft.md).
 
 ## How old must a reader be?
 
