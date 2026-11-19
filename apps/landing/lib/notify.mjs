@@ -24,7 +24,7 @@ const DEFAULT_HOSTNAMES = ["hifth.app"];
 const MAX_EMAIL = 254;
 const CONFIRM_CODE = /^[0-9a-f]{48}$/;
 const LEAVE_CODE = /^[0-9a-f]{64}$/;
-const LIST_SETTINGS = ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "LIST_KEY"];
+export const LIST_SETTINGS = ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "LIST_KEY"];
 
 /** The email, trimmed and lower-cased, or null when it is not a plausible address. */
 export function cleanEmail(raw) {
@@ -168,15 +168,16 @@ const hasListSettings = (env) => LIST_SETTINGS.every((k) => env?.[k]);
 /**
  * Calls one of the list's database functions. Returns its answer, or throws when the list could
  * not be reached or refused: a free Supabase project that has slept answers 503, and every such
- * failure is "please try again later" to the reader.
+ * failure is "please try again later" to the reader. The error carries the answer's `status`, so
+ * the daily tidy (tidy.mjs) can log it.
  */
-async function rpc(env, fetch, name, args) {
+export async function rpc(env, fetch, name, args) {
   const res = await fetch(`${String(env.SUPABASE_URL).replace(/\/+$/, "")}/rest/v1/rpc/${name}`, {
     method: "POST",
     headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY, "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify({ p_key: env.LIST_KEY, ...args }),
   });
-  if (!res.ok) throw new Error(`list answered ${res.status}`);
+  if (!res.ok) throw Object.assign(new Error(`list answered ${res.status}`), { status: res.status });
   const text = await res.text();
   return text ? JSON.parse(text) : null;
 }
