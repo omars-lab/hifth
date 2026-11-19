@@ -178,3 +178,24 @@ test("gate:budget does not count a late-loading file against the start-up limit"
   const r = checkStartup({ script: heavy(100), late: heavy(95) });
   assert.equal(r.status, 0, r.out);
 });
+
+/**
+ * The account section's words load with the section, not at start-up (sign-in
+ * ⑳, 2026-11-19): only the store apps show it. A slip that pulled them back
+ * into the start-up words would weigh about a kilobyte, under the drift the
+ * baseline absorbs, so the check looks for them by name. Written before the
+ * check and seen failing.
+ */
+const ACCOUNT_WORDS = 'const m = { accountLeaves: "Signing in sends hifth.app two things." };';
+
+test("gate:budget refuses the account section's words in the start-up download", () => {
+  const r = checkStartup({ script: PLAIN, words: ACCOUNT_WORDS });
+  assert.equal(r.status, 1, r.out);
+  assert.match(r.out, /account section's words are in the start-up download/);
+  assert.match(r.out, /assets\/en\.gen-BBBBBBBB\.js/);
+});
+
+test("gate:budget passes the account section's words in a file that loads later", () => {
+  const r = checkStartup({ script: PLAIN, late: ACCOUNT_WORDS });
+  assert.equal(r.status, 0, r.out);
+});

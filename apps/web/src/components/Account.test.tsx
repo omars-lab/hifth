@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { dropBookmark, toBookmarkFile } from "@hifth/core";
-import { stringsFor } from "../i18n";
+import { loadAccountWords } from "../account-words";
 import { clearFaults, recentFaults } from "../fault-log";
 import { Account } from "./Account";
 
@@ -16,7 +16,8 @@ import { Account } from "./Account";
  * is made up.
  */
 
-const AR = stringsFor("ar");
+// The section's own word pack (account-words.ts), fetched here as the section fetches it.
+const AR = await loadAccountWords("ar");
 const CODE = "MADE-UP-CODE-7421";
 
 type Reply = { value: unknown } | { error: string } | { hold: true };

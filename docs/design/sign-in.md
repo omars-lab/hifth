@@ -454,9 +454,13 @@ Yours, before the store apps show the button. Apple lets an app draw its own "Si
 
 Recommended: A. It keeps the page as it is and matches what readers expect. Nothing in the app changes until you have the artwork.
 
-### ⑳ Do the account words slow the app's start for readers who never see them? · **open**
+### ⑳ Do the account words slow the app's start for readers who never see them? · **fixed**
 
-The agent's, and next after sign-in (raised 2026-11-19). The account section's English and Arabic words are packed with the words every reader loads when the app opens, though only the store apps show the section. Step 16 made each language's words about 1 KB larger (zipped), which the app's size check let through only after its limit was raised. Moving the account words into the part that loads later, when the info panel opens, would give that back. It needs the words to be split into two packs, which touches every screen's words. It was waiting for a quiet stretch; now the start-up download is at 160.1 of its 161 KB, and the line that tells a hafiz a mistyped verse link went nowhere (today nothing happens at all) needs room there first.
+No longer, since 2026-11-19. The account section's 41 English and Arabic sentences now live in a pack of their own, which the section fetches only once the app says there is something to show. A reader in a browser, where sign-in is never offered, never downloads them. The download at start-up went from 160.1 to 158.9 KB (zipped), against its 161 KB limit. That is the room the line telling a hafiz a mistyped verse link went nowhere was waiting for.
+
+The whole app grew 0.9 KB, to 219.4 of its 220 KB cap, because the two small files each carry their own packing overhead. That cap counts both languages' words though a reader only ever fetches one, so the next addition to the app as a whole still needs room made elsewhere (the optimizing-performance skill's list of trims).
+
+How it holds: the size check refuses a build whose start-up files carry the account words, and its own tests prove it does. The words check holds the pack to the same rules as the start-up words (every key in both languages, every plural complete) and refuses a sentence kept in both places. The plain-words test reads every pack. How to add a pack is in the languages design page (`docs/design/i18n.md`, "Words that load later").
 
 ### ㉑ May the table that keeps each reader's copy of their marks be added to the real accounts database? · **open**
 

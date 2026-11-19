@@ -523,49 +523,8 @@ export interface Strings {
   reportClose: string;
   reportMailIntro: string;
 
-  /* ---- the account section (components/Account.tsx, sign-in step 16) ------ */
-  accountTitle: string;
-  accountOptional: string;
-  accountLeaves: string;
-  accountSignIn: string;
-  accountInviteLabel: string;
-  accountInviteHelp: string;
-  accountInviteRefused: string;
-  accountTooMany: string;
-  accountOffline: string;
-  accountFailed: string;
-  accountSignedIn: string;
-  accountHeld: string;
-  accountSignOut: string;
-  accountSignOutFailed: string;
-  accountDelete: string;
-  accountDeleteAsk: string;
-  accountDeleteYes: string;
-  accountDeleteNo: string;
-  accountDeletedCut: string;
-  accountDeletedLeft: string;
-  accountDeleteSignedOut: string;
-  accountDeleteOffline: string;
-  accountDeleteFailed: string;
-  accountInviteKept: string;
-  accountForgetInvite: string;
-  accountHeldNoMarks: string;
-  accountCopyLeaves: string;
-  accountCopyKeep: string;
-  /** The day hifth.app last kept the copy of the reader's marks. */
-  accountCopyKept(at: number): string;
-  accountCopyDone: string;
-  accountCopyBusy: string;
-  accountCopyTooBig: string;
-  accountCopySignedOut: string;
-  accountCopyFailed: string;
-  accountCopyDrop: string;
-  accountCopyDropAsk: string;
-  accountCopyDropYes: string;
-  accountCopyDropNo: string;
-  accountCopyDropped: string;
-  accountCopyDropSignedOut: string;
-  accountCopyDropFailed: string;
+  /* The account section's words are not here: they load with the section
+   * itself (account-words.ts, sign-in ⑳), not with these start-up words. */
 
   /* ---- colophon ----------------------------------------------------------- */
   aboutTitle: string;
@@ -1367,7 +1326,7 @@ export interface Strings {
 }
 
 /** The reader's own calendar day for a moment, as the `YYYY-MM-DD` `longDay` reads. */
-function localDay(at: number): string {
+export function localDay(at: number): string {
   const d = new Date(at);
   const p = (v: number) => String(v).padStart(2, "0");
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
@@ -1710,7 +1669,6 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     vdBookmarkAria: (label) => m.vdBookmarkAria({ label }),
     drawerBack: (label) => m.drawerBack({ label }),
     useSince: (day) => m.useSince({ dayText: longDay(day, lang) }),
-    accountCopyKept: (at) => m.accountCopyKept({ dayText: longDay(localDay(at), lang) }),
     useTimes: (count) => m.useTimes({ n: count, nText: n(count) }),
     useLast: (day) => m.useLast({ dayText: longDay(day, lang) }),
     useNeverHead: (count) => m.useNeverHead({ n: count, nText: n(count) }),

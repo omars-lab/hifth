@@ -96,6 +96,8 @@ const SPECIMENS = {
   "packages/etl/scripts/lib/segmentation.mjs":
     "the named print-to-corpus alignment exceptions, each one word",
   "apps/web/src/messages/ar.gen.ts": "our own Arabic interface strings, generated from our own catalog",
+  "apps/web/src/messages/account/account.ar.gen.ts":
+    "the account section's own Arabic interface strings, a pack loaded with the section (sign-in ⑳)",
   "apps/web/src/components/RootLens.test.tsx": "one root, vowelled, as a lens fixture",
   "packages/core/src/roots.test.ts": "the same root",
 };

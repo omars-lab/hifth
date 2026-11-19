@@ -113,7 +113,9 @@ Every setting follows one pattern; `apps/web/src/drawer-marks.ts` is a small one
    `remember…()` function.
 2. `App.tsx` keeps the choice in state, with a `choose…` callback.
 3. The info panel (`apps/web/src/components/Colophon.tsx`) shows it as a radio group.
-4. Its words go in `en.json`, `ar.json` and `i18n.tsx`, then `pnpm -s i18n:build`.
+4. Its words go in `en.json`, `ar.json` and `i18n.tsx`, then `pnpm -s i18n:build`. Words only one
+   rarely seen screen needs go in a pack of their own instead, so they stay out of the start-up
+   download (`docs/design/i18n.md`, "Words that load later").
 5. A test that picks the other choice and sees the app change, and one that it is still
    picked after a reload.
 

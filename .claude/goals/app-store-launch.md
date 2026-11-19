@@ -57,11 +57,12 @@ Four facts shape the order:
 - **Two answers take weeks**, and everything else is days: the rights holders' replies, and
   sign-in (about three weeks of work; the owner made its three choices by 2026-11-18). These two set the
   launch date, so they are asked for first, and the rest is built while they wait.
-- **The first download is full**: 160.1 of its 161 KB, and the app as a whole 218.5 of its
-  220 KB (2026-11-19, after a trim of how style names are written). The app's log, the off-switch,
-  the "new version ready" prompt and the line telling a hafiz a verse link went nowhere must each
-  load after the page is up. The next room comes from splitting the app's words so the sign-in
-  words stop loading at start (⑳ on the sign-in page, backlog row `sign-in-words-load-at-start`).
+- **The first download is nearly full**: 158.9 of its 161 KB, and the app as a whole 219.4 of
+  its 220 KB (2026-11-19, after the account section's words moved into a pack of their own, ⑳ on
+  the sign-in page). That freed 1.2 KB at start-up, enough for the line telling a hafiz a verse
+  link went nowhere. The app's log, the off-switch and the "new version ready" prompt must still
+  load after the page is up. The whole app has 0.6 KB left, so the next addition to it needs a
+  trim first (the optimizing-performance skill's list).
 - **Some checks need a device and a person** (the screen-reader walk, the new layout on the
   iPad). They go on the by-hand checklist and are done in batches, never one at a time.
 
@@ -108,7 +109,7 @@ page" below). Backlog row names are in brackets.
 | **The licence** | 6 | (The citations page, `launch-citations-page`, is built and checked: it goes live with hifth.app's first upload.) Reading the page artwork's terms (`launch-page-artwork-terms`) and the recitation audio's terms (`launch-recitation-audio-terms`) | The two permissions (`launch-corpus-permission`, `launch-tajweed-permission`) wait on the owner's emails. Fallback if no answer by the date: fetch that data from hifth.app after install, or leave the tajweed colours off. The upload rows (`gpl-and-the-app-store`, `app-store-not-a-target`) close when the answers do. |
 | **What Apple requires** | 3 | (The iPad and iPhone permissions file and the hifth.app file that tells Apple which links open the app, `launch-ios-entitlements`, are built and checked; the site's file goes live with hifth.app's first upload, then a link is tried on the iPad from the by-hand list.) (The archive, the export and Apple's check, `launch-archive-upload`, are done. The Mac sandbox, `launch-mac-sandbox`, is done on this laptop: built, checked by the release check and walked.) | The Mac store archive and its installer package are built and checked (`make app-archive-mac`, `make app-export-mac`, owner's yes 2026-11-17). Apple's check of the Mac package waits on the owner adding the Mac to the app's store record (waiting list, item 6), and its upload on the licence. The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
 | **Listing** | 1 | The Arabic listing (`launch-store-answers`). (The store pictures are done: `make app-store-shots`, 2026-11-17; since 2026-11-19 the phone and tablet pictures show the clock and battery, ㊹.) (The English listing, the privacy, age and export answers and the category are drafted and checked by `make app-store-listing`.) | The EU trader answer, the price and the copyright line are the owner's (waiting list). The content-rights answer waits on the permissions, the same lock as the upload. |
-| **Accounts** | 3 | (Backups, `launch-backups`, are built and the restore practised on made-up rows, 2026-11-19; the first real copy, the schedule, where copies live, how long and whether they are locked are the owner's.) (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, and the info panel's links to it and the support page, `launch-support-links-in-app`, are done.) | Sign-in (`launch-sign-in`) and deleting an account (`launch-account-deletion`) are built on the laptop and switched off (2026-11-18 and 19), tested with stand-ins for Apple, the app and the server. The key file and the real database were done 2026-11-18. What is left is the owner's: hifth.app's upload with sign-in switched on, Apple's notice address, the invite codes, the privacy draft's questions, the yes for the marks table (㉑), then one sitting with the iPad (⑭). Meanwhile the agent's own next piece is splitting the app's words (⑳), which makes room at start-up. |
+| **Accounts** | 3 | (Backups, `launch-backups`, are built and the restore practised on made-up rows, 2026-11-19; the first real copy, the schedule, where copies live, how long and whether they are locked are the owner's.) (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, and the info panel's links to it and the support page, `launch-support-links-in-app`, are done.) | Sign-in (`launch-sign-in`) and deleting an account (`launch-account-deletion`) are built on the laptop and switched off (2026-11-18 and 19), tested with stand-ins for Apple, the app and the server. The key file and the real database were done 2026-11-18. What is left is the owner's: hifth.app's upload with sign-in switched on, Apple's notice address, the invite codes, the privacy draft's questions, the yes for the marks table (㉑), then one sitting with the iPad (⑭). (The account words now load only with the account section, ⑳, 2026-11-19, which made room at start-up.) |
 
 ## What comes next, in order
 
@@ -129,9 +130,9 @@ comes before what matters once readers have it, since a turned-down build costs 
 6. **Hearing about problems:** the app's log and readers' crashes. (The sources in English ㊴
    are fixed, and so are store reviews, store numbers and the release page on the new key.)
 7. **Accounts:** sign-in is built and switched off (2026-11-19); the rest waits on the owner's
-   steps and an iPad sitting. Next for the agent: split the app's words so the sign-in words load
-   only when the account section opens (⑳), which frees room at start-up for the line telling a
-   hafiz a verse link went nowhere.
+   steps and an iPad sitting. The account words now load only when the account section opens
+   (⑳, done 2026-11-19), which freed room at start-up. Next for the agent: the line telling a
+   hafiz a verse link went nowhere, which that room was for.
 8. **Test flight** with a few named readers, then **upload and release** once the permissions
    are in writing.
 

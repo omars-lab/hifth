@@ -101,9 +101,10 @@ made-up number.
 
 - The goal page's "What comes next" is the order. Within it, a number that blocks the upload or
   a review comes first; then one that would slow a fix once readers have the app; then polish.
-- New web code loads after the page is up: the first download is full (160.1 of 161 KB on
-  2026-11-19). Splitting the app's words (⑳ on the sign-in page) is the way to make room, and
-  comes before anything else is added to start-up.
+- New web code loads after the page is up: the first download is nearly full (158.9 of 161 KB
+  on 2026-11-19, after the account words moved into their own pack, ⑳ on the sign-in page), and
+  the whole app is at 219.4 of 220 KB. Words only one screen needs go in a pack of their own
+  (`docs/design/i18n.md`, "Words that load later"); anything else new needs a trim first.
 - Do not reopen a choice the owner already made, and do not decide one that waits on them.
 - The licence lock is deliberate. Work around it (citations, fallbacks), never through it.
   Apple's own check (`make app-store-check`) is allowed before the licence answer (owner,

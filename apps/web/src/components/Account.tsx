@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { useT, type Strings } from "../i18n";
+import { useAccountWords, type AccountWords } from "../account-words";
 import { askApp } from "../ask-app";
 import { accountState, deleteAccount, forgetInvite, inviteKept, signIn, signOut, type AccountState } from "../account";
 import { copyState, dropCopy, keepCopy, type CopyState } from "../marks-copy";
@@ -37,7 +37,7 @@ export type CopyMarks = { file: () => string; load: (marksFile: string) => void 
 
 type Ask = typeof askApp;
 type Line = keyof Pick<
-  Strings,
+  AccountWords,
   | "accountInviteRefused"
   | "accountTooMany"
   | "accountOffline"
@@ -70,7 +70,6 @@ export function Account({
   /** Where this device's marks come from and go back to; without it, no copy is offered. */
   marks?: CopyMarks | undefined;
 }): JSX.Element | null {
-  const { t } = useT();
   const [state, setState] = useState<AccountState | null>(null);
   const [kept, setKept] = useState(false);
   const [copy, setCopy] = useState<CopyState>({ kind: "off" });
@@ -79,6 +78,9 @@ export function Account({
   const [confirming, setConfirming] = useState(false);
   const [dropping, setDropping] = useState(false);
   const [line, setLine] = useState<Line | null>(null);
+  // The words come in their own small download (account-words.ts), fetched
+  // only once the app says there is something to draw.
+  const t = useAccountWords(state !== null && (state !== "off" || line !== null));
   const box = useRef<HTMLInputElement | null>(null);
   const shown = useRef(true);
   const id = useId();
@@ -221,6 +223,7 @@ export function Account({
   // A reader who just deleted their account is told so even where sign-in is
   // then no longer offered.
   if (state === "off" && line === null) return null;
+  if (t === null) return null;
 
   const leaves = `${id}-leaves`;
   const copyLeaves = `${id}-copy-leaves`;
