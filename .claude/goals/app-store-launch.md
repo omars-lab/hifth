@@ -27,9 +27,9 @@ stays private and the store build stays the public one.
   hits can be heard about, traced and fixed within days.
 - **Done:** the app is in the store on all three devices and those measures have held for a month.
 
-## Are we on it? (checked 2026-11-17)
+## Are we on it? (checked 2026-11-19)
 
-Not yet: 29 launch rows are open. The App Store is still recorded as "not a target", and the
+Not yet: 19 launch rows are open (`make issues LAUNCH=1`). The App Store is still recorded as "not a target", and the
 upload is locked until two rights holders say yes in writing. Everything else goes ahead meanwhile.
 
 Done so far:
@@ -42,7 +42,13 @@ Done so far:
 - the outside-links test;
 - sound with the silent switch on;
 - the review notes, with a no-connection first launch;
-- the error screen and "Report a problem".
+- the error screen and "Report a problem";
+- sign-in, built on the laptop and switched off (2026-11-18 and 19): Apple's sheet in the app,
+  hifth.app's server code, staying signed in, delete my account, the invite code, the limit on
+  tries, the account section, and the button that keeps a copy of a reader's marks on hifth.app.
+  What is left of it is on the owner's side (the waiting list below) or needs the owner's iPad;
+- the push names every browser test that passed only on its second try (㉕);
+- backups of readers' data, with a restore practised on made-up rows (㉘).
 
 Four facts shape the order:
 
@@ -51,9 +57,11 @@ Four facts shape the order:
 - **Two answers take weeks**, and everything else is days: the rights holders' replies, and
   sign-in (about three weeks of work; the owner made its three choices by 2026-11-18). These two set the
   launch date, so they are asked for first, and the rest is built while they wait.
-- **The first download is full**: 160.8 of its 161 KB, though the app as a whole has 9 KB of
-  room. The app's log, the off-switch and the "new version ready" prompt must each load after
-  the page is up, or a trim of the first download must come first.
+- **The first download is full**: 160.1 of its 161 KB, and the app as a whole 218.5 of its
+  220 KB (2026-11-19, after a trim of how style names are written). The app's log, the off-switch,
+  the "new version ready" prompt and the line telling a hafiz a verse link went nowhere must each
+  load after the page is up. The next room comes from splitting the app's words so the sign-in
+  words stop loading at start (⑳ on the sign-in page, backlog row `sign-in-words-load-at-start`).
 - **Some checks need a device and a person** (the screen-reader walk, the new layout on the
   iPad). They go on the by-hand checklist and are done in batches, never one at a time.
 
@@ -76,14 +84,14 @@ The first one is the main measure. The others say whether we could run the app o
 
 | Measure | Value | As of |
 |---|---|---|
-| Launch blockers open | **24** of 46 (2026-11-17, after the store reviews ㉜, the download numbers ㉝ and the second key on the release page ㉞ closed; `make issues LAUNCH=1` lists them). Before that, **26**: 24 of the 44 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day, and the archive with Apple's own check ⑪ later that day. Later still the support page ⑳ and the apps' privacy policy ㉙ closed, and one item was added for linking both from inside the app (㊸), which closed the same day. Of the 26, **7 can get the app turned down at review**, 6 stop the upload itself (four launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
-| Owner steps waiting | **14**, ordered by what each frees in "Waiting on the owner" (all three sign-in choices answered by 2026-11-18, which brought two small sign-in steps of the owner's to the front): the Sign in with Apple key file; a yes to make the accounts database; two permission emails and a fallback date; whether the store build shows tajweed; the hifth.app first upload steps; one test problem report seen to arrive; adding the Mac to the app's store record; the Mac keyboard test permission; the EU trader answer; delete 134 merged branches and ask GitHub to purge; try the new layout on the iPad; save the vendor number; three store answers; four answers about backups (added 2026-11-19) | 2026-11-19 |
+| Launch blockers open | **19** (2026-11-19, `make issues LAUNCH=1`: 15 open, 4 blocked; 9 of them are the owner's). Since 2026-11-17: the retry report ㉕ and the store pictures' clock ㊹ closed; sign-in ㉖, account deletion ㉗ and backups ㉘ are built but stay open on owner steps and the iPad sitting. Before that, **24** of 46 (2026-11-17, after the store reviews ㉜, the download numbers ㉝ and the second key on the release page ㉞ closed; `make issues LAUNCH=1` lists them). Before that, **26**: 24 of the 44 on the launch page, and the two older App Store rows on the licence. Seven added 2026-11-17 by the first walk as Apple's reviewer (㉟ to ㊶); the reviewer walk itself ㉟, the first-open ribbon ㊳, the English sources ㊴, the walk tools' launch settings ㊱ and the English top bar at 320 px ㊶ closed the same day, and the archive with Apple's own check ⑪ later that day. Later still the support page ⑳ and the apps' privacy policy ㉙ closed, and one item was added for linking both from inside the app (㊸), which closed the same day. Of the 26, **7 can get the app turned down at review**, 6 stop the upload itself (four launch-page items and the two older licence rows), and 13 matter once readers have it (the launch page's "Which of these could get the app turned down" sorts them) | 2026-11-17 |
+| Owner steps waiting | **14** items on the list (18 steps, counting sign-in's five separately), ordered by what each frees in "Waiting on the owner". The key file and the accounts database were done 2026-11-18; five sign-in steps were added as sign-in got built (the yes for the marks table, Apple's notice address, the invite codes, the privacy draft's questions, one iPad sitting) | 2026-11-19 |
 | Days since a restore was practised | **0**, on made-up rows only (`make hifth-app-backup-drill`: the list, and accounts from the sign-in branch's tables). No real copy yet: that waits on the owner's yes. `make hifth-app-backup-status` re-counts it | 2026-11-19 |
 | Days since the release command ran clean | no release command yet; its archive, export and Apple's check ran clean on 2026-11-17 | 2026-11-17 |
 | Unanswered reports and reviews | **0** store reviews, none waiting (read live with the reviews key; the app is not in the store yet). Reader reports have no folder to land in yet | 2026-11-17 |
 | New crashes | readers' crashes cannot be read yet | 2026-11-15 |
-| Unsteady tests | not reported yet | 2026-11-15 |
-| Skills with a known gap | **10** | 2026-11-15 |
+| Unsteady tests | **0**: the last push ran 2,076 browser tests, every one on its first try (the push names any that needed a second, ㉕) | 2026-11-19 |
+| Skills with a known gap | **9**: the `testing` skill now has the second-try rule and report (㉕); the other nine rows in the plan's skills table are not re-counted since | 2026-11-19 |
 
 Update this table on every pass of the loop (`.claude/loop-prompts/operational-readiness.md`).
 
@@ -96,11 +104,11 @@ page" below). Backlog row names are in brackets.
 | Line of work | Open | Free to build now | Blocked, and the way around it meanwhile |
 |---|---|---|---|
 | **Hearing about problems** | 2 | Readers' crashes (`launch-readers-crashes`). (Store reviews, `launch-store-feedback`, store numbers, `launch-store-numbers`, and the second key on the release page, `launch-keys-on-release-page`, are done; the numbers wait on the owner saving the vendor number.) | The app's log (`launch-logging`) has to load after the page is up, since the first download is full. (The support page, `launch-support-page`, is built and checked: it goes live with hifth.app's first upload.) |
-| **Shipping a fix fast** | 5 | The release command (`launch-release-command`), the site's undo (`launch-site-undo`), reporting tests that pass only on a second try (`launch-retry-tests-hidden`) | The off-switch (`launch-remote-switch`) and the "new version ready" prompt (`launch-browser-new-version`) load after the page is up, for the same reason. The off-switch's file goes online with hifth.app's first upload; until then it is tested against a local copy. |
+| **Shipping a fix fast** | 4 | The release command (`launch-release-command`), the site's undo (`launch-site-undo`). (Reporting tests that pass only on a second try, `launch-retry-tests-hidden`, is done, 2026-11-19.) | The off-switch (`launch-remote-switch`) and the "new version ready" prompt (`launch-browser-new-version`) load after the page is up, for the same reason. The off-switch's file goes online with hifth.app's first upload; until then it is tested against a local copy. |
 | **The licence** | 6 | (The citations page, `launch-citations-page`, is built and checked: it goes live with hifth.app's first upload.) Reading the page artwork's terms (`launch-page-artwork-terms`) and the recitation audio's terms (`launch-recitation-audio-terms`) | The two permissions (`launch-corpus-permission`, `launch-tajweed-permission`) wait on the owner's emails. Fallback if no answer by the date: fetch that data from hifth.app after install, or leave the tajweed colours off. The upload rows (`gpl-and-the-app-store`, `app-store-not-a-target`) close when the answers do. |
 | **What Apple requires** | 3 | (The iPad and iPhone permissions file and the hifth.app file that tells Apple which links open the app, `launch-ios-entitlements`, are built and checked; the site's file goes live with hifth.app's first upload, then a link is tried on the iPad from the by-hand list.) (The archive, the export and Apple's check, `launch-archive-upload`, are done. The Mac sandbox, `launch-mac-sandbox`, is done on this laptop: built, checked by the release check and walked.) | The Mac store archive and its installer package are built and checked (`make app-archive-mac`, `make app-export-mac`, owner's yes 2026-11-17). Apple's check of the Mac package waits on the owner adding the Mac to the app's store record (waiting list, item 6), and its upload on the licence. The screen-reader walk (`launch-screen-reader-walk`): the parts a person must do go on the by-hand list. Checking the Mac app needs the keyboard test permission, or a run while the owner is away. |
 | **Listing** | 1 | The Arabic listing (`launch-store-answers`). (The store pictures are done: `make app-store-shots`, 2026-11-17; since 2026-11-19 the phone and tablet pictures show the clock and battery, ㊹.) (The English listing, the privacy, age and export answers and the category are drafted and checked by `make app-store-listing`.) | The EU trader answer, the price and the copyright line are the owner's (waiting list). The content-rights answer waits on the permissions, the same lock as the upload. |
-| **Accounts** | 2 | (Backups, `launch-backups`, are built and the restore practised on made-up rows, 2026-11-19; the first real copy, the schedule, where copies live, how long and whether they are locked are the owner's.) (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, and the info panel's links to it and the support page, `launch-support-links-in-app`, are done.) | The three sign-in choices were made by 2026-11-18, so sign-in (`launch-sign-in`) is ours to build: our own small code on hifth.app's Cloudflare with its free database, the copy not locked at first. Two small owner steps remain (waiting list items 1 and 2): the Sign in with Apple key file, and a yes to make the real database. Until then the server runs on the laptop against a local copy, with a made-up key. Deleting an account (`launch-account-deletion`) comes with it, behind a switch that is off. The first real sign-in needs hifth.app's first upload. |
+| **Accounts** | 3 | (Backups, `launch-backups`, are built and the restore practised on made-up rows, 2026-11-19; the first real copy, the schedule, where copies live, how long and whether they are locked are the owner's.) (The privacy policy for what the app keeps today, `launch-app-privacy-policy`, and the info panel's links to it and the support page, `launch-support-links-in-app`, are done.) | Sign-in (`launch-sign-in`) and deleting an account (`launch-account-deletion`) are built on the laptop and switched off (2026-11-18 and 19), tested with stand-ins for Apple, the app and the server. The key file and the real database were done 2026-11-18. What is left is the owner's: hifth.app's upload with sign-in switched on, Apple's notice address, the invite codes, the privacy draft's questions, the yes for the marks table (㉑), then one sitting with the iPad (⑭). Meanwhile the agent's own next piece is splitting the app's words (⑳), which makes room at start-up. |
 
 ## What comes next, in order
 
@@ -120,7 +128,10 @@ comes before what matters once readers have it, since a turned-down build costs 
    off-switch and the prompt, each loaded after the page is up.
 6. **Hearing about problems:** the app's log and readers' crashes. (The sources in English ㊴
    are fixed, and so are store reviews, store numbers and the release page on the new key.)
-7. **Accounts:** all three sign-in choices are made (2026-11-18), so the sign-in build can start.
+7. **Accounts:** sign-in is built and switched off (2026-11-19); the rest waits on the owner's
+   steps and an iPad sitting. Next for the agent: split the app's words so the sign-in words load
+   only when the account section opens (⑳), which frees room at start-up for the line telling a
+   hafiz a verse link went nowhere.
 8. **Test flight** with a few named readers, then **upload and release** once the permissions
    are in writing.
 
@@ -128,16 +139,13 @@ The plan has the detail of each step.
 
 ## Waiting on the owner, most work freed first
 
-1. **Make the Sign in with Apple key file** (sign-in page, step 12; about 20 minutes). In
-   Apple's developer site, under Keys, make a key with Sign in with Apple ticked, download the
-   file once, and note its ID; then save both as hifth.app secrets on Cloudflare. It is a
-   different key from the App Store Connect one you already made. Deleting an account needs it,
-   and Apple's review requires deleting an account, so it frees the launch's account deletion
-   (㉗). Until then, deletion is built and tested on the laptop with a made-up key.
-2. **Say yes to making the accounts database on hifth.app's Cloudflare** (sign-in page, step 9;
-   one line from you, five minutes of work). It is the free database you chose on 2026-11-18;
-   making it touches the live account, so it waits for your word. Until then, the server code
-   runs against a local copy on the laptop.
+1. **Upload hifth.app and switch sign-in on there** (item 5 below, plus `SIGN_IN` and
+   `APPLE_APP_IDS` on the live project). Frees the first real sign-in, the iPad trials, the site's
+   undo, and puts the support page and citations online.
+2. **Sign-in's own small steps** (the sign-in page): register hifth.app's notice address on
+   Apple's developer site (step 13); make the invite codes and set them on the site (⑯); answer
+   the privacy draft's seven questions (step 19); say yes or no to adding the marks-copy table to
+   the real accounts database (㉑); then one sitting with your iPad to try it all (⑭).
 3. **Send the two permission emails, and set the date after which we stop waiting.** This frees
    only the upload, but the answer takes weeks, so the sooner it goes the better.
 4. **Should the store build show the tajweed colours?** (launch item ㊲) Off: one permission
@@ -175,6 +183,9 @@ The plan has the detail of each step.
    the database password in the saved keys (`make env-set NAME=SUPABASE_DB_URL`, in your own
    terminal).
 
+(Done 2026-11-18: the Sign in with Apple key file, and the accounts database made on hifth.app's
+Cloudflare, its tables in place and empty.)
+
 (Answered 2026-11-18: the three sign-in choices. A reader's marks follow them; accounts are kept
 by our own small code on hifth.app's Cloudflare with its free database; the copy on our server is
 not locked at first.)
@@ -183,9 +194,22 @@ not locked at first.)
 site publishes from this laptop, not from GitHub; the Mac store archive and its certificate
 may be made.)
 
-## Where the work stands (2026-11-17)
+## Where the work stands (2026-11-19)
 
-- Worktree `../hifth-auth`, branch `mac-store-archive`, intent `launch-mac-sandbox`. It holds
+- **Now:** worktree `../hifth-auth`, branch `sign-in-server`, draft pull request #655, intent
+  `launch-sign-in`. Pushed up to "The app is back under its size limits" (every check passed,
+  2,076 browser tests on their first try). One doc commit after it, about the backlog and this
+  page, rides with the next push. The pull request stays a draft until the owner has seen
+  sign-in; it carries sign-in steps 10 to 21, the backups (㉘) and the size trim.
+- **Next item:** split the app's words so the sign-in words load only when the account section
+  opens (⑳, backlog row `sign-in-words-load-at-start`). It touches every screen's words, so it
+  gets its own branch from `origin/main` once #655 merges, or from `sign-in-server` if it has not.
+- **The loop is not running.** The work has been driven by hand, one "continue" at a time. To
+  run it, paste the prompt from `.claude/loop-prompts/operational-readiness.md` into `/loop`.
+
+Older notes, kept for what they say about how things work:
+
+- (2026-11-17) Worktree `../hifth-auth`, branch `mac-store-archive`, intent `launch-mac-sandbox`. It holds
   the Mac store archive and package commands (`make app-archive-mac`, `make app-export-mac`),
   run once from the committed tree on 2026-11-17: the receipt says all committed, and the app
   inside the package passed the store check with no problems. Its pull request merges when
@@ -211,7 +235,8 @@ may be made.)
 - Then, on the same branch: the English store answers (㉚) on `docs/design/store-listing.md`,
   checked by `make app-store-listing`, and both privacy pages now say the sound is asked for
   before Play and name the setting that stops it.
-- The first download is at 160.1 of 161 KB (2026-11-17), so new code loads after the page is up.
+- The first download is at 160.1 of 161 KB (2026-11-19, after sign-in pushed it over and two
+  build settings brought it back), so new code loads after the page is up.
 
 ## The tools that make this repeatable
 

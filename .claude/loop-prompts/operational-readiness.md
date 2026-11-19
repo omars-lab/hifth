@@ -88,7 +88,7 @@ flowchart TD
 | Days since the release command ran clean | The date of its last clean dry run |
 | Unanswered reports and reviews | The `operate-app` skill's commands, once built; until then "no way to receive them" |
 | New crashes | The `crash-logs` skill; a crash with no issue row counts |
-| Unsteady tests | The last push's report of tests that passed only on a second try |
+| Unsteady tests | The last push's closing lines: "Every browser test passed on its first try", or the list of those that needed a second; `make second-tries` for the worst over recent runs |
 | Skills with a known gap | Open rows in the plan's skills table |
 
 A measure that cannot be counted yet says so in words ("no release command yet"), never a
@@ -101,7 +101,9 @@ made-up number.
 
 - The goal page's "What comes next" is the order. Within it, a number that blocks the upload or
   a review comes first; then one that would slow a fix once readers have the app; then polish.
-- New web code loads after the page is up: the first download is full (160.8 of 161 KB).
+- New web code loads after the page is up: the first download is full (160.1 of 161 KB on
+  2026-11-19). Splitting the app's words (⑳ on the sign-in page) is the way to make room, and
+  comes before anything else is added to start-up.
 - Do not reopen a choice the owner already made, and do not decide one that waits on them.
 - The licence lock is deliberate. Work around it (citations, fallbacks), never through it.
   Apple's own check (`make app-store-check`) is allowed before the licence answer (owner,

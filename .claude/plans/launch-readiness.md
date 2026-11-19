@@ -164,6 +164,12 @@ choices from the owner that are already written up in `docs/design/sign-in.md`: 
 unlocks first, where reader accounts live, and whether a reader's copy is locked so we cannot
 read it.
 
+*Status 2026-11-19: the three choices were made 2026-11-18. Sign-in, delete my account, the
+account section and the copy of a reader's marks are built on the laptop and switched off
+(order in `.claude/plans/sign-in-build.md`, step table on the sign-in page). Backups are built,
+with a restore practised on made-up rows (㉘). What is left waits on the owner's steps, listed on
+the goal page.*
+
 - Sign in with Apple through Apple's own sheet in the apps, as the sign-in page recommends.
 - **Delete my account, inside the app**, which also cancels the Apple sign-in. Apple requires it.
 - A place in the app to see what is stored about you and to remove it.
@@ -208,7 +214,7 @@ read it.
 | `native-shell` | Builds the private flavour by default, says nothing of store builds | Add the store build and its guard |
 | `walk-app` | Its 218-line checklist has no store-build walk | Add a first-launch, no-connection and sign-in walk |
 | `manual-testing` | Parked list predates the launch | Add the screen-reader and device checks |
-| `testing` | Silent on unsteady tests | Add the rule and the report |
+| `testing` | ~~Silent on unsteady tests~~ done 2026-11-19 (㉕) | The rule, the push's report and `make second-tries` |
 | every skill | Not checked recently | Read each one's first line (what makes it fire) and fix vague ones |
 
 **The loop prompt:** `.claude/loop-prompts/operational-readiness.md`, beside the existing
@@ -241,7 +247,7 @@ no copy on GitHub, last changed 2026-09-30.
 
 - Send the two permission emails; set the fallback date.
 - Delete the 134 merged branches and ask GitHub Support for the purge.
-- The three sign-in choices.
+- ~~The three sign-in choices.~~ Made 2026-11-18. The live list is on the goal page.
 - The hifth.app first upload steps (key permission, database step, four secrets, mail sender).
 - The EU trader declaration.
 - Give the terminal the permission the Mac's keyboard test needs, or run it while away.
