@@ -212,3 +212,97 @@ test("both privacy pages say the sound is asked for early, and name the setting 
 test("the English and Arabic privacy pages have the same sections, in the same order", () => {
   assert.deepEqual(sectionIds(page("ar/privacy.html")), sectionIds(page("privacy.html")));
 });
+
+/*
+ * The design check of 2026-11-16 (docs/design/app-layout.md ⑩, backlog front-page-comments-of-nov-12)
+ * measured six faults on the served front page. Each test below holds one of them shut: the
+ * styles are read as text, the page's named colours are read from its :root blocks, and the
+ * contrast is worked out the way WCAG does, so a colour change that makes a ring or an edge
+ * faint again fails here before anyone has to see it.
+ */
+const styles = () => page("styles.css");
+const tokensIn = (block) => Object.fromEntries([...block.matchAll(/--([\w-]+):\s*([^;]+);/g)].map(([, k, v]) => [k, v.trim()]));
+const schemes = () => {
+  const css = styles();
+  const light = tokensIn(css.match(/^:root\s*\{([\s\S]*?)\}/m)[1]);
+  const dark = { ...light, ...tokensIn(css.match(/:root:not\(\[data-theme="light"\]\)\s*\{([\s\S]*?)\}/)[1]) };
+  return { light, dark };
+};
+const resolve = (tokens, value) => {
+  for (let v = value, i = 0; i < 5; i++) {
+    const ref = v.match(/^var\(--([\w-]+)\)$/);
+    if (!ref) return v;
+    v = tokens[ref[1]];
+  }
+  return value;
+};
+const luminance = (hex) => {
+  const [r, g, b] = hex.replace("#", "").match(/../g).map((h) => parseInt(h, 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a, b) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+const outsideRoot = () => styles().replace(/:root[^{]*\{[^}]*\}/g, "");
+const ruleFor = (selector) => {
+  const esc = selector.replace(/[.*+?^${}()|[\]\\#:]/g, "\\$&");
+  return outsideRoot().match(new RegExp(`(?:^|[},]\\s*)${esc}\\s*(?:,[^{]*)?\\{([^}]*)\\}`, "m"))?.[1] ?? "";
+};
+
+test("every control shows a keyboard ring at 3:1 or better, in light and dark", () => {
+  const ring = ruleFor(":focus-visible");
+  assert.match(ring, /outline:\s*\d+px solid var\(--focus\)/, "one :focus-visible rule for every control, drawn in --focus");
+  for (const [name, tokens] of Object.entries(schemes())) {
+    for (const surface of ["paper", "card"]) {
+      const ratio = contrast(resolve(tokens, tokens.focus), resolve(tokens, tokens[surface]));
+      assert.ok(ratio >= 3, `${name}: the ring is ${ratio.toFixed(2)}:1 on --${surface}`);
+    }
+  }
+  assert.doesNotMatch(outsideRoot(), /outline:\s*[^;]*var\(--ochre\)/, "the faint ochre ring is gone from the device tabs");
+});
+
+test("the email box's edge is 3:1 or better against the page, in light and dark", () => {
+  assert.match(ruleFor("#notify-email"), /border:\s*1px solid var\(--field-edge\)/);
+  for (const [name, tokens] of Object.entries(schemes())) {
+    for (const surface of ["paper", "card"]) {
+      const ratio = contrast(resolve(tokens, tokens["field-edge"]), resolve(tokens, tokens[surface]));
+      assert.ok(ratio >= 3, `${name}: the box's edge is ${ratio.toFixed(2)}:1 on --${surface}`);
+    }
+  }
+});
+
+test("a button's words never break onto a second line", () => {
+  assert.match(ruleFor(".button"), /white-space:\s*nowrap/);
+});
+
+test("headings and the opening line balance their lines, so none ends on one word", () => {
+  for (const selector of ["h1, h2, h3", ".lead"]) {
+    assert.match(ruleFor(selector), /text-wrap:\s*balance/, selector);
+  }
+});
+
+test("the front page's styles use three weights of type at most", () => {
+  const weights = new Set([
+    ...[...styles().matchAll(/font:\s*(\d00)\s/g)].map(([, w]) => w),
+    ...[...styles().matchAll(/font-weight:\s*(\d00)/g)].map(([, w]) => w),
+    "400",
+  ]);
+  assert.ok(weights.size <= 3, `weights in use: ${[...weights].sort().join(", ")}`);
+});
+
+test("no colour is written in place: shadows and the rest come from the named colours", () => {
+  assert.doesNotMatch(outsideRoot(), /rgba?\(|#[0-9a-f]{3,8}\b/i);
+  for (const [name, tokens] of Object.entries(schemes())) {
+    for (const key of ["shadow-soft", "shadow-raised"]) assert.ok(tokens[key], `${name} names --${key}`);
+  }
+});
+
+test("the front page's footer links are a list, not a row joined by dots", () => {
+  for (const path of ["index.html", "ar/index.html"]) {
+    const footer = page(path).match(/<footer>[\s\S]*?<\/footer>/)[0];
+    assert.doesNotMatch(footer, /·/, `${path}'s footer joins links with dots`);
+    assert.match(footer, /<ul class="footer-links">[\s\S]*<li><a /, `${path}'s footer lists its links`);
+  }
+});
