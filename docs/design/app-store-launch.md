@@ -485,8 +485,8 @@ refuses any picture of a size the store does not take. Two faults found on the w
 tests: the Mac window opened at the wrong height (written up in
 `docs/issues/mac-store-shot-window-size.md`), and a picture run read the laptop's own saved
 reading place, so the Mac pictures showed a "Left off" ribbon; a picture run now starts from an
-empty, throwaway store. Every picture was looked at. **Left over:** on the iPhone pictures the
-strip where the clock and battery sit is empty (㊹).
+empty, throwaway store. Every picture was looked at. The strip where the clock and battery sit,
+empty at first on the iPhone pictures, now shows them (㊹).
 
 ### ㉜ Nothing reads what readers write about the app in the store · **fixed**
 
@@ -658,15 +658,20 @@ and 390 wide in both languages, and the browser test runs in Chrome, Firefox and
 Safari engine. Not yet looked at inside the iPad app itself. The pages answer once hifth.app's
 first upload is made.
 
-### ㊹ The iPhone store pictures have an empty strip where the clock and battery sit · **open**
+### ㊹ The iPhone store pictures have an empty strip where the clock and battery sit · **fixed**
 
 Found while looking at the pictures ㉛ takes. The app photographs its own page, so the strip at
 the top of an iPhone picture, where a real phone shows the time and battery, is one flat band.
 Apple takes the pictures as they are, but they look less finished than a phone in a hand.
 
-*What would answer it:* set the simulator's clock and battery to Apple's usual 9:41 and full,
-and photograph the whole screen; or fill the strip with the page's own top colour. A test
-refuses an iPhone picture whose top strip is one flat colour.
+*What answered it (2026-11-19):* on the iPhones and the iPad, the store pictures are now of the
+whole simulator screen. The simulator's clock is set to Apple's usual 9:41, with full signal and
+a full battery, and put back afterwards. The app still takes its own picture first, as the sign
+the page is ready and settled, then stays open while the whole screen is photographed. The check
+at the end now refuses a phone or tablet picture whose top strip is one flat colour, and names
+one whose pixels it cannot read. Tried on the 6.9 inch iPhone and looked at: the time, signal,
+Wi-Fi and battery sit above the Hifth bar. The first try showed a charging bolt on the battery,
+so the battery is now set as full and unplugged, the way Apple's own pictures show it.
 
 ### ㊺ Where did the verse-number rings on our pages come from? · **open**
 
