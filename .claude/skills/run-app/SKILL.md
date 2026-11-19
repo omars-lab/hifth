@@ -77,6 +77,9 @@ but confirm which, because "desktop UI" reads both ways.
    browser so it works offline, and a tab that has opened it once goes on being served that
    saved copy. A change then looks as if it did not land. Clear it in the tab, then reload:
    `navigator.serviceWorker.getRegistrations().then((rs) => Promise.all(rs.map((r) => r.unregister()))).then(() => location.reload())`.
+   If the old look is still there after that, the saved files outlived the worker; delete them
+   too and reload: `caches.keys().then((ks) => Promise.all(ks.map((k) => caches.delete(k)))).then(() => location.reload())`
+   (2026-11-19: a style change for the link line only showed after both).
    The dev server (7122) saves nothing, so it never does this.
 5. **At phone width the dev server's comment bar covers the bottom of the app.** The bar for
    leaving comments on a page sits in the bottom corner of every dev-server page, and on a

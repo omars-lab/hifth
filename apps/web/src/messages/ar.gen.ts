@@ -286,6 +286,7 @@ const messages: Catalog = {
   licenceBody: "برنامج حرّ برخصة GNU GPL الإصدار الثالث أو ما بعده: لك أن تدرسه وتعدّله وتنشره. وهذه شيفرة هذه النسخة بعينها، لا فرعٌ قد يتغيّر:",
   licenceHead: "الرخصة والمصدر",
   likeVerse: (d) => "أشدّها شبهًا: " + d.ref,
+  linkNowhere: "هذا الرابط لا يشير إلى صفحة أو آية",
   listenAsRecited: "كما تُتلى",
   listenFaster: "أسرع",
   listenOnce: "مرة واحدة",

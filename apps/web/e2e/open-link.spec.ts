@@ -258,3 +258,72 @@ test.describe("Hifth · a link naming a mus'haf the site does not have", () => {
     await expect(page).toHaveURL(/#\/hafs-kfqc\/2:255$/);
   });
 });
+
+// Backlog app-link-it-cannot-place. A link the app can read no place from (a
+// typo, a verse past the end of its surah, a page past the last) used to do
+// nothing at all: the reader tapped it and stayed where they were, with no
+// word why. Now one short line says the link does not point to a page or verse.
+// The Mac and iPad app hands such a link on as `#/nowhere`, so the line is the
+// same for both doors. The line never repeats the link's own words.
+test.describe("Hifth · a link that points nowhere", () => {
+  test.use({ locale: "en-US" });
+  const line = (page: Page) => page.getByRole("status").filter({ hasText: "This link does not point to a page or verse" });
+
+  for (const hash of ["#/x", "#/nowhere", "#/hafs-kfqc/999:999", "#/hafs-kfqc/2:999", "#/hafs-kfqc/2:999-2:1000", "#/hafs-kfqc/p9999"]) {
+    test(`${hash} says so in one line, and the reader stays on a page`, async ({ page }) => {
+      await page.goto(`/${hash}`);
+      await expect(line(page)).toBeVisible({ timeout: 20_000 });
+      await expect(page.locator('svg[aria-labelledby^="page-label-"]:visible').first()).toBeVisible();
+      await expect(page.getByRole("alert").filter({ hasText: "Could not load" })).toHaveCount(0);
+    });
+  }
+
+  test("a good link, an empty address and the moved-site hand-over say nothing", async ({ page }) => {
+    for (const hash of ["", "#/hafs-kfqc/p19", "#/carry"]) {
+      await page.goto(`/${hash}`);
+      await expect(page.locator('svg[aria-labelledby^="page-label-"]:visible').first()).toBeVisible({ timeout: 20_000 });
+      await page.waitForTimeout(500);
+      await expect(line(page)).toHaveCount(0);
+    }
+  });
+
+  test("Hide takes the line away, and the same bad link again brings it back", async ({ page }) => {
+    await page.goto("/#/hafs-kfqc/p19");
+    await expect(page.locator('svg[aria-labelledby="page-label-19"]:visible')).toBeVisible({ timeout: 20_000 });
+    await page.evaluate(() => (location.hash = "#/hafs-kfqc/2:999"));
+    await expect(line(page)).toBeVisible();
+    // The reader is still on the page they were on, and the address says so.
+    await expect(page).toHaveURL(/#\/hafs-kfqc\/p19$/);
+    await line(page).getByRole("button", { name: "Hide this notice" }).click();
+    await expect(line(page)).toHaveCount(0);
+    await page.evaluate(() => (location.hash = "#/hafs-kfqc/2:999"));
+    await expect(line(page)).toBeVisible();
+  });
+
+  // Drawn in the offline strip's styles, which stack Hide under the words on a
+  // phone: for one sentence that doubled the strip's height for nothing.
+  test("on a phone the sentence and Hide sit on one row", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/#/x");
+    await expect(line(page)).toBeVisible({ timeout: 20_000 });
+    const words = await line(page).getByText("This link does not point to a page or verse").boundingBox();
+    const hide = await line(page).getByRole("button", { name: "Hide this notice" }).boundingBox();
+    const middle = (b: { y: number; height: number }) => b.y + b.height / 2;
+    expect(Math.abs(middle(words!) - middle(hide!))).toBeLessThan(4);
+  });
+
+  test("a good link after a bad one clears the line", async ({ page }) => {
+    await page.goto("/#/x");
+    await expect(line(page)).toBeVisible({ timeout: 20_000 });
+    await page.evaluate(() => (location.hash = "#/hafs-kfqc/p19"));
+    await expect(page.locator('svg[aria-labelledby="page-label-19"]:visible')).toBeVisible();
+    await expect(line(page)).toHaveCount(0);
+  });
+});
+
+test("Hifth · a link that points nowhere says so in Arabic too", async ({ page }) => {
+  await page.goto("/#/x");
+  await expect(page.getByRole("status").filter({ hasText: "هذا الرابط لا يشير إلى صفحة أو آية" })).toBeVisible({
+    timeout: 20_000,
+  });
+});

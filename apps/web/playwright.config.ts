@@ -305,8 +305,10 @@ export default defineConfig({
           // drawing; Firefox is the owner's browser, so a blank page there counts.
           // And `report-problem`: the reader's own report and its mail link.
           // And `account`: the sign-in section, against a stand-in app.
+          // And `open-link`: a link that opens a panel, and the line that says
+          // a link points nowhere, which a reader meets from another app.
           name: "desktop-firefox",
-          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|drawer-tools|tool-help|settings-drawer|drawer-marks|drawer-glow|left-off-look|full-screen-tools|reading-bars|bookmark-pull|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes|share-menu-fresh|wide-screen-later|slider-back|new-layout|page-stopped|report-problem|account)\.spec\.ts/,
+          testMatch: /(pencil|spread-fit|edge-peel|lazy-tools|lookalike-compare-view|tajweed-key|highlight|mark-tools|undo-redo|eraser|slider-arrows|word-stack|lookalikes-in-drawer|drawer-tools|tool-help|settings-drawer|drawer-marks|drawer-glow|left-off-look|full-screen-tools|reading-bars|bookmark-pull|pen-guide|record-days|app-pages|landing-pages|carry-marks|mistakes|share-menu-fresh|wide-screen-later|slider-back|new-layout|page-stopped|report-problem|account|open-link)\.spec\.ts/,
           use: {
             browserName: "firefox",
             viewport: { width: 1440, height: 900 },

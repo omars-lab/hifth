@@ -86,6 +86,42 @@ struct RouteTests {
         #expect(Route.parse(try #require(URL(string: raw))) == nil)
     }
 
+    // Backlog app-link-it-cannot-place: a plain link to a place the app cannot
+    // find used to be dropped, and the reader saw nothing happen. It now goes
+    // on as one fixed address the page answers with "this link goes nowhere".
+    @Test("a plain link opens its place, the shipped mus'haf's for another, or the fixed nowhere address")
+    func destination() throws {
+        let to = { (raw: String) throws -> String? in Route.destination(try #require(URL(string: raw))) }
+        #expect(try to("hifth:///hafs-kfqc/2:255") == "#/hafs-kfqc/2:255")
+        #expect(try to("https://hifth.app/read/#/hafs-kfqc/p45") == "#/hafs-kfqc/p45")
+        #expect(try to("https://hifth.app/read/#/warsh-libya/p1?w=1-2") == "#/hafs-kfqc/p1?w=1-2")
+        #expect(try to("hifth://nope/2:255") == "#/hafs-kfqc/2:255")
+        #expect(Route.parse(try #require(URL(string: "hifth://nope/2:255"))) == nil, "a request still says the mus'haf is wrong")
+    }
+
+    @Test("a link naming a place the app cannot read goes on as the fixed nowhere address", arguments: [
+        "hifth:///hafs-kfqc/x",
+        "hifth://hafs-kfqc/p0",
+        "hifth:///hafs-kfqc/2:1/extra",
+        "hifth:///hafs-kfqc/2:1-0",
+        "hifth://open/#/hafs-kfqc/2:",
+        "https://hifth.app/read/#/x",
+        "https://hifth.app/read/#/hafs-kfqc/p0",
+    ])
+    func destinationUnplaced(_ raw: String) throws {
+        #expect(Route.destination(try #require(URL(string: raw))) == Route.unplaced)
+    }
+
+    @Test("a link naming no place opens the app and says nothing", arguments: [
+        "hifth://", "hifth:///", "hifth://open", "hifth://open/",
+        "https://hifth.app/read/", "https://hifth.app/read/#/",
+        "https://hifth.app/support/#/x", "https://www.hifth.app/read/#/x",
+        "https://blog.bytesofpurpose.com/hifth/#/x", "hifth-app://app/index.html",
+    ])
+    func destinationNone(_ raw: String) throws {
+        #expect(Route.destination(try #require(URL(string: raw))) == nil)
+    }
+
     @Test("other schemes and empty links are not routes")
     func parseRefuses() throws {
         #expect(Route.parse(try #require(URL(string: "https://blog.bytesofpurpose.com/hifth/#/hafs-kfqc/2:255"))) == nil)

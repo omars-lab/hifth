@@ -57,12 +57,11 @@ Four facts shape the order:
 - **Two answers take weeks**, and everything else is days: the rights holders' replies, and
   sign-in (about three weeks of work; the owner made its three choices by 2026-11-18). These two set the
   launch date, so they are asked for first, and the rest is built while they wait.
-- **The first download is nearly full**: 158.9 of its 161 KB, and the app as a whole 219.4 of
-  its 220 KB (2026-11-19, after the account section's words moved into a pack of their own, ⑳ on
-  the sign-in page). That freed 1.2 KB at start-up, enough for the line telling a hafiz a verse
-  link went nowhere. The app's log, the off-switch and the "new version ready" prompt must still
-  load after the page is up. The whole app has 0.6 KB left, so the next addition to it needs a
-  trim first (the optimizing-performance skill's list).
+- **The first download is nearly full**: 159.2 of its 161 KB, and the app as a whole 219.7 of
+  its 220 KB (2026-11-19, after the line telling a hafiz a verse link went nowhere, ㊽, used the
+  room the account words' move, ⑳ on the sign-in page, made). The app's log, the off-switch and
+  the "new version ready" prompt must still load after the page is up. The whole app has 0.3 KB
+  left, so the next addition to it needs a trim first (the optimizing-performance skill's list).
 - **Some checks need a device and a person** (the screen-reader walk, the new layout on the
   iPad). They go on the by-hand checklist and are done in batches, never one at a time.
 
@@ -131,8 +130,8 @@ comes before what matters once readers have it, since a turned-down build costs 
    are fixed, and so are store reviews, store numbers and the release page on the new key.)
 7. **Accounts:** sign-in is built and switched off (2026-11-19); the rest waits on the owner's
    steps and an iPad sitting. The account words now load only when the account section opens
-   (⑳, done 2026-11-19), which freed room at start-up. Next for the agent: the line telling a
-   hafiz a verse link went nowhere, which that room was for.
+   (⑳, done 2026-11-19), which freed room at start-up, and the line telling a hafiz a verse
+   link went nowhere used it (㊽, done 2026-11-19).
 8. **Test flight** with a few named readers, then **upload and release** once the permissions
    are in writing.
 
@@ -198,13 +197,11 @@ may be made.)
 ## Where the work stands (2026-11-19)
 
 - **Now:** worktree `../hifth-auth`, branch `sign-in-server`, draft pull request #655, intent
-  `launch-sign-in`. Pushed up to "The app is back under its size limits" (every check passed,
-  2,076 browser tests on their first try). One doc commit after it, about the backlog and this
-  page, rides with the next push. The pull request stays a draft until the owner has seen
-  sign-in; it carries sign-in steps 10 to 21, the backups (㉘) and the size trim.
-- **Next item:** split the app's words so the sign-in words load only when the account section
-  opens (⑳, backlog row `sign-in-words-load-at-start`). It touches every screen's words, so it
-  gets its own branch from `origin/main` once #655 merges, or from `sign-in-server` if it has not.
+  `launch-sign-in`. The pull request stays a draft until the owner has seen sign-in; it carries
+  sign-in steps 10 to 21, the backups (㉘), the size trim, the account words loading only with
+  the account section (⑳, pushed), and the line for a link that goes nowhere (㊽, backlog row
+  `app-link-it-cannot-place`, 2026-11-19).
+- **Next item:** the other half of ⑫ on the sign-in page, then the owner's batch of asks.
 - **The loop is not running.** The work has been driven by hand, one "continue" at a time. To
   run it, paste the prompt from `.claude/loop-prompts/operational-readiness.md` into `/loop`.
 

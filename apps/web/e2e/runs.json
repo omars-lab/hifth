@@ -200,6 +200,7 @@
     "open-link.spec.ts": [
       "android",
       "desktop",
+      "desktop-firefox",
       "iphone"
     ],
     "page-labels.spec.ts": [

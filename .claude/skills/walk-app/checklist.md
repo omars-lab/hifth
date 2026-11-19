@@ -37,6 +37,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `upright-ipad-opens-two-small-pages`
 - [ ] A deep link to a verse lands on its page with the verse marked; turn the phone the moment it
   opens and the mark is still there. · phone, phone-side · issue: `turned-phone-loses-linked-verse-mark`
+- [ ] A link to a verse that does not exist (try 2:999, or a mistyped page) says "This link does
+  not point to a page or verse" in one row under the top bar, with Hide; the page you were on
+  stays. In the iPad and Mac apps, a hifth:// or hifth.app link like that says the same, and
+  `hifth:///` on its own only opens the app. · phone, desktop, Firefox, the iPad app, the Mac app ·
+  issue: `app-link-it-cannot-place` · tests: `e2e/open-link.spec.ts`, `ShellCallbackTests.swift`
 - [ ] Open at page 1 and turn to page 3: the paper stays the same size and shape; the opening text sits
   in the middle, not on a squat card. · desktop, phone · issue: `opening-pages-squat`
 - [ ] In the info panel, set "The first two pages" to usual size: pages 1 and 2 redraw at once with

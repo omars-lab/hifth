@@ -48,7 +48,9 @@ Three pieces, and each one is small on purpose:
    also where the reader's bookmarks and notes are stored.
 2. **A route parser.** A `hifth://` link, a launch environment variable or a `--route=`
    argument each carry a route verbatim. The parser accepts `/<edition>/<target>[?query]` and
-   nothing else; a bad link is dropped, not opened.
+   nothing else. Since 2026-11-19 a link the reader taps that names a place the app cannot
+   read is handed on as one fixed address the page cannot read either, so the page says the
+   link goes nowhere instead of nothing happening; a link naming no place only opens the app.
 3. **A three-word bridge.** The page tells the shell `ready`, `route` and `share`. The shell
    tells the page one thing at start, in a small object: that it is inside a shell, which
    platform, and the public site's address for links. Since 2026-09-29 the page also lends the
@@ -181,7 +183,7 @@ cost a hafiz.
 | choice | what we did | what it buys | what it costs | what it rules out |
 | --- | --- | --- | --- | --- |
 | how the files are served | the app's own scheme, `hifth-app://app` | the page works as on a website; storage stays put across updates | the address is frozen for ever, because moving it moves the reader's notes | never renaming the scheme or host |
-| what the shell knows about routes | nothing; it passes the web app's own link grammar through | one grammar, no drift; a shared link and a `hifth://` link are the same string | a bad plain link is dropped silently rather than explained (an x-callback-url request is explained, on the caller's error address) | a native "go to" screen of its own |
+| what the shell knows about routes | nothing; it passes the web app's own link grammar through | one grammar, no drift; a shared link and a `hifth://` link are the same string | a bad plain link gets one fixed line ("this link does not point to a page or verse"), not a reason (an x-callback-url request is explained, on the caller's error address) | a native "go to" screen of its own |
 | how big the Mac window opens | large enough for the two-page spread on first launch | a Mac user sees the open mus'haf, not a phone layout in a big window | a small laptop screen still gets the single page below the breakpoint | nothing; the reader can resize |
 | trackpad pinch | left to WebKit and the web app | one zoom behaviour everywhere | untested by a machine on a real trackpad | a native zoom control |
 | what the shell shows besides the page | a hidden route label and the window title | tests and screenshots have something native to wait on | nothing visible to a reader | nothing |

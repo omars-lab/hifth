@@ -93,19 +93,23 @@ nonisolated enum Route {
     /// `hifth:///hafs-kfqc/2:255`, `hifth://hafs-kfqc/2:255`,
     /// `hifth://open/#/hafs-kfqc/2:255` (a site link's tail, fragment and all).
     static func parse(_ url: URL) -> String? {
-        if url.scheme?.lowercased() == "https" { return siteLink(url) }
-        guard url.scheme?.lowercased() == scheme else { return nil }
-        if let fragment = url.fragment, fragment.hasPrefix("/") {
-            return hash(from: fragment)
-        }
-        var route = url.path
-        if let host = url.host, !host.isEmpty, host != "open" {
-            route = "/" + host + route
-        }
-        if let query = url.query, !query.isEmpty {
-            route += "?" + query
-        }
-        return hash(from: route)
+        rawRoute(url).flatMap(hash(from:))
+    }
+
+    /// The hash a plain link hands the web app for a place the app cannot
+    /// find. The web app cannot read it either, so it shows its one line saying
+    /// the link goes nowhere. A fixed address, so nothing the link said reaches
+    /// the page (backlog: app-link-it-cannot-place).
+    static let unplaced = "#/nowhere"
+
+    /// Where a plain link opens: its place; the same place in the mus'haf the
+    /// app ships, when it names another (as the site does); `unplaced` when it
+    /// names a place the app cannot read; or `nil` when it names none
+    /// (`hifth://`, `hifth://open`, the reader on hifth.app with nothing after
+    /// it, or an address that is not the reader at all), which only opens the app.
+    static func destination(_ url: URL) -> String? {
+        guard let raw = rawRoute(url) else { return nil }
+        return hash(from: raw) ?? inShippedEdition(raw).flatMap(hash(from:)) ?? unplaced
     }
 
     /// The site that hands its reader links to the app, and the addresses on
@@ -115,15 +119,45 @@ nonisolated enum Route {
     static let siteHost = "hifth.app"
     static let readerPaths: Set<String> = ["/read", "/read/", "/read/index.html"]
 
-    /// `https://hifth.app/read/#/hafs-kfqc/2:255` → the same hash the site
-    /// would show. Any other https address, including another page on
-    /// hifth.app, another port or another name in front, is not a route.
-    private static func siteLink(_ url: URL) -> String? {
-        guard url.host?.lowercased() == siteHost, url.port == nil, url.user == nil,
-              readerPaths.contains(url.path(percentEncoded: true)),
-              let fragment = url.fragment, fragment.hasPrefix("/")
+    /// The place part of a link, before any check, or `nil` when the link
+    /// names no place. `https://hifth.app/read/#/hafs-kfqc/2:255` gives the
+    /// same place the site would read; any other https address, including
+    /// another page on hifth.app, another port or another name in front,
+    /// names none.
+    private static func rawRoute(_ url: URL) -> String? {
+        var route: String
+        switch url.scheme?.lowercased() {
+        case "https":
+            guard url.host?.lowercased() == siteHost, url.port == nil, url.user == nil,
+                  readerPaths.contains(url.path(percentEncoded: true)),
+                  let fragment = url.fragment, fragment.hasPrefix("/")
+            else { return nil }
+            route = fragment
+        case scheme:
+            if let fragment = url.fragment, fragment.hasPrefix("/") {
+                route = fragment
+            } else {
+                route = url.path
+                if let host = url.host, !host.isEmpty, host != "open" {
+                    route = "/" + host + route
+                }
+                if let query = url.query, !query.isEmpty {
+                    route += "?" + query
+                }
+            }
+        default:
+            return nil
+        }
+        return route.isEmpty || route == "/" ? nil : route
+    }
+
+    /// `/warsh-libya/p1` → `/hafs-kfqc/p1`: the same place in the mus'haf the
+    /// app ships, as the site opens a link naming one it does not have.
+    private static func inShippedEdition(_ raw: String) -> String? {
+        guard let edition = editionSegment(of: raw), raw.hasPrefix("/" + edition),
+              let shipped = shippedEditions.first
         else { return nil }
-        return hash(from: fragment)
+        return "/" + shipped + raw.dropFirst(1 + edition.count)
     }
 
     // MARK: - Where and in which language this launch opens

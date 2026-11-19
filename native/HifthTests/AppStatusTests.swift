@@ -155,6 +155,7 @@ struct AppStatusTests {
         var scripts: [String] = []
         model.runScript = { source, _ in scripts.append(source) }
         model.open(try #require(URL(string: "hifth://hafs-kfqc/2:255")))
-        #expect(scripts.isEmpty)
+        model.open(try #require(URL(string: "hifth:///hafs-kfqc/x")))
+        #expect(scripts.isEmpty, "not even the line saying a link goes nowhere")
     }
 }

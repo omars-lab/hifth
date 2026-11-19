@@ -59,8 +59,15 @@ Four doors, all ending in the same hash:
   site's file at `/.well-known/apple-app-site-association` is live (launch item ⑨). The app
   takes only the reader's addresses on exactly `hifth.app`; the site's file claims the same
   ones, written by the deploy-site skill's `app-links.mjs`. Add a mus'haf to the app's shipped
-  list and to that file's list together; a test holds the two. A link the app opens but cannot
-  place is dropped silently today (backlog `app-link-it-cannot-place`).
+  list and to that file's list together; a test holds the two.
+
+A plain link (the first two doors) goes through `Route.destination`, not `Route.parse`. It
+opens its place; a mus'haf the app does not ship opens the same place in the one it does, as
+the site does; a place the app cannot read goes on as the fixed `Route.unplaced` (`#/nowhere`),
+and the web app answers that with one line saying the link does not point to a page or verse.
+A link naming no place (`hifth://open`, the reader with nothing after it) only opens the app.
+`Route.parse` stays strict, because an x-callback-url request must say *why* it was refused.
+Tests: `RouteTests` (`destination…`) and `ShellCallbackTests` (`unplacedLinkHandedOn`).
 - `HIFTH_ROUTE=/hafs-kfqc/p45` env var — what the Makefile uses.
 - `--route=/hafs-kfqc/p45` launch argument — what XCUITest uses.
 

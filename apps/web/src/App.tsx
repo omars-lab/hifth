@@ -200,6 +200,7 @@ import { ShareSheet } from "./components/ShareSheet";
 import { ListenOptions } from "./components/ListenOptions";
 import { rememberListenWay, savedListenWay } from "./listen-way";
 import { OfflineNotice } from "./components/OfflineNotice";
+import noticeStyles from "./components/OfflineNotice.module.css";
 import { CoachMarks } from "./components/CoachMarks";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
@@ -632,6 +633,13 @@ export function App(): JSX.Element {
    * in settings, so a first open goes straight to the page.
    */
   const [coachUp, setCoachUp] = useState(false);
+  /**
+   * The last link opened pointed nowhere: one no place can be read from, or a
+   * verse or page past the end (backlog app-link-it-cannot-place). One fixed
+   * line says so, the same for a link from the address bar and one the Mac and
+   * iPad app hands on. A good link and Hide take it away.
+   */
+  const [nowhere, setNowhere] = useState(false);
 
   const stageRef = useRef<PageStageHandle>(null);
   // The page's room, which the cards stand inside rather than over the bars.
@@ -3774,8 +3782,16 @@ export function App(): JSX.Element {
   // `origin` only chooses the wording of the announcement — a jump lands by the
   // same code as a shared link, and must keep doing so.
   const restoreState = useCallback(
-    (state: AppState, origin: "link" | "jump" = "link") => {
-      if (!resolver) return;
+    (state: AppState, origin: "link" | "jump" = "link"): boolean => {
+      if (!resolver) return true;
+      // A verse past the end of its surah, or a page past the last, is no
+      // place at all: turned away before the link changes anything else, so
+      // the router can say it points nowhere (backlog app-link-it-cannot-place).
+      // A verse that exists but is not drawn yet keeps its own message below.
+      const sel = state.select;
+      const past = sel === null ? (state.page ?? 0) > totalPages : sel.ayah > (AYAH_COUNTS[sel.surah - 1] ?? 0);
+      if (past) return false;
+      if (origin === "link") setNowhere(false);
       const edition = resolver.edition;
       // A *link* says which desk it wants, and says it by omission too: pasting a
       // plain link while sitting on a dark field puts you back on the default,
@@ -3838,7 +3854,7 @@ export function App(): JSX.Element {
           announce(t.arrivedPage(origin, state.page));
           void stage.showPage(state.page);
         }
-        return;
+        return true;
       }
 
       // A range link (`2:47-2:48`) restores the highlight + its merged menu, on
@@ -3852,7 +3868,7 @@ export function App(): JSX.Element {
           setSelectedKey(null);
           setSelectedRange(null);
           announce(t.rangeUnavailable);
-          return;
+          return true;
         }
         setSelectedKey(null);
         setSelectedRange(keys);
@@ -3863,7 +3879,7 @@ export function App(): JSX.Element {
         // leaves no single-verse mark on the first verse, so a link must not
         // either — the two roads land on one look.
         void stage.navigateTo(keys[0]!, { pulse: false });
-        return;
+        return true;
       }
 
       const key = refToKey(edition, state.select);
@@ -3873,7 +3889,7 @@ export function App(): JSX.Element {
         setSelectedKey(null);
         setSelectedRange(null);
         announce(t.ayahUnavailable);
-        return;
+        return true;
       }
       setSelectedRange(null);
       setSelectedKey(key);
@@ -3885,8 +3901,9 @@ export function App(): JSX.Element {
       // Words the link names (`?w=3-7`) are laid as word ink on arrival. The
       // address then names the verse only, as it does after `?tool=`.
       void stage.navigateTo(key, { pulse: true, ...(origin === "link" && state.word ? { words: state.word } : {}) });
+      return true;
     },
-    [resolver, announce, t, chooseTool, handlePageMode],
+    [resolver, announce, t, chooseTool, handlePageMode, totalPages],
   );
 
   // The surah menu's line for keeping its recitation on the device
@@ -4013,7 +4030,7 @@ export function App(): JSX.Element {
 
   // Gate cold-open restore on the resolver: a deep link parsed before the
   // manifest loads must not be dropped (restoreState no-ops without a resolver).
-  useHashRouter(currentState, restoreState, resolver !== null);
+  useHashRouter(currentState, restoreState, resolver !== null, () => setNowhere(true));
   // The Mac shell's Page menu turns the page through this; nothing outside
   // the shell can see it.
   // And the iPad app hands it the Apple Pencil's double-tap and squeeze, with
@@ -4720,6 +4737,29 @@ export function App(): JSX.Element {
           setRevisionOpen(true);
         }}
       />
+
+      {/* A link that went nowhere. Not held by the tips strip, the pitch or full
+          screen like the strip above: it answers what the reader just did, and
+          without it the tap looks ignored. It never repeats the link's words.
+          Drawn in the offline strip's own styles, so it adds one sentence and
+          no stylesheet. */}
+      {nowhere && (
+        <div className={`${noticeStyles.notice} ${noticeStyles.oneLine}`} role="status" data-notice="link-nowhere">
+          <div className={noticeStyles.text}>
+            <span className={noticeStyles.body}>{t.linkNowhere}</span>
+          </div>
+          <div className={noticeStyles.actions}>
+            <button
+              type="button"
+              className={noticeStyles.dismiss}
+              onClick={() => setNowhere(false)}
+              aria-label={t.dismissNotice}
+            >
+              {t.dismiss}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* The three verbs, once, in the layout rather than over the page — the
           first tap it teaches has to land while the strip is still up. */}

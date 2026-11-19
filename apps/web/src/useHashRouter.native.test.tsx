@@ -25,6 +25,55 @@ afterEach(() => {
   window.history.replaceState(null, "", "#");
 });
 
+/**
+ * Backlog app-link-it-cannot-place: a link naming no place there is used to do
+ * nothing at all. The router now says so through `onNowhere`, and puts back the
+ * address of what is still on screen, so the same bad link a second time is a
+ * change of address again and is answered again.
+ */
+describe("useHashRouter and a link that points nowhere", () => {
+  const p19: AppState = { edition: "hafs-kfqc", select: null, page: 19 };
+
+  function open(hash: string, onRestore: (s: AppState) => boolean | void = () => {}) {
+    window.history.replaceState(null, "", hash);
+    let nowhere = 0;
+    const view = renderHook(
+      ({ state, ready }: { state: AppState | null; ready: boolean }) =>
+        useHashRouter(state, onRestore, ready, () => void nowhere++),
+      { initialProps: { state: null as AppState | null, ready: false } },
+    );
+    view.rerender({ state: p19, ready: true });
+    return { count: () => nowhere };
+  }
+
+  it("a link no place can be read from says so", () => {
+    expect(open("#/x").count()).toBe(1);
+    expect(open("#/nowhere").count()).toBe(1);
+  });
+
+  it("an empty address, a bare #/ and the moved site's hand-over only open the app", () => {
+    for (const hash of ["#", "#/", "#/carry", "#/carry?v=1"]) expect(open(hash).count(), hash).toBe(0);
+  });
+
+  it("a link the app refuses says so, and does not count as the place it landed", () => {
+    const seen = open("#/hafs-kfqc/2:999", () => false);
+    expect(seen.count()).toBe(1);
+    // The first view writes its own address, since the link was not followed.
+    expect(window.location.hash).toBe("#/hafs-kfqc/p19");
+  });
+
+  it("the same bad link twice is answered twice, and the address goes back each time", () => {
+    const seen = open("#/hafs-kfqc/p19");
+    expect(seen.count()).toBe(0);
+    for (const n of [1, 2]) {
+      window.location.hash = "#/x";
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+      expect(seen.count()).toBe(n);
+      expect(window.location.hash).toBe("#/hafs-kfqc/p19");
+    }
+  });
+});
+
 describe("useHashRouter in the native shell", () => {
   it("posts ready on the ready edge, then every route it writes", () => {
     const sent: unknown[] = [];
@@ -81,7 +130,7 @@ describe("useHashRouter in the native shell", () => {
       const restored: AppState[] = [];
       const { rerender } = renderHook(
         ({ state, ready }: { state: AppState | null; ready: boolean }) =>
-          useHashRouter(state, (s) => restored.push(s), ready),
+          useHashRouter(state, (s) => void restored.push(s), ready),
         { initialProps: { state: null as AppState | null, ready: false } },
       );
       // The resolver arrives: the app's first view is page 1, and the link is
@@ -128,7 +177,7 @@ describe("useHashRouter in the native shell", () => {
       const restored: AppState[] = [];
       const { rerender } = renderHook(
         ({ state, ready }: { state: AppState | null; ready: boolean }) =>
-          useHashRouter(state, (s) => restored.push(s), ready),
+          useHashRouter(state, (s) => void restored.push(s), ready),
         { initialProps: { state: null as AppState | null, ready: false } },
       );
       rerender({ state: pageOne, ready: true });

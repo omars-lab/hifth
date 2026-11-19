@@ -243,7 +243,10 @@ final class ShellModel {
         case .failure(let failure, let callbacks)?:
             answer(callbacks.errorURL(failure))
         case nil:
-            guard !linksOff, let hash = Route.parse(url) else { return }
+            // A link to a place the app cannot find goes on as `Route.unplaced`,
+            // so the page says it goes nowhere; dropped here, the reader saw
+            // nothing happen. A link naming no place only opens the app.
+            guard !linksOff, let hash = Route.destination(url) else { return }
             show(hash)
         }
     }

@@ -294,6 +294,8 @@ export interface Strings {
   arrivedAyah(origin: "link" | "jump", label: string, page: number): string;
   rangeUnavailable: string;
   ayahUnavailable: string;
+  /** A link that names no page or verse there is (backlog app-link-it-cannot-place). */
+  linkNowhere: string;
   noConcordance: string;
   /** The footer's screen-reader-only summary of what the rail is offering. */
   railSummary(surah: string, links: number): string;

@@ -784,6 +784,18 @@ size: page 7 grows from 40 KB to 66 KB as sent over the network, so all pages to
 about 1.6 to 2 times. Whether that size is worth it is the owner's call. It rides with the ring
 swap (㊺), since both copy every page again.
 
+### ㊽ A link to a verse the app cannot find does nothing at all · **fixed**
+
+Found while building ⑨. Once hifth.app links open the app, a mistyped verse in one reached the
+app and was dropped without a word: the app stayed where it was, and the reader could not tell
+the link had done anything. The website did the same with a link it could not read.
+
+*Where it stands (2026-11-19):* fixed. Such a link now shows one line under the top bar, "This
+link does not point to a page or verse", with Hide. The reader stays on the page they were
+reading. In the app, the link is handed to the page instead of dropped; a link that names no
+place at all still only opens the app. The browser tests cover the line on a computer, a phone
+and Firefox, in English and Arabic, and the app's own tests failed with the old code put back.
+
 ## Which of these could get the app turned down, and which matter once readers have it?
 
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
@@ -803,7 +815,8 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
   reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
   reviews ㉜ and numbers ㉝, both keys on the release page ㉞, a report seen to arrive ㊵,
-  whether the website keeps the recitation ㊻, and the words our copy step moves ㊼.
+  whether the website keeps the recitation ㊻, and the words our copy step moves ㊼. (A link
+  to a verse the app cannot find ㊽ is fixed.)
 
 ## What does this leave alone?
 

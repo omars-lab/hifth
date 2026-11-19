@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { parseHash, serializeState, shippedEdition, type AppState } from "@hifth/core";
+import { CARRY_HASH } from "./moved";
 import { postReady, postRoute } from "./native-bridge";
 import { noteStep, noteViewChange } from "./step-log";
 
@@ -20,11 +21,19 @@ import { noteStep, noteViewChange } from "./step-log";
  */
 export function useHashRouter(
   state: AppState | null,
-  onRestore: (state: AppState) => void,
+  // `false` means the link reads but names no place there is (a verse past the
+  // end of its surah, a page past the last): nothing moved, and `onNowhere` runs.
+  onRestore: (state: AppState) => boolean | void,
   ready = true,
+  // A link that points nowhere: one the router cannot read, or one `onRestore`
+  // refused. The reader stays where they were, and the address goes back to
+  // saying so (backlog app-link-it-cannot-place). Never handed the link's text.
+  onNowhere: () => void = () => {},
 ): void {
   const onRestoreRef = useRef(onRestore);
   onRestoreRef.current = onRestore;
+  const onNowhereRef = useRef(onNowhere);
+  onNowhereRef.current = onNowhere;
   // The hash for what the app is showing now, so a hashchange that only names
   // the current view is ignored. It was once "the hash we last wrote", which
   // went stale the moment the reader moved on: a link back to that page was
@@ -59,9 +68,15 @@ export function useHashRouter(
       if (parsed) {
         if (coldOpened.current) noteStep("link");
         lastView.current = null;
-        onRestoreRef.current(parsed);
+        if (onRestoreRef.current(parsed) !== false) return parsed;
+      } else if (!names(hash)) {
+        return null; // an empty address, or the moved site's hand-over
       }
-      return parsed;
+      onNowhereRef.current();
+      // Put back the address of the view still on screen. On a cold open there
+      // is none yet; the first view writes its own once it is drawn.
+      if (showing.current) window.history.replaceState(null, "", showing.current);
+      return null;
     };
     if (ready && !coldOpened.current) {
       noteStep("open");
@@ -98,6 +113,15 @@ export function useHashRouter(
     if (hash === window.location.hash) return;
     window.history.replaceState(null, "", hash);
   }, [state]);
+}
+
+/**
+ * Whether an address the router cannot read was still meant as a link to a
+ * place. `#`, `#/` and no hash at all only open the app, and the moved site's
+ * hand-over (`moved.ts`) is read by its own code.
+ */
+function names(hash: string): boolean {
+  return hash.startsWith("#/") && hash.length > 2 && hash !== CARRY_HASH && !hash.startsWith(`${CARRY_HASH}?`);
 }
 
 /** The page or verse a view is on, with nothing else: what a restore moves. */
