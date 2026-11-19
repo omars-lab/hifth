@@ -113,8 +113,13 @@ licenceEn: Free to use in software under the Complex's terms · this does not me
   pages of the Complex's free 1441H Hafs drawing files, with no fitting, and every letter
   landed in place. The drawing files hold no font; every letter is already a drawn shape. So
   the answer above stands for the text.
-- **One small open point: the verse-number rings.** quran-svg redrew them from a source it
-  does not name, and they are drawn the way a font's letters are. If they come from the
+- **One small open point: the verse-number rings.** The numbers inside them are the
+  Complex's; only the ring around each is in question. quran-svg redrew the rings from a
+  source it does not name. It is not the Douri font's end-of-verse sign, and quran-svg's later
+  pages take a ring from the Complex's page fonts instead, which is why our pin stays where it
+  is. The Complex's free drawing files have their own pale green medallion at each verse end,
+  and one of those, placed from the verse numbers, matches on every page checked (launch page,
+  ㊺), so swapping it in needs no drawing files in the repo. If the rings come from the
   Complex's font, that licence covers them. Tracked on the launch page (㊺).
 - **Immutability:** SVG bytes are never hand-edited (PLAN §8). Loop 4b applies
   **three** declared transforms, each reproducible and each asserted:

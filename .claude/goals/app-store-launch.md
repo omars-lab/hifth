@@ -67,7 +67,7 @@ Four facts shape the order:
 | **Days since the release command ran clean** | Version bump to a built, checked archive, upload still locked. Under 14. | This page |
 | **Unanswered reports and reviews** | Reader reports in the support folder and store reviews with no answer. Zero. | Store reviews: `make app-store-reviews ARGS=pull` (the `store-feedback` skill). Reader reports: the `operate-app` skill's commands, once built |
 | **New crashes** | Crashes from readers' devices not yet in a backlog row. Zero. | The `crash-logs` skill, once it reads readers' crashes |
-| **Unsteady tests** | Tests that passed only on a second try in the last push. Zero. | The push's report, once built |
+| **Unsteady tests** | Tests that passed only on a second try in the last push. Zero. | The push prints them after each browser run; `make second-tries` lists the worst over the last 20 runs (the `testing` skill) |
 | **Skills with a known gap** | Rows still open in the skills table in the plan. Zero. | The plan's stage 9 |
 
 The first one is the main measure. The others say whether we could run the app once it is out.
