@@ -7607,6 +7607,18 @@
       "note": "Owner, 2026-11-16 (page comments t_3b503f and t_f9e931): Go to, the size buttons and one page or two belong on the page bar at the bottom, and its turn buttons should look like the keyboard keys drawn in the top bar. Those two keys are pictures, not buttons. Plan: a rough build behind one switch, \"The new layout\"; the slider itself does not change. Tried on the iPad and a laptop, in Chrome and Firefox, before anything is chosen. Built 2026-11-16 behind the info panel's switch \"The new layout\" (e2e/new-layout.spec.ts); waiting on the owner to try it on the iPad."
     },
     {
+      "id": "pagebar-fisheye-marker-flees",
+      "source": {
+        "file": "docs/design/page-bar-zoom-plan.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "useCase": "move-across-the-whole-mushaf",
+      "note": "Found 2026-11-18 while fixing a Back-button test that failed in Firefox. With a mouse, the page bar's magnifier (on by default) spreads the juz markers apart around the pointer, so near the pointer a marker moves about nine times as far as the pointer does. A pointer sent straight to a marker's resting place sees the marker slide about 19 pixels away, and the click lands on the bar beside it, which does nothing; in Firefox, at least 16 of 26 probe runs (plain clicks and hover-then-click alike) recorded the click on the bar, not the marker. A hand that homes in slowly does reach it, because the marker sits under the pointer once the pointer is on it. To find out: whether a reader with a real mouse misses markers, and whether a click on the bar between markers under the magnifier should jump to the page under the pointer. The Back-button tests now send the click to the marker itself (e2e/slider-back.spec.ts) so they test Back, not pointing."
+    },
+    {
       "id": "layout-pens-in-the-top-bar",
       "source": {
         "file": "docs/design/app-layout.md",

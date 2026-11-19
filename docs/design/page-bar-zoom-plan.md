@@ -172,6 +172,24 @@ app until the owner picks one. The owner picked D, both together.
 - For step 5, a real phone in hand. The automatic browser checks cannot tell whether a slowed
   scrub feels right.
 
+## Open questions, and what would answer each
+
+### ① Does the magnifier make a juz mark hard to click with a mouse? · **open**
+
+**What it changes for a hafiz:** whether a quick point-and-click on "Juz 3" opens juz 3, or
+does nothing and has to be tried again.
+
+Found 2026-11-18, while fixing a test. Near the mouse the magnifier spreads the juz marks
+apart, so a mark moves about nine times as far as the mouse does. A mouse sent straight to
+where a mark rests sees the mark slide about 19 pixels away, and the click lands on the bar
+beside it, which does nothing. A hand that homes in slowly does reach the mark, because the
+mark sits under the mouse once the mouse is on it.
+
+*What would answer it:* the owner, or a hafiz, clicking a few juz marks with a real mouse
+(parked on the by-hand checklist). If they miss, two fixes to try: a click on the bar near a
+mark under the magnifier opens that juz, or the mark under the mouse stops moving once the
+mouse slows down.
+
 ## What is this plan not settling?
 
 - Hizb and quarter marks (the finer divisions inside a juz). They could slot into the same
