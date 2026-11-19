@@ -2,4 +2,7 @@
 {"v":1,"ts":"2026-11-12T19:34:31Z","ev":"shot","role":"comment","author":"omar","icloud":"CloudDesktop/data/page-comments/hifth/t_0f5ddd/comment.png","sha":"de176a53aa8f"}
 {"v":1,"ts":"2026-11-12T19:59:13Z","ev":"anchor","author":"page","state":"lost"}
 {"v":1,"ts":"2026-11-12T19:59:14Z","ev":"anchor","author":"page","state":"found"}
+{"v":1,"ts":"2026-11-12T20:01:47Z","ev":"shot","role":"after","author":"claude","icloud":"CloudDesktop/data/page-comments/hifth/t_0f5ddd/after-eb49ed02.png","sha":"5a283bd1f75d","commit":"eb49ed02"}
+{"v":1,"ts":"2026-11-12T20:01:47Z","ev":"reply","author":"claude","body":"Added under **Coming next** as *Open Hifth from other apps*: links that open a verse from Shortcuts, a reminder or your notes. It says it comes with the Mac and iPhone apps, because those are what answer the links. After picture attached.","commit":"eb49ed02"}
+{"v":1,"ts":"2026-11-12T20:01:47Z","ev":"status","author":"claude","status":"resolved","note":"Links-from-other-apps line committed in eb49ed02."}
 {"v":1,"ts":"2026-11-16T13:47:47Z","ev":"reply","author":"claude","body":"Not done yet. This is one of eight comments on the front page from 2026-11-12, now listed together in the backlog (`front-page-comments-of-nov-12`, item ⑩ in `docs/design/app-layout.md`) for the front-page work to take, since that work has changes of its own not merged yet."}
