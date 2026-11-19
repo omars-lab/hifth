@@ -709,6 +709,16 @@ every page is copied again, and the page pictures the tests compare against chan
 owner sees before they are replaced. The scripts behind every number above are in the
 mushaf-reference skill's scripts folder.
 
+*Built, switched off, 2026-11-18:* the swap is now a step in the copy step, with a switch in the
+page record that picks the ring we have today, the Complex's medallion, or our own ring. It is
+set to today's ring, so no page has changed. Every copy now counts the rings (6248, the doubled
+ones included), and with a swap on it also checks that each ring sat on its own verse number and
+that every one was replaced. Run through the real copy step on the same seven pages, the
+medallion lands as closely as before (5.4% to 6.0%), and by eye each number sits on top of its
+medallion with none run together. Our own ring was looked at the same way. Once the owner picks,
+what is left is flipping the switch, copying every page again and showing the owner the changed
+page pictures.
+
 ### ㊻ Should the website keep playing the recitation? · **open**
 
 Quran.com's terms (⑥) cover the website as much as the store app: personal use only. The store
