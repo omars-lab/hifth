@@ -14,9 +14,11 @@ import {
   makeRunFolder,
   matchCounts,
   pgDumpCounts,
+  poolerProblem,
   runName,
   runsToPrune,
   statusLines,
+  unlistedTables,
   wholeCounts,
 } from "./backup-reader-data.mjs";
 
@@ -54,6 +56,21 @@ const cleanEnv = () => Object.fromEntries(Object.entries(process.env).filter(([k
 test("only the tables a restore needs are copied; the site's key and sign-in secrets stay out", () => {
   assert.deepEqual(STORES.list.tables, ["notify.people"]);
   assert.deepEqual(STORES.accounts.tables, ["accounts", "apple_tickets"]);
+  assert.deepEqual(Object.keys(STORES.list.leftOut), ["notify.server_keys"]);
+  assert.deepEqual(Object.keys(STORES.accounts.leftOut).sort(), ["d1_migrations", "sessions", "sign_in_counts", "sign_in_words"]);
+  for (const s of Object.values(STORES)) for (const why of Object.values(s.leftOut)) assert.ok(why.length > 20, "each left-out table says why");
+});
+
+test("a table the store has that is neither copied nor named as left out is caught", () => {
+  assert.deepEqual(unlistedTables("accounts", ["accounts", "apple_tickets", "sessions", "sign_in_words", "sign_in_counts", "d1_migrations", "_cf_KV", "_cf_METADATA", "sqlite_sequence"]), []);
+  assert.deepEqual(unlistedTables("accounts", ["accounts", "apple_tickets", "reader_marks"]), ["reader_marks"]);
+  assert.deepEqual(unlistedTables("list", ["notify.people", "notify.server_keys", "notify.waitlist"]), ["notify.waitlist"]);
+});
+
+test("the list's address is refused when it goes through the pooler that pg_dump cannot use", () => {
+  assert.match(poolerProblem({ PGPORT: "6543", PGHOST: "aws-0-x.pooler.supabase.com" }), /6543/);
+  assert.equal(poolerProblem({ PGPORT: "5432", PGHOST: "aws-0-x.pooler.supabase.com" }), null);
+  assert.equal(poolerProblem({ PGPORT: "5432", PGHOST: "db.example.supabase.co" }), null);
 });
 
 test("a Postgres copy is counted table by table", () => {
@@ -147,6 +164,8 @@ test("the status says when the last copy was made, and calls it stale past the l
   assert.match(fresh.lines.join("\n"), /practised restore \(made-up rows\): 1 day ago/);
   assert.equal(statusLines({ manifest: { run: "r", at: "2026-11-15T00:00:00Z", ok: true }, drillAt: null, now }).stale, true);
   assert.equal(statusLines({ manifest: { run: "r", at: "2026-11-19T01:00:00Z", ok: false }, drillAt: null, now }).stale, true);
+  const listOnly = statusLines({ manifest: null, drillAt: "2026-11-18T00:00:00Z", drillStores: ["list"], now });
+  assert.match(listOnly.lines.join("\n"), /made-up rows, for list\): 1 day ago/);
 });
 
 test("log lines are ev= lines whose values hold no row content", () => {

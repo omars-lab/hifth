@@ -449,9 +449,14 @@ count asked of the store itself. The copies are kept owner-only outside any repo
 `make hifth-app-backup-drill` practised the whole round trip on made-up rows: 3 people on the
 list, and 2 accounts with 1 Apple ticket from the sign-in branch's tables. Each was put back into
 an empty database and counted. `make hifth-app-backup-status` says how old the last copy is.
+Every table in each store is named as copied or left out, with the reason, and a copy stops on
+a table that is on neither list. A practice with a made-up extra table was refused by name. The
+steps for putting a real copy back are in the deploy-site skill.
 
 Left, and waiting on the owner:
-- the first real copy, which needs the database password in the saved keys;
+- the first real copy, which needs the database password in the saved keys (the session address
+  on port 5432, not the pooler on 6543). It is also the first run of the real path, so it runs
+  with the owner watching;
 - where copies live (this laptop only, or also a second place), and how long they are kept,
   because a reader who leaves the list stays in older copies until those are pruned;
 - whether copies are locked with a password;

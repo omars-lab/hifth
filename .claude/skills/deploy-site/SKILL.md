@@ -143,6 +143,30 @@ table's rows must match a count asked of the store itself. Copies go to
 and never inside a git checkout; the newest 30 runs are kept. Only counts reach the screen or the
 log, never a row.
 
+**Every table is decided.** Each store's tables are listed in the script as copied or left out,
+with the reason. Before each copy the script asks the store which tables it has, and stops if one
+is on neither list. So a new migration that adds a table (say, readers' marks) stops the next
+backup until someone adds the table to one list or the other, in the same change as the migration.
+A reader signing up during a copy makes the copy and the count differ, so a mismatch is tried once
+more before it counts as a failure. The list's saved address must be the direct or session one
+(port 5432); `pg_dump` cannot work through Supabase's pooler on port 6543, and the script says so.
+
+**Putting a real copy back** (with the owner, never alone; only counts on screen):
+
+1. Pick the run folder under `copies/` and check its `manifest.json` says `ok: true`.
+2. **The list:** make the empty table first by applying the list's migration to the new database
+   (`supabase/migrations/*_notify_list.sql`), then load `list.sql` with `psql -f`. Count
+   `notify.people` and compare with the manifest. The site's key is not in the copy, so make a new
+   one as the list's setup steps say.
+3. **Accounts:** apply the migrations to the empty database (`wrangler d1 migrations apply`),
+   then load `accounts.sql` with `wrangler d1 execute <name> --file accounts.sql`. Count
+   `accounts` and `apple_tickets` and compare. Sign-ins were not copied, so every reader signs in
+   again once; their account and marks are still theirs.
+4. Write down in launch item ㉘ when it was done and the counts.
+
+The first real copy is also the first test of the real path (the real address, the site's own
+Cloudflare settings), so run it with the owner watching.
+
 The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch-all rule under
 `/read/` as an endless loop, and the app needs none, since it keeps its place after the `#`.
 Cloudflare also serves `privacy.html` at `/privacy`, `sources.html` at `/sources` and

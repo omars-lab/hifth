@@ -37,10 +37,46 @@ const LANDING = join(REPO, "apps/landing");
 export const BACKUP_HOME = process.env.HIFTH_BACKUP_HOME || join(homedir(), "Library/Application Support/hifth-backups");
 const COPIES = join(BACKUP_HOME, "copies");
 
+/**
+ * What each store holds: the tables copied, and every other table, named with why it stays out.
+ * A table the store has that is in neither list stops the copy (see unlistedTables), so a new
+ * table, such as one holding readers' marks, cannot be left out of the copies without anyone
+ * deciding it.
+ */
 export const STORES = {
-  list: { kind: "postgres", tables: ["notify.people"] },
-  accounts: { kind: "d1", tables: ["accounts", "apple_tickets"] },
+  list: {
+    kind: "postgres",
+    tables: ["notify.people"],
+    leftOut: {
+      "notify.server_keys": "the site's own key; a restore makes a new one, and a copy of it is a leak",
+    },
+  },
+  accounts: {
+    kind: "d1",
+    tables: ["accounts", "apple_tickets"],
+    leftOut: {
+      sessions: "sign-ins; after a restore each reader signs in again, and a copy would let anyone holding it sign in as them",
+      sign_in_words: "one-time words that run out in minutes; nothing to put back",
+      sign_in_counts: "how many words went out in each ten minutes, by everyone together; rebuilt as sign-ins happen",
+      d1_migrations: "Cloudflare's note of which migrations ran; the restore runs them itself",
+    },
+  },
 };
+
+/** The store's own bookkeeping tables, never ours to copy or name. */
+const INTERNAL = /^(sqlite_|_cf_)/;
+
+/** Tables `store` has that are neither copied nor named as left out. Empty means all is decided. */
+export function unlistedTables(store, names) {
+  const s = STORES[store];
+  return names.filter((n) => !INTERNAL.test(n) && !s.tables.includes(n) && !(n in s.leftOut));
+}
+
+/** Why a Postgres address cannot be copied from, or null. pg_dump cannot work through Supabase's
+ *  transaction pooler (port 6543); the direct or session address (port 5432) works. */
+export function poolerProblem(pg) {
+  return pg.PGPORT === "6543" ? "the list's address goes through the pooler on port 6543, which pg_dump cannot use; save the session address (port 5432) instead" : null;
+}
 
 // ---------------------------------------------------------------------------------------------
 // Checks on a copy. Each answers with counts or an error; an error never quotes the copy.
@@ -175,6 +211,11 @@ export function d1DatabaseName(toml) {
 // ---------------------------------------------------------------------------------------------
 // Talking to the stores. Each returns { text } / { counts } or { error }; never a store's own words.
 
+/** Whether `tool` can be started at all, so a missing tool is named, not mistaken for a failure. */
+function hasTool(tool) {
+  return !spawnSync(tool, ["--version"], { encoding: "utf8" }).error;
+}
+
 function libpq(tool) {
   const brew = `/opt/homebrew/opt/libpq/bin/${tool}`;
   if (existsSync(brew)) return brew;
@@ -185,10 +226,16 @@ function libpq(tool) {
 function pgCopy(address, file) {
   const pg = pgEnvFrom(address);
   if (!pg) return { error: "the list's address is not a postgres:// address" };
+  const pooler = poolerProblem(pg);
+  if (pooler) return { error: pooler };
   const dump = libpq("pg_dump");
   const psql = libpq("psql");
   if (!dump || !psql) return { error: "pg_dump or psql is not installed (brew install libpq)" };
   const env = { ...process.env, ...pg, SUPABASE_DB_URL: "" };
+  const t = spawnSync(psql, ["-X", "-A", "-t", "-v", "ON_ERROR_STOP=1", "-c", "select coalesce(string_agg(table_schema || '.' || table_name, ','), '') from information_schema.tables where table_schema = 'notify'"], { env, encoding: "utf8" });
+  if (t.status !== 0) return { error: "the list did not say which tables it has" };
+  const unlisted = unlistedTables("list", t.stdout.trim().split(",").filter(Boolean));
+  if (unlisted.length) return { error: `the list has tables nobody decided to copy or leave out: ${unlisted.join(",")}; add each to STORES` };
   const d = spawnSync(dump, ["--data-only", "--no-owner", "--no-privileges", ...STORES.list.tables.map((t) => `--table=${t}`), "-f", file], { env, encoding: "utf8" });
   if (d.status !== 0) return { error: "pg_dump did not finish" };
   chmodSync(file, 0o600);
@@ -210,6 +257,17 @@ function d1Copy({ name, where, config, file }) {
   const at = where === "local" ? ["--local"] : ["--remote"];
   const cfg = config ? ["--config", config] : [];
   const opts = { cwd: config ? dirname(config) : LANDING, encoding: "utf8", env: { ...process.env, CI: "1" } };
+  if (!hasTool("wrangler")) return { error: "wrangler is not on the PATH (use the repo's Node, from .nvmrc)" };
+  const t = spawnSync("wrangler", [...base, "execute", name, ...at, ...cfg, "--json", "--command", "select name from sqlite_master where type = 'table'"], opts);
+  if (t.status !== 0) return { error: "the accounts database did not say which tables it has" };
+  let names;
+  try {
+    names = JSON.parse(t.stdout)[0].results.map((r) => r.name);
+  } catch {
+    return { error: "the accounts table list was not readable" };
+  }
+  const unlisted = unlistedTables("accounts", names);
+  if (unlisted.length) return { error: `the accounts database has tables nobody decided to copy or leave out: ${unlisted.join(",")}; add each to STORES` };
   const tables = STORES.accounts.tables.flatMap((t) => ["--table", t]);
   const e = spawnSync("wrangler", [...base, "export", name, ...at, ...cfg, ...tables, "--no-schema", "--output", file], opts);
   if (e.status !== 0) return { error: "the accounts export did not finish" };
@@ -227,8 +285,10 @@ function d1Copy({ name, where, config, file }) {
   return counts ? { counts } : { error: "the accounts count held something other than counts" };
 }
 
-/** Copy one store into `dir`, check the copy, and answer with its counts or an error. */
-function copyStore(store, dir, target) {
+/** Copy one store into `dir`, check the copy, and answer with its counts or an error. A reader
+ *  signing up between the copy and the count makes the two differ, so a mismatch is tried once
+ *  more before it counts as a failure. */
+function copyStore(store, dir, target, tries = 2) {
   const file = join(dir, `${store}.sql`);
   const got = store === "list" ? pgCopy(target.address, file) : d1Copy({ ...target, file });
   if (got.error) return got;
@@ -236,7 +296,13 @@ function copyStore(store, dir, target) {
   const read = store === "list" ? pgDumpCounts(text) : d1ExportCounts(text);
   if (read.error) return read;
   const match = matchCounts(read.counts, got.counts);
-  if (match.error) return match;
+  if (match.error) {
+    if (tries > 1) {
+      say("copy_retry", { store, msg: "the copy and the store's count differed; trying once more" });
+      return copyStore(store, dir, target, tries - 1);
+    }
+    return match;
+  }
   const sha256 = createHash("sha256").update(text).digest("hex");
   return { counts: got.counts, bytes: Buffer.byteLength(text), sha256 };
 }
@@ -360,6 +426,7 @@ function drillAccounts(work, given) {
     if (given) return { error: "no .sql files in the accounts migrations folder given" };
     return { skipped: "no accounts database on this branch yet (it comes with sign-in); --accounts-migrations <folder> practises it from another branch" };
   }
+  for (const tool of ["wrangler", "sqlite3"]) if (!hasTool(tool)) return { error: `${tool} is not on the PATH (wrangler comes with the repo's Node from .nvmrc; sqlite3 is in /usr/bin)` };
   const here = join(work, "d1");
   mkdirSync(here);
   cpSync(migrations, join(here, "migrations"), { recursive: true });
@@ -416,7 +483,7 @@ export function drill({ accountsMigrations: given } = {}) {
 const daysSince = (iso, now) => Math.floor((now - Date.parse(iso)) / 86400000);
 
 /** Plain lines about the last copy and drill, and whether either is older than `maxDays`. */
-export function statusLines({ manifest, drillAt, now = Date.now(), maxDays = 2 }) {
+export function statusLines({ manifest, drillAt, drillStores, now = Date.now(), maxDays = 2 }) {
   const lines = [];
   let stale = false;
   if (!manifest) {
@@ -430,7 +497,8 @@ export function statusLines({ manifest, drillAt, now = Date.now(), maxDays = 2 }
   if (!drillAt) lines.push("No restore has been practised on this laptop yet.");
   else {
     const d = daysSince(drillAt, now);
-    lines.push(`Last practised restore (made-up rows): ${d} day${d === 1 ? "" : "s"} ago.`);
+    const which = drillStores && drillStores.length ? `, for ${drillStores.join(" and ")}` : "";
+    lines.push(`Last practised restore (made-up rows${which}): ${d} day${d === 1 ? "" : "s"} ago.`);
   }
   return { lines, stale };
 }
@@ -440,12 +508,13 @@ function status(argv) {
   const maxDays = Number(valueOf(argv, "--max-days") || 2);
   const drillFile = join(BACKUP_HOME, "last-drill.json");
   let drillAt = null;
+  let drillStores = null;
   try {
-    drillAt = JSON.parse(readFileSync(drillFile, "utf8")).at;
+    ({ at: drillAt, stores: drillStores } = JSON.parse(readFileSync(drillFile, "utf8")));
   } catch {
     drillAt = null; // no practice yet, or the file is unreadable: the status says "never"
   }
-  const { lines, stale } = statusLines({ manifest: lastManifest(out), drillAt, maxDays });
+  const { lines, stale } = statusLines({ manifest: lastManifest(out), drillAt, drillStores, maxDays });
   for (const l of lines) console.log(l);
   return !stale;
 }
