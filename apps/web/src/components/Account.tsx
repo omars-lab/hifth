@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useT, type Strings } from "../i18n";
-import { askApp } from "../native-bridge";
+import { askApp } from "../ask-app";
 import { accountState, deleteAccount, forgetInvite, inviteKept, signIn, signOut, type AccountState } from "../account";
 import styles from "./Account.module.css";
 

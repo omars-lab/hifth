@@ -18,7 +18,7 @@
  *    page is not a secure context, so `navigator.share` and the clipboard are
  *    both missing, and a share button that silently did nothing would be the
  *    first thing a tester pressed.
- *  - `ask`: a question the page waits on (`askApp`), for what only the app
+ *  - `ask`: a question the page waits on (`askApp`, in ask-app.ts), for what only the app
  *    can do, such as Apple's sign-in sheet. The app always answers, through
  *    `window.__HIFTH_ANSWER__`, with the question's id; WebKit's own way of
  *    replying to a message was not relied on, since Apple's page does not say
@@ -60,7 +60,6 @@ type Handler = { postMessage: (m: unknown) => void };
 type Shelled = Window & {
   __HIFTH_NATIVE__?: unknown;
   __HIFTH_PAGE__?: PageApi;
-  __HIFTH_ANSWER__?: (id: string, answer: unknown) => void;
   webkit?: { messageHandlers?: Record<string, Handler | undefined> };
 };
 
@@ -101,7 +100,8 @@ export function shareBase(): string {
     : info.publicBase + "/";
 }
 
-function post(message: NativeMessage): boolean {
+/** Send one message to the shell. `false` means "not in the shell". */
+export function post(message: NativeMessage): boolean {
   if (!isNative()) return false;
   const handler = (window as Shelled).webkit?.messageHandlers?.hifth;
   if (!handler) return false;
@@ -133,64 +133,11 @@ export function postRoute(hash: string): void {
   post({ type: "route", hash });
 }
 
-/**
- * Questions waiting for the app's answer, by id. The id starts with a mark
- * picked once per page load, so an answer meant for a page that has since
- * reloaded never settles a new question that happens to share its number.
- * The ids only have to differ from each other, not be hard to guess.
+/*
+ * `askApp`, the question the page waits on, is in ask-app.ts: only the
+ * account section asks, and that section loads after the first page, so the
+ * question code loads with it rather than with every reader's start-up.
  */
-const waiting = new Map<
-  string,
-  { resolve: (value: unknown) => void; reject: (e: Error) => void }
->();
-const loadMark = Math.random().toString(36).slice(2, 8);
-let asked = 0;
-
-/** The door the app answers through, from Swift: `ShellModel.answerScript`. */
-function receiveAnswer(id: string, answer: unknown): void {
-  const question = waiting.get(id);
-  if (!question) return; // nobody is waiting: a stray, or a second answer
-  waiting.delete(id);
-  const a = answer as { ok?: unknown; value?: unknown; error?: unknown } | null;
-  if (a && typeof a === "object" && a.ok === true) question.resolve(a.value);
-  else if (a && typeof a === "object" && a.ok === false)
-    question.reject(new Error(typeof a.error === "string" ? a.error : "no"));
-  else question.reject(new Error("bad-answer"));
-}
-
-/**
- * Ask the app a question and wait for its answer (sign-in step 7). The app
- * answers every question it is sent, a no included, so by default this waits
- * as long as it takes: a question like signing in waits on a person at
- * Apple's sheet. `waitMs` gives up sooner, for a question that should be quick.
- * Outside the app it fails at once with `not-in-app`. `text` is one short line
- * the question carries, such as the invite code a tester typed with `sign-in`.
- *
- * The answer comes back through `window.__HIFTH_ANSWER__`, put in place here
- * before the first question leaves, never through `__HIFTH_PAGE__`, which the
- * page's own handlers take down and put back between renders.
- */
-export function askApp(
-  name: string,
-  { waitMs, text }: { waitMs?: number; text?: string } = {},
-): Promise<unknown> {
-  if (!isNative()) return Promise.reject(new Error("not-in-app"));
-  const w = window as Shelled;
-  w.__HIFTH_ANSWER__ = receiveAnswer;
-  asked += 1;
-  const id = `${loadMark}-${asked}`;
-  return new Promise((resolve, reject) => {
-    waiting.set(id, { resolve, reject });
-    if (waitMs !== undefined)
-      setTimeout(() => {
-        if (waiting.delete(id)) reject(new Error("no-answer"));
-      }, waitMs);
-    if (!post(text === undefined ? { type: "ask", id, name } : { type: "ask", id, name, text })) {
-      waiting.delete(id);
-      reject(new Error("not-in-app"));
-    }
-  });
-}
 
 /**
  * Let the shell turn the page. Returns the teardown; outside the shell it

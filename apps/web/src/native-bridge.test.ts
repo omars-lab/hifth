@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { askApp } from "./ask-app";
 import {
-  askApp,
   exposeToShell,
   isNative,
   nativeShare,

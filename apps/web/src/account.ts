@@ -1,4 +1,4 @@
-import { askApp } from "./native-bridge";
+import { askApp } from "./ask-app";
 
 /*
  * The account section's questions to the app (sign-in step 16,
