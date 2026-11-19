@@ -2414,8 +2414,11 @@ test.describe("Hifth · the look-alike chips sit beside their page", () => {
       await expect(paper).toBeVisible({ timeout: 20_000 });
       await expect(rail(page)).toHaveAttribute("data-beside", side);
       await expect(rail(page)).not.toHaveAttribute("data-home", /.*/);
-      const open = await boxOf(paper);
-      const chips = await boxOf(rail(page));
+      // Measured once both stop moving: the page is still growing to its
+      // magnified size when the chips first appear, and a measure taken then
+      // read gaps of 35 to 76 (one run in five, ten tests at once, 2026-11-18).
+      const open = await stillBoxOf(paper);
+      const chips = await stillBoxOf(rail(page));
       const gap = side === "right" ? chips.x - (open.x + open.width) : open.x - (chips.x + chips.width);
       expect(gap, `the chips ${JSON.stringify(chips)} beside the page ${JSON.stringify(open)}`).toBeGreaterThanOrEqual(4);
       expect(gap).toBeLessThanOrEqual(32);

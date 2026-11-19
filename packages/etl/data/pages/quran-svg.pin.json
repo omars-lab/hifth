@@ -19,6 +19,13 @@
     ],
     "$comment": "Not a taste call. This exact config was recovered by searching plugin-disable masks against apps/web/public/assets/pages/hafs-kfqc/7.svg — the page Loop 0 vendored by hand — and it reproduces all three Loop 0 pages byte-for-byte. collapseGroups flattens the outer transform matrix the stage's coordinate model assumes; removeUnknownsAndDefaults strips the number/surah/ayah attributes the resolver reads; cleanupIds renames verse-*, which is the anchor itself."
   },
+  "rings": {
+    "mode": "upstream",
+    "$comment": "Which ring goes round each verse number (launch item 45). upstream keeps quran-svg's, whose source it does not name, and leaves every page as pinned. complex puts in the Complex's own medallion from its free 1441H drawing files, read from verse-ring-complex.json beside this file. plain draws a ring of our own. Both swaps place the shape from the verse number's centre plus these straight lines, fitted against the drawing files on pages 7 (regular) and 1 and 2 (small); the mushaf-reference skill's scripts fit and check them. Changing the mode rewrites every page and the pins below, so it goes with --repin and a golden re-baseline.",
+    "regular": { "dx": [0.194134, -0.001794, 0.000004], "dy": [1.603837, 0.00001, -0.001687] },
+    "small": { "dx": [0.121654, -0.001649, 0.000137], "dy": [1.43927, 0.000131, -0.00164], "scale": 0.81, "pages": [1, 2] },
+    "plain": { "radius": 6.44, "width": 0.75, "fill": "#231f20" }
+  },
   "pages": [
     {
       "page": 1,

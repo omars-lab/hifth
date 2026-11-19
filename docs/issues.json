@@ -7139,7 +7139,7 @@
       "owner": "agent",
       "launch": true,
       "useCase": "know-where-this-text-came-from",
-      "note": "Found 2026-11-17 by the checker on the terms research. Text answered the same day: the page text comes from the Complex's own 1441H Hafs drawing files, not its font. quran-svg's first README (d964aaee, 2026-02-07, before our pin) names the Complex's Illustrator files, and nothing of theirs mentions a font; the 'QCF V2 glyph outlines' wording was ours. Pages 2, 7, 300 and 604, as pinned (hashes match the pin), were laid over the same pages of 1441-AI-hafs with no fitting, and every letter landed in place; the drawing files hold no fonts. Still open: the verse-number rings, which quran-svg redrew from a source it does not name, drawn the way font letters are. Settle by comparing the ring with the end-of-verse sign in the Complex's fonts, asking quran-svg, or drawing our own ring."
+      "note": "Found 2026-11-17 by the checker on the terms research. Text answered the same day: the page text comes from the Complex's own 1441H Hafs drawing files, not its font. quran-svg's first README (d964aaee, 2026-02-07, before our pin) names the Complex's Illustrator files, and nothing of theirs mentions a font; the 'QCF V2 glyph outlines' wording was ours. Pages 2, 7, 300 and 604, as pinned (hashes match the pin), were laid over the same pages of 1441-AI-hafs with no fitting, and every letter landed in place; the drawing files hold no fonts. Still open: the verse-number rings, which quran-svg redrew from a source it does not name, drawn the way font letters are. Measured 2026-11-18 (scripts in .claude/skills/mushaf-reference/scripts/medallion_*): the numerals are the Complex's; the ring (bounds 0,-410 to 1248,1255) is not the Douri U+06DD outline (37,-419 to 1514,1406); upstream's later pages swap it for QCF4 page-font outlines, so no re-pin. All 604 pinned pages: 6236 numerals, one ring each (pages 1 and 2 draw each twice, at scale 0.0075). One medallion from the 1441H drawing of page 7 (sha256 c27f6607...), placed by a line fitted on pages 7, 300, 604 (small-page line from 1 and 2, scale 0.81), puts 5.1% to 6.0% of its green off the drawing's on pages 1, 2, 7, 176, 177, 300, 604, the same as an exact copy (renderer floor about 5%); 176 and 177 held out. Built 2026-11-18, switched off: the swap step is in vendor-pages.mjs before svgo (packages/etl/scripts/lib/verse-rings.mjs, ten tests, one failed first), chosen by the pin's rings.mode, left at 'upstream' so every page is unchanged; the copy step now asserts 6248 rings on every run, and with a swap on, 12 doubled dropped and 6236 placed. Through the real copy path at one decimal place, 5.4% to 6.0% of our green misses the drawing's on the same seven pages; by eye the number sits on top of the medallion and no two merge. The plain ring was looked at the same way. Waits on the owner: the Complex's medallion or our own ring. Then: commit the template (verse-ring-complex.json) if the medallion, flip the mode, vendor:pages --repin, full re-copy, golden diff shown to the owner."
     },
     {
       "id": "page-copy-moves-words",
@@ -7151,7 +7151,7 @@
       "severity": "defect",
       "owner": "agent",
       "useCase": "know-where-this-text-came-from",
-      "note": "Found 2026-11-17 by the check behind ㊺. vendor-pages.mjs runs svgo with floatPrecision 1, which rounds the shapes and rewrites cubic curves as quadratic ones. Over the Complex's drawing file, 28% to 56% of the ink differs on pages 2, 7, 300 and 604, while the pinned upstream pages land in place; on page 604 whole lines sit about 2 of 345 units off. Likely cause: the rounding builds up along relative path steps (not proven). Fix: first a test that draws each vendored page over its upstream page and sets a ceiling on the difference, then more precision or no curve rewrite, then a re-pin. The words gate and the pages gate assume one decimal, and mark placement must be checked against the new pages."
+      "note": "Found 2026-11-17 by the check behind ㊺. vendor-pages.mjs runs svgo with floatPrecision 1, which rounds the shapes and rewrites cubic curves as quadratic ones. Over the Complex's drawing file, 28% to 56% of the ink differs on pages 2, 7, 300 and 604, while the pinned upstream pages land in place; on page 604 whole lines sit about 2 of 345 units off. Likely cause: the rounding builds up along relative path steps (not proven). Fix: first a test that draws each vendored page over its upstream page and sets a ceiling on the difference, then more precision or no curve rewrite, then a re-pin. The words gate and the pages gate assume one decimal, and mark placement must be checked against the new pages. Measured 2026-11-18 (medallion_svgo_trial.mjs + medallion_overlay.py): floatPrecision 2 leaves about 3 and 2 differing pixels on pages 7 and 604 (about 43k and 45k at 1); 3 gains nothing more. Cost: page 7 brotli 39.9 KB to 65.5 KB, about 1.6 to 2 times for all pages (94 MB raw today). Size call waits on the owner; rides with the ㊺ re-copy."
     },
     {
       "id": "launch-website-recitation",
@@ -7493,11 +7493,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉕"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "The push should list every test that needed a second try, so each one is fixed."
+      "useCase": "send-apple-only-the-build-we-checked",
+      "closedBy": "scripts/second-tries.test.mjs",
+      "note": "The push should list every test that needed a second try, so each one is fixed. Fixed 2026-11-18: after each browser run in the push, pass or fail, scripts/second-tries.mjs names every test that failed first and passed on its retry, keeps a 20-run history in the git folder, and says how often each one needed a retry; make second-tries lists them. The push's result is unchanged. Its first run named two tests, both fixed in the same branch."
     },
     {
       "id": "launch-sign-in",
@@ -7561,7 +7563,7 @@
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "A backup on a schedule kept off the database's own host, a message when one fails, and one restore into a scratch database with its rows counted."
+      "note": "A backup on a schedule kept off the database's own host, a message when one fails, and one restore into a scratch database with its rows counted. Built 2026-11-19: the copy, its checks and a practised restore on made-up rows (make hifth-app-backup-drill). Open until the owner says yes to the first real copy and the schedule, and picks where copies live, how long, and whether they are locked."
     },
     {
       "id": "launch-app-privacy-policy",
@@ -7610,12 +7612,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊹"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "launch": true,
       "useCase": "find-hifth-and-open-it",
-      "note": "Found 2026-11-17 looking at the store pictures: on the iPhone pictures the strip at the top where the clock and battery sit is an empty band, because the app photographs its own page. Apple takes the pictures as they are, but they look less finished than a real phone. Fix: set the simulator's clock and battery to Apple's usual 9:41 and full (xcrun simctl status_bar override) and photograph the whole screen, or fill the strip with the page's own top colour. Test: the store-shots check refuses an iPhone picture whose top strip is one flat colour."
+      "closedBy": ".claude/skills/release-app/scripts/store-shots.test.mjs",
+      "note": "Found 2026-11-17 looking at the store pictures: on the iPhone pictures the strip at the top where the clock and battery sit is an empty band, because the app photographs its own page. Fixed 2026-11-19: make app-store-shots now photographs the whole simulator screen on the iPhones and the iPad (make app-shot WHOLE_SCREEN=1), with the clock at 9:41, full signal and a full unplugged battery, put back afterwards. The app takes its own picture first as the sign the page is ready, then stays open (HIFTH_SNAPSHOT_STAY=1) while the screen is photographed. The store-shots check refuses a phone or tablet picture whose top strip is one flat colour, and names one whose pixels it cannot read (tests: store-shots.test.mjs, which watched the flat-strip test fail with the check switched off). Tried on the 6.9 inch iPhone and looked at by eye."
     },
     {
       "id": "launch-reviewer-walk",
@@ -7753,6 +7756,18 @@
       "owner": "agent",
       "useCase": "move-across-the-whole-mushaf",
       "note": "Owner, 2026-11-16 (page comments t_3b503f and t_f9e931): Go to, the size buttons and one page or two belong on the page bar at the bottom, and its turn buttons should look like the keyboard keys drawn in the top bar. Those two keys are pictures, not buttons. Plan: a rough build behind one switch, \"The new layout\"; the slider itself does not change. Tried on the iPad and a laptop, in Chrome and Firefox, before anything is chosen. Built 2026-11-16 behind the info panel's switch \"The new layout\" (e2e/new-layout.spec.ts); waiting on the owner to try it on the iPad."
+    },
+    {
+      "id": "pagebar-fisheye-marker-flees",
+      "source": {
+        "file": "docs/design/page-bar-zoom-plan.md",
+        "item": "①"
+      },
+      "status": "open",
+      "severity": "question",
+      "owner": "agent",
+      "useCase": "move-across-the-whole-mushaf",
+      "note": "Found 2026-11-18 while fixing a Back-button test that failed in Firefox. With a mouse, the page bar's magnifier (on by default) spreads the juz markers apart around the pointer, so near the pointer a marker moves about nine times as far as the pointer does. A pointer sent straight to a marker's resting place sees the marker slide about 19 pixels away, and the click lands on the bar beside it, which does nothing; in Firefox, at least 16 of 26 probe runs (plain clicks and hover-then-click alike) recorded the click on the bar, not the marker. A hand that homes in slowly does reach it, because the marker sits under the pointer once the pointer is on it. To find out: whether a reader with a real mouse misses markers, and whether a click on the bar between markers under the magnifier should jump to the page under the pointer. The Back-button tests now send the click to the marker itself (e2e/slider-back.spec.ts) so they test Back, not pointing."
     },
     {
       "id": "layout-pens-in-the-top-bar",

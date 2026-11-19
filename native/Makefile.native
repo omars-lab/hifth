@@ -225,7 +225,7 @@ app-run-ipad: app-build-ipad ## Boot the simulator, install and launch at ROUTE
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
 	SIMCTL_CHILD_HIFTH_ROUTE=$(ROUTE) SIMCTL_CHILD_HIFTH_APPEARANCE=$(APPEARANCE) xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS)
 
-app-shot: ## Screenshot the app at ROUTE on TARGET=ipad|mac (APPEARANCE=light|dark) into native/shots/
+app-shot: ## Screenshot the app at ROUTE on TARGET=ipad|mac (APPEARANCE=light|dark) into native/shots/; WHOLE_SCREEN=1 on a simulator takes the whole screen, clock at 9:41 and battery full
 # The app takes this picture of itself as it starts, before a UI test could turn it, so it is
 # always upright; SIDEWAYS was once passed here and quietly ignored.
 ifneq ($(SIDEWAYS),)
@@ -245,11 +245,26 @@ else
 	xcrun simctl install $(IPAD_UDID) $(IPAD_APP)
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
 	@rm -f $(SHOT_OUT)
+ifneq ($(WHOLE_SCREEN),)
+	@# The store's pictures show the clock and battery (launch item ㊹): Apple's usual
+	@# 9:41, full signal and a full battery, put back to the real ones afterwards.
+	xcrun simctl status_bar $(IPAD_UDID) override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 \
+	  --cellularMode active --cellularBars 4 --batteryState discharging --batteryLevel 100
+endif
 	SIMCTL_CHILD_HIFTH_ROUTE=$(ROUTE) SIMCTL_CHILD_HIFTH_APPEARANCE=$(APPEARANCE) \
 	  SIMCTL_CHILD_HIFTH_SNAPSHOT_PATH=$(abspath $(SHOT_OUT)) \
+	  $(if $(WHOLE_SCREEN),SIMCTL_CHILD_HIFTH_SNAPSHOT_STAY=1) \
 	  xcrun simctl launch $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS)
 	@for i in $$(seq 1 60); do test -s $(SHOT_OUT) && break; sleep 0.5; done
 	@test -s $(SHOT_OUT) || { echo "no screenshot after 30 s"; exit 1; }
+ifneq ($(WHOLE_SCREEN),)
+	@# The app's own picture is its page only, with a plain strip where the clock sits.
+	@# It is kept as the sign the page is ready and settled; the whole simulator screen
+	@# is photographed over it while the app stays open.
+	xcrun simctl io $(IPAD_UDID) screenshot --type=png $(abspath $(SHOT_OUT))
+	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
+	xcrun simctl status_bar $(IPAD_UDID) clear
+endif
 endif
 	@# An empty file, or a picture with no pixels, is a failure, not a shot:
 	@# the Mac app once wrote 0 bytes here for weeks and this line said ✓.
@@ -270,7 +285,7 @@ app-store-shots: app-golden-public ## The store's screenshots of the public buil
 	  if [ "$$target" = mac ]; then \
 	    $(MAKE) --no-print-directory app-shot TARGET=mac LOCALE=$$locale WINDOW=$$window ROUTE="$$route" SHOT_OUT="$$out" < /dev/null || exit 1; \
 	  else \
-	    $(MAKE) --no-print-directory app-shot TARGET=ipad IPAD="$$sim" LOCALE=$$locale ROUTE="$$route" SHOT_OUT="$$out" < /dev/null || exit 1; \
+	    $(MAKE) --no-print-directory app-shot TARGET=ipad WHOLE_SCREEN=1 IPAD="$$sim" LOCALE=$$locale ROUTE="$$route" SHOT_OUT="$$out" < /dev/null || exit 1; \
 	  fi; \
 	  magick mogrify -background white -alpha remove -alpha off "$$out" || exit 1; \
 	done

@@ -210,7 +210,9 @@ function signedPermissions(app, file) {
  * and sign-in's) were left out from the start and are listed so they stay out.
  * The two waits and the Mac window size were left out with the rest but only
  * listed on 2026-11-18, when a test began matching this list against the
- * names the app's code reads, so a new setting cannot be missed again.
+ * names the app's code reads, so a new setting cannot be missed again. That
+ * test caught the next one the day after: the setting that keeps the app open
+ * for a whole-screen store picture (2026-11-19), added on another branch.
  * The route and language settings are read in the same place
  * and left out with them, but their names are too short to find, so a test
  * of the app's own code holds them instead (scripts/native-store-launch-settings.test.mjs).
@@ -226,6 +228,7 @@ export const STORE_SIGNS = [
   ["the launch setting that points sign-in at another server", "HIFTH_SIGN_IN_URL", "string"],
   ["the launch setting that waits before the probe asks", "HIFTH_PROBE_DELAY_MS", "string"],
   ["the launch setting that waits before the picture", "HIFTH_SNAPSHOT_DELAY_MS", "string"],
+  ["the launch setting that keeps the app open after its picture", "HIFTH_SNAPSHOT_STAY", "string"],
   ["the launch setting that sizes the Mac window for store pictures", "HIFTH_WINDOW_SIZE", "string", "mac"],
 ];
 

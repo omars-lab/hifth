@@ -206,6 +206,13 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     in Safari, since the app claims only the reader. Why not a machine: only Apple's servers
     and a real device decide whether a link opens the app; the tests prove the site's file, the
     app's permission and the app's reading of the link each on their own (launch item ⑨).
+27. **Clicking a juz mark on the page bar with a real mouse.** On the laptop, open
+    `#/hafs-kfqc/p7`, move the mouse to the page bar at the bottom and click "Juz 3", then
+    "Juz 30", the way you would to jump. Right: each click opens its juz on the first try, with
+    no hunting as the marks spread apart under the mouse. Why not a machine: a test's mouse
+    jumps straight to a point and often misses the mark, while a hand homes in; only a
+    hand can say whether the spread makes the marks hard to hit (page bar plan, open
+    question ①; backlog row pagebar-fisheye-marker-flees).
 
 ## Done
 

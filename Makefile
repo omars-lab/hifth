@@ -125,7 +125,11 @@ pitch-e2e: core ## Playwright check of the PRIVATE pitch commentary (local only 
 	  echo ""; \
 	  exit 1; \
 	}
-	HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch --project=pitch-firefox
+	HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch --project=pitch-firefox; s=$$?; node scripts/second-tries.mjs; exit $$s
+
+.PHONY: second-tries
+second-tries: ## The browser tests that most often passed only on their second try, over the last 20 pushes
+	@node scripts/second-tries.mjs --list
 
 .PHONY: pitch-script
 pitch-script: core ## The pitch demo, one test per step: prints how many of its steps pass (local only — needs the note file)
@@ -425,8 +429,11 @@ pre-push-checks: e2e-port-free commit-labels secrets-history checks-fast ## The 
 	@# it is the project that caught a jump bug the Android one missed. And the
 	@# two Firefox ones, the owner's browser (about 30 s): until 2026-10-11 they
 	@# were on no list and ran nowhere. scripts/prepush-projects.test.mjs fails
-	@# when a project is on no list again.
-	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=ipad --project=golden --project=ipad-golden --project=desktop-firefox --project=desktop-firefox-runs
+	@# when a project is on no list again. A test that fails and then passes on
+	@# its one retry still goes green, so scripts/second-tries.mjs names each one
+	@# after the run (pass or fail) and keeps a count, and the push still ends
+	@# with the browser run's own result (launch item ㉕).
+	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=ipad --project=golden --project=ipad-golden --project=desktop-firefox --project=desktop-firefox-runs; s=$$?; node scripts/second-tries.mjs; exit $$s
 	@# The pitch suite, where most faults a walk of the demo finds keep their
 	@# test (about a minute). It needs the gitignored notes, so on a machine
 	@# without them it is skipped with a line saying so, not failed.
@@ -869,6 +876,19 @@ hifth-app-ready: ## Is hifth.app ready for its first upload? One line per thing 
 
 hifth-app-invites: ## Makes invite codes for sign-in's tester stage and the line for the SIGN_IN_INVITES setting. The owner runs it; the codes are shown once. ARGS="--count 12"
 	@node .claude/skills/deploy-site/scripts/invite-codes.mjs $(ARGS)
+
+# Copies of what readers gave hifth.app (the Mac-app list, and accounts once sign-in is
+# merged), kept on this laptop outside every repo. Counts only on screen.
+BACKUP := node .claude/skills/deploy-site/scripts/backup-reader-data.mjs
+.PHONY: hifth-app-backup hifth-app-backup-drill hifth-app-backup-status
+hifth-app-backup: ## Copy readers' data off its hosts to this laptop, check each copy's rows against the store; the owner says yes before the first real one. ARGS="--out <folder>"
+	@dotenvx run --quiet -- $(BACKUP) run $(ARGS)
+
+hifth-app-backup-drill: ## Practise the whole copy and restore on made-up rows, here only (needs Docker, and wrangler for the accounts half); ARGS="--accounts-migrations <folder>" practises accounts before sign-in is merged
+	@$(BACKUP) drill $(ARGS)
+
+hifth-app-backup-status: ## How old the last copy of readers' data and the last practised restore are; fails past ARGS="--max-days 2"
+	@$(BACKUP) status $(ARGS)
 
 hifth-app-turnstile: ## Does hifth.app's spam-check widget exist? Prints its public site key. ARGS=--make makes it and saves its secret; never prints the secret or the token
 	@python3 .claude/skills/deploy-site/scripts/turnstile-widget.py $(ARGS)

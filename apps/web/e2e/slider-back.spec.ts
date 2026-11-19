@@ -13,7 +13,14 @@ test.use({ locale: "en-US", viewport: { width: 1280, height: 800 } });
 
 const NUM = "header .numeric";
 const back = (page: Page): Locator => page.locator("[data-slider-back]");
-const juz = (page: Page, n: number): Locator => page.locator(`[data-testid='juz-detent'][data-juz='${n}']`);
+const marker = (page: Page, n: number): Locator => page.locator(`[data-testid='juz-detent'][data-juz='${n}']`);
+// A jump by a juz marker, for the tests here, which are about Back and not about
+// pointing. A pointer sent to the marker wakes the bar's magnifier, which slides
+// the marker out from under it, and the click then lands on the bar beside it
+// (measured 2026-11-18 in Firefox: 1 run in 30, and twice in a row in one push).
+// So the click is sent to the marker itself. Pointing at a marker under the
+// magnifier is its own fault, on the backlog (pagebar-fisheye-marker-flees).
+const juz = (page: Page, n: number) => ({ click: () => marker(page, n).dispatchEvent("click") });
 
 async function open(page: Page, on: boolean): Promise<void> {
   if (on) await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), { key: SLIDER_BACK_KEY, value: "on" });

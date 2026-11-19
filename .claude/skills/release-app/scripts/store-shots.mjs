@@ -13,19 +13,27 @@
 // The store takes PNG or JPEG, one to ten per size, and refuses a picture with
 // a see-through layer. Each set below is the largest Apple lists for its
 // device, which the store shrinks for the smaller ones.
+//
+// A phone or tablet picture must also show the clock and battery along its top
+// (launch item ㊹). The app's own picture of its page leaves a plain strip
+// there, so make app-store-shots photographs the whole simulator screen
+// instead, and the check refuses a top strip that is one flat colour.
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { constants, inflateSync } from "node:zlib";
 
 /**
  * The devices the store shows pictures for. `simulator` is the simulator the
  * picture is taken on; the Mac has none, and opens its window at `window`
- * points instead (16:10, as the store asks).
+ * points instead (16:10, as the store asks). `statusBar` is how many rows of
+ * pixels from the top the clock and battery sit within, at the picture's size:
+ * 54 points on these iPhones at 3 pixels a point, 24 on the iPad at 2.
  */
 export const DEVICES = [
-  { key: "iphone-6.9", target: "ipad", simulator: "iPhone 17 Pro Max", sizes: [[1320, 2868], [1290, 2796], [1260, 2736]] },
-  { key: "iphone-6.3", target: "ipad", simulator: "iPhone 17", sizes: [[1206, 2622], [1179, 2556]] },
-  { key: "ipad-13", target: "ipad", simulator: "iPad Pro 13-inch (M5)", sizes: [[2064, 2752], [2048, 2732]] },
+  { key: "iphone-6.9", target: "ipad", simulator: "iPhone 17 Pro Max", statusBar: 162, sizes: [[1320, 2868], [1290, 2796], [1260, 2736]] },
+  { key: "iphone-6.3", target: "ipad", simulator: "iPhone 17", statusBar: 162, sizes: [[1206, 2622], [1179, 2556]] },
+  { key: "ipad-13", target: "ipad", simulator: "iPad Pro 13-inch (M5)", statusBar: 48, sizes: [[2064, 2752], [2048, 2732]] },
   { key: "mac", target: "mac", window: "1280x800", sizes: [[2560, 1600], [2880, 1800], [1280, 800], [1440, 900]] },
 ];
 
@@ -73,6 +81,73 @@ export function pngHeader(bytes) {
   return { width, height, seeThrough };
 }
 
+/**
+ * Whether the top `rows` rows of a PNG are all one colour: true, false, or
+ * null when its pixels cannot be read (not 8 bits a colour, interlaced, or
+ * cut short), which the check names rather than passes.
+ */
+export function flatTop(bytes, rows) {
+  const width = bytes.readUInt32BE(16);
+  const depth = bytes[24];
+  const interlaced = bytes[28] !== 0;
+  // Grey, colour, palette, grey with see-through, colour with see-through.
+  const channels = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }[bytes[25]];
+  if (depth !== 8 || interlaced || !channels) return null;
+  const parts = [];
+  for (let at = 8; at + 8 <= bytes.length; ) {
+    const length = bytes.readUInt32BE(at);
+    const type = bytes.toString("latin1", at + 4, at + 8);
+    if (type === "IDAT") parts.push(bytes.subarray(at + 8, at + 8 + length));
+    if (type === "IEND") break;
+    at += 12 + length;
+  }
+  const stride = width * channels;
+  const need = rows * (stride + 1);
+  let raw;
+  try {
+    // Only the top rows are needed, so only as much of the pixels is unpacked
+    // as gives them, rather than the whole 11 MB picture.
+    const packed = Buffer.concat(parts);
+    for (let take = 65536; ; take *= 2) {
+      raw = inflateSync(packed.subarray(0, take), { finishFlush: constants.Z_SYNC_FLUSH });
+      if (raw.length >= need || take >= packed.length) break;
+    }
+  } catch {
+    return null;
+  }
+  if (raw.length < need) return null;
+  // Each row is stored as its difference from the row above or the pixel to
+  // its left, in one of five ways the row's first byte names; undo that.
+  let previous = Buffer.alloc(stride);
+  let first = null;
+  for (let y = 0; y < rows; y++) {
+    const start = y * (stride + 1);
+    const way = raw[start];
+    const row = Buffer.from(raw.subarray(start + 1, start + 1 + stride));
+    for (let i = 0; i < stride; i++) {
+      const left = i >= channels ? row[i - channels] : 0;
+      const up = previous[i];
+      const upLeft = i >= channels ? previous[i - channels] : 0;
+      let guess = 0;
+      if (way === 1) guess = left;
+      else if (way === 2) guess = up;
+      else if (way === 3) guess = (left + up) >> 1;
+      else if (way === 4) {
+        const p = left + up - upLeft;
+        const pa = Math.abs(p - left), pb = Math.abs(p - up), pc = Math.abs(p - upLeft);
+        guess = pa <= pb && pa <= pc ? left : pb <= pc ? up : upLeft;
+      } else if (way !== 0) return null;
+      row[i] = (row[i] + guess) & 0xff;
+    }
+    first ??= row.subarray(0, channels);
+    for (let i = 0; i < stride; i += channels) {
+      for (let k = 0; k < channels; k++) if (row[i + k] !== first[k]) return false;
+    }
+    previous = row;
+  }
+  return true;
+}
+
 /** What is wrong with the pictures in a folder, one line each; empty when nothing is. */
 export function problems(dir, read = (p) => readFileSync(p), list = listPngs) {
   const found = new Set(list(dir).map((p) => relative(dir, p)));
@@ -83,7 +158,8 @@ export function problems(dir, read = (p) => readFileSync(p), list = listPngs) {
       continue;
     }
     found.delete(file);
-    const header = pngHeader(read(join(dir, file)));
+    const bytes = read(join(dir, file));
+    const header = pngHeader(bytes);
     if (!header) {
       out.push(`${file}: not a PNG`);
       continue;
@@ -94,6 +170,16 @@ export function problems(dir, read = (p) => readFileSync(p), list = listPngs) {
       out.push(`${file}: ${width}x${height}, but the store takes ${want} for ${device.key}`);
     }
     if (seeThrough) out.push(`${file}: has a see-through layer, which the store refuses`);
+    if (device.statusBar) {
+      const flat = flatTop(bytes, device.statusBar);
+      if (flat === null) out.push(`${file}: its pixels could not be read, so the clock along its top was not checked`);
+      else if (flat) {
+        out.push(
+          `${file}: the top ${device.statusBar} rows are one flat colour, so the clock and battery are missing;` +
+            " take it with make app-shot WHOLE_SCREEN=1, which photographs the whole simulator screen",
+        );
+      }
+    }
   }
   for (const extra of found) out.push(`${extra}: not in the plan, so it would be uploaded by mistake`);
   return out;
