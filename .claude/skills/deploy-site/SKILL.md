@@ -118,6 +118,55 @@ copied into the release folder, and `wrangler.toml` names no database (the check
   not open yet.
 - **To check the database's own rules:** `make notify-db-test` against the local copy.
 
+**Backing up what readers gave us** (launch item ㉘). Two stores hold readers' data: the Mac-app
+list in Supabase, and accounts on Cloudflare once sign-in is merged. Supabase's free plan keeps
+no backups at all (`docs/research/app-launch/research.md`, question 1), and Cloudflare's own undo
+for its databases lives inside the same account, so `make hifth-app-backup` copies both to this
+laptop. Short version:
+
+- **Practise first, on made-up rows:** `make hifth-app-backup-drill` (Docker running). It starts a
+  throwaway Postgres 17, applies the list's migration, adds three made-up people, copies them,
+  puts the copy into an empty database and counts them. For accounts it does the same with
+  wrangler's local database and sqlite. Before sign-in is merged, point it at the sign-in branch's
+  tables: `ARGS="--accounts-migrations ../hifth-auth/apps/landing/migrations"`.
+- **A real copy waits on the owner's yes**, and so does running it on a schedule.
+  `make hifth-app-backup` needs `SUPABASE_DB_URL` in the saved keys, and for accounts, the site's
+  `wrangler.toml` naming the database.
+- **How old is the last copy?** `make hifth-app-backup-status`, which fails past two days.
+
+What is copied and what is not: only `notify.people` from the list (the site's key stays out),
+and only `accounts` and `apple_tickets` from accounts (sign-in sessions and one-time words are
+left out, since a reader can sign in again). A copy counts only when it is whole: a Postgres copy
+must end with its "dump complete" line, an accounts copy must be whole statements, and each
+table's rows must match a count asked of the store itself. Copies go to
+`~/Library/Application Support/hifth-backups/copies/` (or `--out`), one folder per run, owner-only,
+and never inside a git checkout; the newest 30 runs are kept. Only counts reach the screen or the
+log, never a row.
+
+**Every table is decided.** Each store's tables are listed in the script as copied or left out,
+with the reason. Before each copy the script asks the store which tables it has, and stops if one
+is on neither list. So a new migration that adds a table (say, readers' marks) stops the next
+backup until someone adds the table to one list or the other, in the same change as the migration.
+A reader signing up during a copy makes the copy and the count differ, so a mismatch is tried once
+more before it counts as a failure. The list's saved address must be the direct or session one
+(port 5432); `pg_dump` cannot work through Supabase's pooler on port 6543, and the script says so.
+
+**Putting a real copy back** (with the owner, never alone; only counts on screen):
+
+1. Pick the run folder under `copies/` and check its `manifest.json` says `ok: true`.
+2. **The list:** make the empty table first by applying the list's migration to the new database
+   (`supabase/migrations/*_notify_list.sql`), then load `list.sql` with `psql -f`. Count
+   `notify.people` and compare with the manifest. The site's key is not in the copy, so make a new
+   one as the list's setup steps say.
+3. **Accounts:** apply the migrations to the empty database (`wrangler d1 migrations apply`),
+   then load `accounts.sql` with `wrangler d1 execute <name> --file accounts.sql`. Count
+   `accounts` and `apple_tickets` and compare. Sign-ins were not copied, so every reader signs in
+   again once; their account and marks are still theirs.
+4. Write down in launch item ㉘ when it was done and the counts.
+
+The first real copy is also the first test of the real path (the real address, the site's own
+Cloudflare settings), so run it with the owner watching.
+
 The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch-all rule under
 `/read/` as an endless loop, and the app needs none, since it keeps its place after the `#`.
 Cloudflare also serves `privacy.html` at `/privacy`, `sources.html` at `/sources` and
@@ -180,6 +229,7 @@ page leaves out. A release missing either copy is refused. To change a source, c
 | `scripts/release-hifth-app.mjs verify` | Looks at the live site as a reader's browser does | After a release; when someone asks if hifth.app is live | `make hifth-app-verify` (`ARGS="--url https://x.pages.dev"` for a preview) |
 | `apps/web/e2e/landing-shots.spec.ts` (a Playwright file, not a script here) | Builds the plain public app and photographs it for the front page: the laptop, phone and iPad-with-pen views and one picture per feature, into `apps/landing/shots/` as JPEGs. Each picture checks the screen shows what it is meant to before it is taken. Never from the pitch build | After a change to how the app looks that the front page's pictures show; before a release that changes the front page | `make landing-shots` |
 | `scripts/list-count.mjs` | Asks the Supabase database how many people are on the Mac-app list and how many still have to confirm, and prints those two numbers only; an answer holding anything else is refused. The password goes in the environment, never on the command line | When someone asks how many signed up; after a sign-up test on the live site | `make hifth-app-list-count` (`ARGS=--local` for the copy on this laptop) |
+| `scripts/backup-reader-data.mjs` | Copies readers' data (the list, and accounts once sign-in is merged) to this laptop, checks each copy is whole and its rows match the store's own count, keeps the newest 30 runs owner-only outside any repo, and writes a manifest of counts. `drill` does the whole copy and put-back on made-up rows in throwaway databases; `status` says how old the last copy and practice are. Prints counts only | Before the first real copy, and after any change to the list's or accounts' tables (drill); to copy for real once the owner says yes; to see if copies are current | `make hifth-app-backup-drill` (`ARGS="--accounts-migrations <folder>"`), `make hifth-app-backup`, `make hifth-app-backup-status`; tests: `node --test .claude/skills/deploy-site/scripts/backup-reader-data.test.mjs` |
 | `scripts/turnstile-widget.py` | Looks for the spam check's widget for hifth.app on the new Cloudflare account and prints its public site key. With `--make` it makes the widget if there is none, then saves its secret as `TURNSTILE_SECRET` through `scripts/env/env-set.sh`. The token, account ID and secret are never printed. The token needs the Account, Turnstile, Edit permission; without it Cloudflare answers "Authentication error" (seen 2026-11-14) | Once, before the first release; to read the site key again | `make hifth-app-turnstile` (`ARGS=--make` to make it) |
 | `supabase/tests/notify_list.test.sql` (database checks, not a script here) | Proves the public key alone cannot read the list or the keys, the site key is needed, a repeat sign-up answers the same, only the latest confirm code works, and leaving removes the row | After changing the list's database part | `make notify-db-test` (`supabase start` first) |
 | `scripts/shipped.mjs` | The lists of what may and may not go up, and the folder check | Changing what the site may hold | imported; tests: `node --test .claude/skills/deploy-site/scripts/shipped.test.mjs` |

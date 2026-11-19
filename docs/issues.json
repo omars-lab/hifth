@@ -7415,7 +7415,7 @@
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "A backup on a schedule kept off the database's own host, a message when one fails, and one restore into a scratch database with its rows counted."
+      "note": "A backup on a schedule kept off the database's own host, a message when one fails, and one restore into a scratch database with its rows counted. Built 2026-11-19: the copy, its checks and a practised restore on made-up rows (make hifth-app-backup-drill). Open until the owner says yes to the first real copy and the schedule, and picks where copies live, how long, and whether they are locked."
     },
     {
       "id": "launch-app-privacy-policy",
