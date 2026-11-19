@@ -893,6 +893,10 @@ SUPABASE_WORKDIR ?= .
 notify-db-test: ## Check the sign-up list's database rules against the local Supabase copy (supabase start first)
 	@supabase --workdir $(SUPABASE_WORKDIR) test db
 
+.PHONY: hifth-app-tidy-try
+hifth-app-tidy-try: ## Run the list's daily tidy once on this laptop, against the local Supabase copy, and say how many it removed; nothing reaches Cloudflare
+	@SUPABASE_WORKDIR=$(SUPABASE_WORKDIR) node .claude/skills/deploy-site/scripts/try-tidy.mjs $(ARGS)
+
 .PHONY: shots
 shots: ## Recapture the guide's screenshots from the real app into docs/validation/shots/
 	@# Two passes, because the perf probe is a build-time flag and not a URL
