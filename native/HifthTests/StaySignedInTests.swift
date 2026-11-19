@@ -280,6 +280,125 @@ struct StaySignedInTests {
         #expect(store.kept == fresh)
     }
 
+    // MARK: - Telling hifth.app (question 13)
+
+    typealias FakeServer = AccountTests.FakeServer
+
+    /// The app with hifth.app played too, and its own notice board so a notice posted here
+    /// reaches no other test's app.
+    private func model(store: FakeStore, check: FakeCheck, server: FakeServer) -> (ShellModel, NotificationCenter) {
+        let (model, _) = model(store: store, check: check)
+        server.status = 204
+        server.body = ""
+        model.server = SignIn.Server(base: AccountTests.base, send: server.send)
+        let notices = NotificationCenter()
+        model.notices = notices
+        return (model, notices)
+    }
+
+    /// Lets the app's own queued work run, for as long as `done` says it is not finished.
+    private func settle(until done: () -> Bool) async {
+        for _ in 0..<1000 where !done() { await Task.yield() }
+    }
+
+    @Test("at launch, a sign-in Apple says the reader cut off is ended on hifth.app too, not only on this device", arguments: [
+        SignIn.Standing.revoked, SignIn.Standing.notFound,
+    ])
+    func launchTellsServer(standing: SignIn.Standing) async {
+        let store = FakeStore(Self.saved)
+        let server = FakeServer()
+        let (model, _) = model(store: store, check: FakeCheck(standing), server: server)
+        model.receive(.ready)
+        await model.sessionCheck?.value
+        await model.lastSignOut?.value
+        #expect(store.kept == nil)
+        #expect(server.asked.count == 1)
+        #expect(server.asked.first?.path == "/api/sign-out")
+        #expect(server.asked.first?.authorization == "Bearer made-up-session")
+    }
+
+    @Test("at launch, a sign-in that is still allowed, or that Apple could not check, asks hifth.app nothing", arguments: [
+        SignIn.Standing.allowed, SignIn.Standing.unknown,
+    ])
+    func launchKeepsQuiet(standing: SignIn.Standing) async {
+        let server = FakeServer()
+        let (model, _) = model(store: FakeStore(Self.saved), check: FakeCheck(standing), server: server)
+        model.receive(.ready)
+        await model.sessionCheck?.value
+        await model.lastSignOut?.value
+        #expect(model.session == Self.saved)
+        #expect(server.asked.isEmpty)
+    }
+
+    @Test("at launch, a sign-in that ran out asks hifth.app nothing: hifth.app already turns it away")
+    func launchRunOutKeepsQuiet() async {
+        let old = SignIn.Session(token: "made-up-session", expiresAt: 1_700_000_000, appleUser: "made-up-apple-user")
+        let server = FakeServer()
+        let (model, _) = model(store: FakeStore(old), check: FakeCheck(.revoked), server: server)
+        model.receive(.ready)
+        await model.sessionCheck?.value
+        await model.lastSignOut?.value
+        #expect(server.asked.isEmpty)
+    }
+
+    @Test("while the app is open, Apple's notice that the reader cut Hifth off signs this device out and tells hifth.app")
+    func noticeWhileOpen() async {
+        let store = FakeStore(Self.saved)
+        let check = FakeCheck(.allowed)
+        let server = FakeServer()
+        let (model, notices) = model(store: store, check: check, server: server)
+        model.receive(.ready)
+        await model.sessionCheck?.value
+        #expect(model.session == Self.saved)
+
+        check.answer = .revoked
+        notices.post(name: ASAuthorizationAppleIDProvider.credentialRevokedNotification, object: nil)
+        await settle { model.lastCutOffCheck != nil }
+        await model.lastCutOffCheck?.value
+        await model.lastSignOut?.value
+        #expect(model.session == nil)
+        #expect(store.kept == nil)
+        #expect(server.asked.map(\.path) == ["/api/sign-out"])
+        #expect(server.asked.first?.authorization == "Bearer made-up-session")
+    }
+
+    @Test("Apple's notice changes nothing when Apple, asked, still says the reader allows Hifth, or cannot say", arguments: [
+        SignIn.Standing.allowed, SignIn.Standing.unknown,
+    ])
+    func noticeButStillAllowed(standing: SignIn.Standing) async {
+        let store = FakeStore(Self.saved)
+        let check = FakeCheck(.allowed)
+        let server = FakeServer()
+        let (model, notices) = model(store: store, check: check, server: server)
+        model.receive(.ready)
+        await model.sessionCheck?.value
+
+        check.answer = standing
+        notices.post(name: ASAuthorizationAppleIDProvider.credentialRevokedNotification, object: nil)
+        await settle { model.lastCutOffCheck != nil }
+        await model.lastCutOffCheck?.value
+        await model.lastSignOut?.value
+        #expect(check.asked.count == 2)
+        #expect(model.session == Self.saved)
+        #expect(store.kept == Self.saved)
+        #expect(server.asked.isEmpty)
+    }
+
+    @Test("Apple's notice when nobody is signed in asks neither Apple nor hifth.app")
+    func noticeWhenOut() async {
+        let check = FakeCheck(.revoked)
+        let server = FakeServer()
+        let (model, notices) = model(store: FakeStore(), check: check, server: server)
+        model.receive(.ready)
+        await model.sessionCheck?.value
+
+        notices.post(name: ASAuthorizationAppleIDProvider.credentialRevokedNotification, object: nil)
+        await settle { model.lastCutOffCheck != nil }
+        await model.lastCutOffCheck?.value
+        #expect(check.asked.isEmpty)
+        #expect(server.asked.isEmpty)
+    }
+
     #if !STORE
     @Test("a build that names no sign-in server keeps nothing and asks Apple nothing: the laptop's tests and walks never touch the real Keychain")
     func offMeansNoKeychain() {

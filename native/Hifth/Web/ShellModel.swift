@@ -1,3 +1,4 @@
+import AuthenticationServices
 import Foundation
 import Observation
 import WebKit
@@ -680,6 +681,11 @@ final class ShellModel {
     /// The check at launch, kept so the page's questions and the tests can
     /// wait for it.
     @ObservationIgnored private(set) var sessionCheck: Task<Void, Never>?
+    /// Where Apple's notice that the reader cut Hifth off arrives while the app
+    /// is open (question 13). The tests give each app its own.
+    @ObservationIgnored var notices: NotificationCenter = .default
+    /// The check that notice starts, kept so the tests can wait for it.
+    @ObservationIgnored private(set) var lastCutOffCheck: Task<Void, Never>?
 
     /// Once per launch, after the first page is up or at the page's first
     /// sign-in question, whichever comes first: read the saved session and ask
@@ -692,11 +698,56 @@ final class ShellModel {
         let moment = now()
         let task = Task { [weak self] in
             guard let store else { return }
-            let restored = await SignIn.restore(from: store, check: check, now: moment)
+            let (restored, cutOff) = await SignIn.launchCheck(from: store, check: check, now: moment)
             self?.session = restored
+            if let cutOff { self?.tellSignedOut(cutOff) }
         }
         sessionCheck = task
+        watchForCutOff()
         return task
+    }
+
+    /// Tells hifth.app that this device's sign-in has ended, without making the
+    /// page wait for the answer: the device is signed out whatever it says.
+    private func tellSignedOut(_ leaving: SignIn.Session) {
+        guard let server else { return }
+        lastSignOut = Task { await server.signOut(session: leaving.token) }
+    }
+
+    /// Apple posts a notice when the reader cuts Hifth off in their Apple
+    /// settings while the app is open (question 13). Listened for once, and only
+    /// in a build that signs in at all.
+    @ObservationIgnored private var cutOffWatch: NSObjectProtocol?
+
+    private func watchForCutOff() {
+        guard cutOffWatch == nil, sessionStore != nil else { return }
+        cutOffWatch = notices.addObserver(
+            forName: ASAuthorizationAppleIDProvider.credentialRevokedNotification, object: nil, queue: nil
+        ) { [weak self] _ in
+            Task { @MainActor in self?.appleSaysCutOff() }
+        }
+    }
+
+    /// The notice says nothing of whom it is about, so Apple is asked about the
+    /// reader signed in here, as at launch. Only Apple's own "cut off" or "not
+    /// known" drops the sign-in; no answer keeps it, so the notice can never sign
+    /// out a reader who still allows Hifth.
+    private func appleSaysCutOff() {
+        lastCutOffCheck = Task { [weak self] in
+            guard let self else { return }
+            await self.checkSessionOnce().value
+            guard let held = self.session, let check = self.credentialCheck else { return }
+            switch await check.standing(of: held.appleUser) {
+            case .allowed, .unknown:
+                return
+            case .revoked, .notFound:
+                // A sign-in made while Apple was being asked is a new yes from the reader.
+                guard self.session == held else { return }
+                self.session = nil
+                self.sessionStore?.clear()
+                self.tellSignedOut(held)
+            }
+        }
     }
     /// A sign-in is open: a second ask is turned away rather than showing a
     /// second sheet.

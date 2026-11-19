@@ -40,17 +40,24 @@ extension SignIn {
     /// The check at launch. Hands back the saved session when it may still be used, and drops it
     /// from the store when it has run out, cannot be checked, or the reader has cut Hifth off.
     static func restore(from store: SessionStore, check: CredentialCheck?, now: Date) async -> Session? {
-        guard let saved = store.load() else { return nil }
+        await launchCheck(from: store, check: check, now: now).session
+    }
+
+    /// The same check, also handing back the session it dropped because the reader cut Hifth
+    /// off (question 13), so hifth.app can be told to end it too. A session that ran out is not
+    /// handed back: hifth.app already turns it away.
+    static func launchCheck(from store: SessionStore, check: CredentialCheck?, now: Date) async -> (session: Session?, cutOff: Session?) {
+        guard let saved = store.load() else { return (nil, nil) }
         guard usable(saved, now: now) else {
             store.clear()
-            return nil
+            return (nil, nil)
         }
         switch await check?.standing(of: saved.appleUser) ?? .unknown {
         case .allowed, .unknown:
-            return saved
+            return (saved, nil)
         case .revoked, .notFound:
             store.clear()
-            return nil
+            return (nil, saved)
         }
     }
 

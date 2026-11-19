@@ -4154,10 +4154,11 @@
         "file": "docs/design/sign-in.md",
         "item": "⑬"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
-      "note": "At launch the app drops its saved sign-in when Apple says the reader cut Hifth off, but does not tell hifth.app, so the server's copy lives until it runs out. And the app asks Apple only at launch, not while open; Apple has an in-app notice for a cut-off that the app does not listen for yet. Found in step 15, 2026-11-18."
+      "closedBy": "native/HifthTests/StaySignedInTests.swift",
+      "note": "At launch the app dropped its saved sign-in when Apple said the reader cut Hifth off, but did not tell hifth.app, so the server's copy lived until it ran out. And the app asked Apple only at launch, not while open. Found in step 15, 2026-11-18. Fixed 2026-11-18: a cut-off found at launch now also ends the sign-in on hifth.app, without making the page wait; a run-out sign-in tells hifth.app nothing. While open, the app listens for Apple's notice, asks Apple about the reader signed in here, and signs out (telling hifth.app) only if Apple says cut off or not known. Tests in StaySignedInTests.swift, watched failing first."
     },
     {
       "id": "sign-in-stays-signed-in-on-devices",
