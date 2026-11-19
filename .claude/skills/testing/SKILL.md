@@ -138,6 +138,20 @@ make report    # opens the last run's traces, DOM snapshots, console, network,
                # and the three-way image diff for a golden failure
 ```
 
+**The push names every test that passed only on its second try.** The browser tests retry a
+failed test once, so such a test lets the push through. Right after the browser tests (and after
+the pitch suite), `scripts/second-tries.mjs` reads Playwright's results file and prints each one:
+the run, the file and line, the test's name, what went wrong the first time, and how many of the
+last twenty runs it needed a second try in. Each run is kept in a history inside git's own folder,
+shared by every working copy and never committed. It only reports; the push still passes or fails
+on the tests themselves. A name in that list is a fault to fix with the three steps below, and if
+you cannot fix it this session, give it a backlog row. To see which tests do it most often:
+
+```
+make second-tries     # the tests that needed a second try, most often first, over the last 20 runs
+node scripts/second-tries.mjs --results <results.json> --history <file>   # one run, by hand
+```
+
 **A test that fails now and then and passes on the retry: find out whether the test or the
 app is wrong before touching either.** Three steps, each a few minutes:
 

@@ -7369,11 +7369,13 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㉕"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
       "owner": "agent",
       "launch": true,
-      "note": "The push should list every test that needed a second try, so each one is fixed."
+      "useCase": "send-apple-only-the-build-we-checked",
+      "closedBy": "scripts/second-tries.test.mjs",
+      "note": "The push should list every test that needed a second try, so each one is fixed. Fixed 2026-11-18: after each browser run in the push, pass or fail, scripts/second-tries.mjs names every test that failed first and passed on its retry, keeps a 20-run history in the git folder, and says how often each one needed a retry; make second-tries lists them. The push's result is unchanged. Its first run named two tests, both fixed in the same branch."
     },
     {
       "id": "launch-sign-in",

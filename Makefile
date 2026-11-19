@@ -125,7 +125,11 @@ pitch-e2e: core ## Playwright check of the PRIVATE pitch commentary (local only 
 	  echo ""; \
 	  exit 1; \
 	}
-	HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch --project=pitch-firefox
+	HIFTH_PITCH=1 $(WEB) exec playwright test --project=pitch --project=pitch-firefox; s=$$?; node scripts/second-tries.mjs; exit $$s
+
+.PHONY: second-tries
+second-tries: ## The browser tests that most often passed only on their second try, over the last 20 pushes
+	@node scripts/second-tries.mjs --list
 
 .PHONY: pitch-script
 pitch-script: core ## The pitch demo, one test per step: prints how many of its steps pass (local only — needs the note file)
@@ -425,8 +429,11 @@ pre-push-checks: e2e-port-free commit-labels secrets-history checks-fast ## The 
 	@# it is the project that caught a jump bug the Android one missed. And the
 	@# two Firefox ones, the owner's browser (about 30 s): until 2026-10-11 they
 	@# were on no list and ran nowhere. scripts/prepush-projects.test.mjs fails
-	@# when a project is on no list again.
-	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=ipad --project=golden --project=ipad-golden --project=desktop-firefox --project=desktop-firefox-runs
+	@# when a project is on no list again. A test that fails and then passes on
+	@# its one retry still goes green, so scripts/second-tries.mjs names each one
+	@# after the run (pass or fail) and keeps a count, and the push still ends
+	@# with the browser run's own result (launch item ㉕).
+	$(WEB) exec playwright test --project=desktop --project=android --project=iphone --project=ipad --project=golden --project=ipad-golden --project=desktop-firefox --project=desktop-firefox-runs; s=$$?; node scripts/second-tries.mjs; exit $$s
 	@# The pitch suite, where most faults a walk of the demo finds keep their
 	@# test (about a minute). It needs the gitignored notes, so on a machine
 	@# without them it is skipped with a line saying so, not failed.

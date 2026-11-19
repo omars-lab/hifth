@@ -405,10 +405,18 @@ build from before. The very first upload has nothing live to keep, so it runs wi
 `ARGS=--no-carry`; the real check of the kept files is the second upload. The store apps do not
 need any of this: their pages are packed inside them.
 
-### ㉕ A test that passes only on its second try still counts as a pass · **open**
+### ㉕ A test that passes only on its second try still counts as a pass · **fixed**
 
 *What would answer it:* the push reports every test that needed a second try, so each one is
 fixed rather than hidden.
+
+*What was built, 2026-11-18:* after every browser run in the push, pass or fail, the push now
+prints each test that failed first and passed on its retry, with its browser, its file and line,
+and what went wrong the first time. It keeps a short history on the laptop, so a test that keeps
+needing a second try says how often ("3 of the last 20 runs"), and `make second-tries` lists the
+worst ones. The push still passes or fails on the tests themselves. The testing skill says what
+to do with a name. The first push to try it named two tests, and both are fixed: the Back
+button's tests in Firefox, and the look-alike chips beside a magnified page.
 
 ### ㉖ Sign-in is not built yet · **open**
 
