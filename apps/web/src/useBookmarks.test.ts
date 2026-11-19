@@ -135,4 +135,19 @@ describe("a note the reader deleted stays deleted", () => {
     act(() => void result.current.loadFile([], [], [{ id: "b", at: back.usedAt - 1 }]));
     expect(result.current.scoped.map((n) => n.id).sort()).toEqual(["a", "b"]);
   });
+
+  // Undo leaves out a change that changed nothing by comparing before and after.
+  // A pin dropped and closed empty ends where it began, but its removal is still
+  // remembered, so a list of removals in what Undo hears made the two differ and
+  // left an Undo that did nothing. Found by the browser test of exactly that,
+  // 2026-11-19, after the removals were added.
+  it("Undo hears the notes alone, not the list of what was taken away", async () => {
+    const heard: unknown[] = [];
+    const { result } = await ready((from, to) => {
+      heard.push(from, to);
+    });
+    act(() => result.current.commitScoped([scopedNote("a")], "deleted"));
+    expect(heard).toHaveLength(2);
+    for (const side of heard) expect(Object.keys(side as object).sort()).toEqual(["mistakes", "scoped"]);
+  });
 });

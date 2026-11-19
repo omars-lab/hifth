@@ -242,10 +242,13 @@ export function useNotes(
 
   // Undo hears the notes as a whole, before and after: the notes that gather
   // verses and the mistakes together, so taking a change back is one write.
+  // It never hears the list of what was taken away: `restore` works that out
+  // afresh, and a list that grew under a change that changed nothing (a pin
+  // dropped and closed empty) would otherwise leave an Undo that does nothing.
   const change = useCallback(
     (next: Marks, said: string, how?: CommitHow) => {
       const tracked = track(latest.current, next, Date.now());
-      if (!how?.unrecorded) record?.(latest.current, tracked, said, how?.opens);
+      if (!how?.unrecorded) record?.(marksOf(latest.current), marksOf(tracked), said, how?.opens);
       hold(tracked);
       save(said);
     },
@@ -320,6 +323,8 @@ interface Held {
 
 /** The notes themselves, without the list of what was taken away. */
 type Marks = Pick<Held, "scoped" | "mistakes">;
+
+const marksOf = (h: Held): Marks => ({ scoped: h.scoped, mistakes: h.mistakes });
 
 const EMPTY: Held = { scoped: [], mistakes: [], removed: [] };
 
