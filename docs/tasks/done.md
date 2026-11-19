@@ -14,6 +14,22 @@ commit or design-doc item for the actual reasoning.
 This session's task numbers started again from 1, so they clash with the numbers further down;
 match by title. Pushes and merges are folded into the work they shipped.
 
+### 2026-11-19: the launch, continued, and a loop a fresh session can run
+
+Same plan and goal page. What is still open is on the goal page and the backlog's launch rows;
+the goal page now names every one, checked by the issues skill's `goal-names-every-row` script.
+
+**Done:**
+- #77: The account section's words load only when it opens, which made room at start-up (⑳,
+  f4f76843).
+- #78: A verse link that points to no page or verse says so instead of doing nothing (b4d5af8f).
+- #79: The machine half of the screen-reader walk: on the iPad, a screen reader meets only the
+  verses and the controls (⑯, 0bb27c4a). The by-hand half is on the manual-testing list.
+- #80, #81: This session's snags folded into the skills, and the loop prompt made runnable in a
+  fresh session, with helper agents for independent work (69162ae0).
+- #82: The goal page's "Where the work stands" brought up to date (72f28123, 69162ae0), and every
+  open launch row and owner step named on it (452a24c0).
+
 ### 2026-11-17 to 2026-11-18: the launch, continued, and the sign-in choices
 
 Same plan and goal page as the block below. What is still open is on the backlog, in its launch

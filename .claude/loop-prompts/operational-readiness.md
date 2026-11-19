@@ -98,7 +98,9 @@ never decrypted to the terminal.
 6. **Improve the setup** when a step was slow or done by hand: put it in a skill's script. Fold
    one session note from `docs/retros/` into its skills (oldest `folded: no` first), and write
    this session's snags in its own note as they happen.
-7. **Write it down** the same turn: the goal page's numbers, the issue row, the plan.
+7. **Write it down** the same turn: the goal page's numbers, the issue row, the plan. A finished
+   session task gets a dated line with its commit in `docs/tasks/done.md`, then comes off the
+   task list; the list holds only what is open.
 8. **Ship it** with the next feature, tell the owner in one sentence, go to 1. Stop only when
    every line of work is blocked on the owner, and then ask once, in one list.
 
