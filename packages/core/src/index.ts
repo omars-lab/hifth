@@ -157,6 +157,9 @@ export {
   type JumpArrow,
   type ArrowShowing,
 } from "./confusions.js";
+// marks copy: this device's marks and the copy kept on hifth.app put together,
+// all four kinds and both sides' deletions (sign-in step 21c).
+export { mergeMarkFiles } from "./marks-copy.js";
 // tafsir seam — commentary is its own node in the reserved `tafsir/<name>/S:A`
 // namespace, behind a provider contract so a live open source and a side-loaded
 // private edition are swapped without the UI knowing which (decision

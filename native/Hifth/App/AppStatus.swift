@@ -37,6 +37,9 @@ struct AppStatus: Equatable {
     enum Offer: String, CaseIterable {
         /// Sign in with Apple (sign-in step 16).
         case signIn = "sign-in"
+        /// The button that keeps a copy of the reader's marks on hifth.app (sign-in step 21).
+        /// Offered only beside sign-in, so the file names both.
+        case marksCopy = "marks-copy"
     }
 
     /// The lowest version still allowed, by platform ("ios", "macos").

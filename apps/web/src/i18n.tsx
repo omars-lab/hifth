@@ -549,6 +549,23 @@ export interface Strings {
   accountDeleteFailed: string;
   accountInviteKept: string;
   accountForgetInvite: string;
+  accountHeldNoMarks: string;
+  accountCopyLeaves: string;
+  accountCopyKeep: string;
+  /** The day hifth.app last kept the copy of the reader's marks. */
+  accountCopyKept(at: number): string;
+  accountCopyDone: string;
+  accountCopyBusy: string;
+  accountCopyTooBig: string;
+  accountCopySignedOut: string;
+  accountCopyFailed: string;
+  accountCopyDrop: string;
+  accountCopyDropAsk: string;
+  accountCopyDropYes: string;
+  accountCopyDropNo: string;
+  accountCopyDropped: string;
+  accountCopyDropSignedOut: string;
+  accountCopyDropFailed: string;
 
   /* ---- colophon ----------------------------------------------------------- */
   aboutTitle: string;
@@ -1693,6 +1710,7 @@ export function buildStrings(lang: Lang, m: Catalog): Strings {
     vdBookmarkAria: (label) => m.vdBookmarkAria({ label }),
     drawerBack: (label) => m.drawerBack({ label }),
     useSince: (day) => m.useSince({ dayText: longDay(day, lang) }),
+    accountCopyKept: (at) => m.accountCopyKept({ dayText: longDay(localDay(at), lang) }),
     useTimes: (count) => m.useTimes({ n: count, nText: n(count) }),
     useLast: (day) => m.useLast({ dayText: longDay(day, lang) }),
     useNeverHead: (count) => m.useNeverHead({ n: count, nText: n(count) }),

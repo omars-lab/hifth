@@ -637,8 +637,53 @@ final class ShellModel {
             }
         case "signed-in":
             return ["ok": true, "value": await currentSession() == nil ? "signed-out" : "signed-in"]
+        case "marks-fetch", "marks-keep", "marks-drop":
+            return await answerCopy(question: name, text: text)
         default:
             return ["ok": false, "error": "unknown-question"]
+        }
+    }
+
+    /// The copy of the reader's marks on hifth.app (sign-in step 21c). `marks-fetch` hands the
+    /// page hifth.app's reply as it came (`{marks, number, savedAt}`), or `no-copy`;
+    /// `marks-keep` sends the page's `{marks, after}` as it wrote it and hands back
+    /// `{number, savedAt}`, or `newer-copy`; `marks-drop` takes the copy off hifth.app.
+    /// The app never reads inside the file: the page merges it, and hifth.app checks it.
+    /// Fetching and keeping are offered only while the launch file allows the copy; taking it
+    /// back is always allowed to a signed-in reader, so a copy is never left out of reach.
+    private func answerCopy(question name: String, text: String?) async -> [String: Any] {
+        if name != "marks-drop" {
+            await statusRead?.value
+            guard SignIn.copyOffered(server: server != nil, on: status.on, storeBuild: storeBuild) else {
+                return ["ok": false, "error": "off"]
+            }
+        }
+        guard let server else { return ["ok": false, "error": "off"] }
+        guard let current = await currentSession() else { return ["ok": false, "error": "signed-out"] }
+        do {
+            switch name {
+            case "marks-fetch":
+                guard let copy = try await server.readMarks(session: current.token) else {
+                    return ["ok": false, "error": "no-copy"]
+                }
+                return ["ok": true, "value": copy]
+            case "marks-keep":
+                guard let body = text, !body.isEmpty else { return ["ok": false, "error": "bad-request"] }
+                guard body.utf8.count <= SignIn.mostMarksBytes else { return ["ok": false, "error": "too-big"] }
+                return ["ok": true, "value": try await server.keepMarks(session: current.token, body: body)]
+            default:
+                try await server.dropMarks(session: current.token)
+                return ["ok": true, "value": "dropped"]
+            }
+        } catch let failure as SignIn.Failure where failure == .refused("signed-out") {
+            // hifth.app no longer knows this sign-in; the device is signed out.
+            session = nil
+            sessionStore?.clear()
+            return ["ok": false, "error": "signed-out"]
+        } catch let failure as SignIn.Failure {
+            return ["ok": false, "error": failure.code]
+        } catch {
+            return ["ok": false, "error": SignIn.Failure.badReply.code]
         }
     }
 

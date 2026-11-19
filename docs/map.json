@@ -2713,6 +2713,26 @@
           "file": "apps/landing/migrations/0004_marks_copies.sql",
           "symbol": "CREATE TABLE marks_copies",
           "note": "The copy's table. It goes with the account by cascade (delete my account, Apple's account-deleted notice). Laptop database only until the owner says yes to adding it to the real one."
+        },
+        {
+          "file": "packages/core/src/marks-copy.ts",
+          "symbol": "mergeMarkFiles",
+          "note": "Step 21c: this device's marks file and the copy from hifth.app put together, all four kinds, and each side's deletions kept (step 21a). The later act wins. Tested in marks-copy.test.ts with made-up marks."
+        },
+        {
+          "file": "apps/web/src/marks-copy.ts",
+          "symbol": "keepCopy",
+          "note": "The page's half of \"Keep a copy of my marks on hifth.app\": fetch the copy, merge, send it back saying which copy it was built on, and start again (three tries) when another device kept a newer one. copyState says what the section shows; dropCopy deletes the copy. It throws nothing and keeps nothing it carries."
+        },
+        {
+          "file": "apps/web/src/components/Account.tsx",
+          "symbol": "Account",
+          "note": "The account section of the info panel (steps 16 and 21c). Signed in, and only where the app offers the copy, it shows the sentence saying what goes and that we could read it, right above the keep button, when a copy was last kept, and a delete-the-copy button that asks once more. What comes back loads through the page's own Load a file. App.tsx hands it the marks through Colophon.tsx."
+        },
+        {
+          "file": "native/Hifth/Web/ShellModel.swift",
+          "symbol": "answerCopy",
+          "note": "The app is only the go-between for the copy: marks-fetch, marks-keep and marks-drop carry the marks file to /api/marks with the reader's session and back, answering off where sign-in is off. The calls are in SignIn.swift; MarksCopyTests.swift plays the server."
         }
       ],
       "extend": [

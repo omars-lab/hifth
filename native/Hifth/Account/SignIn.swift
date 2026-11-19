@@ -95,6 +95,14 @@ enum SignIn {
     /// The longest invite code sent. A real one is 19 letters; this leaves room for spaces.
     static let mostInviteLetters = 64
 
+    /// The most a marks file sent to hifth.app may weigh, in bytes as hifth.app counts them: the
+    /// copy's own limit (MOST_COPY_BYTES in apps/landing/lib/marks-copy.mjs) and the few letters
+    /// around it.
+    static let mostMarksBytes = 1_500_064
+    /// The most a copy fetched back may weigh: the file, the letters around it, and room for
+    /// hifth.app writing it out a little longer than the device sent it.
+    static let mostMarksReplyBytes = 1_600_000
+
     /// The whole sign-in, with Apple's sheet passed in so the tests can play it. `invite` is the
     /// tester's code as typed; the server tidies it. `invited` is called once the server has
     /// handed out a word, which is when a sent code is known to be good: before Apple's sheet,
@@ -163,15 +171,55 @@ enum SignIn {
             return reply["appleLink"] as? String == "cut" ? "cut" : "left"
         }
 
+        // MARK: The copy of the reader's marks (step 21)
+        //
+        // The app carries the page's marks file there and back and never reads inside it: the
+        // page merges, and hifth.app checks it is a marks file.
+
+        /// The reader's copy as hifth.app wrote it (`{marks, number, savedAt}`), or nil when they
+        /// have none yet.
+        func readMarks(session: String) async throws -> String? {
+            do {
+                let data = try await exchange("GET", "api/marks", body: nil, session: session, most: SignIn.mostMarksReplyBytes)
+                guard let text = String(data: data, encoding: .utf8) else { throw Failure.badReply }
+                return text
+            } catch let failure as Failure where failure == Failure("no-copy") {
+                return nil
+            }
+        }
+
+        /// Replaces the copy with `body` (`{marks, after}`), sent as the page wrote it. Hands back
+        /// hifth.app's reply (`{number, savedAt}`); `newer-copy` when another device kept one first.
+        func keepMarks(session: String, body: String) async throws -> String {
+            let data = try await exchange("PUT", "api/marks", body: Data(body.utf8), session: session, most: 64 * 1024)
+            guard let text = String(data: data, encoding: .utf8) else { throw Failure.badReply }
+            return text
+        }
+
+        /// Takes the copy off hifth.app. The account stays.
+        func dropMarks(session: String) async throws {
+            _ = try await exchange("DELETE", "api/marks", body: nil, session: session, most: 64 * 1024)
+        }
+
         /// `session` goes in the Authorization line, never in the body or the address.
         private func call(_ path: String, body: [String: String]?, session: String? = nil) async throws -> [String: Any] {
+            let sent = try body.map { try JSONSerialization.data(withJSONObject: $0) }
+            let data = try await exchange("POST", path, body: sent, session: session, most: 64 * 1024)
+            if data.isEmpty { return [:] }
+            guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { throw Failure.badReply }
+            return json
+        }
+
+        /// One request to hifth.app. A good answer's body comes back as it came, up to `most`
+        /// bytes; every other answer is turned into the word the page acts on.
+        private func exchange(_ method: String, _ path: String, body: Data?, session: String?, most: Int) async throws -> Data {
             var request = URLRequest(url: base.appending(path: path))
-            request.httpMethod = "POST"
+            request.httpMethod = method
             request.httpShouldHandleCookies = false
             if let session { request.setValue("Bearer \(session)", forHTTPHeaderField: "Authorization") }
             if let body {
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                request.httpBody = try JSONSerialization.data(withJSONObject: body)
+                request.httpBody = body
             }
             let data: Data
             let response: URLResponse
@@ -182,10 +230,13 @@ enum SignIn {
                 : nil
             switch status {
             case 200:
-                guard let json else { throw Failure.badReply }
-                return json
-            case 204: return [:]
+                guard data.count <= most else { throw Failure.badReply }
+                return data
+            case 204: return Data()
+            // hifth.app's own 404 for a reader with no copy yet; any other 404 is sign-in switched off.
+            case 404 where json?["reason"] as? String == "no-copy": throw Failure("no-copy")
             case 404: throw Failure.off
+            case 409 where json?["reason"] as? String == "newer-copy": throw Failure("newer-copy")
             case 503: throw Failure("not-set-up")
             case 400: throw Failure("bad-request")
             case 413: throw Failure("too-big")
@@ -219,6 +270,13 @@ enum SignIn {
     /// connection. A laptop trial that names a server by hand has already said yes.
     static func offered(server: Bool, on: Set<AppStatus.Offer>, storeBuild: Bool) -> Bool {
         server && (!storeBuild || on.contains(.signIn))
+    }
+
+    /// Whether the account section offers to keep a copy of the reader's marks on hifth.app
+    /// (step 21). Only where sign-in is offered, and in the store build only once the launch file
+    /// names the copy too, so the copy can wait for its own yes after sign-in is switched on.
+    static func copyOffered(server: Bool, on: Set<AppStatus.Offer>, storeBuild: Bool) -> Bool {
+        offered(server: server, on: on, storeBuild: storeBuild) && (!storeBuild || on.contains(.marksCopy))
     }
 
     /// The store build, which takes its switches from the launch file alone.

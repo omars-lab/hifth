@@ -2,7 +2,11 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useT, type Strings } from "../i18n";
 import { askApp } from "../ask-app";
 import { accountState, deleteAccount, forgetInvite, inviteKept, signIn, signOut, type AccountState } from "../account";
+import { copyState, dropCopy, keepCopy, type CopyState } from "../marks-copy";
 import styles from "./Account.module.css";
+
+/** This device's marks file, and how to load one back (the page's "Save to a file" and "Load a file"). */
+export type CopyMarks = { file: () => string; load: (marksFile: string) => void };
 
 /**
  * The account section of the info panel (sign-in step 16,
@@ -23,6 +27,12 @@ import styles from "./Account.module.css";
  * An invite code a tester types is read from the box and the box emptied in
  * the same breath: it is handed to the app and kept in no state, no storage
  * and no message here.
+ *
+ * Signed in, and where the app offers it, the section also offers "Keep a copy
+ * of my marks on hifth.app" (sign-in step 21c). The sentence above the button
+ * says what goes, that the copy is not locked and who could read it; the
+ * section says when a copy was last kept and offers to delete it. What comes
+ * back is loaded the way a saved file is, so the reader hears what it brought.
  */
 
 type Ask = typeof askApp;
@@ -38,35 +48,51 @@ type Line = keyof Pick<
   | "accountDeleteSignedOut"
   | "accountDeleteOffline"
   | "accountDeleteFailed"
+  | "accountCopyDone"
+  | "accountCopyBusy"
+  | "accountCopyTooBig"
+  | "accountCopySignedOut"
+  | "accountCopyFailed"
+  | "accountCopyDropped"
+  | "accountCopyDropSignedOut"
+  | "accountCopyDropFailed"
 >;
 
 export function Account({
   ask = askApp,
   sectionClass,
   headingClass,
+  marks,
 }: {
   ask?: Ask;
   sectionClass?: string | undefined;
   headingClass?: string | undefined;
+  /** Where this device's marks come from and go back to; without it, no copy is offered. */
+  marks?: CopyMarks | undefined;
 }): JSX.Element | null {
   const { t } = useT();
   const [state, setState] = useState<AccountState | null>(null);
   const [kept, setKept] = useState(false);
+  const [copy, setCopy] = useState<CopyState>({ kind: "off" });
   const [busy, setBusy] = useState(false);
   const [wantsCode, setWantsCode] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [dropping, setDropping] = useState(false);
   const [line, setLine] = useState<Line | null>(null);
   const box = useRef<HTMLInputElement | null>(null);
   const shown = useRef(true);
   const id = useId();
+  const offersCopy = marks !== undefined;
 
   const look = useCallback(async () => {
     const now = await accountState(ask);
     const keeps = now === "off" ? false : await inviteKept(ask);
+    const held: CopyState = now === "signed-in" && offersCopy ? await copyState(ask) : { kind: "off" };
     if (!shown.current) return;
     setState(now);
     setKept(keeps);
-  }, [ask]);
+    setCopy(held);
+  }, [ask, offersCopy]);
 
   useEffect(() => {
     shown.current = true;
@@ -149,12 +175,55 @@ export function Account({
       return null;
     });
 
+  const onKeepCopy = () => {
+    if (!marks) return;
+    const file = marks.file();
+    press(async () => {
+      const out = await keepCopy(file, ask);
+      switch (out.kind) {
+        case "kept":
+          marks.load(out.marks);
+          return "accountCopyDone";
+        case "busy":
+          return "accountCopyBusy";
+        case "too-big":
+          return "accountCopyTooBig";
+        case "signed-out":
+          return "accountCopySignedOut";
+        case "offline":
+          return "accountOffline";
+        case "off":
+          // The copy stopped being offered; the next look hides it.
+          return null;
+        default:
+          return "accountCopyFailed";
+      }
+    });
+  };
+
+  const onDropCopy = () => {
+    setDropping(false);
+    press(async () => {
+      switch (await dropCopy(ask)) {
+        case "dropped":
+          return "accountCopyDropped";
+        case "signed-out":
+          return "accountCopyDropSignedOut";
+        case "offline":
+          return "accountDeleteOffline";
+        default:
+          return "accountCopyDropFailed";
+      }
+    });
+  };
+
   if (state === null) return null;
   // A reader who just deleted their account is told so even where sign-in is
   // then no longer offered.
   if (state === "off" && line === null) return null;
 
   const leaves = `${id}-leaves`;
+  const copyLeaves = `${id}-copy-leaves`;
 
   return (
     <section className={sectionClass} aria-labelledby={`${id}-title`} data-account={state}>
@@ -200,7 +269,61 @@ export function Account({
         {state === "signed-in" && (
           <>
             <p className={styles.signedIn}>{t.accountSignedIn}</p>
-            <p className={styles.body}>{t.accountHeld}</p>
+            {/* What hifth.app keeps, then whether that includes a copy of the marks.
+                While the app cannot say, nothing is claimed either way. */}
+            <p className={styles.body}>
+              <span>{t.accountHeld}</span>{" "}
+              {copy.kind === "kept" ? (
+                <span>{t.accountCopyKept(copy.savedAt)}</span>
+              ) : copy.kind === "unknown" ? null : (
+                <span>{t.accountHeldNoMarks}</span>
+              )}
+            </p>
+            {copy.kind !== "off" && (
+              <div className={styles.copy}>
+                <p className={styles.body} id={copyLeaves}>
+                  {t.accountCopyLeaves}
+                </p>
+                {dropping ? (
+                  <div className={styles.confirm}>
+                    <p className={styles.ask}>{t.accountCopyDropAsk}</p>
+                    <div className={styles.actions}>
+                      <button type="button" className={styles.danger} disabled={busy} onClick={onDropCopy}>
+                        {t.accountCopyDropYes}
+                      </button>
+                      <button type="button" className={styles.quiet} disabled={busy} onClick={() => setDropping(false)}>
+                        {t.accountCopyDropNo}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.actions}>
+                    <button
+                      type="button"
+                      className={styles.quiet}
+                      aria-describedby={copyLeaves}
+                      disabled={busy}
+                      onClick={onKeepCopy}
+                    >
+                      {t.accountCopyKeep}
+                    </button>
+                    {copy.kind === "kept" && (
+                      <button
+                        type="button"
+                        className={styles.quiet}
+                        disabled={busy}
+                        onClick={() => {
+                          setLine(null);
+                          setDropping(true);
+                        }}
+                      >
+                        {t.accountCopyDrop}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
             {confirming ? (
               <div className={styles.confirm}>
                 <p className={styles.ask}>{t.accountDeleteAsk}</p>

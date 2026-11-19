@@ -15,7 +15,14 @@ enum BridgeMessage: Equatable {
     /// with this id, through `ShellModel.answerScript`, a no included. `text`
     /// is one short line the question may carry, such as the invite code a
     /// tester typed (sign-in step 18); longer than 200 letters and it is cut.
+    /// `marks-keep` alone carries a whole marks file for hifth.app (step 21),
+    /// kept only up to one letter past the most hifth.app takes, so the app
+    /// can tell it is too big without holding all of it.
     case ask(id: String, name: String, text: String? = nil)
+
+    static func longestText(for question: String) -> Int {
+        question == "marks-keep" ? SignIn.mostMarksBytes + 1 : 200
+    }
 
     init?(body: Any) {
         guard let dict = body as? [String: Any], let type = dict["type"] as? String else { return nil }
@@ -35,7 +42,8 @@ enum BridgeMessage: Equatable {
         case "ask":
             guard let id = dict["id"] as? String, !id.isEmpty,
                   let name = dict["name"] as? String, !name.isEmpty else { return nil }
-            self = .ask(id: id, name: name, text: (dict["text"] as? String).map { String($0.prefix(200)) })
+            let most = Self.longestText(for: name)
+            self = .ask(id: id, name: name, text: (dict["text"] as? String).map { String($0.prefix(most)) })
         default:
             return nil
         }

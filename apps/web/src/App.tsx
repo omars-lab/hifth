@@ -2607,6 +2607,13 @@ export function App(): JSX.Element {
     },
     [announce, loadBookmarksFile, loadNotesFile, loadConfusionsFile, t],
   );
+  // The account section's "Keep a copy of my marks on hifth.app" (sign-in step
+  // 21c): it sends this file, and loads what comes back the way a saved file is
+  // loaded, so the reader hears what the copy brought.
+  const copyMarks = useMemo(
+    () => ({ file: bookmarkFileText, load: (text: string) => void loadBookmarkFile(text) }),
+    [bookmarkFileText, loadBookmarkFile],
+  );
   // Opened by the old address to carry the reader's marks here (moved.ts).
   // Ready only once all three kinds of mark are read in: the notes and the jumps
   // refuse to save before their own read lands, and a carried file loaded then
@@ -5187,6 +5194,7 @@ export function App(): JSX.Element {
           <Colophon
             open={colophonOpen || settingsPage}
             asPage={settingsPage && !colophonOpen}
+            marks={copyMarks}
             onClose={() => {
               setColophonOpen(false);
               setAppPage("mushaf");

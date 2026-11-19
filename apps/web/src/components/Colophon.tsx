@@ -59,7 +59,7 @@ import { ZOOM_ANCHORS, rememberZoomAnchor, useZoomAnchor } from "../zoom-anchor"
 import { NOTE_LEAVES, rememberNoteLeave, useNoteLeave } from "../note-leave";
 import { UsageReadout } from "./UsageReadout";
 import { RecitationShelf } from "./RecitationShelf";
-import { Account } from "./Account";
+import { Account, type CopyMarks } from "./Account";
 import { ReportProblem } from "./ReportProblem";
 import { isNative, shareBase } from "../native-bridge";
 import { sitePageUrl, type SitePage } from "../site-pages";
@@ -164,6 +164,8 @@ interface ColophonProps {
   /** Whether this screen can show two pages side by side. What a card does at the
       facing page's edge only means something then, so a phone is not asked. */
   spread?: boolean;
+  /** This device's marks, for the account section's "Keep a copy of my marks on hifth.app". */
+  marks?: CopyMarks | undefined;
 }
 
 /** One setting the reader picks from: a heading, a row of radio buttons, a note.
@@ -464,6 +466,7 @@ export function Colophon({
   appPages,
   onAppPages,
   asPage = false,
+  marks,
   drawerMarks,
   onDrawerMarks,
   wordTap,
@@ -1086,7 +1089,7 @@ export function Colophon({
             app whether sign-in is offered and draws nothing at all when it is
             not, so a browser and a build with sign-in off look as before. Above
             the report section, which its failure lines point the reader down to. */}
-        <Account sectionClass={styles.block} headingClass={styles.subhead} />
+        <Account sectionClass={styles.block} headingClass={styles.subhead} marks={marks} />
 
         {/* Report a problem (launch item 18, docs/design/report-a-problem.md):
             the reader sees the whole report before their own mail app sends it. */}

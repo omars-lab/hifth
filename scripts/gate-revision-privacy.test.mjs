@@ -28,6 +28,8 @@ const importUsage = "import { countUse } " + "from " + '"./usage-store";';
 const BRIDGE = "apps/web/src/native-bridge.ts";
 const ACCOUNT = "apps/web/src/account.ts";
 const ACCOUNT_PANEL = "apps/web/src/components/Account.tsx";
+const COPY = "apps/web/src/marks-copy.ts";
+const MERGE = "packages/core/src/marks-copy.ts";
 const importAsk = (from) => "import { ask" + "App } " + "from " + `"${from}";\n`;
 
 /** The record, its store, and every module the check already permits. */
@@ -51,6 +53,8 @@ const clean = {
   [BRIDGE]: "export function ask" + "App() {}",
   [ACCOUNT]: importAsk("./native-bridge") + "export const signIn = () => ask" + 'App("sign-in", { text: "x" });',
   [ACCOUNT_PANEL]: importAsk("../native-bridge"),
+  [COPY]: importAsk("./ask-app") + "export const keep = () => ask" + 'App("marks-keep", { text: "{}" });',
+  [MERGE]: "import { mergeConfusions } " + "from " + '"./confusions.js";',
 };
 
 function withFixture(files, fn) {
@@ -187,6 +191,33 @@ test("gate:revision-privacy refuses a new file asking the app a question", () =>
     const r = runGate("revision-privacy", root);
     assert.equal(r.status, 1, r.out);
     assert.match(r.out, /ShareSheet\.tsx asks the app a question/);
+  });
+});
+
+// The question helper moved to its own small file so the start of the app does
+// not load it. A file asking through that one is asking all the same.
+test("gate:revision-privacy refuses a new file asking the app through the question file", () => {
+  withFixture({ ...clean, "apps/web/src/components/ShareSheet.tsx": importAsk("../ask-app") }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /ShareSheet\.tsx asks the app a question/);
+  });
+});
+
+// The copy of the reader's marks hands the app the marks file itself; only the
+// copy's own file may, never the section that draws its button.
+test("gate:revision-privacy lets the copy's file hand the app the marks file", () => {
+  withFixture(clean, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 0, r.out);
+  });
+});
+
+test("gate:revision-privacy refuses a way off the device inside the copy's file", () => {
+  withFixture({ ...clean, [COPY]: clean[COPY] + "\nfet" + 'ch("https://hifth.app/api/marks");' }, (root) => {
+    const r = runGate("revision-privacy", root);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /marks-copy\.ts contains `fetch\(`/);
   });
 });
 

@@ -122,6 +122,10 @@ const RECORDS = [
       ["apps/web/src/useBookmarks.ts", "holds the device's notes and jumps for the app"],
       ["apps/web/src/bookmark-store.ts", "the store is built on the pure module"],
       ["packages/core/src/bookmarks.ts", "the saved file the reader chooses to make"],
+      [
+        "packages/core/src/marks-copy.ts",
+        "puts two saved files together for the copy on hifth.app; pure, sends nothing, and the copy goes only when the reader presses the keep button",
+      ],
       ["packages/core/src/index.ts", "the barrel that exports it"],
     ]),
   },
@@ -161,21 +165,34 @@ const WAYS_OUT = [
  * Who may ask the app a question (sign-in step 16, docs/design/sign-in.md). The
  * app answers some questions by talking to hifth.app, so a question is a way off
  * the device too, one step removed: the page hands the app something and the
- * app sends it on. Today the account section is the only asker. What it sends
- * on, through the app, is Apple's number for the reader, Apple's one-time code
- * (which hifth.app swaps for the ticket that lets it cancel the Apple sign-in)
- * and, for a tester, the invite code they type. None of the three records above
- * goes with them: the askers may not import a record (invariant 1 already says
- * so, and the tests prove it), and they hold no way out of their own.
+ * app sends it on. Two parts of the page ask.
+ *
+ * The account section sends on, through the app, Apple's number for the reader,
+ * Apple's one-time code (which hifth.app swaps for the ticket that lets it
+ * cancel the Apple sign-in) and, for a tester, the invite code they type.
+ *
+ * The copy of the reader's marks (sign-in step 21c) sends the saved marks file,
+ * the same file "Save my marks" writes, and so the marked jumps inside it. It
+ * goes only when the reader presses "Keep a copy of my marks on hifth.app",
+ * under the sentence that says what goes and who could read it.
+ *
+ * The revision record and the usage counts go with neither: the askers may not
+ * import them (invariant 1 already says so, and the tests prove it), and they
+ * hold no way out of their own.
  *
  * `text` is whether the file may hand the app words of its own with a question.
- * Only the question helpers may, and only for the invite code a tester types.
+ * Only the question helpers may: the invite code a tester types, and the marks
+ * file the reader chose to keep.
+ *
+ * The question helper lives in its own small file (ask-app.ts), so the start of
+ * the app does not load it; an import from there or from native-bridge counts.
  */
 const ASKERS = new Map([
   ["apps/web/src/account.ts", { text: true, why: "the account section's questions; hands the app only the typed invite code" }],
   ["apps/web/src/components/Account.tsx", { text: false, why: "the account section; asks through account.ts, hands the app nothing of its own" }],
+  ["apps/web/src/marks-copy.ts", { text: true, why: "the copy's questions; hands the app the marks file only when the reader presses the keep button" }],
 ]);
-const ASK = /\bimport\s*\{[^}]*\baskApp\b[^}]*\}\s*from\s*["'][^"']*native-bridge(\.(js|ts))?["']/;
+const ASK = /\bimport\s*\{[^}]*\baskApp\b[^}]*\}\s*from\s*["'][^"']*(?:native-bridge|ask-app)(\.(js|ts))?["']/;
 
 /** Ways out of the device. Matched as plain substrings — a grep, not a parse. */
 const ESCAPE_HATCHES = [
