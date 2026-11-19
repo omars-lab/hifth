@@ -59,6 +59,7 @@ import { ZOOM_ANCHORS, rememberZoomAnchor, useZoomAnchor } from "../zoom-anchor"
 import { NOTE_LEAVES, rememberNoteLeave, useNoteLeave } from "../note-leave";
 import { UsageReadout } from "./UsageReadout";
 import { RecitationShelf } from "./RecitationShelf";
+import { Account } from "./Account";
 import { ReportProblem } from "./ReportProblem";
 import { isNative, shareBase } from "../native-bridge";
 import { sitePageUrl, type SitePage } from "../site-pages";
@@ -1080,6 +1081,12 @@ export function Colophon({
             </button>
           </section>
         )}
+
+        {/* The account (sign-in step 16, docs/design/sign-in.md). It asks the
+            app whether sign-in is offered and draws nothing at all when it is
+            not, so a browser and a build with sign-in off look as before. Above
+            the report section, which its failure lines point the reader down to. */}
+        <Account sectionClass={styles.block} headingClass={styles.subhead} />
 
         {/* Report a problem (launch item 18, docs/design/report-a-problem.md):
             the reader sees the whole report before their own mail app sends it. */}

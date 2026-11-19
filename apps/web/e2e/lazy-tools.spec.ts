@@ -42,6 +42,9 @@ const LATER = [
   // page, but its report panel is only needed once the card shows.
   "components/ReportProblem.tsx",
   "problem-report.ts",
+  // The account section (sign-in step 16) lives only in the info panel.
+  "components/Account.tsx",
+  "account.ts",
   // The go-to box draws nothing until "/" or its button opens it.
   "components/Jumper.tsx",
   // The verse's "more" menu draws nothing until a press and hold opens it.

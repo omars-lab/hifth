@@ -523,6 +523,33 @@ export interface Strings {
   reportClose: string;
   reportMailIntro: string;
 
+  /* ---- the account section (components/Account.tsx, sign-in step 16) ------ */
+  accountTitle: string;
+  accountOptional: string;
+  accountLeaves: string;
+  accountSignIn: string;
+  accountInviteLabel: string;
+  accountInviteHelp: string;
+  accountInviteRefused: string;
+  accountTooMany: string;
+  accountOffline: string;
+  accountFailed: string;
+  accountSignedIn: string;
+  accountHeld: string;
+  accountSignOut: string;
+  accountSignOutFailed: string;
+  accountDelete: string;
+  accountDeleteAsk: string;
+  accountDeleteYes: string;
+  accountDeleteNo: string;
+  accountDeletedCut: string;
+  accountDeletedLeft: string;
+  accountDeleteSignedOut: string;
+  accountDeleteOffline: string;
+  accountDeleteFailed: string;
+  accountInviteKept: string;
+  accountForgetInvite: string;
+
   /* ---- colophon ----------------------------------------------------------- */
   aboutTitle: string;
   aboutLede: string;

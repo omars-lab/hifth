@@ -1,6 +1,12 @@
 {
   "about": "Which browser runs pick up each test file. Checked by scripts/gate-e2e-runs.mjs, so a file cannot join or leave a run unseen. Do not edit by hand: change the lists in playwright.config.ts, then run `pnpm gate:e2e-runs --write` and read the difference.",
   "files": {
+    "account.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "app-pages.spec.ts": [
       "android",
       "desktop",
