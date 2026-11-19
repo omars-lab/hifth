@@ -181,6 +181,38 @@ polygon is ayah 16:112. If that mapping were wrong you would read the wrong text
 true pair false. Looking the key up somewhere we do not control takes our resolver out of
 the loop.
 
+## Laying our page over the Complex's own drawing file
+
+The Complex publishes its 1441H Hafs pages as free Illustrator drawing files, one per page,
+mirrored at `https://cdn.quran.ws/KFGQPC/resources/dm/1441-ai-hafs/` (folder
+`1441 مصحف حفص-إليستريتور`, files `NNN___Hafs39__DM.ai`, about 1.3 MB each, 466 MB in all).
+They are the strongest reference we have: the print itself, as the Complex drew it. This is how
+item ㊺ (where the verse-number rings came from) and ㊼ (our copy step moving words) on the
+launch page were measured; every number cited there comes from these scripts.
+
+Rules: download each drawing file into its own folder, never into the repo; run every script
+with `python3 -I`; the pictures the overlay writes show scripture, so they stay in the session's
+scratch folder and are never committed. Needs `pdftoppm`, `pdftocairo`, `pdfinfo`, `rsvg-convert`
+and `magick`.
+
+### Scripts — when to use each
+
+All in `.claude/skills/mushaf-reference/scripts/`. `<pinned>` is a raw upstream page from the
+copy step's cache (`packages/etl/data/pages/.cache/svg/NNN.svg`, main checkout only); a
+`<drawing.svg>` is a drawing file converted with `pdftocairo -svg NNN.ai NNN.svg`.
+
+| Script | What it does | When to reach for it | Command |
+|---|---|---|---|
+| `medallion_overlay.py` | Downloads the page's drawing file (if not already in `<out>/dl/`), renders it and our pinned and shipped pages at the same size from the page's own transform, no fitting, and counts differing ink. Then masks the pale green on both and prints `ours_off_drawing`, the share of our green that misses the drawing's (about 5% is what two renderers disagree by on the same file) | Any "does our page still sit on the Complex's?" question: after a copy-step change, a ring swap, a re-pin | `python3 -I medallion_overlay.py <page> <out> <pin.json> <shipped_dir> https://cdn.quran.ws/KFGQPC/resources/dm/1441-ai-hafs` |
+| `medallion_list.py` | Lists every green shape in a drawing with its place, size and a short fingerprint | To see a page's medallions before fitting, or to spot the page border and frames | `python3 -I medallion_list.py <drawing.svg>` |
+| `medallion_swap_trial.py` | Swaps each ring for the drawing's own medallion at that verse end (mode A) or a plain ring of ours (mode B); drops the twin rings on pages 1 and 2 | The exact-copy baseline to compare any cheaper swap against | `python3 -I medallion_swap_trial.py <pinned> <drawing.svg> 547.086 A\|B <out.svg>` |
+| `medallion_offsets.py` | Per verse end, the medallion's centre minus the numeral's, and a straight-line fit with the worst left over | To check whether the numeral alone can place the medallion on a new kind of page | `python3 -I medallion_offsets.py <pinned> <drawing.svg> 547.086` |
+| `medallion_extract.py` | Writes the template: one medallion from one drawing file, that file's address and sha256, and the two placing lines (regular pages, and pages 1 and 2 with their smaller scale) | To make or remake the template the copy step's swap would use | `python3 -I medallion_extract.py <out.json> <007.ai> <url> 7 --regular <p>:<d> ... --small <p>:<d> ...` |
+| `medallion_place_trial.py` | Places the template's medallion on a pinned page from its numerals alone, reading no drawing file | To test the template on a page it was not made from, then run the overlay on the result | `python3 -I medallion_place_trial.py <pinned> <template.json> <page> <out.svg>` |
+| `medallion_svgo_trial.mjs` | Runs one page through the copy step's shrink settings from the pin, at a chosen rounding, and prints the size and whether verse numbers and green survive | To weigh a different rounding (㊼) before changing the copy step | `node medallion_svgo_trial.mjs packages/etl <pin.json> <in.svg> <out.svg> [places]` |
+
+The page's height in the drawing files is 547.086 points; the marker frame's y runs up from it.
+
 ## Where this stops
 
 Say this plainly rather than letting a green probe imply more than it proved.

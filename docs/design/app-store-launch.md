@@ -680,9 +680,34 @@ Complex's own. Each is drawn the way a font's letter is, and quran-svg does not 
 came from. If they come from the Complex's font, the strict licence covers that one small
 decoration.
 
-*What would answer it:* compare the ring with the end-of-verse sign in the Complex's fonts and
-a few common Arabic fonts, or ask quran-svg. Or draw our own ring and use it instead: we already
-draw marks on the page, and that removes the question.
+*What we found, 2026-11-18:*
+
+- **The numbers inside the rings are the Complex's.** They landed in place with the text.
+  Only the ring around each number is in question.
+- **The ring is not the end-of-verse sign from the font quran-svg's notes mention** (the
+  Douri font's): its outline has a different size and shape. Its source is still not named.
+- **quran-svg's newer pages swap the ring for one taken from the Complex's page fonts.**
+  That is the strict licence, so moving our pin forward would make the question worse. We did
+  not.
+- **Every page has exactly one ring per verse number**: 6236 of each across all 604 pinned
+  pages. Pages 1 and 2 draw each ring twice, one on top of the other, and smaller.
+- **The Complex's own drawing files have a pale green medallion at each verse end, where our
+  ring is.** One medallion, taken from page 7's drawing file, placed from each verse number by
+  one straight-line rule, lands on the drawing's own medallion as closely as an exact copy
+  does. We checked pages 1, 2, 7, 176 (a prostration verse), 177 (a surah heading), 300 and
+  604. On each, about 5% of our green falls off the drawing's, which is the same 5% that two
+  renderers drawing the very same file disagree by. Pages 1 and 2 need their own rule and a
+  smaller medallion (0.81 times). Pages 176 and 177 were not used to make the rule.
+- **So the copy step would need no drawing files.** It needs only that one shape, the page it
+  came from with the file's fingerprint, and the two rules. The 466 MB of drawing files stay
+  out of the repo.
+
+*What would answer it:* the owner picks the look. Either the Complex's own medallion (pale
+green, as in its printed page, from its free-use drawing files), or a ring we draw ourselves.
+Both remove the unnamed source. The copy step then swaps the ring as a declared, checked step,
+every page is copied again, and the page pictures the tests compare against change, which the
+owner sees before they are replaced. The scripts behind every number above are in the
+mushaf-reference skill's scripts folder.
 
 ### ㊻ Should the website keep playing the recitation? · **open**
 
@@ -707,6 +732,14 @@ it on those pages.
 ceiling on the difference, then a copy step that keeps more precision (or leaves the curves
 alone), checked by that test. Every page is copied again, so the marks drawn on the page must
 be checked against the new pages too.
+
+*Measured, 2026-11-18:* rounding to two decimal places instead of one removes the drift. On
+page 7 the copied page then differs from the pinned one by about 3 pixels, and on page 604 by
+about 2; at
+one decimal place it was about 43,000 and 45,000. Three places gains nothing more. The cost is
+size: page 7 grows from 40 KB to 66 KB as sent over the network, so all pages together grow by
+about 1.6 to 2 times. Whether that size is worth it is the owner's call. It rides with the ring
+swap (㊺), since both copy every page again.
 
 ## Which of these could get the app turned down, and which matter once readers have it?
 
