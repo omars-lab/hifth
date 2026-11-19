@@ -92,6 +92,19 @@ test.describe("Hifth · rarely used tools load when first opened", () => {
     expect(core, "core files still in the start-up script").toEqual([]);
   });
 
+  test("the first script carries no stand-in for module preloading", async ({ page }) => {
+    // Every browser the app is built for preloads modules on its own (Safari
+    // 17 and up, which iOS 17 and macOS 14 bring), so the build's stand-in for
+    // the ones that cannot was 0.2 KB of start-up for nobody. Its tell-tale is
+    // the scan it makes for the page's preload links. (The build's own loader
+    // also asks whether the browser can preload; that one stays.)
+    await page.goto("/");
+    const src = await page.locator('script[type="module"][src]').first().getAttribute("src");
+    const text = await (await page.request.get(new URL(src!, page.url()).href)).text();
+    expect(text.length, "the start-up script came back").toBeGreaterThan(10_000);
+    expect(text.includes('link[rel="modulepreload"]'), "the stand-in is in the start-up script").toBe(false);
+  });
+
   // Each opened by its own button, with the tools' file held back for a moment,
   // as on a slow connection the first time. The file is not asked for until the
   // button is pressed; the page must not move, nothing may spin, and the sheet

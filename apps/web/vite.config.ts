@@ -9,6 +9,7 @@ import { defineConfig, type Plugin } from "vite";
 import preact from "@preact/preset-vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { preloadScript } from "./src/lang-preload";
+import { classNamer } from "./src/class-names";
 import { devHubRoute } from "./src/dev/dev-hub";
 import { intentPictureRoute } from "./src/dev/intent-picture";
 import { LOCALE_IDS } from "./src/messages/locales.gen";
@@ -287,7 +288,11 @@ export default defineConfig({
       Boolean(process.env.VITE_TAFSIR_QF_BASE && process.env.VITE_TAFSIR_QF_ID),
     ),
   },
-  plugins: [pageComments(), 
+  // Class names for the components' style files without the line number the
+  // default added: about 1,600 names in the start-up download. The namer
+  // refuses a build where two files would share a name. See class-names.ts.
+  css: { modules: { generateScopedName: classNamer() } },
+  plugins: [pageComments(),
     dropPrivateUnlessPitch(),
     commentaryOnlyWhenShown(),
     preloadReaderLanguage(),
@@ -446,6 +451,13 @@ export default defineConfig({
     // one thing terser's renaming could change. See trims.md, "Trimmed 2026-11-13 (2)".
     minify: "terser",
     terserOptions: { compress: { passes: 2 }, ecma: 2020 },
+    // No stand-in for browsers that cannot preload a module. Every browser the
+    // app is built for preloads on its own: the iPad and iPhone app needs
+    // iOS 17 and the Mac app macOS 14, both Safari 17, which added it; Firefox
+    // and Chrome have had it for years. The stand-in shipped in the start-up
+    // script anyway. A browser without it still loads every file, just without
+    // the head start. See trims.md, "Trimmed 2026-11-19".
+    modulePreload: { polyfill: false },
     rollupOptions: {
       output: {
         // Fold a tiny shared file (the plural helper every language file
