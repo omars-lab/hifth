@@ -456,7 +456,7 @@ Recommended: A. It keeps the page as it is and matches what readers expect. Noth
 
 ### ⑳ Do the account words slow the app's start for readers who never see them? · **open**
 
-The agent's, not urgent. The account section's English and Arabic words are packed with the words every reader loads when the app opens, though only the store apps show the section. Step 16 made each language's words about 1 KB larger (zipped), which the app's size check let through only after its limit was raised. Moving the account words into the part that loads later, when the info panel opens, would give that back. It needs the words to be split into two packs, which touches every screen's words, so it waits for a quiet stretch.
+The agent's, and next after sign-in (raised 2026-11-19). The account section's English and Arabic words are packed with the words every reader loads when the app opens, though only the store apps show the section. Step 16 made each language's words about 1 KB larger (zipped), which the app's size check let through only after its limit was raised. Moving the account words into the part that loads later, when the info panel opens, would give that back. It needs the words to be split into two packs, which touches every screen's words. It was waiting for a quiet stretch; now the start-up download is at 160.1 of its 161 KB, and the line that tells a hafiz a mistyped verse link went nowhere (today nothing happens at all) needs room there first.
 
 ### ㉑ May the table that keeps each reader's copy of their marks be added to the real accounts database? · **open**
 
