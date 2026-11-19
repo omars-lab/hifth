@@ -332,6 +332,65 @@ test.describe("Hifth · axe automated a11y", () => {
     expect(serious, JSON.stringify(serious, null, 2)).toEqual([]);
   });
 
+  // The second screen a reader meets: a page with a verse chosen, which adds the
+  // hop rail, the verse's outline and the trail. Launch item 16, 2026-11-19.
+  test("a chosen verse has no serious/critical axe violations", async ({ page }) => {
+    await page.goto("/");
+    await tapAyah(page, "#verse-55");
+    await expect(page.getByRole("group", { name: "روابط الآية" })).toBeVisible();
+    const results = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa"])
+      .analyze();
+    const serious = results.violations.filter(
+      (v) => v.impact === "serious" || v.impact === "critical",
+    );
+    expect(serious, JSON.stringify(serious, null, 2)).toEqual([]);
+  });
+
+  // Apple's accessibility check on the iPad (2026-11-19) heard every verse-number
+  // ring, its number and the lettering as a nameless picture, 23 on page 7. The
+  // desktop browsers leave those out of their tree already, so axe and the snapshot
+  // above never saw them; this pins the attribute the iPad's reader obeys, and that
+  // hiding them never hides a verse button with them.
+  test("the page drawing's rings and lettering are hidden from screen readers", async ({ page }) => {
+    await page.goto("/");
+    const stage = page.locator('svg[aria-labelledby="page-label-7"]');
+    await expect(stage.locator("#verse-55")).toHaveAttribute("role", "button");
+    await expect(stage.locator("#ayah_markers")).toHaveAttribute("aria-hidden", "true");
+    await expect(stage.locator("#content")).toHaveAttribute("aria-hidden", "true");
+    await expect(stage.locator("[aria-hidden='true'] [role='button']")).toHaveCount(0);
+  });
+
+  // With a verse chosen, the page slider sits under the verse's tools. A style rule
+  // hid it from sight, but the iPad's screen reader still met its handle as a nameless
+  // item behind the Bookmark button (Apple's check, 2026-11-19). Taking it out with
+  // `inert` says the same thing to every reader, sighted or not; the end arrows stay.
+  // The knob itself the iPad still listed even then, hidden three ways, so under the
+  // tools it is not drawn at all; and the slider control's own grip it listed too, so
+  // the control is taken out of the layout there, while the track keeps its room.
+  test("the page slider under a chosen verse's tools is out of a screen reader's way", async ({ page }) => {
+    await page.goto("/");
+    const arrows = page.locator("nav:has(input[type='range']) > button");
+    await expect(arrows).toHaveCount(2);
+    const before = await arrows.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().x));
+    await tapAyah(page, "#verse-55");
+    const bar = page.locator("nav[data-behind]");
+    await expect(bar).toHaveCount(1);
+    await expect(bar.getByTestId("page-handle")).toHaveCount(0);
+    await expect(bar.locator("input[type='range']")).toHaveCSS("display", "none");
+    // Nothing moves: the end arrows stay where they were.
+    const after = await arrows.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().x));
+    expect(after).toEqual(before);
+    const inert = (sel: string, nth = 0) =>
+      bar.locator(sel).nth(nth).evaluate((el) => el.closest("[inert]") !== null);
+    expect(await inert("input[type='range']")).toBe(true);
+    expect(await inert("#hifth-page-inventory")).toBe(true);
+    // The two end arrows stay in reach.
+    await expect(bar.locator(":scope > button")).toHaveCount(2);
+    expect(await inert(":scope > button", 0)).toBe(false);
+    expect(await inert(":scope > button", 1)).toBe(false);
+  });
+
   test("the open hop popover has no serious/critical axe violations", async ({ page }) => {
     await gotoLink(page, "verse-2-48-lookalikes");
     const results = await new AxeBuilder({ page })

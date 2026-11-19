@@ -635,6 +635,15 @@ describe("Highlighter marker swipes", () => {
     }
   });
 
+  it("keeps its strokes out of a screen reader: the verse itself already says which verse", () => {
+    // Apple's accessibility check on the iPad (2026-11-19) found each stroke over a chosen
+    // verse as a picture with no name, one per line. They are paint, not content.
+    hl.highlight("quran/hafs-kfqc/2:38", "sel", "selection");
+    const overlay = svg.querySelector("#hifth-overlay")!;
+    expect(overlay.getAttribute("aria-hidden")).toBe("true");
+    expect(overlay.querySelectorAll(".hl-sel").length).toBeGreaterThan(0);
+  });
+
   it("splits a long ayah's fused middle box into one line per line (#4, #12)", () => {
     // 2:249 as vendored (`verse-256`, page 41): a one-line head, six full-width
     // middle lines the print fused into one 218-unit box, and a one-line tail.

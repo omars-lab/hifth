@@ -628,6 +628,13 @@
   visibility: hidden;
 }
 
+/* The slider control itself goes fully: hidden from sight and switched off,
+   the iPad's screen reader still listed its grip as a nameless item (Apple's
+   check, 2026-11-19). The track keeps its room, so nothing moves. */
+.bar[data-behind] .range {
+  display: none;
+}
+
 .inventory {
   grid-column: 1 / -1;
   text-align: center;

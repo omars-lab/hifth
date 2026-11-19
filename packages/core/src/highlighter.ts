@@ -885,6 +885,9 @@ function ensureOverlay(svg: SVGSVGElement): SVGGElement {
     overlay.setAttribute("id", OVERLAY_ID);
     svg.appendChild(overlay);
   }
+  // Paint, not content: the verse under a stroke is the button that names it. Without this
+  // the iPad's screen reader met each stroke as a nameless picture (Apple's check, 2026-11-19).
+  overlay.setAttribute("aria-hidden", "true");
   if (!overlay.querySelector(`#${FIBRE_ID}`)) overlay.appendChild(fibreFilter());
   return overlay;
 }

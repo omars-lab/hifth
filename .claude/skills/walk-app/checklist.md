@@ -1188,6 +1188,11 @@ would break. Pictures of this build may be committed; it carries no held text.
   then back to `large`) and open the app: say whether the bars grew. · reviewer iPhone SE ·
   walked 2026-11-17: nothing in the app follows the system text size; the question went to the
   accessibility row (issue: `launch-screen-reader-walk`)
+- [ ] Run Apple's accessibility check inside the app (`make app-test ONLY=AccessibilityAuditTests`):
+  no nameless picture, no button too small to touch, no faint text, on a page and on a chosen
+  verse. · iPad simulator · test: `native/HifthUITests/AccessibilityAuditTests.swift` · found
+  2026-11-19: every verse-number ring, its number and the lettering on page 7 read as nameless
+  pictures (23), which the browsers' own checks could not see; now hidden from readers
 - [ ] Open the Mac store copy fresh, from an emptied data folder: page 7, no "Left off" ribbon. ·
   Mac · not walked: the Mac picture command builds the test copy and keeps the laptop's saved
   data, so it showed a ribbon from past runs; waits for the Mac sandbox (issue: `launch-mac-sandbox`)

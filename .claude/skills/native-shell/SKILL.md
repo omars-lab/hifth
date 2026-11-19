@@ -26,6 +26,7 @@ by hand: `make app-generate` rewrites it.
 | tests, fast | `make app-unit-test` (route, bundle paths, bridge; Mac, seconds) |
 | tests, full | `make app-test` (unit tests + the iPad simulator smoke) |
 | one simulator test | `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize` |
+| Apple's accessibility check, iPad | `make app-test ONLY=AccessibilityAuditTests` (see "Apple's accessibility check" below) |
 | Mac smoke | `make app-test-mac-ui` (needs Accessibility permission, see below) |
 | console output | `make app-logs` · `make app-run-mac-stdout` |
 | tests on the owner's iPad's iOS (18.5) | `make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>` |
@@ -328,6 +329,36 @@ look at what the test saw:
 xcrun xcresulttool get test-results summary --path native/shots/ipad-smoke.xcresult
 xcrun xcresulttool export attachments --path native/shots/ipad-smoke.xcresult --output-path native/shots/ipad-smoke-attachments
 ```
+
+## Apple's accessibility check
+
+`make app-test ONLY=AccessibilityAuditTests` runs the check Xcode's Accessibility Inspector
+runs, on page 7 and on a page with verse 2:255 chosen, inside the iPad app. It finds what a
+VoiceOver reader would trip on: a nameless picture, a target too small to touch, faint text.
+It is the machine half of the screen-reader walk; listening stays on the by-hand list.
+
+- **Rebuild the web copy first.** `ONLY=` skips the web build, so after a change to the web
+  app run `make app-web FLAVOUR=public` before the check, or it tests the old copy (it did,
+  2026-11-19: a whole run spent re-finding a fault already fixed).
+- **One kind per call.** All kinds at once gives up on a full page with "Audit failed to
+  complete in time" before it reports anything. The test loops over the kinds.
+- **Reading a finding.** Each one prints an `ev=a11y_finding` line and is kept as a note on the
+  run. The element type is a number: 43 is a picture, 48 is plain text, 9 is a button. Frames
+  are in points (the shots are twice that). Export the notes with the `export attachments`
+  line above; the shots show the page artwork, so they stay in the scratch folder, never a commit.
+- **Why only here.** Desktop and phone browsers leave the page drawing out of their own
+  accessibility tree, so axe and the aria snapshots in `share-a11y.spec.ts` never see what the
+  iPad's reader announces. The page drawing's rings and lettering are hidden from readers in
+  `apps/web/src/page-drawing-a11y.ts` for that reason (2026-11-19).
+- **Plain text and pictures with no action** are not touch targets, so a "too small to touch"
+  finding on one is noted, not failed. Anything a reader can tap must be a button.
+- **Hidden is not gone on the iPad.** iPad WebKit still lists a slider's grip, and a drawn
+  knob, through `visibility: hidden`, `aria-hidden` and `inert`. A control that must leave a
+  reader's way takes `display: none` (keep its room with the parent's size so nothing moves).
+  A nameless type-1 item with no id or value is the tell (2026-11-19: the page slider under a
+  verse's tools).
+- **Check the screen the reader gets.** Wait for the screen's own controls before auditing
+  (the verse test waits for its Bookmark button); the address is set before they open.
 
 ## Adding a route shape: round-trip it
 

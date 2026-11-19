@@ -698,6 +698,13 @@ export function PageSlider({
     [available, onStep, onGoTo],
   );
 
+  // Under a verse's tools the track and the count are hidden by the stylesheet, and
+  // `inert` says it to every reader as well: the iPad's screen reader still met the
+  // hidden handle as a nameless item (Apple's check, 2026-11-19). A plain attribute,
+  // because React 18 does not know the name, and given a value, because React 18
+  // drops one that is empty; the browser takes any value as on.
+  const away = behind ? { inert: "true" } : {};
+
   return (
     /* Pinned RTL in both languages — see the direction note above. `nav` rather
        than a bare div so a screen-reader user can jump to it as a landmark; it
@@ -721,7 +728,7 @@ export function PageSlider({
 
       {lead}
 
-      <div className={styles.track} ref={trackRef}>
+      <div className={styles.track} ref={trackRef} {...away}>
         <input
           ref={inputRef}
           type="range"
@@ -858,8 +865,11 @@ export function PageSlider({
             the same value, so the range input underneath keeps its keyboard and
             screen-reader behaviour. Hidden while the bar is inert (no
             inventory), so no knob floats over a dead track. Follows the drag:
-            `value` is the scrub value mid-drag, the loaded page at rest. */}
-        {!empty && (
+            `value` is the scrub value mid-drag, the loaded page at rest. Not drawn
+            at all under a verse's tools: hidden from sight, marked hidden and
+            inside the switched-off track, the iPad's screen reader still listed it
+            as a nameless item (Apple's check, 2026-11-19). */}
+        {!empty && !behind && (
           <span
             className={styles.handle}
             data-testid="page-handle"
@@ -978,7 +988,7 @@ export function PageSlider({
           so the fact reaches a listener who will never see the runs. The bar
           runs right to left, so without `dir="auto"` the English line put its
           leading number at the far end ("of 604 pages available 604"). */}
-      <span id="hifth-page-inventory" className={styles.inventory} dir="auto">
+      <span id="hifth-page-inventory" className={styles.inventory} dir="auto" {...away}>
         {t.pagesVendored(available.length, total)}
       </span>
     </nav>
