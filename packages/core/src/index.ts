@@ -31,13 +31,16 @@ export { formatWordKey, parseWordKey, ayahKeyOf, type WordKey } from "./keys.js"
 // file and loaded back (decisions bookmark-model, bookmark-store, bookmark-admin).
 export {
   BOOKMARK_NAME_MAX,
+  bookmarkChangedAt,
   bookmarksOnPage,
   clearSurah,
   dropBookmark,
   droppedAt,
   groupBySurah,
   liftBookmark,
+  mergeBookmarkFile,
   mergeBookmarks,
+  touchBookmark,
   moveBookmark,
   openBookmark,
   parseBookmarkFile,
@@ -103,15 +106,19 @@ export {
   type ScopedNote,
   type ScopedNoteKind,
 } from "./scoped-notes.js";
-// removals — the notes a reader took away, by id and time, so a copy merged in
-// from another device does not bring them back (docs/design/sign-in.md, step 21a)
+// removals — the bookmarks, notes and jumps a reader took away, by id and time,
+// so a copy merged in from another device does not bring them back
+// (docs/design/sign-in.md, steps 21a and ㉒)
 export {
   REMOVAL_KEEP_MS,
+  copyRemovals,
   dropRemoved,
   isRemoval,
   joinRemovals,
+  removalsOf,
   trackRemovals,
   type Removal,
+  type RemovalKind,
 } from "./removals.js";
 // confusion jumps — where your memory jumped from one verse to another, kept
 // as one record per pair with every time it happened (docs/design/confusion-jumps.md)
@@ -121,10 +128,13 @@ export {
   allConfusions,
   dismissedConfusions,
   confusionsFrom,
+  confusionChangedAt,
   eraseJumps,
   isConfusion,
   markConfusion,
   mergeConfusions,
+  mergeConfusionsFile,
+  touchConfusion,
   nextWasl,
   removeConfusion,
   removeLastTime,

@@ -11,6 +11,7 @@ import {
   jumpArrows,
   markConfusion,
   mergeConfusions,
+  mergeConfusionsFile,
   nextWasl,
   removeConfusion,
   removeLastTime,
@@ -151,6 +152,62 @@ describe("a slip, told apart from a jump", () => {
     const held = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE);
     const loaded = setConfusionKind(held, held[0]!.id, "slip", 2_000);
     expect(kindOf(mergeConfusions(held, loaded)[0]!)).toBe("slip");
+  });
+});
+
+describe("a jump taken away stays away when another device's copy is merged in", () => {
+  const one = () => markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE);
+
+  it("a removal newer than the jump's last change takes it away, from either side", () => {
+    const held = one();
+    const id = held[0]!.id;
+    const here = mergeConfusionsFile([], [{ id, at: 2_000 }], held, []);
+    expect(here.confusions).toEqual([]);
+    expect(here.removed).toEqual([{ id, at: 2_000 }]);
+    const there = mergeConfusionsFile(held, [], [], [{ id, at: 2_000 }]);
+    expect(there.confusions).toEqual([]);
+  });
+
+  it("a jump marked again after it was removed elsewhere stays, and the removal is forgotten", () => {
+    const held = one();
+    const id = held[0]!.id;
+    const again = markConfusion(held, { key: K("2:58") }, { key: K("7:161") }, 3_000, LAPTOP);
+    const merged = mergeConfusionsFile(again, [], [], [{ id, at: 2_000 }]);
+    expect(merged.confusions).toHaveLength(1);
+    expect(merged.confusions[0]!.times).toHaveLength(2);
+    expect(merged.removed).toEqual([]);
+  });
+
+  it("counts the jumps that arrived", () => {
+    const other = markConfusion([], { key: K("2:59") }, { key: K("7:162") }, 1_500, LAPTOP);
+    expect(mergeConfusionsFile(one(), [], other, []).added).toBe(1);
+  });
+
+  it("two devices that marked the same jump settle on one id, whichever merges first", () => {
+    // Marked on each device before they ever shared a copy: two ids for one
+    // jump. Unless both keep the same one, a removal of one id on the first
+    // device misses the other's, and the jump comes back.
+    const phone = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE);
+    const laptop = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 2_000, LAPTOP);
+    expect(phone[0]!.id).not.toBe(laptop[0]!.id);
+    const onPhone = mergeConfusions(phone, laptop);
+    const onLaptop = mergeConfusions(laptop, phone);
+    expect(onPhone).toHaveLength(1);
+    expect(onPhone[0]!.id).toBe(onLaptop[0]!.id);
+  });
+
+  it("settling never takes an id another jump already holds", () => {
+    const phone = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 1_000, PHONE);
+    // On the laptop the same jump has the id that sorts first, but a
+    // different jump here already holds that id.
+    const laptop = markConfusion([], { key: K("2:58") }, { key: K("7:161") }, 2_000, LAPTOP);
+    const clash = markConfusion([], { key: K("3:7") }, { key: K("3:8") }, 2_000, PHONE);
+    expect(laptop[0]!.id < phone[0]!.id).toBe(true);
+    expect(clash[0]!.id).toBe(laptop[0]!.id);
+    const held = [...phone, ...clash];
+    const merged = mergeConfusions(held, laptop);
+    expect(new Set(merged.map((c) => c.id)).size).toBe(merged.length);
+    expect(merged.find((c) => c.from.key === K("2:58"))!.id).toBe(phone[0]!.id);
   });
 });
 

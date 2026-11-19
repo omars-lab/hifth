@@ -7,7 +7,8 @@ import {
   clearSurah,
   dropBookmark,
   liftBookmark,
-  mergeBookmarks,
+  copyRemovals,
+  removalsOf,
   isMistake,
   addNote,
   editNote,
@@ -1982,8 +1983,10 @@ export function App(): JSX.Element {
   }, [keepHistory]);
   const {
     bookmarks,
+    removed: bookmarksRemoved,
     loaded: bookmarksLoaded,
     commit: commitBookmarks,
+    loadFile: loadBookmarksFile,
     restore: restoreBookmarks,
     saved: bookmarksSaved,
   } = useBookmarks(announce, t.bmNotSaved, recorders.bookmarks);
@@ -2206,6 +2209,7 @@ export function App(): JSX.Element {
   // (confusion-jumps, step 3): how many different verses it went to.
   const {
     confusions,
+    removed: jumpsRemoved,
     device,
     loaded: jumpsLoaded,
     ready: jumpsReady,
@@ -2548,11 +2552,18 @@ export function App(): JSX.Element {
   const bookmarkFileText = useCallback(
     () =>
       JSON.stringify(
-        toBookmarkFile(bookmarks, Date.now(), notes.filter(isMistake), [...scoped], confusions, notesRemoved),
+        toBookmarkFile(
+          bookmarks,
+          Date.now(),
+          notes.filter(isMistake),
+          [...scoped],
+          confusions,
+          copyRemovals([bookmarksRemoved, notesRemoved, jumpsRemoved], [...bookmarks, ...scoped, ...notes, ...confusions]),
+        ),
         null,
         2,
       ),
-    [bookmarks, notes, scoped, confusions, notesRemoved],
+    [bookmarks, notes, scoped, confusions, bookmarksRemoved, notesRemoved, jumpsRemoved],
   );
 
   const saveBookmarkFile = useCallback(() => {
@@ -2573,27 +2584,28 @@ export function App(): JSX.Element {
         announce(t.bmLoadBad);
         return null;
       }
-      const merged = mergeBookmarks(bookmarks, file.bookmarks);
-      const newBookmarks = merged.length - bookmarks.length;
+      // The one list of what was taken away goes to each kind by its id's first letter.
+      const gone = file.removed ?? [];
+      const noteGone = removalsOf(gone, "note");
       const newNotes =
-        file.notes || file.scopedNotes || file.removed
-          ? loadNotesFile(file.notes ?? [], file.scopedNotes ?? [], file.removed ?? [])
+        file.notes || file.scopedNotes || noteGone.length > 0
+          ? loadNotesFile(file.notes ?? [], file.scopedNotes ?? [], noteGone)
           : 0;
-      const newJumps = file.confusions ? loadConfusionsFile(file.confusions) : 0;
+      const jumpGone = removalsOf(gone, "jump");
+      const newJumps = file.confusions || jumpGone.length > 0 ? loadConfusionsFile(file.confusions ?? [], jumpGone) : 0;
       // Say what the file brought; "nothing new" only when it brought nothing at all.
-      const parts = [
-        ...(newBookmarks > 0 ? [t.bmLoaded(newBookmarks)] : []),
-        ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
-        ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
-      ];
-      const added = Math.max(0, newBookmarks) + newNotes + newJumps;
-      const said =
-        from === "carry" ? t.carryArrived(added) : parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0);
-      // A file loaded is not a step: its notes and jumps are not either.
-      commitBookmarks(merged, said, { unrecorded: true });
-      return added;
+      // A file loaded is not a step Undo hears, for any of the three kinds.
+      return loadBookmarksFile(file.bookmarks, removalsOf(gone, "bookmark"), (newBookmarks) => {
+        const parts = [
+          ...(newBookmarks > 0 ? [t.bmLoaded(newBookmarks)] : []),
+          ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
+          ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
+        ];
+        const added = newBookmarks + newNotes + newJumps;
+        return from === "carry" ? t.carryArrived(added) : parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0);
+      }) + newNotes + newJumps;
     },
-    [announce, bookmarks, commitBookmarks, loadNotesFile, loadConfusionsFile, t],
+    [announce, loadBookmarksFile, loadNotesFile, loadConfusionsFile, t],
   );
   // Opened by the old address to carry the reader's marks here (moved.ts).
   // Ready only once all three kinds of mark are read in: the notes and the jumps
@@ -2824,7 +2836,9 @@ export function App(): JSX.Element {
       const { step } = got;
       const said = back ? t.markUndone(step.said) : t.markRedone(step.said);
       const put = step.store === "bookmarks" ? restoreBookmarks : step.store === "notes" ? restoreNotes : restoreConfusions;
-      put(back ? step.before : step.after, said);
+      // Only what this step changed: a mark a file or another device's copy
+      // brought in since is kept, not taken away for every device (㉒).
+      put(back ? step.before : step.after, said, back ? step.after : step.before);
     },
     [announce, keepHistory, restoreBookmarks, restoreNotes, restoreConfusions, t],
   );

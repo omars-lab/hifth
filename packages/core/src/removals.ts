@@ -51,6 +51,34 @@ export function joinRemovals(a: readonly Removal[], b: readonly Removal[]): Remo
   return [...byId.values()].sort((x, y) => (x.id < y.id ? -1 : x.id > y.id ? 1 : 0));
 }
 
+/**
+ * Which kind of mark a removal belongs to, by the first letter of its id:
+ * bookmarks start with `b`, look-alike jumps with `j`, notes with `n`. The copy
+ * carries one list for all three, and each kind merges only its own, so a
+ * note's removal can never take away a bookmark. An id with any other first
+ * letter belongs to no kind and is dropped, which can only leave a mark in
+ * place, never take one away.
+ */
+export type RemovalKind = "bookmark" | "note" | "jump";
+const PREFIX: Record<RemovalKind, string> = { bookmark: "b", note: "n", jump: "j" };
+
+export function removalsOf(removed: readonly Removal[], kind: RemovalKind): Removal[] {
+  return removed.filter((r) => r.id.startsWith(PREFIX[kind]));
+}
+
+/**
+ * The one list a copy carries: every kind's removals joined, without any for a
+ * mark the device still holds (a removal for a mark that is there would only
+ * be forgotten at the next merge, and says nothing true).
+ */
+export function copyRemovals(
+  lists: readonly (readonly Removal[])[],
+  present: readonly { readonly id: string }[],
+): Removal[] {
+  const there = new Set(present.map((x) => x.id));
+  return lists.reduce<Removal[]>((all, l) => joinRemovals(all, l), []).filter((r) => !there.has(r.id));
+}
+
 /** The marks a removal does not take away: a mark changed after its removal stays. */
 export function dropRemoved<T extends { readonly id: string }>(
   set: readonly T[],

@@ -7532,11 +7532,12 @@
         "file": "docs/design/sign-in.md",
         "item": "㉒"
       },
-      "status": "open",
+      "status": "fixed",
       "severity": "defect",
       "owner": "agent",
       "useCase": "sign-in-so-my-marks-follow-me",
-      "note": "Since step 21a a deleted note stays deleted when another device's copy of the marks is loaded in: the device keeps the note's id and when it went. Bookmarks and confusion jumps have no such list yet, so one deleted on the iPad comes back the next time the iPhone's older copy is loaded in. The fix is the same list (removals.ts) carried for them too, with the same tests. Not a blocker for laptop trials, but it is before marks follow a reader between devices for real."
+      "closedBy": "apps/web/src/useBookmarks.test.ts",
+      "note": "Done 2026-11-19. Bookmarks and look-alike jumps now keep the same list of what was deleted as notes do (removals.ts), saved beside them on the device, and the saved file and the copy sent to hifth.app carry all three kinds in one list. A copy's deletion takes the mark away unless it changed since; an older copy no longer brings a deleted one back (mergeBookmarkFile, mergeConfusionsFile). Undo after a file loaded now changes only what its own step changed (stepOnto in mark-history.ts), so it no longer takes away what the file brought and spreads that as a deletion. Tests: removals, bookmarks and confusions in core; the hooks, the store and Undo in the web app, each watched failing first. One rare gap stays, written in sign-in.md ㉒: a jump two devices marked under two names that could not settle on one."
     },
     {
       "id": "launch-account-deletion",

@@ -75,6 +75,30 @@ export function redoStep(h: MarkHistory): { step: MarkStep; history: MarkHistory
   return { step, history: { past: [...h.past, step], future: h.future.slice(1) } };
 }
 
+/**
+ * One step taken back, or done again, onto what the reader holds now (㉒).
+ * `to` is the snapshot the step goes to and `from` the one it leaves. Only
+ * what the step itself changed is changed: a mark it added goes, one it took
+ * away or changed comes back as it was, and anything else stays as it is now.
+ * So a mark a file or another device's copy brought in since the step is kept,
+ * and is not taken away (which would spread to every device as a deletion).
+ * With nothing brought in since, the answer is `to` itself, in its order.
+ */
+export function stepOnto<T extends { readonly id: string }>(now: readonly T[], to: readonly T[], from: readonly T[]): T[] {
+  const was = new Map(from.map((x) => [x.id, x]));
+  const held = new Map(now.map((x) => [x.id, x]));
+  const goes = new Set(to.map((x) => x.id));
+  const out: T[] = [];
+  for (const x of to) {
+    const left = was.get(x.id);
+    const touched = left === undefined || !same(left, x);
+    if (touched) out.push(x);
+    else if (held.has(x.id)) out.push(held.get(x.id)!);
+  }
+  for (const x of now) if (!goes.has(x.id) && !was.has(x.id)) out.push(x);
+  return out;
+}
+
 /** Whether a key press is meant for the box being typed in, not for the page's Undo. */
 export function typingIn(target: EventTarget | null): boolean {
   // A box inside a shadow root (the page-comment box is one) shows up as its host,

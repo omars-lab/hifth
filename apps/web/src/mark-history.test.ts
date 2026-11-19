@@ -1,5 +1,43 @@
 import { describe, expect, it } from "vitest";
-import { HISTORY_DEPTH, NO_HISTORY, recordStep, redoStep, typingIn, undoStep, type MarkStep } from "./mark-history";
+import { HISTORY_DEPTH, NO_HISTORY, recordStep, redoStep, stepOnto, typingIn, undoStep, type MarkStep } from "./mark-history";
+
+/*
+ * ㉒: a file loaded, or another device's copy merged, is not a step Undo hears.
+ * Undo after it must change only what its own step changed, or it would take
+ * away what the copy brought, and that removal would then spread to every
+ * device.
+ */
+describe("Undo changes only what its own step changed", () => {
+  const m = (id: string, text = id) => ({ id, text });
+
+  it("takes away what the step added, and keeps what came in since", () => {
+    const now = [m("a"), m("b"), m("loaded")];
+    expect(stepOnto(now, [m("a")], [m("a"), m("b")])).toEqual([m("a"), m("loaded")]);
+  });
+
+  it("puts back what the step took away, beside what came in since", () => {
+    const now = [m("a"), m("loaded")];
+    expect(stepOnto(now, [m("a"), m("b")], [m("a")])).toEqual([m("a"), m("b"), m("loaded")]);
+  });
+
+  it("puts back the old words of a mark the step changed, and leaves a mark the step did not touch as it is now", () => {
+    const now = [m("a", "new"), m("c", "changed by the copy")];
+    expect(stepOnto(now, [m("a", "old"), m("c")], [m("a", "new"), m("c")])).toEqual([
+      m("a", "old"),
+      m("c", "changed by the copy"),
+    ]);
+  });
+
+  it("with nothing loaded in between, gives exactly the snapshot", () => {
+    const to = [m("a"), m("b", "old")];
+    const from = [m("b", "new"), m("c")];
+    expect(stepOnto(from, to, from)).toEqual(to);
+  });
+
+  it("does not bring back a mark the step left alone that a copy took away since", () => {
+    expect(stepOnto([m("b")], [m("a"), m("b", "old")], [m("a"), m("b", "new")])).toEqual([m("b", "old")]);
+  });
+});
 
 const step = (before: number[], after: number[], store: MarkStep["store"] = "notes"): MarkStep => ({ store, before, after, said: "" });
 

@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   REMOVAL_KEEP_MS,
+  copyRemovals,
   dropRemoved,
   isRemoval,
   joinRemovals,
+  removalsOf,
   trackRemovals,
   type Removal,
 } from "./removals.js";
@@ -95,5 +97,31 @@ describe("reading a removal from a file", () => {
     expect(isRemoval({ id: "a", at: Number.NaN })).toBe(false);
     expect(isRemoval({ id: "a", at: 1, text: "words" })).toBe(false);
     expect(isRemoval(null)).toBe(false);
+  });
+});
+
+describe("one list in the copy, three kinds of mark on the device", () => {
+  const list = [
+    { id: "b1", at: 5 },
+    { id: "n1", at: 6 },
+    { id: "j1", at: 7 },
+    { id: "x1", at: 8 },
+  ];
+
+  it("each kind takes only the removals of its own marks", () => {
+    expect(removalsOf(list, "bookmark")).toEqual([{ id: "b1", at: 5 }]);
+    expect(removalsOf(list, "note")).toEqual([{ id: "n1", at: 6 }]);
+    expect(removalsOf(list, "jump")).toEqual([{ id: "j1", at: 7 }]);
+  });
+
+  it("the copy carries every kind's removals once, and none for a mark the device still holds", () => {
+    const out = copyRemovals(
+      [[{ id: "b1", at: 5 }], [{ id: "n1", at: 6 }, { id: "b1", at: 9 }], [{ id: "j1", at: 7 }]],
+      [{ id: "n1" }],
+    );
+    expect(out).toEqual([
+      { id: "b1", at: 9 },
+      { id: "j1", at: 7 },
+    ]);
   });
 });

@@ -32,6 +32,52 @@ const SET_KEY = "mine";
 interface SetRecord {
   readonly id: typeof SET_KEY;
   readonly bookmarks: readonly Bookmark[];
+  /**
+   * The bookmarks the reader took away, by id and time only (removals.ts in
+   * the core, ㉒), so a copy from another device does not bring them back.
+   * Kept in the same record, so the set and the list are one write.
+   */
+  readonly removed?: readonly Removal[];
+}
+
+/** A list of removals as stored, or empty when it is missing or broken. */
+const readRemoved = (x: unknown): Removal[] => (Array.isArray(x) && x.every(isRemoval) ? [...x] : []);
+
+/**
+ * Put a record whose `removed` list is kept as it was when the caller does not
+ * give one, in the same write, so a write that only changes the marks never
+ * loses the list.
+ */
+async function putKeepingRemoved<T extends { readonly id: string; readonly removed?: readonly Removal[] }>(
+  rec: T,
+  removed: readonly Removal[] | undefined,
+): Promise<boolean> {
+  if (!bookmarkStoreSupported()) return false;
+  let db: IDBDatabase | null = null;
+  try {
+    db = await openDb();
+    const tx = db.transaction(SETS, "readwrite");
+    const sets = tx.objectStore(SETS);
+    const done = new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+    if (removed) sets.put({ ...rec, removed });
+    else {
+      const req = sets.get(rec.id);
+      req.onsuccess = () => {
+        const was = readRemoved((req.result as { removed?: unknown } | undefined)?.removed);
+        sets.put({ ...rec, removed: was });
+      };
+    }
+    await done;
+    return true;
+  } catch {
+    return false;
+  } finally {
+    db?.close();
+  }
 }
 
 export function bookmarkStoreSupported(): boolean {
@@ -51,9 +97,9 @@ function openDb(): Promise<IDBDatabase> {
   });
 }
 
-/** Read every bookmark the phone holds. Empty when there are none or no store. */
-export async function readBookmarks(): Promise<Bookmark[]> {
-  if (!bookmarkStoreSupported()) return [];
+/** Every bookmark the phone holds, and the ones taken away. Empty when there are none or no store. */
+export async function readBookmarkSet(): Promise<{ bookmarks: Bookmark[]; removed: Removal[] }> {
+  if (!bookmarkStoreSupported()) return { bookmarks: [], removed: [] };
   let db: IDBDatabase | null = null;
   try {
     db = await openDb();
@@ -63,36 +109,26 @@ export async function readBookmarks(): Promise<Bookmark[]> {
       req.onsuccess = () => resolve(req.result as SetRecord | undefined);
       req.onerror = () => reject(req.error);
     });
-    return rec ? [...rec.bookmarks] : [];
+    return { bookmarks: rec ? [...rec.bookmarks] : [], removed: readRemoved(rec?.removed) };
   } catch {
-    return [];
+    return { bookmarks: [], removed: [] };
   } finally {
     db?.close();
   }
 }
 
+/** Read every bookmark the phone holds. Empty when there are none or no store. */
+export async function readBookmarks(): Promise<Bookmark[]> {
+  return (await readBookmarkSet()).bookmarks;
+}
+
 /**
- * Replace the whole set. Resolves true when it landed, false when it did not,
+ * Replace the whole set, with the bookmarks taken away when given (left as
+ * they were when not). Resolves true when it landed, false when it did not,
  * so the page can say "not saved on this device" rather than pretend.
  */
-export async function writeBookmarks(set: readonly Bookmark[]): Promise<boolean> {
-  if (!bookmarkStoreSupported()) return false;
-  let db: IDBDatabase | null = null;
-  try {
-    db = await openDb();
-    const tx = db.transaction(SETS, "readwrite");
-    tx.objectStore(SETS).put({ id: SET_KEY, bookmarks: set } satisfies SetRecord);
-    await new Promise<void>((resolve, reject) => {
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
-    });
-    return true;
-  } catch {
-    return false;
-  } finally {
-    db?.close();
-  }
+export function writeBookmarks(set: readonly Bookmark[], removed?: readonly Removal[]): Promise<boolean> {
+  return putKeepingRemoved({ id: SET_KEY, bookmarks: set } satisfies SetRecord, removed);
 }
 
 /*
@@ -288,6 +324,8 @@ const CONFUSIONS_KEY = "confusions";
 interface ConfusionsRecord {
   readonly id: typeof CONFUSIONS_KEY;
   readonly confusions: readonly Confusion[];
+  /** The jumps taken away, by id and time only, as the bookmarks keep theirs. */
+  readonly removed?: readonly Removal[];
 }
 
 async function getRecord<T>(key: string): Promise<T | undefined> {
@@ -330,18 +368,23 @@ async function putRecord<T extends { readonly id: string }>(rec: T): Promise<boo
  * over what is there.
  */
 export async function readConfusions(): Promise<Confusion[] | null> {
+  return (await readConfusionSet())?.confusions ?? null;
+}
+
+/** Every jump the device holds, and the ones taken away. Null as readConfusions is. */
+export async function readConfusionSet(): Promise<{ confusions: Confusion[]; removed: Removal[] } | null> {
   if (!bookmarkStoreSupported()) return null;
   try {
     const rec = await getRecord<ConfusionsRecord>(CONFUSIONS_KEY);
-    return (rec?.confusions ?? []).filter(isConfusion);
+    return { confusions: (rec?.confusions ?? []).filter(isConfusion), removed: readRemoved(rec?.removed) };
   } catch {
     return null;
   }
 }
 
-/** Replace every jump at once. False when the device refused it. */
-export function writeConfusions(set: readonly Confusion[]): Promise<boolean> {
-  return putRecord({ id: CONFUSIONS_KEY, confusions: set } satisfies ConfusionsRecord);
+/** Replace every jump at once, with the ones taken away when given. False when the device refused it. */
+export function writeConfusions(set: readonly Confusion[], removed?: readonly Removal[]): Promise<boolean> {
+  return putKeepingRemoved({ id: CONFUSIONS_KEY, confusions: set } satisfies ConfusionsRecord, removed);
 }
 
 /*

@@ -4,7 +4,9 @@ import { dropBookmark, editScopedNote, liftBookmark, markConfusion, type Note } 
 import {
   deviceNameOf,
   loadNotes,
+  readBookmarkSet,
   readBookmarks,
+  readConfusionSet,
   readConfusions,
   readDevice,
   readSeam,
@@ -50,6 +52,23 @@ describe("bookmark store", () => {
     expect((await readBookmarks()).map((b) => b.name)).toEqual(["Kursi"]);
     await writeBookmarks([]);
     expect((await readSeam())?.page).toBe(107);
+  });
+
+  it("keeps the bookmarks taken away in the same write, and a write that does not say leaves them alone", async () => {
+    const set = dropBookmark([], { key: "quran/hafs-kfqc/2:255", page: 42, name: "Kursi" }, T);
+    const removed = [{ id: "bgone", at: T + 5 }];
+    expect(await writeBookmarks(set, removed)).toBe(true);
+    expect(await readBookmarkSet()).toEqual({ bookmarks: set, removed });
+    expect(await writeBookmarks([])).toBe(true);
+    expect(await readBookmarkSet()).toEqual({ bookmarks: [], removed });
+    expect(await writeBookmarks([], [])).toBe(true);
+    expect((await readBookmarkSet()).removed).toEqual([]);
+  });
+
+  it("drops a broken list of bookmarks taken away rather than the bookmarks", async () => {
+    const set = dropBookmark([], { key: "quran/hafs-kfqc/2:255", page: 42, name: "Kursi" }, T);
+    await seed([{ id: "mine", bookmarks: set, removed: [{ id: "b1", at: "soon" }] }]);
+    expect(await readBookmarkSet()).toEqual({ bookmarks: set, removed: [] });
   });
 });
 
@@ -161,6 +180,23 @@ describe("confusion jumps kept on the device", () => {
     const one = markConfusion([], { key: "quran/hafs-kfqc/2:58" }, null, T, "d1");
     await writeConfusions([...one, { id: "bad" } as never]);
     expect(await readConfusions()).toEqual(one);
+  });
+
+  it("keeps the jumps taken away in the same write, and a write that does not say leaves them alone", async () => {
+    const one = markConfusion([], { key: "quran/hafs-kfqc/2:58" }, { key: "quran/hafs-kfqc/7:161" }, T, "d1");
+    const removed = [{ id: "jgone", at: T + 5 }];
+    expect(await writeConfusions(one, removed)).toBe(true);
+    expect(await readConfusionSet()).toEqual({ confusions: one, removed });
+    expect(await writeConfusions([])).toBe(true);
+    expect((await readConfusionSet())?.removed).toEqual(removed);
+    expect(await writeConfusions([], [])).toBe(true);
+    expect((await readConfusionSet())?.removed).toEqual([]);
+  });
+
+  it("drops a broken list of jumps taken away rather than the jumps", async () => {
+    const one = markConfusion([], { key: "quran/hafs-kfqc/2:58" }, null, T, "d1");
+    await seed([{ id: "confusions", confusions: one, removed: [{ id: "j1", at: "soon" }] }]);
+    expect(await readConfusionSet()).toEqual({ confusions: one, removed: [] });
   });
 
   it("names this device once, with a random id that stays, and a name that can change", async () => {
