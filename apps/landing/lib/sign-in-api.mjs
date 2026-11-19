@@ -8,6 +8,10 @@
 //   POST /api/sign-in/apple-notice   { payload } from Apple -> 200 | 400 | 401 { reason } | 413
 //   POST /api/sign-in/delete-account Authorization: Bearer <session>
 //                                    -> 200 { deleted: true, appleLink: "cut" | "left" } | 401 { reason }
+//   GET    /api/marks   Authorization -> 200 { marks, number, savedAt } | 404 { reason: "no-copy" } | 401
+//   PUT    /api/marks   Authorization, { marks, after } -> 200 { number, savedAt }
+//                       | 409 { reason: "newer-copy", number } | 400 | 401 | 413 { reason, most }
+//   DELETE /api/marks   Authorization -> 204, the copy gone and the account kept (step 21)
 //
 // What the server needs, all set in Cloudflare and none of it secret:
 //   SIGN_IN        "on" opens the addresses. Anything else and they answer 404, as if they were
@@ -31,6 +35,7 @@ import { APPLE_KEYS, checkAppleNote } from "./apple-signin.mjs";
 import { appleConfig, checkAppleNotice, openTicket, revokeTicket, sealTicket, tradeCode } from "./apple-link.mjs";
 import { inviteHash, tidyInvite } from "./invites.mjs";
 import { WORD_SECONDS, actOnAppleNotice, deleteAccount, handOutWord, signIn, signOut, whoIs } from "./accounts.mjs";
+import { MOST_COPY_BYTES, dropCopy, isMarksFile, keepCopy, readCopy } from "./marks-copy.mjs";
 
 /** A sign-in body is a note of a few kilobytes and a 64-letter word; anything far bigger is not one. */
 const MOST_BYTES = 16 * 1024;
@@ -221,6 +226,62 @@ export async function handleDeleteAccount(request, env, { fetch } = {}) {
   if (!accountId) return reply(401, { reason: "signed-out" });
   const { appleLink } = await deleteAccount(env.ACCOUNTS, accountId, { cut: ticketCut(env, fetch) });
   return reply(200, { deleted: true, appleLink });
+}
+
+/**
+ * The account behind the request's session, or the reply that stops it. Only ever the reader's
+ * own: the account is the one their session belongs to, never one named in the request.
+ */
+async function reader(request, env) {
+  const stop = closed(env);
+  if (stop) return { stop };
+  const accountId = await whoIs(env.ACCOUNTS, sessionFrom(request));
+  return accountId ? { accountId } : { stop: reply(401, { reason: "signed-out" }) };
+}
+
+/** GET /api/marks: the reader's copy of their marks, for another of their devices to merge in. */
+export async function handleReadMarks(request, env) {
+  const { stop, accountId } = await reader(request, env);
+  if (stop) return stop;
+  const copy = await readCopy(env.ACCOUNTS, accountId);
+  return copy ? reply(200, copy) : reply(404, { reason: "no-copy" });
+}
+
+/**
+ * PUT /api/marks { marks, after }. Replaces the copy whole. `after` is the number of the copy the
+ * device last fetched or wrote, 0 for none; if another device has written since, nothing is
+ * written and the reply names the newer number, so the device fetches, merges and sends again.
+ */
+export async function handleKeepMarks(request, env) {
+  const { stop, accountId } = await reader(request, env);
+  if (stop) return stop;
+  // The file's own size, plus room for the few letters around it.
+  const most = MOST_COPY_BYTES + 64;
+  const tooBig = () => reply(413, { reason: "too-big", most: MOST_COPY_BYTES });
+  if (Number(request.headers.get("content-length") ?? 0) > most) return tooBig();
+  const text = await request.text();
+  if (new TextEncoder().encode(text).length > most) return tooBig();
+  let body;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    body = null;
+  }
+  const { marks, after } = body && typeof body === "object" && !Array.isArray(body) ? body : {};
+  if (!isMarksFile(marks) || !Number.isInteger(after) || after < 0) return reply(400, { reason: "bad-request" });
+  if (new TextEncoder().encode(JSON.stringify(marks)).length > MOST_COPY_BYTES) return tooBig();
+
+  const now = Date.now();
+  const kept = await keepCopy(env.ACCOUNTS, accountId, marks, after, { now });
+  return kept.ok ? reply(200, { number: kept.number, savedAt: now }) : reply(409, { reason: "newer-copy", number: kept.number });
+}
+
+/** DELETE /api/marks. The copy goes; the account and the reader's sign-ins stay. Fine when there is none. */
+export async function handleDropMarks(request, env) {
+  const { stop, accountId } = await reader(request, env);
+  if (stop) return stop;
+  await dropCopy(env.ACCOUNTS, accountId);
+  return reply(204);
 }
 
 /** POST /api/sign-out. Quietly fine with no session or an unknown one: the device is signed out either way. */

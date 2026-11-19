@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createLocalJWKSet, exportJWK, exportPKCS8, generateKeyPair, SignJWT } from "jose";
-import { handleAppleNotice, handleDeleteAccount, handleWord, handleSignIn, handleSignOut } from "./sign-in-api.mjs";
+import { handleAppleNotice, handleDeleteAccount, handleKeepMarks, handleWord, handleSignIn, handleSignOut } from "./sign-in-api.mjs";
 import { inviteHash } from "./invites.mjs";
 import { MOST_WORDS_A_STRETCH, whoIs } from "./accounts.mjs";
 import { localD1 } from "./test-d1.mjs";
@@ -269,7 +269,12 @@ test("Apple's notice that a reader stopped using Apple sign-in signs them out ev
 test("Apple's notice that a reader deleted their Apple account deletes what is kept about them", async () => {
   const { db, env, rows } = setUp();
   const session = await signedIn(env, "000001.made-up.0001");
-  await signedIn(env, "000002.made-up.0002");
+  const other = await signedIn(env, "000002.made-up.0002");
+  const copy = { marks: { kind: "hifth.bookmarks", version: 2, savedAt: 1, bookmarks: [] }, after: 0 };
+  for (const s of [session, other]) {
+    const put = new Request("https://hifth.app/api/marks", { method: "PUT", headers: { authorization: `Bearer ${s}` }, body: JSON.stringify(copy) });
+    assert.equal((await handleKeepMarks(put, env)).status, 200);
+  }
   const res = await handleAppleNotice(
     post("/api/sign-in/apple-notice", await notice("account-delete", "000001.made-up.0001")),
     env,
@@ -278,6 +283,7 @@ test("Apple's notice that a reader deleted their Apple account deletes what is k
   assert.equal(res.status, 200);
   assert.equal(await whoIs(db, session), null);
   assert.deepEqual(rows("accounts").map((r) => r.apple_user), ["000002.made-up.0002"]);
+  assert.equal(rows("marks_copies").length, 1, "the copy of their marks went with the account; the other reader's stayed");
 });
 
 test("a notice Apple did not sign changes nothing and is refused", async () => {

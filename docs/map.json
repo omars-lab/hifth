@@ -2688,6 +2688,16 @@
           "file": "apps/landing/functions/api/sign-in/index.js",
           "symbol": "onRequestPost",
           "note": "Cloudflare's thin file for /api/sign-in; word.js, apple-notice.js, delete-account.js and ../sign-out.js are its siblings."
+        },
+        {
+          "file": "apps/landing/lib/marks-copy.mjs",
+          "symbol": "keepCopy",
+          "note": "Step 21, your marks follow you: one copy of a reader's marks file per account. The device merges; the server checks it is a marks file and nothing more (the record of pages read can never ride in it), caps it at 1.5 MB, and refuses a write from a device that has not seen the latest copy (409 with the newer number). Its addresses, GET, PUT and DELETE /api/marks, are in sign-in-api.mjs, with the thin file functions/api/marks.js."
+        },
+        {
+          "file": "apps/landing/migrations/0004_marks_copies.sql",
+          "symbol": "CREATE TABLE marks_copies",
+          "note": "The copy's table. It goes with the account by cascade (delete my account, Apple's account-deleted notice). Laptop database only until the owner says yes to adding it to the real one."
         }
       ],
       "extend": [
@@ -2700,7 +2710,7 @@
         "On the laptop's Cloudflare stand-in, Apple refuses to hand over its keys, so a note is refused as keys-unreachable there; that is expected (docs/issues/apple-keys-refuse-local-runtime.md)."
       ],
       "gates": [
-        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/accounts.test.mjs apps/landing/lib/sign-in-api.test.mjs apps/landing/lib/apple-link.test.mjs apps/landing/lib/server-only.test.mjs"
+        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/accounts.test.mjs apps/landing/lib/sign-in-api.test.mjs apps/landing/lib/marks-copy.test.mjs apps/landing/lib/apple-link.test.mjs apps/landing/lib/server-only.test.mjs"
       ],
       "seeAlso": [
         "hifth-app-site"
