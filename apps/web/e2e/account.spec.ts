@@ -26,35 +26,51 @@ async function openPanel(page: Page) {
   return sheet;
 }
 
-function standInApp(page: Page, start: "off" | "signed-out" | "signed-in") {
-  return page.addInitScript((first) => {
+/**
+ * `invite`: "none" never asks for a code; "kept" says the device keeps one;
+ * "needed" refuses a sign-in until a code is sent with it, then keeps it.
+ */
+function standInApp(page: Page, start: "off" | "signed-out" | "signed-in", invite: "none" | "kept" | "needed" = "none") {
+  return page.addInitScript(([first, code]) => {
     let state = first;
+    let kept = code === "kept";
+    let text: string | undefined;
     const asked: string[] = [];
+    const sent: (string | undefined)[] = [];
     const reply = (id: string, answer: unknown) =>
       setTimeout(() => (window as unknown as { __HIFTH_ANSWER__?: (i: string, a: unknown) => void }).__HIFTH_ANSWER__?.(id, answer), 30);
     const answers: Record<string, () => unknown> = {
       account: () => ({ ok: true, value: state }),
-      "invite-kept": () => ({ ok: true, value: "no" }),
-      "sign-in": () => ((state = "signed-in"), { ok: true, value: "signed-in" }),
+      "invite-kept": () => ({ ok: true, value: kept ? "yes" : "no" }),
+      "forget-invite": () => ((kept = false), { ok: true, value: "forgotten" }),
+      "sign-in": () => {
+        if (code === "needed" && !kept && !text) return { ok: false, error: "invite-needed" };
+        if (code === "needed") kept = true;
+        state = "signed-in";
+        return { ok: true, value: "signed-in" };
+      },
       "sign-out": () => ((state = "signed-out"), { ok: true, value: "signed-out" }),
       "delete-account": () => ((state = "signed-out"), { ok: true, value: "deleted-cut" }),
     };
     Object.assign(window, {
       __HIFTH_NATIVE__: Object.freeze({ platform: "ios", publicBase: "https://example.test/hifth/" }),
       __standInAsked: asked,
+      __standInSent: sent,
       webkit: {
         messageHandlers: {
           hifth: {
-            postMessage: (m: { type?: string; id?: string; name?: string }) => {
+            postMessage: (m: { type?: string; id?: string; name?: string; text?: string }) => {
               if (m.type !== "ask" || !m.id || !m.name) return;
               asked.push(m.name);
+              if (m.name === "sign-in") sent.push(m.text);
+              text = m.text;
               reply(m.id, answers[m.name]?.() ?? { ok: false, error: "unknown-question" });
             },
           },
         },
       },
     });
-  }, start);
+  }, [start, invite] as const);
 }
 
 test("a plain browser shows no account section", async ({ page }) => {
@@ -91,6 +107,43 @@ test("signed out: what leaves the device sits above Apple's button, which keeps 
     return [c.backgroundColor, c.color];
   });
   expect(colours).toEqual(["rgb(0, 0, 0)", "rgb(255, 255, 255)"]);
+});
+
+const INVITE_BOX = "رمز الدعوة";
+const INVITE_KEPT = "يحتفظ هذا الجهاز برمز دعوتك، فلا تكتبه من جديد.";
+const FORGET_INVITE = "انسَ رمز الدعوة";
+const MADE_UP_CODE = "MADE-UP-7Q2K";
+
+test("a tester types the invite code once: the box appears, the code goes to the app, and leaves the page", async ({ page }) => {
+  await standInApp(page, "signed-out", "needed");
+  const sheet = await openPanel(page);
+  await expect(sheet.getByText(INVITE_KEPT)).toHaveCount(0);
+
+  await sheet.getByRole("button", { name: SIGN_IN }).click();
+  const box = sheet.getByRole("textbox", { name: INVITE_BOX });
+  await expect(box).toBeVisible();
+  await box.fill(MADE_UP_CODE);
+  await sheet.getByRole("button", { name: SIGN_IN }).click();
+
+  await expect(sheet.getByText("أنت مسجّل الدخول في هذا الجهاز.")).toBeVisible();
+  // The first try carries no code; the second carries the one typed.
+  const sent = await page.evaluate(() => (window as unknown as { __standInSent: (string | undefined)[] }).__standInSent.map((s) => s ?? ""));
+  expect(sent).toEqual(["", MADE_UP_CODE]);
+  expect(await page.content()).not.toContain(MADE_UP_CODE);
+});
+
+test("a kept invite code is said, and the reader can forget it", async ({ page }) => {
+  await standInApp(page, "signed-out", "kept");
+  const sheet = await openPanel(page);
+  const line = sheet.getByText(INVITE_KEPT);
+  await line.scrollIntoViewIfNeeded();
+  await expect(line).toBeVisible();
+
+  await sheet.getByRole("button", { name: FORGET_INVITE }).click();
+  await expect(line).toHaveCount(0);
+  await expect(sheet.getByRole("button", { name: FORGET_INVITE })).toHaveCount(0);
+  const asked = await page.evaluate(() => (window as unknown as { __standInAsked: string[] }).__standInAsked);
+  expect(asked).toContain("forget-invite");
 });
 
 test("sign in, sign out, sign in again and delete the account after saying yes", async ({ page }) => {
