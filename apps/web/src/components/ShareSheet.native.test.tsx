@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import type { AppState } from "@hifth/core";
 import { ShareSheet } from "./ShareSheet";
@@ -23,6 +23,14 @@ const STATE: AppState = {
   edition: "hafs-kfqc",
   select: { surah: 2, ayah: 255 },
 };
+
+// The sheet's buttons come from the rarely used tools' file, loaded the first
+// time the sheet opens; that first load compiles the whole large file and can
+// outrun the 5-second wait under the commit check's full load (2026-11-19, the
+// same in HighlightMenu.test.tsx). Loaded once here, with its own allowance.
+beforeAll(async () => {
+  await import("./rarely-used");
+}, 60_000);
 
 afterEach(() => {
   delete w.__HIFTH_NATIVE__;

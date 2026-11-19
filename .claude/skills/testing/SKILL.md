@@ -169,6 +169,24 @@ app is wrong before touching either.** Three steps, each a few minutes:
 The page-edge strip was found this way on 2026-11-11
 (`docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md`).
 
+**A unit test that waits for something from the rarely used tools fails when the laptop is
+busy.** The share sheet's links, the report button and the other tools in
+`components/rarely-used.ts` load the first time they open. The first load compiles that whole
+file, 1.5 to 3 seconds on a quiet laptop, which can run past the 5-second wait during the commit
+check. Load it once before the tests, with its own allowance, so the wait covers only the
+drawing:
+
+```ts
+beforeAll(async () => {
+  await import("./rarely-used");
+}, 60_000);
+```
+
+`PageStopped.test.tsx`, `HighlightMenu.test.tsx` and `ShareSheet.native.test.tsx` do this
+(2026-11-16 and 2026-11-19). A browser test that opens a page and waits the default 5 seconds
+for the verse's tools hit the same thing on a busy push: wait 20 seconds, as
+`slider-arrows.spec.ts` does.
+
 ## The golden pictures
 
 `golden` photographs one page per shot at phone size, and `ipad-golden` at iPad size. Only the
