@@ -490,7 +490,9 @@ export function App(): JSX.Element {
   useEffect(() => {
     if (!commentaryOpen) setNoteShort(false);
   }, [commentaryOpen]);
-  const [page, setPage] = useState(START_PAGE);
+  // Set only through `setPage` from `usePageDestination` below, which keeps
+  // where the reader is going in step with it.
+  const [page, setPageState] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // Words marked inside the selected verse, by a hold or a link's `?w=`. Kept
   // here, not in the page, because the page is built afresh when the book goes
@@ -1086,7 +1088,7 @@ export function App(): JSX.Element {
   }, [selectedKey]);
 
   // Where the reader is, and where they are going (`page-destination.ts`).
-  const { pageRef, pendingPageRef, turnLanded } = usePageDestination(page);
+  const { pageRef, pendingPageRef, setPage } = usePageDestination(page, setPageState);
 
   useEffect(() => {
     loadManifest()
@@ -1939,7 +1941,6 @@ export function App(): JSX.Element {
         void stage.turnTo(next).then((landed) => {
           if (pendingPageRef.current !== next) return; // a newer turn owns it
           if (landed) {
-            turnLanded(next);
             setPage(next);
             // The place you were holding was on the page you just left. Drop it
             // as the leaf lands — atomically with the header — so the highlight,
@@ -1960,7 +1961,7 @@ export function App(): JSX.Element {
       // because nothing here was selected.
       void stage.navigateTo(anchor, { pulse: false, zoom: 1 });
     },
-    [pageTurns, announce, t, turnLanded],
+    [pageTurns, announce, t, setPage],
   );
 
   // Bookmarks (docs/decisions/bookmark-fold.md, bookmark-admin.md): ribbons on

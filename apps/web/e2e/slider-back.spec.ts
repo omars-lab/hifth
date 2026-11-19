@@ -26,6 +26,12 @@ async function open(page: Page, on: boolean): Promise<void> {
   if (on) await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), { key: SLIDER_BACK_KEY, value: "on" });
   await page.goto("/#/hafs-kfqc/p7");
   await expect(page.locator(NUM)).toHaveText(pageNumber(7));
+  // And until the opening link has drawn page 7. The header reads 7 before the
+  // pages have loaded, and the markers appear with them: a press sent the
+  // instant they appear lands before the link has put the reader on 7, and the
+  // link then puts them back (the iPhone run, 6 times in 40, 2026-11-19). A
+  // finger cannot beat it; a test can.
+  await expect(page.locator('svg[aria-labelledby="page-label-7"]')).toBeVisible();
 }
 
 test("the button is not there until the reader switches it on", async ({ page }) => {

@@ -34,13 +34,16 @@ export async function pixelsOf(page: Page, selector: string, opts: { middle?: nu
   // quietly trims it.
   // And taken once the page has settled: on a phone the verse is still sliding
   // into place for a moment after it is drawn, and can sit below the screen.
+  // A mark with no box yet (drawn but not laid out, which Firefox showed on a
+  // busy push, 2026-11-19) is not "still": two empty answers in a row once
+  // passed as settled, and the measuring below then read a box that was not there.
   const mark = page.locator(selector).first();
   let last = "";
   await expect
     .poll(
       async () => {
         const now = JSON.stringify(await mark.boundingBox());
-        const still = now === last;
+        const still = now !== "null" && now === last;
         last = now;
         return still;
       },

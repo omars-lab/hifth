@@ -7499,7 +7499,7 @@
       "launch": true,
       "useCase": "send-apple-only-the-build-we-checked",
       "closedBy": "scripts/second-tries.test.mjs",
-      "note": "The push should list every test that needed a second try, so each one is fixed. Fixed 2026-11-18: after each browser run in the push, pass or fail, scripts/second-tries.mjs names every test that failed first and passed on its retry, keeps a 20-run history in the git folder, and says how often each one needed a retry; make second-tries lists them. The push's result is unchanged. Its first run named two tests, both fixed in the same branch."
+      "note": "The push should list every test that needed a second try, so each one is fixed. Fixed 2026-11-18: after each browser run in the push, pass or fail, scripts/second-tries.mjs names every test that failed first and passed on its retry, keeps a 20-run history in the git folder, and says how often each one needed a retry; make second-tries lists them. The push's result is unchanged. Its first run named two tests, both fixed in the same branch. A later push, 2026-11-19, named two more, and one was a fault in the app, not the test: a part marker pressed while the app was still opening could have its jump undone by the opening link, and that marker then did nothing until the page changed some other way (6 runs in 40 on the iPhone). The page and where the reader is going are now set together (page-destination.ts, its test fails on the old code); the Back-button tests passed 200 of 200 on the iPhone and the page-turn tests 80 of 80. The other was the test: the Firefox highlight test read a mark's box before the mark had one (e2e/ink.ts now waits for a real box), 30 of 30."
     },
     {
       "id": "launch-sign-in",
