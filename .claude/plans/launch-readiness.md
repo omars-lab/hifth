@@ -206,9 +206,9 @@ the goal page.*
 
 | Skill | Gap | Fix |
 |---|---|---|
-| (new) `release-app` | No skill covers version, archive, upload, review, staged release | New skill with its scripts and a "when to use each" table |
-| (new) `operate-app` | Nothing covers reading crashes, reports and reviews, or the fix-in-a-hurry path | New skill; the pages from stages 4 and 5 live beside it |
-| `crash-logs` | Works only with a cable | Add crashes from readers' devices |
+| (new) `release-app` | No skill covers version, archive, upload, review, staged release | Done 2026-11-17: the skill exists, with `make app-release` |
+| (new) `operate-app` | Nothing covers reading crashes, reports and reviews, or the fix-in-a-hurry path | Done 2026-11-20: a map skill that hands each step to its owner; fix-in-a-hurry stays in understanding-processes |
+| `crash-logs` | Works only with a cable | Done: `make app-store-crashes` reads what Apple collected |
 | `deploy-site` | ~~No undo~~ done (`make hifth-app-put-back`, its drill waits on the first upload) | Add the put-back command |
 | `app-setup` | No store-listing or signing-for-the-store steps | Add them |
 | `native-shell` | ~~Says nothing of store builds~~ done: the store build, Apple's accessibility check, the profile check (the default flavour is still the private one, on purpose, for the pitch) | Add the store build and its guard |

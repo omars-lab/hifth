@@ -12,7 +12,7 @@ rather than repeating them.
 | process | page | the commands live in |
 |---|---|---|
 | Releasing the iPad, iPhone and Mac app, from a version number to readers | [app-release.md](app-release.md) | `release-app`, `app-setup` |
-| A broken version is on the store: reproduce, fix, rebuild, ask Apple for a faster review | [fix-in-a-hurry.md](fix-in-a-hurry.md) | `release-app`, `crash-logs` |
+| A broken version is on the store: reproduce, fix, rebuild, ask Apple for a faster review | [fix-in-a-hurry.md](fix-in-a-hurry.md) | `operate-app` (the map), `release-app`, `crash-logs` |
 
 ## Scripts: when to use each
 
