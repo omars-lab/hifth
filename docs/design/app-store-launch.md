@@ -492,7 +492,12 @@ app's name, category, privacy file and export setting, with a test that breaks e
 Writing the privacy answer showed the policy did not say the sound is asked for before Play, so
 both privacy pages now say so and name the setting that stops it, held by a test. **Still open:**
 the EU trader answer, the price and the copyright line (the owner's); the "rights to the content"
-answer, which waits on the permissions; the listing in Arabic.
+answer, which waits on the permissions; a native reader's read of the Arabic listing.
+
+*Arabic drafted 2026-11-20:* each box a reader sees has an Arabic twin on the listing page,
+written with the app's own Arabic words, and the same check holds each to Apple's limit; Arabic
+keywords that repeat a subtitle word are caught even under different vowel marks. The store name
+stays "Hifth", the word under the icon, unless the owner picks حفظ (waiting list).
 
 ### ㉛ There are no screenshots at Apple's sizes · **fixed**
 

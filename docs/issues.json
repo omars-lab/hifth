@@ -7637,7 +7637,7 @@
       "owner": "agent",
       "launch": true,
       "useCase": "get-help-and-know-what-is-kept",
-      "note": "Drafted 2026-11-17 on docs/design/store-listing.md: name, subtitle, keywords, promotional line, description, category, privacy answer (Data Not Collected, with the reasons), age answers (4+), export answer, support and privacy addresses; make app-store-listing checks them against Apple's limits and the app's settings. Both privacy pages now also say the sound is asked for early and name the setting that stops it. Still open: the EU trader answer, price and copyright line (the owner's), the content-rights answer (waits on the permissions), and the Arabic listing."
+      "note": "Drafted 2026-11-17 on docs/design/store-listing.md: name, subtitle, keywords, promotional line, description, category, privacy answer (Data Not Collected, with the reasons), age answers (4+), export answer, support and privacy addresses; make app-store-listing checks them against Apple's limits and the app's settings. Both privacy pages now also say the sound is asked for early and name the setting that stops it. Still open: the EU trader answer, price and copyright line (the owner's), the content-rights answer (waits on the permissions). The Arabic listing is drafted (2026-11-20) with the app's own Arabic words and held to Apple's limits by the same check; a native reader reads it and the owner picks the Arabic store name before it goes in."
     },
     {
       "id": "launch-store-screenshots",

@@ -118,6 +118,10 @@ pnpm -C apps/web exec playwright test --project=desktop
 pnpm -C apps/web exec playwright test desktop.spec.ts --project=desktop -g "holds the slider"
 ```
 
+**Name the setups a spec runs on.** Some specs run on the phone setups only (a hold marks
+words only on a touch screen, so `word.spec.ts` skips the computer ones); "passes everywhere"
+then means "passes on iphone and android", and the report says so.
+
 **Playwright does not build the app.** It serves whatever is already in `apps/web/dist`,
 so build first or the run tests the old app:
 
@@ -293,3 +297,9 @@ owner the difference and ask before doing that.
 A test that measures something first asserts the setup took: the thing was found, and the
 condition really holds (a drawer test checks the drawer did grow). A "not found" answer of -1
 is less than any limit, and passed a test on 2026-11-20 before the fix existed.
+
+To learn whether a resize or a turn rebuilds a part of the page, tag its DOM node before
+(`el.dataset.probe = "1"`) and look for the tag after: one probe settles what reading the
+layout code cannot. After a fix, ask what it might have opened (the advisor is good at this):
+on 2026-11-13 that found Escape clearing only the words the page made itself, not the ones the
+app handed down.
