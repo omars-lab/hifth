@@ -115,6 +115,41 @@ for (const banner of [false, true]) for (const way of ["off", "own"]) test(`the 
   }
 });
 
+// With only the panels following a phone at its largest size, the drawer grows
+// twice over, and the four tools share a 375 px row: the Same roots count
+// dropped under its icon, apart from it (SE simulator, 2026-11-20). The test
+// browsers do not know the phone's text size, so the phone's answer at its
+// largest (body text 53 px, against 17 by default) is given to the app's probe.
+for (const way of ["panels", "phone"]) test(`the Same roots count stays beside its icon when the drawer grows (${way})`, async ({ page }) => {
+  test.skip(!grown, "needs the larger-text build: make text-grow-e2e");
+  await page.addInitScript(() => {
+    const real = window.getComputedStyle.bind(window);
+    window.getComputedStyle = ((el: Element, pseudo?: string | null) => {
+      const style = real(el, pseudo);
+      // The probe is a hidden <i>; Chromium drops its font setting, so it is
+      // found by its shape rather than by that.
+      if (el instanceof HTMLElement && el.tagName === "I" && el.style.visibility === "hidden" && el.style.position === "absolute") {
+        return new Proxy(style, { get: (s, k) => (k === "fontSize" ? "53px" : Reflect.get(s, k)) });
+      }
+      return style;
+    }) as typeof window.getComputedStyle;
+  });
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto(`/?lang=en&grow=${way}#/hafs-kfqc/2:48`);
+  await page.reload();
+  const roots = page.locator("[data-verse-drawer] button[aria-expanded]").filter({ hasText: "⬡" });
+  await expect(roots).toBeVisible();
+  const apart = await roots.evaluate((b) => {
+    const [icon, count] = [...b.querySelectorAll(":scope span[aria-hidden]")].map((s) => s.getBoundingClientRect());
+    if (!icon || !count) return -1;
+    return Math.abs(icon.top + icon.height / 2 - (count.top + count.height / 2));
+  });
+  const zoom = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector("[data-verse-drawer]")!).zoom) || 1);
+  expect(apart, "the icon and its count were both found").toBeGreaterThanOrEqual(0);
+  expect(zoom, "the drawer grows well past the bars' cap, as on the simulator").toBeGreaterThan(1.6);
+  expect(apart, "px between the middles of the icon and its count").toBeLessThan(8);
+});
+
 test("with no way picked, the app is exactly as it was", async ({ page }) => {
   await page.goto("/#/hafs-kfqc/2:48");
   await expect(page.locator("svg[role='group']").first()).toBeVisible();

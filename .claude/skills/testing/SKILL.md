@@ -55,6 +55,11 @@ Say which runs you ran. If WebKit will not start, install it once:
 
 ## Running them
 
+A quick look at one local page in Firefox, with no test file: `pnpm -C apps/web exec playwright
+screenshot --browser=firefox <address> <out.png>` (Playwright lives in `apps/web`, not the root).
+For a phone-width look in the `chrome-devtools` tools, use `emulate` with a viewport of
+`390x844x3,mobile,touch`; `resize_page` stops at about 500 px wide.
+
 Everything runs from the **repo root**, and the PATH gotcha from the `run-app` skill
 applies — a non-login shell here has node 18, which has no `pnpm`. Use the version
 `.nvmrc` names (22 today):
@@ -284,3 +289,7 @@ owner the difference and ask before doing that.
    viewport's arithmetic) → the phone spec; the `iphone` and `android` runs check it on
    every push.
 4. **Is it a pixel?** (colour, wash, exact placement) → a golden picture.
+
+A test that measures something first asserts the setup took: the thing was found, and the
+condition really holds (a drawer test checks the drawer did grow). A "not found" answer of -1
+is less than any limit, and passed a test on 2026-11-20 before the fix existed.

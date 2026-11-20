@@ -153,6 +153,12 @@ in a selector must be written `$$`; a full verse key avoids it.
 
 ## When a walk finds a fault
 
+A check that asks "is this in the built app?" is proved both ways on real builds: a build made
+to leak on purpose must fail it, and the clean one must pass. That is how the release check's
+short-word hole showed (an optimized build hides a word of 15 letters or fewer). Check a gallery
+with made-up captures in the scratchpad (a test-pattern video, one refused, one unsettled), never
+real ones, so the book's text stays out.
+
 Each fault gets, in the same change as its fix:
 
 - **an item** in the design doc it belongs to (pitch faults: `docs/design/knowledge-graph-commentary.md`,

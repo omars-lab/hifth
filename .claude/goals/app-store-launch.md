@@ -220,6 +220,11 @@ may be made.)
   test at 375 by 500 with the banner went red first, and the simulator shows the whole verse in
   English and Arabic. Next for larger text: open the decision. The Nov 13 front-page merge note
   was folded into `testing`.
+- **Sixth loop pass (2026-11-20):** the three larger-text ways were photographed on the iPhone
+  SE simulator, and the decision is open for the owner (docs/design/larger-text-options.md,
+  recommended: follow the phone, with our own size kept as a setting). The pictures found the
+  Same roots count dropping under its icon in a drawer grown twice over; fixed, with a test that
+  went red first. The Nov 13 walk-capture note was folded into `testing`, `issues` and `walk-app`.
 - **Fourth loop pass (2026-11-20):** both larger-text faults the iPhone showed are fixed, each
   with a browser test that went red first: the grown top bar on a small phone hides the tagline
   and the mus'haf name, so the info button stays on screen, and the verse drawer now tells the

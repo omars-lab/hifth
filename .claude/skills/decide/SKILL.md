@@ -248,6 +248,11 @@ sent to anybody.
 The record named in `doc` has to link to each, or its argument is about a picture the reader
 cannot reach.
 
+The owner's waiting page (`docs/waiting-on-you.md`) lifts the recommendation out of the record,
+but only from a heading ending "— recommended" (for example "## A. Follow the phone — recommended")
+or a line starting "**Recommended**". A recommendation only inside a callout is not seen; check
+the count `make -s issues-doc` prints ("N with a recommendation") went up.
+
 `related` lists the ids of decisions that constrain or are constrained by this one — question
 6, made machine-checkable. It is the one piece of a decision that no single record can hold,
 because relatedness is a fact about a pair, and the second half is usually written months

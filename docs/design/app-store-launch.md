@@ -807,6 +807,10 @@ the store ask about this, so the answer has to match what the app does.
 everywhere, only in the panels, or a size setting of our own) so the owner can choose with a
 hand on each.
 
+*2026-11-20:* the three ways are built and photographed on the iPhone SE simulator, and the
+choice is open for the owner on its own page (larger-text-options). None reaches twice the size
+yet, so the store's larger-text answer stays "no" until the top bar is rebuilt to wrap.
+
 ### ㊿ Some screens have never had the automatic accessibility scan · **open**
 
 Split out of ⑯ on 2026-11-19. The scan runs on the page, a chosen verse, the look-alikes list,

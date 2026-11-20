@@ -195,6 +195,10 @@ redraw. Edit the register, then `make -s issues-doc tasks-doc`; after a ledger c
 stale page, redraw all three at once rather than one per refusal:
 `make -s use-cases-doc issues-doc tasks-doc`.
 
+A merge clash in a drawn page (`docs/backlog.md`, `docs/issues.md`, `docs/waiting-on-you.md`) is
+worked in the register, not the page: keep both sides' new rows in `docs/issues.json`, then
+redraw. Save a copy of the page first and compare after; only counts and fingerprints should move.
+
 ## The board — the backlog on GitHub, at a glance
 
 <https://github.com/users/omars-lab/projects/2> shows every open item and every check by

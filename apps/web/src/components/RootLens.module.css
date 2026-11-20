@@ -19,6 +19,14 @@
   cursor: pointer;
 }
 
+/* The icon, its count and the picked dot stay on one line together. */
+.glyph {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  white-space: nowrap;
+}
+
 .trigger[aria-expanded="true"] {
   color: var(--accent-strong);
 }

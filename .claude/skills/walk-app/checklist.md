@@ -1204,8 +1204,10 @@ would break. Pictures of this build may be committed; it carries no held text.
   (`xcrun simctl ui <device> content_size accessibility-extra-extra-extra-large`), each of
   `?grow=phone`, `?grow=panels`, `?grow=own&size=1.5`, English and Arabic: the words themselves
   grow, not only the boxes; every top-bar button stays on the screen; the verse drawer leaves the
-  chosen verse in sight. Open each build on a fresh address (a new port), or the offline copy
+  chosen verse in sight, and the drawer is still larger than usual; in the drawer each tool's icon and
+  count sit on one line. `docs/design/larger-text-options/shoot.sh <port>` takes all five pictures. Open each build on a fresh address (a new port), or the offline copy
   serves the last build. · iPhone SE simulator · test: `apps/web/e2e/text-grow.spec.ts` guards
   words and buttons in the test browsers, which do not show either fault · found 2026-11-20:
   iPhone Safari kept the words at their size inside the grown parts (fixed); the info button is
-  pushed off the top bar and the drawer covers the verse (open, issue: `a11y-larger-text`)
+  pushed off the top bar and the drawer covers the verse (both fixed); the Same roots count dropped
+  under its icon in the drawer grown twice over (fixed) · issue: `a11y-larger-text`

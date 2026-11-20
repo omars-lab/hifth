@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Larger text options</title>
+<meta name="description" content="When a reader makes their phone's text larger, what in Hifth should grow with it?">
+<!-- Built by scripts/build-design-note.mjs from design/larger-text-options.md. Do not edit by hand. -->
+<style>
+:root { --bg: #fbfaf7; --ink: #1f2328; --muted: #5b636d; --line: #d9dcd3; --tip: #eef6ee; --tip-edge: #3d8b55; --code: #f0efe9; --link: #1f5fa8; --hafiz: #fff3c4; --flow: #4b5563; --marks: #b4690e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #161c25; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2e3846; --tip: #17271d; --tip-edge: #5fbf7a; --code: #1d2531; --link: #8cb8f0; --hafiz: #3a3214; } }
+:root[data-theme="dark"] { --bg: #161c25; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2e3846; --tip: #17271d; --tip-edge: #5fbf7a; --code: #1d2531; --link: #8cb8f0; --hafiz: #3a3214; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+main { max-width: 60rem; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.6rem; line-height: 1.25; }
+h2 { font-size: 1.25rem; margin-top: 2.2rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
+h3 { font-size: 1.05rem; margin-top: 1.8rem; }
+a { color: var(--link); }
+code { background: var(--code); padding: 0 4px; border-radius: 4px; font-size: 0.9em; }
+.callout { background: var(--tip); border-left: 4px solid var(--tip-edge); padding: 4px 16px; border-radius: 6px; }
+.callout-title { font-weight: 700; margin-bottom: 0; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: left; }
+th { background: var(--code); }
+thead:not(:has(th:not(:empty))) { display: none; }
+tr:has(td:first-child strong:only-child) td { background: var(--hafiz); }
+.diagram { margin: 1rem 0; padding: 12px; background: #ffffff; border-radius: 8px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; width: 100%; max-width: 560px !important; height: auto; }
+.diagram svg .flowchart-link.edge-pattern-solid { stroke: var(--flow) !important; stroke-dasharray: 8 5 !important; animation: note-flow 0.9s linear infinite; }
+.diagram svg .flowchart-link.edge-thickness-thick { stroke: var(--marks) !important; stroke-width: 3.5px !important; }
+.diagram svg .flowchart-link.edge-pattern-dotted { stroke-dasharray: 2 6 !important; stroke-linecap: round; animation: none; }
+@keyframes note-flow { to { stroke-dashoffset: -13; } }
+@media (prefers-reduced-motion: reduce) { .diagram svg .flowchart-link { animation: none !important; } }
+</style>
+</head>
+<body>
+<main>
+<h1>When a reader makes their phone&#39;s text larger, what in Hifth should grow with it?</h1>
+<p><em>Asked 2026-11-20 by the launch loop, for the owner. Three ways are built in a separate build of the app, so they can be tried by hand on a phone; the ordinary app has none of it yet. The pictures are the iPhone SE simulator, in English, with verse 2:48 chosen.</em></p>
+<p><em>This note is the record. Its page is <a href="larger-text-options.html">larger-text-options.html</a>, on the site at <a href="https://blog.bytesofpurpose.com/hifth/docs/design/larger-text-options.html">https://blog.bytesofpurpose.com/hifth/docs/design/larger-text-options.html</a>, rebuilt from this note by <code>scripts/build-design-note.mjs</code>. The pictures are remade by <code>larger-text-options/shoot.sh</code>.</em></p>
+<aside class="callout tip"><p class="callout-title">Short version</p>
+
+<p><strong>What differs:</strong> today the mus&#39;haf page has its own size control, but the bars, buttons and panels around it never grow, even when the phone&#39;s text is set to its largest. The three ways differ in what grows and who sets the size.
+<strong>Recommended: follow the phone (A) as the default, with &quot;our own size&quot; (C) kept as a setting in the info panel.</strong> A reader who already made their phone&#39;s text larger gets bigger controls without looking for anything; a reader on a computer, or one who wants only Hifth bigger, can pick a size.
+<strong>What none of them does yet:</strong> Apple&#39;s &quot;Larger Text&quot; label in the store asks for text that reaches twice its size through the common tasks. The top bar stops at 1.25 times on a small phone, so whichever way wins, the store&#39;s answer stays &quot;no&quot; until that is solved (see the last section).</p>
+</aside>
+
+<h2>What do the words on this page mean?</h2>
+<ul>
+<li><strong>The bars</strong>: the strip across the top (the app&#39;s name, the page number, the tajweed button, the info button) and the strip across the bottom.</li>
+<li><strong>The panels</strong>: what rises over the page: the chosen verse&#39;s tools drawer, the info panel, the look-alikes list.</li>
+<li><strong>The phone&#39;s text size</strong>: the setting in the iPhone&#39;s Settings, under Display, or Accessibility for the largest sizes. Most apps grow their words with it.</li>
+<li><strong>Mus&#39;haf page</strong>: the printed page itself. It is never touched by any of this; it already has its own size control.</li>
+</ul>
+<h2>What changes for a hafiz?</h2>
+<blockquote>
+<p>[!important] For a hafiz mid-revision
+A hafiz with weak eyes revising from the phone can already make the page bigger, but then squints at the tools around it: the verse&#39;s Listen and Same roots buttons, the page number, the look-alikes count. Bigger controls mean fewer missed taps mid-recitation and less leaning in to read &quot;2:48&quot;. It touches only readers who have made their text larger; for everyone else, nothing moves.</p>
+</blockquote>
+<h2>Why is this being asked now?</h2>
+<p>The launch walk as Apple&#39;s reviewer (2026-11-17) set the iPhone SE to its largest text and nothing outside the page grew. Apple&#39;s store listing asks whether the app supports larger text, and the answer has to match the app. The three ways were built rough on 2026-11-19 and walked on the simulator on 2026-11-20; the faults that walk found are fixed (the words not growing on iPhone Safari, the info button pushed off the screen, the drawer covering the verse, the Same roots count dropping under its icon).</p>
+<h2>What happens if nobody decides?</h2>
+<p>The app stays as it is: the controls never grow. The store&#39;s larger-text answer is &quot;no&quot;, which is honest. Nothing else is blocked, but the rough build cannot ship as it is: the app is at its size limit and the chosen way needs a trim to fit (backlog row text-grow-needs-a-trim), and that trim waits on knowing which way to keep.</p>
+<h2>What do the three ways look like?</h2>
+<p>The phone&#39;s text at its largest size for A and B; for C the phone is at its normal size and the reader picked 1.5 times in Hifth.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Today</th>
+<th>A. Follow the phone</th>
+<th>B. Only the panels</th>
+<th>C. Our own size (1.5)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><img src="larger-text-options/off.png" alt="Today: nothing grows"></td>
+<td><img src="larger-text-options/phone.png" alt="A: the bars and the drawer grow"></td>
+<td><img src="larger-text-options/panels.png" alt="B: only the drawer grows"></td>
+<td><img src="larger-text-options/own-150.png" alt="C: our own size, 1.5 times"></td>
+</tr>
+<tr>
+<td>Nothing grows. (Safari&#39;s own install notice shows here; with a way picked it waits while the drawer is open.)</td>
+<td>The top bar grows to 1.25 times, the most a 375-wide phone fits; the drawer grows as far as the room under the verse allows.</td>
+<td>The top bar stays as it is; the drawer grows twice over, as large as the room allows.</td>
+<td>The same as A, at a size picked in Hifth rather than in the phone&#39;s settings.</td>
+</tr>
+</tbody></table></div>
+<p>C at its smaller step, 1.25 times: <a href="larger-text-options/own-125.png">own-125.png</a>.</p>
+<h2>A. Follow the phone as the default, with our own size kept as a setting — recommended</h2>
+<p>The bars and the panels grow with the phone&#39;s text size. On a computer, the browser&#39;s own text setting counts the same way.</p>
+<blockquote>
+<p>[!important] For a hafiz
+Nothing to find: a reader who already set their phone large gets larger controls the first time they open Hifth.</p>
+</blockquote>
+<ul>
+<li><strong>Gets:</strong> the way every well-made iPhone app behaves; no new setting to learn.</li>
+<li><strong>Costs:</strong> on a small phone the top bar loses its tagline and the ▤ mus&#39;haf button (the info panel&#39;s &quot;Choose the mus&#39;haf&quot; is still there). A reader who wants large text everywhere except Hifth cannot say so.</li>
+<li><strong>Commits to:</strong> testing every new bar and panel at the largest size.</li>
+</ul>
+<h2>B. Only the panels follow the phone</h2>
+<p>The tools drawer and the panels grow; the bars stay as they are.</p>
+<blockquote>
+<p>[!important] For a hafiz
+The verse&#39;s tools and the lists are easy to read; the page number and the top buttons stay small.</p>
+</blockquote>
+<ul>
+<li><strong>Gets:</strong> the top bar keeps every button and the tagline on a small phone; the panels get the most room to grow.</li>
+<li><strong>Costs:</strong> half an answer. The page number, the thing a hafiz looks at most, stays small.</li>
+<li><strong>Commits to:</strong> a store answer of &quot;no&quot;, since the bars are part of the common tasks.</li>
+</ul>
+<h2>C. Our own size, picked in Hifth</h2>
+<p>A setting in the info panel: normal, 1.25 times or 1.5 times. The phone&#39;s setting is ignored.</p>
+<blockquote>
+<p>[!important] For a hafiz
+The one way that works the same on the iPad, a computer and a phone, and the one way that makes Hifth larger without making every other app larger too.</p>
+</blockquote>
+<ul>
+<li><strong>Gets:</strong> control for the reader; the same size everywhere they read.</li>
+<li><strong>Costs:</strong> a reader has to know to look for it; the one who set their phone large and expects apps to follow gets nothing until they find it.</li>
+<li><strong>Commits to:</strong> a setting with steps we choose. Past 1.5 the drawer stops growing on a small phone because the room under the verse runs out.</li>
+</ul>
+<h2>What else could be considered, and why is it not here?</h2>
+<ul>
+<li><strong>Grow the mus&#39;haf page too.</strong> Left off: the page already has its own size control, and growing it with the text would fight that control.</li>
+<li><strong>Follow the phone, and also offer our own size (A plus C).</strong> This is the recommendation: the project keeps a built runner-up as a setting rather than deleting it.</li>
+<li><strong>Rebuild the bars to wrap onto two lines</strong> so the top bar can reach twice its size. Not an option for this choice; it is the follow-up the store answer needs, whichever way wins.</li>
+</ul>
+<h2>What have we already decided that touches this?</h2>
+<ul>
+<li><strong>ayah-drawer</strong>: the verse&#39;s tools sit in one drawer that rises from the bottom and must leave the verse in sight. That is why the drawer here grows only as far as the room under the chosen verse allows.</li>
+</ul>
+<h2>What do others do?</h2>
+<ul>
+<li>Apple&#39;s &quot;Larger Text&quot; label in the App Store asks that text can be made at least twice as large through an app&#39;s common tasks, and suggests following the phone&#39;s setting (Dynamic Type) as the usual way. <em>Seen in a search summary of Apple&#39;s 2025 talk on accessibility labels (<a href="https://developer.apple.com/videos/play/wwdc2025/224">WWDC25 session 224</a>) and the store&#39;s page on the labels; the full criteria page was not opened.</em></li>
+<li>Other mus&#39;haf apps: not looked at this time.</li>
+</ul>
+<h2>What would change the answer?</h2>
+<ul>
+<li>If walking with the owner&#39;s own phone shows the panels covering what they are about at the largest sizes, B or C (with its cap at 1.5) gets more attractive than A.</li>
+<li>If most readers use Hifth on a computer or iPad, where no phone setting applies, C matters more than A.</li>
+</ul>
+<h2>What is this not settling?</h2>
+<ul>
+<li><strong>The store&#39;s larger-text answer.</strong> No way reaches twice the size today: the top bar stops at 1.25 times on a small phone, and C stops at 1.5. Answering &quot;yes&quot; needs the bars rebuilt to wrap, and that is a separate piece of work after this choice.</li>
+<li><strong>The trim</strong> that lets the chosen way fit in the app&#39;s size limit (backlog row text-grow-needs-a-trim).</li>
+<li><strong>Arabic.</strong> Walked on the simulator only with A at the largest size; B and C were drawn in English only.</li>
+</ul>
+<h2>How do I try it by hand?</h2>
+<p>From the repository: <code>make text-grow-serve PORT=5795</code>, then open the address it prints on the phone with <code>?grow=phone</code>, <code>?grow=panels</code>, <code>?grow=own&amp;size=1.5</code> or <code>?grow=off</code>. The choice is kept on that phone until another link changes it.</p>
+<h2>So what is being decided?</h2>
+<p>Which way should the app ship with as the default, and which of the others stay as a setting: <strong>A. follow the phone</strong>, <strong>B. only the panels</strong>, <strong>C. our own size</strong>, or <strong>D. nothing grows, as today</strong>.</p>
+
+</main>
+</body>
+</html>
