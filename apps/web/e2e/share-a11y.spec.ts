@@ -401,4 +401,65 @@ test.describe("Hifth · axe automated a11y", () => {
     );
     expect(serious, JSON.stringify(serious, null, 2)).toEqual([]);
   });
+
+  // The other screens a reader opens, each with axe run over it (launch item 16,
+  // 2026-11-19): the record of what was read, the saved-offline shelf, the
+  // navigation tips, and the info panel, which holds the settings, the sources and
+  // the account section. Before these, axe only ever saw the page, a chosen verse
+  // and the look-alikes list.
+  for (const name of ["record", "shelf", "tips"] as const) {
+    test(`the ${name} screen has no serious/critical axe violations`, async ({ page }) => {
+      await gotoLink(page, name);
+      expect(await seriousViolations(page)).toEqual([]);
+    });
+  }
+
+  test("the info panel has no serious/critical axe violations", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("svg[role='group']").first()).toBeVisible();
+    await page.getByRole("button", { name: /عن حِفظ/ }).click();
+    await expect(page.getByRole("dialog", { name: "عن حِفظ" })).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+  });
+
+  // The checks above all passed the day they were written, which proves nothing on
+  // its own. This plants a button with no name in the open info panel and expects the
+  // same helper to name it, so a helper that had stopped looking would fail here.
+  test("the axe helper does catch a nameless button", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /عن حِفظ/ }).click();
+    const sheet = page.getByRole("dialog", { name: "عن حِفظ" });
+    await expect(sheet).toBeVisible();
+    await sheet.evaluate((d) => {
+      const b = document.createElement("button");
+      b.id = "planted-nameless";
+      d.appendChild(b);
+    });
+    const found = await seriousViolations(page);
+    expect(found.map((v) => v.rule)).toContain("button-name");
+    expect(found.flatMap((v) => v.where).join(" ")).toContain("#planted-nameless");
+  });
+
+  test.describe("in English", () => {
+    test.use({ locale: "en-US" });
+
+    test("the page and the info panel have no serious/critical axe violations", async ({ page }) => {
+      await page.goto("/");
+      await expect(page.locator("svg[role='group']").first()).toBeVisible();
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
+      expect(await seriousViolations(page), "the page").toEqual([]);
+      await page.getByRole("button", { name: /About Hifth/ }).click();
+      await expect(page.getByRole("dialog", { name: /About Hifth/ })).toBeVisible();
+      expect(await seriousViolations(page), "the info panel").toEqual([]);
+    });
+  });
 });
+
+/** Axe's serious and critical findings on what is on screen now, each with the
+ *  rule, its help line and the elements it names, so a failure reads on its own. */
+async function seriousViolations(page: Page) {
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
+  return results.violations
+    .filter((v) => v.impact === "serious" || v.impact === "critical")
+    .map((v) => ({ rule: v.id, help: v.help, where: v.nodes.map((n) => n.target.join(" ")) }));
+}
