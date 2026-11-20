@@ -85,7 +85,7 @@ export default tseslint.config(
   },
   // Node scripts (ETL) get Node globals.
   {
-    files: ["packages/etl/**/*.{mjs,ts}", "scripts/**/*.mjs", "native/scripts/**/*.mjs", "apps/web/e2e/tools/**/*.mjs"],
+    files: ["packages/etl/**/*.{mjs,ts}", "scripts/**/*.mjs", "native/scripts/**/*.mjs", "apps/web/e2e/tools/**/*.mjs", "docs/design/**/shoot.mjs"],
     languageOptions: { globals: { ...globals.node } },
   },
   // The perf harness is a Node script that ALSO ships browser code inside

@@ -137,3 +137,11 @@ This is the mechanism behind this skill's promise to "screenshot the app". It is
 skill owns the suites that hold the UI still (e2e, golden); this is for *looking*
 and for a quick end-to-end sanity check. The driver is `apps/web/e2e/tools/drive.mjs`;
 `make drive` is the one stable call site over it.
+
+## Where the browser tools can save a picture
+
+The chrome-devtools tools refuse to write a screenshot into the session's scratch folder ("not
+within workspace roots"). Take the picture inline (no file path), save it under the repo in a
+gitignored folder, or, for a page's headers, use curl. For pictures a design page keeps, write a
+small Playwright script beside the page instead (`docs/design/tajweed-mark-contrast-options/shoot.mjs`
+is the model: it loads the web app's own Playwright and lays each option's style over the real app).

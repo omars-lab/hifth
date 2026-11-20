@@ -162,6 +162,11 @@ row that is not there.
 
 4. **`make issues-doc`**, then `pnpm gate:issues`.
 
+The heading word must be the very word in the row's `status`: a row marked `fixed` needs its
+item headed `· **fixed**`, not `· **answered**`, or the check refuses it. `closedBy` must be a
+file that exists (a test or a script), not a sentence. Each row needs its own item; two rows
+pointing at the same item is refused too.
+
 ## Close — and what closing costs
 
 1. **Fix it, and write the test in the same change.** Not after. The test is what

@@ -145,12 +145,14 @@ test.describe("Hifth · axe on a computer", () => {
   }
 
   // Left failing on purpose (2026-11-20). In the picker's "A tajweed rule" row,
-  // each rule starts with a small mark in its tajweed colour. The madd mark is
-  // the app's madd orange (#d55e00) on the card's near-white, about 3.9 to 1,
-  // under the 4.5 to 1 axe asks of text. The mark is hidden from screen readers
-  // and the rule's name is written beside it, but the fix is a darker madd
-  // colour, which changes the tajweed colours everywhere they show, so it waits
-  // for the owner. The test below still scans everything else in the picker.
+  // each rule starts with a small mark in its tajweed colour. Axe flags only the
+  // madd mark (#d55e00, under the 4.5 to 1 it asks of text), but measured by
+  // hand four of the seven are faint: wasl and idgham 2.9, ghunnah 3.2, madd
+  // 3.7. The marks are hidden from screen readers and each rule's name is
+  // written beside them. How to draw them is the open decision
+  // tajweed-mark-contrast (docs/design/tajweed-mark-contrast-options.md); when
+  // it is answered, this scan comes back on. The test below still scans
+  // everything else in the picker.
   test.fixme("the mistake picker has no serious/critical axe violations", async ({ page }) => {
     await openMistakePicker(page);
     expect(await seriousViolations(page)).toEqual([]);

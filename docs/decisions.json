@@ -649,7 +649,8 @@
         "mark-granularity",
         "loop-6a",
         "highlight-strength",
-        "highlight-options"
+        "highlight-options",
+        "tajweed-mark-contrast"
       ]
     },
     {
@@ -1553,6 +1554,36 @@
         "desktop-vs-mobile",
         "graduation-losers",
         "share-sheet-builder"
+      ]
+    },
+    {
+      "id": "tajweed-mark-contrast",
+      "question": "In the mistake picker, four of the seven small coloured tajweed marks are faint on their buttons: leave them, darken madd only, darken each faint colour in the picker only, or draw the letters in ink with a colour bar?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the marks as they are"
+        },
+        {
+          "id": "B",
+          "label": "Darken madd only, on the page too"
+        },
+        {
+          "id": "C",
+          "label": "A darker shade of each faint colour, in the picker only"
+        },
+        {
+          "id": "D",
+          "label": "Ink letters with a short bar in the rule's colour"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/tajweed-mark-contrast-options.html",
+      "page": "docs/design/tajweed-mark-contrast-options.html",
+      "builtBy": "scripts/build-design-note.mjs",
+      "doc": "docs/design/tajweed-mark-contrast-options.md",
+      "related": [
+        "tajweed-colours"
       ]
     },
     {
