@@ -7365,7 +7365,7 @@
       "feature": "a11y",
       "status": "open",
       "severity": "risk",
-      "note": "Axe (share-a11y.spec.ts) scans the page, a chosen verse, the look-alikes list, the record, the shelf, the tips and the info panel, on the phone browsers only. Not yet scanned: the bookmark drawer, the note box, the mistake picker, the drawer's tools, the account section once opened, and the computer layout. Notes and mistakes open only in the computer-layout tests, so this needs a desktop run of the scan. Found 2026-11-19."
+      "note": "Axe (share-a11y.spec.ts) scans the page, a chosen verse, the look-alikes list, the record, the shelf, the tips and the info panel, on the phone browsers. Since 2026-11-20 axe-more.spec.ts also scans the bookmark drawer, the verse's tools drawer with a tool open, the account section signed out and signed in, and on a computer (Chrome and Firefox) the wide layout, the info panel, the note box and the mistake picker; all clean but one. Left open: in the mistake picker's tajweed row, the small madd colour mark is the app's madd orange (#d55e00) at about 3.9 to 1 on the card, under the 4.5 to 1 axe asks. It is hidden from screen readers and the rule's name is written beside it, but the fix is a darker madd colour, which changes the tajweed colours everywhere, so it waits for the owner; that scan is marked fixme and a second scan checks the rest of the picker. Found 2026-11-19."
     },
     {
       "id": "launch-readers-crashes",
