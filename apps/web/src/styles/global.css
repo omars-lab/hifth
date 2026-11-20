@@ -74,3 +74,26 @@ button {
   white-space: nowrap;
   border: 0;
 }
+
+/*
+ * Larger text, rough build (text-grow.ts; backlog row a11y-larger-text). Only
+ * for a reader who picked a way, so nothing here touches the app as it is.
+ * The bars grow for "phone" and "own"; the panels grow for all three. A part
+ * inside another grown part is left alone, or it would grow twice.
+ */
+:root:is([data-text-grow="phone"], [data-text-grow="own"])
+  :is([data-top-bar], [data-phone-bar], [role="toolbar"], [role="tablist"], [data-undo-bar]):not(
+    :is([data-top-bar], [data-phone-bar], [role="toolbar"], [role="tablist"], [data-undo-bar], [role="dialog"], [data-verse-drawer]) *
+  ),
+:root[data-text-grow] :is([role="dialog"], [data-verse-drawer]):not(:is([role="dialog"], [data-verse-drawer]) *) {
+  zoom: min(var(--text-grow, 1), var(--grow-cap, 2));
+  /* iPhone Safari keeps text at 100% under the rule at the top of this file,
+     even inside a zoom: the boxes grew and the words did not (SE simulator,
+     2026-11-20). Our test browsers do not show it; the walk checks it. */
+  -webkit-text-size-adjust: auto;
+}
+/* Found on the first try: past 1.25 the top bar no longer fits an iPhone SE
+   (375 px wide) and pushes the screen sideways, so it stops there. */
+[data-top-bar] {
+  --grow-cap: 1.25;
+}

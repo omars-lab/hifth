@@ -332,7 +332,7 @@ test("a store build with none of the tools' launch settings passes", () => {
 });
 
 test("any of the tools' launch settings left in a store build fails, saying which", () => {
-  for (const [what, text] of STORE_SIGNS) {
+  for (const [what, text] of STORE_SIGNS.filter(([, , , only]) => only !== "mac")) {
     const r = archiveRun(`code ${text} code`);
     assert.equal(r.status, 1, `"${text}" in the store build was not caught`);
     assert.ok(r.stdout.includes(what), `the failure says ${what}: ${r.stdout}`);
@@ -441,6 +441,18 @@ test("on the Mac, a debug build missing a sign the Mac has fails as out of date"
   const r = macRun({}, { debugCode: everyMacSign.replace(first, "") });
   assert.equal(r.status, 1);
   assert.match(r.stdout, /out of date/);
+});
+
+test("the Mac-only launch setting is caught in a Mac store build, and not asked of an iPad debug build", () => {
+  const macOnly = STORE_SIGNS.filter(([, , , only]) => only === "mac");
+  assert.deepEqual(macOnly.map(([, text]) => text), ["HIFTH_WINDOW_SIZE"]);
+  for (const [what, text] of macOnly) {
+    const r = macRun({ binaries: { Hifth: `code ${text} code` } }, { extra: ["--store"] });
+    assert.equal(r.status, 1, `"${text}" in the Mac store build was not caught`);
+    assert.ok(r.stdout.includes(what), `the failure says ${what}: ${r.stdout}`);
+  }
+  const ipad = archiveRun("plain app code", { debugCode: everyStoreSign.replace("HIFTH_WINDOW_SIZE", "") });
+  assert.equal(ipad.status, 0, ipad.stdout + ipad.stderr);
 });
 
 test("the iPad-only signs are marked so, and the Mac keeps the rest", () => {

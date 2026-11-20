@@ -100,6 +100,12 @@ to read it as a newcomer would.
   `package.json` (usually via `gates:fast`), and a hook target in the `Makefile`
   (`pre-commit` or `pre-push`) that reaches it. A gate no hook runs is a comment;
   `gate:gates` fails on one.
+- **Before naming a new make switch, search both Makefiles for the name.** The root `Makefile`
+  includes `native/Makefile.native`, so a name the other one sets is always on. `SHOTS=1` on
+  `make feature-links` was always on for that reason; it is now `PICTURES=1`.
+- **Ask for a review right after the first commit of a new tool, before building on it.** One
+  such review found three gaps that 45 passing tests did not cover (2026-11-10). Each gap then
+  got a test seen failing first.
 - **Several agents share this checkout.** Anything that builds, installs or stages
   takes the lock: `make lock L=build CMD="…"`. Protocol in
   `docs/PARALLEL-AGENTS.md`.
@@ -113,7 +119,9 @@ Every setting follows one pattern; `apps/web/src/drawer-marks.ts` is a small one
    `remember…()` function.
 2. `App.tsx` keeps the choice in state, with a `choose…` callback.
 3. The info panel (`apps/web/src/components/Colophon.tsx`) shows it as a radio group.
-4. Its words go in `en.json`, `ar.json` and `i18n.tsx`, then `pnpm -s i18n:build`.
+4. Its words go in `en.json`, `ar.json` and `i18n.tsx`, then `pnpm -s i18n:build`. Words only one
+   rarely seen screen needs go in a pack of their own instead, so they stay out of the start-up
+   download (`docs/design/i18n.md`, "Words that load later").
 5. A test that picks the other choice and sees the app change, and one that it is still
    picked after a reload.
 
@@ -122,8 +130,16 @@ The English words are part of the start-up download, which has its own size limi
 
 ## Pushing and merging
 
+- **In a new working copy, before the first commit:** `intent start <row>` (see the `issues`
+  skill), then `pnpm install --frozen-lockfile --prefer-offline` (a few seconds). A new copy has
+  no installed packages, so the commit check otherwise stops at `tsc: command not found`.
+  A helper handed a reused working copy does both too, or its commit misses its task label.
+  Say so in the helper's brief.
+- **Send the commit's output to a file** with `> log 2>&1`; the commit check prints too much to
+  read inline. `git commit -o <file>` does not do this: it means "commit only this file".
 - **Push in the background, output to a log file.** The push runs every local check, about
-  13 minutes. Don't edit that working copy until it ends. Another working copy is fine: each
+  13 minutes, even on a branch that changes only the agent folder. Start it as a background
+  run; a waiting call with a 10-minute limit is cut off before it ends. Don't edit that working copy until it ends. Another working copy is fine: each
   serves the app on its own port.
 - **A pull request shows no hosted checks**, so the green signal is that push's own run. Read
   the end of the log before merging.

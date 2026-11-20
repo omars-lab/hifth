@@ -3,7 +3,7 @@ date: 2026-11-18
 repo: hifth
 session: app store launch, sign-in choices
 branch: sign-in-choices
-folded: no
+folded: yes
 ---
 
 ## Snags

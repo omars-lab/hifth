@@ -3,7 +3,7 @@ date: 2026-11-13
 repo: hifth
 session: bbb12999
 branch: mistake-kinds (the hifth.app front page), PR #610, merged
-folded: no
+folded: 2026-11-20
 ---
 
 ## Snags
@@ -19,3 +19,5 @@ folded: no
 ## Worth copying
 - `.claude/skills/optimizing-performance/trims.md`: trying the build settings first (the minifier) freed 13.6 KB where cutting code had freed 0.8. Measure each setting alone before cutting code.
 - `docs/issues.json` conflicts (both sides only added rows at the end): rebuilding the file row by row from the common ancestor, ours and theirs (keep whichever side changed a row, and flag rows both changed) resolved three conflict blocks with no hand-picking and no rows lost. Then rebuild the generated pages from the merged file, never resolve them by hand.
+
+**Landed (2026-11-20):** the merge, budget, background-push and PATH lessons are in the `testing` skill, under "After merging main, and pushing in the background". The size-map path and the release check were already fixed in that session.

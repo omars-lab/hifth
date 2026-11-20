@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * CI gate: JS bundle budget. The web app's total gzipped JS must stay under
- * 220 KB (PLAN §6 set 150; raised 2026-09-27, 2026-10-11, 2026-11-10 and 2026-11-16 on measured start-up sweeps —
+ * 225 KB (PLAN §6 set 150; raised 2026-09-27, 2026-10-11, 2026-11-10, 2026-11-16 and 2026-11-20 on measured start-up sweeps —
  * see the optimizing-performance skill). Runs after `pnpm build`.
  *
  * The budget alone was not enough, and performance.md ⑤ named why: **it notices at the
@@ -51,7 +51,7 @@ import { gzipSync } from "node:zlib";
 const ROOT = process.env.HIFTH_GATE_ROOT ?? new URL("..", import.meta.url).pathname;
 const DIST = join(ROOT, "apps", "web", "dist");
 const BASELINE = join(ROOT, "scripts", "budget-baseline.json");
-const BUDGET_GZ = 220 * 1024;
+const BUDGET_GZ = 225 * 1024;
 
 /** How far the total may drift before someone has to look. See the docblock. */
 const TOLERANCE_GZ = 1024;
@@ -206,6 +206,21 @@ const startupFiles = walk(DIST)
   .filter((n) => /^assets\/(index|en\.gen)-[A-Za-z0-9_-]{8}\.(js|css)$/.test(n));
 const startupGz = startupFiles.reduce((sum, n) => sum + gzipSync(readFileSync(join(DIST, n))).length, 0);
 if (startupFiles.length) console.log(`  start-up download: ${kb(startupGz)} KB gz of ${kb(STARTUP_GZ)} (main script, English words, style sheet)`);
+// The account section's words load with the section (sign-in ⑳, i18n.md):
+// only the store apps show it. Pulled back into start-up they would weigh about
+// a kilobyte, under the drift the baseline absorbs, so look for them by name.
+// The marker is a key of that pack; keys survive minifying.
+const ACCOUNT_MARKER = "accountLeaves";
+const accountAtStart = startupFiles.filter((n) => readFileSync(join(DIST, n), "utf8").includes(ACCOUNT_MARKER));
+if (accountAtStart.length) {
+  console.error(
+    "gate:budget — FAIL: the account section's words are in the start-up download.\n" +
+      accountAtStart.map((n) => `  ${n}: "${ACCOUNT_MARKER}"`).join("\n") +
+      "\n  They belong in their own pack (apps/web/src/messages/account/), read through" +
+      "\n  account-words.ts, so a reader who never sees the section never downloads them.",
+  );
+  process.exit(1);
+}
 if (startupGz > STARTUP_GZ) {
   console.error(
     `gate:budget — FAIL: the start-up download is ${kb(startupGz)} KB gz, over its ${kb(STARTUP_GZ)} KB limit.\n` +

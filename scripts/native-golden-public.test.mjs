@@ -120,3 +120,34 @@ test("a public build that itself carries the private folder is copied without it
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.ok(!existsSync(join(bundle, "assets", "private")));
 });
+
+// The fallback for the tajweed colours (app-store-launch ㊲): if the permission
+// for their data does not come, the store build is made with NO_TAJWEED=1, and
+// the copy then leaves the colours' data out of the app, not only the button.
+// Without the switch, the colours stay in, as the owner chose on 2026-11-20.
+function bundleWithTajweed() {
+  const paths = bundleWith("const a = 1;");
+  mkdirSync(join(paths.dist, "assets", "skins", "hafs-kfqc", "tajweed"), { recursive: true });
+  writeFileSync(join(paths.dist, "assets", "skins", "hafs-kfqc", "tajweed", "1.json"), "{}");
+  writeFileSync(join(paths.dist, "assets", "skins", "hafs-kfqc", "NOTICE.txt"), "the data's credit");
+  return paths;
+}
+
+test("a store build without the tajweed colours leaves their data out", () => {
+  const paths = bundleWithTajweed();
+  const r = spawnSync(
+    "make",
+    ["-s", "-C", root, "app-web-copy", "FLAVOUR=public", "NO_TAJWEED=1", `DIST=${paths.dist}`, `WEB_BUNDLE=${paths.bundle}`],
+    { encoding: "utf8" },
+  );
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(!existsSync(join(paths.bundle, "assets", "skins")), "the data and the notice crediting it are both left out");
+  assert.ok(existsSync(join(paths.bundle, "index.html")));
+});
+
+test("the store build keeps the tajweed colours unless told to leave them out", () => {
+  const paths = bundleWithTajweed();
+  const r = copy("public", paths);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(existsSync(join(paths.bundle, "assets", "skins", "hafs-kfqc", "tajweed", "1.json")));
+});

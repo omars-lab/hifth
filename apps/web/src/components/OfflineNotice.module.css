@@ -76,3 +76,14 @@
     justify-content: flex-end;
   }
 }
+
+/* One short sentence and Hide (the line for a link that points nowhere, drawn
+   by App): one row on every screen, since stacking it took a phone's strip to
+   twice the height for nothing. */
+.notice.oneLine {
+  flex-direction: row;
+  align-items: center;
+}
+.oneLine .actions {
+  margin-inline-start: auto;
+}

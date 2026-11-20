@@ -245,7 +245,7 @@ node-ok: ## Check the running node against .nvmrc + package.json engines
 	@scripts/require-node.sh
 
 .PHONY: gates
-gates: build ## The static gates: no <text> in SVG, license present, JS budget <220KB gz
+gates: build ## The static gates: no <text> in SVG, license present, JS budget <225KB gz
 	$(PNPM) gates
 
 .PHONY: lighthouse
@@ -555,6 +555,19 @@ phone: build ## Serve the built app for your phone; prints the LAN URL to open
 	@echo ""
 	$(WEB) exec vite preview --host --port $(PORT)
 
+.PHONY: text-grow-e2e text-grow-serve
+text-grow-e2e: core ## Browser check of the larger-text rough build (built with its switch on)
+	@# The switch is only in a VITE_TEXT_GROW build (src/main.tsx). This leaves a
+	@# throwaway dist/: `make build` puts the ordinary one back.
+	VITE_TEXT_GROW=1 $(WEB) build
+	HIFTH_TEXT_GROW=1 $(WEB) exec playwright test e2e/text-grow.spec.ts --project=iphone --project=android
+	$(WEB) build
+
+text-grow-serve: core ## Serve the larger-text rough build on the Wi-Fi, to try it on a phone
+	VITE_TEXT_GROW=1 $(WEB) build
+	@echo "  On the phone: http://$(LAN_IP):$(PORT)/?grow=phone  (or grow=panels, grow=own&size=1.5, grow=off)"
+	$(WEB) exec vite preview --host --port $(PORT)
+
 .PHONY: phone-perf
 phone-perf: ## Serve a probe build so the PHONE measures itself — the follow-up ① capture
 	@# VITE_PERF_PROBE is read at build time only (src/main.tsx), so this bundle
@@ -776,6 +789,13 @@ guide: ## Render the runbooks to docs/validation/guide.html and serve them to yo
 	@node scripts/render-diagrams.mjs
 	@LAN_IP="$(LAN_IP)" node scripts/build-validation-guide.mjs --serve
 
+.PHONY: guide-doc
+guide-doc: ## Redraw docs/validation/guide.html and its diagrams, without serving them
+	@# What the validation check asks for when the ledger changed. `make guide`
+	@# draws the same page and then serves it, which never returns (2026-11-19).
+	@node scripts/render-diagrams.mjs
+	@node scripts/build-validation-guide.mjs
+
 .PHONY: session
 session: ## Work one check with the answers banked as you go:  make session CHECK=<id>
 	@# `make guide` is the reading surface — every check, tickable, nothing
@@ -867,6 +887,15 @@ hifth-app-verify: ## Look at live hifth.app: pages answer, the app is this commi
 
 hifth-app-list-count: ## How many people are on hifth.app's Mac-app list, and how many still to confirm; never shows an address. ARGS=--local counts the copy on this laptop
 	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/list-count.mjs $(ARGS)
+
+hifth-app-apple-key: ## Are the Sign in with Apple key, its id and the team id saved on hifth.app's Cloudflare project? Prints set or not set only. ARGS="--save <AuthKey_<id>.p8>" (owner, own terminal) sends them
+	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/apple-sign-in-key.mjs $(ARGS)
+
+hifth-app-ready: ## Is hifth.app ready for its first upload? One line per thing it needs (project, domain, each site setting, spam-check widget, main's front page), names and yes or no only
+	@dotenvx run --quiet -- node .claude/skills/deploy-site/scripts/first-upload.mjs
+
+hifth-app-invites: ## Makes invite codes for sign-in's tester stage and the line for the SIGN_IN_INVITES setting. The owner runs it; the codes are shown once. ARGS="--count 12"
+	@node .claude/skills/deploy-site/scripts/invite-codes.mjs $(ARGS)
 
 # Copies of what readers gave hifth.app (the Mac-app list, and accounts once sign-in is
 # merged), kept on this laptop outside every repo. Counts only on screen.

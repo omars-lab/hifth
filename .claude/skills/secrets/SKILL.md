@@ -54,6 +54,28 @@ holds a name this table does not list.
 | `DOTENV_PUBLIC_KEY_ENCRYPTED` | The public half of the key, written by the tool at the top of `.env.encrypted`. Not a secret. | Written by `make env-encrypt`. | `make env-check` | Changes only when the key changes (below). | It is in the committed file. |
 | the key (`.env.keys`) | The private key that unlocks `.env.encrypted`. Not in the table's file; the only one that opens everything. | Made by `make env-encrypt` the first time. | `make env-keys-status` | "Changing the key" below. | LastPass, `dotenvx/hifth` (`make env-keys-push`). |
 
+## Secrets kept only on Cloudflare
+
+Some values never come to the laptop's saved settings at all: the live site reads them, and
+nothing here does. They are saved on the hifth.app Pages project (`hifth-app`) and nowhere else.
+None of them is printed; each check says only whether it is set.
+
+| Secret on the project | What it is | Where it comes from | Check it (Claude may run) | Replace it (owner) |
+| --- | --- | --- | --- | --- |
+| `APPLE_SIGN_IN_KEY` | The Sign in with Apple key file's text. The server signs with it to end a reader's link with Apple when they delete their account. Not the upload key. | Apple developer site → **Keys → +**, ticked for Sign in with Apple on the app's ID (`app-setup` step ⑥). Downloaded once; kept at `~/.appstoreconnect/sign-in-with-apple/AuthKey_<id>.p8`, readable by the owner only. | `make hifth-app-apple-key` | Revoke the key on Apple's Keys page, make a new one the same way, `make hifth-app-apple-key ARGS="--save <new file>"`, then delete the old file. |
+| `APPLE_SIGN_IN_KEY_ID` | Which key that is (10 letters and digits). | Read from the key file's name by the same command. | same | Saved with the key. |
+| `APPLE_TEAM_ID` | The Apple team. It also goes public in the app-links file with the first upload; saved as a secret here only so all three travel together. | Read from this laptop's signing certificate by the same command. | same | Never changes for the team. |
+| `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `LIST_KEY`, `TURNSTILE_SECRET` | The notify list's address, its public key, the site's own key, and the spam check's secret. | The `deploy-site` skill's "Once, by the owner" steps; `TURNSTILE_SECRET` also sits in the saved settings (`make hifth-app-turnstile`). | `wrangler pages secret list --project-name hifth-app` from the sign-in working copy (names only) | As each source says. |
+
+**Apple's key files are not backed up, on purpose.** Neither the Sign in with Apple key nor the
+App Store upload key has a LastPass copy; LastPass holds only the key that opens the encrypted
+settings. Each Apple key lives in its file on this laptop and, for the sign-in key, in
+Cloudflare, which never hands a secret back. If the laptop is lost, the live site keeps working on
+Cloudflare's copy; the file is only needed again to move or rotate the key, and then the owner
+makes a new one on Apple's Keys page (about 10 minutes), saves it as above and revokes the old
+one. Fewer copies means fewer places it can leak from. (Owner, 2026-11-18: "No copy, remake if
+lost", asked when the sign-in key was first saved.)
+
 ## If a value leaked
 
 ```mermaid
@@ -119,6 +141,11 @@ session in this repo (wired in `.claude/settings.json`). It refuses:
 It is a seatbelt for honest mistakes, not a wall. A new check that needs to look at saved values
 goes into `scripts/env/lib/envfile.py` as a command that prints names, shapes or fingerprints
 only, with a test; never a one-off pipeline.
+
+**A new refusal is written against what names the file, not a list of commands that read it.**
+A reviewer found six ways round a list of reading commands in minutes. To test the guard for
+real, start a fresh session against a made-up `.env` holding a marker word, try to reach it, and
+count the marker in the output: it must be 0.
 
 ## Scripts — when to use each
 

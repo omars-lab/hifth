@@ -31,10 +31,22 @@ struct AppStatus: Equatable {
         let upTo: String?
     }
 
+    /// What the file may switch on: something a build carries but does not offer until
+    /// hifth.app is ready for it. Off unless named, so a launch with no connection offers none
+    /// of them. A name this build does not know is ignored.
+    enum Offer: String, CaseIterable {
+        /// Sign in with Apple (sign-in step 16).
+        case signIn = "sign-in"
+        /// The button that keeps a copy of the reader's marks on hifth.app (sign-in step 21).
+        /// Offered only beside sign-in, so the file names both.
+        case marksCopy = "marks-copy"
+    }
+
     /// The lowest version still allowed, by platform ("ios", "macos").
     var lowest: [String: String] = [:]
     var notice: Notice?
     var off: Set<Part> = []
+    var on: Set<Offer> = []
 
     /// The file, or nil when it is not a format-1 status file.
     static func parse(_ data: Data) -> AppStatus? {
@@ -58,6 +70,9 @@ struct AppStatus: Equatable {
         if let off = root["off"] as? [Any] {
             status.off = Set(off.compactMap { ($0 as? String).flatMap(Part.init(rawValue:)) })
         }
+        if let on = root["on"] as? [Any] {
+            status.on = Set(on.compactMap { ($0 as? String).flatMap(Offer.init(rawValue:)) })
+        }
         return status
     }
 
@@ -67,10 +82,11 @@ struct AppStatus: Equatable {
         var tooOld = false
         var notice: Notice?
         var off: Set<Part> = []
+        var on: Set<Offer> = []
     }
 
     func verdict(platform: String, version: String, dismissed: Set<String>) -> Verdict {
-        var verdict = Verdict(off: off)
+        var verdict = Verdict(off: off, on: on)
         guard let mine = Version(version) else { return verdict }
         if let floor = lowest[platform].flatMap(Version.init), mine < floor { verdict.tooOld = true }
         if let notice, !dismissed.contains(notice.id) {

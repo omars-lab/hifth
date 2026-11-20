@@ -164,6 +164,12 @@ choices from the owner that are already written up in `docs/design/sign-in.md`: 
 unlocks first, where reader accounts live, and whether a reader's copy is locked so we cannot
 read it.
 
+*Status 2026-11-19: the three choices were made 2026-11-18. Sign-in, delete my account, the
+account section and the copy of a reader's marks are built on the laptop and switched off
+(order in `.claude/plans/sign-in-build.md`, step table on the sign-in page). Backups are built,
+with a restore practised on made-up rows (㉘). What is left waits on the owner's steps, listed on
+the goal page.*
+
 - Sign in with Apple through Apple's own sheet in the apps, as the sign-in page recommends.
 - **Delete my account, inside the app**, which also cancels the Apple sign-in. Apple requires it.
 - A place in the app to see what is stored about you and to remove it.
@@ -200,16 +206,19 @@ read it.
 
 | Skill | Gap | Fix |
 |---|---|---|
-| (new) `release-app` | No skill covers version, archive, upload, review, staged release | New skill with its scripts and a "when to use each" table |
-| (new) `operate-app` | Nothing covers reading crashes, reports and reviews, or the fix-in-a-hurry path | New skill; the pages from stages 4 and 5 live beside it |
-| `crash-logs` | Works only with a cable | Add crashes from readers' devices |
-| `deploy-site` | No undo | Add the put-back command |
-| `app-setup` | No store-listing or signing-for-the-store steps | Add them |
-| `native-shell` | Builds the private flavour by default, says nothing of store builds | Add the store build and its guard |
-| `walk-app` | Its 218-line checklist has no store-build walk | Add a first-launch, no-connection and sign-in walk |
-| `manual-testing` | Parked list predates the launch | Add the screen-reader and device checks |
-| `testing` | Silent on unsteady tests | Add the rule and the report |
+| (new) `release-app` | No skill covers version, archive, upload, review, staged release | Done 2026-11-17: the skill exists, with `make app-release` |
+| (new) `operate-app` | Nothing covers reading crashes, reports and reviews, or the fix-in-a-hurry path | Done 2026-11-20: a map skill that hands each step to its owner; fix-in-a-hurry stays in understanding-processes |
+| `crash-logs` | Works only with a cable | Done: `make app-store-crashes` reads what Apple collected |
+| `deploy-site` | ~~No undo~~ done (`make hifth-app-put-back`, its drill waits on the first upload) | Add the put-back command |
+| `app-setup` | ~~No store-listing or signing-for-the-store steps~~ done 2026-11-20: they live in the release guide and `make app-store-listing`; app-setup now points there | Point at them |
+| `native-shell` | ~~Says nothing of store builds~~ done: the store build, Apple's accessibility check, the profile check (the default flavour is still the private one, on purpose, for the pitch) | Add the store build and its guard |
+| `walk-app` | ~~No store-build walk~~ done: the release check with the public flavour, the first-open walk as Apple's reviewer, the fresh-install look (a sign-in walk waits on sign-in being switched on) | Add a first-launch, no-connection and sign-in walk |
+| `manual-testing` | ~~Parked list predates the launch~~ done 2026-11-20: the silent switch and crash report checks are on the list, and a check fails the push when a waiting ledger check is missing from it | Add the screen-reader and device checks |
+| `testing` | ~~Silent on unsteady tests~~ done 2026-11-19 (㉕) | The rule, the push's report and `make second-tries` |
 | every skill | Not checked recently | Read each one's first line (what makes it fire) and fix vague ones |
+| every skill | 28 session notes in `docs/retros/` say `folded: no` (2026-11-19): snags no skill has taken in yet | Fold them with `skill-manager:consolidate-retros`, oldest first; the loop counts what is left |
+
+Open on 2026-11-20: 5 rows above, and 18 notes not folded. (2026-11-19: 6 rows, 28 notes.)
 
 **The loop prompt:** `.claude/loop-prompts/operational-readiness.md`, beside the existing
 walk-and-fix one (the repo's folder for these; no second folder). Run with `/loop` and no
@@ -241,7 +250,7 @@ no copy on GitHub, last changed 2026-09-30.
 
 - Send the two permission emails; set the fallback date.
 - Delete the 134 merged branches and ask GitHub Support for the purge.
-- The three sign-in choices.
+- ~~The three sign-in choices.~~ Made 2026-11-18. The live list is on the goal page.
 - The hifth.app first upload steps (key permission, database step, four secrets, mail sender).
 - The EU trader declaration.
 - Give the terminal the permission the Mac's keyboard test needs, or run it while away.

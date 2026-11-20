@@ -47,6 +47,27 @@ the update watcher (`pwa-update.ts`, loaded only once the offline worker is up) 
 usual cost of more files. `e2e/lazy-tools.spec.ts` lists both moved files, and opens the colour key
 on a slow first load.
 
+**Trimmed 2026-11-19: total 220.3 → 218.5 KB, start-up about 161.3 → 160.1 KB.** The sign-in
+work (copies of marks kept on hifth.app, and removals that stay removed when copies merge) took
+the app 0.3 KB over the 220 KB cap and the start-up download over its 161 KB limit. Two build
+settings, no feature moved:
+- **Shorter class names (−1.6 KB).** Each rule in a component's style file got a name like
+  `_grip_1as2g_98`, and the last part was the line the rule sat on. The hash in the middle already
+  keeps two files apart, so the line number was only bytes, in the script and the style sheet
+  both, about 1,600 times in start-up. `src/class-names.ts` now names them `_grip_1as2g`, and
+  refuses a build where two files would share a name. The readable part still comes first, so the
+  browser tests that find elements by it (`[class*='foldFlap']`) are unchanged; the picture
+  comparisons all still match. `src/class-names.test.ts` holds the rule.
+- **No preload stand-in (−0.2 KB).** The build shipped a small script that does the browser's
+  module preloading for browsers that cannot. Every browser the app is built for can: the iPad and
+  iPhone app needs iOS 17 and the Mac app macOS 14, both Safari 17. Without it a browser still
+  loads every file, only without the head start (`modulePreload: { polyfill: false }`).
+  `e2e/lazy-tools.spec.ts` fails if the stand-in comes back into the start-up script.
+
+Looked at and left: a third minifier pass (no gain), comments in the built scripts (there are
+none), and the words file (plain strings, nothing to squeeze). That leaves 1.5 KB under the cap and
+0.9 KB under the start-up limit.
+
 **Trimmed 2026-11-17: start-up 160.9 → 160.1 KB.** The verse menu (the tap-and-hold menu
 on a verse, and its corner twin) moved out of start-up into the rarely-used file: it draws
 nothing until a verse is held, so it mounts only then. Main script 127.98 → 127.35 KB; the

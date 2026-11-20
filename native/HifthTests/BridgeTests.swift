@@ -6,7 +6,7 @@ import Testing
 /// change on one side without the other shows up here or there.
 @Suite("Bridge")
 struct BridgeTests {
-    @Test("decodes the three messages the page sends")
+    @Test("decodes the four messages the page sends")
     func decode() {
         #expect(BridgeMessage(body: ["type": "ready"]) == .ready)
         #expect(BridgeMessage(body: ["type": "route", "hash": "#/hafs-kfqc/2:255"]) == .route("#/hafs-kfqc/2:255"))
@@ -14,6 +14,10 @@ struct BridgeTests {
             BridgeMessage(body: ["type": "share", "url": "https://x/#/a", "title": "t", "text": "b"])
                 == .share(url: "https://x/#/a", title: "t", text: "b")
         )
+        #expect(BridgeMessage(body: ["type": "ask", "id": "q1", "name": "ping"]) == .ask(id: "q1", name: "ping"))
+        #expect(BridgeMessage(body: ["type": "ask", "id": "q1", "name": "sign-in", "text": "made-up"]) == .ask(id: "q1", name: "sign-in", text: "made-up"))
+        #expect(BridgeMessage(body: ["type": "ask", "id": "q1", "name": "sign-in", "text": 7]) == .ask(id: "q1", name: "sign-in"))
+        #expect(BridgeMessage(body: ["type": "ask", "id": "q1", "name": "sign-in", "text": String(repeating: "z", count: 5000)]) == .ask(id: "q1", name: "sign-in", text: String(repeating: "z", count: 200)))
     }
 
     @Test("ignores anything else")
@@ -22,6 +26,9 @@ struct BridgeTests {
         #expect(BridgeMessage(body: ["type": "route"]) == nil)
         #expect(BridgeMessage(body: ["type": "share"]) == nil)
         #expect(BridgeMessage(body: ["type": "eval", "code": "1"]) == nil)
+        #expect(BridgeMessage(body: ["type": "ask", "name": "ping"]) == nil)
+        #expect(BridgeMessage(body: ["type": "ask", "id": "q1"]) == nil)
+        #expect(BridgeMessage(body: ["type": "ask", "id": "", "name": "ping"]) == nil)
     }
 
     @Test("the boot script hands the page its platform and the public site")

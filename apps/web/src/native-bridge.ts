@@ -18,6 +18,11 @@
  *    page is not a secure context, so `navigator.share` and the clipboard are
  *    both missing, and a share button that silently did nothing would be the
  *    first thing a tester pressed.
+ *  - `ask`: a question the page waits on (`askApp`, in ask-app.ts), for what only the app
+ *    can do, such as Apple's sign-in sheet. The app always answers, through
+ *    `window.__HIFTH_ANSWER__`, with the question's id; WebKit's own way of
+ *    replying to a message was not relied on, since Apple's page does not say
+ *    how the page receives it (sign-in ⑤).
  *
  * What the page needs from the shell: `publicBase`, the site's real address.
  * A link built from `location.origin` inside the shell would read
@@ -48,7 +53,8 @@ export interface NativeInfo {
 export type NativeMessage =
   | { type: "ready" }
   | { type: "route"; hash: string }
-  | { type: "share"; url: string; title: string; text: string };
+  | { type: "share"; url: string; title: string; text: string }
+  | { type: "ask"; id: string; name: string; text?: string };
 
 type Handler = { postMessage: (m: unknown) => void };
 type Shelled = Window & {
@@ -94,7 +100,8 @@ export function shareBase(): string {
     : info.publicBase + "/";
 }
 
-function post(message: NativeMessage): boolean {
+/** Send one message to the shell. `false` means "not in the shell". */
+export function post(message: NativeMessage): boolean {
   if (!isNative()) return false;
   const handler = (window as Shelled).webkit?.messageHandlers?.hifth;
   if (!handler) return false;
@@ -125,6 +132,12 @@ export function postReady(): void {
 export function postRoute(hash: string): void {
   post({ type: "route", hash });
 }
+
+/*
+ * `askApp`, the question the page waits on, is in ask-app.ts: only the
+ * account section asks, and that section loads after the first page, so the
+ * question code loads with it rather than with every reader's start-up.
+ */
 
 /**
  * Let the shell turn the page. Returns the teardown; outside the shell it

@@ -102,3 +102,41 @@ test("settings that stop saying the app uses only exempt encryption are refused"
   assert.match(out, /export answer: the Mac settings do not say/);
   assert.doesNotMatch(out, /iPad and iPhone settings do not say/);
 });
+
+// The Arabic listing: Apple shows the store page in the reader's language, so
+// each box a reader sees has an Arabic twin, `<name>-ar`, under the same rules.
+// The words below are made up for the tests.
+test("every box a reader sees has its Arabic twin, and the real one fits", () => {
+  const { code, out } = run(real);
+  assert.equal(code, 0, out);
+  for (const name of ["name", "subtitle", "keywords", "promotional-text", "description"]) {
+    assert.match(out, new RegExp(`^${name}-ar: (\\d+ of \\d+|set)$`, "m"));
+  }
+  assert.doesNotMatch(out, /^review-notes-ar/m, "the reviewer reads English");
+});
+
+test("a missing Arabic box is refused", () => {
+  const { code, out } = run(real.replace("<!-- field: subtitle-ar -->", ""));
+  assert.equal(code, 1);
+  assert.match(out, /problem: subtitle-ar: missing/);
+});
+
+test("an Arabic subtitle over 30 characters is refused", () => {
+  const { code, out } = run(withField("subtitle-ar", "كلمات مصنوعة للاختبار تطول كثيرا عن الحد"));
+  assert.equal(code, 1);
+  assert.match(out, /problem: subtitle-ar: \d+ characters, \d+ over Apple's 30/);
+});
+
+test("an Arabic name that is not the app's display name is refused", () => {
+  const { code, out } = run(withField("name-ar", "اسم"));
+  assert.equal(code, 1);
+  assert.match(out, /name-ar: differs from the iPad and iPhone app's display name/);
+});
+
+test("an Arabic keyword that repeats a subtitle word is refused, whatever its vowel marks", () => {
+  const page = withField("subtitle-ar", "كَلِمة مصنوعة");
+  const pattern = /(<!-- field: keywords-ar -->\n```text\n)[\s\S]*?(\n```)/;
+  const { code, out } = run(page.replace(pattern, "$1كلمة,أخرى$2"));
+  assert.equal(code, 1);
+  assert.match(out, /keywords-ar: 1 keyword\(s\) repeat a word already in the name or subtitle/);
+});

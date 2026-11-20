@@ -77,7 +77,9 @@ pre-commit, scoped to the staged files. It refuses:
   and not merely in a comment (`scripts/code-pointers.mjs`);
 - a `proof` naming a test that is gone, or a string that is in the file but is
   not a test title. A title that drifted by one word is exactly the drift worth
-  catching and is invisible to a substring search;
+  catching and is invisible to a substring search. The check reads titles from the file's
+  text, so a test made in a loop with a built title (`${title} (${lang})`) is not a test to it.
+  Keep the proving test's title written out, and share the body through a function instead;
 - a `proof` naming a `gate` script `package.json` does not define;
 - a use case with no proof at all;
 - a `feature` the map does not define, or an `includes` naming nothing;

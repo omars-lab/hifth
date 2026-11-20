@@ -19,6 +19,12 @@ The list lives in `checklist.md` so it can change without this skill changing. T
 for the phone-and-device checks already live in the validation ledger — the checklist points at
 them by name and never copies them (see the `validate` skill, "Tier 7").
 
+## Scripts — when to use each
+
+| Script | What it does | When | Command |
+|---|---|---|---|
+| `scripts/checklist-names-every-check.mjs` | lists every check in the validation ledger that still waits on a person and is not named on `checklist.md`, and fails if there is one | after adding a check to the ledger; the scripts' tests run it on every push | `node .claude/skills/manual-testing/scripts/checklist-names-every-check.mjs` |
+
 ## Adding an item
 
 One entry in `checklist.md`, under **Parked**, in priority order (what a Study Quran reader would

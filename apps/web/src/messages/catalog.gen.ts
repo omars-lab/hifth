@@ -280,6 +280,7 @@ export interface Catalog {
   readonly licenceBody: string;
   readonly licenceHead: string;
   readonly likeVerse: (d: { readonly ref: string | number }) => string;
+  readonly linkNowhere: string;
   readonly listenAsRecited: string;
   readonly listenFaster: string;
   readonly listenOnce: string;

@@ -10,11 +10,11 @@ under item ㉚. Nothing here is sent anywhere yet; the owner pastes it into Appl
 - **What this page is:** the words for Apple's forms, drafted where they can be checked against
   the app.
 - **Done so far:** the notes for Apple's reviewer; the name, subtitle, keywords, short promotion
-  and description in English; the category; the privacy answer; the age answers (4+); the export
+  and description in English, and a first draft in Arabic; the category; the privacy answer; the age answers (4+); the export
   answer; the support and privacy addresses.
 - **Still to come:** the EU trader answer (the owner's), the price and copyright line (the
   owner's), the "rights to the content" answer (waits on the permissions), the listing in
-  Arabic, and a test account once sign-in exists.
+  Arabic read by a native reader (drafted 2026-11-20), and a test account once sign-in exists.
 - **What keeps it honest:** a test checks every field against Apple's length limits and against
   the app's own settings (`make app-store-listing` prints the counts).
 
@@ -161,6 +161,60 @@ It works with no connection from the first launch: the pages and the look-alike 
 No account, no ads, no tracking. Nothing you write leaves your device.
 ```
 
+## What will a reader see on the store page in Arabic?
+
+Apple shows the store page in the reader's language, so each box above has an Arabic twin. This
+is a first draft, written from the English boxes with the app's own Arabic words (العلامات for
+bookmarks, استمع for listen, احفظ في ملف for saving to a file). **A native reader reads it
+before it goes in** (the owner's, on the waiting list). The same check holds it to Apple's limits.
+
+- **The name stays "Hifth"**, the word under the icon, since the app has no Arabic name under
+  its icon. The app's own Arabic calls it حفظ ("ثبّت حفظ ليعمل دون إنترنت"). Writing حفظ on the
+  store page too would need the same name under the icon on Arabic phones; that is the owner's
+  call, and the check will follow it.
+- **The description names it once as «حفظ» (Hifth)**, as the app's Arabic does, so a reader
+  who searches either finds it.
+
+<!-- field: name-ar -->
+```text
+Hifth
+```
+
+<!-- field: subtitle-ar -->
+```text
+للحُفّاظ: الآيات المتشابهة
+```
+
+<!-- field: keywords-ar -->
+```text
+قرآن,مصحف,حفظ,حافظ,مراجعة,متشابهات,تثبيت,أخطاء,جزء,صفحة,تسميع,تلاوة
+```
+
+<!-- field: promotional-text-ar -->
+```text
+راجع على الصفحة المطبوعة التي حفظت منها، والآيات التي تكاد تُقرأ مثلها على بُعد لمسة. يعمل دون إنترنت من أول تشغيل.
+```
+
+<!-- field: description-ar -->
+```text
+«حفظ» (Hifth) رفيقٌ في المراجعة لمن حفظ القرآن الكريم.
+
+يعرض صفحات المصحف المطبوعة كلها، وعددها ٦٠٤ صفحات. وعند أي آية يعرض المواضع الأخرى في القرآن التي تكاد تُقرأ مثلها، وهي حيث يزلّ الحافظ، والكلمات التي يبدأ عندها كل موضع بالاختلاف.
+
+ما يمكنك فعله:
+
+- المس آية لترى الآيات التي تشبهها، وانتقل إلى أيٍّ منها مباشرة.
+- علّم زلّاتك بالكتابة على الصفحة بإصبعك أو بقلم Apple Pencil. وعلى iPad، انقر القلم مرتين أو اضغط عليه لتغيير الأداة.
+- ضع العلامات، واحفظها في ملف تأخذه معك.
+- استمع إلى تلاوة آية. هذا وحده يحتاج إلى اتصال.
+- افتح آية من تطبيق آخر أو من الاختصارات برابط.
+- استخدم الأزرار بالعربية أو الإنجليزية. يتبع التطبيق لغة جهازك، ويغيّرها مفتاح واحد.
+
+يعمل دون اتصال من أول تشغيل: الصفحات والآيات المتشابهة داخل التطبيق.
+
+لا حساب، ولا إعلانات، ولا تتبّع. ولا يغادر جهازك شيء مما تكتبه.
+```
+
 **Category:** Education first, Reference second. (The Mac app's own settings already say
 Education, and a test keeps the two the same.)
 
@@ -184,14 +238,16 @@ Why that answer is true, case by case:
 
 | What leaves the device | Why it is not "collected" |
 |---|---|
-| Nothing the reader writes: notes, marks, bookmarks, progress | It stays in the app's own storage on the device. No code sends it. |
+| Nothing the reader writes: notes, marks, bookmarks, progress | It stays in the app's own storage on the device. The only code that can send it is the copy of the marks (sign-in step 21), and the app offers that only when sign-in is on, which it is not in any build yet. |
 | One small file at each launch, and nothing while reading | The store build leaves the recitation out (launch item ⑥). Its only request is the launch check (launch item ㉑): one public file from hifth.app, asked for with no cookies, no identifiers and nothing about the reader, compared on the device, and kept by us nowhere. Apple counts data as collected only when it is kept longer than it takes to answer the request, so this is not collected. If the recitation comes back, the fetch is of a public sound file from a site that is not code inside our app, so Apple's word "partner" would not cover it either. |
 | A problem report, if the reader sends one | The reader sees the whole report first and sends it from their own mail app, with their own address on it, each time they choose to. Apple lists exactly this kind of "customer service request", given by the reader and shown in full, as one that need not be declared. |
 
 The app's privacy file says the same (tracks nobody, collects nothing), and a test refuses a
 listing whose answer disagrees with it. **This answer changes when sign-in ships:** an account
-stores an Apple sign-in id and the reader's copy, so the form then lists those, "linked to
-you", for "app functionality".
+stores Apple's number for the reader (User ID) and, only if the reader presses its button, one
+copy of their marks, including the mistakes they marked (Other User Content, and Sensitive Info
+if the owner says yes). The form then lists those, "linked to you", for "app functionality".
+The full new answer is drafted in [the privacy draft](sign-in-privacy-draft.md).
 
 ## How old must a reader be?
 
@@ -227,6 +283,6 @@ keeps both set.
   page artwork, the word-root data and the tajweed colours (the store build leaves the
   recitation out, item ⑥). The answer "we have the rights" waits on the two permission emails
   and the artwork question (launch items ③ ④ ㊺); it is the same lock as the upload.
-- **The listing in Arabic.** Apple shows the listing in the reader's language. The Arabic
-  version is drafted after the English one is settled, and read by a native reader before it
-  goes in.
+- **The listing in Arabic** is drafted (above, 2026-11-20) and checked against Apple's limits.
+  Before it goes in, a native reader reads it, and the owner says whether the Arabic store name
+  is "Hifth" or حفظ.

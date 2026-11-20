@@ -99,8 +99,24 @@ three entry files in `apps/landing/functions/api/` (sign up, confirm, leave). Th
 Supabase: the table and the three database functions the form calls are in
 `supabase/migrations/20261113000001_notify_list.sql`, with their checks in
 `supabase/tests/notify_list.test.sql`. The upload runs from `apps/landing/`; none of this is
-copied into the release folder, and `wrangler.toml` names no database (the check refuses one).
+copied into the release folder. `wrangler.toml` names one database, sign-in's accounts
+(binding `ACCOUNTS`, made 2026-11-18); the check refuses any other, so the list can never move
+back onto Cloudflare by accident. `wrangler pages dev` ignores that line, so a laptop trial of
+sign-in passes `--d1 ACCOUNTS=<local name>` and never touches the real one. On the laptop, Apple
+also refuses to hand its keys to that server, so a real note from Apple's sheet is refused there
+as "keys-unreachable" even when nothing is wrong; that is the laptop, not the code
+(`docs/issues/apple-keys-refuse-local-runtime.md`). Laptop tests use made-up keys instead, and
+the first real check of a note is the live site after the owner's upload.
 
+- **Before the first upload, and after each step below:** `make hifth-app-ready`. One line per
+  thing the upload needs, ✓ or ✗, with who does the missing ones: the Pages project and its live
+  branch, hifth.app attached and active, each site setting (names only), the spam-check widget,
+  whether the release can put the real spam-check key in (main's page keeps the test key; the
+  real one must be saved as `HIFTH_APP_TURNSTILE_SITEKEY`), and whether sign-in's code is on main
+  yet. Only live uploads are counted, not previews.
+  It cannot see the email list's tables on the real Supabase project, so it names that as the
+  owner's to confirm. First run 2026-11-18: project and the three Apple settings ✓; domain not
+  attached, the four email-form settings, the widget and the front page's key ✗.
 - **Once, by the owner** (it needs the database password; the `manage-database` skill's login
   check first):
   1. Push the migration to the real Supabase project, and store the hash of a new, real site key
@@ -109,6 +125,61 @@ copied into the release folder, and `wrangler.toml` names no database (the check
      site key) and `TURNSTILE_SECRET`. Also the sender's settings, once the decision
      `notify-list-sender` is made.
   3. Add `SUPABASE_DB_URL` to the saved keys, so `make hifth-app-list-count` can count.
+  4. **The Sign in with Apple key** (sign-in step 12): make it on Apple's site
+     (<https://developer.apple.com/account/resources/authkeys/add>) as the `app-setup` skill's
+     step ⑥ says, field by field, keep the file in `~/.appstoreconnect/sign-in-with-apple/`, then in
+     your own terminal `make hifth-app-apple-key ARGS="--save <that file>"`. It saves three
+     secrets, `APPLE_SIGN_IN_KEY`, `APPLE_SIGN_IN_KEY_ID` and `APPLE_TEAM_ID`, and prints none of
+     them. Claude checks afterwards with `make hifth-app-apple-key`, which prints set or not set.
+  5. **Switch sign-in on**, after the first upload: `SIGN_IN=on` and
+     `APPLE_APP_IDS=com.bytesofpurpose.hifth` on the project (neither is secret). Until then the
+     sign-in addresses answer "not on yet", whatever else is set. That is only the server's
+     half. The store apps show Apple's button only once `apps/landing/app-status.json` lists
+     `"on": ["sign-in"]` (the names it accepts are `OFFERS` in
+     `.claude/skills/deploy-site/scripts/app-status.mjs`), so turn the server on first,
+     release, try it, then add the app's switch and release again. The try uses a build that
+     is not the store build, launched with `HIFTH_SIGN_IN_URL=https://hifth.app`: such a build
+     shows the button whenever it names a server, while the store build waits for the launch
+     file (`SignIn.offered` in `native/Hifth/Account/SignIn.swift`). Before the app's switch:
+     the account section's button may carry Apple's logo only from Apple's own artwork, which
+     is not in the repo yet (an owner question; backlog row `sign-in-apple-logo-artwork`).
+     Two things first, or readers'
+     links with Apple can never be cut and no sign-in can start (sign-in steps 13, 14 and 17):
+     - every file in `apps/landing/migrations/` is in the real accounts database, put in with
+       the owner's yes (0001 to 0003 are in as of 2026-11-18; a later file needs a new yes). `0002_apple_tickets.sql` holds Apple's cancel tickets;
+       `0003_sign_in_counts.sql` holds the count that limits how many sign-ins can be started,
+       and without it every sign-in fails at its first step;
+     - the owner has registered `https://hifth.app/api/sign-in/apple-notice` on Apple's developer
+       site as the address for Sign in with Apple's server-to-server notices, so Apple can say
+       when a reader has left. Apple's own steps (read 2026-11-18,
+       <https://developer.apple.com/help/account/capabilities/enabling-server-to-server-notifications/>):
+       Certificates, Identifiers & Profiles, Identifiers, pick the app's identifier, scroll to
+       Sign in with Apple, Configure, type the address, Done, then Save at the top right. It
+       takes one address, and only on the main app identifier.
+     And one thing soon after, which does not hold the switch up (sign-in step 17): the owner
+     adds the one free rate limiting rule on the hifth.app zone, so a single caller hammering
+     the sign-in start address is cut off at Cloudflare before our code or database is touched.
+     Cloudflare's own steps (read 2026-11-18,
+     <https://developers.cloudflare.com/waf/rate-limiting-rules/create-zone-dashboard/>): on the
+     zone's Security rules page, Create rule, Rate limiting rules; name it; Field "URI Path",
+     Operator "equals", Value `/api/sign-in/word`; With the same characteristics: IP; When rate
+     exceeds: 2 requests per 10 seconds; Then take action: Block, for 10 seconds; Deploy. The
+     free plan gives one rule with those 10-second periods. Only that one address: never
+     `/api/sign-in` as a whole, which would also catch delete my account and Apple's notices.
+     Be clear what it buys: it does not stop one caller keeping new sign-ins out (question ⑮ on
+     the sign-in page says why), and it does not cover the project's `pages.dev` address.
+     What it does buy: every ask runs our code, and the free plan runs it 100,000 times a day
+     before Cloudflare answers with its own error until midnight UTC. With the rule, one caller
+     gets about 17,000 asks a day through to that address.
+
+     And if the owner chooses to keep sign-in to invited testers (question ⑮, sign-in step 18):
+     the owner runs `make hifth-app-invites` in their own terminal. It shows each code once, to
+     hand to a tester, and one line starting `SIGN_IN_INVITES=`. The part after the `=` goes on
+     the project as the setting `SIGN_IN_INVITES` (not a secret: it holds scrambled copies of
+     random codes, never a code). From then on only someone with a code can start a sign-in.
+     Never run the command for the owner or read its output: the codes are theirs to hand out.
+     To add testers, run it again and add the new copies after a comma. Clearing the setting
+     does not close sign-in, it opens it to everyone; `SIGN_IN` is the switch that closes it.
 - **To try the form locally:** `supabase start` (in a scratch copy if the repo's own is busy, named
   by `SUPABASE_WORKDIR`), then `make hifth-app-serve`, and open http://127.0.0.1:7124/ (press C to
   leave a comment on the page). It reads the local list's address and key from `supabase status`
@@ -157,8 +228,10 @@ laptop. Short version:
 - **How old is the last copy?** `make hifth-app-backup-status`, which fails past two days.
 
 What is copied and what is not: only `notify.people` from the list (the site's key stays out),
-and only `accounts` and `apple_tickets` from accounts (sign-in sessions and one-time words are
-left out, since a reader can sign in again). A copy counts only when it is whole: a Postgres copy
+and `accounts`, `apple_tickets` and `marks_copies` from accounts (sign-in sessions and one-time
+words are left out, since a reader can sign in again). The readers' kept copies of their marks
+reach the real database only on the owner's yes (sign-in ㉑); until then a copy says
+`ev=table_not_yet tables=marks_copies` and copies the rest. A copy counts only when it is whole: a Postgres copy
 must end with its "dump complete" line, an accounts copy must be whole statements, and each
 table's rows must match a count asked of the store itself. Copies go to
 `~/Library/Application Support/hifth-backups/copies/` (or `--out`), one folder per run, owner-only,
@@ -169,6 +242,8 @@ log, never a row.
 with the reason. Before each copy the script asks the store which tables it has, and stops if one
 is on neither list. So a new migration that adds a table (say, readers' marks) stops the next
 backup until someone adds the table to one list or the other, in the same change as the migration.
+A test also reads every accounts migration in the checkout and fails the commit when one makes a
+table on neither list, so this is caught before the backup ever runs.
 A reader signing up during a copy makes the copy and the count differ, so a mismatch is tried once
 more before it counts as a failure. The list's saved address must be the direct or session one
 (port 5432); `pg_dump` cannot work through Supabase's pooler on port 6543, and the script says so.
@@ -182,8 +257,8 @@ more before it counts as a failure. The list's saved address must be the direct 
    one as the list's setup steps say.
 3. **Accounts:** apply the migrations to the empty database (`wrangler d1 migrations apply`),
    then load `accounts.sql` with `wrangler d1 execute <name> --file accounts.sql`. Count
-   `accounts` and `apple_tickets` and compare. Sign-ins were not copied, so every reader signs in
-   again once; their account and marks are still theirs.
+   `accounts`, `apple_tickets` and `marks_copies` and compare. Sign-ins were not copied, so every
+   reader signs in again once; their account and their kept marks are still theirs.
 4. Write down in launch item ㉘ when it was done and the counts.
 
 The first real copy is also the first test of the real path (the real address, the site's own
@@ -193,6 +268,17 @@ The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch
 `/read/` as an endless loop, and the app needs none, since it keeps its place after the `#`.
 Cloudflare also serves `privacy.html` at `/privacy`, `sources.html` at `/sources` and
 `support.html` at `/support`, so `_headers` names those addresses.
+
+To see which answers really get the `_headers` rules, serve the exact release folder with
+`wrangler pages dev` (the `run-app` table has the line) and read each address's headers with
+`curl -sI`. Cloudflare adds them to the files it serves, not to the answers the server code
+writes, and only this showed it (2026-11-15).
+
+The app's pages carry small scripts whose words change with every build. Their safety rule in
+`_headers` holds a gap, `{app-inline-scripts}`, that the release fills with each script's
+fingerprint, and the release refuses the folder if the gap is left unfilled
+(`scripts/shipped.mjs`). That keeps `unsafe-inline` out without copying a fingerprint by hand;
+use the same gap for a new page script.
 
 **The support page** (`support.html`, `ar/support.html`) is the address the store listing gives
 for help. It says how to send a problem report from the app, naming the buttons by the words the
@@ -235,6 +321,13 @@ page leaves out. A release missing either copy is refused. To change a source, c
   - To see which sign-in a folder uses: `wrangler whoami` there prints "Active profile: hifth".
     In the main checkout the saved key wins over the sign-in, which is what the scripts want.
   - Cloudflare marks these commands experimental, so check `wrangler auth --help` if one fails.
+- **Deleting a folder Finder is writing to.** Removing the old release folder failed with
+  "directory not empty" while Finder kept adding `.DS_Store` to it, and retrying never wins.
+  Move the folder aside first, then delete the moved copy (`docs/issues/old-folder-written-to-while-deleted.md`).
+- **A list drawn from a page, counted against the page.** The dev side bar listed 9 panels
+  where the features page showed 11, because it matched a card's class exactly and two cards
+  carry a second class. Before calling such a list done, count what the page shows and what
+  the list shows.
 - **The Cloudflare Pages project** is `hifth-app` unless `HIFTH_APP_PAGES_PROJECT` says otherwise.
 
 ## Scripts — when to use each
@@ -251,12 +344,15 @@ page leaves out. A release missing either copy is refused. To change a source, c
 | `scripts/release-hifth-app.mjs verify` | Looks at the live site as a reader's browser does | After a release; when someone asks if hifth.app is live | `make hifth-app-verify` (`ARGS="--url https://x.pages.dev"` for a preview) |
 | `apps/web/e2e/landing-shots.spec.ts` (a Playwright file, not a script here) | Builds the plain public app and photographs it for the front page: the laptop, phone and iPad-with-pen views and one picture per feature, into `apps/landing/shots/` as JPEGs. Each picture checks the screen shows what it is meant to before it is taken. Never from the pitch build | After a change to how the app looks that the front page's pictures show; before a release that changes the front page | `make landing-shots` |
 | `scripts/list-count.mjs` | Asks the Supabase database how many people are on the Mac-app list and how many still have to confirm, and prints those two numbers only; an answer holding anything else is refused. The password goes in the environment, never on the command line | When someone asks how many signed up; after a sign-up test on the live site | `make hifth-app-list-count` (`ARGS=--local` for the copy on this laptop) |
+| `scripts/first-upload.mjs` | Says whether hifth.app is ready for its first upload, one ✓ or ✗ line per need, from Cloudflare (with the saved keys) and from origin/main. Prints names and set or not set, never a value, token, account or database address | Before walking the owner through the first upload, and after each step they finish | `make hifth-app-ready`; tests: `node --test .claude/skills/deploy-site/scripts/first-upload.test.mjs` |
+| `scripts/invite-codes.mjs` | Makes invite codes for sign-in's tester stage (16 letters and digits each, 80 random bits) and prints them once, with the one line for the `SIGN_IN_INVITES` setting, which holds only their scrambled copies. Saves nothing. It shares the code's rules with the server (`apps/landing/lib/invites.mjs`) | The owner, in their own terminal, when testers are invited or more are added. Claude never runs it for real codes | `make hifth-app-invites` (`ARGS="--count 12"`); tests: `node --test .claude/skills/deploy-site/scripts/invite-codes.test.mjs` |
+| `scripts/turnstile-widget.py` | Looks for the spam check's widget for hifth.app on the new Cloudflare account and prints its public site key. With `--make` it makes the widget if there is none, then saves its secret as `TURNSTILE_SECRET` and its public site key as `HIFTH_APP_TURNSTILE_SITEKEY` through `scripts/env/env-set.sh`. The repo's front page keeps Cloudflare's test key so the form works on this laptop; the release puts the saved site key into its own copy of the page, in both languages, and refuses a copy that kept the test key. The token, account ID and secret are never printed. The token needs the Account, Turnstile, Edit permission; without it Cloudflare answers "Authentication error" (seen 2026-11-14). On 2026-11-18 the saved token could list widgets (there were none yet) | Once, before the first release; to read the site key again | `make hifth-app-turnstile` (`ARGS=--make` to make it) |
+| `scripts/apple-sign-in-key.mjs` | With no word, asks Cloudflare whether the three Sign in with Apple settings are saved on the project and prints "set" or "not set" for each, never a value. With `--save <AuthKey_<id>.p8>` (the owner, in their own terminal) it first checks the file is named the way Apple names it, is a P-256 private key, is readable by its owner only and sits outside the repo, then sends the key, its id (from the file name) and the team id (`scripts/lib/signing-team.mjs`) as secrets, and checks. Refuses unless the saved token and account id are loaded. The first check, 2026-11-18, said not set three times | Once, when the owner has made the key (app-setup step ⑥); after any key change; when sign-in's account deletion says it cannot reach Apple | `make hifth-app-apple-key` (`ARGS="--save <file>"`, owner only); tests: `node --test .claude/skills/deploy-site/scripts/apple-sign-in-key.test.mjs` |
 | `scripts/try-tidy.mjs` | Runs the list's daily tidy Worker once in Cloudflare's local runner, against the local Supabase copy only, presses its timer, reads its `ev=tidy_` line and says how many unconfirmed addresses it removed. Refuses when no local copy with a web interface is running | After changing the tidy Worker or its database function, before it is put live | `make hifth-app-tidy-try` (`SUPABASE_WORKDIR=<scratch copy>`, `ARGS="--port <n>"`); tests: `node --test .claude/skills/deploy-site/scripts/try-tidy.test.mjs` |
 | `scripts/backup-reader-data.mjs` | Copies readers' data (the list, and accounts once sign-in is merged) to this laptop, checks each copy is whole and its rows match the store's own count, keeps the newest 30 runs owner-only outside any repo, and writes a manifest of counts. `drill` does the whole copy and put-back on made-up rows in throwaway databases; `status` says how old the last copy and practice are. Prints counts only | Before the first real copy, and after any change to the list's or accounts' tables (drill); to copy for real once the owner says yes; to see if copies are current | `make hifth-app-backup-drill` (`ARGS="--accounts-migrations <folder>"`), `make hifth-app-backup`, `make hifth-app-backup-status`; tests: `node --test .claude/skills/deploy-site/scripts/backup-reader-data.test.mjs` |
-| `scripts/turnstile-widget.py` | Looks for the spam check's widget for hifth.app on the new Cloudflare account and prints its public site key. With `--make` it makes the widget if there is none, then saves its secret as `TURNSTILE_SECRET` through `scripts/env/env-set.sh`. The token, account ID and secret are never printed. The token needs the Account, Turnstile, Edit permission; without it Cloudflare answers "Authentication error" (seen 2026-11-14) | Once, before the first release; to read the site key again | `make hifth-app-turnstile` (`ARGS=--make` to make it) |
 | `supabase/tests/notify_list.test.sql` (database checks, not a script here) | Proves the public key alone cannot read the list or the keys, the site key is needed, a repeat sign-up answers the same, only the latest confirm code works, and leaving removes the row | After changing the list's database part | `make notify-db-test` (`supabase start` first) |
 | `scripts/shipped.mjs` | The lists of what may and may not go up, and the folder check | Changing what the site may hold | imported; tests: `node --test .claude/skills/deploy-site/scripts/shipped.test.mjs` |
-| `scripts/app-links.mjs` | Writes and checks the file at `/.well-known/apple-app-site-association` that tells Apple which hifth.app links open the iPad and iPhone app (launch item ⑨). The release fills in the Apple team's id from this laptop's signing setup (`scripts/lib/signing-team.mjs`, shared with the store build check), so the id is never in the repo, and no message ever prints it. It claims only the reader's addresses with a mus'haf place, the same ones the app takes (`Route.swift`). With no signing team, a release is refused and `check --no-build` leaves the file out with one line. `_headers` serves it as JSON, never cached; `verify` checks it answers with no redirect, since Apple follows none | Changing which links open the app, or adding a mus'haf the app ships | imported by `check`, `publish` and `verify`; tests: `node --test .claude/skills/deploy-site/scripts/app-links.test.mjs` |
+| `scripts/app-links.mjs` | Writes and checks the file at `/.well-known/apple-app-site-association` that tells Apple which hifth.app links open the iPad and iPhone app (launch item ⑨). The release fills in the Apple team's id from this laptop's signing setup (`scripts/lib/signing-team.mjs`, shared with the store build check), so the id is never in the repo, and no message ever prints it. Once published, though, the id is public: it is in this file for anyone to read, which Apple requires and every app that opens links does. It is not a secret, but the first upload is the first time it appears in public, so the owner hears that before the upload (the launch goal's waiting list, item 1). It claims only the reader's addresses with a mus'haf place, the same ones the app takes (`Route.swift`). With no signing team, a release is refused and `check --no-build` leaves the file out with one line. `_headers` serves it as JSON, never cached; `verify` checks it answers with no redirect, since Apple follows none | Changing which links open the app, or adding a mus'haf the app ships | imported by `check`, `publish` and `verify`; tests: `node --test .claude/skills/deploy-site/scripts/app-links.test.mjs` |
 | `scripts/dev-sidebar.mjs` | The side bar on every local front page, design page and the features page (never in the app, never on the live site). Its groups: the front pages, then each section of the features page with its cards (pitch-only cards tagged), then the design pages. It lights the page you are on, folds to icons on a laptop and becomes a Menu drawer on a phone. The release check refuses its marker and `dev-hub/` if either reaches a folder going up | Changing the side bar's groups or looks; a new feature card or design page needs nothing, it is read from the pages | imported by `prepare`; tests: `node --test .claude/skills/deploy-site/scripts/dev-sidebar.test.mjs` |
 | `scripts/dev-designs.mjs` | Lists every options page and written note for the side bar, newest commit first, and draws each note (its pictures, diagrams and highlighted boxes) as a page. The release check refuses `docs/` if it ever reaches a folder going up | Changing how notes are drawn or listed; a new design page needs nothing, the list is read from the folders | imported by `prepare`; tests: `node --test .claude/skills/deploy-site/scripts/dev-designs.test.mjs` |
 | `scripts/live.mjs` | The look at the live site | Changing what verify asks for | imported; tests: `node --test .claude/skills/deploy-site/scripts/live.test.mjs` |

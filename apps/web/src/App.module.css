@@ -189,6 +189,18 @@
   }
 }
 
+/* Larger text on a phone (rough build, backlog row a11y-larger-text). At its
+   1.25 cap the top bar has the room of a 300 px screen on an iPhone SE, so it
+   takes the narrowest screen's steps in both languages: the name line goes and
+   ▤ steps aside (the info panel's "Choose the mus'haf" is its way back). On the
+   SE simulator in English the info button was pushed off the edge without it. */
+@media (max-width: 480px) {
+  :global(:root:is([data-text-grow="phone"], [data-text-grow="own"])) .tagline,
+  :global(:root:is([data-text-grow="phone"], [data-text-grow="own"])) .mushafBtn {
+    display: none;
+  }
+}
+
 .pageNum {
   font-size: var(--text-lg);
   font-weight: 600;

@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The permissions the Mac App Store build asks for (Release only):
+    - the sandbox, which the Mac store requires (launch item 8);
+    - the network, and the files the reader picks;
+    - Sign in with Apple, through Apple's own sheet (launch item 9). Apple allows it only for
+      apps signed with the paid team, so the everyday Debug build, signed on the laptop with
+      no profile, asks for nothing (Hifth-macOS.entitlements stays empty).
+  Anything else needs the owner's yes first.
+-->
 <plist version="1.0">
 <dict>
 	<key>com.apple.security.app-sandbox</key>
@@ -8,5 +17,9 @@
 	<true/>
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
 </dict>
 </plist>

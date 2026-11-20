@@ -60,6 +60,9 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
 8. **Licensing questions** — the App Store, the page layout's licence, the third upstream source.
    Needs someone qualified to read licences; not needed for the pitch. Answers go into the
    decision records, not tests.
+   The licences of the outside sources we check ourselves against, and that our saved copies
+   of them hold no Qur'an text, are the ledger check `qul-rulers-terms-and-text-free` (10
+   minutes, signed in to the QUL site).
 
 9. **Pinch on a Mac trackpad, inside the Mac app.** `make app-run-mac ROUTE=/hafs-kfqc/p45`,
    then pinch on the page and on the two-page spread. Right: the page zooms under your
@@ -213,6 +216,22 @@ Two ways to open the app: this laptop, `make pitch` then `http://localhost:7122/
     jumps straight to a point and often misses the mark, while a hand homes in; only a
     hand can say whether the spread makes the marks hard to hit (page bar plan, open
     question ①; backlog row pagebar-fisheye-marker-flees).
+28. **A recitation with the silent switch on, on a real iPhone or iPad.** Install the app from
+    this laptop, turn the silent switch on, open a verse and press play; then take a call while
+    it plays. Right: you hear it with the switch on, and it pauses for the call. Why not a
+    machine: the simulator has no silent switch, and only an ear can say it was heard (launch
+    item 12). Steps in the ledger: `silent-switch-recitation-heard`.
+29. **A crash report reaching "Report a problem" on a real iPad.** Run the app from Xcode on a
+    real iPad, have Xcode hand it a made-up crash report (Debug menu, Simulate MetricKit
+    Payloads), reopen the app and open Report a problem; later, once a test build is out, have a
+    tester's copy crash and send it. Right: the report shows in Report a problem, and the
+    tester's crash shows in the crash list. Why not a machine: only a real device receives
+    Apple's reports. Steps in the ledger: `device-crash-report-arrives`.
+30. **Twenty look-alike pairs against a printed mus'haf.** Take 20 of the pairs the app calls
+    look-alikes, look each up in a printed King Fahd Complex mus'haf (with a hafiz if you can),
+    and say whether a hafiz would really mix them up. Right: most are genuine look-alikes; every
+    verdict, right or wrong, is kept. Why not a machine: whether two verses are confusable is a
+    hafiz's judgement (30 to 45 minutes). Steps in the ledger: `edge-spot-audit`.
 
 ## Done
 

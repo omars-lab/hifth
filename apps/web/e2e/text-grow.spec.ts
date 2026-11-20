@@ -1,0 +1,157 @@
+import { test, expect, type Page } from "@playwright/test";
+
+// Larger text, rough build (backlog row a11y-larger-text). A reader's chosen
+// way makes the bars and panels grow; the mus'haf page keeps its own size, and
+// nothing runs off the side of a small phone. With no way picked, nothing moves.
+//
+// The switch is only in a build made with VITE_TEXT_GROW=1 (`make text-grow-e2e`),
+// because the app has no room left under its size cap for it yet: the way the
+// owner picks gets a trim first. The ordinary build must carry none of it.
+const grown = process.env.HIFTH_TEXT_GROW === "1";
+
+test("the ordinary build carries no larger-text code, so a link to it changes nothing", async ({ page }) => {
+  test.skip(grown, "this run serves the larger-text build");
+  await page.goto("/?grow=own&size=1.5#/hafs-kfqc/2:48");
+  await expect(page.locator("svg[role='group']").first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.dataset.textGrow)).toBeUndefined();
+  const scripts = await page.evaluate(() => [...document.scripts].map((s) => s.src).filter(Boolean));
+  for (const src of scripts) expect(await (await page.request.get(src)).text()).not.toContain("hifth.text.grow");
+});
+
+async function sizes(page: Page) {
+  const bar = page.locator('[data-phone-bar] button').first();
+  await expect(bar).toBeVisible();
+  const page7 = page.locator("svg[role='group']").first();
+  await expect(page7).toBeVisible();
+  // The words themselves, not only the box around them: on iPhone Safari the
+  // app's "keep text at 100%" rule stopped the words growing while their boxes
+  // grew (found on the SE simulator, 2026-11-20).
+  const words = await bar.evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    return range.getBoundingClientRect().height;
+  });
+  return {
+    words,
+    bar: (await bar.boundingBox())!.height,
+    page: (await page7.boundingBox())!.width,
+    overflow: await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
+  };
+}
+
+for (const lang of ["ar", "en"]) test(`a chosen size grows the bar's buttons, not the page, and nothing runs off the side (${lang})`, async ({ page }) => {
+  test.skip(!grown, "needs the larger-text build: make text-grow-e2e");
+  // The narrowest phone we support, the iPhone SE. English is the wider row:
+  // on the SE simulator its info button was pushed off the edge (2026-11-20).
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto(`/?lang=${lang}#/hafs-kfqc/2:48`);
+  const before = await sizes(page);
+
+  await page.goto(`/?lang=${lang}&grow=own&size=1.5#/hafs-kfqc/2:48`);
+  await page.reload();
+  const after = await sizes(page);
+
+  expect(after.bar / before.bar).toBeGreaterThan(1.4);
+  expect(after.words / before.words).toBeGreaterThan(1.4);
+  // Every button on the top bar is still on the screen: when the words really
+  // grew on the iPhone SE, the info button was pushed off the right edge.
+  const cut = await page.locator("[data-top-bar] button").evaluateAll((all) =>
+    all
+      .map((b) => b.getBoundingClientRect())
+      .filter((r) => r.width > 0 && (r.left < -1 || r.right > window.innerWidth + 1)).length,
+  );
+  expect(cut, "top-bar buttons cut off at the screen's edge").toBe(0);
+  expect(after.page).toBeCloseTo(before.page, 0);
+  expect(after.overflow).toBeLessThanOrEqual(0);
+});
+
+// The verse's drawer lifts the chosen verse above itself. With no tool open it
+// sits in the bottom bar's room and says nothing; grown, it rose past that room
+// and covered the verse on the SE simulator at 1.5 times (2026-11-20). It also
+// measured itself at its size before growing.
+// In Safari on an iPhone, an app not yet on the Home Screen shows a banner
+// asking to install it, a third of the SE's screen. The test browsers' storage
+// is kept, so the banner never showed there; here the storage says it is not
+// kept, as Safari's does. On the SE simulator at 1.5 times, the grown top bar,
+// the banner and the grown drawer left no room for the verse (2026-11-20).
+for (const banner of [false, true]) for (const way of ["off", "own"]) test(`the chosen verse stays above its drawer on an iPhone SE (larger text ${way}${banner ? ", install banner" : ""})`, async ({ page }) => {
+  test.skip(!grown, "needs the larger-text build: make text-grow-e2e");
+  if (banner) {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "userAgent", { get: () => "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1" });
+      if (navigator.storage) {
+        navigator.storage.persisted = async () => false;
+        navigator.storage.persist = async () => false;
+      }
+    });
+  }
+  // The SE's screen less Safari's own bars, about the room the page really
+  // gets there: shorter than the bare 667 our test browsers give it.
+  await page.setViewportSize({ width: 375, height: 500 });
+  await page.goto(`/?lang=en&grow=${way}&size=1.5#/hafs-kfqc/2:48`);
+  await page.reload();
+  const drawer = page.getByRole("region", { name: /^Tools for / });
+  await expect(drawer).toBeVisible();
+  if (banner) {
+    // Proves the banner really shows here, so the grown run means something;
+    // grown, it waits while the drawer is open.
+    const notice = page.getByText("Install Hifth so it stays with you offline");
+    if (way === "off") await expect(notice).toBeVisible();
+    else await expect(notice).toBeHidden();
+  }
+  const covered = async () =>
+    page.evaluate(() => {
+      const card = document.querySelector("[data-verse-drawer]")!.getBoundingClientRect();
+      const lines = [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")]
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.width > 0);
+      if (lines.length === 0) return -1;
+      return Math.round(Math.max(0, ...lines.map((r) => r.bottom - card.top)));
+    });
+  await expect.poll(covered, { message: "pixels of the verse under the drawer", timeout: 8_000 }).toBe(0);
+  if (way === "own") {
+    const zoom = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector("[data-verse-drawer]")!).zoom) || 1);
+    expect(zoom, "the drawer still grows for the reader who asked").toBeGreaterThan(1.2);
+  }
+});
+
+// With only the panels following a phone at its largest size, the drawer grows
+// twice over, and the four tools share a 375 px row: the Same roots count
+// dropped under its icon, apart from it (SE simulator, 2026-11-20). The test
+// browsers do not know the phone's text size, so the phone's answer at its
+// largest (body text 53 px, against 17 by default) is given to the app's probe.
+for (const way of ["panels", "phone"]) test(`the Same roots count stays beside its icon when the drawer grows (${way})`, async ({ page }) => {
+  test.skip(!grown, "needs the larger-text build: make text-grow-e2e");
+  await page.addInitScript(() => {
+    const real = window.getComputedStyle.bind(window);
+    window.getComputedStyle = ((el: Element, pseudo?: string | null) => {
+      const style = real(el, pseudo);
+      // The probe is a hidden <i>; Chromium drops its font setting, so it is
+      // found by its shape rather than by that.
+      if (el instanceof HTMLElement && el.tagName === "I" && el.style.visibility === "hidden" && el.style.position === "absolute") {
+        return new Proxy(style, { get: (s, k) => (k === "fontSize" ? "53px" : Reflect.get(s, k)) });
+      }
+      return style;
+    }) as typeof window.getComputedStyle;
+  });
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto(`/?lang=en&grow=${way}#/hafs-kfqc/2:48`);
+  await page.reload();
+  const roots = page.locator("[data-verse-drawer] button[aria-expanded]").filter({ hasText: "⬡" });
+  await expect(roots).toBeVisible();
+  const apart = await roots.evaluate((b) => {
+    const [icon, count] = [...b.querySelectorAll(":scope span[aria-hidden]")].map((s) => s.getBoundingClientRect());
+    if (!icon || !count) return -1;
+    return Math.abs(icon.top + icon.height / 2 - (count.top + count.height / 2));
+  });
+  const zoom = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector("[data-verse-drawer]")!).zoom) || 1);
+  expect(apart, "the icon and its count were both found").toBeGreaterThanOrEqual(0);
+  expect(zoom, "the drawer grows well past the bars' cap, as on the simulator").toBeGreaterThan(1.6);
+  expect(apart, "px between the middles of the icon and its count").toBeLessThan(8);
+});
+
+test("with no way picked, the app is exactly as it was", async ({ page }) => {
+  await page.goto("/#/hafs-kfqc/2:48");
+  await expect(page.locator("svg[role='group']").first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.dataset.textGrow)).toBeUndefined();
+});

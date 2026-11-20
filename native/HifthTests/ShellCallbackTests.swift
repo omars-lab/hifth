@@ -110,4 +110,30 @@ struct ShellCallbackTests {
         #expect(opened.urls.isEmpty)
         #expect(model.currentHash == "#/hafs-kfqc/p3")
     }
+
+    // Backlog app-link-it-cannot-place: the shell used to drop a link it could
+    // not read, so the reader tapped it and nothing happened. It now hands the
+    // page one fixed address, and the page says the link goes nowhere.
+    @Test("a plain link to a place the app cannot find is handed on, not dropped")
+    func unplacedLinkHandedOn() throws {
+        let (model, opened) = model()
+        var routes: [String] = []
+        model.runScript = { _, args in if let r = args["route"] as? String { routes.append(r) } }
+        model.receive(.ready)
+        model.open(try url("hifth:///hafs-kfqc/x"))
+        model.open(try url("https://hifth.app/read/#/hafs-kfqc/p0"))
+        #expect(routes == [Route.unplaced, Route.unplaced])
+        #expect(opened.urls.isEmpty)
+    }
+
+    @Test("a plain link naming no place only opens the app")
+    func emptyLinkTurnsNothing() throws {
+        let (model, _) = model()
+        var scripts: [String] = []
+        model.runScript = { source, _ in scripts.append(source) }
+        model.receive(.ready)
+        model.open(try url("hifth://open"))
+        model.open(try url("https://hifth.app/read/"))
+        #expect(scripts.isEmpty)
+    }
 }

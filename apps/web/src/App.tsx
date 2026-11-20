@@ -7,7 +7,8 @@ import {
   clearSurah,
   dropBookmark,
   liftBookmark,
-  mergeBookmarks,
+  copyRemovals,
+  removalsOf,
   isMistake,
   addNote,
   editNote,
@@ -199,6 +200,7 @@ import { ShareSheet } from "./components/ShareSheet";
 import { ListenOptions } from "./components/ListenOptions";
 import { rememberListenWay, savedListenWay } from "./listen-way";
 import { OfflineNotice } from "./components/OfflineNotice";
+import noticeStyles from "./components/OfflineNotice.module.css";
 import { CoachMarks } from "./components/CoachMarks";
 import { BookmarkRibbons } from "./components/BookmarkRibbons";
 import { UndoBar } from "./components/UndoBar";
@@ -254,6 +256,7 @@ import {
   type PitchSurah,
 } from "./pitch/pitch";
 import { RECITATION } from "./recitation";
+import { TAJWEED } from "./tajweed-in-build";
 // The one commentary drawer and its sources (decision `tafsir-provider`): the
 // pitch's book is one source, a live public service another, and the drawer
 // draws whichever is on without knowing which.
@@ -489,7 +492,9 @@ export function App(): JSX.Element {
   useEffect(() => {
     if (!commentaryOpen) setNoteShort(false);
   }, [commentaryOpen]);
-  const [page, setPage] = useState(START_PAGE);
+  // Set only through `setPage` from `usePageDestination` below, which keeps
+  // where the reader is going in step with it.
+  const [page, setPageState] = useState(START_PAGE);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // Words marked inside the selected verse, by a hold or a link's `?w=`. Kept
   // here, not in the page, because the page is built afresh when the book goes
@@ -629,6 +634,13 @@ export function App(): JSX.Element {
    * in settings, so a first open goes straight to the page.
    */
   const [coachUp, setCoachUp] = useState(false);
+  /**
+   * The last link opened pointed nowhere: one no place can be read from, or a
+   * verse or page past the end (backlog app-link-it-cannot-place). One fixed
+   * line says so, the same for a link from the address bar and one the Mac and
+   * iPad app hands on. A good link and Hide take it away.
+   */
+  const [nowhere, setNowhere] = useState(false);
 
   const stageRef = useRef<PageStageHandle>(null);
   // The page's room, which the cards stand inside rather than over the bars.
@@ -1085,7 +1097,7 @@ export function App(): JSX.Element {
   }, [selectedKey]);
 
   // Where the reader is, and where they are going (`page-destination.ts`).
-  const { pageRef, pendingPageRef, turnLanded } = usePageDestination(page);
+  const { pageRef, pendingPageRef, setPage } = usePageDestination(page, setPageState);
 
   useEffect(() => {
     loadManifest()
@@ -1938,7 +1950,6 @@ export function App(): JSX.Element {
         void stage.turnTo(next).then((landed) => {
           if (pendingPageRef.current !== next) return; // a newer turn owns it
           if (landed) {
-            turnLanded(next);
             setPage(next);
             // The place you were holding was on the page you just left. Drop it
             // as the leaf lands — atomically with the header — so the highlight,
@@ -1959,7 +1970,7 @@ export function App(): JSX.Element {
       // because nothing here was selected.
       void stage.navigateTo(anchor, { pulse: false, zoom: 1 });
     },
-    [pageTurns, announce, t, turnLanded],
+    [pageTurns, announce, t, setPage],
   );
 
   // Bookmarks (docs/decisions/bookmark-fold.md, bookmark-admin.md): ribbons on
@@ -1982,8 +1993,10 @@ export function App(): JSX.Element {
   }, [keepHistory]);
   const {
     bookmarks,
+    removed: bookmarksRemoved,
     loaded: bookmarksLoaded,
     commit: commitBookmarks,
+    loadFile: loadBookmarksFile,
     restore: restoreBookmarks,
     saved: bookmarksSaved,
   } = useBookmarks(announce, t.bmNotSaved, recorders.bookmarks);
@@ -2148,6 +2161,7 @@ export function App(): JSX.Element {
   const {
     notes,
     scoped,
+    removed: notesRemoved,
     loaded: notesLoaded,
     commit: commitNotes,
     commitScoped,
@@ -2205,6 +2219,7 @@ export function App(): JSX.Element {
   // (confusion-jumps, step 3): how many different verses it went to.
   const {
     confusions,
+    removed: jumpsRemoved,
     device,
     loaded: jumpsLoaded,
     ready: jumpsReady,
@@ -2541,15 +2556,24 @@ export function App(): JSX.Element {
 
   // The file carries the notes that gather verses and, apart from them, the
   // marked mistakes, which are still the old kind of note, and the jumps. The
-  // same text is what the carry to hifth.app sends (moved.ts).
+  // same text is what the carry to hifth.app sends (moved.ts). It also names
+  // the notes taken away, by id and time only, so a device that merges it
+  // takes them away too (removals.ts).
   const bookmarkFileText = useCallback(
     () =>
       JSON.stringify(
-        toBookmarkFile(bookmarks, Date.now(), notes.filter(isMistake), [...scoped], confusions),
+        toBookmarkFile(
+          bookmarks,
+          Date.now(),
+          notes.filter(isMistake),
+          [...scoped],
+          confusions,
+          copyRemovals([bookmarksRemoved, notesRemoved, jumpsRemoved], [...bookmarks, ...scoped, ...notes, ...confusions]),
+        ),
         null,
         2,
       ),
-    [bookmarks, notes, scoped, confusions],
+    [bookmarks, notes, scoped, confusions, bookmarksRemoved, notesRemoved, jumpsRemoved],
   );
 
   const saveBookmarkFile = useCallback(() => {
@@ -2570,24 +2594,35 @@ export function App(): JSX.Element {
         announce(t.bmLoadBad);
         return null;
       }
-      const merged = mergeBookmarks(bookmarks, file.bookmarks);
-      const newBookmarks = merged.length - bookmarks.length;
-      const newNotes = file.notes || file.scopedNotes ? loadNotesFile(file.notes ?? [], file.scopedNotes ?? []) : 0;
-      const newJumps = file.confusions ? loadConfusionsFile(file.confusions) : 0;
+      // The one list of what was taken away goes to each kind by its id's first letter.
+      const gone = file.removed ?? [];
+      const noteGone = removalsOf(gone, "note");
+      const newNotes =
+        file.notes || file.scopedNotes || noteGone.length > 0
+          ? loadNotesFile(file.notes ?? [], file.scopedNotes ?? [], noteGone)
+          : 0;
+      const jumpGone = removalsOf(gone, "jump");
+      const newJumps = file.confusions || jumpGone.length > 0 ? loadConfusionsFile(file.confusions ?? [], jumpGone) : 0;
       // Say what the file brought; "nothing new" only when it brought nothing at all.
-      const parts = [
-        ...(newBookmarks > 0 ? [t.bmLoaded(newBookmarks)] : []),
-        ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
-        ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
-      ];
-      const added = Math.max(0, newBookmarks) + newNotes + newJumps;
-      const said =
-        from === "carry" ? t.carryArrived(added) : parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0);
-      // A file loaded is not a step: its notes and jumps are not either.
-      commitBookmarks(merged, said, { unrecorded: true });
-      return added;
+      // A file loaded is not a step Undo hears, for any of the three kinds.
+      return loadBookmarksFile(file.bookmarks, removalsOf(gone, "bookmark"), (newBookmarks) => {
+        const parts = [
+          ...(newBookmarks > 0 ? [t.bmLoaded(newBookmarks)] : []),
+          ...(newNotes > 0 ? [t.noteLoaded(newNotes)] : []),
+          ...(newJumps > 0 ? [t.jumpLoaded(newJumps)] : []),
+        ];
+        const added = newBookmarks + newNotes + newJumps;
+        return from === "carry" ? t.carryArrived(added) : parts.length > 0 ? parts.join(t.sep) : t.bmLoaded(0);
+      }) + newNotes + newJumps;
     },
-    [announce, bookmarks, commitBookmarks, loadNotesFile, loadConfusionsFile, t],
+    [announce, loadBookmarksFile, loadNotesFile, loadConfusionsFile, t],
+  );
+  // The account section's "Keep a copy of my marks on hifth.app" (sign-in step
+  // 21c): it sends this file, and loads what comes back the way a saved file is
+  // loaded, so the reader hears what the copy brought.
+  const copyMarks = useMemo(
+    () => ({ file: bookmarkFileText, load: (text: string) => void loadBookmarkFile(text) }),
+    [bookmarkFileText, loadBookmarkFile],
   );
   // Opened by the old address to carry the reader's marks here (moved.ts).
   // Ready only once all three kinds of mark are read in: the notes and the jumps
@@ -2818,7 +2853,9 @@ export function App(): JSX.Element {
       const { step } = got;
       const said = back ? t.markUndone(step.said) : t.markRedone(step.said);
       const put = step.store === "bookmarks" ? restoreBookmarks : step.store === "notes" ? restoreNotes : restoreConfusions;
-      put(back ? step.before : step.after, said);
+      // Only what this step changed: a mark a file or another device's copy
+      // brought in since is kept, not taken away for every device (㉒).
+      put(back ? step.before : step.after, said, back ? step.after : step.before);
     },
     [announce, keepHistory, restoreBookmarks, restoreNotes, restoreConfusions, t],
   );
@@ -3746,8 +3783,16 @@ export function App(): JSX.Element {
   // `origin` only chooses the wording of the announcement — a jump lands by the
   // same code as a shared link, and must keep doing so.
   const restoreState = useCallback(
-    (state: AppState, origin: "link" | "jump" = "link") => {
-      if (!resolver) return;
+    (state: AppState, origin: "link" | "jump" = "link"): boolean => {
+      if (!resolver) return true;
+      // A verse past the end of its surah, or a page past the last, is no
+      // place at all: turned away before the link changes anything else, so
+      // the router can say it points nowhere (backlog app-link-it-cannot-place).
+      // A verse that exists but is not drawn yet keeps its own message below.
+      const sel = state.select;
+      const past = sel === null ? (state.page ?? 0) > totalPages : sel.ayah > (AYAH_COUNTS[sel.surah - 1] ?? 0);
+      if (past) return false;
+      if (origin === "link") setNowhere(false);
       const edition = resolver.edition;
       // A *link* says which desk it wants, and says it by omission too: pasting a
       // plain link while sitting on a dark field puts you back on the default,
@@ -3762,7 +3807,7 @@ export function App(): JSX.Element {
         const panel = state.open;
         if (panel === "jump") setJumperOpen(true);
         else if (panel === "about") setColophonOpen(true);
-        else if (panel === "key") setLegendOpen(true);
+        else if (panel === "key") setLegendOpen(TAJWEED);
         else if (panel === "editions") setEditionOpen(true);
         else if (panel === "tips") setCoachUp(true);
         else if (panel === "lookalikes" || panel === "roots") {
@@ -3810,7 +3855,7 @@ export function App(): JSX.Element {
           announce(t.arrivedPage(origin, state.page));
           void stage.showPage(state.page);
         }
-        return;
+        return true;
       }
 
       // A range link (`2:47-2:48`) restores the highlight + its merged menu, on
@@ -3824,7 +3869,7 @@ export function App(): JSX.Element {
           setSelectedKey(null);
           setSelectedRange(null);
           announce(t.rangeUnavailable);
-          return;
+          return true;
         }
         setSelectedKey(null);
         setSelectedRange(keys);
@@ -3835,7 +3880,7 @@ export function App(): JSX.Element {
         // leaves no single-verse mark on the first verse, so a link must not
         // either — the two roads land on one look.
         void stage.navigateTo(keys[0]!, { pulse: false });
-        return;
+        return true;
       }
 
       const key = refToKey(edition, state.select);
@@ -3845,7 +3890,7 @@ export function App(): JSX.Element {
         setSelectedKey(null);
         setSelectedRange(null);
         announce(t.ayahUnavailable);
-        return;
+        return true;
       }
       setSelectedRange(null);
       setSelectedKey(key);
@@ -3857,8 +3902,9 @@ export function App(): JSX.Element {
       // Words the link names (`?w=3-7`) are laid as word ink on arrival. The
       // address then names the verse only, as it does after `?tool=`.
       void stage.navigateTo(key, { pulse: true, ...(origin === "link" && state.word ? { words: state.word } : {}) });
+      return true;
     },
-    [resolver, announce, t, chooseTool, handlePageMode],
+    [resolver, announce, t, chooseTool, handlePageMode, totalPages],
   );
 
   // The surah menu's line for keeping its recitation on the device
@@ -3985,7 +4031,7 @@ export function App(): JSX.Element {
 
   // Gate cold-open restore on the resolver: a deep link parsed before the
   // manifest loads must not be dropped (restoreState no-ops without a resolver).
-  useHashRouter(currentState, restoreState, resolver !== null);
+  useHashRouter(currentState, restoreState, resolver !== null, () => setNowhere(true));
   // The Mac shell's Page menu turns the page through this; nothing outside
   // the shell can see it.
   // And the iPad app hands it the Apple Pencil's double-tap and squeeze, with
@@ -4539,7 +4585,7 @@ export function App(): JSX.Element {
     <MarkUndoContext.Provider value={markUndo}>
     <FullScreenContext.Provider value={fullInBar}>
     <div className={styles.app} dir={dir} data-full={full || undefined} data-bars-away={(barsAway && !full) || undefined}data-full-tools={keepTools ? fullTools : undefined} data-full-side={keepTools ? penSide : undefined} data-full-touch={touchFullNow ?? undefined} data-pages={appPages === "row" ? "" : undefined} data-note-stands={(noteStanding && noteCorner !== null) || undefined}>
-      <header className={styles.chrome}>
+      <header className={styles.chrome} data-top-bar>
         {/* The wordmark is the colophon's opener. Publishing this app conveys
             it (GPL §6), so the source offer and the four source credits have to
             be reachable from the running page — and the chrome already carries
@@ -4686,12 +4732,38 @@ export function App(): JSX.Element {
           reader had asked to see whole. It is a notice they can act on, so it
           comes back with the bars rather than being dismissed. */}
       <OfflineNotice
-        hold={coachUp || PITCH || full}
+        // Larger text (rough build): on a phone, the grown top bar, this banner and
+        // the grown verse drawer left no room for the verse on the iPhone SE
+        // (2026-11-20), so the banner waits while a verse's drawer is open.
+        hold={coachUp || PITCH || full || (!!import.meta.env.VITE_TEXT_GROW && phone && drawerUp && document.documentElement.dataset.textGrow !== undefined)}
         onShowPacks={() => {
           setRevisionAt("juz");
           setRevisionOpen(true);
         }}
       />
+
+      {/* A link that went nowhere. Not held by the tips strip, the pitch or full
+          screen like the strip above: it answers what the reader just did, and
+          without it the tap looks ignored. It never repeats the link's words.
+          Drawn in the offline strip's own styles, so it adds one sentence and
+          no stylesheet. */}
+      {nowhere && (
+        <div className={`${noticeStyles.notice} ${noticeStyles.oneLine}`} role="status" data-notice="link-nowhere">
+          <div className={noticeStyles.text}>
+            <span className={noticeStyles.body}>{t.linkNowhere}</span>
+          </div>
+          <div className={noticeStyles.actions}>
+            <button
+              type="button"
+              className={noticeStyles.dismiss}
+              onClick={() => setNowhere(false)}
+              aria-label={t.dismissNotice}
+            >
+              {t.dismiss}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* The three verbs, once, in the layout rather than over the page — the
           first tap it teaches has to land while the strip is still up. */}
@@ -5133,7 +5205,7 @@ export function App(): JSX.Element {
       {/* CC BY 4.0's condition, discharged where a reader can see it — the
           licence the rule spans ship under requires the credit to travel with
           the work, not just with the repo. */}
-      {legendMounted && (
+      {legendMounted && TAJWEED && (
         <Later>
           <TajweedLegend
             open={legendOpen}
@@ -5167,6 +5239,7 @@ export function App(): JSX.Element {
           <Colophon
             open={colophonOpen || settingsPage}
             asPage={settingsPage && !colophonOpen}
+            marks={copyMarks}
             onClose={() => {
               setColophonOpen(false);
               setAppPage("mushaf");

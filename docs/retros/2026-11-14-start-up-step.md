@@ -3,7 +3,7 @@ date: 2026-11-14
 repo: hifth
 session: move-12-kb-out-of-startup
 branch: move-12-kb-out-of-startup
-folded: no
+folded: yes
 ---
 
 ## Snags

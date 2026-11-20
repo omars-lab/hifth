@@ -49,9 +49,11 @@ IPAD_APP      = $(DERIVED)/Build/Products/$(CONFIG)-iphonesimulator/Hifth.app
 # folder, which can be emptied for a true first open, and never touches the
 # everyday Debug app's saved notes. The id the store sees is the real one: the
 # suffix is given here, on the command line, and never in the project.
+# This copy is signed on the laptop with no profile from Apple, so it gets the
+# store's permissions minus Sign in with Apple (Hifth-macOS-Laptop.entitlements).
 MAC_RELEASE   = $(filter Release,$(CONFIG))
 MAC_ID        = $(BUNDLE_ID)$(if $(MAC_RELEASE),.release)
-MAC_ID_ARG    = $(if $(MAC_RELEASE),PRODUCT_BUNDLE_IDENTIFIER=$(MAC_ID))
+MAC_ID_ARG    = $(if $(MAC_RELEASE),PRODUCT_BUNDLE_IDENTIFIER=$(MAC_ID) CODE_SIGN_ENTITLEMENTS=Hifth/Resources/Hifth-macOS-Laptop.entitlements)
 MAC_APP       = $(DERIVED)/Build/Products/$(CONFIG)/Hifth.app
 # A sandboxed app may write only inside its own data folder ("Operation not
 # permitted" anywhere else, tried 2026-11-17). So in Release a picture is
@@ -77,6 +79,10 @@ STORE_SHOTS_JS := .claude/skills/release-app/scripts/store-shots.mjs
 # Which web build goes in: `pitch` (private, with the held commentary) or
 # `public` (what the site ships).
 FLAVOUR      ?= pitch
+# NO_TAJWEED=1 makes the store build without the tajweed colours: the fallback
+# if their data's permission does not come (app-store-launch ㊲). Unset, the
+# colours stay in, with the reader's own switch, as the owner chose 2026-11-20.
+NO_TAJWEED   ?=
 # The simulator the iPad targets use. Any name from `xcrun simctl list devices`.
 IPAD         ?= iPad Pro 13-inch (M5)
 IPAD_UDID     = $(shell $(NATIVE)/scripts/simulator-udid.sh "$(IPAD)")
@@ -164,9 +170,9 @@ ifeq ($(FLAVOUR),pitch)
 	VITE_PITCH=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
 else
 	@# The store build leaves the recitation out (app-store-launch ⑥).
-	VITE_NO_RECITATION=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
+	VITE_NO_RECITATION=1 $(if $(NO_TAJWEED),VITE_NO_TAJWEED=1) $(WEB) exec vite build --outDir dist-native --emptyOutDir
 endif
-	@$(MAKE) --no-print-directory app-web-copy FLAVOUR=$(FLAVOUR)
+	@$(MAKE) --no-print-directory app-web-copy FLAVOUR=$(FLAVOUR) NO_TAJWEED=$(NO_TAJWEED)
 
 .PHONY: app-web-copy
 # The copy alone, so a test can drive it without a web build. A folder the copy
@@ -178,8 +184,13 @@ app-web-copy:
 ifeq ($(FLAVOUR),pitch)
 	rsync -a --delete $(DIST)/ $(WEB_BUNDLE)/
 else
-	rsync -a --delete --delete-excluded --exclude 'assets/private' $(DIST)/ $(WEB_BUNDLE)/
+	rsync -a --delete --delete-excluded --exclude 'assets/private' $(if $(NO_TAJWEED),--exclude 'assets/skins') $(DIST)/ $(WEB_BUNDLE)/
 	@test ! -e $(WEB_BUNDLE)/assets/private || { echo "held data reached the public shell bundle"; exit 1; }
+ifneq ($(NO_TAJWEED),)
+	@# Made without the tajweed colours (㊲): their data, and the notice that
+	@# credits it, must not have come along. The skins folder holds nothing else.
+	@test ! -e $(WEB_BUNDLE)/assets/skins || { echo "the tajweed data reached a build made without it"; exit 1; }
+endif
 	@# The store build leaves the recitation out: Quran.com's terms allow personal
 	@# use only (app-store-launch ⑥). Checked on what was copied, not on the flag.
 	@# Source maps are skipped: they hold the original source, comments and all,
@@ -289,7 +300,7 @@ app-store-shots: app-golden-public ## The store's screenshots of the public buil
 	done
 	@node $(STORE_SHOTS_JS) check $(STORE_SHOTS)
 
-app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1 [TURNS=12,24]] [STEPS=/abs/steps.json, iPad only, either way up] [PROBE_SHOT=file.png]
+app-probe: ## Print what the page sees inside the shell, TARGET=mac|ipad [EVAL='js expression' | EVALFILE=path] [DELAY_MS=…] [SIDEWAYS=1 [TURNS=12,24]] [STEPS=/abs/steps.json, iPad only, either way up] [PROBE_SHOT=file.png] [SIGN_IN_URL=http://127.0.0.1:8788, the sign-in server; not the sideways or steps runs]
 ifneq ($(TURNS),)
 ifneq ($(TARGET)$(SIDEWAYS),ipad1)
 	@echo "  ✗ TURNS needs TARGET=ipad SIDEWAYS=1: only the sideways UI test can turn the iPad"; exit 1
@@ -334,6 +345,7 @@ else
 	-xcrun simctl terminate $(IPAD_UDID) $(BUNDLE_ID) 2>/dev/null
 	SIMCTL_CHILD_HIFTH_PROBE=1 SIMCTL_CHILD_HIFTH_ROUTE='$(ROUTE)' SIMCTL_CHILD_HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
 	  SIMCTL_CHILD_HIFTH_PROBE_DELAY_MS=$(DELAY_MS) SIMCTL_CHILD_HIFTH_PROBE_SHOT='$(PROBE_SHOT_AT)' \
+	  $(if $(SIGN_IN_URL),SIMCTL_CHILD_HIFTH_SIGN_IN_URL='$(SIGN_IN_URL)') \
 	  xcrun simctl launch --console-pty --terminate-running-process $(IPAD_UDID) $(BUNDLE_ID) $(LOCALE_ARGS) \
 	  | grep '^probe {' | sed 's/^probe //' | python3 -m json.tool
 	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
@@ -342,7 +354,8 @@ else
 	$(MAKE) app-build-mac
 	@: > $(MAC_LOG)
 	$(MAC_OPEN) --env HIFTH_PROBE=1 --env HIFTH_ROUTE='$(ROUTE)' --env HIFTH_PROBE_EVAL=$(PROBE_EVAL) \
-	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) --env HIFTH_PROBE_SHOT='$(MAC_PROBE_SHOT_AT)' $(MAC_APP) $(MAC_ARGS)
+	  --env HIFTH_PROBE_DELAY_MS=$(DELAY_MS) --env HIFTH_PROBE_SHOT='$(MAC_PROBE_SHOT_AT)' \
+	  $(if $(SIGN_IN_URL),--env HIFTH_SIGN_IN_URL='$(SIGN_IN_URL)') $(MAC_APP) $(MAC_ARGS)
 	@grep '^probe {' $(MAC_LOG) | sed 's/^probe //' | python3 -m json.tool
 	$(if $(PROBE_SHOT),$(call mac_copy_out,$(PROBE_SHOT)))
 	$(if $(PROBE_SHOT),@ls -l '$(PROBE_SHOT_AT)')
@@ -434,6 +447,9 @@ app-device-register: app-generate ## Register a new plugged-in device with Apple
 	  set -o pipefail; $(XCB) -scheme Hifth-iOS -destination "id=$$udid" -allowProvisioningUpdates \
 	  -allowProvisioningDeviceRegistration DEVELOPMENT_TEAM=$(TEAM) build | $(XCPRETTY)
 	@$(MAKE) --no-print-directory app-device-install DEVICE="$(DEVICE)"
+
+app-profile-allows: ## Say whether each signing profile Xcode downloaded allows a permission (KEY=, default Sign in with Apple); prints no team id
+	@sh native/scripts/profile-allows.sh --installed $(or $(KEY),com.apple.developer.applesignin)
 
 # ---- a real iPad over USB
 app-device-install: app-generate ## Build for a plugged-in iPad, install and launch at ROUTE (DEVICE=<name from `xcrun devicectl list devices`>)

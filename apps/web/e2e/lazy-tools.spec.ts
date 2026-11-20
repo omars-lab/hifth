@@ -42,6 +42,9 @@ const LATER = [
   // page, but its report panel is only needed once the card shows.
   "components/ReportProblem.tsx",
   "problem-report.ts",
+  // The account section (sign-in step 16) lives only in the info panel.
+  "components/Account.tsx",
+  "account.ts",
   // The go-to box draws nothing until "/" or its button opens it.
   "components/Jumper.tsx",
   // The verse's "more" menu draws nothing until a press and hold opens it.
@@ -87,6 +90,19 @@ test.describe("Hifth · rarely used tools load when first opened", () => {
     expect(sources.some((s) => s.endsWith("packages/core/dist/revision.js"))).toBe(true);
     const core = LATER_CORE.filter((f) => sources.some((s) => s.endsWith(`packages/core/dist/${f}`)));
     expect(core, "core files still in the start-up script").toEqual([]);
+  });
+
+  test("the first script carries no stand-in for module preloading", async ({ page }) => {
+    // Every browser the app is built for preloads modules on its own (Safari
+    // 17 and up, which iOS 17 and macOS 14 bring), so the build's stand-in for
+    // the ones that cannot was 0.2 KB of start-up for nobody. Its tell-tale is
+    // the scan it makes for the page's preload links. (The build's own loader
+    // also asks whether the browser can preload; that one stays.)
+    await page.goto("/");
+    const src = await page.locator('script[type="module"][src]').first().getAttribute("src");
+    const text = await (await page.request.get(new URL(src!, page.url()).href)).text();
+    expect(text.length, "the start-up script came back").toBeGreaterThan(10_000);
+    expect(text.includes('link[rel="modulepreload"]'), "the stand-in is in the start-up script").toBe(false);
   });
 
   // Each opened by its own button, with the tools' file held back for a moment,

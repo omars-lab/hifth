@@ -36,14 +36,14 @@ setting was changed.*
 
 > [!important] For a hafiz
 > **Reading and revising: nothing, and it must stay that way.** Every Qur'an app either researcher looked at lets people read with no account. A sign-in wall in front of the mus'haf would cost a hafiz the thing they came for.
-> **What sign-in can add is one thing:** something of theirs that lives off their own devices, on purpose. The clearest case: revising on the iPad in the morning and in Firefox on the family laptop at night becomes one revision, not two. iCloud already carries marks between a reader's own Apple devices, but it cannot reach Firefox, Windows or Android.
+> **What sign-in can add is one thing:** something of theirs that lives off their own devices, on purpose. The clearest case: revising on the iPad in the morning and in Firefox on the family laptop at night becomes one revision, not two. Today nothing carries marks between devices except a saved file the reader moves by hand. iCloud was planned for a reader's own Apple devices but never built (checked 2026-11-19), and it could never reach Firefox, Windows or Android.
 > **The risk to weigh:** a record of where someone's memory slips in the Qur'an is close to their worship. Apple's privacy label lists religious beliefs under sensitive information. So every new way out is its own button that says what goes and to whom, and the reader can see and take back what they sent.
 
 ## Why is this being asked now?
 
 Two things changed in the week before the owner asked: the paid Apple membership arrived on 2026-11-08, and the iPad build was signed with the paid team on 2026-11-10. Sign in with Apple needs both. Testers are next, through TestFlight, once the licence reading clears the upload.
 
-**What happens if nobody decides?** Nothing breaks. Testers can still be invited through TestFlight, and they can send feedback with TestFlight's own button. Your own iPad and Mac keep in step through your own iCloud with no account. The cost of waiting is only that the online features stay unbuilt: marks in Firefox, switching a teacher link off from anywhere, and later sharing between a student and a teacher.
+**What happens if nobody decides?** Nothing breaks. Testers can still be invited through TestFlight, and they can send feedback with TestFlight's own button. Your own iPad and Mac keep in step only by a saved file you move by hand: the iCloud carry was planned but never built. The cost of waiting is only that the online features stay unbuilt: marks in Firefox, switching a teacher link off from anywhere, and later sharing between a student and a teacher.
 
 **What have we already decided that limits this?**
 
@@ -59,7 +59,7 @@ Two things changed in the week before the owner asked: the paid Apple membership
 Both researchers counted steps, and their counts differed: A said 6 done and 18 left, B said 3 done and 20 in all. The difference is bookkeeping, not disagreement. A counted three things on our side as done; B counted only Apple's side. Checked against the files on 2026-11-15:
 
 - hifth.app has server functions on Cloudflare checked in (the notify list's three). **Done** as far as the files show; the live site was not looked at, and question ⑦ asks whether the list really works.
-- The privacy check exists. **Done**, though it still has to be told about the new way out (step 16).
+- The privacy check exists. **Done**, and since 2026-11-18 it also names the new way out (step 16): only the account section may ask the app a question, and only its question file may hand the app the typed invite code.
 - "Cloudflare's free database chosen" was chosen for shared copies, not accounts, and no database is connected to hifth.app's server yet. **Not done for accounts**; moved to the owner's question ②.
 - B's three "not checked" steps (the key file, the mail sender, the website's Apple name) are steps nobody has done; neither researcher could see Apple's dashboard. They are listed as left.
 
@@ -77,30 +77,30 @@ Averaging the counts would be meaningless, so the table is split by milestone in
 | A | What sign-in unlocks first (① below) | done 2026-11-17: your marks follow you | — | — |
 | B | Where accounts live (② below) | done 2026-11-18: our own code on hifth.app's Cloudflare, free database | — | — |
 | **Milestone 1: a first real sign-in on your own iPad, hidden behind a developer setting** | | | | |
-| 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple, and add the same line to the Mac's | half done: the iPad and iPhone file asks for it (launch item ⑨); the Mac's two files do not yet | agent | an hour |
-| 7 | Let the page ask the app a question and wait for the answer (today messages only go one way, page to app) | left | agent | half a day, with tests |
-| 8 | Show Apple's sheet from the app with a fresh one-off word, and hand the result on | left | agent | a day |
-| 9 | Connect a free database to hifth.app's server for accounts (⑨ below) | left | you in the Cloudflare dashboard, or the agent with your yes | 5 minutes |
-| 10 | Server code on hifth.app: check Apple's note against Apple's published keys, make or find the account, start a session, sign out | left | agent | two to three days |
+| 6 | Give the iPad and iPhone build a permissions file asking for Sign in with Apple, and add the same line to the Mac's | done 2026-11-18: the iPad and iPhone file asks for it (launch item ⑨), and so does the Mac store build's. The two Mac builds signed on the laptop with no profile from Apple cannot carry it (Xcode refuses to build them), so the everyday one asks for nothing and the laptop's Release copy uses the store's file without that line | — | — |
+| 7 | Let the page ask the app a question and wait for the answer (before this, messages only went one way, page to app) | done 2026-11-18: works in the Mac app; the iPad tries it in step 11 | agent | half a day, with tests |
+| 8 | Show Apple's sheet from the app with a fresh one-off word, and hand the result on | left: built 2026-11-18 and tested with a stand-in sheet and server; the Mac app answers "sign-in is off" when no server is named. The real sheet is first seen in step 11, on your iPad | agent | a day |
+| 9 | Connect a free database to hifth.app's server for accounts (⑨ below) | done 2026-11-18 with your yes: made, its tables in place and empty, named in the site's settings. It reaches the live site with your next upload of hifth.app | — | — |
+| 10 | Server code on hifth.app: check Apple's note against Apple's published keys, make or find the account, start a session, sign out | done 2026-11-18 on the laptop with made-up keys and a local database copy; switched off on the live site until you switch it on there. The live fetch of Apple's keys is proved by the first real sign-in | — | — |
 | 11 | Trials on your iPad: does the page get a waiting answer from the app, and what address does it say it comes from (⑤ below) | left | you hold the iPad, agent runs it | an hour |
 | **Milestone 2: ready for people other than you** | | | | |
-| 12 | (⑧ below) Make the key file in Apple's developer site, note its ID, store both as hifth.app secrets on Cloudflare. **Needed even with no website sign-in**, because deleting an account needs it | left | you, Apple then Cloudflare dashboards | 20 minutes |
-| 13 | Get Apple's cancel-ticket at the first sign-in and keep it locked on the server; take Apple's notices that a reader has left | left | agent | a day |
-| 14 | "Delete my account" inside the app: delete everything, cut the link with Apple. App Review requires it | left | agent | a day |
-| 15 | Keep the session in the Keychain, so an iPad stays signed in for months; check at each launch that the reader has not cut Hifth off in their Apple settings | left | agent | half a day |
-| 16 | A button that says what leaves the device and who sees it, a place to see and take it back, and the new way out named in the privacy check | left | agent | a day |
-| 17 | Limit how often anyone can try, reusing the notify list's "are you a person" check | left | agent; you may need to switch on a limit in Cloudflare | half a day |
-| 18 | Keep it to testers: an invite code (an email list fails when testers hide their email), and a working test login for Apple's beta reviewers | left | agent | half a day |
-| 19 | Privacy page and App Store privacy label updated | left | agent drafts, you approve | half a day |
+| 12 | (⑧ below) Make the key file in Apple's developer site, note its ID, store both as hifth.app secrets on Cloudflare. **Needed even with no website sign-in**, because deleting an account needs it | done 2026-11-18 (⑧); the live site uses them from its first upload | you, Apple then Cloudflare dashboards | 20 minutes |
+| 13 | Get Apple's cancel-ticket at the first sign-in and keep it locked on the server; take Apple's notices that a reader has left | left: the server half was built 2026-11-18 and tested with a stand-in Apple and made-up keys. The app sends Apple's one-time code with the sign-in since 2026-11-18, and the tickets table is in the real database (your yes, 2026-11-18; empty). Still to do: you register hifth.app's notice address on Apple's developer site | you, on Apple's site | a day |
+| 14 | "Delete my account" inside the app: delete everything, cut the link with Apple. App Review requires it | built 2026-11-18. The server deletes the account, every session and the ticket, and tells Apple to cut the link. The button is in the account section (step 16): it asks once more, and only on hifth.app's yes does the app forget the sign-in and the invite code. Tested with a stand-in app and in a browser. Left: the same on your iPad (⑭) | agent, then one sitting with your iPad | a day |
+| 15 | Keep the session in the Keychain, so an iPad stays signed in (for now 60 days from sign-in, with no renewal: ⑫); check at each launch that the reader has not cut Hifth off in their Apple settings | built 2026-11-18, tested with a stand-in Keychain and a stand-in Apple. Left: the checks only a real iPad can answer (⑭) | agent, then one sitting with your iPad | half a day |
+| 16 | A button that says what leaves the device and who sees it, a place to see and take it back, and the new way out named in the privacy check | built 2026-11-18: an account section in the info panel says what leaves the device and what hifth.app keeps, above Apple's button. Signed in, it offers sign out and delete my account. A tester's kept invite code can be forgotten there (⑱). The privacy check names it as the only part of the page that may ask the app. Tested with a stand-in app and in a browser. Left: the same in the real app (⑭), and the wording, which is yours to approve with the privacy draft | agent, then you | a day |
+| 17 | Limit how often anyone can try | built on the server 2026-11-18: at most 60 sign-ins can be started in any ten minutes, by everyone together, and the next ask is told how long to wait (ten minutes at most). Not the notify list's "are you a person" check after all: that check runs in a web page, and sign-in is asked by the app. It protects the database; it does not stop one person keeping new sign-ins out (question ⑮). Since 2026-11-18 the app says "try again shortly" instead of a plain error, and the table is in the real database (your yes, the same day). You chose the invite code to stop one person keeping others out (⑮) | — | — |
+| 18 | Keep it to testers: an invite code (an email list fails when testers hide their email), and a working test login for Apple's beta reviewers | server half built 2026-11-18, and off: with invite codes set on the site, only someone holding one can start a sign-in, and a wrong or missing code is turned away before the database is touched. A command makes the codes; the site holds only their scrambled copies. You chose to use it (⑮, option A, 2026-11-18). The app half was built the same day: the app sends the code the tester typed, keeps it on the device in its own Keychain item once hifth.app has taken it (so it is typed once, and signing out does not lose it), drops it only when hifth.app says it is no longer good, and tells the page "invite needed" or "too many" in place of a plain error. The box where the tester types the code came with step 16's account section, which shows it only when hifth.app asks for a code, and offers to forget a kept one (⑱). Left: you make the codes and set them on the site (⑯); a code for Apple's beta reviewers goes in the review notes | agent, then you (⑯) | half a day |
+| 19 | Privacy page and App Store privacy label updated | left: drafted 2026-11-18 in [the privacy draft](sign-in-privacy-draft.md), with seven questions for you at its top. Nothing live has changed | agent drafts, you approve | half a day |
 | 20 | Sign the Mac build with the paid team. Apple says Sign in with Apple does not work in Mac apps sold outside the App Store, so the Mac goes through TestFlight or the Mac App Store | done 2026-11-17: the Mac App Store build is signed with the paid team and archived; its Sign in with Apple line is step 6 | — | — |
-| 21 | The first thing sign-in unlocks, behind its own button (depends on ①) | left | agent | three to four days for "your marks follow you" |
+| 21 | The first thing sign-in unlocks, behind its own button (depends on ①) | built on the laptop 2026-11-19, and off: (a) deleted notes, bookmarks and jumps stay deleted when two devices' marks are put together (㉒); (b) hifth.app keeps one copy of a reader's marks, on the laptop's database only (㉑); (c) signed in, the account section offers "Keep a copy of my marks on hifth.app". The sentence above the button says every mark and note goes, that the copy is not locked and the person who runs Hifth could read it (③). Pressing it fetches the copy, puts it together with this device's marks, sends the result back, and loads it here too, so each device that presses it ends with all of them. The section says when a copy was last kept and offers to delete it. The app offers none of it until hifth.app says sign-in is on and the copy is offered. Tested with a stand-in app and stand-in server. (d) done 2026-11-19: the privacy draft and the store listing's notes name the copy. Left: your yes to add the copy's table to the real accounts database (㉑), then the same on your iPad (⑭) | agent, then you | — |
 | 22 | TestFlight upload and tester invitations | left | **held by the licence reading**, not by sign-in | — |
 | **Later, not needed for testers on Apple devices** | | | | |
 | 23 | Website sign-in on hifth.app for Firefox: the website's Apple name with its return addresses, then the code | left | you in the Apple dashboard, then agent | 30 minutes, then one to two days |
 | 24 | Register the mail sender with Apple, so mail reaches readers who hid their email | left | you in the Apple dashboard and DNS; waits on the mail sender decision | 30 minutes |
 | 25 | A second way in for people without Apple: a six-digit code by email | left | agent, after the mail sender is picked | two days |
 
-**Headline: 5 done, both answers in (2026-11-17 and 2026-11-18), then 6 steps to a first real sign-in on your iPad (about a week), 10 more to be ready for testers (about two weeks; step 20 is done), and 3 for later.** Both researchers put the whole build at two to three weeks of agent work; this table agrees.
+**Headline, 2026-11-18: 5 done before we began, and both answers in. Of the 6 steps to a first real sign-in, 4 are done; the 2 left (Apple's real sheet, and the trials) both need your iPad. Toward testers, step 20 is done and steps 14 to 18 are built and tried with a stand-in app, waiting on one sitting with your iPad (⑭). Still to do: the key file's secrets on the site (12), Apple's notice address (13), the privacy page (19), the first thing sign-in unlocks (21, three to four days) and the upload (22, held by the licence). 3 for later.** Both researchers put the whole build at two to three weeks of agent work; this table agrees.
 
 ### What can be built and tried now, on your own devices?
 
@@ -123,13 +123,14 @@ sequenceDiagram
   participant W as hifth.app server
   R->>P: presses the button for the feature
   P->>A: "sign me in", and waits
-  A->>A: makes a fresh one-off word
-  A->>S: Apple's sheet, with a scrambled copy of the word
+  A->>W: asks for a fresh one-off word
+  W-->>A: the word (or "sign-in is off", and no sheet is shown)
+  A->>S: Apple's sheet, with a scrambled copy of the word, asking for no name and no email
   S-->>R: Face ID
-  S-->>A: Apple's note, a one-time code, the name (first time only)
-  A->>W: the note, the code, the word, the name
+  S-->>A: Apple's note and a one-time code
+  A->>W: the note and the word (the one-time code too, from step 13)
   W->>W: checks Apple's signature, that it is for Hifth, not expired, the word matches
-  W->>S: trades the one-time code for the cancel-ticket
+  W->>S: trades the one-time code for the cancel-ticket (step 13)
   W->>W: keeps the ticket locked, makes or finds the account
   W-->>A: a session
   A->>A: keeps the session in the Keychain
@@ -306,7 +307,7 @@ The checker re-opened the sources behind every claim that would change the recom
 | Better Auth's website sign-in had the cookie fault, closed as fixed and reportedly reverted | Confirmed, and then superseded: the first fix was reverted on 2025-11-04, but a second fix that turns Apple's form into an ordinary page load was merged on 2025-11-05 and is still in the code. Read, not tried; one later "still failing" comment went unanswered. Checked 2026-11-18 in [library-check.md](../research/sign-in/library-check.md) |
 | One forum report says the same person gets a different account number in the app and on the website | Apple's developer support says the same number is given when both belong to one team; the contrary forum thread (2019, plus a 2023 "same issue") has no cause or answer. **Unsettled; trial ④** |
 | One Apple page says website sign-in needs an existing app in the App Store; another does not | **Confirmed: the two Apple pages disagree.** Unsettled; trial ⑥ |
-| Keep only a scrambled copy of each session on the server; sessions renew on use and end after 60 days unused | Not contested; design detail |
+| Keep only a scrambled copy of each session on the server; sessions renew on use and end after 60 days unused | Not contested; design detail. The scrambled copy is built; the code ends a session 60 days after sign-in with no renewal, and which of the two to keep is ⑫ |
 
 | Only B | Checked |
 | --- | --- |
@@ -327,7 +328,7 @@ The checker re-opened the sources behind every claim that would change the recom
 - **If trial ④ shows different account numbers in the app and on the website**, link the two by email the first time, or ask the reader to sign in both ways once.
 - **If trial ⑥ shows website sign-in needs an App Store app**, website sign-in waits for the first App Store release.
 - **If the Mac app has to ship outside the App Store**, Mac readers sign in through a browser panel on hifth.app instead.
-- **If the licence reading keeps testers away for months**, milestone 2 can wait, and iCloud covers your own devices meanwhile.
+- **If the licence reading keeps testers away for months**, milestone 2 can wait, and the saved file covers your own devices meanwhile (iCloud would too, if it were built).
 
 ## What is this not settling?
 
@@ -365,7 +366,7 @@ Apple's developer support says yes for apps and websites under one team; one for
 
 ### ⑤ Can the page inside the app wait for the app's answer, and what address does it say it comes from? · **open**
 
-No Apple page says the page gets a waiting answer from the app; WebKit bugs from 2021 show such a page calling a website said it came from "null". **What would answer it:** an hour on your iPad (step 11): ask the app a question from the page and wait for the answer; call hifth.app from the page and read what address the server sees; try the browser's scrambling code on the page.
+**Answered on the Mac; the iPad is left.** No Apple page says the page gets a waiting answer from the app; WebKit bugs from 2021 show such a page calling a website said it came from "null". So step 7 did not lean on WebKit's own reply: the page gives each question an id and the app answers by calling back into the page with that id, which it could already do. In the real Mac app on 2026-11-18 the page asked, waited, and got the answer. The address question no longer matters, because the app, not the page, calls hifth.app. **What would finish it:** the same ask on your iPad (step 11), a few minutes.
 
 ### ⑥ Does website sign-in work before the app is in the App Store? · **open**
 
@@ -375,10 +376,113 @@ Apple's help page does not require it; Apple's set-up page says an existing App 
 
 The notify list's server code calls Supabase's data door with the public key, but the checked-in settings switch that door off, and the Supabase move page says nothing uses it. Either the settings file is out of date or the list does not work. **What would answer it:** the store check, which prints settings and never a row, compared against the settings file; then one test sign-up on the notify form. This matters before anything else is added to that project.
 
-### ⑧ Is the Sign in with Apple key file made and saved on Cloudflare? · **open**
+### ⑧ Is the Sign in with Apple key file made and saved on Cloudflare? · **answered**
 
-Step 12: about 20 minutes in Apple's developer site, then Cloudflare. It is a different key from the App Store Connect one already made. Deleting an account needs it to cut the link with Apple, and Apple's review requires deleting an account, so the launch's account deletion waits on it. Meanwhile deletion is built and tested on the laptop with a made-up key. **What would answer it:** the owner makes the key, notes its ID, and saves both as hifth.app secrets; the check prints only that each secret is set.
+**Settled 2026-11-18 by the owner: yes.** Step 12. The owner made the key on Apple's site, the file was moved to its own folder outside the repo and made readable by its owner only, and the owner's save sent the key, its ID and the team ID to hifth.app's Cloudflare project as secrets. The check printed "set" for all three. The live site uses them from its first upload; until then sign-in stays off there. It is a different key from the App Store Connect one. Deleting an account needs it to cut the link with Apple, and Apple's review requires deleting an account.
 
-### ⑨ May the accounts database be made on hifth.app's Cloudflare account? · **open**
+### ⑨ May the accounts database be made on hifth.app's Cloudflare account? · **answered**
 
-Step 9: the free database chosen in ②, made with one command. Making it touches the live account, so it waits for the owner's word. Meanwhile the server code runs against a local copy on the laptop, so nothing else waits. **What would answer it:** a one-line yes from the owner.
+**Settled 2026-11-18 by the owner: yes.** Step 9: the free database chosen in ②, made with one command. It was made the same day: its three tables are in place and empty, and the site's settings name it. The release check allows that one database and no other. Sign-in is still off on the live site: nothing was uploaded, and the two switches that turn it on are not set there. Laptop trials keep using a local copy, so nothing in this work writes to the real one.
+
+### ⑩ Has Apple been told where to send its notices, and is the tickets table in the real database? · **open**
+
+The table half is done: on 2026-11-18 you said yes, and the tickets table and the table that counts sign-ins started are both in the real accounts database, empty. One step is left, and it is yours. Without it a reader's link with Apple can never be cut from our side. **You, on Apple's developer site:** under the app's identifier, Sign in with Apple, Edit, enter hifth.app's notice address (the deploy skill gives it in full) so Apple can tell us when a reader stops using Sign in with Apple with Hifth or deletes their Apple account.
+
+### ⑪ What happens to a reader's cancel ticket if the Apple key file is ever replaced? · **fixed**
+
+The ticket's lock is worked out from the Sign in with Apple key file, so there is no extra secret to keep. The cost, found in step 13: after a key swap the old tickets could not be opened, and nothing replaced them, because sign-in saw a ticket was kept and did not ask Apple for a new one. **Fixed 2026-11-18:** each sign-in now checks that the kept ticket still opens with today's key file. If it does not, the sign-in trades Apple's new one-time code for a fresh ticket, and swaps it in only once the new one is in hand, so a failed trade never loses the old one. A ticket that opens is left alone, and Apple is not asked again. Tested with a real lock and a replaced made-up key file: the second sign-in swaps the ticket, and "delete my account" can then hand it back to Apple. So a reader whose ticket went dead is mended the next time they sign in; until then their "delete my account" still deletes everything we hold and tells them to remove Hifth in their Apple settings. One small case is left, and needs no fix before launch: if Apple cuts the link but our delete then fails, the ticket left behind is dead, and a second try says the link was left, which is true.
+
+### ⑫ How long does a sign-in last, and are old ones cleared out? · **open**
+
+This page says a sign-in renews each time it is used, so an iPad stays signed in for months. The code gives a fixed 60 days and never renews, and nothing removes sign-ins or one-off words that have run out, so a list of when each device signed in builds up until the account is deleted. Found by the privacy draft (step 19), which follows the code. To settle: renew on use or keep the fixed length; then make the privacy page promise exactly that. The clearing half is done: since step 17, one-off words that have run out are cleared each time a new one is handed out, and since 2026-11-18 sign-ins that have run out, anyone's, are cleared each time someone signs in (tested). So the list of when each device signed in now holds only sign-ins still in use. What is left is your choice: renew on use, or keep a fixed 60 days.
+
+**What it changes for a hafiz:** with a fixed length, an iPad in daily use is signed out every 60 days and the reader taps "Sign in with Apple" again (one sheet; the invite code is meant to be kept, which the iPad sitting ⑭ checks). With renewal, an iPad in use stays signed in, and only one left unused for 60 days signs out.
+
+**What counts as "using" a sign-in today (read 2026-11-19).** The app shows its sign-in to hifth.app only to read or write the copy of the marks, and to delete the account. The marks copy waits on your yes for its table (㉑). Until then a sign-in is used for nothing day to day, so renewal would change nothing a reader sees. The two choices go together.
+
+| | What it is | What it buys | What it costs | What it commits you to |
+|---|---|---|---|---|
+| **A. Keep a fixed 60 days** (recommended while sign-in is for invited testers) | What the code does now | Nothing to build. The privacy draft already says it word for word | A reader in daily use signs in again every 60 days | Only this page's "renews on use" line (in the table of earlier choices) changes. Comes back before sign-in opens to everyone |
+| **B. Renew on use** | Each time the app reads or writes the marks copy, hifth.app moves the end date to 60 days from then, and its reply carries the new date, which the app saves | A reader in daily use is never signed out | About half a day, with tests on both sides: hifth.app's renewal, and the app saving the new date (today the app keeps the date it got at sign-in and drops the sign-in on that date, so a server-only change would not be enough). It does nothing until the marks copy is on | The privacy page's sentence becomes "60 days after you last used it". A sign-in someone copied off a device lasts as long as it keeps being used; sign-out, delete my account and Apple's notices still end it |
+| **C. A longer fixed length**, such as a year | One number on hifth.app; the app already takes its end date from hifth.app's reply | Fewer sign-ins again, with nothing built | A sign-in copied off a device lasts a year | The privacy page's "60 days" changes to the new length |
+
+Recommended: A now, since nothing uses a sign-in day to day until the marks copy is on; choose between A and B together with ㉑.
+
+### ⑬ Does the app tell hifth.app when it signs a reader out by itself? · **fixed**
+
+Found in step 15. At launch the app drops its saved sign-in when Apple says the reader has cut Hifth off, but it did not tell hifth.app, so the server's copy lived on until it ran out (Apple's own notice, ⑩, covers most cases). And the app only asked Apple at launch: a reader who cut Hifth off while the app was open stayed signed in until the next launch.
+
+**Fixed 2026-11-18.** At launch, when Apple says the reader cut Hifth off or does not know them, the app now also tells hifth.app to end that sign-in, the same way "Sign out" does. It does not wait for the answer, so a launch with no connection is not slowed; the device is signed out either way. A sign-in that simply ran out tells hifth.app nothing, since hifth.app already turns it away. While the app is open, it listens for Apple's notice that the reader cut Hifth off. The notice does not say which Apple account it is about, so the app asks Apple about the reader signed in here, and signs out only if Apple says cut off or not known. If Apple says the reader still allows Hifth, or cannot say, nothing changes. Tested with made-up values, the tests watched failing first: a cut-off at launch reaches hifth.app; an allowed, unanswered or run-out sign-in sends nothing; the notice while open signs out only when Apple confirms; a notice with nobody signed in asks no one.
+
+### ⑭ Does an iPad really stay signed in, and sign out when it should? · **open**
+
+Step 15's code is tested with a stand-in Keychain and a stand-in Apple, so six things can only be seen on real devices, after the first real sign-in (step 11). Parked for one sitting with the iPad, each answer to become a test where it can: still signed in after quitting the app, after restarting the iPad, and some days later; signed out at the next launch after you remove Hifth under Sign in with Apple in the iPad's Settings; still signed in when opened in airplane mode; what a reader sees after deleting the app and installing it again; whether the store-signed Mac app can save its sign-in at all; and whether a tester's invite code, typed once, is still there after signing out and after a restart. Since step 16 there is one more: how the account section looks and reads inside the real app (Apple's button, the invite box, sign out, delete my account and the line that forgets a kept code), which so far was seen only with a stand-in app in a browser.
+
+### ⑮ Could one person keep everyone else from signing in? · **answered**
+
+**Settled by the owner on 2026-11-18: A, the invite code first.** It holds while sign-in is for invited testers; the question comes back, between B and C, before sign-in opens to everyone. Your step is ⑯, and what comes after is ⑰. The reasoning as it stood:
+
+Yes, and on the free plan no limit on how often people ask can fully stop it. Here is why, in numbers.
+
+The free database allows 100,000 writes a day, and starting a sign-in costs a handful of writes before the person has proved anything. So since step 17 the server starts at most 60 sign-ins in any ten minutes, for everyone together: at most 8,640 a day, which keeps the day's allowance safe. Without that, anyone could use the allowance up and stop every sign-in until midnight. But the 60 are shared by every reader, because we keep nothing about who is asking (no internet address, as the privacy draft promises). One ask every ten seconds is enough to take all 60. So one person with a script can keep new sign-ins out for as long as they keep asking, and a real reader who taps "Sign in" is told to try again. Readers who are already signed in are not touched, and neither are sign-out, delete my account or Apple's notices.
+
+Cloudflare's free plan offers one limit per caller, and it helps less than it sounds: its shortest setting still lets one caller ask about once every ten seconds, which is the whole shared allowance. It is still worth adding, because it stops a flood from one place before it reaches our code (steps in the deploy-site skill, step 5).
+
+What does stop it:
+
+| | What it is | What it buys | What it costs | What it commits you to |
+|---|---|---|---|---|
+| **A. An invite code, checked first** (recommended for the tester stage) | An invite code for testers, checked before a sign-in is started, without touching the database. The server half is built and switched off (step 18); it comes on only when you set the codes on the site | Someone without a code cannot start a sign-in at all, so cannot use up the 60 | The app half of step 18 is still to build; a tester types a code once. Someone without a code can still send asks that are turned away, see below | Only holds while sign-in is for invited people. Opening sign-in to everyone reopens this question |
+| **B. Pay for the bigger database plan** | Cloudflare's paid plan (about 5 dollars a month) allows far more writes, so the 60 can become thousands | The shared limit stops being something one person can reach by trickling | A monthly bill; a flood can still cost money | A paid plan to keep; the limit number becomes a setting to choose |
+| **C. Have the app prove it is the real app** | Apple can vouch that a request comes from our real app on a real device | Scripts cannot start sign-ins at all | Not looked into yet: I have not read Apple's pages on it, and it does nothing for a later website sign-in | Research first, then a build of unknown size |
+| **D. Live with it** | Leave the shared 60 as the only guard | Nothing to do | Anyone who wants to can keep new readers from signing in | Fine for your own iPad; not for a release |
+
+Recommended: A now, since step 18 builds the invite code anyway and only the place of the check changes; decide between B and C before sign-in opens to everyone.
+
+One thing none of A to D removes. Every ask that reaches hifth.app runs our code, even one that is turned away, and Cloudflare's free plan runs our code 100,000 times a day (read 2026-11-18 on Cloudflare's pricing and limits pages; it starts afresh at midnight UTC; plain pages do not count). Past that, Cloudflare answers with an error page of its own until midnight, for sign-in, sign-out, delete my account and the notify form alike. I did not find on those pages whether a site like ours can be set to carry on without its code instead. This is where the free Cloudflare limit per caller earns its place: set as in the deploy-site skill, one caller gets at most about 17,000 asks a day through to the address that starts a sign-in, well short of the 100,000. It covers only that one address, so a flood aimed at the others would need the paid plan's wider rules.
+
+
+### ⑯ Have the invite codes been made and set on the site? · **open**
+
+Yours, before sign-in is switched on, since you chose invite codes (⑮, 2026-11-18). In your own terminal, run the command that makes the codes (the deploy skill, step 5, names it). It shows each code once: hand one to each tester, and keep one for Apple's beta reviewers, which goes in the review notes. Then set the one line it prints on the site. Until that line is set, anyone can start a sign-in once sign-in is on. The agent never runs the command for real codes and never sees them.
+
+### ⑰ What stops one person keeping everyone out once sign-in opens to everyone? · **open**
+
+Not urgent: it only matters on the day sign-in stops being for invited testers. The invite code (⑮) is what stops it today, and it goes away that day. The two ways left are under ⑮: pay for the bigger database plan (B), or have the app prove it is the real app (C), which has not been looked into yet. The agent reads Apple's pages on C first, so the choice is between two known things. Nothing is owed from you until then.
+
+### ⑱ Can a tester make the app forget their invite code? · **fixed**
+
+Yes, since 2026-11-18. The app keeps the typed code on the device so it is typed once, and such a kept item can outlive deleting the app. So when a code is kept, the account section (step 16) says so and offers to forget it. The page only ever hears whether a code is kept, never the code itself. Deleting the account forgets it too. The app's own tests and the page's tests cover all three. Whether a kept code really outlives deleting the app is one of ⑭'s checks on your iPad.
+
+### ⑲ Should the sign-in button carry Apple's logo? · **open**
+
+Yours, before the store apps show the button. Apple lets an app draw its own "Sign in with Apple" button only in black or white, with Apple's words, and with Apple's logo taken only from the artwork Apple hands out, never one we draw (Apple's design guide for Sign in with Apple, read 2026-11-18). That artwork is not in the repo, so today's button is black with the words and no logo. Three ways:
+
+| | What a reader sees | Good | Costs |
+|---|---|---|---|
+| A. Apple's artwork | The black button with Apple's logo, the way every other app shows it | Looks like the button readers already trust | You download the artwork from Apple's developer site and say yes to its terms; it is then kept in the repo |
+| B. Apple's own button | The button the system draws, with the logo, in the app's own screen instead of inside the page | Nothing to download; always matches Apple's rules | The account section's layout splits between the page and the app, a bigger change and harder to test |
+| C. No logo | Today's black button with words only | Nothing more to do | Apple's guide describes only two kinds of home-made button, logo only and logo with words, and has no words-only kind; its reviewers judge every home-made button, so this risks a rejected build |
+
+Recommended: A. It keeps the page as it is and matches what readers expect. Nothing in the app changes until you have the artwork.
+
+### ⑳ Do the account words slow the app's start for readers who never see them? · **fixed**
+
+No longer, since 2026-11-19. The account section's 41 English and Arabic sentences now live in a pack of their own, which the section fetches only once the app says there is something to show. A reader in a browser, where sign-in is never offered, never downloads them. The download at start-up went from 160.1 to 158.9 KB (zipped), against its 161 KB limit. That is the room the line telling a hafiz a mistyped verse link went nowhere was waiting for.
+
+The whole app grew 0.9 KB, to 219.4 of its 220 KB cap, because the two small files each carry their own packing overhead. That cap counts both languages' words though a reader only ever fetches one, so the next addition to the app as a whole still needs room made elsewhere (the optimizing-performance skill's list of trims).
+
+How it holds: the size check refuses a build whose start-up files carry the account words, and its own tests prove it does. The words check holds the pack to the same rules as the start-up words (every key in both languages, every plural complete) and refuses a sentence kept in both places. The plain-words test reads every pack. How to add a pack is in the languages design page (`docs/design/i18n.md`, "Words that load later").
+
+### ㉑ May the table that keeps each reader's copy of their marks be added to the real accounts database? · **open**
+
+Step 21b added one more table: it keeps one copy of a signed-in reader's marks, replaced whole each time they send a new one, and deleted with their account. It is built and tested on the laptop's local copy only. Your yes on 2026-11-18 covered the two sign-in tables, not this one, so it waits on a new yes. **You:** say yes in the chat, and it is added with the same one command as before, empty. Nothing uses it until the app's button (step 21c) is switched on, so there is no hurry; it only has to be there before the first upload with that button on. Without it, the button would fail on the live site and say so; no reader's marks would be lost, since the device keeps its own.
+
+### ㉒ Can a bookmark or jump the reader deleted come back from an older copy? · **fixed**
+
+No longer. Since step 21a a deleted note stays deleted when another device's copy is loaded in, because the device keeps each deleted note's id and when it went. Bookmarks and the jumps between look-alike verses now keep the same list, and the file a device saves (and the copy it sends to hifth.app) carries all three. So a bookmark deleted on the iPad stays deleted when the iPhone's older copy is loaded in, and a bookmark the iPhone deleted goes from the iPad too. A mark changed after it was deleted elsewhere stays: the later act wins. The list forgets a deletion after a while, like the notes' list.
+
+Two things came with it:
+
+- **Undo after a copy is loaded in changes only what Undo's own step changed.** Before, Undo put back the whole set as it was before the step, so a bookmark, note or jump that a file had brought in since was taken away again, and that would have been sent on to every device as a deletion. Now a mark the step did not touch stays as it is.
+- **One rare gap is left, for jumps.** Two devices that each marked the same pair of look-alike verses before they ever shared a copy hold it under two names. When the copies meet, both settle on the same name, so a later deletion reaches both. Only when that name is already taken on one device does each keep its own, and then a deletion on one may not reach the other. It needs two devices to mark the same pair in the same moment, so it is noted here and not fixed.

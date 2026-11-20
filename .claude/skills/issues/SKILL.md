@@ -15,6 +15,10 @@ registers**, each of which was already disciplined before the catalog existed:
 | a design doc's §*Open questions, and what would answer each* | what that document knows it has not settled | it belongs to one document's subject matter |
 | `docs/validation/ledger.json` | checks a machine cannot run | answering it needs a human, a phone, or a printed mushaf |
 
+A new design doc that holds open items passes `pnpm gate:issues` only with that exact heading,
+`## Open questions, and what would answer each`, and items under it numbered `### ①`, `### ②`
+and on. The smallest note that passes is that heading and one `### ① … · **open**` item.
+
 **`docs/backlog.md` is where a reader starts.** It is rebuilt from all of these
 (`make tasks-doc`) and carries every open item's full text, so it reads on its own after a
 session is cleared. Never edit it; edit the item where it lives, then rebuild. Anything a
@@ -94,11 +98,19 @@ Two things it will not tell you and you should weigh:
 the path the pitch walks (the six passages in `.claude/goals/study-quran-pitch.md`).
 `make issues PITCH=1` lists and counts only those, and that count is one of the goal's
 numbers. Add the tag when a walk of the demo finds the fault; the check refuses any value
-but `true`.
+but `true`. The `launch` tag works the same way: `"launch": false` is refused, so a row that is
+not a launch fault leaves the tag off.
 
 **Before the first commit on a row,** run `intent start <the row's id>` on the branch. A hook
 then ends each commit message with the task, its use case, its feature and its plan, read from
 the row's `useCase` and `feature` fields. `intent status` shows what is set.
+In a new working copy, run it straight after making the copy. A commit made before it has no
+label, the push refuses it, and labelling it afterwards takes one more commit, which has no
+label either. A working copy someone else made and you reuse needs it too.
+Run it from inside that working copy, or as `intent -C <folder> start <row>`; run from elsewhere,
+it reads the main checkout and says "no task named" for a row that exists.
+A `git commit` with a hand-set PATH must keep `~/.local/bin` in it. Without it the hook only
+prints "the intent tool is not installed", and the commit lands with no labels.
 
 ## Open — write a new one down
 
@@ -117,6 +129,9 @@ row that is not there.
    ```markdown
    ### ⑦ What is wrong, in a sentence someone else could act on · **confirmed**
    ```
+
+   The heading ends in one bare status word from the table above. Anything added to
+   it (`· **answered: no**`) fails the gate; put the detail in the prose below.
 
    Continue the numbering that section already uses. Below it, prose: what is
    wrong, **what would answer it**, and — if you reproduced it — the viewport,
@@ -146,7 +161,20 @@ row that is not there.
    milestone; a person or a piece of hardware is written as prose (`"a hafiz"`),
    and the gate tells the two apart by whether the string has a space in it.
 
+   **Name a `useCase` or a `feature` on each new row.** A row with neither can only be heaped in
+   a pile by `intent roadmap`, and 117 of 127 open rows were like that on 2026-11-11.
+
+   **Change `docs/issues.json` with a plain edit, never a script.** It is hand-edited, and a
+   script that rewrote two rows reformatted five others. To lift one row out to read it, find the
+   row's start and the end of its last field: a pattern that stops at the first closing brace
+   stops inside the smaller object the row holds.
+
 4. **`make issues-doc`**, then `pnpm gate:issues`.
+
+The heading word must be the very word in the row's `status`: a row marked `fixed` needs its
+item headed `· **fixed**`, not `· **answered**`, or the check refuses it. `closedBy` must be a
+file that exists (a test or a script), not a sentence. Each row needs its own item; two rows
+pointing at the same item is refused too.
 
 ## Close — and what closing costs
 
@@ -156,8 +184,14 @@ row that is not there.
    and add a short *Closed by* paragraph naming what now notices a regression.
    Do not delete the item. The record of a defect that existed is worth more than
    a shorter document, and the next reader needs to know it was considered.
+   Marking an open question `answered` also means updating every backlog row that waits on it.
+   The check names those rows.
 3. **Update the index**: `status`, and `closedBy` pointing at the test.
 4. **`make issues-doc`**, then `pnpm gate:issues`.
+
+Before closing an item, search `docs/issues.json` for its source item (the file and its number,
+such as `docs/performance.md` ㉓), not for a name you guess. A row already pointing at it under
+another name makes the commit's backlog check fail when the item closes and the row stays open.
 
 If the fix taught you something the guess got wrong, say so in the register.
 `page-turning.md` ⑪ is the model: the doc predicted reduced-motion would need the
@@ -169,6 +203,25 @@ shows how the mistake was reachable.
 eleven markers were wrong when the catalog was first built — three items had been
 silently fixed loops earlier and still said `confirmed`. Check the code, then
 check the test.
+
+## The backlog pages are drawn, never typed into
+
+`docs/backlog.md` and the task pages are drawn from `docs/issues.json` (and the by-hand list
+from `docs/validation/ledger.json`). A note typed straight into a drawn page is gone on the next
+redraw. Edit the register, then `make -s issues-doc tasks-doc`; after a ledger change also
+`make guide-doc`, or the commit's checks refuse the stale guide page.
+
+`make issues` and `make use-cases` only print; they redraw nothing. When the fast checks name a
+stale page, redraw all three at once rather than one per refusal:
+`make -s use-cases-doc issues-doc tasks-doc`.
+
+In a new working copy, run `pnpm install` and build core (`pnpm -C packages/core -s build`)
+before the first redraw. Without it the redraw stops with a missing-module error that does not
+say core is the cause.
+
+A merge clash in a drawn page (`docs/backlog.md`, `docs/issues.md`, `docs/waiting-on-you.md`) is
+worked in the register, not the page: keep both sides' new rows in `docs/issues.json`, then
+redraw. Save a copy of the page first and compare after; only counts and fingerprints should move.
 
 ## The board — the backlog on GitHub, at a glance
 
@@ -184,6 +237,7 @@ way is [docs/design/project-board.md](../../../docs/design/project-board.md).
 |---|---|---|---|
 | `scripts/sync-project-board.mjs` | Adds a card for each new open item, updates changed ones, moves closed ones to Done | After the backlog changes, so the board matches | `make board` |
 | `scripts/sync-project-board.mjs --dry-run` | Says what a copy would add, change or finish, touching nothing | Before the first copy in a session, or when unsure | `make board-dry` |
+| `scripts/goal-names-every-row.mjs` | Lists the open or blocked launch rows that the launch goal page never names, and fails if any. A session working from the page alone never sees a row it leaves out (2026-11-19: five were missing) | On every count of the launch loop, and after adding a launch row | `node .claude/skills/issues/scripts/goal-names-every-row.mjs` (`--goal`, `--issues` to point elsewhere); tests: `node --test .claude/skills/issues/scripts/goal-names-every-row.test.mjs` |
 
 ## What this skill will not do
 

@@ -4,71 +4,55 @@
     ".claude/skills/optimizing-performance/scripts/perf-report.mjs. startupMs is Lighthouse's time-to-interactive, median",
     "of `runs`, on the phone pinned in .lighthouserc.json. The goal is 2500."
   ],
-  "measuredAt": "2026-11-17T03:06:21.371Z",
+  "measuredAt": "2026-11-20T12:42:50.875Z",
   "goalMs": 2500,
   "points": [
     {
       "addedKb": 0,
-      "scriptGzKb": 125,
-      "appScriptGzKb": 125,
+      "scriptGzKb": 124.3,
+      "appScriptGzKb": 124.3,
       "runs": 5,
-      "startupMs": 2111,
-      "largestPaintMs": 2111,
-      "blockingMs": 28,
+      "startupMs": 2106,
+      "largestPaintMs": 2106,
+      "blockingMs": 1,
       "allStartupMs": [
-        2108,
+        2559,
         2106,
-        2115,
-        2111,
-        2112
+        2106,
+        2105,
+        2104
       ]
     },
     {
       "addedKb": 25,
-      "scriptGzKb": 150.9,
-      "appScriptGzKb": 125,
+      "scriptGzKb": 150.2,
+      "appScriptGzKb": 124.3,
       "runs": 5,
-      "startupMs": 2261,
-      "largestPaintMs": 2261,
-      "blockingMs": 35,
+      "startupMs": 2255,
+      "largestPaintMs": 2255,
+      "blockingMs": 0,
       "allStartupMs": [
-        2261,
-        2269,
-        2261,
-        2257,
-        2259
+        2162,
+        2255,
+        2255,
+        2704,
+        2705
       ]
     },
     {
       "addedKb": 50,
-      "scriptGzKb": 175.9,
-      "appScriptGzKb": 125,
+      "scriptGzKb": 175.2,
+      "appScriptGzKb": 124.3,
       "runs": 5,
-      "startupMs": 2408,
-      "largestPaintMs": 2408,
-      "blockingMs": 6,
+      "startupMs": 2406,
+      "largestPaintMs": 2406,
+      "blockingMs": 0,
       "allStartupMs": [
-        2411,
+        2281,
         2406,
-        2408,
-        2406,
-        2408
-      ]
-    },
-    {
-      "addedKb": 100,
-      "scriptGzKb": 225.9,
-      "appScriptGzKb": 125,
-      "runs": 5,
-      "startupMs": 2709,
-      "largestPaintMs": 2709,
-      "blockingMs": 17,
-      "allStartupMs": [
-        2706,
-        2709,
-        2707,
-        2717,
-        2723
+        2855,
+        2855,
+        2284
       ]
     }
   ]

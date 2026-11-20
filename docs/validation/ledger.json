@@ -197,6 +197,7 @@
         "needs": [
           "The same phone, with VoiceOver (iOS: Settings → Accessibility → VoiceOver, or triple-click the side button) or TalkBack (Android: Settings → Accessibility).",
           "About 8 quiet minutes. You are listening, not looking — the last step asks you to stop looking entirely.",
+          "For the App Store (launch item 16), the same three steps once more in the installed app: on the iPad with VoiceOver, and on the Mac with VoiceOver (Command-F5). Apple's own check already runs on the iPad app in the tests and passes; it proves every item has a name, not that the names sound right or that you can find your way.",
           "The ordinary build, not the probe build.",
           "Nothing to memorise. This used to be eight steps; five of them were checking that a control existed under a given name, and those are now aria snapshots in apps/web/e2e/__aria__/{iphone,android}/ that fail the build when a label changes. Reading those five files first is optional and takes a minute — they are exactly what the app should announce."
         ],

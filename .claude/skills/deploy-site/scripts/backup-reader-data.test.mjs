@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -18,6 +18,7 @@ import {
   runName,
   runsToPrune,
   statusLines,
+  tablesToCopy,
   unlistedTables,
   wholeCounts,
 } from "./backup-reader-data.mjs";
@@ -55,7 +56,7 @@ const cleanEnv = () => Object.fromEntries(Object.entries(process.env).filter(([k
 
 test("only the tables a restore needs are copied; the site's key and sign-in secrets stay out", () => {
   assert.deepEqual(STORES.list.tables, ["notify.people"]);
-  assert.deepEqual(STORES.accounts.tables, ["accounts", "apple_tickets"]);
+  assert.deepEqual(STORES.accounts.tables, ["accounts", "apple_tickets", "marks_copies"]);
   assert.deepEqual(Object.keys(STORES.list.leftOut), ["notify.server_keys"]);
   assert.deepEqual(Object.keys(STORES.accounts.leftOut).sort(), ["d1_migrations", "sessions", "sign_in_counts", "sign_in_words"]);
   for (const s of Object.values(STORES)) for (const why of Object.values(s.leftOut)) assert.ok(why.length > 20, "each left-out table says why");
@@ -65,6 +66,24 @@ test("a table the store has that is neither copied nor named as left out is caug
   assert.deepEqual(unlistedTables("accounts", ["accounts", "apple_tickets", "sessions", "sign_in_words", "sign_in_counts", "d1_migrations", "_cf_KV", "_cf_METADATA", "sqlite_sequence"]), []);
   assert.deepEqual(unlistedTables("accounts", ["accounts", "apple_tickets", "reader_marks"]), ["reader_marks"]);
   assert.deepEqual(unlistedTables("list", ["notify.people", "notify.server_keys", "notify.waitlist"]), ["notify.waitlist"]);
+});
+
+test("a listed table the store does not have yet is named, not copied, so the copy still runs", () => {
+  // The real accounts database gets the copies table only on the owner's yes (sign-in ㉑).
+  assert.deepEqual(tablesToCopy("accounts", ["accounts", "apple_tickets", "sessions"]), { copy: ["accounts", "apple_tickets"], notYet: ["marks_copies"] });
+  assert.deepEqual(tablesToCopy("accounts", ["accounts", "apple_tickets", "marks_copies"]), { copy: ["accounts", "apple_tickets", "marks_copies"], notYet: [] });
+  assert.deepEqual(tablesToCopy("list", ["notify.people"]), { copy: ["notify.people"], notYet: [] });
+});
+
+test("every table the accounts database's changes make is copied or named as left out", () => {
+  // Caught here, at commit time, rather than by the first real copy refusing to run.
+  const dir = join(import.meta.dirname, "../../../../apps/landing/migrations");
+  if (!existsSync(dir)) return; // a branch without sign-in has no accounts database yet
+  const made = readdirSync(dir)
+    .filter((n) => n.endsWith(".sql"))
+    .flatMap((n) => [...readFileSync(join(dir, n), "utf8").matchAll(/CREATE TABLE (?:IF NOT EXISTS )?(\w+)/gi)].map((m) => m[1]));
+  assert.ok(made.length > 0, "the changes make at least one table");
+  assert.deepEqual(unlistedTables("accounts", made), []);
 });
 
 test("the list's address is refused when it goes through the pooler that pg_dump cannot use", () => {

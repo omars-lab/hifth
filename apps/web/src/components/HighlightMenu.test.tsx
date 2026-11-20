@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { beforeAll, describe, it, expect, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import type { AppState, MergedEdge } from "@hifth/core";
 import { HighlightMenu } from "./HighlightMenu";
@@ -20,6 +20,16 @@ vi.mock("./later", async () => ({
   Later: ({ children }: { children: preact.ComponentChildren }) => <>{children}</>,
   ShareBody: (await vi.importActual<typeof ShareBodyModule>("./ShareBody")).ShareBody,
 }));
+
+// The share sheet's buttons still come from the rarely used tools' file, which
+// loads the first time the sheet opens, and that first load compiles the whole
+// large file: 1.5 to 2.7 seconds alone, and past the 5-second wait under the
+// commit check's full load (2026-11-19). Loading it once here, with its own
+// long allowance, leaves the wait to cover only the sheet opening, as in
+// PageStopped.test.tsx.
+beforeAll(async () => {
+  await import("./rarely-used");
+}, 60_000);
 
 const ED = "hafs-kfqc";
 const k = (ref: string) => `quran/${ED}/${ref}`;

@@ -398,7 +398,9 @@ check (`gate:validation`) refuses a pending check that is missing any of this.
   `scripts/render-diagrams.mjs`, which draws each new diagram to
   `docs/validation/diagrams/<hash>.svg` in a headless browser, and the guide
   inlines it, so the page stays one file that opens offline. Commit the SVGs. A
-  missing one fails the build check, and the fix it names is `make guide`.
+  missing one, or a guide older than the ledger, fails the build check, and the
+  fix it names is `make guide-doc`: the same drawing without the phone server,
+  so it returns. `make guide` serves after drawing and never returns.
 - **The overview diagram is built from the briefs** (every check → what it
   unlocks, with `after` arrows), never written by hand.
 - **Finished checks fold into one list** at the end: question, date, result.

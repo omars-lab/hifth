@@ -77,7 +77,8 @@ function clearAway(out) {
  * (app-links.mjs). With no team it writes none, and the folder check says the file is missing,
  * so a release cannot go up without it.
  */
-export function assemble({ landing = LANDING, app = APP_DIST, out = OUT, team = null } = {}) {
+export function assemble({ landing = LANDING, app = APP_DIST, out = OUT, team = null, sitekey = null } = {}) {
+  if (sitekey != null && !SITE_KEY_SHAPE.test(sitekey)) throw new Error("the spam check's site key is not shaped like one; nothing was put together");
   clearAway(out);
   mkdirSync(join(out, "read"), { recursive: true });
   for (const name of readdirSync(landing)) {
@@ -99,11 +100,33 @@ export function assemble({ landing = LANDING, app = APP_DIST, out = OUT, team = 
     filter: (src) => src === app || !APP_SKIP(src.slice(app.length + 1)),
   });
   fillAppScriptRule(out);
+  if (sitekey) stampSiteKey(out, sitekey);
   if (team) {
     mkdirSync(dirname(join(out, APP_LINKS_FILE)), { recursive: true });
     writeFileSync(join(out, APP_LINKS_FILE), appSiteAssociation(team));
   }
   return out;
+}
+
+/** A Turnstile site key: letters, digits, _ and -, nothing that could end the attribute. */
+const SITE_KEY_SHAPE = /^[0-9A-Za-z_-]{10,64}$/;
+/** Cloudflare's published test site keys (always pass, always block, always ask). */
+const TEST_SITE_KEY = /data-sitekey="[123]x0{20}[A-Z]{2}"/g;
+const FORM_PAGES = ["index.html", join("ar", "index.html")];
+
+/**
+ * Put the spam check's real site key into the release copy of the front page, in both
+ * languages. The repo's pages keep Cloudflare's test key, because the real widget answers only on
+ * hifth.app and the form has to work on this laptop too (decision ⑤ in the site record). The
+ * key is public: it sits in the page for every reader to see. It is saved on the laptop as
+ * HIFTH_APP_TURNSTILE_SITEKEY by make hifth-app-turnstile ARGS=--make.
+ */
+function stampSiteKey(out, sitekey) {
+  for (const page of FORM_PAGES) {
+    const path = join(out, page);
+    if (!existsSync(path)) continue;
+    writeFileSync(path, readFileSync(path, "utf8").replace(TEST_SITE_KEY, `data-sitekey="${sitekey}"`));
+  }
 }
 
 /**
@@ -124,17 +147,29 @@ function fillAppScriptRule(out) {
 /**
  * What is wrong with the site's Cloudflare settings (apps/landing/wrangler.toml), which the
  * upload reads. The email list lives on Supabase and the form reaches it through Pages
- * secrets, so this file must name no database and hold no Supabase address or key: a
- * Supabase project's address in a checked-in file is one this repo keeps out of sight, and a
- * leftover Cloudflare database block would put up a form the code no longer uses.
+ * secrets, so this file holds no Supabase address or key: a Supabase project's address in a
+ * checked-in file is one this repo keeps out of sight. The one Cloudflare database it may name
+ * is the sign-in server's accounts (made 2026-11-18, sign-in step 9); any other database block
+ * is a leftover that would put up a form the code no longer uses.
  */
+export const ALLOWED_DATABASES = ["ACCOUNTS"];
+
 export function configProblems(text) {
   const path = "apps/landing/wrangler.toml";
   if (typeof text !== "string") return [{ path, why: "the site's Cloudflare settings are missing" }];
   const lines = text.split("\n").filter((l) => !/^\s*#/.test(l)).join("\n");
   const problems = [];
-  if (/\[\[\s*d1_databases\s*\]\]/.test(lines)) {
-    problems.push({ path, why: "still names a Cloudflare database; the email list is on Supabase now, so take the block out" });
+  for (const block of lines.split(/\[\[\s*d1_databases\s*\]\]/).slice(1)) {
+    const own = block.split(/^\s*\[/m)[0];
+    const binding = own.match(/^\s*binding\s*=\s*"([^"]*)"/m)?.[1];
+    if (!ALLOWED_DATABASES.includes(binding)) {
+      problems.push({
+        path,
+        why: binding
+          ? `names a Cloudflare database "${binding}"; only the accounts database belongs here (the email list is on Supabase), so take the block out`
+          : "names a Cloudflare database with no binding name; only the accounts database belongs here, so take the block out",
+      });
+    }
   }
   if (/supabase\.co|SUPABASE_|LIST_KEY|TURNSTILE_SECRET/i.test(lines)) {
     problems.push({ path, why: "holds a Supabase address or one of the form's secret settings; those go in as Pages secrets, never in this file" });
@@ -228,7 +263,11 @@ function check({ build, release = true }) {
   // The team id is read here, from this laptop's signing setup, and only ever written into the
   // folder; nothing prints it. A look on this laptop goes on without it, saying so once.
   const team = signingTeam({ script: join(root, "native", "scripts", "signing-team.sh") });
-  assemble({ landing, app, out, team });
+  // The spam check's real site key is public but lives only in the saved keys, so a look on
+  // this laptop outside dotenvx keeps the test key and the check below says so.
+  const sitekey = process.env.HIFTH_APP_TURNSTILE_SITEKEY || null;
+  assemble({ landing, app, out, team, sitekey });
+  if (!sitekey) console.log("  No HIFTH_APP_TURNSTILE_SITEKEY loaded, so the front page keeps the spam check's test key (make hifth-app-turnstile ARGS=--make saves the real one).");
   const { files, bytes } = readFolder(out);
   const { version: shipping } = current(readFileSync(join(root, "native", "project.yml"), "utf8"));
   let { problems } = auditShipped(files, { commit, shipping });

@@ -68,7 +68,7 @@ test("gate:i18n passes catalogs in step with their generated files", () => {
   withCatalogs({ ar, en }, (root) => {
     const r = runGate("i18n", root);
     assert.equal(r.status, 0, r.out);
-    assert.match(r.out, /OK \(2 locales × 3 messages, generated code in step\)/);
+    assert.match(r.out, /OK \(2 locales × 3 messages at start-up, generated code in step\)/);
   });
 });
 

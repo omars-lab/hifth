@@ -294,6 +294,8 @@ export interface Strings {
   arrivedAyah(origin: "link" | "jump", label: string, page: number): string;
   rangeUnavailable: string;
   ayahUnavailable: string;
+  /** A link that names no page or verse there is (backlog app-link-it-cannot-place). */
+  linkNowhere: string;
   noConcordance: string;
   /** The footer's screen-reader-only summary of what the rail is offering. */
   railSummary(surah: string, links: number): string;
@@ -522,6 +524,9 @@ export interface Strings {
   reportCopied: string;
   reportClose: string;
   reportMailIntro: string;
+
+  /* The account section's words are not here: they load with the section
+   * itself (account-words.ts, sign-in ⑳), not with these start-up words. */
 
   /* ---- colophon ----------------------------------------------------------- */
   aboutTitle: string;
@@ -1323,7 +1328,7 @@ export interface Strings {
 }
 
 /** The reader's own calendar day for a moment, as the `YYYY-MM-DD` `longDay` reads. */
-function localDay(at: number): string {
+export function localDay(at: number): string {
   const d = new Date(at);
   const p = (v: number) => String(v).padStart(2, "0");
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;

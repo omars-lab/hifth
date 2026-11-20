@@ -37,6 +37,11 @@ one of them. *Pitch* means the private build (`make pitch`); everything else is 
   `upright-ipad-opens-two-small-pages`
 - [ ] A deep link to a verse lands on its page with the verse marked; turn the phone the moment it
   opens and the mark is still there. · phone, phone-side · issue: `turned-phone-loses-linked-verse-mark`
+- [ ] A link to a verse that does not exist (try 2:999, or a mistyped page) says "This link does
+  not point to a page or verse" in one row under the top bar, with Hide; the page you were on
+  stays. In the iPad and Mac apps, a hifth:// or hifth.app link like that says the same, and
+  `hifth:///` on its own only opens the app. · phone, desktop, Firefox, the iPad app, the Mac app ·
+  issue: `app-link-it-cannot-place` · tests: `e2e/open-link.spec.ts`, `ShellCallbackTests.swift`
 - [ ] Open at page 1 and turn to page 3: the paper stays the same size and shape; the opening text sits
   in the middle, not on a squat card. · desktop, phone · issue: `opening-pages-squat`
 - [ ] In the info panel, set "The first two pages" to usual size: pages 1 and 2 redraw at once with
@@ -1183,6 +1188,11 @@ would break. Pictures of this build may be committed; it carries no held text.
   then back to `large`) and open the app: say whether the bars grew. · reviewer iPhone SE ·
   walked 2026-11-17: nothing in the app follows the system text size; the question went to the
   accessibility row (issue: `launch-screen-reader-walk`)
+- [ ] Run Apple's accessibility check inside the app (`make app-test ONLY=AccessibilityAuditTests`):
+  no nameless picture, no button too small to touch, no faint text, on a page and on a chosen
+  verse. · iPad simulator · test: `native/HifthUITests/AccessibilityAuditTests.swift` · found
+  2026-11-19: every verse-number ring, its number and the lettering on page 7 read as nameless
+  pictures (23), which the browsers' own checks could not see; now hidden from readers
 - [ ] Open the Mac store copy fresh, from an emptied data folder: page 7, no "Left off" ribbon. ·
   Mac · not walked: the Mac picture command builds the test copy and keeps the laptop's saved
   data, so it showed a ribbon from past runs; waits for the Mac sandbox (issue: `launch-mac-sandbox`)
@@ -1190,3 +1200,14 @@ would break. Pictures of this build may be committed; it carries no held text.
   see: a "Left off" ribbon, a bookmark, a note, a first-run tip, a half-drawn page. · Mac, iPad,
   iPhone · test: `native/HifthTests/ScreenshotDataTests.swift` · found 2026-11-17: the Mac pictures
   showed the laptop's own "Left off" ribbon; a picture run now starts from an empty, throwaway store
+- [ ] Larger text (`make text-grow-serve`), on the iPhone SE simulator at its largest text size
+  (`xcrun simctl ui <device> content_size accessibility-extra-extra-extra-large`), each of
+  `?grow=phone`, `?grow=panels`, `?grow=own&size=1.5`, English and Arabic: the words themselves
+  grow, not only the boxes; every top-bar button stays on the screen; the verse drawer leaves the
+  chosen verse in sight, and the drawer is still larger than usual; in the drawer each tool's icon and
+  count sit on one line. `docs/design/larger-text-options/shoot.sh <port>` takes all five pictures. Open each build on a fresh address (a new port), or the offline copy
+  serves the last build. · iPhone SE simulator · test: `apps/web/e2e/text-grow.spec.ts` guards
+  words and buttons in the test browsers, which do not show either fault · found 2026-11-20:
+  iPhone Safari kept the words at their size inside the grown parts (fixed); the info button is
+  pushed off the top bar and the drawer covers the verse (both fixed); the Same roots count dropped
+  under its icon in the drawer grown twice over (fixed) · issue: `a11y-larger-text`

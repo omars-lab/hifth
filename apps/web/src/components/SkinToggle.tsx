@@ -1,6 +1,7 @@
 import { type SkinId } from "@hifth/core";
 import { useT } from "../i18n";
 import styles from "./SkinToggle.module.css";
+import { TAJWEED } from "../tajweed-in-build";
 
 interface SkinToggleProps {
   /** The skin currently applied (L3 owns it; the stage applies it). */
@@ -25,8 +26,10 @@ interface SkinToggleProps {
  * without having seen it — a tajweed error in a memorisation tool is the kind of
  * bug that teaches a mistake.
  */
-export function SkinToggle({ skin, onChange, onOpenLegend }: SkinToggleProps): JSX.Element {
+export function SkinToggle({ skin, onChange, onOpenLegend }: SkinToggleProps): JSX.Element | null {
   const { t } = useT();
+  // A store build made without the colours has nothing to switch on (tajweed-in-build.ts).
+  if (!TAJWEED) return null;
   const on = skin === "tajweed";
   return (
     <div className={styles.group} role="group" aria-label={t.skinGroup}>

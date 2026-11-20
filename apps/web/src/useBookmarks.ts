@@ -1,20 +1,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  bookmarkChangedAt,
+  confusionChangedAt,
   dropUnwritten,
   fromPins,
   isMistake,
+  joinRemovals,
+  mergeBookmarkFile,
   mergeConfusions,
+  mergeConfusionsFile,
   mergeNotesFile,
   pinsOf,
+  touchBookmark,
+  touchConfusion,
+  trackRemovals,
   type Bookmark,
   type Confusion,
   type Note,
+  type Removal,
   type ScopedNote,
 } from "@hifth/core";
 import {
   loadNotes,
-  readBookmarks,
-  readConfusions,
+  readBookmarkSet,
+  readConfusionSet,
   readDevice,
   readSeam,
   writeAllNotes,
@@ -24,7 +33,7 @@ import {
   type Device,
   type HeldNotes,
 } from "./bookmark-store";
-import type { CommitHow, Recorder } from "./mark-history";
+import { stepOnto, type CommitHow, type Recorder } from "./mark-history";
 
 /**
  * The reader's bookmarks, held for the app: loaded from the phone once, and every
@@ -44,20 +53,36 @@ export function useBookmarks(
   record?: Recorder,
 ): {
   bookmarks: readonly Bookmark[];
+  /** The bookmarks the reader took away, by id and time, for the copy to carry (removals.ts, ㉒). */
+  removed: readonly Removal[];
   /** True once the bookmarks saved in this browser have been read in. */
   loaded: boolean;
   commit: (next: Bookmark[], said: string, how?: CommitHow) => void;
-  restore: (set: unknown, said: string) => void;
+  /**
+   * Merge in a copy's bookmarks and the ones it says were taken away; how many
+   * arrived. Undo does not hear it. `say` gives the line to announce once it is
+   * saved, from how many arrived.
+   */
+  loadFile: (
+    fileBookmarks: readonly Bookmark[],
+    fileRemoved?: readonly Removal[],
+    say?: (added: number) => string,
+  ) => number;
+  /** Undo or Redo: go to `set` from `leaving`, changing only what that step changed (stepOnto). */
+  restore: (set: unknown, said: string, leaving?: unknown) => void;
   /** Settles once every write asked for so far has reached disk. */
   saved: () => Promise<unknown>;
 } {
-  const [bookmarks, setBookmarksState] = useState<readonly Bookmark[]>([]);
+  const [held, setHeld] = useState<HeldSet<Bookmark>>(NOTHING);
   const [loaded, setLoaded] = useState(false);
-  const latest = useRef<readonly Bookmark[]>([]);
-  const setBookmarks = useCallback((next: readonly Bookmark[] | ((now: readonly Bookmark[]) => readonly Bookmark[])) => {
-    latest.current = typeof next === "function" ? next(latest.current) : next;
-    setBookmarksState(latest.current);
-  }, []);
+  const latest = useRef<HeldSet<Bookmark>>(NOTHING);
+  const setBookmarks = useCallback(
+    (next: HeldSet<Bookmark> | ((now: HeldSet<Bookmark>) => HeldSet<Bookmark>)) => {
+      latest.current = typeof next === "function" ? next(latest.current) : next;
+      setHeld(latest.current);
+    },
+    [],
+  );
 
   // Writes go one after another, and the first waits for the read. Each opens
   // the store on its own, and two opened close together (a drop, then the
@@ -67,10 +92,14 @@ export function useBookmarks(
 
   useEffect(() => {
     let live = true;
-    const read = readBookmarks().then((set) => {
+    const read = readBookmarkSet().then((got) => {
       if (!live) return;
+      const set = got.bookmarks;
       // A drop made in the moment before the read landed is kept, not overwritten.
-      setBookmarks((now) => (now.length === 0 ? set : [...set, ...now.filter((b) => !set.some((s) => s.id === b.id))]));
+      setBookmarks((now) => ({
+        marks: now.marks.length === 0 ? set : [...set, ...now.marks.filter((b) => !set.some((s) => s.id === b.id))],
+        removed: joinRemovals(got.removed, now.removed),
+      }));
       setLoaded(true);
     });
     queue.current = read;
@@ -80,26 +109,76 @@ export function useBookmarks(
   }, [setBookmarks]);
 
   const write = useCallback(
-    (next: readonly Bookmark[], said: string) => {
+    (next: HeldSet<Bookmark>, said: string) => {
       setBookmarks(next);
       // The set written is the one held when its turn comes, not the one at the
       // commit: a commit made before the read landed did not yet hold what was read.
       queue.current = queue.current
-        .then(() => writeBookmarks([...latest.current]))
-        .then((ok) => announce(ok ? said : notSaved));
+        .then(() => writeBookmarks([...latest.current.marks], latest.current.removed))
+        .then((ok) => {
+          if (!ok) announce(notSaved);
+          else if (said) announce(said);
+        });
     },
     [announce, notSaved, setBookmarks],
   );
+  // Undo hears the bookmarks alone; the list of what was taken away is worked
+  // out afresh at each change and each Undo, as the notes' is.
   const commit = useCallback(
     (next: Bookmark[], said: string, how?: CommitHow) => {
-      if (!how?.unrecorded) record?.(latest.current, next, said);
-      write(next, said);
+      const tracked = trackSet(latest.current, next, Date.now(), bookmarkChangedAt, touchBookmark);
+      if (!how?.unrecorded) record?.(latest.current.marks, tracked.marks, said);
+      write(tracked, said);
     },
     [record, write],
   );
-  const restore = useCallback((set: unknown, said: string) => write(set as readonly Bookmark[], said), [write]);
+  const restore = useCallback(
+    (set: unknown, said: string, leaving?: unknown) => {
+      const to = set as readonly Bookmark[];
+      const next = leaving ? stepOnto(latest.current.marks, to, leaving as readonly Bookmark[]) : to;
+      write(trackSet(latest.current, next, Date.now(), bookmarkChangedAt, touchBookmark), said);
+    },
+    [write],
+  );
+  const loadFile = useCallback(
+    (fileBookmarks: readonly Bookmark[], fileRemoved: readonly Removal[] = [], say?: (added: number) => string) => {
+      const now = latest.current;
+      const merged = mergeBookmarkFile(now.marks, now.removed, fileBookmarks, fileRemoved);
+      write({ marks: merged.bookmarks, removed: merged.removed }, say?.(merged.added) ?? "");
+      return merged.added;
+    },
+    [write],
+  );
 
-  return { bookmarks, loaded, commit, restore, saved: () => queue.current };
+  return {
+    bookmarks: held.marks,
+    removed: held.removed,
+    loaded,
+    commit,
+    loadFile,
+    restore,
+    saved: () => queue.current,
+  };
+}
+
+/** One kind of mark as held: the marks, and the ones taken away (removals.ts). */
+interface HeldSet<T> {
+  readonly marks: readonly T[];
+  readonly removed: readonly Removal[];
+}
+
+const NOTHING: HeldSet<never> = { marks: [], removed: [] };
+
+/** The set after a change, with what it took away remembered and what it put back stamped newer. */
+function trackSet<T extends { readonly id: string }>(
+  from: HeldSet<T>,
+  next: readonly T[],
+  now: number,
+  changedAt: (x: T) => number,
+  touch: (x: T, now: number) => T,
+): HeldSet<T> {
+  const got = trackRemovals(from.removed, from.marks, next, now, changedAt, touch);
+  return { marks: got.after, removed: got.removed };
 }
 
 /**
@@ -170,13 +249,16 @@ export function useNotes(
 ): {
   notes: readonly Note[];
   scoped: readonly ScopedNote[];
+  /** The notes the reader took away, by id and time, for the copy to carry (removals.ts). */
+  removed: readonly Removal[];
   /** True once the saved notes have been read in; nothing is written before. */
   loaded: boolean;
   commit: (next: Note[], said: string, how?: CommitHow) => void;
   /** Replace the notes that gather verses outright, as joining a note and its Undo do. */
   commitScoped: (next: readonly ScopedNote[], said: string, how?: CommitHow) => void;
-  loadFile: (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => number;
-  restore: (held: unknown, said: string) => void;
+  loadFile: (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[], fileRemoved?: readonly Removal[]) => number;
+  /** Undo or Redo: go to `held` from `leaving`, changing only what that step changed (stepOnto). */
+  restore: (held: unknown, said: string, leaving?: unknown) => void;
   /** Settles once every write asked for so far has reached disk. */
   saved: () => Promise<unknown>;
 } {
@@ -208,6 +290,7 @@ export function useNotes(
       hold({
         scoped: [...kept, ...now.scoped.filter((n) => !got.scoped.some((s) => s.id === n.id))],
         mistakes: [...got.mistakes, ...now.mistakes.filter((n) => !got.mistakes.some((s) => s.id === n.id))],
+        removed: joinRemovals(got.removed, now.removed),
       });
       setLoaded(true);
     });
@@ -224,7 +307,7 @@ export function useNotes(
           const from = stored.current;
           if (!from) return false;
           const now = latest.current;
-          return writeAllNotes([...from.backup, ...now.mistakes], now.scoped);
+          return writeAllNotes([...from.backup, ...now.mistakes], now.scoped, now.removed);
         })
         .then((ok) => {
           if (!ok) announce(notSaved);
@@ -236,10 +319,14 @@ export function useNotes(
 
   // Undo hears the notes as a whole, before and after: the notes that gather
   // verses and the mistakes together, so taking a change back is one write.
+  // It never hears the list of what was taken away: `restore` works that out
+  // afresh, and a list that grew under a change that changed nothing (a pin
+  // dropped and closed empty) would otherwise leave an Undo that does nothing.
   const change = useCallback(
-    (next: Held, said: string, how?: CommitHow) => {
-      if (!how?.unrecorded) record?.(latest.current, next, said, how?.opens);
-      hold(next);
+    (next: Marks, said: string, how?: CommitHow) => {
+      const tracked = track(latest.current, next, Date.now());
+      if (!how?.unrecorded) record?.(marksOf(latest.current), marksOf(tracked), said, how?.opens);
+      hold(tracked);
       save(said);
     },
     [hold, record, save],
@@ -268,19 +355,29 @@ export function useNotes(
     [change],
   );
 
+  // Undo and Redo put back the notes they held, but the list of what was taken
+  // away is worked out from what the device holds now, never taken from the
+  // snapshot: a deletion the snapshot predates still happened, and a note Undo
+  // brings back must be stamped newer than its deletion.
   const restore = useCallback(
-    (held: unknown, said: string) => {
-      hold(held as Held);
+    (held: unknown, said: string, leaving?: unknown) => {
+      const to = held as Marks;
+      const from = leaving as Marks | undefined;
+      const now = latest.current;
+      const next: Marks = from
+        ? { scoped: stepOnto(now.scoped, to.scoped, from.scoped), mistakes: stepOnto(now.mistakes, to.mistakes, from.mistakes) }
+        : to;
+      hold(track(now, next, Date.now()));
       save(said);
     },
     [hold, save],
   );
 
   const loadFile = useCallback(
-    (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[]) => {
+    (fileNotes: readonly Note[], fileScoped: readonly ScopedNote[], fileRemoved: readonly Removal[] = []) => {
       const now = latest.current;
-      const merged = mergeNotesFile(now.scoped, now.mistakes, fileNotes, fileScoped);
-      hold({ scoped: merged.scoped, mistakes: merged.mistakes });
+      const merged = mergeNotesFile(now.scoped, now.mistakes, fileNotes, fileScoped, now.removed, fileRemoved);
+      hold({ scoped: merged.scoped, mistakes: merged.mistakes, removed: merged.removed });
       save("");
       return merged.added;
     },
@@ -288,15 +385,57 @@ export function useNotes(
   );
 
   const notes = useMemo(() => [...pinsOf(held.scoped), ...held.mistakes], [held]);
-  return { notes, scoped: held.scoped, loaded, commit, commitScoped, loadFile, restore, saved: () => queue.current };
+  return {
+    notes,
+    scoped: held.scoped,
+    removed: held.removed,
+    loaded,
+    commit,
+    commitScoped,
+    loadFile,
+    restore,
+    saved: () => queue.current,
+  };
 }
 
 interface Held {
   readonly scoped: ScopedNote[];
   readonly mistakes: Note[];
+  readonly removed: Removal[];
 }
 
-const EMPTY: Held = { scoped: [], mistakes: [] };
+/** The notes themselves, without the list of what was taken away. */
+type Marks = Pick<Held, "scoped" | "mistakes">;
+
+const marksOf = (h: Held): Marks => ({ scoped: h.scoped, mistakes: h.mistakes });
+
+const EMPTY: Held = { scoped: [], mistakes: [], removed: [] };
+
+/**
+ * The notes after a change, with what the change took away remembered and a
+ * note it put back stamped newer than its removal (removals.ts). A note that
+ * gathers verses counts as changed when it was last edited or used; a mistake
+ * when it was last edited.
+ */
+function track(from: Held, next: Marks, now: number): Held {
+  const scoped = trackRemovals(
+    from.removed,
+    from.scoped,
+    next.scoped,
+    now,
+    (n) => Math.max(n.updatedAt, n.usedAt),
+    (n, at) => ({ ...n, usedAt: at }),
+  );
+  const mistakes = trackRemovals(
+    scoped.removed,
+    from.mistakes,
+    next.mistakes,
+    now,
+    (n) => n.updatedAt,
+    (n, at) => ({ ...n, updatedAt: at }),
+  );
+  return { scoped: scoped.after, mistakes: mistakes.after, removed: mistakes.removed };
+}
 
 /**
  * The reader's confusion jumps (docs/design/confusion-jumps.md), held like the
@@ -311,26 +450,29 @@ export function useConfusions(
   record?: Recorder,
 ): {
   confusions: readonly Confusion[];
+  /** The jumps the reader took away, by id and time, for the copy to carry (removals.ts, ㉒). */
+  removed: readonly Removal[];
   device: Device | null;
   /** True once the saved jumps have been read in; nothing is written before. */
   loaded: boolean;
   /** True once the read has finished, whether it found the store or not. */
   ready: boolean;
   commit: (next: readonly Confusion[], said: string, how?: CommitHow) => void;
-  loadFile: (fileJumps: readonly Confusion[]) => number;
-  restore: (jumps: unknown, said: string) => void;
+  loadFile: (fileJumps: readonly Confusion[], fileRemoved?: readonly Removal[]) => number;
+  /** Undo or Redo: go to `jumps` from `leaving`, changing only what that step changed (stepOnto). */
+  restore: (jumps: unknown, said: string, leaving?: unknown) => void;
   /** Settles once every write asked for so far has reached disk. */
   saved: () => Promise<unknown>;
 } {
-  const [held, setHeld] = useState<readonly Confusion[]>([]);
+  const [held, setHeld] = useState<HeldSet<Confusion>>(NOTHING);
   const [device, setDevice] = useState<Device | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [ready, setReady] = useState(false);
-  const latest = useRef<readonly Confusion[]>([]);
+  const latest = useRef<HeldSet<Confusion>>(NOTHING);
   const read = useRef(false);
   const queue = useRef<Promise<unknown>>(Promise.resolve());
 
-  const hold = useCallback((next: readonly Confusion[]) => {
+  const hold = useCallback((next: HeldSet<Confusion>) => {
     latest.current = next;
     setHeld(next);
   }, []);
@@ -340,13 +482,14 @@ export function useConfusions(
     void readDevice(typeof navigator === "undefined" ? "" : navigator.userAgent).then((d) => {
       if (live) setDevice(d);
     });
-    queue.current = readConfusions().then((got) => {
+    queue.current = readConfusionSet().then((got) => {
       if (!live) return;
       setReady(true);
       if (!got) return;
       read.current = true;
       // Jumps marked before the read landed are kept beside what was read.
-      hold(mergeConfusions(got, latest.current));
+      const now = latest.current;
+      hold({ marks: mergeConfusions(got.confusions, now.marks), removed: joinRemovals(got.removed, now.removed) });
       setLoaded(true);
     });
     return () => {
@@ -357,7 +500,7 @@ export function useConfusions(
   const save = useCallback(
     (said: string) => {
       queue.current = queue.current
-        .then(() => (read.current ? writeConfusions(latest.current) : false))
+        .then(() => (read.current ? writeConfusions(latest.current.marks, latest.current.removed) : false))
         .then((ok) => {
           if (!ok) announce(notSaved);
           else if (said) announce(said);
@@ -366,31 +509,46 @@ export function useConfusions(
     [announce, notSaved],
   );
 
+  // As with the bookmarks, Undo hears the jumps alone.
   const commit = useCallback(
     (next: readonly Confusion[], said: string, how?: CommitHow) => {
-      if (!how?.unrecorded) record?.(latest.current, next, said);
-      hold(next);
+      const tracked = trackSet(latest.current, next, Date.now(), confusionChangedAt, touchConfusion);
+      if (!how?.unrecorded) record?.(latest.current.marks, tracked.marks, said);
+      hold(tracked);
       save(said);
     },
     [hold, record, save],
   );
   const restore = useCallback(
-    (jumps: unknown, said: string) => {
-      hold(jumps as readonly Confusion[]);
+    (jumps: unknown, said: string, leaving?: unknown) => {
+      const to = jumps as readonly Confusion[];
+      const next = leaving ? stepOnto(latest.current.marks, to, leaving as readonly Confusion[]) : to;
+      hold(trackSet(latest.current, next, Date.now(), confusionChangedAt, touchConfusion));
       save(said);
     },
     [hold, save],
   );
 
   const loadFile = useCallback(
-    (fileJumps: readonly Confusion[]) => {
-      const before = latest.current.length;
-      hold(mergeConfusions(latest.current, fileJumps));
+    (fileJumps: readonly Confusion[], fileRemoved: readonly Removal[] = []) => {
+      const now = latest.current;
+      const merged = mergeConfusionsFile(now.marks, now.removed, fileJumps, fileRemoved);
+      hold({ marks: merged.confusions, removed: merged.removed });
       save("");
-      return latest.current.length - before;
+      return merged.added;
     },
     [hold, save],
   );
 
-  return { confusions: held, device, loaded, ready, commit, loadFile, restore, saved: () => queue.current };
+  return {
+    confusions: held.marks,
+    removed: held.removed,
+    device,
+    loaded,
+    ready,
+    commit,
+    loadFile,
+    restore,
+    saved: () => queue.current,
+  };
 }

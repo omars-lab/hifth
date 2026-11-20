@@ -55,6 +55,11 @@ Say which runs you ran. If WebKit will not start, install it once:
 
 ## Running them
 
+A quick look at one local page in Firefox, with no test file: `pnpm -C apps/web exec playwright
+screenshot --browser=firefox <address> <out.png>` (Playwright lives in `apps/web`, not the root).
+For a phone-width look in the `chrome-devtools` tools, use `emulate` with a viewport of
+`390x844x3,mobile,touch`; `resize_page` stops at about 500 px wide.
+
 Everything runs from the **repo root**, and the PATH gotcha from the `run-app` skill
 applies — a non-login shell here has node 18, which has no `pnpm`. Use the version
 `.nvmrc` names (22 today):
@@ -72,7 +77,45 @@ pnpm -r test                                     # every package (core, etl, web
 ```
 
 `@hifth/core` must be built before the packages that import it (`make core`, or
-`make test` which does it for you) — the Loop 0 lesson.
+`make test` which does it for you) — the Loop 0 lesson. The web app's type check reads the
+core package's built output too, so after a change to core it fails with errors that point at
+the web app's files until `pnpm -C packages/core -s build` runs. The web app's unit tests read
+that built copy as well, so a wording fix made in core still looks unfixed there until core is
+rebuilt.
+
+**When two places share a rule** (the release tag's shape, say), the test writes the rule out as
+a plain string in both, not only through the shared function. A shared function changes both
+sides at once, so only the written-out copy notices the day one side changes it (2026-11-17).
+
+**A test that was green the moment you wrote it** has not shown it can fail. Break the feature on
+purpose in two places, watch the test go red each time, then put the code back.
+Before you trust a first-try pass, check which build `dist` holds: Playwright serves whatever was
+built last, and a test passed on a build made without the feature it was meant to catch
+(2026-11-19). And some faults only show on the real phone: on iPhone Safari a grown part kept its
+words at their old size while the test browsers grew them (2026-11-20). When a size or text
+change passes at once, look at it on the simulator before calling it checked.
+
+**A new file that reads the record of what was opened** is refused at commit time by the privacy
+check, minutes into the commit. Run `pnpm -s gate:revision-privacy` (a second) right after adding
+one, and add the file to the check's list if it truly needs the record.
+
+**Write a script's Arabic-letter test as `/\p{Script=Arabic}/u`**, not a range of typed Arabic
+characters. A typed range picked up an invisible character that the commit's lint refused, and
+the Edit tool turns `\u` escapes back into raw characters (2026-11-11).
+
+### Tests that run git
+
+A test that runs git makes a throwaway repo and strips every `GIT_*` variable first:
+`fixtureEnv()` in `scripts/gate-fixture.mjs`. During a commit, the hook's own git variables
+would otherwise point the test's `git init` and `git add` at the real repo. Point the global
+settings at nothing as well, so the laptop's own git setup cannot leak in.
+
+Don't run one repo's git-heavy tests while another repo's push checks are running. Both slow
+down, and a timing failure then can't be read. Run them one after the other.
+
+**After moving test files,** run the moved tests and search for the old path in every quoting
+style (quotes, backticks, bare). A search for quoted paths once missed one in backticks, and a
+test that reads every script in its folder started reading the moved tests too.
 
 ### End-to-end, in a browser
 
@@ -80,6 +123,21 @@ pnpm -r test                                     # every package (core, etl, web
 pnpm -C apps/web exec playwright test --project=desktop
 pnpm -C apps/web exec playwright test desktop.spec.ts --project=desktop -g "holds the slider"
 ```
+
+**Name the setups a spec runs on.** Some specs run on the phone setups only (a hold marks
+words only on a touch screen, so `word.spec.ts` skips the computer ones); "passes everywhere"
+then means "passes on iphone and android", and the report says so.
+
+**Find a tool's button by its exact name.** `getByRole("radio", { name: "Mistake" })` also
+matches every longer name that holds the word, so pass `exact: true`.
+
+**The `iphone` setup is 390 by 664**, the room Safari leaves with its bars, not the phone's 844.
+Safari's "Install Hifth" notice takes about 160 of those at the top until it is hidden. A size
+worked from the screen's height (`dvh`) ignores the notice, so size a part from the page's own
+area instead (`cqh` on a size container), and test it with the notice up.
+
+**This Mac has no `timeout` command.** To stop a Playwright run that might hang, pass
+`--global-timeout=<ms>`.
 
 **Playwright does not build the app.** It serves whatever is already in `apps/web/dist`,
 so build first or the run tests the old app:
@@ -107,6 +165,10 @@ which runs pick up each file, and the commit check (`pnpm gate:e2e-runs`) refuse
 or one that joined or left a run, printing where it runs and where it does not. Add the file
 to the lists it belongs on, then `pnpm gate:e2e-runs --write` and commit the record with it.
 
+**Before picking `--project`, look the file up in `apps/web/e2e/runs.json`.** Some files run
+only on the laptop and Firefox (the phone runs leave `lazy-tools.spec.ts` out, for one), so
+`--project=iphone` on them finds no tests and says so, which is easy to read as a pass.
+
 A push looks at the copy's two ports before anything else (`make e2e-port-free`). If a
 preview server from an earlier look is still on one, the push stops in a second and prints
 the port, the program holding it and the `kill` line that stops it. Run the same target by
@@ -128,10 +190,24 @@ Firefox on a pretend iPad (`hasTouch`) sends a mouse click with **no pointer eve
 code that listens for `pointerdown` never hears `page.mouse.click`. Use
 `page.touchscreen.tap` for a touch (found 2026-11-11, the pencil's rings).
 
+**Tapping a verse:** `tapAyah` in `apps/web/e2e/ayah.ts` taps with a finger, at a point it has
+checked a finger can reach. A run with no touch (the desktop ones) needs a mouse click at
+`ayahTarget`'s point instead. No helper picks between the two yet, so each new test chooses by
+the project it runs in.
+
+**To make "a slow connection might do this" into a failing test,** hold back one file: open a
+context with the offline cache switched off (`serviceWorkers: "block"`), then delay that file's
+route. With the cache on, the route is never asked.
+
 The other projects: `pitch` and `pitch-firefox` (the private pitch build, its own port),
 `pitch-script` (the six demo passages), `iphone`, `ipad`, and the golden pictures.
 
 ### Reading a failure
+
+**A part grown with CSS `zoom` gives two heights.** `offsetHeight` is its height before growing,
+and `getBoundingClientRect` is the grown box on the screen. When a grown part's numbers look
+wrong, print both before guessing a second cause: in the verse drawer the real fault was that it
+never reported its height at all (2026-11-20).
 
 ```
 make report    # opens the last run's traces, DOM snapshots, console, network,
@@ -169,6 +245,61 @@ app is wrong before touching either.** Three steps, each a few minutes:
 The page-edge strip was found this way on 2026-11-11
 (`docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md`).
 
+Four more habits for these:
+
+- **Repeat the fix 25 times too, before committing it.** The first fix for a test that needed
+  two free ports failed five runs in eight.
+- **When a failing run's picture shows the cause, force that state** rather than chasing the
+  timing. The chips beside the look-alike rows failed once because the verse's drawer measured
+  itself while still short; slowing the processor never made it happen, but holding the drawer
+  short with a style and then letting it grow made it fail every time (2026-11-12).
+- **A value read once right after a load or a setting change goes in `expect.poll`**, and a
+  first page load gets 20 seconds. Four tests passed only on retry on a busy laptop, each of
+  them reading such a value once.
+- **Watch for the change that matters, not a count.** A watcher told to stop "once both pages
+  are found" stopped before they had settled; watching for the page changing side caught it.
+
+**A unit test that waits for something from the rarely used tools fails when the laptop is
+busy.** The share sheet's links, the report button and the other tools in
+`components/rarely-used.ts` load the first time they open. The first load compiles that whole
+file, 1.5 to 3 seconds on a quiet laptop, which can run past the 5-second wait during the commit
+check. Load it once before the tests, with its own allowance, so the wait covers only the
+drawing:
+
+```ts
+beforeAll(async () => {
+  await import("./rarely-used");
+}, 60_000);
+```
+
+`PageStopped.test.tsx`, `HighlightMenu.test.tsx` and `ShareSheet.native.test.tsx` do this
+(2026-11-16 and 2026-11-19). A browser test that opens a page and waits the default 5 seconds
+for the verse's tools hit the same thing on a busy push: wait 20 seconds, as
+`slider-arrows.spec.ts` does.
+
+## After merging main, and pushing in the background
+
+(Folded from the Nov 13 front-page merge note, and the Nov 20 loop passes.)
+
+- **Run the whole browser suite once on a merge before pushing.** Two tests from one side can meet
+  the other side's change for the first time. Print the measured box before reading code.
+- **Run `pnpm gate:budget` after a merge that brings in a lot of main.** Each side can be under
+  the 1.0 KB margin while the two together are not; expect to run `make budget-update`.
+- **A background push reports the last command's exit.** `git push …; echo exit=$?` said yes
+  while the push hook had refused it. Read the log's last lines, or end the command with the push.
+- **A background command needs the same PATH as a foreground one** (Node 22 and `~/.local/bin`),
+  or the push hook stops at once on the Node check. A commit made without `~/.local/bin` is
+  worse: the hook that adds the task lines is skipped with no error. After each commit, check
+  `git log -1 "--format=%(trailers:key=Intent-Task,valueonly)"` prints the task.
+- **Don't build in a working copy while its push is testing there.** The build replaces the app
+  the push's browser tests are serving.
+- **On a small phone, a layout test runs in English as well as Arabic.** The test browsers start in
+  Arabic, and the English row is the wider one.
+- **On an iPhone, Safari's own bars take room the test browsers don't.** On the iPhone SE the page
+  gets about 500 px of height, not 667, and Safari shows the install banner the test browsers
+  never do. A test about room on a small phone uses 375 by 500, and the banner (an iPhone user
+  agent, with storage that says it is not kept) where it matters: see `e2e/text-grow.spec.ts`.
+
 ## The golden pictures
 
 `golden` photographs one page per shot at phone size, and `ipad-golden` at iPad size. Only the
@@ -186,3 +317,25 @@ owner the difference and ask before doing that.
    viewport's arithmetic) → the phone spec; the `iphone` and `android` runs check it on
    every push.
 4. **Is it a pixel?** (colour, wash, exact placement) → a golden picture.
+
+A test that measures something first asserts the setup took: the thing was found, and the
+condition really holds (a drawer test checks the drawer did grow). A "not found" answer of -1
+is less than any limit, and passed a test on 2026-11-20 before the fix existed.
+
+To learn whether a resize or a turn rebuilds a part of the page, tag its DOM node before
+(`el.dataset.probe = "1"`) and look for the tag after: one probe settles what reading the
+layout code cannot. After a fix, ask what it might have opened (the advisor is good at this):
+on 2026-11-13 that found Escape clearing only the words the page made itself, not the ones the
+app handed down.
+
+Keep a feature's rules (which tab is in front, what a button does in each state) as small pure
+functions beside the component, as `drawer-tools.ts` does: they take a unit test with no browser,
+and the browser test is left with only the wiring.
+
+When a change moves a default (a note's shape, a layout), pin the old tests to the setting they
+were written for, and write the same promises again for the new default. On 2026-11-14 the new
+group found the chips hidden behind the standing note, which the old tests could not reach.
+
+A character range in a test or source (for a regex) is built from numbers with
+`String.fromCharCode`, not written as `\uXXXX` through the Edit tool: the tool writes the real
+characters, which can be invisible, and lint refuses the file.

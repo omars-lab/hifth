@@ -1,0 +1,351 @@
+import AuthenticationServices
+import CryptoKit
+import Foundation
+
+/// Signing in from the app (sign-in step 8 in docs/design/sign-in.md). The page asks the app
+/// "sign-in" (`askApp` in apps/web/src/native-bridge.ts); the app then:
+///
+/// 1. asks hifth.app for a fresh one-off word (`POST /api/sign-in/word`), with the tester's
+///    invite code while sign-in is for invited testers (step 18);
+/// 2. shows Apple's sheet with a scrambled copy of the word, asking Apple for no name and no
+///    email, because the server keeps neither;
+/// 3. hands Apple's note, the plain word and Apple's one-time code to hifth.app
+///    (`POST /api/sign-in`), which checks the note was made for this word and answers with a
+///    session. The code lets the server cut the link with Apple when the account is deleted;
+/// 4. tells the page only "signed-in". The session never reaches the page.
+///
+/// The word is asked for before the sheet, so a server with sign-in switched off, past its
+/// limit or wanting an invite code answers before Face ID is ever shown. The server side is apps/landing/lib/sign-in-api.mjs.
+enum SignIn {
+    /// Why a sign-in did not happen, in a word the page can act on.
+    struct Failure: Error, Equatable, Sendable {
+        let code: String
+        init(_ code: String) { self.code = code }
+
+        /// The reader closed Apple's sheet.
+        static let cancelled = Failure("cancelled")
+        /// hifth.app could not be reached.
+        static let offline = Failure("offline")
+        /// hifth.app or Apple answered with something that is not what was asked for.
+        static let badReply = Failure("bad-reply")
+        /// A sign-in is already open; the second ask is turned away, not queued.
+        static let busy = Failure("busy")
+        /// The app has no window to show Apple's sheet over.
+        static let noWindow = Failure("no-window")
+        /// Apple's sheet could not be shown or did not finish: no Apple account on the device,
+        /// or a build without the Sign in with Apple permission.
+        static let notAvailable = Failure("not-available")
+        /// Sign-in is switched off on the server (it answers 404), or this build names no server.
+        static let off = Failure("sign-in-off")
+        /// Too many sign-ins were started in these ten minutes (step 17), or this device asked
+        /// too fast. Trying again shortly works.
+        static let tooMany = Failure("too-many")
+        /// Sign-in is for invited testers and the invite code was missing or wrong (step 18).
+        static let inviteNeeded = Failure("invite-needed")
+
+        /// hifth.app turned the note down. Its reason is kept, cut down to plain letters, digits
+        /// and dashes, since it comes from outside the app.
+        static func refused(_ reason: String?) -> Failure {
+            let clean = String((reason ?? "").filter { $0.isASCII && ($0.isLowercase || $0.isNumber || $0 == "-") }.prefix(40))
+            return Failure(clean.isEmpty ? "refused" : "refused:\(clean)")
+        }
+    }
+
+    /// What hifth.app hands back: the session, and when it ends (seconds since 1970). With it
+    /// goes Apple's lasting id for the reader, which the app needs at each launch to ask Apple
+    /// whether the reader still allows Hifth. Kept in the Keychain (step 15, StaySignedIn.swift);
+    /// none of it ever reaches the page.
+    struct Session: Equatable, Sendable, Codable {
+        let token: String
+        let expiresAt: Int
+        var appleUser = ""
+    }
+
+    /// What Apple's sheet hands back: its signed note, the one-time code the server trades
+    /// for the ticket that lets it cancel the sign-in later (step 13), and Apple's
+    /// lasting id for the reader, which stays on the device.
+    struct AppleAnswer: Sendable {
+        let note: String
+        let code: String?
+        let user: String
+    }
+
+    /// The scrambled copy of the word Apple signs into its note: the lowercase hex SHA-256, the
+    /// same as `hashWord` in apps/landing/lib/apple-signin.mjs.
+    static func scramble(_ word: String) -> String {
+        SHA256.hash(data: Data(word.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// Apple's request: the scrambled word, and no name or email asked for.
+    static func appleRequest(nonce: String) -> ASAuthorizationAppleIDRequest {
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = []
+        request.nonce = nonce
+        return request
+    }
+
+    /// Apple's error, as a reason: closing the sheet is "cancelled", anything else means the
+    /// sheet could not do its work here.
+    static func failure(for error: Error) -> Failure {
+        if let failure = error as? Failure { return failure }
+        if let apple = error as? ASAuthorizationError, apple.code == .canceled { return .cancelled }
+        return .notAvailable
+    }
+
+    /// The longest invite code sent. A real one is 19 letters; this leaves room for spaces.
+    static let mostInviteLetters = 64
+
+    /// The most a marks file sent to hifth.app may weigh, in bytes as hifth.app counts them: the
+    /// copy's own limit (MOST_COPY_BYTES in apps/landing/lib/marks-copy.mjs) and the few letters
+    /// around it.
+    static let mostMarksBytes = 1_500_064
+    /// The most a copy fetched back may weigh: the file, the letters around it, and room for
+    /// hifth.app writing it out a little longer than the device sent it.
+    static let mostMarksReplyBytes = 1_600_000
+
+    /// The whole sign-in, with Apple's sheet passed in so the tests can play it. `invite` is the
+    /// tester's code as typed; the server tidies it. `invited` is called once the server has
+    /// handed out a word, which is when a sent code is known to be good: before Apple's sheet,
+    /// so the code can be kept even if the tester then closes the sheet.
+    static func run(
+        server: Server,
+        invite: String? = nil,
+        invited: () -> Void = {},
+        askApple: (_ nonce: String) async throws -> AppleAnswer
+    ) async -> Result<Session, Failure> {
+        do {
+            let word = try await server.word(invite: invite)
+            invited()
+            let apple: AppleAnswer
+            do { apple = try await askApple(scramble(word)) } catch { throw failure(for: error) }
+            var session = try await server.signIn(note: apple.note, word: word, code: apple.code)
+            session.appleUser = apple.user
+            return .success(session)
+        } catch let failure as Failure {
+            return .failure(failure)
+        } catch {
+            return .failure(.badReply)
+        }
+    }
+
+    // MARK: - hifth.app
+
+    /// hifth.app's two sign-in addresses.
+    struct Server {
+        let base: URL
+        /// How a request leaves; the tests replace it with a stand-in server.
+        var send: (URLRequest) async throws -> (Data, URLResponse) = Server.ephemeral
+
+        /// A fresh one-off word, good for ten minutes.
+        func word(invite: String? = nil) async throws -> String {
+            let typed = String((invite ?? "").prefix(SignIn.mostInviteLetters))
+            let reply = try await call("api/sign-in/word", body: typed.isEmpty ? nil : ["invite": typed])
+            guard let word = reply["word"] as? String, (1...256).contains(word.count) else { throw Failure.badReply }
+            return word
+        }
+
+        /// Apple's note and the plain word, traded for a session. Apple's one-time code goes
+        /// along when Apple gave one.
+        func signIn(note: String, word: String, code: String? = nil) async throws -> Session {
+            var body = ["note": note, "word": word]
+            if let code, !code.isEmpty { body["code"] = code }
+            let reply = try await call("api/sign-in", body: body)
+            guard let token = reply["session"] as? String, !token.isEmpty,
+                  let expiresAt = (reply["expiresAt"] as? NSNumber)?.intValue
+            else { throw Failure.badReply }
+            return Session(token: token, expiresAt: expiresAt)
+        }
+
+        /// Ends the session on hifth.app. Nothing comes back and nothing is thrown: the device
+        /// is signed out either way, and a session hifth.app never hears about ends by itself.
+        func signOut(session: String) async {
+            _ = try? await call("api/sign-out", body: nil, session: session)
+        }
+
+        /// Deletes the reader's account and everything kept about them. Says whether Apple
+        /// dropped its side of the link too ("cut"), or the reader should remove Hifth in their
+        /// Apple settings ("left"). Throws unless hifth.app says in so many words it is deleted.
+        func deleteAccount(session: String) async throws -> String {
+            let reply = try await call("api/sign-in/delete-account", body: nil, session: session)
+            guard reply["deleted"] as? Bool == true else { throw Failure.badReply }
+            return reply["appleLink"] as? String == "cut" ? "cut" : "left"
+        }
+
+        // MARK: The copy of the reader's marks (step 21)
+        //
+        // The app carries the page's marks file there and back and never reads inside it: the
+        // page merges, and hifth.app checks it is a marks file.
+
+        /// The reader's copy as hifth.app wrote it (`{marks, number, savedAt}`), or nil when they
+        /// have none yet.
+        func readMarks(session: String) async throws -> String? {
+            do {
+                let data = try await exchange("GET", "api/marks", body: nil, session: session, most: SignIn.mostMarksReplyBytes)
+                guard let text = String(data: data, encoding: .utf8) else { throw Failure.badReply }
+                return text
+            } catch let failure as Failure where failure == Failure("no-copy") {
+                return nil
+            }
+        }
+
+        /// Replaces the copy with `body` (`{marks, after}`), sent as the page wrote it. Hands back
+        /// hifth.app's reply (`{number, savedAt}`); `newer-copy` when another device kept one first.
+        func keepMarks(session: String, body: String) async throws -> String {
+            let data = try await exchange("PUT", "api/marks", body: Data(body.utf8), session: session, most: 64 * 1024)
+            guard let text = String(data: data, encoding: .utf8) else { throw Failure.badReply }
+            return text
+        }
+
+        /// Takes the copy off hifth.app. The account stays.
+        func dropMarks(session: String) async throws {
+            _ = try await exchange("DELETE", "api/marks", body: nil, session: session, most: 64 * 1024)
+        }
+
+        /// `session` goes in the Authorization line, never in the body or the address.
+        private func call(_ path: String, body: [String: String]?, session: String? = nil) async throws -> [String: Any] {
+            let sent = try body.map { try JSONSerialization.data(withJSONObject: $0) }
+            let data = try await exchange("POST", path, body: sent, session: session, most: 64 * 1024)
+            if data.isEmpty { return [:] }
+            guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { throw Failure.badReply }
+            return json
+        }
+
+        /// One request to hifth.app. A good answer's body comes back as it came, up to `most`
+        /// bytes; every other answer is turned into the word the page acts on.
+        private func exchange(_ method: String, _ path: String, body: Data?, session: String?, most: Int) async throws -> Data {
+            var request = URLRequest(url: base.appending(path: path))
+            request.httpMethod = method
+            request.httpShouldHandleCookies = false
+            if let session { request.setValue("Bearer \(session)", forHTTPHeaderField: "Authorization") }
+            if let body {
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.httpBody = body
+            }
+            let data: Data
+            let response: URLResponse
+            do { (data, response) = try await send(request) } catch { throw Failure.offline }
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            let json = data.count <= 64 * 1024
+                ? (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+                : nil
+            switch status {
+            case 200:
+                guard data.count <= most else { throw Failure.badReply }
+                return data
+            case 204: return Data()
+            // hifth.app's own 404 for a reader with no copy yet; any other 404 is sign-in switched off.
+            case 404 where json?["reason"] as? String == "no-copy": throw Failure("no-copy")
+            case 404: throw Failure.off
+            case 409 where json?["reason"] as? String == "newer-copy": throw Failure("newer-copy")
+            case 503: throw Failure("not-set-up")
+            case 400: throw Failure("bad-request")
+            case 413: throw Failure("too-big")
+            case 401: throw Failure.refused(json?["reason"] as? String)
+            // Cloudflare's own limit answers 429 with a page of its own, so the body is not read.
+            case 429: throw Failure.tooMany
+            // Only our own 403 means the invite code; any other is not ours to explain.
+            case 403 where json?["reason"] as? String == "invite-needed": throw Failure.inviteNeeded
+            default: throw Failure("server-error")
+            }
+        }
+
+        /// No cookies, no cache, nothing kept on disk: a session is in the reply.
+        static func ephemeral(_ request: URLRequest) async throws -> (Data, URLResponse) {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+            configuration.httpCookieAcceptPolicy = .never
+            configuration.httpShouldSetCookies = false
+            configuration.urlCache = nil
+            configuration.timeoutIntervalForRequest = 20
+            configuration.timeoutIntervalForResource = 20
+            let session = URLSession(configuration: configuration)
+            defer { session.finishTasksAndInvalidate() }
+            return try await session.data(for: request)
+        }
+    }
+
+    /// Whether a reader who is not signed in is offered sign-in. A build that names no server
+    /// never offers it. The store build offers it only once hifth.app's launch file switches it
+    /// on (AppStatus.Offer), so the button is not shown before the server is ready or with no
+    /// connection. A laptop trial that names a server by hand has already said yes.
+    static func offered(server: Bool, on: Set<AppStatus.Offer>, storeBuild: Bool) -> Bool {
+        server && (!storeBuild || on.contains(.signIn))
+    }
+
+    /// Whether the account section offers to keep a copy of the reader's marks on hifth.app
+    /// (step 21). Only where sign-in is offered, and in the store build only once the launch file
+    /// names the copy too, so the copy can wait for its own yes after sign-in is switched on.
+    static func copyOffered(server: Bool, on: Set<AppStatus.Offer>, storeBuild: Bool) -> Bool {
+        offered(server: server, on: on, storeBuild: storeBuild) && (!storeBuild || on.contains(.marksCopy))
+    }
+
+    /// The store build, which takes its switches from the launch file alone.
+    #if STORE
+    static let storeBuild = true
+    #else
+    static let storeBuild = false
+    #endif
+
+    /// Where this build signs in. The build for the store uses hifth.app. Every other build signs
+    /// in only when `HIFTH_SIGN_IN_URL` names a server (the laptop's stand-in), so the laptop's
+    /// tests and walks never ask hifth.app anything; the store build has no way in from a launch
+    /// setting at all, the same as the launch file (AppStatus.launchAddress).
+    #if STORE
+    static func address() -> URL? { URL(string: "https://hifth.app") }
+    #else
+    static func address(
+        _ environment: [String: String] = ProcessInfo.processInfo.environment
+    ) -> URL? {
+        environment["HIFTH_SIGN_IN_URL"].flatMap(URL.init(string:))
+    }
+    #endif
+}
+
+/// Apple's sheet, shown over the app's window. Kept alive by the sign-in that awaits it, and it
+/// keeps Apple's controller alive in turn: a controller let go before Apple answers never calls
+/// back, and the page would wait forever.
+final class AppleSheet: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    private let anchor: ASPresentationAnchor
+    private var controller: ASAuthorizationController?
+    private var waiting: CheckedContinuation<SignIn.AppleAnswer, Error>?
+
+    init(anchor: ASPresentationAnchor) {
+        self.anchor = anchor
+    }
+
+    func ask(nonce: String) async throws -> SignIn.AppleAnswer {
+        try await withCheckedThrowingContinuation { continuation in
+            waiting = continuation
+            let controller = ASAuthorizationController(authorizationRequests: [SignIn.appleRequest(nonce: nonce)])
+            controller.delegate = self
+            controller.presentationContextProvider = self
+            self.controller = controller
+            controller.performRequests()
+        }
+    }
+
+    /// Answers once: a second call from Apple finds nothing waiting.
+    private func finish(_ result: Result<SignIn.AppleAnswer, Error>) {
+        guard let waiting else { return }
+        self.waiting = nil
+        controller = nil
+        waiting.resume(with: result)
+    }
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let data = credential.identityToken,
+              let note = String(data: data, encoding: .utf8), !note.isEmpty
+        else { return finish(.failure(SignIn.Failure.badReply)) }
+        let code = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
+        finish(.success(SignIn.AppleAnswer(note: note, code: code, user: credential.user)))
+    }
+
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        finish(.failure(SignIn.failure(for: error)))
+    }
+
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        anchor
+    }
+}

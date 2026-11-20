@@ -3,7 +3,7 @@ date: 2026-11-19
 repo: hifth
 session: hifth.app front page (design fixes, the list's daily tidy)
 branch: notify-list-keep-awake, PR after #659
-folded: no
+folded: yes
 ---
 
 ## Snags

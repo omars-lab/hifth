@@ -30,6 +30,10 @@ moving.
 | `make comments` | 127.0.0.1:8767 | The comment server in front of the dev server on 7122 | Yes | When the dev server's own comment bar is not loading |
 | (the browser tests) | 127.0.0.1:4173 | The tests' own copy of the built app | No | Never by hand. Free the port if a test run refuses to start (see 3 below) |
 
+**The local servers serve the app from the root, not from the live site's path.** The site lives
+under `/hifth/` on the web, but `http://127.0.0.1:7123/hifth/` on the laptop is a blank page. Open
+the address the server prints.
+
 **To comment on a page, use 7122 or 7124.** The bar is added only by the dev server or by the
 comment server in front of something. A built copy served on its own (7123, 8788) never has it.
 Comments are saved in `.page-comments/threads/` of the folder the server was started from, so
@@ -60,7 +64,7 @@ app either.
 If the ask is genuinely "open that design page", `open docs/design/<name>.html` —
 but confirm which, because "desktop UI" reads both ways.
 
-## Seeing a change — five ways a fix gets checked where it cannot fail
+## Seeing a change — six ways a fix gets checked where it cannot fail
 
 1. **A hash-only navigation is not a reload.** The app routes on `#/…`, so pointing
    the tab at a new `#` address keeps the old module graph running. After an edit,
@@ -77,6 +81,12 @@ but confirm which, because "desktop UI" reads both ways.
    browser so it works offline, and a tab that has opened it once goes on being served that
    saved copy. A change then looks as if it did not land. Clear it in the tab, then reload:
    `navigator.serviceWorker.getRegistrations().then((rs) => Promise.all(rs.map((r) => r.unregister()))).then(() => location.reload())`.
+   If the old look is still there after that, the saved files outlived the worker; delete them
+   too and reload: `caches.keys().then((ks) => Promise.all(ks.map((k) => caches.delete(k)))).then(() => location.reload())`
+   (2026-11-19: a style change for the link line only showed after both).
+   To know which build the tab runs, compare the script name it loaded
+   (`[...document.scripts].map((s) => s.src)`) with the one in `apps/web/dist/index.html`;
+   if they differ, the tab is on the saved copy, whatever the page looks like.
    The dev server (7122) saves nothing, so it never does this.
 5. **At phone width the dev server's comment bar covers the bottom of the app.** The bar for
    leaving comments on a page sits in the bottom corner of every dev-server page, and on a
@@ -85,6 +95,15 @@ but confirm which, because "desktop UI" reads both ways.
    over the last icon of the row and the end of the slider (measured at 390 wide, 2026-11-11),
    and Hide is forgotten on reload. Look at the preview, which never has the bar, or take the
    bar off the page for the look: `document.getElementById("__page-comments")?.remove()`.
+   On a page of our own with that bar (the dev side bar, 2026-11-14), a button at the bottom
+   corner sat under it too, and the bar wraps to two rows on a phone; only the picture at 390
+   wide showed it.
+   On the hifth.app pages `make hifth-app-serve` gives, the bar makes the page scroll sideways
+   at 320 wide, so a narrow check there blames the page for the bar's fault. Check narrow widths
+   on the plain front-page files instead, with a static server on `apps/landing/` (2026-11-19).
+6. **Both of the owner's browsers, in minutes.** Look with Chrome DevTools at 1280 and 390
+   wide, then take one Firefox picture with a throwaway Playwright script in
+   `apps/web/e2e/tools/`, deleted after.
 
 ## Screenshotting the app when there is no browser window — `make drive`
 
@@ -121,3 +140,11 @@ This is the mechanism behind this skill's promise to "screenshot the app". It is
 skill owns the suites that hold the UI still (e2e, golden); this is for *looking*
 and for a quick end-to-end sanity check. The driver is `apps/web/e2e/tools/drive.mjs`;
 `make drive` is the one stable call site over it.
+
+## Where the browser tools can save a picture
+
+The chrome-devtools tools refuse to write a screenshot into the session's scratch folder ("not
+within workspace roots"). Take the picture inline (no file path), save it under the repo in a
+gitignored folder, or, for a page's headers, use curl. For pictures a design page keeps, write a
+small Playwright script beside the page instead (`docs/design/tajweed-mark-contrast-options/shoot.mjs`
+is the model: it loads the web app's own Playwright and lays each option's style over the real app).

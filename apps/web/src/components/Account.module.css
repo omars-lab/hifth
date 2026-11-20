@@ -1,0 +1,131 @@
+/* The account section of the info panel. Words first: what leaves the device
+   and what hifth.app keeps are read before any button. Apple's sign-in button
+   is the one strong thing here; sign out, delete and forget stay quiet beside
+   it, and only the "yes, delete it" press is marked. Every press target is
+   44px. */
+
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  text-align: start;
+}
+
+.body,
+.signedIn,
+.ask,
+.line {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.signedIn,
+.ask,
+.line {
+  color: var(--ink);
+}
+
+.signedIn {
+  font-weight: 600;
+}
+
+.line {
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: 2px solid var(--accent);
+  background: var(--paper);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Apple's rules: black or white only, rectangular, at least 140 by 30. */
+.apple {
+  min-block-size: var(--touch-min);
+  min-inline-size: 140px;
+  padding-inline: var(--space-5);
+  border: 1px solid #000;
+  border-radius: var(--radius-md);
+  background: #000;
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: var(--text-md);
+  font-weight: 500;
+}
+
+.quiet,
+.danger {
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-pill);
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-size: var(--text-sm);
+}
+
+.quiet:hover {
+  border-color: var(--accent);
+}
+
+.danger {
+  border-color: var(--ink);
+  font-weight: 600;
+}
+
+.apple:disabled,
+.quiet:disabled,
+.danger:disabled,
+.box:disabled {
+  opacity: 0.5;
+}
+
+.confirm,
+.kept,
+.copy,
+.code {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* The copy of the marks on hifth.app: its own block, set apart from the
+   account's own buttons so "delete the copy" is never read as "delete my account". */
+.copy,
+.kept {
+  align-items: flex-start;
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--hairline);
+}
+
+.codeLabel {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.box {
+  inline-size: 100%;
+  max-inline-size: 22rem;
+  box-sizing: border-box;
+  min-block-size: var(--touch-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-md);
+}
+
+.apple:focus-visible,
+.quiet:focus-visible,
+.danger:focus-visible,
+.box:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 3px;
+}

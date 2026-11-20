@@ -1,8 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { EDITIONS } from "@hifth/core";
 import { EDITION_COPY } from "../editions";
-import ar from "./ar.json";
-import en from "./en.json";
+import startAr from "./ar.json";
+import startEn from "./en.json";
+
+// Every word a reader can see: the start-up words and every pack that loads
+// later (a folder of its own here; messages-compile.mjs, `packNames`). A pack
+// is held to the same rules, found by looking, so a new one cannot slip past.
+const PACKS = import.meta.glob<Record<string, string>>("./*/*.json", { eager: true, import: "default" });
+const inPacks = (locale: "en" | "ar") =>
+  Object.entries(PACKS)
+    .filter(([path]) => path.endsWith(`/${locale}.json`))
+    .map(([, words]) => words);
+const ar: Record<string, string> = Object.assign({}, startAr, ...inPacks("ar"));
+const en: Record<string, string> = Object.assign({}, startEn, ...inPacks("en"));
+
+it("finds the account section's words, which load on their own", () => {
+  expect(Object.keys(en)).toContain("accountTitle");
+  expect(Object.keys(ar)).toContain("accountTitle");
+});
 
 // Every string here is something a reader sees. Our own words for our own
 // plumbing do not belong in it: a hafiz should never need to know what a

@@ -34,7 +34,7 @@ import { REFERENCE, ROOT, compileAll } from "./messages-compile.mjs";
 const problems = [];
 const rel = (p) => relative(ROOT, p);
 
-const { ids, analyses, files, problems: parseProblems } = compileAll();
+const { ids, files, packs, problems: parseProblems } = compileAll();
 problems.push(...parseProblems);
 
 /* 1 — the committed generated code is what the catalogs compile to. */
@@ -46,6 +46,10 @@ for (const [path, contents] of files) {
   }
 }
 
+/* 2 to 4 run over every set of catalogs: the start-up words and each pack
+ * (messages-compile.mjs, `packNames`). `label` names the file, pack and all. */
+for (const { ids, analyses, label } of packs) {
+
 /* 2 — every locale carries exactly the reference's keys. */
 const reference = analyses.get(REFERENCE);
 if (reference) {
@@ -54,13 +58,13 @@ if (reference) {
     if (id === REFERENCE) continue;
     const have = new Set(analyses.get(id).asts.keys());
     for (const key of want) {
-      if (!have.has(key)) problems.push(`${id}.json — missing key '${key}' (it is in ${REFERENCE}.json)`);
+      if (!have.has(key)) problems.push(`${label(id)} — missing key '${key}' (it is in ${label(REFERENCE)})`);
     }
     for (const key of have) {
       if (!want.has(key)) {
         problems.push(
-          `${id}.json — key '${key}' is not in ${REFERENCE}.json. A key no other locale ` +
-            `has is a key no component reads; add it to ${REFERENCE}.json first.`,
+          `${label(id)} — key '${key}' is not in ${label(REFERENCE)}. A key no other locale ` +
+            `has is a key no component reads; add it to ${label(REFERENCE)} first.`,
         );
       }
     }
@@ -76,14 +80,14 @@ for (const id of ids) {
     const missing = [...categories].filter((c) => !named.has(c));
     if (missing.length > 0) {
       problems.push(
-        `${id}.json — ${at} handles [${[...named].join(", ")}] but ${id} has ` +
+        `${label(id)} — ${at} handles [${[...named].join(", ")}] but ${id} has ` +
           `[${[...categories].join(", ")}]; missing ${missing.join(", ")}. An unhandled ` +
           `category falls to 'other', which is how «١٠٣ صفحة» happened.`,
       );
     }
     const dead = [...named].filter((c) => c !== "other" && !categories.has(c));
     if (dead.length > 0) {
-      problems.push(`${id}.json — ${at} has case(s) ${dead.join(", ")}, which ${id} never selects`);
+      problems.push(`${label(id)} — ${at} has case(s) ${dead.join(", ")}, which ${id} never selects`);
     }
   }
 }
@@ -97,10 +101,10 @@ if (reference) {
     for (const [at, cases] of reference.selects) {
       const mine = here.selects.get(at);
       if (!mine) {
-        problems.push(`${id}.json — ${at} is a select in ${REFERENCE}.json and not here`);
+        problems.push(`${label(id)} — ${at} is a select in ${label(REFERENCE)} and not here`);
       } else if ([...cases].sort().join("|") !== [...mine].sort().join("|")) {
         problems.push(
-          `${id}.json — ${at} offers [${mine.join(", ")}], ${REFERENCE}.json offers ` +
+          `${label(id)} — ${at} offers [${mine.join(", ")}], ${label(REFERENCE)} offers ` +
             `[${cases.join(", ")}]. The caller passes one value; both must accept it.`,
         );
       }
@@ -112,7 +116,7 @@ if (reference) {
       for (const name of args.keys()) {
         if (!mine.has(name)) {
           problems.push(
-            `${id}.json — '${key}' never uses {${name}}, which ${REFERENCE}.json does. ` +
+            `${label(id)} — '${key}' never uses {${name}}, which ${label(REFERENCE)} does. ` +
               `A dropped placeholder is a sentence missing the thing it is about.`,
           );
         }
@@ -120,6 +124,8 @@ if (reference) {
     }
   }
 }
+
+} // every pack
 
 /* A locale with a catalog but no row in LOCALES is a compile error, not this
  * gate's job — but a catalog `Intl` has never heard of is worth saying plainly,
@@ -139,5 +145,6 @@ if (problems.length > 0) {
   process.exit(1);
 }
 
-const keys = reference ? reference.asts.size : 0;
-console.log(`gate:i18n — OK (${ids.length} locales × ${keys} messages, generated code in step)`);
+// "3 messages at start-up + 41 in account": the start-up words first, then each pack.
+const sizes = packs.map((p) => `${p.analyses.get(REFERENCE)?.asts.size ?? 0} ${p.pack ? `in ${p.pack}` : "messages at start-up"}`);
+console.log(`gate:i18n — OK (${ids.length} locales × ${sizes.join(" + ")}, generated code in step)`);

@@ -3,7 +3,7 @@ date: 2026-11-13
 repo: hifth
 session: f20a6685
 branch: feature-check
-folded: no
+folded: 2026-11-20
 ---
 
 ## Snags
@@ -28,3 +28,9 @@ folded: no
 - Sending each card's link and then a capture link named after the card, one card at a time
   with the app closed in between, turned "does every link work in the app" into one command
   with a line per card.
+
+## Landed
+- 2026-11-20: walk-app, "Before you trust what the app shows you". The other lessons (build the web pages before the iPad app, one card at a time) were already in its scripts table.
+
+## Landed
+- 2026-11-20: walk-app, "Before you trust what the app shows you". The other lessons (build the web pages before the iPad app, one card at a time) were already in its scripts table.

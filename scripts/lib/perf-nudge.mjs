@@ -33,6 +33,15 @@ export function measuredGz(output) {
 }
 
 /**
+ * The cap the size check printed, if it ran; else null. Read before the cap in
+ * the hook's own checkout, which can be behind the worktree the check ran in.
+ */
+export function measuredCapGz(output) {
+  const m = String(output ?? "").match(/gate:budget — .*?([\d.]+) KB budget/);
+  return m ? Math.round(Number(m[1]) * 1024) : null;
+}
+
+/**
  * What is worth acting on. Each finding has a `key` (so the hook says it once per
  * session) and `say` (the sentence the session reads).
  */

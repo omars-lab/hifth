@@ -2169,6 +2169,11 @@
           "file": "packages/core/src/scoped-notes.ts",
           "symbol": "notesAbout",
           "note": "The notes a juz, surah or page label lists: those about it or a smaller part inside it, and those holding one of its verses. The menu items are in cornerItems in App.tsx; a note with no verse opens its box there (openNoteOf, closeLabelNote)."
+        },
+        {
+          "file": "packages/core/src/removals.ts",
+          "symbol": "trackRemovals",
+          "note": "A note the reader deleted stays deleted when another device's copy is loaded in: each deletion is kept as the note's id and when it went, for a year, in the device's store and the saved file. A copy whose note is older than the deletion loses it; a note changed or put back by Undo after the deletion wins. mergeNotesFile in scoped-notes.ts applies it; track in useBookmarks.ts records each deletion."
         }
       ],
       "extend": [
@@ -2398,7 +2403,12 @@
         {
           "file": "native/Hifth/Web/Bridge.swift",
           "symbol": "Bridge",
-          "note": "The three words the page says to the shell — ready, route, share — and nothing else. The route is mirrored into a hidden native label so a test has something native to wait on."
+          "note": "The four words the page says to the shell — ready, route, share, ask — and nothing else. The route is mirrored into a hidden native label so a test has something native to wait on. An ask carries an id; ShellModel answers it by name (answer(question:)) through `answerScript`, always, a no included. AskTests.swift plays the page's side."
+        },
+        {
+          "file": "native/Hifth/Account/SignIn.swift",
+          "symbol": "SignIn",
+          "note": "The page's `sign-in` question (sign-in step 8): ask hifth.app for a one-off word, show Apple's sheet with its scrambled copy and no name or email asked for, trade Apple's note and the word for a session. The word comes first, so sign-in switched off on the server never shows Face ID. The page hears only `signed-in` or a reason; the session stays in ShellModel. Only builds not for the store read HIFTH_SIGN_IN_URL; with none set they answer `sign-in-off`. AppleSheet keeps Apple's controller alive until it answers, once. SignInTests.swift plays the sheet and the server."
         },
         {
           "file": "native/Hifth/Web/Pencil.swift",
@@ -2433,7 +2443,7 @@
         {
           "file": "apps/web/src/native-bridge.ts",
           "symbol": "nativeInfo",
-          "note": "The web side: reads the small object the shell injects at document start (platform, public site address), so shared links stay public links and the service worker and install prompt stay off in-shell. `exposeToShell` lends the page's turn to the Mac's Page menu. Does nothing in a browser."
+          "note": "The web side: reads the small object the shell injects at document start (platform, public site address), so shared links stay public links and the service worker and install prompt stay off in-shell. `exposeToShell` lends the page's turn to the Mac's Page menu. `askApp` asks the app a question and waits, matching the answer that comes back through `window.__HIFTH_ANSWER__` by id (sign-in step 7). Does nothing in a browser."
         },
         {
           "file": "native/Makefile.native",
@@ -2632,6 +2642,113 @@
       "seeAlso": [
         "offline-pwa",
         "share-links"
+      ]
+    },
+    {
+      "id": "accounts",
+      "what": "Sign in with Apple, so a reader's marks can follow them to their other devices. hifth.app checks the note Apple hands the app and keeps the reader's account on its own small database; the reader's email is never kept or used to find them.",
+      "layer": "L3 server",
+      "entry": [
+        {
+          "file": "apps/landing/lib/apple-signin.mjs",
+          "symbol": "checkAppleNote",
+          "note": "Checks Apple's note (an identity token): Apple's signature, signed one pinned way only, issued by Apple, meant for one of our app ids, not expired, and carrying the scrambled copy of the one-off word hifth.app handed out. Only Apple's lasting user number comes back."
+        },
+        {
+          "file": "apps/landing/lib/accounts.mjs",
+          "symbol": "signIn",
+          "note": "Spends the one-off word, runs Apple's check, finds or makes the account by Apple's user number, and hands back a new session. Beside it: handOutWord (at most MOST_WORDS_A_STRETCH handed out in any ten minutes, sign-in step 17), whoIs, signOut, actOnAppleNotice and deleteAccount (steps 13 and 14)."
+        },
+        {
+          "file": "apps/landing/lib/apple-link.mjs",
+          "symbol": "tradeCode",
+          "note": "The link with Apple that outlives a sign-in (steps 13 and 14): trades the one-time code from Apple's sheet for the cancel ticket, locks and opens the ticket, hands it back to Apple when an account is deleted, and checks the notices Apple sends when a reader leaves from Apple's side."
+        },
+        {
+          "file": "apps/landing/migrations/0002_apple_tickets.sql",
+          "symbol": "CREATE TABLE apple_tickets",
+          "note": "One locked cancel ticket per account. Goes into the real database only with the owner's yes, before sign-in is switched on."
+        },
+        {
+          "file": "apps/landing/lib/invites.mjs",
+          "symbol": "tidyInvite",
+          "note": "Invite codes for the tester stage (sign-in step 18): newInvite makes one from 80 random bits, tidyInvite reads a typed one, inviteHash is the scrambled copy the site's SIGN_IN_INVITES setting holds. The check itself is uninvited in sign-in-api.mjs, before the database."
+        },
+        {
+          "file": ".claude/skills/deploy-site/scripts/invite-codes.mjs",
+          "symbol": "sheet",
+          "note": "make hifth-app-invites: prints new codes once and the setting's line. The owner runs it."
+        },
+        {
+          "file": "apps/landing/migrations/0003_sign_in_counts.sql",
+          "symbol": "CREATE TABLE sign_in_counts",
+          "note": "How many one-off words were handed out in each ten minutes, by everyone together; nothing about who asked. Goes into the real database with the tickets table."
+        },
+        {
+          "file": "apps/landing/migrations/0001_accounts.sql",
+          "symbol": "CREATE TABLE accounts",
+          "note": "The tables: accounts, sessions and one-off words. Only scrambled copies of sessions and words are kept."
+        },
+        {
+          "file": "apps/landing/lib/test-d1.mjs",
+          "symbol": "localD1",
+          "note": "The tests' stand-in for Cloudflare's database: Node's own SQLite, running the real migration files."
+        },
+        {
+          "file": "apps/landing/lib/sign-in-api.mjs",
+          "symbol": "handleSignIn",
+          "note": "The web addresses: a one-off word (429 when too many are waiting), sign in, sign out, delete my account, and the one Apple posts its notices to. Answers 404 unless SIGN_IN is \"on\", 503 without the database or app ids; every reply says no-store and none carries Apple's user number."
+        },
+        {
+          "file": "apps/landing/functions/api/sign-in/index.js",
+          "symbol": "onRequestPost",
+          "note": "Cloudflare's thin file for /api/sign-in; word.js, apple-notice.js, delete-account.js and ../sign-out.js are its siblings."
+        },
+        {
+          "file": "apps/landing/lib/marks-copy.mjs",
+          "symbol": "keepCopy",
+          "note": "Step 21, your marks follow you: one copy of a reader's marks file per account. The device merges; the server checks it is a marks file and nothing more (the record of pages read can never ride in it), caps it at 1.5 MB, and refuses a write from a device that has not seen the latest copy (409 with the newer number). Its addresses, GET, PUT and DELETE /api/marks, are in sign-in-api.mjs, with the thin file functions/api/marks.js."
+        },
+        {
+          "file": "apps/landing/migrations/0004_marks_copies.sql",
+          "symbol": "CREATE TABLE marks_copies",
+          "note": "The copy's table. It goes with the account by cascade (delete my account, Apple's account-deleted notice). Laptop database only until the owner says yes to adding it to the real one."
+        },
+        {
+          "file": "packages/core/src/marks-copy.ts",
+          "symbol": "mergeMarkFiles",
+          "note": "Step 21c: this device's marks file and the copy from hifth.app put together, all four kinds, and each side's deletions kept (step 21a). The later act wins. Tested in marks-copy.test.ts with made-up marks."
+        },
+        {
+          "file": "apps/web/src/marks-copy.ts",
+          "symbol": "keepCopy",
+          "note": "The page's half of \"Keep a copy of my marks on hifth.app\": fetch the copy, merge, send it back saying which copy it was built on, and start again (three tries) when another device kept a newer one. copyState says what the section shows; dropCopy deletes the copy. It throws nothing and keeps nothing it carries."
+        },
+        {
+          "file": "apps/web/src/components/Account.tsx",
+          "symbol": "Account",
+          "note": "The account section of the info panel (steps 16 and 21c). Signed in, and only where the app offers the copy, it shows the sentence saying what goes and that we could read it, right above the keep button, when a copy was last kept, and a delete-the-copy button that asks once more. What comes back loads through the page's own Load a file. App.tsx hands it the marks through Colophon.tsx."
+        },
+        {
+          "file": "native/Hifth/Web/ShellModel.swift",
+          "symbol": "answerCopy",
+          "note": "The app is only the go-between for the copy: marks-fetch, marks-keep and marks-drop carry the marks file to /api/marks with the reader's session and back, answering off where sign-in is off. The calls are in SignIn.swift; MarksCopyTests.swift plays the server."
+        }
+      ],
+      "extend": [
+        "Every check is written first and watched failing, with made-up keys and made-up notes; a real Apple account's note never goes in the repository.",
+        "Accounts are found by Apple's lasting user number, never by email.",
+        "The sign-in library (jose) is for the server only; the web app and the shared core never import it, and a test refuses it.",
+        "Only the local database copy until the owner says yes to the real one (docs/design/sign-in.md, question 9).",
+        "The plan and its order: .claude/plans/sign-in-build.md.",
+        "Limit only the word address, and keep nothing about a caller; the limit per caller is Cloudflare's (docs/issues/sign-in-limit-not-the-person-check.md).",
+        "On the laptop's Cloudflare stand-in, Apple refuses to hand over its keys, so a note is refused as keys-unreachable there; that is expected (docs/issues/apple-keys-refuse-local-runtime.md)."
+      ],
+      "gates": [
+        "node --test apps/landing/lib/apple-signin.test.mjs apps/landing/lib/accounts.test.mjs apps/landing/lib/sign-in-api.test.mjs apps/landing/lib/marks-copy.test.mjs apps/landing/lib/apple-link.test.mjs apps/landing/lib/server-only.test.mjs"
+      ],
+      "seeAlso": [
+        "hifth-app-site"
       ]
     },
     {

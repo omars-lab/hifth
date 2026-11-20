@@ -29,6 +29,18 @@ flowchart LR
   line --> ship[Commit, push, merge] --> next
 ```
 
+**Before you trust what the app shows you** (from the 2026-11-13 feature check):
+
+- Clear the app's offline copy, or open a fresh port, before checking a fix by eye. Otherwise the
+  page runs the old script and the fix looks missing.
+- In a worktree, copy the private notes into its own git-ignored folder before building the pitch
+  app. They live only in the main checkout.
+- A capture's `where.json` is written three times: empty, then once the page answers, then with
+  the video. Wait for the answer or the video, not for the file to appear.
+- A panel a link opens carries its link name (`data-panel`), which is what the feature check
+  reads, since its label changes with the language. A new panel needs that attribute, or the
+  check fails it.
+
 To run this over and over on its own, paste the prompt in `.claude/loop-prompts/walk-and-fix.md`
 into `/loop`: each pass picks the worst open item, walks it everywhere, fixes and ships it, and
 writes down what it found.
@@ -49,6 +61,10 @@ writes down what it found.
 | the Mac and iPad apps | `make app-run-mac` / `make app-run-ipad`, pictures with `make app-shot` (the native-shell skill) |
 | the iPad app held sideways | the iPad simulator, turned; the native-shell skill's "Walking the app in the simulator" — the iPad's own WebKit is not Playwright's, so the pitch gets walked here too |
 | first visit vs returning reader | leave the hint owed, or `SEEN_COACH=1` |
+
+**Look at the Arabic screen before calling a right-to-left layout done.** The record's month
+arrows were flipped twice (once by the browser, once by our own style), which no English test
+could show.
 
 A swipe is `swipe=x,y>x,y` in `ACT`: a real finger that moves (Chrome only). `drag=` is a
 mouse, so a swipe walked with it only shows what a mouse does — on an open book a mouse turns
@@ -116,6 +132,11 @@ seconds. Run it before the slower iPad walk; it is not a substitute for it.
 | `scripts/gap-throttle.mjs` | runs the gap walk in Chromium at home speed, slow wifi and poor wifi, once for each way of making the next verse ready and each pause before the press, each in a fresh browser | comparing the next-verse settings, or checking a slow connection, without a device; point it at a local build with `--url`, and at another surah's page with `--route`; `--pause 600,2000` tries each pause before the press and `--gaps 0` times only the first verse; `--from tools --route /hafs-kfqc/2:255` presses Play on that verse's tools instead of the corner | `node .claude/skills/walk-app/scripts/gap-throttle.mjs --url http://localhost:5197/` |
 | `make app-test ONLY=` | one simulator test, which can turn the iPad and measure the web view's own picture | pinning an app-only fault, watched failing first | `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize` |
 
+**Writing made-up days into the record from a walk script:** open its database with the set-up
+step that makes its stores (`onupgradeneeded`), copy what was there first, and put it back at
+the end. Opening it with no set-up step leaves an empty database the app then cannot write to.
+`scripts/record-days-walk.js` shows the safe way.
+
 A made-up Escape key sent from a walk script does not close the info panel, though it does
 close a pen's question. Close the panel with its own close button, as
 `scripts/app-pages-walk.js` does (`header button` inside the panel).
@@ -132,6 +153,16 @@ in a selector must be written `$$`; a full verse key avoids it.
 
 ## When a walk finds a fault
 
+A check that asks "is this in the built app?" is proved both ways on real builds: a build made
+to leak on purpose must fail it, and the clean one must pass. That is how the release check's
+short-word hole showed (an optimized build hides a word of 15 letters or fewer). Check a gallery
+with made-up captures in the scratchpad (a test-pattern video, one refused, one unsettled), never
+real ones, so the book's text stays out.
+
+A check on a screen asks about every line of the verse, not only the card being changed: on
+2026-11-14 a sideways-phone check asked only about the note, and the bars at the foot covering the
+verse's end passed unseen until the walk's pictures showed them.
+
 Each fault gets, in the same change as its fix:
 
 - **an item** in the design doc it belongs to (pitch faults: `docs/design/knowledge-graph-commentary.md`,
@@ -146,6 +177,13 @@ Each fault gets, in the same change as its fix:
 A fault you cannot act on (the owner's call, a fix blocked on someone) still gets its row and its
 checklist line, marked **open**, and is said out loud at the end of the walk. A check only a person
 can make (a real phone, a week of use) goes to the manual-testing skill's list, not here.
+
+Before calling a walk's failure a fault, look at its picture: on the first iPhone walk
+(2026-11-14) three of five failures were the walk's own checks assuming an iPad. A new step asks
+the window what it has room for (`h.spread()` in `scripts/pitch-walk-steps.mjs`: two pages or
+one), never assumes a wide screen. To learn whether a link restarts the open app, read the app's
+process number with `xcrun devicectl device info processes` before and after the link; the same
+number means it was not restarted.
 
 Never put text from The Study Quran in a checklist line, an issue row, a test or a commit: describe
 where the fault is, not what the note says.

@@ -88,6 +88,7 @@ import type { RunMark } from "../run-mark";
 import { bookShift, growFromX, savedZoomAcross, useZoomAcross } from "../zoom-across";
 import { zoomAnchorY, type VerseSpan } from "../zoom-anchor";
 import { savedTurnLanding, turnLandsAt } from "../turn-landing";
+import { hideDrawingFromReaders } from "../page-drawing-a11y";
 import styles from "./PageStage.module.css";
 import { printedNumbersOf } from "./verse-numbers";
 
@@ -2403,6 +2404,7 @@ export const PageStage = forwardRef<PageStageHandle, PageStageProps>(function Pa
       // img must be a leaf (axe: "img must not have focusable descendants").
       svgEl.setAttribute("role", "group");
       svgEl.setAttribute("aria-labelledby", `page-label-${targetPage}`);
+      hideDrawingFromReaders(svgEl as unknown as SVGSVGElement);
       svgEl.classList.add(styles.svg ?? "");
       fitDrawingToPage(svgEl as unknown as SVGSVGElement, openingTextRef.current);
       printRunningHeads(host, svgEl, targetPage, resolver, tRef.current);

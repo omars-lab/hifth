@@ -31,13 +31,16 @@ export { formatWordKey, parseWordKey, ayahKeyOf, type WordKey } from "./keys.js"
 // file and loaded back (decisions bookmark-model, bookmark-store, bookmark-admin).
 export {
   BOOKMARK_NAME_MAX,
+  bookmarkChangedAt,
   bookmarksOnPage,
   clearSurah,
   dropBookmark,
   droppedAt,
   groupBySurah,
   liftBookmark,
+  mergeBookmarkFile,
   mergeBookmarks,
+  touchBookmark,
   moveBookmark,
   openBookmark,
   parseBookmarkFile,
@@ -103,6 +106,20 @@ export {
   type ScopedNote,
   type ScopedNoteKind,
 } from "./scoped-notes.js";
+// removals — the bookmarks, notes and jumps a reader took away, by id and time,
+// so a copy merged in from another device does not bring them back
+// (docs/design/sign-in.md, steps 21a and ㉒)
+export {
+  REMOVAL_KEEP_MS,
+  copyRemovals,
+  dropRemoved,
+  isRemoval,
+  joinRemovals,
+  removalsOf,
+  trackRemovals,
+  type Removal,
+  type RemovalKind,
+} from "./removals.js";
 // confusion jumps — where your memory jumped from one verse to another, kept
 // as one record per pair with every time it happened (docs/design/confusion-jumps.md)
 export {
@@ -111,10 +128,13 @@ export {
   allConfusions,
   dismissedConfusions,
   confusionsFrom,
+  confusionChangedAt,
   eraseJumps,
   isConfusion,
   markConfusion,
   mergeConfusions,
+  mergeConfusionsFile,
+  touchConfusion,
   nextWasl,
   removeConfusion,
   removeLastTime,
@@ -137,6 +157,9 @@ export {
   type JumpArrow,
   type ArrowShowing,
 } from "./confusions.js";
+// marks copy: this device's marks and the copy kept on hifth.app put together,
+// all four kinds and both sides' deletions (sign-in step 21c).
+export { mergeMarkFiles } from "./marks-copy.js";
 // tafsir seam — commentary is its own node in the reserved `tafsir/<name>/S:A`
 // namespace, behind a provider contract so a live open source and a side-loaded
 // private edition are swapped without the UI knowing which (decision

@@ -13,7 +13,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } fr
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { findings, isWatched, measuredGz } from "./lib/perf-nudge.mjs";
+import { findings, isWatched, measuredCapGz, measuredGz } from "./lib/perf-nudge.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const LOG = join(homedir(), ".claude", "metrics", "perf-nudges.log");
@@ -50,6 +50,7 @@ function main() {
     // a reminder must never break the work
   }
   totalGz = measuredGz(output) ?? totalGz;
+  capGz = measuredCapGz(output) ?? capGz;
 
   const session = String(input.session_id ?? "none").replace(/[^\w-]/g, "");
   const marker = join(tmpdir(), `hifth-perf-nudge-${session}.json`);

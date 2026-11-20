@@ -3,7 +3,7 @@ date: 2026-11-17
 repo: hifth
 session: 857e6644 (reviewer walk of the store build)
 branch: store-feedback
-folded: no
+folded: yes
 ---
 
 ## Snags

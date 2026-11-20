@@ -20,7 +20,8 @@
  * and gets handed one field too many, an analytics call added to measure
  * engagement. Each is one import away, and none of them looks wrong in review.
  *
- * So the promise is a gate. Three invariants:
+ * So the promise is a gate. Four invariants (the fourth is about the app,
+ * which can talk to hifth.app for the page):
  *
  *   1. **Nothing that can reach the network may import the record.** The set of
  *      modules allowed to import `revision.ts` or `revision-store.ts` is listed
@@ -35,6 +36,9 @@
  *      carries the reader's marks to hifth.app sends the record too, but only
  *      when the reader ticks the box that says what goes and to whom. The app
  *      hands the record's reader to that card and to nothing else.
+ *   4. **Only the files in ASKERS may ask the app a question**, and they hold
+ *      no way out of their own. The app answers some questions by talking to
+ *      hifth.app, so a question is a way off the device one step removed.
  *
  * Deliberately NOT an ESLint rule. `import/no-restricted-paths` can say "this
  * directory may not import that one", which is the wrong shape: the rule here is
@@ -118,6 +122,10 @@ const RECORDS = [
       ["apps/web/src/useBookmarks.ts", "holds the device's notes and jumps for the app"],
       ["apps/web/src/bookmark-store.ts", "the store is built on the pure module"],
       ["packages/core/src/bookmarks.ts", "the saved file the reader chooses to make"],
+      [
+        "packages/core/src/marks-copy.ts",
+        "puts two saved files together for the copy on hifth.app; pure, sends nothing, and the copy goes only when the reader presses the keep button",
+      ],
       ["packages/core/src/index.ts", "the barrel that exports it"],
     ]),
   },
@@ -152,6 +160,39 @@ const WAYS_OUT = [
     why: "the carry to hifth.app, sent only when the reader ticks the box that names it",
   },
 ];
+
+/**
+ * Who may ask the app a question (sign-in step 16, docs/design/sign-in.md). The
+ * app answers some questions by talking to hifth.app, so a question is a way off
+ * the device too, one step removed: the page hands the app something and the
+ * app sends it on. Two parts of the page ask.
+ *
+ * The account section sends on, through the app, Apple's number for the reader,
+ * Apple's one-time code (which hifth.app swaps for the ticket that lets it
+ * cancel the Apple sign-in) and, for a tester, the invite code they type.
+ *
+ * The copy of the reader's marks (sign-in step 21c) sends the saved marks file,
+ * the same file "Save my marks" writes, and so the marked jumps inside it. It
+ * goes only when the reader presses "Keep a copy of my marks on hifth.app",
+ * under the sentence that says what goes and who could read it.
+ *
+ * The revision record and the usage counts go with neither: the askers may not
+ * import them (invariant 1 already says so, and the tests prove it), and they
+ * hold no way out of their own.
+ *
+ * `text` is whether the file may hand the app words of its own with a question.
+ * Only the question helpers may: the invite code a tester types, and the marks
+ * file the reader chose to keep.
+ *
+ * The question helper lives in its own small file (ask-app.ts), so the start of
+ * the app does not load it; an import from there or from native-bridge counts.
+ */
+const ASKERS = new Map([
+  ["apps/web/src/account.ts", { text: true, why: "the account section's questions; hands the app only the typed invite code" }],
+  ["apps/web/src/components/Account.tsx", { text: false, why: "the account section; asks through account.ts, hands the app nothing of its own" }],
+  ["apps/web/src/marks-copy.ts", { text: true, why: "the copy's questions; hands the app the marks file only when the reader presses the keep button" }],
+]);
+const ASK = /\bimport\s*\{[^}]*\baskApp\b[^}]*\}\s*from\s*["'][^"']*(?:native-bridge|ask-app)(\.(js|ts))?["']/;
 
 /** Ways out of the device. Matched as plain substrings — a grep, not a parse. */
 const ESCAPE_HATCHES = [
@@ -264,7 +305,42 @@ for (const way of WAYS_OUT) {
   }
 }
 
+// ── Invariant 4: a closed list of who asks the app, and no way out in them ───
+const uncommented = (text) => text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+for (const file of sources()) {
+  const rel = relative(ROOT, file);
+  if (rel.endsWith(".test.ts") || rel.endsWith(".test.tsx") || rel.includes("/e2e/")) continue;
+  const code = uncommented(readFileSync(file, "utf8"));
+  const asker = ASKERS.get(rel);
+  if (!asker) {
+    if (ASK.test(code)) {
+      failures.push(
+        `${rel} asks the app a question.\n` +
+          `    The app answers some questions by talking to hifth.app, so a question is a\n` +
+          `    way off the device. Only the files in ASKERS in this file may ask; add\n` +
+          `    this one there with what it hands the app and why.`,
+      );
+    }
+    continue;
+  }
+  for (const hatch of ESCAPE_HATCHES) {
+    if (code.includes(hatch)) {
+      failures.push(`${rel} contains \`${hatch}\` — a file that asks the app holds no way off the device of its own.`);
+    }
+  }
+  if (!asker.text && /\btext\s*:/.test(code)) {
+    failures.push(`${rel} hands the app words with a question. Only the files ASKERS marks may (${asker.why}).`);
+  }
+}
+
 // A gate whose allow-list points at deleted files silently guards nothing.
+for (const rel of ASKERS.keys()) {
+  try {
+    statSync(join(ROOT, rel));
+  } catch {
+    failures.push(`The list of askers names ${rel}, which no longer exists — prune it.`);
+  }
+}
 for (const [rel] of RECORDS.flatMap((r) => [...r.allowed])) {
   try {
     statSync(join(ROOT, rel));
@@ -281,5 +357,6 @@ if (failures.length > 0) {
 
 console.error(
   `gate:revision-privacy — OK (${RECORDS.flatMap((r) => r.modules).length} record modules, ` +
-    `${RECORDS.reduce((n, r) => n + r.allowed.size, 0)} permitted importers, ${ESCAPE_HATCHES.length} hatches checked)`,
+    `${RECORDS.reduce((n, r) => n + r.allowed.size, 0)} permitted importers, ${ASKERS.size} askers, ` +
+    `${ESCAPE_HATCHES.length} hatches checked)`,
 );

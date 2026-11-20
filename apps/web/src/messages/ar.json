@@ -65,6 +65,7 @@
   "arrivedAyah": "{via} {label}، صفحة {page}",
   "rangeUnavailable": "المقطع المطلوب غير متوفّر بعد",
   "ayahUnavailable": "الآية المطلوبة غير متوفّرة بعد",
+  "linkNowhere": "هذا الرابط لا يشير إلى صفحة أو آية",
   "noConcordance": "لا يمكن بعدُ مطابقة هذه الطبعة آيةً بآية",
   "railSummary": "{surah}، {n, plural, zero{لا روابط} one{رابط واحد} two{رابطان} few{{linksText} روابط} many{{linksText} رابطًا} other{{linksText} رابط}}",
   "ayahAria": "الآية {label}",

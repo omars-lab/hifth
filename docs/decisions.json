@@ -649,7 +649,8 @@
         "mark-granularity",
         "loop-6a",
         "highlight-strength",
-        "highlight-options"
+        "highlight-options",
+        "tajweed-mark-contrast"
       ]
     },
     {
@@ -1499,7 +1500,8 @@
       "related": [
         "selection-drawer",
         "note-way-back",
-        "share-sheet-builder"
+        "share-sheet-builder",
+        "larger-text-way"
       ]
     },
     {
@@ -1552,6 +1554,66 @@
         "desktop-vs-mobile",
         "graduation-losers",
         "share-sheet-builder"
+      ]
+    },
+    {
+      "id": "tajweed-mark-contrast",
+      "question": "In the mistake picker, four of the seven small coloured tajweed marks are faint on their buttons: leave them, darken madd only, darken each faint colour in the picker only, or draw the letters in ink with a colour bar?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Leave the marks as they are"
+        },
+        {
+          "id": "B",
+          "label": "Darken madd only, on the page too"
+        },
+        {
+          "id": "C",
+          "label": "A darker shade of each faint colour, in the picker only"
+        },
+        {
+          "id": "D",
+          "label": "Ink letters with a short bar in the rule's colour"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/tajweed-mark-contrast-options.html",
+      "page": "docs/design/tajweed-mark-contrast-options.html",
+      "builtBy": "scripts/build-design-note.mjs",
+      "doc": "docs/design/tajweed-mark-contrast-options.md",
+      "related": [
+        "tajweed-colours"
+      ]
+    },
+    {
+      "id": "larger-text-way",
+      "question": "When a reader makes their phone's text larger, what in Hifth should grow with it: everything around the page, only the panels, or a size picked in Hifth?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Follow the phone: the bars and panels grow with the phone's text size"
+        },
+        {
+          "id": "B",
+          "label": "Only the panels follow the phone; the bars stay as they are"
+        },
+        {
+          "id": "C",
+          "label": "Our own size, picked in Hifth's info panel (1.25 or 1.5 times)"
+        },
+        {
+          "id": "D",
+          "label": "Nothing grows, as today"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/larger-text-options.html",
+      "page": "docs/design/larger-text-options.html",
+      "builtBy": "scripts/build-design-note.mjs",
+      "doc": "docs/design/larger-text-options.md",
+      "related": [
+        "ayah-drawer"
       ]
     },
     {

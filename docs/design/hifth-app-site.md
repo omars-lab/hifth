@@ -78,6 +78,14 @@ lets every robot through. The release check refuses it. The real key comes from 
 Cloudflare account, when the owner makes the Turnstile widget for hifth.app. Its secret half
 goes in as a Pages secret, never in the repository.
 
+**How the real key gets in (2026-11-18).** The page in the repo keeps the test key, because the
+real widget answers only on hifth.app, so a real key in the repo would break the form on this
+laptop. Making the widget (`make hifth-app-turnstile ARGS=--make`) saves its public site key
+beside its secret, as HIFTH_APP_TURNSTILE_SITEKEY, and the release puts that key into its own
+copy of the page, in both languages. The release check still refuses a copy that kept the test
+key, so a release without the saved key cannot go up. `make hifth-app-ready` says whether the
+key is saved. What is left: the owner makes the widget.
+
 ### ⑥ Does the email form keep an address? · **open**
 
 Built, not live yet. It works on this laptop (2026-11-12). It was tried on Cloudflare's own local server, with the real

@@ -40,7 +40,10 @@ Then read the three charts in order, and decide:
    settings, option pages, rarely used tools, the crop tool, big tables. Those can load **when
    first opened** (a dynamic `import()`), so they stop counting against start-up time. A library
    that is large for what we use it for can be swapped out. **Trim first if there is an obvious
-   candidate.**
+   candidate.** Loading later does not help the size cap itself: the cap counts every file the
+   build makes, so splitting a part off adds a little to the total (0.3 KB more for the larger-text
+   switch, 2026-11-19). To keep a rough build out of the count, put it behind a build-time switch
+   instead (`import.meta.env.VITE_…`), so ordinary builds drop it.
 3. **What does more code cost?** The sweep chart gives milliseconds per kilobyte, and how many
    kilobytes still fit inside 2.5 s. **Raise the cap only while the chart shows room**, and leave a
    margin. The padding the sweep adds only has to download, but real code also has to run, so a
@@ -83,6 +86,14 @@ it does not; never raise just to make a red check go green without looking at th
   `make perf-compare`, and the readings show how many KB the next step needs. That is cheaper
   than trimming one part at a time and measuring after each (2026-11-14: 157.1 KB crossed,
   162.6 KB did not).
+- **Moving code out of start-up never lowers the total.** So a fix for the start-up limit always
+  trips the size check's 1 KB drift line next. Put `make budget-update` and the trim's note in
+  [trims.md](trims.md) into the same commit as the move.
+- **The start-up sum counts the main style sheet** (about 18 KB), though the size check's listing
+  shows no style sheets. Before counting a move's saving, check which sheet the moved part's
+  styles landed in.
+- **Measure start-up with every other server on the laptop stopped.** That gave five runs within
+  17 ms of each other, steady enough to back a raise of the cap with evidence (2026-11-16).
 - **Nothing here is limited by processor speed yet.** Start-up is dominated by downloads, so kilobytes
   are the right thing to count. One exception: expanding the page index on load costs about 85 ms
   of blocking time. If blocking time grows, measure processor work too, not only size.
@@ -95,6 +106,13 @@ it does not; never raise just to make a red check go green without looking at th
   GitHub Actions minutes, and left Lighthouse out as too slow for a hook). Run `make lighthouse`
   before a demo, and whenever the size cap moves.
 
+- **Check a size figure against the built files before reasoning from it.** A slow-down was once
+  blamed on start-up work because a note said the app grew 10 KB; the build said 22 (item ⑳ in
+  `docs/performance.md`).
+- **A page only the developer sees keeps its words in its own file, in English,** so none of
+  them land in the word lists every build ships. To prove the size check really covers the
+  real build (its own tests use made-up builds), let such a page into a build once on purpose
+  and watch the check refuse it by name, then take it out.
 - **The speed probe on the laptop's dev server is `VITE_PERF_PROBE=1 make dev`.** The probe is
   the panel of timings drawn over the page. It is switched on when the app is built or served,
   not from the address bar, and the only make target that names it (`make phone-perf`) builds
@@ -123,6 +141,7 @@ each finding. It only reads files and the command's own output; it never builds 
 | 2026-10-11 | 200 KB | the app reached 171.7 KB, its start-up script 118.4 KB. Sweep: start-up 2138 ms as built; still ≤ 2500 ms with +75 KB (2437), over it from +100 KB (2586). So ~75 KB of room; raised by a third of it (+25 KB), inside the rule above. Moving code into a file loaded later would not have helped: every shipped script counts toward this total |
 | 2026-11-10 | 210 KB | the app reached 199.3 KB, with three features waiting. Sweep, run alone: start-up 2306 ms as built; still ≤ 2500 ms with +25 KB (2450) and +50 KB (2451), over it at +100 KB (2746). The margin at +50 KB is only 49 ms and one of its five runs read 2854, so the room was counted as the 25 KB that held cleanly; raised by 10 KB, under half of that. Start-up as built is 168 ms slower than at the last raise, so the next raise needs a trim or a faster start first |
 | 2026-11-16 | 220 KB | the app reached 211.0 KB with "the new layout" on the page bar, after the error card and "Report a problem" filled the 210. The faster start came first (the 2026-11-14 trim, ㉑). Sweep, run alone: start-up 2111 ms as built (195 ms faster than at the last raise); 2261 with +25 KB, 2408 with +50 KB, 2709 with +100 KB; every five-run set within 17 ms of itself. So ~50 KB of room, 92 ms clear at +50; raised by 10 KB, a fifth of it. The start-up download's own limit (161 KB) did not move |
+| 2026-11-20 | 225 KB | the larger-text switch (㊾) costs 1.0 KB and would take the app from 219.8 to 220.8 KB, over the 220. Three trims were looked at and ruled out (the gesture library is already cut to drag and pinch; preact/compat is needed; turning the 170 word adapters into a table saves only ~0.3 KB, as compression already folds them). Sweep: start-up 2106 ms as built; 2255 with +25 KB, 2406 with +50 KB. So ~50 KB of room still; raised by 5 KB, a tenth of it |
 
 ### What the 2026-09-27 sweep taught us
 

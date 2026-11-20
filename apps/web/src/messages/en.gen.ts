@@ -286,6 +286,7 @@ const messages: Catalog = {
   licenceBody: "Free software under the GNU GPL, version 3 or later: you may study it, change it and pass it on. This is the source of this exact build, not a branch that may move:",
   licenceHead: "Licence and source",
   likeVerse: (d) => "Most alike: " + d.ref,
+  linkNowhere: "This link does not point to a page or verse",
   listenAsRecited: "As recited",
   listenFaster: "Faster",
   listenOnce: "Once",

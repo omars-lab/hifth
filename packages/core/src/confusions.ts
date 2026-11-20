@@ -12,6 +12,8 @@
  * whatever id the app hands in.
  */
 
+import { dropRemoved, joinRemovals, type Removal } from "./removals.js";
+
 /** Where a jump starts or lands: a verse, and the word at the seam when known. */
 export interface JumpEnd {
   readonly key: string;
@@ -369,6 +371,14 @@ export function dismissedConfusions(set: readonly Confusion[]): Confusion[] {
  * two different jumps in the same moment and make the same id, and those must
  * stay two records. A "not sure yet" record has no pair, so it matches only
  * itself (same id, same verse).
+ *
+ * Two devices that each marked the same pair before they shared a copy hold
+ * it under two ids. The merged record takes the id that sorts first, so both
+ * devices end on the same one whichever merges first; a removal is kept by
+ * id, and one sent for the other id would miss it. It keeps its own id
+ * instead when another record already holds that one. In that rare case the
+ * two devices can still hold different ids for the pair, and a removal on one
+ * may not reach the other (docs/design/sign-in.md, "your marks follow you").
  */
 export function mergeConfusions(held: readonly Confusion[], loaded: readonly Confusion[]): Confusion[] {
   const out = [...held];
@@ -382,15 +392,46 @@ export function mergeConfusions(held: readonly Confusion[], loaded: readonly Con
     }
     const mine = out[i]!;
     const later = x.updatedAt > mine.updatedAt ? x : mine;
+    const first = x.id < mine.id ? x.id : mine.id;
+    const id = out.some((c, j) => j !== i && c.id === first) ? mine.id : first;
     out[i] = {
       ...later,
-      id: mine.id,
+      id,
       times: joinTimes(mine.times, x.times),
       createdAt: Math.min(mine.createdAt, x.createdAt),
       updatedAt: Math.max(mine.updatedAt, x.updatedAt),
     };
   }
   return out;
+}
+
+/** When a jump last changed, for weighing it against its removal. */
+export const confusionChangedAt = (c: Confusion): number => c.updatedAt;
+
+/** Marks a jump as put back now, so a removal elsewhere older than now cannot take it away. */
+export const touchConfusion = (c: Confusion, now: number): Confusion => ({ ...c, updatedAt: Math.max(c.updatedAt, now) });
+
+/**
+ * Merge another device's copy of the jumps, with both sides' removals: a jump
+ * taken away on either side after its last change goes, one changed after its
+ * removal stays and its removal is forgotten. Removals are matched by id
+ * only, never by verses (see mergeConfusions for why the ids agree).
+ */
+export function mergeConfusionsFile(
+  held: readonly Confusion[],
+  heldRemoved: readonly Removal[],
+  loaded: readonly Confusion[],
+  loadedRemoved: readonly Removal[],
+): { confusions: Confusion[]; removed: Removal[]; added: number } {
+  const gone = joinRemovals(heldRemoved, loadedRemoved);
+  const confusions = dropRemoved(mergeConfusions(held, loaded), gone, confusionChangedAt);
+  const there = new Set(confusions.map((c) => c.id));
+  const had = new Set(held.map((c) => c.id));
+  return {
+    confusions,
+    removed: gone.filter((r) => !there.has(r.id)),
+    added: confusions.filter((c) => !had.has(c.id)).length,
+  };
 }
 
 const isEnd = (e: unknown): e is JumpEnd => {

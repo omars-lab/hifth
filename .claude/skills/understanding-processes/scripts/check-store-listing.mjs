@@ -35,6 +35,11 @@ const LIMITS = {
   "review-notes": 4000,
   "privacy-answer": undefined,
 };
+// Apple shows the store page in the reader's language, so each box a reader
+// sees has an Arabic twin under the same limit. The review notes and the
+// privacy answer are read by Apple, in English.
+const SHOWN = ["name", "subtitle", "keywords", "promotional-text", "description"];
+for (const name of SHOWN) LIMITS[`${name}-ar`] = LIMITS[name];
 
 /** Each `<!-- field: x -->` line, and the text block or quote right after it. */
 export function readFields(page) {
@@ -58,7 +63,8 @@ export function readFields(page) {
 const read = (path) => (existsSync(join(root, path)) ? readFileSync(join(root, path), "utf8") : "");
 /** The value after a key in an Apple settings file, as its raw XML. */
 const plistValue = (xml, key) => xml.match(new RegExp(`<key>${key}</key>\\s*(<[^>]+/>|<[^>]+>[^<]*</[^>]+>)`))?.[1] ?? "";
-const words = (text) => text.toLowerCase().split(/[^\p{L}\p{N}']+/u).filter(Boolean);
+// Vowel marks are dropped first, so كَلِمة and كلمة are one word.
+const words = (text) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().split(/[^\p{L}\p{N}']+/u).filter(Boolean);
 
 export function check(page) {
   const fields = readFields(page);
@@ -82,23 +88,27 @@ export function check(page) {
   const mac = read("native/Hifth/Resources/Info-macOS.plist");
 
   // The store name is the name under the icon.
-  if (fields.name) {
+  // The app has no Arabic display name, so the Arabic store name is the same word.
+  for (const key of ["name", "name-ar"]) {
+    if (!fields[key]) continue;
     for (const [label, xml] of [["iPad and iPhone", ios], ["Mac", mac]]) {
-      if (plistValue(xml, "CFBundleDisplayName") !== `<string>${fields.name}</string>`) {
-        problems.push(`name: differs from the ${label} app's display name`);
+      if (plistValue(xml, "CFBundleDisplayName") !== `<string>${fields[key]}</string>`) {
+        problems.push(`${key}: differs from the ${label} app's display name`);
       }
     }
   }
 
   // Keywords: Apple already searches the name and subtitle, so a keyword that
   // repeats one of their words spends characters on nothing.
-  if (fields.keywords) {
-    const list = fields.keywords.split(",").map((k) => k.trim().toLowerCase());
-    if (list.some((k) => k === "")) problems.push("keywords: an empty keyword (two commas together, or one at the end)");
-    if (new Set(list).size !== list.length) problems.push("keywords: a keyword is listed twice");
-    const taken = new Set(words(`${fields.name ?? ""} ${fields.subtitle ?? ""}`));
-    const repeats = list.filter((k) => words(k).some((w) => taken.has(w))).length;
-    if (repeats) problems.push(`keywords: ${repeats} keyword(s) repeat a word already in the name or subtitle`);
+  for (const end of ["", "-ar"]) {
+    const key = `keywords${end}`;
+    if (!fields[key]) continue;
+    const list = fields[key].split(",").map((k) => words(k).join(" "));
+    if (list.some((k) => k === "")) problems.push(`${key}: an empty keyword (two commas together, or one at the end)`);
+    if (new Set(list).size !== list.length) problems.push(`${key}: a keyword is listed twice`);
+    const taken = new Set(words(`${fields[`name${end}`] ?? ""} ${fields[`subtitle${end}`] ?? ""}`));
+    const repeats = list.filter((k) => k.split(" ").some((w) => taken.has(w))).length;
+    if (repeats) problems.push(`${key}: ${repeats} keyword(s) repeat a word already in the name or subtitle`);
   }
 
   // "Data Not Collected" must agree with the app's privacy file.

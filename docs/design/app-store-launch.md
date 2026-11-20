@@ -492,7 +492,12 @@ app's name, category, privacy file and export setting, with a test that breaks e
 Writing the privacy answer showed the policy did not say the sound is asked for before Play, so
 both privacy pages now say so and name the setting that stops it, held by a test. **Still open:**
 the EU trader answer, the price and the copyright line (the owner's); the "rights to the content"
-answer, which waits on the permissions; the listing in Arabic.
+answer, which waits on the permissions; a native reader's read of the Arabic listing.
+
+*Arabic drafted 2026-11-20:* each box a reader sees has an Arabic twin on the listing page,
+written with the app's own Arabic words, and the same check holds each to Apple's limit; Arabic
+keywords that repeat a subtitle word are caught even under different vowel marks. The store name
+stays "Hifth", the word under the icon, unless the owner picks حفظ (waiting list).
 
 ### ㉛ There are no screenshots at Apple's sizes · **fixed**
 
@@ -572,11 +577,13 @@ in a built app, so a test reads the app's code instead and refuses any read of a
 the store build would keep. The Mac app is not archived yet; when it is, it takes the same
 switch.
 
-### ㊲ Should the store build show the tajweed colours at all? · **open**
+### ㊲ Should the store build show the tajweed colours at all? · **answered**
 
-Its data's permission (④) is not in hand, and its badge says "unchecked". Leaving it off takes
-one permission off the upload's path; leaving it on keeps a feature huffaz use. The owner's
-call.
+Its data's permission (④) is not in hand, and its badge says "unchecked". The owner chose on
+2026-11-20 to keep them: they stay in the app, and the reader turns them on and off with their
+own button. If the permission does not come, the store build is made without them
+(`make app-web FLAVOUR=public NO_TAJWEED=1`), which leaves out the button, the key, their data
+and their credit. That fallback is built and tested, and off.
 
 ### ㊳ A "Left off" ribbon appears on the first open, though nothing has been read · **fixed**
 
@@ -784,6 +791,43 @@ size: page 7 grows from 40 KB to 66 KB as sent over the network, so all pages to
 about 1.6 to 2 times. Whether that size is worth it is the owner's call. It rides with the ring
 swap (㊺), since both copy every page again.
 
+### ㊽ A link to a verse the app cannot find does nothing at all · **fixed**
+
+Found while building ⑨. Once hifth.app links open the app, a mistyped verse in one reached the
+app and was dropped without a word: the app stayed where it was, and the reader could not tell
+the link had done anything. The website did the same with a link it could not read.
+
+*Where it stands (2026-11-19):* fixed. Such a link now shows one line under the top bar, "This
+link does not point to a page or verse", with Hide. The reader stays on the page they were
+reading. In the app, the link is handed to the page instead of dropped; a link that names no
+place at all still only opens the app. The browser tests cover the line on a computer, a phone
+and Firefox, in English and Arabic, and the app's own tests failed with the old code put back.
+
+### ㊾ The bars, buttons and panels stay the same size when the phone's text is made larger · **open**
+
+Found on the reviewer walk (2026-11-17), split out of ⑯ on 2026-11-19. With the iPhone SE set
+to its largest text size, nothing outside the page grew. The page has its own size control, but
+a reader with weak eyes cannot grow the controls around it. Apple's accessibility questions in
+the store ask about this, so the answer has to match what the app does.
+
+*Where it stands (2026-11-19):* open. Next, build the main ways roughly (follow the phone's size
+everywhere, only in the panels, or a size setting of our own) so the owner can choose with a
+hand on each.
+
+*2026-11-20:* the three ways are built and photographed on the iPhone SE simulator, and the
+choice is open for the owner on its own page (larger-text-options). None reaches twice the size
+yet, so the store's larger-text answer stays "no" until the top bar is rebuilt to wrap.
+
+### ㊿ Some screens have never had the automatic accessibility scan · **open**
+
+Split out of ⑯ on 2026-11-19. The scan runs on the page, a chosen verse, the look-alikes list,
+the record, the shelf, the tips and the info panel, in Arabic and English, on the phone
+browsers. It has not looked at the bookmark drawer, the note box, the mistake picker, the
+drawer's tools, the account section once opened, or the computer layout.
+
+*Where it stands (2026-11-19):* open. Notes and mistakes open only in the computer-layout
+tests, so the scan needs a run there too.
+
 ## Which of these could get the app turned down, and which matter once readers have it?
 
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
@@ -796,14 +840,15 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
   permissions file ⑨ (the upload checks both); the store's questions ㉚ and screenshots ㉛;
   sign-in ㉖ and deleting an account ㉗ (once sign-in ships, deletion must be in the app); the
-  tajweed question ㊲ (it can read as unfinished). (The reviewer walk ㉟, the walk tools'
+  (The tajweed question ㊲ is answered: kept, with a fallback.) (The reviewer walk ㉟, the walk tools'
   settings ㊱, the English top bar at 320 px ㊶, the support page ⑳, the privacy policy ㉙
   and the app's links to both ㊸ are fixed.)
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
-  reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
+  reader ⑯, larger text ㊾, the screens the scan has not seen ㊿, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
   reviews ㉜ and numbers ㉝, both keys on the release page ㉞, a report seen to arrive ㊵,
-  whether the website keeps the recitation ㊻, and the words our copy step moves ㊼.
+  whether the website keeps the recitation ㊻, and the words our copy step moves ㊼. (A link
+  to a verse the app cannot find ㊽ is fixed.)
 
 ## What does this leave alone?
 

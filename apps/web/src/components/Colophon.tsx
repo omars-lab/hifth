@@ -28,6 +28,7 @@ import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PITCH } from "../pitch/pitch";
 import { RECITATION, RECITATION_CREDIT } from "../recitation";
+import { TAJWEED, TAJWEED_CREDIT } from "../tajweed-in-build";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
 import { NOTE_LEADS, NOTE_SIDEWAYS, rememberNoteLead, rememberNoteSideways, useNoteLead, useNoteSideways } from "../phone-note";
 import { CARD_ROOMS, rememberCardRoom, useCardRoom } from "../card-room";
@@ -59,6 +60,7 @@ import { ZOOM_ANCHORS, rememberZoomAnchor, useZoomAnchor } from "../zoom-anchor"
 import { NOTE_LEAVES, rememberNoteLeave, useNoteLeave } from "../note-leave";
 import { UsageReadout } from "./UsageReadout";
 import { RecitationShelf } from "./RecitationShelf";
+import { Account, type CopyMarks } from "./Account";
 import { ReportProblem } from "./ReportProblem";
 import { isNative, shareBase } from "../native-bridge";
 import { sitePageUrl, type SitePage } from "../site-pages";
@@ -163,6 +165,8 @@ interface ColophonProps {
   /** Whether this screen can show two pages side by side. What a card does at the
       facing page's edge only means something then, so a phone is not asked. */
   spread?: boolean;
+  /** This device's marks, for the account section's "Keep a copy of my marks on hifth.app". */
+  marks?: CopyMarks | undefined;
 }
 
 /** One setting the reader picks from: a heading, a row of radio buttons, a note.
@@ -463,6 +467,7 @@ export function Colophon({
   appPages,
   onAppPages,
   asPage = false,
+  marks,
   drawerMarks,
   onDrawerMarks,
   wordTap,
@@ -1081,6 +1086,12 @@ export function Colophon({
           </section>
         )}
 
+        {/* The account (sign-in step 16, docs/design/sign-in.md). It asks the
+            app whether sign-in is offered and draws nothing at all when it is
+            not, so a browser and a build with sign-in off look as before. Above
+            the report section, which its failure lines point the reader down to. */}
+        <Account sectionClass={styles.block} headingClass={styles.subhead} marks={marks} />
+
         {/* Report a problem (launch item 18, docs/design/report-a-problem.md):
             the reader sees the whole report before their own mail app sends it. */}
         <section className={styles.block} aria-labelledby="colophon-report">
@@ -1174,7 +1185,10 @@ export function Colophon({
                 English (launch item 39): an English reader, Apple's reviewer
                 among them, could not tell what the app is built on. That line
                 is bound to SOURCES.md too, so neither language can drift. */}
-            {CREDITS.filter((credit) => RECITATION || credit.href !== RECITATION_CREDIT).map((credit) => (
+            {CREDITS.filter(
+              (credit) =>
+                (RECITATION || credit.href !== RECITATION_CREDIT) && (TAJWEED || credit.href !== TAJWEED_CREDIT),
+            ).map((credit) => (
               <li key={credit.href} className={styles.row} data-credit={credit.href}>
                 <div className={styles.credit} lang="ar" dir="rtl">
                   <span className={styles.what}>{credit.what}</span>

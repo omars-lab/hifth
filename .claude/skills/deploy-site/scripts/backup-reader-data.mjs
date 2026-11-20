@@ -53,7 +53,7 @@ export const STORES = {
   },
   accounts: {
     kind: "d1",
-    tables: ["accounts", "apple_tickets"],
+    tables: ["accounts", "apple_tickets", "marks_copies"],
     leftOut: {
       sessions: "sign-ins; after a restore each reader signs in again, and a copy would let anyone holding it sign in as them",
       sign_in_words: "one-time words that run out in minutes; nothing to put back",
@@ -70,6 +70,15 @@ const INTERNAL = /^(sqlite_|_cf_)/;
 export function unlistedTables(store, names) {
   const s = STORES[store];
   return names.filter((n) => !INTERNAL.test(n) && !s.tables.includes(n) && !(n in s.leftOut));
+}
+
+/** Which listed tables a store has to copy now, and which listed ones it does not have yet. A
+ *  table comes to the real store only when its change is applied there, so a copy taken before
+ *  then names it and still runs, rather than failing on a table that is not there. */
+export function tablesToCopy(store, names) {
+  const have = new Set(names);
+  const listed = STORES[store].tables;
+  return { copy: listed.filter((t) => have.has(t)), notYet: listed.filter((t) => !have.has(t)) };
 }
 
 /** Why a Postgres address cannot be copied from, or null. pg_dump cannot work through Supabase's
@@ -268,11 +277,13 @@ function d1Copy({ name, where, config, file }) {
   }
   const unlisted = unlistedTables("accounts", names);
   if (unlisted.length) return { error: `the accounts database has tables nobody decided to copy or leave out: ${unlisted.join(",")}; add each to STORES` };
-  const tables = STORES.accounts.tables.flatMap((t) => ["--table", t]);
+  const { copy, notYet } = tablesToCopy("accounts", names);
+  if (notYet.length) say("table_not_yet", { store: "accounts", tables: notYet.join(","), msg: "listed but not in this database yet; nothing to copy from it" });
+  const tables = copy.flatMap((t) => ["--table", t]);
   const e = spawnSync("wrangler", [...base, "export", name, ...at, ...cfg, ...tables, "--no-schema", "--output", file], opts);
   if (e.status !== 0) return { error: "the accounts export did not finish" };
   chmodSync(file, 0o600);
-  const q = `select ${STORES.accounts.tables.map((t) => `(select count(*) from ${t}) as ${t}`).join(", ")}`;
+  const q = `select ${copy.map((t) => `(select count(*) from ${t}) as ${t}`).join(", ")}`;
   const c = spawnSync("wrangler", [...base, "execute", name, ...at, ...cfg, "--json", "--command", q], opts);
   if (c.status !== 0) return { error: "the accounts database did not answer its count" };
   let answer;
@@ -281,7 +292,7 @@ function d1Copy({ name, where, config, file }) {
   } catch {
     return { error: "the accounts count was not readable" };
   }
-  const counts = wholeCounts(answer, STORES.accounts.tables);
+  const counts = wholeCounts(answer, copy);
   return counts ? { counts } : { error: "the accounts count held something other than counts" };
 }
 
@@ -360,6 +371,7 @@ const MADE_UP_PEOPLE = `insert into notify.people (email, lang, confirm_code, co
 insert into notify.server_keys (hash, note) values (sha256('made-up-key'), 'made up');`;
 const MADE_UP_ACCOUNTS = `INSERT INTO accounts VALUES ('drill-1','000000.drill.0001',1700000000),('drill-2','000000.drill.0002',1700000001);
 INSERT INTO apple_tickets VALUES ('drill-1','made-up-sealed','app.example.drill',1700000000);
+INSERT INTO marks_copies VALUES ('drill-2','{"made":"up"}',3,1700000002);
 INSERT INTO sessions VALUES ('drill-hash','drill-1',1700000000,1800000000);`;
 
 function run(cmd, args, opts = {}) {
@@ -442,11 +454,12 @@ function drillAccounts(work, given) {
   const files = readdirSync(migrations).filter((n) => n.endsWith(".sql")).sort();
   const reads = [...files.map((f) => `.read ${join(migrations, f)}`), `.read ${join(runDir, "accounts.sql")}`];
   if (!run("sqlite3", ["-bail", db, ...reads])) return { error: "the copy did not load into the empty database" };
-  const c = spawnSync("sqlite3", [db, "select json_object('accounts', (select count(*) from accounts), 'apple_tickets', (select count(*) from apple_tickets), 'sessions', (select count(*) from sessions))"], { encoding: "utf8" });
+  const c = spawnSync("sqlite3", [db, "select json_object('accounts', (select count(*) from accounts), 'apple_tickets', (select count(*) from apple_tickets), 'marks_copies', (select count(*) from marks_copies), 'copy_number', (select number from marks_copies where account_id = 'drill-2'), 'sessions', (select count(*) from sessions))"], { encoding: "utf8" });
   const restored = JSON.parse(c.stdout.trim());
   if (restored.accounts !== 2 || restored.apple_tickets !== 1) return { error: "the restored accounts hold a different number of rows" };
+  if (restored.marks_copies !== 1 || restored.copy_number !== 3) return { error: "the reader's copy of their marks did not come back as it was" };
   if (restored.sessions !== 0) return { error: "sign-in sessions reached the copy" };
-  return { counts: { accounts: restored.accounts, apple_tickets: restored.apple_tickets } };
+  return { counts: { accounts: restored.accounts, apple_tickets: restored.apple_tickets, marks_copies: restored.marks_copies } };
 }
 
 export function drill({ accountsMigrations: given } = {}) {

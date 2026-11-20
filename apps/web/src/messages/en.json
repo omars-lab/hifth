@@ -65,6 +65,7 @@
   "arrivedAyah": "{via} {label} · page {page}",
   "rangeUnavailable": "That passage is not available yet",
   "ayahUnavailable": "That ayah is not available yet",
+  "linkNowhere": "This link does not point to a page or verse",
   "noConcordance": "That edition cannot be matched verse by verse yet",
   "railSummary": "{surah} · {n, plural, one{1 link} other{{linksText} links}}",
   "ayahAria": "Ayah {label}",

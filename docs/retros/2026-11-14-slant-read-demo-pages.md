@@ -3,7 +3,7 @@ date: 2026-11-14
 repo: hifth
 session: slant read of the demo's pages
 branch: pitch-records-after-foot-bars
-folded: no
+folded: yes
 ---
 
 ## Snags

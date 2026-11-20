@@ -10,6 +10,11 @@ ask a question, does a gesture feel right, does a screenshot get heard.
 **What you need:** the iPad plugged in, unlocked and trusted, or a booted simulator.
 **How long:** five minutes to write the card, one install, then a few minutes of the owner's time.
 
+**Run a check before the real code, not only after it.** When a feature hangs on something only
+the device can say (does iOS ask again, does a recording start), a throwaway build and a short
+card settle it first. On 2026-11-12 one install, a five-step card and two copy-backs answered
+three open questions in about ten minutes of the owner's time.
+
 1. **Write the card.** Use a row of the by-hand checks list, or a small steps file in `checks/`.
    Every step is a question with a tick or a cross for an answer.
 2. **Install a build from this laptop.** Release builds have no card.

@@ -3,7 +3,7 @@ date: 2026-11-16
 repo: hifth
 session: launch-readiness (App Store launch items 7, 10, 12 to 15, 18)
 branch: launch-readiness
-folded: no
+folded: yes
 ---
 
 ## Snags

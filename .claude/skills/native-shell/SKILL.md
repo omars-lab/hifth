@@ -26,6 +26,7 @@ by hand: `make app-generate` rewrites it.
 | tests, fast | `make app-unit-test` (route, bundle paths, bridge; Mac, seconds) |
 | tests, full | `make app-test` (unit tests + the iPad simulator smoke) |
 | one simulator test | `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize` |
+| Apple's accessibility check, iPad | `make app-test ONLY=AccessibilityAuditTests` (see "Apple's accessibility check" below) |
 | Mac smoke | `make app-test-mac-ui` (needs Accessibility permission, see below) |
 | console output | `make app-logs` · `make app-run-mac-stdout` |
 | tests on the owner's iPad's iOS (18.5) | `make app-test IPAD="Hifth iPad 18.5" ONLY=SmokeTests/<test>` |
@@ -59,8 +60,15 @@ Four doors, all ending in the same hash:
   site's file at `/.well-known/apple-app-site-association` is live (launch item ⑨). The app
   takes only the reader's addresses on exactly `hifth.app`; the site's file claims the same
   ones, written by the deploy-site skill's `app-links.mjs`. Add a mus'haf to the app's shipped
-  list and to that file's list together; a test holds the two. A link the app opens but cannot
-  place is dropped silently today (backlog `app-link-it-cannot-place`).
+  list and to that file's list together; a test holds the two.
+
+A plain link (the first two doors) goes through `Route.destination`, not `Route.parse`. It
+opens its place; a mus'haf the app does not ship opens the same place in the one it does, as
+the site does; a place the app cannot read goes on as the fixed `Route.unplaced` (`#/nowhere`),
+and the web app answers that with one line saying the link does not point to a page or verse.
+A link naming no place (`hifth://open`, the reader with nothing after it) only opens the app.
+`Route.parse` stays strict, because an x-callback-url request must say *why* it was refused.
+Tests: `RouteTests` (`destination…`) and `ShellCallbackTests` (`unplacedLinkHandedOn`).
 - `HIFTH_ROUTE=/hafs-kfqc/p45` env var — what the Makefile uses.
 - `--route=/hafs-kfqc/p45` launch argument — what XCUITest uses.
 
@@ -313,6 +321,11 @@ whose label is the hash — and attaches a screenshot (`.keepAlways`) named `ver
 `page-45-dark`, `page-45-landscape` (iPad only). In-page behaviour is Playwright's job
 (`apps/web/e2e/ipad.spec.ts`); these only prove the shell boots, takes a route, and shows it.
 
+**A test switch that does something at start needs a twin that only sets things up.**
+`HIFTH_WALK_CAPTURE_AT_START` also takes a capture at launch, so a test that only needed the
+captures to land in a folder it can read had to wait for `HIFTH_WALK_CAPTURE_FOLDER`. Add the
+set-up-only switch alongside any new "do X at start" switch from the outset.
+
 Results land in `native/shots/ipad-smoke.xcresult` / `mac-smoke.xcresult` (the Makefile
 deletes the old bundle first; an existing `-resultBundlePath` is an error in Xcode 26). To
 look at what the test saw:
@@ -321,6 +334,41 @@ look at what the test saw:
 xcrun xcresulttool get test-results summary --path native/shots/ipad-smoke.xcresult
 xcrun xcresulttool export attachments --path native/shots/ipad-smoke.xcresult --output-path native/shots/ipad-smoke-attachments
 ```
+
+## Apple's accessibility check
+
+`make app-test ONLY=AccessibilityAuditTests` runs the check Xcode's Accessibility Inspector
+runs, on page 7 and on a page with verse 2:255 chosen, inside the iPad app. It finds what a
+VoiceOver reader would trip on: a nameless picture, a target too small to touch, faint text.
+It is the machine half of the screen-reader walk; listening stays on the by-hand list.
+
+- **Rebuild the web copy first.** `ONLY=` skips the web build, so after a change to the web
+  app run `make app-web FLAVOUR=public` before the check, or it tests the old copy (it did,
+  2026-11-19: a whole run spent re-finding a fault already fixed).
+- **One kind per call.** All kinds at once gives up on a full page with "Audit failed to
+  complete in time" before it reports anything. The test loops over the kinds.
+- **Reading a finding.** Each one prints an `ev=a11y_finding` line and is kept as a note on the
+  run. The element type is a number: 43 is a picture, 48 is plain text, 9 is a button. Frames
+  are in points (the shots are twice that). Export the notes with the `export attachments`
+  line above; the shots show the page artwork, so they stay in the scratch folder, never a commit.
+- **Why only here.** Desktop and phone browsers leave the page drawing out of their own
+  accessibility tree, so axe and the aria snapshots in `share-a11y.spec.ts` never see what the
+  iPad's reader announces. The page drawing's rings and lettering are hidden from readers in
+  `apps/web/src/page-drawing-a11y.ts` for that reason (2026-11-19).
+- **Plain text and pictures with no action** are not touch targets, so a "too small to touch"
+  finding on one is noted, not failed. Anything a reader can tap must be a button.
+- **Hidden is not gone on the iPad.** iPad WebKit still lists a slider's grip, and a drawn
+  knob, through `visibility: hidden`, `aria-hidden` and `inert`. A control that must leave a
+  reader's way takes `display: none` (keep its room with the parent's size so nothing moves).
+  A nameless type-1 item with no id or value is the tell (2026-11-19: the page slider under a
+  verse's tools). In React 18, `inert` needs a value (`inert: "true"`); a bare `inert=""` is
+  dropped without a word, so test that the attribute is really on the page.
+- **Compare two runs' finding lists before trusting "it passed before".** Count the
+  `ev=a11y_finding` lines per kind in each log. A rule that excused a finding once can stop
+  matching quietly (2026-11-19: the "not a touch target" excuse compared the wrong field, so
+  every run failed on plain text).
+- **Check the screen the reader gets.** Wait for the screen's own controls before auditing
+  (the verse test waits for its Bookmark button); the address is set before they open.
 
 ## Adding a route shape: round-trip it
 
@@ -340,6 +388,11 @@ JavaScript copy of the parser the contract page's builder runs: `link-builder.te
 same examples through it, so a rule changed in Swift and not there fails on the example. A new
 edition goes in `Route.editions` and the contract's `Edition` schema (`x-editions`), with
 `shipped` true only once its pages are in the build.
+
+**A new action (beside `open`, `current`, `capture`…) goes in five places in the contract and
+its copies:** its path, the error codes, an example, the example note that lists which actions
+exist, and the web link builder. The examples run in both the Swift test and the web test, and
+that is what catches a missed builder; keep both.
 
 ## Crashes
 
@@ -414,6 +467,10 @@ exist only on the real iPad, so the last check is a finger (and the Pencil) on t
 | "no simulator named …" | name not in `simctl list devices available` | pass `IPAD='<exact name>'`; boot with `xcrun simctl bootstatus <udid> -b` |
 | new route ignored on `simctl launch` | app already running; launch ignores env | `xcrun simctl terminate <udid> com.bytesofpurpose.hifth` first |
 | "open in Hifth?" alert in the simulator | `simctl openurl` | expected once per install; use the env var in scripts |
+| a UI test that opens a `hifth://` link waits on a screen that never comes | `XCUIDevice.shared.system.open` brings up the same "Open in Hifth?" prompt, on the Home Screen's side | tap the prompt's Open button if it shows up (`springboard.buttons["Open"]`), as `SmokeTests.swift` does |
+| `make app-unit-test` ends "Executed 0 tests" | that last line is the old test runner's count; the newer suites report as `Suite "…" passed after` or `failed after` | grep for those lines, not the last one |
+| words in a new native panel missing, though the UI test passes and finds them | on the iOS 26.5 iPad simulator, `.secondary` text inside a ScrollView over a `.regularMaterial` card is not drawn at all (2026-11-12) | use `Color.gray`, and look at a cropped picture of every new native panel, not only the test's pass |
+| a link that opens the app loses its last part | iOS cuts such a link at 2,048 characters, silently (12 steps sent, 9 arrived) | any link built from long text gets a length cap and a test with a long made-up list, as `check-card.mjs` has |
 | clang module errors from Homebrew paths | stale `CPATH` | the Makefile does `unexport CPATH`; if you call `xcodebuild` yourself, `unset CPATH` — or use `make app-test ONLY=…` instead of `xcodebuild -only-testing` |
 | `-only-testing:HifthUITests/…` runs nothing | the iPad UI test target is `HifthUITests-iOS` | `make app-test ONLY=SmokeTests/<name>` adds the right prefix, and fails ("0 ran") when a name selects nothing instead of passing green |
 | right in Playwright, wrong in the app | the iPad's own WebKit is not Playwright's | walk it in the simulator (above); `HIFTH_PITCH_BROWSER=webkit` runs the pitch e2e in Playwright's WebKit, which is closer but still not the app |
@@ -428,6 +485,7 @@ skills share them.
 |---|---|---|---|
 | `release-watch.mjs` | Opens the installed app on the iPad with its output saved, watches it, then checks for new crash reports. Waits up to 3 minutes for a locked iPad to be unlocked (the build is long enough for it to lock itself), then says "could not open"; says "closed by itself" for an early exit, and fails on an uncaught error or a new report | The last step of every release to the iPad | `make app-release-ipad DEVICE=<name>` |
 | `profile-lasts.sh` | Reads the signing profile inside the built app and stops if it has under 30 days left, or if it does not list the plugged-in iPad (the iPad would refuse the app) | Run by every device install | `make app-device-install` |
+| `profile-allows.sh` | Says whether a signing profile allows one permission (Sign in with Apple, the hifth.app links, iCloud), and whether it is a store or development profile, printing only its name and yes or no. A profile holds the team id in several places, so never print one whole. A "no" means the box is not ticked on the app's ID on Apple's site (Certificates, Identifiers & Profiles, Identifiers), or Xcode has not downloaded the profile again since. First run 2026-11-18: the Mac store, iPad store and iPad development profiles all allow Sign in with Apple | Before a store build that adds a permission; when Apple refuses a permission at signing | `make app-profile-allows` (`KEY=com.apple.developer.associated-domains` for another); tests: `node --test scripts/native-profile-allows.test.mjs` |
 | `device-udid.mjs` | Turns a connected device's name into the hardware id the signing profile lists it by | Run by every device install, before the profile check | `node native/scripts/device-udid.mjs --device "<name>"` |
 | `xcode-account.sh` | Says whether Xcode has an account signed in | Run by every device install | `sh native/scripts/xcode-account.sh` |
 | `simulator-udid.sh` | Turns a simulator name into its id | Picking `IPAD="…"` for a test | used by the Makefile |

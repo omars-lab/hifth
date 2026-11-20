@@ -10,28 +10,32 @@ import { useCallback, useEffect, useRef } from "react";
  * walking the book. `pendingPageRef` is that destination, and it is the number
  * every page-stepping decision is made against.
  *
- * Both are synced from `page` rather than written at each of the places that
- * call `setPage`: a deep link, a hop, a trail rewind and a scrub all settle the
- * reader somewhere, and any of them arriving mid-turn should reset the
- * destination to wherever they put us. All but a turn's own landing: the
- * destination is already that page when it lands, and by the time the change
- * settles a flick let go just after may have moved it on. Reset then, that
- * flick's own landing found the destination gone and was dropped, so two
- * quick flicks turned one page.
+ * Every road that settles the reader somewhere (a deep link, a hop, a trail
+ * rewind, a scrub, a turn's own landing) sets the page through `setPage` here,
+ * which puts the destination on that page in the same moment. A deep link
+ * arriving mid-turn resets the destination to wherever it put us.
+ *
+ * It used to be synced afterwards, from `page` changing, and that missed two
+ * cases. A flick let go just as the last turn landed had its destination reset
+ * under it, so two quick flicks turned one page (that needed a "turn landed"
+ * exception). And a jump undone in the same moment, a part marker tapped as
+ * the opening link put the page back, never changed `page` at all: the
+ * destination stayed on the jump's page and every later tap on that marker was
+ * taken for the jump already under way (seen on the iPhone run, 2026-11-19).
+ * Set at the moment of setting, both are right with no exception.
  */
-export function usePageDestination(page: number) {
+export function usePageDestination(page: number, setPageState: (page: number) => void) {
   const pageRef = useRef(page);
   const pendingPageRef = useRef(page);
-  const landedRef = useRef<number | null>(null);
   useEffect(() => {
     pageRef.current = page;
-    const turned = landedRef.current === page;
-    landedRef.current = null;
-    if (!turned) pendingPageRef.current = page;
   }, [page]);
-  /** Say a turn has landed on `n`, just before the page is set to it. */
-  const turnLanded = useCallback((n: number): void => {
-    landedRef.current = n;
-  }, []);
-  return { pageRef, pendingPageRef, turnLanded };
+  const setPage = useCallback(
+    (n: number): void => {
+      pendingPageRef.current = n;
+      setPageState(n);
+    },
+    [setPageState],
+  );
+  return { pageRef, pendingPageRef, setPage };
 }

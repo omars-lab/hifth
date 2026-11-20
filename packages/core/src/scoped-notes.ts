@@ -20,6 +20,7 @@
 
 import { parseAyahKey } from "./keys.js";
 import { isMistake, mergeNotes, NOTE_TEXT_MAX, type Note } from "./notes.js";
+import { dropRemoved, joinRemovals, type Removal } from "./removals.js";
 import { AYAH_COUNTS, HIZB_STARTS, JUZ_STARTS, TOTAL_AYAHS, fromAbsoluteAyah, hizbOf, juzOf, toAbsoluteAyah } from "./quran-meta.js";
 import type { EditionId } from "./types.js";
 
@@ -457,16 +458,35 @@ export function mergeScopedNotes(held: readonly ScopedNote[], loaded: readonly S
  * mistakes stay mistakes. A newer file carries the new kind of note as well.
  * Either way a note held in both places keeps the copy changed last, and
  * `added` counts what the device did not have, for the line the reader is told.
+ *
+ * The notes taken away on this device and in the file are put together, and a
+ * note whose removal is newer than its last change goes, wherever it was
+ * (removals.ts). A note still there afterwards was changed after its removal,
+ * so its removal is forgotten.
  */
 export function mergeNotesFile(
   heldScoped: readonly ScopedNote[],
   heldMistakes: readonly Note[],
   fileNotes: readonly Note[],
   fileScoped: readonly ScopedNote[],
-): { scoped: ScopedNote[]; mistakes: Note[]; added: number } {
-  const scoped = mergeScopedNotes(mergeScopedNotes(heldScoped, migrateV1Notes(fileNotes, [])), fileScoped);
-  const mistakes = mergeNotes(heldMistakes, fileNotes.filter(isMistake));
-  return { scoped, mistakes, added: scoped.length - heldScoped.length + mistakes.length - heldMistakes.length };
+  heldRemoved: readonly Removal[] = [],
+  fileRemoved: readonly Removal[] = [],
+): { scoped: ScopedNote[]; mistakes: Note[]; added: number; removed: Removal[] } {
+  const gone = joinRemovals(heldRemoved, fileRemoved);
+  const scoped = dropRemoved(
+    mergeScopedNotes(mergeScopedNotes(heldScoped, migrateV1Notes(fileNotes, [])), fileScoped),
+    gone,
+    (n) => Math.max(n.updatedAt, n.usedAt),
+  );
+  const mistakes = dropRemoved(mergeNotes(heldMistakes, fileNotes.filter(isMistake)), gone, (n) => n.updatedAt);
+  const there = new Set([...scoped, ...mistakes].map((n) => n.id));
+  const had = new Set([...heldScoped, ...heldMistakes].map((n) => n.id));
+  return {
+    scoped,
+    mistakes,
+    added: [...there].filter((id) => !had.has(id)).length,
+    removed: gone.filter((r) => !there.has(r.id)),
+  };
 }
 
 /*

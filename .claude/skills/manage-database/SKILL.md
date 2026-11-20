@@ -17,6 +17,8 @@ profile, and the first step of any database work is the login check.
 2. **If it fails,** it prints the line the owner types in the prompt. The login opens a browser,
    so it is theirs to run.
 3. **Then do the work,** with `--profile ~/.supabase/profiles/hifth.yaml` on every hosted command.
+   In a skill's examples, write the profile into every `supabase …` command, even a local-only
+   one: `scripts/supabase-profile.test.mjs` refuses one without it.
 
 ```mermaid
 flowchart TD
@@ -42,7 +44,7 @@ flowchart TD
 | Login | How it is chosen | What it reaches | Use it for |
 |---|---|---|---|
 | Hifth's own account | `--profile ~/.supabase/profiles/hifth.yaml` | hifth.app only | everything Hifth |
-| The older bytesofpurpose account | the default, with no profile; or `~/.supabase/profiles/bytesofpurpose.yaml` | the old Hifth project (being paused) and two unrelated projects | nothing new; reading the old project during the move |
+| The older bytesofpurpose account | the default, with no profile; or `~/.supabase/profiles/bytesofpurpose.yaml` | the old Hifth project and two unrelated projects (the login check prints whether each is running or paused) | nothing new; reading the old project during the move |
 | The connected Supabase tools in the chat | the chat's own connection | a third account, at its free limit | never for Hifth |
 
 `SUPABASE_ACCESS_TOKEN` in the shell beats every saved login, whichever profile is named. The
@@ -104,6 +106,11 @@ What any version must keep:
 ## Rules
 
 - Never print a token, a project reference, a database password or an email address.
+- Check the live state before writing that a project is paused, moved or done. A page once said
+  the old project was paused while it was still running, and the next step was planned on it.
+  The login check prints each project's state.
+- Never preview a settings push without answering no: it counts an empty answer as yes. The
+  `leverage-qul` skill gives the safe line.
 - Never run a hosted command without `--profile ~/.supabase/profiles/hifth.yaml`. A test on the
   `supabase-move` branch checks every skill for this.
 - Never use the connected Supabase tools in the chat for Hifth.

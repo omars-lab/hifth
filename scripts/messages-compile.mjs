@@ -27,7 +27,7 @@
  * being edited without `pnpm i18n:build`.
  */
 import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { parse } from "@messageformat/parser";
 
 // HIFTH_GATE_ROOT points gate:i18n (and the build it compares against) at a
@@ -49,20 +49,38 @@ export const MESSAGES_DIR = join(ROOT, "apps", "web", "src", "messages");
 export const REFERENCE = "ar";
 
 /** The locales that exist, discovered from the catalogs themselves. */
-export function localeIds() {
-  const ids = readdirSync(MESSAGES_DIR)
+export function localeIds(dir = MESSAGES_DIR) {
+  const ids = readdirSync(dir)
     .filter((f) => f.endsWith(".json"))
     .map((f) => f.slice(0, -".json".length))
     .sort();
   if (!ids.includes(REFERENCE)) {
-    throw new Error(`messages/: the reference locale ${REFERENCE}.json is missing`);
+    throw new Error(`${relative(ROOT, dir)}/: the reference locale ${REFERENCE}.json is missing`);
   }
   return ids;
 }
 
 /** One locale's catalog: flat key → ICU MessageFormat source. */
-export function readCatalog(id) {
-  return JSON.parse(readFileSync(join(MESSAGES_DIR, `${id}.json`), "utf8"));
+export function readCatalog(id, dir = MESSAGES_DIR) {
+  return JSON.parse(readFileSync(join(dir, `${id}.json`), "utf8"));
+}
+
+/**
+ * The word packs: each folder in messages/ holding catalogs of its own.
+ *
+ * The catalogs in messages/ itself are the words every reader downloads when
+ * the app opens. A pack is words only one late-loading part of the app reads,
+ * such as the account section (sign-in ⑳, docs/design/sign-in.md): it compiles
+ * to files of its own in its folder, fetched when that part asks for them, so
+ * they cost the start-up download nothing. Every pack must carry the same
+ * languages as the start-up words, and no key may live in two places.
+ */
+export function packNames() {
+  return readdirSync(MESSAGES_DIR, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && /^[a-z][a-z0-9-]*$/.test(d.name))
+    .map((d) => d.name)
+    .filter((name) => readdirSync(join(MESSAGES_DIR, name)).some((f) => f.endsWith(".json")))
+    .sort();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -191,9 +209,12 @@ function walkSelectors(tokens, key, plurals, selects, path = "") {
 /* Emitting                                                                    */
 /* -------------------------------------------------------------------------- */
 
-const BANNER = (what) =>
+/** Where a pack's catalogs live, as the banner names them. No pack: the start-up words. */
+const sourceOf = (pack) => `apps/web/src/messages/${pack ? `${pack}/` : ""}*.json`;
+
+const BANNER = (what, pack = null) =>
   `/* GENERATED — do not edit. ${what}\n` +
-  ` * Source: apps/web/src/messages/*.json. Regenerate: \`pnpm i18n:build\`.\n` +
+  ` * Source: ${sourceOf(pack)}. Regenerate: \`pnpm i18n:build\`.\n` +
   ` * \`gate:i18n\` fails the build if this file and the catalogs disagree. */\n`;
 
 function expr(tokens, usedArgs) {
@@ -284,10 +305,10 @@ function unionArgs(analyses, key) {
  * fallback chain — a missing key cannot render another locale's words, because a
  * missing key does not compile.
  */
-export function emitCatalogType(analyses) {
+export function emitCatalogType(analyses, pack = null) {
   const reference = analyses.find((a) => a.locale === REFERENCE);
   const lines = [
-    BANNER(`The shape every locale must fill. Keys from ${REFERENCE}.json.`),
+    BANNER(`The shape every locale must fill. Keys from ${REFERENCE}.json.`, pack),
     "",
     "export interface Catalog {",
   ];
@@ -312,25 +333,30 @@ export function emitCatalogType(analyses) {
 }
 
 /** One locale's compiled module. Typed `Catalog`, so tsc is the first lock. */
-export function emitLocale(analysis) {
-  const lines = [
-    BANNER(`The ${analysis.locale} chrome, compiled from ICU MessageFormat.`),
-    "",
-    'import { plural, select } from "./plural";',
-    'import type { Catalog } from "./catalog.gen";',
-    "",
-    "/** The tag Intl.PluralRules resolves its CLDR categories from. */",
-    `const LC = ${JSON.stringify(analysis.locale)};`,
-    "",
-    "const messages: Catalog = {",
-  ];
+export function emitLocale(analysis, pack = null) {
+  const entries = [];
   for (const key of [...analysis.asts.keys()].sort()) {
     const used = new Set();
     const body = expr(analysis.asts.get(key), used);
     const member = IDENT.test(key) ? key : JSON.stringify(key);
-    lines.push(used.size > 0 ? `  ${member}: (d) => ${body},` : `  ${member}: ${body},`);
+    entries.push(used.size > 0 ? `  ${member}: (d) => ${body},` : `  ${member}: ${body},`);
   }
-  lines.push("};", "", "export default messages;", "");
+  // Import only the helpers the words call. A pack of plain sentences (the
+  // account section's, sign-in ⑳) calls neither, and the lint check refuses
+  // an unused import.
+  const code = entries.join("\n");
+  const helpers = ["plural", "select"].filter((name) => new RegExp(`\\b${name}\\(`).test(code));
+  const lines = [BANNER(`The ${analysis.locale} chrome, compiled from ICU MessageFormat.`, pack), ""];
+  if (helpers.length) lines.push(`import { ${helpers.join(", ")} } from "${pack ? "../" : "./"}plural";`);
+  lines.push('import type { Catalog } from "./catalog.gen";', "");
+  if (/\bLC\b/.test(code)) {
+    lines.push(
+      "/** The tag Intl.PluralRules resolves its CLDR categories from. */",
+      `const LC = ${JSON.stringify(analysis.locale)};`,
+      "",
+    );
+  }
+  lines.push("const messages: Catalog = {", ...entries, "};", "", "export default messages;", "");
   return lines.join("\n");
 }
 
@@ -363,42 +389,91 @@ export function emitLocaleIds(ids) {
  * row's key, and the whole point is that they might not. Here the list is
  * derived from the catalogs, so it cannot be forgotten.
  */
-export function emitRegistry(ids) {
+export function emitRegistry(ids, pack = null) {
+  const why = pack
+    ? "/** Dynamic imports: this pack's words are read only by a part of the app\n" +
+      " *  that loads late, so they are fetched when it asks for them and never\n" +
+      " *  with the words every reader downloads at start-up. The service worker\n" +
+      " *  precaches every one, so they work offline. */\n"
+    : "/** Dynamic imports, not static: each language is its own file, so a reader\n" +
+      " *  downloads only the one they read in (the two together were ~10 KB gz of\n" +
+      " *  start-up code). The one they open in is fetched before the first paint:\n" +
+      " *  index.html asks for it up front and main.tsx waits for it. The service\n" +
+      " *  worker precaches every one, so switching works offline. */\n";
   return (
-    BANNER("Every locale's compiled catalog, keyed by id, each loaded on demand.") +
+    BANNER("Every locale's compiled catalog, keyed by id, each loaded on demand.", pack) +
     "\n" +
     'import type { Catalog } from "./catalog.gen";\n' +
-    'import type { LocaleId } from "./locales.gen";\n' +
+    `import type { LocaleId } from "${pack ? "../" : "./"}locales.gen";\n` +
     "\n" +
-    "/** Dynamic imports, not static: each language is its own file, so a reader\n" +
-    " *  downloads only the one they read in (the two together were ~10 KB gz of\n" +
-    " *  start-up code). The one they open in is fetched before the first paint:\n" +
-    " *  index.html asks for it up front and main.tsx waits for it. The service\n" +
-    " *  worker precaches every one, so switching works offline. */\n" +
+    why +
     "export const CATALOG_LOADERS: Readonly<\n" +
     "  Record<LocaleId, () => Promise<{ default: Catalog }>>\n" +
     "> = {\n" +
-    ids.map((i) => `  ${i}: () => import("./${i}.gen"),`).join("\n") +
+    ids.map((i) => `  ${i}: () => import("./${localeFile(i, pack)}"),`).join("\n") +
     "\n};\n"
   );
 }
 
-/** Everything the generator writes, as `path → contents`. */
-export function compileAll() {
-  const ids = localeIds();
+/**
+ * A locale's compiled module, without its `.ts`. A pack's carries the pack's
+ * name (`account.en.gen`), so its built file can never be taken for the
+ * start-up words' `en.gen`, which the size check and the up-front fetch in
+ * index.html both find by name.
+ */
+const localeFile = (id, pack) => (pack ? `${pack}.${id}.gen` : `${id}.gen`);
+
+/** One set of catalogs, read and parsed: the start-up words (`pack: null`) or one pack. */
+function readPack(pack) {
+  const dir = pack ? join(MESSAGES_DIR, pack) : MESSAGES_DIR;
+  const label = (id) => `${pack ? `${pack}/` : ""}${id}.json`;
+  const ids = localeIds(dir);
   const analyses = new Map();
   const problems = [];
   for (const id of ids) {
-    const a = analyse(readCatalog(id), id);
-    problems.push(...a.problems.map((p) => `${id}.json — ${p}`));
+    const a = analyse(readCatalog(id, dir), id);
+    problems.push(...a.problems.map((p) => `${label(id)} — ${p}`));
     analyses.set(id, a);
   }
+  return { pack, dir, label, ids, analyses, problems };
+}
+
+/**
+ * Everything the generator writes, as `path → contents`.
+ *
+ * `ids` and `analyses` are the start-up words'; `packs` is every set,
+ * start-up words first, which is what `gate:i18n` runs its checks over.
+ */
+export function compileAll() {
+  const packs = [readPack(null), ...packNames().map(readPack)];
+  const [main] = packs;
+  const { ids, analyses } = main;
+  const problems = packs.flatMap((p) => p.problems);
+
+  for (const p of packs.slice(1)) {
+    // The loaders are typed by the start-up words' languages, so a pack with
+    // another set would not compile; say which file is missing or extra.
+    for (const id of ids) if (!p.ids.includes(id)) problems.push(`${p.label(id)} is missing: every pack carries every language`);
+    for (const id of p.ids) if (!ids.includes(id)) problems.push(`${p.label(id)} has no ${id}.json beside the start-up words`);
+  }
+  // A key in two places is read from one and quietly stale in the other.
+  const owner = new Map();
+  for (const p of packs) {
+    for (const key of p.analyses.get(REFERENCE)?.asts.keys() ?? []) {
+      const before = owner.get(key);
+      if (before) problems.push(`'${key}' is in both ${before} and ${p.label(REFERENCE)}; keep it in one`);
+      else owner.set(key, p.label(REFERENCE));
+    }
+  }
+
   const files = new Map();
   if (problems.length === 0) {
     files.set(join(MESSAGES_DIR, "locales.gen.ts"), emitLocaleIds(ids));
-    files.set(join(MESSAGES_DIR, "catalog.gen.ts"), emitCatalogType([...analyses.values()]));
-    files.set(join(MESSAGES_DIR, "catalogs.gen.ts"), emitRegistry(ids));
-    for (const id of ids) files.set(join(MESSAGES_DIR, `${id}.gen.ts`), emitLocale(analyses.get(id)));
+    for (const p of packs) {
+      files.set(join(p.dir, "catalog.gen.ts"), emitCatalogType([...p.analyses.values()], p.pack));
+      files.set(join(p.dir, "catalogs.gen.ts"), emitRegistry(p.ids, p.pack));
+      for (const id of p.ids) files.set(join(p.dir, `${localeFile(id, p.pack)}.ts`), emitLocale(p.analyses.get(id), p.pack));
+    }
   }
-  return { ids, analyses, files, problems };
+  return { ids, analyses, files, problems, packs };
 }

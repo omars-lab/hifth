@@ -38,8 +38,12 @@ async function openTools(page: Page): Promise<void> {
     await expect(note).toHaveCount(0);
     return;
   }
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("region", { name: /^(Tools for |أدوات )/ })).toBeVisible();
+  // The public build opens the tools by itself on a verse's address. They are
+  // waited for as long as the slider test waits, with no key pressed first: on
+  // a laptop busy with every other test, the first page can take longer than
+  // the usual five seconds, and the tools then failed to show in time
+  // (passed only on its second try, android, 2026-11-19).
+  await expect(page.getByRole("region", { name: /^(Tools for |أدوات )/ })).toBeVisible({ timeout: 20_000 });
 }
 
 for (const locale of ["en-US", "ar"] as const) {

@@ -56,13 +56,17 @@ export function RootLensTrigger({
       aria-label={spokenName(t.rootsTrigger(count, curated), caption, t.sep)}
       onClick={onToggle}
     >
-      <span aria-hidden="true">⬡</span>
-      <span className="numeric" aria-hidden="true">
-        {t.num(count)}
+      {/* One piece, so a narrow cell never puts the count under its icon
+          (the grown drawer on an iPhone SE did, 2026-11-20). */}
+      <span className={styles.glyph}>
+        <span aria-hidden="true">⬡</span>
+        <span className="numeric" aria-hidden="true">
+          {t.num(count)}
+        </span>
+        {curated > 0 && (
+          <span className={styles.pickedDot} aria-hidden="true" />
+        )}
       </span>
-      {curated > 0 && (
-        <span className={styles.pickedDot} aria-hidden="true" />
-      )}
       {caption && <span data-caption="">{caption}</span>}
     </button>
   );

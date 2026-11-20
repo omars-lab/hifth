@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tajweed mark contrast</title>
+<meta name="description" content="In the mistake picker, the small coloured tajweed marks are faint on their buttons. How should they be drawn?">
+<!-- Built by scripts/build-design-note.mjs from design/tajweed-mark-contrast-options.md. Do not edit by hand. -->
+<style>
+:root { --bg: #fbfaf7; --ink: #1f2328; --muted: #5b636d; --line: #d9dcd3; --tip: #eef6ee; --tip-edge: #3d8b55; --code: #f0efe9; --link: #1f5fa8; --hafiz: #fff3c4; --flow: #4b5563; --marks: #b4690e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #161c25; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2e3846; --tip: #17271d; --tip-edge: #5fbf7a; --code: #1d2531; --link: #8cb8f0; --hafiz: #3a3214; } }
+:root[data-theme="dark"] { --bg: #161c25; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2e3846; --tip: #17271d; --tip-edge: #5fbf7a; --code: #1d2531; --link: #8cb8f0; --hafiz: #3a3214; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, sans-serif; }
+main { max-width: 60rem; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.6rem; line-height: 1.25; }
+h2 { font-size: 1.25rem; margin-top: 2.2rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
+h3 { font-size: 1.05rem; margin-top: 1.8rem; }
+a { color: var(--link); }
+code { background: var(--code); padding: 0 4px; border-radius: 4px; font-size: 0.9em; }
+.callout { background: var(--tip); border-left: 4px solid var(--tip-edge); padding: 4px 16px; border-radius: 6px; }
+.callout-title { font-weight: 700; margin-bottom: 0; }
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; text-align: left; }
+th { background: var(--code); }
+thead:not(:has(th:not(:empty))) { display: none; }
+tr:has(td:first-child strong:only-child) td { background: var(--hafiz); }
+.diagram { margin: 1rem 0; padding: 12px; background: #ffffff; border-radius: 8px; overflow-x: auto; }
+.diagram svg { display: block; margin: 0 auto; width: 100%; max-width: 560px !important; height: auto; }
+.diagram svg .flowchart-link.edge-pattern-solid { stroke: var(--flow) !important; stroke-dasharray: 8 5 !important; animation: note-flow 0.9s linear infinite; }
+.diagram svg .flowchart-link.edge-thickness-thick { stroke: var(--marks) !important; stroke-width: 3.5px !important; }
+.diagram svg .flowchart-link.edge-pattern-dotted { stroke-dasharray: 2 6 !important; stroke-linecap: round; animation: none; }
+@keyframes note-flow { to { stroke-dashoffset: -13; } }
+@media (prefers-reduced-motion: reduce) { .diagram svg .flowchart-link { animation: none !important; } }
+</style>
+</head>
+<body>
+<main>
+<h1>In the mistake picker, the small coloured tajweed marks are faint on their buttons. How should they be drawn?</h1>
+<p><em>Asked 2026-11-20 by the launch loop, for the owner. The pictures are the real app on a computer, with a few lines of style laid over it for each way; nothing in the app has changed yet.</em></p>
+<p><em>This note is the record. Its page is <a href="tajweed-mark-contrast-options.html">tajweed-mark-contrast-options.html</a>, on the site at <a href="https://blog.bytesofpurpose.com/hifth/docs/design/tajweed-mark-contrast-options.html">https://blog.bytesofpurpose.com/hifth/docs/design/tajweed-mark-contrast-options.html</a>, rebuilt from this note by <code>scripts/build-design-note.mjs</code>. The pictures are remade by <code>tajweed-mark-contrast-options/shoot.mjs</code>.</em></p>
+<aside class="callout tip"><p class="callout-title">Short version</p>
+
+<p><strong>What differs:</strong> each tajweed-rule button in the mistake picker starts with a small letter in that rule&#39;s colour. Four of the seven letters are too faint to read comfortably on the button&#39;s paper colour. The ways differ in whether the page&#39;s tajweed colours change too.
+<strong>Recommended: C, a darker shade of each faint colour, in the picker only.</strong> Every mark becomes easy to read, each keeps its own colour, and the colours on the mus&#39;haf page do not move.
+<strong>What it does not touch:</strong> the colours a reader sees on the page, or the reader&#39;s own colour choices (decided in 2026-08).</p>
+</aside>
+
+<h2>What do the words on this page mean?</h2>
+<ul>
+<li><strong>The mistake picker</strong>: the box that opens when a reader marks a mistake on a verse and is asked what went wrong. One of its rows is &quot;A tajweed rule&quot;, with a button per rule.</li>
+<li><strong>The mark</strong>: the small Arabic letter at the start of each rule button, drawn in that rule&#39;s colour, so the button matches the colour on the page.</li>
+<li><strong>Tajweed</strong>: the rules of recitation. The seven groups here are madd (lengthening), hamzat wasl, ghunnah and ikhfa, idgham, qalqalah, silent letters and madd lazim.</li>
+<li><strong>Easy to read</strong>: the accessibility rule most apps follow asks that small writing be at least 4.5 times lighter or darker than what it sits on (&quot;4.5 to 1&quot;). Body text in Hifth is far above that.</li>
+</ul>
+<h2>What changes for a hafiz?</h2>
+<blockquote>
+<p>[!important] For a hafiz mid-revision
+A hafiz marking a slip in madd or ghunnah picks the rule by its name, which is written in full on every button, so nobody is stuck today. The mark is what lets the eye jump to the right button by colour, matching what they just saw on the page. For a reader with weaker eyes, or on a bright screen, the grey wasl and pink idgham marks almost vanish, and that shortcut is lost.</p>
+</blockquote>
+<h2>Why is this being asked now?</h2>
+<p>The automated accessibility check that runs before launch (the a11y-axe-remaining-screens row) flagged the madd mark on 2026-11-19. Measuring by hand on 2026-11-20 found it is not only madd: four marks fall short. The check sees only madd because it skips letters it judges to be decoration. Fixing madd alone would make the check pass and leave the worse three as they are.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>rule</th>
+<th>colour</th>
+<th>against the button</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>hamzat wasl</td>
+<td>grey #9c9284</td>
+<td>2.9 to 1</td>
+</tr>
+<tr>
+<td>idgham</td>
+<td>pink #cc79a7</td>
+<td>2.9 to 1</td>
+</tr>
+<tr>
+<td>ghunnah / ikhfa</td>
+<td>green #009e73</td>
+<td>3.2 to 1</td>
+</tr>
+<tr>
+<td>madd</td>
+<td>orange #d55e00</td>
+<td>3.7 to 1</td>
+</tr>
+<tr>
+<td>qalqalah</td>
+<td>blue #0072b2</td>
+<td>4.9 to 1 (passes)</td>
+</tr>
+<tr>
+<td>silent</td>
+<td>brown #6e6259</td>
+<td>5.6 to 1 (passes)</td>
+</tr>
+<tr>
+<td>madd lazim</td>
+<td>dark red #8e2400</td>
+<td>8.3 to 1 (passes)</td>
+</tr>
+</tbody></table></div>
+<h2>What happens if nobody decides?</h2>
+<p>The marks stay as they are, and the full check of the mistake picker stays switched off (a narrower check covers everything else in the box). The launch is not blocked: the marks are hidden from screen readers and the rule&#39;s name sits beside each one. But the accessibility row stays open.</p>
+<h2>What do the ways look like?</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>A. As today</th>
+<th>B. Darker madd only</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><img src="tajweed-mark-contrast-options/a-today-picker.png" alt="The rule buttons as today"></td>
+<td><img src="tajweed-mark-contrast-options/b-madd-darker-picker.png" alt="Only the madd mark darkened"></td>
+</tr>
+<tr>
+<td><strong>C. A darker shade of each faint colour, picker only</strong></td>
+<td><strong>D. Ink letters with a colour bar under each</strong></td>
+</tr>
+<tr>
+<td><img src="tajweed-mark-contrast-options/c-picker-shades-picker.png" alt="Four marks in darker shades"></td>
+<td><img src="tajweed-mark-contrast-options/d-ink-and-bar-picker.png" alt="Marks in ink with coloured bars"></td>
+</tr>
+</tbody></table></div>
+<h2>A. Leave the marks as they are</h2>
+<ul>
+<li><strong>Good:</strong> nothing changes, nothing to build.</li>
+<li><strong>Costs:</strong> wasl, idgham and ghunnah stay hard to see; the accessibility row stays open with a known fault.</li>
+<li><strong>Commits us to:</strong> keeping the switched-off check, and explaining it in the launch notes.</li>
+</ul>
+<h2>B. Darken madd only, everywhere</h2>
+<ul>
+<li><strong>Good:</strong> one colour changes; the automated check passes.</li>
+<li><strong>Costs:</strong> the three faintest marks are untouched, so the passing check hides a real fault. Madd changes on the page too, and the darker orange (#b95200) moves closer to madd lazim&#39;s dark red, the pair the page tells apart by lightness.</li>
+<li><strong>Commits us to:</strong> a change to the page&#39;s colours, which reopens the 2026-08 colour choice for one group.</li>
+</ul>
+<h2>C. A darker shade of each faint colour, in the picker only — recommended</h2>
+<ul>
+<li><strong>Good:</strong> every mark reaches 4.5 to 1; each keeps its own hue, so it still matches the page at a glance; the page&#39;s colours do not move.</li>
+<li><strong>Costs:</strong> the picker&#39;s colours are a shade darker than the page&#39;s, which a sharp eye may notice. If a reader recolours a group (the 2026-08 decision lets them), the picker needs to darken their colour too, worked out in the app rather than written down.</li>
+<li><strong>Commits us to:</strong> a small rule that darkens a colour until it reads, used wherever a rule&#39;s colour sits on paper as writing.</li>
+<li>The shades: wasl #786e61, madd #b95200, ghunnah #007f5d, idgham #b84685.</li>
+</ul>
+<h2>D. Ink letters, with a short bar in the rule&#39;s colour under each</h2>
+<ul>
+<li><strong>Good:</strong> the letters are as readable as the names; the colour is still there; a reader&#39;s own colours work with no extra rule, since a bar is not writing and needs only 3 to 1 against the paper (wasl and idgham still fall a little short of that).</li>
+<li><strong>Costs:</strong> the colour is now a thin bar, not the letter, so the eye&#39;s match to the page is weaker; the buttons look busier.</li>
+<li><strong>Commits us to:</strong> a new small shape in the picker.</li>
+</ul>
+<h2>What else could be considered, and why is it not here?</h2>
+<ul>
+<li><strong>Darken all seven colours everywhere.</strong> It would fix the picker, but it reopens the whole tajweed palette chosen in 2026-08, and the madd grades on the page are told apart by lightness, which darker colours squeeze together. Too large a change for a small mark.</li>
+<li><strong>Remove the marks.</strong> The names carry the meaning, but the colour link to the page is the point of the mark; losing it is worse than a faint mark.</li>
+</ul>
+<h2>What have we already decided that touches this?</h2>
+<ul>
+<li><strong>tajweed-colours</strong> (decided B, 2026-08-19): a reader can recolour the seven groups. Any way here must work with a reader&#39;s own colours; C needs to darken them in the app, D needs nothing.</li>
+</ul>
+<h2>What do others do?</h2>
+<p>Did not look at other Qur&#39;an apps for this. The common practice in apps generally is the one in C: a darker &quot;text&quot; shade of a brand colour, used wherever the colour has to be read as writing.</p>
+<h2>What would change the answer?</h2>
+<ul>
+<li>If the owner wants the picker&#39;s colours to be the very same as the page&#39;s, D is the way.</li>
+<li>If the reader&#39;s own colours turn out hard to darken well, D is the way.</li>
+</ul>
+<h2>What is this not settling?</h2>
+<p>The colours on the mus&#39;haf page itself, and whether the page&#39;s madd grades are distinct enough. Those stay with the 2026-08 decision.</p>
+<h2>So what is being decided?</h2>
+<p>Which of A to D the mistake picker&#39;s tajweed marks use. Recommended: C.</p>
+
+</main>
+</body>
+</html>
