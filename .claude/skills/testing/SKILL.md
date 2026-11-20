@@ -72,7 +72,34 @@ pnpm -r test                                     # every package (core, etl, web
 ```
 
 `@hifth/core` must be built before the packages that import it (`make core`, or
-`make test` which does it for you) — the Loop 0 lesson.
+`make test` which does it for you) — the Loop 0 lesson. The web app's type check reads the
+core package's built output too, so after a change to core it fails with errors that point at
+the web app's files until `pnpm -C packages/core -s build` runs.
+
+**A test that was green the moment you wrote it** has not shown it can fail. Break the feature on
+purpose in two places, watch the test go red each time, then put the code back.
+
+**A new file that reads the record of what was opened** is refused at commit time by the privacy
+check, minutes into the commit. Run `pnpm -s gate:revision-privacy` (a second) right after adding
+one, and add the file to the check's list if it truly needs the record.
+
+**Write a script's Arabic-letter test as `/\p{Script=Arabic}/u`**, not a range of typed Arabic
+characters. A typed range picked up an invisible character that the commit's lint refused, and
+the Edit tool turns `\u` escapes back into raw characters (2026-11-11).
+
+### Tests that run git
+
+A test that runs git makes a throwaway repo and strips every `GIT_*` variable first:
+`fixtureEnv()` in `scripts/gate-fixture.mjs`. During a commit, the hook's own git variables
+would otherwise point the test's `git init` and `git add` at the real repo. Point the global
+settings at nothing as well, so the laptop's own git setup cannot leak in.
+
+Don't run one repo's git-heavy tests while another repo's push checks are running. Both slow
+down, and a timing failure then can't be read. Run them one after the other.
+
+**After moving test files,** run the moved tests and search for the old path in every quoting
+style (quotes, backticks, bare). A search for quoted paths once missed one in backticks, and a
+test that reads every script in its folder started reading the moved tests too.
 
 ### End-to-end, in a browser
 
@@ -132,6 +159,15 @@ Firefox on a pretend iPad (`hasTouch`) sends a mouse click with **no pointer eve
 code that listens for `pointerdown` never hears `page.mouse.click`. Use
 `page.touchscreen.tap` for a touch (found 2026-11-11, the pencil's rings).
 
+**Tapping a verse:** `tapAyah` in `apps/web/e2e/ayah.ts` taps with a finger, at a point it has
+checked a finger can reach. A run with no touch (the desktop ones) needs a mouse click at
+`ayahTarget`'s point instead. No helper picks between the two yet, so each new test chooses by
+the project it runs in.
+
+**To make "a slow connection might do this" into a failing test,** hold back one file: open a
+context with the offline cache switched off (`serviceWorkers: "block"`), then delay that file's
+route. With the cache on, the route is never asked.
+
 The other projects: `pitch` and `pitch-firefox` (the private pitch build, its own port),
 `pitch-script` (the six demo passages), `iphone`, `ipad`, and the golden pictures.
 
@@ -172,6 +208,20 @@ app is wrong before touching either.** Three steps, each a few minutes:
 
 The page-edge strip was found this way on 2026-11-11
 (`docs/issues/edge-strip-measured-before-the-leaf-knew-its-side.md`).
+
+Four more habits for these:
+
+- **Repeat the fix 25 times too, before committing it.** The first fix for a test that needed
+  two free ports failed five runs in eight.
+- **When a failing run's picture shows the cause, force that state** rather than chasing the
+  timing. The chips beside the look-alike rows failed once because the verse's drawer measured
+  itself while still short; slowing the processor never made it happen, but holding the drawer
+  short with a style and then letting it grow made it fail every time (2026-11-12).
+- **A value read once right after a load or a setting change goes in `expect.poll`**, and a
+  first page load gets 20 seconds. Four tests passed only on retry on a busy laptop, each of
+  them reading such a value once.
+- **Watch for the change that matters, not a count.** A watcher told to stop "once both pages
+  are found" stopped before they had settled; watching for the page changing side caught it.
 
 **A unit test that waits for something from the rarely used tools fails when the laptop is
 busy.** The share sheet's links, the report button and the other tools in

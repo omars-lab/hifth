@@ -146,6 +146,14 @@ row that is not there.
    milestone; a person or a piece of hardware is written as prose (`"a hafiz"`),
    and the gate tells the two apart by whether the string has a space in it.
 
+   **Name a `useCase` or a `feature` on each new row.** A row with neither can only be heaped in
+   a pile by `intent roadmap`, and 117 of 127 open rows were like that on 2026-11-11.
+
+   **Change `docs/issues.json` with a plain edit, never a script.** It is hand-edited, and a
+   script that rewrote two rows reformatted five others. To lift one row out to read it, find the
+   row's start and the end of its last field: a pattern that stops at the first closing brace
+   stops inside the smaller object the row holds.
+
 4. **`make issues-doc`**, then `pnpm gate:issues`.
 
 ## Close — and what closing costs
