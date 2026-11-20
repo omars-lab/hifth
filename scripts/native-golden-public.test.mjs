@@ -129,6 +129,7 @@ function bundleWithTajweed() {
   const paths = bundleWith("const a = 1;");
   mkdirSync(join(paths.dist, "assets", "skins", "hafs-kfqc", "tajweed"), { recursive: true });
   writeFileSync(join(paths.dist, "assets", "skins", "hafs-kfqc", "tajweed", "1.json"), "{}");
+  writeFileSync(join(paths.dist, "assets", "skins", "hafs-kfqc", "NOTICE.txt"), "the data's credit");
   return paths;
 }
 
@@ -140,7 +141,7 @@ test("a store build without the tajweed colours leaves their data out", () => {
     { encoding: "utf8" },
   );
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.ok(!existsSync(join(paths.bundle, "assets", "skins", "hafs-kfqc", "tajweed")));
+  assert.ok(!existsSync(join(paths.bundle, "assets", "skins")), "the data and the notice crediting it are both left out");
   assert.ok(existsSync(join(paths.bundle, "index.html")));
 });
 

@@ -184,11 +184,12 @@ app-web-copy:
 ifeq ($(FLAVOUR),pitch)
 	rsync -a --delete $(DIST)/ $(WEB_BUNDLE)/
 else
-	rsync -a --delete --delete-excluded --exclude 'assets/private' $(if $(NO_TAJWEED),--exclude 'assets/skins/*/tajweed') $(DIST)/ $(WEB_BUNDLE)/
+	rsync -a --delete --delete-excluded --exclude 'assets/private' $(if $(NO_TAJWEED),--exclude 'assets/skins') $(DIST)/ $(WEB_BUNDLE)/
 	@test ! -e $(WEB_BUNDLE)/assets/private || { echo "held data reached the public shell bundle"; exit 1; }
 ifneq ($(NO_TAJWEED),)
-	@# Made without the tajweed colours (㊲): their data must not have come along.
-	@! ls -d $(WEB_BUNDLE)/assets/skins/*/tajweed >/dev/null 2>&1 || { echo "the tajweed data reached a build made without it"; exit 1; }
+	@# Made without the tajweed colours (㊲): their data, and the notice that
+	@# credits it, must not have come along. The skins folder holds nothing else.
+	@test ! -e $(WEB_BUNDLE)/assets/skins || { echo "the tajweed data reached a build made without it"; exit 1; }
 endif
 	@# The store build leaves the recitation out: Quran.com's terms allow personal
 	@# use only (app-store-launch ⑥). Checked on what was copied, not on the flag.
