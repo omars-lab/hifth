@@ -4731,7 +4731,10 @@ export function App(): JSX.Element {
           reader had asked to see whole. It is a notice they can act on, so it
           comes back with the bars rather than being dismissed. */}
       <OfflineNotice
-        hold={coachUp || PITCH || full}
+        // Larger text (rough build): on a phone, the grown top bar, this banner and
+        // the grown verse drawer left no room for the verse on the iPhone SE
+        // (2026-11-20), so the banner waits while a verse's drawer is open.
+        hold={coachUp || PITCH || full || (!!import.meta.env.VITE_TEXT_GROW && phone && drawerUp && document.documentElement.dataset.textGrow !== undefined)}
         onShowPacks={() => {
           setRevisionAt("juz");
           setRevisionOpen(true);

@@ -230,6 +230,26 @@ export function VerseDrawer({
   }, [shown, clearKey]);
   const tallRef = useRef(noted);
   tallRef.current = noted;
+  // Larger text (rough build): the drawer grows only as far as the room under
+  // the lifted verse allows, and never smaller than the app as it is. On the
+  // SE simulator, Safari's own toolbar leaves a shorter screen than our test
+  // browsers have, and the drawer at 1.5 times covered the verse (2026-11-20).
+  // Measured with no tool open; a tool's list is cut to fit by the step below.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!import.meta.env.VITE_TEXT_GROW || document.documentElement.dataset.textGrow === undefined) return;
+    if (!shown || hasPanel || !el || noted === null) return;
+    const fit = () => {
+      const verse = clear.current?.();
+      if (!verse) return;
+      const tall = verse.span ? verse.span.bottom - verse.span.top : noted;
+      const room = window.innerHeight - (verse.riseTo + tall) - CLEARANCE;
+      el.style.setProperty("--grow-cap", String(Math.max(1, Math.floor((room / el.offsetHeight) * 100) / 100)));
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [shown, hasPanel, clearKey, noted]);
   useLayoutEffect(() => {
     const el = ref.current;
     const box = panelRef.current;

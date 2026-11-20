@@ -69,13 +69,36 @@ for (const lang of ["ar", "en"]) test(`a chosen size grows the bar's buttons, no
 // sits in the bottom bar's room and says nothing; grown, it rose past that room
 // and covered the verse on the SE simulator at 1.5 times (2026-11-20). It also
 // measured itself at its size before growing.
-for (const way of ["off", "own"]) test(`the chosen verse stays above its drawer on an iPhone SE (larger text ${way})`, async ({ page }) => {
+// In Safari on an iPhone, an app not yet on the Home Screen shows a banner
+// asking to install it, a third of the SE's screen. The test browsers' storage
+// is kept, so the banner never showed there; here the storage says it is not
+// kept, as Safari's does. On the SE simulator at 1.5 times, the grown top bar,
+// the banner and the grown drawer left no room for the verse (2026-11-20).
+for (const banner of [false, true]) for (const way of ["off", "own"]) test(`the chosen verse stays above its drawer on an iPhone SE (larger text ${way}${banner ? ", install banner" : ""})`, async ({ page }) => {
   test.skip(!grown, "needs the larger-text build: make text-grow-e2e");
-  await page.setViewportSize({ width: 375, height: 667 });
+  if (banner) {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "userAgent", { get: () => "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1" });
+      if (navigator.storage) {
+        navigator.storage.persisted = async () => false;
+        navigator.storage.persist = async () => false;
+      }
+    });
+  }
+  // The SE's screen less Safari's own bars, about the room the page really
+  // gets there: shorter than the bare 667 our test browsers give it.
+  await page.setViewportSize({ width: 375, height: 500 });
   await page.goto(`/?lang=en&grow=${way}&size=1.5#/hafs-kfqc/2:48`);
   await page.reload();
   const drawer = page.getByRole("region", { name: /^Tools for / });
   await expect(drawer).toBeVisible();
+  if (banner) {
+    // Proves the banner really shows here, so the grown run means something;
+    // grown, it waits while the drawer is open.
+    const notice = page.getByText("Install Hifth so it stays with you offline");
+    if (way === "off") await expect(notice).toBeVisible();
+    else await expect(notice).toBeHidden();
+  }
   const covered = async () =>
     page.evaluate(() => {
       const card = document.querySelector("[data-verse-drawer]")!.getBoundingClientRect();
@@ -86,6 +109,10 @@ for (const way of ["off", "own"]) test(`the chosen verse stays above its drawer 
       return Math.round(Math.max(0, ...lines.map((r) => r.bottom - card.top)));
     });
   await expect.poll(covered, { message: "pixels of the verse under the drawer", timeout: 8_000 }).toBe(0);
+  if (way === "own") {
+    const zoom = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector("[data-verse-drawer]")!).zoom) || 1);
+    expect(zoom, "the drawer still grows for the reader who asked").toBeGreaterThan(1.2);
+  }
 });
 
 test("with no way picked, the app is exactly as it was", async ({ page }) => {

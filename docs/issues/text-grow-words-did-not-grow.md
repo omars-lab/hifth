@@ -53,6 +53,28 @@ browser test that went red first:
   tells the page its top, and it counts its own growth: a grown part's height in code is its
   height before growing, so the code multiplies by the growth.
 
+## What the walk of the fixed build showed
+
+On the SE simulator, the top bar fitted, but the verse was still covered at 1.25 and 1.5 times.
+Two things the test browsers do not have took the room:
+
+- Safari's own bars. The page gets about 500 px of height on the SE, not 667.
+- The "Install Hifth" banner, which Safari shows to an app not on the Home Screen. It took about
+  a quarter of the screen. The test browsers keep their storage, so it never showed there.
+
+The browser test now runs at 375 by 500, with and without the banner, and it went red first
+(23 px covered at 548, 71 px at 500). Two changes, both only in the larger-text build:
+
+- The banner waits on a phone while a verse's drawer is open, the way it already waits for the
+  first-run guide. The app already holds it back when something more important is on screen.
+- The drawer grows only as far as the room under the lifted verse allows, never below the
+  ordinary size. Fitting the drawer alone first was tried: it left the banner in place and gave
+  up growing, so the reader who asked for bigger text got the ordinary size. The test now checks
+  that the drawer still grows.
+
+Seen fixed on the simulator in English at 1.5 times, and in Arabic following the phone at its
+largest size.
+
 ## What to remember
 
 A size change on the iPhone has to be looked at on the iPhone. The test browsers are not iPhone

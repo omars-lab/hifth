@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { clearFaults, noteFault } from "./fault-log";
 import { stringsFor } from "./i18n";
 import { STEP_LIMIT, clearSteps, noteViewChange } from "./step-log";
@@ -25,6 +25,7 @@ const DEVICE_LINES =
   "- 2026-11-16 21:04 froze for 20 sec, app 0.1.0 (7)";
 
 afterEach(() => {
+  vi.useRealTimers();
   clearFaults();
   clearSteps();
   localStorage.clear();
@@ -96,11 +97,16 @@ describe("the problem report", () => {
   });
 
   it("takes the steps the app kept, and never which page they were on", () => {
+    // The clock is fixed: the report's time line once ended in ".438" seconds
+    // and matched the page number by chance (a commit check, 2026-11-20).
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(Date.UTC(2026, 10, 20, 7, 58, 11, 438));
     noteViewChange({ edition: "e", select: null, page: 437 }, { edition: "e", select: null, page: 438 });
     const text = reportText(gatherFacts());
     expect(text).toContain("turned to another page");
-    expect(text).not.toContain("437");
-    expect(text).not.toContain("438");
+    const kept = text.replace(/^Time: .*$/m, "");
+    expect(kept).not.toContain("437");
+    expect(kept).not.toContain("438");
   });
 
   it("says when it comes from the website, or from a laptop's own copy", () => {
