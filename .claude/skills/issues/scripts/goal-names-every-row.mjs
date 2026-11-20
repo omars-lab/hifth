@@ -2,8 +2,11 @@
 // Lists the open or blocked launch rows in docs/issues.json that the launch goal page never
 // names. The loop works from that page alone, so a row it leaves out is work nobody picks up.
 // Exits 1 when any are missing. Run: node .claude/skills/issues/scripts/goal-names-every-row.mjs
+// It finds the repo's files from where the script sits, so it works from any folder.
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+
+const ROOT = fileURLToPath(new URL("../../../../", import.meta.url));
 
 const LIVE = new Set(["open", "blocked"]);
 
@@ -27,8 +30,8 @@ function arg(name, fallback) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const issuesPath = arg("--issues", "docs/issues.json");
-  const goalPath = arg("--goal", ".claude/goals/app-store-launch.md");
+  const issuesPath = arg("--issues", `${ROOT}docs/issues.json`);
+  const goalPath = arg("--goal", `${ROOT}.claude/goals/app-store-launch.md`);
   const missing = rowsTheGoalMisses(
     rowsOf(JSON.parse(readFileSync(issuesPath, "utf8"))),
     readFileSync(goalPath, "utf8"),

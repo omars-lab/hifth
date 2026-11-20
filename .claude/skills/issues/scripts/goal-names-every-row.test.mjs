@@ -47,3 +47,14 @@ test("the command fails and lists what is missing", () => {
   ], { encoding: "utf8" });
   assert.equal(ok.status, 0);
 });
+
+test("run from another folder, it still reads this repo's register and goal page", () => {
+  // The loop ran it from the main checkout while working in another working copy, and it
+  // stopped on a missing file. Its own files are found from where the script sits.
+  const elsewhere = mkdtempSync(join(tmpdir(), "goal-rows-cwd-"));
+  const run = spawnSync(process.execPath, [
+    new URL("./goal-names-every-row.mjs", import.meta.url).pathname,
+  ], { encoding: "utf8", cwd: elsewhere });
+  assert.doesNotMatch(run.stderr, /ENOENT/);
+  assert.match(run.stdout, /goal page/);
+});
