@@ -100,6 +100,12 @@ to read it as a newcomer would.
   `package.json` (usually via `gates:fast`), and a hook target in the `Makefile`
   (`pre-commit` or `pre-push`) that reaches it. A gate no hook runs is a comment;
   `gate:gates` fails on one.
+- **Before naming a new make switch, search both Makefiles for the name.** The root `Makefile`
+  includes `native/Makefile.native`, so a name the other one sets is always on. `SHOTS=1` on
+  `make feature-links` was always on for that reason; it is now `PICTURES=1`.
+- **Ask for a review right after the first commit of a new tool, before building on it.** One
+  such review found three gaps that 45 passing tests did not cover (2026-11-10). Each gap then
+  got a test seen failing first.
 - **Several agents share this checkout.** Anything that builds, installs or stages
   takes the lock: `make lock L=build CMD="…"`. Protocol in
   `docs/PARALLEL-AGENTS.md`.
