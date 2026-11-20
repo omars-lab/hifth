@@ -189,6 +189,28 @@ the first real check of a note is the live site after the owner's upload.
   not open yet.
 - **To check the database's own rules:** `make notify-db-test` against the local copy.
 
+**The list's daily tidy** (`apps/landing/tidy/`, backlog row `notify-list-keep-awake`). A small
+Cloudflare Worker with no web address runs once a day at 04:17 UTC. It calls one database
+function, `notify_tidy`, that deletes addresses left unconfirmed for over 7 days and returns how
+many went. The daily call also keeps Supabase's free plan from pausing the database after a week
+with no use. Its log line carries only that count (`ev=tidy_ok removed=N`), never an address.
+
+- **To try it on this laptop:** start a local copy with its web interface on, then
+  `make hifth-app-tidy-try`. The repo's own copy has the web interface off on purpose (it also
+  holds the outside library's store), so use a scratch copy: copy `supabase/` into a scratch
+  folder, set `[api] enabled = true` and a `project_id` and ports of its own there, run
+  `supabase --profile ~/.supabase/profiles/hifth.yaml --workdir <scratch> start`, and pass `SUPABASE_WORKDIR=<scratch>`. It runs the real
+  Worker in Cloudflare's local runner, presses its timer once, and prints the count.
+- **Putting it live, by the owner** (deploying needs the owner's OK; not done yet):
+  1. Push the database change `supabase/migrations/20261119000001_notify_tidy.sql` to the real
+     project, with the list's other changes.
+  2. Set the Worker's three secrets: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` and `LIST_KEY`,
+     the same values the Pages project holds (`wrangler secret put <name>` in
+     `apps/landing/tidy/`, through dotenvx, on the hifth account).
+  3. `wrangler deploy` in `apps/landing/tidy/`, then the next morning read the first run's line
+     in the Worker's logs: `ev=tidy_ok removed=N`. A `tidy_skipped` line names a missing secret;
+     `tidy_failed status=…` is the database's answer.
+
 **Backing up what readers gave us** (launch item ㉘). Two stores hold readers' data: the Mac-app
 list in Supabase, and accounts on Cloudflare once sign-in is merged. Supabase's free plan keeps
 no backups at all (`docs/research/app-launch/research.md`, question 1), and Cloudflare's own undo
@@ -315,6 +337,7 @@ page leaves out. A release missing either copy is refused. To change a source, c
 | `scripts/invite-codes.mjs` | Makes invite codes for sign-in's tester stage (16 letters and digits each, 80 random bits) and prints them once, with the one line for the `SIGN_IN_INVITES` setting, which holds only their scrambled copies. Saves nothing. It shares the code's rules with the server (`apps/landing/lib/invites.mjs`) | The owner, in their own terminal, when testers are invited or more are added. Claude never runs it for real codes | `make hifth-app-invites` (`ARGS="--count 12"`); tests: `node --test .claude/skills/deploy-site/scripts/invite-codes.test.mjs` |
 | `scripts/turnstile-widget.py` | Looks for the spam check's widget for hifth.app on the new Cloudflare account and prints its public site key. With `--make` it makes the widget if there is none, then saves its secret as `TURNSTILE_SECRET` and its public site key as `HIFTH_APP_TURNSTILE_SITEKEY` through `scripts/env/env-set.sh`. The repo's front page keeps Cloudflare's test key so the form works on this laptop; the release puts the saved site key into its own copy of the page, in both languages, and refuses a copy that kept the test key. The token, account ID and secret are never printed. The token needs the Account, Turnstile, Edit permission; without it Cloudflare answers "Authentication error" (seen 2026-11-14). On 2026-11-18 the saved token could list widgets (there were none yet) | Once, before the first release; to read the site key again | `make hifth-app-turnstile` (`ARGS=--make` to make it) |
 | `scripts/apple-sign-in-key.mjs` | With no word, asks Cloudflare whether the three Sign in with Apple settings are saved on the project and prints "set" or "not set" for each, never a value. With `--save <AuthKey_<id>.p8>` (the owner, in their own terminal) it first checks the file is named the way Apple names it, is a P-256 private key, is readable by its owner only and sits outside the repo, then sends the key, its id (from the file name) and the team id (`scripts/lib/signing-team.mjs`) as secrets, and checks. Refuses unless the saved token and account id are loaded. The first check, 2026-11-18, said not set three times | Once, when the owner has made the key (app-setup step ⑥); after any key change; when sign-in's account deletion says it cannot reach Apple | `make hifth-app-apple-key` (`ARGS="--save <file>"`, owner only); tests: `node --test .claude/skills/deploy-site/scripts/apple-sign-in-key.test.mjs` |
+| `scripts/try-tidy.mjs` | Runs the list's daily tidy Worker once in Cloudflare's local runner, against the local Supabase copy only, presses its timer, reads its `ev=tidy_` line and says how many unconfirmed addresses it removed. Refuses when no local copy with a web interface is running | After changing the tidy Worker or its database function, before it is put live | `make hifth-app-tidy-try` (`SUPABASE_WORKDIR=<scratch copy>`, `ARGS="--port <n>"`); tests: `node --test .claude/skills/deploy-site/scripts/try-tidy.test.mjs` |
 | `scripts/backup-reader-data.mjs` | Copies readers' data (the list, and accounts once sign-in is merged) to this laptop, checks each copy is whole and its rows match the store's own count, keeps the newest 30 runs owner-only outside any repo, and writes a manifest of counts. `drill` does the whole copy and put-back on made-up rows in throwaway databases; `status` says how old the last copy and practice are. Prints counts only | Before the first real copy, and after any change to the list's or accounts' tables (drill); to copy for real once the owner says yes; to see if copies are current | `make hifth-app-backup-drill` (`ARGS="--accounts-migrations <folder>"`), `make hifth-app-backup`, `make hifth-app-backup-status`; tests: `node --test .claude/skills/deploy-site/scripts/backup-reader-data.test.mjs` |
 | `supabase/tests/notify_list.test.sql` (database checks, not a script here) | Proves the public key alone cannot read the list or the keys, the site key is needed, a repeat sign-up answers the same, only the latest confirm code works, and leaving removes the row | After changing the list's database part | `make notify-db-test` (`supabase start` first) |
 | `scripts/shipped.mjs` | The lists of what may and may not go up, and the folder check | Changing what the site may hold | imported; tests: `node --test .claude/skills/deploy-site/scripts/shipped.test.mjs` |

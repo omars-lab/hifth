@@ -378,7 +378,7 @@ Two shapes are worth building, because the difference is felt, not seen: **A,** 
 
 *What would answer it:* your pick. A is assumed until then. B is worth its own question later, for reminders.
 
-### ⑩ Eight comments on hifth.app's front page have not been answered · **open**
+### ⑩ Eight comments on hifth.app's front page have not been answered · **fixed**
 
 Left on 2026-11-12. They ask for:
 
@@ -388,7 +388,7 @@ Left on 2026-11-12. They ask for:
 - tabs for iPad, iPhone, Mac and the web, with "coming soon" where an app is not out;
 - a picture of two pages side by side, and a language choice across the whole site.
 
-The design check of 2026-11-16 added these, measured on the served page and not yet looked at by eye:
+The design check of 2026-11-16 added these, measured on the served page:
 
 - the ring that shows which control the keyboard is on is too faint against the page, and one control shows none;
 - the edge of the email box is too faint to see where to type;
@@ -399,7 +399,7 @@ The design check of 2026-11-16 added these, measured on the served page and not 
 
 It also flagged that the page ends on the email sign-up. That is on purpose while the apps are not out, so it is not a fault.
 
-*What would answer it:* the front-page work takes each one, since that work has changes of its own not yet merged and this plan should not edit the same page under it.
+*How it was answered:* all eight comments were built on the front page. The six faults were fixed on 2026-11-19, each with a test that refuses it coming back, and looked at in Chrome and Firefox, light and dark, in English and Arabic. Running the design check again flags only the inside of the spam check. That part is Cloudflare's frame, which draws its own ring and which the check cannot see into. The comment on the device tabs stays open on the page, only in case the owner wants the tabs named or ordered differently.
 
 ### ⑪ Should the bars hide while reading, and come back on a tap? · **open**
 

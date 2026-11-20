@@ -6959,9 +6959,10 @@
       },
       "status": "open",
       "severity": "risk",
-      "owner": "agent",
+      "owner": "user",
       "feature": "hifth-app-site",
-      "note": "Supabase's free plan puts the list's project to sleep after 7 quiet days, after which the form can only answer try again later until the owner wakes it by hand; and an unconfirmed address is only deleted when someone else signs up, so the privacy page's deleted-after-7-days is not yet kept on a quiet week. Build the daily timer from the design note: a small separate Cloudflare Worker that calls the database once a day and deletes unconfirmed rows in the same run, tested for what it asks, then checked after its first real run. Putting it live needs the owner's OK; it goes once the list is live (notify-list-not-live)."
+      "useCase": "hear-when-the-mac-app-is-out",
+      "note": "Supabase's free plan puts the list's project to sleep after 7 quiet days, after which the form can only answer try again later until the owner wakes it by hand; and an unconfirmed address is only deleted when someone else signs up, so the privacy page's deleted-after-7-days is not yet kept on a quiet week. Build the daily timer from the design note: a small separate Cloudflare Worker that calls the database once a day and deletes unconfirmed rows in the same run, tested for what it asks, then checked after its first real run. Putting it live needs the owner's OK; it goes once the list is live (notify-list-not-live). 2026-11-19: built and checked on this laptop, not live. A new database function deletes addresses unconfirmed for over 7 days and answers only the count; the Worker in apps/landing/tidy/ calls it at 04:17 UTC daily and has no web address. What is left is the owner's, once the list is live: push the database change to the real project, set the Worker's three secrets (the same as the site's form), OK the deploy, and read the first run's line the next morning. The steps are in the deploy-site skill."
     },
     {
       "id": "supabase-move",
@@ -7902,10 +7903,12 @@
         "file": "docs/design/app-layout.md",
         "item": "⑩"
       },
-      "status": "open",
+      "status": "fixed",
+      "closedBy": "apps/landing/lib/pages.test.mjs",
       "severity": "question",
       "owner": "agent",
       "feature": "hifth-app-site",
+      "useCase": "find-hifth-and-open-it",
       "note": "Eight page comments the owner left on hifth.app's front page on 2026-11-12 (t_c21ede, t_594286, t_016a29, t_0f5ddd, t_37714b, t_7a13cc, t_7b53cc, t_9200ae): a features section, a new line under the name, Aref Ruqaa for the name's lettering, device tabs with \"coming soon\", a two-page picture and a site-wide language choice. They belong to the front-page work, which has unmerged changes of its own; listed here so they are not lost."
     },
     {

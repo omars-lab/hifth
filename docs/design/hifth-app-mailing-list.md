@@ -204,4 +204,18 @@ Answered by the form always saying "check your inbox", with a test that a repeat
 
 ### ⑦ Nothing keeps the free database awake, or deletes unconfirmed addresses on time · **open**
 
-Supabase's free plan puts a project to sleep after 7 quiet days, and then the form can only say "try again later" until the owner wakes it by hand. And an address nobody confirms is only deleted when someone else signs up, so the privacy page's "deleted after 7 days" is not yet true on a quiet week. Answered by the daily timer described above: a small separate Cloudflare Worker that calls the database once a day and deletes unconfirmed rows in the same run, with a test of what it asks the database and a check after its first real run. Putting the Worker live needs the owner's OK.
+Built and tried on this laptop; not live yet (below). Supabase's free plan puts a project to sleep after 7 quiet days, and then the form can only say "try again later" until the owner wakes it by hand. And an address nobody confirms is only deleted when someone else signs up, so the privacy page's "deleted after 7 days" is not yet true on a quiet week. Answered by the daily timer described above: a small separate Cloudflare Worker that calls the database once a day and deletes unconfirmed rows in the same run, with a test of what it asks the database and a check after its first real run. Putting the Worker live needs the owner's OK.
+
+Built 2026-11-19, not yet live:
+
+- **One database function does both jobs.** A new "tidy" function deletes every address left unconfirmed for more than 7 days and answers only how many went, never which. Like the other three it asks for the site's own list key. Being a call at all is what keeps the project awake.
+- **The Worker has a timer and no web address.** It runs at 04:17 UTC each day, a quiet hour for both readers' time zones. It answers no web requests, and it has no workers.dev or preview address, so nobody can call it from outside.
+- **Its settings are the form's three, set as its own secrets:** the database address, the publishable key and the list key. None is written in a file.
+- **Each run logs one line per step and only a count:** started, then removed N, or failed with the answer's status. A failed run fails visibly in Cloudflare's list of runs. A sleeping database answers 503, so a run that finds it asleep says so.
+- **Checked:** the database rules against a local copy (wrong key refused, only the old unconfirmed row goes, a second run finds nothing), and the Worker against a stand-in database (what it asks, what it logs, how it fails).
+
+To put it live, in order, once the list itself is live:
+
+1. Push the database change to the real project, the same way as the list's first part.
+2. Set the Worker's three secrets on the new Cloudflare account.
+3. Deploy the Worker, then read its first run's line in Cloudflare the next morning.

@@ -7,6 +7,13 @@
   --teal-ink: #ffffff;
   --ochre: #e6a23a;
   --rule: #ddd3c2;
+  /* The keyboard ring and the email box's edge: each 3:1 or better against the page and the
+     card, in both schemes (the design check of 2026-11-16; pages.test.mjs works it out). */
+  --focus: var(--teal);
+  --field-edge: #8a8070;
+  --shadow-soft: 0 12px 32px rgba(60, 45, 20, 0.14);
+  --shadow-raised: 0 20px 50px rgba(60, 45, 20, 0.18);
+  --shadow-lifted: 0 16px 40px rgba(60, 45, 20, 0.28);
   color-scheme: light dark;
 }
 
@@ -20,10 +27,21 @@
     --teal-ink: #0f1a17;
     --ochre: #e6a23a;
     --rule: #3a3428;
+    --field-edge: #7a7262;
+    --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.4);
+    --shadow-raised: 0 20px 50px rgba(0, 0, 0, 0.45);
+    --shadow-lifted: 0 16px 40px rgba(0, 0, 0, 0.55);
   }
 }
 
 * { box-sizing: border-box; }
+
+/* One ring for every control a keyboard can reach. The spam check is a frame from Cloudflare
+   and draws its own ring inside it, which our styles cannot reach (looked at 2026-11-19). */
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* No heading or opening line ends on one word left alone. */
+h1, h2, h3 { text-wrap: balance; }
 
 body {
   margin: 0;
@@ -42,7 +60,7 @@ main, footer { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
   display: flex;
   justify-content: flex-end;
   gap: 4px;
-  font: 500 14px/1.2 ui-sans-serif, system-ui, sans-serif;
+  font: 14px/1.2 ui-sans-serif, system-ui, sans-serif;
 }
 
 .lang-bar a {
@@ -103,6 +121,7 @@ h1 {
   font-size: 30px;
   line-height: 1.25;
   max-width: 18em;
+  text-wrap: balance;
 }
 
 .actions { margin: 0 0 12px; }
@@ -116,6 +135,7 @@ h1 {
   color: var(--teal);
   font: 600 16px/1.2 ui-sans-serif, system-ui, sans-serif;
   text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -123,7 +143,7 @@ h1 {
 
 .mac {
   margin: 0;
-  font: 500 15px/1.4 ui-sans-serif, system-ui, sans-serif;
+  font: 15px/1.4 ui-sans-serif, system-ui, sans-serif;
   color: var(--muted);
 }
 
@@ -142,7 +162,7 @@ h1 {
   display: block;
   height: auto;
   border: 1px solid var(--rule);
-  box-shadow: 0 20px 50px rgba(60, 45, 20, 0.18);
+  box-shadow: var(--shadow-raised);
 }
 
 /* The phone sits on the left corner in both languages: the highlighted verse is on the
@@ -159,7 +179,7 @@ h1 {
   left: 0;
   width: 27%;
   border-radius: 16px;
-  box-shadow: 0 16px 40px rgba(60, 45, 20, 0.28);
+  box-shadow: var(--shadow-lifted);
 }
 
 .notify h2, .feature h3, .coming h3 {
@@ -197,7 +217,7 @@ h1 {
   height: auto;
   border-radius: 16px;
   border: 1px solid var(--rule);
-  box-shadow: 0 12px 32px rgba(60, 45, 20, 0.14);
+  box-shadow: var(--shadow-soft);
 }
 
 .coming {
@@ -229,7 +249,7 @@ h1 {
   border: 1px solid var(--rule);
   border-radius: 999px;
   color: var(--muted);
-  font: 500 15px/1.2 ui-sans-serif, system-ui, sans-serif;
+  font: 15px/1.2 ui-sans-serif, system-ui, sans-serif;
   cursor: pointer;
 }
 
@@ -239,7 +259,7 @@ h1 {
   color: var(--teal-ink);
 }
 
-.device-tabs input:focus-visible + label { outline: 2px solid var(--ochre); outline-offset: 2px; }
+.device-tabs input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 .device-panels { margin-top: 16px; }
 .device-panel { display: none; }
@@ -273,17 +293,17 @@ h1 {
   min-width: 0;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--field-edge);
   background: var(--card);
   color: var(--ink);
   font: 16px/1.2 ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Beside the email box the button wears the box's corners and a lighter weight,
+/* Beside the email box the button wears the box's corners and the body's weight,
    so the two read as one pair rather than a pill outweighing the field. */
 #notify-form .button {
   border-radius: 12px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .cf-turnstile { flex-basis: 100%; }
@@ -307,6 +327,16 @@ footer {
   border-top: 1px solid var(--rule);
   color: var(--muted);
   font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
+}
+
+/* The footer's links, as a list that wraps with room between, not a row joined by dots. */
+.footer-links {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
 }
 
 .prose { max-width: 40em; padding: 48px 16px; }

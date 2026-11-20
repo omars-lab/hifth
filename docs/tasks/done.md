@@ -9,6 +9,16 @@ deleted and forgotten.
 Nothing here is hand-restated from those sources beyond a one-line summary — read the linked
 commit or design-doc item for the actual reasoning.
 
+## Session of 2026-11-19: the hifth.app front page
+
+Task numbers are this session's own; match by title.
+
+**Done:**
+- #38: The six design faults on the front page fixed, and the 2026-11-12 row closed (PR #659).
+- #39: The list's daily tidy, built and tried on this laptop but not live: a database function
+  deletes addresses left unconfirmed for over 7 days and the daily call keeps the free database
+  awake (backlog `notify-list-keep-awake`, mailing-list note ⑦). Putting it live is the owner's.
+
 ## Sessions of 2026-11-15 to 2026-11-18
 
 This session's task numbers started again from 1, so they clash with the numbers further down;
