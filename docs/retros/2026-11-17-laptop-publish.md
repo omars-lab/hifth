@@ -3,7 +3,7 @@ date: 2026-11-17
 repo: hifth
 session: 857e6644 (publish from the laptop, repo private later)
 branch: laptop-publish, PR #641
-folded: no
+folded: yes
 ---
 
 ## Snags

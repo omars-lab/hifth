@@ -81,6 +81,10 @@ pnpm -r test                                     # every package (core, etl, web
 core package's built output too, so after a change to core it fails with errors that point at
 the web app's files until `pnpm -C packages/core -s build` runs.
 
+**When two places share a rule** (the release tag's shape, say), the test writes the rule out as
+a plain string in both, not only through the shared function. A shared function changes both
+sides at once, so only the written-out copy notices the day one side changes it (2026-11-17).
+
 **A test that was green the moment you wrote it** has not shown it can fail. Break the feature on
 purpose in two places, watch the test go red each time, then put the code back.
 Before you trust a first-try pass, check which build `dist` holds: Playwright serves whatever was
@@ -186,6 +190,11 @@ The other projects: `pitch` and `pitch-firefox` (the private pitch build, its ow
 `pitch-script` (the six demo passages), `iphone`, `ipad`, and the golden pictures.
 
 ### Reading a failure
+
+**A part grown with CSS `zoom` gives two heights.** `offsetHeight` is its height before growing,
+and `getBoundingClientRect` is the grown box on the screen. When a grown part's numbers look
+wrong, print both before guessing a second cause: in the verse drawer the real fault was that it
+never reported its height at all (2026-11-20).
 
 ```
 make report    # opens the last run's traces, DOM snapshots, console, network,

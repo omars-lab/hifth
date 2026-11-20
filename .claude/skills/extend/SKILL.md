@@ -133,6 +133,10 @@ The English words are part of the start-up download, which has its own size limi
 - **In a new working copy, before the first commit:** `intent start <row>` (see the `issues`
   skill), then `pnpm install --frozen-lockfile --prefer-offline` (a few seconds). A new copy has
   no installed packages, so the commit check otherwise stops at `tsc: command not found`.
+  A helper handed a reused working copy does both too, or its commit misses its task label.
+  Say so in the helper's brief.
+- **Send the commit's output to a file** with `> log 2>&1`; the commit check prints too much to
+  read inline. `git commit -o <file>` does not do this: it means "commit only this file".
 - **Push in the background, output to a log file.** The push runs every local check, about
   13 minutes, even on a branch that changes only the agent folder. Start it as a background
   run; a waiting call with a 10-minute limit is cut off before it ends. Don't edit that working copy until it ends. Another working copy is fine: each

@@ -17,6 +17,8 @@ profile, and the first step of any database work is the login check.
 2. **If it fails,** it prints the line the owner types in the prompt. The login opens a browser,
    so it is theirs to run.
 3. **Then do the work,** with `--profile ~/.supabase/profiles/hifth.yaml` on every hosted command.
+   In a skill's examples, write the profile into every `supabase …` command, even a local-only
+   one: `scripts/supabase-profile.test.mjs` refuses one without it.
 
 ```mermaid
 flowchart TD

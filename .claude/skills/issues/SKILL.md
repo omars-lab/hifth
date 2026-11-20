@@ -94,14 +94,19 @@ Two things it will not tell you and you should weigh:
 the path the pitch walks (the six passages in `.claude/goals/study-quran-pitch.md`).
 `make issues PITCH=1` lists and counts only those, and that count is one of the goal's
 numbers. Add the tag when a walk of the demo finds the fault; the check refuses any value
-but `true`.
+but `true`. The `launch` tag works the same way: `"launch": false` is refused, so a row that is
+not a launch fault leaves the tag off.
 
 **Before the first commit on a row,** run `intent start <the row's id>` on the branch. A hook
 then ends each commit message with the task, its use case, its feature and its plan, read from
 the row's `useCase` and `feature` fields. `intent status` shows what is set.
 In a new working copy, run it straight after making the copy. A commit made before it has no
 label, the push refuses it, and labelling it afterwards takes one more commit, which has no
-label either.
+label either. A working copy someone else made and you reuse needs it too.
+Run it from inside that working copy, or as `intent -C <folder> start <row>`; run from elsewhere,
+it reads the main checkout and says "no task named" for a row that exists.
+A `git commit` with a hand-set PATH must keep `~/.local/bin` in it. Without it the hook only
+prints "the intent tool is not installed", and the commit lands with no labels.
 
 ## Open — write a new one down
 
@@ -175,6 +180,8 @@ pointing at the same item is refused too.
    and add a short *Closed by* paragraph naming what now notices a regression.
    Do not delete the item. The record of a defect that existed is worth more than
    a shorter document, and the next reader needs to know it was considered.
+   Marking an open question `answered` also means updating every backlog row that waits on it.
+   The check names those rows.
 3. **Update the index**: `status`, and `closedBy` pointing at the test.
 4. **`make issues-doc`**, then `pnpm gate:issues`.
 

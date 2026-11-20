@@ -165,6 +165,8 @@ answerable by the person it is for.
 
 - [ ] No file names, paths, function names, gate names, or commands anywhere a reader is
       meant to follow. They belong in the body of the record, where the reasons are.
+      The decisions check also refuses an option label holding a mixed-case product name, as
+      "names a symbol". Say in plain words what the thing is instead.
 - [ ] Domain words stay — *verse*, *tajweed*, *madd*, *ghunnah*, *mus'haf*, *waṣl*. A reader
       of this app knows them, and translating them out makes the page vaguer, not simpler.
 - [ ] Our words for our plumbing go — *salience*, *shard*, *skin*, *family*, *pipeline*,
@@ -203,6 +205,20 @@ can rebuild it. Split the generator when the data needs something not in the rep
 `--extract` mode that reads whatever large local cache is involved and writes a small JSON of
 findings, and a default mode that renders from **committed bytes only**. Then the page
 rebuilds on a fresh clone and the expensive half runs once.
+
+**A page written as a note.** When the options page is mostly words and process drawings, write
+it as one Markdown note in `docs/design/` and build the page beside it with
+`node scripts/build-design-note.mjs --note docs/design/<name>.md --title "<tab title>"`. The
+note's Mermaid drawings are drawn into the page at build time, so the note and the page cannot
+disagree. In those drawings a moving line is a step that happens, a thick line is the reader's
+marks, and a dotted line is a step that does not happen. A drawing with no lines lays its boxes
+out in a jumble; chain them with `~~~` to keep their order. Styling Mermaid's lines from the
+page's CSS needs `!important`, because Mermaid writes the dash pattern on the line itself.
+`scripts/build-design-note.test.mjs` checks every built page in Chrome and Firefox.
+
+**Build a new page only after another branch in the same folder is pushed.** The push check
+looks at every built page under `docs/`, committed or not. One untracked page with a bad link
+stopped the push of an unrelated branch. Or check the new page's links before that push.
 
 Two addresses, and the gate refuses one without the other:
 

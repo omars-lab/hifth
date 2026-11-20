@@ -98,6 +98,9 @@ but confirm which, because "desktop UI" reads both ways.
    On a page of our own with that bar (the dev side bar, 2026-11-14), a button at the bottom
    corner sat under it too, and the bar wraps to two rows on a phone; only the picture at 390
    wide showed it.
+   On the hifth.app pages `make hifth-app-serve` gives, the bar makes the page scroll sideways
+   at 320 wide, so a narrow check there blames the page for the bar's fault. Check narrow widths
+   on the plain front-page files instead, with a static server on `apps/landing/` (2026-11-19).
 6. **Both of the owner's browsers, in minutes.** Look with Chrome DevTools at 1280 and 390
    wide, then take one Firefox picture with a throwaway Playwright script in
    `apps/web/e2e/tools/`, deleted after.
