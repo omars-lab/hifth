@@ -29,6 +29,18 @@ flowchart LR
   line --> ship[Commit, push, merge] --> next
 ```
 
+**Before you trust what the app shows you** (from the 2026-11-13 feature check):
+
+- Clear the app's offline copy, or open a fresh port, before checking a fix by eye. Otherwise the
+  page runs the old script and the fix looks missing.
+- In a worktree, copy the private notes into its own git-ignored folder before building the pitch
+  app. They live only in the main checkout.
+- A capture's `where.json` is written three times: empty, then once the page answers, then with
+  the video. Wait for the answer or the video, not for the file to appear.
+- A panel a link opens carries its link name (`data-panel`), which is what the feature check
+  reads, since its label changes with the language. A new panel needs that attribute, or the
+  check fails it.
+
 To run this over and over on its own, paste the prompt in `.claude/loop-prompts/walk-and-fix.md`
 into `/loop`: each pass picks the worst open item, walks it everywhere, fixes and ships it, and
 writes down what it found.

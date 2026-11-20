@@ -91,7 +91,7 @@ The first one is the main measure. The others say whether we could run the app o
 | Unanswered reports and reviews | **0** store reviews, none waiting (read live with the reviews key; the app is not in the store yet). Reader reports have no folder to land in yet | 2026-11-17 |
 | New crashes | none can arrive yet: reading readers' crashes is built (`launch-readers-crashes`), but no build has reached a reader or a test device to send one | 2026-11-19 |
 | Unsteady tests | **0**: the last push ran 2,076 browser tests, every one on its first try (the push names any that needed a second, ㉕) | 2026-11-19 |
-| Skills with a known gap | **6 rows and 21 notes** (third loop pass, 2026-11-20: the two Nov 13 notes and last pass's skill lines were folded, and this pass added its own note). Before: **6 rows and 21 notes** (second loop pass, 2026-11-19). Before: **6 rows and 28 notes**, re-counted 2026-11-19. Of the plan's skills table, `testing`, `deploy-site`, `native-shell` and `walk-app` are done and 6 rows are open; 28 session notes in `docs/retros/` say `folded: no` (this session's own was folded the same day). Before: 9, rows only, not re-counted | 2026-11-19 |
+| Skills with a known gap | **6 rows and 21 notes** (fourth loop pass, 2026-11-20: one note folded, this pass added its own). Before: **6 rows and 21 notes** (third loop pass, 2026-11-20: the two Nov 13 notes and last pass's skill lines were folded, and this pass added its own note). Before: **6 rows and 21 notes** (second loop pass, 2026-11-19). Before: **6 rows and 28 notes**, re-counted 2026-11-19. Of the plan's skills table, `testing`, `deploy-site`, `native-shell` and `walk-app` are done and 6 rows are open; 28 session notes in `docs/retros/` say `folded: no` (this session's own was folded the same day). Before: 9, rows only, not re-counted | 2026-11-19 |
 
 Update this table on every pass of the loop (`.claude/loop-prompts/operational-readiness.md`).
 
@@ -213,6 +213,12 @@ may be made.)
 
 ## Where the work stands (2026-11-19)
 
+- **Fourth loop pass (2026-11-20):** both larger-text faults the iPhone showed are fixed, each
+  with a browser test that went red first: the grown top bar on a small phone hides the tagline
+  and the mus'haf name, so the info button stays on screen, and the verse drawer now tells the
+  page its top when grown, so the chosen verse stays above it. Next for larger text: walk the
+  fixed build on the SE simulator (follow-the-phone at 2 times included), then open the decision.
+  The Nov 13 feature-check note was folded into `walk-app`.
 - **Third loop pass (2026-11-20):** larger text was looked at on the iPhone SE simulator at its
   largest size, in English and Arabic. At first only the boxes grew; the words stayed the same,
   because the app's "keep text at 100%" rule held inside the grown parts on iPhone Safari (the
