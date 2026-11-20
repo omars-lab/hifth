@@ -23,6 +23,7 @@ import type {
   WordShard,
 } from "@hifth/core";
 import { expandManifest, isCompactManifest, parseTajweedVocabulary } from "@hifth/core";
+import { TAJWEED } from "./tajweed-in-build";
 import { packedResponse } from "./packs.js";
 
 const BASE = import.meta.env.BASE_URL;
@@ -183,6 +184,7 @@ export function loadTajweedShard(
   edition: string,
   surah: number,
 ): Promise<TajweedShard | null> {
+  if (!TAJWEED) return Promise.resolve(null);
   return json<TajweedShard>(`${BASE}assets/skins/${edition}/tajweed/${surah}.json`);
 }
 
@@ -204,6 +206,7 @@ export function loadTajweedShard(
 export async function loadTajweedVocabulary(
   edition: string,
 ): Promise<TajweedVocabulary | null> {
+  if (!TAJWEED) return null;
   const raw = await json<unknown>(`${BASE}assets/skins/${edition}/tajweed/rules.json`);
   return raw === null ? null : parseTajweedVocabulary(raw);
 }

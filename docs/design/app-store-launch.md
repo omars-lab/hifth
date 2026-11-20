@@ -577,11 +577,13 @@ in a built app, so a test reads the app's code instead and refuses any read of a
 the store build would keep. The Mac app is not archived yet; when it is, it takes the same
 switch.
 
-### ㊲ Should the store build show the tajweed colours at all? · **open**
+### ㊲ Should the store build show the tajweed colours at all? · **answered**
 
-Its data's permission (④) is not in hand, and its badge says "unchecked". Leaving it off takes
-one permission off the upload's path; leaving it on keeps a feature huffaz use. The owner's
-call.
+Its data's permission (④) is not in hand, and its badge says "unchecked". The owner chose on
+2026-11-20 to keep them: they stay in the app, and the reader turns them on and off with their
+own button. If the permission does not come, the store build is made without them
+(`make app-web FLAVOUR=public NO_TAJWEED=1`), which leaves out the button, the key, their data
+and their credit. That fallback is built and tested, and off.
 
 ### ㊳ A "Left off" ribbon appears on the first open, though nothing has been read · **fixed**
 
@@ -838,7 +840,7 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
 - **Can get the app turned down at review:** the Mac sandbox ⑧ and the iPad and iPhone
   permissions file ⑨ (the upload checks both); the store's questions ㉚ and screenshots ㉛;
   sign-in ㉖ and deleting an account ㉗ (once sign-in ships, deletion must be in the app); the
-  tajweed question ㊲ (it can read as unfinished). (The reviewer walk ㉟, the walk tools'
+  (The tajweed question ㊲ is answered: kept, with a fallback.) (The reviewer walk ㉟, the walk tools'
   settings ㊱, the English top bar at 320 px ㊶, the support page ⑳, the privacy policy ㉙
   and the app's links to both ㊸ are fixed.)
 - **Matters once readers have it** (Apple will not check these, readers will): the screen

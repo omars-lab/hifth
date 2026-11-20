@@ -7088,7 +7088,7 @@
         "the owner sending email 2"
       ],
       "launch": true,
-      "note": "Draft written 2026-11-15 in docs/design/store-permission-emails.md, not sent. Fallback: leave the tajweed colours out of the store build."
+      "note": "Draft written 2026-11-15 in docs/design/store-permission-emails.md, not sent. Fallback, built 2026-11-20: make the store build with NO_TAJWEED=1, which leaves the tajweed colours out (item ㊲)."
     },
     {
       "id": "launch-recitation-permission",
@@ -7701,11 +7701,12 @@
         "file": "docs/design/app-store-launch.md",
         "item": "㊲"
       },
-      "status": "open",
+      "status": "answered",
       "severity": "question",
-      "owner": "user",
+      "owner": "agent",
       "launch": true,
-      "note": "Should the store build show the tajweed colours at all? Its data's permission (item ④) is not in hand, and its badge says \"unchecked\" (it said \"beta\" until 2026-11-17). Off in the store build: one permission leaves the upload's path, and a reviewer sees nothing that reads as unfinished; huffaz lose a feature until it returns in an update. On: the feature stays, and the upload waits on that permission too. The owner's call."
+      "note": "Owner, 2026-11-20: \"we should have toggle to enable and disable - they should be in app - worst case we disable Tajweed colours in the store build.\" So the colours stay in the store build, behind the reader's own on/off button (already there). The fallback is built and off: `make app-web FLAVOUR=public NO_TAJWEED=1` leaves out the button, the key, the data and its credit. Turn it on only if the permission (item ④) does not come.",
+      "closedBy": "the build switch NO_TAJWEED (apps/web/src/tajweed-in-build.ts), with its tests"
     },
     {
       "id": "launch-left-off-on-first-open",

@@ -79,6 +79,10 @@ STORE_SHOTS_JS := .claude/skills/release-app/scripts/store-shots.mjs
 # Which web build goes in: `pitch` (private, with the held commentary) or
 # `public` (what the site ships).
 FLAVOUR      ?= pitch
+# NO_TAJWEED=1 makes the store build without the tajweed colours: the fallback
+# if their data's permission does not come (app-store-launch ㊲). Unset, the
+# colours stay in, with the reader's own switch, as the owner chose 2026-11-20.
+NO_TAJWEED   ?=
 # The simulator the iPad targets use. Any name from `xcrun simctl list devices`.
 IPAD         ?= iPad Pro 13-inch (M5)
 IPAD_UDID     = $(shell $(NATIVE)/scripts/simulator-udid.sh "$(IPAD)")
@@ -166,9 +170,9 @@ ifeq ($(FLAVOUR),pitch)
 	VITE_PITCH=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
 else
 	@# The store build leaves the recitation out (app-store-launch ⑥).
-	VITE_NO_RECITATION=1 $(WEB) exec vite build --outDir dist-native --emptyOutDir
+	VITE_NO_RECITATION=1 $(if $(NO_TAJWEED),VITE_NO_TAJWEED=1) $(WEB) exec vite build --outDir dist-native --emptyOutDir
 endif
-	@$(MAKE) --no-print-directory app-web-copy FLAVOUR=$(FLAVOUR)
+	@$(MAKE) --no-print-directory app-web-copy FLAVOUR=$(FLAVOUR) NO_TAJWEED=$(NO_TAJWEED)
 
 .PHONY: app-web-copy
 # The copy alone, so a test can drive it without a web build. A folder the copy
@@ -180,8 +184,12 @@ app-web-copy:
 ifeq ($(FLAVOUR),pitch)
 	rsync -a --delete $(DIST)/ $(WEB_BUNDLE)/
 else
-	rsync -a --delete --delete-excluded --exclude 'assets/private' $(DIST)/ $(WEB_BUNDLE)/
+	rsync -a --delete --delete-excluded --exclude 'assets/private' $(if $(NO_TAJWEED),--exclude 'assets/skins/*/tajweed') $(DIST)/ $(WEB_BUNDLE)/
 	@test ! -e $(WEB_BUNDLE)/assets/private || { echo "held data reached the public shell bundle"; exit 1; }
+ifneq ($(NO_TAJWEED),)
+	@# Made without the tajweed colours (㊲): their data must not have come along.
+	@! ls -d $(WEB_BUNDLE)/assets/skins/*/tajweed >/dev/null 2>&1 || { echo "the tajweed data reached a build made without it"; exit 1; }
+endif
 	@# The store build leaves the recitation out: Quran.com's terms allow personal
 	@# use only (app-store-launch ⑥). Checked on what was copied, not on the flag.
 	@# Source maps are skipped: they hold the original source, comments and all,

@@ -256,6 +256,7 @@ import {
   type PitchSurah,
 } from "./pitch/pitch";
 import { RECITATION } from "./recitation";
+import { TAJWEED } from "./tajweed-in-build";
 // The one commentary drawer and its sources (decision `tafsir-provider`): the
 // pitch's book is one source, a live public service another, and the drawer
 // draws whichever is on without knowing which.
@@ -3806,7 +3807,7 @@ export function App(): JSX.Element {
         const panel = state.open;
         if (panel === "jump") setJumperOpen(true);
         else if (panel === "about") setColophonOpen(true);
-        else if (panel === "key") setLegendOpen(true);
+        else if (panel === "key") setLegendOpen(TAJWEED);
         else if (panel === "editions") setEditionOpen(true);
         else if (panel === "tips") setCoachUp(true);
         else if (panel === "lookalikes" || panel === "roots") {
@@ -5204,7 +5205,7 @@ export function App(): JSX.Element {
       {/* CC BY 4.0's condition, discharged where a reader can see it — the
           licence the rule spans ship under requires the credit to travel with
           the work, not just with the repo. */}
-      {legendMounted && (
+      {legendMounted && TAJWEED && (
         <Later>
           <TajweedLegend
             open={legendOpen}

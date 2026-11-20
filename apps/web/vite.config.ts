@@ -284,6 +284,10 @@ export default defineConfig({
     // build sets VITE_NO_RECITATION, and the copy step checks the server's
     // address really did drop out.
     __RECITATION__: JSON.stringify(!process.env.VITE_NO_RECITATION),
+    // Whether the build carries the tajweed colours (src/tajweed-in-build.ts):
+    // off only in a store build made with NO_TAJWEED=1, the fallback if their
+    // data's permission does not come (app-store-launch ㊲).
+    __TAJWEED__: JSON.stringify(!process.env.VITE_NO_TAJWEED),
     __LIVE_TAFSIR__: JSON.stringify(
       Boolean(process.env.VITE_TAFSIR_QF_BASE && process.env.VITE_TAFSIR_QF_ID),
     ),

@@ -33,6 +33,12 @@ interface ImportMetaEnv {
   readonly VITE_NO_RECITATION?: string;
 
   /**
+   * Set only by a store build made with `NO_TAJWEED=1`, the fallback if the
+   * tajweed data's permission does not come (`src/tajweed-in-build.ts`).
+   */
+  readonly VITE_NO_TAJWEED?: string;
+
+  /**
    * The open live tafsir provider (`src/tafsir/quran-foundation.ts`). Set
    * `VITE_TAFSIR_QF_BASE` (the service's API base) and `VITE_TAFSIR_QF_ID` (which
    * of its 100+ tafsir editions) to turn it on; with either absent the provider

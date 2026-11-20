@@ -28,6 +28,7 @@ import { CARD_EDGES, rememberCardEdge, useCardEdge } from "../card-edge";
 import { OPENING_TEXTS, rememberOpeningText, useOpeningText } from "../opening-text";
 import { PITCH } from "../pitch/pitch";
 import { RECITATION, RECITATION_CREDIT } from "../recitation";
+import { TAJWEED, TAJWEED_CREDIT } from "../tajweed-in-build";
 import { LONG_VERSES, rememberLongVerse, useLongVerse } from "../long-verse";
 import { NOTE_LEADS, NOTE_SIDEWAYS, rememberNoteLead, rememberNoteSideways, useNoteLead, useNoteSideways } from "../phone-note";
 import { CARD_ROOMS, rememberCardRoom, useCardRoom } from "../card-room";
@@ -1184,7 +1185,10 @@ export function Colophon({
                 English (launch item 39): an English reader, Apple's reviewer
                 among them, could not tell what the app is built on. That line
                 is bound to SOURCES.md too, so neither language can drift. */}
-            {CREDITS.filter((credit) => RECITATION || credit.href !== RECITATION_CREDIT).map((credit) => (
+            {CREDITS.filter(
+              (credit) =>
+                (RECITATION || credit.href !== RECITATION_CREDIT) && (TAJWEED || credit.href !== TAJWEED_CREDIT),
+            ).map((credit) => (
               <li key={credit.href} className={styles.row} data-credit={credit.href}>
                 <div className={styles.credit} lang="ar" dir="rtl">
                   <span className={styles.what}>{credit.what}</span>
