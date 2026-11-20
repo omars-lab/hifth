@@ -40,7 +40,18 @@ With the words really growing, two faults showed that the empty space had hidden
 - the info button is pushed off the right edge of the top bar, even at 1.25 times;
 - the verse drawer covers the chosen verse at 1.5 times, and the whole page at 2 times.
 
-Both are open on the backlog row, and both come before the owner is asked to choose a way.
+Both come before the owner is asked to choose a way. Both were fixed the same day, each with a
+browser test that went red first:
+
+- **Top bar.** At 1.25 times the SE has the room of a 300 px screen. On small phones the grown
+  bar now hides the tagline and the mus'haf name, as the app already does on narrower screens.
+  The test checks English too, because the test browsers start in Arabic and the Arabic row is
+  the shorter one.
+- **Drawer.** With no tool open, the drawer sits in the bottom bar's room, which the page already
+  keeps clear, so it never told the page where its top was. Grown 1.5 times, it stands 68 px
+  taller than that room and covered the verse by 26 px. In the larger-text build it now always
+  tells the page its top, and it counts its own growth: a grown part's height in code is its
+  height before growing, so the code multiplies by the growth.
 
 ## What to remember
 

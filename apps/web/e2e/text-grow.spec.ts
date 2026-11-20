@@ -39,14 +39,15 @@ async function sizes(page: Page) {
   };
 }
 
-test("a chosen size grows the bar's buttons, not the page, and nothing runs off the side", async ({ page }) => {
+for (const lang of ["ar", "en"]) test(`a chosen size grows the bar's buttons, not the page, and nothing runs off the side (${lang})`, async ({ page }) => {
   test.skip(!grown, "needs the larger-text build: make text-grow-e2e");
-  // The narrowest phone we support, the iPhone SE.
+  // The narrowest phone we support, the iPhone SE. English is the wider row:
+  // on the SE simulator its info button was pushed off the edge (2026-11-20).
   await page.setViewportSize({ width: 375, height: 667 });
-  await page.goto("/#/hafs-kfqc/2:48");
+  await page.goto(`/?lang=${lang}#/hafs-kfqc/2:48`);
   const before = await sizes(page);
 
-  await page.goto("/?grow=own&size=1.5#/hafs-kfqc/2:48");
+  await page.goto(`/?lang=${lang}&grow=own&size=1.5#/hafs-kfqc/2:48`);
   await page.reload();
   const after = await sizes(page);
 
@@ -62,6 +63,29 @@ test("a chosen size grows the bar's buttons, not the page, and nothing runs off 
   expect(cut, "top-bar buttons cut off at the screen's edge").toBe(0);
   expect(after.page).toBeCloseTo(before.page, 0);
   expect(after.overflow).toBeLessThanOrEqual(0);
+});
+
+// The verse's drawer lifts the chosen verse above itself. With no tool open it
+// sits in the bottom bar's room and says nothing; grown, it rose past that room
+// and covered the verse on the SE simulator at 1.5 times (2026-11-20). It also
+// measured itself at its size before growing.
+for (const way of ["off", "own"]) test(`the chosen verse stays above its drawer on an iPhone SE (larger text ${way})`, async ({ page }) => {
+  test.skip(!grown, "needs the larger-text build: make text-grow-e2e");
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto(`/?lang=en&grow=${way}&size=1.5#/hafs-kfqc/2:48`);
+  await page.reload();
+  const drawer = page.getByRole("region", { name: /^Tools for / });
+  await expect(drawer).toBeVisible();
+  const covered = async () =>
+    page.evaluate(() => {
+      const card = document.querySelector("[data-verse-drawer]")!.getBoundingClientRect();
+      const lines = [...document.querySelectorAll<SVGGraphicsElement>("#hifth-overlay .hl-sel")]
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.width > 0);
+      if (lines.length === 0) return -1;
+      return Math.round(Math.max(0, ...lines.map((r) => r.bottom - card.top)));
+    });
+  await expect.poll(covered, { message: "pixels of the verse under the drawer", timeout: 8_000 }).toBe(0);
 });
 
 test("with no way picked, the app is exactly as it was", async ({ page }) => {

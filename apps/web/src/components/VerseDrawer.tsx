@@ -183,7 +183,11 @@ export function VerseDrawer({
   useLayoutEffect(() => {
     const el = ref.current;
     const tell = coverTo.current;
-    if (!shown || !hasPanel || !el || !tell) return;
+    // Larger text (rough build): the drawer grows past the bar's room it
+    // otherwise sits in, so it covers the verse even with no tool open and
+    // says so. Only in that build, so the app as it is does not change.
+    const grown = !!import.meta.env.VITE_TEXT_GROW && document.documentElement.dataset.textGrow !== undefined;
+    if (!shown || !(hasPanel || grown) || !el || !tell) return;
     const stop = watchCover(el, () => el.offsetHeight, (top) => coverTo.current?.(top));
     return () => {
       stop();

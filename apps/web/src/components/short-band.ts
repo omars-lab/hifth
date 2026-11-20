@@ -66,8 +66,13 @@ export function watchCover(sheet: HTMLElement, height: () => number, onCover: (t
     }
     // Measured up from the card's own foot: a corner card stands above the
     // bars, and measuring from the window's foot left the verse under it.
-    const foot = window.innerHeight - (parseFloat(getComputedStyle(sheet).bottom) || 0);
-    onCover(foot - height());
+    // A grown card (larger text) is drawn `zoom` times its measured height,
+    // and its gap at the foot grows with it: measured plain, the drawer at 1.5
+    // times left most of the verse under it (iPhone SE, 2026-11-20).
+    const style = getComputedStyle(sheet);
+    const zoom = parseFloat(style.zoom) || 1;
+    const foot = window.innerHeight - (parseFloat(style.bottom) || 0) * zoom;
+    onCover(foot - height() * zoom);
   };
   report();
   window.addEventListener("resize", report);
