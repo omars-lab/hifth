@@ -210,7 +210,7 @@ the goal page.*
 | (new) `operate-app` | Nothing covers reading crashes, reports and reviews, or the fix-in-a-hurry path | Done 2026-11-20: a map skill that hands each step to its owner; fix-in-a-hurry stays in understanding-processes |
 | `crash-logs` | Works only with a cable | Done: `make app-store-crashes` reads what Apple collected |
 | `deploy-site` | ~~No undo~~ done (`make hifth-app-put-back`, its drill waits on the first upload) | Add the put-back command |
-| `app-setup` | No store-listing or signing-for-the-store steps | Add them |
+| `app-setup` | ~~No store-listing or signing-for-the-store steps~~ done 2026-11-20: they live in the release guide and `make app-store-listing`; app-setup now points there | Point at them |
 | `native-shell` | ~~Says nothing of store builds~~ done: the store build, Apple's accessibility check, the profile check (the default flavour is still the private one, on purpose, for the pitch) | Add the store build and its guard |
 | `walk-app` | ~~No store-build walk~~ done: the release check with the public flavour, the first-open walk as Apple's reviewer, the fresh-install look (a sign-in walk waits on sign-in being switched on) | Add a first-launch, no-connection and sign-in walk |
 | `manual-testing` | ~~Parked list predates the launch~~ done 2026-11-20: the silent switch and crash report checks are on the list, and a check fails the push when a waiting ledger check is missing from it | Add the screen-reader and device checks |

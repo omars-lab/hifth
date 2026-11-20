@@ -127,6 +127,14 @@ the steps: list and copy the crash file with `xcrun devicectl`, then get the rea
 leaves out of it by relaunching with `--console`. Use the device's name, never its id, in
 anything written down.
 
+**The store listing and signing for the store** are not set up here, because they belong to a
+release, not to the laptop. The words for Apple's store forms (name, subtitle, keywords,
+description, privacy answers, notes for the reviewer) are drafted in
+`docs/design/store-listing.md`. `make app-store-listing` checks each field's length against
+Apple's limit and that it agrees with the app. `make app-release-setup` says which release
+needs are in place. The whole road, click by click, is the `understanding-processes` skill's
+`app-release.md`.
+
 Not used: fastlane (a third-party tool that wraps the same Apple commands) and Apple's
 Transporter app. The first certificate for uploads ("Apple Distribution") is made by Xcode the
 first time it archives; nothing to do by hand.
