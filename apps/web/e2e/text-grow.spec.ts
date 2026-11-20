@@ -23,7 +23,16 @@ async function sizes(page: Page) {
   await expect(bar).toBeVisible();
   const page7 = page.locator("svg[role='group']").first();
   await expect(page7).toBeVisible();
+  // The words themselves, not only the box around them: on iPhone Safari the
+  // app's "keep text at 100%" rule stopped the words growing while their boxes
+  // grew (found on the SE simulator, 2026-11-20).
+  const words = await bar.evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    return range.getBoundingClientRect().height;
+  });
   return {
+    words,
     bar: (await bar.boundingBox())!.height,
     page: (await page7.boundingBox())!.width,
     overflow: await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth),
@@ -42,6 +51,15 @@ test("a chosen size grows the bar's buttons, not the page, and nothing runs off 
   const after = await sizes(page);
 
   expect(after.bar / before.bar).toBeGreaterThan(1.4);
+  expect(after.words / before.words).toBeGreaterThan(1.4);
+  // Every button on the top bar is still on the screen: when the words really
+  // grew on the iPhone SE, the info button was pushed off the right edge.
+  const cut = await page.locator("[data-top-bar] button").evaluateAll((all) =>
+    all
+      .map((b) => b.getBoundingClientRect())
+      .filter((r) => r.width > 0 && (r.left < -1 || r.right > window.innerWidth + 1)).length,
+  );
+  expect(cut, "top-bar buttons cut off at the screen's edge").toBe(0);
   expect(after.page).toBeCloseTo(before.page, 0);
   expect(after.overflow).toBeLessThanOrEqual(0);
 });

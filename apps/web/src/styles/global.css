@@ -87,6 +87,10 @@ button {
   ),
 :root[data-text-grow] :is([role="dialog"], [data-verse-drawer]):not(:is([role="dialog"], [data-verse-drawer]) *) {
   zoom: min(var(--text-grow, 1), var(--grow-cap, 2));
+  /* iPhone Safari keeps text at 100% under the rule at the top of this file,
+     even inside a zoom: the boxes grew and the words did not (SE simulator,
+     2026-11-20). Our test browsers do not show it; the walk checks it. */
+  -webkit-text-size-adjust: auto;
 }
 /* Found on the first try: past 1.25 the top bar no longer fits an iPhone SE
    (375 px wide) and pushes the screen sideways, so it stops there. */
