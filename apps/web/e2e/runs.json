@@ -17,6 +17,12 @@
       "android",
       "iphone"
     ],
+    "axe-more.spec.ts": [
+      "android",
+      "desktop",
+      "desktop-firefox",
+      "iphone"
+    ],
     "bookmark-pull.spec.ts": [
       "android",
       "desktop",
