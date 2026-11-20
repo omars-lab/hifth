@@ -3,7 +3,7 @@ date: 2026-11-15
 repo: hifth
 session: hifth.app front page and its safety
 branch: hifth-app-next, PR #631; hifth-app-read-csp
-folded: no
+folded: yes
 ---
 
 ## Snags

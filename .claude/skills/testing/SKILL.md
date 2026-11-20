@@ -79,7 +79,9 @@ pnpm -r test                                     # every package (core, etl, web
 `@hifth/core` must be built before the packages that import it (`make core`, or
 `make test` which does it for you) — the Loop 0 lesson. The web app's type check reads the
 core package's built output too, so after a change to core it fails with errors that point at
-the web app's files until `pnpm -C packages/core -s build` runs.
+the web app's files until `pnpm -C packages/core -s build` runs. The web app's unit tests read
+that built copy as well, so a wording fix made in core still looks unfixed there until core is
+rebuilt.
 
 **When two places share a rule** (the release tag's shape, say), the test writes the rule out as
 a plain string in both, not only through the shared function. A shared function changes both
@@ -125,6 +127,17 @@ pnpm -C apps/web exec playwright test desktop.spec.ts --project=desktop -g "hold
 **Name the setups a spec runs on.** Some specs run on the phone setups only (a hold marks
 words only on a touch screen, so `word.spec.ts` skips the computer ones); "passes everywhere"
 then means "passes on iphone and android", and the report says so.
+
+**Find a tool's button by its exact name.** `getByRole("radio", { name: "Mistake" })` also
+matches every longer name that holds the word, so pass `exact: true`.
+
+**The `iphone` setup is 390 by 664**, the room Safari leaves with its bars, not the phone's 844.
+Safari's "Install Hifth" notice takes about 160 of those at the top until it is hidden. A size
+worked from the screen's height (`dvh`) ignores the notice, so size a part from the page's own
+area instead (`cqh` on a size container), and test it with the notice up.
+
+**This Mac has no `timeout` command.** To stop a Playwright run that might hang, pass
+`--global-timeout=<ms>`.
 
 **Playwright does not build the app.** It serves whatever is already in `apps/web/dist`,
 so build first or the run tests the old app:
@@ -275,7 +288,9 @@ for the verse's tools hit the same thing on a busy push: wait 20 seconds, as
 - **A background push reports the last command's exit.** `git push …; echo exit=$?` said yes
   while the push hook had refused it. Read the log's last lines, or end the command with the push.
 - **A background command needs the same PATH as a foreground one** (Node 22 and `~/.local/bin`),
-  or the push hook stops at once on the Node check.
+  or the push hook stops at once on the Node check. A commit made without `~/.local/bin` is
+  worse: the hook that adds the task lines is skipped with no error. After each commit, check
+  `git log -1 "--format=%(trailers:key=Intent-Task,valueonly)"` prints the task.
 - **Don't build in a working copy while its push is testing there.** The build replaces the app
   the push's browser tests are serving.
 - **On a small phone, a layout test runs in English as well as Arabic.** The test browsers start in

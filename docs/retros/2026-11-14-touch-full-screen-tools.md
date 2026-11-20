@@ -3,7 +3,7 @@ date: 2026-11-14
 repo: hifth
 session: full screen keeps the tools on a phone
 branch: next-item-3
-folded: no
+folded: yes
 ---
 
 ## Snags

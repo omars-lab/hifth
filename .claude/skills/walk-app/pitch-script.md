@@ -34,6 +34,18 @@ polished on the iPad. Fill in the last two columns after each walk.
 
 3:84 is a candidate seventh passage; the owner decides whether it is in.
 
+**Reading which words a note slants, against the printed page** (2026-11-14):
+
+- Read the page pictures at full size. Readers working from half-size pictures missed a slanted
+  word now and then, and a full-size pass over the doubtful calls caught them.
+- Compare by words, never by slanted runs. The hand-read rows join neighbouring words into one
+  run, so a count of runs looked like a loss when the words had gained.
+- Before merging hand-read rows that switch off the automatic slant rule, list every word the rule
+  slanted that the rows leave upright, and check each on the print. That gives a measured miss
+  rate (17 of 18 were the rule's mistakes, 1 was a real miss), not a guess.
+- Copy the built notes before building them again, then compare verse by verse. Only the verses
+  read, and those sharing a paragraph with them, may change, and no note's words may change.
+
 ## The steps
 
 Each step: what to do, what "right" looks like, and the command that walks it in the iPad

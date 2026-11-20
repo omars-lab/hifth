@@ -15,6 +15,10 @@ registers**, each of which was already disciplined before the catalog existed:
 | a design doc's §*Open questions, and what would answer each* | what that document knows it has not settled | it belongs to one document's subject matter |
 | `docs/validation/ledger.json` | checks a machine cannot run | answering it needs a human, a phone, or a printed mushaf |
 
+A new design doc that holds open items passes `pnpm gate:issues` only with that exact heading,
+`## Open questions, and what would answer each`, and items under it numbered `### ①`, `### ②`
+and on. The smallest note that passes is that heading and one `### ① … · **open**` item.
+
 **`docs/backlog.md` is where a reader starts.** It is rebuilt from all of these
 (`make tasks-doc`) and carries every open item's full text, so it reads on its own after a
 session is cleared. Never edit it; edit the item where it lives, then rebuild. Anything a
@@ -185,6 +189,10 @@ pointing at the same item is refused too.
 3. **Update the index**: `status`, and `closedBy` pointing at the test.
 4. **`make issues-doc`**, then `pnpm gate:issues`.
 
+Before closing an item, search `docs/issues.json` for its source item (the file and its number,
+such as `docs/performance.md` ㉓), not for a name you guess. A row already pointing at it under
+another name makes the commit's backlog check fail when the item closes and the row stays open.
+
 If the fix taught you something the guess got wrong, say so in the register.
 `page-turning.md` ⑪ is the model: the doc predicted reduced-motion would need the
 duration token zeroed, the real answer was that the band is never inserted at
@@ -206,6 +214,10 @@ redraw. Edit the register, then `make -s issues-doc tasks-doc`; after a ledger c
 `make issues` and `make use-cases` only print; they redraw nothing. When the fast checks name a
 stale page, redraw all three at once rather than one per refusal:
 `make -s use-cases-doc issues-doc tasks-doc`.
+
+In a new working copy, run `pnpm install` and build core (`pnpm -C packages/core -s build`)
+before the first redraw. Without it the redraw stops with a missing-module error that does not
+say core is the cause.
 
 A merge clash in a drawn page (`docs/backlog.md`, `docs/issues.md`, `docs/waiting-on-you.md`) is
 worked in the register, not the page: keep both sides' new rows in `docs/issues.json`, then

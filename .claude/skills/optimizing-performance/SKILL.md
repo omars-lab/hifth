@@ -86,6 +86,14 @@ it does not; never raise just to make a red check go green without looking at th
   `make perf-compare`, and the readings show how many KB the next step needs. That is cheaper
   than trimming one part at a time and measuring after each (2026-11-14: 157.1 KB crossed,
   162.6 KB did not).
+- **Moving code out of start-up never lowers the total.** So a fix for the start-up limit always
+  trips the size check's 1 KB drift line next. Put `make budget-update` and the trim's note in
+  [trims.md](trims.md) into the same commit as the move.
+- **The start-up sum counts the main style sheet** (about 18 KB), though the size check's listing
+  shows no style sheets. Before counting a move's saving, check which sheet the moved part's
+  styles landed in.
+- **Measure start-up with every other server on the laptop stopped.** That gave five runs within
+  17 ms of each other, steady enough to back a raise of the cap with evidence (2026-11-16).
 - **Nothing here is limited by processor speed yet.** Start-up is dominated by downloads, so kilobytes
   are the right thing to count. One exception: expanding the page index on load costs about 85 ms
   of blocking time. If blocking time grows, measure processor work too, not only size.

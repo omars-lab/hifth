@@ -269,6 +269,17 @@ The site has no `_redirects` file on purpose: Cloudflare ignored the app's catch
 Cloudflare also serves `privacy.html` at `/privacy`, `sources.html` at `/sources` and
 `support.html` at `/support`, so `_headers` names those addresses.
 
+To see which answers really get the `_headers` rules, serve the exact release folder with
+`wrangler pages dev` (the `run-app` table has the line) and read each address's headers with
+`curl -sI`. Cloudflare adds them to the files it serves, not to the answers the server code
+writes, and only this showed it (2026-11-15).
+
+The app's pages carry small scripts whose words change with every build. Their safety rule in
+`_headers` holds a gap, `{app-inline-scripts}`, that the release fills with each script's
+fingerprint, and the release refuses the folder if the gap is left unfilled
+(`scripts/shipped.mjs`). That keeps `unsafe-inline` out without copying a fingerprint by hand;
+use the same gap for a new page script.
+
 **The support page** (`support.html`, `ar/support.html`) is the address the store listing gives
 for help. It says how to send a problem report from the app, naming the buttons by the words the
 app shows (`apps/landing/lib/pages.test.mjs` reads them from the app's message files, so a

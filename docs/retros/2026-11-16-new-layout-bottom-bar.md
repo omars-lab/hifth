@@ -3,7 +3,7 @@ date: 2026-11-16
 repo: hifth
 session: launch-readiness, new layout on the page bar
 branch: new-layout-bottom-bar, PR #636
-folded: no
+folded: yes
 ---
 
 ## Snags

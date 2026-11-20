@@ -3,7 +3,7 @@ date: 2026-11-16
 repo: hifth
 session: launch-readiness, layout plan and influence research
 branch: influences-catalog
-folded: no
+folded: yes
 ---
 
 ## Snags
