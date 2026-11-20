@@ -78,6 +78,11 @@ the web app's files until `pnpm -C packages/core -s build` runs.
 
 **A test that was green the moment you wrote it** has not shown it can fail. Break the feature on
 purpose in two places, watch the test go red each time, then put the code back.
+Before you trust a first-try pass, check which build `dist` holds: Playwright serves whatever was
+built last, and a test passed on a build made without the feature it was meant to catch
+(2026-11-19). And some faults only show on the real phone: on iPhone Safari a grown part kept its
+words at their old size while the test browsers grew them (2026-11-20). When a size or text
+change passes at once, look at it on the simulator before calling it checked.
 
 **A new file that reads the record of what was opened** is refused at commit time by the privacy
 check, minutes into the commit. Run `pnpm -s gate:revision-privacy` (a second) right after adding

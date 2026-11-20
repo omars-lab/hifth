@@ -40,7 +40,10 @@ Then read the three charts in order, and decide:
    settings, option pages, rarely used tools, the crop tool, big tables. Those can load **when
    first opened** (a dynamic `import()`), so they stop counting against start-up time. A library
    that is large for what we use it for can be swapped out. **Trim first if there is an obvious
-   candidate.**
+   candidate.** Loading later does not help the size cap itself: the cap counts every file the
+   build makes, so splitting a part off adds a little to the total (0.3 KB more for the larger-text
+   switch, 2026-11-19). To keep a rough build out of the count, put it behind a build-time switch
+   instead (`import.meta.env.VITE_…`), so ordinary builds drop it.
 3. **What does more code cost?** The sweep chart gives milliseconds per kilobyte, and how many
    kilobytes still fit inside 2.5 s. **Raise the cap only while the chart shows room**, and leave a
    margin. The padding the sweep adds only has to download, but real code also has to run, so a

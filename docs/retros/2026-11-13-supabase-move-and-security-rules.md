@@ -3,7 +3,7 @@ date: 2026-11-13
 repo: hifth
 session: 2b1703dd (Supabase move; two landing-page comments; security rules)
 branch: supabase-move, security-rules (the rules file alone), env-set-formats (PR #608)
-folded: yes
+folded: 2026-11-20
 ---
 
 ## Snags

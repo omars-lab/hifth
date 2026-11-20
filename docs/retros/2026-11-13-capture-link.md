@@ -3,7 +3,7 @@ date: 2026-11-13
 repo: hifth
 session: capture link (feature-links step 3)
 branch: capture-link
-folded: yes
+folded: 2026-11-20
 ---
 
 ## Snags
