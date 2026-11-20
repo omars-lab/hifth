@@ -159,6 +159,10 @@ short-word hole showed (an optimized build hides a word of 15 letters or fewer).
 with made-up captures in the scratchpad (a test-pattern video, one refused, one unsettled), never
 real ones, so the book's text stays out.
 
+A check on a screen asks about every line of the verse, not only the card being changed: on
+2026-11-14 a sideways-phone check asked only about the note, and the bars at the foot covering the
+verse's end passed unseen until the walk's pictures showed them.
+
 Each fault gets, in the same change as its fix:
 
 - **an item** in the design doc it belongs to (pitch faults: `docs/design/knowledge-graph-commentary.md`,

@@ -307,3 +307,11 @@ app handed down.
 Keep a feature's rules (which tab is in front, what a button does in each state) as small pure
 functions beside the component, as `drawer-tools.ts` does: they take a unit test with no browser,
 and the browser test is left with only the wiring.
+
+When a change moves a default (a note's shape, a layout), pin the old tests to the setting they
+were written for, and write the same promises again for the new default. On 2026-11-14 the new
+group found the chips hidden behind the standing note, which the old tests could not reach.
+
+A character range in a test or source (for a regex) is built from numbers with
+`String.fromCharCode`, not written as `\uXXXX` through the Edit tool: the tool writes the real
+characters, which can be invisible, and lint refuses the file.

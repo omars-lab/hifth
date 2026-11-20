@@ -7343,16 +7343,17 @@
     {
       "id": "text-grow-needs-a-trim",
       "source": {
-        "file": "docs/design/app-store-launch.md",
-        "item": "㊾"
+        "file": "docs/performance.md",
+        "item": "㉕"
       },
       "owner": "agent",
       "launch": true,
       "useCase": "use-it-without-seeing-it",
       "feature": "a11y",
-      "status": "open",
+      "status": "fixed",
       "severity": "risk",
-      "note": "Measured again 2026-11-20, after main was merged in: the ordinary app is 219.8 KB of its 220 KB limit, and with the larger-text switch built in (VITE_TEXT_GROW=1) it is 220.8 KB, so the switch costs about 1.0 KB, not the 0.6 KB first written, and the trim owed is at least 1.5 KB, so the rest of the sign-in work has room too. Looked at the same day, through the optimizing-performance skill's size-by-source script, and none gave the 1 KB: the gesture library already ships only drag and pinch (8.4 KB, against 9.2 KB for all of it, measured alone); the React stand-in (3 KB) is needed by the screens that load later and by the gesture library; no word in the English list is unused (a whole-word search of the source, not a check that runs). The one large candidate left: about 375 short lines in i18n.tsx that turn numbers into the reader's digits before handing them to a message; the word-list compiler could do that itself. That is a change to how the lists are compiled, so it is a pass of its own, not a quick trim. Until then the rough build stays behind the switch, out of the ordinary app."
+      "note": "Measured again 2026-11-20, after main was merged in: the ordinary app is 219.8 KB of its 220 KB limit, and with the larger-text switch built in (VITE_TEXT_GROW=1) it is 220.8 KB, so the switch costs about 1.0 KB, not the 0.6 KB first written, and the trim owed is at least 1.5 KB, so the rest of the sign-in work has room too. Looked at the same day, through the optimizing-performance skill's size-by-source script, and none gave the 1 KB: the gesture library already ships only drag and pinch (8.4 KB, against 9.2 KB for all of it, measured alone); the React stand-in (3 KB) is needed by the screens that load later and by the gesture library; no word in the English list is unused (a whole-word search of the source, not a check that runs). The one candidate left, measured the same day and ruled out: i18n.tsx's 170 one-line adapters (each hands a message its numbers in the reader's digits). Minified and compressed, 68 of them take 949 bytes as written and 823 as a table plus a loop, so all 170 would save about 0.3 KB; compression already folds the repetition. So no trim of 1.5 KB is in sight without cutting a feature. The skill's rule for that case is to raise the limit only when the start-up timing run shows at least twice the room asked for (the 2026-11-16 run showed about 50 KB); the 2026-11-20 run showed the same ~50 KB, so the limit went up by 5 KB instead of cutting a feature. Until then the rough build stays behind the switch, out of the ordinary app.",
+      "closedBy": "scripts/gate-budget.mjs"
     },
     {
       "id": "a11y-axe-remaining-screens",

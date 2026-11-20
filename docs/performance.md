@@ -693,6 +693,12 @@ entry saying what moved.
 
 ---
 
+### ㉕ Larger text would push the app 0.8 KB past its size limit · **fixed**
+
+Split out of the launch page's larger-text item (㊾) on 2026-11-19. Building in the larger-text switch adds about 1.0 KB, taking the app from 219.8 to 220.8 KB against a limit of 220. Three trims were measured and ruled out on 2026-11-20: the gesture library already ships only drag and pinch; the React stand-in is needed; and rewriting the 170 short word helpers as a table saves about 0.3 KB, because compression already folds the repetition.
+
+*Fixed (2026-11-20):* a fresh start-up timing run gave 2106 ms as built and 2406 ms with 50 KB added, still under the 2.5 s goal, so there is about 50 KB of room. The limit went from 220 to 225 KB, a tenth of that room, and the larger-text build now passes the size check with 4.2 KB spare. The size check fails the push if the app ever passes 225 KB. The cap's history is in the speed guide (the optimizing-performance skill).
+
 ## 4. Prefetch
 
 ### ⑧ Shards prefetch by mounted page, not by hop target · **fixed**

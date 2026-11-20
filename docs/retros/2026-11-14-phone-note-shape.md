@@ -3,7 +3,7 @@ date: 2026-11-14
 repo: hifth
 session: phone note shape
 branch: note-shape-phone, PR #622
-folded: no
+folded: yes (2026-11-20: testing and walk-app skills; the status-word rule was already in the issues skill)
 ---
 
 ## Snags
