@@ -31,8 +31,8 @@ the goal page now names every one, checked by the issues skill's `goal-names-eve
   open launch row and owner step named on it (452a24c0).
 - Loop pass 1: Apple's accessibility check passes on the iPhone 17 simulator too, with no change
   needed (⑯).
-- Loop pass 1: Axe looks at every main browser screen, and a planted fault proves it still
-  catches one (⑯, 3db0c0c9).
+- Loop pass 1: Axe looks at the record, shelf, tips and info panel too, in both languages, and a
+  planted fault proves it still catches one (⑯, 3db0c0c9).
 - Loop pass 1: Our setup compared with the launch research; nothing new, every line is done or
   has a row.
 - Loop pass 1: The check that the goal page names every launch row works from any folder.

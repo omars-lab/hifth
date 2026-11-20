@@ -796,6 +796,27 @@ reading. In the app, the link is handed to the page instead of dropped; a link t
 place at all still only opens the app. The browser tests cover the line on a computer, a phone
 and Firefox, in English and Arabic, and the app's own tests failed with the old code put back.
 
+### ㊾ The bars, buttons and panels stay the same size when the phone's text is made larger · **open**
+
+Found on the reviewer walk (2026-11-17), split out of ⑯ on 2026-11-19. With the iPhone SE set
+to its largest text size, nothing outside the page grew. The page has its own size control, but
+a reader with weak eyes cannot grow the controls around it. Apple's accessibility questions in
+the store ask about this, so the answer has to match what the app does.
+
+*Where it stands (2026-11-19):* open. Next, build the main ways roughly (follow the phone's size
+everywhere, only in the panels, or a size setting of our own) so the owner can choose with a
+hand on each.
+
+### ㊿ Some screens have never had the automatic accessibility scan · **open**
+
+Split out of ⑯ on 2026-11-19. The scan runs on the page, a chosen verse, the look-alikes list,
+the record, the shelf, the tips and the info panel, in Arabic and English, on the phone
+browsers. It has not looked at the bookmark drawer, the note box, the mistake picker, the
+drawer's tools, the account section once opened, or the computer layout.
+
+*Where it stands (2026-11-19):* open. Notes and mistakes open only in the computer-layout
+tests, so the scan needs a run there too.
+
 ## Which of these could get the app turned down, and which matter once readers have it?
 
 Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
@@ -812,7 +833,7 @@ Sorted on 2026-11-17, after the first walk as Apple's reviewer. Open items only.
   settings ㊱, the English top bar at 320 px ㊶, the support page ⑳, the privacy policy ㉙
   and the app's links to both ㊸ are fixed.)
 - **Matters once readers have it** (Apple will not check these, readers will): the screen
-  reader ⑯, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
+  reader ⑯, larger text ㊾, the screens the scan has not seen ㊿, readers' crashes ⑰, the app's log ⑲, the off-switch ㉑, the release command ㉒,
   the site's undo ㉓, the "new version" prompt ㉔, the retry report ㉕, backups ㉘, store
   reviews ㉜ and numbers ㉝, both keys on the release page ㉞, a report seen to arrive ㊵,
   whether the website keeps the recitation ㊻, and the words our copy step moves ㊼. (A link

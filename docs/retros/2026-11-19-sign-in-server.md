@@ -29,17 +29,3 @@ owner's.
 ## Worth copying
 - Before cutting features to fit the size cap, look at what the build adds by itself. The class names' trailing line number was 1.6 KB of the start-up download and no reader saw it; the namer that drops it also refuses a build where two files would share a name.
 - Committing doc-only changes after a background push finishes, not during it: the commit's checks rebuild the app the push's browser tests are reading.
-
-## Loop pass 1 (2026-11-19, evening; not folded yet)
-
-The first pass of the operational-readiness loop, started from `/loop`.
-
-### Snags
-- `.claude/loop-prompts/operational-readiness.md` exists only on `sign-in-server`, not on main, so a session started in the main checkout looked for it and found nothing. It turned up with `git log --all`. It reaches main when #655 merges; until then, start the loop in `../hifth-auth`.
-- `.claude/skills/issues/scripts/goal-names-every-row.mjs` read its default files relative to the folder it was run from, so run from the main checkout it stopped on a missing file. It now finds them from where the script sits, with a test that runs it from a temp folder.
-- Making a new working copy for a helper agent set git's hooks folder back to the default; the git-settings guard put it back to `.githooks`. Check `git config core.hooksPath` after `git worktree add`.
-- Axe's new screen checks all passed the moment they were written, which proves nothing alone. A planted nameless button in the info panel, expected to be caught, is what shows they are really looking.
-- `share-a11y.spec.ts` runs only on the iPhone and Android browsers (see `apps/web/e2e/runs.json`), so `--project desktop` on it finds no tests.
-
-### Worth copying
-- Apple's accessibility check on the iPhone 17 simulator passed with no change after the iPad fixes: fixing what the iPad's reader heard was enough for the phone too.
