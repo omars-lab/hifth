@@ -303,3 +303,7 @@ To learn whether a resize or a turn rebuilds a part of the page, tag its DOM nod
 layout code cannot. After a fix, ask what it might have opened (the advisor is good at this):
 on 2026-11-13 that found Escape clearing only the words the page made itself, not the ones the
 app handed down.
+
+Keep a feature's rules (which tab is in front, what a button does in each state) as small pure
+functions beside the component, as `drawer-tools.ts` does: they take a unit test with no browser,
+and the browser test is left with only the wiring.

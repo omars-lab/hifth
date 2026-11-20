@@ -174,5 +174,12 @@ A fault you cannot act on (the owner's call, a fix blocked on someone) still get
 checklist line, marked **open**, and is said out loud at the end of the walk. A check only a person
 can make (a real phone, a week of use) goes to the manual-testing skill's list, not here.
 
+Before calling a walk's failure a fault, look at its picture: on the first iPhone walk
+(2026-11-14) three of five failures were the walk's own checks assuming an iPad. A new step asks
+the window what it has room for (`h.spread()` in `scripts/pitch-walk-steps.mjs`: two pages or
+one), never assumes a wide screen. To learn whether a link restarts the open app, read the app's
+process number with `xcrun devicectl device info processes` before and after the link; the same
+number means it was not restarted.
+
 Never put text from The Study Quran in a checklist line, an issue row, a test or a commit: describe
 where the fault is, not what the note says.
