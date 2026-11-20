@@ -142,6 +142,11 @@ It is a seatbelt for honest mistakes, not a wall. A new check that needs to look
 goes into `scripts/env/lib/envfile.py` as a command that prints names, shapes or fingerprints
 only, with a test; never a one-off pipeline.
 
+**A new refusal is written against what names the file, not a list of commands that read it.**
+A reviewer found six ways round a list of reading commands in minutes. To test the guard for
+real, start a fresh session against a made-up `.env` holding a marker word, try to reach it, and
+count the marker in the output: it must be 0.
+
 ## Scripts — when to use each
 
 | Script | What it does | When | Command |

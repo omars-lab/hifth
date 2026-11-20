@@ -99,6 +99,9 @@ but `true`.
 **Before the first commit on a row,** run `intent start <the row's id>` on the branch. A hook
 then ends each commit message with the task, its use case, its feature and its plan, read from
 the row's `useCase` and `feature` fields. `intent status` shows what is set.
+In a new working copy, run it straight after making the copy. A commit made before it has no
+label, the push refuses it, and labelling it afterwards takes one more commit, which has no
+label either.
 
 ## Open — write a new one down
 
@@ -117,6 +120,9 @@ row that is not there.
    ```markdown
    ### ⑦ What is wrong, in a sentence someone else could act on · **confirmed**
    ```
+
+   The heading ends in one bare status word from the table above. Anything added to
+   it (`· **answered: no**`) fails the gate; put the detail in the prose below.
 
    Continue the numbering that section already uses. Below it, prose: what is
    wrong, **what would answer it**, and — if you reproduced it — the viewport,
@@ -184,6 +190,10 @@ check the test.
 from `docs/validation/ledger.json`). A note typed straight into a drawn page is gone on the next
 redraw. Edit the register, then `make -s issues-doc tasks-doc`; after a ledger change also
 `make guide-doc`, or the commit's checks refuse the stale guide page.
+
+`make issues` and `make use-cases` only print; they redraw nothing. When the fast checks name a
+stale page, redraw all three at once rather than one per refusal:
+`make -s use-cases-doc issues-doc tasks-doc`.
 
 ## The board — the backlog on GitHub, at a glance
 

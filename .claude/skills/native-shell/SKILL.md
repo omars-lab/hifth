@@ -321,6 +321,11 @@ whose label is the hash — and attaches a screenshot (`.keepAlways`) named `ver
 `page-45-dark`, `page-45-landscape` (iPad only). In-page behaviour is Playwright's job
 (`apps/web/e2e/ipad.spec.ts`); these only prove the shell boots, takes a route, and shows it.
 
+**A test switch that does something at start needs a twin that only sets things up.**
+`HIFTH_WALK_CAPTURE_AT_START` also takes a capture at launch, so a test that only needed the
+captures to land in a folder it can read had to wait for `HIFTH_WALK_CAPTURE_FOLDER`. Add the
+set-up-only switch alongside any new "do X at start" switch from the outset.
+
 Results land in `native/shots/ipad-smoke.xcresult` / `mac-smoke.xcresult` (the Makefile
 deletes the old bundle first; an existing `-resultBundlePath` is an error in Xcode 26). To
 look at what the test saw:
@@ -383,6 +388,11 @@ JavaScript copy of the parser the contract page's builder runs: `link-builder.te
 same examples through it, so a rule changed in Swift and not there fails on the example. A new
 edition goes in `Route.editions` and the contract's `Edition` schema (`x-editions`), with
 `shipped` true only once its pages are in the build.
+
+**A new action (beside `open`, `current`, `capture`…) goes in five places in the contract and
+its copies:** its path, the error codes, an example, the example note that lists which actions
+exist, and the web link builder. The examples run in both the Swift test and the web test, and
+that is what catches a missed builder; keep both.
 
 ## Crashes
 

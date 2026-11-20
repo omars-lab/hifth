@@ -130,8 +130,12 @@ The English words are part of the start-up download, which has its own size limi
 
 ## Pushing and merging
 
+- **In a new working copy, before the first commit:** `intent start <row>` (see the `issues`
+  skill), then `pnpm install --frozen-lockfile --prefer-offline` (a few seconds). A new copy has
+  no installed packages, so the commit check otherwise stops at `tsc: command not found`.
 - **Push in the background, output to a log file.** The push runs every local check, about
-  13 minutes. Don't edit that working copy until it ends. Another working copy is fine: each
+  13 minutes, even on a branch that changes only the agent folder. Start it as a background
+  run; a waiting call with a 10-minute limit is cut off before it ends. Don't edit that working copy until it ends. Another working copy is fine: each
   serves the app on its own port.
 - **A pull request shows no hosted checks**, so the green signal is that push's own run. Read
   the end of the log before merging.
