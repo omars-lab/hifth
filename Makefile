@@ -555,6 +555,19 @@ phone: build ## Serve the built app for your phone; prints the LAN URL to open
 	@echo ""
 	$(WEB) exec vite preview --host --port $(PORT)
 
+.PHONY: text-grow-e2e text-grow-serve
+text-grow-e2e: core ## Browser check of the larger-text rough build (built with its switch on)
+	@# The switch is only in a VITE_TEXT_GROW build (src/main.tsx). This leaves a
+	@# throwaway dist/: `make build` puts the ordinary one back.
+	VITE_TEXT_GROW=1 $(WEB) build
+	HIFTH_TEXT_GROW=1 $(WEB) exec playwright test e2e/text-grow.spec.ts --project=iphone --project=android
+	$(WEB) build
+
+text-grow-serve: core ## Serve the larger-text rough build on the Wi-Fi, to try it on a phone
+	VITE_TEXT_GROW=1 $(WEB) build
+	@echo "  On the phone: http://$(LAN_IP):$(PORT)/?grow=phone  (or grow=panels, grow=own&size=1.5, grow=off)"
+	$(WEB) exec vite preview --host --port $(PORT)
+
 .PHONY: phone-perf
 phone-perf: ## Serve a probe build so the PHONE measures itself — the follow-up ① capture
 	@# VITE_PERF_PROBE is read at build time only (src/main.tsx), so this bundle

@@ -9,6 +9,12 @@ interface ImportMetaEnv {
    */
   readonly VITE_PERF_PROBE?: string;
   /**
+   * Set only by `make text-grow-e2e` and `make text-grow-serve`: the larger-text
+   * rough build (`src/text-grow.ts`), kept out of every other build until the
+   * owner picks a way and it gets a trim to fit under the size cap.
+   */
+  readonly VITE_TEXT_GROW?: string;
+  /**
    * Set only by the private pitch build (`make pitch`), which loads The Study
    * Quran's held commentary + cross-references for a demo shown to the
    * rights-holders in a room — never shipped. Absent in every public build, so

@@ -375,6 +375,10 @@
       "desktop-firefox",
       "iphone"
     ],
+    "text-grow.spec.ts": [
+      "android",
+      "iphone"
+    ],
     "tool-help.spec.ts": [
       "desktop",
       "desktop-firefox"

@@ -23,6 +23,13 @@ installInputTiming(window);
 // not stop the page, so they get no screen (see fault-log.ts).
 installFaultLog(window);
 
+// Larger bars and panels (rough build, text-grow.ts), only in a build made with
+// VITE_TEXT_GROW=1: the app has no room under its size cap for it until the
+// chosen way gets a trim (backlog row text-grow-needs-a-trim).
+if (import.meta.env.VITE_TEXT_GROW) {
+  void import("./text-grow").then((m) => m.installTextGrow(window));
+}
+
 const root = document.getElementById("root");
 if (!root) throw new Error("missing #root");
 

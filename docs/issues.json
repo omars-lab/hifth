@@ -7337,7 +7337,21 @@
       "feature": "a11y",
       "status": "open",
       "severity": "risk",
-      "note": "Nothing outside the page follows the phone's text size: the reviewer walk (2026-11-17) set the iPhone SE to the largest size and the bars, buttons and panels looked the same. A reader with weak eyes can grow the page with its own control but not the controls around it. Next: build the options roughly (follow the system size everywhere, only in panels, or a size setting of our own) so the owner chooses with a hand on each, then answer the store's accessibility questions to match. Split out of launch-screen-reader-walk on 2026-11-19."
+      "note": "Nothing outside the page follows the phone's text size: the reviewer walk (2026-11-17) set the iPhone SE to the largest size and the bars, buttons and panels looked the same. A reader with weak eyes can grow the page with its own control but not the controls around it. 2026-11-19: a rough build of the three ways is in, as a separate build (make text-grow-serve, then a link with ?grow=phone, ?grow=panels or ?grow=own&size=1.5). What it already taught: past 1.25 times, the top bar no longer fits an iPhone SE and pushes the screen sideways, so the top bar stops there; the bottom bars and the verse drawer grow fully and stay readable. Next: look at each way on the SE simulator at its largest size, in Arabic too, then open the decision so the owner chooses with a hand on each, then answer the store's larger-text question to match. Split out of launch-screen-reader-walk on 2026-11-19."
+    },
+    {
+      "id": "text-grow-needs-a-trim",
+      "source": {
+        "file": "docs/design/app-store-launch.md",
+        "item": "㊾"
+      },
+      "owner": "agent",
+      "launch": true,
+      "useCase": "use-it-without-seeing-it",
+      "feature": "a11y",
+      "status": "open",
+      "severity": "risk",
+      "note": "The larger-text switch costs about 0.6 KB and the app had 0.3 KB of room under its 220 KB size limit on 2026-11-19, so the rough build is kept out of the ordinary app (built only with VITE_TEXT_GROW=1). Before the way the owner picks ships, a trim of at least 0.6 KB is owed, through the optimizing-performance skill. The rest of the sign-in work will meet the same limit, so the trim should come first."
     },
     {
       "id": "a11y-axe-remaining-screens",
