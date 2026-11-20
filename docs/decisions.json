@@ -1556,6 +1556,36 @@
       ]
     },
     {
+      "id": "larger-text-way",
+      "question": "When a reader makes their phone's text larger, what in Hifth should grow with it: everything around the page, only the panels, or a size picked in Hifth?",
+      "status": "open",
+      "options": [
+        {
+          "id": "A",
+          "label": "Follow the phone: the bars and panels grow with the phone's text size"
+        },
+        {
+          "id": "B",
+          "label": "Only the panels follow the phone; the bars stay as they are"
+        },
+        {
+          "id": "C",
+          "label": "Our own size, picked in Hifth's info panel (1.25 or 1.5 times)"
+        },
+        {
+          "id": "D",
+          "label": "Nothing grows, as today"
+        }
+      ],
+      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/larger-text-options.html",
+      "page": "docs/design/larger-text-options.html",
+      "builtBy": "scripts/build-design-note.mjs",
+      "doc": "docs/design/larger-text-options.md",
+      "related": [
+        "ayah-drawer"
+      ]
+    },
+    {
       "id": "phone-note-lead",
       "question": "When a reader taps a verse on a phone held upright, should The Study Quran's note show its commentary at once, or the whole translation first?",
       "status": "open",
@@ -2291,36 +2321,6 @@
         "storage-model",
         "sign-in-first-unlock",
         "sign-in-accounts-home"
-      ]
-    },
-    {
-      "id": "larger-text-way",
-      "question": "When a reader makes their phone's text larger, what in Hifth should grow with it: everything around the page, only the panels, or a size picked in Hifth?",
-      "status": "open",
-      "options": [
-        {
-          "id": "A",
-          "label": "Follow the phone: the bars and panels grow with the phone's text size"
-        },
-        {
-          "id": "B",
-          "label": "Only the panels follow the phone; the bars stay as they are"
-        },
-        {
-          "id": "C",
-          "label": "Our own size, picked in Hifth's info panel (1.25 or 1.5 times)"
-        },
-        {
-          "id": "D",
-          "label": "Nothing grows, as today"
-        }
-      ],
-      "artifact": "https://blog.bytesofpurpose.com/hifth/docs/design/larger-text-options.html",
-      "page": "docs/design/larger-text-options.html",
-      "builtBy": "scripts/build-design-note.mjs",
-      "doc": "docs/design/larger-text-options.md",
-      "related": [
-        "ayah-drawer"
       ]
     }
   ]
