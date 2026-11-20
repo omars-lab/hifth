@@ -64,7 +64,7 @@ app either.
 If the ask is genuinely "open that design page", `open docs/design/<name>.html` —
 but confirm which, because "desktop UI" reads both ways.
 
-## Seeing a change — five ways a fix gets checked where it cannot fail
+## Seeing a change — six ways a fix gets checked where it cannot fail
 
 1. **A hash-only navigation is not a reload.** The app routes on `#/…`, so pointing
    the tab at a new `#` address keeps the old module graph running. After an edit,
@@ -95,6 +95,12 @@ but confirm which, because "desktop UI" reads both ways.
    over the last icon of the row and the end of the slider (measured at 390 wide, 2026-11-11),
    and Hide is forgotten on reload. Look at the preview, which never has the bar, or take the
    bar off the page for the look: `document.getElementById("__page-comments")?.remove()`.
+   On a page of our own with that bar (the dev side bar, 2026-11-14), a button at the bottom
+   corner sat under it too, and the bar wraps to two rows on a phone; only the picture at 390
+   wide showed it.
+6. **Both of the owner's browsers, in minutes.** Look with Chrome DevTools at 1280 and 390
+   wide, then take one Firefox picture with a throwaway Playwright script in
+   `apps/web/e2e/tools/`, deleted after.
 
 ## Screenshotting the app when there is no browser window — `make drive`
 

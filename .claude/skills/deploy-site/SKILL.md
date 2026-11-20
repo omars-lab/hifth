@@ -288,6 +288,13 @@ page leaves out. A release missing either copy is refused. To change a source, c
   - To see which sign-in a folder uses: `wrangler whoami` there prints "Active profile: hifth".
     In the main checkout the saved key wins over the sign-in, which is what the scripts want.
   - Cloudflare marks these commands experimental, so check `wrangler auth --help` if one fails.
+- **Deleting a folder Finder is writing to.** Removing the old release folder failed with
+  "directory not empty" while Finder kept adding `.DS_Store` to it, and retrying never wins.
+  Move the folder aside first, then delete the moved copy (`docs/issues/old-folder-written-to-while-deleted.md`).
+- **A list drawn from a page, counted against the page.** The dev side bar listed 9 panels
+  where the features page showed 11, because it matched a card's class exactly and two cards
+  carry a second class. Before calling such a list done, count what the page shows and what
+  the list shows.
 - **The Cloudflare Pages project** is `hifth-app` unless `HIFTH_APP_PAGES_PROJECT` says otherwise.
 
 ## Scripts — when to use each
