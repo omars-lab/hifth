@@ -246,6 +246,27 @@ beforeAll(async () => {
 for the verse's tools hit the same thing on a busy push: wait 20 seconds, as
 `slider-arrows.spec.ts` does.
 
+## After merging main, and pushing in the background
+
+(Folded from the Nov 13 front-page merge note, and the Nov 20 loop passes.)
+
+- **Run the whole browser suite once on a merge before pushing.** Two tests from one side can meet
+  the other side's change for the first time. Print the measured box before reading code.
+- **Run `pnpm gate:budget` after a merge that brings in a lot of main.** Each side can be under
+  the 1.0 KB margin while the two together are not; expect to run `make budget-update`.
+- **A background push reports the last command's exit.** `git push …; echo exit=$?` said yes
+  while the push hook had refused it. Read the log's last lines, or end the command with the push.
+- **A background command needs the same PATH as a foreground one** (Node 22 and `~/.local/bin`),
+  or the push hook stops at once on the Node check.
+- **Don't build in a working copy while its push is testing there.** The build replaces the app
+  the push's browser tests are serving.
+- **On a small phone, a layout test runs in English as well as Arabic.** The test browsers start in
+  Arabic, and the English row is the wider one.
+- **On an iPhone, Safari's own bars take room the test browsers don't.** On the iPhone SE the page
+  gets about 500 px of height, not 667, and Safari shows the install banner the test browsers
+  never do. A test about room on a small phone uses 375 by 500, and the banner (an iPhone user
+  agent, with storage that says it is not kept) where it matters: see `e2e/text-grow.spec.ts`.
+
 ## The golden pictures
 
 `golden` photographs one page per shot at phone size, and `ipad-golden` at iPad size. Only the

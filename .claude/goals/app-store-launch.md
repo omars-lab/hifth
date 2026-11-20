@@ -213,6 +213,13 @@ may be made.)
 
 ## Where the work stands (2026-11-19)
 
+- **Fifth loop pass (2026-11-20):** the fixed larger-text build was walked on the iPhone SE
+  simulator. The verse was still covered there: Safari's bars leave the page about 500 px and it
+  shows the install banner, which the test browsers never did. Now the banner waits while a
+  grown verse drawer is open on a phone, and the drawer grows only as far as the room allows; a
+  test at 375 by 500 with the banner went red first, and the simulator shows the whole verse in
+  English and Arabic. Next for larger text: open the decision. The Nov 13 front-page merge note
+  was folded into `testing`.
 - **Fourth loop pass (2026-11-20):** both larger-text faults the iPhone showed are fixed, each
   with a browser test that went red first: the grown top bar on a small phone hides the tagline
   and the mus'haf name, so the info button stays on screen, and the verse drawer now tells the
