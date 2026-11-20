@@ -95,6 +95,13 @@ it does not; never raise just to make a red check go green without looking at th
   GitHub Actions minutes, and left Lighthouse out as too slow for a hook). Run `make lighthouse`
   before a demo, and whenever the size cap moves.
 
+- **Check a size figure against the built files before reasoning from it.** A slow-down was once
+  blamed on start-up work because a note said the app grew 10 KB; the build said 22 (item ⑳ in
+  `docs/performance.md`).
+- **A page only the developer sees keeps its words in its own file, in English,** so none of
+  them land in the word lists every build ships. To prove the size check really covers the
+  real build (its own tests use made-up builds), let such a page into a build once on purpose
+  and watch the check refuse it by name, then take it out.
 - **The speed probe on the laptop's dev server is `VITE_PERF_PROBE=1 make dev`.** The probe is
   the panel of timings drawn over the page. It is switched on when the app is built or served,
   not from the address bar, and the only make target that names it (`make phone-perf`) builds

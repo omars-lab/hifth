@@ -30,6 +30,10 @@ moving.
 | `make comments` | 127.0.0.1:8767 | The comment server in front of the dev server on 7122 | Yes | When the dev server's own comment bar is not loading |
 | (the browser tests) | 127.0.0.1:4173 | The tests' own copy of the built app | No | Never by hand. Free the port if a test run refuses to start (see 3 below) |
 
+**The local servers serve the app from the root, not from the live site's path.** The site lives
+under `/hifth/` on the web, but `http://127.0.0.1:7123/hifth/` on the laptop is a blank page. Open
+the address the server prints.
+
 **To comment on a page, use 7122 or 7124.** The bar is added only by the dev server or by the
 comment server in front of something. A built copy served on its own (7123, 8788) never has it.
 Comments are saved in `.page-comments/threads/` of the folder the server was started from, so

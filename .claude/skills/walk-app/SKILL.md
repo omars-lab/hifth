@@ -50,6 +50,10 @@ writes down what it found.
 | the iPad app held sideways | the iPad simulator, turned; the native-shell skill's "Walking the app in the simulator" — the iPad's own WebKit is not Playwright's, so the pitch gets walked here too |
 | first visit vs returning reader | leave the hint owed, or `SEEN_COACH=1` |
 
+**Look at the Arabic screen before calling a right-to-left layout done.** The record's month
+arrows were flipped twice (once by the browser, once by our own style), which no English test
+could show.
+
 A swipe is `swipe=x,y>x,y` in `ACT`: a real finger that moves (Chrome only). `drag=` is a
 mouse, so a swipe walked with it only shows what a mouse does — on an open book a mouse turns
 only from the outer edge, and so does a finger.
@@ -115,6 +119,11 @@ seconds. Run it before the slower iPad walk; it is not a substitute for it.
 | `scripts/note-handoff.mjs` | opens the note across the foot of an upright iPad, then does one thing that takes its place (Close, a page-turn key, Back, a long press and a menu item, a verse number's menu, a look-alike chip, the note's grip, a hop from one of its references, a swipe, a pinch) and prints, frame by frame, the sliding copy of the note, the live note, any menu and the page's top; boxes and numbers only, pictures only with `--shots` into scratch; with `--run` it first plays the page's surah from its corner and opens the note on the verse being heard, waits `--wait` ms (a verse's length lets the recitation move past the note's verse, the moment a presenter actually turns), says which verse is heard against the note's, read off the recitation's Pause, and at the end whether the sound is still going, and which verse a number pressed belonged to | after any change to how the note leaves, rises or hands over to a list or menu; walk every `--mode` once, and `--lang ar` once, and again with `--run` after a change to runs (a page route, `/p2?view=one`); pinch needs `--engine chromium` (real touches) | `node .claude/skills/walk-app/scripts/note-handoff.mjs --mode chip --route '/hafs-kfqc/2:49?view=one'` |
 | `scripts/gap-throttle.mjs` | runs the gap walk in Chromium at home speed, slow wifi and poor wifi, once for each way of making the next verse ready and each pause before the press, each in a fresh browser | comparing the next-verse settings, or checking a slow connection, without a device; point it at a local build with `--url`, and at another surah's page with `--route`; `--pause 600,2000` tries each pause before the press and `--gaps 0` times only the first verse; `--from tools --route /hafs-kfqc/2:255` presses Play on that verse's tools instead of the corner | `node .claude/skills/walk-app/scripts/gap-throttle.mjs --url http://localhost:5197/` |
 | `make app-test ONLY=` | one simulator test, which can turn the iPad and measure the web view's own picture | pinning an app-only fault, watched failing first | `make app-test ONLY=SmokeTests/testLandscapeOpensTheBookFullSize` |
+
+**Writing made-up days into the record from a walk script:** open its database with the set-up
+step that makes its stores (`onupgradeneeded`), copy what was there first, and put it back at
+the end. Opening it with no set-up step leaves an empty database the app then cannot write to.
+`scripts/record-days-walk.js` shows the safe way.
 
 A made-up Escape key sent from a walk script does not close the info panel, though it does
 close a pen's question. Close the panel with its own close button, as
